@@ -24,6 +24,9 @@ define(function (require) {
       var self = this;
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
+      .then(function () {
+        return common.sleep(1000);
+      })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
         return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
         .click();
