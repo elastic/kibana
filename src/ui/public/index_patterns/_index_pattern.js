@@ -213,6 +213,10 @@ define(function (require) {
       };
 
       self.create = function () {
+        if (!self.id) {
+          return Promise.reject(new Error('Unable to create indexPatterns without an id'));
+        }
+
         var body = self.prepBody();
         return docSource.doCreate(body)
         .catch(function (err) {
@@ -238,6 +242,10 @@ define(function (require) {
       };
 
       self.save = function () {
+        if (!self.id) {
+          return Promise.reject(new Error('Unable to create indexPatterns without an id'));
+        }
+
         var body = self.prepBody();
         return docSource.doIndex(body).then(() => self.id);
       };
