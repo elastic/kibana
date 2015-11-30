@@ -22,11 +22,13 @@ define(function (require) {
      * @return {*}        [description]
      */
     MetricAggType.prototype.getValue = function (agg, bucket) {
+      // Metric types where an empty set equals `zero`
       var zeroable = ['Unique Count', 'Sum'];
       var isSettableToZero = zeroable.indexOf(agg.__type.title) !== -1;
       var isCount = agg.__type.title === 'Count';
 
       // Return proper values when no buckets are present
+      // `Count` handles empty sets properly
       if (!bucket[agg.id] && !isCount) return isSettableToZero ? 0 : '?';
 
       return bucket[agg.id].value;
