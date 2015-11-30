@@ -28,15 +28,18 @@ define(function (require) {
 
         bdd.it('should allow setting advanced settings', function () {
           return settingsPage.clickAdvancedTab()
-          .then(function () {
-            return settingsPage.setAdvancedSetting('dateFormat:tz', 'American/Phoenix');
-            // expect(patternName).to.be('logstash-*');
+          .then(function TestCallSetAdvancedSettingsForTimezone() {
+            common.log('calling setAdvancedSetting');
+            return settingsPage.setAdvancedSettings('dateFormat:tz', 'America/Phoenix');
+          })
+          .then(function GetAdvancedSetting() {
+            return settingsPage.getAdvancedSettings('dateFormat:tz');
+          })
+          .then(function (advancedSetting) {
+            expect(advancedSetting).to.be('America/Phoenix');
           })
           .catch(common.handleError(this));
         });
-
-
-
 
       });
     });
