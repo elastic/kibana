@@ -28,6 +28,9 @@ module.exports = function (grunt) {
         config: {
           path: {
             data: dataDir
+          },
+          cluster: {
+            name: 'esvm-dev'
           }
         }
       }
@@ -39,6 +42,9 @@ module.exports = function (grunt) {
         config: {
           http: {
             port: 9210
+          },
+          cluster: {
+            name: 'esvm-test'
           }
         }
       }
@@ -50,6 +56,9 @@ module.exports = function (grunt) {
         config: {
           http: {
             port: uiConfig.servers.elasticsearch.port
+          },
+          cluster: {
+            name: 'esvm-ui'
           }
         }
       }
