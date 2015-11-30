@@ -10,7 +10,7 @@ module.exports = function (kbnServer, server, config) {
 
   server = kbnServer.server = new Hapi.Server();
 
-  const urlLookup = require('./urlLookup')(server);
+  const shortUrlLookup = require('./short_url_lookup')(server);
 
   // Create a new connection
   var connectionOptions = {
@@ -160,7 +160,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
-      const url = await urlLookup.getUrl(request.params.urlId);
+      const url = await shortUrlLookup.getUrl(request.params.urlId);
       reply().redirect(url);
     }
   });
@@ -169,7 +169,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'POST',
     path: '/shorten',
     handler: async function (request, reply) {
-      const urlId = await urlLookup.generateUrlId(request.payload.url);
+      const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
       reply(urlId);
     }
   });

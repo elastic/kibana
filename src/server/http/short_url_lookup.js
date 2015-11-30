@@ -11,8 +11,8 @@ export default function (server) {
         id: urlId,
         body: {
           doc: {
-            'access-date': new Date(),
-            'access-count': urlDoc._source['access-count'] + 1
+            'accessDate': new Date(),
+            'accessCount': urlDoc._source.accessCount + 1
           }
         }
       });
@@ -35,7 +35,7 @@ export default function (server) {
         resolve(response);
       })
       .catch(err => {
-        resolve();
+        reject();
       });
     });
 
@@ -52,9 +52,9 @@ export default function (server) {
         id: urlId,
         body: {
           url,
-          'access-count': 0,
-          'create-date': new Date(),
-          'access-date': new Date()
+          'accessCount': 0,
+          'createDate': new Date(),
+          'accessDate': new Date()
         }
       })
       .then(response => {
