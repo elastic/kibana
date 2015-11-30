@@ -47,6 +47,7 @@ define(function (require) {
         return fieldFormats.getInstance('percent') || fieldFormats.getDefaultInstance('number');
       },
       getValue: function (agg, bucket) {
+        // The percentile rank of an empty set is undefined.
         if (!bucket[agg.parentId]) return '?';
 
         // values for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
