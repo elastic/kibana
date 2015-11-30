@@ -14,6 +14,7 @@ define(function (require) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
           var value = table.rows[0][i];
 
+          // Return string when value is '?'
           value = typeof value === 'string' ? value : fieldFormatter(value);
 
           metrics.push({
