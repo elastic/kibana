@@ -12,9 +12,11 @@ define(function (require) {
       tableGroups.tables.forEach(function (table) {
         table.columns.forEach(function (column, i) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
+          var value = typeof table.rows[0][i] !== 'undefined' ? table.rows[0][i] : '?';
+          var isString = typeof value === 'string';
           metrics.push({
             label: column.title,
-            value: fieldFormatter(table.rows[0][i])
+            value: !isString ? fieldFormatter(value) : value
           });
         });
       });
