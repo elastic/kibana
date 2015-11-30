@@ -22,7 +22,8 @@ describe('plugins/elasticsearch', function () {
             },
             status: {
               red: sinon.stub()
-            }
+            },
+            url: 'http://localhost:9210'
           }
         }
       };
