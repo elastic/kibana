@@ -1,4 +1,5 @@
 define(function (require) {
+  var config = require('intern').config;
   var Common = require('../../../support/pages/Common');
   var SettingsPage = require('../../../support/pages/SettingsPage');
   var expect = require('intern/dojo/node!expect.js');
@@ -9,6 +10,7 @@ define(function (require) {
       var common;
       var settingsPage;
       var remote;
+      var defaultTimeout = config.timeouts.default;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -93,9 +95,11 @@ define(function (require) {
         });
 
         bdd.it('makelogs data should have expected number of fields', function () {
-          return settingsPage.getFieldsTabCount()
-          .then(function (tabCount) {
-            expect(tabCount).to.be('' + expectedFieldCount);
+          return common.tryForTime(defaultTimeout, function () {
+            return settingsPage.getFieldsTabCount()
+            .then(function (tabCount) {
+              expect(tabCount).to.be('' + expectedFieldCount);
+            });
           })
           .catch(common.handleError(this));
         });

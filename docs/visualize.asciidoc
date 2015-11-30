@@ -98,12 +98,12 @@ colors, and row/column splits. For pie charts, use the metric for the slice size
 slices.
 
 Choose the metric aggregation for your visualization's Y axis, such as 
-{ref}search-aggregations-metrics-valuecount-aggregation.html[count], 
-{ref}search-aggregations-metrics-avg-aggregation.html[average], 
-{ref}search-aggregations-metrics-sum-aggregation.html[sum], 
-{ref}search-aggregations-metrics-min-aggregation.html[min], 
-{ref}search-aggregations-metrics-max-aggregation.html[max], or 
-{ref}search-aggregations-metrics-cardinality-aggregation.html[cardinality] 
+{ref}/search-aggregations-metrics-valuecount-aggregation.html[count], 
+{ref}/search-aggregations-metrics-avg-aggregation.html[average], 
+{ref}/search-aggregations-metrics-sum-aggregation.html[sum], 
+{ref}/search-aggregations-metrics-min-aggregation.html[min], 
+{ref}/search-aggregations-metrics-max-aggregation.html[max], or 
+{ref}/search-aggregations-metrics-cardinality-aggregation.html[cardinality] 
 (unique count). Use bucket aggregations for the visualization's X axis, color slices, and row/column splits. Common 
 bucket aggregations include date histogram, range, terms, filters, and significant terms.
 
@@ -130,6 +130,9 @@ NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
 
 To render the visualization on the _preview canvas_, click the green *Apply Changes* button at the top right of the
 Aggregation Builder.
+
+You can learn more about aggregation and how altering the order of aggregations affects your visualizations 
+https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[here]. 
 
 [float]
 [[visualize-filters]]

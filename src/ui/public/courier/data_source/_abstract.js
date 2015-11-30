@@ -123,8 +123,9 @@ define(function (require) {
 
       return new PromiseEmitter(function (resolve, reject) {
         const defer = Promise.defer();
-        self._createRequest(defer);
         defer.promise.then(resolve, reject);
+
+        self._createRequest(defer);
       }, handler);
     };
 
@@ -144,7 +145,10 @@ define(function (require) {
     SourceAbstract.prototype.onError = function (handler) {
       var self = this;
 
-      return new PromiseEmitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject) {
+        const defer = Promise.defer();
+        defer.promise.then(resolve, reject);
+
         errorHandlers.push({
           source: self,
           defer: defer

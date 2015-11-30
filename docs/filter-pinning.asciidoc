@@ -21,6 +21,78 @@ Toggle Filter image:images/filter-toggle.png[]:: Click this icon to _toggle_ a f
 filters, and display in green. Only elements that match the filter are displayed. To change this to an exclusion 
 filters, displaying only elements that _don't_ match, toggle the filter. Exclusion filters display in red.
 Remove Filter image:images/filter-delete.png[]:: Click this icon to remove a filter entirely.
+Custom Filter image:images/filter-custom.png[]:: Click this icon to display a text field where you can customize the JSON
+representation of the filter and specify an alias to use for the filter name:
++
+image::images/filter-custom-json.png[]
++
+You can use JSON filter representation to implement predicate logic, with `should` for OR, `must` for AND, and `must_not` 
+for NOT:
++
+.OR Example
+==========
+[source,json]
+{
+  "bool": {
+    "should": [
+      {
+        "term": {
+          "geoip.country_name.raw": "Canada"
+        }
+      },
+      {
+        "term": {
+          "geoip.country_name.raw": "China"
+        }
+      }
+    ]
+  }
+}
+==========
++
+.AND Example
+==========
+[source,json]
+{
+  "bool": {
+    "must": [
+      {
+        "term": {
+          "geoip.country_name.raw": "United States"
+        }
+      },
+      {
+        "term": {
+          "geoip.city_name.raw": "New York"
+        }
+      }
+    ]
+  }
+}
+
+==========
++
+.NOT Example
+==========
+[source,json]
+{
+  "bool": {
+    "must_not": [
+      {
+        "term": {
+          "geoip.country_name.raw": "United States"
+        }
+      },
+      {
+        "term": {
+          "geoip.country_name.raw": "Canada"
+        }
+      }
+    ]
+  }
+}
+==========
+Click the *Done* button to update the filter with your changes.
 
 To apply any of the filter actions to all the filters currently in place, click the image:images/filter-actions.png[] 
 *Global Filter Actions* button and select an action.
