@@ -18,6 +18,9 @@ describe('Server basePath config', function () {
       plugins: { scanDirs: [src('plugins')] },
       logging: { quiet: true },
       optimize: { enabled: false },
+      elasticsearch: {
+        url: 'http://localhost:9210'
+      }
     });
     await kbnServer.ready();
     return kbnServer;
