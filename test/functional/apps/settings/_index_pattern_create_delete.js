@@ -47,6 +47,7 @@ define(function (require) {
         bdd.it('should have expected table headers', function checkingHeader() {
           return settingsPage.getTableHeader()
           .then(function (headers) {
+            common.debug('header.length = ' + headers.length);
             var expectedHeaders = [
               'name',
               'type',
@@ -93,6 +94,7 @@ define(function (require) {
           return common.tryForTime(5000, function () {
             return remote.getCurrentUrl()
             .then(function (currentUrl) {
+              common.debug('currentUrl = ' + currentUrl);
               expect(currentUrl).to.not.contain('logstash-*');
             });
           })

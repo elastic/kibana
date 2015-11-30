@@ -48,9 +48,11 @@ define(function (require) {
             return common.sleep(1000);
           })
           .then(function openControlsByName() {
-            return settingsPage.openControlsByName(fieldName);
+            common.debug('Starting openControlsByName "geo.coordinates"');
+            return settingsPage.openControlsByName('geo.coordinates');
           })
           .then(function increasePopularity() {
+            common.debug('increasePopularity');
             return settingsPage.increasePopularity();
           });
         });
@@ -63,6 +65,7 @@ define(function (require) {
         bdd.it('should update the popularity input', function () {
           return settingsPage.getPopularity()
           .then(function (popularity) {
+            common.debug('popularity = ' + popularity);
             expect(popularity).to.be('1');
           })
           .catch(common.handleError(this));
@@ -82,6 +85,7 @@ define(function (require) {
             return settingsPage.getPopularity();
           })
           .then(function (popularity) {
+            common.debug('popularity = ' + popularity);
             expect(popularity).to.be('0');
           })
           .catch(common.handleError(this));
@@ -101,6 +105,7 @@ define(function (require) {
             return settingsPage.getPopularity();
           })
           .then(function (popularity) {
+            common.debug('popularity = ' + popularity);
             expect(popularity).to.be('1');
           })
           .catch(common.handleError(this));

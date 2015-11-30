@@ -150,12 +150,12 @@ define(function (require) {
         return Promise
         .try(block)
         .then(function tryForTimeSuccess() {
-          self.debug('tryForTime success in about ' + (lastTry - start) + ' ms');
+          self.debug('tryForTime success in about ' + (lastTry - start) + ' milliseconds');
           return (lastTry - start);
         })
         .catch(function tryForTimeCatch(err) {
-          self.debug('tryForTime failure, retry in ' + retryDelay + 'ms - ' + err.message);
-          tempMessage = err.message;
+          self.debug('failed with "' + err.message + '"');
+          self.debug('trying again in 1/2 second');
           return Promise.delay(retryDelay).then(attempt);
         });
       }
@@ -163,17 +163,20 @@ define(function (require) {
       return Promise.try(attempt);
     },
 
-    log: function (logString) {
+    log: function log(logString) {
       console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
-    debug: function (logString) {
+    debug: function debug(logString) {
       if (config.debug) this.log(logString);
     },
 
-    sleep: function (sleepMilliseconds) {
-      this.debug('sleeping for ' + sleepMilliseconds + 'ms');
-      return Promise.resolve().delay(sleepMilliseconds);
+    sleep: function sleep(sleepMilliseconds) {
+      var self = this;
+      self.debug('... sleep(' + sleepMilliseconds + ') start');
+
+      return Promise.resolve().delay(sleepMilliseconds)
+      .then(function () { self.debug('... sleep(' + sleepMilliseconds + ') end'); });
     },
 
     handleError: function (testObj) {
@@ -191,7 +194,7 @@ define(function (require) {
       };
     },
 
-    saveScreenshot: function (filename) {
+    saveScreenshot: function saveScreenshot(filename) {
       var self = this;
       var outDir = path.resolve('test', 'output');
 
