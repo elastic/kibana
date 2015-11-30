@@ -22,7 +22,7 @@
 
         <h2>First time configuration</h2>
         <p>
-          First You'll need to edit your <code>timelion.json</code> to tell timelion where to fetch data. If you're using logstash (and the default <code>logstash-*</code> pattern), you're already done. Otherwise, update the <code>timefield</code> and <code>default_index</code> parameters to match your environment. Look for this section:
+          First you'll need to edit your <code>timelion.json</code> to tell timelion where to fetch data. If you're using logstash (and the default <code>logstash-*</code> pattern), you're already done. Otherwise, update the <code>timefield</code> and <code>default_index</code> parameters to match your environment. Look for this section:
 
           <pre>
     "es": {
@@ -33,7 +33,7 @@
         </p>
 
         <p>
-        You'll see some other parameters in there too, we won't be missing with them for now, but this file can be used to configure much of timelions default behavior. That said, almost everything in this file can also be specified on-the-fly with the timelion expression syntax. More on that in a bit.
+        You'll see some other parameters in there too, we won't be messing with them for now, but this file can be used to configure much of timelion's default behavior. That said, almost everything in this file can also be specified on-the-fly with the timelion expression syntax. More on that in a bit.
         </p>
       </div>
       <div class="doc-container-buttons">
@@ -52,7 +52,7 @@
         </p>
         <p>
           <h4>Intervals</h4>
-          You might already have one nice chart, but I'm going to operate on the assumption you don't for educational purposes. The input bar at the top as two inputs. On the left, is your expression, leave that alone for now, we'll get to it. On the right is the <strong>interval selector</strong>, which is currently set to <code>{{state.interval}}</code>.
+          You might already have one nice chart, but I'm going to operate on the assumption you don't for educational purposes. The input bar at the top has two inputs. On the left, is your expression, leave that alone for now, we'll get to it. On the right is the <strong>interval selector</strong>, which is currently set to <code>{{state.interval}}</code>.
           <span ng-show="state.interval == '1d'"><strong>Looks good!</strong></span>
           <span ng-show="state.interval != '1d'">Set it to <code>1d</code>. That's pretty safe</span>
           If timelion thinks your combination of time range and interval will produce too many data points it will throw an error. You can configure that limit in <code>timelion.json</code>
@@ -117,7 +117,7 @@
           </tr>
           <tr>
             <td><code>.es(*).color(#f66).lines(fill=3), .es(US).bars(1).points(radius=3, weight=1)</code></td>
-            <td><strong>Wooo expressions.</strong> In the last example we used un-named arguments to <code>color()</code> and <code>bars</code>, which rely on the arguments position in a comma seperated list. We can use named arugments to make expressions easier to read and arguments easier to remember.</td>
+            <td><strong>Wooo expressions.</strong> In the last example we used un-named arguments to <code>color()</code> and <code>bars</code>, which rely on the arguments position in a comma separated list. We can use named arugments to make expressions easier to read and arguments easier to remember.</td>
           </tr>
             <tr>
             <td><code>(.es(*), .es(GB)).points()</code></td>
@@ -139,7 +139,7 @@
       <p>
         We can make our charts pretty all day, but its time for <strong>businessing</strong>. As an example exercise, we're going to figure out what percentage some subset of our data represents of the whole, over time. For example, what percentage of my web traffic comes from the US? Lets start with finding all events that contain US: <code>.es('US')</code>. Now, to find that ratio to the whole, we'd need to divide <code>'US'</code> by everything, try this: <code>.es('US').divide(.es())</code>. Ah, not bad, but of course this provides us with a number between 0 and 1, lets correct that to a percentage: <code>.es('US').divide(.es()).multiply(100)</code>. There, now we've divided all US traffic by all worldwide traffic, then multiplied the result by 100 to get a percentage.
       </p>
-      <p>Timelion has a number of built in arithmetic function, such as <code>sum</code>, <code>subtract</code>, <code>multiply</code> and <code>divide</code>, many of which can take a series or a number. There are also other data transformation functions including <code>movingaverage</code>, <code>abs</code> and <code>derivative</code>. In addition there are other view transformation functions than the ones we learned on the previous page. See the function reference for the complete list of transforming, and drawing functions.
+      <p>Timelion has a number of built in arithmetic functions, such as <code>sum</code>, <code>subtract</code>, <code>multiply</code> and <code>divide</code>, many of which can take a series or a number. There are also other data transformation functions including <code>movingaverage</code>, <code>abs</code> and <code>derivative</code>. In addition there are other view transformation functions than the ones we learned on the previous page. See the function reference for the complete list of transforming, and drawing functions.
 
       <p>Now that you know the syntax, jump over to the <a ng-click="section = 'functions'">Function Reference</a> for detailed info on all of Timelions available functions.
     </div>
