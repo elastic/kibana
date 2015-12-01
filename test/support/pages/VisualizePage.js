@@ -339,6 +339,9 @@ define(function (require) {
       .findByCssSelector('button.ng-scope[aria-label="Save Visualization"]')
       .click()
       .then(function () {
+        return common.sleep(1000);
+      })
+      .then(function () {
         common.debug('saveButton button clicked');
         return self.remote
         .setFindTimeout(defaultTimeout)
