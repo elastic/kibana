@@ -25,6 +25,7 @@ define(function (require) {
     var headerPage;
     var settingsPage;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
+    this.timeout = 120005;
 
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
@@ -36,13 +37,11 @@ define(function (require) {
     });
 
     bdd.before(function () {
-      common.debug('running bdd.before');
-      this.timeout = 120000;
-      return remote.setWindowSize(1200,800)
-      // load a minimal set of makelogs data
-      .then(function loadIfEmptyMakelogs() {
-        return scenarioManager.loadIfEmpty('logstashFunctional');
-      });
+      var self = this;
+      remote.setWindowSize(1200,800);
+      // load a set of makelogs data
+      common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
+      return scenarioManager.loadIfEmpty('logstashFunctional');
     });
 
 

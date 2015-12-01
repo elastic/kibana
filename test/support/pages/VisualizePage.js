@@ -1,9 +1,10 @@
 define(function (require) {
 
+  var config = require('intern').config;
   var registerSuite = require('intern!object');
   var Common = require('./Common');
 
-  var defaultTimeout = 5000;
+  var defaultTimeout = config.timeouts.default;
   var common;
 
   function VisualizePage(remote) {
