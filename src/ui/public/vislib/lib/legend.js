@@ -1,6 +1,10 @@
 define(function (require) {
-  return function LegendFactory(Private) {
+  require('ui/vislib/components/legend_value/legend_value.js');
+  require('ui/vislib/components/legend_value/legend_value.less');
+
+  return function LegendFactory(Private, $rootScope, $compile) {
     var d3 = require('d3');
+    var $ = require('jquery');
     var _ = require('lodash');
     var Dispatch = Private(require('ui/vislib/lib/dispatch'));
     var Data = Private(require('ui/vislib/lib/data'));
@@ -133,27 +137,27 @@ define(function (require) {
       .data(data)
       .enter()
         .append('li')
-        .attr('class', 'color')
+        .classed('legend-value', true)
         .each(function (d) {
-          var li = d3.select(this);
-          self._addIdentifier.call(this, d);
+          var $scope = $rootScope.$new();
+          $scope.legendData = d;
+          $scope.color = args.color(d.label);
+          $scope.visEl = self.el;
 
+
+          $compile(this)($scope);
+
+          var li = d3.select(this);
+          dataLabel(this, d.label);
+
+          /*
           li.append('i')
           .attr('class', 'fa fa-circle dots')
           .attr('style', 'color:' + args.color(d.label));
 
           li.append('span').text(d.label);
+          */
         });
-    };
-
-    /**
-     * Append the data label to the element
-     *
-     * @method _addIdentifier
-     * @param label {string} label to use
-     */
-    Legend.prototype._addIdentifier = function (d) {
-      dataLabel(this, d.label);
     };
 
     /**
@@ -184,6 +188,7 @@ define(function (require) {
 
       legendDiv.select('.legend-ul').selectAll('li')
       .on('mouseover', function (d) {
+        return;
         var label = d.label;
         var charts = visEl.selectAll('.chart');
 
@@ -211,6 +216,7 @@ define(function (require) {
         eventEl.style('word-break', 'break-all');
       })
       .on('mouseout', function () {
+        return;
         /*
          * The default opacity of elements in charts may be modified by the
          * chart constructor, and so may differ from that of the legend
