@@ -84,28 +84,6 @@ define(function (require) {
       });
     };
 
-    Legend.prototype._colorPicker = function (el, label) {
-      const self = this;
-
-      const container = el.selectAll('div');
-      if (!container.empty()) return container.remove();
-
-      return el
-      .append('div')
-      .attr('class', 'color-selector')
-      .selectAll('i').data(colorPalette)
-      .enter()
-        .append('i')
-        .attr('class', 'fa fa-circle dots')
-        .attr('style', function (d) {
-          return `color: ${d};`;
-        }).on('click', function (d) {
-          const colors = self.vis.uiState.get('vis.colors') || {};
-          colors[label] = d;
-          self.vis.uiState.set('vis.colors', colors);
-        });
-    };
-
     /**
      * Adds list to legend
      *
@@ -129,25 +107,15 @@ define(function (require) {
       .enter()
         .append('li')
         .classed('legend-value', true)
+        .classed('color', true)
         .each(function (d) {
-          var $scope = $rootScope.$new();
-          $scope.legendData = d;
-          $scope.color = args.color(d.label);
-          $scope.visEl = self.el;
-
-
+          var $scope = _.extend($rootScope.$new(), {
+            visEl: self.el,
+            color: args.color(d.label),
+            legendData: d,
+            uiState: self.vis.uiState
+          });
           $compile(this)($scope);
-
-          var li = d3.select(this);
-          dataLabel(this, d.label);
-
-          /*
-          li.append('i')
-          .attr('class', 'fa fa-circle dots')
-          .attr('style', 'color:' + args.color(d.label));
-
-          li.append('span').text(d.label);
-          */
         });
     };
 
@@ -177,64 +145,13 @@ define(function (require) {
         self.vis.resize();
       });
 
-      legendDiv.select('.legend-ul').selectAll('li')
-      .on('mouseover', function (d) {
-        return;
-        var label = d.label;
-        var charts = visEl.selectAll('.chart');
-
-        function filterLabel() {
-          var pointLabel = this.getAttribute('data-label');
-          return pointLabel !== label.toString();
-        }
-
-        if (label && label !== 'Count') {
-          d3.select(this).style('cursor', 'pointer');
-        }
-
-        // legend
-        legendDiv.selectAll('li')
-        .filter(filterLabel)
-        .classed('blur_shape', true);
-
-        // all data-label attribute
-        charts.selectAll('[data-label]')
-        .filter(filterLabel)
-        .classed('blur_shape', true);
-
-        var eventEl =  d3.select(this);
-        eventEl.style('white-space', 'inherit');
-        eventEl.style('word-break', 'break-all');
-      })
-      .on('mouseout', function () {
-        return;
-        /*
-         * The default opacity of elements in charts may be modified by the
-         * chart constructor, and so may differ from that of the legend
-         */
-
-        var charts = visEl.selectAll('.chart');
-
-        // legend
-        legendDiv.selectAll('li')
-        .classed('blur_shape', false);
-
-        // all data-label attribute
-        charts.selectAll('[data-label]')
-        .classed('blur_shape', false);
-
-        var eventEl =  d3.select(this);
-        eventEl.style('white-space', 'nowrap');
-        eventEl.style('word-break', 'inherit');
-      });
-
       legendDiv.selectAll('li.color').each(function (d) {
-        d3.select(this).on('click', function (d) {
-          self._colorPicker(d3.select(this), d.label);
-        });
-        //if (label !== undefined && label !== 'Count') {
-        //  d3.select(this).call(self.events.addClickEvent());
-        //}
+        var label = d.label;
+        /*
+        if (label !== undefined && label !== 'Count') {
+          d3.select(this).call(self.events.addClickEvent());
+        }
+        */
       });
     };
 
