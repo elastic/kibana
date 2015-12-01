@@ -1,3 +1,23 @@
-<li>
-  <i class="fa fa-circle" ng-style="{color: color}"></i> {{legendData.label}}
-</li>
+<div ng-class="{'legend-value-selected': showDetails}" class="legend-value-container">
+  <div ng-click="showDetails = !showDetails" class="legend-value-truncate">
+    <i class="fa fa-circle" ng-style="{color: color}"></i> {{legendData.label}}
+  </div>
+  <div ng-show="showDetails" class="legend-value-details">
+    <div class="legend-value-full">
+      <label>Actual value</label>
+      <p>
+        <small>{{legendData.label}}</small>
+      </p>
+    </div>
+
+    <div class="legend-value-color-picker">
+      <label>Color</label>
+      <p>
+        <i ng-click="setColor(color)"
+          ng-repeat="color in colors"
+          ng-style="{color: color}" class="fa fa-circle dot">
+        </i>
+      </p>
+    </div>
+  </div>
+</div>

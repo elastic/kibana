@@ -27,40 +27,20 @@
   }
 
   .legend-ul {
+    width: 150px;
     flex: 1 1 1px;
     overflow-x: hidden;
     overflow-y: auto;
+    color: @legend-item-color;
 
     list-style-type: none;
     padding: 0;
     visibility: visible;
     min-height: 0;
-    min-width: 60px;
+    font-size: 12px;
+    line-height: 13px;
+    text-align: left;
     margin-right: 5px;
-
-    li.color {
-      min-height: 22px;
-      padding: 3px 0 3px 0;
-      text-align: left;
-      font-size: 12px;
-      line-height: 13px;
-      color: @legend-item-color;
-      cursor: default;
-      text-align: left;
-      white-space: nowrap;
-      overflow-x: hidden;
-      text-overflow: ellipsis;
-      max-width: 150px;
-
-      .dots {
-        padding-right: 5px;
-        cursor: pointer;
-      }
-    }
-
-    .color-selector {
-      width: 80px;
-    }
   }
 
   .legend-ul.hidden {

@@ -1,3 +1,45 @@
+@import (reference) "~ui/styles/variables";
+
+.legend-value {
+  margin-left: 5px;
+
+  &-container {
+    padding: 3px;
+  }
+
+  &-selected {
+    background-color: @well-bg;
+  }
+
+  &-truncate {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &-full {
+    white-space: normal;
+    word-break: break-all;
+  }
+
+  &-details {
+    padding: 5px 0px;
+  }
+
+  &-color-picker {
+    .dot {
+      line-height: 14px;
+      margin: 2px;
+      font-size: 14px;
+    }
+
+    .dot:hover {
+      margin: 0px;
+      font-size: 18px
+    }
+  }
+}
+
 .legend-value:hover {
   cursor: pointer;
 }
