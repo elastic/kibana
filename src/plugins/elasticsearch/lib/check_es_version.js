@@ -7,7 +7,7 @@ module.exports = function (server) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
 
   var client = server.plugins.elasticsearch.client;
-  var minimumElasticsearchVersion = server.config().get('elasticsearch.minimumVerison');
+  var minimumElasticsearchVersion = server.config().get('elasticsearch.minimumVersion');
 
   return client.nodes.info()
   .then(function (info) {
