@@ -23,32 +23,33 @@ module.exports = function registerPut(server) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const indexPattern = _.cloneDeep(req.payload);
       const mappings = _(req.payload.fields)
-        .indexBy('name')
-        .mapValues(value => value.mapping)
-        .omit(_.isUndefined)
-        .value();
+      .indexBy('name')
+      .mapValues(value => value.mapping)
+      .omit(_.isUndefined)
+      .value();
+
       indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
         return _.omit(field, 'mapping');
       }));
 
       if (!_.isEmpty(mappings)) {
-        reply(Boom.badRequest('Mappings cannot be updated'));
-      } else {
-        const params = {
-          index: '.kibana',
-          type: 'index-pattern',
-          id: req.params.id,
-          body: {
-            doc: indexPattern
-          }
-        };
-        callWithRequest(req, 'update', params)
-          .then(function (pattern) {
-            reply(pattern);
-          }, function (error) {
-            reply(handleESError(error));
-          });
+        return reply(Boom.badRequest('Mappings cannot be updated'));
       }
+
+      const params = {
+        index: '.kibana',
+        type: 'index-pattern',
+        id: req.params.id,
+        body: {
+          doc: indexPattern
+        }
+      };
+      callWithRequest(req, 'update', params)
+      .then(function (pattern) {
+        return reply(pattern);
+      }, function (error) {
+        return reply(handleESError(error));
+      });
     }
   });
 };

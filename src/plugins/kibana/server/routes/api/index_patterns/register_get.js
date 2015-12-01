@@ -30,31 +30,35 @@ module.exports = function registerGet(server) {
       };
 
       callWithRequest(req, 'search', params)
-        .then(function parseResults(results) {
-          const hits = results.hits.hits;
-          return _.map(hits, (patternHit) => {
-            patternHit._source.fields = JSON.parse(patternHit._source.fields);
-            return patternHit._source;
-          });
-        })
-        .then((patterns) => {
-          return Promise.map(patterns, (pattern) => {
-            return getMappings(pattern.title, req).catch(() => {
-              return {};
-            }).then((mappings) => {
-              return stitchPatternAndMappings(pattern, mappings);
-            });
-          });
-        })
-        .then(removeDeprecatedFieldProps)
-        .then((patterns) => {
-          return _.map(patterns, convertToSnakeCase);
-        })
-        .then((patterns) => {
-          reply(patterns);
-        }, function (error) {
-          reply(handleESError(error));
+      .then(function parseResults(results) {
+        const hits = results.hits.hits;
+        return _.map(hits, (patternHit) => {
+          patternHit._source.fields = JSON.parse(patternHit._source.fields);
+          return patternHit._source;
         });
+      })
+      .then((patterns) => {
+        return Promise.map(patterns, (pattern) => {
+          return getMappings(pattern.title, req).catch(() => {
+            return {};
+          })
+          .then((mappings) => {
+            return stitchPatternAndMappings(pattern, mappings);
+          });
+        });
+      })
+      .then(removeDeprecatedFieldProps)
+      .then((patterns) => {
+        return _.map(patterns, convertToSnakeCase);
+      })
+      .then(
+        function (patterns) {
+          reply(patterns);
+        },
+        function (error) {
+          reply(handleESError(error));
+        }
+      );
     }
   });
 
@@ -73,22 +77,26 @@ module.exports = function registerGet(server) {
 
       Promise.join(
         callWithRequest(req, 'get', params)
-          .then((result) => {
-            result._source.fields = JSON.parse(result._source.fields);
-            return result._source;
-          }),
+        .then((result) => {
+          result._source.fields = JSON.parse(result._source.fields);
+          return result._source;
+        }),
         getMappings(pattern, req),
-        stitchPatternAndMappings)
-        .then(removeDeprecatedFieldProps)
-        .then((pattern) => {
-          return _.isArray(pattern) ? pattern[0] : pattern;
-        })
-        .then(convertToSnakeCase)
-        .then(function (pattern) {
+        stitchPatternAndMappings
+      )
+      .then(removeDeprecatedFieldProps)
+      .then((pattern) => {
+        return _.isArray(pattern) ? pattern[0] : pattern;
+      })
+      .then(convertToSnakeCase)
+      .then(
+        function (pattern) {
           reply(pattern);
-        }, function (error) {
+        },
+        function (error) {
           reply(handleESError(error));
-        });
+        }
+      );
     }
   });
 };

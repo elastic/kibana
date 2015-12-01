@@ -17,17 +17,17 @@ module.exports = function registerDelete(server) {
       Promise.all([
         callWithRequest(req, 'delete', deletePatternParams),
         callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id)})
-            .catch((error) => {
-              if (!error.status || error.status !== 404) {
-                throw error;
-              }
-            })
+        .catch((error) => {
+          if (!error.status || error.status !== 404) {
+            throw error;
+          }
+        })
       ])
-        .then(function (pattern) {
-          reply('success');
-        }, function (error) {
-          reply(handleESError(error));
-        });
+      .then(function (pattern) {
+        reply('success');
+      }, function (error) {
+        reply(handleESError(error));
+      });
     }
   });
 };
