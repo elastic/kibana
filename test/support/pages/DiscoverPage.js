@@ -36,6 +36,9 @@ define(function (require) {
       var self = this;
       return self.clickSaveSearchButton()
       .then(function () {
+        common.sleep(1000);
+      })
+      .then(function () {
         common.debug('--saveSearch button clicked');
         return thisTime.findById('SaveSearch')
         .type(searchName);

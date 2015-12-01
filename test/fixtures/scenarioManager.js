@@ -62,7 +62,6 @@ ScenarioManager.prototype.unload = function (id) {
     return bulk.indexName;
   });
 
-  console.log('DELETING INDEX: ' + indices);
   return this.client.indices.delete({
     index: indices
   })
