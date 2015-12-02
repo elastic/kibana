@@ -21,6 +21,9 @@ define(function (require) {
       common = new Common(this.remote);
       remote = this.remote;
       return remote.setWindowSize(1200,800);
+      remote.setTimeout('script', 5 * 60 * 1000);
+      remote.setTimeout('implicit', 5 * 60 * 1000);
+      remote.setTimeout('page load', 5 * 60 * 1000);
     });
 
     bdd.after(function unloadMakelogs() {

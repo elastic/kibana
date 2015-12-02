@@ -39,9 +39,19 @@ define(function (require) {
     bdd.before(function () {
       var self = this;
       remote.setWindowSize(1200,800);
+      remote.setTimeout('script', 5 * 60 * 1000);
+      remote.setTimeout('implicit', 5 * 60 * 1000);
+      remote.setTimeout('page load', 5 * 60 * 1000);
+
+      remote.getTimeout('page load')  //One of 'script', 'implicit', or 'page load'. (ms)
+      .then(function (timeout) {      //  defaults  0,          0,         Infinity
+        common.debug(timeout);
+      })
+      .then(function () {
       // load a set of makelogs data
-      common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
-      return scenarioManager.loadIfEmpty('logstashFunctional');
+        common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
+        return scenarioManager.loadIfEmpty('logstashFunctional');
+      });
     });
 
 
