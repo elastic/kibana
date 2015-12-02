@@ -17,7 +17,7 @@ module.exports = function registerGet(server) {
     path: '/api/kibana/index_patterns',
     method: 'GET',
     handler: function (req, reply) {
-      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
 
       const params = {
         index: '.kibana',
@@ -29,7 +29,7 @@ module.exports = function registerGet(server) {
         }
       };
 
-      callWithRequest(req, 'search', params)
+      boundCallWithRequest('search', params)
       .then(function parseResults(results) {
         const hits = results.hits.hits;
         return _.map(hits, (patternHit) => {
@@ -39,7 +39,7 @@ module.exports = function registerGet(server) {
       })
       .then((patterns) => {
         return Promise.map(patterns, (pattern) => {
-          return getMappings(pattern.title, req).catch(() => {
+          return getMappings(pattern.title, boundCallWithRequest).catch(() => {
             return {};
           })
           .then((mappings) => {
@@ -66,7 +66,7 @@ module.exports = function registerGet(server) {
     path: '/api/kibana/index_patterns/{id}',
     method: 'GET',
     handler: function (req, reply) {
-      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       let pattern = req.params.id;
 
       const params = {
@@ -76,12 +76,12 @@ module.exports = function registerGet(server) {
       };
 
       Promise.join(
-        callWithRequest(req, 'get', params)
+        boundCallWithRequest('get', params)
         .then((result) => {
           result._source.fields = JSON.parse(result._source.fields);
           return result._source;
         }),
-        getMappings(pattern, req),
+        getMappings(pattern, boundCallWithRequest),
         stitchPatternAndMappings
       )
       .then(removeDeprecatedFieldProps)
