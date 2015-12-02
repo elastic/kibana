@@ -42,8 +42,7 @@ define(function (require) {
         });
       },
       getValue: function (agg, bucket) {
-        // The percentile of an empty set is undefined.
-        if (!bucket[agg.parentId]) return '?';
+        if (!bucket[agg.parentId]) return;
 
         // percentiles for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
         // parse the keys and respond with the value that matches

@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
   var module = require('ui/modules').get('kibana/metric_vis', ['kibana']);
@@ -8,6 +9,10 @@ define(function (require) {
 
     var metrics = $scope.metrics = [];
 
+    $scope.isNullorNaN = function (val) {
+      return _.isNull(val) || isNaN(val);
+    };
+
     $scope.processTableGroups = function (tableGroups) {
       tableGroups.tables.forEach(function (table) {
         table.columns.forEach(function (column, i) {
@@ -15,7 +20,7 @@ define(function (require) {
           var value = table.rows[0][i];
 
           // Return string when value is '?'
-          value = typeof value === 'string' ? value : fieldFormatter(value);
+          value = $scope.isNullorNaN(value) ? '?' : fieldFormatter(value);
 
           metrics.push({
             label: column.title,
