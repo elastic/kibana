@@ -298,6 +298,8 @@ define(function (require) {
           .then(function (currentUrl) {
             if (!currentUrl.match(/indices\/.+\?/)) {
               throw new Error('Index pattern not created');
+            } else {
+              common.debug('Index pattern created: ' + currentUrl);
             }
           });
         });
