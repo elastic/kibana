@@ -90,9 +90,8 @@ module.exports = function (grunt) {
         '-jar',
         'selenium/selenium-server-standalone-2.47.1.jar',
         '-port',
-        uiConfig.servers.webdriver.port,
-        '-timeout',
-        6002
+        '-timeout 60',
+        uiConfig.servers.webdriver.port
       ]
     },
 
@@ -108,9 +107,8 @@ module.exports = function (grunt) {
         '-jar',
         'selenium/selenium-server-standalone-2.47.1.jar',
         '-port',
-        uiConfig.servers.webdriver.port,
-        '-timeout',
-        6001
+        '-timeout 60',
+        uiConfig.servers.webdriver.port
       ]
     },
 
