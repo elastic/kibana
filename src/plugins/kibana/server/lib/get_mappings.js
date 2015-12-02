@@ -2,9 +2,8 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 const {templateToPattern, patternToTemplate} = require('./convert_pattern_and_template_name');
 
-module.exports = function getMappings(pattern, req) {
+module.exports = function getMappings(pattern, boundCallWithRequest) {
   const templateName = patternToTemplate(pattern);
-  const callWithRequest = req.server.plugins.elasticsearch.callWithRequest;
 
   const fieldMappingParams = {
     index: pattern,
@@ -14,7 +13,7 @@ module.exports = function getMappings(pattern, req) {
     include_defaults: true
   };
 
-  return callWithRequest(req, 'indices.getTemplate', {name: templateName})
+  return boundCallWithRequest('indices.getTemplate', {name: templateName})
     .then((template) => {
       let mappings = template[templateName].mappings;
       let mergedMappings = {};
@@ -25,7 +24,7 @@ module.exports = function getMappings(pattern, req) {
       });
       return mergedMappings;
     }, (error) => {
-      return callWithRequest(req, 'indices.getFieldMapping', fieldMappingParams)
+      return boundCallWithRequest('indices.getFieldMapping', fieldMappingParams)
         .then((fieldMappings) => {
           return _.mapValues(_.reduce(fieldMappings, (mergedMappings, indexMappings) => {
             return _.reduce(indexMappings.mappings, (mergedMappings, typeMappings) => {
