@@ -10,7 +10,7 @@ describe('plugins/elasticsearch', function () {
     var plugin;
 
     beforeEach(function () {
-      var get = sinon.stub().withArgs('elasticserach.minimumVerison').returns('1.4.3');
+      var get = sinon.stub().withArgs('elasticserach.minimumVersion').returns('1.4.3');
       var config = function () { return { get: get }; };
       server = {
         log: _.noop,

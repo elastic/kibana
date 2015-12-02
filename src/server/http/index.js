@@ -14,6 +14,9 @@ module.exports = function (kbnServer, server, config) {
   var connectionOptions = {
     host: config.get('server.host'),
     port: config.get('server.port'),
+    state: {
+      strictHeader: false
+    },
     routes: {
       cors: config.get('server.cors')
     }
