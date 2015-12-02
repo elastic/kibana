@@ -13,7 +13,8 @@ define(function (require) {
         Private(require('ui/agg_types/metrics/stdDeviation')),
         Private(require('ui/agg_types/metrics/cardinality')),
         Private(require('ui/agg_types/metrics/percentiles')),
-        Private(require('ui/agg_types/metrics/percentile_ranks'))
+        Private(require('ui/agg_types/metrics/percentile_ranks')),
+        Private(require('ui/agg_types/metrics/scripted_metric'))
       ],
       buckets: [
         Private(require('ui/agg_types/buckets/date_histogram')),
