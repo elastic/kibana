@@ -1,4 +1,11 @@
 <form role="form" class="vis-share">
+  <p ng-show="objectId">
+    <input type="checkbox" ng-model="ignoreState" id="ignoreState" />
+    <label for="ignoreState">
+      Link to saved {{objectType}}
+      <small>By selecting this option, future changes to this saved {{objectType}} will be reflected in the shared view. Note: Shared URLs always include globally persisted state such as time picker and auto refresh.</small>
+    </label>
+  </p>
   <p>
     <input type="checkbox" ng-model="shortenUrls" id="shortenUrls" />
     <label for="shortenUrls">Shorten URLs</label>
@@ -26,7 +33,7 @@
         Share a link
       </label>
       <div class="form-control" disabled ng-if="!shortenUrls">
-        {{getUrl()}}
+        {{url}}
       </div>
       <div class="form-control" disabled ng-if="shortenUrls && !shortUrlsLoading">
         {{shortUrl}}

@@ -1,22 +1,63 @@
 const app = require('ui/modules').get('kibana');
+const _ = require('lodash');
+const { parse } = require('querystring');
 
 app.directive('share', function (Private) {
   const urlShortener = Private(require('./url_shortener'));
 
   return {
     restrict: 'E',
-    scope: { objectType: '@' },
+    scope: {
+      objectType: '@',
+      objectId: '@'
+    },
     template: require('ui/share/index.html'),
-    controller: function ($scope, $rootScope, $location, $http) {
+    controller: function ($scope, $rootScope, $location) {
       $scope.shortUrlsLoading = false;
 
-      $scope.$watch('getUrl()', function (url) {
+      function updateUrl(url) {
         $scope.url = url;
         $scope.embedUrl = url.replace('?', '?embed&');
 
         //when the url changes we want to hide any generated short urls
         $scope.shortenUrls = false;
         $scope.shortUrl = undefined;
+      }
+
+      function buildQueryString(data) {
+        var result = [];
+        _.forOwn(data, (value, key) => {
+          result.push(`${key}=${value}`);
+        });
+        return result.join('&');
+      }
+
+      function removeAppState(url) {
+        let index = url.indexOf('?');
+        if (index === -1) return url;
+
+        let base = url.substring(0, index);
+        let qs = url.substring(index + 1);
+
+        let qsParts = parse(qs);
+        delete qsParts._a;
+        qs = buildQueryString(qsParts);
+
+        return `${base}?${qs}`;
+      }
+
+      $scope.getUrl = function () {
+        return $location.absUrl();
+      };
+
+      $scope.$watch('getUrl()', updateUrl);
+
+      $scope.$watch('ignoreState', enabled => {
+        if (enabled) {
+          updateUrl(removeAppState($scope.url));
+        } else {
+          updateUrl($scope.getUrl());
+        }
       });
 
       $scope.$watch('shortenUrls', enabled => {
@@ -46,10 +87,6 @@ app.directive('share', function (Private) {
           }
         }
       });
-
-      $scope.getUrl = function () {
-        return $location.absUrl();
-      };
     }
   };
 });
