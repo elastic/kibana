@@ -17,7 +17,7 @@ export default function (server) {
         }
       });
     } catch (err) {
-      console.log('Error updating url metadata', err);
+      console.log('Warning: Error updating url metadata', err);
       //swallow errors. It isn't critical if there is no update.
     }
   }
@@ -35,7 +35,7 @@ export default function (server) {
         resolve(response);
       })
       .catch(err => {
-        reject();
+        resolve();
       });
     });
 
@@ -88,6 +88,8 @@ export default function (server) {
     async getUrl(urlId) {
       try {
         const urlDoc = await getUrlDoc(urlId);
+        if (!urlDoc) throw new Error('Requested shortened url does note exist in kibana index');
+
         updateMetadata(urlId, urlDoc);
 
         return urlDoc._source.url;
