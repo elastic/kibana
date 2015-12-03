@@ -1,17 +1,22 @@
-<div ng-class="{'legend-value-selected': showDetails}" class="legend-value-container">
-  <div ng-click="showDetails = !showDetails" class="legend-value-truncate">
+<div class="legend-value-container">
+  <div
+    ng-click="showDetails = !showDetails"
+    ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"\
+    class="legend-value-title">
     <i class="fa fa-circle" ng-style="{color: color}"></i> {{legendData.label}}
   </div>
+
+
   <div ng-show="showDetails" class="legend-value-details">
-    <div class="legend-value-full">
-      <label>Actual value</label>
-      <p>
-        <small>{{legendData.label}}</small>
-      </p>
+
+    <div ng-show="hasFilter">
+      <label>Filter</label>
+      <button class="btn btn-xs" ng-click="filter(false)"><i class="fa fa-search-plus"></i></button>
+      <button class="btn btn-xs" ng-click="filter(true)"><i class="fa fa-search-minus"></i></button>
     </div>
 
+
     <div class="legend-value-color-picker">
-      <label>Color</label>
       <p>
         <i ng-click="setColor(color)"
           ng-repeat="color in colors"

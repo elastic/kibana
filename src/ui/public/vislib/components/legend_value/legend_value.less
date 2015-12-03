@@ -1,14 +1,12 @@
 @import (reference) "~ui/styles/variables";
 
 .legend-value {
-  margin-left: 5px;
-
-  &-container {
+  &-title {
     padding: 3px;
-  }
 
-  &-selected {
-    background-color: @well-bg;
+    &:hover {
+      background-color: @sidebar-hover-bg;
+    }
   }
 
   &-truncate {
@@ -20,10 +18,13 @@
   &-full {
     white-space: normal;
     word-break: break-all;
+    background-color: @sidebar-bg;
   }
 
   &-details {
     padding: 5px 0px;
+    margin-left: 3px;
+    border-bottom: 1px solid @sidebar-bg;
   }
 
   &-color-picker {
@@ -44,9 +45,3 @@
   cursor: pointer;
 }
 
-.legend-ul:hover .legend-value {
-    opacity: .5;
-}
-.legend-ul .legend-value:hover {
-    opacity: 1;
-}

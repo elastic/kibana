@@ -3,23 +3,27 @@
 
 .legend-col-wrapper {
   .flex-parent(0, 0, auto);
+  flex-direction: row;
   z-index: 10;
   min-height: 0;
 
-  .legend-toggle {
+  .header {
+    border-right: 1px solid @sidebar-bg;
     cursor: pointer;
-    opacity: 0.75;
-    white-space: nowrap;
-    font-size: 0.9em;
+    width: 15px;
+  }
 
-    .legend-open {
-      margin-right: 20px;
+  .legend-toggle {
+
+    &:hover {
+      color: @sidebar-hover-color;
+      background-color: @sidebar-hover-bg;
     }
 
-    .legend-closed {
-      font-size: 1.5em;
-      padding-left: 5px;
-    }
+    background-color: @sidebar-bg;
+    font-size: 10px;
+    padding: 8px 3px;
+    border-bottom-left-radius: @border-radius-small;
   }
 
   .column-labels {
@@ -27,7 +31,7 @@
   }
 
   .legend-ul {
-    width: 150px;
+    width: 135px;
     flex: 1 1 1px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -40,7 +44,6 @@
     font-size: 12px;
     line-height: 13px;
     text-align: left;
-    margin-right: 5px;
   }
 
   .legend-ul.hidden {

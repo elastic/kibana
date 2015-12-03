@@ -2,13 +2,19 @@ define(function (require) {
   var _ = require('lodash');
   var html = require('ui/vislib/components/legend_value/legend_value.html');
   var $ = require('jquery');
+  var d3 = require('d3');
 
   require('ui/modules').get('kibana')
-  .directive('legendValue', function () {
+  .directive('legendValue', function (Private, getAppState) {
+    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+
     return {
       restrict: 'C',
       template: html,
       link: function ($scope, $elem) {
+
+        var $state = getAppState();
+        var clickHandler = filterBarClickHandler($state);
 
         $elem.on('mouseover', function () {
           $('[data-label]', $scope.visEl).not('[data-label="' + $scope.legendData.label + '"]').css('opacity', 0.5);
@@ -22,6 +28,10 @@ define(function (require) {
           var colors = $scope.uiState.get('vis.colors') || {};
           colors[$scope.legendData.label] = color;
           $scope.uiState.set('vis.colors', colors);
+        };
+
+        $scope.filter = function (negate) {
+          clickHandler({point: $scope.legendData, negate: negate});
         };
 
         $scope.colors = [
