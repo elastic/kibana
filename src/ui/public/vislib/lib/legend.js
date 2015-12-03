@@ -12,9 +12,6 @@ define(function (require) {
     var dataLabel = require('ui/vislib/lib/_data_label');
     var color = Private(require('ui/vislib/components/color/color'));
 
-    const NUM_COLORS = 5 * 5; // rows x columns
-    const colorPalette = Private(require('ui/vislib/components/color/color_palette'))(NUM_COLORS);
-
     /**
      * Appends legend to the visualization
      *
@@ -80,7 +77,7 @@ define(function (require) {
       .append('div')
       .attr('class', 'column-labels')
       .html(function () {
-        return legendHeaderTemplate({ isOpen: self.vis.get('legendOpen') });
+        return legendHeaderTemplate({ isOpen: self.vis.uiState.get('legendOpen') });
       });
     };
 
@@ -99,7 +96,7 @@ define(function (require) {
       return el.append('ul')
       .attr('class', function () {
         var className = 'legend-ul';
-        if (self.vis && !self.vis.get('legendOpen')) className += ' hidden';
+        if (self.vis && !self.vis.uiState.get('legendOpen')) className += ' hidden';
         return className;
       })
       .selectAll('li')
@@ -107,9 +104,10 @@ define(function (require) {
       .enter()
         .append('li')
         .classed('legend-value', true)
-        .classed('color', true)
         .each(function (d) {
+          var hasFilter = data.length > 1 ? true : false;
           var $scope = _.extend($rootScope.$new(), {
+            hasFilter: hasFilter,
             visEl: self.el,
             color: args.color(d.label),
             legendData: d,
@@ -133,25 +131,20 @@ define(function (require) {
       this._header(legendDiv, this);
       this._list(legendDiv, items, this);
 
-      var headerIcon = visEl.select('.legend-toggle');
+      var headerIcon = visEl.select('.header');
+      //var legendOpen = self.vis.uiState.get('legendOpen', legendOpen);
+      //visEl.select('ul.legend-ul').classed('hidden', !legendOpen);
+
+      //self.vis.set('legendOpen', false);
 
       // toggle legend open and closed
       headerIcon
       .on('click', function legendClick() {
-        var legendOpen = !self.vis.get('legendOpen');
-        self.vis.set('legendOpen', legendOpen);
+        var legendOpen = !self.vis.uiState.get('legendOpen');
+        self.vis.uiState.set('legendOpen', legendOpen);
 
         visEl.select('ul.legend-ul').classed('hidden', legendOpen);
         self.vis.resize();
-      });
-
-      legendDiv.selectAll('li.color').each(function (d) {
-        var label = d.label;
-        /*
-        if (label !== undefined && label !== 'Count') {
-          d3.select(this).call(self.events.addClickEvent());
-        }
-        */
       });
     };
 

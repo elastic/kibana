@@ -58,6 +58,13 @@ define(function (require) {
 
           if (!filters.length) return;
 
+          if (event.negate) {
+            _.each(filters, function (filter) {
+              filter.meta = filter.meta || {};
+              filter.meta.negate = true;
+            });
+          }
+
           filters = dedupFilters($state.filters, uniqFilters(filters));
           // We need to add a bunch of filter deduping here.
           $state.$newFilters = filters;
