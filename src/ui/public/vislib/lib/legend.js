@@ -43,23 +43,11 @@ define(function (require) {
     };
 
     Legend.prototype._getSeriesLabels = function (data) {
-      var isOneSeries = data.every(function (chart) {
-        return chart.series.length === 1;
-      });
-
-      var values = data.map(function (chart) {
-        var yLabel = isOneSeries ? chart.yAxisLabel : undefined;
-
-        return chart.series.map(function (series) {
-          if (yLabel) series.label = yLabel;
-          return series;
-        });
-      })
-      .reduce(function (a, b) {
-        return a.concat(b);
-      }, []);
-
-      return _.uniq(values, 'label');
+      return _(data)
+      .pluck('series')
+      .flatten()
+      .uniq('label')
+      .value();
     };
 
     Legend.prototype._getLabels = function (data, type) {
