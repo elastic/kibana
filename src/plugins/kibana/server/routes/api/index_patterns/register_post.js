@@ -1,5 +1,4 @@
 const Boom = require('boom');
-const Joi = require('joi');
 const _ = require('lodash');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 const indexPatternSchema = require('../../../lib/schemas/index_pattern_schema');
@@ -9,13 +8,14 @@ module.exports = function registerPost(server) {
   server.route({
     path: '/api/kibana/index_patterns',
     method: 'POST',
+    config: {
+      validate: {
+        payload: indexPatternSchema.post
+      }
+    },
     handler: function (req, reply) {
       if (_.isEmpty(req.payload)) {
         return reply(Boom.badRequest('Payload required'));
-      }
-      const validation = Joi.validate(req.payload, indexPatternSchema.post);
-      if (validation.error) {
-        return reply(Boom.badRequest(validation.error));
       }
 
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
