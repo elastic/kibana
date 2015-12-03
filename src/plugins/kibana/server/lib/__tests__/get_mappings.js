@@ -1,4 +1,5 @@
 const expect = require('expect.js');
+const _ = require('lodash');
 const getMappings = require('../get_mappings');
 const indexTemplate = require('../../../../../fixtures/index_template.json');
 const fieldMappings = require('../../../../../fixtures/field_mapping_multi_index.json');
@@ -51,18 +52,14 @@ describe('getMappings', function () {
   it('should return an object with field mappings for a given index pattern keyed by the field names', function () {
     return getMappings('logstash-*', mockCallWithRequestWithTemplate)
     .then(function (result) {
-      expect(result).to.be.eql(correctResult);
-      expect(result).to.only.have.keys(['agent', '@timestamp', 'bytes', 'ip', 'geo.coordinates']);
-      expect(result.agent).to.only.have.keys(['index', 'type', 'doc_values']);
+      expect(_.isEqual(result, correctResult)).to.be(true);
     });
   });
 
   it('should return mappings directly from the indices when no index template exists', function () {
     return getMappings('logstash-*', mockCallWithRequestNoTemplate)
     .then(function (result) {
-      expect(result).to.be.eql(correctResult);
-      expect(result).to.only.have.keys(['agent', '@timestamp', 'bytes', 'ip', 'geo.coordinates']);
-      expect(result.agent).to.only.have.keys(['index', 'type', 'doc_values']);
+      expect(_.isEqual(result, correctResult)).to.be(true);
     });
   });
 
