@@ -11,7 +11,7 @@ define(function (require) {
 
       var defer = $q.defer();
       try {
-        fn(defer.resolve, defer.reject, defer);
+        fn(defer.resolve, defer.reject);
       } catch (e) {
         defer.reject(e);
       }
