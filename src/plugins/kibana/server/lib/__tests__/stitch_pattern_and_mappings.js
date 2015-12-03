@@ -1,5 +1,6 @@
 const expect = require('expect.js');
 const stitchPatternAndMappings = require('../stitch_pattern_and_mappings');
+const correctResult = require('../../../../../fixtures/index_pattern_with_mappings.json');
 
 const indexPattern = {
   title: 'logstash-*',
@@ -13,7 +14,7 @@ const indexPattern = {
     {
       name: 'ip',
       count: 2,
-      scripted: false,
+      scripted: false
     }
   ]
 };
@@ -31,32 +32,6 @@ const mappings = {
   }
 };
 
-const correctResult = {
-  'title': 'logstash-*',
-  'timeFieldName': '@timestamp',
-  'fields': [
-    {
-      'name': 'geo.coordinates',
-      'count': 0,
-      'scripted': false,
-      'mapping': {
-        'index': 'not_analyzed',
-        'type': 'geo_point',
-        'doc_values': false
-      }
-    },
-    {
-      'name': 'ip',
-      'count': 2,
-      'scripted': false,
-      'mapping': {
-        'index': 'not_analyzed',
-        'type': 'ip',
-        'doc_values': true
-      }
-    }
-  ]
-};
 
 describe('stitchPatternAndMappings', function () {
 
