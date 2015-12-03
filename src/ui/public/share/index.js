@@ -1,6 +1,7 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const { parse } = require('querystring');
+const angular = require('angular');
 
 app.directive('share', function (Private) {
   const urlShortener = Private(require('./url_shortener'));
@@ -9,10 +10,12 @@ app.directive('share', function (Private) {
     restrict: 'E',
     scope: {
       objectType: '@',
-      objectId: '@'
+      objectId: '@',
+      setAllowEmbed: '&?allowEmbed'
     },
     template: require('ui/share/index.html'),
     controller: function ($scope, $rootScope, $location) {
+      $scope.allowEmbed = $scope.setAllowEmbed ? $scope.setAllowEmbed() : true;
       $scope.shortUrlsLoading = false;
 
       function updateUrl(url) {
