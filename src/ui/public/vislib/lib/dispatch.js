@@ -161,6 +161,10 @@ define(function (require) {
      */
     Dispatch.prototype.allowBrushing = function () {
       var xAxis = this.handler.xAxis;
+
+      // Don't allow brushing for time based charts from non-time-based indices
+      if (xAxis.ordered && xAxis.ordered.endzones === false) return false;
+
       return Boolean(xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
     };
 
