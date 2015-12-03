@@ -1,0 +1,39 @@
+{
+  "kibana-logstash-*": {
+    "order": 0,
+    "template": "logstash-*",
+    "settings": {},
+    "mappings": {
+      "_default_": {
+        "properties": {
+          "agent": {
+            "index": "analyzed",
+            "type": "string",
+            "doc_values": false
+          },
+          "@timestamp": {
+            "index": "not_analyzed",
+            "type": "date",
+            "doc_values": true
+          },
+          "bytes": {
+            "index": "not_analyzed",
+            "type": "number",
+            "doc_values": true
+          },
+          "ip": {
+            "index": "not_analyzed",
+            "type": "ip",
+            "doc_values": true
+          },
+          "geo.coordinates": {
+            "index": "not_analyzed",
+            "type": "geo_point",
+            "doc_values": false
+          }
+        }
+      }
+    },
+    "aliases": {}
+  }
+}
