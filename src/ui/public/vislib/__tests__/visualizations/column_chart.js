@@ -33,6 +33,7 @@ dataTypesArray.forEach(function (dataType, i) {
     var vis;
     var visLibParams = {
       type: 'histogram',
+      hasTimeField: true,
       addLegend: true,
       addTooltip: true,
       mode: mode
