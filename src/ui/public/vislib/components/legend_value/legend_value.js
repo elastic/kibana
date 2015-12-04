@@ -17,6 +17,11 @@ define(function (require) {
         var $state = getAppState();
         var clickHandler = filterBarClickHandler($state);
 
+        $scope.$on('$destroy', function () {
+          $elem.off('mouseover');
+          $elem.off('mouseout');
+        });
+
         $elem.on('mouseover', function () {
           $('[data-label]', $scope.visEl).not('[data-label="' + $scope.legendData.label + '"]').css('opacity', 0.5);
         });

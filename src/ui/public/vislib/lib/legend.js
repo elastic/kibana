@@ -29,6 +29,7 @@ define(function (require) {
       var labels = this.labels = this._getLabels(data, type);
       var labelsArray = labels.map(function (obj) { return obj.label; });
 
+      this.legendScope = $rootScope.$new();
       this.events = new Dispatch();
       this.vis = vis;
       this.el = vis.el;
@@ -60,6 +61,10 @@ define(function (require) {
     Legend.prototype._getLabels = function (data, type) {
       if (type === 'pie') return this._getPieLabels(data);
       return this._getSeriesLabels(data);
+    };
+
+    Legend.prototype.destroy = function () {
+      this.legendScope.$destroy();
     };
 
     /**
@@ -108,7 +113,7 @@ define(function (require) {
         .classed('color', true)
         .classed('legend-value', true)
         .each(function (d) {
-          var $scope = _.extend($rootScope.$new(), {
+          var $scope = _.extend(self.legendScope.$new(), {
             visEl: self.el,
             color: args.color(d.label),
             legendData: d,
