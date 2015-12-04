@@ -41,6 +41,53 @@ define(function (require) {
       });
     };
 
+    this.scan = function (pageSize = 100, docCount = 1000) {
+      var allResults = {
+        hits: [],
+        total: 0
+      };
+
+      var self = this;
+      return new Promise(function (resolve, reject) {
+        es.search({
+          index: kbnIndex,
+          type: 'dashboard',
+          size: pageSize,
+          body: { query: {match_all: {}}},
+          searchType: 'scan',
+          scroll: '1m'
+        }, function getMoreUntilDone(error, response) {
+          var scanAllResults = docCount === Number.POSITIVE_INFINITY;
+          allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, docCount);
+
+          var hits = response.hits.hits
+          .slice(0, allResults.total - allResults.hits.length)
+          .map(self.mapHits.bind(self));
+          allResults.hits =  allResults.hits.concat(hits);
+
+          var collectedAllResults = allResults.total === allResults.hits.length;
+          if (collectedAllResults) {
+            resolve(allResults);
+          } else {
+            es.scroll({
+              scrollId: response._scroll_id,
+            }, getMoreUntilDone);
+          }
+        });
+      });
+    };
+
+    this.scanAll = function (queryString, pageSize = 100) {
+      return this.scan(pageSize, Number.POSITIVE_INFINITY);
+    };
+
+    this.mapHits = function (hit) {
+      var source = hit._source;
+      source.id = hit._id;
+      source.url = this.urlFor(hit._id);
+      return source;
+    };
+
     this.find = function (searchString, size = 100) {
       var self = this;
       var body;
@@ -67,12 +114,7 @@ define(function (require) {
       .then(function (resp) {
         return {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(function (hit) {
-            var source = hit._source;
-            source.id = hit._id;
-            source.url = self.urlFor(hit._id);
-            return source;
-          })
+          hits: resp.hits.hits.map(self.mapHits.bind(self))
         };
       });
     };
