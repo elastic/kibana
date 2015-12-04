@@ -3,7 +3,7 @@ const indexPatternSchema = require('../../../lib/schemas/index_pattern_schema');
 const _ = require('lodash');
 const handleESError = require('../../../lib/handle_es_error');
 
-module.exports = function registerPut(server) {
+module.exports = function registerPut(server, cache) {
   server.route({
     path: '/api/kibana/index_patterns/{id}',
     method: 'PUT',
@@ -46,6 +46,8 @@ module.exports = function registerPut(server) {
       };
       callWithRequest(req, 'update', params)
       .then(function (pattern) {
+        cache.drop('kibana-all');
+        cache.drop(req.params.id);
         return reply('success');
       }, function (error) {
         return reply(handleESError(error));

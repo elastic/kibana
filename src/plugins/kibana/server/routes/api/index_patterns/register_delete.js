@@ -2,7 +2,7 @@ const Promise = require('bluebird');
 const handleESError = require('../../../lib/handle_es_error');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 
-module.exports = function registerDelete(server) {
+module.exports = function registerDelete(server, cache) {
   server.route({
     path: '/api/kibana/index_patterns/{id}',
     method: 'DELETE',
@@ -24,6 +24,8 @@ module.exports = function registerDelete(server) {
         })
       ])
       .then(function (pattern) {
+        cache.drop('kibana-all');
+        cache.drop(req.params.id);
         reply('success');
       }, function (error) {
         reply(handleESError(error));
