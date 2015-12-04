@@ -46,7 +46,7 @@ module.exports = function registerPut(server) {
       };
       callWithRequest(req, 'update', params)
       .then(function (pattern) {
-        return reply(pattern);
+        return reply('success');
       }, function (error) {
         return reply(handleESError(error));
       });
