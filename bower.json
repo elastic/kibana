@@ -49,7 +49,8 @@
     "lodash-deep": "spenceralger/lodash-deep#1a7eca8344",
     "marked": "0.3.3",
     "numeral": "1.5.3",
-    "leaflet-draw": "0.2.4"
+    "leaflet-draw": "0.2.4",
+    "semver": "~4.3.4"
   },
   "devDependencies": {},
   "resolutions": {
