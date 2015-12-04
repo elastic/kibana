@@ -35,6 +35,16 @@ define(function (require) {
           return settingsPage.createIndexPattern();
         })
         .then(function () {
+          return settingsPage.clickAdvancedTab();
+        })
+        .then(function GetAdvancedSetting() {
+          common.debug('check for required UTC timezone');
+          return settingsPage.getAdvancedSettings('dateFormat:tz');
+        })
+        .then(function (advancedSetting) {
+          expect(advancedSetting).to.be('UTC');
+        })
+        .then(function () {
           common.debug('navigateToApp visualize');
           return common.navigateToApp('visualize');
         })

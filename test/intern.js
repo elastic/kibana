@@ -13,9 +13,9 @@ define(function (require) {
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
-      'test/functional/status_page/index',
-      'test/functional/apps/settings/index',
-      'test/functional/apps/discover/index',
+      // 'test/functional/status_page/index',
+      // 'test/functional/apps/settings/index',
+      // 'test/functional/apps/discover/index',
       'test/functional/apps/visualize/index'
     ],
     excludeInstrumentation: /(fixtures|node_modules)\//,
