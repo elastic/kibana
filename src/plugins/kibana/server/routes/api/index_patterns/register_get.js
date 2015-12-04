@@ -85,9 +85,6 @@ module.exports = function registerGet(server) {
         stitchPatternAndMappings
       )
       .then(removeDeprecatedFieldProps)
-      .then((pattern) => {
-        return _.isArray(pattern) ? pattern[0] : pattern;
-      })
       .then(convertToSnakeCase)
       .then(
         function (pattern) {
