@@ -105,6 +105,7 @@ define(function (require) {
       .data(data)
       .enter()
         .append('li')
+        .classed('color', true)
         .classed('legend-value', true)
         .each(function (d) {
           var $scope = _.extend($rootScope.$new(), {
