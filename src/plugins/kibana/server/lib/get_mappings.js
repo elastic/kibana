@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 const {templateToPattern, patternToTemplate} = require('./convert_pattern_and_template_name');
 
 /**
- * Returns mappings for fields in indices matching pattern. Gets mappings from
+ * Returns normalized mappings for fields in indices matching pattern. Gets mappings from
  * a matching index template if it exists, otherwise obtained directly from the indices
  * themselves.
  *
@@ -35,13 +35,22 @@ module.exports = function getMappings(pattern, boundCallWithRequest) {
     }, (error) => {
       return boundCallWithRequest('indices.getFieldMapping', fieldMappingParams)
         .then((fieldMappings) => {
-          return _.mapValues(_.reduce(fieldMappings, (mergedMappings, indexMappings) => {
+          return _.reduce(fieldMappings, (mergedMappings, indexMappings) => {
             return _.reduce(indexMappings.mappings, (mergedMappings, typeMappings) => {
-              return _.defaults(mergedMappings, typeMappings);
+              return _.assign(mergedMappings, typeMappings, function (mergedValue, typeValue, key) {
+                const shortName = _.last(typeValue.full_name.split('.'));
+                if (mergedValue === undefined) {
+                  return typeValue.mapping[shortName];
+                }
+                else {
+                  if (mergedValue.type !== typeValue.mapping[shortName].type) {
+                    mergedValue.type = 'conflict';
+                  }
+                  return mergedValue;
+                }
+              });
             }, mergedMappings);
-          }, {}), (value) => {
-            return value.mapping[_.last(value.full_name.split('.'))];
-          });
+          }, {});
         });
     });
 };

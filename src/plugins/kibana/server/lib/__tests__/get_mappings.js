@@ -47,6 +47,17 @@ function mockCallWithRequestNoTemplate(endpoint, params) {
   }
 }
 
+function mockCallWithRequestWithTypeConflict(endpoint, params) {
+  if (endpoint === 'indices.getTemplate') {
+    return Promise.reject();
+  }
+  if (endpoint === 'indices.getFieldMapping') {
+    const conflictedMappings = _.cloneDeep(fieldMappings);
+    conflictedMappings['logstash-2015.12.03'].mappings.apache.agent.mapping.agent.type = 'date';
+    return Promise.resolve(conflictedMappings);
+  }
+}
+
 describe('getMappings', function () {
 
   it('should return an object with field mappings for a given index pattern keyed by the field names', function () {
@@ -60,6 +71,15 @@ describe('getMappings', function () {
     return getMappings('logstash-*', mockCallWithRequestNoTemplate)
     .then(function (result) {
       expect(_.isEqual(result, correctResult)).to.be(true);
+    });
+  });
+
+  it('should mark a field\'s type as \'conflict\' if has different types across indices', function () {
+    return getMappings('logstash-*', mockCallWithRequestWithTypeConflict)
+    .then(function (result) {
+      const correctResultWithConflict = _.cloneDeep(correctResult);
+      correctResultWithConflict.agent.type = 'conflict';
+      expect(_.isEqual(result, correctResultWithConflict)).to.be(true);
     });
   });
 
