@@ -10,7 +10,7 @@ define(function (require) {
     var metrics = $scope.metrics = [];
 
     $scope.isNullorNaN = function (val) {
-      return _.isNull(val) || isNaN(val);
+      return !val || _.isNull(val) || _.isNaN(val);
     };
 
     $scope.processTableGroups = function (tableGroups) {
