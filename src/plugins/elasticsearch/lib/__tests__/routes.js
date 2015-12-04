@@ -27,6 +27,9 @@ describe('plugins/elasticsearch', function () {
         },
         optimize: {
           enabled: false
+        },
+        elasticsearch: {
+          url: 'http://localhost:9210'
         }
       });
 
