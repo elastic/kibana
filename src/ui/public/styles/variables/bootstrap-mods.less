@@ -104,6 +104,8 @@
 
 //** Default background color used for all tables.
 @table-bg:                  transparent;
+//** Background color used for `.table-striped`.
+@table-bg-accent:                       #f9f9f9;
 //** Background color used for `.table-hover`.
 @table-bg-hover:            @gray-lighter;
 @table-bg-active:           @table-bg-hover;
@@ -155,6 +157,8 @@
 //** Small `.form-control` border radius
 @input-border-radius-small:      @border-radius-small;
 
+//** Placeholder text color
+@input-color-placeholder:               #acb6c0;
 
 //** Default `.form-control` height
 @input-height-base:              (@line-height-computed + (@padding-base-vertical * 2) + 2);
@@ -196,6 +200,9 @@
 @dropdown-border:               rgba(0,0,0,.15);
 //** Dropdown menu `border-color` **for IE8**.
 @dropdown-fallback-border:      @gray13;
+
+//** Divider color for between dropdown items.
+@dropdown-divider-bg:                   #e5e5e5;
 
 //** Dropdown link text color.
 @dropdown-link-color:           @gray-dark;
@@ -333,6 +340,7 @@
 @navbar-arrow-size:                7px;
 
 // Default theme
+@navbar-default-bg:                     #656A76;
 @navbar-default-color:                  @white;
 @navbar-default-border:                 darken(@navbar-default-bg, 10%);
 @navbar-default-link-color:             @gray-lighter;
@@ -356,6 +364,7 @@
 
 // Inverted navbar
 // Reset inverted navbar basics
+@navbar-inverse-link-active-bg:         #41454c;
 @navbar-inverse-color:                  @white;
 @navbar-inverse-bg:                     @gray-darker;
 @navbar-inverse-border:                 darken(@navbar-inverse-bg, 10%);
@@ -549,6 +558,8 @@
 @modal-backdrop-opacity:                .5;
 //** Modal footer border color
 @modal-footer-border-color:             @modal-header-border-color;
+//** Modal header border color
+@modal-header-border-color:             #e5e5e5;
 
 //** Padding applied to the modal body
 @modal-inner-padding:         20px;
@@ -635,6 +646,9 @@
 //** Background color of disabled list items
 @list-group-disabled-bg:                @gray-lighter;
 //** Text color for content within disabled list items
+//** Background color of single list items on hover
+@list-group-hover-bg:                   #f5f5f5;
+
 @list-group-disabled-text-color:        @list-group-disabled-color;
 @list-group-link-color:                 @gray5;
 @list-group-link-hover-color:           @list-group-link-color;
@@ -665,10 +679,12 @@
 @panel-danger-text:                     @state-danger-text;
 @panel-danger-border:                   @state-danger-border;
 @panel-danger-heading-bg:               @state-danger-bg;
-@panel-body-padding:          15px;
-@panel-heading-padding:       10px 15px;
-@panel-footer-padding:        @panel-heading-padding;
-@panel-border-radius:         @border-radius-base;
+@panel-body-padding:                    15px;
+@panel-heading-padding:                 10px 15px;
+@panel-footer-padding:                  @panel-heading-padding;
+@panel-border-radius:                   @border-radius-base;
+@panel-footer-bg:                       #f5f5f5;
+@panel-default-heading-bg:              #f5f5f5;
 
 
 //== Thumbnails
@@ -748,21 +764,23 @@
 //
 //##
 
-@close-color:                 @black;
-@close-font-weight:           bold;
-@close-text-shadow:           none;
+@close-color:                           @black;
+@close-font-weight:                     bold;
+@close-text-shadow:                     none;
 
 
 //== Code
 //
 //##
 
+@code-color:                            #c7254e;
+@code-bg:                               #f9f2f4;
 @kbd-color:                             @white;
 @kbd-bg:                                @gray3;
 @pre-bg:                                @gray-lighter;
 @pre-color:                             @gray-dark;
 @pre-border-color:                      @gray12;
-@pre-scrollable-max-height:   340px;
+@pre-scrollable-max-height:             340px;
 
 
 //== Type
