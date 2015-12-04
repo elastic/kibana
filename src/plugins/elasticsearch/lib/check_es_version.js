@@ -18,7 +18,7 @@ module.exports = function (server) {
         return false;
       }
 
-      // remove nodes that are gte the min version
+      // remove nodes that satify required engine version
       return !versionSatisfies(node.version, engineVersion);
     });
 
@@ -29,7 +29,7 @@ module.exports = function (server) {
     });
 
     var message = `This version of Kibana requires Elasticsearch ` +
-    `${engineVersion} or higher on all nodes. I found ` +
+    `${engineVersion} on all nodes. I found ` +
     `the following incompatible nodes in your cluster: ${badNodeNames.join(',')}`;
 
     throw new SetupError(server, message);
