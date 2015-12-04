@@ -15,6 +15,36 @@ define(function (require) {
   SettingsPage.prototype = {
     constructor: SettingsPage,
 
+    clickAdvancedTab: function () {
+      console.log('in clickAdvancedTab');
+      return common.findTestSubject('settingsNav advanced').click();
+    },
+
+    setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
+      var self = this;
+      return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
+      .click()
+      .then(function () {
+        return common.sleep(1000);
+      })
+      .then(function setAdvancedSettingsClickPropertyValue(selectList) {
+        return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
+        .click();
+      })
+      .then(function setAdvancedSettingsClickSaveButton() {
+        return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
+        .click();
+      });
+    },
+
+    getAdvancedSettings: function getAdvancedSettings(propertyName) {
+      var self = this;
+      console.log('in setAdvancedSettings');
+      return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+      .getVisibleText();
+    },
+
+
     navigateTo: function () {
       return common.navigateToApp('settings');
     },
