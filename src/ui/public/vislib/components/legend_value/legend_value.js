@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var html = require('ui/vislib/components/legend_value/legend_value.html');
+
   var $ = require('jquery');
   var d3 = require('d3');
 
