@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var versionSatisfies = require('../version_satisfies');
 var expect = require('expect.js');
 
