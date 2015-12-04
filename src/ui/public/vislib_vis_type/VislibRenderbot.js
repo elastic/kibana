@@ -31,7 +31,10 @@ module.exports = function VislibRenderbotFactory(Private) {
     return _.assign(
       {},
       self.vis.type.params.defaults,
-      { type: self.vis.type.name },
+      {
+        type: self.vis.type.name,
+        hasTimeField: self.vis.indexPattern.hasTimeField()
+      },
       self.vis.params
     );
   };
