@@ -72,12 +72,14 @@ define(function (require) {
      */
     Legend.prototype._header = function (el, args) {
       var self = this;
+      var legendOpen = self.vis.uiState.get('legendOpen');
+      if (legendOpen == null) legendOpen = true;
       return el.append('div')
       .attr('class', 'header')
       .append('div')
       .attr('class', 'column-labels')
       .html(function () {
-        return legendHeaderTemplate({ isOpen: self.vis.uiState.get('legendOpen') });
+        return legendHeaderTemplate({ isOpen: legendOpen });
       });
     };
 
@@ -105,9 +107,7 @@ define(function (require) {
         .append('li')
         .classed('legend-value', true)
         .each(function (d) {
-          var hasFilter = data.length > 1 ? true : false;
           var $scope = _.extend($rootScope.$new(), {
-            hasFilter: hasFilter,
             visEl: self.el,
             color: args.color(d.label),
             legendData: d,
@@ -132,18 +132,20 @@ define(function (require) {
       this._list(legendDiv, items, this);
 
       var headerIcon = visEl.select('.header');
-      //var legendOpen = self.vis.uiState.get('legendOpen', legendOpen);
-      //visEl.select('ul.legend-ul').classed('hidden', !legendOpen);
+      var legendOpen = self.vis.uiState.get('legendOpen', legendOpen);
+      if (legendOpen == null) legendOpen = true;
 
-      //self.vis.set('legendOpen', false);
+      visEl.select('ul.legend-ul').classed('hidden', !legendOpen);
 
       // toggle legend open and closed
       headerIcon
       .on('click', function legendClick() {
-        var legendOpen = !self.vis.uiState.get('legendOpen');
-        self.vis.uiState.set('legendOpen', legendOpen);
+        var legendOpen = self.vis.uiState.get('legendOpen', legendOpen);
+        legendOpen = (legendOpen == null || legendOpen) ? false : true;
 
-        visEl.select('ul.legend-ul').classed('hidden', legendOpen);
+
+        self.vis.uiState.set('legendOpen', legendOpen);
+        visEl.select('ul.legend-ul').classed('hidden', !legendOpen);
         self.vis.resize();
       });
     };
