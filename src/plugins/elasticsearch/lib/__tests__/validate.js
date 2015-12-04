@@ -17,7 +17,10 @@ describe('plugins/elasticsearch', function () {
       server: { autoListen: false },
       plugins: { scanDirs: [ fromRoot('src/plugins') ] },
       logging: { quiet: true },
-      optimize: { enabled: false }
+      optimize: { enabled: false },
+      elasticsearch: {
+        url: 'http://localhost:9210'
+      }
     });
 
     return kbnServer.ready()
