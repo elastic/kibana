@@ -52,56 +52,56 @@
             }
           }
         }
-      }
-    },
-    "apache": {
-      "agent": {
-        "full_name": "agent",
-        "mapping": {
-          "agent": {
-            "index": "analyzed",
-            "type": "string",
-            "doc_values": false
-          }
-        }
       },
-      "@timestamp": {
-        "full_name": "@timestamp",
-        "mapping": {
-          "@timestamp": {
-            "index": "not_analyzed",
-            "type": "date",
-            "doc_values": true
+      "apache": {
+        "agent": {
+          "full_name": "agent",
+          "mapping": {
+            "agent": {
+              "index": "analyzed",
+              "type": "string",
+              "doc_values": false
+            }
           }
-        }
-      },
-      "bytes": {
-        "full_name": "bytes",
-        "mapping": {
-          "bytes": {
-            "index": "not_analyzed",
-            "type": "number",
-            "doc_values": true
+        },
+        "@timestamp": {
+          "full_name": "@timestamp",
+          "mapping": {
+            "@timestamp": {
+              "index": "not_analyzed",
+              "type": "date",
+              "doc_values": true
+            }
           }
-        }
-      },
-      "ip": {
-        "full_name": "ip",
-        "mapping": {
-          "ip": {
-            "index": "not_analyzed",
-            "type": "ip",
-            "doc_values": true
+        },
+        "bytes": {
+          "full_name": "bytes",
+          "mapping": {
+            "bytes": {
+              "index": "not_analyzed",
+              "type": "number",
+              "doc_values": true
+            }
           }
-        }
-      },
-      "geo.coordinates": {
-        "full_name": "geo.coordinates",
-        "mapping": {
-          "coordinates": {
-            "index": "not_analyzed",
-            "type": "geo_point",
-            "doc_values": false
+        },
+        "ip": {
+          "full_name": "ip",
+          "mapping": {
+            "ip": {
+              "index": "not_analyzed",
+              "type": "ip",
+              "doc_values": true
+            }
+          }
+        },
+        "geo.coordinates": {
+          "full_name": "geo.coordinates",
+          "mapping": {
+            "coordinates": {
+              "index": "not_analyzed",
+              "type": "geo_point",
+              "doc_values": false
+            }
           }
         }
       }
@@ -160,56 +160,56 @@
             }
           }
         }
-      }
-    },
-    "apache": {
-      "agent": {
-        "full_name": "agent",
-        "mapping": {
-          "agent": {
-            "index": "analyzed",
-            "type": "string",
-            "doc_values": false
-          }
-        }
       },
-      "@timestamp": {
-        "full_name": "@timestamp",
-        "mapping": {
-          "@timestamp": {
-            "index": "not_analyzed",
-            "type": "date",
-            "doc_values": true
+      "apache": {
+        "agent": {
+          "full_name": "agent",
+          "mapping": {
+            "agent": {
+              "index": "analyzed",
+              "type": "string",
+              "doc_values": false
+            }
           }
-        }
-      },
-      "bytes": {
-        "full_name": "bytes",
-        "mapping": {
-          "bytes": {
-            "index": "not_analyzed",
-            "type": "number",
-            "doc_values": true
+        },
+        "@timestamp": {
+          "full_name": "@timestamp",
+          "mapping": {
+            "@timestamp": {
+              "index": "not_analyzed",
+              "type": "date",
+              "doc_values": true
+            }
           }
-        }
-      },
-      "ip": {
-        "full_name": "ip",
-        "mapping": {
-          "ip": {
-            "index": "not_analyzed",
-            "type": "ip",
-            "doc_values": true
+        },
+        "bytes": {
+          "full_name": "bytes",
+          "mapping": {
+            "bytes": {
+              "index": "not_analyzed",
+              "type": "number",
+              "doc_values": true
+            }
           }
-        }
-      },
-      "geo.coordinates": {
-        "full_name": "geo.coordinates",
-        "mapping": {
-          "coordinates": {
-            "index": "not_analyzed",
-            "type": "geo_point",
-            "doc_values": false
+        },
+        "ip": {
+          "full_name": "ip",
+          "mapping": {
+            "ip": {
+              "index": "not_analyzed",
+              "type": "ip",
+              "doc_values": true
+            }
+          }
+        },
+        "geo.coordinates": {
+          "full_name": "geo.coordinates",
+          "mapping": {
+            "coordinates": {
+              "index": "not_analyzed",
+              "type": "geo_point",
+              "doc_values": false
+            }
           }
         }
       }
