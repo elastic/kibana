@@ -3,8 +3,8 @@ define(function (require) {
     var d3 = require('d3');
     var _ = require('lodash');
 
-   //var seedColors = Private(require('ui/vislib/components/color/seed_colors'));
-    var seedColors = ['#666'];
+    var seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+
     // Shamelessly borrowed from flot.colorhelpers
     function scale(color, toVary, variation) {
       for (var i = 0; i < toVary.length; ++i) {
