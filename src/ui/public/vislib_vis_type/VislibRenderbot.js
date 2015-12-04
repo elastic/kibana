@@ -27,13 +27,16 @@ module.exports = function VislibRenderbotFactory(Private) {
 
   VislibRenderbot.prototype._getVislibParams = function () {
     var self = this;
+    // Add attribute which determines whether an index is time based or not.
+    var hasTimeField = self.vis.indexPattern && self.vis.indexPattern.hasTimeField();
+
 
     return _.assign(
       {},
       self.vis.type.params.defaults,
       {
         type: self.vis.type.name,
-        hasTimeField: self.vis.indexPattern.hasTimeField()
+        hasTimeField: hasTimeField
       },
       self.vis.params
     );
