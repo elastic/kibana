@@ -59,7 +59,7 @@ define(function (require) {
           } else variation = -variation;
         }
 
-        colors[i] = scale(color, 'rgb', 1 + variation);
+        colors[i] = scale(color, 'rgb', 1 + variation).toString();
       }
       return colors;
 
