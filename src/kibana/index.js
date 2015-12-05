@@ -35,6 +35,8 @@ define(function (require) {
     .constant('cacheBust', window.KIBANA_COMMIT_SHA)
     // The minimum Elasticsearch version required to run Kibana
     .constant('minimumElasticsearchVersion', '1.4.4')
+    // The Elasticsearch engine version required to run Kibana (semver syntax)
+    .constant('elasticsearchEngineVersion', '^1.4.4')
     // When we need to identify the current session of the app, ef shard preference
     .constant('sessionId', Date.now())
     // attach the route manager's known routes
