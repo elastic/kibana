@@ -133,7 +133,18 @@
               ng-model="index.timeField"
               auto-select-if-only-one="index.dateFields"
               class="form-control">
-            </select>
+            </select>            
+            <label>
+              Nested Field Path
+              &nbsp;
+              <kbn-info info="If the selected field is contained in a nested object, enter the path below."></kbn-info>
+              &nbsp;
+            </label>
+            <input
+              ng-model="index.nestedPath"
+              name="nestedPath"
+              type="text"
+              class="form-control">
           </div>
 
           <button
