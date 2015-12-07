@@ -132,12 +132,19 @@ gulp.task('release', ['package'], function (done) {
     s3.upload(params, function (err, data) {
       if (err) return done(err);
       gulpUtil.log('Finished', gulpUtil.colors.cyan('uploaded') + ' Available at ' + data.Location);
-      done();
+      keys.pop();
     });
-  })
+  });
 
-
-
+  function waitForUpload() {
+    if (keys.length) {//we want it to match
+      setTimeout(waitForUpload, 50);//wait 50 millisecnds then recheck
+      return;
+    }
+    done();
+    //real action
+  }
+  waitForUpload();
 });
 
 gulp.task('dev', ['sync'], function (done) {
