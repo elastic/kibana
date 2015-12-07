@@ -10,7 +10,7 @@ define(function (require) {
 
     beforeEach(module('kibana', function ($provide) {
       // hard coded to prevent failures when we bump the version
-      $provide.constant('minimumElasticsearchVersion', '1.4.3');
+      $provide.constant('elasticsearchEngineVersion', '^1.4.3');
     }));
 
     beforeEach(inject(function (Private, $injector) {

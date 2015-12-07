@@ -36,7 +36,8 @@ require.config({
     text: 'bower_components/requirejs-text/text',
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
     marked: 'bower_components/marked/lib/marked',
-    numeral: 'bower_components/numeral/numeral'
+    numeral: 'bower_components/numeral/numeral',
+    semver: 'bower_components/semver/semver.browser'
   },
   shim: {
     angular: {
