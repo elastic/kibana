@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.4.0-snapshot",
+  "version": "5.0.0-snapshot",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -49,11 +49,13 @@
     "test:coverage": "grunt test:coverage",
     "build": "grunt build",
     "start": "./bin/kibana --dev",
-    "precommit": "grunt lintStagedFiles",
+    "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
     "lint": "grunt eslint:source",
-    "lintroller": "grunt eslint:fixSource"
+    "lintroller": "grunt eslint:fixSource",
+    "mocha": "mocha --compilers js:babel/register",
+    "mocha:debug": "mocha --debug-brk --compilers js:babel/register"
   },
   "repository": {
     "type": "git",
