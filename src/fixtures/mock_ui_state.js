@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   var keys = {};
   return {
     get: function (path, def) {
@@ -8,11 +9,7 @@ define(function (require) {
       keys[path] = val;
       return val;
     },
-    on: function (eventName, callback) {
-      return;
-    },
-    off: function (eventName) {
-      return;
-    }
+    on: _.noop,
+    off: _.noop
   }
 })
