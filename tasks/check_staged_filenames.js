@@ -8,7 +8,7 @@ export default function (grunt) {
     .reduce((all, name) => `${all}  ${name}\n`, '');
 
     if (invalid) {
-      grunt.log.error(`Filenames must use snake_case.\n${invalid}`);
+      grunt.fail.fatal(`Filenames must use snake_case.\n${invalid}`);
     }
   });
 }
