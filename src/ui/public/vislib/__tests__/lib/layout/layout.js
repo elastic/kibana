@@ -52,7 +52,6 @@ dateHistogramArray.forEach(function (data, i) {
         expect($(vis.el).find('.vis-wrapper').length).to.be(1);
         expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(1);
         expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
-        expect($(vis.el).find('.legend-col-wrapper').length).to.be(1);
         expect($(vis.el).find('.y-axis-col').length).to.be(1);
         expect($(vis.el).find('.y-axis-title').length).to.be(1);
         expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(1);
