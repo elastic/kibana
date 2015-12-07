@@ -30,7 +30,8 @@ describe('Integration', function () {
 
     $rootScope.vis = vis;
     $rootScope.esResponse = esResponse;
-    $el = $('<visualize vis="vis" es-resp="esResponse">');
+    $rootScope.uiState = require('fixtures/mock_ui_state');
+    $el = $('<visualize vis="vis" es-resp="esResponse" ui-state="uiState">');
     $compile($el)($rootScope);
     $rootScope.$apply();
 
