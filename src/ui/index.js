@@ -77,7 +77,6 @@ module.exports = async (kbnServer, server, config) => {
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
       vars: defaults(app.getInjectedVars(), defaultInjectedVars),
-      xsrfToken: this.issueXsrfToken(),
     };
 
     return this.view(app.templateName, {

@@ -1,19 +1,17 @@
-import { forbidden } from 'boom';
+import { badRequest } from 'boom';
 
 export default function (kbnServer, server, config) {
-  const token = config.get('server.xsrf.token');
+  const version = config.get('pkg.version');
   const disabled = config.get('server.xsrf.disableProtection');
-
-  server.decorate('reply', 'issueXsrfToken', function () {
-    return token;
-  });
+  const header = 'kbn-version';
 
   server.ext('onPostAuth', function (req, reply) {
-    if (disabled || req.method === 'get') return reply.continue();
+    const noHeaderGet = req.method === 'get' && !req.headers[header];
+    if (disabled || noHeaderGet) return reply.continue();
 
-    const attempt = req.headers['kbn-xsrf-token'];
-    if (!attempt) return reply(forbidden('Missing XSRF token'));
-    if (attempt !== token) return reply(forbidden('Invalid XSRF token'));
+    const submission = req.headers[header];
+    if (!submission) return reply(badRequest(`Missing ${header} header`));
+    if (submission !== version) return reply(badRequest(`Invalid ${header}, expected ${version}`, { version }));
 
     return reply.continue();
   });

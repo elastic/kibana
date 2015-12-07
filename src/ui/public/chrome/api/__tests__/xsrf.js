@@ -5,43 +5,42 @@ import ngMock from 'ngMock';
 
 import xsrfChromeApi from '../xsrf';
 
-const xsrfHeader = 'kbn-xsrf-token';
-const xsrfToken = 'xsrfToken';
+const xsrfHeader = 'kbn-version';
+const { version } = require('../../../../../../package.json');
 
 describe('chrome xsrf apis', function () {
   describe('#getXsrfToken()', function () {
     it('exposes the token', function () {
       const chrome = {};
-      xsrfChromeApi(chrome, { xsrfToken });
-      expect(chrome.getXsrfToken()).to.be(xsrfToken);
+      xsrfChromeApi(chrome, { version });
+      expect(chrome.getXsrfToken()).to.be(version);
     });
   });
 
   context('jQuery support', function () {
     it('adds a global jQuery prefilter', function () {
       stub($, 'ajaxPrefilter');
-      xsrfChromeApi({}, {});
+      xsrfChromeApi({}, { version });
       expect($.ajaxPrefilter.callCount).to.be(1);
     });
 
     context('jQuery prefilter', function () {
       let prefilter;
-      const xsrfToken = 'xsrfToken';
 
       beforeEach(function () {
         stub($, 'ajaxPrefilter');
-        xsrfChromeApi({}, { xsrfToken });
+        xsrfChromeApi({}, { version });
         prefilter = $.ajaxPrefilter.args[0][0];
       });
 
-      it('sets the kbn-xsrf-token header', function () {
+      it(`sets the ${xsrfHeader} header`, function () {
         const setHeader = stub();
         prefilter({}, {}, { setRequestHeader: setHeader });
 
         expect(setHeader.callCount).to.be(1);
         expect(setHeader.args[0]).to.eql([
           xsrfHeader,
-          xsrfToken
+          version
         ]);
       });
 
@@ -60,7 +59,7 @@ describe('chrome xsrf apis', function () {
       beforeEach(function () {
         stub($, 'ajaxPrefilter');
         const chrome = {};
-        xsrfChromeApi(chrome, { xsrfToken });
+        xsrfChromeApi(chrome, { version });
         ngMock.module(chrome.$setupXsrfRequestInterceptor);
       });
 
@@ -78,9 +77,9 @@ describe('chrome xsrf apis', function () {
         $httpBackend.verifyNoOutstandingRequest();
       });
 
-      it('injects a kbn-xsrf-token header on every request', function () {
+      it(`injects a ${xsrfHeader} header on every request`, function () {
         $httpBackend.expectPOST('/api/test', undefined, function (headers) {
-          return headers[xsrfHeader] === xsrfToken;
+          return headers[xsrfHeader] === version;
         }).respond(200, '');
 
         $http.post('/api/test');
@@ -114,7 +113,7 @@ describe('chrome xsrf apis', function () {
       });
 
       it('accepts alternate tokens to use', function () {
-        const customToken = `custom:${xsrfToken}`;
+        const customToken = `custom:${version}`;
         $httpBackend.expectPOST('/api/test', undefined, function (headers) {
           return headers[xsrfHeader] === customToken;
         }).respond(200, '');
