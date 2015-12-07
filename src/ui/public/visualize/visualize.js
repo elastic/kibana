@@ -1,10 +1,12 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
+    require('ui/visualize/visualize_legend');
+
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('ui/registry/vis_types'));
@@ -40,6 +42,7 @@ define(function (require) {
         }
 
         var getVisEl = getter('.visualize-chart');
+        var getVisContainer = getter('.vis-container');
         var getSpyEl = getter('visualize-spy');
 
         $scope.fullScreenSpy = false;
@@ -47,19 +50,16 @@ define(function (require) {
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
         var applyClassNames = function () {
-          var $spyEl = getSpyEl();
-          var $visEl = getVisEl();
+          var $visEl = getVisContainer();
           var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
-          // external
-          $el.toggleClass('only-visualization', !$scope.spy.mode);
-          $el.toggleClass('visualization-and-spy', $scope.spy.mode && !fullSpy);
-          $el.toggleClass('only-spy', Boolean(fullSpy));
-          if ($spyEl) $spyEl.toggleClass('only', Boolean(fullSpy));
-
-          // internal
-          $visEl.toggleClass('spy-visible', Boolean($scope.spy.mode));
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
+
+          $timeout(function () {
+            if ($visEl.height() < 100) {
+              $visEl.addClass('spy-only');
+            };
+          }, 0);
         };
 
         // we need to wait for some watchers to fire at least once

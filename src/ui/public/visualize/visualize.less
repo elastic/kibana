@@ -12,19 +12,20 @@ visualize {
     white-space: pre-line;
   }
 
-  .visualize-chart {
+  .vis-container {
+    height: 1px;
+    display: flex;
+    flex-direction: row;
+
     flex: 1 1 auto;
     overflow: auto;
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
 
-    &.spy-visible {
-      height: 0px;
-    }
-
     &.spy-only {
       display: none;
     }
+
   }
 
   .loading {
@@ -180,3 +181,4 @@ visualize-spy {
     white-space: pre-wrap;
   }
 }
+

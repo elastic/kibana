@@ -1,6 +1,11 @@
 @import "~ui/styles/mixins";
 @import "~ui/styles/variables";
 
+visualize-legend {
+  display: flex;
+  flex-direction: row;
+}
+
 .legend-col-wrapper {
   .flex-parent(0, 0, auto);
   flex-direction: row;
@@ -8,13 +13,11 @@
   min-height: 0;
 
   .header {
-    border-right: 1px solid @sidebar-bg;
     cursor: pointer;
     width: 15px;
   }
 
   .legend-toggle {
-
     &:hover {
       color: @sidebar-hover-color;
       background-color: @sidebar-hover-bg;
@@ -22,6 +25,7 @@
 
     background-color: @sidebar-bg;
     font-size: 10px;
+    height: 30px;
     padding: 8px 3px;
     border-bottom-left-radius: @border-radius-small;
   }
@@ -31,25 +35,83 @@
   }
 
   .legend-ul {
+    border-left: 1px solid @sidebar-bg;
     width: 135px;
     flex: 1 1 1px;
     overflow-x: hidden;
     overflow-y: auto;
     color: @legend-item-color;
-
     list-style-type: none;
     padding: 0;
+    margin-bottom: 0;
     visibility: visible;
     min-height: 0;
     font-size: 12px;
     line-height: 13px;
     text-align: left;
+
+    display: flex;
+    flex-direction: column;
   }
 
   .legend-ul.hidden {
     visibility: hidden;
   }
+}
 
-  .legend-toggle {
+.legend-value {
+  &-title {
+    padding: 3px;
+
+    &:hover {
+      background-color: @sidebar-hover-bg;
+    }
+  }
+
+  &-truncate {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &-full {
+    white-space: normal;
+    word-break: break-all;
+    background-color: @sidebar-bg;
+  }
+
+  &-details {
+    border-bottom: 1px solid @sidebar-bg;
+
+    .filter-button {
+      display: block;
+      float: left;
+      width: 50%;
+      border-radius: 0px;
+      background-color: @sidebar-bg;
+
+      &:hover {
+        background-color: @sidebar-hover-bg;
+      }
+    }
+  }
+
+  &-color-picker {
+    .dot {
+      line-height: 14px;
+      margin: 2px;
+      font-size: 14px;
+    }
+
+    .dot:hover {
+      margin: 0px;
+      font-size: 18px
+    }
   }
 }
+
+.legend-value:hover {
+  cursor: pointer;
+}
+
+

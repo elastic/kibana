@@ -2,7 +2,6 @@ define(function (require) {
   return function PieHandler(Private) {
     var Handler = Private(require('ui/vislib/lib/handler/handler'));
     var Data = Private(require('ui/vislib/lib/data'));
-    var Legend = Private(require('ui/vislib/lib/legend'));
     var ChartTitle = Private(require('ui/vislib/lib/chart_title'));
 
     /*
@@ -11,7 +10,6 @@ define(function (require) {
 
     return function (vis) {
       return new Handler(vis, {
-        legend: new Legend(vis),
         chartTitle: new ChartTitle(vis.el)
       });
     };

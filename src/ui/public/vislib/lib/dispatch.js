@@ -226,16 +226,8 @@ define(function (require) {
      */
     Dispatch.prototype.highlightLegend = function (element) {
       var label = this.getAttribute('data-label');
-
       if (!label) return;
-
-      d3.select(element)
-        .select('.legend-ul')
-        .selectAll('li.color')
-        .filter(function (d, i) {
-          return String(d.label) !== label;
-        })
-        .classed('blur_shape', true);
+      $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
     };
 
     /**
@@ -245,10 +237,7 @@ define(function (require) {
      * @method unHighlightLegend
      */
     Dispatch.prototype.unHighlightLegend = function (element) {
-      d3.select(element)
-        .select('.legend-ul')
-        .selectAll('li.color')
-        .classed('blur_shape', false);
+      $('[data-label]', element.parentNode).css('opacity', 1);
     };
 
     /**
