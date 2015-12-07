@@ -16,7 +16,7 @@ define(function (require) {
     constructor: SettingsPage,
 
     clickAdvancedTab: function () {
-      console.log('in clickAdvancedTab');
+      common.debug('in clickAdvancedTab');
       return common.findTestSubject('settingsNav advanced').click();
     },
 
@@ -39,7 +39,7 @@ define(function (require) {
 
     getAdvancedSettings: function getAdvancedSettings(propertyName) {
       var self = this;
-      console.log('in setAdvancedSettings');
+      common.debug('in setAdvancedSettings');
       return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
       .getVisibleText();
     },
