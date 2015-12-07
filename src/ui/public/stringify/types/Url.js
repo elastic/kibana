@@ -1,16 +1,11 @@
 define(function (require) {
   return function UrlFormatProvider(Private, highlightFilter) {
     var _ = require('lodash');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/go.png');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/stop.png');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/de.png');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/ne.png');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/us.png');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/ni.png');
-    require('!!file?name=[path][name].[ext]!ui/stringify/icons/cv.png');
 
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+
     require('ui/field_format_editor/pattern/pattern');
+    require('ui/stringify/icons');
 
     _.class(Url).inherits(FieldFormat);
     function Url(params) {
