@@ -113,23 +113,31 @@ gulp.task('package', ['build'], function (done) {
 
 gulp.task('release', ['package'], function (done) {
   var filename = packageName + '.tar.gz';
-  var key = 'kibana/timelion/';
-  if (yargs.latest) {
-    key += 'timelion-latest.tar.gz';
-  } else {
-    key += filename;
-  }
-  var s3 = new aws.S3();
-  var params = {
-    Bucket: 'download.elasticsearch.org',
-    Key: key,
-    Body: fs.createReadStream(path.join(targetDir, filename))
-  };
-  s3.upload(params, function (err, data) {
-    if (err) return done(err);
-    gulpUtil.log('Finished', gulpUtil.colors.cyan('uploaded') + ' Available at ' + data.Location);
-    done();
-  });
+
+  // Upload to both places.
+  var keys = ['kibana/timelion/', 'elastic/timelion/'];
+
+  _.each(keys, function (key) {
+    if (yargs.latest) {
+      key += 'timelion-latest.tar.gz';
+    } else {
+      key += filename;
+    }
+    var s3 = new aws.S3();
+    var params = {
+      Bucket: 'download.elasticsearch.org',
+      Key: key,
+      Body: fs.createReadStream(path.join(targetDir, filename))
+    };
+    s3.upload(params, function (err, data) {
+      if (err) return done(err);
+      gulpUtil.log('Finished', gulpUtil.colors.cyan('uploaded') + ' Available at ' + data.Location);
+      done();
+    });
+  })
+
+
+
 });
 
 gulp.task('dev', ['sync'], function (done) {

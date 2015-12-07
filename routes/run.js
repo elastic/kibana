@@ -10,8 +10,8 @@ function replyWithError(e, reply) {
 module.exports = function (server) {
 
   server.route({
-    method: 'POST',
-    path: '/timelion/sheet',
+    method: ['POST', 'GET'],
+    path: '/timelion/run',
     handler: function (request, reply) {
       var tlConfig = require('../handlers/lib/tl_config.js')({
         server: server,
@@ -21,13 +21,22 @@ module.exports = function (server) {
 
       var sheet;
       try {
-        sheet = chainRunner.processRequest(request.payload);
+        sheet = chainRunner.processRequest(request.payload || {
+          sheet: [request.query.expression],
+          time: {
+            from: request.query.from,
+            to: request.query.to,
+            interval: request.query.interval,
+            timezone: request.query.timezone
+          }
+        });
       } catch (e) {
         replyWithError(e, reply);
         return;
       }
 
       return Promise.all(sheet).then(function (sheet) {
+        // TODO: Consider supporting returning either the sheet, or a flot png image?
         var response = {
           sheet: sheet,
           stats: chainRunner.getStats()

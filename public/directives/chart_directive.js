@@ -72,6 +72,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         console.log('redrawing');
         $timeout(function () {
           // This is a lot faster than calling drawPlot(); Stolen from the borked flot.resize plugin
+          // TODO: Currently resizing breaks tooltips
           $scope.plot.resize();
           $scope.plot.setupGrid();
           $scope.plot.draw();
@@ -133,6 +134,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         for (i = 0; i < dataset.length; ++i) {
 
           var series = dataset[i];
+          var precision = _.get(series, '_meta.precision', 2);
 
           if (series._hide) continue;
 
@@ -143,29 +145,18 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
             }
           }
 
-          // Interpolate
           var y;
-          var p1 = series.data[j - 1];
-          var p2 = series.data[j];
-
-          if (p1 == null) {
-            y = p2[1];
-          } else if (p2 == null) {
-            y = p1[1];
-          } else if (p1[1] == null || p2[1] == null) {
+          try {
+            y = series.data[j][1];
+          } catch (e) {
             y = null;
-          } else {
-            y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
           }
-
-          var precision = _.get(series, '_meta.precision', 2);
 
           if (y != null) {
             legendValueNumbers.eq(i).text('(' + y.toFixed(precision) + ')');
           } else {
             legendValueNumbers.eq(i).empty();
           }
-
         }
       }
 
