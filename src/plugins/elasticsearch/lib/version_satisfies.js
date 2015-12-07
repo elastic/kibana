@@ -9,7 +9,7 @@ module.exports = function (actual, expected) {
   }
 
   function cleanVersion(version) {
-    var match = version.match(/\d\.\d\.\d/);
+    var match = version.match(/\d+\.\d+\.\d+/);
     if (!match) return version;
     return match[0];
   }
