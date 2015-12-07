@@ -22,6 +22,8 @@ define(function (require) {
     ['2.2.0', '^2.1.0', true],
     ['3.0.0-snapshot', '^2.1.0', false],
     ['3.0.0', '^2.1.0', false],
+    ['2.10.20-snapshot', '^2.10.20', true],
+    ['2.10.999', '^2.10.20', true],
   ];
 
   describe('version satisfies', function () {
