@@ -3,6 +3,13 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
 
+  /**
+  *  moment objects can have an associated timezone, and when converting to a Date the
+  *  timezone is changed to browser time.  This can cause issues, such as a day picker
+  *  showing the wrong day.
+  *  When a moment date is passed in, offset the timezone so that after converting to a Date object
+  *  the day does not appear changed.  When reading back, convert to moment and remove the offset.
+  */
   require('ui/modules')
   .get('kibana')
   .directive('offsetTimezone', function () {
@@ -18,6 +25,7 @@ define(function (require) {
         // continue to offset the date.
         var offsetDate = false;
 
+        //Going from Date object to moment
         function fromDatePicker(value) {
           if (!value) return;
           var date = moment(value);
@@ -30,10 +38,11 @@ define(function (require) {
           return date;
         }
 
+        //Going from moment to Date object
         function toDatePicker(value) {
           if (!value) return;
-
           var date = new Date(value.format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+
           var offset = date.getTimezoneOffset() + value.utcOffset();
           date.setMinutes(date.getMinutes() + offset);
           offsetDate = true;
