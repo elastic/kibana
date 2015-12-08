@@ -1,4 +1,4 @@
-// in test/support/pages/SettingsPage.js
+// in test/support/pages/settings_page.js
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
@@ -7,13 +7,13 @@ define(function (require) {
   var defaultTimeout = config.timeouts.default;
   var common;
 
-  function SettingsPage(remote) {
+  function settings_page(remote) {
     this.remote = remote;
     common = new Common(this.remote);
   }
 
-  SettingsPage.prototype = {
-    constructor: SettingsPage,
+  settings_page.prototype = {
+    constructor: settings_page,
 
     clickAdvancedTab: function () {
       common.debug('in clickAdvancedTab');
@@ -24,9 +24,6 @@ define(function (require) {
       var self = this;
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
-      .then(function () {
-        return common.sleep(1000);
-      })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
         return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
         .click();
@@ -325,5 +322,5 @@ define(function (require) {
     }
   };
 
-  return SettingsPage;
+  return settings_page;
 });
