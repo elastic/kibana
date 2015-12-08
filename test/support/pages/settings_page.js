@@ -7,13 +7,13 @@ define(function (require) {
   var defaultTimeout = config.timeouts.default;
   var common;
 
-  function settings_page(remote) {
+  function settingsPage(remote) {
     this.remote = remote;
     common = new Common(this.remote);
   }
 
-  settings_page.prototype = {
-    constructor: settings_page,
+  settingsPage.prototype = {
+    constructor: settingsPage,
 
     clickAdvancedTab: function () {
       common.debug('in clickAdvancedTab');
@@ -322,5 +322,5 @@ define(function (require) {
     }
   };
 
-  return settings_page;
+  return settingsPage;
 });
