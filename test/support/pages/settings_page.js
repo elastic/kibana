@@ -35,7 +35,6 @@ define(function (require) {
     },
 
     getAdvancedSettings: function getAdvancedSettings(propertyName) {
-      var self = this;
       common.debug('in setAdvancedSettings');
       return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
       .getVisibleText();
