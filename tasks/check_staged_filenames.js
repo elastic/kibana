@@ -4,7 +4,7 @@ export default function (grunt) {
 
     const invalid = grunt.config
     .get('stagedFiles')
-    .filter(name => name.match(/[A-Z ]/))
+    .filter(name => name.match(/[A-Z \-]/))
     .reduce((all, name) => `${all}  ${name}\n`, '');
 
     if (invalid) {
