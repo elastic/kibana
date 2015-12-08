@@ -5,7 +5,7 @@ var url = require('url');
 var fs = require('fs');
 var request = require('request');
 var tar = require('tar');
-var progressReporter = require('./progressReporter');
+var progressReporter = require('./progress_reporter');
 
 module.exports = function (settings, logger) {
 

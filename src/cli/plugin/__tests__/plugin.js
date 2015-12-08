@@ -3,8 +3,8 @@ var sinon = require('sinon');
 
 var plugin = require('../plugin');
 var installer = require('../plugin_installer');
-var remover = require('../pluginRemover');
-var settingParser = require('../settingParser');
+var remover = require('../plugin_remover');
+var settingParser = require('../setting_parser');
 
 describe('kibana cli', function () {
 

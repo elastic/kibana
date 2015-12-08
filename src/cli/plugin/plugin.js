@@ -1,10 +1,10 @@
 var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
 
-var settingParser = require('./settingParser');
+var settingParser = require('./setting_parser');
 var installer = require('./plugin_installer');
-var remover = require('./pluginRemover');
-var pluginLogger = require('./pluginLogger');
+var remover = require('./plugin_remover');
+var pluginLogger = require('./plugin_logger');
 
 module.exports = function (program) {
   function processCommand(command, options) {
