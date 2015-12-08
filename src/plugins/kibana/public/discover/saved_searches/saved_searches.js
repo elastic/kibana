@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/discover/saved_searches/_saved_search');
   require('ui/notify');
@@ -16,7 +17,10 @@ define(function (require) {
   });
 
   module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl) {
-
+    var scanner = new Scanner(es, {
+      index: kbnIndex,
+      type: 'search'
+    });
 
     var notify = createNotifier({
       location: 'Saved Searches'
@@ -31,44 +35,12 @@ define(function (require) {
       nouns: 'saved searches'
     };
 
-    this.scan = function (pageSize = 100, docCount = 1000) {
-      var allResults = {
-        hits: [],
-        total: 0
-      };
 
-      var self = this;
-      return new Promise(function (resolve, reject) {
-        es.search({
-          index: kbnIndex,
-          type: 'search',
-          size: pageSize,
-          body: { query: {match_all: {}}},
-          searchType: 'scan',
-          scroll: '1m'
-        }, function getMoreUntilDone(error, response) {
-          var scanAllResults = docCount === Number.POSITIVE_INFINITY;
-          allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, docCount);
-
-          var hits = response.hits.hits
-          .slice(0, allResults.total - allResults.hits.length)
-          .map(self.mapHits.bind(self));
-          allResults.hits =  allResults.hits.concat(hits);
-
-          var collectedAllResults = allResults.total === allResults.hits.length;
-          if (collectedAllResults) {
-            resolve(allResults);
-          } else {
-            es.scroll({
-              scrollId: response._scroll_id,
-            }, getMoreUntilDone);
-          }
-        });
-      });
-    };
-
-    this.scanAll = function (queryString, pageSize = 100) {
-      return this.scan(pageSize, Number.POSITIVE_INFINITY);
+    this.scanAll = function (queryString, pageSize = 1000) {
+      return scanner.scanAndMap(queryString, {
+        pageSize,
+        docCount: Number.POSITIVE_INFINITY
+      }, this.mapHits.bind(this));
     };
 
 

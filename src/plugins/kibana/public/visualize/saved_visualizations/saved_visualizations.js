@@ -1,6 +1,7 @@
 define(function (require) {
   var app = require('ui/modules').get('app/visualize');
   var _ = require('lodash');
+  var Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/visualize/saved_visualizations/_saved_vis');
 
@@ -13,6 +14,12 @@ define(function (require) {
 
   app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
     var visTypes = Private(require('ui/registry/vis_types'));
+
+    var scanner = new Scanner(es, {
+      index: kbnIndex,
+      type: 'visualization'
+    });
+
     var notify = new Notifier({
       location: 'Saved Visualization Service'
     });
@@ -41,44 +48,11 @@ define(function (require) {
       });
     };
 
-    this.scan = function (pageSize = 100, docCount = 1000) {
-      var allResults = {
-        hits: [],
-        total: 0
-      };
-
-      var self = this;
-      return new Promise(function (resolve, reject) {
-        es.search({
-          index: kbnIndex,
-          type: 'visualization',
-          size: pageSize,
-          body: { query: {match_all: {}}},
-          searchType: 'scan',
-          scroll: '1m'
-        }, function getMoreUntilDone(error, response) {
-          var scanAllResults = docCount === Number.POSITIVE_INFINITY;
-          allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, docCount);
-
-          var hits = response.hits.hits
-          .slice(0, allResults.total - allResults.hits.length)
-          .map(self.mapHits.bind(self));
-          allResults.hits =  allResults.hits.concat(hits);
-
-          var collectedAllResults = allResults.total === allResults.hits.length;
-          if (collectedAllResults) {
-            resolve(allResults);
-          } else {
-            es.scroll({
-              scrollId: response._scroll_id,
-            }, getMoreUntilDone);
-          }
-        });
-      });
-    };
-
-    this.scanAll = function (queryString, pageSize = 100) {
-      return this.scan(pageSize, Number.POSITIVE_INFINITY);
+    this.scanAll = function (queryString, pageSize = 1000) {
+      return scanner.scanAndMap(queryString, {
+        pageSize,
+        docCount: Number.POSITIVE_INFINITY
+      }, this.mapHits.bind(this));
     };
 
     this.mapHits = function (hit) {
