@@ -22,13 +22,6 @@ module.exports = function (options) {
     return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
   }
 
-  function generateGithubUrl(settings) {
-    var version = (settings.version) || 'master';
-    var filename = version + '.tar.gz';
-
-    return 'https://github.com/' + settings.organization + '/' + settings.package + '/archive/' + filename;
-  }
-
   function parse() {
     var parts;
     var settings = {
@@ -78,7 +71,6 @@ module.exports = function (options) {
         settings.version = parts.shift();
 
         settings.urls.push(generateDownloadUrl(settings));
-        settings.urls.push(generateGithubUrl(settings));
       }
     }
 

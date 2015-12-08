@@ -2,9 +2,9 @@ var expect = require('expect.js');
 var sinon = require('sinon');
 
 var plugin = require('../plugin');
-var installer = require('../pluginInstaller');
-var remover = require('../pluginRemover');
-var settingParser = require('../settingParser');
+var installer = require('../plugin_installer');
+var remover = require('../plugin_remover');
+var settingParser = require('../setting_parser');
 
 describe('kibana cli', function () {
 

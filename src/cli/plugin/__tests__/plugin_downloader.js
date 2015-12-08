@@ -5,8 +5,8 @@ var glob = require('glob');
 var rimraf = require('rimraf');
 var { join } = require('path');
 
-var pluginLogger = require('../pluginLogger');
-var pluginDownloader = require('../pluginDownloader');
+var pluginLogger = require('../plugin_logger');
+var pluginDownloader = require('../plugin_downloader');
 
 describe('kibana cli', function () {
 
@@ -58,7 +58,7 @@ describe('kibana cli', function () {
       });
 
       it.skip('should download and extract a valid plugin', function () {
-        var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
+        var filename = join(__dirname, 'replies/test_plugin_master.tar.gz');
         var couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
           'content-length': '10'
@@ -110,7 +110,7 @@ describe('kibana cli', function () {
       afterEach(function () {});
 
       it.skip('should loop through bad urls until it finds a good one.', function () {
-        var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
+        var filename = join(__dirname, 'replies/test_plugin_master.tar.gz');
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
@@ -159,7 +159,7 @@ describe('kibana cli', function () {
       });
 
       it.skip('should stop looping through urls when it finds a good one.', function () {
-        var filename = join(__dirname, 'replies/test-plugin-master.tar.gz');
+        var filename = join(__dirname, 'replies/test_plugin_master.tar.gz');
         var settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
