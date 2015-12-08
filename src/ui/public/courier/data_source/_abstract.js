@@ -322,17 +322,37 @@ define(function (require) {
                 }
               });
 
-              flatState.body.query = {
-                filtered: {
-                  query: flatState.body.query,
-                  filter: {
-                    bool: {
-                      must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
-                      must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
+              if (!flatState.index.nestedPath) {
+                flatState.body.query = {
+                  filtered: {
+                    query: flatState.body.query,
+                    filter: {
+                      bool: {
+                        must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
+                        must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
+                      }
                     }
                   }
-                }
-              };
+                };
+              }
+              else {
+                flatState.body.query = {
+                  filtered: {
+                    query: flatState.body.query,
+                    filter: {
+                      nested: {
+                        path: flatState.index.nestedPath,
+                        filter: {
+                          bool: {
+                            must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
+                            must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
+                          }
+                        }
+                      }
+                    }
+                  }
+                };
+              }
             }
             delete flatState.filters;
           }

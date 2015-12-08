@@ -48,7 +48,7 @@ define(function (require) {
 
     AggConfigs.prototype.toDsl = function () {
       var dslTopLvl = {};
-      var dslLvlCursor;
+      var dslLvlCursor = dslTopLvl; // start at the top level
       var nestedMetrics;
 
       if (this.vis.isHierarchical()) {
@@ -71,20 +71,7 @@ define(function (require) {
         return !config.type.hasNoDsl;
       })
       .forEach(function nestEachConfig(config, i, list) {
-        if (!dslLvlCursor) {
-          // start at the top level
-          dslLvlCursor = dslTopLvl;
-        } else {
-          var prevConfig = list[i - 1];
-          var prevDsl = dslLvlCursor[prevConfig.id];
-
-          // advance the cursor and nest under the previous agg, or
-          // put it on the same level if the previous agg doesn't accept
-          // sub aggs
-          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
-        }
-
-        var dsl = dslLvlCursor[config.id] = config.toDsl();
+        var dsl = config.toDslNested(dslLvlCursor);
         var subAggs;
 
         if (config.schema.group === 'buckets' && i < list.length - 1) {
@@ -94,9 +81,18 @@ define(function (require) {
 
         if (subAggs && nestedMetrics) {
           nestedMetrics.forEach(function (agg) {
-            subAggs[agg.config.id] = agg.dsl;
+            if (typeof agg === AggConfig) {
+              agg.toDslNested(subAggs);
+            } else {
+              subAggs[agg.config.id] = agg.dsl;
+            }
           });
         }
+
+          // advance the cursor and nest under the previous agg, or
+          // put it on the same level if the previous agg doesn't accept
+          // sub aggs
+        dslLvlCursor = dsl.aggs || dslLvlCursor;
       });
 
       return dslTopLvl;
