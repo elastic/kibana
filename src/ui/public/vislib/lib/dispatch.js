@@ -161,7 +161,10 @@ define(function (require) {
      */
     Dispatch.prototype.allowBrushing = function () {
       var xAxis = this.handler.xAxis;
-      return Boolean(xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
+      // Don't allow brushing for time based charts from non-time-based indices
+      var hasTimeField = this.handler.vis._attr.hasTimeField;
+
+      return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
     };
 
     /**

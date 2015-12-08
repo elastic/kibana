@@ -49,7 +49,7 @@
     "test:coverage": "grunt test:coverage",
     "build": "grunt build",
     "start": "./bin/kibana --dev",
-    "precommit": "grunt lintStagedFiles",
+    "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
     "lint": "grunt eslint:source",
@@ -132,6 +132,7 @@
     "whatwg-fetch": "0.9.0"
   },
   "devDependencies": {
+    "@spalger/test-subj-selector": "0.2.1",
     "Nonsense": "0.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
