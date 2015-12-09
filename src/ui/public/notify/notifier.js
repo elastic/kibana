@@ -86,10 +86,17 @@ define(function (require) {
     if (typeof msg === 'string') {
       rtn += msg;
     } else if (msg instanceof Error) {
-      rtn += msg.message;
+      rtn += describeError(msg);
     }
 
     return rtn;
+  }
+
+  function describeError(err) {
+    if (!err) return undefined;
+    if (err.body && err.body.message) return err.body.message;
+    if (err.message) return err.message;
+    return '' + err;
   }
 
   function formatInfo() {
@@ -280,6 +287,8 @@ define(function (require) {
       actions: ['accept']
     }, cb);
   };
+
+  Notifier.prototype.describeError = describeError;
 
   if (log === _.noop) {
     Notifier.prototype.log = _.noop;
