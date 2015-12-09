@@ -131,7 +131,7 @@ class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.jsx', '.less', ''],
+        extensions: ['.js', '.json', '.jsx', '.less', ''],
         postfixes: [''],
         modulesDirectories: ['webpackShims', 'node_modules'],
         loaderPostfixes: ['-loader', ''],
