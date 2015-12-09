@@ -53,8 +53,8 @@ define(function (require) {
                   var esResp = JSON.parse(resp.data.resp.response);
                   return _.get(esResp, 'error.root_cause[0].reason');
                 } catch (e) {
-                  var error = _.get(resp, 'data.resp.message');
-                  if (error) return error;
+                  if (_.get(resp, 'data.resp.message')) return _.get(resp, 'data.resp.message');
+                  if (_.get(resp, 'data.resp.output.payload.message')) return _.get(resp, 'data.resp.output.payload.message');
                   return 'Unknown error';
                 }
               }());
