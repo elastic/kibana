@@ -135,6 +135,7 @@ describe('index pattern', function () {
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
     require('testUtils/noDigestPromises').activateForSuite();
+    var indexPatternId = 'test-pattern';
     var indexPattern;
     var fieldLength;
     var truncatedFields;
@@ -404,48 +405,12 @@ describe('index pattern', function () {
 
   describe('#isWildcard()', function () {
     it('returns true if id has an *', function () {
-      return create('foo*').then(function (pattern) {
-        expect(pattern.isWildcard()).to.be(true);
-      });
+      indexPattern.id = 'foo*';
+      expect(indexPattern.isWildcard()).to.be(true);
     });
     it('returns false if id has no *', function () {
-      return create('foo').then(function (pattern) {
-        expect(pattern.isWildcard()).to.be(false);
-      });
-    });
-  });
-
-  describe('#create()', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
-
-    it('should require an id', function () {
-      return create()
-      .then(indexPattern => indexPattern.create())
-      .then(
-        () => {
-          throw new Error('expected create to fail');
-        },
-        (err) => {
-          expect(err.message).to.match(/\bid\b/i);
-        }
-      );
-    });
-  });
-
-  describe('#save()', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
-
-    it('should require an id', function () {
-      return create()
-      .then(indexPattern => indexPattern.save())
-      .then(
-        () => {
-          throw new Error('expected save to fail');
-        },
-        (err) => {
-          expect(err.message).to.match(/\bid\b/i);
-        }
-      );
+      indexPattern.id = 'foo';
+      expect(indexPattern.isWildcard()).to.be(false);
     });
   });
 });
