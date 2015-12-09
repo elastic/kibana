@@ -71,6 +71,7 @@ describe('xsrf request filter', function () {
 
         expect(resp.statusCode).to.be(400);
         expect(resp.headers).to.have.property(xsrfHeader, version);
+        expect(resp.payload).to.match(/"Browser client is out of date/);
       });
     });
   }
@@ -110,7 +111,7 @@ describe('xsrf request filter', function () {
         });
 
         expect(resp.statusCode).to.be(400);
-        expect(resp.payload).to.match(/"Invalid kbn-version, expected/);
+        expect(resp.payload).to.match(/"Browser client is out of date/);
       });
     });
   }
