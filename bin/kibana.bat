@@ -6,7 +6,11 @@ set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\node.exe
-for /f "delims=" %%i in ('WHERE node') do set SYS_NODE=%%i
+
+WHERE /Q node
+IF %ERRORLEVEL% EQU 0 (
+  for /f "delims=" %%i in ('WHERE node') do set SYS_NODE=%%i
+)
 
 If Not Exist "%NODE%" (
   IF Exist "%SYS_NODE%" (
