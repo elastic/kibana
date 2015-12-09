@@ -116,11 +116,11 @@ module.exports = function (kbnServer, server, config) {
     let response = req.response;
 
     if (response.isBoom) {
-      response.output.headers['x-app-name'] = kbnServer.name;
-      response.output.headers['x-app-version'] = kbnServer.version;
+      response.output.headers['kbn-name'] = kbnServer.name;
+      response.output.headers['kbn-version'] = kbnServer.version;
     } else {
-      response.header('x-app-name', kbnServer.name);
-      response.header('x-app-version', kbnServer.version);
+      response.header('kbn-name', kbnServer.name);
+      response.header('kbn-version', kbnServer.version);
     }
 
     return reply.continue();
