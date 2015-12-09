@@ -14,7 +14,7 @@ define(function (require) {
       });
 
       if (!myHandlers.length) {
-        notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
+        notify.fatal(new Error(`unhandled courier request error: ${ notify.describeError(error) }`));
       } else {
         myHandlers.forEach(function (handler) {
           handler.defer.resolve(error);
