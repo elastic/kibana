@@ -54,6 +54,17 @@ describe('Scanner', function () {
       });
     });
 
+    it('should only return the requested number of documents', function () {
+      return scanner.scanAndMap(null, {docCount: 1}, function (hit) {
+        return hit.toUpperCase();
+      })
+      .then(function (response) {
+        expect(response.hits[0]).to.be('ONE');
+        expect(response.hits[1]).to.be(undefined);
+      });
+    });
+
+
     afterEach(function () {
       search.restore();
       scroll.restore();
