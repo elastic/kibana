@@ -42,7 +42,9 @@ define(function (require) {
         };
 
         $scope.toggleLegend = function () {
-          $scope.open = !$scope.uiState.get('vis.legendOpen', true);
+          var bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
+          var bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
+          $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
           $scope.uiState.set('vis.legendOpen', $scope.open);
         };
 
@@ -53,7 +55,6 @@ define(function (require) {
         $scope.canFilter = function (legendData) {
           var filters = clickHandler({point: legendData}, true) || [];
           return filters.length;
-          //return filters == null ? false : true;
         };
 
         $scope.colors = [
