@@ -1,4 +1,4 @@
-// in test/support/pages/SettingsPage.js
+// in test/support/pages/settings_page.js
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
@@ -7,13 +7,39 @@ define(function (require) {
   var defaultTimeout = config.timeouts.default;
   var common;
 
-  function SettingsPage(remote) {
+  function settingsPage(remote) {
     this.remote = remote;
     common = new Common(this.remote);
   }
 
-  SettingsPage.prototype = {
-    constructor: SettingsPage,
+  settingsPage.prototype = {
+    constructor: settingsPage,
+
+    clickAdvancedTab: function () {
+      common.debug('in clickAdvancedTab');
+      return common.findTestSubject('settingsNav advanced').click();
+    },
+
+    setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
+      var self = this;
+      return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
+      .click()
+      .then(function setAdvancedSettingsClickPropertyValue(selectList) {
+        return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
+        .click();
+      })
+      .then(function setAdvancedSettingsClickSaveButton() {
+        return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
+        .click();
+      });
+    },
+
+    getAdvancedSettings: function getAdvancedSettings(propertyName) {
+      common.debug('in setAdvancedSettings');
+      return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+      .getVisibleText();
+    },
+
 
     navigateTo: function () {
       return common.navigateToApp('settings');
@@ -295,5 +321,5 @@ define(function (require) {
     }
   };
 
-  return SettingsPage;
+  return settingsPage;
 });
