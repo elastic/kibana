@@ -7,9 +7,16 @@
         aria-label="{{savedObj.vis.type.title}} Icon"
         title="{{savedObj.vis.type.title}}">
       </i>
-      {{savedObj.title}}
+      <span ng-if="panel.customTitle">{{panel.customTitle}}</span>
+      <span ng-hide="panel.customTitle">{{savedObj.title}}</span>
+      <input ng-show="showFormTitle" text="title" ng-model="panel.customTitle">
     </span>
+
     <div class="btn-group">
+      <a aria-label="customTitle" tooltip="Custom title"
+        ng-show="chrome.getVisible() && editUrl" ng-click="showFormTitle = !showFormTitle">
+        <i aria-hidden="true" class="fa fa-tag"></i>
+      </a>
       <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
