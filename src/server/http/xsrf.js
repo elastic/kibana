@@ -11,7 +11,12 @@ export default function (kbnServer, server, config) {
 
     const submission = req.headers[header];
     if (!submission) return reply(badRequest(`Missing ${header} header`));
-    if (submission !== version) return reply(badRequest(`Invalid ${header}, expected ${version}`, { version }));
+    if (submission !== version) {
+      return reply(badRequest('Browser client is out of date, please refresh the page', {
+        expected: version,
+        got: submission
+      }));
+    }
 
     return reply.continue();
   });
