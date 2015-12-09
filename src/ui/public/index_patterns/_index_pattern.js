@@ -54,14 +54,7 @@ define(function (require) {
     function IndexPattern(id) {
       var self = this;
 
-      if (id) {
-        Object.defineProperty(this, 'id', {
-          get() { return id; },
-          set() {
-            throw new Error('Saved IndexPatterns can not get new ids.');
-          }
-        });
-      }
+      setId(id);
 
       var docSource = new DocSource();
 
@@ -230,13 +223,14 @@ define(function (require) {
         return body;
       };
 
-      self.create = function () {
-        if (!self.id) {
-          return Promise.reject(new Error('Unable to create indexPatterns without an id'));
-        }
+      function setId(id) {
+        return self.id = id;
+      }
 
+      self.create = function () {
         var body = self.prepBody();
         return docSource.doCreate(body)
+        .then(setId)
         .catch(function (err) {
           if (_.get(err, 'origError.status') === 409) {
             var confirmMessage = 'Are you sure you want to overwrite this?';
@@ -249,23 +243,19 @@ define(function (require) {
                     return cached.then(pattern => pattern.destroy());
                   }
                 })
-                .then(() => docSource.doIndex(body));
+                .then(() => docSource.doIndex(body))
+                .then(setId);
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
           }
           return Promise.resolve(false);
-        })
-        .then(() => self.id);
+        });
       };
 
       self.save = function () {
-        if (!self.id) {
-          return Promise.reject(new Error('Unable to create indexPatterns without an id'));
-        }
-
         var body = self.prepBody();
-        return docSource.doIndex(body).then(() => self.id);
+        return docSource.doIndex(body).then(setId);
       };
 
       self.refreshFields = function () {
