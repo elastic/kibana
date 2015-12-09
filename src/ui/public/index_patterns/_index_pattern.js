@@ -15,6 +15,7 @@ define(function (require) {
 
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
+    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
     var type = 'index-pattern';
 
@@ -218,7 +219,14 @@ define(function (require) {
 
             return safeConfirm(confirmMessage).then(
               function () {
-                return docSource.doIndex(body).then(setId);
+                return Promise.try(function () {
+                  const cached = patternCache.get(self.id);
+                  if (cached) {
+                    return cached.then(pattern => pattern.destroy());
+                  }
+                })
+                .then(() => docSource.doIndex(body))
+                .then(setId);
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
@@ -255,6 +263,11 @@ define(function (require) {
 
       self.toString = function () {
         return '' + self.toJSON();
+      };
+
+      self.destroy = function () {
+        patternCache.clear(self.id);
+        docSource.destroy();
       };
 
       self.metaFields = config.get('metaFields');
