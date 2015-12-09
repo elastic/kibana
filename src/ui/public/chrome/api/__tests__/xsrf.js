@@ -112,10 +112,10 @@ describe('chrome xsrf apis', function () {
         $httpBackend.flush();
       });
 
-      it('accepts alternate tokens to use', function () {
+      it('treats the kbnXsrfToken option as boolean-y', function () {
         const customToken = `custom:${version}`;
         $httpBackend.expectPOST('/api/test', undefined, function (headers) {
-          return headers[xsrfHeader] === customToken;
+          return headers[xsrfHeader] === version;
         }).respond(200, '');
 
         $http({
