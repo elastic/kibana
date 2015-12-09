@@ -102,7 +102,6 @@ module.exports = new Datasource('es', {
       throw new Error('url= is not allowed');
     }
 
-    var client = tlConfig.server.plugins.elasticsearch.client;
     var callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
 
     var body = buildRequest(config, tlConfig);

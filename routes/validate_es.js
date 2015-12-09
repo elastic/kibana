@@ -4,12 +4,14 @@ module.exports = function (server) {
     path: '/timelion/validate/es',
     handler: function (request, reply) {
       var config = require('../timelion.json');
-      var client = server.plugins.elasticsearch.client;
+      var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
-      client.fieldStats({
+      var body = {
         index: config.es.default_index,
         fields: config.es.timefield
-      }).then(function (resp) {
+      }
+
+      callWithRequest(request, 'fieldStats', body).then(function (resp) {
         reply({
           ok: true,
           field: config.es.timefield,

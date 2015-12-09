@@ -48,6 +48,16 @@ define(function (require) {
               };
             } else {
               $scope.es.valid = false;
+              $scope.es.invalidReason = (function () {
+                try {
+                  var esResp = JSON.parse(resp.data.resp.response);
+                  return _.get(esResp, 'error.root_cause[0].reason');
+                } catch (e) {
+                  var error = _.get(resp, 'data.resp.message');
+                  if (error) return error;
+                  return 'Unknown error';
+                }
+              }());
             }
             return $scope.es.valid;
           });
