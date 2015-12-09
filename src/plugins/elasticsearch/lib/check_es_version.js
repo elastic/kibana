@@ -1,13 +1,13 @@
 var _ = require('lodash');
 var esBool = require('./es_bool');
-var versionMath = require('./version_math');
+var versionSatisfies = require('./version_satisfies');
 var SetupError = require('./setup_error');
 
 module.exports = function (server) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
 
   var client = server.plugins.elasticsearch.client;
-  var minimumElasticsearchVersion = server.config().get('elasticsearch.minimumVerison');
+  var engineVersion = server.config().get('elasticsearch.engineVersion');
 
   return client.nodes.info()
   .then(function (info) {
@@ -18,9 +18,8 @@ module.exports = function (server) {
         return false;
       }
 
-      // remove nodes that are gte the min version
-      var v = node.version.split('-')[0];
-      return !versionMath.gte(minimumElasticsearchVersion, v);
+      // remove nodes that satify required engine version
+      return !versionSatisfies(node.version, engineVersion);
     });
 
     if (!badNodes.length) return true;
@@ -30,7 +29,7 @@ module.exports = function (server) {
     });
 
     var message = `This version of Kibana requires Elasticsearch ` +
-    `${minimumElasticsearchVersion} or higher on all nodes. I found ` +
+    `${engineVersion} on all nodes. I found ` +
     `the following incompatible nodes in your cluster: ${badNodeNames.join(',')}`;
 
     throw new SetupError(server, message);

@@ -100,6 +100,12 @@ The standard `npm run test` task runs several sub tasks and can take several min
     <br>
     <img src="http://i.imgur.com/DwHxgfq.png">
   </dd>
+  
+  <dt><code>npm run mocha [test file or dir]</code> or <code>npm run mocha:debug [test file or dir]</code></dt>
+  <dd>
+    Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
+    for development and fixing individual tests.
+  </dd>
 </dl>
 
 ### Functional UI Testing
