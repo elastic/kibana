@@ -25,7 +25,7 @@ kibana.maxSockets = kibana.maxSockets || Infinity;
 kibana.log_file = kibana.log_file || null;
 kibana.xsrf_token = kibana.xsrf_token || randomBytes(32).toString('hex');
 
-kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
+kibana.request_timeout = kibana.request_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
 kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;
 
