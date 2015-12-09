@@ -5,7 +5,7 @@ define(function (require) {
     var vals = {};
 
     var validId = function (id) {
-      return id && typeof id !== 'object';
+      return typeof id !== 'object';
     };
 
     this.get = function (id) {
