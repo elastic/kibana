@@ -185,6 +185,10 @@ define(function (require) {
         }
       };
 
+      self.hasTimeField = function () {
+        return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+      };
+
       self.prepBody = function () {
         var body = {};
 
