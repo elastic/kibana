@@ -52,8 +52,8 @@ define(function (require) {
     this.scanAll = function (queryString, pageSize = 1000) {
       return scanner.scanAndMap(queryString, {
         pageSize,
-        docCount: Number.POSITIVE_INFINITY
-      }, this.mapHits.bind(this));
+        docCount: Infinity
+      }, (hit) => this.mapHits(hit));
     };
 
     this.mapHits = function (hit) {
@@ -64,7 +64,6 @@ define(function (require) {
     };
 
     this.find = function (searchString, size = 100) {
-      var self = this;
       var body;
       if (searchString) {
         body = {
@@ -86,10 +85,10 @@ define(function (require) {
         body: body,
         size: size
       })
-      .then(function (resp) {
+      .then((resp) => {
         return {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(self.mapHits.bind(self))
+          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
       });
     };
