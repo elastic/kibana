@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-let Scanner = function (client, {index, type}) {
+let Scanner = function (client, {index, type} = {}) {
   if (!index) throw new Error('Expected index');
   if (!type) throw new Error('Expected type');
   if (!client) throw new Error('Expected client');
