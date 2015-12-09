@@ -2,7 +2,7 @@ define(function (require) {
   var module = require('ui/modules').get('kibana/index_patterns');
   require('ui/filters/short_dots');
 
-  module.service('indexPatterns', function (es, Notifier, Private, Promise, kbnIndex) {
+  function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
     var self = this;
     var _ = require('lodash');
     var errors = require('ui/errors');
@@ -45,5 +45,8 @@ define(function (require) {
     self.patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
     self.fieldFormats = Private(require('ui/registry/field_formats'));
     self.IndexPattern = IndexPattern;
-  });
+  }
+
+  module.service('indexPatterns', Private => Private(IndexPatternsProvider));
+  return IndexPatternsProvider;
 });
