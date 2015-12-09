@@ -11,10 +11,10 @@ let Scanner = function (client, {index, type} = {}) {
 };
 
 Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
-  const opts = _.defaults({
+  const opts = _.defaults(options || {}, {
     pageSize: 100,
     docCount: 1000
-  }, options);
+  });
 
   let allResults = {
     hits: [],
