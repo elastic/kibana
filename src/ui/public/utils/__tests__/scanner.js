@@ -64,6 +64,18 @@ describe('Scanner', function () {
       });
     });
 
+    it('should scroll across multiple pages', function () {
+      scroll.restore();
+      let oneResult = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one']}}; // eslint-disable-line max-len
+      scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, oneResult));
+      return scanner.scanAndMap(null, {pageSize: 1})
+      .then(function (response) {
+        expect(scroll.calledTwice);
+        expect(response.hits.length).to.be(2);
+        expect(scroll.getCall(1).args[0].scrollId).to.be('abc');
+        expect(scroll.getCall(0).args[0].scrollId).to.be('abc');
+      });
+    });
 
     afterEach(function () {
       search.restore();
