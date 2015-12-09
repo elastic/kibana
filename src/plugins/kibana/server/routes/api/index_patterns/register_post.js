@@ -19,17 +19,14 @@ module.exports = function registerPost(server) {
       }
 
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
-      const indexPattern = _.cloneDeep(req.payload);
+      const requestDocument = _.cloneDeep(req.payload);
+      const included = requestDocument.included;
+      const indexPatternId = requestDocument.data.id;
+      const indexPattern = requestDocument.data.attributes;
       const isWildcard = _.contains(indexPattern.title, '*');
-      const mappings = _(req.payload.fields)
-      .indexBy('name')
-      .mapValues(value => value.mapping)
-      .omit(_.isUndefined)
-      .value();
+      const templateResource = _.isEmpty(included) ? null : included[0];
 
-      indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
-        return _.omit(field, 'mapping');
-      }));
+      indexPattern.fields = JSON.stringify(indexPattern.fields);
 
       const patternCreateParams = {
         index: '.kibana',
@@ -40,7 +37,7 @@ module.exports = function registerPost(server) {
 
       callWithRequest(req, 'create', patternCreateParams)
       .then((patternResponse) => {
-        if (!isWildcard || _.isEmpty(mappings)) {
+        if (!isWildcard || _.isEmpty(included)) {
           return patternResponse;
         }
 
@@ -51,17 +48,10 @@ module.exports = function registerPost(server) {
           }
 
           const templateParams = {
-            order: 0,
+            order: templateResource.attributes.order,
             create: true,
-            name: patternToTemplate(indexPattern.title),
-            body: {
-              template: indexPattern.title,
-              mappings: {
-                _default_: {
-                  properties: mappings
-                }
-              }
-            }
+            name: templateResource.id,
+            body: _.omit(templateResource.attributes, 'order')
           };
 
           return callWithRequest(req, 'indices.putTemplate', templateParams);
