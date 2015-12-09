@@ -11,17 +11,17 @@ let Scanner = function (client, {index, type} = {}) {
 };
 
 Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
+  let scrollId;
+  let body;
+  let allResults = {
+    hits: [],
+    total: 0
+  };
   const opts = _.defaults(options || {}, {
     pageSize: 100,
     docCount: 1000
   });
 
-  let allResults = {
-    hits: [],
-    total: 0
-  };
-
-  let body;
   if (searchString) {
     body = {
       query: {
@@ -40,6 +40,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
     const getMoreUntilDone = (error, response) => {
       const scanAllResults = opts.docCount === Infinity;
       allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, opts.docCount);
+      scrollId = response._scroll_id || scrollId;
 
       let hits = response.hits.hits
       .slice(0, allResults.total - allResults.hits.length);
@@ -52,7 +53,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
         resolve(allResults);
       } else {
         this.client.scroll({
-          scrollId: response._scroll_id,
+          scrollId
         }, getMoreUntilDone);
       }
     };
