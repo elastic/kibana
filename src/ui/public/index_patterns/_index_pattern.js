@@ -16,6 +16,7 @@ define(function (require) {
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
     var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
     var type = 'index-pattern';
 
@@ -53,7 +54,14 @@ define(function (require) {
     function IndexPattern(id) {
       var self = this;
 
-      setId(id);
+      if (id) {
+        Object.defineProperty(this, 'id', {
+          get() { return id; },
+          set() {
+            throw new Error('Saved IndexPatterns can not get new ids.');
+          }
+        });
+      }
 
       var docSource = new DocSource();
 
@@ -222,32 +230,34 @@ define(function (require) {
         return body;
       };
 
-      function setId(id) {
-        return self.id = id;
-      }
-
       self.create = function () {
         var body = self.prepBody();
         return docSource.doCreate(body)
-        .then(setId)
         .catch(function (err) {
           if (_.get(err, 'origError.status') === 409) {
             var confirmMessage = 'Are you sure you want to overwrite this?';
 
             return safeConfirm(confirmMessage).then(
               function () {
-                return docSource.doIndex(body).then(setId);
+                return Promise.try(function () {
+                  const cached = patternCache.get(self.id);
+                  if (cached) {
+                    return cached.then(pattern => pattern.destroy());
+                  }
+                })
+                .then(() => docSource.doIndex(body));
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
           }
           return Promise.resolve(false);
-        });
+        })
+        .then(() => self.id);
       };
 
       self.save = function () {
         var body = self.prepBody();
-        return docSource.doIndex(body).then(setId);
+        return docSource.doIndex(body).then(() => self.id);
       };
 
       self.refreshFields = function () {
@@ -273,6 +283,11 @@ define(function (require) {
 
       self.toString = function () {
         return '' + self.toJSON();
+      };
+
+      self.destroy = function () {
+        patternCache.clear(self.id);
+        docSource.destroy();
       };
 
       self.metaFields = config.get('metaFields');
