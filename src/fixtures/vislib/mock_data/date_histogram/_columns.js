@@ -20,6 +20,7 @@ module.exports = {
       },
       'series': [
         {
+          'label': 'Count',
           'values': [
             {
               'x': 1415826600000,
@@ -167,6 +168,7 @@ module.exports = {
       },
       'series': [
         {
+          'label': 'Count',
           'values': [
             {
               'x': 1415826630000,
@@ -222,6 +224,7 @@ module.exports = {
       },
       'series': [
         {
+          'label': 'Count',
           'values': [
             {
               'x': 1415826660000,
