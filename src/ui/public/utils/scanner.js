@@ -1,6 +1,6 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
-var Scanner = function (client, {index, type}) {
+let Scanner = function (client, {index, type}) {
   if (!index) throw new Error('Expected index');
   if (!type) throw new Error('Expected type');
   if (!client) throw new Error('Expected client');
@@ -16,12 +16,12 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
     docCount: 1000
   }, options);
 
-  var allResults = {
+  let allResults = {
     hits: [],
     total: 0
   };
 
-  var body;
+  let body;
   if (searchString) {
     body = {
       query: {
@@ -37,24 +37,17 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
   }
 
   return new Promise((resolve, reject) => {
-    this.client.search({
-      index: this.index,
-      type: this.type,
-      size: opts.pageSize,
-      body,
-      searchType: 'scan',
-      scroll: '1m'
-    }, function getMoreUntilDone(error, response) {
-      var scanAllResults = opts.docCount === Number.POSITIVE_INFINITY;
+    const getMoreUntilDone = (error, response) => {
+      const scanAllResults = opts.docCount === Infinity;
       allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, opts.docCount);
 
-      var hits = response.hits.hits
+      let hits = response.hits.hits
       .slice(0, allResults.total - allResults.hits.length);
       if (mapFn) hits = hits.map(mapFn);
 
       allResults.hits =  allResults.hits.concat(hits);
 
-      var collectedAllResults = allResults.total === allResults.hits.length;
+      const collectedAllResults = allResults.total === allResults.hits.length;
       if (collectedAllResults) {
         resolve(allResults);
       } else {
@@ -62,7 +55,16 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
           scrollId: response._scroll_id,
         }, getMoreUntilDone);
       }
-    });
+    };
+
+    this.client.search({
+      index: this.index,
+      type: this.type,
+      size: opts.pageSize,
+      body,
+      searchType: 'scan',
+      scroll: '1m'
+    }, getMoreUntilDone);
   });
 };
 
