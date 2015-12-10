@@ -94,6 +94,13 @@ define(function (require) {
           if (!_.isString($scope.panel.customTitle)) $scope.panel.customTitle = null;
           $scope.uiState.set('title', $scope.panel.customTitle);
         };
+
+        $scope.confirmTitle = function () {$scope.setTitle();};
+        $scope.cancelTitle = function () {
+          $scope.panel.customTitle = $scope.uiState.get('title');
+          $scope.showFormTitle = false;
+        };
+        $scope.resetTitle = function () {$scope.panel.customTitle = null;};
       }
     };
   });

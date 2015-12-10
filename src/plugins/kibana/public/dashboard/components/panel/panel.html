@@ -1,21 +1,30 @@
 <div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
-    <span class="panel-title">
+    <div class="panel-title">
       <i
         class="fa"
         ng-class="savedObj.vis.type.icon"
         aria-label="{{savedObj.vis.type.title}} Icon"
         title="{{savedObj.vis.type.title}}">
       </i>
-      <span ng-if="panel.customTitle">{{panel.customTitle}}</span>
-      <span ng-hide="panel.customTitle">{{savedObj.title}}</span>
-      <input ng-if="showFormTitle" text="title" ng-model="panel.customTitle">
-
       <a class="action panel-title-edit" ng-click="setTitle()">
-        <i class="fa fa-fw fa-edit"></i>
+	      <span ng-if="panel.customTitle">{{panel.customTitle}}</span>
+	      <span ng-hide="panel.customTitle">{{savedObj.title}}</span>
       </a>
+      <input ng-if="showFormTitle" text="title" ng-model="panel.customTitle" ng-show="chrome.getVisible() && editUrl">
 
-    </span>
+     <span ng-if="showFormTitle" class="title-actions" ng-show="chrome.getVisible() && editUrl">
+       <a class="title-confirm" ng-click="confirmTitle()">
+         <i class="fa fa-check-square-o"></i>
+       </a>
+       <a class="title-cancel" ng-click="cancelTitle()">
+         <i class="fa fa-times"></i>
+       </a>
+       <a class="title-reset" ng-click="resetTitle()">
+         <i class="fa fa-undo"></i>
+       </a>
+     </span>
+    </div>
 
     <div class="btn-group">
       <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{editUrl}}">
