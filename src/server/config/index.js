@@ -6,7 +6,6 @@ var listPlugins = require('../lib/listPlugins');
 var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibana.yml');
 var kibana = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
 var env = process.env.NODE_ENV || 'development';
-var randomBytes = require('crypto').randomBytes;
 
 function checkPath(path) {
   try {
@@ -23,7 +22,7 @@ kibana.host = kibana.host || '0.0.0.0';
 kibana.elasticsearch_url = kibana.elasticsearch_url || 'http://localhost:9200';
 kibana.maxSockets = kibana.maxSockets || Infinity;
 kibana.log_file = kibana.log_file || null;
-kibana.xsrf_token = kibana.xsrf_token || randomBytes(32).toString('hex');
+kibana.xsrf_token = kibana.xsrf_token || 'kibana';
 
 kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;

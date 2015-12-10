@@ -65,4 +65,4 @@ verify_ssl: true
 
 # A value to use as a XSRF token. This token is sent back to the server on each request
 # and required if you want to execute requests from other clients (like curl).
-# xsrf_token: ""
+xsrf_token: "kibana"
