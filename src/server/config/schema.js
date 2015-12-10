@@ -44,6 +44,7 @@ module.exports = () => Joi.object({
     }),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
+      token: Joi.string().optional().notes('Deprecated')
     }).default(),
   }).default(),
 
