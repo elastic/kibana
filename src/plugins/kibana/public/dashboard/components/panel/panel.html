@@ -11,7 +11,7 @@
 	      <span ng-if="panel.customTitle">{{panel.customTitle}}</span>
 	      <span ng-hide="panel.customTitle">{{savedObj.title}}</span>
       </a>
-      <input ng-if="showFormTitle" text="title" ng-model="panel.customTitle" ng-show="chrome.getVisible() && editUrl">
+      <input size="10" ng-if="showFormTitle" text="title" ng-model="panel.customTitle" ng-show="chrome.getVisible() && editUrl">
 
      <span ng-if="showFormTitle" class="title-actions" ng-show="chrome.getVisible() && editUrl">
        <a class="title-confirm" ng-click="confirmTitle()">
