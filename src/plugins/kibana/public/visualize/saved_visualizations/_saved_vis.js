@@ -44,6 +44,7 @@ define(function (require) {
 
     SavedVis.mapping = {
       title: 'string',
+      indexPattern: 'string',
       visState: 'json',
       uiStateJSON: 'string',
       description: 'string',

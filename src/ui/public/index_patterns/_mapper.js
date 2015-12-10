@@ -28,7 +28,7 @@ define(function (require) {
       self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
         var id = indexPattern.id;
 
-        var cache = fieldCache.get(id);
+        var cache = fieldCache.get(indexPattern.indexName);
         if (cache) return Promise.resolve(cache);
 
         if (!skipIndexPatternCache) {

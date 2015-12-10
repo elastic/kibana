@@ -29,7 +29,7 @@ define(function (require) {
         bdd.it('should have index pattern in page header', function pageHeader() {
           return settingsPage.getIndexPageHeading().getVisibleText()
           .then(function (patternName) {
-            expect(patternName).to.be('logstash-*');
+            expect(patternName).to.be('logstash-*(@timestamp)');
           })
           .catch(common.handleError(this));
         });
@@ -38,7 +38,7 @@ define(function (require) {
           return common.tryForTime(5000, function () {
             return remote.getCurrentUrl()
             .then(function (currentUrl) {
-              expect(currentUrl).to.contain('logstash-*');
+              expect(currentUrl).to.contain('logstash-*(@timestamp)');
             });
           })
           .catch(common.handleError(this));
@@ -93,7 +93,7 @@ define(function (require) {
           return common.tryForTime(5000, function () {
             return remote.getCurrentUrl()
             .then(function (currentUrl) {
-              expect(currentUrl).to.not.contain('logstash-*');
+              expect(currentUrl).to.not.contain('logstash-*(@timestamp)');
             });
           })
           .catch(common.handleError(this));

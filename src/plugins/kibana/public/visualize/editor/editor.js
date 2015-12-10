@@ -220,6 +220,7 @@ define(function (require) {
     $scope.doSave = function () {
       savedVis.id = savedVis.title;
       savedVis.visState = $state.vis;
+      savedVis.indexPattern = savedVis.vis.indexPattern.id;
       savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
       savedVis.save()

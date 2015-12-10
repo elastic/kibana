@@ -75,6 +75,14 @@ describe('index pattern', function () {
     DocSource.prototype.fetch.returns(Promise.resolve(payload));
   }
 
+  describe('fields', function () {
+    it('should be backwards compatible, and indexName should equal id', function () {
+      return create('test-pattern').then(function (indexPattern) {
+        expect(indexPattern.id).to.eql(indexPattern.indexName);
+      });
+    });
+  });
+
   describe('api', function () {
     it('should have expected properties', function () {
       return create('test-pattern').then(function (indexPattern) {
@@ -300,7 +308,7 @@ describe('index pattern', function () {
         indexPattern.toIndexList(1, 2);
         $rootScope.$apply();
 
-        var id = indexPattern.id;
+        var id = indexPattern.indexName;
         expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
       });
       it('is fulfilled by the result of interval toIndexList', function () {
@@ -351,7 +359,7 @@ describe('index pattern', function () {
         indexPattern.toIndexList(1, 2, 'sortOrder');
         $rootScope.$apply();
 
-        var id = indexPattern.id;
+        var id = indexPattern.indexName;
         var field = indexPattern.timeFieldName;
         expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
@@ -379,7 +387,7 @@ describe('index pattern', function () {
         });
         $rootScope.$apply();
 
-        expect(indexList).to.equal(indexPattern.id);
+        expect(indexList).to.equal(indexPattern.indexName);
       });
     });
   });
