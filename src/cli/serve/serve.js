@@ -76,7 +76,7 @@ module.exports = function (program) {
       return;
     }
 
-    let readYamlConfig = require('./readYamlConfig');
+    let readYamlConfig = require('./read_yaml_config');
     let KbnServer = src('server/KbnServer');
 
     let settings = readYamlConfig(opts.config);
