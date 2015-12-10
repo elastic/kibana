@@ -11,7 +11,7 @@ define(function (require) {
 
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana').then(function () {
-          return request.post('/kibana/index_patterns').send(createTestData().indexPatternWithMappings);
+          return request.post('/kibana/index_patterns').send(createTestData().indexPatternWithTemplate);
         });
       });
 
