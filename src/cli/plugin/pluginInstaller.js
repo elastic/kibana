@@ -4,7 +4,7 @@ var fromRoot = utils('fromRoot');
 var pluginDownloader = require('./pluginDownloader');
 var pluginCleaner = require('./pluginCleaner');
 var KbnServer = require('../../server/KbnServer');
-var readYamlConfig = require('../serve/readYamlConfig');
+var readYamlConfig = require('../serve/read_yaml_config');
 var fs = require('fs');
 
 module.exports = {
