@@ -178,22 +178,33 @@ define(function (require) {
       };
 
       self.toIndexList = function (start, stop, sortDirection) {
-        return new Promise(function (resolve) {
-          var indexList;
-          var interval = self.getInterval();
-
-          if (interval) {
-            indexList = intervals.toIndexList(self.id, interval, start, stop);
-            if (sortDirection === 'desc') indexList = indexList.reverse();
-          } else if (self.isWildcard() && self.hasTimeField()) {
-            indexList = calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
-          } else {
-            indexList = self.id;
+        return self
+        .toDetailedIndexList(start, stop, sortDirection)
+        .then(detailedIndices => {
+          if (!_.isArray(detailedIndices)) {
+            return detailedIndices.index;
           }
 
-          resolve(indexList);
+          return _.pluck(detailedIndices, 'index');
         });
       };
+
+      self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
+        const interval = self.getInterval();
+        if (interval) {
+          return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
+        }
+
+        if (self.isWildcard() && self.hasTimeField()) {
+          return calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
+        }
+
+        return {
+          index: self.id,
+          min: -Infinity,
+          max: Infinity,
+        };
+      });
 
       self.hasTimeField = function () {
         return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
