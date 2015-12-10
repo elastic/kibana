@@ -44,48 +44,12 @@ define(function (require) {
           .expect(201);
       });
 
-      bdd.it('should create an index template if mappings are provided', function createTemplate() {
+      bdd.it('should create an index template if a template is included', function createTemplate() {
         return request.post('/kibana/index_patterns')
           .send(createTestData().indexPatternWithTemplate)
           .expect(201)
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'});
-          });
-      });
-
-      bdd.it('should NOT create an index template if mappings are NOT provided', function noMappings() {
-        var pattern = createTestData().indexPatternWithTemplate;
-        pattern.fields = _.map(pattern.fields, function (field) {
-          return _.omit(field, 'mapping');
-        });
-
-        return request.post('/kibana/index_patterns')
-          .send(pattern)
-          .expect(201)
-          .then(function () {
-            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'});
-          })
-          .then(function () {
-            throw new Error('Template was created');
-          }, function (error) {
-            expect(error.status).to.be(404);
-          });
-      });
-
-      bdd.it('should NOT create an index template if pattern does not contain a wildcard', function noWildcard() {
-        var pattern = createTestData().indexPatternWithTemplate;
-        pattern.title = 'notawildcard';
-
-        return request.post('/kibana/index_patterns')
-          .send(pattern)
-          .expect(201)
-          .then(function () {
-            return scenarioManager.client.indices.getTemplate({name: 'kibana-notawildcard'});
-          })
-          .then(function () {
-            throw new Error('Template was created');
-          }, function (error) {
-            expect(error.status).to.be(404);
           });
       });
 
@@ -113,23 +77,21 @@ define(function (require) {
         });
       });
 
-      bdd.it('should return 409 conflict when mappings are provided with a pattern that matches existing indices',
+      bdd.it('should return 409 conflict when a template is included with a pattern that matches existing indices',
         function existingIndicesConflict() {
           var pattern = createTestData().indexPatternWithTemplate;
-          pattern.title = '.kib*';
+          pattern.data.id = pattern.data.attributes.title = pattern.included[0].attributes.template = '.kib*';
 
           return request.post('/kibana/index_patterns')
             .send(pattern)
             .expect(409);
         });
 
-      bdd.it('should return 201 created successfully if a pattern matches existing indices but has NO mappings',
-        function existingIndicesNoMappings() {
+      bdd.it('should return 201 created successfully if a pattern matches existing indices but no template is included',
+        function existingIndicesNoTemplate() {
           var pattern = createTestData().indexPatternWithTemplate;
-          pattern.fields = _.map(pattern.fields, function (field) {
-            return _.omit(field, 'mapping');
-          });
-          pattern.title = '.kib*';
+          pattern.data.id = pattern.data.attributes.title = '.kib*';
+          delete pattern.included;
 
           return request.post('/kibana/index_patterns')
             .send(pattern)
@@ -137,10 +99,13 @@ define(function (require) {
         });
 
       bdd.it('should enforce snake_case in the request body', function () {
+        var pattern = createTestData().indexPatternWithTemplate;
+        pattern.data.attributes = _.mapKeys(pattern.data.attributes, function (value, key) {
+          return _.camelCase(key);
+        });
+
         return request.post('/kibana/index_patterns')
-          .send(_.mapKeys(createTestData().indexPatternWithTemplate, function (value, key) {
-            return _.camelCase(key);
-          }))
+          .send(pattern)
           .expect(400);
       });
 

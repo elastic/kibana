@@ -24,7 +24,6 @@ module.exports = function registerPost(server) {
       const included = requestDocument.included;
       const indexPatternId = requestDocument.data.id;
       const indexPattern = requestDocument.data.attributes;
-      const isWildcard = _.contains(indexPattern.title, '*');
       const templateResource = _.isEmpty(included) ? null : included[0];
 
       if (!_.isEmpty(templateResource)) {
@@ -41,7 +40,7 @@ module.exports = function registerPost(server) {
 
       callWithRequest(req, 'create', patternCreateParams)
       .then((patternResponse) => {
-        if (!isWildcard || _.isEmpty(included)) {
+        if (_.isEmpty(included)) {
           return patternResponse;
         }
 
