@@ -12,7 +12,6 @@ define(function (require) {
     Truncate.id = 'truncate';
     Truncate.title = 'Truncated String';
     Truncate.fieldType = ['string'];
-//   Truncate.editor = require('ui/stringify/editors/truncate.html');
 
     Truncate.prototype._convert = function (val) {
       var length = this.param('fieldLength');
