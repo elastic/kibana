@@ -3,6 +3,7 @@ const _ = require('lodash');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 const indexPatternSchema = require('../../../lib/schemas/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
+const addMappingInfoToPatternFields = require('../../../lib/add_mapping_info_to_pattern_fields');
 
 module.exports = function registerPost(server) {
   server.route({
@@ -26,6 +27,9 @@ module.exports = function registerPost(server) {
       const isWildcard = _.contains(indexPattern.title, '*');
       const templateResource = _.isEmpty(included) ? null : included[0];
 
+      if (!_.isEmpty(templateResource)) {
+        addMappingInfoToPatternFields(indexPattern, templateResource.attributes);
+      }
       indexPattern.fields = JSON.stringify(indexPattern.fields);
 
       const patternCreateParams = {

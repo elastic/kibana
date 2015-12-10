@@ -1,7 +1,7 @@
 const expect = require('expect.js');
 const _ = require('lodash');
 const removeDeprecatedFieldProps = require('../remove_deprecated_field_props');
-const indexPattern = require('../../../../../fixtures/index_pattern_with_mappings.json');
+const indexPattern = require('../../../../../fixtures/index_pattern.json');
 
 indexPattern.fields[0].type = 'geo_point';
 indexPattern.fields[0].indexed = true;
