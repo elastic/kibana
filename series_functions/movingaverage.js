@@ -18,12 +18,18 @@ module.exports = new Chainable('movingaverage', {
   fn: function movingaverageFn(args) {
     return alter(args, function (eachSeries, _window) {
 
+      var windowLeft = Math.floor( _window / 2);
+      var windowRight = _window - windowLeft;
+
       var pairs = eachSeries.data;
+      
+      var pairsLen = pairs.length;
+      
       eachSeries.label = eachSeries.label + ' mvavg=' + _window;
       eachSeries.data = _.map(pairs, function (point, i) {
-        if (i < _window) { return [point[0], null]; }
+        if (i < windowLeft || i >= pairsLen - windowRight ) { return [point[0], null]; }
 
-        var average = _.chain(pairs.slice(i - _window, i))
+        var average = _.chain(pairs.slice(i - windowLeft, i + windowRight ))
         .map(function (point) {
           return point[1];
         }).reduce(function (memo, num) {
