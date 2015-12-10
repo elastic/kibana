@@ -10,12 +10,22 @@ define(function (require) {
     }
 
     Truncate.id = 'truncate';
-    Truncate.title = 'Truncated String (500 chars)';
+    Truncate.title = 'Truncated String';
     Truncate.fieldType = ['string'];
+//   Truncate.editor = require('ui/stringify/editors/truncate.html');
 
     Truncate.prototype._convert = function (val) {
-      return String(val).substr(0, 500);
+      var length = this.param('fieldLength');
+      if (length > 0) {
+        return String(val).substr(0, length) + '...';
+      }
+
+      return val;
     };
+
+    Truncate.editor = require('ui/stringify/editors/truncate.html');
+
+    Truncate.sampleInput = [ require('ui/stringify/samples/large.html') ];
 
     return Truncate;
   };
