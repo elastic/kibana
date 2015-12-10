@@ -14,7 +14,7 @@
 
     <div class="btn-group">
       <a aria-label="customTitle" tooltip="Custom title"
-        ng-show="chrome.getVisible() && editUrl" ng-click="showFormTitle = !showFormTitle">
+        ng-show="chrome.getVisible() && editUrl" ng-click="setTitle()">
         <i aria-hidden="true" class="fa fa-tag"></i>
       </a>
       <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{editUrl}}">

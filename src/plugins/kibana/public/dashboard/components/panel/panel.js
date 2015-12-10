@@ -52,6 +52,14 @@ define(function (require) {
             var uiState = panelConfig.uiState || {};
             $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
 
+            if ($scope.uiState) {
+              $scope.panel.customTitle = $scope.uiState.get('title');
+              // sync external uiState changes
+              var syncUIState = () => $scope.panel.customTitle = $scope.uiState.get('title');
+              $scope.uiState.on('change', syncUIState);
+              $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
+            }
+
             $scope.filter = function (field, value, operator) {
               var index = $scope.savedObj.searchSource.get('index').id;
               filterManager.add(field, value, operator, index);
@@ -78,6 +86,13 @@ define(function (require) {
 
         $scope.remove = function () {
           _.pull($state.panels, $scope.panel);
+        };
+
+        $scope.setTitle = function () {
+          $scope.showFormTitle = !$scope.showFormTitle;
+          // save the panel title to the UI state
+          if (!_.isString($scope.panel.customTitle)) $scope.panel.customTitle = null;
+          $scope.uiState.set('title', $scope.panel.customTitle);
         };
       }
     };
