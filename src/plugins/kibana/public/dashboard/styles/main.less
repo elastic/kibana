@@ -83,7 +83,18 @@ dashboard-grid {
             font-size: 1.2em;
             margin-right: 4px;
           }
+
+          .panel-title-edit {
+            display: none;
+          }
+
+          &:hover {
+            .panel-title-edit {
+              display: inline-block;
+            }
+          }
         }
+
 
         a {
           color: @dashboard-panel-heading-link-color;

@@ -9,14 +9,15 @@
       </i>
       <span ng-if="panel.customTitle">{{panel.customTitle}}</span>
       <span ng-hide="panel.customTitle">{{savedObj.title}}</span>
-      <input ng-show="showFormTitle" text="title" ng-model="panel.customTitle">
+      <input ng-if="showFormTitle" text="title" ng-model="panel.customTitle">
+
+      <a class="action panel-title-edit" ng-click="setTitle()">
+        <i class="fa fa-fw fa-edit"></i>
+      </a>
+
     </span>
 
     <div class="btn-group">
-      <a aria-label="customTitle" tooltip="Custom title"
-        ng-show="chrome.getVisible() && editUrl" ng-click="setTitle()">
-        <i aria-hidden="true" class="fa fa-tag"></i>
-      </a>
       <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
