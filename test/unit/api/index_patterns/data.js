@@ -48,7 +48,7 @@ module.exports = function createTestData() {
                 'ip': {'type': 'ip', 'index': 'not_analyzed', 'doc_values': true},
                 '@timestamp': {'type': 'date', 'index': 'not_analyzed', 'doc_values': true},
                 'agent': {'type': 'string', 'index': 'analyzed', 'doc_values': false},
-                'mapping': {'type': 'number', 'index': 'not_analyzed', 'doc_values': true}
+                'bytes': {'type': 'number', 'index': 'not_analyzed', 'doc_values': true}
               }
             }
           }
