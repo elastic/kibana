@@ -1,6 +1,9 @@
 <div class="pagination-other-pages">
   <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
-    <li ng-hide="page.first">
+    <li ng-style="{'visibility':'hidden'}" ng-if="page.first">
+      <a ng-click="paginate.goToPage(page.prev)">«</a>
+    </li>
+    <li ng-style="{'visibility':'visible'}" ng-if="!page.first">
       <a ng-click="paginate.goToPage(page.prev)">«</a>
     </li>
 
@@ -18,7 +21,10 @@
       <a ng-click="paginate.goToPage(page.count)">...{{page.count}}</a>
     </li>
 
-    <li ng-hide="page.last">
+    <li ng-style="{'visibility':'hidden'}" ng-if="page.last">
+      <a ng-click="paginate.goToPage(page.next)">»</a>
+    </li>
+    <li ng-style="{'visibility':'visible'}" ng-if="!page.last">
       <a ng-click="paginate.goToPage(page.next)">»</a>
     </li>
   </ul>
