@@ -11,6 +11,7 @@ visualize-legend {
   flex-direction: row;
   z-index: 10;
   min-height: 0;
+  overflow: hidden;
 
   .header {
     cursor: pointer;
@@ -39,7 +40,7 @@ visualize-legend {
     width: 150px;
     flex: 1 1 1px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     color: @legend-item-color;
     list-style-type: none;
     padding: 0;
@@ -98,6 +99,7 @@ visualize-legend {
 
   &-color-picker {
     width: 130px;
+    margin: auto;
 
     .dot {
       line-height: 14px;
