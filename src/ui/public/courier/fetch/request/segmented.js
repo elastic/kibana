@@ -86,7 +86,10 @@ define(function (require) {
 
         var indices = self._active = self._queue.splice(0, indexCount);
         params.index = _.pluck(indices, 'index');
-        params.body.size = self._pickSizeForIndices(indices);
+
+        if (self._desiredSize) {
+          params.body.size = self._pickSizeForIndices(indices);
+        }
 
         if (params.body.size === 0) params.search_type = 'count';
 
@@ -235,7 +238,9 @@ define(function (require) {
         });
       }
 
-      mergedHits = self._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
+      if (desiredSize) {
+        mergedHits = self._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
+      }
     };
 
     SegmentedReq.prototype._mergeSegment = notify.timed('merge response segment', function (seg) {
@@ -284,9 +289,10 @@ define(function (require) {
     SegmentedReq.prototype._detectHitsWindow = function (hits) {
       hits = hits || [];
       var indexPattern = this.source.get('index');
+      var desiredSize = this._desiredSize;
 
       var size = _.size(hits);
-      if (size < this._desiredSize) {
+      if (!desiredSize || size < desiredSize) {
         this._hitWindow = {
           size: size,
           min: -Infinity,
@@ -310,20 +316,19 @@ define(function (require) {
 
     SegmentedReq.prototype._pickSizeForIndices = function (indices) {
       var hitWindow = this._hitWindow;
+      var desiredSize = this._desiredSize;
 
+      if (!desiredSize) return undefined;
       // we don't have any hits yet, get us more info!
-      if (!hitWindow) return this._desiredSize;
-
+      if (!hitWindow) return desiredSize;
       // the order of documents isn't important, just get us more
-      if (!this._sortFn) return Math.max(this._desiredSize - hitWindow.size, 0);
-
+      if (!this._sortFn) return Math.max(desiredSize - hitWindow.size, 0);
       // if all of the documents in every index fall outside of our current doc set, we can ignore them.
       var someOverlap = indices.some(function (index) {
         return index.min <= hitWindow.max && hitWindow.min <= index.max;
       });
 
-      if (someOverlap) return this._desiredSize;
-      else return 0;
+      return someOverlap ? desiredSize : 0;
     };
 
     return SegmentedReq;
