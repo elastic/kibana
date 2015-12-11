@@ -1,32 +1,15 @@
 <form role="form" class="vis-share">
-  <div
-    class="form-group"
-    ng-show="objectId">
-    <input type="checkbox" ng-model="ignoreState" id="ignoreState" />
-    <label for="ignoreState">
-      Link to saved {{objectType}}
-    </label>
-    <div>
-      <small>By selecting this option, future changes to this saved {{objectType}} will be reflected in the shared view. Note: Shared URLs always include globally persisted state such as time picker and auto refresh.</small>
-    </div>
-  </div>
   <div class="form-group" ng-if="allowEmbed">
     <label>
       Embed this {{objectType}}
       <small>Add to your html source. Note all clients must still be able to access kibana</small>
     </label>
-    <share-object-url
-      share-as-embed="true"
-      strip-app-state="ignoreState">
-    </share-object-url>
+    <share-object-url share-as-embed="true"></share-object-url>
   </div>
   <div class="form-group">
     <label>
       Share a link
     </label>
-    <share-object-url
-      share-as-embed="false"
-      strip-app-state="ignoreState">
-    </share-object-url>
+    <share-object-url share-as-embed="false"></share-object-url>
   </div>
 </form>
