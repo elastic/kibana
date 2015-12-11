@@ -15,7 +15,7 @@ define(function (require) {
       });
 
       bdd.afterEach(function () {
-        return request.del('/kibana/index_patterns/logstash-*');
+        return request.del('/kibana/index_patterns/logstash-*?include=template');
       });
 
       bdd.it('should return 200 for a successful update', function () {

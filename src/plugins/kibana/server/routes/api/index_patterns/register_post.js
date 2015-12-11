@@ -1,6 +1,5 @@
 const Boom = require('boom');
 const _ = require('lodash');
-const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const addMappingInfoToPatternFields = require('../../../lib/add_mapping_info_to_pattern_fields');

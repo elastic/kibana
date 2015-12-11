@@ -46,9 +46,9 @@ define(function (require) {
 
       bdd.after(function () {
         return Promise.all([
-          request.del('/kibana/index_patterns/logstash-*'),
-          request.del('/kibana/index_patterns/foo'),
-          request.del('/kibana/index_patterns/bar*')
+          request.del('/kibana/index_patterns/logstash-*?include=template'),
+          request.del('/kibana/index_patterns/foo?include=template'),
+          request.del('/kibana/index_patterns/bar*?include=template')
         ]);
       });
 

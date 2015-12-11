@@ -12,7 +12,7 @@ define(function (require) {
       });
 
       bdd.afterEach(function () {
-        return request.del('/kibana/index_patterns/logstash-*');
+        return request.del('/kibana/index_patterns/logstash-*?include=template');
       });
 
       bdd.it('should return 400 for an invalid payload', function invalidPayload() {
@@ -74,6 +74,11 @@ define(function (require) {
           return request.post('/kibana/index_patterns')
             .send(createTestData().indexPatternWithTemplate)
             .expect(409);
+        })
+        .then(function () {
+          return scenarioManager.client.indices.deleteTemplate({
+            name: 'kibana-logstash-*'
+          });
         });
       });
 
