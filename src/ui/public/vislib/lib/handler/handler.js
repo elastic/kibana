@@ -7,7 +7,6 @@ define(function (require) {
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));
-    var Legend = Private(require('ui/vislib/lib/legend'));
 
     /**
      * Handles building all the components of the visualization
@@ -23,7 +22,7 @@ define(function (require) {
         return new Handler(vis, opts);
       }
 
-      this.data = opts.data || new Data(vis.data, vis._attr);
+      this.data = opts.data || new Data(vis.data, vis._attr, vis.uiState);
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -39,15 +38,10 @@ define(function (require) {
       this.axisTitle = opts.axisTitle;
       this.alerts = opts.alerts;
 
-      if (this._attr.addLegend) {
-        this.legend = opts.legend;
-      }
-
       this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
       this.binder = new Binder();
       this.renderArray = _.filter([
         this.layout,
-        this.legend,
         this.axisTitle,
         this.chartTitle,
         this.alerts,
@@ -96,12 +90,6 @@ define(function (require) {
 
       this._validateData();
       this.renderArray.forEach(function (property) {
-        if (property instanceof Legend) {
-          self.vis.activeEvents().forEach(function (event) {
-            self.enable(event, property);
-          });
-        }
-
         if (typeof property.render === 'function') {
           property.render();
         }

@@ -100,10 +100,6 @@ define(function (require) {
                   ]
                 }
               ]
-            },
-            {
-              type: 'div',
-              class: 'legend-col-wrapper'
             }
           ]
         }
