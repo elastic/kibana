@@ -1,4 +1,5 @@
-<div ng-if="vis.type.requiresSearch && esResp.hits.total === 0"
+<div ng-show="vis.type.requiresSearch && esResp.hits.total === 0"
+  ng-class="{ 'spy-visible': $scope.spy.mode, 'spy-only': fullScreenSpyPanel }"
   class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
@@ -9,7 +10,9 @@
 </div>
 <div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
   ng-style="loadingStyle"
-  ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
+  ng-class="{ 'spy-visible': $scope.spy.mode,
+    'spy-only': fullScreenSpyPanel,
+    loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
   class="visualize-chart"></div>
 <!-- <pre>{{chartData | json}}</pre> -->
 <visualize-spy ng-if="vis.type.requiresSearch && showSpyPanel"></visualize-spy>
