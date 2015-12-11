@@ -5,8 +5,8 @@ module.exports = function VislibRenderbotFactory(Private) {
   var buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));
 
   _.class(VislibRenderbot).inherits(Renderbot);
-  function VislibRenderbot(vis, $el) {
-    VislibRenderbot.Super.call(this, vis, $el);
+  function VislibRenderbot(vis, $el, uiState) {
+    VislibRenderbot.Super.call(this, vis, $el, uiState);
     this._createVis();
   }
 
@@ -22,7 +22,7 @@ module.exports = function VislibRenderbotFactory(Private) {
       self.vislibVis.on(event, listener);
     });
 
-    if (this.chartData) self.vislibVis.render(this.chartData);
+    if (this.chartData) self.vislibVis.render(this.chartData, this.uiState);
   };
 
   VislibRenderbot.prototype._getVislibParams = function () {
@@ -43,7 +43,7 @@ module.exports = function VislibRenderbotFactory(Private) {
   VislibRenderbot.prototype.buildChartData = buildChartData;
   VislibRenderbot.prototype.render = function (esResponse) {
     this.chartData = this.buildChartData(esResponse);
-    this.vislibVis.render(this.chartData);
+    this.vislibVis.render(this.chartData, this.uiState);
   };
 
   VislibRenderbot.prototype.destroy = function () {
