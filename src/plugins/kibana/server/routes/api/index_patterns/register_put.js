@@ -16,36 +16,28 @@ module.exports = function registerPut(server) {
       if (_.isEmpty(req.payload)) {
         return reply(Boom.badRequest('Payload required'));
       }
-      if (req.payload.title && req.payload.title !== req.params.id) {
-        return reply(Boom.badRequest('Updates to title not supported'));
-      }
 
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
-      const indexPattern = _.cloneDeep(req.payload);
-      const mappings = _(req.payload.fields)
-      .indexBy('name')
-      .mapValues(value => value.mapping)
-      .omit(_.isUndefined)
-      .value();
+      const indexPatternResource = _.cloneDeep(req.payload);
+      const indexPatternId = indexPatternResource.data.id;
+      const indexPattern = indexPatternResource.data.attributes;
+      const included = indexPatternResource.included;
+      indexPattern.fields = JSON.stringify(indexPattern.fields);
 
-      indexPattern.fields = JSON.stringify(_.map(indexPattern.fields, (field) => {
-        return _.omit(field, 'mapping');
-      }));
-
-      if (!_.isEmpty(mappings)) {
-        return reply(Boom.badRequest('Mappings cannot be updated'));
+      if (!_.isEmpty(included)) {
+        return reply(Boom.badRequest('PUT does not support included resource updates'));
       }
 
       const params = {
         index: '.kibana',
         type: 'index-pattern',
-        id: req.params.id,
+        id: indexPatternId,
         body: {
           doc: indexPattern
         }
       };
       callWithRequest(req, 'update', params)
-      .then(function (pattern) {
+      .then(function () {
         return reply('success');
       }, function (error) {
         return reply(handleESError(error));
