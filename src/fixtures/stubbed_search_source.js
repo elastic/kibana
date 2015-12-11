@@ -30,7 +30,7 @@ define(function (require) {
         return deferedResult.promise;
       },
       onError: function () { return $q.defer().promise; },
-      _flatten() {
+      _flatten: function () {
         return Promise.resolve({ index: indexPattern, body: {} });
       }
     };
