@@ -26,10 +26,10 @@ describe('addMappingInfoToPatternFields', function () {
     addMappingInfoToPatternFields(testPattern, testTemplate);
     expect(_.get(testPattern, 'fields[0]')).to.be.ok();
     expect(_.get(testPattern, 'fields[1]')).to.be.ok();
-    expect(testPattern.fields[0]).to.have.property('type', 'geo_point');
+    expect(testPattern.fields[0]).to.have.property('type', 'number');
     expect(testPattern.fields[0]).to.have.property('indexed', true);
     expect(testPattern.fields[0]).to.have.property('analyzed', false);
-    expect(testPattern.fields[0]).to.have.property('doc_values', false);
+    expect(testPattern.fields[0]).to.have.property('doc_values', true);
 
     expect(testPattern.fields[1]).to.have.property('type', 'ip');
     expect(testPattern.fields[1]).to.have.property('indexed', true);

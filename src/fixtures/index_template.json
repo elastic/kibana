@@ -18,18 +18,13 @@
           },
           "bytes": {
             "index": "not_analyzed",
-            "type": "number",
+            "type": "long",
             "doc_values": true
           },
           "ip": {
             "index": "not_analyzed",
             "type": "ip",
             "doc_values": true
-          },
-          "geo.coordinates": {
-            "index": "not_analyzed",
-            "type": "geo_point",
-            "doc_values": false
           }
         }
       }

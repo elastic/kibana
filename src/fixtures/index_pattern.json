@@ -3,7 +3,7 @@
   "timeFieldName": "@timestamp",
   "fields": [
     {
-      "name": "geo.coordinates",
+      "name": "bytes",
       "count": 0,
       "scripted": false
     },
