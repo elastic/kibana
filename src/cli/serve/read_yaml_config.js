@@ -55,7 +55,7 @@ module.exports = function (path) {
   }
 
   _.each(deprecatedSettings, function (message, setting) {
-    if (_.get(file, setting)) console.error(message);
+    if (_.has(file, setting)) console.error(message);
   });
 
   // transform legeacy options into new namespaced versions
