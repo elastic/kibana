@@ -15,7 +15,11 @@ module.exports = {
           Joi.object({
             name: Joi.string().required(),
             count: Joi.number().integer(),
-            scripted: Joi.boolean()
+            scripted: Joi.boolean(),
+            doc_values: Joi.boolean(),
+            analyzed: Joi.boolean(),
+            indexed: Joi.boolean(),
+            type: Joi.string()
           })
         ),
         field_format_map: Joi.object()
@@ -47,7 +51,11 @@ module.exports = {
           Joi.object({
             name: Joi.string().required(),
             count: Joi.number().integer(),
-            scripted: Joi.boolean()
+            scripted: Joi.boolean(),
+            doc_values: Joi.boolean(),
+            analyzed: Joi.boolean(),
+            indexed: Joi.boolean(),
+            type: Joi.string()
           })
         ),
         field_format_map: Joi.object()

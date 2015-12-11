@@ -1,8 +1,5 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
-const getMappings = require('../../../lib/get_mappings');
-const stitchPatternAndMappings = require('../../../lib/stitch_pattern_and_mappings');
-const removeDeprecatedFieldProps = require('../../../lib/remove_deprecated_field_props');
 const handleESError = require('../../../lib/handle_es_error');
 const createApiDocument = require('../../../lib/api_document_builders/create_api_document');
 const createRelationshipObject = require('../../../lib/api_document_builders/create_relationship_object');
@@ -89,7 +86,8 @@ module.exports = function registerGet(server) {
     method: 'GET',
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
-      let pattern = req.params.id;
+      const shouldIncludeTemplate = req.query.include === 'template';
+      const pattern = req.params.id;
 
       const params = {
         index: '.kibana',
@@ -97,17 +95,34 @@ module.exports = function registerGet(server) {
         id: req.params.id
       };
 
-      Promise.join(
-        boundCallWithRequest('get', params)
-        .then((result) => {
-          result._source.fields = JSON.parse(result._source.fields);
-          return result._source;
-        }),
-        getMappings(pattern, boundCallWithRequest),
-        stitchPatternAndMappings
-      )
-      .then(removeDeprecatedFieldProps)
-      .then(convertToSnakeCase)
+      boundCallWithRequest('get', params)
+      .then((result) => {
+        result._source.fields = JSON.parse(result._source.fields);
+
+        let relationshipsObject;
+        if (result._source.template_id) {
+          relationshipsObject = {
+            template: createRelationshipObject('index_templates', result._source.template_id)
+          };
+          delete result._source.template_id;
+        }
+
+        const snakeAttributes = convertToSnakeCase(result._source);
+        return createResourceObject('index_patterns', result._id, snakeAttributes, relationshipsObject);
+      })
+      .then((patternResource) => {
+        if (!shouldIncludeTemplate) {
+          return createApiDocument(patternResource);
+        }
+        const templateId = _.get(patternResource, 'relationships.template.data.id');
+
+        return boundCallWithRequest('indices.getTemplate', {name: templateId})
+        .then((template) => {
+          return createApiDocument(patternResource, [
+            createResourceObject('index_templates', templateId, template[templateId])
+          ]);
+        });
+      })
       .then(
         function (pattern) {
           reply(pattern);

@@ -87,7 +87,7 @@ define(function (require) {
           return request.get('/kibana/index_patterns/logstash-*')
             .expect(200)
             .then(function (res) {
-              expect(res.body.title).to.be('logstash-*');
+              expect(res.body.data.attributes.title).to.be('logstash-*');
               Joi.assert(res.body, indexPatternSchema.post);
             });
         });
@@ -96,31 +96,8 @@ define(function (require) {
           return request.get('/kibana/index_patterns/logstash-*')
             .expect(200)
             .then(function (res) {
-              expectSnakeCase(res.body);
-            });
-        });
-
-        bdd.it('should return mappings info from the indices if there is no template', function () {
-          var pattern = createTestData().indexPatternWithTemplate;
-          pattern.fields = _.map(pattern.fields, function (field) {
-            return _.omit(field, 'mapping');
-          });
-
-          return request.del('/kibana/index_patterns/logstash-*').expect(200)
-            .then(function () {
-              return scenarioManager.load('makelogs');
-            })
-            .then(function () {
-              return request.post('/kibana/index_patterns').send(pattern).expect(201);
-            })
-            .then(function () {
-              return request.get('/kibana/index_patterns/logstash-*').expect(200);
-            })
-            .then(function (res) {
-              expect(res.body.fields[0].mapping).to.be.an('object');
-            })
-            .finally(function () {
-              scenarioManager.unload('makelogs');
+              expectSnakeCase(res.body.data);
+              expectSnakeCase(res.body.data.attributes);
             });
         });
 
