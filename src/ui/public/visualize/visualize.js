@@ -54,8 +54,10 @@ define(function (require) {
 
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
 
+          // Basically a magic number, chart must be at least this big or only the spy will show
+          var visTooSmall = 100;
           $timeout(function () {
-            if ($visEl.height() < 100) {
+            if ($visEl.height() < visTooSmall) {
               $visEl.addClass('spy-only');
             };
           }, 0);
