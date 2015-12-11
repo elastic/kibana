@@ -43,7 +43,6 @@ define(function (require) {
 
         var getVisEl = getter('.visualize-chart');
         var getVisContainer = getter('.vis-container');
-        var getSpyEl = getter('visualize-spy');
 
         $scope.fullScreenSpy = false;
         $scope.spy = {};
