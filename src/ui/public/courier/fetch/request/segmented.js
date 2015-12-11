@@ -223,17 +223,19 @@ define(function (require) {
 
     SegmentedReq.prototype._mergeHits = function (hits) {
       var self = this;
-      var merged = self._mergedResp;
+      var mergedHits = self._mergedResp.hits.hits;
+      var desiredSize = self._desiredSize;
+      var sortFn = self._sortFn;
 
-      _.pushAll(hits, merged.hits.hits);
+      _.pushAll(hits, mergedHits);
 
-      if (self._sortFn) {
+      if (sortFn) {
         notify.event('resort rows', function () {
-          merged.hits.hits = merged.hits.hits
-          .sort(self._sortFn)
-          .slice(0, self._desiredSize);
+          mergedHits.sort(sortFn);
         });
       }
+
+      mergedHits = self._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
     };
 
     SegmentedReq.prototype._mergeSegment = notify.timed('merge response segment', function (seg) {
