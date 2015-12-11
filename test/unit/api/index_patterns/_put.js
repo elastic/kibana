@@ -10,7 +10,7 @@ define(function (require) {
 
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana').then(function () {
-          return request.post('/kibana/index_patterns').send(createTestData().indexPatternWithMappings);
+          return request.post('/kibana/index_patterns').send(createTestData().indexPatternWithTemplate);
         });
       });
 
@@ -19,12 +19,10 @@ define(function (require) {
       });
 
       bdd.it('should return 200 for a successful update', function () {
-        var pattern = createTestData().indexPatternWithMappings;
-        pattern.fields = _.map(pattern.fields, function (field) {
-          return _.omit(field, 'mapping');
-        });
-        pattern.time_field_name = 'foo';
-        pattern.fields[0].count = 5;
+        var pattern = createTestData().indexPatternWithTemplate;
+        delete pattern.included;
+        pattern.data.attributes.time_field_name = 'foo';
+        pattern.data.attributes.fields[0].count = 5;
 
         return request.put('/kibana/index_patterns/logstash-*')
           .send(pattern)
@@ -39,7 +37,7 @@ define(function (require) {
       });
 
       bdd.it('should return 400 if you try to modify the title', function () {
-        var pattern = createTestData().indexPatternWithMappings;
+        var pattern = createTestData().indexPatternWithTemplate;
         pattern.fields = _.map(pattern.fields, function (field) {
           return _.omit(field, 'mapping');
         });
@@ -52,7 +50,7 @@ define(function (require) {
 
       bdd.it('should return 400 if you try to update mappings', function () {
         return request.put('/kibana/index_patterns/logstash-*')
-          .send(createTestData().indexPatternWithMappings)
+          .send(createTestData().indexPatternWithTemplate)
           .expect(400);
       });
 
@@ -73,18 +71,18 @@ define(function (require) {
 
           //fields must be an array
           request.put('/kibana/index_patterns/logstash-*')
-            .send(_.assign(omitMappings(createTestData().indexPatternWithMappings), {fields: {}}))
+            .send(_.assign(omitMappings(createTestData().indexPatternWithTemplate), {fields: {}}))
             .expect(400),
 
           // field objects must have a name
           request.put('/kibana/index_patterns/logstash-*')
-            .send(_.assign(omitMappings(createTestData().indexPatternWithMappings), {fields: [{count: 0}]}))
+            .send(_.assign(omitMappings(createTestData().indexPatternWithTemplate), {fields: [{count: 0}]}))
             .expect(400)
         ]);
       });
 
       bdd.it('should return 404 for a non-existent id', function () {
-        var pattern = createTestData().indexPatternWithMappings;
+        var pattern = createTestData().indexPatternWithTemplate;
         pattern.fields = _.map(pattern.fields, function (field) {
           return _.omit(field, 'mapping');
         });

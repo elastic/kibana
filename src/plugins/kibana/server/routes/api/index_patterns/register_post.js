@@ -1,7 +1,7 @@
 const Boom = require('boom');
 const _ = require('lodash');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
-const indexPatternSchema = require('../../../lib/schemas/index_pattern_schema');
+const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const addMappingInfoToPatternFields = require('../../../lib/add_mapping_info_to_pattern_fields');
 
@@ -28,13 +28,14 @@ module.exports = function registerPost(server) {
 
       if (!_.isEmpty(templateResource)) {
         addMappingInfoToPatternFields(indexPattern, templateResource.attributes);
+        indexPattern.template_id = templateResource.id;
       }
       indexPattern.fields = JSON.stringify(indexPattern.fields);
 
       const patternCreateParams = {
         index: '.kibana',
         type: 'index-pattern',
-        id: indexPattern.title,
+        id: indexPatternId,
         body: indexPattern
       };
 
@@ -63,13 +64,13 @@ module.exports = function registerPost(server) {
           const deleteParams = {
             index: '.kibana',
             type: 'index-pattern',
-            id: indexPattern.title
+            id: indexPatternId
           };
           return callWithRequest(req, 'delete', deleteParams)
           .then(() => {
             throw templateError;
           }, () => {
-            throw new Error(`index-pattern ${indexPattern.title} created successfully but index template
+            throw new Error(`index-pattern ${indexPatternId} created successfully but index template
             creation failed. Failed to rollback index-pattern creation, must delete manually.`);
           });
         });

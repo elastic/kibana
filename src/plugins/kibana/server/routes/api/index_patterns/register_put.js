@@ -1,5 +1,5 @@
 const Boom = require('boom');
-const indexPatternSchema = require('../../../lib/schemas/index_pattern_schema');
+const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const _ = require('lodash');
 const handleESError = require('../../../lib/handle_es_error');
 

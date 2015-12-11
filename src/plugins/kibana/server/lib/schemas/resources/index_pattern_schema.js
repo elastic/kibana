@@ -1,12 +1,12 @@
 const Joi = require('joi');
-const createApiDocumentSchema = require('./create_api_document_schema');
-const createResourceObject = require('./create_resource_object');
-const relationshipObjectSchema = require('./relationship_object_schema');
+const createApiDocumentSchema = require('../common/create_api_document_schema');
+const createResourceObjectSchema = require('../common/create_resource_object_schema');
+const relationshipObjectSchema = require('../common/relationship_object_schema');
 
 
 module.exports = {
   post: createApiDocumentSchema(
-    createResourceObject(
+    createResourceObjectSchema(
       Joi.object({
         title: Joi.string().required(),
         time_field_name: Joi.string(),
@@ -25,7 +25,7 @@ module.exports = {
       })
     ),
     Joi.array().items(
-      createResourceObject(
+      createResourceObjectSchema(
         Joi.object({
           template: Joi.string().required(),
           order: Joi.number().integer(),
@@ -38,7 +38,7 @@ module.exports = {
   // No attributes are required for an update
   // Templates can't be updated in an index_pattern PUT
   put: createApiDocumentSchema(
-    createResourceObject(
+    createResourceObjectSchema(
       Joi.object({
         title: Joi.string(),
         time_field_name: Joi.string(),
