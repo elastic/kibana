@@ -10,6 +10,7 @@ define(function (require) {
   require('ui/timepicker/quick_ranges');
   require('ui/timepicker/refresh_intervals');
   require('ui/timepicker/time_units');
+  require('ui/timepicker/offset_timezone');
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {
@@ -59,14 +60,6 @@ define(function (require) {
           {text: 'Months ago', value: 'M'},
           {text: 'Years ago', value: 'y'},
         ];
-
-        $scope.$watch('absolute.from', function (date) {
-          if (_.isDate(date)) $scope.absolute.from = moment(date);
-        });
-
-        $scope.$watch('absolute.to', function (date) {
-          if (_.isDate(date)) $scope.absolute.to = moment(date);
-        });
 
         $scope.setMode = function (thisMode) {
           switch (thisMode) {

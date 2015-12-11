@@ -34,6 +34,7 @@ dataTypesArray.forEach(function (dataType, i) {
     var persistedState;
     var visLibParams = {
       type: 'histogram',
+      hasTimeField: true,
       addLegend: true,
       addTooltip: true,
       mode: mode
