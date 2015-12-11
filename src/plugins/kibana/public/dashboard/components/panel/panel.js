@@ -53,11 +53,11 @@ define(function (require) {
             $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
 
             if ($scope.uiState) {
-              $scope.panel.customTitle = $scope.uiState.get('title');
+              $scope.panel.title = $scope.uiState.get('title');
               // sync external uiState changes
-              var syncUIState = () => $scope.panel.customTitle = $scope.uiState.get('title');
+              var syncUIState = function () {$scope.panel.title = $scope.uiState.get('title');};
               $scope.uiState.on('change', syncUIState);
-              $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
+              $scope.$on('$destroy', function () {$scope.uiState.off('change', syncUIState);});
             }
 
             $scope.filter = function (field, value, operator) {
@@ -91,16 +91,16 @@ define(function (require) {
         $scope.setTitle = function () {
           $scope.showFormTitle = !$scope.showFormTitle;
           // save the panel title to the UI state
-          if (!_.isString($scope.panel.customTitle)) $scope.panel.customTitle = null;
-          $scope.uiState.set('title', $scope.panel.customTitle);
+          if (!_.isString($scope.panel.title)) $scope.panel.title = null;
+          $scope.uiState.set('title', $scope.panel.title);
         };
 
         $scope.confirmTitle = function () {$scope.setTitle();};
         $scope.cancelTitle = function () {
-          $scope.panel.customTitle = $scope.uiState.get('title');
+          $scope.panel.title = $scope.uiState.get('title');
           $scope.showFormTitle = false;
         };
-        $scope.resetTitle = function () {$scope.panel.customTitle = null;};
+        $scope.resetTitle = function () {$scope.panel.title = null;};
       }
     };
   });

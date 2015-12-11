@@ -8,22 +8,25 @@
         title="{{savedObj.vis.type.title}}">
       </i>
       <a class="action panel-title-edit" ng-click="setTitle()">
-	      <span ng-if="panel.customTitle">{{panel.customTitle}}</span>
-	      <span ng-hide="panel.customTitle">{{savedObj.title}}</span>
+	      <span ng-if="panel.title">{{panel.title}}</span>
+	      <span ng-hide="panel.title">{{savedObj.title}}</span>
       </a>
-      <input size="10" ng-if="showFormTitle" text="title" ng-model="panel.customTitle" ng-show="chrome.getVisible() && editUrl">
 
-     <span ng-if="showFormTitle" class="title-actions" ng-show="chrome.getVisible() && editUrl">
-       <a class="title-confirm" ng-click="confirmTitle()">
-         <i class="fa fa-check-square-o"></i>
-       </a>
-       <a class="title-cancel" ng-click="cancelTitle()">
-         <i class="fa fa-times"></i>
-       </a>
-       <a class="title-reset" ng-click="resetTitle()">
-         <i class="fa fa-undo"></i>
-       </a>
-     </span>
+      <div>
+       <form class="inline-form" ng-if="showFormTitle" ng-show="chrome.getVisible()" role="form">
+          <input type="text" name="title" ng-model="panel.title" input-focus>
+          <a class="title-confirm" ng-click="confirmTitle()">
+            <i class="fa fa-check-square-o"></i>
+          </a>
+          <a class="title-cancel" ng-click="cancelTitle()">
+            <i class="fa fa-times"></i>
+          </a>
+          <a class="title-reset" ng-click="resetTitle()">
+            <i class="fa fa-undo"></i>
+          </a>
+       </form>
+      </div>
+
     </div>
 
     <div class="btn-group">
