@@ -7,9 +7,9 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div class="vis-container">
-  <div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
-    ng-style="loadingStyle"
+<div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
+  class="vis-container" >
+  <div ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
     class="visualize-chart"></div>
   <visualize-legend></visualize-legend>
