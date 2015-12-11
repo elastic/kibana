@@ -73,7 +73,7 @@ define(function (require) {
     SegmentedReq.prototype.getFetchParams = function () {
       var self = this;
 
-      return self._getFlattenedSource().then((flatSource) => {
+      return self._getFlattenedSource().then(function (flatSource) {
         var params = _.cloneDeep(flatSource);
 
         // calculate the number of indices to fetch in this request in order to prevent
@@ -84,9 +84,9 @@ define(function (require) {
         var remainingSegments = self._maxSegments - self._segments.length;
         var indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
 
-        const indices = self._active = self._queue.splice(0, indexCount);
+        var indices = self._active = self._queue.splice(0, indexCount);
         params.index = _.pluck(indices, 'index');
-        params.body.size = this._pickSizeForIndices(indices);
+        params.body.size = self._pickSizeForIndices(indices);
 
         if (params.body.size === 0) params.search_type = 'count';
 
@@ -222,15 +222,16 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._mergeHits = function (hits) {
-      const merged = this._mergedResp;
+      var self = this;
+      var merged = self._mergedResp;
 
       _.pushAll(hits, merged.hits.hits);
 
-      if (this._sortFn) {
-        notify.event('resort rows', () => {
+      if (self._sortFn) {
+        notify.event('resort rows', function () {
           merged.hits.hits = merged.hits.hits
-          .sort(this._sortFn)
-          .slice(0, this._desiredSize);
+          .sort(self._sortFn)
+          .slice(0, self._desiredSize);
         });
       }
     };
@@ -278,10 +279,11 @@ define(function (require) {
       });
     });
 
-    SegmentedReq.prototype._detectHitsWindow = function (hits = []) {
-      const indexPattern = this.source.get('index');
+    SegmentedReq.prototype._detectHitsWindow = function (hits) {
+      hits = hits || [];
+      var indexPattern = this.source.get('index');
 
-      const size = _.size(hits);
+      var size = _.size(hits);
       if (size < this._desiredSize) {
         this._hitWindow = null;
         return;
@@ -290,18 +292,18 @@ define(function (require) {
       let min;
       let max;
 
-      for (const deepHit of hits) {
-        const hit = indexPattern.flattenHit(deepHit);
-        const time = hit[indexPattern.timeFieldName];
+      hits.forEach(function (deepHit) {
+        var hit = indexPattern.flattenHit(deepHit);
+        var time = hit[indexPattern.timeFieldName];
         if (min == null || time < min) min = time;
         if (max == null || time > max) max = time;
-      }
+      });
 
       this._hitWindow = { size, min, max };
     };
 
     SegmentedReq.prototype._pickSizeForIndices = function (indices) {
-      const hitWindow = this._hitWindow;
+      var hitWindow = this._hitWindow;
 
       // the order of documents isn't important, just get us more
       if (!this._sortFn) return Math.max(this._desiredSize - hitWindow.size, 0);
@@ -310,7 +312,7 @@ define(function (require) {
       if (!hitWindow) return this._desiredSize;
 
       // if all of the documents in every index fall outside of our current doc set, we can ignore them.
-      const someOverlap = indices.some(index => {
+      var someOverlap = indices.some(function (index) {
         return index.min <= hitWindow.max && hitWindow.min <= index.max;
       });
 
