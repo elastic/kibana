@@ -285,7 +285,11 @@ define(function (require) {
 
       var size = _.size(hits);
       if (size < this._desiredSize) {
-        this._hitWindow = null;
+        this._hitWindow = {
+          size: size,
+          min: -Infinity,
+          max: Infinity
+        };
         return;
       }
 
@@ -305,11 +309,11 @@ define(function (require) {
     SegmentedReq.prototype._pickSizeForIndices = function (indices) {
       var hitWindow = this._hitWindow;
 
-      // the order of documents isn't important, just get us more
-      if (!this._sortFn) return Math.max(this._desiredSize - hitWindow.size, 0);
-
       // we don't have any hits yet, get us more info!
       if (!hitWindow) return this._desiredSize;
+
+      // the order of documents isn't important, just get us more
+      if (!this._sortFn) return Math.max(this._desiredSize - hitWindow.size, 0);
 
       // if all of the documents in every index fall outside of our current doc set, we can ignore them.
       var someOverlap = indices.some(function (index) {
