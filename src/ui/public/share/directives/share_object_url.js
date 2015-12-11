@@ -1,6 +1,5 @@
 const app = require('ui/modules').get('kibana');
 const Clipboard = require('clipboard');
-const removeQueryStringValue = require('../lib/remove_query_string_value');
 
 require('../styles/index.less');
 
@@ -10,8 +9,7 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
   return {
     restrict: 'E',
     scope: {
-      getShareAsEmbed: '&shareAsEmbed',
-      stripAppState: '='
+      getShareAsEmbed: '&shareAsEmbed'
     },
     template: require('ui/share/views/share_object_url.html'),
     link: function ($scope, $el) {
@@ -57,12 +55,10 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       $scope.generateShortUrl = function () {
         if ($scope.shortGenerated) return;
 
-        $scope.generating = true;
         urlShortener.shortenUrl($scope.url)
         .then(shortUrl => {
           updateUrl(shortUrl);
           $scope.shortGenerated = true;
-          $scope.generating = false;
         });
       };
 
@@ -71,16 +67,6 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       $scope.$watch('getUrl()', updateUrl);
-
-      $scope.$watch('stripAppState', function (enabled) {
-        const currentUrl = $scope.getUrl();
-        if (enabled) {
-          let newUrl = removeQueryStringValue(currentUrl, '_a');
-          updateUrl(newUrl);
-        } else {
-          updateUrl(currentUrl);
-        }
-      });
     }
   };
 });
