@@ -180,7 +180,7 @@ define(function (require) {
       self.toIndexList = function (start, stop, sortDirection) {
         return self
         .toDetailedIndexList(start, stop, sortDirection)
-        .then(detailedIndices => {
+        .then(function (detailedIndices) {
           if (!_.isArray(detailedIndices)) {
             return detailedIndices.index;
           }
@@ -190,7 +190,8 @@ define(function (require) {
       };
 
       self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
-        const interval = self.getInterval();
+        var interval = self.getInterval();
+
         if (interval) {
           return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
         }
