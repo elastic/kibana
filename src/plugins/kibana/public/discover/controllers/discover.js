@@ -377,7 +377,11 @@ define(function (require) {
         $scope.rows = merged.hits.hits.slice();
 
         notify.event('flatten hit and count fields', function () {
-          var counts = $scope.fieldCounts = (sortFn ? {} : $scope.fieldCounts) || {};
+          var counts = $scope.fieldCounts;
+
+          // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
+          if (!counts || sortFn) counts = $scope.fieldCounts = {};
+
           $scope.rows.forEach(function (hit) {
             // skip this work if we have already done it
             if (hit.$$_counted) return;
