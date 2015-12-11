@@ -31,6 +31,8 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 - Start elasticsearch
 
+  Note: you need to have a java binary in `PATH` or set `JAVA_HOME`.
+
   ```sh
   npm run elasticsearch
   ```
