@@ -1,6 +1,7 @@
 define(function (require) {
   return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
     var _ = require('lodash');
+    var isNumber = require('lodash').isNumber;
     var SearchReq = Private(require('ui/courier/fetch/request/search'));
     var SegmentedHandle = Private(require('ui/courier/fetch/request/_segmented_handle'));
 
@@ -17,7 +18,7 @@ define(function (require) {
       // segmented request specific state
       this._initFn = initFn;
 
-      this._desiredSize = false;
+      this._desiredSize = null;
       this._maxSegments = config.get('courier:maxSegmentCount');
       this._direction = 'desc';
       this._sortFn = null;
@@ -87,7 +88,7 @@ define(function (require) {
         var indices = self._active = self._queue.splice(0, indexCount);
         params.index = _.pluck(indices, 'index');
 
-        if (self._desiredSize) {
+        if (isNumber(self._desiredSize)) {
           params.body.size = self._pickSizeForIndices(indices);
         }
 
@@ -173,7 +174,8 @@ define(function (require) {
      * @param {number|false}
      */
     SegmentedReq.prototype.setSize = function (totalSize) {
-      this._desiredSize = _.parseInt(totalSize) || false;
+      this._desiredSize = _.parseInt(totalSize);
+      if (isNaN(this._desiredSize)) this._desiredSize = null;
     };
 
     SegmentedReq.prototype._createQueue = function () {
@@ -225,10 +227,9 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._mergeHits = function (hits) {
-      var self = this;
-      var mergedHits = self._mergedResp.hits.hits;
-      var desiredSize = self._desiredSize;
-      var sortFn = self._sortFn;
+      var mergedHits = this._mergedResp.hits.hits;
+      var desiredSize = this._desiredSize;
+      var sortFn = this._sortFn;
 
       _.pushAll(hits, mergedHits);
 
@@ -238,8 +239,8 @@ define(function (require) {
         });
       }
 
-      if (desiredSize) {
-        mergedHits = self._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
+      if (isNumber(desiredSize)) {
+        mergedHits = this._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
       }
     };
 
@@ -292,7 +293,7 @@ define(function (require) {
       var desiredSize = this._desiredSize;
 
       var size = _.size(hits);
-      if (!desiredSize || size < desiredSize) {
+      if (!isNumber(desiredSize) || size < desiredSize) {
         this._hitWindow = {
           size: size,
           min: -Infinity,
@@ -318,7 +319,7 @@ define(function (require) {
       var hitWindow = this._hitWindow;
       var desiredSize = this._desiredSize;
 
-      if (!desiredSize) return undefined;
+      if (!isNumber(desiredSize)) return null;
       // we don't have any hits yet, get us more info!
       if (!hitWindow) return desiredSize;
       // the order of documents isn't important, just get us more
