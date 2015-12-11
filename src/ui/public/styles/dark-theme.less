@@ -313,31 +313,49 @@
 
 // /src/ui/public/vislib/styles/_legend.less
   .legend-col-wrapper {
+
     .legend-toggle {
-      background-color: @legend-button-bg;
+      &:hover {
+        color: @sidebar-hover-color;
+        background-color: @sidebar-hover-bg;
+      }
+
+      background-color: @sidebar-bg;
     }
 
     .legend-ul {
-      border-left-color: @legend-border;
+      border-left-color: @sidebar-bg;
+      color: @legend-item-color;
+    }
 
-      .legend-value-title:hover {
-        background-color: @legend-item-hover;
+  }
+
+  .legend-value {
+     &-title {
+      padding: 3px;
+
+      &:hover {
+        background-color: @sidebar-hover-bg;
       }
+    }
 
-      .legend-value-full {
-        background-color: @legend-item-active;
-      }
+    &-full {
+      background-color: @sidebar-hover-bg;
+    }
 
-      .legend-value-details {
-        border-bottom-color: @legend-border;
+    &-details {
+      border-bottom: 1px solid @sidebar-bg;
 
-        .filter-button {
-          background-color: @legend-button-bg;
-          color: @legend-button-color;
+      .filter-button {
+        background-color: @sidebar-bg;
+
+        &:hover {
+          background-color: @sidebar-hover-bg;
         }
       }
     }
   }
+
 
 
 // /src/ui/public/vislib/styles/_layout.less
