@@ -347,7 +347,7 @@ define(function (require) {
       if (sort[0] === '_score') segmented.setMaxSegments(1);
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
       segmented.setSortFn(sortFn);
-      segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
+      segmented.setSize($scope.opts.sampleSize);
 
       // triggered when the status updated
       segmented.on('status', function (status) {
