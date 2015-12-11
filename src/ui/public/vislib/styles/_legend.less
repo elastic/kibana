@@ -1,25 +1,33 @@
 @import "~ui/styles/mixins";
 @import "~ui/styles/variables";
 
+visualize-legend {
+  display: flex;
+  flex-direction: row;
+}
+
 .legend-col-wrapper {
   .flex-parent(0, 0, auto);
+  flex-direction: row;
   z-index: 10;
   min-height: 0;
 
-  .legend-toggle {
+  .header {
     cursor: pointer;
-    opacity: 0.75;
-    white-space: nowrap;
-    font-size: 0.9em;
+    width: 15px;
+  }
 
-    .legend-open {
-      margin-right: 20px;
+  .legend-toggle {
+    &:hover {
+      color: @sidebar-hover-color;
+      background-color: @sidebar-hover-bg;
     }
 
-    .legend-closed {
-      font-size: 1.5em;
-      padding-left: 5px;
-    }
+    background-color: @sidebar-bg;
+    font-size: 10px;
+    height: 30px;
+    padding: 8px 3px;
+    border-bottom-left-radius: @border-radius-small;
   }
 
   .column-labels {
@@ -27,46 +35,85 @@
   }
 
   .legend-ul {
+    border-left: 1px solid @sidebar-bg;
+    width: 150px;
     flex: 1 1 1px;
     overflow-x: hidden;
-    overflow-y: auto;
-
+    overflow-y: scroll;
+    color: @legend-item-color;
     list-style-type: none;
     padding: 0;
+    margin-bottom: 0;
     visibility: visible;
     min-height: 0;
-    min-width: 60px;
-    margin-right: 5px;
+    font-size: 12px;
+    line-height: 13px;
+    text-align: left;
 
-    li.color {
-      min-height: 22px;
-      padding: 3px 0 3px 0;
-      text-align: left;
-      font-size: 12px;
-      line-height: 13px;
-      color: @legend-item-color;
-      cursor: default;
-      text-align: left;
-      white-space: nowrap;
-      overflow-x: hidden;
-      text-overflow: ellipsis;
-      max-width: 150px;
-
-      .dots {
-        padding-right: 5px;
-        cursor: pointer;
-      }
-    }
-
-    .color-selector {
-      width: 80px;
-    }
+    display: flex;
+    flex-direction: column;
   }
 
   .legend-ul.hidden {
     visibility: hidden;
   }
+}
 
-  .legend-toggle {
+.legend-value {
+  &-title {
+    padding: 3px;
+
+    &:hover {
+      background-color: @sidebar-hover-bg;
+    }
+  }
+
+  &-truncate {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &-full {
+    white-space: normal;
+    word-break: break-all;
+    background-color: @sidebar-hover-bg;
+  }
+
+  &-details {
+    border-bottom: 1px solid @sidebar-bg;
+
+    .filter-button {
+      display: block;
+      float: left;
+      width: 50%;
+      border-radius: 0px;
+      background-color: @sidebar-bg;
+
+      &:hover {
+        background-color: @sidebar-hover-bg;
+      }
+    }
+  }
+
+  &-color-picker {
+    width: 130px;
+
+    .dot {
+      line-height: 14px;
+      margin: 2px;
+      font-size: 14px;
+    }
+
+    .dot:hover {
+      margin: 0px;
+      font-size: 18px
+    }
   }
 }
+
+.legend-value:hover {
+  cursor: pointer;
+}
+
+
