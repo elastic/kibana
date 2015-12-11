@@ -79,7 +79,11 @@ define(function (require) {
 
         const min = start.valueOf();
         const max = bound.valueOf();
-        indexList[add]({ index, min, max });
+        indexList[add]({
+          index: index,
+          min: min,
+          max: max
+        });
 
         start = next;
       }
