@@ -35,14 +35,6 @@ define(function (require) {
                 .set('included[0].id', 'kibana-bar*')
                 .set('included[0].attributes.template', 'bar*')
                 .value()
-            ),
-            request.post('/kibana/index_patterns').send(
-              _(createTestData().indexPatternWithTemplate)
-                .set('data.attributes.title', '[.marvel-es-]YYYY.MM.DD')
-                .set('data.id', '[.marvel-es-]YYYY.MM.DD')
-                .set('included[0].id', 'kibana-.marvel-es-*')
-                .set('included[0].attributes.template', '.marvel-es-*')
-                .value()
             )
           ]).then(function () {
             return scenarioManager.client.indices.refresh({
@@ -56,8 +48,7 @@ define(function (require) {
         return Promise.all([
           request.del('/kibana/index_patterns/logstash-*'),
           request.del('/kibana/index_patterns/foo'),
-          request.del('/kibana/index_patterns/bar*'),
-          request.del('/kibana/index_patterns/[.marvel-es-]YYYY.MM.DD')
+          request.del('/kibana/index_patterns/bar*')
         ]);
       });
 
@@ -66,7 +57,7 @@ define(function (require) {
           .expect(200)
           .then(function (res) {
             expect(res.body.data).to.be.an('array');
-            expect(res.body.data.length).to.be(4);
+            expect(res.body.data.length).to.be(3);
           });
       });
 
