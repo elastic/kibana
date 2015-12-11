@@ -28,8 +28,8 @@ module.exports = function ({ Plugin }) {
           cert: string(),
           key: string()
         }).default(),
-        apiVersion: string().default('2.0'),
-        engineVersion: string().valid('^2.1.0').default('^2.1.0')
+        apiVersion: Joi.string().default('2.0'),
+        engineVersion: Joi.string().valid('^3.0.0').default('^3.0.0')
       }).default();
     },
 
