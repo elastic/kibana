@@ -14,7 +14,7 @@ down to one second.
 *Histogram*:: A standard {ref}search-aggregations-bucket-histogram-aggregation.html[_histogram_] is built from a 
 numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty 
 intervals in the histogram.
-*Range*:: With a {ref}search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges 
+*Range*:: With a {ref}/search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges 
 of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove 
 a range.
 *Date Range*:: A {ref}search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values 
@@ -26,12 +26,12 @@ specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoi
 remove a range.
 *Terms*:: A {ref}search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top 
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
-*Filters*:: You can specify a set of {ref}search-aggregations-bucket-filters-aggregation.html[_filters_] for the data. 
+*Filters*:: You can specify a set of {ref}/search-aggregations-bucket-filters-aggregation.html[_filters_] for the data. 
 You can specify a filter as a query string or in JSON format, just as in the Discover search bar. Click *Add Filter* to 
 add another filter. Click the images:labelbutton.png[] *label* button to open the label field, where you can type in a 
 name to display on the visualization.
 *Significant Terms*:: Displays the results of the experimental 
-{ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation.
+{ref}/search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation.
 
 Once you've specified an X axis aggregation, you can define sub-aggregations to refine the visualization. Click *+ Add 
 Sub Aggregation* to define a sub-aggregation, then choose *Split Area* or *Split Chart*, then select a sub-aggregation

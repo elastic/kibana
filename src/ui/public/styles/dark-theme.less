@@ -313,12 +313,49 @@
 
 // /src/ui/public/vislib/styles/_legend.less
   .legend-col-wrapper {
+
+    .legend-toggle {
+      &:hover {
+        color: @sidebar-hover-color;
+        background-color: @sidebar-hover-bg;
+      }
+
+      background-color: @sidebar-bg;
+    }
+
     .legend-ul {
-      li.color {
-        color: @legend-item-color;
+      border-left-color: @sidebar-bg;
+      color: @legend-item-color;
+    }
+
+  }
+
+  .legend-value {
+     &-title {
+      padding: 3px;
+
+      &:hover {
+        background-color: @sidebar-hover-bg;
+      }
+    }
+
+    &-full {
+      background-color: @sidebar-hover-bg;
+    }
+
+    &-details {
+      border-bottom: 1px solid @sidebar-bg;
+
+      .filter-button {
+        background-color: @sidebar-bg;
+
+        &:hover {
+          background-color: @sidebar-hover-bg;
+        }
       }
     }
   }
+
 
 
 // /src/ui/public/vislib/styles/_layout.less
@@ -535,5 +572,5 @@
       }
     }
   }
-
 }
+

@@ -4,7 +4,7 @@ define(function (require) {
   var modules = require('ui/modules');
   var module = modules.get('kibana/notify');
   var errors = require('ui/notify/errors');
-  var Notifier = require('ui/notify/Notifier');
+  var Notifier = require('ui/notify/notifier');
   var rootNotifier = new Notifier();
 
   require('ui/notify/directives');

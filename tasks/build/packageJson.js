@@ -18,6 +18,9 @@ module.exports = function (grunt) {
           sha: grunt.config.get('buildSha')
         },
         repository: pkg.repository,
+        engines: {
+          node: pkg.engines.node
+        },
         dependencies: defaults({}, pkg.dependencies, deepModules)
       }, null, '  ')
     );

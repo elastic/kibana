@@ -1,6 +1,8 @@
 var Bluebird = require('bluebird');
 require('ui/promises');
 
+Bluebird.longStackTraces();
+
 /**
  * replace the Promise service with Bluebird so that tests
  * can use promises without having to call $rootScope.apply()

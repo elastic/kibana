@@ -33,7 +33,10 @@ define(function (require) {
               return responses[_.findIndex(executable, req)];
           }
         })
-        .then(defer.resolve, defer.reject);
+        .then(
+          (res) => defer.resolve(res),
+          (err) => defer.reject(err)
+        );
       };
 
 
@@ -90,7 +93,12 @@ define(function (require) {
           ignore_unavailable: true,
           preference: sessionId,
           body: body
-        }));
+        }))
+        .catch(function (err) {
+          return strategy.handleResponseError
+            ? strategy.handleResponseError(executable, err)
+            : Promise.reject(err);
+        });
       })
       .then(function (clientResp) {
         return strategy.getResponses(clientResp);

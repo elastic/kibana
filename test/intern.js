@@ -3,15 +3,29 @@ define(function (require) {
   var _ = require('intern/dojo/node!lodash');
 
   return _.assign({
+    debug: true,
     capabilities: {
       'selenium-version': '2.47.1',
-      'idle-timeout': 30
+      'idle-timeout': 99
     },
     environments: [{
       browserName: 'firefox'
     }],
-    tunnelOptions: serverConfig.webdriver,
-    functionalSuites: ['test/functional/status.js'],
-    excludeInstrumentation: /(fixtures|node_modules)\//
+    tunnelOptions: serverConfig.servers.webdriver,
+    functionalSuites: [
+      'test/functional/status_page/index',
+      'test/functional/apps/settings/index',
+      'test/functional/apps/discover/index'
+    ],
+    excludeInstrumentation: /(fixtures|node_modules)\//,
+    loaderOptions: {
+      paths: {
+        'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
+        'moment': './node_modules/moment/moment.js'
+      }
+    },
+    timeouts: {
+      default: 90000
+    },
   }, serverConfig);
 });

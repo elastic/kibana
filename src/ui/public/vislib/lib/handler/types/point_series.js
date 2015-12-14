@@ -3,7 +3,6 @@ define(function (require) {
     var injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
     var Handler = Private(require('ui/vislib/lib/handler/handler'));
     var Data = Private(require('ui/vislib/lib/data'));
-    var Legend = Private(require('ui/vislib/lib/legend'));
     var XAxis = Private(require('ui/vislib/lib/x_axis'));
     var YAxis = Private(require('ui/vislib/lib/y_axis'));
     var AxisTitle = Private(require('ui/vislib/lib/axis_title'));
@@ -22,14 +21,13 @@ define(function (require) {
         var data;
 
         if (opts.zeroFill) {
-          data = new Data(injectZeros(vis.data), vis._attr);
+          data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);
         } else {
-          data = new Data(vis.data, vis._attr);
+          data = new Data(vis.data, vis._attr, vis.uiState);
         }
 
         return new Handler(vis, {
           data: data,
-          legend: new Legend(vis, vis.data),
           axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
           chartTitle: new ChartTitle(vis.el),
           xAxis: new XAxis({

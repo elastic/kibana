@@ -21,12 +21,13 @@ module.exports = class KbnLogger {
   }
 
   init(readstream, emitter, callback) {
-    readstream
-    .pipe(this.squeeze)
-    .pipe(this.format)
-    .pipe(this.dest);
 
-    emitter.on('stop', _.noop);
+    this.output = readstream.pipe(this.squeeze).pipe(this.format);
+    this.output.pipe(this.dest);
+
+    emitter.on('stop', () => {
+      this.output.unpipe(this.dest);
+    });
 
     callback();
   }
