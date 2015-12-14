@@ -47,7 +47,7 @@ define(function (require) {
           date.setMinutes(date.getMinutes() + offset);
           offsetDate = true;
 
-          ngModelCntrl.$modelValue = date;
+          return date;
         }
       }
     };
