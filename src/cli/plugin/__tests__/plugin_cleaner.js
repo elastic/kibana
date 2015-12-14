@@ -3,7 +3,7 @@ var sinon = require('sinon');
 var fs = require('fs');
 var rimraf = require('rimraf');
 
-var pluginCleaner = require('../pluginCleaner');
+var pluginCleaner = require('../plugin_cleaner');
 var pluginLogger = require('../pluginLogger');
 
 describe('kibana cli', function () {

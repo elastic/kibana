@@ -2,7 +2,7 @@ var expect = require('expect.js');
 var sinon = require('sinon');
 
 var plugin = require('../plugin');
-var installer = require('../pluginInstaller');
+var installer = require('../plugin_installer');
 var remover = require('../pluginRemover');
 var settingParser = require('../settingParser');
 
