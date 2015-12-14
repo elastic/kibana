@@ -12,10 +12,13 @@ module.exports = async (kbnServer, server, config) => {
   let UiBundlerEnv = require('./UiBundlerEnv');
   let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
-  let uiExports = kbnServer.uiExports = new UiExports(kbnServer);
+  let uiExports = kbnServer.uiExports = new UiExports({
+    urlBasePath: config.get('server.basePath')
+  });
 
   let bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
   bundlerEnv.addContext('env', config.get('env.name'));
+  bundlerEnv.addContext('urlBasePath', config.get('server.basePath'));
   bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
   bundlerEnv.addContext('kbnVersion', config.get('pkg.version'));
   bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
@@ -66,19 +69,21 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   server.decorate('reply', 'renderApp', function (app) {
-    let payload = {
+    const payload = {
       app: app,
       nav: uiExports.apps,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
+      basePath: config.get('server.basePath'),
       vars: defaults(app.getInjectedVars(), defaultInjectedVars),
     };
 
     return this.view(app.templateName, {
       app: app,
       loadingGif: loadingGif,
-      kibanaPayload: payload
+      kibanaPayload: payload,
+      bundlePath: `${config.get('server.basePath')}/bundles`,
     });
   });
 };

@@ -102,6 +102,41 @@ The standard `npm run test` task runs several sub tasks and can take several min
   </dd>
 </dl>
 
+### Functional UI Testing
+
+#### Handy references
+
+- https://theintern.github.io/
+- https://theintern.github.io/leadfoot/Element.html
+
+#### Running tests using npm task:
+
+*The Selenium server that is started currently only runs the tests in Firefox*
+
+To runt the functional UI tests, execute the following command:
+
+`npm run test:ui`
+
+The task above takes a little time to start the servers.  You can also start the servers and leave them running, and then run the tests separately:
+
+`npm run test:ui:server` will start the server required to run the selenium tests, leave this open
+
+`npm run test:ui:runner` will run the frontend tests and close when complete
+
+#### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
+
+Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respecitively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
+
+Once you've got the services running, execute the following:
+
+`npm run test:ui:runner`
+
+#### General notes:
+
+- Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
+- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This gaurantees the same results each run.
+- These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
+- These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 
 ### Submit a pull request
 

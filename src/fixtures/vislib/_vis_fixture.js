@@ -27,7 +27,8 @@ module.exports = function VislibFixtures(Private) {
       defaultYExtents: false,
       setYExtents: false,
       yAxis: {},
-      type: 'histogram'
+      type: 'histogram',
+      hasTimeField: true
     }));
   };
 };

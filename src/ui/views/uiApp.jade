@@ -38,11 +38,17 @@ block content
         loading.removeChild(loading.lastChild);
       }
 
+      function bundleFile(filename) {
+        var anchor = document.createElement('a');
+        anchor.setAttribute('href', !{JSON.stringify(bundlePath)} + '/' + filename);
+        return anchor.href;
+      }
+
       var files = [
-        '/bundles/commons.style.css',
-        '/bundles/#{app.id}.style.css',
-        '/bundles/commons.bundle.js',
-        '/bundles/#{app.id}.bundle.js'
+        bundleFile('commons.style.css'),
+        bundleFile('#{app.id}.style.css'),
+        bundleFile('commons.bundle.js'),
+        bundleFile('#{app.id}.bundle.js')
       ];
 
       (function next() {

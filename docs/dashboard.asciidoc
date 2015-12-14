@@ -102,8 +102,6 @@ Move the cursor to the bottom right corner of the container until the cursor cha
 cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to 
 confirm the new container size.
 
-// enhancement request: a way to specify specific dimensions for a container in pixels, or at least display that info?
-
 [float]
 [[removing-containers]]
 ==== Removing Containers
@@ -136,6 +134,10 @@ A summary of the statistics related to the request and the response, presented a
 grid includes the query duration, the request duration, the total number of records found on the server, and the 
 index pattern used to make the query.
 image:images/NYCTA-Statistics.jpg[]
+
+To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
+*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it 
+is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
 
 [float]
 [[changing-the-visualization]]

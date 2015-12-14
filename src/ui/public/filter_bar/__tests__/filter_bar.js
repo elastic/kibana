@@ -55,6 +55,7 @@ describe('Filter Bar Directive', function () {
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
         { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
         { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
+        { meta: { index: 'logstash-*', alias: 'foo' }, query: { match: { '_type': { query: 'nginx' } } } },
       ];
 
       Promise.map(filters, mapFilter).then(function (filters) {
@@ -75,7 +76,7 @@ describe('Filter Bar Directive', function () {
 
     it('should render all the filters in state', function () {
       var filters = $el.find('.filter');
-      expect(filters).to.have.length(4);
+      expect(filters).to.have.length(5);
       expect($(filters[0]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
       expect($(filters[1]).find('span')[0].innerHTML).to.equal('_type:');
@@ -84,6 +85,11 @@ describe('Filter Bar Directive', function () {
       expect($(filters[2]).find('span')[1].innerHTML).to.equal('"@timestamp"');
       expect($(filters[3]).find('span')[0].innerHTML).to.equal('missing:');
       expect($(filters[3]).find('span')[1].innerHTML).to.equal('"host"');
+    });
+
+    it('should be able to set an alias', function () {
+      var filter = $el.find('.filter')[4];
+      expect($(filter).find('span')[0].innerHTML).to.equal('foo');
     });
 
     describe('editing filters', function () {

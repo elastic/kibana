@@ -1,8 +1,8 @@
 define(function (require) {
   return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
     var _ = require('lodash');
+    var isNumber = require('lodash').isNumber;
     var SearchReq = Private(require('ui/courier/fetch/request/search'));
-    var requestQueue = Private(require('ui/courier/_request_queue'));
     var SegmentedHandle = Private(require('ui/courier/fetch/request/_segmented_handle'));
 
     var notify = new Notifier({
@@ -17,12 +17,15 @@ define(function (require) {
 
       // segmented request specific state
       this._initFn = initFn;
-      this._desiredSize = false;
+
+      this._desiredSize = null;
       this._maxSegments = config.get('courier:maxSegmentCount');
-      this._hitsReceived = 0;
       this._direction = 'desc';
+      this._sortFn = null;
       this._queueCreated = false;
       this._handle = new SegmentedHandle(this);
+
+      this._hitWindow = null;
 
       // prevent the source from changing between requests,
       // all calls will return the same promise
@@ -71,8 +74,7 @@ define(function (require) {
     SegmentedReq.prototype.getFetchParams = function () {
       var self = this;
 
-      return self._getFlattenedSource()
-      .then(function (flatSource) {
+      return self._getFlattenedSource().then(function (flatSource) {
         var params = _.cloneDeep(flatSource);
 
         // calculate the number of indices to fetch in this request in order to prevent
@@ -82,10 +84,12 @@ define(function (require) {
         // request, making sure the first request returns faster.
         var remainingSegments = self._maxSegments - self._segments.length;
         var indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
-        params.index = self._active = self._queue.splice(0, indexCount);
 
-        if (self._desiredSize !== false) {
-          params.body.size = Math.max(self._desiredSize - self._hitsReceived, 0);
+        var indices = self._active = self._queue.splice(0, indexCount);
+        params.index = _.pluck(indices, 'index');
+
+        if (isNumber(self._desiredSize)) {
+          params.body.size = self._pickSizeForIndices(indices);
         }
 
         if (params.body.size === 0) params.search_type = 'count';
@@ -151,6 +155,15 @@ define(function (require) {
     };
 
     /**
+     * Set the function that will be used to sort the rows
+     *
+     * @param {fn}
+     */
+    SegmentedReq.prototype.setSortFn = function (sortFn) {
+      this._sortFn = sortFn;
+    };
+
+    /**
      * Set the sort total number of documents to
      * emit
      *
@@ -161,18 +174,19 @@ define(function (require) {
      * @param {number|false}
      */
     SegmentedReq.prototype.setSize = function (totalSize) {
-      this._desiredSize = _.parseInt(totalSize) || false;
+      this._desiredSize = _.parseInt(totalSize);
+      if (isNaN(this._desiredSize)) this._desiredSize = null;
     };
 
     SegmentedReq.prototype._createQueue = function () {
       var self = this;
       var timeBounds = timefilter.getBounds();
-      var indexPattern = this.source.get('index');
+      var indexPattern = self.source.get('index');
+      self._queueCreated = false;
 
-      return indexPattern.toIndexList(timeBounds.min, timeBounds.max)
+      return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, self._direction)
       .then(function (queue) {
         if (!_.isArray(queue)) queue = [queue];
-        if (self._direction === 'desc') queue = queue.reverse();
 
         self._queue = queue;
         self._queueCreated = true;
@@ -206,11 +220,28 @@ define(function (require) {
 
       this._mergeSegment(seg);
       this.resp = _.omit(this._mergedResp, '_bucketIndex');
-      this._hitsReceived += seg.hits.hits.length;
 
       if (firstHits) this._handle.emit('first', seg);
       if (gotHits)   this._handle.emit('segment', seg);
       if (haveHits)  this._handle.emit('mergedSegment', this.resp);
+    };
+
+    SegmentedReq.prototype._mergeHits = function (hits) {
+      var mergedHits = this._mergedResp.hits.hits;
+      var desiredSize = this._desiredSize;
+      var sortFn = this._sortFn;
+
+      _.pushAll(hits, mergedHits);
+
+      if (sortFn) {
+        notify.event('resort rows', function () {
+          mergedHits.sort(sortFn);
+        });
+      }
+
+      if (isNumber(desiredSize)) {
+        mergedHits = this._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
+      }
     };
 
     SegmentedReq.prototype._mergeSegment = notify.timed('merge response segment', function (seg) {
@@ -221,7 +252,11 @@ define(function (require) {
       merged.took += seg.took;
       merged.hits.total += seg.hits.total;
       merged.hits.max_score = Math.max(merged.hits.max_score, seg.hits.max_score);
-      [].push.apply(merged.hits.hits, seg.hits.hits);
+
+      if (_.size(seg.hits.hits)) {
+        this._mergeHits(seg.hits.hits);
+        this._detectHitsWindow(merged.hits.hits);
+      }
 
       if (!seg.aggregations) return;
 
@@ -251,6 +286,51 @@ define(function (require) {
         });
       });
     });
+
+    SegmentedReq.prototype._detectHitsWindow = function (hits) {
+      hits = hits || [];
+      var indexPattern = this.source.get('index');
+      var desiredSize = this._desiredSize;
+
+      var size = _.size(hits);
+      if (!isNumber(desiredSize) || size < desiredSize) {
+        this._hitWindow = {
+          size: size,
+          min: -Infinity,
+          max: Infinity
+        };
+        return;
+      }
+
+      let min;
+      let max;
+
+      hits.forEach(function (deepHit) {
+        var hit = indexPattern.flattenHit(deepHit);
+        var time = hit[indexPattern.timeFieldName];
+        if (min == null || time < min) min = time;
+        if (max == null || time > max) max = time;
+      });
+
+      this._hitWindow = { size, min, max };
+    };
+
+    SegmentedReq.prototype._pickSizeForIndices = function (indices) {
+      var hitWindow = this._hitWindow;
+      var desiredSize = this._desiredSize;
+
+      if (!isNumber(desiredSize)) return null;
+      // we don't have any hits yet, get us more info!
+      if (!hitWindow) return desiredSize;
+      // the order of documents isn't important, just get us more
+      if (!this._sortFn) return Math.max(desiredSize - hitWindow.size, 0);
+      // if all of the documents in every index fall outside of our current doc set, we can ignore them.
+      var someOverlap = indices.some(function (index) {
+        return index.min <= hitWindow.max && hitWindow.min <= index.max;
+      });
+
+      return someOverlap ? desiredSize : 0;
+    };
 
     return SegmentedReq;
   };

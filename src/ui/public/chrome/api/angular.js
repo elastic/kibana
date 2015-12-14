@@ -21,9 +21,10 @@ module.exports = function (chrome, internals) {
     .value('sessionId', Date.now())
     .value('esUrl', (function () {
       var a = document.createElement('a');
-      a.href = '/elasticsearch';
+      a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
+    .config(chrome.$setupXsrfRequestInterceptor)
     .directive('kbnChrome', function ($rootScope) {
       return {
         template: function ($el) {
@@ -45,7 +46,7 @@ module.exports = function (chrome, internals) {
         controller: function ($scope, $rootScope, $location, $http) {
 
           // are we showing the embedded version of the chrome?
-          chrome.setVisible(!Boolean($location.search().embed));
+          internals.setVisibleDefault(!$location.search().embed);
 
           // listen for route changes, propogate to tabs
           var onRouteChange = function () {

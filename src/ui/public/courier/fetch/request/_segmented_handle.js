@@ -22,6 +22,7 @@ define(function (require) {
       this.setDirection = _.bindKey(req, 'setDirection');
       this.setSize = _.bindKey(req, 'setSize');
       this.setMaxSegments = _.bindKey(req, 'setMaxSegments');
+      this.setSortFn = _.bindKey(req, 'setSortFn');
     }
 
     return SegmentedHandle;
