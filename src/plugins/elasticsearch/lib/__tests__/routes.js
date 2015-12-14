@@ -76,7 +76,7 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana',
-      payload: {settings: { number_of_shards: 1, number_of_replicas: 1 }},
+      payload: {settings: { number_of_shards: 1 }},
       statusCode: 200
     });
 
