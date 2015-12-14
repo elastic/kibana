@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const handleESError = require('../../../lib/handle_es_error');
 const getIndexPattern = require('./get_index_pattern');
+const Boom = require('boom');
 
 module.exports = function registerDelete(server) {
   server.route({
@@ -21,9 +22,14 @@ module.exports = function registerDelete(server) {
       if (shouldIncludeTemplate) {
         result = getIndexPattern(patternId, boundCallWithRequest)
         .then((patternResource) => {
+          const templateId = _.get(patternResource, 'data.relationships.template.data.id');
+          if (!templateId) {
+            throw Boom.badRequest('The specified index pattern has no related template to delete');
+          }
+
           return boundCallWithRequest(
             'indices.deleteTemplate',
-            {name: _.get(patternResource, 'data.relationships.template.data.id')}
+            {name: templateId}
           )
           .catch((error) => {
             if (!error.status || error.status !== 404) {

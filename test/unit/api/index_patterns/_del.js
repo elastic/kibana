@@ -19,7 +19,15 @@ define(function (require) {
       });
 
       bdd.afterEach(function () {
-        return request.del('/kibana/index_patterns/logstash-*?include=template');
+        return request.del('/kibana/index_patterns/logstash-*')
+        .then(function () {
+          return scenarioManager.client.indices.deleteTemplate({name: 'kibana-logstash-*'})
+          .catch(function (err) {
+            if (err.status !== 404) {
+              throw err;
+            }
+          });
+        });
       });
 
       bdd.it('should return 200 for successful deletion of pattern and template', function () {
@@ -34,6 +42,37 @@ define(function (require) {
                 expect(error.status).to.be(404);
               });
           });
+      });
+
+      bdd.it('should not delete the template if the include parameter is not sent', function () {
+        return request.del('/kibana/index_patterns/logstash-*')
+          .expect(200)
+          .then(function () {
+            return request.get('/kibana/index_patterns/logstash-*').expect(404);
+          })
+          .then(function () {
+            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
+            .then(function (res) {
+              expect(res['kibana-logstash-*']).to.be.ok();
+            });
+          });
+      });
+
+      bdd.it('should return a 400 if template deletion is requsted for a pattern with no related template', function () {
+        var templatelessPattern = createTestData().indexPatternWithTemplate;
+        delete templatelessPattern.included;
+        delete templatelessPattern.data.relationships;
+
+        return request.del('/kibana/index_patterns/logstash-*?include=template')
+        .then(function () {
+          return request.post('/kibana/index_patterns')
+            .send(templatelessPattern)
+            .expect(201);
+        })
+        .then(function () {
+          return request.del('/kibana/index_patterns/logstash-*?include=template')
+          .expect(400);
+        });
       });
 
       bdd.it('should return 404 for a non-existent id', function () {
