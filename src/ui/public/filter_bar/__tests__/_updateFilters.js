@@ -39,26 +39,51 @@ describe('update filters', function () {
 
   describe('updating', function () {
     var currentFilter;
+    var newFilter;
 
     beforeEach(function () {
-      currentFilter = {query: { match: { extension: { query: 'jpg', type: 'phrase' } } } };
+      newFilter = _.cloneDeep({
+        query: {
+          match: {
+            extension: {
+              query: 'jpg',
+              type: 'phrase'
+            }
+          }
+        }
+      });
+      currentFilter = _.assign(_.cloneDeep(newFilter), {
+        meta: {}
+      });
     });
 
     it('should be able to update a filter', function () {
-      var newFilter = _.cloneDeep(currentFilter);
       newFilter.query.match.extension.query = 'png';
 
       expect(currentFilter.query.match.extension.query).to.be('jpg');
       queryFilter.updateFilter({
         source: currentFilter,
-        model: newFilter
+        model: newFilter,
+        type: 'query'
       });
       $rootScope.$digest();
       expect(currentFilter.query.match.extension.query).to.be('png');
     });
 
+    it('should set an alias in the meta object', function () {
+
+      queryFilter.updateFilter({
+        source: currentFilter,
+        model: newFilter,
+        type: 'query',
+        alias: 'foo'
+      });
+      $rootScope.$digest();
+      expect(currentFilter.meta.alias).to.be('foo');
+    });
+
     it('should replace the filter type if it is changed', function () {
-      var newFilter = {
+      newFilter = {
         'range': {
           'bytes': {
             'gte': 0,

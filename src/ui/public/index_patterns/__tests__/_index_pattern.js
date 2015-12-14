@@ -44,13 +44,19 @@ describe('index pattern', function () {
 
     // stub calculateIndices
     calculateIndices = sinon.spy(function () {
-      return $injector.get('Promise').resolve(['foo', 'bar']);
+      return $injector.get('Promise').resolve([
+        { index: 'foo', max: Infinity, min: -Infinity },
+        { index: 'bar', max: Infinity, min: -Infinity }
+      ]);
     });
     Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
 
     // spy on intervals
     intervals = Private(require('ui/index_patterns/_intervals'));
-    sinon.stub(intervals, 'toIndexList').returns(['foo', 'bar']);
+    sinon.stub(intervals, 'toIndexList').returns([
+      { index: 'foo', max: Infinity, min: -Infinity },
+      { index: 'bar', max: Infinity, min: -Infinity }
+    ]);
 
     IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
   }));
@@ -290,53 +296,53 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
+      require('testUtils/noDigestPromises').activateForSuite();
+
       var interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
       });
 
-      it('invokes interval toIndexList with given start/stop times', function () {
-        indexPattern.toIndexList(1, 2);
-        $rootScope.$apply();
-
+      it('invokes interval toIndexList with given start/stop times', async function () {
+        await indexPattern.toIndexList(1, 2);
         var id = indexPattern.id;
         expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
       });
-      it('is fulfilled by the result of interval toIndexList', function () {
-        var indexList;
-        indexPattern.toIndexList().then(function (val) {
-          indexList = val;
-        });
-        $rootScope.$apply();
-
+      it('is fulfilled by the result of interval toIndexList', async function () {
+        var indexList = await indexPattern.toIndexList();
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
+      });
+
+      context('with sort order', function () {
+        it('passes the sort order to the intervals module', function () {
+          return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
+          .then(function () {
+            expect(intervals.toIndexList.callCount).to.be(1);
+            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+          });
+        });
       });
     });
 
     context('when index pattern is a time-base wildcard', function () {
+      require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
         sinon.stub(indexPattern, 'isWildcard').returns(true);
       });
 
-      it('invokes calculateIndices with given start/stop times', function () {
-        indexPattern.toIndexList(1, 2);
-        $rootScope.$apply();
-
+      it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
+        await indexPattern.toIndexList(1, 2, 'sortOrder');
         var id = indexPattern.id;
         var field = indexPattern.timeFieldName;
-        expect(calculateIndices.calledWith(id, field, 1, 2)).to.be(true);
+        expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
-      it('is fulfilled by the result of calculateIndices', function () {
-        var indexList;
-        indexPattern.toIndexList().then(function (val) {
-          indexList = val;
-        });
-        $rootScope.$apply();
 
+      it('is fulfilled by the result of calculateIndices', async function () {
+        var indexList = await indexPattern.toIndexList();
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
       });

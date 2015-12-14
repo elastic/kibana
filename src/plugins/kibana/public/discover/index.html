@@ -93,7 +93,7 @@
                 <h1>No results found <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
 
                 <p>
-                  Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here's some ideas:
+                  Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here are some ideas:
                 </p>
 
                 <div class="shard-failures" ng-show="failures">
@@ -176,7 +176,7 @@
 
               </header>
 
-              <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
+              <visualize ng-if="vis && rows.length != 0" vis="vis" ui-state="uiState" es-resp="mergedEsResp" search-source="searchSource"></visualize>
             </div>
 
             <div class="discover-table" fixed-scroll>

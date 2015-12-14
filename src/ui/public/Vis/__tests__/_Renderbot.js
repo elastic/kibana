@@ -15,12 +15,14 @@ describe('renderbot', function () {
     var vis;
     var $el;
     var renderbot;
+    var uiState;
 
     beforeEach(init);
     beforeEach(function () {
       vis = { hello: 'world' };
       $el = 'element';
-      renderbot = new Renderbot(vis, $el);
+      uiState = {};
+      renderbot = new Renderbot(vis, $el, uiState);
     });
 
     it('should have expected methods', function () {

@@ -4,6 +4,10 @@
 # The host to bind the server to.
 # server.host: "0.0.0.0"
 
+# If you are running kibana behind a proxy, and want to mount it at a path,
+# specify that path here. The basePath can't end in a slash.
+# server.basePath: ""
+
 # The Elasticsearch instance to use for all your queries.
 # elasticsearch.url: "http://localhost:9200"
 
@@ -18,12 +22,12 @@
 # The default application to load.
 # kibana.defaultAppId: "discover"
 
-# If your Elasticsearch is protected with basic auth, this is the user credentials
+# If your Elasticsearch is protected with basic auth, these are the user credentials
 # used by the Kibana server to perform maintenance on the kibana_index at startup. Your Kibana
 # users will still need to authenticate with Elasticsearch (which is proxied through
 # the Kibana server)
-# elasticsearch.username: user
-# elasticsearch.password: pass
+# elasticsearch.username: "user"
+# elasticsearch.password: "pass"
 
 # SSL for outgoing requests from the Kibana Server to the browser (PEM formatted)
 # server.ssl.cert: /path/to/your/server.crt
@@ -69,4 +73,4 @@
 # logging.quiet: false
 
 # Set this to true to log all events, including system usage information and all requests.
-# logging.verbose
+# logging.verbose: false

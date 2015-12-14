@@ -45,7 +45,7 @@ define(function (require) {
      * @method render
      * @param data {Object} Elasticsearch query results
      */
-    Vis.prototype.render = function (data) {
+    Vis.prototype.render = function (data, uiState) {
       var chartType = this._attr.type;
 
       if (!data) {
@@ -58,6 +58,12 @@ define(function (require) {
       }
 
       this.data = data;
+
+      if (!this.uiState) {
+        this.uiState = uiState;
+        uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
+      }
+
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
     };
@@ -76,7 +82,7 @@ define(function (require) {
       if (this.handler && _.isFunction(this.handler.resize)) {
         this._runOnHandler('resize');
       } else {
-        this.render(this.data);
+        this.render(this.data, this.uiState);
       }
     };
 
@@ -113,6 +119,7 @@ define(function (require) {
 
       this.binder.destroy();
       this.resizeChecker.destroy();
+      if (this.uiState) this.uiState.off('change', this._uiStateChangeHandler);
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
@@ -128,7 +135,7 @@ define(function (require) {
      */
     Vis.prototype.set = function (name, val) {
       this._attr[name] = val;
-      this.render(this.data);
+      this.render(this.data, this.uiState);
     };
 
     /**
