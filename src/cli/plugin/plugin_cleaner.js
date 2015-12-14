@@ -28,7 +28,10 @@ module.exports = function (settings, logger) {
     // delete the working directory.
     // At this point we're bailing, so swallow any errors on delete.
 
-    try { rimraf.sync(settings.workingPath); }
+    try {
+      rimraf.sync(settings.workingPath);
+      rimraf.sync(settings.pluginPath);
+    }
     catch (e) {} // eslint-disable-line no-empty
   }
 
