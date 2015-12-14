@@ -101,6 +101,7 @@ define(function (require) {
         };
 
         function retrieveAndExportDocs(objs) {
+          if (!objs.length) return notify.error('No saved objects to export.');
           es.mget({
             index: kbnIndex,
             body: {docs: objs.map(transformToMget)}
