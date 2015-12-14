@@ -33,6 +33,6 @@ describe('String Truncate Format', function () {
     var Truncate = fieldFormats.getType('truncate');
     var truncate = new Truncate({fieldLength: 100000});
 
-    expect(truncate.convert('This is some text')).to.be('This is some text...');
+    expect(truncate.convert('This is some text')).to.be('This is some text');
   });
 });
