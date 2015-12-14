@@ -16,7 +16,7 @@ define(function (require) {
     Truncate.prototype._convert = function (val) {
       var length = this.param('fieldLength');
       if (length > 0) {
-        return String(val).substr(0, length) + '...';
+        return _.trunc(val, length);
       }
 
       return val;
