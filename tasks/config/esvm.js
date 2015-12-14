@@ -84,6 +84,11 @@ module.exports = function (grunt) {
               username: 'user',
               password: 'notsecure',
               roles: ['kibana4', 'marvel']
+            },
+            {
+              username: 'admin',
+              password: 'notsecure',
+              roles: ['admin']
             }
           ]
         },
