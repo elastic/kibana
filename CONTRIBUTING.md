@@ -102,7 +102,7 @@ The standard `npm run test` task runs several sub tasks and can take several min
     <br>
     <img src="http://i.imgur.com/DwHxgfq.png">
   </dd>
-  
+
   <dt><code>npm run mocha [test file or dir]</code> or <code>npm run mocha:debug [test file or dir]</code></dt>
   <dd>
     Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
@@ -121,15 +121,20 @@ The standard `npm run test` task runs several sub tasks and can take several min
 
 *The Selenium server that is started currently only runs the tests in Firefox*
 
-To runt the functional UI tests, execute the following command:
+To run the functional UI tests use the following commands
 
-`npm run test:ui`
+<dl>
 
-The task above takes a little time to start the servers.  You can also start the servers and leave them running, and then run the tests separately:
+  <dt><code>npm run test:ui</code></dt>
+  <dd>Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.</dd>
 
-`npm run test:ui:server` will start the server required to run the selenium tests, leave this open
+  <dt><code>npm run test:ui:server</code></dt>
+  <dd>Start the server required for the <code>test:ui:runner</code> tasks. Once the server is started <code>test:ui:runner</code> can be run multiple times without waiting for the server to start.</dd>
 
-`npm run test:ui:runner` will run the frontend tests and close when complete
+  <dt><code>npm run test:ui:runner</code></dt>
+  <dd>Execute the front-end selenium tests. This requires the server started by the <code>test:ui:server</code> task.</dd>
+
+</dl>
 
 #### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
 
@@ -137,7 +142,9 @@ Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respecitively
 
 Once you've got the services running, execute the following:
 
-`npm run test:ui:runner`
+```sh
+npm run test:ui:runner
+```
 
 #### General notes:
 
