@@ -5,6 +5,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var util = require('util');
 var url = require('url');
+var AWS = require('aws-sdk');
 var uri = url.parse(config.elasticsearch);
 if (config.kibana.kibana_elasticsearch_username && config.kibana.kibana_elasticsearch_password) {
   uri.auth = util.format('%s:%s', config.kibana.kibana_elasticsearch_username, config.kibana.kibana_elasticsearch_password);
@@ -21,22 +22,18 @@ if (config.kibana.ca) {
   ssl.ca = fs.readFileSync(config.kibana.ca, 'utf8');
 }
 
-// AWS.config.credentials = new AWS.EC2MetadataCredentials({
-//   httpOptions: { timeout: 5000 } // 5 second timeout
-// });
-
-AWS.config.credentials = new AWS.EnvironmentCredentials('AWS');
+AWS.config.credentials = new AWS.TemporaryCredentials(new AWS.EC2MetadataCredentials({
+  httpOptions: { timeout: 5000 } // 5 second timeout
+}));
 
 module.exports = new elasticsearch.Client({
   host: url.format(uri),
   ssl: ssl,
   connectionClass: require('http-aws-es'),
   amazonES: {
-    region: 'us-east-1',
-      accessKey: 'AKID',
-      secretKey: 'secret',
-      credentials: new AWS.TemporaryCredentials()
-   },
+    region: config.kibana.region,
+    credentials: AWS.config.credentials
+  },
   pingTimeout: config.kibana.ping_timeout,
   log: function (config) {
     this.error = function (err) {
