@@ -10,7 +10,7 @@ describe('String Truncate Format', function () {
 
   it('truncate large string', function () {
     var Truncate = fieldFormats.getType('truncate');
-    var truncate = new Truncate({fieldLength: 7});
+    var truncate = new Truncate({fieldLength: 4});
 
     expect(truncate.convert('This is some text')).to.be('This...');
   });
