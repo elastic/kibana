@@ -3,6 +3,7 @@ const _ = require('lodash');
 const createApiDocument = require('../../../lib/api_document_builders/create_api_document');
 const createRelationshipObject = require('../../../lib/api_document_builders/create_relationship_object');
 const createResourceObject = require('../../../lib/api_document_builders/create_resource_object');
+const Promise = require('bluebird');
 
 module.exports = function getIndexPatterns(boundCallWithRequest, shouldIncludeTemplate) {
   const params = {
