@@ -70,8 +70,6 @@ describe('plugins/elasticsearch', function () {
             .to.have.property('settings');
           expect(params.body.settings)
             .to.have.property('number_of_shards', 1);
-          expect(params.body.settings)
-            .to.have.property('number_of_replicas', 1);
         });
       });
 
