@@ -7,7 +7,7 @@ var { join } = require('path');
 var Promise = require('bluebird');
 
 var pluginLogger = require('../pluginLogger');
-var pluginInstaller = require('../pluginInstaller');
+var pluginInstaller = require('../plugin_installer');
 
 describe('kibana cli', function () {
 
