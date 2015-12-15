@@ -1,22 +1,22 @@
 <div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
-    <div class="panel-title">
+    <div class="panel-title" title="{{::savedObj.title}}">
       <i
         class="fa"
         ng-class="savedObj.vis.type.icon"
-        aria-label="{{savedObj.vis.type.title}} Icon"
-        title="{{savedObj.vis.type.title}}">
+        aria-label="{{::savedObj.vis.type.title}} Icon"
+        title="{{::savedObj.vis.type.title}}">
       </i>
-      <a class="action panel-title-edit" ng-click="setTitle()">
-	      <span ng-if="panel.title">{{panel.title}}</span>
-	      <span ng-hide="panel.title">{{savedObj.title}}</span>
+      <a class="action panel-title-edit" ng-hide="showFormTitle" ng-click="setTitle()">
+        <span ng-if="panel.title">{{panel.title}}</span>
+        <span ng-hide="panel.title">{{::savedObj.title}}</span>
       </a>
 
       <div>
        <form class="inline-form" ng-if="showFormTitle" ng-show="chrome.getVisible()" role="form">
-          <input type="text" name="title" ng-model="panel.title" input-focus>
+          <input type="text" name="title" ng-model="panel.title" placeholder="{{::savedObj.title}}" input-focus>
           <a class="title-confirm" ng-click="confirmTitle()">
-            <i class="fa fa-check-square-o"></i>
+            <i class="fa fa-save"></i>
           </a>
           <a class="title-cancel" ng-click="cancelTitle()">
             <i class="fa fa-times"></i>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="btn-group">
-      <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{editUrl}}">
+      <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
       <a aria-label="Remove" ng-show="chrome.getVisible()" ng-click="remove()">
@@ -45,7 +45,8 @@
     <span ng-bind="error"></span>
   </div>
 
-  <visualize ng-switch-when="visualization"
+  <visualize
+    ng-switch-when="visualization"
     vis="savedObj.vis"
     search-source="savedObj.searchSource"
     show-spy-panel="chrome.getVisible()"
