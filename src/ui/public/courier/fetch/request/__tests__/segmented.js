@@ -47,9 +47,12 @@ describe('ui/courier/fetch/request/segmented', () => {
   }
 
   function mockIndexPattern() {
-    const queue = [1, 2, 3];
     return {
-      toIndexList: sinon.stub().returns(Promise.resolve(queue))
+      toDetailedIndexList: sinon.stub().returns(Promise.resolve([
+        { index: 1, min: 0, max: 1 },
+        { index: 2, min: 0, max: 1 },
+        { index: 3, min: 0, max: 1 },
+      ]))
     };
   }
 });

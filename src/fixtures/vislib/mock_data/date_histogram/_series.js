@@ -12,6 +12,7 @@ module.exports = {
   'yAxisLabel': 'Count of documents',
   'series': [
     {
+      'label': 'Count',
       'values': [
         {
           'x': 1411761450000,

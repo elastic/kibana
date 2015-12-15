@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      branch: '2.1',
+      branch: '2.x',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         network: {
@@ -28,6 +28,9 @@ module.exports = function (grunt) {
         config: {
           path: {
             data: dataDir
+          },
+          cluster: {
+            name: 'esvm-dev'
           }
         }
       }
@@ -35,7 +38,15 @@ module.exports = function (grunt) {
     test: {
       options: {
         directory: resolve(directory, 'test'),
-        purge: true
+        purge: true,
+        config: {
+          http: {
+            port: 9210
+          },
+          cluster: {
+            name: 'esvm-test'
+          }
+        }
       }
     },
     ui: {
@@ -45,6 +56,9 @@ module.exports = function (grunt) {
         config: {
           http: {
             port: uiConfig.servers.elasticsearch.port
+          },
+          cluster: {
+            name: 'esvm-ui'
           }
         }
       }

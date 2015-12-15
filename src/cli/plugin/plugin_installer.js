@@ -2,9 +2,9 @@ let _ = require('lodash');
 var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
 var pluginDownloader = require('./pluginDownloader');
-var pluginCleaner = require('./pluginCleaner');
+var pluginCleaner = require('./plugin_cleaner');
 var KbnServer = require('../../server/KbnServer');
-var readYamlConfig = require('../serve/readYamlConfig');
+var readYamlConfig = require('../serve/read_yaml_config');
 var fs = require('fs');
 
 module.exports = {
@@ -30,6 +30,9 @@ function install(settings, logger) {
   .then(function () {
     return downloader.download();
   })
+  .then(function () {
+    fs.renameSync(settings.workingPath, settings.pluginPath);
+  })
   .then(async function() {
     logger.log('Optimizing and caching browser bundles...');
     let serverConfig = _.merge(
@@ -49,8 +52,7 @@ function install(settings, logger) {
         },
         plugins: {
           initialize: false,
-          scanDirs: [settings.pluginDir, fromRoot('src/plugins')],
-          paths: [settings.workingPath]
+          scanDirs: [settings.pluginDir, fromRoot('src/plugins')]
         }
       }
     );
@@ -60,7 +62,6 @@ function install(settings, logger) {
     await kbnServer.close();
   })
   .then(function () {
-    fs.renameSync(settings.workingPath, settings.pluginPath);
     logger.log('Plugin installation complete');
   })
   .catch(function (e) {

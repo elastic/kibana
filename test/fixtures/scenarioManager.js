@@ -7,7 +7,8 @@ function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
 
   this.client = new elasticsearch.Client({
-    host: server
+    host: server,
+    requestTimeout: 300000
   });
 }
 

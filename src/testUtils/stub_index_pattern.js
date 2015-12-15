@@ -23,6 +23,13 @@ define(function (require) {
       this.routes = IndexPattern.prototype.routes;
 
       this.toIndexList = _.constant(Promise.resolve([pattern]));
+      this.toDetailedIndexList = _.constant(Promise.resolve([
+        {
+          index: pattern,
+          min: 0,
+          max: 1
+        }
+      ]));
       this.getComputedFields = _.bind(getComputedFields, this);
       this.flattenHit = flattenHit(this);
       this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
