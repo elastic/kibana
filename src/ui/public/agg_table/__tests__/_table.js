@@ -180,5 +180,22 @@ describe('AggTable Directive', function () {
       });
       expect(call.args[1]).to.be('somefilename.csv');
     });
+
+    it('should use the export-title attribute', function () {
+      var expected = 'export file name';
+      var $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
+      $scope.$digest();
+
+      var $tableScope = $el.isolateScope();
+      var aggTable = $tableScope.aggTable;
+      $tableScope.table = {
+        columns: [],
+        rows: []
+      };
+      $tableScope.exportTitle = expected;
+      $scope.$digest();
+
+      expect(aggTable.csv.filename).to.equal(`${expected}.csv`);
+    });
   });
 });

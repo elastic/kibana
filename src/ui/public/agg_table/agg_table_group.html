@@ -10,7 +10,12 @@
     <tr>
       <td>
         <kbn-agg-table-group ng-if="table.tables" group="table" per-page="perPage"></kbn-agg-table-group>
-        <kbn-agg-table ng-if="table.rows" table="table" per-page="perPage"></kbn-agg-table>
+        <kbn-agg-table
+          ng-if="table.rows"
+          table="table"
+          export-title="exportTitle"
+          per-page="perPage">
+        </kbn-agg-table>
       </td>
     </tr>
   </tbody>
@@ -28,7 +33,12 @@
     <tr>
       <td ng-repeat="table in columns">
         <kbn-agg-table-group ng-if="table.tables" group="table" per-page="perPage"></kbn-agg-table-group>
-        <kbn-agg-table ng-if="table.rows" table="table" per-page="perPage"></kbn-agg-table>
+        <kbn-agg-table
+          ng-if="table.rows"
+          table="table"
+          export-title="exportTitle"
+          per-page="perPage">
+        </kbn-agg-table>
       </td>
     </tr>
   </tbody>
