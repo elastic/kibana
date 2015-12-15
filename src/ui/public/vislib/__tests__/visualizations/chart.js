@@ -7,6 +7,7 @@ describe('Vislib _chart Test Suite', function () {
   var ColumnChart;
   var Chart;
   var Data;
+  var persistedState;
   var Vis;
   var chartData = {};
   var vis;
@@ -82,6 +83,7 @@ describe('Vislib _chart Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(require('ui/vislib/vis'));
     Data = Private(require('ui/vislib/lib/data'));
+    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
     ColumnChart = Private(require('ui/vislib/visualizations/column_chart'));
     Chart = Private(require('ui/vislib/visualizations/_chart'));
 
@@ -96,7 +98,7 @@ describe('Vislib _chart Test Suite', function () {
     };
 
     vis = new Vis(el[0][0], config);
-    vis.data = new Data(data, config);
+    vis.data = new Data(data, config, persistedState);
 
     myChart = new ColumnChart(vis, el, chartData);
   }));

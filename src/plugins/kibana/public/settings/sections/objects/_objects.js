@@ -94,13 +94,14 @@ define(function (require) {
 
         $scope.exportAll = () => {
           Promise.map($scope.services, (service) =>
-            service.service.find('', MAX_SIZE).then((results) =>
+            service.service.scanAll('').then((results) =>
               results.hits.map((hit) => _.extend(hit, {type: service.type}))
             )
           ).then((results) => retrieveAndExportDocs(_.flattenDeep(results)));
         };
 
         function retrieveAndExportDocs(objs) {
+          if (!objs.length) return notify.error('No saved objects to export.');
           es.mget({
             index: kbnIndex,
             body: {docs: objs.map(transformToMget)}

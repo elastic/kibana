@@ -1,5 +1,6 @@
 describe('ui/index_patterns/_calculate_indices', () => {
   const _ = require('lodash');
+  const pluck = require('lodash').pluck;
   const sinon = require('auto-release-sinon');
   const expect = require('expect.js');
   const ngMock = require('ngMock');
@@ -40,7 +41,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
 
   function run({ start = undefined, stop = undefined } = {}) {
     calculateIndices('wat-*-no', '@something', start, stop).then(value => {
-      indices = value;
+      indices = pluck(value, 'index');
     });
     $rootScope.$apply();
     config = _.first(es.fieldStats.lastCall.args);
@@ -130,29 +131,13 @@ describe('ui/index_patterns/_calculate_indices', () => {
         };
 
         return calculateIndices('*', 'time', null, null).then(function (resp) {
-          expect(resp).to.eql(['c', 'a', 'b']);
-        });
-      });
-    });
-
-    context('when sorting desc', function () {
-      it('returns the indices in max_value order', function () {
-        response = {
-          indices: {
-            c: { fields: { time: { max_value: 10 } } },
-            a: { fields: { time: { max_value: 15 } } },
-            b: { fields: { time: { max_value: 1 } } },
-          }
-        };
-
-        return calculateIndices('*', 'time', null, null, 'desc').then(function (resp) {
-          expect(resp).to.eql(['a', 'c', 'b']);
+          expect(pluck(resp, 'index')).to.eql(['c', 'a', 'b']);
         });
       });
     });
 
     context('when sorting asc', function () {
-      it('returns the indices in min_value order', function () {
+      it('resolves to an array of objects, each with index, start, and end properties', function () {
         response = {
           indices: {
             c: { fields: { time: { max_value: 10, min_value: 9 } } },
@@ -162,7 +147,55 @@ describe('ui/index_patterns/_calculate_indices', () => {
         };
 
         return calculateIndices('*', 'time', null, null, 'asc').then(function (resp) {
-          expect(resp).to.eql(['b', 'a', 'c']);
+          expect(resp).to.eql([
+            {
+              index: 'b',
+              min: 0,
+              max: 1
+            },
+            {
+              index: 'a',
+              min: 5,
+              max: 15
+            },
+            {
+              index: 'c',
+              min: 9,
+              max: 10
+            }
+          ]);
+        });
+      });
+    });
+
+    context('when sorting desc', function () {
+      it('resolves to an array of objects, each with index, min, and max properties', function () {
+        response = {
+          indices: {
+            c: { fields: { time: { max_value: 10, min_value: 9 } } },
+            a: { fields: { time: { max_value: 15, min_value: 5 } } },
+            b: { fields: { time: { max_value: 1, min_value: 0 } } },
+          }
+        };
+
+        return calculateIndices('*', 'time', null, null, 'desc').then(function (resp) {
+          expect(resp).to.eql([
+            {
+              index: 'a',
+              max: 15,
+              min: 5
+            },
+            {
+              index: 'c',
+              max: 10,
+              min: 9
+            },
+            {
+              index: 'b',
+              max: 1,
+              min: 0
+            },
+          ]);
         });
       });
     });

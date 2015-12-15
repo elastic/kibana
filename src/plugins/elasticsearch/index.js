@@ -38,6 +38,7 @@ module.exports = function (kibana) {
       createProxy(server, 'POST', '/{index}/_search');
       createProxy(server, 'POST', '/{index}/_field_stats');
       createProxy(server, 'POST', '/_msearch');
+      createProxy(server, 'POST', '/_search/scroll');
 
       function noBulkCheck(request, reply) {
         if (/\/_bulk/.test(request.path)) {
