@@ -9,8 +9,8 @@ define(function (require) {
 
     var metrics = $scope.metrics = [];
 
-    function isNullorNaN(val) {
-      return _.isNull(val) || _.isNaN(val);
+    function isInvalid(val) {
+      return _.isUndefined(val) || _.isNull(val) || _.isNaN(val);
     }
 
     $scope.processTableGroups = function (tableGroups) {
@@ -19,8 +19,7 @@ define(function (require) {
           var fieldFormatter = table.aggConfig(column).fieldFormatter();
           var value = table.rows[0][i];
 
-          // Return string when value is '?'
-          value = isNullorNaN(value) ? '?' : fieldFormatter(value);
+          value = isInvalid(value) ? '?' : fieldFormatter(value);
 
           metrics.push({
             label: column.title,
