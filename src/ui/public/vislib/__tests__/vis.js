@@ -29,12 +29,14 @@ dataArray.forEach(function (data, i) {
     var beforeEvent = 'click';
     var afterEvent = 'brush';
     var vis;
+    var persistedState;
     var secondVis;
     var numberOfCharts;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       secondVis = Private(require('fixtures/vislib/_vis_fixture'))();
     }));
 
@@ -46,7 +48,7 @@ dataArray.forEach(function (data, i) {
 
     describe('render Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
 
@@ -66,7 +68,7 @@ dataArray.forEach(function (data, i) {
 
     describe('resize Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
         vis.resize();
         numberOfCharts = vis.handler.charts.length;
       });
@@ -85,8 +87,8 @@ dataArray.forEach(function (data, i) {
 
     describe('destroy Method', function () {
       beforeEach(function () {
-        vis.render(data);
-        secondVis.render(data);
+        vis.render(data, persistedState);
+        secondVis.render(data, persistedState);
         secondVis.destroy();
       });
 
@@ -101,7 +103,7 @@ dataArray.forEach(function (data, i) {
 
     describe('set Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
         vis.set('addLegend', false);
         vis.set('offset', 'wiggle');
       });
@@ -114,7 +116,7 @@ dataArray.forEach(function (data, i) {
 
     describe('get Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
       });
 
       it('should get attribue values', function () {
@@ -145,7 +147,7 @@ dataArray.forEach(function (data, i) {
         });
 
         // Render chart
-        vis.render(data);
+        vis.render(data, persistedState);
 
         // Add event after charts have rendered
         listeners.forEach(function (listener) {
@@ -199,7 +201,7 @@ dataArray.forEach(function (data, i) {
         vis.off(beforeEvent, listener1);
 
         // Render chart
-        vis.render(data);
+        vis.render(data, persistedState);
 
         // Add event after charts have rendered
         listeners.forEach(function (listener) {

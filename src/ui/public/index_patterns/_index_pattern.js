@@ -16,6 +16,7 @@ define(function (require) {
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
     var formatHit = require('ui/index_patterns/_format_hit');
     var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
     var type = 'index-pattern';
 
@@ -177,22 +178,34 @@ define(function (require) {
       };
 
       self.toIndexList = function (start, stop, sortDirection) {
-        return new Promise(function (resolve) {
-          var indexList;
-          var interval = self.getInterval();
-
-          if (interval) {
-            indexList = intervals.toIndexList(self.id, interval, start, stop);
-            if (sortDirection === 'desc') indexList = indexList.reverse();
-          } else if (self.isWildcard() && self.hasTimeField()) {
-            indexList = calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
-          } else {
-            indexList = self.id;
+        return self
+        .toDetailedIndexList(start, stop, sortDirection)
+        .then(function (detailedIndices) {
+          if (!_.isArray(detailedIndices)) {
+            return detailedIndices.index;
           }
 
-          resolve(indexList);
+          return _.pluck(detailedIndices, 'index');
         });
       };
+
+      self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
+        var interval = self.getInterval();
+
+        if (interval) {
+          return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
+        }
+
+        if (self.isWildcard() && self.hasTimeField()) {
+          return calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
+        }
+
+        return {
+          index: self.id,
+          min: -Infinity,
+          max: Infinity,
+        };
+      });
 
       self.hasTimeField = function () {
         return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
@@ -236,7 +249,14 @@ define(function (require) {
 
             return safeConfirm(confirmMessage).then(
               function () {
-                return docSource.doIndex(body).then(setId);
+                return Promise.try(function () {
+                  const cached = patternCache.get(self.id);
+                  if (cached) {
+                    return cached.then(pattern => pattern.destroy());
+                  }
+                })
+                .then(() => docSource.doIndex(body))
+                .then(setId);
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
@@ -273,6 +293,11 @@ define(function (require) {
 
       self.toString = function () {
         return '' + self.toJSON();
+      };
+
+      self.destroy = function () {
+        patternCache.clear(self.id);
+        docSource.destroy();
       };
 
       self.metaFields = config.get('metaFields');

@@ -35,6 +35,10 @@ let legacySettingMap = {
   verify_ssl: 'elasticsearch.ssl.verify',
 };
 
+const deprecatedSettings = {
+  'server.xsrf.token': 'server.xsrf.token is deprecated. It is no longer used when providing xsrf protection.'
+};
+
 module.exports = function (path) {
   if (!path) return {};
 
@@ -49,6 +53,10 @@ module.exports = function (path) {
       _.set(config, key, val);
     }
   }
+
+  _.each(deprecatedSettings, function (message, setting) {
+    if (_.has(file, setting)) console.error(message);
+  });
 
   // transform legeacy options into new namespaced versions
   return _.transform(file, function (config, val, key) {

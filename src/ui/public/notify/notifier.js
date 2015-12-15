@@ -267,6 +267,8 @@ define(function (require) {
     }, cb);
   };
 
+  Notifier.prototype.describeError = formatMsg.describeError;
+
   if (log === _.noop) {
     Notifier.prototype.log = _.noop;
   } else {

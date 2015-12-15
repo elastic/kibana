@@ -1,6 +1,7 @@
 define(function (require) {
   var app = require('ui/modules').get('app/visualize');
   var _ = require('lodash');
+  var Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/visualize/saved_visualizations/_saved_vis');
 
@@ -13,6 +14,12 @@ define(function (require) {
 
   app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
     var visTypes = Private(require('ui/registry/vis_types'));
+
+    var scanner = new Scanner(es, {
+      index: kbnIndex,
+      type: 'visualization'
+    });
+
     var notify = new Notifier({
       location: 'Saved Visualization Service'
     });
@@ -41,8 +48,36 @@ define(function (require) {
       });
     };
 
+    this.scanAll = function (queryString, pageSize = 1000) {
+      return scanner.scanAndMap(queryString, {
+        pageSize,
+        docCount: Infinity
+      }, (hit) => this.mapHits(hit));
+    };
+
+    this.mapHits = function (hit) {
+      var source = hit._source;
+      source.id = hit._id;
+      source.url = this.urlFor(hit._id);
+
+      var typeName = source.typeName;
+      if (source.visState) {
+        try { typeName = JSON.parse(source.visState).type; }
+        catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
+      }
+
+      if (!typeName || !visTypes.byName[typeName]) {
+        if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
+        else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
+        return kbnUrl.redirect('/settings/objects/savedVisualizations/{{id}}', {id: source.id});
+      }
+
+      source.type = visTypes.byName[typeName];
+      source.icon = source.type.icon;
+      return source;
+    };
+
     this.find = function (searchString, size = 100) {
-      var self = this;
       var body;
       if (searchString) {
         body = {
@@ -64,30 +99,10 @@ define(function (require) {
         body: body,
         size: size
       })
-      .then(function (resp) {
+      .then((resp) => {
         return {
           total: resp.hits.total,
-          hits: _.transform(resp.hits.hits, function (hits, hit) {
-            var source = hit._source;
-            source.id = hit._id;
-            source.url = self.urlFor(hit._id);
-
-            var typeName = source.typeName;
-            if (source.visState) {
-              try { typeName = JSON.parse(source.visState).type; }
-              catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
-            }
-
-            if (!typeName || !visTypes.byName[typeName]) {
-              if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
-              else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
-              return kbnUrl.redirect('/settings/objects/savedVisualizations/{{id}}', {id: source.id});
-            }
-
-            source.type = visTypes.byName[typeName];
-            source.icon = source.type.icon;
-            hits.push(source);
-          }, [])
+          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
       });
     };

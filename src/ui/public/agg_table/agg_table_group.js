@@ -10,7 +10,8 @@ define(function (require) {
       template: require('ui/agg_table/agg_table_group.html'),
       scope: {
         group: '=',
-        perPage: '=?'
+        perPage: '=?',
+        exportTitle: '=?'
       },
       compile: function ($el) {
         // Use the compile function from the RecursionHelper,
@@ -25,7 +26,7 @@ define(function (require) {
 
               var firstTable = group.tables[0];
               var params = firstTable.aggConfig && firstTable.aggConfig.params;
-              // render groups that have Table children as if they were rows, because itteration is cleaner
+              // render groups that have Table children as if they were rows, because iteration is cleaner
               var childLayout = (params && !params.row) ? 'columns' : 'rows';
 
               $scope[childLayout] = group.tables;
