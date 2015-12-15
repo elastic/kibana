@@ -22,18 +22,9 @@ if (config.kibana.ca) {
   ssl.ca = fs.readFileSync(config.kibana.ca, 'utf8');
 }
 
-AWS.config.credentials = new AWS.TemporaryCredentials(new AWS.EC2MetadataCredentials({
-  httpOptions: { timeout: 5000 } // 5 second timeout
-}));
-
-module.exports = new elasticsearch.Client({
+var options = {
   host: url.format(uri),
   ssl: ssl,
-  connectionClass: require('http-aws-es'),
-  amazonES: {
-    region: config.kibana.region,
-    credentials: AWS.config.credentials
-  },
   pingTimeout: config.kibana.ping_timeout,
   log: function (config) {
     this.error = function (err) {
@@ -45,4 +36,16 @@ module.exports = new elasticsearch.Client({
     this.trace = _.noop;
     this.close = _.noop;
   }
-});
+};
+
+if (config.kibana.transport == "AWS") {
+  var credentialsChain = new AWS.CredentialProviderChain();
+  AWS.config.credentials = credentialsChain;
+  options.connectionClass = require('http-aws-es');
+  options.amazonES = {
+    region: config.kibana.region,
+    credentials: AWS.config.credentials
+  };
+}
+
+module.exports = new elasticsearch.Client(options);
