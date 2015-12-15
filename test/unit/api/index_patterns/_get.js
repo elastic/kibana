@@ -58,6 +58,18 @@ define(function (require) {
           .then(function (res) {
             expect(res.body.data).to.be.an('array');
             expect(res.body.data.length).to.be(3);
+            expect(res.body.included).to.not.be.ok();
+            Joi.assert(res.body, indexPatternSchema.post);
+          });
+      });
+
+      bdd.it('should include related index templates if the include query string param is set', function () {
+        return request.get('/kibana/index_patterns?include=template')
+          .expect(200)
+          .then(function (res) {
+            expect(res.body.included).to.be.an('array');
+            expect(res.body.included.length).to.be(3);
+            Joi.assert(res.body, indexPatternSchema.post);
           });
       });
 
@@ -79,6 +91,16 @@ define(function (require) {
             .expect(200)
             .then(function (res) {
               expect(res.body.data.attributes.title).to.be('logstash-*');
+              Joi.assert(res.body, indexPatternSchema.post);
+            });
+        });
+
+        bdd.it('should include related index template if the include query string param is set', function () {
+          return request.get('/kibana/index_patterns/logstash-*?include=template')
+            .expect(200)
+            .then(function (res) {
+              expect(res.body.data.attributes.title).to.be('logstash-*');
+              expect(res.body.included[0].id).to.be('kibana-logstash-*');
               Joi.assert(res.body, indexPatternSchema.post);
             });
         });
