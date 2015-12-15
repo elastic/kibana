@@ -38,7 +38,7 @@ block content
         loading.removeChild(loading.lastChild);
       }
 
-      var buildNum = window.__KBN__ && window.__KBN__.buildNum;
+      var buildNum = #{kibanaPayload.buildNum};
       var cacheParam = buildNum ? '?v=' + buildNum : '';
       function bundleFile(filename) {
         var anchor = document.createElement('a');
