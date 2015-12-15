@@ -1,44 +1,28 @@
 [[kibana-plugins]]
 == Kibana Plugins added[4.2]
 
-Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin` 
-command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
+Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin`
+command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `installedPlugins` directory and unpacking the plugin files into a new directory.
 
 [float]
 === Installing Plugins
 
-Use the following command to install a plugin:
+Use the following command to install a plugin from `download.elastic.co`
 
 [source,shell]
-bin/kibana plugin --install <org>/<package>/<version>
+bin/kibana plugin --install <package>/<version>
 
 You can also use `-i` instead of `--install`, as in the following example:
 
 [source,shell]
-bin/kibana plugin -i elasticsearch/marvel/latest
+bin/kibana plugin -i marvel/latest
 
-Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the 
-plugin from `download.elastic.co`.
+This will attempt to download the plugin from `download.elastic.co`.
 
-[float]
-=== Installing Plugins from Github
-
-When the specified plugin is not found at `download.elastic.co`, the plugin management tool parses the element 
-as a Github user name, as in the following example:
-
-[source,shell]
-bin/kibana plugin --install github-user/sample-plugin
-Installing sample-plugin
-Attempting to extract from https://download.elastic.co/github-user/sample-plugin/sample-plugin-latest.tar.gz
-Attempting to extract from https://github.com/github-user/sample-plugin/archive/master.tar.gz
-Downloading <some number> bytes....................
-Extraction complete
-Optimizing and caching browser bundles...
-Plugin installation complete
 
 [float]
-=== Installing Plugins from an Arbitrary URL
+=== Installing Plugins from an Arbitrary, or Github URL
 
 You can specify a URL to a plugin with the `-u` or `--url` options after the `-i` or `--install` option, as in the
 following example:

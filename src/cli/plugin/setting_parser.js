@@ -19,7 +19,7 @@ module.exports = function (options) {
     var version = (settings.version) || 'latest';
     var filename = settings.package + '-' + version + '.tar.gz';
 
-    return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
+    return 'https://download.elastic.co/elasticsearch/' + settings.package + '/' + filename;
   }
 
   function parse() {
@@ -66,7 +66,6 @@ module.exports = function (options) {
           throw new Error('Invalid install option. Please use the format <org>/<plugin>/<version>.');
         }
 
-        settings.organization = parts.shift();
         settings.package = parts.shift();
         settings.version = parts.shift();
 
