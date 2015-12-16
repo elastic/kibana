@@ -39,8 +39,12 @@ var options = {
 };
 
 if (config.kibana.transport == "AWS") {
-  var credentialsChain = new AWS.CredentialProviderChain();
-  AWS.config.credentials = credentialsChain;
+  AWS.CredentialProviderChain.defaultProviders = [
+    function () { return new AWS.EnvironmentCredentials('AWS'); },
+    function () { return new AWS.EnvironmentCredentials('AMAZON'); },
+    function () { return new AWS.SharedIniFileCredentials(); },
+    function () { return new AWS.EC2MetadataCredentials(); }
+  ];
   options.connectionClass = require('http-aws-es');
   options.amazonES = {
     region: config.kibana.region,
