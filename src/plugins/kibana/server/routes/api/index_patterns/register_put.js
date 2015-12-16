@@ -2,6 +2,7 @@ const Boom = require('boom');
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const _ = require('lodash');
 const handleESError = require('../../../lib/handle_es_error');
+const { convertToCamelCase } = require('../../../lib/case_conversion');
 
 module.exports = function registerPut(server) {
   server.route({
@@ -20,7 +21,7 @@ module.exports = function registerPut(server) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const indexPatternResource = _.cloneDeep(req.payload);
       const indexPatternId = indexPatternResource.data.id;
-      const indexPattern = indexPatternResource.data.attributes;
+      const indexPattern = convertToCamelCase(indexPatternResource.data.attributes);
       const included = indexPatternResource.included;
       indexPattern.fields = JSON.stringify(indexPattern.fields);
 

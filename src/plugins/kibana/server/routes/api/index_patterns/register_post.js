@@ -3,6 +3,7 @@ const _ = require('lodash');
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const addMappingInfoToPatternFields = require('../../../lib/add_mapping_info_to_pattern_fields');
+const { convertToCamelCase } = require('../../../lib/case_conversion');
 
 module.exports = function registerPost(server) {
   server.route({
@@ -22,7 +23,7 @@ module.exports = function registerPost(server) {
       const requestDocument = _.cloneDeep(req.payload);
       const included = requestDocument.included;
       const indexPatternId = requestDocument.data.id;
-      const indexPattern = requestDocument.data.attributes;
+      const indexPattern = convertToCamelCase(requestDocument.data.attributes);
       const templateResource = _.isEmpty(included) ? null : included[0];
 
       if (!_.isEmpty(templateResource)) {
