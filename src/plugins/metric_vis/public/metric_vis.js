@@ -22,8 +22,8 @@ define(function (require) {
       icon: 'fa-calculator',
       template: require('plugins/metric_vis/metric_vis.html'),
       params: {
-        handleNoResults: true,
         defaults: {
+          handleNoResults: true,
           fontSize: 60
         },
         editor: require('plugins/metric_vis/metric_vis_params.html')
