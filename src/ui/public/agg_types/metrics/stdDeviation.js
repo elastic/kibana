@@ -54,7 +54,6 @@ define(function (require) {
       },
 
       getValue: function (agg, bucket) {
-        // The std deviation of an empty set is undefined
         return _.get(bucket[agg.parentId], agg.valProp());
       }
     });
