@@ -44,17 +44,13 @@ define(function (require) {
         var getVisEl = getter('.visualize-chart');
         var getVisContainer = getter('.vis-container');
 
-        // Show no results message when hasZeroHits is true and it requires search
+        // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
-          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
+          var requiresSearch = _.has($scope, 'vis.type.requiresSearch');
           var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-          var shouldNotShowMessage = _.get($scope, 'vis.params.handleNoResults');
+          var shouldShowMessage = !_.has($scope, 'vis.params.handleNoResults');
 
-          if (requiresSearch && isZeroHits) {
-            // if the vis type handles instances when there are no results,
-            // do not show a no results message
-            return shouldNotShowMessage ? false : true;
-          }
+          return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
         };
 
         $scope.fullScreenSpy = false;
