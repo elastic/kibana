@@ -18,6 +18,14 @@ var url = require('url');
 *   }
 * @return {string}
 */
-module.exports = function getPage(config, app) {
+
+module.exports = getUrl;
+
+function getUrl(config, app) {
   return url.format(_.assign(config, app));
+};
+
+getUrl.noAuth = function getUrlNoAuth(config, app) {
+  var configUrl = _.pick(config, function (val, param) { return param !== 'auth'; });
+  return url.format(_.assign(configUrl, app));
 };
