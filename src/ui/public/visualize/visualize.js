@@ -48,11 +48,10 @@ define(function (require) {
           var isZeroHits = attr.esResp && attr.esResp.hits.total === 0;
 
           if (requiresSearch && isZeroHits) {
-            // The metric vis does not show a no results message
-            return _.get($scope, 'vis.type.name') !== 'metric';
+            // if the vis type handles instances when there are no results,
+            // do not show a no results message
+            return _.get($scope, 'vis.handleNoResults') ? false : true;
           }
-
-          return false;
         };
 
         $scope.fullScreenSpy = false;
