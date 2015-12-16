@@ -96,7 +96,7 @@
     "istanbul": "^0.2.4",
     "license-checker": "3.0.3",
     "load-grunt-config": "^0.7.0",
-    "marked": "^0.3.2",
+    "marked": "0.3.2",
     "marked-text-renderer": "^0.1.0",
     "mkdirp": "^0.5.0",
     "mocha": "^1.20.1",
