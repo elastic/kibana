@@ -1,7 +1,7 @@
 define(function (require) {
   var config = require('intern').config;
   var Common = require('../../../support/pages/Common');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var expect = require('intern/dojo/node!expect.js');
   var Promise = require('bluebird');
 

@@ -1,10 +1,12 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
+    require('ui/visualize/visualize_legend');
+
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('ui/registry/vis_types'));
@@ -40,7 +42,7 @@ define(function (require) {
         }
 
         var getVisEl = getter('.visualize-chart');
-        var getSpyEl = getter('visualize-spy');
+        var getVisContainer = getter('.vis-container');
 
         // Show no results message when hasZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
@@ -60,19 +62,18 @@ define(function (require) {
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
         var applyClassNames = function () {
-          var $spyEl = getSpyEl();
-          var $visEl = getVisEl();
+          var $visEl = getVisContainer();
           var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
-          // external
-          $el.toggleClass('only-visualization', !$scope.spy.mode);
-          $el.toggleClass('visualization-and-spy', $scope.spy.mode && !fullSpy);
-          $el.toggleClass('only-spy', Boolean(fullSpy));
-          if ($spyEl) $spyEl.toggleClass('only', Boolean(fullSpy));
-
-          // internal
-          $visEl.toggleClass('spy-visible', Boolean($scope.spy.mode));
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
+
+          // Basically a magic number, chart must be at least this big or only the spy will show
+          var visTooSmall = 100;
+          $timeout(function () {
+            if ($visEl.height() < visTooSmall) {
+              $visEl.addClass('spy-only');
+            };
+          }, 0);
         };
 
         // we need to wait for some watchers to fire at least once
@@ -126,7 +127,7 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {

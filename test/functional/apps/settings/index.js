@@ -9,6 +9,7 @@ define(function (require) {
   var indexPatternCreateDeleteTest = require('./_index_pattern_create_delete');
   var indexPatternResultsSortTest = require('./_index_pattern_results_sort');
   var indexPatternPopularityTest = require('./_index_pattern_popularity');
+  var advancedSettingsTest = require('./_advanced_settings');
 
   bdd.describe('settings app', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
@@ -30,6 +31,7 @@ define(function (require) {
       });
     });
 
+    advancedSettingsTest(bdd, scenarioManager);
     initialStateTest(bdd, scenarioManager);
     creationChangesTest(bdd, scenarioManager);
     indexPatternCreateDeleteTest(bdd, scenarioManager);

@@ -26,12 +26,14 @@ var visLibParams = {
 _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
   describe('Vislib Area Chart Test Suite for ' + imaVariable + ' Data', function () {
     var vis;
+    var persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       vis.on('brush', _.noop);
-      vis.render(variablesAreCool);
+      vis.render(variablesAreCool, persistedState);
     }));
 
     afterEach(function () {
@@ -42,7 +44,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     describe('checkIfEnoughData method throws an error when not enough data', function () {
       beforeEach(function () {
         ngMock.inject(function () {
-          vis.render(notQuiteEnoughVariables);
+          vis.render(notQuiteEnoughVariables, persistedState);
         });
       });
 
@@ -58,7 +60,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     describe('checkIfEnoughData method should not throw an error when enough data', function () {
       beforeEach(function () {
         ngMock.inject(function () {
-          vis.render(woahLotsOfVariables);
+          vis.render(woahLotsOfVariables, persistedState);
         });
       });
 
@@ -215,7 +217,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
         vis._attr.defaultYExtents = true;
-        vis.render(variablesAreCool);
+        vis.render(variablesAreCool, persistedState);
       });
 
       it('should return yAxis extents equal to data extents', function () {

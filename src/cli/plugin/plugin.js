@@ -2,7 +2,7 @@ var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
 
 var settingParser = require('./settingParser');
-var installer = require('./pluginInstaller');
+var installer = require('./plugin_installer');
 var remover = require('./pluginRemover');
 var pluginLogger = require('./pluginLogger');
 
