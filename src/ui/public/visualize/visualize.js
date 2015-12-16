@@ -44,6 +44,15 @@ define(function (require) {
         var getVisEl = getter('.visualize-chart');
         var getVisContainer = getter('.vis-container');
 
+        // Show no results message when isZeroHits is true and it requires search
+        $scope.showNoResultsMessage = function () {
+          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
+          var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
+          var shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
+
+          return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
+        };
+
         $scope.fullScreenSpy = false;
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
