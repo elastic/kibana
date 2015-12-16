@@ -46,11 +46,12 @@ define(function (require) {
         $scope.showNoResultsMessage = function () {
           var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
           var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
+          var shouldNotShowMessage = _.get($scope, 'vis.params.handleNoResults');
 
           if (requiresSearch && isZeroHits) {
             // if the vis type handles instances when there are no results,
             // do not show a no results message
-            return _.get($scope, 'vis.params.handleNoResults') ? false : true;
+            return shouldNotShowMessage ? false : true;
           }
         };
 
