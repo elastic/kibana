@@ -46,9 +46,9 @@ define(function (require) {
 
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
-          var requiresSearch = _.has($scope, 'vis.type.requiresSearch');
+          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
           var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-          var shouldShowMessage = !_.has($scope, 'vis.params.handleNoResults');
+          var shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
 
           return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
         };
