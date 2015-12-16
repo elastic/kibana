@@ -53,6 +53,25 @@ define(function (require) {
           });
       });
 
+      bdd.it('should normalize field mappings and add them to the index pattern if a template is included', function () {
+        return request.post('/kibana/index_patterns')
+          .send(createTestData().indexPatternWithTemplate)
+          .expect(201)
+          .then(function () {
+            return request.get('/kibana/index_patterns/logstash-*')
+            .expect(200)
+            .then(function (res) {
+              _.forEach(res.body.data.attributes.fields, function (field) {
+                expect(field).to.have.keys('type', 'indexed', 'analyzed', 'doc_values');
+
+                if (field.name === 'bytes') {
+                  expect(field).to.have.property('type', 'number');
+                }
+              });
+            });
+          });
+      });
+
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
         return request.post('/kibana/index_patterns')
           .send(createTestData().indexPatternWithTemplate)
