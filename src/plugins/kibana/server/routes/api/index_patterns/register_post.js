@@ -31,6 +31,7 @@ module.exports = function registerPost(server) {
         indexPattern.template_id = templateResource.id;
       }
       indexPattern.fields = JSON.stringify(indexPattern.fields);
+      indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
       const patternCreateParams = {
         index: '.kibana',

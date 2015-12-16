@@ -14,7 +14,12 @@ module.exports = function getIndexPattern(patternId, boundCallWithRequest, shoul
 
   return boundCallWithRequest('get', params)
   .then((result) => {
-    result._source.fields = JSON.parse(result._source.fields);
+    if (result._source.fields) {
+      result._source.fields = JSON.parse(result._source.fields);
+    }
+    if (result._source.fieldFormatMap) {
+      result._source.fieldFormatMap = JSON.parse(result._source.fieldFormatMap);
+    }
 
     let relationshipsObject;
     if (result._source.template_id) {

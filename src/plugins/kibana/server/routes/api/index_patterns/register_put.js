@@ -24,6 +24,7 @@ module.exports = function registerPut(server) {
       const indexPattern = convertToCamelCase(indexPatternResource.data.attributes);
       const included = indexPatternResource.included;
       indexPattern.fields = JSON.stringify(indexPattern.fields);
+      indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
       if (!_.isEmpty(included)) {
         return reply(Boom.badRequest('PUT does not support included resource updates'));

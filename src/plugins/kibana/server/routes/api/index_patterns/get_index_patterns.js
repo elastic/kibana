@@ -20,7 +20,12 @@ module.exports = function getIndexPatterns(boundCallWithRequest, shouldIncludeTe
   .then(function parseResults(results) {
     const hits = results.hits.hits;
     return _.map(hits, (patternHit) => {
-      patternHit._source.fields = JSON.parse(patternHit._source.fields);
+      if (patternHit._source.fields) {
+        patternHit._source.fields = JSON.parse(patternHit._source.fields);
+      }
+      if (patternHit._source.fieldFormatMap) {
+        patternHit._source.fieldFormatMap = JSON.parse(patternHit._source.fieldFormatMap);
+      }
 
       let relationshipsObject;
       if (patternHit._source.template_id) {

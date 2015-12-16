@@ -16,7 +16,9 @@ const indexPatternResourceObject = createResourceObjectSchema(
         doc_values: Joi.boolean(),
         analyzed: Joi.boolean(),
         indexed: Joi.boolean(),
-        type: Joi.string()
+        type: Joi.string(),
+        script: Joi.string(),
+        lang: Joi.string()
       })
     ),
     field_format_map: Joi.object()
@@ -59,7 +61,9 @@ module.exports = {
             doc_values: Joi.boolean(),
             analyzed: Joi.boolean(),
             indexed: Joi.boolean(),
-            type: Joi.string()
+            type: Joi.string(),
+            script: Joi.string(),
+            lang: Joi.string()
           })
         ),
         field_format_map: Joi.object()
