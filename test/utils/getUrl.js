@@ -26,6 +26,8 @@ function getUrl(config, app) {
 };
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {
-  var configUrl = _.pick(config, function (val, param) { return param !== 'auth'; });
-  return url.format(_.assign(configUrl, app));
+  config = _.pick(config, function (val, param) {
+    return param !== 'auth';
+  });
+  return getUrl(config, app);
 };

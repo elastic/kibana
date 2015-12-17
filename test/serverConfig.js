@@ -10,13 +10,13 @@ module.exports = {
     kibana: {
       protocol: process.env.TEST_UI_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_KIBANA_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_UI_KIBANA_PORT, 10) || 5601,
+      port: parseInt(process.env.TEST_UI_KIBANA_PORT, 10) || 5620,
       auth: 'user:notsecure'
     },
     elasticsearch: {
       protocol: process.env.TEST_UI_ES_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_ES_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_UI_ES_PORT, 10) || 9200,
+      port: parseInt(process.env.TEST_UI_ES_PORT, 10) || 9220,
       auth: 'admin:notsecure'
     }
   },
