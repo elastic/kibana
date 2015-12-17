@@ -47,4 +47,4 @@ if(config.kibana.transport == "AWS") {
   };
 }
 
-module.exports = function() { new elasticsearch.Client(options) };
+module.exports = new elasticsearch.Client(options);
