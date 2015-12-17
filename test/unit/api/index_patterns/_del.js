@@ -58,23 +58,6 @@ define(function (require) {
           });
       });
 
-      bdd.it('should return a 400 if template deletion is requsted for a pattern with no related template', function () {
-        var templatelessPattern = createTestData().indexPatternWithTemplate;
-        delete templatelessPattern.included;
-        delete templatelessPattern.data.relationships;
-
-        return request.del('/kibana/index_patterns/logstash-*?include=template')
-        .then(function () {
-          return request.post('/kibana/index_patterns')
-            .send(templatelessPattern)
-            .expect(201);
-        })
-        .then(function () {
-          return request.del('/kibana/index_patterns/logstash-*?include=template')
-          .expect(400);
-        });
-      });
-
       bdd.it('should return 404 for a non-existent id', function () {
         return request.del('/kibana/index_patterns/doesnotexist?include=template')
           .expect(404);

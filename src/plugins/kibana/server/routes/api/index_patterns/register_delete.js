@@ -24,7 +24,7 @@ module.exports = function registerDelete(server) {
         .then((patternResource) => {
           const templateId = _.get(patternResource, 'data.relationships.template.data.id');
           if (!templateId) {
-            throw Boom.badRequest('The specified index pattern has no related template to delete');
+            return;
           }
 
           return boundCallWithRequest(
