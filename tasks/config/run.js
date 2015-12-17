@@ -24,6 +24,23 @@ module.exports = function (grunt) {
       ]
     },
 
+    apiTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      args: [
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--server.xsrf.disableProtection=true',
+        '--optimize.enabled=false',
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--logging.json=false'
+      ]
+    },
+
     testUIServer: {
       options: {
         wait: false,

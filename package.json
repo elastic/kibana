@@ -85,6 +85,7 @@
     "bootstrap": "3.3.5",
     "brace": "0.5.1",
     "bunyan": "1.4.0",
+    "catbox": "7.0.0",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
@@ -177,6 +178,7 @@
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
+    "supertest-as-promised": "2.0.2",
     "wreck": "6.2.0"
   },
   "engines": {
