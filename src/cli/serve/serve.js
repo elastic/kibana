@@ -125,6 +125,11 @@ module.exports = function (program) {
       process.exit(1); // eslint-disable-line no-process-exit
     }
 
+    process.on('SIGTERM', function () {
+         kbnServer.close();
+         process.exit(0);
+    });
+
     return kbnServer;
   });
 };
