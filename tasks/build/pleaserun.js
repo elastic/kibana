@@ -16,6 +16,7 @@ module.exports = function createServices(grunt) {
         '--install-prefix', service.outputDir,
         '--overwrite',
         '--user', 'kibana',
+        '--prestart', 'chown -R kibana /opt/kibana/optimize',
         '--sysv-log-path', '/var/log/kibana/',
         '-p', service.name,
         '-v', service.version,
