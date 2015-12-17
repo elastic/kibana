@@ -33,7 +33,7 @@ module.exports = {
     Joi.alternatives().try(
       indexPatternResourceObject,
       Joi.array().items(indexPatternResourceObject)
-    ),
+    ).required(),
     Joi.array().items(
       createResourceObjectSchema(
         Joi.object({
@@ -71,6 +71,6 @@ module.exports = {
       Joi.object({
         template: relationshipObjectSchema
       })
-    )
+    ).required()
   )
 };
