@@ -152,65 +152,63 @@ describe('kibana cli', function () {
         describe('install option', function () {
 
           it('should set settings.action property to "install"', function () {
-            options.install = 'org/package/version';
+            options.install = 'package/version';
             parser = settingParser(options);
             var settings = parser.parse(options);
 
             expect(settings).to.have.property('action', 'install');
           });
 
-          it('should allow two parts to the install parameter', function () {
-            options.install = 'kibana/test-plugin';
+          it('should allow two parts to the install parameter, the plugin and version', function () {
+            options.install = 'test-plugin/latest';
             parser = settingParser(options);
 
             expect(parser.parse).withArgs().to.not.throwError();
 
             var settings = parser.parse(options);
 
-            expect(settings).to.have.property('organization', 'kibana');
             expect(settings).to.have.property('package', 'test-plugin');
-            expect(settings).to.have.property('version', undefined);
+            expect(settings).to.have.property('version', 'latest');
           });
 
-          it('should allow three parts to the install parameter', function () {
-            options.install = 'kibana/test-plugin/v1.0.1';
+          it('should allow one part to the install parameter, the plugin', function () {
+            options.install = 'test-plugin';
             parser = settingParser(options);
 
             expect(parser.parse).withArgs().to.not.throwError();
 
             var settings = parser.parse(options);
 
-            expect(settings).to.have.property('organization', 'kibana');
             expect(settings).to.have.property('package', 'test-plugin');
             expect(settings).to.have.property('version', 'v1.0.1');
           });
 
-          it('should not allow one part to the install parameter', function () {
-            options.install = 'test-plugin';
+          it('should not allow zero parts to the install parameter', function () {
+            options.install = '';
             parser = settingParser(options);
 
-            expect(parser.parse).withArgs().to.throwError(/Invalid install option. Please use the format <org>\/<plugin>\/<version>./);
+            expect(parser.parse).withArgs().to.throwError(/Invalid install option. Please use the format <plugin>\/<version>./);
           });
 
-          it('should not allow more than three parts to the install parameter', function () {
-            options.install = 'kibana/test-plugin/v1.0.1/dummy';
+          it('should not allow more than 2 parts to the install parameter', function () {
+            options.install = 'test-plugin/v1.0.1/dummy';
             parser = settingParser(options);
 
             expect(parser.parse).withArgs().to.throwError(/Invalid install option. Please use the format <org>\/<plugin>\/<version>./);
           });
 
           it('should populate the urls collection properly when no version specified', function () {
-            options.install = 'kibana/test-plugin';
+            options.install = 'test-plugin';
             parser = settingParser(options);
 
             var settings = parser.parse();
 
             expect(settings.urls).to.have.property('length', 1);
-            expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-latest.tar.gz');
+            expect(settings.urls).to.contain('https://download.elastic.co/elasticsearch/test-plugin/test-plugin-latest.tar.gz');
           });
 
           it('should populate the urls collection properly version specified', function () {
-            options.install = 'kibana/test-plugin/v1.1.1';
+            options.install = 'test-plugin/v1.1.1';
             parser = settingParser(options);
 
             var settings = parser.parse();
