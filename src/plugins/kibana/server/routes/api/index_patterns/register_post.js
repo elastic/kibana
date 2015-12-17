@@ -24,7 +24,7 @@ module.exports = function registerPost(server) {
 
       if (!_.isEmpty(templateResource)) {
         addMappingInfoToPatternFields(indexPattern, templateResource.attributes);
-        indexPattern.template_id = templateResource.id;
+        indexPattern.templateId = templateResource.id;
       }
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);

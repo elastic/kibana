@@ -28,11 +28,11 @@ module.exports = function getIndexPatterns(boundCallWithRequest, shouldIncludeTe
       }
 
       let relationshipsObject;
-      if (patternHit._source.template_id) {
+      if (patternHit._source.templateId) {
         relationshipsObject = {
-          template: createRelationshipObject('index_templates', patternHit._source.template_id)
+          template: createRelationshipObject('index_templates', patternHit._source.templateId)
         };
-        delete patternHit._source.template_id;
+        delete patternHit._source.templateId;
       }
       const snakeAttributes = convertToSnakeCase(patternHit._source);
       return createResourceObject('index_patterns', patternHit._id, snakeAttributes, relationshipsObject);
