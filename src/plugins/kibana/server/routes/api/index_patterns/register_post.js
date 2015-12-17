@@ -15,10 +15,6 @@ module.exports = function registerPost(server) {
       }
     },
     handler: function (req, reply) {
-      if (_.isEmpty(req.payload)) {
-        return reply(Boom.badRequest('Payload required'));
-      }
-
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const requestDocument = _.cloneDeep(req.payload);
       const included = requestDocument.included;
@@ -46,17 +42,16 @@ module.exports = function registerPost(server) {
           return patternResponse;
         }
 
-        return callWithRequest(req, 'indices.exists', {index: indexPattern.title})
+        return callWithRequest(req, 'indices.exists', {index: indexPatternId})
         .then((matchingIndices) => {
           if (matchingIndices) {
             throw Boom.conflict('Cannot create an index template if existing indices already match index pattern');
           }
 
           const templateParams = {
-            order: templateResource.attributes.order,
             create: true,
             name: templateResource.id,
-            body: _.omit(templateResource.attributes, 'order')
+            body: templateResource.attributes
           };
 
           return callWithRequest(req, 'indices.putTemplate', templateParams);
@@ -77,7 +72,7 @@ module.exports = function registerPost(server) {
         });
       })
       .then(() => {
-        reply('success').statusCode = 201;
+        reply('success').code(201);
       })
       .catch(function (error) {
         reply(handleESError(error));

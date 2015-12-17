@@ -14,10 +14,6 @@ module.exports = function registerPut(server) {
       }
     },
     handler: function (req, reply) {
-      if (_.isEmpty(req.payload)) {
-        return reply(Boom.badRequest('Payload required'));
-      }
-
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const indexPatternResource = _.cloneDeep(req.payload);
       const indexPatternId = indexPatternResource.data.id;
