@@ -34,3 +34,25 @@ from previous versions of Kibana.
 * {k4issue}4816[Issue 4816]: Improves history limit setting to clear past history.
 * {k4issue}4670[Issue 4670]: Fixes issue with range aggregation.
 * {k4issue}4244[Issue 4244]: Fixes issue with pie chart labels.
+
+[float]
+=== Kibana 4.2.2
+
+* Fixes XSS vulnerability (CVE pending) - Thanks to Vladimir Ivanov for responsibly reporting.
+* {k4pull}5078[Pull Request 5078]: Fixes broken links when copying examples from URL formatter.
+* {k4pull}5288[Pull Request 5288]: Fixes compatibility issue with large result sets in Elasticsearch 2.1.
+* {k4pull}5337[Pull Request 5337]: Allow base path to be configured for reverse proxies.
+* {k4pull}5398[Pull Request 5398]: Fixes incorrect sorting on bar charts in some situations.
+* {k4pull}5418[Pull Request 5418]: Fixes fatal error in Firefox when attempting to overwrite an index pattern.
+* {k4pull}5460[Pull Request 5460]: Fixes a caching issue when creating new index patterns.
+* {k4pull}5509[Pull Request 5509]: Prevents exception on discover panel when using non-time-based patterns.
+* {k4pull}5525[Pull Request 5525]: Non-standard cookie format no longer causes fatal error.
+* {k4pull}5536[Pull Request 5536]: Fixes broken image links on URL formatter.
+* {k4pull}5542[Pull Request 5542]: Uses a modern cipher list for TLS.
+* {k4pull}5560[Pull Request 5560]: Removes brushing ability when dealing with non-time-based indices.
+* {k4pull}5572[Pull Request 5572]: Improves Elasticsearch version verification.
+* {k4pull}5582[Pull Request 5582]: No longer relabels legend when only one series exists.
+* {k4pull}5586[Pull Request 5586]: Fixes fatal error when trying to "export all" on large datasets.
+* {k4pull}5587[Pull Request 5587]: Fixes xsrf-token-related fatal error when server restarts.
+* {k4pull}5598[Pull Request 5598]: Allows passing node flags via NODE_OPTIONS.
+* {k4pull}5603[Pull Request 5603]: Bump node.js version from 0.12.7 to 0.12.9 due to security fixes in node.
