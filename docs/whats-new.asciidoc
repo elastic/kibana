@@ -32,3 +32,13 @@ years.
 fields.
 * {k4pull}3671[Pull Request 3671]: Tile maps now support latitude/longitude filtering.
 * {k4pull}3800[Pull Request 3800]: You can now pause auto-refresh on a dashboard.
+
+
+[float]
+=== Kibana 4.1.4
+
+* Fixes XSS vulnerability (CVE pending) - Thanks to Vladimir Ivanov for responsibly reporting.
+* {k4pull}5418[Pull Request 5418]: Fixes fatal error in Firefox when attempting to overwrite an index pattern.
+* {k4pull}5509[Pull Request 5509]: Prevents exception on discover panel when using non-time-based patterns.
+* {k4pull}5576[Pull Request 5576]: Improves Elasticsearch version verification.
+* {k4pull}5603[Pull Request 5639]: Fixes xsrf-token-related fatal error when server restarts.
