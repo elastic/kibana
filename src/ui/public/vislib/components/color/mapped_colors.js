@@ -38,11 +38,8 @@ define((require) => (Private, config) => {
         if (this.get(key) == null) keysToMap.push(key);
       });
 
-      // Generate a color palette big enough that all new keys can have unique color values
-      const allColors = _(this.mapping).values().union(configColors).value();
-      const colorPalette = createColorPalette(allColors.length + keysToMap.length);
-      const newColors = _.difference(colorPalette, allColors);
-      _.merge(this.mapping, _.zipObject(keysToMap, newColors));
+      const colorPalette = createColorPalette(keysToMap.length);
+      _.merge(this.mapping, _.zipObject(keysToMap, colorPalette));
     }
   }
 
