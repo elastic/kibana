@@ -1,4 +1,4 @@
-<div class="input-group">
+<!-- <div class="input-group">
   <input
     ng-model="formattedUrl"
     type="text"
@@ -18,4 +18,43 @@
     ng-click="copyToClipboard()">
     <span aria-hidden="true" class="fa fa-clipboard"></span>
   </button>
+</div> -->
+
+<div class="input-group">
+  <dropdown-button></dropdown-button>
+<!--   <button
+    class="link-button active"
+    ng-click="toggle()"
+    ng-show="toggleValue"
+    tooltip="Link to saved {{$parent.objectType}}">
+    Current URL
+    <span aria-hidden="true" class="fa fa-caret-down"></span>
+  </button> -->
+  <button
+    class="shorten-button"
+    tooltip="Generate Short URL"
+    ng-click="generateShortUrl()"
+    ng-disabled="shortGenerated">
+    <span aria-hidden="true" class="fa fa-compress"></span>
+  </button>
+  <input
+    ng-model="formattedUrl"
+    type="text"
+    readonly=""
+    class="form-control url">
+  </input>
+  <button
+    class="link-button"
+    ng-click="toggle()"
+    ng-show="!toggleValue"
+    tooltip="Link to current URL">
+    <span aria-hidden="true" class="fa fa-link"></span>
+  </button>
+  <button
+    class="clipboard-button"
+    tooltip="Copy to Clipboard"
+    ng-click="copyToClipboard()">
+    <span aria-hidden="true" class="fa fa-clipboard"></span>
+  </button>
 </div>
+

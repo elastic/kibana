@@ -50,6 +50,11 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
         $scope.shortGenerated = false;
       }
 
+      $scope.toggleValue = true;
+      $scope.toggle = function () {
+        $scope.toggleValue = !$scope.toggleValue;
+      };
+
       $scope.shareAsEmbed = $scope.getShareAsEmbed();
 
       $scope.generateShortUrl = function () {
