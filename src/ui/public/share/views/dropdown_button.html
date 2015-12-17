@@ -1,0 +1,47 @@
+<button
+  class="button toggle-button"
+  ng-click="toggle($event)"
+  ng-class="{active:dropdownVisible}">
+  {{ currentValue.title }}
+  <span aria-hidden="true" class="fa fa-caret-down"></span>
+</button>
+<div
+  class="dropdown-button-panel"
+  ng-show="dropdownVisible"
+  ng-style="dropdownStyle"
+  ng-click="dropdownClick($event, 'test')">
+  <div class="heading">
+    <div class="heading-text">
+      <span>Choose the type of URL to share</span>
+    </div>
+    <button ng-click="hideDropdown()">
+      <span aria-hidden="true" class="fa fa-close"></span>
+    </button>
+  </div>
+  <div
+    ng-repeat="option in options"
+    class="item-wrapper option"
+    ng-click="setValue(option);">
+    <div class="item-icon-col">
+      <span
+        ng-show="currentValue === option"
+        aria-hidden="true"
+        class="fa fa-check">
+      </span>
+    </div>
+    <div class="item-description-col">
+      <div class="title">{{ option.title }}</div>
+      <div class="description">{{ option.description }}</div>
+    </div>
+  </div>
+  <div class="item-wrapper help">
+    <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html#sharing-dashboards" target="blank">
+      <div class="item-icon-col">
+        <span aria-hidden="true" class="fa fa-question-circle"></span>
+      </div>
+      <span class="item-description-col">
+        Learn more about shared URLs
+      </span>
+    </a>
+  </div>
+</div>

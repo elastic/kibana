@@ -1,0 +1,92 @@
+@share-object-dropdown-panel-bg: #FFF;
+@share-object-dropdown-panel-border: #CCC;
+@share-object-dropdown-heading-bg: #EEE;
+@share-object-dropdown-item-border: #DDD;
+@share-object-dropdown-item-description-color: #999;
+@share-object-dropdown-option-hover-bg: #CCC;
+@share-object-dropdown-option-hover-color: #FFF;
+
+dropdown-button {
+  position: relative;
+  display: inline-block;
+
+  .toggle-button {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    font-weight: bold;
+  }
+
+  .dropdown-button-panel {
+    z-index: 100;
+    border: 1px solid;
+    border-color: @share-object-dropdown-panel-border;
+    width: 400px;
+    top: 35px;
+    position: absolute;
+    background: @share-object-dropdown-panel-bg;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+
+    .heading {
+      display: flex;
+      background-color: @share-object-dropdown-heading-bg;
+      cursor: default;
+
+      &-text {
+        padding: 5px;
+        width:100%;
+
+        span {
+          font-weight: bold;
+        }
+      }
+
+      button {
+        background-color: transparent;
+
+        span {
+          width: auto;
+        }
+      }
+    }
+  }
+
+  .item-wrapper {
+    display: flex;
+    padding: 5px;
+    border-top: 1px solid;
+    border-top-color: @share-object-dropdown-item-border;
+
+    .title {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .description {
+      color: @share-object-dropdown-item-description-color;
+    }
+
+    &.option:hover {
+      background-color: @share-object-dropdown-option-hover-bg;
+      color: @share-object-dropdown-option-hover-color;
+
+      .description {
+        color: @share-object-dropdown-option-hover-color;
+      }
+    }
+
+    .item-icon-col {
+      width: 20px;
+    }
+
+    .item-description-col {
+      width: 100%;
+    }
+  }
+
+  .item-wrapper.help {
+    a {
+      display: flex;
+      width: 100%;
+    }
+  }
+}
