@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Private, $rootScope, getAppState, globalState) {
+  return function (Private, $rootScope, getAppState, globalState, config) {
     var EventEmitter = Private(require('ui/events'));
     var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
     var onlyStateChanged = require('ui/filter_bar/lib/onlyStateChanged');
@@ -33,13 +33,26 @@ define(function (require) {
 
     /**
      * Adds new filters to the scope and state
-     * @param {object|array} fitlers Filter(s) to add
-     * @param {bool} global Should be added to global state
-     * @retuns {Promise} filter map promise
+     * @param {object|array} filters Filter(s) to add
+     * @param {bool} global Whether the filter should be added to global state
+     * @returns {Promise} filter map promise
      */
     queryFilter.addFilters = function (filters, global) {
+
+      // Check if argument is passed or not
+      if (global === undefined) {
+
+        // Get and set the config default
+        var configDefault = config.get('filters:defaultGlobalState');
+
+        if (configDefault !== undefined) {
+          global = configDefault;
+        }
+      }
+
+      // Determine the state for the new filter
       var appState = getAppState();
-      var state = (global) ? globalState : appState;
+      var filterState = (global) ? globalState : appState;
 
       if (!_.isArray(filters)) {
         filters = [filters];
@@ -47,13 +60,11 @@ define(function (require) {
 
       return mapAndFlattenFilters(filters)
       .then(function (filters) {
-        if (global) {
-          // simply concat global filters, they will be deduped
-          globalState.filters = globalState.filters.concat(filters);
-        } else if (appState) {
-          if (!appState.filters) appState.filters = [];
-          appState.filters = appState.filters.concat(filters);
+        if (!filterState.filters) {
+          filterState.filters = [];
         }
+
+        filterState.filters = filterState.filters.concat(filters);
       });
     };
 

@@ -200,7 +200,11 @@ define(function (require) {
       },
       'dashboard:defaultDarkTheme': {
         value: false,
-        description: 'New dashboards use dark theme by default',
+        description: 'New dashboards use dark theme by default'
+      },
+      'filters:defaultGlobalState': {
+        value: false,
+        description: 'Whether the filters should have a global state (be pinned) by default'
       }
     };
   };
