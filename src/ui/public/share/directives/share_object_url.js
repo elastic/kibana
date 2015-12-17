@@ -21,18 +21,22 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       $scope.clipboardButton = $el.find('button.clipboard-button')[0];
 
       const clipboard = new Clipboard($scope.clipboardButton, {
-        target: function (trigger) {
+        target(trigger) {
           return $scope.textbox;
         }
       });
 
-      clipboard.on('success', function (e) {
+      clipboard.on('success', e => {
         notify.info('URL copied to clipboard.');
         e.clearSelection();
       });
 
-      clipboard.on('error', function (e) {
+      clipboard.on('error', () => {
         notify.info('URL selected. Press Ctrl+C to copy.');
+      });
+
+      $scope.$on('$destroy', () => {
+        clipboard.destroy();
       });
 
       $scope.clipboard = clipboard;

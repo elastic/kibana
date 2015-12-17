@@ -17,7 +17,7 @@ export default function (server) {
         }
       });
     } catch (err) {
-      console.log('Warning: Error updating url metadata', err);
+      server.log('Warning: Error updating url metadata', err);
       //swallow errors. It isn't critical if there is no update.
     }
   }
