@@ -51,10 +51,12 @@ module.exports = function getIndexPatterns(boundCallWithRequest, shouldIncludeTe
       }
     });
 
-    return Promise.map(Array.from(templateIdSet), (templateId) => {
-      return boundCallWithRequest('indices.getTemplate', {name: templateId})
-      .then((template) => {
-        return createResourceObject('index_templates', templateId, template[templateId]);
+    const commaDelimitedTemplateIds = Array.from(templateIdSet).join(',');
+
+    return boundCallWithRequest('indices.getTemplate', {name: commaDelimitedTemplateIds})
+    .then((templates) => {
+      return _.map(templates, (template, templateId) => {
+        return createResourceObject('index_templates', templateId, template);
       });
     })
     .then((templates) => {
