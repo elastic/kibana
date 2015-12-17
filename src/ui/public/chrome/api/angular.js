@@ -1,7 +1,6 @@
 var $ = require('jquery');
 var _ = require('lodash');
 
-require('../appSwitcher');
 var modules = require('ui/modules');
 var ConfigTemplate = require('ui/ConfigTemplate');
 require('ui/directives/config');
@@ -71,6 +70,8 @@ module.exports = function (chrome, internals) {
         }
       };
     });
+
+    require('../directives')(chrome, internals);
 
     modules.link(kibana);
   };
