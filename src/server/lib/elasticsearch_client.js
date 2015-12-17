@@ -6,6 +6,7 @@ var fs = require('fs');
 var util = require('util');
 var url = require('url');
 var AWS = require('aws-sdk');
+var Promise = require('bluebird');
 var uri = url.parse(config.elasticsearch);
 if (config.kibana.kibana_elasticsearch_username && config.kibana.kibana_elasticsearch_password) {
   uri.auth = util.format('%s:%s', config.kibana.kibana_elasticsearch_username, config.kibana.kibana_elasticsearch_password);
@@ -38,7 +39,7 @@ var options = {
   }
 };
 
-if (config.kibana.transport == "AWS") {
+if(config.kibana.transport == "AWS") {
   options.connectionClass = require('http-aws-es');
   options.amazonES = {
     region: config.kibana.region,
@@ -46,4 +47,4 @@ if (config.kibana.transport == "AWS") {
   };
 }
 
-module.exports = new elasticsearch.Client(options);
+module.exports = function() { new elasticsearch.Client(options) };
