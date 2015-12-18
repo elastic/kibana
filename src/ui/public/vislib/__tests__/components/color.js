@@ -137,7 +137,7 @@ describe('Vislib Color Module Test Suite', function () {
       config.set('visualization:colorMapping', previousConfig);
     }));
 
-    it('should properly map keys to unique colors', ngMock.inject((config) => {
+    it('should properly map keys to colors', ngMock.inject((config) => {
       config.set('visualization:colorMapping', {});
 
       const arr = [1, 2, 3, 4, 5];
