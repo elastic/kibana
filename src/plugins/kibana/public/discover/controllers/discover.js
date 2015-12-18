@@ -11,7 +11,6 @@ define(function (require) {
   require('ui/doc_table');
   require('ui/visualize');
   require('ui/notify');
-  require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
   require('ui/filters/moment');
