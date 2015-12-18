@@ -12,9 +12,9 @@ module.exports = function (server) {
   return client.nodes.info()
   .then(function (info) {
     var badNodes = _.filter(info.nodes, function (node) {
-      // remove client nodes (Logstash)
-      var isClient = _.get(node, 'attributes.client');
-      if (isClient != null && esBool(isClient) === true) {
+      // remove client (non-master and non-data) nodes from the check
+      var attrs = _.get(node, 'attributes');
+      if (attrs && !esBool(attrs.master) && !esBool(attrs.data)) {
         return false;
       }
 

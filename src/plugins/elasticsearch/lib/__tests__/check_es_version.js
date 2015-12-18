@@ -74,7 +74,7 @@ describe('plugins/elasticsearch', function () {
     it('passes if that single node is a client node', function () {
       setNodes(
         '1.4.4',
-        { version: '1.4.2', attributes: { client: 'true' } },
+        { version: '1.4.2', attributes: { data: 'false', master: 'false' } },
         '1.4.5'
       );
 
