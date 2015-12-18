@@ -149,7 +149,7 @@ define(function (require) {
       }
 
       // retrieve an instance from cache or create and store on
-      function get(id, prov, $delegateProv, $delegateId) {
+      function get(id, prov, $delegateId, $delegateProv) {
         if (cache[id]) return cache[id];
 
         var instance;
