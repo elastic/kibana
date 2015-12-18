@@ -9,7 +9,7 @@ define(function (require) {
     var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
 
     function fetchQueued(strategy) {
-      var requests = requestQueue.get(strategy);
+      var requests = requestQueue.getStartable(strategy);
       if (!requests.length) return Promise.resolve();
       else return fetchThese(requests);
     }

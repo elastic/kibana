@@ -1,7 +1,7 @@
 const utils = require('requirefrom')('src/utils');
 const fromRoot = utils('fromRoot');
 const settingParser = require('./settingParser');
-const installer = require('./pluginInstaller');
+const installer = require('./plugin_installer');
 const remover = require('./pluginRemover');
 const pluginLogger = require('./pluginLogger');
 

@@ -21,9 +21,10 @@ module.exports = function (chrome, internals) {
     .value('sessionId', Date.now())
     .value('esUrl', (function () {
       var a = document.createElement('a');
-      a.href = '/elasticsearch';
+      a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
+    .config(chrome.$setupXsrfRequestInterceptor)
     .directive('kbnChrome', function ($rootScope) {
       return {
         template: function ($el) {

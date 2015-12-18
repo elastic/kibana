@@ -39,7 +39,7 @@ describe('plugins/elasticsearch', function () {
         nodes: {
           'node-01': {
             version: '1.5.0',
-            http_address: 'inet[/127.0.0.1:9200]',
+            http_address: 'inet[/127.0.0.1:9210]',
             ip: '127.0.0.1'
           }
         }
@@ -55,7 +55,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster green if everything is ready', function () {
-      get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
+      get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.returns(Promise.resolve());
       client.cluster.health.returns(Promise.resolve({ timed_out: false, status: 'green' }));
@@ -73,8 +73,8 @@ describe('plugins/elasticsearch', function () {
 
     it('should set the cluster red if the ping fails, then to green', function () {
 
-      get.withArgs('elasticsearch.url').returns('http://localhost:9200');
-      get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
+      get.withArgs('elasticsearch.url').returns('http://localhost:9210');
+      get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.onCall(0).returns(Promise.reject(new NoConnections()));
       client.ping.onCall(1).returns(Promise.resolve());
@@ -85,7 +85,7 @@ describe('plugins/elasticsearch', function () {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
           expect(plugin.status.red.args[0][0]).to.be(
-            'Unable to connect to Elasticsearch at http://localhost:9200. Retrying in 2.5 seconds.'
+            'Unable to connect to Elasticsearch at http://localhost:9210. Retrying in 2.5 seconds.'
           );
           sinon.assert.calledTwice(client.ping);
           sinon.assert.calledOnce(client.nodes.info);
@@ -97,8 +97,8 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster red if the health check status is red, then to green', function () {
-      get.withArgs('elasticsearch.url').returns('http://localhost:9200');
-      get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
+      get.withArgs('elasticsearch.url').returns('http://localhost:9210');
+      get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.returns(Promise.resolve());
       client.cluster.health.onCall(0).returns(Promise.resolve({ timed_out: false, status: 'red' }));
@@ -120,8 +120,8 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster yellow if the health check timed_out and create index', function () {
-      get.withArgs('elasticsearch.url').returns('http://localhost:9200');
-      get.withArgs('elasticsearch.minimumVerison').returns('1.4.4');
+      get.withArgs('elasticsearch.url').returns('http://localhost:9210');
+      get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.returns(Promise.resolve());
       client.cluster.health.onCall(0).returns(Promise.resolve({ timed_out: true, status: 'red' }));

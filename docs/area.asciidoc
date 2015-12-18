@@ -68,3 +68,9 @@ values.
 this box to change both upper and lower bounds to match the values returned in the data.
 *Show Tooltip*:: Check this box to enable the display of tooltips.
 *Show Legend*:: Check this box to enable the display of a legend next to the chart.
+
+[float]
+[[area-viewing-detailed-information]]
+==== Viewing Detailed Information
+
+include::visualization-raw-data.asciidoc[]

@@ -18,14 +18,6 @@ index names that match the specified pattern.
 An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all 
 indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`. 
 
-If you use event times to create index names (for example, if you're pushing data into Elasticsearch from Logstash), 
-the index pattern can also contain a date format.
-In this case, the static text in the pattern must be enclosed in brackets, and you specify the date format using the 
-tokens described in <<date-format-tokens>>.
-
-For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended 
-to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
-
 An index pattern can also simply be the name of a single index.
 
 To create an index pattern to connect to Elasticsearch:
@@ -43,15 +35,16 @@ list.
 contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index 
 mapping to list all of the fields that contain a timestamp.
 
-. If new indices are generated periodically and have a timestamp appended to the name, select the *Use event times to 
-create index names* option and select the *Index pattern interval*. This enables Kibana to search only those indices 
-that could possibly contain data in the time range you specify. This is primarily applicable if you are using Logstash 
-to feed data into Elasticsearch.
-
 . Click *Create* to add the index pattern. 
 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite* 
 button. 
+
+To use an event time in an index name, enclose the static text in the pattern and specify the date format using the 
+tokens described in the following table.
+
+For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended 
+to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
 
 [float]
 [[date-format-tokens]]
@@ -155,6 +148,46 @@ the field's format from the *Format* drop-down. Format options vary based on the
 You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the 
 *Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
 
+Kibana has https://www.elastic.co/blog/kibana-4-1-field-formatters[field formatters] for the following field types:
+
+==== String Field Formatters
+
+String fields support the `String` and `Url` formatters.
+
+include::string-formatter.asciidoc[]
+
+include::url-formatter.asciidoc[]
+
+==== Date Field Formatters
+
+Date fields support the `Date`, `Url`, and `String` formatters.
+
+The `Date` formatter enables you to choose the display format of date stamps using the http://moment.js[moment.js]
+standard format definitions.
+
+include::string-formatter.asciidoc[]
+
+include::url-formatter.asciidoc[]
+
+==== Geographic Point Field Formatters
+
+Geographic point fields support the `String` formatter.
+
+include::string-formatter.asciidoc[]
+
+==== Numeric Field Formatters
+
+Numeric fields support the `Url`, `String`, `Bytes`, `Number`, `Percentage`, and `Color` formatters.
+
+include::string-formatter.asciidoc[]
+
+include::url-formatter.asciidoc[]
+
+include::color-formatter.asciidoc[]
+
+The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using 
+the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
+
 [float]
 [[create-scripted-field]]
 === Creating a Scripted Field
@@ -215,12 +248,9 @@ To delete a scripted field:
 
 [[advanced-options]]
 === Setting Advanced Options
-The Advanced Settings page enables you to directly edit settings that control the behavior of the Kibana application. 
+The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application. 
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision 
 for displayed decimal values. 
-
-WARNING: Changing advanced settings can have unintended consequences. If you aren't sure what you're doing, it's best 
-to leave these settings as-is.
 
 To set advanced options:
 
@@ -229,62 +259,7 @@ To set advanced options:
 . Enter a new value for the option. 
 . Click the *Save* button.
 
-[float]
-[[managing-saved-objects]]
-=== Managing Saved Searches, Visualizations, and Dashboards 
-
-You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
-export or import sets of searches, visualizations, and dashboards.
-
-Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved 
-object:
-
-. Go to *Settings > Objects*.
-. Select the object you want to view. 
-. Click the *View* button.
-
-Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add 
-a description, and modify the JSON that defines the object's properties. 
-
-If you attempt to access an object whose index has been deleted, Kibana displays its Edit Object page. You can:
-
-* Recreate the index so you can continue using the object.  
-* Delete the object and recreate it using a different index.
-* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing 
-index pattern. This is useful if the index you were working with has been renamed. 
-
-WARNING: No validation is performed for object properties. Submitting invalid changes will render the object unusable. 
-Generally, you should use the *Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of directly 
-editing existing ones. 
-
-To edit a saved object:
-
-. Go to *Settings > Objects*.
-. Select the object you want to edit. 
-. Click the *Edit* button.
-. Make your changes to the object definition.
-. Click the *Save Object* button.
-
-To delete a saved object:
-
-. Go to *Settings > Objects*.
-. Select the object you want to delete. 
-. Click the *Delete* button.
-. Confirm that you really want to delete the object.
-
-To export a set of objects:
-
-. Go to *Settings > Objects*.
-. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations. 
-. Click the selection box for the objects you want to export, or click the *Select All* box.
-. Click *Export* to select a location to write the exported JSON.
-
-To import a set of objects:
-
-. Go to *Settings > Objects*.
-. Click *Import* to navigate to the JSON file representing the set of objects to import.
-. Click *Open* after selecting the JSON file.
-. If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
+include::advanced-settings.asciidoc[]
 
 [[kibana-server-properties]]
 === Setting Kibana Server Properties
@@ -296,7 +271,7 @@ you'll need to update your `kibana.yml` file. You can also enable SSL and set a 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
 [horizontal]
-.Kibana Server Properties
+.Kibana Server Properties Changed in the 4.2 Release
 `server.port` added[4.2]:: The port that the Kibana server runs on.
 +
 *alias*: `port` deprecated[4.2]
@@ -331,7 +306,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 
 `elasticsearch.password` added[4.2]:: This parameter specifies the password for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
 +
-*alias*: `kibana_elasticsearch_password` deprecated [4.2]
+*alias*: `kibana_elasticsearch_password` deprecated[4.2]
 
 `elasticsearch.username` added[4.2]:: This parameter specifies the username for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
 +
@@ -400,7 +375,8 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 + 
 *default*: `true`
 
-`elasticsearch.ssl.ca` added[4.2]:: The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise.
+`elasticsearch.ssl.ca`:: An array of paths to the CA certificates for your Elasticsearch instance. Specify if 
+you are using a self-signed certificate so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise.
 +
 *alias*: `ca` deprecated[4.2]
 
@@ -421,3 +397,60 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 `logging.dest` added[4.2]:: The location where you want to store the Kibana's log output. If not specified, log output is written to standard output and not stored. Specifying a log file suppresses log writes to standard output.
 +
 *alias*: `log_file` deprecated[4.2]
+
+[[managing-saved-objects]]
+=== Managing Saved Searches, Visualizations, and Dashboards 
+
+You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
+export or import sets of searches, visualizations, and dashboards.
+
+Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved 
+object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to view. 
+. Click the *View* button.
+
+Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add 
+a description, and modify the JSON that defines the object's properties. 
+
+If you attempt to access an object whose index has been deleted, Kibana displays its Edit Object page. You can:
+
+* Recreate the index so you can continue using the object.  
+* Delete the object and recreate it using a different index.
+* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing 
+index pattern. This is useful if the index you were working with has been renamed. 
+
+WARNING: No validation is performed for object properties. Submitting invalid changes will render the object unusable. 
+Generally, you should use the *Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of directly 
+editing existing ones. 
+
+To edit a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to edit. 
+. Click the *Edit* button.
+. Make your changes to the object definition.
+. Click the *Save Object* button.
+
+To delete a saved object:
+
+. Go to *Settings > Objects*.
+. Select the object you want to delete. 
+. Click the *Delete* button.
+. Confirm that you really want to delete the object.
+
+To export a set of objects:
+
+. Go to *Settings > Objects*.
+. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations. 
+. Click the selection box for the objects you want to export, or click the *Select All* box.
+. Click *Export* to select a location to write the exported JSON.
+
+To import a set of objects:
+
+. Go to *Settings > Objects*.
+. Click *Import* to navigate to the JSON file representing the set of objects to import.
+. Click *Open* after selecting the JSON file.
+. If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
+

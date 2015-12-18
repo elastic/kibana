@@ -1,8 +1,10 @@
 describe('ui/index_patterns/_calculate_indices', () => {
   const _ = require('lodash');
+  const pluck = require('lodash').pluck;
   const sinon = require('auto-release-sinon');
   const expect = require('expect.js');
   const ngMock = require('ngMock');
+  const moment = require('moment');
 
   let Promise;
   let $rootScope;
@@ -11,11 +13,13 @@ describe('ui/index_patterns/_calculate_indices', () => {
   let response;
   let config;
   let constraints;
+  let indices;
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     response = {
       indices: {
-        'mock-*': 'irrelevant, is ignored'
+        'mock-*': { fields: { '@something': {} } },
+        'ignore-*': { fields: {} }
       }
     };
 
@@ -36,9 +40,11 @@ describe('ui/index_patterns/_calculate_indices', () => {
   }));
 
   function run({ start = undefined, stop = undefined } = {}) {
-    calculateIndices('wat-*-no', '@something', start, stop);
+    calculateIndices('wat-*-no', '@something', start, stop).then(value => {
+      indices = pluck(value, 'index');
+    });
     $rootScope.$apply();
-    config = _.first(es.fieldStats.firstCall.args);
+    config = _.first(es.fieldStats.lastCall.args);
     constraints = config.body.index_constraints;
   }
 
@@ -68,6 +74,17 @@ describe('ui/index_patterns/_calculate_indices', () => {
       it('max_value is gte', () => {
         expect(constraints['@something'].max_value).to.have.property('gte');
       });
+      it('max_value is set to original if not a moment object', () => {
+        expect(constraints['@something'].max_value.gte).to.equal('1234567890');
+      });
+      it('max_value format is set to epoch_millis', () => {
+        expect(constraints['@something'].max_value.format).to.equal('epoch_millis');
+      });
+      it('max_value is set to moment.valueOf if given a moment object', () => {
+        const start = moment();
+        run({ start });
+        expect(constraints['@something'].max_value.gte).to.equal(start.valueOf());
+      });
     });
 
     context('when given stop', () => {
@@ -78,6 +95,25 @@ describe('ui/index_patterns/_calculate_indices', () => {
       it('min_value is lte', () => {
         expect(constraints['@something'].min_value).to.have.property('lte');
       });
+      it('min_value is set to original if not a moment object', () => {
+        expect(constraints['@something'].min_value.lte).to.equal('1234567890');
+      });
+      it('min_value format is set to epoch_millis', () => {
+        expect(constraints['@something'].min_value.format).to.equal('epoch_millis');
+      });
+      it('max_value is set to moment.valueOf if given a moment object', () => {
+        const stop = moment();
+        run({ stop });
+        expect(constraints['@something'].min_value.lte).to.equal(stop.valueOf());
+      });
+    });
+  });
+
+  describe('response filtering', () => {
+    it('filters out any indices that have empty fields', () => {
+      run();
+      expect(_.includes(indices, 'mock-*')).to.be(true);
+      expect(_.includes(indices, 'ignore-*')).to.be(false);
     });
   });
 
@@ -95,29 +131,13 @@ describe('ui/index_patterns/_calculate_indices', () => {
         };
 
         return calculateIndices('*', 'time', null, null).then(function (resp) {
-          expect(resp).to.eql(['c', 'a', 'b']);
-        });
-      });
-    });
-
-    context('when sorting desc', function () {
-      it('returns the indices in max_value order', function () {
-        response = {
-          indices: {
-            c: { fields: { time: { max_value: 10 } } },
-            a: { fields: { time: { max_value: 15 } } },
-            b: { fields: { time: { max_value: 1 } } },
-          }
-        };
-
-        return calculateIndices('*', 'time', null, null, 'desc').then(function (resp) {
-          expect(resp).to.eql(['a', 'c', 'b']);
+          expect(pluck(resp, 'index')).to.eql(['c', 'a', 'b']);
         });
       });
     });
 
     context('when sorting asc', function () {
-      it('returns the indices in min_value order', function () {
+      it('resolves to an array of objects, each with index, start, and end properties', function () {
         response = {
           indices: {
             c: { fields: { time: { max_value: 10, min_value: 9 } } },
@@ -127,7 +147,55 @@ describe('ui/index_patterns/_calculate_indices', () => {
         };
 
         return calculateIndices('*', 'time', null, null, 'asc').then(function (resp) {
-          expect(resp).to.eql(['b', 'a', 'c']);
+          expect(resp).to.eql([
+            {
+              index: 'b',
+              min: 0,
+              max: 1
+            },
+            {
+              index: 'a',
+              min: 5,
+              max: 15
+            },
+            {
+              index: 'c',
+              min: 9,
+              max: 10
+            }
+          ]);
+        });
+      });
+    });
+
+    context('when sorting desc', function () {
+      it('resolves to an array of objects, each with index, min, and max properties', function () {
+        response = {
+          indices: {
+            c: { fields: { time: { max_value: 10, min_value: 9 } } },
+            a: { fields: { time: { max_value: 15, min_value: 5 } } },
+            b: { fields: { time: { max_value: 1, min_value: 0 } } },
+          }
+        };
+
+        return calculateIndices('*', 'time', null, null, 'desc').then(function (resp) {
+          expect(resp).to.eql([
+            {
+              index: 'a',
+              max: 15,
+              min: 5
+            },
+            {
+              index: 'c',
+              max: 10,
+              min: 9
+            },
+            {
+              index: 'b',
+              max: 1,
+              min: 0
+            },
+          ]);
         });
       });
     });

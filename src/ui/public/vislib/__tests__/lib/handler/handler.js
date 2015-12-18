@@ -26,6 +26,7 @@ dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
     var Handler;
     var vis;
+    var persistedState;
     var events = [
       'click',
       'brush'
@@ -35,7 +36,8 @@ dateHistogramArray.forEach(function (data, i) {
     beforeEach(ngMock.inject(function (Private) {
       Handler = Private(require('ui/vislib/lib/handler/handler'));
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      vis.render(data);
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      vis.render(data, persistedState);
     }));
 
     afterEach(function () {

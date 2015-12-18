@@ -5,8 +5,9 @@ let path = require('path');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
+const randomBytes = require('crypto').randomBytes;
 
-module.exports = Joi.object({
+module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
@@ -29,6 +30,7 @@ module.exports = Joi.object({
     port: Joi.number().default(5601),
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string(),
+    basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
       cert: Joi.string(),
       key: Joi.string()
@@ -39,7 +41,11 @@ module.exports = Joi.object({
         origin: ['*://localhost:9876'] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
-    })
+    }),
+    xsrf: Joi.object({
+      disableProtection: Joi.boolean().default(false),
+      token: Joi.string().optional().notes('Deprecated')
+    }).default(),
   }).default(),
 
   logging: Joi.object().keys({
@@ -106,4 +112,3 @@ module.exports = Joi.object({
   }).default()
 
 }).default();
-

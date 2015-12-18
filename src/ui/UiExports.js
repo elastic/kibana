@@ -4,9 +4,10 @@ var minimatch = require('minimatch');
 var UiAppCollection = require('./UiAppCollection');
 
 class UiExports {
-  constructor(kbnServer) {
+  constructor({ urlBasePath }) {
     this.apps = new UiAppCollection(this);
     this.aliases = {};
+    this.urlBasePath = urlBasePath;
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
     this.bundleProviders = [];
@@ -48,7 +49,10 @@ class UiExports {
       case 'apps':
         return (plugin, specs) => {
           for (let spec of [].concat(specs || [])) {
-            let app = this.apps.new(_.defaults({}, spec, { id: plugin.id }));
+            let app = this.apps.new(_.defaults({}, spec, {
+              id: plugin.id,
+              urlBasePath: this.urlBasePath
+            }));
             plugin.apps.add(app);
           }
         };
@@ -81,11 +85,7 @@ class UiExports {
 
     return _.chain(patterns)
     .map(function (pattern) {
-      var matches = names.filter(matcher(pattern));
-      if (!matches.length) {
-        throw new Error('Unable to find uiExports for pattern ' + pattern);
-      }
-      return matches;
+      return names.filter(matcher(pattern));
     })
     .flattenDeep()
     .reduce(function (found, name) {

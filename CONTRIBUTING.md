@@ -31,6 +31,8 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 - Start elasticsearch
 
+  Note: you need to have a java binary in `PATH` or set `JAVA_HOME`.
+
   ```sh
   npm run elasticsearch
   ```
@@ -100,8 +102,56 @@ The standard `npm run test` task runs several sub tasks and can take several min
     <br>
     <img src="http://i.imgur.com/DwHxgfq.png">
   </dd>
+
+  <dt><code>npm run mocha [test file or dir]</code> or <code>npm run mocha:debug [test file or dir]</code></dt>
+  <dd>
+    Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
+    for development and fixing individual tests.
+  </dd>
 </dl>
 
+### Functional UI Testing
+
+#### Handy references
+
+- https://theintern.github.io/
+- https://theintern.github.io/leadfoot/Element.html
+
+#### Running tests using npm task:
+
+*The Selenium server that is started currently only runs the tests in Firefox*
+
+To run the functional UI tests use the following commands
+
+<dl>
+
+  <dt><code>npm run test:ui</code></dt>
+  <dd>Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.</dd>
+
+  <dt><code>npm run test:ui:server</code></dt>
+  <dd>Start the server required for the <code>test:ui:runner</code> tasks. Once the server is started <code>test:ui:runner</code> can be run multiple times without waiting for the server to start.</dd>
+
+  <dt><code>npm run test:ui:runner</code></dt>
+  <dd>Execute the front-end selenium tests. This requires the server started by the <code>test:ui:server</code> task.</dd>
+
+</dl>
+
+#### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
+
+Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respecitively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
+
+Once you've got the services running, execute the following:
+
+```sh
+npm run test:ui:runner
+```
+
+#### General notes:
+
+- Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
+- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This gaurantees the same results each run.
+- These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
+- These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 
 ### Submit a pull request
 

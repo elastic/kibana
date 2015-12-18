@@ -18,10 +18,12 @@ define(function (require) {
      * @param data {Object} Elasticsearch query results
      * @param attr {Object|*} Visualization options
      */
-    function Data(data, attr) {
+    function Data(data, attr, uiState) {
       if (!(this instanceof Data)) {
-        return new Data(data, attr);
+        return new Data(data, attr, uiState);
       }
+
+      this.uiState = uiState;
 
       var self = this;
       var offset;
@@ -40,7 +42,7 @@ define(function (require) {
       this.type = this.getDataType();
 
       this.labels = this._getLabels(this.data);
-      this.color = this.labels ? color(this.labels) : undefined;
+      this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -646,7 +648,7 @@ define(function (require) {
      * @returns {Function} Performs lookup on string and returns hex color
      */
     Data.prototype.getColorFunc = function () {
-      return color(this.getLabels());
+      return color(this.getLabels(), this.uiState.get('vis.colors'));
     };
 
     /**
@@ -658,7 +660,7 @@ define(function (require) {
     Data.prototype.getPieColorFunc = function () {
       return color(this.pieNames(this.getVisData()).map(function (d) {
         return d.label;
-      }));
+      }), this.uiState.get('vis.colors'));
     };
 
     /**
@@ -668,16 +670,21 @@ define(function (require) {
      * @return {undefined}
      */
     Data.prototype._normalizeOrdered = function () {
-      if (!this.data.ordered || !this.data.ordered.date) return;
+      var data = this.getVisData();
+      var self = this;
 
-      var missingMin = this.data.ordered.min == null;
-      var missingMax = this.data.ordered.max == null;
+      data.forEach(function (d) {
+        if (!d.ordered || !d.ordered.date) return;
 
-      if (missingMax || missingMin) {
-        var extent = d3.extent(this.xValues());
-        if (missingMin) this.data.ordered.min = extent[0];
-        if (missingMax) this.data.ordered.max = extent[1];
-      }
+        var missingMin = d.ordered.min == null;
+        var missingMax = d.ordered.max == null;
+
+        if (missingMax || missingMin) {
+          var extent = d3.extent(self.xValues());
+          if (missingMin) d.ordered.min = extent[0];
+          if (missingMax) d.ordered.max = extent[1];
+        }
+      });
     };
 
     /**

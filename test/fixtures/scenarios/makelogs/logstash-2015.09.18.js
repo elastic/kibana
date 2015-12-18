@@ -1,4 +1,3 @@
-/*eslint-disable*/
 module.exports = [{
   'index': {
     '_index': 'logstash-2015.09.18',

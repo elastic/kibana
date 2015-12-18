@@ -31,8 +31,10 @@ dataTypesArray.forEach(function (dataType, i) {
 
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
     var vis;
+    var persistedState;
     var visLibParams = {
       type: 'histogram',
+      hasTimeField: true,
       addLegend: true,
       addTooltip: true,
       mode: mode
@@ -41,8 +43,9 @@ dataTypesArray.forEach(function (dataType, i) {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       vis.on('brush', _.noop);
-      vis.render(data);
+      vis.render(data, persistedState);
     }));
 
     afterEach(function () {
@@ -89,7 +92,7 @@ dataTypesArray.forEach(function (dataType, i) {
     describe('updateBars method', function () {
       beforeEach(function () {
         vis.handler._attr.mode = 'grouped';
-        vis.render(vis.data);
+        vis.render(vis.data, persistedState);
       });
 
       it('should returned grouped bars', function () {
@@ -183,7 +186,7 @@ dataTypesArray.forEach(function (dataType, i) {
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
         vis._attr.defaultYExtents = true;
-        vis.render(data);
+        vis.render(data, persistedState);
       });
 
       it('should return yAxis extents equal to data extents', function () {

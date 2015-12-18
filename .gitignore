@@ -10,6 +10,7 @@ target
 .idea
 *.iml
 *.log
+/test/output
 /esvm
 .htpasswd
 .eslintcache
@@ -20,3 +21,5 @@ config/kibana.dev.yml
 coverage
 selenium
 .babelcache.json
+*.swp
+*.swo
