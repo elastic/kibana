@@ -39,18 +39,15 @@ define(function (require) {
      */
     queryFilter.addFilters = function (filters, global) {
 
-      // Check if argument is passed or not
       if (global === undefined) {
-
-        // Get and set the config default
         var configDefault = config.get('filters:defaultGlobalState');
 
-        if (configDefault !== undefined) {
+        if (configDefault === false || configDefault === true) {
           global = configDefault;
         }
       }
 
-      // Determine the state for the new filter
+      // Determine the state for the new filter (whether to pass the filter through other apps or not)
       var appState = getAppState();
       var filterState = (global) ? globalState : appState;
 
