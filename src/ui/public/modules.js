@@ -19,11 +19,6 @@
  * Private modules are able to find any dependency, since they are injected using the
  * "kibana" module's injector.
  *
- * RECOMMENDATIONS:
- *  - just use the "kibana" module for everything
- *  - rely on js modules for modularity
- *  - use Private modules for everything except directives and filters
- *
  */
 define(function (require) {
   var angular = require('angular');
