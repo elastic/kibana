@@ -13,7 +13,7 @@ define(function (require) {
 
   bdd.describe('settings app', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = 120000;
+    this.timeout = config.timeouts.default;
 
     // on setup, we create an settingsPage instance
     // that we will use for all the tests

@@ -34,11 +34,11 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     expect(req._queueCreated).to.be(true);
   });
 
-  it('relies on indexPattern.toIndexList to generate queue', async function () {
+  it('relies on indexPattern.toDetailedIndexList to generate queue', async function () {
     const source = new MockSource();
     const ip = source.get('index');
     const indices = [1,2,3];
-    sinon.stub(ip, 'toIndexList').returns(Promise.resolve(indices));
+    sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve(indices));
 
     const req = new SegmentedReq(source);
     const output = await req._createQueue();
@@ -49,14 +49,14 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     const source = new MockSource();
     const ip = source.get('index');
     const req = new SegmentedReq(source);
-    sinon.stub(ip, 'toIndexList').returns(Promise.resolve([1,2,3]));
+    sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve([1,2,3]));
 
     req.setDirection('asc');
     await req._createQueue();
-    expect(ip.toIndexList.lastCall.args[2]).to.be('asc');
+    expect(ip.toDetailedIndexList.lastCall.args[2]).to.be('asc');
 
     req.setDirection('desc');
     await req._createQueue();
-    expect(ip.toIndexList.lastCall.args[2]).to.be('desc');
+    expect(ip.toDetailedIndexList.lastCall.args[2]).to.be('desc');
   });
 });

@@ -1,7 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var VisualizePage = require('../../../support/pages/VisualizePage');
   var expect = require('intern/dojo/node!expect.js');
@@ -113,10 +113,34 @@ define(function (require) {
         });
 
 
-        bdd.it('should show correct data', function pageHeader() {
+        bdd.it('should show correct chart', function pageHeader() {
 
           var remote = this.remote;
 
+          // this test only verifies the numerical part of this data
+          // it could also check the legend to verify the extensions
+          var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
+
+          return common.sleep(3000)
+          .then(function () {
+            return visualizePage.getLineChartData()
+            .then(function showData(data) {
+              var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+              for (var x = 0; x < data.length; x++) {
+                common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
+                  (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
+                  ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
+                expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+              }
+              common.debug('Done');
+            });
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should show correct data', function pageHeader() {
+
+          var remote = this.remote;
           var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
           return visualizePage.collapseChart()
@@ -130,28 +154,6 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show correct chart', function pageHeader() {
-
-          this.timeout = 60000;
-          var remote = this.remote;
-
-          // this test only verifies the numerical part of this data
-          // it could also check the legend to verify the extensions
-          var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
-
-          return visualizePage.getLineChartData()
-          .then(function showData(data) {
-            var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-            for (var x = 0; x < data.length; x++) {
-              common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
-                (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
-                ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-              expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
-            }
-            common.debug('Done');
-          })
-          .catch(common.handleError(this));
-        });
 
       });
     });

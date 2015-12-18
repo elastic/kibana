@@ -1,7 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var VisualizePage = require('../../../support/pages/VisualizePage');
   var expect = require('intern/dojo/node!expect.js');

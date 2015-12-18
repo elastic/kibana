@@ -70,7 +70,6 @@ define(function (require) {
       .findByPartialLinkText('Vertical bar chart')
       .click();
     },
-    //////////////////////////
 
     getChartTypeCount: function getChartTypeCount() {
       return this.remote
@@ -96,16 +95,6 @@ define(function (require) {
       });
     },
 
-    //
-    // clickTimepicker: function clickTimepicker() {
-    //   return this.remote
-    //   .setFindTimeout(defaultTimeout * 2)
-    //   .findByClassName('navbar-timepicker-time-desc')
-    //   .then(function (picker) {
-    //     return picker.click();
-    //   });
-    // },
-
     clickAbsoluteButton: function clickAbsoluteButton() {
       return this.remote
       .setFindTimeout(defaultTimeout * 2)
@@ -117,18 +106,16 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout * 2)
       .findByCssSelector('input[ng-model="absolute.from"]')
-      .type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-        '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-        '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
+      .clearValue()
+      .type(timeString);
     },
 
     setToTime: function setToTime(timeString) {
       return this.remote
       .setFindTimeout(defaultTimeout * 2)
       .findByCssSelector('input[ng-model="absolute.to"]')
-      .type('\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-        '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' +
-        '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + '\b' + timeString);
+      .clearValue()
+      .type(timeString);
     },
 
     clickGoButton: function clickGoButton() {
@@ -138,37 +125,12 @@ define(function (require) {
       .click();
     },
 
-
-    // setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
-    //   var self = this;
-    //   common.debug('--Clicking Absolute button');
-    //   return self.clickAbsoluteButton()
-    //   .then(function () {
-    //     common.debug('--Setting From Time : ' + fromTime);
-    //     return self.setFromTime(fromTime);
-    //   })
-    //   .then(function () {
-    //     common.debug('--Setting To Time : ' + toTime);
-    //     return self.setToTime(toTime);
-    //   })
-    //   .then(function () {
-    //     return self.clickGoButton();
-    //   });
-    // },
-
     collapseChart: function collapseChart() {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('div.visualize-show-spy > div > i')
       .click();
     },
-
-    // collapseTimepicker: function collapseTimepicker() {
-    //   return this.remote
-    //   .setFindTimeout(defaultTimeout)
-    //   .findByCssSelector('i.fa.fa-chevron-up')
-    //   .click();
-    // },
 
     getMetric: function getMetric() {
       return this.remote
@@ -642,8 +604,6 @@ define(function (require) {
       });
     },
 
-    // https://jbkflex.wordpress.com/2011/07/28/creating-a-svg-pie-chart-html5/
-    // http://www.w3.org/TR/SVG2/paths.html#PathDataEllipticalArcCommands
     getPieChartData: function getPieChartData() {
       var self = this.remote;
 
@@ -668,9 +628,6 @@ define(function (require) {
         return slices;
       });
     },
-
-
-
 
     getChartAreaWidth: function getChartAreaWidth() {
       return this.remote
@@ -714,7 +671,7 @@ define(function (require) {
           }
         });
       });
-    }
+    },
 
   };
 

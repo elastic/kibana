@@ -7,7 +7,7 @@ define(function (require) {
   var Common = require('../../../support/pages/Common');
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
 
   var chartTypeTest = require('./_chart_types');
   var areaChartTest = require('./_area_chart');
@@ -25,7 +25,7 @@ define(function (require) {
     var headerPage;
     var settingsPage;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = 120005;
+    this.timeout = config.timeouts.default;
 
     // on setup, we create an settingsPage instance
     // that we will use for all the tests

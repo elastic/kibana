@@ -15,7 +15,8 @@ var formatIds = [
   'color',
   'string',
   'url',
-  '_source'
+  '_source',
+  'truncate'
 ];
 
 module.exports = describe('conformance', function () {

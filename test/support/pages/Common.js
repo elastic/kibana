@@ -207,7 +207,7 @@ define(function (require) {
     },
 
     findTestSubject: function findTestSubject(selector) {
-      console.log('in findTestSubject: ' + selector);
+      this.debug('in findTestSubject: ' + selector);
       return this.remote.findByCssSelector(testSubjSelector(selector));
     }
   };

@@ -35,7 +35,7 @@ define(function (require) {
       ]
     });
 
-    intervals.toIndexList = function (format, interval, a, b) {
+    intervals.toIndexList = function (format, interval, a, b, sortDirection) {
       var bounds;
 
       // setup the range that the list will span, return two moment objects that
@@ -70,10 +70,24 @@ define(function (require) {
       // turn stop into milliseconds to that it's not constantly converted by the while condition
       var stop = range.shift().valueOf();
 
+      var add = sortDirection === 'desc' ? 'unshift' : 'push';
+
       while (start <= stop) {
-        indexList.push(start.format(format));
-        start.add(1, interval.name);
+        const index = start.format(format);
+        const next = moment(start).add(1, interval.name);
+        const bound = moment(next).subtract(1, 'ms');
+
+        const min = start.valueOf();
+        const max = bound.valueOf();
+        indexList[add]({
+          index: index,
+          min: min,
+          max: max
+        });
+
+        start = next;
       }
+
       return indexList;
     };
 

@@ -1,7 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var expect = require('intern/dojo/node!expect.js');
 
@@ -11,14 +11,12 @@ define(function (require) {
       var headerPage;
       var settingsPage;
       var discoverPage;
-      var remote;
 
       bdd.before(function () {
         common = new Common(this.remote);
         headerPage = new HeaderPage(this.remote);
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
-        remote = this.remote;
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 

@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/discover/saved_searches/_saved_search');
   require('ui/notify');
@@ -16,7 +17,10 @@ define(function (require) {
   });
 
   module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl) {
-
+    var scanner = new Scanner(es, {
+      index: kbnIndex,
+      type: 'search'
+    });
 
     var notify = createNotifier({
       location: 'Saved Searches'
@@ -30,6 +34,15 @@ define(function (require) {
       noun: 'Saved Search',
       nouns: 'saved searches'
     };
+
+
+    this.scanAll = function (queryString, pageSize = 1000) {
+      return scanner.scanAndMap(queryString, {
+        pageSize,
+        docCount: Infinity
+      }, (hit) => this.mapHits(hit));
+    };
+
 
     this.get = function (id) {
       return (new SavedSearch(id)).init();
@@ -46,8 +59,14 @@ define(function (require) {
       });
     };
 
+    this.mapHits = function (hit) {
+      var source = hit._source;
+      source.id = hit._id;
+      source.url = this.urlFor(hit._id);
+      return source;
+    };
+
     this.find = function (searchString, size = 100) {
-      var self = this;
       var body;
       if (searchString) {
         body = {
@@ -69,15 +88,10 @@ define(function (require) {
         body: body,
         size: size
       })
-      .then(function (resp) {
+      .then((resp) => {
         return {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(function (hit) {
-            var source = hit._source;
-            source.id = hit._id;
-            source.url = self.urlFor(hit._id);
-            return source;
-          })
+          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
       });
     };

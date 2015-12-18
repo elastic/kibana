@@ -1,7 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var VisualizePage = require('../../../support/pages/VisualizePage');
   var expect = require('intern/dojo/node!expect.js');
@@ -95,7 +95,6 @@ define(function (require) {
 
           var testSubName = 'DataTable';
           var vizName1 = 'Visualization ' + testSubName;
-          this.timeout = 60000;
 
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
@@ -119,7 +118,6 @@ define(function (require) {
           var expectedChartData = [ '0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
           '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
           ];
-          this.timeout = 60000;
 
           return visualizePage.getDataTableData()
           .then(function showData(data) {

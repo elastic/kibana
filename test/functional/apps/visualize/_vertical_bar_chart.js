@@ -1,7 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var VisualizePage = require('../../../support/pages/VisualizePage');
   var expect = require('intern/dojo/node!expect.js');
@@ -13,7 +13,7 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var visualizePage;
-      var remote;
+      // var remote;
       var fromTime;
       var toTime;
 
@@ -23,7 +23,7 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
+        // remote = this.remote;
         fromTime = '2015-09-19 06:31:44.000';
         toTime = '2015-09-23 18:31:44.000';
 
@@ -92,9 +92,8 @@ define(function (require) {
 
           var testSubName = 'VerticalBarChart';
           common.debug('Start of test' + testSubName + 'Visualization');
-          this.timeout = 60000;
           var vizName1 = 'Visualization ' + testSubName;
-          var remote = this.remote;
+          // var remote = this.remote;
 
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
@@ -120,7 +119,6 @@ define(function (require) {
 
         bdd.it('should show correct chart', function pageHeader() {
 
-          this.timeout = 60000;
           var expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
           ];
@@ -144,8 +142,6 @@ define(function (require) {
         bdd.it('should show correct data', function pageHeader() {
 
           var testSubName = 'VerticalBarChart';
-          this.timeout = 60000;
-
           // this is only the first page of the tabular data.
           var expectedChartData =  [ 'September 20th 2015, 00:00:00.000 37',
             'September 20th 2015, 03:00:00.000 202',

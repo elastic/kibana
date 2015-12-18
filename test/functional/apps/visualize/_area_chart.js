@@ -1,7 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
   var HeaderPage = require('../../../support/pages/HeaderPage');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/DiscoverPage');
   var VisualizePage = require('../../../support/pages/VisualizePage');
   var expect = require('intern/dojo/node!expect.js');
@@ -102,7 +102,6 @@ define(function (require) {
 
           var testSubName = 'AreaChart';
           var vizName1 = 'Visualization ' + testSubName;
-          this.timeout = 60000;
 
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
@@ -128,8 +127,6 @@ define(function (require) {
 
 
         bdd.it('should show correct data', function pageHeader() {
-
-          this.timeout = 60000;
 
           var expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
             'September 20th 2015, 03:00:00.000 202',
@@ -179,8 +176,6 @@ define(function (require) {
 
 
         bdd.it('should show correct chart', function pageHeader() {
-
-          this.timeout = 60000;
 
           var chartHeight = 0;
           var xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',

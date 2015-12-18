@@ -63,6 +63,7 @@ describe('No global chart settings', function () {
   var chart1;
   var chart2;
   var Vis;
+  var persistedState;
   var indexPattern;
   var buildHierarchicalData;
   var data1;
@@ -73,6 +74,7 @@ describe('No global chart settings', function () {
     chart1 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams1);
     chart2 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams2);
     Vis = Private(require('ui/Vis'));
+    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
 
@@ -98,8 +100,8 @@ describe('No global chart settings', function () {
     data1 = buildHierarchicalData(stubVis1, fixtures.threeTermBuckets);
     data2 = buildHierarchicalData(stubVis2, fixtures.threeTermBuckets);
 
-    chart1.render(data1);
-    chart2.render(data2);
+    chart1.render(data1, persistedState);
+    chart2.render(data2, persistedState);
   }));
 
   afterEach(function () {
@@ -157,6 +159,7 @@ aggArray.forEach(function (dataAgg, i) {
     };
     var vis;
     var Vis;
+    var persistedState;
     var indexPattern;
     var buildHierarchicalData;
     var data;
@@ -165,6 +168,7 @@ aggArray.forEach(function (dataAgg, i) {
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
       Vis = Private(require('ui/Vis'));
+      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
 
@@ -179,7 +183,7 @@ aggArray.forEach(function (dataAgg, i) {
 
       data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
 
-      vis.render(data);
+      vis.render(data, persistedState);
     }));
 
     afterEach(function () {

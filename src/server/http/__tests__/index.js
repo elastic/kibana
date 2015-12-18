@@ -4,7 +4,9 @@ import KbnServer from '../../KbnServer';
 describe('cookie validation', function () {
   let kbnServer;
   beforeEach(function () {
-    kbnServer = new KbnServer();
+    kbnServer = new KbnServer({
+      server: { autoListen: false }
+    });
     return kbnServer.ready();
   });
   afterEach(function () {

@@ -110,6 +110,8 @@ define(function (require) {
     }
 
     var $state = $scope.state = new AppState(getStateDefaults());
+    $scope.uiState = $state.makeStateful('uiState');
+
     function getStateDefaults() {
       return {
         query: $scope.searchSource.get('query') || '',
@@ -337,14 +339,15 @@ define(function (require) {
       }());
 
       var sortFn = null;
-      if (sortBy === 'non-time') {
+      if (sortBy !== 'implicit') {
         sortFn = new HitSortFn(sort[1]);
       }
 
       $scope.updateTime();
       if (sort[0] === '_score') segmented.setMaxSegments(1);
       segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
-      segmented.setSize(sortBy === 'time' ? $scope.opts.sampleSize : false);
+      segmented.setSortFn(sortFn);
+      segmented.setSize($scope.opts.sampleSize);
 
       // triggered when the status updated
       segmented.on('status', function (status) {
@@ -362,30 +365,30 @@ define(function (require) {
             return failure.index + failure.shard + failure.reason;
           });
         }
+      }));
 
-        var rows = $scope.rows;
+      segmented.on('mergedSegment', function (merged) {
+        $scope.mergedEsResp = merged;
+        $scope.hits = merged.hits.total;
+
         var indexPattern = $scope.searchSource.get('index');
 
-        // merge the rows and the hits, use a new array to help watchers
-        rows = $scope.rows = rows.concat(resp.hits.hits);
-
-        if (sortFn) {
-          notify.event('resort rows', function () {
-            rows.sort(sortFn);
-            rows = $scope.rows = rows.slice(0, totalSize);
-            $scope.fieldCounts = {};
-          });
-        }
+        // the merge rows, use a new array to help watchers
+        $scope.rows = merged.hits.hits.slice();
 
         notify.event('flatten hit and count fields', function () {
           var counts = $scope.fieldCounts;
+
+          // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
+          if (!counts || sortFn) counts = $scope.fieldCounts = {};
+
           $scope.rows.forEach(function (hit) {
-            // skip this work if we have already done it and we are NOT sorting.
-            // ---
+            // skip this work if we have already done it
+            if (hit.$$_counted) return;
+
             // when we are sorting results, we need to redo the counts each time because the
-            // "top 500" may change with each response
-            if (hit.$$_counted && !sortFn) return;
-            hit.$$_counted = true;
+            // "top 500" may change with each response, so don't mark this as counted
+            if (!sortFn) hit.$$_counted = true;
 
             var fields = _.keys(indexPattern.flattenHit(hit));
             var n = fields.length;
@@ -396,13 +399,6 @@ define(function (require) {
             }
           });
         });
-
-      }));
-
-      segmented.on('mergedSegment', function (merged) {
-        $scope.mergedEsResp = merged;
-        $scope.hits = merged.hits.total;
-
       });
 
       segmented.on('complete', function () {
@@ -489,6 +485,7 @@ define(function (require) {
       }
 
       $scope.vis = new Vis($scope.indexPattern, {
+        title: savedSearch.title,
         type: 'histogram',
         params: {
           addLegend: false,

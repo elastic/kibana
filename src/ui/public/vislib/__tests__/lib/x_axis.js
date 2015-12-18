@@ -8,6 +8,7 @@ var expect = require('expect.js');
 describe('Vislib xAxis Class Test Suite', function () {
   var XAxis;
   var Data;
+  var persistedState;
   var xAxis;
   var el;
   var fixture;
@@ -77,6 +78,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Data = Private(require('ui/vislib/lib/data'));
+    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
     XAxis = Private(require('ui/vislib/lib/x_axis'));
 
     el = d3.select('body').append('div')
@@ -86,7 +88,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     fixture = el.append('div')
       .attr('class', 'x-axis-div');
 
-    dataObj = new Data(data, {});
+    dataObj = new Data(data, {}, persistedState);
     xAxis = new XAxis({
       el: $('.x-axis-div')[0],
       xValues: dataObj.xValues(),
