@@ -39,11 +39,11 @@ define((require) => (Private, config) => {
       });
 
       const colorPalette = createColorPalette(keysToMap.length);
+      const mappedKeys = keysToMap.slice(0);
       _.merge(this.mapping, _.zipObject(keysToMap, colorPalette));
 
       // Need to remove any keys whose generated color matches the configColor
-      const mappedKeys = keysToMap.slice(0);
-      keysToMap.length = 0; // Reset the keysToMap array
+      keysToMap.length = 0;
 
       if (mappedKeys.length) this.mapKeys(mappedKeys);
     }
