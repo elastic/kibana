@@ -25,7 +25,7 @@ define(function (require) {
     var mapping = mappingSetup.expandShorthand({
       title: 'string',
       timeFieldName: 'string',
-      searchLiterally: 'boolean',
+      notExpandable: 'boolean',
       intervalName: 'string',
       fields: 'json',
       fieldFormatMap: {
@@ -197,7 +197,7 @@ define(function (require) {
           return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
         }
 
-        if (self.isWildcard() && self.hasTimeField() && !self.shouldSearchLiterally()) {
+        if (self.isWildcard() && self.hasTimeField() && self.canExpandIndices()) {
           return calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
         }
 
@@ -208,8 +208,8 @@ define(function (require) {
         };
       });
 
-      self.shouldSearchLiterally = function () {
-        return !!this.searchLiterally;
+      self.canExpandIndices = function () {
+        return !this.notExpandable;
       };
 
       self.hasTimeField = function () {
