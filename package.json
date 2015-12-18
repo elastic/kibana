@@ -85,6 +85,7 @@
     "bootstrap": "3.3.5",
     "brace": "0.5.1",
     "bunyan": "1.4.0",
+    "clipboard": "1.5.5",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",

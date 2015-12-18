@@ -6,6 +6,7 @@ define(function (require) {
 
   require('ui/visualize');
   require('ui/collapsible_sidebar');
+  require('ui/share');
 
   require('ui/routes')
   .when('/visualize/create', {
@@ -232,15 +233,6 @@ define(function (require) {
           kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
         }
       }, notify.fatal);
-    };
-
-    $scope.shareData = function () {
-      return {
-        link: $location.absUrl(),
-        // This sucks, but seems like the cleanest way. Uhg.
-        embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-          '" height="600" width="800"></iframe>'
-      };
     };
 
     $scope.unlink = function () {
