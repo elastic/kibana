@@ -1,7 +1,7 @@
 const { fromNode: fn } = require('bluebird');
 const { createWriteStream, unlinkSync } = require('fs');
 const Wreck = require('wreck');
-const getProgressReporter = require('../progressReporter');
+const getProgressReporter = require('../progress_reporter');
 
 function sendRequest({ sourceUrl, timeout }) {
   const maxRedirects = 11; //Because this one goes to 11.

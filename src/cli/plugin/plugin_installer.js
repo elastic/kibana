@@ -1,9 +1,9 @@
 const _ = require('lodash');
 const utils = require('requirefrom')('src/utils');
 const fromRoot = utils('fromRoot');
-const pluginDownloader = require('./pluginDownloader');
+const pluginDownloader = require('./plugin_downloader');
 const pluginCleaner = require('./plugin_cleaner');
-const pluginExtractor = require('./pluginExtractor');
+const pluginExtractor = require('./plugin_extractor');
 const KbnServer = require('../../server/KbnServer');
 const readYamlConfig = require('../serve/read_yaml_config');
 const { statSync, renameSync } = require('fs');

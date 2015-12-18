@@ -3,7 +3,7 @@ var expect = require('expect.js');
 
 var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
-var settingParser = require('../settingParser');
+var settingParser = require('../setting_parser');
 
 describe('kibana cli', function () {
 

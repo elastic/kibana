@@ -1,7 +1,7 @@
 const expect = require('expect.js');
 const sinon = require('sinon');
-const progressReporter = require('../progressReporter');
-const pluginLogger = require('../pluginLogger');
+const progressReporter = require('../progress_reporter');
+const pluginLogger = require('../plugin_logger');
 
 describe('kibana cli', function () {
 

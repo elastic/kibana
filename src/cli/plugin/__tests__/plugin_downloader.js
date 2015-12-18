@@ -5,8 +5,8 @@ const glob = require('glob');
 const rimraf = require('rimraf');
 const { join } = require('path');
 const mkdirp = require('mkdirp');
-const pluginLogger = require('../pluginLogger');
-const pluginDownloader = require('../pluginDownloader');
+const pluginLogger = require('../plugin_logger');
+const pluginDownloader = require('../plugin_downloader');
 
 describe('kibana cli', function () {
 
@@ -63,16 +63,16 @@ describe('kibana cli', function () {
       describe('http downloader', function () {
 
         it('should download an unsupported file type, but return undefined for archiveType', function () {
-          const filePath = join(__dirname, 'replies/Banana21.jpg');
+          const filePath = join(__dirname, 'replies/banana.jpg');
           const couchdb = nock('http://www.files.com')
             .defaultReplyHeaders({
               'content-length': '10',
               'content-type': 'image/jpeg'
             })
-            .get('/banana21.jpg')
+            .get('/banana.jpg')
             .replyWithFile(200, filePath);
 
-          const sourceUrl = 'http://www.files.com/banana21.jpg';
+          const sourceUrl = 'http://www.files.com/banana.jpg';
           return downloader._downloadSingle(sourceUrl)
           .then(function (data) {
             expect(data.archiveType).to.be(undefined);
@@ -105,7 +105,7 @@ describe('kibana cli', function () {
         });
 
         it('should download a tarball from a valid http url', function () {
-          const filePath = join(__dirname, 'replies/test-plugin-master.tar.gz');
+          const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
 
           const couchdb = nock('http://www.files.com')
             .defaultReplyHeaders({
@@ -125,7 +125,7 @@ describe('kibana cli', function () {
         });
 
         it('should download a zip from a valid http url', function () {
-          const filePath = join(__dirname, 'replies/test-plugin-master.zip');
+          const filePath = join(__dirname, 'replies/test_plugin_master.zip');
 
           const couchdb = nock('http://www.files.com')
             .defaultReplyHeaders({
@@ -149,7 +149,7 @@ describe('kibana cli', function () {
       describe('local file downloader', function () {
 
         it('should copy an unsupported file type, but return undefined for archiveType', function () {
-          const filePath = join(__dirname, 'replies/Banana21.jpg');
+          const filePath = join(__dirname, 'replies/banana.jpg');
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
           const couchdb = nock('http://www.files.com')
@@ -157,7 +157,7 @@ describe('kibana cli', function () {
               'content-length': '10',
               'content-type': 'image/jpeg'
             })
-            .get('/banana21.jpg')
+            .get('/banana.jpg')
             .replyWithFile(200, filePath);
 
           return downloader._downloadSingle(sourceUrl)
@@ -179,7 +179,7 @@ describe('kibana cli', function () {
         });
 
         it('should copy a tarball from a valid local file', function () {
-          const filePath = join(__dirname, 'replies/test-plugin-master.tar.gz');
+          const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
           return downloader._downloadSingle(sourceUrl)
@@ -190,7 +190,7 @@ describe('kibana cli', function () {
         });
 
         it('should copy a zip from a valid local file', function () {
-          const filePath = join(__dirname, 'replies/test-plugin-master.zip');
+          const filePath = join(__dirname, 'replies/test_plugin_master.zip');
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
           return downloader._downloadSingle(sourceUrl)
@@ -206,7 +206,7 @@ describe('kibana cli', function () {
 
     describe('download', function () {
       it('should loop through bad urls until it finds a good one.', function () {
-        const filePath = join(__dirname, 'replies/test-plugin-master.tar.gz');
+        const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
         const settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
@@ -242,7 +242,7 @@ describe('kibana cli', function () {
       });
 
       it('should stop looping through urls when it finds a good one.', function () {
-        const filePath = join(__dirname, 'replies/test-plugin-master.tar.gz');
+        const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
         const settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',

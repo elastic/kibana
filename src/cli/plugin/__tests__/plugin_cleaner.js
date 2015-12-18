@@ -4,7 +4,7 @@ const fs = require('fs');
 const rimraf = require('rimraf');
 
 const pluginCleaner = require('../plugin_cleaner');
-const pluginLogger = require('../pluginLogger');
+const pluginLogger = require('../plugin_logger');
 
 describe('kibana cli', function () {
 

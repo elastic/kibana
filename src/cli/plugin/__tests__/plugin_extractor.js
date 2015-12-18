@@ -5,9 +5,9 @@ const rimraf = require('rimraf');
 const { join } = require('path');
 const mkdirp = require('mkdirp');
 
-const pluginLogger = require('../pluginLogger');
-const extract = require('../pluginExtractor');
-const pluginDownloader = require('../pluginDownloader');
+const pluginLogger = require('../plugin_logger');
+const extract = require('../plugin_extractor');
+const pluginDownloader = require('../plugin_downloader');
 
 describe('kibana cli', function () {
 
@@ -56,7 +56,7 @@ describe('kibana cli', function () {
     describe('extractArchive', function () {
 
       it('successfully extract a valid tarball', function () {
-        return copyReplyFile('test-plugin-master.tar.gz')
+        return copyReplyFile('test_plugin_master.tar.gz')
         .then((data) => {
           return extract(settings, logger, data.archiveType);
         })
@@ -75,7 +75,7 @@ describe('kibana cli', function () {
       });
 
       it('successfully extract a valid zip', function () {
-        return copyReplyFile('test-plugin-master.zip')
+        return copyReplyFile('test_plugin_master.zip')
         .then((data) => {
           return extract(settings, logger, data.archiveType);
         })
@@ -115,7 +115,7 @@ describe('kibana cli', function () {
       });
 
       it('throw an error when passed an unknown archive type', function () {
-        return copyReplyFile('Banana21.jpg')
+        return copyReplyFile('banana.jpg')
         .then((data) => {
           return extract(settings, logger, data.archiveType);
         })

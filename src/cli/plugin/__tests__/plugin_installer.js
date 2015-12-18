@@ -3,7 +3,7 @@ const sinon = require('sinon');
 const rimraf = require('rimraf');
 const { mkdirSync } = require('fs');
 const { join } = require('path');
-const pluginLogger = require('../pluginLogger');
+const pluginLogger = require('../plugin_logger');
 const pluginInstaller = require('../plugin_installer');
 
 describe('kibana cli', function () {
