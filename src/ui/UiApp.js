@@ -18,7 +18,7 @@ class UiApp {
     this.icon = this.spec.icon;
     this.hidden = this.spec.hidden;
     this.autoloadOverrides = this.spec.autoload;
-    this.templateName = this.spec.templateName || 'uiApp';
+    this.templateName = this.spec.templateName || 'ui_app';
     this.url = `${spec.urlBasePath || ''}${this.spec.url || `/app/${this.id}`}`;
 
     // once this resolves, no reason to run it again
