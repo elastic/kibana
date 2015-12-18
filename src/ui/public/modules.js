@@ -4,10 +4,35 @@
  * hard/impossible to do in require.js since all of the dependencies for a module are
  * loaded before it is.
  *
+ * Here is an example:
+ *
+ * 	In the scenario below, require.js would load directive.js first because it is a
+ * 	dependency of app.js. This would cause the call to `angular.module('app')` to
+ * 	execute before the module is actually created. This causes angular to through an
+ * 	error. This effect is magnifies when app.js links off to many different modules.
+ *
+ * 	This is normally solved by creating unique modules per file, listed as the 1st
+ * 	alternate solution below. Unfortunately this solution would have required that
+ * 	we replicate our require statements.
+ *
+ *  	app.js
+ *      ```
+ *      angular.module('app', ['ui.bootstrap'])
+ *      .controller('AppController', function () { ... });
+ *
+ *      require('./directive');
+ *      ```
+ *
+ *    directive.js
+ *      ```
+ *      angular.module('app')
+ *      .directive('someDirective', function () { ... });
+ *      ```
+ *
  * Before taking this approach we saw three possible solutions:
- *  1. replicate our js modules in angular modules/use a different module per file
- *  2. create a single module outside of our js modules and share it
- *  3. use a helper lib to dynamically create modules as needed.
+ *   1. replicate our js modules in angular modules/use a different module per file
+ *   2. create a single module outside of our js modules and share it
+ *   3. use a helper lib to dynamically create modules as needed.
  *
  * We decided to go with #3
  *
