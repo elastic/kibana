@@ -24,7 +24,7 @@ define(function (require) {
 
       isTimeBased: true,
       nameIsPattern: false,
-      searchLiterally: false,
+      notExpandable: false,
       sampleCount: 5,
       nameIntervalOptions: intervals,
 
@@ -34,7 +34,7 @@ define(function (require) {
     index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
     index.timeField = null;
 
-    $scope.canSearchLiterally = function () {
+    $scope.canExpandIndices = function () {
       // to maximize performance in the digest cycle, move from the least
       // expensive operation to most
       return index.isTimeBased && !index.nameIsPattern && _.includes(index.name, '*');
@@ -57,8 +57,8 @@ define(function (require) {
           }
         }
 
-        if (index.searchLiterally && $scope.canSearchLiterally()) {
-          indexPattern.searchLiterally = true;
+        if (index.notExpandable && $scope.canExpandIndices()) {
+          indexPattern.notExpandable = true;
         }
 
         // fetch the fields

@@ -346,12 +346,12 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is a time-base wildcard that is explicitly set to search literally', function () {
+    context('when index pattern is a time-base wildcard that is configured not to expand', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
         sinon.stub(indexPattern, 'isWildcard').returns(true);
-        sinon.stub(indexPattern, 'shouldSearchLiterally').returns(true);
+        sinon.stub(indexPattern, 'canExpandIndices').returns(false);
       });
 
       it('is fulfilled by id', async function () {
@@ -426,13 +426,13 @@ describe('index pattern', function () {
       });
     });
 
-    context('when index pattern is a time-base wildcard that is explicitly set to search literally', function () {
+    context('when index pattern is a time-base wildcard that is configured not to expand', function () {
       require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
         sinon.stub(indexPattern, 'isWildcard').returns(true);
-        sinon.stub(indexPattern, 'shouldSearchLiterally').returns(true);
+        sinon.stub(indexPattern, 'canExpandIndices').returns(false);
       });
 
       it('is fulfilled by id', async function () {
@@ -458,18 +458,18 @@ describe('index pattern', function () {
     });
   });
 
-  describe('#shouldSearchLiterally()', function () {
-    it('returns false if searchLiterally is false', function () {
-      indexPattern.searchLiterally = false;
-      expect(indexPattern.shouldSearchLiterally()).to.be(false);
+  describe('#canExpandIndices()', function () {
+    it('returns true if notExpandable is false', function () {
+      indexPattern.notExpandable = false;
+      expect(indexPattern.canExpandIndices()).to.be(true);
     });
-    it('returns false if searchLiterally is not defined', function () {
-      delete indexPattern.searchLiterally;
-      expect(indexPattern.shouldSearchLiterally()).to.be(false);
+    it('returns true if notExpandable is not defined', function () {
+      delete indexPattern.notExpandable;
+      expect(indexPattern.canExpandIndices()).to.be(true);
     });
-    it('returns true if searchLiterally is true', function () {
-      indexPattern.searchLiterally = true;
-      expect(indexPattern.shouldSearchLiterally()).to.be(true);
+    it('returns false if notExpandable is true', function () {
+      indexPattern.notExpandable = true;
+      expect(indexPattern.canExpandIndices()).to.be(false);
     });
   });
 

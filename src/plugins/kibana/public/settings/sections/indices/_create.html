@@ -73,13 +73,13 @@
               </small>
             </div>
 
-          <div class="form-group" ng-if="canSearchLiterally()">
+          <div class="form-group" ng-if="canExpandIndices()">
             <label>
-              <input ng-model="index.searchLiterally" type="checkbox">
+              <input ng-model="index.notExpandable" type="checkbox">
               Do not expand index pattern into queries against individual indices when searching <small>(Not recommended)</small>
             </label>
 
-            <div ng-if="index.searchLiterally" class="alert alert-info">
+            <div ng-if="index.notExpandable" class="alert alert-info">
               This index pattern will be queried directly rather than being
               expanded into more performant searches against individual indices.
             </div>
