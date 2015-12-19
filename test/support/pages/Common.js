@@ -25,8 +25,10 @@ define(function (require) {
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
           // since we're using hash URLs, always reload first to force re-render
+          self.debug('>>> get ' + url);
           return self.remote.get(url)
           .then(function () {
+            self.debug('<<< get ' + url);
             return self.remote.refresh();
           })
           .then(function () {
