@@ -1,0 +1,30 @@
+<kbn-settings-app section="add_data">
+  <kbn-settings-add-data class="container">
+    <div class="header">
+      <h2 class="title">Add Data To ElasticSearch/Kibana</h2>
+    </div>
+<!--
+    <ul class="nav nav-tabs">
+      <li
+        class="kbn-settings-tab"
+        ng-class="{ active: state.currentStep === step.title, disabled: !step.enabled }"
+        ng-repeat="step in steps">
+        <a
+          title="{{ step.title }}"
+          ng-click="changeStep(step)"
+          ng-show="step.enabled">
+          {{ step.order }}.
+          {{ step.title }}
+        </a>
+        <a ng-hide="step.enabled">
+          {{ step.order }}.
+          {{ step.title }}
+        </a>
+      </li>
+    </ul>
+    <object-changes></object-changes> -->
+
+    <pipeline-setup></pipeline-setup>
+
+  </kbn-settings-add-data>
+</kbn-settings-app>

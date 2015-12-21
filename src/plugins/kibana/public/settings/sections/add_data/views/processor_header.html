@@ -1,0 +1,118 @@
+<div class="processor-header">
+  <button
+    aria-label="{{ collapsed ? 'Open Editor' : 'Close Editor' }}"
+    tooltip="{{ collapsed ? 'Open Editor' : 'Close Editor' }}"
+    tooltip-append-to-body="true"
+    ng-click="collapsed = !collapsed"
+    type="button"
+    class="btn btn-default btn-xs processor-header-toggle">
+    <i aria-hidden="true" ng-class="{ 'fa-caret-down': !collapsed, 'fa-caret-right': collapsed }" class="fa"></i>
+  </button>
+
+  <div class="processor-header-title">
+    <span>
+      {{ $parent.counter }}. {{ processor.title }} Processor
+    </span>
+
+    <span ng-if="collapsed" class="processor-header-description">
+      on '{{ field }}'
+    </span>
+  </div>
+<!--
+  <span ng-if="!editorOpen && aggForm.$invalid" class="processor-header-description danger">
+    {{ errors }}
+  </span> -->
+
+  <div class="processor-header-controls btn-group">
+    <button
+      aria-label="Increase Priority"
+      tooltip="Increase Priority"
+      tooltip-append-to-body="true"
+      ng-click="moveUp()"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-caret-up"></i>
+    </button>
+
+    <button
+      aria-label="Decrease Priority"
+      tooltip="Decrease Priority"
+      tooltip-append-to-body="true"
+      ng-click="moveDown()"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-caret-down"></i>
+    </button>
+
+    <button
+      aria-label="Remove Processor"
+      tooltip="Remove Processor"
+      tooltip-append-to-body="true"
+      ng-click="remove()"
+      type="button"
+      class="btn btn-xs btn-danger">
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
+  </div>
+</div>
+<!--
+<div class="processor-header">
+  <button
+    aria-label="{{ editorOpen ? 'Close Editor' : 'Open Editor' }}"
+    ng-click="editorOpen = !editorOpen"
+    type="button"
+    class="btn btn-default btn-xs processor-header-toggle">
+    <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
+  </button>
+
+  <span class="processor-header-title">
+    {{ title }}
+  </span>
+
+  <span ng-if="!editorOpen && aggForm.$valid" class="processor-header-description">
+    {{ description }}
+  </span>
+
+  <span ng-if="!editorOpen && aggForm.$invalid" class="processor-header-description danger">
+    {{ errors }}
+  </span>
+
+  <div class="processor-header-controls btn-group">
+    <button
+      aria-label="Increase Priority"
+      ng-if="stats.count > 1"
+      ng-class="{ disabled: $first }"
+      ng-click="moveUp(agg)"
+      tooltip="Increase Priority"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-caret-up"></i>
+    </button>
+
+    <button
+      aria-lebl="Decrease Priority"
+      ng-if="stats.count > 1"
+      ng-class="{ disabled: $last }"
+      ng-click="moveDown(agg)"
+      tooltip="Decrease Priority"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-caret-down"></i>
+    </button>
+
+    <button
+      ng-if="canRemove(agg)"
+      aria-label="Remove Dimension"
+      ng-if="stats.count > stats.min"
+      ng-click="remove(agg)"
+      tooltip="Remove Dimension"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs btn-danger">
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
+  </div>
+</div>
+ -->

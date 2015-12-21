@@ -1,0 +1,76 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+kbn-settings-add-data {
+  @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
+  @vis-editor-sidebar-min-width: 350px;
+  @vis-editor-nesting-width: 8px;
+  @vis-editor-agg-editor-spacing: 5px;
+  @padding-base-vertical: 5px;
+
+  ul {
+    list-style-type: none;
+    padding: 0px;
+
+    li {
+      border: 1px solid gray;
+    }
+  }
+
+  .processor_content {
+    padding: @padding-base-vertical;
+  }
+
+  label {
+    margin-bottom: 0px;
+  }
+
+  .form-group {
+    margin-bottom: @padding-base-vertical;
+  }
+
+  processor-header {
+
+    .processor-header {
+      display: flex;
+      align-items: center;
+      flex: 1 0 auto;
+      margin-bottom: @vis-editor-agg-editor-spacing;
+      background-color: #DDD;
+      border-bottom: 1px solid #CCC;
+
+      &-toggle {
+        flex: 0 0 auto;
+        margin-right: @vis-editor-agg-editor-spacing;
+      }
+
+      &-subagg-icon {
+        flex: 0 1 auto;
+        padding-right: @padding-base-vertical;
+      }
+
+      &-title {
+        flex: 1 1 auto;
+        .ellipsis();
+        font-weight: bold;
+      }
+
+      &-description {
+        font-weight: normal;
+        padding-right: @vis-editor-agg-editor-spacing;
+
+        &.danger {
+          .text-danger();
+          font-weight: bold;
+        }
+      }
+
+      &-controls {
+        flex: 0 0 auto;
+      }
+    }
+
+  }
+
+}

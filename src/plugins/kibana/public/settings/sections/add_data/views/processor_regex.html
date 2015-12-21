@@ -1,0 +1,33 @@
+<processor-header
+  processor="processor"
+  field="sourceField"
+  collapsed="contentCollapsed">
+</processor-header>
+<div
+  class="processor_content"
+  ng-hide="contentCollapsed">
+  <div class="form-group">
+    <label>Field:</label>
+    <select
+      class="form-control"
+      ng-options="field as field for field in fields"
+      ng-model="sourceField">
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Field Data:</label>
+    <pre>{{ fieldData }}</pre>
+  </div>
+  <div class="form-group">
+    <label>Target Field:</label>
+    <input type="text" class="form-control" ng-model="targetField">
+  </div>
+  <div class="form-group">
+    <label>Expression:</label>
+    <input type="text" class="form-control" ng-model="expression">
+  </div>
+  <div class="form-group">
+    <label><input type="checkbox" ng-model="onlyShowNewFields"></input>Output:</label>
+    <pre>{{ outputDisplayObject | json }}</pre>
+  </div>
+</div>
