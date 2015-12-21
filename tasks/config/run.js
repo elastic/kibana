@@ -88,7 +88,7 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.47.1.jar',
+        'selenium/selenium-server-standalone-2.48.2.jar',
         '-port',
         uiConfig.servers.webdriver.port
       ]
@@ -104,7 +104,7 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.47.1.jar',
+        'selenium/selenium-server-standalone-2.48.2.jar',
         '-port',
         uiConfig.servers.webdriver.port
       ]
