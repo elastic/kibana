@@ -6,11 +6,45 @@ define(function (require) {
   var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
   var getUrl = require('intern/dojo/node!../../utils/getUrl');
   var fs = require('intern/dojo/node!fs');
+  var _ = require('intern/dojo/node!lodash');
+  var parse = require('intern/dojo/node!url').parse;
+  var format = require('intern/dojo/node!url').format;
   var path = require('intern/dojo/node!path');
+
+  function injectTimestampQuery(func, url) {
+    var formatted = modifyQueryString(url, function (parsed) {
+      parsed.query._t = Date.now();
+    });
+    return func.call(this, formatted);
+  }
+
+  function removeTimestampQuery(func) {
+    return func.call(this)
+    .then(function (url) {
+      return modifyQueryString(url, function (parsed) {
+        parsed.query = _.omit(parsed.query, '_t');
+      });
+    });
+  }
+
+  function modifyQueryString(url, func) {
+    var parsed = parse(url, true);
+    if (parsed.query === null) {
+      parsed.query = {};
+    }
+    func(parsed);
+    return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
+  }
 
   function Common(remote) {
     this.remote = remote;
+    if (remote.get.wrapper !== injectTimestampQuery) {
+      this.remote.get = _.wrap(this.remote.get, injectTimestampQuery);
+      remote.get.wrapper = injectTimestampQuery;
+      this.remote.getCurrentUrl = _.wrap(this.remote.getCurrentUrl, removeTimestampQuery);
+    }
   }
+
 
   var defaultTimeout = config.timeouts.default;
 
