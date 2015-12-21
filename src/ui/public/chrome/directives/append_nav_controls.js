@@ -14,8 +14,10 @@ export default function (chrome, internals) {
         const controls = Private(chromeNavControlsRegistry);
 
         for (const control of controls.inOrder) {
-          parts.push(`<!-- nav control ${control.name} -->`);
-          parts.push(control.template);
+          parts.unshift(
+            `<!-- nav control ${control.name} -->`,
+            control.template
+          );
         }
 
         return parts.join('\n');
