@@ -10,7 +10,7 @@ define(function (require) {
     }
 
     function areColorConflicts(newColors, configColors) {
-      return newColors.every(function (color) {
+      return newColors.some(function (color) {
         return _.includes(configColors, color);
       });
     }
