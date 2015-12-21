@@ -15,7 +15,8 @@ module.exports = function (grunt) {
     'karma:dev'
   ]);
 
-  grunt.registerTask('test:ui', [
+  // test:ui temporarily renamed
+  grunt.registerTask('test:browser', [
     'esvm:ui',
     'run:testUIServer',
     'downloadSelenium',
