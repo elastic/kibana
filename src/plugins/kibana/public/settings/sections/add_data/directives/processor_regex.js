@@ -10,12 +10,11 @@ app.directive('processorRegex', function () {
     restrict: 'E',
     template: require('../views/processor_regex.html'),
     controller: function ($scope, debounce) {
-      window.scopes.push($scope);
 
       //this occurs when the parent processor changes it's output object,
       //which means that this processor's input object is changing.
       function refreshFields() {
-        console.log(`refreshFields: ${$scope.counter}.`);
+        objectManager.mutateClone($scope.outputObject, $scope.inputObject);
         $scope.fields = keysDeep($scope.inputObject);
 
         if (!_.contains($scope.fields, $scope.sourceField)) {
@@ -25,7 +24,6 @@ app.directive('processorRegex', function () {
       }
 
       function refreshFieldData() {
-        console.log(`refreshFieldData: ${$scope.counter}.`);
         $scope.fieldData = _.get($scope.inputObject, $scope.sourceField);
         refreshOutput();
       }
@@ -37,12 +35,17 @@ app.directive('processorRegex', function () {
         if ($scope.expression && $scope.targetField) {
           let matches = [];
           try {
-            const regex = new RegExp($scope.expression, 'i');
+            const regex = new RegExp($scope.expression, 'ig');
             matches = $scope.fieldData.match(regex);
-          } catch(err) {}
+          } catch(err) {
+          }
 
-          if (matches && matches[0]) {
-            _.set(processorOutput, $scope.targetField, matches[0]);
+          if (matches) {
+            if (matches.length === 1) {
+              _.set(processorOutput, $scope.targetField, matches[0]);
+            } else {
+              _.set(processorOutput, $scope.targetField, matches);
+            }
           } else {
             _.set(processorOutput, $scope.targetField, '');
           }
@@ -52,7 +55,6 @@ app.directive('processorRegex', function () {
       }
 
       function refreshOutput() {
-        console.log(`refreshOutput: ${$scope.counter}.`);
         const processorOutput = getProcessorOutput();
 
         objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
@@ -68,7 +70,7 @@ app.directive('processorRegex', function () {
       //TODO: This is only here for debugging purposes.
       $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
 
-      $scope.outputObject = _.cloneDeep($scope.inputObject);
+      $scope.outputObject = {};
 
       $scope.$watch('sourceField', refreshFieldData);
       $scope.$watch('targetField', refreshOutput);
