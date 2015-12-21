@@ -40,7 +40,7 @@ describe('chrome nav controls', function () {
     expect($el.find('#testTemplateEl')).to.have.length(1);
   });
 
-  it('renders controls in order', function () {
+  it('renders controls in reverse order, assuming that each control will float:right', function () {
     stubRegistry.register(function () {
       return {
         name: 'control2',
@@ -68,6 +68,6 @@ describe('chrome nav controls', function () {
       $el.find('.testControl')
       .toArray()
       .map(el => el.id)
-    ).to.eql(['1', '2', '3']);
+    ).to.eql(['3', '2', '1']);
   });
 });
