@@ -1,41 +1,27 @@
-var _ = require('lodash');
-var zlib = require('zlib');
-var Promise = require('bluebird');
-var url = require('url');
-var fs = require('fs');
-var request = require('request');
-var tar = require('tar');
-var progressReporter = require('./progress_reporter');
+const _ = require('lodash');
+const urlParse = require('url').parse;
+const downloadHttpFile = require('./downloaders/http');
+const downloadLocalFile = require('./downloaders/file');
 
-module.exports = function (settings, logger) {
+export default function createPluginDownloader(settings, logger) {
+  let archiveType;
+  let sourceType;
 
   //Attempts to download each url in turn until one is successful
   function download() {
-    var urls = settings.urls;
+    const urls = settings.urls.slice(0);
 
     function tryNext() {
-      var sourceUrl = urls.shift();
+      const sourceUrl = urls.shift();
       if (!sourceUrl) {
-        throw new Error('Not a valid url.');
+        throw new Error('No valid url specified.');
       }
 
-      logger.log('Attempting to extract from ' + sourceUrl);
+      logger.log(`Attempting to transfer from ${sourceUrl}`);
 
-      return Promise.try(function () {
-        return downloadSingle(sourceUrl, settings.workingPath, settings.timeout, logger)
-        .catch(function (err) {
-          if (err.message === 'ENOTFOUND') {
-            return tryNext();
-          }
-          if (err.message === 'EEXTRACT') {
-            throw (new Error('Error extracting the plugin archive... is this a valid tar.gz file?'));
-          }
-          throw (err);
-        });
-      })
-      .catch(function (err) {
-        //Special case for when request.get throws an exception
-        if (err.message.match(/invalid uri/i)) {
+      return downloadSingle(sourceUrl)
+      .catch((err) => {
+        if (err.message === 'ENOTFOUND') {
           return tryNext();
         }
         throw (err);
@@ -45,51 +31,18 @@ module.exports = function (settings, logger) {
     return tryNext();
   }
 
-  //Attempts to download a single url
-  function downloadSingle(source, dest, timeout) {
-    var gunzip = zlib.createGunzip();
-    var tarExtract = new tar.Extract({ path: dest, strip: 1 });
+  function downloadSingle(sourceUrl) {
+    const urlInfo = urlParse(sourceUrl);
+    let downloadPromise;
 
-    var requestOptions = { url: source };
-    if (timeout !== 0) {
-      requestOptions.timeout = timeout;
+    if (/^file/.test(urlInfo.protocol)) {
+      downloadPromise = downloadLocalFile(logger, urlInfo.path, settings.tempArchiveFile);
+    } else {
+      downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
     }
 
-    return wrappedRequest(requestOptions)
-    .then(function (fileStream) {
-      var reporter = progressReporter(logger, fileStream);
-
-      fileStream
-      .on('response', reporter.handleResponse)
-      .on('data', reporter.handleData)
-      .on('error', _.partial(reporter.handleError, 'ENOTFOUND'))
-      .pipe(gunzip)
-      .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
-      .pipe(tarExtract)
-      .on('error', _.partial(reporter.handleError, 'EEXTRACT'))
-      .on('end', reporter.handleEnd);
-
-      return reporter.promise;
-    });
+    return downloadPromise;
   }
-
-  function wrappedRequest(requestOptions) {
-    return Promise.try(function () {
-      let urlInfo = url.parse(requestOptions.url);
-      if (/^file/.test(urlInfo.protocol)) {
-        return fs.createReadStream(urlInfo.path);
-      } else {
-        return request.get(requestOptions);
-      }
-    })
-    .catch(function (err) {
-      if (err.message.match(/invalid uri/i)) {
-        throw new Error('ENOTFOUND');
-      }
-      throw err;
-    });
-  }
-
 
   return {
     download: download,

@@ -1,6 +1,8 @@
 define(function (require) {
   var module = require('ui/modules').get('app/dashboard');
   var _ = require('lodash');
+  var Scanner = require('ui/utils/scanner');
+
   // bring in the factory
   require('plugins/kibana/dashboard/services/_saved_dashboard');
 
@@ -14,6 +16,11 @@ define(function (require) {
 
   // This is the only thing that gets injected into controllers
   module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, kbnUrl) {
+    var scanner = new Scanner(es, {
+      index: kbnIndex,
+      type: 'dashboard'
+    });
+
     this.type = SavedDashboard.type;
     this.Class = SavedDashboard;
 
@@ -41,8 +48,21 @@ define(function (require) {
       });
     };
 
+    this.scanAll = function (queryString, pageSize = 1000) {
+      return scanner.scanAndMap(queryString, {
+        pageSize,
+        docCount: Infinity
+      }, (hit) => this.mapHits(hit));
+    };
+
+    this.mapHits = function (hit) {
+      var source = hit._source;
+      source.id = hit._id;
+      source.url = this.urlFor(hit._id);
+      return source;
+    };
+
     this.find = function (searchString, size = 100) {
-      var self = this;
       var body;
       if (searchString) {
         body = {
@@ -64,15 +84,10 @@ define(function (require) {
         body: body,
         size: size
       })
-      .then(function (resp) {
+      .then((resp) => {
         return {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(function (hit) {
-            var source = hit._source;
-            source.id = hit._id;
-            source.url = self.urlFor(hit._id);
-            return source;
-          })
+          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
       });
     };

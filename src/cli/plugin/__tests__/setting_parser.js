@@ -229,6 +229,26 @@ describe('kibana cli', function () {
             expect(settings).to.have.property('pluginPath', expected);
           });
 
+          it('should populate the workingPath', function () {
+            options.install = 'kibana/test-plugin';
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing');
+
+            expect(settings).to.have.property('workingPath', expected);
+          });
+
+          it('should populate the tempArchiveFile', function () {
+            options.install = 'kibana/test-plugin';
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing/archive.part');
+
+            expect(settings).to.have.property('tempArchiveFile', expected);
+          });
+
           describe('with url option', function () {
 
             it('should allow one part to the install parameter', function () {

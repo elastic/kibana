@@ -1,7 +1,7 @@
 var parse = require('url').parse;
 var bindKey = require('lodash').bindKey;
 
-require('../appSwitcher/appSwitcher.less');
+require('../app_switcher/app_switcher.less');
 var DomLocationProvider = require('ui/domLocation');
 
 require('ui/modules')
@@ -9,7 +9,7 @@ require('ui/modules')
 .directive('appSwitcher', function () {
   return {
     restrict: 'E',
-    template: require('./appSwitcher.html'),
+    template: require('./app_switcher.html'),
     controllerAs: 'switcher',
     controller: function ($scope, Private) {
       var domLocation = Private(DomLocationProvider);

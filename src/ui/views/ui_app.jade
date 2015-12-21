@@ -38,12 +38,13 @@ block content
         loading.removeChild(loading.lastChild);
       }
 
+      var buildNum = #{kibanaPayload.buildNum};
+      var cacheParam = buildNum ? '?v=' + buildNum : '';
       function bundleFile(filename) {
         var anchor = document.createElement('a');
-        anchor.setAttribute('href', !{JSON.stringify(bundlePath)} + '/' + filename);
+        anchor.setAttribute('href', !{JSON.stringify(bundlePath)} + '/' + filename + cacheParam);
         return anchor.href;
       }
-
       var files = [
         bundleFile('commons.style.css'),
         bundleFile('#{app.id}.style.css'),
@@ -55,7 +56,7 @@ block content
         var file = files.shift();
         if (!file) return;
 
-        var type = /\.js$/.test(file) ? 'script' : 'link';
+        var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
         var dom = document.createElement(type);
         dom.setAttribute('async', '');
 

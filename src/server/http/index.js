@@ -10,6 +10,8 @@ module.exports = function (kbnServer, server, config) {
 
   server = kbnServer.server = new Hapi.Server();
 
+  const shortUrlLookup = require('./short_url_lookup')(server);
+
   // Create a new connection
   var connectionOptions = {
     host: config.get('server.host'),
@@ -116,11 +118,11 @@ module.exports = function (kbnServer, server, config) {
     let response = req.response;
 
     if (response.isBoom) {
-      response.output.headers['x-app-name'] = kbnServer.name;
-      response.output.headers['x-app-version'] = kbnServer.version;
+      response.output.headers['kbn-name'] = kbnServer.name;
+      response.output.headers['kbn-version'] = kbnServer.version;
     } else {
-      response.header('x-app-name', kbnServer.name);
-      response.header('x-app-version', kbnServer.version);
+      response.header('kbn-name', kbnServer.name);
+      response.header('kbn-version', kbnServer.version);
     }
 
     return reply.continue();
@@ -151,6 +153,24 @@ module.exports = function (kbnServer, server, config) {
         pathname: path.slice(0, -1),
       }))
       .permanent(true);
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/goto/{urlId}',
+    handler: async function (request, reply) {
+      const url = await shortUrlLookup.getUrl(request.params.urlId);
+      reply().redirect(url);
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/shorten',
+    handler: async function (request, reply) {
+      const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+      reply(urlId);
     }
   });
 

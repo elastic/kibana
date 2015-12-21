@@ -1,27 +1,22 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-var nock = require('nock');
-var rimraf = require('rimraf');
-var fs = require('fs');
-var { join } = require('path');
-var Promise = require('bluebird');
-
-var pluginLogger = require('../plugin_logger');
-var pluginInstaller = require('../plugin_installer');
+const expect = require('expect.js');
+const sinon = require('sinon');
+const rimraf = require('rimraf');
+const { mkdirSync } = require('fs');
+const { join } = require('path');
+const pluginLogger = require('../plugin_logger');
+const pluginInstaller = require('../plugin_installer');
 
 describe('kibana cli', function () {
 
   describe('plugin installer', function () {
 
     describe('pluginInstaller', function () {
+      let logger;
+      let testWorkingPath;
+      let processExitStub;
 
-      var logger;
-      var testWorkingPath;
-      var processExitStub;
-      var statSyncStub;
       beforeEach(function () {
         processExitStub = undefined;
-        statSyncStub = undefined;
         logger = pluginLogger(false);
         testWorkingPath = join(__dirname, '.test.data');
         rimraf.sync(testWorkingPath);
@@ -31,7 +26,6 @@ describe('kibana cli', function () {
 
       afterEach(function () {
         if (processExitStub) processExitStub.restore();
-        if (statSyncStub) statSyncStub.restore();
         logger.log.restore();
         logger.error.restore();
         rimraf.sync(testWorkingPath);
@@ -39,9 +33,9 @@ describe('kibana cli', function () {
 
       it('should throw an error if the workingPath already exists.', function () {
         processExitStub = sinon.stub(process, 'exit');
-        fs.mkdirSync(testWorkingPath);
+        mkdirSync(testWorkingPath);
 
-        var settings = {
+        let settings = {
           pluginPath: testWorkingPath
         };
 
@@ -52,18 +46,6 @@ describe('kibana cli', function () {
           expect(logger.error.firstCall.args[0]).to.match(/already exists/);
           expect(process.exit.called).to.be(true);
         });
-      });
-
-      it('should rethrow any non "ENOENT" error from fs.', function () {
-        statSyncStub = sinon.stub(fs, 'statSync', function () {
-          throw new Error('This is unexpected.');
-        });
-
-        var settings = {
-          pluginPath: testWorkingPath
-        };
-
-        expect(pluginInstaller.install).withArgs(settings, logger).to.throwException(/this is unexpected/i);
       });
 
     });

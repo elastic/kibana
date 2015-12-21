@@ -1,26 +1,45 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-var nock = require('nock');
-var glob = require('glob');
-var rimraf = require('rimraf');
-var { join } = require('path');
-
-var pluginLogger = require('../plugin_logger');
-var pluginDownloader = require('../plugin_downloader');
+const expect = require('expect.js');
+const sinon = require('sinon');
+const nock = require('nock');
+const glob = require('glob');
+const rimraf = require('rimraf');
+const { join } = require('path');
+const mkdirp = require('mkdirp');
+const pluginLogger = require('../plugin_logger');
+const pluginDownloader = require('../plugin_downloader');
 
 describe('kibana cli', function () {
 
   describe('plugin downloader', function () {
+    const testWorkingPath = join(__dirname, '.test.data');
+    const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
+    let logger;
+    let downloader;
 
-    var testWorkingPath = join(__dirname, '.test.data');
-    var logger;
-    var downloader;
+    function expectWorkingPathEmpty() {
+      const files = glob.sync('**/*', { cwd: testWorkingPath });
+      expect(files).to.eql([]);
+    }
+
+    function expectWorkingPathNotEmpty() {
+      const files = glob.sync('**/*', { cwd: testWorkingPath });
+      const expected = [
+        'archive.part'
+      ];
+
+      expect(files.sort()).to.eql(expected.sort());
+    }
+
+    function shouldReject() {
+      throw new Error('expected the promise to reject');
+    }
 
     beforeEach(function () {
       logger = pluginLogger(false);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
       rimraf.sync(testWorkingPath);
+      mkdirp.sync(testWorkingPath);
     });
 
     afterEach(function () {
@@ -32,86 +51,163 @@ describe('kibana cli', function () {
     describe('_downloadSingle', function () {
 
       beforeEach(function () {
-        downloader = pluginDownloader({}, logger);
+        const settings = {
+          urls: [],
+          workingPath: testWorkingPath,
+          tempArchiveFile: tempArchiveFilePath,
+          timeout: 0
+        };
+        downloader = pluginDownloader(settings, logger);
       });
 
-      afterEach(function () {
-      });
+      describe('http downloader', function () {
 
-      it.skip('should throw an ENOTFOUND error for a 404 error', function () {
-        var couchdb = nock('http://www.files.com')
-                .get('/plugin.tar.gz')
-                .reply(404);
+        it('should download an unsupported file type, but return undefined for archiveType', function () {
+          const filePath = join(__dirname, 'replies/banana.jpg');
+          const couchdb = nock('http://www.files.com')
+            .defaultReplyHeaders({
+              'content-length': '10',
+              'content-type': 'image/jpeg'
+            })
+            .get('/banana.jpg')
+            .replyWithFile(200, filePath);
 
-        var source = 'http://www.files.com/plugin.tar.gz';
-
-        var errorStub = sinon.stub();
-        return downloader._downloadSingle(source, testWorkingPath, 0, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/ENOTFOUND/);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
+          const sourceUrl = 'http://www.files.com/banana.jpg';
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be(undefined);
+            expectWorkingPathNotEmpty();
+          });
         });
+
+        it('should throw an ENOTFOUND error for a http ulr that returns 404', function () {
+          const couchdb = nock('http://www.files.com')
+            .get('/plugin.tar.gz')
+            .reply(404);
+
+          const sourceUrl = 'http://www.files.com/plugin.tar.gz';
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(shouldReject, function (err) {
+            expect(err.message).to.match(/ENOTFOUND/);
+            expectWorkingPathEmpty();
+          });
+        });
+
+        it('should throw an ENOTFOUND error for an invalid url', function () {
+          const sourceUrl = 'i am an invalid url';
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(shouldReject, function (err) {
+            expect(err.message).to.match(/ENOTFOUND/);
+            expectWorkingPathEmpty();
+          });
+        });
+
+        it('should download a tarball from a valid http url', function () {
+          const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
+
+          const couchdb = nock('http://www.files.com')
+            .defaultReplyHeaders({
+              'content-length': '10',
+              'content-type': 'application/x-gzip'
+            })
+            .get('/plugin.tar.gz')
+            .replyWithFile(200, filePath);
+
+          const sourceUrl = 'http://www.files.com/plugin.tar.gz';
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be('.tar.gz');
+            expectWorkingPathNotEmpty();
+          });
+        });
+
+        it('should download a zip from a valid http url', function () {
+          const filePath = join(__dirname, 'replies/test_plugin_master.zip');
+
+          const couchdb = nock('http://www.files.com')
+            .defaultReplyHeaders({
+              'content-length': '341965',
+              'content-type': 'application/zip'
+            })
+            .get('/plugin.zip')
+            .replyWithFile(200, filePath);
+
+          const sourceUrl = 'http://www.files.com/plugin.zip';
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be('.zip');
+            expectWorkingPathNotEmpty();
+          });
+        });
+
       });
 
-      it.skip('should download and extract a valid plugin', function () {
-        var filename = join(__dirname, 'replies/test_plugin_master.tar.gz');
-        var couchdb = nock('http://www.files.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/plugin.tar.gz')
-        .replyWithFile(200, filename);
+      describe('local file downloader', function () {
 
-        var source = 'http://www.files.com/plugin.tar.gz';
+        it('should copy an unsupported file type, but return undefined for archiveType', function () {
+          const filePath = join(__dirname, 'replies/banana.jpg');
+          const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
-        return downloader._downloadSingle(source, testWorkingPath, 0, logger)
-        .then(function (data) {
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          var expected = [
-            'README.md',
-            'index.js',
-            'package.json',
-            'public',
-            'public/app.js'
-          ];
-          expect(files.sort()).to.eql(expected.sort());
+          const couchdb = nock('http://www.files.com')
+            .defaultReplyHeaders({
+              'content-length': '10',
+              'content-type': 'image/jpeg'
+            })
+            .get('/banana.jpg')
+            .replyWithFile(200, filePath);
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be(undefined);
+            expectWorkingPathNotEmpty();
+          });
         });
-      });
 
-      it('should abort the download and extraction for a corrupt archive.', function () {
-        var filename = join(__dirname, 'replies/corrupt.tar.gz');
-        var couchdb = nock('http://www.files.com')
-        .get('/plugin.tar.gz')
-        .replyWithFile(200, filename);
+        it('should throw an ENOTFOUND error for an invalid local file', function () {
+          const filePath = join(__dirname, 'replies/i-am-not-there.tar.gz');
+          const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
-        var source = 'http://www.files.com/plugin.tar.gz';
-
-        var errorStub = sinon.stub();
-        return downloader._downloadSingle(source, testWorkingPath, 0, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
+          return downloader._downloadSingle(sourceUrl)
+          .then(shouldReject, function (err) {
+            expect(err.message).to.match(/ENOTFOUND/);
+            expectWorkingPathEmpty();
+          });
         });
+
+        it('should copy a tarball from a valid local file', function () {
+          const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
+          const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be('.tar.gz');
+            expectWorkingPathNotEmpty();
+          });
+        });
+
+        it('should copy a zip from a valid local file', function () {
+          const filePath = join(__dirname, 'replies/test_plugin_master.zip');
+          const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be('.zip');
+            expectWorkingPathNotEmpty();
+          });
+        });
+
       });
 
     });
 
     describe('download', function () {
-
-      beforeEach(function () {});
-
-      afterEach(function () {});
-
-      it.skip('should loop through bad urls until it finds a good one.', function () {
-        var filename = join(__dirname, 'replies/test_plugin_master.tar.gz');
-        var settings = {
+      it('should loop through bad urls until it finds a good one.', function () {
+        const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
+        const settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
             'http://www.files.com/badfile2.tar.gz',
@@ -119,11 +215,12 @@ describe('kibana cli', function () {
             'http://www.files.com/goodfile.tar.gz'
           ],
           workingPath: testWorkingPath,
+          tempArchiveFile: tempArchiveFilePath,
           timeout: 0
         };
         downloader = pluginDownloader(settings, logger);
 
-        var couchdb = nock('http://www.files.com')
+        const couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -132,35 +229,21 @@ describe('kibana cli', function () {
         .get('/badfile2.tar.gz')
         .reply(404)
         .get('/goodfile.tar.gz')
-        .replyWithFile(200, filename);
+        .replyWithFile(200, filePath);
 
-        var errorStub = sinon.stub();
         return downloader.download(settings, logger)
-        .catch(errorStub)
         .then(function (data) {
-          expect(errorStub.called).to.be(false);
-
           expect(logger.log.getCall(0).args[0]).to.match(/badfile1.tar.gz/);
           expect(logger.log.getCall(1).args[0]).to.match(/badfile2.tar.gz/);
           expect(logger.log.getCall(2).args[0]).to.match(/I am a bad uri/);
           expect(logger.log.getCall(3).args[0]).to.match(/goodfile.tar.gz/);
-          expect(logger.log.lastCall.args[0]).to.match(/complete/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          var expected = [
-            'README.md',
-            'index.js',
-            'package.json',
-            'public',
-            'public/app.js'
-          ];
-          expect(files.sort()).to.eql(expected.sort());
+          expectWorkingPathNotEmpty();
         });
       });
 
-      it.skip('should stop looping through urls when it finds a good one.', function () {
-        var filename = join(__dirname, 'replies/test_plugin_master.tar.gz');
-        var settings = {
+      it('should stop looping through urls when it finds a good one.', function () {
+        const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
+        const settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
             'http://www.files.com/badfile2.tar.gz',
@@ -168,11 +251,12 @@ describe('kibana cli', function () {
             'http://www.files.com/badfile3.tar.gz'
           ],
           workingPath: testWorkingPath,
+          tempArchiveFile: tempArchiveFilePath,
           timeout: 0
         };
         downloader = pluginDownloader(settings, logger);
 
-        var couchdb = nock('http://www.files.com')
+        const couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -181,45 +265,33 @@ describe('kibana cli', function () {
         .get('/badfile2.tar.gz')
         .reply(404)
         .get('/goodfile.tar.gz')
-        .replyWithFile(200, filename)
+        .replyWithFile(200, filePath)
         .get('/badfile3.tar.gz')
         .reply(404);
 
-        var errorStub = sinon.stub();
         return downloader.download(settings, logger)
-        .catch(errorStub)
         .then(function (data) {
-          expect(errorStub.called).to.be(false);
-
-          for (var i = 0; i < logger.log.callCount; i++) {
+          for (let i = 0; i < logger.log.callCount; i++) {
             expect(logger.log.getCall(i).args[0]).to.not.match(/badfile3.tar.gz/);
           }
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          var expected = [
-            'README.md',
-            'index.js',
-            'package.json',
-            'public',
-            'public/app.js'
-          ];
-          expect(files.sort()).to.eql(expected.sort());
+          expectWorkingPathNotEmpty();
         });
       });
 
-      it.skip('should throw an error when it doesn\'t find a good url.', function () {
-        var settings = {
+      it('should throw an error when it doesn\'t find a good url.', function () {
+        const settings = {
           urls: [
             'http://www.files.com/badfile1.tar.gz',
             'http://www.files.com/badfile2.tar.gz',
             'http://www.files.com/badfile3.tar.gz'
           ],
           workingPath: testWorkingPath,
+          tempArchiveFile: tempArchiveFilePath,
           timeout: 0
         };
         downloader = pluginDownloader(settings, logger);
 
-        var couchdb = nock('http://www.files.com')
+        const couchdb = nock('http://www.files.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -230,15 +302,10 @@ describe('kibana cli', function () {
         .get('/badfile3.tar.gz')
         .reply(404);
 
-        var errorStub = sinon.stub();
         return downloader.download(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
-          expect(errorStub.called).to.be(true);
-          expect(errorStub.lastCall.args[0].message).to.match(/not a valid/i);
-
-          var files = glob.sync('**/*', { cwd: testWorkingPath });
-          expect(files).to.eql([]);
+        .then(shouldReject, function (err) {
+          expect(err.message).to.match(/no valid url specified/i);
+          expectWorkingPathEmpty();
         });
       });
 

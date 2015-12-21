@@ -1,12 +1,12 @@
-var { resolve } = require('path');
-var expiry = require('expiry-js');
+const { resolve } = require('path');
+const expiry = require('expiry-js');
 
-module.exports = function (options) {
+export default function createSettingParser(options) {
   function parseMilliseconds(val) {
-    var result;
+    let result;
 
     try {
-      var timeVal = expiry(val);
+      let timeVal = expiry(val);
       result = timeVal.asMilliseconds();
     } catch (ex) {
       result = 0;
@@ -16,15 +16,15 @@ module.exports = function (options) {
   }
 
   function generateDownloadUrl(settings) {
-    var version = (settings.version) || 'latest';
-    var filename = settings.package + '-' + version + '.tar.gz';
+    const version = (settings.version) || 'latest';
+    const filename = settings.package + '-' + version + '.tar.gz';
 
     return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
   }
 
   function parse() {
-    var parts;
-    var settings = {
+    let parts;
+    let settings = {
       timeout: 0,
       silent: false,
       quiet: false,
@@ -92,6 +92,7 @@ module.exports = function (options) {
     if (settings.package) {
       settings.pluginPath = resolve(settings.pluginDir, settings.package);
       settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
+      settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
     }
 
     return settings;

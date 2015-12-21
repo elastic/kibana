@@ -2,7 +2,7 @@ describe('Notifier', function () {
   var _ = require('lodash');
   var ngMock = require('ngMock');
   var expect = require('expect.js');
-  var Notifier = require('ui/notify/Notifier');
+  var Notifier = require('ui/notify/notifier');
 
   var message = 'Oh, the humanity!';
   var notifier;

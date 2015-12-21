@@ -1,71 +1,38 @@
-var Promise = require('bluebird');
-
 /*
-Responsible for reporting the progress of the file stream
+Generates file transfer progress messages
 */
-module.exports = function (logger, stream) {
-  var oldDotCount = 0;
-  var runningTotal = 0;
-  var totalSize = 0;
-  var hasError = false;
-  var _resolve;
-  var _reject;
-  var _resp;
+export default function createProgressReporter(logger) {
+  let dotCount = 0;
+  let runningTotal = 0;
+  let totalSize = 0;
 
-  var promise = new Promise(function (resolve, reject) {
-    _resolve = resolve;
-    _reject = reject;
-  });
+  function init(size) {
+    totalSize = size;
+    let totalDesc = totalSize || 'unknown number of';
 
-  function handleError(errorMessage, err) {
-    if (hasError) return;
-
-    if (err) logger.error(err);
-    hasError = true;
-    if (stream.abort) stream.abort();
-    _reject(new Error(errorMessage));
-  }
-
-  function handleResponse(resp) {
-    _resp = resp;
-    if (resp.statusCode >= 400) {
-      handleError('ENOTFOUND', null);
-    } else {
-      totalSize = parseInt(resp.headers['content-length'], 10) || 0;
-      var totalDesc = totalSize || 'unknown number of';
-
-      logger.log('Downloading ' + totalDesc + ' bytes', true);
-    }
+    logger.log(`Transferring ${totalDesc} bytes`, true);
   }
 
   //Should log a dot for every 5% of progress
-  //Note: no progress is logged if the plugin is downloaded in a single packet
-  function handleData(buffer) {
-    if (hasError) return;
+  function progress(size) {
     if (!totalSize) return;
 
-    runningTotal += buffer.length;
-    var dotCount = Math.round(runningTotal / totalSize * 100 / 5);
-    if (dotCount > 20) dotCount = 20;
-    for (var i = 0; i < (dotCount - oldDotCount); i++) {
+    runningTotal += size;
+    let newDotCount = Math.round(runningTotal / totalSize * 100 / 5);
+    if (newDotCount > 20) newDotCount = 20;
+    for (let i = 0; i < (newDotCount - dotCount); i++) {
       logger.log('.', true);
     }
-    oldDotCount = dotCount;
+    dotCount = newDotCount;
   }
 
-  function handleEnd() {
-    if (hasError) return;
-
-    logger.log('Extraction complete');
-    _resolve();
+  function complete() {
+    logger.log(`Transfer complete`, false);
   }
 
   return {
-    promise: promise,
-    handleResponse: handleResponse,
-    handleError: handleError,
-    handleData: handleData,
-    handleEnd: handleEnd,
-    hasError: function () { return hasError; }
+    init: init,
+    progress: progress,
+    complete: complete
   };
 };
