@@ -1,28 +1,26 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-var fs = require('fs');
-var rimraf = require('rimraf');
+const expect = require('expect.js');
+const sinon = require('sinon');
+const fs = require('fs');
+const rimraf = require('rimraf');
 
-var pluginCleaner = require('../plugin_cleaner');
-var pluginLogger = require('../pluginLogger');
+const pluginCleaner = require('../plugin_cleaner');
+const pluginLogger = require('../plugin_logger');
 
 describe('kibana cli', function () {
 
   describe('plugin installer', function () {
 
     describe('pluginCleaner', function () {
-
-      var settings = {
+      const settings = {
         workingPath: 'dummy'
       };
 
       describe('cleanPrevious', function () {
-
-        var cleaner;
-        var errorStub;
-        var logger;
-        var progress;
-        var request;
+        let cleaner;
+        let errorStub;
+        let logger;
+        let progress;
+        let request;
 
         beforeEach(function () {
           errorStub = sinon.stub();
@@ -46,7 +44,7 @@ describe('kibana cli', function () {
         it('should resolve if the working path does not exist', function () {
           sinon.stub(rimraf, 'sync');
           sinon.stub(fs, 'statSync', function () {
-            var error = new Error('ENOENT');
+            const error = new Error('ENOENT');
             error.code = 'ENOENT';
             throw error;
           });
@@ -61,7 +59,7 @@ describe('kibana cli', function () {
         it('should rethrow any exception except ENOENT from fs.statSync', function () {
           sinon.stub(rimraf, 'sync');
           sinon.stub(fs, 'statSync', function () {
-            var error = new Error('An Unhandled Error');
+            const error = new Error('An Unhandled Error');
             throw error;
           });
 
@@ -112,8 +110,9 @@ describe('kibana cli', function () {
       });
 
       describe('cleanError', function () {
-        var cleaner;
-        var logger;
+        let cleaner;
+        let logger;
+
         beforeEach(function () {
           logger = pluginLogger(false);
           cleaner = pluginCleaner(settings, logger);

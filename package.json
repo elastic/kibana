@@ -62,6 +62,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
+    "@bigfunger/decompress-zip": "^0.2.0-stripfix2",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
