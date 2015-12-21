@@ -96,6 +96,8 @@ define(function (require) {
       });
     };
 
+    Promise.$async = Promise.method;
+
     return Promise;
   });
 
