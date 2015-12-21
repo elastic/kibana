@@ -22,22 +22,6 @@ Because the organization given is `elasticsearch`, the plugin management tool au
 plugin from `download.elastic.co`.
 
 [float]
-=== Installing Plugins from Github
-
-When the specified plugin is not found at `download.elastic.co`, the plugin management tool parses the element 
-as a Github user name, as in the following example:
-
-[source,shell]
-bin/kibana plugin --install github-user/sample-plugin
-Installing sample-plugin
-Attempting to extract from https://download.elastic.co/github-user/sample-plugin/sample-plugin-latest.tar.gz
-Attempting to extract from https://github.com/github-user/sample-plugin/archive/master.tar.gz
-Downloading <some number> bytes....................
-Extraction complete
-Optimizing and caching browser bundles...
-Plugin installation complete
-
-[float]
 === Installing Plugins from an Arbitrary URL
 
 You can specify a URL to a plugin with the `-u` or `--url` options after the `-i` or `--install` option, as in the
