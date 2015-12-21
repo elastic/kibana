@@ -140,9 +140,9 @@ describe('Vislib Color Module Test Suite', function () {
     it('should properly map keys to colors', ngMock.inject((config) => {
       config.set('visualization:colorMapping', {});
 
-      const arr = [1, 2, 3, 4, 5];
+      const arr = _.range(60);
       mappedColors.mapKeys(arr);
-      expect(_(mappedColors.mapping).values().uniq().size()).to.be(arr.length);
+      expect(_(mappedColors.mapping).values().size()).to.be(arr.length);
     }));
 
     it('should not include colors used by the config', ngMock.inject((config) => {
@@ -155,18 +155,6 @@ describe('Vislib Color Module Test Suite', function () {
       const colorValues = _(mappedColors.mapping).values();
       expect(colorValues.contains(seedColors[0])).to.be(false);
       expect(colorValues.uniq().size()).to.be(arr.length);
-    }));
-
-    it('should create a unique array of colors even when config is set', ngMock.inject((config) => {
-      const newConfig = {bar: seedColors[0]};
-      config.set('visualization:colorMapping', newConfig);
-
-      const arr = ['foo', 'bar', 'baz', 'qux'];
-      mappedColors.mapKeys(arr);
-
-      const expectedSize = _(arr).difference(_.keys(newConfig)).size();
-      expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
-      expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
     }));
 
     it('should treat different formats of colors as equal', ngMock.inject((config) => {
