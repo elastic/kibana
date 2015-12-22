@@ -72,11 +72,11 @@ async function install(settings, logger) {
 
     await pluginExtractor (settings, logger, archiveType);
 
+    rimrafSync(settings.tempArchiveFile);
+
     renameSync(settings.workingPath, settings.pluginPath);
 
     await rebuildKibanaCache(settings, logger);
-
-    rimrafSync(settings.tempArchiveFile);
 
     logger.log('Plugin installation complete');
   } catch (err) {
