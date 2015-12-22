@@ -45,8 +45,7 @@ async function rebuildKibanaCache(settings, logger) {
       },
       plugins: {
         initialize: false,
-        scanDirs: [settings.pluginDir, fromRoot('src/plugins')],
-        paths: [settings.workingPath]
+        scanDirs: [settings.pluginDir, fromRoot('src/plugins')]
       }
     }
   );
@@ -73,11 +72,11 @@ async function install(settings, logger) {
 
     await pluginExtractor (settings, logger, archiveType);
 
-    await rebuildKibanaCache(settings, logger);
-
     rimrafSync(settings.tempArchiveFile);
 
     renameSync(settings.workingPath, settings.pluginPath);
+
+    await rebuildKibanaCache(settings, logger);
 
     logger.log('Plugin installation complete');
   } catch (err) {
