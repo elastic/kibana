@@ -1,7 +1,7 @@
 var expect = require('expect.js');
 var sinon = require('sinon');
-var progressReporter = require('../progressReporter');
-var pluginLogger = require('../pluginLogger');
+var progressReporter = require('../progress_reporter');
+var pluginLogger = require('../plugin_logger');
 
 describe('kibana cli', function () {
 
