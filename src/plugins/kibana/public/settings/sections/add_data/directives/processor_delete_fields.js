@@ -16,11 +16,20 @@ app.directive('processorDeleteFields', function () {
       function refreshFields() {
         objectManager.mutateClone($scope.outputObject, $scope.inputObject);
 
-        let fields = [];
-        keysDeep($scope.inputObject).forEach((fieldname) => {
-          fields.push({ name: fieldname, selected: false });
+        const newKeys = keysDeep($scope.inputObject);
+        const oldKeys = $scope.fields.map((field) => field.name);
+        const removed = _.difference(oldKeys, newKeys);
+        const added = _.difference(newKeys, oldKeys);
+
+        added.forEach((fieldname) => {
+          $scope.fields.push({ name: fieldname, selected: false });
         });
-        $scope.fields = fields;
+        removed.forEach((fieldname) => {
+          _.remove($scope.fields, (field) => {
+            return field.name === fieldname;
+          });
+        });
+        $scope.fields.sort();
       }
 
       function getProcessorOutput() {
@@ -35,6 +44,10 @@ app.directive('processorDeleteFields', function () {
         });
       }
 
+      function getProcessorDescription() {
+
+      }
+
       function refreshOutput() {
         getProcessorOutput()
         .then((processorOutput) => {
@@ -45,11 +58,14 @@ app.directive('processorDeleteFields', function () {
           } else {
             $scope.outputDisplayObject = $scope.outputObject;
           }
+
+          $scope.processorDescription = getProcessorDescription();
         });
       }
       refreshOutput = debounce(refreshOutput, 200);
 
       $scope.outputObject = {};
+      $scope.fields = [];
 
       $scope.toggleField = function(field) {
         refreshOutput();

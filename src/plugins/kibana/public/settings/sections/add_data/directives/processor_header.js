@@ -8,7 +8,8 @@ app.directive('processorHeader', function () {
     scope: {
       processor: '=',
       field: '=',
-      collapsed: '='
+      collapsed: '=',
+      description: '='
     },
     template: require('../views/processor_header.html'),
     controller: function ($scope) {

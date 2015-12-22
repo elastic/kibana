@@ -23,7 +23,9 @@ app.directive('sourceData', function () {
         let newObj = {};
         try {
           newObj = JSON.parse($scope.inputText);
-        } catch(er) { }
+        } catch(er) {
+          return undefined;
+        }
 
         return newObj
       }
@@ -31,7 +33,9 @@ app.directive('sourceData', function () {
       function refreshOutput() {
         const processorOutput = getProcessorOutput();
 
-        objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
+        if (processorOutput) {
+          objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
+        }
       }
       refreshOutput = debounce(refreshOutput, 200);
 

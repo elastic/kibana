@@ -84,6 +84,8 @@ app.directive('processorRegex', function () {
       $scope.$watch('expression', refreshOutput);
       $scope.$watch('onlyShowNewFields', refreshOutput);
 
+      $scope.processorDescription = 'Bill';
+
       $scope.$watchCollection('inputObject', refreshFields);
     }
   };
