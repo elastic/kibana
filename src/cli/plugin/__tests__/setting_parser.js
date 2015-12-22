@@ -3,7 +3,7 @@ var expect = require('expect.js');
 
 var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
-var settingParser = require('../settingParser');
+var settingParser = require('../setting_parser');
 
 describe('kibana cli', function () {
 
@@ -205,9 +205,8 @@ describe('kibana cli', function () {
 
             var settings = parser.parse();
 
-            expect(settings.urls).to.have.property('length', 2);
+            expect(settings.urls).to.have.property('length', 1);
             expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-latest.tar.gz');
-            expect(settings.urls).to.contain('https://github.com/kibana/test-plugin/archive/master.tar.gz');
           });
 
           it('should populate the urls collection properly version specified', function () {
@@ -216,9 +215,8 @@ describe('kibana cli', function () {
 
             var settings = parser.parse();
 
-            expect(settings.urls).to.have.property('length', 2);
+            expect(settings.urls).to.have.property('length', 1);
             expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-v1.1.1.tar.gz');
-            expect(settings.urls).to.contain('https://github.com/kibana/test-plugin/archive/v1.1.1.tar.gz');
           });
 
           it('should populate the pluginPath', function () {
@@ -229,6 +227,26 @@ describe('kibana cli', function () {
             var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
+          });
+
+          it('should populate the workingPath', function () {
+            options.install = 'kibana/test-plugin';
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing');
+
+            expect(settings).to.have.property('workingPath', expected);
+          });
+
+          it('should populate the tempArchiveFile', function () {
+            options.install = 'kibana/test-plugin';
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing/archive.part');
+
+            expect(settings).to.have.property('tempArchiveFile', expected);
           });
 
           describe('with url option', function () {

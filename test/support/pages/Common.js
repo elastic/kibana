@@ -6,11 +6,45 @@ define(function (require) {
   var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
   var getUrl = require('intern/dojo/node!../../utils/getUrl');
   var fs = require('intern/dojo/node!fs');
+  var _ = require('intern/dojo/node!lodash');
+  var parse = require('intern/dojo/node!url').parse;
+  var format = require('intern/dojo/node!url').format;
   var path = require('intern/dojo/node!path');
+
+  function injectTimestampQuery(func, url) {
+    var formatted = modifyQueryString(url, function (parsed) {
+      parsed.query._t = Date.now();
+    });
+    return func.call(this, formatted);
+  }
+
+  function removeTimestampQuery(func) {
+    return func.call(this)
+    .then(function (url) {
+      return modifyQueryString(url, function (parsed) {
+        parsed.query = _.omit(parsed.query, '_t');
+      });
+    });
+  }
+
+  function modifyQueryString(url, func) {
+    var parsed = parse(url, true);
+    if (parsed.query === null) {
+      parsed.query = {};
+    }
+    func(parsed);
+    return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
+  }
 
   function Common(remote) {
     this.remote = remote;
+    if (remote.get.wrapper !== injectTimestampQuery) {
+      this.remote.get = _.wrap(this.remote.get, injectTimestampQuery);
+      remote.get.wrapper = injectTimestampQuery;
+      this.remote.getCurrentUrl = _.wrap(this.remote.getCurrentUrl, removeTimestampQuery);
+    }
   }
+
 
   var defaultTimeout = config.timeouts.default;
 
@@ -19,22 +53,28 @@ define(function (require) {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      var appUrl = getUrl(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + appUrl);
+      // navUrl includes user:password@ for use with Shield
+      // appUrl excludes user:password@ to match what getCurrentUrl returns
+      var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
+      var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
+      self.debug('navigating to ' + appName + ' url: ' + navUrl);
 
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
           // since we're using hash URLs, always reload first to force re-render
-          self.debug('>>> get ' + url);
+          self.debug('navigate to: ' + url);
           return self.remote.get(url)
           .then(function () {
-            self.debug('<<< get ' + url);
+            self.debug('returned from get, calling refresh');
             return self.remote.refresh();
           })
           .then(function () {
+            self.debug('check testStatusPage');
             if (testStatusPage !== false) {
+              self.debug('self.checkForKibanaApp()');
               return self.checkForKibanaApp()
               .then(function (kibanaLoaded) {
+                self.debug('kibanaLoaded = ' + kibanaLoaded);
                 if (!kibanaLoaded) {
                   var msg = 'Kibana is not loaded, retrying';
                   self.debug(msg);
@@ -51,6 +91,7 @@ define(function (require) {
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
               ' in ' + defaultTimeout + 'ms' +
+              ' appUrl = ' + appUrl +
               ' currentUrl = ' + currentUrl;
               self.debug(msg);
               throw new Error(msg);
@@ -61,7 +102,7 @@ define(function (require) {
         });
       };
 
-      return doNavigation(appUrl)
+      return doNavigation(navUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {

@@ -8,7 +8,7 @@ var cloneDeep = require('lodash').cloneDeep;
 var indexBy = require('lodash').indexBy;
 
 require('ui/chrome');
-require('ui/chrome/appSwitcher');
+require('../app_switcher');
 var DomLocationProvider = require('ui/domLocation');
 
 describe('appSwitcher directive', function () {

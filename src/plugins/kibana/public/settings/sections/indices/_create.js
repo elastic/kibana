@@ -24,6 +24,7 @@ define(function (require) {
 
       isTimeBased: true,
       nameIsPattern: false,
+      notExpandable: false,
       sampleCount: 5,
       nameIntervalOptions: intervals,
 
@@ -32,6 +33,12 @@ define(function (require) {
 
     index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
     index.timeField = null;
+
+    $scope.canExpandIndices = function () {
+      // to maximize performance in the digest cycle, move from the least
+      // expensive operation to most
+      return index.isTimeBased && !index.nameIsPattern && _.includes(index.name, '*');
+    };
 
     $scope.refreshFieldList = function () {
       fetchFieldList().then(updateFieldList);
@@ -48,6 +55,10 @@ define(function (require) {
           if (index.nameIsPattern) {
             indexPattern.intervalName = index.nameInterval.name;
           }
+        }
+
+        if (index.notExpandable && $scope.canExpandIndices()) {
+          indexPattern.notExpandable = true;
         }
 
         // fetch the fields

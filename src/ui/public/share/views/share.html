@@ -1,0 +1,15 @@
+<form role="form" class="vis-share">
+  <div class="form-group" ng-if="allowEmbed">
+    <label>
+      Embed this {{objectType}}
+      <small>Add to your html source. Note all clients must still be able to access kibana</small>
+    </label>
+    <share-object-url share-as-embed="true"></share-object-url>
+  </div>
+  <div class="form-group">
+    <label>
+      Share a link
+    </label>
+    <share-object-url share-as-embed="false"></share-object-url>
+  </div>
+</form>
