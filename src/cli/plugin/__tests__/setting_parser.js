@@ -205,9 +205,8 @@ describe('kibana cli', function () {
 
             var settings = parser.parse();
 
-            expect(settings.urls).to.have.property('length', 2);
+            expect(settings.urls).to.have.property('length', 1);
             expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-latest.tar.gz');
-            expect(settings.urls).to.contain('https://github.com/kibana/test-plugin/archive/master.tar.gz');
           });
 
           it('should populate the urls collection properly version specified', function () {
@@ -216,9 +215,8 @@ describe('kibana cli', function () {
 
             var settings = parser.parse();
 
-            expect(settings.urls).to.have.property('length', 2);
+            expect(settings.urls).to.have.property('length', 1);
             expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-v1.1.1.tar.gz');
-            expect(settings.urls).to.contain('https://github.com/kibana/test-plugin/archive/v1.1.1.tar.gz');
           });
 
           it('should populate the pluginPath', function () {

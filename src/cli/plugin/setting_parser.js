@@ -22,13 +22,6 @@ export default function createSettingParser(options) {
     return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
   }
 
-  function generateGithubUrl(settings) {
-    const version = (settings.version) || 'master';
-    const filename = version + '.tar.gz';
-
-    return 'https://github.com/' + settings.organization + '/' + settings.package + '/archive/' + filename;
-  }
-
   function parse() {
     let parts;
     let settings = {
@@ -78,7 +71,6 @@ export default function createSettingParser(options) {
         settings.version = parts.shift();
 
         settings.urls.push(generateDownloadUrl(settings));
-        settings.urls.push(generateGithubUrl(settings));
       }
     }
 

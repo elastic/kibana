@@ -45,11 +45,22 @@ function downloadResponse({ resp, targetPath, progressReporter }) {
   });
 }
 
-function getArchiveTypeFromResponse(resp) {
+function getArchiveTypeFromResponse(resp, sourceUrl) {
   const contentType = (resp.headers['content-type'] || '');
+
   switch (contentType.toLowerCase()) {
     case 'application/zip': return '.zip';
     case 'application/x-gzip': return '.tar.gz';
+    default:
+      //If we can't infer the archive type from the content-type header,
+      //fall back to checking the extension in the url
+      if (/\.zip$/i.test(sourceUrl)) {
+        return '.zip';
+      }
+      if (/\.tar\.gz$/i.test(sourceUrl)) {
+        return '.tar.gz';
+      }
+      break;
   }
 }
 
@@ -74,7 +85,7 @@ export default async function downloadUrl(logger, sourceUrl, targetPath, timeout
     }
 
     // all is well, return our archive type
-    const archiveType = getArchiveTypeFromResponse(resp);
+    const archiveType = getArchiveTypeFromResponse(resp, sourceUrl);
     return { archiveType };
   } catch (err) {
     if (err.message !== 'ENOTFOUND') {
