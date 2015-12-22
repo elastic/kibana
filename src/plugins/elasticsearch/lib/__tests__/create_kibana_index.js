@@ -60,7 +60,7 @@ describe('plugins/elasticsearch', function () {
         });
       });
 
-      it('should be created with 1 shard and 1 replica', function () {
+      it('should be created with 1 shard and default replica', function () {
         var fn = createKibanaIndex(server);
         return fn.then(function () {
           var params = client.indices.create.args[0][0];
@@ -71,22 +71,7 @@ describe('plugins/elasticsearch', function () {
           expect(params.body.settings)
             .to.have.property('number_of_shards', 1);
           expect(params.body.settings)
-            .to.have.property('number_of_replicas', 1);
-        });
-      });
-
-      it('should be created with 1 shard and 1 replica', function () {
-        var fn = createKibanaIndex(server);
-        return fn.then(function () {
-          var params = client.indices.create.args[0][0];
-          expect(params)
-            .to.have.property('body');
-          expect(params.body)
-            .to.have.property('settings');
-          expect(params.body.settings)
-            .to.have.property('number_of_shards', 1);
-          expect(params.body.settings)
-            .to.have.property('number_of_replicas', 1);
+            .to.not.have.property('number_of_replicas');
         });
       });
 
@@ -137,4 +122,3 @@ describe('plugins/elasticsearch', function () {
 
   });
 });
-

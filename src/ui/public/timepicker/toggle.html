@@ -1,0 +1,33 @@
+<ul ng-show="timefilter.enabled" class="nav navbar-nav navbar-right navbar-timepicker">
+  <li>
+    <a
+      ng-click="toggleRefresh()"
+      ng-show="timefilter.refreshInterval.value > 0">
+
+      <i class="fa" ng-class="timefilter.refreshInterval.pause ? 'fa-play' : 'fa-pause'"></i>
+    </a>
+  </li>
+
+  <li
+    ng-class="{active: pickerTemplate.is('interval') }"
+    ng-show="timefilter.refreshInterval.value > 0 || !!pickerTemplate.current"
+    class="to-body">
+
+    <a ng-click="pickerTemplate.toggle('interval')" class="navbar-timepicker-auto-refresh-desc">
+      <span ng-show="timefilter.refreshInterval.value === 0"><i class="fa fa-repeat"></i> Auto-refresh</span>
+      <span ng-show="timefilter.refreshInterval.value > 0">{{timefilter.refreshInterval.display}}</span>
+    </a>
+
+  </li>
+
+  <li class="to-body" ng-class="{active: pickerTemplate.is('filter')}">
+    <a
+      ng-click="pickerTemplate.toggle('filter')"
+      aria-haspopup="true"
+      aria-expanded="false"
+      class="navbar-timepicker-time-desc">
+      <i aria-hidden="true" class="fa fa-clock-o"></i>
+      <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
+    </a>
+  </li>
+</ul>

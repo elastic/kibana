@@ -62,6 +62,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
+    "@bigfunger/decompress-zip": "^0.2.0-stripfix2",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -85,6 +86,7 @@
     "bootstrap": "3.3.5",
     "brace": "0.5.1",
     "bunyan": "1.4.0",
+    "clipboard": "1.5.5",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
@@ -166,7 +168,7 @@
     "karma-ie-launcher": "0.2.0",
     "karma-mocha": "0.2.0",
     "karma-safari-launcher": "0.1.1",
-    "libesvm": "1.0.7",
+    "libesvm": "3.2.0",
     "license-checker": "3.1.0",
     "load-grunt-config": "0.7.2",
     "marked-text-renderer": "0.1.0",
