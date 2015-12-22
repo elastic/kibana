@@ -1,7 +1,7 @@
-module.exports = function (settings) {
-  var previousLineEnded = true;
-  var silent = !!settings.silent;
-  var quiet = !!settings.quiet;
+export default function createPluginLogger(settings) {
+  let previousLineEnded = true;
+  const silent = !!settings.silent;
+  const quiet = !!settings.quiet;
 
   function log(data, sameLine) {
     if (silent || quiet) return;
@@ -33,7 +33,7 @@ module.exports = function (settings) {
       data.pipe(process.stderr);
       return;
     }
-    process.stderr.write(data + '\n');
+    process.stderr.write(`${data}\n`);
     previousLineEnded = true;
   }
 

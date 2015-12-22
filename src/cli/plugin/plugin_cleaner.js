@@ -1,9 +1,7 @@
-var rimraf = require('rimraf');
-var fs = require('fs');
-var Promise = require('bluebird');
+const rimraf = require('rimraf');
+const fs = require('fs');
 
-module.exports = function (settings, logger) {
-
+export default function createPluginCleaner(settings, logger) {
   function cleanPrevious() {
     return new Promise(function (resolve, reject) {
       try {
@@ -27,11 +25,7 @@ module.exports = function (settings, logger) {
   function cleanError() {
     // delete the working directory.
     // At this point we're bailing, so swallow any errors on delete.
-
-    try {
-      rimraf.sync(settings.workingPath);
-      rimraf.sync(settings.pluginPath);
-    }
+    try { rimraf.sync(settings.workingPath); }
     catch (e) {} // eslint-disable-line no-empty
   }
 

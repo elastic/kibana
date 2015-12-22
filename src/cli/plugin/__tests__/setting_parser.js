@@ -3,7 +3,7 @@ var expect = require('expect.js');
 
 var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
-var settingParser = require('../settingParser');
+var settingParser = require('../setting_parser');
 
 describe('kibana cli', function () {
 
@@ -229,6 +229,26 @@ describe('kibana cli', function () {
             var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
+          });
+
+          it('should populate the workingPath', function () {
+            options.install = 'kibana/test-plugin';
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing');
+
+            expect(settings).to.have.property('workingPath', expected);
+          });
+
+          it('should populate the tempArchiveFile', function () {
+            options.install = 'kibana/test-plugin';
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing/archive.part');
+
+            expect(settings).to.have.property('tempArchiveFile', expected);
           });
 
           describe('with url option', function () {

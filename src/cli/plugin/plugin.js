@@ -1,14 +1,13 @@
-var utils = require('requirefrom')('src/utils');
-var fromRoot = utils('fromRoot');
+const utils = require('requirefrom')('src/utils');
+const fromRoot = utils('fromRoot');
+const settingParser = require('./setting_parser');
+const installer = require('./plugin_installer');
+const remover = require('./plugin_remover');
+const pluginLogger = require('./plugin_logger');
 
-var settingParser = require('./settingParser');
-var installer = require('./plugin_installer');
-var remover = require('./pluginRemover');
-var pluginLogger = require('./pluginLogger');
-
-module.exports = function (program) {
+export default function pluginCli(program) {
   function processCommand(command, options) {
-    var settings;
+    let settings;
     try {
       settings = settingParser(command).parse();
     } catch (ex) {
@@ -17,7 +16,7 @@ module.exports = function (program) {
       process.exit(64); // eslint-disable-line no-process-exit
     }
 
-    var logger = pluginLogger(settings);
+    const logger = pluginLogger(settings);
 
     if (settings.action === 'install') {
       installer.install(settings, logger);
