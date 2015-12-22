@@ -26,4 +26,9 @@ export default [
     title: 'Date',
     template: '<processor-date></processor-date>'
   },
+  {
+    id: 'delete_fields',
+    title: 'Delete Fields',
+    template: '<processor-delete-fields></processor-delete-fields>'
+  },
 ];

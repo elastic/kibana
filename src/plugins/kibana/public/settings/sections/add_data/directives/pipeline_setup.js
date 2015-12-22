@@ -4,6 +4,7 @@ const $ = require('jquery');
 
 require('./processor_grok');
 require('./processor_regex');
+require('./processor_delete_fields');
 
 app.directive('pipelineSetup', function ($compile) {
   return {
@@ -29,7 +30,7 @@ app.directive('pipelineSetup', function ($compile) {
 
       function getCurrentProcessors() {
         let currentProcessors = [];
-        $el.find('li').each((index, li) => {
+        $el.find('li.processor').each((index, li) => {
           const processor = $(li).data('processor');
           currentProcessors.push(processor)
         });
@@ -49,7 +50,7 @@ app.directive('pipelineSetup', function ($compile) {
           processor.$scope.inputObject = $scope.inputObject;
         }
 
-        processor.$el = $compile(`<li>${processor.template}</li>`)(processor.$scope);
+        processor.$el = $compile(`<li class="processor">${processor.template}</li>`)(processor.$scope);
         processor.$el.appendTo($el);
 
         processor.$el.data('processor', processor);

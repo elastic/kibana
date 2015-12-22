@@ -10,6 +10,12 @@ function update(object, originalObject, added, removed) {
     _.set(object, key, _.get(added, key));
   });
 
+  if (removed) {
+    removed.forEach((key) => {
+      delete object[key];
+    });
+  }
+
   return object;
 }
 

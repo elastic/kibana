@@ -9,7 +9,7 @@ app.directive('processorRegex', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_regex.html'),
-    controller: function ($scope, debounce) {
+    controller: function ($scope, debounce, Promise, $timeout) {
 
       //this occurs when the parent processor changes it's output object,
       //which means that this processor's input object is changing.
@@ -25,45 +25,51 @@ app.directive('processorRegex', function () {
 
       function refreshFieldData() {
         $scope.fieldData = _.get($scope.inputObject, $scope.sourceField);
-        refreshOutput();
+        //refreshOutput();
       }
       refreshFieldData = debounce(refreshFieldData, 100);
 
       function getProcessorOutput() {
-        const processorOutput = {};
+        return new Promise(function(resolve, reject) {
+          const processorOutput = {};
 
-        if ($scope.expression && $scope.targetField) {
-          let matches = [];
-          try {
-            const regex = new RegExp($scope.expression, 'ig');
-            matches = $scope.fieldData.match(regex);
-          } catch(err) {
-          }
+          if (!$scope.expression || !$scope.targetField)
+            resolve();
 
-          if (matches) {
-            if (matches.length === 1) {
-              _.set(processorOutput, $scope.targetField, matches[0]);
-            } else {
-              _.set(processorOutput, $scope.targetField, matches);
+          $timeout(function() {
+            let matches = [];
+            try {
+              const regex = new RegExp($scope.expression, 'ig');
+              matches = $scope.fieldData.match(regex);
+            } catch(err) {
             }
-          } else {
-            _.set(processorOutput, $scope.targetField, '');
-          }
-        }
 
-        return processorOutput;
+            if (matches) {
+              if (matches.length === 1) {
+                _.set(processorOutput, $scope.targetField, matches[0]);
+              } else {
+                _.set(processorOutput, $scope.targetField, matches);
+              }
+            } else {
+              _.set(processorOutput, $scope.targetField, '');
+            }
+
+            resolve(processorOutput);
+          }, 0);
+        });
       }
 
       function refreshOutput() {
-        const processorOutput = getProcessorOutput();
+        getProcessorOutput()
+        .then((processorOutput) => {
+          objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
 
-        objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
-
-        if ($scope.onlyShowNewFields) {
-          $scope.outputDisplayObject = processorOutput;
-        } else {
-          $scope.outputDisplayObject = $scope.outputObject;
-        }
+          if ($scope.onlyShowNewFields) {
+            $scope.outputDisplayObject = processorOutput;
+          } else {
+            $scope.outputDisplayObject = $scope.outputObject;
+          }
+        });
       }
       refreshOutput = debounce(refreshOutput, 200);
 
