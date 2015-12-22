@@ -53,14 +53,12 @@ export default function pluginCli(program) {
 `
   Common examples:
     -i username/sample
-      attempts to download the latest version from the following urls:
+      attempts to download the latest version from the following url:
         https://download.elastic.co/username/sample/sample-latest.tar.gz
-        https://github.com/username/sample/archive/master.tar.gz
 
     -i username/sample/v1.1.1
-      attempts to download version v1.1.1 from the following urls:
+      attempts to download version v1.1.1 from the following url:
         https://download.elastic.co/username/sample/sample-v1.1.1.tar.gz
-        https://github.com/username/sample/archive/v1.1.1.tar.gz
 
     -i sample -u http://www.example.com/other_name.tar.gz
       attempts to download from the specified url,
