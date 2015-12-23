@@ -2,7 +2,7 @@ module.exports = function createServices(grunt) {
   var { resolve } = require('path');
 
   let exec = require('../utils/exec');
-  let userScriptsPath = grunt.config.get('userScriptsPath');
+  let userScriptsPath = grunt.config.get('userScriptsDir');
 
   grunt.registerTask('_build:pleaseRun', function () {
     // TODO(sissel): Detect if 'pleaserun' is found, and provide a useful error
