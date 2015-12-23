@@ -11,14 +11,12 @@ define(function (require) {
       var headerPage;
       var settingsPage;
       var discoverPage;
-      var remote;
 
       bdd.before(function () {
         common = new Common(this.remote);
         headerPage = new HeaderPage(this.remote);
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
-        remote = this.remote;
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
@@ -41,17 +39,10 @@ define(function (require) {
           return common.navigateToApp('discover');
         })
         .then(function () {
-          common.debug('clickTimepicker');
-          return headerPage.clickTimepicker();
-        })
-        .then(function () {
           common.debug('setAbsoluteRange');
           return headerPage.setAbsoluteRange(fromTime, toTime);
         })
-        .then(function () {
-          common.debug('collapseTimepicker');
-          return headerPage.collapseTimepicker();
-        });
+        .catch(common.handleError(this));
       });
 
 
