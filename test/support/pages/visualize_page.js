@@ -2,7 +2,7 @@ define(function (require) {
 
   var config = require('intern').config;
   var registerSuite = require('intern!object');
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var defaultTimeout = config.timeouts.default;
   var common;
