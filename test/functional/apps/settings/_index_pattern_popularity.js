@@ -47,8 +47,8 @@ define(function (require) {
             return common.sleep(1000);
           })
           .then(function openControlsByName() {
-            common.debug('Starting openControlsByName "geo.coordinates"');
-            return settingsPage.openControlsByName('geo.coordinates');
+            common.debug('Starting openControlsByName (' + fieldName + ')');
+            return settingsPage.openControlsByName(fieldName);
           })
           .then(function increasePopularity() {
             common.debug('increasePopularity');
