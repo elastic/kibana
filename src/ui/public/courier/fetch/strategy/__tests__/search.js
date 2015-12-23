@@ -31,57 +31,6 @@ describe('ui/courier/fetch/strategy/search', () => {
     });
   });
 
-  describe('#handleResponseError()', () => {
-    let error;
-    beforeEach(() => {
-      error = { status: 404, body: { error: { index: '[-*]' } } };
-    });
-
-    it('recovers 404 for index -* with empty response', () => {
-      let resp;
-      search.handleResponseError(reqsFetchParams, error).then(val => resp = val);
-      $rootScope.$apply();
-
-      expect(resp.responses).not.to.be(undefined);
-    });
-
-    it('mocks all of the bundled searches', () => {
-      let resp;
-      reqsFetchParams.push({});
-      search.handleResponseError(reqsFetchParams, error).then(val => resp = val);
-      $rootScope.$apply();
-
-      expect(Array.isArray(resp.responses)).to.be(true);
-      expect(resp.responses.length).to.be(2);
-      resp.responses.forEach(res => {
-        expect(res.hits.total).to.be(0);
-        expect(res.hits.hits.length).to.be(0);
-      });
-    });
-
-    context('when not a 404', () => {
-      it('rejects with the original response', () => {
-        error.status = 403;
-        let err;
-        search.handleResponseError(reqsFetchParams, error).catch(val => err = val);
-        $rootScope.$apply();
-
-        expect(err).to.be(error);
-      });
-    });
-
-    context('when not for -* index', () => {
-      it('rejects with the original response', () => {
-        error.body.error.index = '[foo-*]';
-        let err;
-        search.handleResponseError(reqsFetchParams, error).catch(val => err = val);
-        $rootScope.$apply();
-
-        expect(err).to.be(error);
-      });
-    });
-  });
-
   describe('#reqsFetchParamsToBody()', () => {
     it('filters out any body properties that begin with $', () => {
       let value;

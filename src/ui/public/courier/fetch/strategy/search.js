@@ -4,31 +4,8 @@ define(function (require) {
     var angular = require('angular');
     var toJson = require('ui/utils/aggressive_parse').toJson;
 
-    function emptyResponse() {
-      return { hits: { total: 0, hits: [] } };
-    };
-
     return {
       clientMethod: 'msearch',
-
-      /**
-       * Recover from a 404 when searching against no indexes
-       *
-       * If we get a 404 while intentionally searching for no indexes, we can
-       * simply mock an empty result since that is ultimately what kibana cares
-       * about.
-       *
-       * @param  {object} response - the client response from elasticsearch
-       * @return {Promise} - fulfilled by mock or rejected with original error
-       */
-      handleResponseError: function (requests, response) {
-        var is404 = _.get(response, 'status') === 404;
-        var isEmptyIndexList = _.get(response, 'body.error.index') === '[-*]';
-
-        return is404 && isEmptyIndexList
-          ? Promise.resolve({ responses: requests.map(emptyResponse) })
-          : Promise.reject(response);
-      },
 
       /**
        * Flatten a series of requests into as ES request body
