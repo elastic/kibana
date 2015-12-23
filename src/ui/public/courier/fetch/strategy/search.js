@@ -57,7 +57,7 @@ define(function (require) {
             // handle that request by querying *all* indexes, which is the
             // opposite of what we want in this case.
             if (_.isArray(indexList) && indexList.length === 0) {
-              indexList.push('-*');
+              indexList.push('.kibana-devnull');
             }
             return angular.toJson({
               index: indexList,
