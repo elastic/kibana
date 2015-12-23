@@ -1,5 +1,5 @@
 define(function (require) {
-  var serverConfig = require('intern/dojo/node!./serverConfig');
+  var serverConfig = require('intern/dojo/node!./server_config');
   var _ = require('intern/dojo/node!lodash');
 
   return _.assign({

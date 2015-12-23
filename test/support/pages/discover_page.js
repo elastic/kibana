@@ -1,4 +1,4 @@
-// in test/support/pages/DiscoverPage.js
+// in test/support/pages/discover_page.js
 define(function (require) {
   var config = require('intern').config;
   var Common = require('./Common');

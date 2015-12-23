@@ -1,5 +1,5 @@
 var expect = require('expect.js');
-var getUrl = require('../getUrl');
+var getUrl = require('../get_url');
 
 describe('getUrl', function () {
   it('should convert to a url', function () {

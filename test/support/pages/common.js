@@ -1,10 +1,10 @@
-// in test/support/pages/Common.js
+// in test/support/pages/common.js
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
   var moment = require('moment');
   var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
-  var getUrl = require('intern/dojo/node!../../utils/getUrl');
+  var getUrl = require('intern/dojo/node!../../utils/get_url');
   var fs = require('intern/dojo/node!fs');
   var _ = require('intern/dojo/node!lodash');
   var parse = require('intern/dojo/node!url').parse;
