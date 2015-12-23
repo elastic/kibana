@@ -12,18 +12,21 @@ module.exports = function (grunt) {
       return resolve(rootPath, file);
     });
 
-    let ln = (source, link) => exec('ln', ['-s', source, link]);
+    //We don't want to build os packages with symlinks
+    let transferFiles = (source, link) => grunt.option('os-packages')
+      ? exec('cp', ['-r', source, link])
+      : exec('ln', ['-s', source, link]);
 
     grunt.config.get('platforms').forEach(function (platform) {
       grunt.file.mkdir(platform.buildDir);
 
       // link all files at the root of the build
       buildFiles.forEach(function (source) {
-        ln(source, resolve(platform.buildDir, basename(source)));
+        transferFiles(source, resolve(platform.buildDir, basename(source)));
       });
 
       // link the node modules
-      ln(platform.nodeDir, resolve(platform.buildDir, 'node'));
+      transferFiles(platform.nodeDir, resolve(platform.buildDir, 'node'));
     });
   });
 };
