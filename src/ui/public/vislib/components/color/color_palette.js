@@ -5,56 +5,60 @@ export default function ColorPaletteUtilService(Private) {
 
   var seedColors = Private(VislibComponentsColorSeedColorsProvider);
 
+  function spectrum(start, end, fraction) {
+    start = d3.rgb(start);
+    end = d3.rgb(end);
 
-  /*
-   * Generates an array of hex colors the length of the input number.
-   * If the number is greater than the length of seed colors available,
-   * new colors are generated up to the value of the input number.
-   */
-
-  var offset = 300; // Hue offset to start at
-
-  var fraction = function (goal) {
-    var walkTree = function (numerator, denominator, bytes) {
-      if (bytes.length) {
-        return walkTree(
-          (numerator * 2) + (bytes.pop() ? 1 : -1),
-          denominator * 2,
-          bytes
-        );
-
-      } else {
-        return numerator / denominator;
-      }
-    };
-
-    var b = (goal + 2)
-      .toString(2)
-      .split('')
-      .map(function (num) {
-        return parseInt(num, 10);
-      });
-    b.shift();
-
-    return walkTree(1, 2, b);
-
-  };
-
-  return function (num) {
-    if (!_.isNumber(num)) {
-      throw new TypeError('ColorPaletteUtilService expects a number');
+    function scale(c1, c2) {
+      var num = (c1 + Math.round((c2 - c1) * fraction));
+      num = Math.max(Math.min(num, 255), 0);
+      return num;
     }
 
-    var colors = seedColors;
+    return d3
+      .rgb(scale(start.r, end.r), scale(start.g, end.g), scale(start.b, end.b))
+      .toString();
+  }
 
-    var seedLength = seedColors.length;
+  function createLevel(seed, level) {
+    if (level < 1) return seed;
 
-    _.times(num - seedLength, function (i) {
-      colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());
+    var levelSize = Math.pow(2, level - 1);
+    var steps = _.times(levelSize, function (i) {
+      var numerator = -1 + ((i + 1) * 2);
+      var denominator = Math.pow(2, level);
+      return numerator / denominator;
     });
 
-    return colors;
+    var colors = _.map(seed, function (color, i) {
+      var c1 = seed[(i || seed.length) - 1]; // Make a circle, use previous color, or last color in seed array
+      var c2 = color;
+      return _.map(steps, function (fraction) {
+        return spectrum(c1, c2, fraction);
+      });
+    });
 
+    // Instead of zip merging the array, just flatten, this means like colors will be near each other
+    // but thats actually a good thing. Its easier to tell 2 similar greens apart when they're adjacent
+    return _.flatten(colors);
+  }
+
+  return function (num) {
+    if (num <= seedColors.length) return seedColors;
+
+    // Need more colors!
+    var colors = seedColors;
+    var original = seedColors.base;
+
+    // Figure out what level of the tree we're on
+    var level = Math.log(colors.length / original.length) / Math.log(2);
+
+    // Add new levels until we have enough colors
+    while (colors.length <= num) {
+      colors.push.apply(colors, createLevel(original, ++level));
+    }
+
+    return colors;
   };
 
 };
