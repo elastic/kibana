@@ -7,7 +7,7 @@ describe('_.zipperConcat', function () {
     var b = [4, 5, 6];
 
     var output = _.zipperConcat(a, b);
-    expect(output).to.equal([
+    expect(output).to.eql([
       1, 4,
       2, 5,
       3, 6,
@@ -19,8 +19,8 @@ describe('_.zipperConcat', function () {
     var b = [4, 5, 6];
     var c = [7, 8, 9];
 
-    var output = _.zipperConcat(a, b);
-    expect(output).to.equal([
+    var output = _.zipperConcat(a, b, c);
+    expect(output).to.eql([
       1, 4, 7,
       2, 5, 8,
       3, 6, 9,
