@@ -38,9 +38,7 @@ export default function ColorPaletteUtilService(Private) {
       });
     });
 
-    // Instead of zip merging the array, just flatten, this means like colors will be near each other
-    // but thats actually a good thing. Its easier to tell 2 similar greens apart when they're adjacent
-    return _.flatten(colors);
+    return _.zipperConcat.apply(this, colors);
   }
 
   return function (num) {
