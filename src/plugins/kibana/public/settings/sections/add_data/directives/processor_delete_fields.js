@@ -84,10 +84,7 @@ app.directive('processorDeleteFields', function () {
       $scope.$watchCollection('fields', refreshOutput);
 
       $scope.$watchCollection('inputObject', refreshFields);
-      $scope.$watch('inputObject', function() {
-        console.log('This should ONLY fire on a rewiring');
-        refreshFields();
-      });
+      $scope.$watch('inputObject', refreshFields);
     }
   };
 });

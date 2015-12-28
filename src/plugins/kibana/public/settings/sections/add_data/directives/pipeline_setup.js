@@ -2,6 +2,8 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 
+
+window.ProcessorManager = require('../lib/processor_manager');
 require('./processor_grok');
 require('./processor_regex');
 require('./processor_delete_fields');
@@ -25,9 +27,10 @@ app.directive('pipelineSetup', function ($compile) {
         var removed = _.difference(currentProcessors, processors);
         var added = _.difference(processors, currentProcessors);
 
-        if (removed.length) removed.forEach(removeProcessor);
-        if (added.length) added.forEach(addProcessor);
-        if (removed.length) rewireScopes(); //TODO: I think this should happen regardless. Remove it from the addProcessor logic.
+        removed.forEach(removeProcessor);
+        added.forEach(addProcessor);
+
+        rewireScopes();
       });
 
       function getCurrentProcessors() {
@@ -49,11 +52,9 @@ app.directive('pipelineSetup', function ($compile) {
         processor.$scope.removeProcessor = function() {
           $scope.removeProcessor(processor);
         };
-        if (lastProcessor) {
-          processor.$scope.inputObject = lastProcessor.$scope.outputObject;
-        } else {
-          processor.$scope.inputObject = $scope.inputObject;
-        }
+        processor.$scope.moveUp = function() {
+          $scope.moveUpProcessor(processor);
+        };
 
         processor.$el = $compile(`<li class="processor">${processor.template}</li>`)(processor.$scope);
         processor.$el.appendTo($el);
@@ -64,11 +65,12 @@ app.directive('pipelineSetup', function ($compile) {
         lastProcessor = processor;
       }
 
-      //TODO: This functionality is completely untested.
       function removeProcessor(processor) {
         //TODO: look at the destroy logic for the url shortener/clipboard.js stuff
 
-        processor.$el.remove();
+        processor.$el.slideUp(200, () => {
+          processor.$el.remove();
+        });
 
         // destroy the scope
         processor.$scope.$destroy();
@@ -97,6 +99,13 @@ app.directive('pipelineSetup', function ($compile) {
       $scope.removeProcessor = function(processor) {
         const index = $scope.processors.indexOf(processor);
         $scope.processors.splice(index, 1);
+      }
+
+      $scope.moveUpProcessor = function(processor) {
+        const index = $scope.processors.indexOf(processor);
+        if (index === 0) return;
+
+        $scope.processors[index] = $scope.processors.splice(index + 1, 1, $scope.processors[index])[0];
       }
 
       $scope.addProcessor = function() {
