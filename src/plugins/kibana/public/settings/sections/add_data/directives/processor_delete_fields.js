@@ -32,23 +32,35 @@ app.directive('processorDeleteFields', function () {
         $scope.fields.sort();
       }
 
+      function getSelectedFields() {
+        let result = [];
+        $scope.fields.forEach((field) => {
+          if (field.selected) {
+            result.push(field.name);
+          }
+        });
+
+        return result;
+      }
+
       function getProcessorOutput() {
+        const fieldsToRemove = getSelectedFields();
+
         return new Promise(function(resolve, reject) {
-          let fieldsToRemove = [];
-          $scope.fields.forEach((field) => {
-            if (field.selected) {
-              fieldsToRemove.push(field.name);
-            }
-          });
           resolve(fieldsToRemove);
         });
       }
 
-      function getProcessorDescription() {
+      function getDescription() {
+        let fieldList = getSelectedFields()
+          .map(field => `[${field}]`).join(', ');
 
+        return `Delete Fields ${fieldList}`;
       }
 
       function refreshOutput() {
+        $scope.processorDescription = getDescription();
+
         getProcessorOutput()
         .then((processorOutput) => {
           objectManager.update($scope.outputObject, $scope.inputObject, null, processorOutput);
@@ -58,8 +70,6 @@ app.directive('processorDeleteFields', function () {
           } else {
             $scope.outputDisplayObject = $scope.outputObject;
           }
-
-          $scope.processorDescription = getProcessorDescription();
         });
       }
       refreshOutput = debounce(refreshOutput, 200);
@@ -74,6 +84,10 @@ app.directive('processorDeleteFields', function () {
       $scope.$watchCollection('fields', refreshOutput);
 
       $scope.$watchCollection('inputObject', refreshFields);
+      $scope.$watch('inputObject', function() {
+        console.log('This should ONLY fire on a rewiring');
+        refreshFields();
+      });
     }
   };
 });

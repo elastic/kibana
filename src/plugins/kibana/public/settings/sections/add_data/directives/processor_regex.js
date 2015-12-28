@@ -59,7 +59,13 @@ app.directive('processorRegex', function () {
         });
       }
 
+      function getDescription() {
+        return `RegEx [${$scope.sourceField}] -> [${$scope.targetField}]`;
+      }
+
       function refreshOutput() {
+        $scope.processorDescription = getDescription();
+
         getProcessorOutput()
         .then((processorOutput) => {
           objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
@@ -77,6 +83,7 @@ app.directive('processorRegex', function () {
       $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
 
       $scope.outputObject = {};
+      $scope.targetField = '';
 
       $scope.$watch('sourceField', refreshFieldData);
       $scope.$watch('targetField', refreshOutput);
@@ -84,9 +91,11 @@ app.directive('processorRegex', function () {
       $scope.$watch('expression', refreshOutput);
       $scope.$watch('onlyShowNewFields', refreshOutput);
 
-      $scope.processorDescription = 'Bill';
-
       $scope.$watchCollection('inputObject', refreshFields);
+      $scope.$watch('inputObject', function() {
+        console.log('This should ONLY fire on a rewiring');
+        refreshFields();
+      });
     }
   };
 });

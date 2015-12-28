@@ -9,7 +9,8 @@ app.directive('processorHeader', function () {
       processor: '=',
       field: '=',
       collapsed: '=',
-      description: '='
+      description: '=',
+      removeFn: '&'
     },
     template: require('../views/processor_header.html'),
     controller: function ($scope) {
@@ -22,7 +23,8 @@ app.directive('processorHeader', function () {
       }
 
       $scope.remove = function() {
-        console.log('Remove');
+        //console.log($scope.removeFn);
+        $scope.removeFn($scope.processor);
       }
     }
   };

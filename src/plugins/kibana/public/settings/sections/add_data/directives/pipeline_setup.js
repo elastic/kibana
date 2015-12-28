@@ -19,6 +19,7 @@ app.directive('pipelineSetup', function ($compile) {
       let lastProcessor = undefined;
 
       $scope.$watchCollection('processors', function (processors) {
+        console.log('$watchCollection(procesors)', processors);
         const currentProcessors = getCurrentProcessors();
 
         var removed = _.difference(currentProcessors, processors);
@@ -26,6 +27,7 @@ app.directive('pipelineSetup', function ($compile) {
 
         if (removed.length) removed.forEach(removeProcessor);
         if (added.length) added.forEach(addProcessor);
+        if (removed.length) rewireScopes(); //TODO: I think this should happen regardless. Remove it from the addProcessor logic.
       });
 
       function getCurrentProcessors() {
@@ -44,6 +46,9 @@ app.directive('pipelineSetup', function ($compile) {
         processor.$scope = $scope.$new();
         processor.$scope.processor = processor;
         processor.$scope.counter = counter;
+        processor.$scope.removeProcessor = function() {
+          $scope.removeProcessor(processor);
+        };
         if (lastProcessor) {
           processor.$scope.inputObject = lastProcessor.$scope.outputObject;
         } else {
@@ -61,11 +66,25 @@ app.directive('pipelineSetup', function ($compile) {
 
       //TODO: This functionality is completely untested.
       function removeProcessor(processor) {
+        //TODO: look at the destroy logic for the url shortener/clipboard.js stuff
+
+        processor.$el.remove();
+
         // destroy the scope
         processor.$scope.$destroy();
 
         processor.$el.removeData('processor');
         processor.$el.removeData('$scope');
+      }
+
+      function rewireScopes() {
+        $scope.processors.forEach((processor, index) => {
+          if (index === 0) {
+            processor.$scope.inputObject = $scope.inputObject;
+          } else {
+            processor.$scope.inputObject = $scope.processors[index - 1].$scope.outputObject;
+          }
+        });
       }
     },
     controller: function ($scope, AppState) {
@@ -74,6 +93,11 @@ app.directive('pipelineSetup', function ($compile) {
       $scope.processorType = $scope.defaultProcessorType;
       $scope.processors = [];
       $scope.inputObject = {};
+
+      $scope.removeProcessor = function(processor) {
+        const index = $scope.processors.indexOf(processor);
+        $scope.processors.splice(index, 1);
+      }
 
       $scope.addProcessor = function() {
         var newProcessor = _.cloneDeep($scope.processorType);

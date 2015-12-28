@@ -2,11 +2,15 @@
   processor="processor"
   field="sourceField"
   collapsed="contentCollapsed"
-  description="processorDescription">
+  description="processorDescription"
+  removeFn="removeProcessor">
 </processor-header>
 <div
   class="processor_content"
   ng-hide="contentCollapsed">
+  <div class="form-group">
+    <button ng-click="removeProcessor()">Delete Me!</button>
+  </div>
   <div class="form-group">
     <label>Fields:</label>
     <ul>
