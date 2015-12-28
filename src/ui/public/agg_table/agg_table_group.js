@@ -11,6 +11,7 @@ define(function (require) {
       scope: {
         group: '=',
         perPage: '=?',
+        sort: '=?',
         exportTitle: '=?'
       },
       compile: function ($el) {

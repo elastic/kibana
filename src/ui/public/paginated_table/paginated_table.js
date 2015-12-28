@@ -14,6 +14,7 @@ define(function (require) {
         columns: '=',
         perPage: '=?',
         sortHandler: '=?',
+        sort: '=?',
         showSelector: '=?'
       },
       controllerAs: 'paginatedTable',
@@ -24,7 +25,7 @@ define(function (require) {
           direction: null
         };
 
-        self.sortColumn = function (colIndex) {
+        self.sortColumn = function (colIndex, dir) {
           var col = $scope.columns[colIndex];
 
           if (!col) return;
@@ -33,7 +34,7 @@ define(function (require) {
           var sortDirection;
 
           if (self.sort.columnIndex !== colIndex) {
-            sortDirection = 'asc';
+            sortDirection = dir || 'asc';
           } else {
             var directions = {
               null: 'asc',
@@ -45,6 +46,10 @@ define(function (require) {
 
           self.sort.columnIndex = colIndex;
           self.sort.direction = sortDirection;
+          $scope.sort = {
+            columnIndex: colIndex,
+            direction:  sortDirection
+          };
           self._setSortGetter(colIndex);
         };
 
@@ -61,6 +66,11 @@ define(function (require) {
             };
           }
         };
+
+        // Set the sort state if it is set
+        if ($scope.sort && $scope.sort.columnIndex !== null) {
+          self.sortColumn($scope.sort.columnIndex, $scope.sort.direction);
+        }
 
         // update the sordedRows result
         $scope.$watchMulti([
