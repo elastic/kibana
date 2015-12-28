@@ -1,5 +1,6 @@
 import SimpleGit from 'simple-git';
 import { promisify } from 'bluebird';
+import { includes } from 'lodash';
 
 export default function filesToCommit(path) {
   const simpleGit = new SimpleGit(path);
@@ -29,4 +30,12 @@ export function isAdded(file) {
 
 export function isDeleted(file) {
   return file.status === 'D';
+}
+
+export function isUnmerged(file) {
+  return file.status === 'U';
+}
+
+export function isStaged(file) {
+  return !isDeleted(file) && !isUnmerged(file);
 }
