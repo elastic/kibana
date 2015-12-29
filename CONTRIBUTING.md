@@ -104,7 +104,7 @@ The standard `npm run test` task runs several sub tasks and can take several min
 
 #### OS packages
 
-Packages are built using fpm, pleaserun, dpkg, rpm, and pkgbuild.  fpm and pleaserun can be installed using gem.
+Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
 ```sh
 gem install pleaserun
 gem install fpm
