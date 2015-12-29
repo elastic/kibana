@@ -4,7 +4,15 @@ export default function ProcessorManager() {
   const self = this;
 
   self.processors = [];
+  self.counter = 0;
+  self.updatePaused = false;
 };
+
+ProcessorManager.prototype.pauseUpdate = function(paused) {
+  const self = this;
+
+  self.updatePaused = paused;
+}
 
 ProcessorManager.prototype.remove = function(processor) {
   const self = this;
@@ -15,6 +23,7 @@ ProcessorManager.prototype.remove = function(processor) {
 }
 
 ProcessorManager.prototype.moveUp = function(processor) {
+  console.log('ProcessorManager', 'moveUp');
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
@@ -41,7 +50,9 @@ ProcessorManager.prototype.moveDown = function(processor) {
 ProcessorManager.prototype.add = function(processorType) {
   const self = this;
   const processors = self.processors;
+  self.counter += 1;
 
   const newProcessor = _.cloneDeep(processorType);
+  newProcessor.processorId = self.counter;
   processors.push(newProcessor);
 }

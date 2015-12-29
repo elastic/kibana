@@ -14,9 +14,11 @@ app.directive('processorDeleteFields', function () {
       //this occurs when the parent processor changes it's output object,
       //which means that this processor's input object is changing.
       function refreshFields() {
-        objectManager.mutateClone($scope.outputObject, $scope.inputObject);
+        console.log($scope.processor.processorId, 'refreshFields');
 
+        objectManager.mutateClone($scope.outputObject, $scope.inputObject);
         const newKeys = keysDeep($scope.inputObject);
+
         const oldKeys = $scope.fields.map((field) => field.name);
         const removed = _.difference(oldKeys, newKeys);
         const added = _.difference(newKeys, oldKeys);
@@ -30,6 +32,8 @@ app.directive('processorDeleteFields', function () {
           });
         });
         $scope.fields.sort();
+
+        refreshOutput();
       }
 
       function getSelectedFields() {
@@ -59,17 +63,14 @@ app.directive('processorDeleteFields', function () {
       }
 
       function refreshOutput() {
+        console.log($scope.processor.processorId, 'refreshOutput');
         $scope.processorDescription = getDescription();
 
         getProcessorOutput()
         .then((processorOutput) => {
           objectManager.update($scope.outputObject, $scope.inputObject, null, processorOutput);
 
-          if ($scope.onlyShowNewFields) {
-            $scope.outputDisplayObject = processorOutput;
-          } else {
-            $scope.outputDisplayObject = $scope.outputObject;
-          }
+          $scope.outputDisplayObject = $scope.outputObject;
         });
       }
       refreshOutput = debounce(refreshOutput, 200);
@@ -81,10 +82,20 @@ app.directive('processorDeleteFields', function () {
         refreshOutput();
       }
 
-      $scope.$watchCollection('fields', refreshOutput);
+      $scope.$watchCollection('fields', () => {
+        console.log($scope.processor.processorId, '$watch', 'fields');
+        refreshOutput();
+      });
 
-      $scope.$watchCollection('inputObject', refreshFields);
-      $scope.$watch('inputObject', refreshFields);
+      $scope.$watchCollection('inputObject', () => {
+        console.log($scope.processor.processorId, '$watchCollection', 'inputObject');
+        refreshFields();
+      });
+
+      $scope.$watch('inputObject', () => {
+        console.log($scope.processor.processorId, '$watch', 'inputObject');
+        refreshFields();
+      });
     }
   };
 });

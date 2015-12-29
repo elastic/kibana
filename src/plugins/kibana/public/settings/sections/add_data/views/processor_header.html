@@ -10,7 +10,7 @@
   </button>
 
   <div class="processor-header-title">
-    <span>{{ description }}</span>
+    <span>{{processor.processorId}}. {{ description }}</span>
 <!--     <span>
       {{ $parent.counter }}. {{ processor.title }} Processor
     </span>
@@ -29,7 +29,7 @@
       aria-label="Increase Priority"
       tooltip="Increase Priority"
       tooltip-append-to-body="true"
-      ng-click="moveUp()"
+      ng-click="manager.moveUp(processor)"
       type="button"
       class="btn btn-xs btn-default">
       <i aria-hidden="true" class="fa fa-caret-up"></i>
@@ -39,7 +39,7 @@
       aria-label="Decrease Priority"
       tooltip="Decrease Priority"
       tooltip-append-to-body="true"
-      ng-click="moveDown()"
+      ng-click="manager.moveDown(processor)"
       type="button"
       class="btn btn-xs btn-default">
       <i aria-hidden="true" class="fa fa-caret-down"></i>
@@ -49,7 +49,7 @@
       aria-label="Remove Processor"
       tooltip="Remove Processor"
       tooltip-append-to-body="true"
-      ng-click="remove()"
+      ng-click="manager.remove(processor)"
       type="button"
       class="btn btn-xs btn-danger">
       <i aria-hidden="true" class="fa fa-times"></i>

@@ -5,19 +5,21 @@ const keysDeep = require('../lib/keys_deep');
 const objectManager = require('../lib/object_manager');
 require('./processor_header');
 
-app.directive('processorRegex', function () {
+app.directive('processorDate', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_regex.html'),
+    template: require('../views/processor_date.html'),
     controller: function ($scope, debounce, Promise, $timeout) {
 
       //this occurs when the parent processor changes it's output object,
       //which means that this processor's input object is changing.
       function refreshFields() {
-        console.log($scope.processor.processorId, 'refreshFields');
+        if ($scope.manager.updatePaused) return;
 
         objectManager.mutateClone($scope.outputObject, $scope.inputObject);
         $scope.fields = keysDeep($scope.inputObject);
+
+        console.log($scope.processor.processorId, $scope.fields);
 
         if (!_.contains($scope.fields, $scope.sourceField)) {
           $scope.sourceField = $scope.fields[0];
@@ -27,7 +29,6 @@ app.directive('processorRegex', function () {
       }
 
       function refreshFieldData() {
-        console.log($scope.processor.processorId, 'refreshFieldData');
         $scope.fieldData = _.get($scope.inputObject, $scope.sourceField);
       }
       refreshFieldData = debounce(refreshFieldData, 100);
@@ -36,23 +37,19 @@ app.directive('processorRegex', function () {
         return new Promise(function(resolve, reject) {
           const processorOutput = {};
 
-          if (!$scope.expression || !$scope.targetField)
+          if (!$scope.targetField)
             resolve();
 
           $timeout(function() {
-            let matches = [];
-            try {
-              const regex = new RegExp($scope.expression, 'ig');
-              matches = $scope.fieldData.match(regex);
-            } catch(err) {
+            let result;
+
+            let temp = new Date($scope.fieldData);
+            if (!isNaN( temp.getTime())) {
+              result = temp;
             }
 
-            if (matches) {
-              if (matches.length === 1) {
-                _.set(processorOutput, $scope.targetField, matches[0]);
-              } else {
-                _.set(processorOutput, $scope.targetField, matches);
-              }
+            if (result) {
+              _.set(processorOutput, $scope.targetField, result);
             } else {
               _.set(processorOutput, $scope.targetField, '');
             }
@@ -63,11 +60,10 @@ app.directive('processorRegex', function () {
       }
 
       function getDescription() {
-        return `RegEx [${$scope.sourceField}] -> [${$scope.targetField}]`;
+        return `Date [${$scope.sourceField}] -> [${$scope.targetField}]`;
       }
 
       function refreshOutput() {
-        console.log($scope.processor.processorId, 'refreshOutput');
         $scope.processorDescription = getDescription();
 
         getProcessorOutput()
@@ -79,44 +75,24 @@ app.directive('processorRegex', function () {
       }
       refreshOutput = debounce(refreshOutput, 200);
 
-      //TODO: This is only here for debugging purposes.
-      $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
-
       $scope.outputObject = {};
       $scope.targetField = '';
 
-      $scope.$watch('sourceField', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'sourceField');
-        refreshFieldData();
-      });
+      $scope.$watch('sourceField', refreshFieldData);
+      $scope.$watch('targetField', refreshOutput);
+      $scope.$watch('fieldData', refreshOutput);
 
-      $scope.$watch('targetField', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'targetField');
-        refreshOutput();
-      });
-
-      $scope.$watch('fieldData', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'fieldData');
-        refreshOutput();
-      });
-
-      $scope.$watch('expression', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'expression');
-        refreshOutput();
-      });
-
-      $scope.$watch('onlyShowNewFields', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'onlyShowNewFields');
-        refreshOutput();
-      });
-
-      $scope.$watchCollection('inputObject', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'inputObject');
+      $scope.$watch('manager.updatePaused', (updatePaused) => {
+        if (updatePaused) return;
         refreshFields();
       });
 
+      $scope.$watchCollection('inputObject', () => {
+        console.log($scope.processor.processorId, '$watchCollection(inputObject)');
+        refreshFields();
+      });
       $scope.$watch('inputObject', () => {
-        console.log($scope.processor.processorId, '$watch', 'inputObject');
+        console.log($scope.processor.processorId, '$watch(inputObject)');
         refreshFields();
       });
     }
