@@ -108,6 +108,8 @@
     "jade-loader": "0.7.1",
     "joi": "6.6.1",
     "jquery": "2.1.4",
+    "js-data": "2.8.2",
+    "js-data-angular": "3.1.0",
     "js-yaml": "3.4.1",
     "json-loader": "0.5.3",
     "json-stringify-safe": "5.0.1",
