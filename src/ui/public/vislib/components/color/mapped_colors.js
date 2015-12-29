@@ -1,4 +1,4 @@
-define((require) => (Private, config) => {
+define((require) => (Private, config, $rootScope) => {
   const _ = require('lodash');
   const d3 = require('d3');
   const createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
@@ -14,7 +14,10 @@ define((require) => (Private, config) => {
    * Provides functions to interact with the lookup table
    */
   class MappedColors {
+
     constructor() {
+      $rootScope.$on('$routeChangeStart', () => this.purge());
+      this.oldMap = {};
       this.mapping = {};
     }
 
@@ -22,9 +25,20 @@ define((require) => (Private, config) => {
       return getConfigColorMapping()[key] || this.mapping[key];
     }
 
+    flush() {
+      this.oldMap = _.clone(this.mapping);
+      this.mapping = {};
+    }
+
+    purge() {
+      this.oldMap = {};
+      this.mapping = {};
+    }
+
     mapKeys(keys) {
       const configMapping = getConfigColorMapping();
       const configColors = _.values(configMapping);
+      const oldColors = _.values(this.oldMap);
 
       const keysToMap = [];
       _.each(keys, (key) => {
@@ -34,12 +48,15 @@ define((require) => (Private, config) => {
         // If this key is mapped to a color used by the config color mapping, we need to remap it
         if (_.contains(configColors, this.mapping[key])) keysToMap.push(key);
 
+        // if key exist in oldMap, move it to mapping
+        if (this.oldMap[key]) this.mapping[key] = this.oldMap[key];
+
         // If this key isn't mapped, we need to map it
         if (this.get(key) == null) keysToMap.push(key);
       });
 
       // Generate a color palette big enough that all new keys can have unique color values
-      const allColors = _(this.mapping).values().union(configColors).value();
+      const allColors = _(this.mapping).values().union(configColors).union(oldColors).value();
       const colorPalette = createColorPalette(allColors.length + keysToMap.length);
       const newColors = _.difference(colorPalette, allColors);
       _.merge(this.mapping, _.zipObject(keysToMap, newColors));
