@@ -1,6 +1,7 @@
 export default function (grunt) {
   grunt.registerTask('precommit', [
-    'collectStagedFiles',
+    'collectFilesToCommit',
+    'checkAddedFilenames',
     'lintStagedFiles'
   ]);
 };
