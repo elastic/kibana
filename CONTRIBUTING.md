@@ -110,6 +110,20 @@ The standard `npm run test` task runs several sub tasks and can take several min
   </dd>
 </dl>
 
+#### OS packages
+
+Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+```sh
+gem install pleaserun
+gem install fpm
+npm run build:ospackages
+```
+
+To specify a package to build you can add `rpm` or `deb` as an argument.
+```sh
+npm run build:ospackages -- --rpm
+```
+
 ### Functional UI Testing
 
 #### Handy references
