@@ -119,6 +119,11 @@ gem install fpm
 npm run build:ospackages
 ```
 
+To specify a package to build you can add `rpm` or `deb` as an argument.
+```sh
+npm run build:ospackages -- --rpm
+```
+
 ### Functional UI Testing
 
 #### Handy references
