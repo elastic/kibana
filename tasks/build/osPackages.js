@@ -38,14 +38,6 @@ module.exports = function (grunt) {
         fpm(args.concat('-t', 'deb', '-a', arch, files, sysv, systemd));
         return;
       }
-
-      // kibana.pkg
-      if (/darwin-x(86|64)$/.test(name)) {
-        let launchd = servicesByName.launchd.outputDir + '/=/';
-        fpm(args.concat('-t', 'osxpkg', '-a', arch, files, launchd));
-        return;
-      }
-
     });
   });
 };
