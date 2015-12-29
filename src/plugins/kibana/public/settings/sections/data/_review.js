@@ -22,7 +22,6 @@ routes.when('/settings/data/review', {
 modules.get('apps/settings')
   .controller('settingsDataReview', function ($scope, Private) {
     var store = Private(storeProvider);
-    $scope.perPage = 25;
     $scope.columns = [
       {title: 'field'},
       {title: 'mapping'},
