@@ -1,0 +1,21 @@
+<div
+  class="processor_container"
+  ng-class="{dirty: isDirty}">
+  <processor-header
+    processor="processor"
+    field="sourceField"
+    collapsed="contentCollapsed"
+    description="processorDescription"
+    manager="manager">
+  </processor-header>
+  <div class="form-group">
+    <button ng-click="update()">Do Update</button>
+  </div>
+  <div
+    class="processor_content"
+    ng-hide="contentCollapsed">
+    <div class="form-group">
+      <pre>{{ processor.outputObject | json }}</pre>
+    </div>
+  </div>
+</div>

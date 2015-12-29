@@ -1,0 +1,14 @@
+<processor-header
+  processor="processor"
+  field="sourceField"
+  collapsed="contentCollapsed"
+  description="processorDescription"
+  manager="manager">
+</processor-header>
+<div
+  class="processor_content"
+  ng-hide="contentCollapsed">
+  <div class="form-group">
+    <pre>{{ outputDisplayObject | json }}</pre>
+  </div>
+</div>

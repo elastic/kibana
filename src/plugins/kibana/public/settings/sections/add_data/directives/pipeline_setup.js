@@ -3,10 +3,7 @@ const _ = require('lodash');
 const $ = require('jquery');
 const ProcessorManager = require('../lib/processor_manager');
 
-require('./processor_grok');
-require('./processor_regex');
-require('./processor_date');
-require('./processor_delete_fields');
+require('./processors');
 
 app.directive('pipelineSetup', function ($compile) {
   return {
@@ -19,7 +16,6 @@ app.directive('pipelineSetup', function ($compile) {
       $el = $scope.$el = $container.find('.pipeline-wrapper');
 
       $scope.$watchCollection('manager.processors', function (processors) {
-        console.log(0, 'pipelineSetup', 'processor collection watch');
         const currentProcessors = getCurrentProcessors();
 
         var removed = _.difference(currentProcessors, processors);
@@ -28,7 +24,7 @@ app.directive('pipelineSetup', function ($compile) {
         removed.forEach(removeProcessor);
         added.forEach(addProcessor);
 
-        rewireScopes();
+        updateProcessorChain();
         reorderDom();
       });
 
@@ -43,7 +39,6 @@ app.directive('pipelineSetup', function ($compile) {
       }
 
       function addProcessor(processor) {
-        console.log(0, 'pipelineSetup', 'addProcessor');
         counter += 1;
 
         processor.$scope = $scope.$new();
@@ -59,7 +54,6 @@ app.directive('pipelineSetup', function ($compile) {
       }
 
       function removeProcessor(processor) {
-        console.log(0, 'pipelineSetup', 'removeProcessor');
         //TODO: look at the destroy logic for the url shortener/clipboard.js stuff
 
         processor.$el.slideUp(200, () => {
@@ -74,17 +68,28 @@ app.directive('pipelineSetup', function ($compile) {
       }
 
       //TODO: Move this into the manager?
-      function rewireScopes() {
-        console.log(0, 'pipelineSetup', 'rewireScopes');
+      function updateProcessorChain() {
         const processors = $scope.manager.processors;
 
+        let topIndexChanged = -1;
         processors.forEach((processor, index) => {
+          let newParent;
           if (index === 0) {
-            processor.$scope.inputObject = $scope.inputObject;
+            newParent = $scope.sampleData;
           } else {
-            processor.$scope.inputObject = processors[index - 1].$scope.outputObject;
+            newParent = processors[index - 1];
+          }
+
+          //Do something here to track the top processor in the chain to change (to start the update process);
+          let changed = processor.$scope.setParent(newParent);
+          if (topIndexChanged === -1 && changed) {
+            topIndexChanged = index;
           }
         });
+        if (topIndexChanged !== -1) {
+          console.log('top index changed', topIndexChanged);
+          processors[topIndexChanged].$scope.forceUpdate();
+        }
       }
 
       function reorderDom() {
@@ -120,7 +125,7 @@ app.directive('pipelineSetup', function ($compile) {
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
       $scope.manager = new ProcessorManager();
-      $scope.inputObject = {};
+      $scope.sampleData = {};
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));

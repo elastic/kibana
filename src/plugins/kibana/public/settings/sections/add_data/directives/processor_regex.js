@@ -14,7 +14,6 @@ app.directive('processorRegex', function () {
       //this occurs when the parent processor changes it's output object,
       //which means that this processor's input object is changing.
       function refreshFields() {
-        console.log($scope.processor.processorId, 'refreshFields');
 
         objectManager.mutateClone($scope.outputObject, $scope.inputObject);
         $scope.fields = keysDeep($scope.inputObject);
@@ -27,7 +26,6 @@ app.directive('processorRegex', function () {
       }
 
       function refreshFieldData() {
-        console.log($scope.processor.processorId, 'refreshFieldData');
         $scope.fieldData = _.get($scope.inputObject, $scope.sourceField);
       }
       refreshFieldData = debounce(refreshFieldData, 100);
@@ -67,7 +65,6 @@ app.directive('processorRegex', function () {
       }
 
       function refreshOutput() {
-        console.log($scope.processor.processorId, 'refreshOutput');
         $scope.processorDescription = getDescription();
 
         getProcessorOutput()
@@ -85,40 +82,13 @@ app.directive('processorRegex', function () {
       $scope.outputObject = {};
       $scope.targetField = '';
 
-      $scope.$watch('sourceField', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'sourceField');
-        refreshFieldData();
-      });
-
-      $scope.$watch('targetField', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'targetField');
-        refreshOutput();
-      });
-
-      $scope.$watch('fieldData', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'fieldData');
-        refreshOutput();
-      });
-
-      $scope.$watch('expression', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'expression');
-        refreshOutput();
-      });
-
-      $scope.$watch('onlyShowNewFields', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'onlyShowNewFields');
-        refreshOutput();
-      });
-
-      $scope.$watchCollection('inputObject', () => {
-        console.log($scope.processor.processorId, '$watchCollection', 'inputObject');
-        refreshFields();
-      });
-
-      $scope.$watch('inputObject', () => {
-        console.log($scope.processor.processorId, '$watch', 'inputObject');
-        refreshFields();
-      });
+      $scope.$watch('sourceField', refreshFieldData);
+      $scope.$watch('targetField', refreshOutput);
+      $scope.$watch('fieldData', refreshOutput);
+      $scope.$watch('expression', refreshOutput);
+      $scope.$watch('onlyShowNewFields', refreshOutput);
+      //$scope.$watchCollection('inputObject', refreshFields);
+      $scope.$watch('inputObject', refreshFields);
     }
   };
 });
