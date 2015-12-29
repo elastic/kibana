@@ -79,6 +79,8 @@ class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
+      externals: ['axios'],
+
       recordsPath: resolve(this.env.workingDir, 'webpack.records'),
 
       plugins: [
