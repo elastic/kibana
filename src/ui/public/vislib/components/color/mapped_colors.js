@@ -26,16 +26,11 @@ define((require) => (Private, config, $rootScope) => {
     }
 
     flush() {
-      // Move current mapping to old mapping
-      // Reset this.mapping.
       this.oldMap = _.clone(this.mapping);
       this.mapping = {};
     }
 
     purge() {
-      console.log('purging!');
-      // Move current mapping to old mapping
-      // Reset this.mapping.
       this.oldMap = {};
       this.mapping = {};
     }
@@ -46,7 +41,6 @@ define((require) => (Private, config, $rootScope) => {
       const oldColors = _.values(this.oldMap);
 
       const keysToMap = [];
-      //console.log('requested', keys.sort(), '\nexisting', _.keys(this.mapping).sort());
       _.each(keys, (key) => {
         // If this key is mapped in the config, it's unnecessary to have it mapped here
         if (configMapping[key]) delete this.mapping[key];
