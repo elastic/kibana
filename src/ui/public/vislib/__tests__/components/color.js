@@ -137,36 +137,12 @@ describe('Vislib Color Module Test Suite', function () {
       config.set('visualization:colorMapping', previousConfig);
     }));
 
-    it('should properly map keys to unique colors', ngMock.inject((config) => {
+    it('should properly map keys to colors', ngMock.inject((config) => {
       config.set('visualization:colorMapping', {});
 
-      const arr = [1, 2, 3, 4, 5];
+      const arr = _.range(60);
       mappedColors.mapKeys(arr);
-      expect(_(mappedColors.mapping).values().uniq().size()).to.be(arr.length);
-    }));
-
-    it('should not include colors used by the config', ngMock.inject((config) => {
-      const newConfig = {bar: seedColors[0]};
-      config.set('visualization:colorMapping', newConfig);
-
-      const arr = ['foo', 'baz', 'qux'];
-      mappedColors.mapKeys(arr);
-
-      const colorValues = _(mappedColors.mapping).values();
-      expect(colorValues.contains(seedColors[0])).to.be(false);
-      expect(colorValues.uniq().size()).to.be(arr.length);
-    }));
-
-    it('should create a unique array of colors even when config is set', ngMock.inject((config) => {
-      const newConfig = {bar: seedColors[0]};
-      config.set('visualization:colorMapping', newConfig);
-
-      const arr = ['foo', 'bar', 'baz', 'qux'];
-      mappedColors.mapKeys(arr);
-
-      const expectedSize = _(arr).difference(_.keys(newConfig)).size();
-      expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
-      expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
+      expect(_(mappedColors.mapping).values().size()).to.be(arr.length);
     }));
 
     it('should treat different formats of colors as equal', ngMock.inject((config) => {
@@ -180,7 +156,6 @@ describe('Vislib Color Module Test Suite', function () {
 
       const expectedSize = _(arr).difference(_.keys(newConfig)).size();
       expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
-      expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
       expect(mappedColors.get('bar')).to.be(seedColors[0]);
     }));
   });
