@@ -1,14 +1,12 @@
 var createAgent = require('./create_agent');
 var mapUri = require('./map_uri');
 var { resolve } = require('url');
-module.exports = function createProxy(server, method, route, config) {
 
-  var pre = '/elasticsearch';
-  var sep = route[0] === '/' ? '' : '/';
-  var path = `${pre}${sep}${route}`;
+function createProxy(server, method, route, config) {
+
   var options = {
     method: method,
-    path: path,
+    path: createProxy.createPath(route),
     handler: {
       proxy: {
         mapUri: mapUri(server),
@@ -24,3 +22,10 @@ module.exports = function createProxy(server, method, route, config) {
   server.route(options);
 };
 
+createProxy.createPath = function createPath(path) {
+  const pre = '/elasticsearch';
+  const sep = path[0] === '/' ? '' : '/';
+  return `${pre}${sep}${path}`;
+};
+
+module.exports = createProxy;
