@@ -65,7 +65,7 @@ module.exports = function (plugin, server) {
     if (timeoutId) return;
 
     var myId = setTimeout(function () {
-      check().finally(function () {
+      Promise.try(check).finally(function () {
         if (timeoutId === myId) startorRestartChecking();
       });
     }, ms);
