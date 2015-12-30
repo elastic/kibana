@@ -100,6 +100,18 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
+        bdd.it('should show expected number of hits', function () {
+          var expectedHitCount = '14,004';
+          return common.tryForTime(10 * 1000, function tryingForTime() {
+            return discoverPage.getHitCount()
+            .then(function (hitCount) {
+              common.debug('hitCount = ' + hitCount);
+              expect(hitCount).to.be(expectedHitCount);
+            });
+          })
+          .catch(common.handleError(this));
+        });
+
         bdd.it('should show the correct bar chart', function () {
           var expectedBarChartData = [0,0,0,0,1.0968749999999972,7.6781250000000085,
             37.87875,92.210625,108.590625,71.80875,23.54625,4.753124999999997,
@@ -119,6 +131,27 @@ define(function (require) {
                 }
               });
             });
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('select field _type should show the correct _type data', function () {
+          var expectedFieldData = ['Quick Count ( 500 /500 records )',
+            'apache',
+            '80.4%',
+            'nginx',
+            '19.6%',
+          ];
+          return discoverPage.selectField('_type')
+          .then(function () {
+            return common.sleep(10000);
+          })
+          .then(function () {
+            return discoverPage.getFieldData();
+          })
+          .then(function (fieldData) {
+            common.debug('fieldData = ' + fieldData.split('\n'));
+            expect(fieldData.split('\n')).to.eql(expectedFieldData);
           })
           .catch(common.handleError(this));
         });

@@ -115,7 +115,31 @@ define(function (require) {
     getSpinnerDone: function getSpinnerDone() {
       common.debug('--getSpinner done method');
       return thisTime.findByCssSelector('span.spinner.ng-hide');
+    },
+
+    getHitCount: function getHitCount() {
+      return thisTime.findByCssSelector('strong.discover-info-hits.ng-binding')
+      .getVisibleText();
+    },
+
+    selectField: function selectField(fieldName) {
+      return thisTime
+      .findByCssSelector('field-name[title="' + fieldName + '"]')
+      .click();
+    },
+
+    getFieldData: function getFieldData() {
+      // html body#kibana-body div.content div.application.ng-scope.tab-discover div.app-container.ng-scope div.container-fluid div.row div.col-md-2.sidebar-container.collapsible-sidebar disc-field-chooser.ng-isolate-scope div.sidebar-list ul.list-unstyled.discover-unpopular-fields.hidden-sm.hidden-xs li.sidebar-item.ng-scope div.ng-scope div.discover-field-details div.ng-scope div.discover-field-details-item.ng-scope div div.discover-field-details-value.ng-binding.ng-isolate-scope
+      //html body#kibana-body div.content div.application.ng-scope.tab-discover div.app-container.ng-scope div.container-fluid div.row div.col-md-2.sidebar-container.collapsible-sidebar disc-field-chooser.ng-isolate-scope div.sidebar-list ul.list-unstyled.discover-unpopular-fields.hidden-sm.hidden-xs li.sidebar-item.ng-scope div.ng-scope div.discover-field-details
+      return thisTime
+      .findByCssSelector('div.discover-field-details')
+      .getVisibleText();
     }
+    // clickAddField: function clickAddField() {
+    //   return thisTime
+    //   .findByCssSelector('button[ng-bind*="add"]')
+    //   .click();
+    // }
 
   };
 
