@@ -33,7 +33,8 @@ describe('plugins/elasticsearch', function () {
         }
       });
 
-      return kbnServer.ready();
+      return kbnServer.ready()
+      .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });
 
 
@@ -76,8 +77,19 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana',
-      payload: {settings: { number_of_shards: 1 }},
-      statusCode: 200
+      statusCode: 405
+    });
+
+    testRoute({
+      method: 'PUT',
+      url: '/elasticsearch/.kibana',
+      statusCode: 405
+    });
+
+    testRoute({
+      method: 'DELETE',
+      url: '/elasticsearch/.kibana',
+      statusCode: 405
     });
 
     testRoute({
