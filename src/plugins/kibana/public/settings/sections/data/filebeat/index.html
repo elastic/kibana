@@ -1,0 +1,15 @@
+<kbn-settings-app section="data">
+  <div ng-controller="kbnSettingsDataFilebeat" class="container">
+    Filebeat wizard breadcrumb
+
+    <div ng-switch="currentStep">
+      <paste-samples-step ng-switch-when="0"></paste-samples-step>
+      <pipeline-step ng-switch-when="1"></pipeline-step>
+      <pattern-review-step ng-switch-when="2"></pattern-review-step>
+      <install-filebeat-step ng-switch-when="3"></install-filebeat-step>
+    </div>
+
+    <button ng-click="prevStep()">Prev</button>
+    <button ng-click="nextStep()">Next</button>
+  </div>
+</kbn-settings-app>
