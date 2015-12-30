@@ -1,19 +1,72 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const $ = require('jquery');
-const keysDeep = require('../lib/keys_deep');
-const objectManager = require('../lib/object_manager');
 require('./processor_header');
+
+//THIS IS THE SCOPE OF THE INDIVIDUAL PROCESSORS.
+app.directive('innerProcessor', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      processor: '='
+    },
+    template: require('../views/inner_processor.html'),
+    controller : function ($scope, $rootScope, $timeout) {
+      const processor = $scope.processor;
+
+      function applyProcessor() {
+        $rootScope.$broadcast('processor_started', { processor: processor });
+
+        //this is just here to simulate an async process.
+        $timeout(function() {
+          //each processor will generate it's own output object
+          let output = _.cloneDeep(processor.inputObject);
+          let key = `processor_${processor.processorId}_field`;
+          let value = new Date().toString();
+          _.set(output, key, value);
+
+          //each processor will generate it's own description
+          let description = `Added ${key}`;
+
+          const message = {
+            processor: processor,
+            output: output,
+            description: description
+          };
+
+          $rootScope.$broadcast('processor_finished', message);
+        }, 300);
+      }
+
+      function processorStart(event, message) {
+        if (message.processor !== processor) return;
+
+        applyProcessor();
+      }
+
+      const startListener = $scope.$on('processor_start', processorStart);
+
+      //internal only (linked to the button, no other use, for debug only)
+      //this would be logic that would be triggered from any processor
+      //specific state changes like selectedfield or expression, etc
+      $scope.update = function() {
+        applyProcessor();
+      }
+
+      $scope.$on('$destroy', () => {
+        startListener();
+      });
+    }
+  }
+});
 
 app.directive('processorSimple1', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_simple1.html'),
-    controller: function ($scope, $rootScope, $timeout) {
+    controller: function ($scope, $rootScope) {
+      const processor = $scope.processor;
 
       function parentUpdated(event, message) {
-        const processor = $scope.processor;
-
         if (message.processor === $scope.parent) {
           updateInputObject();
           applyProcessor();
@@ -29,50 +82,57 @@ app.directive('processorSimple1', function () {
       function updateInputObject() {
         //checks to see if the parent is a basic object or a processor
         if ($scope.parent.processorId) {
-          $scope.inputObject = _.cloneDeep($scope.parent.outputObject);
+          processor.inputObject = _.cloneDeep($scope.parent.outputObject);
         } else {
-          $scope.inputObject = _.cloneDeep($scope.parent);
+          processor.inputObject = _.cloneDeep($scope.parent);
         }
       }
 
       function applyProcessor() {
-        const processor = $scope.processor;
+        //tell the inner processor to start work.
+        $rootScope.$broadcast('processor_start', { processor: processor });
+      }
+
+      function processorStarted(event, message) {
+        if (processor !== message.processor) return;
+
+        //the inner processor has started to work (either on it's own or from us telling it to)
         setDirty();
+      }
 
-        //this is just here to simulate an async process.
-        $timeout(function() {
-          let output = _.cloneDeep($scope.inputObject);
-          let key = `processor_${processor.processorId}_field`;
-          let value = new Date().toString();
-          _.set(output, key, value);
+      //the inner processor has told us it's done.
+      function processorFinished(event, message) {
+        if (processor !== message.processor) return;
 
-          processor.outputObject = output;
-          $scope.isDirty = false;
+        processor.outputObject = message.output;
+        $scope.processorDescription = message.description;
+        $scope.isDirty = false;
 
-          $rootScope.$broadcast('processor_update', { processor: processor });
-        }, 1000);
+        $rootScope.$broadcast('processor_update', { processor: processor });
       }
 
       function setDirty() {
-        const processor = $scope.processor;
         $scope.isDirty = true;
 
         //alert my child if one exists.
         $rootScope.$broadcast('processor_dirty', { processor: processor });
       }
 
-      $scope.$on('processor_update', parentUpdated);
-      $scope.$on('processor_dirty', parentDirty);
+      const updateListener = $scope.$on('processor_update', parentUpdated);
+      const dirtyListener = $scope.$on('processor_dirty', parentDirty);
+      const startedListener = $scope.$on('processor_started', processorStarted);
+      const finishedListener = $scope.$on('processor_finished', processorFinished);
 
-      //internal only (linked to the button, no other use, for debug only)
-      $scope.update = function() {
-
-        applyProcessor();
-      }
+      $scope.$on('$destroy', () => {
+        updateListener();
+        dirtyListener();
+        startedListener();
+        finishedListener();
+      });
 
       //external hooks
       $scope.forceUpdate = function() {
-        $scope.update();
+        applyProcessor();
       }
 
       //returns whether the parent actually changed

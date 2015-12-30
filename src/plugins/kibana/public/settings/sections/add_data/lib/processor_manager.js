@@ -23,7 +23,6 @@ ProcessorManager.prototype.remove = function(processor) {
 }
 
 ProcessorManager.prototype.moveUp = function(processor) {
-  console.log('ProcessorManager', 'moveUp');
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);

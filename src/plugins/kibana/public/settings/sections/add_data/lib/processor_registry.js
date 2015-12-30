@@ -3,7 +3,8 @@ export default [
     id: 'simple1',
     title: 'Simple 1',
     default: true,
-    template: '<processor-simple1></processor-simple1>'
+    template: '<processor-simple1></processor-simple1>',
+    innerTemplate: '<inner-processor processor="processor"></inner-processor>'
   },
   {
     id: 'simple2',

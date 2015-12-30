@@ -87,7 +87,6 @@ app.directive('pipelineSetup', function ($compile) {
           }
         });
         if (topIndexChanged !== -1) {
-          console.log('top index changed', topIndexChanged);
           processors[topIndexChanged].$scope.forceUpdate();
         }
       }
@@ -101,20 +100,20 @@ app.directive('pipelineSetup', function ($compile) {
 
           if (index === 0) {
             if (!$el.is(':first-child')) {
-              $el.fadeOut(100, () => {
+              //$el.fadeOut(100, () => {
                 $el.detach();
                 $parent.prepend($el);
-                $el.fadeIn(100);
-              });
+                //$el.fadeIn(100);
+              //});
             }
           } else {
             const previousProcessor = processors[index-1];
             if ($el.prev()[0] !== previousProcessor.$el[0]) {
-              $el.fadeOut(100, () => {
+              //$el.fadeOut(100, () => {
                 $el.detach();
                 previousProcessor.$el.after($el);
-                $el.fadeIn(100);
-              });
+                //$el.fadeIn(100);
+              //});
             }
           }
         });
