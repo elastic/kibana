@@ -15,30 +15,39 @@ app.directive('processContainer', function ($compile) {
       scope.processor = processor;
       const $innerEl = $compile(processor.template)(scope);
 
+      //THIS IS TEMPORARY!!!!
+      $scope.$inner_scope = scope;
+
       $innerEl.appendTo($container);
     },
     controller: function ($scope, $rootScope) {
       const processor = $scope.processor;
+      const Logger = require('../lib/logger');
+      const logger = new Logger(processor, 'processContainer', true);
 
       function parentUpdated(event, message) {
-        if (message.processor === $scope.parent) {
+        if (message.processor === processor.parent) {
+          logger.log('my parent updated');
           updateInputObject();
+
+          $scope.$inner_scope.poop();
+
           applyProcessor();
         }
       }
 
       function parentDirty(event, message) {
-        if (message.processor === $scope.parent) {
+        if (message.processor === processor.parent) {
           setDirty();
         }
       }
 
       function updateInputObject() {
         //checks to see if the parent is a basic object or a processor
-        if ($scope.parent.processorId) {
-          processor.inputObject = _.cloneDeep($scope.parent.outputObject);
+        if (processor.parent.processorId) {
+          processor.inputObject = _.cloneDeep(processor.parent.outputObject);
         } else {
-          processor.inputObject = _.cloneDeep($scope.parent);
+          processor.inputObject = _.cloneDeep(processor.parent);
         }
       }
 
@@ -92,11 +101,13 @@ app.directive('processContainer', function ($compile) {
       //Can the parent go into the processor instead of the scope?
 
       //returns whether the parent actually changed
+      //DO NOT DO ANYTHING THAT REQUIRES PROCESSING HERE!!!!
       $scope.setParent = function(parent) {
-        const oldParent = $scope.parent;
-        $scope.parent = parent;
+        const oldParent = processor.parent;
+        processor.parent = parent;
 
         updateInputObject();
+        //TODO: Somewhere the new processor needs to be initialized!
 
         return (oldParent !== parent);
       }

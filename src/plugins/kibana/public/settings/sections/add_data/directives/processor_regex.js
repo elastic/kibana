@@ -10,6 +10,8 @@ app.directive('processorRegex', function () {
     template: require('../views/processor_regex.html'),
     controller : function ($scope, $rootScope, $timeout, debounce) {
       const processor = $scope.processor;
+      const Logger = require('../lib/logger');
+      const logger = new Logger(processor, 'processorRegex', true);
 
       function getDescription() {
         const source = ($scope.sourceField) ? $scope.sourceField : '?';
@@ -18,6 +20,7 @@ app.directive('processorRegex', function () {
       }
 
       function applyProcessor() {
+        logger.log('I am processing!');
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         //this is just here to simulate an async process.
@@ -51,8 +54,9 @@ app.directive('processorRegex', function () {
             description: description
           };
 
+        logger.log('I am DONE processing!');
           $rootScope.$broadcast('processor_finished', message);
-        }, 100);
+        }, 1000);
       }
       applyProcessor = debounce(applyProcessor, 200);
 
@@ -66,32 +70,36 @@ app.directive('processorRegex', function () {
         $scope.fieldData = _.get(processor.inputObject, $scope.sourceField);
       }
 
+      function parentUpdated(event, message) {
+        if (message.processor !== processor.parent) return;
+
+        $scope.fields = keysDeep(processor.inputObject);
+        refreshFieldData();
+      }
+
+      // function processorInitialized(event, message) {
+      //   if (message.processor !== processor) return;
+
+      //   $scope.fields = keysDeep(processor.inputObject);
+      // }
+
+      $scope.poop = function() {
+        logger.log('Refresh my state if I need to.');
+        $scope.fields = keysDeep(processor.inputObject);
+        refreshFieldData();
+      }
+
       const startListener = $scope.$on('processor_start', processorStart);
+      const finishedListener = $scope.$on('processor_finished', parentUpdated);
+      //const initializeListener = $scope.$on('processor_initialize', processorInitialized);
 
       $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
       $scope.targetField = '';
 
       $scope.$on('$destroy', () => {
         startListener();
-      });
-
-
-      // function parentUpdated(event, message) {
-      //   debugger;
-      //   if (message.processor !== processor.parent) return;
-
-      //   console.log(processor.processorId, 'I should update my state because my parent updated.');
-      // }
-
-      // const finishedListener = $scope.$on('processor_finished', parentUpdated);
-
-      // $scope.$on('$destroy', () => {
-      //   finishedListener();
-      // });
-
-      $scope.$watch('processor.inputObject', function() {
-        $scope.fields = keysDeep(processor.inputObject);
-        refreshFieldData();
+        finishedListener();
+        //initializeListener();
       });
 
       $scope.$watch('sourceField', () => {

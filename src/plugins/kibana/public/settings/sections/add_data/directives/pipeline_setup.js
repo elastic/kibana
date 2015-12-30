@@ -10,8 +10,6 @@ app.directive('pipelineSetup', function ($compile) {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),
     link: function ($scope, $el) {
-      let counter = 0;
-
       const $container = $el;
       $el = $scope.$el = $container.find('.pipeline-container');
 
@@ -39,11 +37,8 @@ app.directive('pipelineSetup', function ($compile) {
       }
 
       function addProcessor(processor) {
-        counter += 1;
-
         processor.$scope = $scope.$new();
         processor.$scope.processor = processor;
-        processor.$scope.counter = counter;
         processor.$scope.manager = $scope.manager;
 
         const template = `<li><process-container></process-container></li>`;

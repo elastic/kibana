@@ -10,8 +10,11 @@ app.directive('processorSimple', function () {
     template: require('../views/processor_simple.html'),
     controller : function ($scope, $rootScope, $timeout) {
       const processor = $scope.processor;
+      const Logger = require('../lib/logger');
+      const logger = new Logger(processor, 'processorSimple', true);
 
       function applyProcessor() {
+        logger.log('I am processing!');
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         //this is just here to simulate an async process.
@@ -31,8 +34,9 @@ app.directive('processorSimple', function () {
             description: description
           };
 
+          logger.log('I am DONE processing!');
           $rootScope.$broadcast('processor_finished', message);
-        }, 100);
+        }, 1000);
       }
 
       function processorStart(event, message) {
@@ -53,6 +57,11 @@ app.directive('processorSimple', function () {
       $scope.$on('$destroy', () => {
         startListener();
       });
+
+
+      $scope.poop = function() {
+        logger.log('Refresh my state if I need to.');
+      }
     }
   }
 });
