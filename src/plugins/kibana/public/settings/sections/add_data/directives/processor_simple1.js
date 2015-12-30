@@ -1,5 +1,6 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
+const $ = require('jquery');
 require('./processor_header');
 
 //THIS IS THE SCOPE OF THE INDIVIDUAL PROCESSORS.
@@ -59,10 +60,19 @@ app.directive('innerProcessor', function () {
   }
 });
 
-app.directive('processorSimple1', function () {
+app.directive('processorSimple1', function ($compile) {
   return {
     restrict: 'E',
     template: require('../views/processor_simple1.html'),
+    link: function ($scope, $el) {
+      const processor = $scope.processor;
+      const $container = $el.find('.inner_processor_container');
+
+      const scope = $scope.$new();
+      const $innerEl = $compile(processor.innerTemplate)(scope);
+
+      $innerEl.appendTo($container);
+    },
     controller: function ($scope, $rootScope) {
       const processor = $scope.processor;
 
