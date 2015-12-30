@@ -20,10 +20,10 @@
     </div>
 
     <div ng-switch="currentStep">
-      <paste-samples-step ng-switch-when="0"></paste-samples-step>
-      <pipeline-step ng-switch-when="1"></pipeline-step>
-      <pattern-review-step ng-switch-when="2"></pattern-review-step>
-      <install-filebeat-step ng-switch-when="3"></install-filebeat-step>
+      <paste-samples-step on-save="saveStepResults(0, results)" ng-switch-when="0"></paste-samples-step>
+      <pipeline-step on-save="saveStepResults(1, results)" logs="stepResults[0]" ng-switch-when="1"></pipeline-step>
+      <pattern-review-step on-save="saveStepResults(2, results)" docs="stepResults[1]" ng-switch-when="2"></pattern-review-step>
+      <install-filebeat-step results="stepResults" ng-switch-when="3"></install-filebeat-step>
     </div>
 
     <button ng-click="prevStep()">Prev</button>

@@ -4,7 +4,11 @@ var template = require('plugins/kibana/settings/sections/data/directives/pipelin
 modules.get('apps/settings')
   .directive('pipelineStep', function () {
     return {
-      template: template
+      template: template,
+      scope: {
+        logs: '=',
+        save: '&onSave'
+      }
     };
   });
 

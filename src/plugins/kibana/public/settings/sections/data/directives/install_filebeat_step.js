@@ -4,7 +4,13 @@ var template = require('plugins/kibana/settings/sections/data/directives/install
 modules.get('apps/settings')
   .directive('installFilebeatStep', function () {
     return {
-      template: template
+      template: template,
+      scope: {
+        results: '='
+      },
+      controller: function ($scope) {
+        var results = $scope.results;
+      }
     };
   });
 

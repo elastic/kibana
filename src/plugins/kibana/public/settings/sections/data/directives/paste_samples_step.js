@@ -4,7 +4,10 @@ var template = require('plugins/kibana/settings/sections/data/directives/paste_s
 modules.get('apps/settings')
   .directive('pasteSamplesStep', function () {
     return {
-      template: template
+      template: template,
+      scope: {
+        save: '&onSave'
+      }
     };
   });
 

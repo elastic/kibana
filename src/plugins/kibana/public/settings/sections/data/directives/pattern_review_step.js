@@ -4,7 +4,11 @@ var template = require('plugins/kibana/settings/sections/data/directives/pattern
 modules.get('apps/settings')
   .directive('patternReviewStep', function () {
     return {
-      template: template
+      template: template,
+      scope: {
+        docs: '=',
+        save: '&onSave'
+      }
     };
   });
 

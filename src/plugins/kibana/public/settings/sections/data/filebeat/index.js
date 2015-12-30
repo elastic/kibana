@@ -15,9 +15,9 @@ routes.when('/settings/data/filebeat', {
 modules.get('apps/settings')
   .controller('kbnSettingsDataFilebeat', function ($scope) {
     var totalSteps = 4;
-    var currentStep = 0;
+    $scope.currentStep = 0;
+    $scope.stepResults = [];
 
-    $scope.currentStep = currentStep;
     $scope.nextStep = function () {
       if ($scope.currentStep + 1 < totalSteps) {
         ++$scope.currentStep;
@@ -32,4 +32,7 @@ modules.get('apps/settings')
       $scope.currentStep = step;
     };
 
+    $scope.saveStepResults = function (step, results) {
+      $scope.stepResults[step] = results;
+    };
   });
