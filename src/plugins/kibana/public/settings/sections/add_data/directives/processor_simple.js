@@ -45,22 +45,21 @@ app.directive('processorSimple', function () {
         applyProcessor();
       }
 
+      $scope.consumeNewInputObject = function() {
+        logger.log('consuming new inputObject');
+      }
+
       const startListener = $scope.$on('processor_start', processorStart);
+
+      $scope.$on('$destroy', () => {
+        startListener();
+      });
 
       //internal only (linked to the button, no other use, for debug only)
       //this would be logic that would be triggered from any processor
       //specific state changes like selectedfield or expression, etc
       $scope.update = function() {
         applyProcessor();
-      }
-
-      $scope.$on('$destroy', () => {
-        startListener();
-      });
-
-
-      $scope.poop = function() {
-        logger.log('Refresh my state if I need to.');
       }
     }
   }

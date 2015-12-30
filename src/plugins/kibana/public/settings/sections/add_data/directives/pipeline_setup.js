@@ -13,11 +13,9 @@ app.directive('pipelineSetup', function ($compile) {
       const $container = $el;
       $el = $scope.$el = $container.find('.pipeline-container');
 
-      $scope.$watchCollection('manager.processors', function (processors) {
-        const currentProcessors = getCurrentProcessors();
-
-        var removed = _.difference(currentProcessors, processors);
-        var added = _.difference(processors, currentProcessors);
+      $scope.$watchCollection('manager.processors', function (newVal, oldVal) {
+        var removed = _.difference(oldVal, newVal);
+        var added = _.difference(newVal, oldVal);
 
         removed.forEach(removeProcessor);
         added.forEach(addProcessor);
@@ -26,17 +24,10 @@ app.directive('pipelineSetup', function ($compile) {
         reorderDom();
       });
 
-      function getCurrentProcessors() {
-        let currentProcessors = [];
-        $el.children('li').each((index, li) => {
-          const processor = $(li).data('processor');
-          currentProcessors.push(processor)
-        });
-
-        return currentProcessors;
-      }
-
       function addProcessor(processor) {
+        //TODO: This is wrong now... since both the process_container and process_worker share
+        //a reference to the same processor object. The processor should not have a reference
+        //to the $scope object as is being done here.
         processor.$scope = $scope.$new();
         processor.$scope.processor = processor;
         processor.$scope.manager = $scope.manager;
@@ -51,8 +42,6 @@ app.directive('pipelineSetup', function ($compile) {
       }
 
       function removeProcessor(processor) {
-        //TODO: look at the destroy logic for the url shortener/clipboard.js stuff
-
         processor.$el.slideUp(200, () => {
           processor.$el.remove();
         });
@@ -82,6 +71,12 @@ app.directive('pipelineSetup', function ($compile) {
             topIndexChanged = Math.min(index, topIndexChanged);
           }
         });
+
+        if (topIndexChanged === processors.length-1) {
+          //the processor has been added and it's parent assigned. It should initialize
+          processors[topIndexChanged].$scope.init();
+        }
+
         if (topIndexChanged < Infinity) {
           processors[topIndexChanged].$scope.forceUpdate();
         }

@@ -30,7 +30,10 @@ app.directive('processContainer', function ($compile) {
           logger.log('my parent updated');
           updateInputObject();
 
-          $scope.$inner_scope.poop();
+          //TODO: YUCK!
+          ////I NEED this to fire between the updateInputObject
+          ///code and the applyProcessor code. Relying on watches will not work.
+          $scope.$inner_scope.consumeNewInputObject();
 
           applyProcessor();
         }
@@ -107,9 +110,15 @@ app.directive('processContainer', function ($compile) {
         processor.parent = parent;
 
         updateInputObject();
-        //TODO: Somewhere the new processor needs to be initialized!
 
         return (oldParent !== parent);
+      }
+
+      $scope.init = function() {
+        logger.log('I am a new processor and my parent has been assigned. Initialize');
+
+        //TODO: YUCK!
+        $scope.$inner_scope.consumeNewInputObject();
       }
     }
   };

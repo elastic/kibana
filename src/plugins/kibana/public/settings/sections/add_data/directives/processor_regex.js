@@ -70,36 +70,19 @@ app.directive('processorRegex', function () {
         $scope.fieldData = _.get(processor.inputObject, $scope.sourceField);
       }
 
-      function parentUpdated(event, message) {
-        if (message.processor !== processor.parent) return;
-
-        $scope.fields = keysDeep(processor.inputObject);
-        refreshFieldData();
-      }
-
-      // function processorInitialized(event, message) {
-      //   if (message.processor !== processor) return;
-
-      //   $scope.fields = keysDeep(processor.inputObject);
-      // }
-
-      $scope.poop = function() {
-        logger.log('Refresh my state if I need to.');
+      $scope.consumeNewInputObject = function() {
+        logger.log('consuming new inputObject');
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
       }
 
       const startListener = $scope.$on('processor_start', processorStart);
-      const finishedListener = $scope.$on('processor_finished', parentUpdated);
-      //const initializeListener = $scope.$on('processor_initialize', processorInitialized);
 
       $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
       $scope.targetField = '';
 
       $scope.$on('$destroy', () => {
         startListener();
-        finishedListener();
-        //initializeListener();
       });
 
       $scope.$watch('sourceField', () => {
