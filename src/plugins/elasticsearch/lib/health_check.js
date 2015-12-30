@@ -19,7 +19,7 @@ module.exports = function (plugin, server) {
     return client.ping({ requestTimeout: 1500 }).catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s. Retrying in 2.5 seconds.', config.get('elasticsearch.url')));
+      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
 
       return Promise.delay(2500).then(waitForPong);
     });
@@ -42,7 +42,7 @@ module.exports = function (plugin, server) {
       // If status === "red" that means that index(es) were found
       // but the shards are not ready for queries
       if (resp.status === 'red') {
-        plugin.status.red('Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.');
+        plugin.status.red('Elasticsearch is still initializing the kibana index.');
         return Promise.delay(2500).then(waitForShards);
       }
 
