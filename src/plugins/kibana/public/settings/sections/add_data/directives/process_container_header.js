@@ -2,7 +2,7 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 
-app.directive('processorHeader', function () {
+app.directive('processContainerHeader', function () {
   return {
     restrict: 'E',
     scope: {
@@ -12,7 +12,7 @@ app.directive('processorHeader', function () {
       description: '=',
       manager: '='
     },
-    template: require('../views/processor_header.html'),
+    template: require('../views/process_container_header.html'),
     controller: function ($scope) {}
   };
 });

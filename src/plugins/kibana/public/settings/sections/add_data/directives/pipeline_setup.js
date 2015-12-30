@@ -13,7 +13,7 @@ app.directive('pipelineSetup', function ($compile) {
       let counter = 0;
 
       const $container = $el;
-      $el = $scope.$el = $container.find('.pipeline-wrapper');
+      $el = $scope.$el = $container.find('.pipeline-container');
 
       $scope.$watchCollection('manager.processors', function (processors) {
         const currentProcessors = getCurrentProcessors();
@@ -30,7 +30,7 @@ app.directive('pipelineSetup', function ($compile) {
 
       function getCurrentProcessors() {
         let currentProcessors = [];
-        $el.find('li.processor').each((index, li) => {
+        $el.children('li').each((index, li) => {
           const processor = $(li).data('processor');
           currentProcessors.push(processor)
         });
@@ -46,7 +46,9 @@ app.directive('pipelineSetup', function ($compile) {
         processor.$scope.counter = counter;
         processor.$scope.manager = $scope.manager;
 
-        processor.$el = $compile(`<li class="processor">${processor.template}</li>`)(processor.$scope);
+        const template = `<li><process-container></process-container></li>`;
+
+        processor.$el = $compile(template)(processor.$scope);
         processor.$el.appendTo($el);
 
         processor.$el.data('processor', processor);
@@ -71,7 +73,7 @@ app.directive('pipelineSetup', function ($compile) {
       function updateProcessorChain() {
         const processors = $scope.manager.processors;
 
-        let topIndexChanged = -1;
+        let topIndexChanged = Infinity;
         processors.forEach((processor, index) => {
           let newParent;
           if (index === 0) {
@@ -80,13 +82,12 @@ app.directive('pipelineSetup', function ($compile) {
             newParent = processors[index - 1];
           }
 
-          //Do something here to track the top processor in the chain to change (to start the update process);
           let changed = processor.$scope.setParent(newParent);
-          if (topIndexChanged === -1 && changed) {
-            topIndexChanged = index;
+          if (changed) {
+            topIndexChanged = Math.min(index, topIndexChanged);
           }
         });
-        if (topIndexChanged !== -1) {
+        if (topIndexChanged < Infinity) {
           processors[topIndexChanged].$scope.forceUpdate();
         }
       }
@@ -100,20 +101,14 @@ app.directive('pipelineSetup', function ($compile) {
 
           if (index === 0) {
             if (!$el.is(':first-child')) {
-              //$el.fadeOut(100, () => {
-                $el.detach();
-                $parent.prepend($el);
-                //$el.fadeIn(100);
-              //});
+              $el.detach();
+              $parent.prepend($el);
             }
           } else {
             const previousProcessor = processors[index-1];
             if ($el.prev()[0] !== previousProcessor.$el[0]) {
-              //$el.fadeOut(100, () => {
-                $el.detach();
-                previousProcessor.$el.after($el);
-                //$el.fadeIn(100);
-              //});
+              $el.detach();
+              previousProcessor.$el.after($el);
             }
           }
         });

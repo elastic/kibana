@@ -9,72 +9,79 @@ kbn-settings-add-data {
   @vis-editor-agg-editor-spacing: 5px;
   @padding-base-vertical: 5px;
 
-  .dirty {
-    background-color: red;
-  }
 
   ul {
     list-style-type: none;
     padding: 0px;
 
-    li.processor {
+    &>li {
       border: 1px solid gray;
     }
   }
 
-  .processor_content {
-    padding: @padding-base-vertical;
-  }
+  process-container {
+    display: block;
+    overflow: hidden;
+    position: relative;
 
-  label {
-    margin-bottom: 0px;
-  }
-
-  .form-group {
-    margin-bottom: @padding-base-vertical;
-  }
-
-  processor-header {
-
-    .processor-header {
-      display: flex;
-      align-items: center;
-      flex: 1 0 auto;
-      margin-bottom: @vis-editor-agg-editor-spacing;
-      background-color: #DDD;
-      border-bottom: 1px solid #CCC;
-
-      &-toggle {
-        flex: 0 0 auto;
-        margin-right: @vis-editor-agg-editor-spacing;
+    .dirty {
+      .overlay {
+        display: block;
       }
+    }
 
-      &-subagg-icon {
-        flex: 0 1 auto;
-        padding-right: @padding-base-vertical;
-      }
+    .overlay {
+      // TODO: Figure out the best way to disable/gray out the processor
+      display: none;
+      position: absolute;
 
-      &-title {
-        flex: 1 1 auto;
-        .ellipsis();
-        font-weight: bold;
-      }
+      top: -5000px;
+      left: -5000px;
+      width: 10000px;
+      height: 10000px;
+      background-color: black;
+      opacity: .10;
+    }
 
-      &-description {
-        font-weight: normal;
-        padding-right: @vis-editor-agg-editor-spacing;
+    .process-container-content {
+      padding: @padding-base-vertical;
+    }
 
-        &.danger {
-          .text-danger();
+    label {
+      margin-bottom: 0px;
+    }
+
+    .form-group {
+      margin-bottom: @padding-base-vertical;
+    }
+
+    process-container-header {
+      .process-container-header {
+        display: flex;
+        align-items: center;
+        flex: 1 0 auto;
+        margin-bottom: @vis-editor-agg-editor-spacing;
+        background-color: #DDD;
+        border-bottom: 1px solid #CCC;
+
+        &-toggle {
+          flex: 0 0 auto;
+          margin-right: @vis-editor-agg-editor-spacing;
+        }
+
+        &-title {
+          flex: 1 1 auto;
+          .ellipsis();
           font-weight: bold;
         }
-      }
 
-      &-controls {
-        flex: 0 0 auto;
+        &-controls {
+          flex: 0 0 auto;
+        }
       }
     }
 
   }
+
 
 }

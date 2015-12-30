@@ -2,42 +2,31 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
-const objectManager = require('../lib/object_manager');
-require('./processor_header');
 
+//scope.processor is attached by the wrapper.
 app.directive('processorRegex', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_regex.html'),
-    controller: function ($scope, debounce, Promise, $timeout) {
+    controller : function ($scope, $rootScope, $timeout, debounce) {
+      const processor = $scope.processor;
 
-      //this occurs when the parent processor changes it's output object,
-      //which means that this processor's input object is changing.
-      function refreshFields() {
-
-        objectManager.mutateClone($scope.outputObject, $scope.inputObject);
-        $scope.fields = keysDeep($scope.inputObject);
-
-        if (!_.contains($scope.fields, $scope.sourceField)) {
-          $scope.sourceField = $scope.fields[0];
-        }
-        refreshFieldData();
-        refreshOutput();
+      function getDescription() {
+        const source = ($scope.sourceField) ? $scope.sourceField : '?';
+        const target = ($scope.targetField) ? $scope.targetField : '?';
+        return `RegEx - [${source}] -> [${target}]`;
       }
 
-      function refreshFieldData() {
-        $scope.fieldData = _.get($scope.inputObject, $scope.sourceField);
-      }
-      refreshFieldData = debounce(refreshFieldData, 100);
+      function applyProcessor() {
+        $rootScope.$broadcast('processor_started', { processor: processor });
 
-      function getProcessorOutput() {
-        return new Promise(function(resolve, reject) {
-          const processorOutput = {};
+        //this is just here to simulate an async process.
+        $timeout(function() {
+          const output = _.cloneDeep(processor.inputObject);
+          const key = $scope.targetField;
+          const description = getDescription();
 
-          if (!$scope.expression || !$scope.targetField)
-            resolve();
-
-          $timeout(function() {
+          if ($scope.expression && $scope.targetField && $scope.sourceField) {
             let matches = [];
             try {
               const regex = new RegExp($scope.expression, 'ig');
@@ -47,48 +36,72 @@ app.directive('processorRegex', function () {
 
             if (matches) {
               if (matches.length === 1) {
-                _.set(processorOutput, $scope.targetField, matches[0]);
+                _.set(output, key, matches[0]);
               } else {
-                _.set(processorOutput, $scope.targetField, matches);
+                _.set(output, key, matches);
               }
             } else {
-              _.set(processorOutput, $scope.targetField, '');
+              _.set(output, key, '');
             }
+          }
 
-            resolve(processorOutput);
-          }, 0);
-        });
+          const message = {
+            processor: processor,
+            output: output,
+            description: description
+          };
+
+          $rootScope.$broadcast('processor_finished', message);
+        }, 100);
+      }
+      applyProcessor = debounce(applyProcessor, 200);
+
+      function processorStart(event, message) {
+        if (message.processor !== processor) return;
+
+        applyProcessor();
       }
 
-      function getDescription() {
-        return `RegEx [${$scope.sourceField}] -> [${$scope.targetField}]`;
+      function refreshFieldData() {
+        $scope.fieldData = _.get(processor.inputObject, $scope.sourceField);
       }
 
-      function refreshOutput() {
-        $scope.processorDescription = getDescription();
+      const startListener = $scope.$on('processor_start', processorStart);
 
-        getProcessorOutput()
-        .then((processorOutput) => {
-          objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
-
-          $scope.outputDisplayObject = $scope.outputObject;
-        });
-      }
-      refreshOutput = debounce(refreshOutput, 200);
-
-      //TODO: This is only here for debugging purposes.
       $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
-
-      $scope.outputObject = {};
       $scope.targetField = '';
 
-      $scope.$watch('sourceField', refreshFieldData);
-      $scope.$watch('targetField', refreshOutput);
-      $scope.$watch('fieldData', refreshOutput);
-      $scope.$watch('expression', refreshOutput);
-      $scope.$watch('onlyShowNewFields', refreshOutput);
-      //$scope.$watchCollection('inputObject', refreshFields);
-      $scope.$watch('inputObject', refreshFields);
+      $scope.$on('$destroy', () => {
+        startListener();
+      });
+
+
+      // function parentUpdated(event, message) {
+      //   debugger;
+      //   if (message.processor !== processor.parent) return;
+
+      //   console.log(processor.processorId, 'I should update my state because my parent updated.');
+      // }
+
+      // const finishedListener = $scope.$on('processor_finished', parentUpdated);
+
+      // $scope.$on('$destroy', () => {
+      //   finishedListener();
+      // });
+
+      $scope.$watch('processor.inputObject', function() {
+        $scope.fields = keysDeep(processor.inputObject);
+        refreshFieldData();
+      });
+
+      $scope.$watch('sourceField', () => {
+        refreshFieldData();
+        applyProcessor();
+      });
+
+      $scope.$watch('targetField', applyProcessor);
+      $scope.$watch('expression', applyProcessor);
     }
-  };
+  }
 });
+

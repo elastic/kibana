@@ -1,19 +1,19 @@
 <div
-  class="processor_container"
   ng-class="{dirty: isDirty}">
-  <processor-header
+  <process-container-header
     processor="processor"
     field="sourceField"
     collapsed="contentCollapsed"
     description="processorDescription"
     manager="manager">
-  </processor-header>
-  <div class="inner_processor_container"></div>
+  </process-container-header>
   <div
-    class="processor_content"
+    class="process-container-content"
     ng-hide="contentCollapsed">
+    <div class="process-worker-container"></div>
     <div class="form-group">
       <pre>{{ processor.outputObject | json }}</pre>
     </div>
   </div>
+  <div class="overlay"></div>
 </div>

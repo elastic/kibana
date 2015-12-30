@@ -1,6 +1,4 @@
-require('./processor_date');
-require('./processor_delete_fields');
-require('./processor_grok');
+require('./process_container');
+require('./processor_simple');
+require('./processor_one_field');
 require('./processor_regex');
-require('./processor_simple1');
-require('./processor_simple2');

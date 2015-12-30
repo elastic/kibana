@@ -1,7 +1,7 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 
-require('./object_changes.js');
+//require('./object_changes.js');
 
 app.directive('kbnSettingsAddData', function () {
   return {
