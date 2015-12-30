@@ -1,6 +1,23 @@
 <kbn-settings-app section="data">
   <div ng-controller="kbnSettingsDataFilebeat" class="container">
-    Filebeat wizard breadcrumb
+    <div class="btn-group">
+      <button ng-class="{active: currentStep === 0}"
+              ng-click="setCurrentStep(0)">
+        Paste
+      </button>
+      <button ng-class="{active: currentStep === 1}"
+              ng-click="setCurrentStep(1)">
+        Parse
+      </button>
+      <button ng-class="{active: currentStep === 2}"
+              ng-click="setCurrentStep(2)">
+        Review
+      </button>
+      <button ng-class="{active: currentStep === 3}"
+              ng-click="setCurrentStep(3)">
+        Install Filebeat
+      </button>
+    </div>
 
     <div ng-switch="currentStep">
       <paste-samples-step ng-switch-when="0"></paste-samples-step>

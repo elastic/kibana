@@ -28,5 +28,8 @@ modules.get('apps/settings')
         --$scope.currentStep;
       }
     };
+    $scope.setCurrentStep = function (step) {
+      $scope.currentStep = step;
+    };
 
   });
