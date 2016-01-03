@@ -98,6 +98,10 @@ app.directive('pipelineSetup', function ($compile) {
           }
         });
       }
+
+      $scope.$watch('sampleData', function(newVal) {
+        updateProcessorChain();
+      });
     },
     controller: function ($scope, AppState) {
       $scope.processorTypes = require('../lib/processor_registry.js');

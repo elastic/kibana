@@ -1,6 +1,5 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const objectManager = require('../lib/object_manager');
 
 app.directive('sourceData', function () {
   return {
@@ -28,10 +27,10 @@ app.directive('sourceData', function () {
       }
 
       function refreshOutput() {
-        const processorOutput = getProcessorOutput();
+        const newOutput = getProcessorOutput();
 
-        if (processorOutput) {
-          objectManager.update($scope.outputObject, $scope.inputObject, processorOutput);
+        if (newOutput) {
+          $scope.outputObject = getProcessorOutput();
         }
       }
       refreshOutput = debounce(refreshOutput, 200);
