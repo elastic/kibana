@@ -19,7 +19,15 @@ app.directive('processorRegex', function () {
         return `RegEx - [${source}] -> [${target}]`;
       }
 
+      function checkForNewInputObject() {
+        logger.log('consuming new inputObject');
+        $scope.fields = keysDeep(processor.inputObject);
+        refreshFieldData();
+      }
+
       function applyProcessor() {
+        checkForNewInputObject();
+
         logger.log('I am processing!');
         $rootScope.$broadcast('processor_started', { processor: processor });
 
@@ -56,7 +64,7 @@ app.directive('processorRegex', function () {
 
         logger.log('I am DONE processing!');
           $rootScope.$broadcast('processor_finished', message);
-        }, 1000);
+        }, 0);
       }
       applyProcessor = debounce(applyProcessor, 200);
 
@@ -68,12 +76,6 @@ app.directive('processorRegex', function () {
 
       function refreshFieldData() {
         $scope.fieldData = _.get(processor.inputObject, $scope.sourceField);
-      }
-
-      $scope.consumeNewInputObject = function() {
-        logger.log('consuming new inputObject');
-        $scope.fields = keysDeep(processor.inputObject);
-        refreshFieldData();
       }
 
       const startListener = $scope.$on('processor_start', processorStart);

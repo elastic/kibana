@@ -72,11 +72,6 @@ app.directive('pipelineSetup', function ($compile) {
           }
         });
 
-        if (topIndexChanged === processors.length-1) {
-          //the processor has been added and it's parent assigned. It should initialize
-          processors[topIndexChanged].$scope.init();
-        }
-
         if (topIndexChanged < Infinity) {
           processors[topIndexChanged].$scope.forceUpdate();
         }

@@ -1,0 +1,13 @@
+<div class="form-group">
+  <label>Fields:</label>
+  <ul>
+    <li ng-repeat="field in fields">
+      <input
+        id="selected_{{processor.processorId}}_{{$index}}"
+        type="checkbox"
+        ng-model="field.selected"
+        ng-click="toggleField(field)" />
+      <label for="selected_{{processor.processorId}}_{{$index}}">{{field.name}}</label>
+    </li>
+  </ul>
+</div>

@@ -2,7 +2,6 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 
-//THIS IS THE SCOPE OF THE INDIVIDUAL PROCESSORS.
 //scope.processor is attached by the wrapper.
 app.directive('processorSimple', function () {
   return {
@@ -13,7 +12,13 @@ app.directive('processorSimple', function () {
       const Logger = require('../lib/logger');
       const logger = new Logger(processor, 'processorSimple', true);
 
+      function checkForNewInputObject() {
+        logger.log('consuming new inputObject');
+      }
+
       function applyProcessor() {
+        checkForNewInputObject();
+
         logger.log('I am processing!');
         $rootScope.$broadcast('processor_started', { processor: processor });
 
@@ -36,17 +41,13 @@ app.directive('processorSimple', function () {
 
           logger.log('I am DONE processing!');
           $rootScope.$broadcast('processor_finished', message);
-        }, 1000);
+        }, 0);
       }
 
       function processorStart(event, message) {
         if (message.processor !== processor) return;
 
         applyProcessor();
-      }
-
-      $scope.consumeNewInputObject = function() {
-        logger.log('consuming new inputObject');
       }
 
       const startListener = $scope.$on('processor_start', processorStart);
