@@ -13,6 +13,8 @@ var NO_INDEX = 'no_index';
 var INITIALIZING = 'initializing';
 var READY = 'ready';
 
+var REQUEST_DELAY = 2500;
+
 module.exports = function (plugin, server) {
   var config = server.config();
   var client = server.plugins.elasticsearch.client;
@@ -25,7 +27,7 @@ module.exports = function (plugin, server) {
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
 
-      return Promise.delay(2500).then(waitForPong);
+      return Promise.delay(REQUEST_DELAY).then(waitForPong);
     });
   }
 
@@ -57,7 +59,7 @@ module.exports = function (plugin, server) {
     return getHealth()
     .then(function (health) {
       if (health !== READY) {
-        return Promise.delay(2500).then(waitUntilReady);
+        return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
       }
     });
   }
@@ -72,7 +74,7 @@ module.exports = function (plugin, server) {
 
       if (health === INITIALIZING) {
         plugin.status.red('Elasticsearch is still initializing the kibana index.');
-        return Promise.delay(2500).then(waitForShards);
+        return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
 
       // otherwise we are g2g
@@ -103,7 +105,7 @@ module.exports = function (plugin, server) {
   }
 
   function startorRestartChecking() {
-    scheduleCheck(stopChecking() ? 2500 : 1);
+    scheduleCheck(stopChecking() ? REQUEST_DELAY : 1);
   }
 
   function stopChecking() {
