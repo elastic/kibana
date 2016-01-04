@@ -1,11 +1,10 @@
 const { convertToSnakeCase } = require('../../../lib/case_conversion');
 const _ = require('lodash');
 const createApiDocument = require('../../../lib/api_document_builders/create_api_document');
-const createRelationshipObject = require('../../../lib/api_document_builders/create_relationship_object');
 const createResourceObject = require('../../../lib/api_document_builders/create_resource_object');
 
 
-module.exports = function getIndexPattern(patternId, boundCallWithRequest, shouldIncludeTemplate) {
+module.exports = function getIndexPattern(patternId, boundCallWithRequest) {
   const params = {
     index: '.kibana',
     type: 'index-pattern',
@@ -21,28 +20,7 @@ module.exports = function getIndexPattern(patternId, boundCallWithRequest, shoul
       result._source.fieldFormatMap = JSON.parse(result._source.fieldFormatMap);
     }
 
-    let relationshipsObject;
-    if (result._source.templateId) {
-      relationshipsObject = {
-        template: createRelationshipObject('index_templates', result._source.templateId)
-      };
-      delete result._source.templateId;
-    }
-
     const snakeAttributes = convertToSnakeCase(result._source);
-    return createResourceObject('index_patterns', result._id, snakeAttributes, relationshipsObject);
-  })
-  .then((patternResource) => {
-    if (!shouldIncludeTemplate) {
-      return createApiDocument(patternResource);
-    }
-    const templateId = _.get(patternResource, 'relationships.template.data.id');
-
-    return boundCallWithRequest('indices.getTemplate', {name: templateId})
-      .then((template) => {
-        return createApiDocument(patternResource, [
-          createResourceObject('index_templates', templateId, template[templateId])
-        ]);
-      });
+    return createApiDocument(createResourceObject('index_patterns', result._id, snakeAttributes));
   });
 };

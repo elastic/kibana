@@ -10,9 +10,8 @@ module.exports = function registerGet(server) {
     method: 'GET',
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
-      const shouldIncludeTemplate = req.query.include === 'template';
 
-      getIndexPatterns(boundCallWithRequest, shouldIncludeTemplate)
+      getIndexPatterns(boundCallWithRequest)
       .then(
         function (patterns) {
           reply(patterns);
@@ -29,10 +28,9 @@ module.exports = function registerGet(server) {
     method: 'GET',
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
-      const shouldIncludeTemplate = req.query.include === 'template';
       const patternId = req.params.id;
 
-      getIndexPattern(patternId, boundCallWithRequest, shouldIncludeTemplate)
+      getIndexPattern(patternId, boundCallWithRequest)
       .then(
         function (pattern) {
           reply(pattern);

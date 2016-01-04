@@ -19,21 +19,17 @@ define(function (require) {
       bdd.before(function () {
         return scenarioManager.reload('emptyKibana').then(function () {
           return Promise.all([
-            request.post('/kibana/index_patterns').send(createTestData().indexPatternWithTemplate),
+            request.post('/kibana/index_patterns').send(createTestData().indexPattern),
             request.post('/kibana/index_patterns').send(
-              _(createTestData().indexPatternWithTemplate)
+              _(createTestData().indexPattern)
               .set('data.attributes.title', 'foo')
               .set('data.id', 'foo')
-              .set('included[0].id', 'kibana-foo')
-              .set('included[0].attributes.template', 'foo')
               .value()
             ),
             request.post('/kibana/index_patterns').send(
-              _(createTestData().indexPatternWithTemplate)
+              _(createTestData().indexPattern)
                 .set('data.attributes.title', 'bar*')
                 .set('data.id', 'bar*')
-                .set('included[0].id', 'kibana-bar*')
-                .set('included[0].attributes.template', 'bar*')
                 .value()
             )
           ]).then(function () {
@@ -46,9 +42,9 @@ define(function (require) {
 
       bdd.after(function () {
         return Promise.all([
-          request.del('/kibana/index_patterns/logstash-*?include=template'),
-          request.del('/kibana/index_patterns/foo?include=template'),
-          request.del('/kibana/index_patterns/bar*?include=template')
+          request.del('/kibana/index_patterns/logstash-*'),
+          request.del('/kibana/index_patterns/foo'),
+          request.del('/kibana/index_patterns/bar*')
         ]);
       });
 
@@ -59,16 +55,6 @@ define(function (require) {
             expect(res.body.data).to.be.an('array');
             expect(res.body.data.length).to.be(3);
             expect(res.body.included).to.not.be.ok();
-            Joi.assert(res.body, indexPatternSchema.post);
-          });
-      });
-
-      bdd.it('should include related index templates if the include query string param is set', function () {
-        return request.get('/kibana/index_patterns?include=template')
-          .expect(200)
-          .then(function (res) {
-            expect(res.body.included).to.be.an('array');
-            expect(res.body.included.length).to.be(3);
             Joi.assert(res.body, indexPatternSchema.post);
           });
       });
@@ -91,16 +77,6 @@ define(function (require) {
             .expect(200)
             .then(function (res) {
               expect(res.body.data.attributes.title).to.be('logstash-*');
-              Joi.assert(res.body, indexPatternSchema.post);
-            });
-        });
-
-        bdd.it('should include related index template if the include query string param is set', function () {
-          return request.get('/kibana/index_patterns/logstash-*?include=template')
-            .expect(200)
-            .then(function (res) {
-              expect(res.body.data.attributes.title).to.be('logstash-*');
-              expect(res.body.included[0].id).to.be('kibana-logstash-*');
               Joi.assert(res.body, indexPatternSchema.post);
             });
         });

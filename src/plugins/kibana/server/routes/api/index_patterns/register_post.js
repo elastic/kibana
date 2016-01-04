@@ -1,9 +1,12 @@
 const Boom = require('boom');
 const _ = require('lodash');
+const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const addMappingInfoToPatternFields = require('../../../lib/add_mapping_info_to_pattern_fields');
 const { convertToCamelCase } = require('../../../lib/case_conversion');
+const createMappingFromPatternField = require('../../../lib/create_mapping_from_pattern_field');
+const castMappingType = require('../../../lib/cast_mapping_type');
 
 module.exports = function registerPost(server) {
   server.route({
@@ -17,15 +20,28 @@ module.exports = function registerPost(server) {
     handler: function (req, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const requestDocument = _.cloneDeep(req.payload);
-      const included = requestDocument.included;
       const indexPatternId = requestDocument.data.id;
       const indexPattern = convertToCamelCase(requestDocument.data.attributes);
-      const templateResource = _.isEmpty(included) ? null : included[0];
 
-      if (!_.isEmpty(templateResource)) {
-        addMappingInfoToPatternFields(indexPattern, templateResource.attributes);
-        indexPattern.templateId = templateResource.id;
-      }
+      _.forEach(indexPattern.fields, function (field) {
+        _.defaults(field, {
+          indexed: true,
+          analyzed: false,
+          doc_values: true,
+          scripted: false,
+          count: 0
+        });
+      });
+
+      const mappings = _(indexPattern.fields)
+      .indexBy('name')
+      .mapValues(createMappingFromPatternField)
+      .value();
+
+      _.forEach(indexPattern.fields, function (field) {
+        field.type = castMappingType(field.type);
+      });
+
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
@@ -38,20 +54,24 @@ module.exports = function registerPost(server) {
 
       callWithRequest(req, 'create', patternCreateParams)
       .then((patternResponse) => {
-        if (_.isEmpty(included)) {
-          return patternResponse;
-        }
-
         return callWithRequest(req, 'indices.exists', {index: indexPatternId})
         .then((matchingIndices) => {
           if (matchingIndices) {
-            throw Boom.conflict('Cannot create an index template if existing indices already match index pattern');
+            throw Boom.conflict('Cannot create an index pattern via this API if existing indices already match the pattern');
           }
 
           const templateParams = {
+            order: 0,
             create: true,
-            name: templateResource.id,
-            body: templateResource.attributes
+            name: patternToTemplate(indexPatternId),
+            body: {
+              template: indexPatternId,
+              mappings: {
+                _default_: {
+                  properties: mappings
+                }
+              }
+            }
           };
 
           return callWithRequest(req, 'indices.putTemplate', templateParams);
