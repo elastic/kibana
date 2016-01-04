@@ -42,6 +42,11 @@ define((require) => (Private, config) => {
       const allColors = _(this.mapping).values().union(configColors).value();
       const colorPalette = createColorPalette(allColors.length + keysToMap.length);
       const newColors = _.difference(colorPalette, allColors);
+
+      while (newColors.length < keysToMap.length) {
+        newColors.push(_.sample(allColors));
+      }
+
       _.merge(this.mapping, _.zipObject(keysToMap, newColors));
     }
   }
