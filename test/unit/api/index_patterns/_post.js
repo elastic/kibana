@@ -53,6 +53,50 @@ define(function (require) {
           });
       });
 
+      bdd.it('should provide defaults for optional field properties that need to be initialized and cast types', function createTemplate() {
+        return request.post('/kibana/index_patterns')
+          .send(createTestData().indexPattern)
+          .expect(201)
+          .then(function () {
+            return request.get('/kibana/index_patterns/logstash-*')
+            .expect(200)
+            .then(function (res) {
+              var fields = res.body.data.attributes.fields;
+              // @timestamp was created with only name and type, all other fields should be set as defaults by API
+              expect(res.body.data.attributes.title).to.be('logstash-*');
+              expect(fields[1].name).to.be('@timestamp');
+              expect(fields[1].type).to.be('date');
+              expect(fields[1].count).to.be(0);
+              expect(fields[1].scripted).to.be(false);
+              expect(fields[1].indexed).to.be(true);
+              expect(fields[1].analyzed).to.be(false);
+              expect(fields[1].doc_values).to.be(true);
+
+              // API should cast Java types to JS before storing the Kibana index pattern.
+              // bytes was created as a long and cast to number
+              expect(fields[3].name).to.be('bytes');
+              expect(fields[3].type).to.be('number');
+            });
+          });
+      });
+
+      bdd.it('should create index template default mappings based on the info in the kibana index pattern', function createTemplate() {
+        return request.post('/kibana/index_patterns')
+          .send(createTestData().indexPattern)
+          .expect(201)
+          .then(function () {
+            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
+            .then(function (template) {
+              var mappings = template['kibana-logstash-*'].mappings._default_.properties;
+              expect(mappings).to.be.ok();
+              expect(_.isEqual(mappings.ip, {index: 'not_analyzed', type: 'ip', doc_values: false})).to.be.ok();
+              expect(_.isEqual(mappings['@timestamp'], {index: 'not_analyzed', type: 'date', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings.agent, {index: 'analyzed', type: 'string', doc_values: false})).to.be.ok();
+              expect(_.isEqual(mappings.bytes, {index: 'not_analyzed', type: 'long', doc_values: true})).to.be.ok();
+            });
+          });
+      });
+
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
         return request.post('/kibana/index_patterns')
           .send(createTestData().indexPattern)

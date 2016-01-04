@@ -11,22 +11,22 @@ module.exports = function createTestData() {
             'name': 'ip',
             'type': 'ip',
             'count': 2,
-            'scripted': false
+            'scripted': false,
+            'indexed': true,
+            'analyzed': false,
+            'doc_values': false
           }, {
             'name': '@timestamp',
-            'type': 'date',
-            'count': 0,
-            'scripted': false
+            'type': 'date'
           }, {
             'name': 'agent',
             'type': 'string',
-            'count': 0,
-            'scripted': false
+            'indexed': true,
+            'analyzed': true,
+            'doc_values': false
           }, {
             'name': 'bytes',
-            'type': 'long',
-            'count': 2,
-            'scripted': false
+            'type': 'long'
           }]
         }
       }
