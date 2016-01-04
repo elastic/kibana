@@ -29,6 +29,7 @@ describe('createMappingFromPatternField', function () {
 
   it('should remove kibana properties that are not valid for ES field mappings', function () {
     const mapping = createMappingFromPatternField(testField);
+    expect(mapping).to.not.have.property('name');
     expect(mapping).to.not.have.property('count');
     expect(mapping).to.not.have.property('scripted');
     expect(mapping).to.not.have.property('indexed');

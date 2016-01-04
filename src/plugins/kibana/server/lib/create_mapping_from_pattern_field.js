@@ -7,6 +7,7 @@ module.exports = function createMappingFromPatternField(field) {
   }
   const mapping = _.cloneDeep(field);
 
+  delete mapping.name;
   delete mapping.count;
   delete mapping.scripted;
   delete mapping.indexed;
