@@ -59,6 +59,11 @@ define((require) => (Private, config, $rootScope) => {
       const allColors = _(this.mapping).values().union(configColors).union(oldColors).value();
       const colorPalette = createColorPalette(allColors.length + keysToMap.length);
       const newColors = _.difference(colorPalette, allColors);
+
+      while (newColors.length < keysToMap.length) {
+        newColors.push(_.sample(allColors));
+      }
+
       _.merge(this.mapping, _.zipObject(keysToMap, newColors));
     }
   }
