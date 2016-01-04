@@ -1,6 +1,6 @@
 # Contributing to Kibana
 
-### How issues work
+## How issues work
 At any given time the Kibana team at Elastic is working on dozens of features and enhancements to Kibana and other projects at Elastic. When you file an issue we'll take the time to digest it, consider solutions, and weigh its applicability to both the broad Kibana user base and our own goals for the project. Once we've completed that process we will assign the issue a priority.
 
 - **P1**: A high priority issue that affects almost all Kibana users. Bugs that would cause incorrect results, security issues and features that would vastly improve the user experience for everyone. Work arounds for P1s generally don't exist without a code change.
@@ -185,7 +185,7 @@ npm run test:ui:runner
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 
-### Submit a pull request
+## Submitting a pull request
 
 Push your local changes to your forked copy of the repository and submit a pull request. In the pull request, describe what your changes do and mention the number of the issue where discussion has taken place, eg “Closes #123″.
 
