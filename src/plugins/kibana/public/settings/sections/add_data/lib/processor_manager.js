@@ -1,18 +1,12 @@
 const _ = require('lodash');
+const Processor = require('./processor');
 
 export default function ProcessorManager() {
   const self = this;
 
   self.processors = [];
   self.counter = 0;
-  self.updatePaused = false;
 };
-
-ProcessorManager.prototype.pauseUpdate = function(paused) {
-  const self = this;
-
-  self.updatePaused = paused;
-}
 
 ProcessorManager.prototype.remove = function(processor) {
   const self = this;
@@ -20,6 +14,8 @@ ProcessorManager.prototype.remove = function(processor) {
   const index = processors.indexOf(processor);
 
   processors.splice(index, 1);
+
+  self.log();
 }
 
 ProcessorManager.prototype.moveUp = function(processor) {
@@ -32,6 +28,8 @@ ProcessorManager.prototype.moveUp = function(processor) {
   const temp = processors[index - 1];
   processors[index - 1] = processors[index];
   processors[index] = temp;
+
+  self.log();
 }
 
 ProcessorManager.prototype.moveDown = function(processor) {
@@ -44,6 +42,8 @@ ProcessorManager.prototype.moveDown = function(processor) {
   const temp = processors[index + 1];
   processors[index + 1] = processors[index];
   processors[index] = temp;
+
+  self.log();
 }
 
 ProcessorManager.prototype.add = function(processorType) {
@@ -51,7 +51,15 @@ ProcessorManager.prototype.add = function(processorType) {
   const processors = self.processors;
   self.counter += 1;
 
-  const newProcessor = _.cloneDeep(processorType);
+  const newProcessor = new Processor(processorType);
   newProcessor.processorId = self.counter;
   processors.push(newProcessor);
+
+  self.log();
+}
+
+ProcessorManager.prototype.log = function() {
+  const self = this;
+
+  console.log('Manager', self.processors);
 }

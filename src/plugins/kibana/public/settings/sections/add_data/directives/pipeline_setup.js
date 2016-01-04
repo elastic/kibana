@@ -108,6 +108,7 @@ app.directive('pipelineSetup', function ($compile) {
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
       $scope.manager = new ProcessorManager();
+      window.manager = $scope.manager; //TODO: Remove This!
       $scope.sampleData = {};
 
       function getDefaultProcessorType() {
