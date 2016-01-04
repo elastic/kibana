@@ -6,6 +6,7 @@ export default function ProcessorManager() {
 
   self.processors = [];
   self.counter = 0;
+  self.rootObject = {};
 };
 
 ProcessorManager.prototype.remove = function(processor) {
@@ -62,4 +63,28 @@ ProcessorManager.prototype.log = function() {
   const self = this;
 
   console.log('Manager', self.processors);
+}
+
+ProcessorManager.prototype.updateParents = function() {
+  const self = this;
+  const processors = self.processors;
+
+  let topIndexChanged = Infinity;
+  processors.forEach((processor, index) => {
+    let newParent;
+    if (index === 0) {
+      newParent = self.rootObject;
+    } else {
+      newParent = processors[index - 1];
+    }
+
+    let changed = processor.setParent(newParent);
+    if (changed) {
+      topIndexChanged = Math.min(index, topIndexChanged);
+    }
+  });
+
+  if (topIndexChanged < Infinity) {
+    return processors[topIndexChanged];
+  }
 }

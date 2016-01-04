@@ -11,11 +11,11 @@ app.directive('processorRegex', function () {
     controller : function ($scope, $rootScope, $timeout, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorRegex', true);
+      const logger = new Logger(processor, 'processorRegex', false);
 
       function getDescription() {
-        const source = ($scope.sourceField) ? $scope.sourceField : '?';
-        const target = ($scope.targetField) ? $scope.targetField : '?';
+        const source = (processor.sourceField) ? processor.sourceField : '?';
+        const target = (processor.targetField) ? processor.targetField : '?';
         return `RegEx - [${source}] -> [${target}]`;
       }
 
@@ -35,13 +35,13 @@ app.directive('processorRegex', function () {
         //this is just here to simulate an async process.
         $timeout(function() {
           const output = _.cloneDeep(processor.inputObject);
-          const key = $scope.targetField;
+          const key = processor.targetField;
           const description = getDescription();
 
-          if ($scope.expression && $scope.targetField && $scope.sourceField) {
+          if (processor.expression && processor.targetField && processor.sourceField) {
             let matches = [];
             try {
-              const regex = new RegExp($scope.expression, 'ig');
+              const regex = new RegExp(processor.expression, 'ig');
               matches = $scope.fieldData.match(regex);
             } catch(err) {
             }
@@ -76,25 +76,27 @@ app.directive('processorRegex', function () {
       }
 
       function refreshFieldData() {
-        $scope.fieldData = _.get(processor.inputObject, $scope.sourceField);
+        $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
       const startListener = $scope.$on('processor_start', processorStart);
 
-      $scope.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
-      $scope.targetField = '';
+      //TODO: Remove this. hard coded for testing.
+      processor.expression = '^[0-3]?[0-9]/[0-3]?[0-9]/(?:[0-9]{2})?[0-9]{2}';
+
+      processor.targetField = '';
 
       $scope.$on('$destroy', () => {
         startListener();
       });
 
-      $scope.$watch('sourceField', () => {
+      $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
 
-      $scope.$watch('targetField', applyProcessor);
-      $scope.$watch('expression', applyProcessor);
+      $scope.$watch('processor.targetField', applyProcessor);
+      $scope.$watch('processor.expression', applyProcessor);
     }
   }
 });

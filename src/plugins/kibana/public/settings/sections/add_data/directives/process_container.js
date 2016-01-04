@@ -20,22 +20,7 @@ app.directive('processContainer', function ($compile) {
     controller: function ($scope, $rootScope) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processContainer', true);
-
-      function parentUpdated(event, message) {
-        if (message.processor === processor.parent) {
-          logger.log('my parent updated');
-          updateInputObject();
-
-          applyProcessor();
-        }
-      }
-
-      function parentDirty(event, message) {
-        if (message.processor === processor.parent) {
-          setDirty();
-        }
-      }
+      const logger = new Logger(processor, 'processContainer', false);
 
       function updateInputObject() {
         //checks to see if the parent is a basic object or a processor
@@ -69,18 +54,33 @@ app.directive('processContainer', function ($compile) {
         $rootScope.$broadcast('processor_update', { processor: processor });
       }
 
-      function setDirty() {
-        $scope.isDirty = true;
+      function parentUpdated(event, message) {
+        if (message.processor !== processor.parent) return;
 
-        //alert my child if one exists.
-        $rootScope.$broadcast('processor_dirty', { processor: processor });
+        logger.log('my parent updated');
+        updateInputObject();
+        applyProcessor();
       }
 
       function forceUpdate(event, message) {
         if (processor !== message.processor) return;
 
+        logger.log(`I'm being forced to update`);
         updateInputObject();
         applyProcessor();
+      }
+
+      function parentDirty(event, message) {
+        if (message.processor !== processor.parent) return;
+
+        setDirty();
+      }
+
+      function setDirty() {
+        $scope.isDirty = true;
+
+        //alert my child if one exists.
+        $rootScope.$broadcast('processor_dirty', { processor: processor });
       }
 
       const forceUpdateListener = $scope.$on('processor_force_update', forceUpdate);

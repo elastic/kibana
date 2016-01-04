@@ -3,7 +3,7 @@
   <select
     class="form-control"
     ng-options="field as field for field in fields"
-    ng-model="sourceField">
+    ng-model="processor.sourceField">
   </select>
 </div>
 <div class="form-group">
@@ -12,9 +12,9 @@
 </div>
 <div class="form-group">
   <label>Target Field:</label>
-  <input type="text" class="form-control" ng-model="targetField">
+  <input type="text" class="form-control" ng-model="processor.targetField">
 </div>
 <div class="form-group">
   <label>Expression:</label>
-  <input type="text" class="form-control" ng-model="expression">
+  <input type="text" class="form-control" ng-model="processor.expression">
 </div>

@@ -11,7 +11,7 @@ app.directive('processorDelete', function () {
     controller : function ($scope, $rootScope, $timeout, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorDelete', true);
+      const logger = new Logger(processor, 'processorDelete', false);
 
       function getDescription() {
         let fieldList = getSelectedFields()
@@ -76,7 +76,8 @@ app.directive('processorDelete', function () {
           const output = _.cloneDeep(processor.inputObject);
           const description = getDescription();
 
-          getSelectedFields().forEach((field) => {
+          processor.fieldsToDelete = getSelectedFields();
+          processor.fieldsToDelete.forEach((field) => {
             delete output[field];
           });
 

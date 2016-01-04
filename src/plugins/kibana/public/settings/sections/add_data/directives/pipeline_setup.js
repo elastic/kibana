@@ -5,24 +5,13 @@ const ProcessorManager = require('../lib/processor_manager');
 
 require('./processors');
 
-app.directive('pipelineSetup', function ($compile) {
+app.directive('pipelineSetup', function ($compile, $rootScope) {
   return {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),
     link: function ($scope, $el) {
       const $container = $el;
       $el = $scope.$el = $container.find('.pipeline-container');
-
-      $scope.$watchCollection('manager.processors', function (newVal, oldVal) {
-        var removed = _.difference(oldVal, newVal);
-        var added = _.difference(newVal, oldVal);
-
-        removed.forEach(removeProcessor);
-        added.forEach(addProcessor);
-
-        updateProcessorChain();
-        reorderDom();
-      });
 
       function addProcessor(processor) {
         const scope = $scope.$new();
@@ -31,6 +20,8 @@ app.directive('pipelineSetup', function ($compile) {
 
         const template = `<li><process-container></process-container></li>`;
 
+        //TODO: Attaching the $el to the processor object doesn't feel right. I'd like to
+        //fix this at some point.
         processor.$el = $compile(template)(scope);
         processor.$el.appendTo($el);
       }
@@ -40,31 +31,13 @@ app.directive('pipelineSetup', function ($compile) {
           processor.$el.remove();
         });
 
-        // destroy the scope
         processor.$scope.$destroy();
       }
 
-      //TODO: Move this into the manager?
       function updateProcessorChain() {
-        const processors = $scope.manager.processors;
-
-        let topIndexChanged = Infinity;
-        processors.forEach((processor, index) => {
-          let newParent;
-          if (index === 0) {
-            newParent = $scope.sampleData;
-          } else {
-            newParent = processors[index - 1];
-          }
-
-          let changed = processor.setParent(newParent);
-          if (changed) {
-            topIndexChanged = Math.min(index, topIndexChanged);
-          }
-        });
-
-        if (topIndexChanged < Infinity) {
-          $scope.forceUpdate(processors[topIndexChanged]);
+        const topProcessorChanged = manager.updateParents();
+        if (topProcessorChanged) {
+          $rootScope.$broadcast('processor_force_update', { processor: topProcessorChanged });
         }
       }
 
@@ -90,11 +63,23 @@ app.directive('pipelineSetup', function ($compile) {
         });
       }
 
+      $scope.$watchCollection('manager.processors', function (newVal, oldVal) {
+        var removed = _.difference(oldVal, newVal);
+        var added = _.difference(newVal, oldVal);
+
+        removed.forEach(removeProcessor);
+        added.forEach(addProcessor);
+
+        updateProcessorChain();
+        reorderDom();
+      });
+
       $scope.$watch('sampleData', function(newVal) {
+        manager.rootObject = $scope.sampleData;
         updateProcessorChain();
       });
     },
-    controller: function ($scope, $rootScope, AppState) {
+    controller: function ($scope, AppState) {
       $scope.processorTypes = require('../lib/processor_registry.js');
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
@@ -104,10 +89,6 @@ app.directive('pipelineSetup', function ($compile) {
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
-      }
-
-      $scope.forceUpdate = function(processor) {
-        $rootScope.$broadcast('processor_force_update', { processor: processor });
       }
     }
   };
