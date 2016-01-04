@@ -8,6 +8,7 @@ const indexPatternResourceObject = createResourceObjectSchema(
     title: Joi.string().required(),
     time_field_name: Joi.string(),
     interval_name: Joi.string(),
+    not_expandable: Joi.boolean(),
     fields: Joi.array().items(
       Joi.object({
         name: Joi.string().required(),
