@@ -239,53 +239,74 @@ describe('Vislib Color Module Test Suite', function () {
   });
 
   describe('Color Palette', function () {
-    var colorCount = 42;
-    var colors;
-    var colorFn;
+    var num1 = 45;
+    var num2 = 72;
+    var num3 = 90;
+    var string = 'Welcome';
+    var bool = true;
+    var nullValue = null;
+    var emptyArr = [];
+    var emptyObject = {};
+    var notAValue;
+    var createColorPalette;
+    var colorPalette;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       seedColors = Private(require('ui/vislib/components/color/seed_colors'));
-      colorFn = Private(require('ui/vislib/components/color/color_palette'));
-      colors = colorFn(colorCount);
+      createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
+      colorPalette = createColorPalette(num1);
     }));
 
+    it('should throw an error if input is not a number', function () {
+      expect(function () {
+        createColorPalette(string);
+      }).to.throwError();
+
+      expect(function () {
+        createColorPalette(bool);
+      }).to.throwError();
+
+      expect(function () {
+        createColorPalette(nullValue);
+      }).to.throwError();
+
+      expect(function () {
+        createColorPalette(emptyArr);
+      }).to.throwError();
+
+      expect(function () {
+        createColorPalette(emptyObject);
+      }).to.throwError();
+
+      expect(function () {
+        createColorPalette(notAValue);
+      }).to.throwError();
+    });
+
     it('should be a function', function () {
-      expect(colorFn).to.be.a(Function);
+      expect(typeof createColorPalette).to.be('function');
     });
 
     it('should return an array', function () {
-      expect(colors).to.be.a(Array);
+      expect(colorPalette instanceof Array).to.be(true);
     });
 
     it('should return an array of the same length as the input', function () {
-      expect(colors.length).to.be(colorCount);
+      expect(colorPalette.length).to.be(num1);
     });
 
-    it('should use the seed colors first', function () {
-      _.each(seedColors, function (color, i) {
-        expect(color).to.equal(colors[i]);
-      });
+    it('should return the seed color array when input length is 72', function () {
+      expect(createColorPalette(num2)[71]).to.be(seedColors[71]);
     });
 
-    it('should then generate a darker version of the seed', function () {
-      var parsedSeed = d3.hsl(seedColors[0]);
-      var parsedResult = d3.hsl(colors[seedColors.length]);
-      expect(parsedResult.l).to.be.lessThan(parsedSeed.l);
+    it('should return an array of the same length as the input when input is greater than 72', function () {
+      expect(createColorPalette(num3).length).to.be(num3);
     });
 
-    it('followed by a lighter version', function () {
-      var parsedSeed = d3.hsl(seedColors[0]);
-      var parsedResult = d3.hsl(colors[seedColors.length * 2]);
-      expect(parsedResult.l).to.be.greaterThan(parsedSeed.l);
+    it('should create new darker colors when input is greater than 72', function () {
+      expect(createColorPalette(num3)[72]).not.to.equal(seedColors[0]);
     });
-
-    it('and then a darker version again', function () {
-      var parsedSeed = d3.hsl(seedColors[0]);
-      var parsedResult = d3.hsl(colors[seedColors.length * 3]);
-      expect(parsedResult.l).to.be.lessThan(parsedSeed.l);
-    });
-
 
   });
 });
