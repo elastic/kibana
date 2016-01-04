@@ -8,14 +8,14 @@ define(function () {
 
   return function SeedColorUtilService() {
     return [
-      '#7eb26d',
-      '#eab839',
-      '#6ed0e0',
-      '#ef843c',
-      '#e24d42',
-      '#1f78c1',
-      '#ba43a9',
-      '#705da0'
+      '#7EB26D',
+      '#EAB839',
+      '#6ED0E0',
+      '#EF843C',
+      '#E24D42',
+      '#1F78C1',
+      '#BA43A9',
+      '#705DA0'
     ];
   };
 });
