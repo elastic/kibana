@@ -3,7 +3,7 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-//scope.processor is attached by the wrapper.
+//scope.processor is attached by the process_container.
 app.directive('processorRegex', function () {
   return {
     restrict: 'E',

@@ -15,8 +15,6 @@ ProcessorManager.prototype.remove = function(processor) {
   const index = processors.indexOf(processor);
 
   processors.splice(index, 1);
-
-  self.log();
 }
 
 ProcessorManager.prototype.moveUp = function(processor) {
@@ -29,8 +27,6 @@ ProcessorManager.prototype.moveUp = function(processor) {
   const temp = processors[index - 1];
   processors[index - 1] = processors[index];
   processors[index] = temp;
-
-  self.log();
 }
 
 ProcessorManager.prototype.moveDown = function(processor) {
@@ -43,8 +39,6 @@ ProcessorManager.prototype.moveDown = function(processor) {
   const temp = processors[index + 1];
   processors[index + 1] = processors[index];
   processors[index] = temp;
-
-  self.log();
 }
 
 ProcessorManager.prototype.add = function(processorType) {
@@ -53,16 +47,8 @@ ProcessorManager.prototype.add = function(processorType) {
   self.counter += 1;
 
   const newProcessor = new Processor(processorType);
-  newProcessor.processorId = self.counter;
+  newProcessor.processorId = `processor_${self.counter}`; //Keep the processorId value a string.
   processors.push(newProcessor);
-
-  self.log();
-}
-
-ProcessorManager.prototype.log = function() {
-  const self = this;
-
-  console.log('Manager', self.processors);
 }
 
 ProcessorManager.prototype.updateParents = function() {

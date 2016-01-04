@@ -19,19 +19,16 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
         scope.manager = $scope.manager;
 
         const template = `<li><process-container></process-container></li>`;
-
-        //TODO: Attaching the $el to the processor object doesn't feel right. I'd like to
-        //fix this at some point.
-        processor.$el = $compile(template)(scope);
-        processor.$el.appendTo($el);
+        const $newEl = $compile(template)(scope);
+        $scope.$elements[processor.processorId] = $newEl;
+        $newEl.appendTo($el);
       }
 
       function removeProcessor(processor) {
-        processor.$el.slideUp(200, () => {
-          processor.$el.remove();
+        const $el = $scope.$elements[processor.processorId];
+        $el.slideUp(200, () => {
+          $el.remove();
         });
-
-        processor.$scope.$destroy();
       }
 
       function updateProcessorChain() {
@@ -46,7 +43,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
         const $parent = $scope.$el;
 
         processors.forEach((processor, index) => {
-          const $el = processor.$el;
+          const $el = $scope.$elements[processor.processorId];
 
           if (index === 0) {
             if (!$el.is(':first-child')) {
@@ -55,9 +52,10 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
             }
           } else {
             const previousProcessor = processors[index-1];
-            if ($el.prev()[0] !== previousProcessor.$el[0]) {
+            const $previousEl = $scope.$elements[previousProcessor.processorId];
+            if ($el.prev()[0] !== $previousEl[0]) {
               $el.detach();
-              previousProcessor.$el.after($el);
+              $previousEl.after($el);
             }
           }
         });
@@ -84,8 +82,11 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
       $scope.manager = new ProcessorManager();
-      window.manager = $scope.manager; //TODO: Remove This!
+      $scope.$elements = {}; //keeps track of the dom elements associated with processors as jquery objects
       $scope.sampleData = {};
+
+      window.$elements = $scope.$elements; //TODO: Remove This!
+      window.manager = $scope.manager; //TODO: Remove This!
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
