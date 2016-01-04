@@ -8,10 +8,14 @@ export default function ProcessorManager(processor, area, enabled) {
   self.processor = processor;
 };
 
-ProcessorManager.prototype.log = function(message) {
+ProcessorManager.prototype.log = function(message, extra) {
   const self = this;
 
   if (!self.enabled) return;
 
-  console.log(self.processor.processorId, self.area, message);
+  if (extra) {
+    console.log(self.processor.processorId, self.area, message, extra);
+  } else {
+    console.log(self.processor.processorId, self.area, message);
+  }
 }

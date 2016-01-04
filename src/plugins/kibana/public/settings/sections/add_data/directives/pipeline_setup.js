@@ -25,20 +25,14 @@ app.directive('pipelineSetup', function ($compile) {
       });
 
       function addProcessor(processor) {
-        //TODO: This is wrong now... since both the process_container and process_worker share
-        //a reference to the same processor object. The processor should not have a reference
-        //to the $scope object as is being done here.
-        processor.$scope = $scope.$new();
-        processor.$scope.processor = processor;
-        processor.$scope.manager = $scope.manager;
+        const scope = $scope.$new();
+        scope.processor = processor;
+        scope.manager = $scope.manager;
 
         const template = `<li><process-container></process-container></li>`;
 
-        processor.$el = $compile(template)(processor.$scope);
+        processor.$el = $compile(template)(scope);
         processor.$el.appendTo($el);
-
-        processor.$el.data('processor', processor);
-        processor.$el.data('$scope', processor.$scope);
       }
 
       function removeProcessor(processor) {
@@ -48,9 +42,6 @@ app.directive('pipelineSetup', function ($compile) {
 
         // destroy the scope
         processor.$scope.$destroy();
-
-        processor.$el.removeData('processor');
-        processor.$el.removeData('$scope');
       }
 
       //TODO: Move this into the manager?
@@ -66,14 +57,14 @@ app.directive('pipelineSetup', function ($compile) {
             newParent = processors[index - 1];
           }
 
-          let changed = processor.$scope.setParent(newParent);
+          let changed = processor.setParent(newParent);
           if (changed) {
             topIndexChanged = Math.min(index, topIndexChanged);
           }
         });
 
         if (topIndexChanged < Infinity) {
-          processors[topIndexChanged].$scope.forceUpdate();
+          $scope.forceUpdate(processors[topIndexChanged]);
         }
       }
 
@@ -103,7 +94,7 @@ app.directive('pipelineSetup', function ($compile) {
         updateProcessorChain();
       });
     },
-    controller: function ($scope, AppState) {
+    controller: function ($scope, $rootScope, AppState) {
       $scope.processorTypes = require('../lib/processor_registry.js');
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
@@ -113,6 +104,10 @@ app.directive('pipelineSetup', function ($compile) {
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
+      }
+
+      $scope.forceUpdate = function(processor) {
+        $rootScope.$broadcast('processor_force_update', { processor: processor });
       }
     }
   };

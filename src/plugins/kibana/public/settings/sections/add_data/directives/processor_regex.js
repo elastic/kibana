@@ -20,7 +20,8 @@ app.directive('processorRegex', function () {
       }
 
       function checkForNewInputObject() {
-        logger.log('consuming new inputObject');
+        //debugger;
+        logger.log('consuming new inputObject', processor.inputObject);
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
       }

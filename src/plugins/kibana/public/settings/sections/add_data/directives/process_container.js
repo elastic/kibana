@@ -76,35 +76,26 @@ app.directive('processContainer', function ($compile) {
         $rootScope.$broadcast('processor_dirty', { processor: processor });
       }
 
+      function forceUpdate(event, message) {
+        if (processor !== message.processor) return;
+
+        updateInputObject();
+        applyProcessor();
+      }
+
+      const forceUpdateListener = $scope.$on('processor_force_update', forceUpdate);
       const updateListener = $scope.$on('processor_update', parentUpdated);
       const dirtyListener = $scope.$on('processor_dirty', parentDirty);
       const startedListener = $scope.$on('processor_started', processorStarted);
       const finishedListener = $scope.$on('processor_finished', processorFinished);
 
       $scope.$on('$destroy', () => {
+        forceUpdateListener();
         updateListener();
         dirtyListener();
         startedListener();
         finishedListener();
       });
-
-      //external hooks
-      $scope.forceUpdate = function() {
-        applyProcessor();
-      }
-
-      //Can the parent go into the processor instead of the scope?
-
-      //returns whether the parent actually changed
-      //DO NOT DO ANYTHING THAT REQUIRES PROCESSING HERE!!!!
-      $scope.setParent = function(parent) {
-        const oldParent = processor.parent;
-        processor.parent = parent;
-
-        updateInputObject();
-
-        return (oldParent !== parent);
-      }
     }
   };
 });

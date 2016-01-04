@@ -7,6 +7,11 @@ export default function Processor(processorType) {
   self.template = processorType.template;
 };
 
-Processor.prototype.dummy = function(paused) {
+Processor.prototype.setParent = function(newParent) {
   const self = this;
+
+  const oldParent = self.parent;
+  self.parent = newParent;
+
+  return (oldParent !== parent);
 }
