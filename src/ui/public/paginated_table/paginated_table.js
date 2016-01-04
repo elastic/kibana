@@ -46,10 +46,14 @@ define(function (require) {
 
           self.sort.columnIndex = colIndex;
           self.sort.direction = sortDirection;
-          $scope.sort = {
-            columnIndex: colIndex,
-            direction:  sortDirection
-          };
+          // Tell the vis it's time to update it's params
+          // FIXME, why the hell doesn't $scope.$emit work?!?!?!
+          $scope.$root.$broadcast('updateParams', {
+            sort: {
+              columnIndex: colIndex,
+              direction: sortDirection
+            }
+          });
           self._setSortGetter(colIndex);
         };
 

@@ -127,7 +127,9 @@ define(function (require) {
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {
-          if ($scope.renderbot) $scope.renderbot.updateParams();
+          if ($scope.renderbot) {
+            $scope.renderbot.updateParams();
+          }
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
@@ -154,6 +156,11 @@ define(function (require) {
           if (oldRenderbot && newRenderbot !== oldRenderbot) {
             oldRenderbot.destroy();
           }
+        });
+
+        // Enable the visualizations to update the the vis.params
+        $scope.$on('updateParams', function (evt, params) {
+          _.assign($scope.editableVis.params, params);
         });
 
         $scope.$on('$destroy', function () {
