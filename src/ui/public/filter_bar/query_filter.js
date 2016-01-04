@@ -40,7 +40,7 @@ define(function (require) {
     queryFilter.addFilters = function (filters, global) {
 
       if (global === undefined) {
-        var configDefault = config.get('filters:defaultGlobalState');
+        var configDefault = config.get('filters:pinnedByDefault');
 
         if (configDefault === false || configDefault === true) {
           global = configDefault;
