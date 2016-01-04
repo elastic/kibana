@@ -8,7 +8,6 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var post = require('./_post');
   var get = require('./_get');
-  var put = require('./_put');
   var del = require('./_del');
 
   bdd.describe('index_patterns API', function () {
@@ -25,7 +24,6 @@ define(function (require) {
 
     get(bdd, scenarioManager, request);
     post(bdd, scenarioManager, request);
-    put(bdd, scenarioManager, request);
     del(bdd, scenarioManager, request);
   });
 });
