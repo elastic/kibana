@@ -3,7 +3,6 @@ const _ = require('lodash');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
-const addMappingInfoToPatternFields = require('../../../lib/add_mapping_info_to_pattern_fields');
 const { convertToCamelCase } = require('../../../lib/case_conversion');
 const createMappingFromPatternField = require('../../../lib/create_mapping_from_pattern_field');
 const castMappingType = require('../../../lib/cast_mapping_type');
@@ -24,16 +23,27 @@ module.exports = function registerPost(server) {
       const indexPattern = convertToCamelCase(requestDocument.data.attributes);
 
       _.forEach(indexPattern.fields, function (field) {
-        _.defaults(field, {
-          indexed: true,
-          analyzed: false,
-          doc_values: true,
-          scripted: false,
-          count: 0
-        });
+        if (field.scripted) {
+          _.defaults(field, {
+            indexed: false,
+            analyzed: false,
+            doc_values: false,
+            count: 0
+          });
+        }
+        else {
+          _.defaults(field, {
+            indexed: true,
+            analyzed: false,
+            doc_values: true,
+            scripted: false,
+            count: 0
+          });
+        }
       });
 
       const mappings = _(indexPattern.fields)
+      .reject('scripted')
       .indexBy('name')
       .mapValues(createMappingFromPatternField)
       .value();

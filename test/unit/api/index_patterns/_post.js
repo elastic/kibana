@@ -97,6 +97,32 @@ define(function (require) {
           });
       });
 
+      bdd.it('scripted fields should not get added to the template', function createTemplate() {
+        var testData = createTestData().indexPattern;
+        testData.data.attributes.fields.push({
+          'name': 'Double Bytes',
+          'type': 'number',
+          'scripted': true,
+          'script': 'doc[\'bytes\'].value * 2',
+          'lang': 'expression',
+          'indexed': false,
+          'analyzed': false,
+          'doc_values': false
+        });
+
+        return request.post('/kibana/index_patterns')
+          .send(testData)
+          .expect(201)
+          .then(function () {
+            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
+              .then(function (template) {
+                var mappings = template['kibana-logstash-*'].mappings._default_.properties;
+                expect(mappings).to.be.ok();
+                expect(mappings).to.not.have.property('Double Bytes');
+              });
+          });
+      });
+
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
         return request.post('/kibana/index_patterns')
           .send(createTestData().indexPattern)
