@@ -7,7 +7,6 @@ define(function (require) {
   var _ = require('intern/dojo/node!lodash');
   var expect = require('intern/dojo/node!expect.js');
   var post = require('./_post');
-  var get = require('./_get');
   var del = require('./_del');
 
   bdd.describe('index_patterns API', function () {
@@ -22,7 +21,6 @@ define(function (require) {
       return scenarioManager.unload('emptyKibana');
     });
 
-    get(bdd, scenarioManager, request);
     post(bdd, scenarioManager, request);
     del(bdd, scenarioManager, request);
   });

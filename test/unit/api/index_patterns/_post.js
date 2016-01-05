@@ -58,12 +58,15 @@ define(function (require) {
           .send(createTestData().indexPattern)
           .expect(201)
           .then(function () {
-            return request.get('/kibana/index_patterns/logstash-*')
-            .expect(200)
+            return scenarioManager.client.get({
+              index: '.kibana',
+              type: 'index-pattern',
+              id: 'logstash-*'
+            })
             .then(function (res) {
-              var fields = res.body.data.attributes.fields;
+              var fields = JSON.parse(res._source.fields);
               // @timestamp was created with only name and type, all other fields should be set as defaults by API
-              expect(res.body.data.attributes.title).to.be('logstash-*');
+              expect(res._source.title).to.be('logstash-*');
               expect(fields[1].name).to.be('@timestamp');
               expect(fields[1].type).to.be('date');
               expect(fields[1].count).to.be(0);
