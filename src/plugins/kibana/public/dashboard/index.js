@@ -19,6 +19,7 @@ define(function (require) {
 
   require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
 
+  var dashboardTemplate = require('plugins/kibana/dashboard/index.html');
 
   var app = require('ui/modules').get('app/dashboard', [
     'elasticsearch',
@@ -31,15 +32,23 @@ define(function (require) {
 
   require('ui/routes')
   .when('/dashboard', {
-    template: require('plugins/kibana/dashboard/index.html'),
+    template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, config) {
         return savedDashboards.get();
       }
     }
   })
+  .when('/dashboard/new', {
+    template: dashboardTemplate,
+    resolve: {
+      dash: function (savedDashboards) {
+        return savedDashboards.get();
+      }
+    }
+  })
   .when('/dashboard/:id', {
-    template: require('plugins/kibana/dashboard/index.html'),
+    template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
