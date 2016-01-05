@@ -4,6 +4,10 @@ define(function (require) {
   var _ = require('lodash');
   var dateMath = require('ui/utils/dateMath');
   var moment = require('moment');
+  var Notifier = require('ui/notify/notifier');
+  var notify = new Notifier({
+    location: 'timepicker',
+  });
 
   require('ui/directives/input_datetime');
   require('ui/directives/inequality');
@@ -142,10 +146,11 @@ define(function (require) {
 
         $scope.setRefreshInterval = function (interval) {
           interval = _.clone(interval);
-          console.log('before: ' + interval.pause);
+          notify.log('before: ' + interval.pause);
           interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
 
-          console.log('after: ' + interval.pause);
+          notify.log('after: ' + interval.pause);
+
           $scope.interval = interval;
         };
 

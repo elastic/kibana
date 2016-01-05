@@ -6,6 +6,7 @@ var config = require('./config').scenarios;
 function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
 
+  // NOTE: some large sets of test data can take several minutes to load
   this.client = new elasticsearch.Client({
     host: server,
     requestTimeout: 300000

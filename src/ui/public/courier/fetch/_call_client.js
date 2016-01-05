@@ -93,12 +93,7 @@ define(function (require) {
           ignore_unavailable: true,
           preference: sessionId,
           body: body
-        }))
-        .catch(function (err) {
-          return strategy.handleResponseError
-            ? strategy.handleResponseError(executable, err)
-            : Promise.reject(err);
-        });
+        }));
       })
       .then(function (clientResp) {
         return strategy.getResponses(clientResp);

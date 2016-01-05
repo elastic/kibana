@@ -88,7 +88,7 @@ export default function (server) {
     async getUrl(urlId) {
       try {
         const urlDoc = await getUrlDoc(urlId);
-        if (!urlDoc) throw new Error('Requested shortened url does note exist in kibana index');
+        if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
 
         updateMetadata(urlId, urlDoc);
 
