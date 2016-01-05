@@ -276,9 +276,7 @@ define(function (require) {
             };
           }
 
-          if (flatState.body.size === 0) {
-            flatState.search_type = 'count';
-          } else {
+          if (flatState.body.size > 0) {
             var computedFields = flatState.index.getComputedFields();
             flatState.body.fields = computedFields.fields;
             flatState.body.script_fields = flatState.body.script_fields || {};

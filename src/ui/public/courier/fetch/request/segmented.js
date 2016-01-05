@@ -92,8 +92,6 @@ define(function (require) {
           params.body.size = self._pickSizeForIndices(indices);
         }
 
-        if (params.body.size === 0) params.search_type = 'count';
-
         return params;
       });
     };
