@@ -202,6 +202,10 @@ define(function (require) {
         value: false,
         description: 'New dashboards use dark theme by default'
       },
+      'dashboard:defaultDashboard': {
+        value: '',
+        description: 'The default dashboard to load. ID can be found in the URL when the dashboard is loaded.'
+      },
       'filters:pinnedByDefault': {
         value: false,
         description: 'Whether the filters should have a global state (be pinned) by default'
