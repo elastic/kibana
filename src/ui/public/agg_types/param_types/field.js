@@ -56,8 +56,10 @@ define(function (require) {
       var field = aggConfig.params.field;
 
       if (field.scripted) {
-        output.params.script = field.script;
-        output.params.lang = field.lang;
+        output.params.script = {
+          script: field.script,
+          lang: field.lang
+        };
       } else {
         output.params.field = field.name;
       }
