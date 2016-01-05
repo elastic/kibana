@@ -11,7 +11,6 @@ define(function (require) {
   require('ui/doc_table');
   require('ui/visualize');
   require('ui/notify');
-  require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
   require('ui/filters/moment');
@@ -20,6 +19,7 @@ define(function (require) {
   require('ui/state_management/app_state');
   require('ui/timefilter');
   require('ui/highlight/highlight_tags');
+  require('ui/share');
 
   var app = require('ui/modules').get('apps/discover', [
     'kibana/notify',
@@ -91,7 +91,8 @@ define(function (require) {
     // config panel templates
     $scope.configTemplate = new ConfigTemplate({
       load: require('plugins/kibana/discover/partials/load_search.html'),
-      save: require('plugins/kibana/discover/partials/save_search.html')
+      save: require('plugins/kibana/discover/partials/save_search.html'),
+      share: require('plugins/kibana/discover/partials/share_search.html')
     });
 
     $scope.timefilter = timefilter;
@@ -485,6 +486,7 @@ define(function (require) {
       }
 
       $scope.vis = new Vis($scope.indexPattern, {
+        title: savedSearch.title,
         type: 'histogram',
         params: {
           addLegend: false,
@@ -492,7 +494,7 @@ define(function (require) {
         },
         listeners: {
           click: function (e) {
-            console.log(e);
+            notify.log(e);
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';

@@ -3,6 +3,7 @@ require('plugins/kibana/visualize/index');
 require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
 require('plugins/kibana/doc/index');
+require('ui/timepicker');
 
 var moment = require('moment-timezone');
 
@@ -11,6 +12,8 @@ var routes = require('ui/routes');
 var modules = require('ui/modules');
 
 var kibanaLogoUrl = require('ui/images/kibana.svg');
+
+routes.enable();
 
 routes
 .otherwise({

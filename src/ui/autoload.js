@@ -63,7 +63,7 @@ exports.reload = function () {
     'ui/stringify/register',
     'ui/styleCompile',
     'ui/timefilter',
-    'ui/timepicker',
+    'ui/timepicker', // TODO: remove this for 5.0
     'ui/tooltip',
     'ui/typeahead',
     'ui/url',

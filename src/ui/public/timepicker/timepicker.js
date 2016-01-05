@@ -4,13 +4,17 @@ define(function (require) {
   var _ = require('lodash');
   var dateMath = require('ui/utils/dateMath');
   var moment = require('moment');
+  var Notifier = require('ui/notify/notifier');
+  var notify = new Notifier({
+    location: 'timepicker',
+  });
 
   require('ui/directives/input_datetime');
   require('ui/directives/inequality');
   require('ui/timepicker/quick_ranges');
   require('ui/timepicker/refresh_intervals');
   require('ui/timepicker/time_units');
-  require('ui/timepicker/offset_timezone');
+  require('ui/timepicker/toggle');
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {
@@ -60,6 +64,14 @@ define(function (require) {
           {text: 'Months ago', value: 'M'},
           {text: 'Years ago', value: 'y'},
         ];
+
+        $scope.$watch('absolute.from', function (date) {
+          if (_.isDate(date)) $scope.absolute.from = moment(date);
+        });
+
+        $scope.$watch('absolute.to', function (date) {
+          if (_.isDate(date)) $scope.absolute.to = moment(date);
+        });
 
         $scope.setMode = function (thisMode) {
           switch (thisMode) {
@@ -134,10 +146,11 @@ define(function (require) {
 
         $scope.setRefreshInterval = function (interval) {
           interval = _.clone(interval);
-          console.log('before: ' + interval.pause);
+          notify.log('before: ' + interval.pause);
           interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
 
-          console.log('after: ' + interval.pause);
+          notify.log('after: ' + interval.pause);
+
           $scope.interval = interval;
         };
 

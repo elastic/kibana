@@ -1,0 +1,74 @@
+extends ./chrome.jade
+
+block content
+  style.
+    .ui-app-loading {
+      width: 33.3%;
+      margin: 60px auto;
+      padding: 0 15px;
+      text-align: center;
+      font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #444444;
+      padding-top: 45px;
+      background-size: 128px;
+      background-position: top center;
+      background-repeat: no-repeat;
+      background-image: url('data:image/gif;base64,#{loadingGif}');
+    }
+
+    .ui-app-loading small {
+      font-size: 65%;
+      font-weight: 400;
+      color: #b4bcc2;
+    }
+
+
+  div.ui-app-loading
+    h1
+      strong Kibana
+      small.
+        &nbsp;is loading. Give me a moment here. I'm loading a whole bunch of code. Don't worry, all this good stuff will be cached up for next time!
+
+  script.
+    window.onload = function () {
+
+      var hideLoadingMessage = /#.*[?&]embed(&|$)/.test(window.location.href);
+      if (hideLoadingMessage) {
+        var loading = document.querySelector('.ui-app-loading h1');
+        loading.removeChild(loading.lastChild);
+      }
+
+      var buildNum = #{kibanaPayload.buildNum};
+      var cacheParam = buildNum ? '?v=' + buildNum : '';
+      function bundleFile(filename) {
+        var anchor = document.createElement('a');
+        anchor.setAttribute('href', !{JSON.stringify(bundlePath)} + '/' + filename + cacheParam);
+        return anchor.href;
+      }
+      var files = [
+        bundleFile('commons.style.css'),
+        bundleFile('#{app.id}.style.css'),
+        bundleFile('commons.bundle.js'),
+        bundleFile('#{app.id}.bundle.js')
+      ];
+
+      (function next() {
+        var file = files.shift();
+        if (!file) return;
+
+        var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
+        var dom = document.createElement(type);
+        dom.setAttribute('async', '');
+
+        if (type === 'script') {
+          dom.setAttribute('src', file);
+          dom.addEventListener('load', next);
+          document.head.appendChild(dom);
+        } else {
+          dom.setAttribute('rel', 'stylesheet');
+          dom.setAttribute('href', file);
+          document.head.appendChild(dom);
+          next();
+        }
+      }());
+    };

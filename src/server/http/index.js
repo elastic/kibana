@@ -10,6 +10,8 @@ module.exports = function (kbnServer, server, config) {
 
   server = kbnServer.server = new Hapi.Server();
 
+  const shortUrlLookup = require('./short_url_lookup')(server);
+
   // Create a new connection
   var connectionOptions = {
     host: config.get('server.host'),
@@ -18,7 +20,10 @@ module.exports = function (kbnServer, server, config) {
       strictHeader: false
     },
     routes: {
-      cors: config.get('server.cors')
+      cors: config.get('server.cors'),
+      payload: {
+        maxBytes: config.get('server.maxPayloadBytes')
+      }
     }
   };
 
@@ -151,6 +156,24 @@ module.exports = function (kbnServer, server, config) {
         pathname: path.slice(0, -1),
       }))
       .permanent(true);
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/goto/{urlId}',
+    handler: async function (request, reply) {
+      const url = await shortUrlLookup.getUrl(request.params.urlId);
+      reply().redirect(url);
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/shorten',
+    handler: async function (request, reply) {
+      const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+      reply(urlId);
     }
   });
 

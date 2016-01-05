@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 
 define(function (require) {
   var _ = require('lodash');

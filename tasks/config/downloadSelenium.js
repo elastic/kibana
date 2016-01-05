@@ -5,9 +5,9 @@ module.exports = function (grunt) {
   return {
     options: {
       selenium: {
-        filename: 'selenium-server-standalone-2.47.1.jar',
-        server: 'https://selenium-release.storage.googleapis.com/2.47/',
-        md5: 'e6cb10b8f0f353c6ca4a8f62fb5cb472',
+        filename: 'selenium-server-standalone-2.48.2.jar',
+        server: 'https://selenium-release.storage.googleapis.com/2.48/',
+        md5: 'b2784fc67c149d3c13c83d2108104689',
         directory: path.join(grunt.config.get('root'), 'selenium')
       }
     }
