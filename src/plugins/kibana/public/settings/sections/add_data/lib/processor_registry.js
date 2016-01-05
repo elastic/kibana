@@ -1,18 +1,14 @@
-export default [
-  {
-    id: 'simple',
-    title: 'Simple',
-    default: true,
-    template: '<processor-simple></processor-simple>'
+var _ = require('lodash');
+var registry = [];
+
+export default {
+  register: function (service) {
+    registry.push(service);
   },
-  {
-    id: 'regex',
-    title: 'RegEx',
-    template: '<processor-regex></processor-regex>'
+  all: function () {
+    return registry;
   },
-  {
-    id: 'delete',
-    title: 'Delete Fields',
-    template: '<processor-delete></processor-delete>'
+  get: function (id) {
+    return _.find(registry, { service: id });
   }
-];
+};

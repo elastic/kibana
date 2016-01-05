@@ -37,7 +37,7 @@ app.directive('sourceData', function () {
 
       $scope.inputText =
 `{
-"_raw": "11/24/2015 - - src=1.1.1.1 evil=1",
+"_raw": "11/24/2015 - - src=2607:f8b0:400d:c07::67 tar=172.15.95.62 evil=1",
 "_deal": "I am a simple string"
 }`;
       $scope.inputObject = _.cloneDeep($scope.outputObject);

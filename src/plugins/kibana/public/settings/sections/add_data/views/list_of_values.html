@@ -1,0 +1,24 @@
+<div
+  class="value-list-item"
+  ng-repeat="value in app.values track by $index">
+  <input
+    type="text"
+    class="form-control"
+    ng-model="app.values[$index]" />
+  <button
+    aria-label="Remove"
+    tooltip="Remove"
+    tooltip-append-to-body="true"
+    ng-click="delete($index)"
+    type="button"
+    class="btn btn-xs btn-danger">
+    <i aria-hidden="true" class="fa fa-times"></i>
+  </button>
+</div>
+<div class="value-list-item">
+  <input
+    type="text"
+    class="form-control"
+    ng-model="newValue"
+    ng-blur="addItem($event)">
+</div>

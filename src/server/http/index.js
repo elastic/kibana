@@ -174,5 +174,18 @@ module.exports = function (kbnServer, server, config) {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/jimtest',
+    handler: async function (request, reply) {
+      console.log(server);
+
+      console.log('I am getting here at least.');
+      const result = await jimtest.test1();
+      console.log(result);
+      reply(result);
+    }
+  });
+
   return kbnServer.mixin(require('./xsrf'));
 };

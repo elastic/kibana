@@ -4,6 +4,7 @@ const $ = require('jquery');
 const ProcessorManager = require('../lib/processor_manager');
 
 require('./processors');
+require('./list_of_values');
 
 app.directive('pipelineSetup', function ($compile, $rootScope) {
   return {
@@ -78,7 +79,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       });
     },
     controller: function ($scope, AppState) {
-      $scope.processorTypes = require('../lib/processor_registry.js');
+      $scope.processorTypes = require('../lib/processor_registry.js').all().sort();
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
       $scope.manager = new ProcessorManager();

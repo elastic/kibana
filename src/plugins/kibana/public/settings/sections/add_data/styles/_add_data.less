@@ -2,6 +2,12 @@
 @import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/theme";
 
+list-of-values {
+  .value-list-item {
+    display: flex;
+  }
+}
+
 kbn-settings-add-data {
   @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
   @vis-editor-sidebar-min-width: 350px;
@@ -81,6 +87,10 @@ kbn-settings-add-data {
           flex: 0 0 auto;
         }
       }
+    }
+
+    pre.output {
+      max-height: 200px;
     }
 
   }
