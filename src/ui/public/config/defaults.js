@@ -21,7 +21,7 @@ define(function (require) {
       },
       'dateFormat': {
         value: 'MMMM Do YYYY, HH:mm:ss.SSS',
-        description: 'When displaying a pretty formatted date, use this format',
+        description: 'When displaying a pretty formatted date, use this format'
       },
       'dateFormat:tz': {
         value: 'Browser',
@@ -49,20 +49,20 @@ define(function (require) {
       },
       'defaultIndex': {
         value: null,
-        description: 'The index to access if no index is set',
+        description: 'The index to access if no index is set'
       },
       'metaFields': {
         value: ['_source', '_id', '_type', '_index', '_score'],
-        description: 'Fields that exist outside of _source to merge into our document when displaying it',
+        description: 'Fields that exist outside of _source to merge into our document when displaying it'
       },
       'discover:sampleSize': {
         value: 500,
-        description: 'The number of rows to show in the table',
+        description: 'The number of rows to show in the table'
       },
       'doc_table:highlight': {
         value: true,
         description: 'Highlight results in Discover and Saved Searches Dashboard.' +
-          'Highlighing makes request slow when working on big documents.',
+          'Highlighing makes request slow when working on big documents.'
       },
       'courier:maxSegmentCount': {
         value: 30,
@@ -72,15 +72,15 @@ define(function (require) {
       },
       'fields:popularLimit': {
         value: 10,
-        description: 'The top N most popular fields to show',
+        description: 'The top N most popular fields to show'
       },
       'histogram:barTarget': {
         value: 50,
-        description: 'Attempt to generate around this many bar when using "auto" interval in date histograms',
+        description: 'Attempt to generate around this many bar when using "auto" interval in date histograms'
       },
       'histogram:maxBars': {
         value: 100,
-        description: 'Never show more than this many bar in date histograms, scale values if needed',
+        description: 'Never show more than this many bar in date histograms, scale values if needed'
       },
       'visualization:tileMap:maxPrecision': {
         value: 7,
@@ -88,7 +88,7 @@ define(function (require) {
         '12 is the max. ' +
         '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
-        'Explanation of cell dimensions</a>',
+        'Explanation of cell dimensions</a>'
       },
       'visualization:tileMap:WMSdefaults': {
         value: JSON.stringify({
@@ -100,7 +100,7 @@ define(function (require) {
             format: 'image/png',
             transparent: true,
             attribution: 'Maps provided by USGS',
-            styles: '',
+            styles: ''
           }
         }, null, '  '),
         type: 'json',
@@ -119,19 +119,19 @@ define(function (require) {
       },
       'csv:separator': {
         value: ',',
-        description: 'Separate exported values with this string',
+        description: 'Separate exported values with this string'
       },
       'csv:quoteValues': {
         value: true,
-        description: 'Should values be quoted in csv exports?',
+        description: 'Should values be quoted in csv exports?'
       },
       'history:limit': {
         value: 10,
-        description: 'In fields that have history (e.g. query inputs), show this many recent values',
+        description: 'In fields that have history (e.g. query inputs), show this many recent values'
       },
       'shortDots:enable': {
         value: false,
-        description: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
+        description: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz'
       },
       'truncate:maxHeight': {
         value: 115,
@@ -151,7 +151,7 @@ define(function (require) {
           '  "number": { "id": "number", "params": {} },',
           '  "_source": { "id": "_source", "params": {} },',
           '  "_default_": { "id": "string", "params": {} }',
-          '}',
+          '}'
         ].join('\n'),
         description: 'Map of the format name to use by default for each field type. ' +
           '"_default_" is used if the field type is not mentioned explicitly'
