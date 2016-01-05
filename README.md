@@ -18,6 +18,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 ## Upgrade from previous version
 
 * Move any custom configurations in your old kibana.yml to your new one
+* Reinstall plugins
 * Start or restart Kibana
 
 ## Quick Start
