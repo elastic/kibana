@@ -80,7 +80,8 @@ define(function (require) {
           });
       });
 
-      bdd.it('should create index template default mappings based on the info in the kibana index pattern', function createTemplate() {
+      bdd.it('should create index template with _default_ mappings based on the info in the kibana index pattern',
+      function createTemplate() {
         return request.post('/kibana/index_patterns')
           .send(createTestData().indexPattern)
           .expect(201)
@@ -93,6 +94,15 @@ define(function (require) {
               expect(_.isEqual(mappings['@timestamp'], {index: 'not_analyzed', type: 'date', doc_values: true})).to.be.ok();
               expect(_.isEqual(mappings.agent, {index: 'analyzed', type: 'string', doc_values: false})).to.be.ok();
               expect(_.isEqual(mappings.bytes, {index: 'not_analyzed', type: 'long', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings.geo, {
+                properties: {
+                  coordinates: {
+                    index: 'not_analyzed',
+                    type: 'geo_point',
+                    doc_values: true
+                  }
+                }
+              })).to.be.ok();
             });
           });
       });

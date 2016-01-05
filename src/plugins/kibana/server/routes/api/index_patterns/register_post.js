@@ -4,7 +4,7 @@ const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pat
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const { convertToCamelCase } = require('../../../lib/case_conversion');
-const createMappingFromPatternField = require('../../../lib/create_mapping_from_pattern_field');
+const createMappingsFromPatternFields = require('../../../lib/create_mappings_from_pattern_fields');
 const castMappingType = require('../../../lib/cast_mapping_type');
 
 module.exports = function registerPost(server) {
@@ -42,11 +42,7 @@ module.exports = function registerPost(server) {
         }
       });
 
-      const mappings = _(indexPattern.fields)
-      .reject('scripted')
-      .indexBy('name')
-      .mapValues(createMappingFromPatternField)
-      .value();
+      const mappings = createMappingsFromPatternFields(_.reject(indexPattern.fields, 'scripted'));
 
       _.forEach(indexPattern.fields, function (field) {
         field.type = castMappingType(field.type);

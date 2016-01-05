@@ -27,6 +27,10 @@ module.exports = function createTestData() {
           }, {
             'name': 'bytes',
             'type': 'long'
+          },
+          {
+            'name': 'geo.coordinates',
+            'type': 'geo_point'
           }]
         }
       }
