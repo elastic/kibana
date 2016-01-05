@@ -276,9 +276,7 @@ define(function (require) {
             };
           }
 
-          if (flatState.body.size === 0) {
-            flatState.search_type = 'count';
-          } else {
+          if (flatState.body.size > 0) {
             var computedFields = flatState.index.getComputedFields();
             flatState.body.fields = computedFields.fields;
             flatState.body.script_fields = flatState.body.script_fields || {};
@@ -323,14 +321,20 @@ define(function (require) {
               });
 
               flatState.body.query = {
-                filtered: {
-                  query: flatState.body.query,
-                  filter: {
-                    bool: {
-                      must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
-                      must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
-                    }
-                  }
+                bool: {
+                  must:
+                    [flatState.body.query]
+                    .concat(
+                      _(flatState.filters)
+                      .filter(filterNegate(false))
+                      .map(cleanFilter)
+                      .value()
+                    ),
+
+                  must_not:
+                    _(flatState.filters)
+                    .filter(filterNegate(true))
+                    .map(cleanFilter).value()
                 }
               };
             }
