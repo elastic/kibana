@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var $ = require('jquery');
   var angular = require('angular');
   var ConfigTemplate = require('ui/ConfigTemplate');
   var chrome = require('ui/chrome');
@@ -118,7 +117,7 @@ define(function (require) {
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
-          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
+          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
