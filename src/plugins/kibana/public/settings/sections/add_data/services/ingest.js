@@ -75,6 +75,19 @@ app.service('ingest', function ($http) {
     return body;
   }
 
+  function buildBodyRename(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'rename' : {
+          'field' : processor.sourceField,
+          'to': processor.targetField
+        }
+    });
+
+    return body;
+  }
+
   function buildBody(processor) {
     switch(processor.typeid) {
       case 'geoip':
@@ -88,6 +101,9 @@ app.service('ingest', function ($http) {
         break;
       case 'append':
         return buildBodyAppend(processor);
+        break;
+      case 'rename':
+        return buildBodyRename(processor);
         break;
     }
   }

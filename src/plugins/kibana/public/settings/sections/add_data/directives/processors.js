@@ -6,3 +6,4 @@ require('./processor_geoip');
 require('./processor_grok');
 require('./processor_set');
 require('./processor_append');
+require('./processor_rename');
