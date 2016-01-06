@@ -31,7 +31,6 @@ define(function (require) {
 
   require('ui/routes')
   .when('/dashboard', {
-    template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, config, kbnUrl, Notifier) {
         var defaultDashboard = config.get('dashboard:defaultDashboard', '');
