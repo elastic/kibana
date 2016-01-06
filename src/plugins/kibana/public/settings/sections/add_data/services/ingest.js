@@ -136,6 +136,19 @@ app.service('ingest', function ($http) {
     return body;
   }
 
+  function buildBodySplit(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'split' : {
+          'field' : processor.sourceField,
+          'separator' : processor.separator
+        }
+    });
+
+    return body;
+  }
+
   function buildBody(processor) {
     switch(processor.typeid) {
       case 'geoip':
@@ -164,6 +177,9 @@ app.service('ingest', function ($http) {
         break;
       case 'trim':
         return buildBodyTrim(processor);
+        break;
+      case 'split':
+        return buildBodySplit(processor);
         break;
     }
   }
