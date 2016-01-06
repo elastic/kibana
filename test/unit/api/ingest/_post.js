@@ -38,16 +38,16 @@ define(function (require) {
         ]);
       });
 
-      bdd.it('should return 201 when an ingest config is successfully created', function createIngestConfig() {
+      bdd.it('should return 204 when an ingest config is successfully created', function createIngestConfig() {
         return request.post('/kibana/ingest')
           .send(createTestData())
-          .expect(201);
+          .expect(204);
       });
 
       bdd.it('should create an index template if a fields array is included', function createTemplate() {
         return request.post('/kibana/ingest')
           .send(createTestData())
-          .expect(201)
+          .expect(204)
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'});
           });
@@ -56,7 +56,7 @@ define(function (require) {
       bdd.it('should provide defaults for field properties', function createTemplate() {
         return request.post('/kibana/ingest')
           .send(createTestData())
-          .expect(201)
+          .expect(204)
           .then(function () {
             return scenarioManager.client.get({
               index: '.kibana',
@@ -82,7 +82,7 @@ define(function (require) {
       function createTemplate() {
         return request.post('/kibana/ingest')
           .send(createTestData())
-          .expect(201)
+          .expect(204)
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
             .then(function (template) {
@@ -112,7 +112,7 @@ define(function (require) {
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
         return request.post('/kibana/ingest')
           .send(createTestData())
-          .expect(201)
+          .expect(204)
           .then(function () {
             return request.post('/kibana/ingest')
               .send(createTestData())

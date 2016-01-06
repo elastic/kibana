@@ -91,7 +91,7 @@ module.exports = function registerPost(server) {
         });
       })
       .then(() => {
-        reply('success').code(201);
+        reply().code(204);
       })
       .catch(function (error) {
         reply(handleESError(error));

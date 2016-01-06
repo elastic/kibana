@@ -24,7 +24,7 @@ module.exports = function registerDelete(server) {
             })
       ])
         .then(function (pattern) {
-          reply('success');
+          reply({success: true});
         }, function (error) {
           reply(handleESError(error));
         });

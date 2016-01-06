@@ -14,7 +14,7 @@ define(function (require) {
         .then(function () {
           return request.post('/kibana/ingest')
           .send(createTestData())
-          .expect(201);
+          .expect(204);
         });
       });
 
