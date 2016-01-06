@@ -162,6 +162,19 @@ app.service('ingest', function ($http) {
     return body;
   }
 
+  function buildBodyConvert(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'convert' : {
+          'field' : processor.sourceField,
+          'type' : processor.type
+        }
+    });
+
+    return body;
+  }
+
   function buildBody(processor) {
     switch(processor.typeid) {
       case 'geoip':
@@ -196,6 +209,9 @@ app.service('ingest', function ($http) {
         break;
       case 'join':
         return buildBodyJoin(processor);
+        break;
+      case 'convert':
+        return buildBodyConvert(processor);
         break;
     }
   }

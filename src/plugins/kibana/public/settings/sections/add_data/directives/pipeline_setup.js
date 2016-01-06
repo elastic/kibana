@@ -81,7 +81,9 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       });
     },
     controller: function ($scope, AppState) {
-      $scope.processorTypes = require('../lib/processor_registry.js').all().sort();
+      const types = require('../lib/processor_registry.js').all();
+      $scope.processorTypes = _.sortBy(types, 'title');
+
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
       $scope.manager = new ProcessorManager();
