@@ -3,6 +3,12 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
+require('../lib/processor_registry').register({
+  typeid: 'delete',
+  title: 'Delete',
+  template: '<processor-delete></processor-delete>'
+});
+
 //scope.processor is attached by the wrapper.
 app.directive('processorDelete', function () {
   return {
@@ -11,7 +17,7 @@ app.directive('processorDelete', function () {
     controller : function ($scope, $rootScope, $timeout, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorDelete', false);
+      const logger = new Logger(processor, 'processorDelete', true);
 
       function getDescription() {
         let fieldList = getSelectedFields()

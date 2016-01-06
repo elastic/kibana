@@ -88,6 +88,54 @@ app.service('ingest', function ($http) {
     return body;
   }
 
+  function buildBodyRemove(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'remove' : {
+          'field' : processor.sourceField
+        }
+    });
+
+    return body;
+  }
+
+  function buildBodyLowercase(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'lowercase' : {
+          'field' : processor.sourceField
+        }
+    });
+
+    return body;
+  }
+
+  function buildBodyUppercase(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'uppercase' : {
+          'field' : processor.sourceField
+        }
+    });
+
+    return body;
+  }
+
+  function buildBodyTrim(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'trim' : {
+          'field' : processor.sourceField
+        }
+    });
+
+    return body;
+  }
+
   function buildBody(processor) {
     switch(processor.typeid) {
       case 'geoip':
@@ -104,6 +152,18 @@ app.service('ingest', function ($http) {
         break;
       case 'rename':
         return buildBodyRename(processor);
+        break;
+      case 'remove':
+        return buildBodyRemove(processor);
+        break;
+      case 'lowercase':
+        return buildBodyLowercase(processor);
+        break;
+      case 'uppercase':
+        return buildBodyUppercase(processor);
+        break;
+      case 'trim':
+        return buildBodyTrim(processor);
         break;
     }
   }

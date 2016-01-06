@@ -12,5 +12,5 @@ Processor.prototype.setParent = function(newParent) {
   const oldParent = self.parent;
   self.parent = newParent;
 
-  return (oldParent !== parent);
+  return (oldParent !== self.parent);
 }
