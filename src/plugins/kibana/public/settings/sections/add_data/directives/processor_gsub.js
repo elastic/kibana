@@ -2,39 +2,39 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
-require('../services/ingest');
 
 require('../lib/processor_registry').register({
-  typeid: 'grok',
-  title: 'Grok',
-  template: '<processor-grok></processor-grok>'
+  typeid: 'gsub',
+  title: 'Gsub',
+  template: '<processor-gsub></processor-gsub>'
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorGrok', function () {
+app.directive('processorGsub', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_grok.html'),
+    template: require('../views/processor_gsub.html'),
     controller : function ($scope, $rootScope, debounce, ingest) {
       const processor = $scope.processor;
-      const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorGeoIp', false);
 
       function getDescription() {
         const source = (processor.sourceField) ? processor.sourceField : '?';
-        return `Grok - [${source}]`;
+        return `Gsub - [${source}]`;
       }
 
       function checkForNewInputObject() {
-        logger.log('consuming new inputObject', processor.inputObject);
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
       }
 
+      function refreshFieldData() {
+        $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
+      }
+
       function applyProcessor() {
+        console.log('applyProcessor', processor);
         checkForNewInputObject();
 
-        logger.log('I am processing!');
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
@@ -55,7 +55,6 @@ app.directive('processorGrok', function () {
             description: description
           };
 
-          logger.log('I am DONE processing!');
           $rootScope.$broadcast('processor_finished', message);
         });
       }
@@ -65,10 +64,6 @@ app.directive('processorGrok', function () {
         if (message.processor !== processor) return;
 
         applyProcessor();
-      }
-
-      function refreshFieldData() {
-        $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
       const startListener = $scope.$on('processor_start', processorStart);
@@ -82,11 +77,8 @@ app.directive('processorGrok', function () {
         applyProcessor();
       });
 
-      //processor.pattern = '%{DATE:timestamp} - - %{GREEDYDATA:text}';
-      processor.pattern = '';
       $scope.$watch('processor.pattern', applyProcessor);
-
-      //%{DATE:timestamp} - - src=%{IP:grok_ip}: %{GREEDYDATA:text}
+      $scope.$watch('processor.replacement', applyProcessor);
     }
   }
 });

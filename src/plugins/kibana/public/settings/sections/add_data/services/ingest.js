@@ -175,6 +175,20 @@ app.service('ingest', function ($http) {
     return body;
   }
 
+  function buildBodyGsub(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'gsub' : {
+          'field' : processor.sourceField,
+          'pattern' : processor.pattern,
+          'replacement' : processor.replacement
+        }
+    });
+
+    return body;
+  }
+
   function buildBody(processor) {
     switch(processor.typeid) {
       case 'geoip':
@@ -212,6 +226,9 @@ app.service('ingest', function ($http) {
         break;
       case 'convert':
         return buildBodyConvert(processor);
+        break;
+      case 'gsub':
+        return buildBodyGsub(processor);
         break;
     }
   }

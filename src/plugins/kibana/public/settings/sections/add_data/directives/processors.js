@@ -11,5 +11,6 @@ require('./processor_trim');
 require('./processor_split');
 require('./processor_join');
 require('./processor_convert');
+require('./processor_gsub');
 
 //require('./processor_delete');
