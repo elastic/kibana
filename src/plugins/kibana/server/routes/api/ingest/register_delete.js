@@ -4,7 +4,7 @@ const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pat
 
 module.exports = function registerDelete(server) {
   server.route({
-    path: '/api/kibana/index_patterns/{id}',
+    path: '/api/kibana/ingest/{id}',
     method: 'DELETE',
     handler: function (req, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;

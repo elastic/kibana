@@ -1,6 +1,6 @@
 define({
   suites: [
-    'test/unit/api/index_patterns/index'
+    'test/unit/api/ingest/index'
   ],
   excludeInstrumentation: /(fixtures|node_modules)\//,
   loaderOptions: {

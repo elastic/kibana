@@ -9,7 +9,7 @@ define(function (require) {
   var post = require('./_post');
   var del = require('./_del');
 
-  bdd.describe('index_patterns API', function () {
+  bdd.describe('ingest API', function () {
     var scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
     request = request(url.format(serverConfig.servers.kibana) + '/api');
 

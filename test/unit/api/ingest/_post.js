@@ -1,52 +1,52 @@
 define(function (require) {
   var Promise = require('bluebird');
-  var createTestData = require('intern/dojo/node!../../../unit/api/index_patterns/data');
+  var createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
   var _ = require('intern/dojo/node!lodash');
   var expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager, request) {
-    bdd.describe('POST index_patterns', function postIndexPatterns() {
+    bdd.describe('POST ingest', function postIngest() {
 
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana');
       });
 
       bdd.afterEach(function () {
-        return request.del('/kibana/index_patterns/logstash-*');
+        return request.del('/kibana/ingest/logstash-*');
       });
 
       bdd.it('should return 400 for an invalid payload', function invalidPayload() {
         return Promise.all([
-          request.post('/kibana/index_patterns').expect(400),
+          request.post('/kibana/ingest').expect(400),
 
-          request.post('/kibana/index_patterns')
+          request.post('/kibana/ingest')
             .send({})
             .expect(400),
 
-          request.post('/kibana/index_patterns')
-            .send(_.set(createTestData().indexPattern, 'data.attributes.title', false))
+          request.post('/kibana/ingest')
+            .send(_.set(createTestData(), 'title', false))
             .expect(400),
 
-          request.post('/kibana/index_patterns')
-            .send(_.set(createTestData().indexPattern, 'data.attributes.fields', {}))
+          request.post('/kibana/ingest')
+            .send(_.set(createTestData(), 'fields', {}))
             .expect(400),
 
           // Fields must have a name and type
-          request.post('/kibana/index_patterns')
-            .send(_.set(createTestData().indexPattern, 'data.attributes.fields', [{count: 0}]))
+          request.post('/kibana/ingest')
+            .send(_.set(createTestData(), 'fields', [{count: 0}]))
             .expect(400)
         ]);
       });
 
-      bdd.it('should return 201 when a pattern is successfully created', function createPattern() {
-        return request.post('/kibana/index_patterns')
-          .send(createTestData().indexPattern)
+      bdd.it('should return 201 when an ingest config is successfully created', function createIngestConfig() {
+        return request.post('/kibana/ingest')
+          .send(createTestData())
           .expect(201);
       });
 
       bdd.it('should create an index template if a fields array is included', function createTemplate() {
-        return request.post('/kibana/index_patterns')
-          .send(createTestData().indexPattern)
+        return request.post('/kibana/ingest')
+          .send(createTestData())
           .expect(201)
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'});
@@ -54,8 +54,8 @@ define(function (require) {
       });
 
       bdd.it('should provide defaults for field properties', function createTemplate() {
-        return request.post('/kibana/index_patterns')
-          .send(createTestData().indexPattern)
+        return request.post('/kibana/ingest')
+          .send(createTestData())
           .expect(201)
           .then(function () {
             return scenarioManager.client.get({
@@ -78,10 +78,10 @@ define(function (require) {
           });
       });
 
-      bdd.it('should create index template with _default_ mappings based on the info in the kibana index pattern',
+      bdd.it('should create index template with _default_ mappings based on the info in the ingest config',
       function createTemplate() {
-        return request.post('/kibana/index_patterns')
-          .send(createTestData().indexPattern)
+        return request.post('/kibana/ingest')
+          .send(createTestData())
           .expect(201)
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
@@ -110,12 +110,12 @@ define(function (require) {
       });
 
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
-        return request.post('/kibana/index_patterns')
-          .send(createTestData().indexPattern)
+        return request.post('/kibana/ingest')
+          .send(createTestData())
           .expect(201)
           .then(function () {
-            return request.post('/kibana/index_patterns')
-              .send(createTestData().indexPattern)
+            return request.post('/kibana/ingest')
+              .send(createTestData())
               .expect(409);
           });
       });
@@ -127,8 +127,8 @@ define(function (require) {
             template: 'logstash-*'
           }
         }).then(function () {
-          return request.post('/kibana/index_patterns')
-            .send(createTestData().indexPattern)
+          return request.post('/kibana/ingest')
+            .send(createTestData())
             .expect(409);
         })
         .then(function () {
@@ -140,21 +140,21 @@ define(function (require) {
 
       bdd.it('should return 409 conflict when the pattern matches existing indices',
         function existingIndicesConflict() {
-          var pattern = createTestData().indexPattern;
-          pattern.data.id = pattern.data.attributes.title = '.kib*';
+          var pattern = createTestData();
+          pattern.id = pattern.title = '.kib*';
 
-          return request.post('/kibana/index_patterns')
+          return request.post('/kibana/ingest')
             .send(pattern)
             .expect(409);
         });
 
       bdd.it('should enforce snake_case in the request body', function () {
-        var pattern = createTestData().indexPattern;
-        pattern.data.attributes = _.mapKeys(pattern.data.attributes, function (value, key) {
+        var pattern = createTestData();
+        pattern = _.mapKeys(pattern, function (value, key) {
           return _.camelCase(key);
         });
 
-        return request.post('/kibana/index_patterns')
+        return request.post('/kibana/ingest')
           .send(pattern)
           .expect(400);
       });

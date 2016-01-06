@@ -9,18 +9,19 @@ const initDefaultFieldProps = require('../../../lib/init_default_field_props');
 
 module.exports = function registerPost(server) {
   server.route({
-    path: '/api/kibana/index_patterns',
+    path: '/api/kibana/ingest',
     method: 'POST',
     config: {
       validate: {
-        payload: indexPatternSchema.post
+        payload: indexPatternSchema
       }
     },
     handler: function (req, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const requestDocument = _.cloneDeep(req.payload);
-      const indexPatternId = requestDocument.data.id;
-      const indexPattern = convertToCamelCase(requestDocument.data.attributes);
+      const indexPatternId = requestDocument.id;
+      const indexPattern = convertToCamelCase(requestDocument);
+      delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
       indexPattern.fields = initDefaultFieldProps(indexPattern.fields);
