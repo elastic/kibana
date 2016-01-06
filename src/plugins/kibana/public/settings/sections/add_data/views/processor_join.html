@@ -1,0 +1,16 @@
+<div class="form-group">
+  <label>Array Field:</label>
+  <select
+    class="form-control"
+    ng-options="field as field for field in fields"
+    ng-model="processor.sourceField">
+  </select>
+</div>
+<div class="form-group">
+  <label>Field Data:</label>
+  <pre>{{ fieldData }}</pre>
+</div>
+<div class="form-group">
+  <label>Separator:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.separator">
+</div>

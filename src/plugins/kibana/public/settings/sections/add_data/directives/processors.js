@@ -9,5 +9,6 @@ require('./processor_lowercase');
 require('./processor_uppercase');
 require('./processor_trim');
 require('./processor_split');
+require('./processor_join');
 
 //require('./processor_delete');
