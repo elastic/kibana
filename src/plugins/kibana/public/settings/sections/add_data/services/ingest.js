@@ -189,6 +189,22 @@ app.service('ingest', function ($http) {
     return body;
   }
 
+  function buildBodyDate(processor) {
+    const body = buildBodyBase(processor);
+
+    body.pipeline.processors.push({
+        'date' : {
+          'match_field' : processor.sourceField,
+          'target_field' : processor.targetField,
+          'match_formats' : processor.formats,
+          'timezone': processor.timezone,
+          'locale': processor.locale
+        }
+    });
+
+    return body;
+  }
+
   function buildBody(processor) {
     switch(processor.typeid) {
       case 'geoip':
@@ -229,6 +245,9 @@ app.service('ingest', function ($http) {
         break;
       case 'gsub':
         return buildBodyGsub(processor);
+        break;
+      case 'date':
+        return buildBodyDate(processor);
         break;
     }
   }

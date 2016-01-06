@@ -39,7 +39,6 @@ app.directive('processorJoin', function () {
       }
 
       function applyProcessor() {
-        console.log('applyProcessor', processor);
         checkForNewInputObject();
 
         $rootScope.$broadcast('processor_started', { processor: processor });

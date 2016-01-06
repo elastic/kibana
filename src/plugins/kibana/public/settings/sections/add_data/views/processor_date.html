@@ -1,0 +1,48 @@
+<div class="form-group">
+  <label>Field:</label>
+  <select
+    class="form-control"
+    ng-options="field as field for field in fields"
+    ng-model="processor.sourceField">
+  </select>
+</div>
+<div class="form-group">
+  <label>Field Data:</label>
+  <pre>{{ fieldData }}</pre>
+</div>
+<div class="form-group">
+  <label>Target Field:</label>
+  <input type="text" class="form-control" ng-model="processor.targetField">
+</div>
+<div class="form-group">
+  <label>Formats:</label>
+  <div ng-repeat="format in formats">
+    <input
+      type="checkbox"
+      id="format_{{processor.processorId}}_{{$index}}"
+      ng-model="format.selected"
+      ng-click="updateFormats()" />
+    <label for="format_{{processor.processorId}}_{{$index}}">{{format.title}}</label>
+  </div>
+  <input
+    type="text"
+    class="form-control"
+    ng-model="customFormat"
+    ng-show="customFormatSelected">
+</div>
+<div class="form-group">
+  <label>Timezone:</label>
+  <select
+    class="form-control"
+    ng-options="timezone as timezone for timezone in timezones"
+    ng-model="processor.timezone">
+  </select>
+</div>
+<div class="form-group">
+  <label>Locale:</label>
+  <select
+    class="form-control"
+    ng-options="locale as locale for locale in locales"
+    ng-model="processor.locale">
+  </select>
+</div>

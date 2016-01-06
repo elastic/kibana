@@ -33,7 +33,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       }
 
       function updateProcessorChain() {
-        const topProcessorChanged = manager.updateParents();
+        const topProcessorChanged = $scope.manager.updateParents();
         if (topProcessorChanged) {
           console.log('updateProcessorChain, topProcessorChanged: ', topProcessorChanged.processorId);
           $rootScope.$broadcast('processor_force_update', { processor: topProcessorChanged });
@@ -75,8 +75,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       });
 
       $scope.$watch('sampleData', function(newVal) {
-        console.log('pipeline_setup', 'rootObject changed');
-        manager.rootObject = $scope.sampleData;
+        $scope.manager.rootObject = $scope.sampleData;
         updateProcessorChain();
       });
     },
@@ -89,9 +88,6 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       $scope.manager = new ProcessorManager();
       $scope.$elements = {}; //keeps track of the dom elements associated with processors as jquery objects
       $scope.sampleData = {};
-
-      window.$elements = $scope.$elements; //TODO: Remove This!
-      window.manager = $scope.manager; //TODO: Remove This!
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
