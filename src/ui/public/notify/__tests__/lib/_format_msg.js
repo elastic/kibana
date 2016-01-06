@@ -21,6 +21,22 @@ describe('formatMsg', function () {
     expect(actual).to.equal('error message');
   });
 
+  it('should handle a simple Angular $http error object', function () {
+    var err = {
+      data: {
+        statusCode: 403,
+        error: 'Forbidden',
+        message: '[security_exception] action [indices:data/read/mget] is unauthorized for user [user]'
+      },
+      status: 403,
+      config: {},
+      statusText: 'Forbidden'
+    };
+    var actual = formatMsg(err);
+
+    expect(actual).to.equal('Error 403 Forbidden: [security_exception] action [indices:data/read/mget] is unauthorized for user [user]');
+  });
+
   it('should handle an extended elasticsearch error', function () {
     var err = {
       resp : {
