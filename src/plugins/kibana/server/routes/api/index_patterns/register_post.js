@@ -5,7 +5,7 @@ const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern
 const handleESError = require('../../../lib/handle_es_error');
 const { convertToCamelCase } = require('../../../lib/case_conversion');
 const createMappingsFromPatternFields = require('../../../lib/create_mappings_from_pattern_fields');
-const castMappingType = require('../../../lib/cast_mapping_type');
+const initDefaultFieldProps = require('../../../lib/init_default_field_props');
 
 module.exports = function registerPost(server) {
   server.route({
@@ -22,31 +22,8 @@ module.exports = function registerPost(server) {
       const indexPatternId = requestDocument.data.id;
       const indexPattern = convertToCamelCase(requestDocument.data.attributes);
 
-      _.forEach(indexPattern.fields, function (field) {
-        if (field.scripted) {
-          _.defaults(field, {
-            indexed: false,
-            analyzed: false,
-            doc_values: false,
-            count: 0
-          });
-        }
-        else {
-          _.defaults(field, {
-            indexed: true,
-            analyzed: false,
-            doc_values: true,
-            scripted: false,
-            count: 0
-          });
-        }
-      });
-
-      const mappings = createMappingsFromPatternFields(_.reject(indexPattern.fields, 'scripted'));
-
-      _.forEach(indexPattern.fields, function (field) {
-        field.type = castMappingType(field.type);
-      });
+      const mappings = createMappingsFromPatternFields(indexPattern.fields);
+      indexPattern.fields = initDefaultFieldProps(indexPattern.fields);
 
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
@@ -79,7 +56,9 @@ module.exports = function registerPost(server) {
                       match: '*',
                       match_mapping_type: 'string',
                       mapping: {
-                        type: 'string', index: 'analyzed', omit_norms: true,
+                        type: 'string',
+                        index: 'analyzed',
+                        omit_norms: true,
                         fielddata: {format: 'disabled'},
                         fields: {
                           raw: {type: 'string', index: 'not_analyzed', doc_values: true, ignore_above: 256}

@@ -9,24 +9,16 @@ module.exports = function createTestData() {
           'time_field_name': '@timestamp',
           'fields': [{
             'name': 'ip',
-            'type': 'ip',
-            'count': 2,
-            'scripted': false,
-            'indexed': true,
-            'analyzed': false,
-            'doc_values': false
+            'type': 'ip'
           }, {
             'name': '@timestamp',
             'type': 'date'
           }, {
             'name': 'agent',
-            'type': 'string',
-            'indexed': true,
-            'analyzed': true,
-            'doc_values': false
+            'type': 'string'
           }, {
             'name': 'bytes',
-            'type': 'long'
+            'type': 'number'
           },
           {
             'name': 'geo.coordinates',

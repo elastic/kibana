@@ -10,15 +10,19 @@ describe('createMappingsFromPatternFields', function () {
     testFields = [
       {
         'name': 'ip',
-        'type': 'ip',
-        'count': 2,
-        'scripted': false
+        'type': 'ip'
       },
       {
         'name': 'geo.coordinates',
-        'type': 'geo_point',
-        'count': 0,
-        'scripted': false
+        'type': 'geo_point'
+      },
+      {
+        'name': 'agent',
+        'type': 'string'
+      },
+      {
+        'name': 'bytes',
+        'type': 'number'
       }
     ];
   });
@@ -35,27 +39,28 @@ describe('createMappingsFromPatternFields', function () {
     expect(_.isEqual(testFields, testFieldClone)).to.be.ok();
   });
 
-  it('should remove kibana properties that are not valid for ES field mappings', function () {
-    const mappings = createMappingsFromPatternFields(testFields);
-    expect(mappings.ip).to.not.have.property('name');
-    expect(mappings.ip).to.not.have.property('count');
-    expect(mappings.ip).to.not.have.property('scripted');
-    expect(mappings.ip).to.not.have.property('indexed');
-    expect(mappings.ip).to.not.have.property('analyzed');
-  });
-
-  it('should set doc_values and indexed status based on the relevant kibana properties if they exist', function () {
-    testFields[0].indexed = true;
-    testFields[0].analyzed = false;
-    testFields[0].doc_values = true;
+  it('should set the same default mapping for all non-strings', function () {
     let mappings = createMappingsFromPatternFields(testFields);
 
-    expect(mappings.ip).to.have.property('doc_values', true);
-    expect(mappings.ip).to.have.property('index', 'not_analyzed');
+    _.forEach(function (mapping) {
+      if (mapping.type !== 'string') {
+        expect(_.isEqual(mapping, {
+          type: mapping.type,
+          index: 'not_analyzed',
+          doc_values: true
+        }));
+      }
+    });
+  });
 
-    testFields[0].analyzed = true;
-    mappings = createMappingsFromPatternFields(testFields);
-    expect(mappings.ip).to.have.property('index', 'analyzed');
+  it('should give strings a multi-field mapping', function () {
+    let mappings = createMappingsFromPatternFields(testFields);
+
+    _.forEach(function (mapping) {
+      if (mapping.type === 'string') {
+        expect(mapping.to.have.property('fields'));
+      }
+    });
   });
 
   it('should handle nested fields', function () {
@@ -65,5 +70,12 @@ describe('createMappingsFromPatternFields', function () {
     expect(mappings.geo).to.have.property('properties');
     expect(mappings.geo.properties).to.have.property('coordinates');
     expect(_.isEqual(mappings.geo.properties.coordinates, {type: 'geo_point'}));
+  });
+
+  it('should map all number fields as an ES double', function () {
+    let mappings = createMappingsFromPatternFields(testFields);
+
+    expect(mappings).to.have.property('bytes');
+    expect(mappings.bytes).to.have.property('type', 'double');
   });
 });

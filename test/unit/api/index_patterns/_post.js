@@ -53,7 +53,7 @@ define(function (require) {
           });
       });
 
-      bdd.it('should provide defaults for optional field properties that need to be initialized and cast types', function createTemplate() {
+      bdd.it('should provide defaults for field properties', function createTemplate() {
         return request.post('/kibana/index_patterns')
           .send(createTestData().indexPattern)
           .expect(201)
@@ -74,11 +74,6 @@ define(function (require) {
               expect(fields[1].indexed).to.be(true);
               expect(fields[1].analyzed).to.be(false);
               expect(fields[1].doc_values).to.be(true);
-
-              // API should cast Java types to JS before storing the Kibana index pattern.
-              // bytes was created as a long and cast to number
-              expect(fields[3].name).to.be('bytes');
-              expect(fields[3].type).to.be('number');
             });
           });
       });
@@ -93,10 +88,11 @@ define(function (require) {
             .then(function (template) {
               var mappings = template['kibana-logstash-*'].mappings._default_.properties;
               expect(mappings).to.be.ok();
-              expect(_.isEqual(mappings.ip, {index: 'not_analyzed', type: 'ip', doc_values: false})).to.be.ok();
+              expect(_.isEqual(mappings.ip, {index: 'not_analyzed', type: 'ip', doc_values: true})).to.be.ok();
               expect(_.isEqual(mappings['@timestamp'], {index: 'not_analyzed', type: 'date', doc_values: true})).to.be.ok();
-              expect(_.isEqual(mappings.agent, {index: 'analyzed', type: 'string', doc_values: false})).to.be.ok();
-              expect(_.isEqual(mappings.bytes, {index: 'not_analyzed', type: 'long', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings.bytes, {index: 'not_analyzed', type: 'double', doc_values: true})).to.be.ok();
+
+              // object fields are mapped as such, with individual mappings for each of their properties
               expect(_.isEqual(mappings.geo, {
                 properties: {
                   coordinates: {
@@ -106,33 +102,10 @@ define(function (require) {
                   }
                 }
               })).to.be.ok();
+
+              // strings should be mapped as multi fields
+              expect(mappings.agent).to.have.property('fields');
             });
-          });
-      });
-
-      bdd.it('scripted fields should not get added to the template', function createTemplate() {
-        var testData = createTestData().indexPattern;
-        testData.data.attributes.fields.push({
-          'name': 'Double Bytes',
-          'type': 'number',
-          'scripted': true,
-          'script': 'doc[\'bytes\'].value * 2',
-          'lang': 'expression',
-          'indexed': false,
-          'analyzed': false,
-          'doc_values': false
-        });
-
-        return request.post('/kibana/index_patterns')
-          .send(testData)
-          .expect(201)
-          .then(function () {
-            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
-              .then(function (template) {
-                var mappings = template['kibana-logstash-*'].mappings._default_.properties;
-                expect(mappings).to.be.ok();
-                expect(mappings).to.not.have.property('Double Bytes');
-              });
           });
       });
 

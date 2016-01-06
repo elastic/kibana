@@ -52,8 +52,6 @@ module.exports = function (grunt) {
       args: [
         '--server.port=' + uiConfig.servers.kibana.port,
         '--env.name=development',
-        //remember to remove this
-        '--server.xsrf.disableProtection=true',
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
         '--logging.json=false'
       ]
