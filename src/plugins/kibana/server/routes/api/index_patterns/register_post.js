@@ -74,6 +74,19 @@ module.exports = function registerPost(server) {
               template: indexPatternId,
               mappings: {
                 _default_: {
+                  dynamic_templates: [{
+                    string_fields: {
+                      match: '*',
+                      match_mapping_type: 'string',
+                      mapping: {
+                        type: 'string', index: 'analyzed', omit_norms: true,
+                        fielddata: {format: 'disabled'},
+                        fields: {
+                          raw: {type: 'string', index: 'not_analyzed', doc_values: true, ignore_above: 256}
+                        }
+                      }
+                    }
+                  }],
                   properties: mappings
                 }
               }
