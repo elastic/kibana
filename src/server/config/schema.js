@@ -47,6 +47,7 @@ module.exports = () => Joi.object({
       disableProtection: Joi.boolean().default(false),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
+    devProxyPort: Joi.number().default(5603),
   }).default(),
 
   logging: Joi.object().keys({

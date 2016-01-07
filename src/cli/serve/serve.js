@@ -25,6 +25,43 @@ let pathCollector = function () {
 let pluginDirCollector = pathCollector();
 let pluginPathCollector = pathCollector();
 
+function initServerSettings(opts, extraCliOptions) {
+  let readYamlConfig = require('./read_yaml_config');
+  let settings = readYamlConfig(opts.config);
+  let set = _.partial(_.set, settings);
+  let get = _.partial(_.get, settings);
+  let has = _.partial(_.has, settings);
+  let merge = _.partial(_.merge, settings);
+
+  if (opts.dev) {
+    try { merge(readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
+    catch (e) { null; }
+  }
+
+  if (opts.dev) {
+    set('env', 'development');
+    set('optimize.lazy', true);
+  }
+
+  if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
+  if (opts.port) set('server.port', opts.port);
+  if (opts.host) set('server.host', opts.host);
+  if (opts.quiet) set('logging.quiet', true);
+  if (opts.silent) set('logging.silent', true);
+  if (opts.verbose) set('logging.verbose', true);
+  if (opts.logFile) set('logging.dest', opts.logFile);
+
+  set('plugins.scanDirs', _.compact([].concat(
+    get('plugins.scanDirs'),
+    opts.pluginDir
+  )));
+
+  set('plugins.paths', [].concat(opts.pluginPath || []));
+  merge(extraCliOptions);
+
+  return settings;
+}
+
 module.exports = function (program) {
   let command = program.command('serve');
 
@@ -69,50 +106,19 @@ module.exports = function (program) {
 
   command
   .action(async function (opts) {
+    const settings = initServerSettings(opts, this.getUnknownOptions());
+
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
       let ClusterManager = require('../cluster/ClusterManager');
-      new ClusterManager(opts);
+      new ClusterManager(opts, settings);
       return;
     }
 
-    let readYamlConfig = require('./read_yaml_config');
-    let KbnServer = src('server/KbnServer');
-
-    let settings = readYamlConfig(opts.config);
-
-    if (opts.dev) {
-      try { _.merge(settings, readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
-      catch (e) { null; }
-    }
-
-    let set = _.partial(_.set, settings);
-    let get = _.partial(_.get, settings);
-
-    if (opts.dev) {
-      set('env', 'development');
-      set('optimize.lazy', true);
-    }
-
-    if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
-    if (opts.port) set('server.port', opts.port);
-    if (opts.host) set('server.host', opts.host);
-    if (opts.quiet) set('logging.quiet', true);
-    if (opts.silent) set('logging.silent', true);
-    if (opts.verbose) set('logging.verbose', true);
-    if (opts.logFile) set('logging.dest', opts.logFile);
-
-    set('plugins.scanDirs', _.compact([].concat(
-      get('plugins.scanDirs'),
-      opts.pluginDir
-    )));
-
-    set('plugins.paths', [].concat(opts.pluginPath || []));
-
     let kbnServer = {};
-
+    let KbnServer = src('server/KbnServer');
     try {
-      kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+      kbnServer = new KbnServer(settings);
       await kbnServer.ready();
     }
     catch (err) {
