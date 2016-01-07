@@ -6,7 +6,23 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'rename',
   title: 'Rename',
-  template: '<processor-rename></processor-rename>'
+  template: '<processor-rename></processor-rename>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'rename' : {
+        'field' : self.sourceField,
+        'to': self.targetField
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    const target = (self.targetField) ? self.targetField : '?';
+    return `Rename - [${source}] -> [${target}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -38,7 +54,7 @@ app.directive('processorRename', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

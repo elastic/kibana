@@ -6,7 +6,22 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'split',
   title: 'Split',
-  template: '<processor-split></processor-split>'
+  template: '<processor-split></processor-split>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'split' : {
+        'field' : self.sourceField,
+        'separator' : self.separator
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Split - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -37,7 +52,7 @@ app.directive('processorSplit', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

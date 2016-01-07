@@ -6,7 +6,22 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'join',
   title: 'Join',
-  template: '<processor-join></processor-join>'
+  template: '<processor-join></processor-join>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'join' : {
+        'field' : self.sourceField,
+        'separator' : self.separator
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Join - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -44,7 +59,7 @@ app.directive('processorJoin', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

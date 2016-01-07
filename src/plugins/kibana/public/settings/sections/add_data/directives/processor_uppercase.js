@@ -6,7 +6,21 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'uppercase',
   title: 'Uppercase',
-  template: '<processor-uppercase></processor-uppercase>'
+  template: '<processor-uppercase></processor-uppercase>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'uppercase' : {
+        'field' : self.sourceField
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Uppercase - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -37,7 +51,7 @@ app.directive('processorUppercase', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

@@ -35,7 +35,6 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       function updateProcessorChain() {
         const topProcessorChanged = $scope.manager.updateParents();
         if (topProcessorChanged) {
-          console.log('updateProcessorChain, topProcessorChanged: ', topProcessorChanged.processorId);
           $rootScope.$broadcast('processor_force_update', { processor: topProcessorChanged });
         }
       }

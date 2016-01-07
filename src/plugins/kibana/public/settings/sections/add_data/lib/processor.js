@@ -3,7 +3,7 @@ const _ = require('lodash');
 export default function Processor(processorType) {
   const self = this;
 
-  _.merge(self, _.pick(processorType, ['title', 'template', 'typeid']));
+  _.merge(self, _.pick(processorType, ['title', 'template', 'typeid', 'getDefinition', 'getDescription']));
 };
 
 Processor.prototype.setParent = function(newParent) {

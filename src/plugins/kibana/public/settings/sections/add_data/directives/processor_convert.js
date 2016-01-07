@@ -6,7 +6,22 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'convert',
   title: 'Convert',
-  template: '<processor-convert></processor-convert>'
+  template: '<processor-convert></processor-convert>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'convert' : {
+        'field' : self.sourceField,
+        'type' : self.type
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Convert - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -37,7 +52,7 @@ app.directive('processorConvert', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

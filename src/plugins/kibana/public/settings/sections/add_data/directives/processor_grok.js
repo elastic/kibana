@@ -7,7 +7,22 @@ require('../services/ingest');
 require('../lib/processor_registry').register({
   typeid: 'grok',
   title: 'Grok',
-  template: '<processor-grok></processor-grok>'
+  template: '<processor-grok></processor-grok>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'grok' : {
+        'field' : self.sourceField,
+        'pattern': self.pattern
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Grok - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -38,7 +53,7 @@ app.directive('processorGrok', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

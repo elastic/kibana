@@ -6,7 +6,25 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'date',
   title: 'Date',
-  template: '<processor-date></processor-date>'
+  template: '<processor-date></processor-date>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'date' : {
+        'match_field' : self.sourceField,
+        'target_field' : self.targetField,
+        'match_formats' : self.formats,
+        'timezone': self.timezone,
+        'locale': self.locale
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Date - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -39,7 +57,7 @@ app.directive('processorDate', function() {
         });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function(result) {

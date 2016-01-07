@@ -6,7 +6,22 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'set',
   title: 'Set',
-  template: '<processor-set></processor-set>'
+  template: '<processor-set></processor-set>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'set' : {
+        'field' : self.targetField,
+        'value': self.value
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const target = (self.targetField) ? self.targetField : '?';
+    return `Set - [${target}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -31,7 +46,7 @@ app.directive('processorSet', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

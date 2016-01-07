@@ -7,7 +7,23 @@ require('../services/ingest');
 require('../lib/processor_registry').register({
   typeid: 'geoip',
   title: 'Geo IP',
-  template: '<processor-geoip></processor-geoip>'
+  template: '<processor-geoip></processor-geoip>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'geoip' : {
+        'source_field' : self.sourceField,
+        'target_field': self.targetField
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    const target = (self.targetField) ? self.targetField : '?';
+    return `Geo IP - [${source}] -> [${target}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -39,7 +55,7 @@ app.directive('processorGeoip', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {

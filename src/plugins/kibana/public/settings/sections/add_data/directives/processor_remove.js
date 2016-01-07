@@ -6,7 +6,21 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'remove',
   title: 'Remove',
-  template: '<processor-remove></processor-remove>'
+  template: '<processor-remove></processor-remove>',
+  getDefinition: function() {
+    const self = this;
+    return {
+      'remove' : {
+        'field' : self.sourceField
+      }
+    };
+  },
+  getDescription: function() {
+    const self = this;
+
+    const source = (self.sourceField) ? self.sourceField : '?';
+    return `Remove - [${source}]`;
+  }
 });
 
 //scope.processor is attached by the process_container.
@@ -37,7 +51,7 @@ app.directive('processorRemove', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = getDescription();
+        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {
