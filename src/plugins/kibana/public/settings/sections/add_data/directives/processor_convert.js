@@ -20,7 +20,8 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Convert - [${source}]`;
+    const type = (self.type) ? self.type : '?';
+    return `[${source}] to ${type}`;
   }
 });
 

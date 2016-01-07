@@ -77,7 +77,7 @@ kbn-settings-add-data {
 
   ul.pipeline-container {
     &>li {
-      border: 1px solid gray;
+      border: 1px solid #ccc;
     }
   }
 
@@ -144,6 +144,11 @@ kbn-settings-add-data {
           flex: 1 1 auto;
           .ellipsis();
           font-weight: bold;
+
+          .processor-description {
+            font-weight: normal;
+            font-style: italic;
+          }
         }
 
         &-controls {

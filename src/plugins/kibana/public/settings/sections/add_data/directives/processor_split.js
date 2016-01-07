@@ -20,7 +20,8 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Split - [${source}]`;
+    const separator = (self.separator) ? self.separator : '?';
+    return `[${source}] on '${separator}'`;
   }
 });
 

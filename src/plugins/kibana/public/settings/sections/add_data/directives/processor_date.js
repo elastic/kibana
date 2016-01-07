@@ -23,7 +23,8 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Date - [${source}]`;
+    const target = (self.targetField) ? self.targetField : '?';
+    return `[${source}] -> [${target}]`;
   }
 });
 

@@ -20,7 +20,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const target = (self.targetField) ? self.targetField : '?';
-    return `Set - [${target}]`;
+    return `[${target}]`;
   }
 });
 

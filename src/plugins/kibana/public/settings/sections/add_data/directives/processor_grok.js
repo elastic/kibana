@@ -27,7 +27,7 @@ require('../lib/processor_registry').register({
     let addedDescription = added.sort().map(field => `[${field}]`).join(', ');
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Grok - [${source}] -> ${addedDescription}`;
+    return `[${source}] -> ${addedDescription}`;
   }
 });
 

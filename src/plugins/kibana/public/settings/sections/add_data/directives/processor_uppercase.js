@@ -19,7 +19,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Uppercase - [${source}]`;
+    return `[${source}]`;
   }
 });
 

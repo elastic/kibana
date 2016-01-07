@@ -20,7 +20,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const target = (self.targetField) ? self.targetField : '?';
-    return `Append - [${target}]`;
+    return `[${target}]`;
   }
 });
 

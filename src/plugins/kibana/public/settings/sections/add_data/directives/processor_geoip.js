@@ -22,7 +22,7 @@ require('../lib/processor_registry').register({
 
     const source = (self.sourceField) ? self.sourceField : '?';
     const target = (self.targetField) ? self.targetField : '?';
-    return `Geo IP - [${source}] -> [${target}]`;
+    return `[${source}] -> [${target}]`;
   }
 });
 

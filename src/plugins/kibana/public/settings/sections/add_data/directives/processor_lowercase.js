@@ -19,7 +19,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Lowercase - [${source}]`;
+    return `[${source}]`;
   }
 });
 
@@ -33,7 +33,7 @@ app.directive('processorLowercase', function () {
 
       function getDescription() {
         const source = (processor.sourceField) ? processor.sourceField : '?';
-        return `Lowercase - [${source}]`;
+        return `[${source}]`;
       }
 
       function checkForNewInputObject() {

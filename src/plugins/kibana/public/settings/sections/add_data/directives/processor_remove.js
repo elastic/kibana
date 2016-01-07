@@ -19,7 +19,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Remove - [${source}]`;
+    return `[${source}]`;
   }
 });
 
@@ -33,7 +33,7 @@ app.directive('processorRemove', function () {
 
       function getDescription() {
         const source = (processor.sourceField) ? processor.sourceField : '?';
-        return `Remove - [${source}]`;
+        return `[${source}]`;
       }
 
       function checkForNewInputObject() {

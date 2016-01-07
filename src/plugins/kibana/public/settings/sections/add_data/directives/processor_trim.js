@@ -19,7 +19,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Trim - [${source}]`;
+    return `[${source}]`;
   }
 });
 

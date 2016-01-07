@@ -21,7 +21,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Gsub - [${source}] - '${self.pattern}' -> '${self.replacement}'`;
+    return `[${source}] - '${self.pattern}' -> '${self.replacement}'`;
   }
 });
 
