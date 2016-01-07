@@ -20,8 +20,14 @@ require('../lib/processor_registry').register({
   getDescription: function() {
     const self = this;
 
+    let inputKeys = keysDeep(self.inputObject);
+    let outputKeys = keysDeep(self.outputObject);
+    let added = _.difference(outputKeys, inputKeys);
+
+    let addedDescription = added.sort().map(field => `[${field}]`).join(', ');
+
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Grok - [${source}]`;
+    return `Grok - [${source}] -> ${addedDescription}`;
   }
 });
 
@@ -53,7 +59,6 @@ app.directive('processorGrok', function () {
         $rootScope.$broadcast('processor_started', { processor: processor });
 
         let output;
-        const description = processor.getDescription();
 
         ingest.simulate(processor)
         .then(function (result) {
@@ -63,6 +68,10 @@ app.directive('processorGrok', function () {
           } else {
             output = result;
           }
+
+          //TODO: I ONLY DID THIS FOR THE GROK PROCESSOR. I THINK THIS NEEDS TO HAPPEN HERE FOR ALL AND TAKEN OUT OF THE CONTAINER EVENT HANDLER. Also, I don't think result should be in here anymore either... consumers should just examine the processor object.
+          processor.outputObject = result;
+          const description = processor.getDescription();
 
           const message = {
             processor: processor,
