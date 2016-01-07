@@ -18,6 +18,6 @@ module.exports = Joi.object({
       script: Joi.string(),
       lang: Joi.string()
     })
-  ).required(),
+  ).required().min(1),
   field_format_map: Joi.object()
 });

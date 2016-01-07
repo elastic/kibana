@@ -31,6 +31,10 @@ define(function (require) {
             .send(_.set(createTestData(), 'fields', {}))
             .expect(400),
 
+          request.post('/kibana/ingest')
+            .send(_.set(createTestData(), 'fields', []))
+            .expect(400),
+
           // Fields must have a name and type
           request.post('/kibana/ingest')
             .send(_.set(createTestData(), 'fields', [{count: 0}]))
