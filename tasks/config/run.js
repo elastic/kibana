@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      cmd: binScript,
       args: [
         '--server.port=' + uiConfig.servers.kibana.port,
         '--server.xsrf.disableProtection=true',
@@ -48,7 +48,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      cmd: binScript,
       args: [
         '--server.port=' + uiConfig.servers.kibana.port,
         '--env.name=development',
