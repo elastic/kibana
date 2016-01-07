@@ -15,6 +15,26 @@ kbn-settings-add-data {
   @vis-editor-agg-editor-spacing: 5px;
   @padding-base-vertical: 5px;
 
+  pipeline-output {
+    display: block;
+
+    .header-line {
+      display: flex;
+
+      label {
+        width: 100%;
+      }
+    }
+
+    pre {
+      min-height: 100px;
+    }
+
+    pre.collapsed {
+      max-height: 100px;
+    }
+  }
+
   label {
     margin-bottom: 0px;
   }
@@ -58,6 +78,15 @@ kbn-settings-add-data {
   ul.pipeline-container {
     &>li {
       border: 1px solid gray;
+    }
+  }
+
+  .empty-pipeline {
+    border: 1px solid #ccc;
+    padding: 5px;
+
+    p {
+      font-size: 15px;
     }
   }
 
@@ -124,7 +153,8 @@ kbn-settings-add-data {
     }
 
     pre.output {
-      max-height: 200px;
+      max-height: 100px;
+      min-height: 100px;
     }
 
   }

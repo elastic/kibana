@@ -1,8 +1,22 @@
 <source-data-new output-object="sampleData" last-processor="lastProcessor"></source-data-new>
-<ul class="pipeline-container"></ul>
+
+<pipeline-output last-processor="lastProcessor"></pipeline-output>
 
 <div class="form-group">
-  <label>Processsor Type:</label>
+  <label>Processor Pipeline:</label>
+  <ul
+    class="pipeline-container"
+    ng-show="manager.processors.length > 0">
+  </ul>
+  <div
+    class="empty-pipeline"
+    ng-hide="manager.processors.length > 0">
+    <p>Your pipeline is currently empty. Add a processor to get started!</p>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>Processor Type:</label>
   <select
     class="form-control"
     ng-options="processorType as processorType.title for processorType in processorTypes"

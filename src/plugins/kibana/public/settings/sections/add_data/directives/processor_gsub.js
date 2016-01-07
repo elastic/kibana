@@ -21,7 +21,7 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `Gsub - [${source}]`;
+    return `Gsub - [${source}] - '${self.pattern}' -> '${self.replacement}'`;
   }
 });
 
@@ -91,6 +91,9 @@ app.directive('processorGsub', function () {
         refreshFieldData();
         applyProcessor();
       });
+
+      processor.pattern = '';
+      processor.replacement = '';
 
       $scope.$watch('processor.pattern', applyProcessor);
       $scope.$watch('processor.replacement', applyProcessor);

@@ -70,7 +70,13 @@ ProcessorManager.prototype.updateParents = function() {
     }
   });
 
+  let topProcessorChanged;
+  let lastProcessor;
   if (topIndexChanged < Infinity) {
-    return processors[topIndexChanged];
+    topProcessorChanged = processors[topIndexChanged];
   }
+  if (processors.length > 0) {
+    lastProcessor = processors[processors.length-1];
+  }
+  return { topProcessorChanged, lastProcessor };
 }

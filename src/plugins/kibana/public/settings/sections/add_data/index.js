@@ -3,6 +3,7 @@ define(function (require) {
   require('./directives/pipeline_setup');
   require('./directives/source_data');
   require('./directives/source_data_new');
+  require('./directives/pipeline_output');
   require('./styles/_add_data.less');
 
   require('ui/routes')

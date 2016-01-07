@@ -33,10 +33,11 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       }
 
       function updateProcessorChain() {
-        const topProcessorChanged = $scope.manager.updateParents();
+        const { topProcessorChanged, lastProcessor } = $scope.manager.updateParents();
         if (topProcessorChanged) {
           $rootScope.$broadcast('processor_force_update', { processor: topProcessorChanged });
         }
+        $scope.lastProcessor = lastProcessor;
       }
 
       function reorderDom() {
