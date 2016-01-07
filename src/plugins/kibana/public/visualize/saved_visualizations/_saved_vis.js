@@ -99,8 +99,8 @@ define(function (require) {
     SavedVis.prototype._createVis = function () {
       var self = this;
 
-      if (self.stateJSON) {
-        self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
+      if (self.uiStateJSON) {
+        self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.uiStateJSON));
       }
 
       self.visState.title = self.title;
