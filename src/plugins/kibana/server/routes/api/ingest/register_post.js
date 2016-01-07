@@ -84,9 +84,13 @@ module.exports = function registerPost(server) {
             return callWithRequest(req, 'delete', deleteParams)
             .then(() => {
               throw templateError;
-            }, () => {
-              throw new Error(`index-pattern ${indexPatternId} created successfully but index template
-              creation failed. Failed to rollback index-pattern creation, must delete manually.`);
+            }, (patternDeletionError) => {
+              throw new Error(
+                `index-pattern ${indexPatternId} created successfully but index template
+                creation failed. Failed to rollback index-pattern creation, must delete manually.
+                ${patternDeletionError.toString()}
+                ${templateError.toString()}`
+              );
             });
           });
         });
