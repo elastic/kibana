@@ -31,7 +31,7 @@ module.exports = function createMappingsFromPatternFields(fields) {
       };
     }
 
-    _.set(mappings, field.name.replace('.', '.properties.'), mapping);
+    _.set(mappings, field.name.split('.').join('.properties.'), mapping);
   });
 
   return mappings;
