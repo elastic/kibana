@@ -29,21 +29,21 @@ module.exports = function registerPost(server) {
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
-      const patternCreateParams = {
-        index: '.kibana',
-        type: 'index-pattern',
-        id: indexPatternId,
-        body: indexPattern
-      };
+      return callWithRequest(req, 'indices.exists', {index: indexPatternId})
+      .then((matchingIndices) => {
+        if (matchingIndices) {
+          throw Boom.conflict('Cannot create an index pattern via this API if existing indices already match the pattern');
+        }
 
-      callWithRequest(req, 'create', patternCreateParams)
-      .then((patternResponse) => {
-        return callWithRequest(req, 'indices.exists', {index: indexPatternId})
-        .then((matchingIndices) => {
-          if (matchingIndices) {
-            throw Boom.conflict('Cannot create an index pattern via this API if existing indices already match the pattern');
-          }
+        const patternCreateParams = {
+          index: '.kibana',
+          type: 'index-pattern',
+          id: indexPatternId,
+          body: indexPattern
+        };
 
+        return callWithRequest(req, 'create', patternCreateParams)
+        .then((patternResponse) => {
           const templateParams = {
             order: 0,
             create: true,
@@ -73,20 +73,21 @@ module.exports = function registerPost(server) {
             }
           };
 
-          return callWithRequest(req, 'indices.putTemplate', templateParams);
-        })
-        .catch((templateError) => {
-          const deleteParams = {
-            index: '.kibana',
-            type: 'index-pattern',
-            id: indexPatternId
-          };
-          return callWithRequest(req, 'delete', deleteParams)
-          .then(() => {
-            throw templateError;
-          }, () => {
-            throw new Error(`index-pattern ${indexPatternId} created successfully but index template
-            creation failed. Failed to rollback index-pattern creation, must delete manually.`);
+          return callWithRequest(req, 'indices.putTemplate', templateParams)
+          .catch((templateError) => {
+            const deleteParams = {
+              index: '.kibana',
+              type: 'index-pattern',
+              id: indexPatternId
+            };
+
+            return callWithRequest(req, 'delete', deleteParams)
+            .then(() => {
+              throw templateError;
+            }, () => {
+              throw new Error(`index-pattern ${indexPatternId} created successfully but index template
+              creation failed. Failed to rollback index-pattern creation, must delete manually.`);
+            });
           });
         });
       })
