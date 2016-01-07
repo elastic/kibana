@@ -1,4 +1,5 @@
 require('./process_container');
+require('./output_preview');
 require('./processor_geoip');
 require('./processor_grok');
 require('./processor_set');

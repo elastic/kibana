@@ -12,7 +12,7 @@
     ng-hide="contentCollapsed">
     <div class="process-worker-container"></div>
     <div class="form-group">
-      <pre class="output">{{ processor.outputObject | json }}</pre>
+      <output-preview new-object="processor.outputObject"></output-preview>
     </div>
   </div>
   <div class="overlay"></div>
