@@ -78,5 +78,8 @@ ProcessorManager.prototype.updateParents = function() {
   if (processors.length > 0) {
     lastProcessor = processors[processors.length-1];
   }
+  if (!topProcessorChanged){
+    topProcessorChanged = lastProcessor;
+  }
   return { topProcessorChanged, lastProcessor };
 }
