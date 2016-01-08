@@ -29,6 +29,8 @@ require('ui/saved_objects/saved_object_registry').register(require('plugins/time
 var unsafeNotifications = require('ui/notify')._notifs;
 var ConfigTemplate = require('ui/ConfigTemplate');
 
+require('ui/routes').enable();
+
 require('ui/routes')
   .when('/:id?', {
     template: require('plugins/timelion/index.html'),
