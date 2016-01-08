@@ -30,15 +30,16 @@ app.directive('processorJoin', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_join.html'),
-    controller : function ($scope, $rootScope, debounce, ingest) {
+    controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const Logger = require('../lib/logger');
+      const logger = new Logger(processor, processor.title, false);
 
-      function getDescription() {
-        const source = (processor.sourceField) ? processor.sourceField : '?';
-        return `[${source}]`;
-      }
+      function consumeNewInputObject(event, message) {
+        if (message.processor !== processor) return;
 
-      function checkForNewInputObject() {
+        logger.log('consuming new inputObject', processor.inputObject);
+
         const allKeys = keysDeep(processor.inputObject);
         const keys = [];
         allKeys.forEach((key) => {
@@ -48,6 +49,8 @@ app.directive('processorJoin', function () {
         })
         $scope.fields = keys;
         refreshFieldData();
+
+        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
@@ -55,44 +58,17 @@ app.directive('processorJoin', function () {
       }
 
       function applyProcessor() {
-        checkForNewInputObject();
-
-        $rootScope.$broadcast('processor_started', { processor: processor });
-
-        let output;
-        const description = processor.getDescription();
-
-        ingest.simulate(processor)
-        .then(function (result) {
-          //TODO: this flow needs to be streamlined
-          if (!result) {
-            output = _.cloneDeep(processor.inputObject);
-          } else {
-            output = result;
-          }
-
-          const message = {
-            processor: processor,
-            output: output,
-            description: description
-          };
-
-          $rootScope.$broadcast('processor_finished', message);
-        });
-      }
-      applyProcessor = debounce(applyProcessor, 200);
-
-      function processorStart(event, message) {
-        if (message.processor !== processor) return;
-
-        applyProcessor();
+        logger.log('processor properties changed. force update');
+        $rootScope.$broadcast('processor_force_update', { processor: processor });
       }
 
-      const startListener = $scope.$on('processor_start', processorStart);
+      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
 
       $scope.$on('$destroy', () => {
-        startListener();
+        inputObjectChangingListener();
       });
+
+      processor.separator = '';
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
@@ -103,4 +79,3 @@ app.directive('processorJoin', function () {
     }
   }
 });
-

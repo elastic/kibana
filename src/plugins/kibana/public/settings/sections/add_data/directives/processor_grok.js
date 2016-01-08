@@ -39,7 +39,7 @@ app.directive('processorGrok', function () {
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorGrok', false);
+      const logger = new Logger(processor, processor.title, false);
 
       function consumeNewInputObject(event, message) {
         if (message.processor !== processor) return;

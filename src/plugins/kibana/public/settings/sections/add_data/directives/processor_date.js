@@ -33,17 +33,20 @@ app.directive('processorDate', function() {
   return {
     restrict: 'E',
     template: require('../views/processor_date.html'),
-    controller: function($scope, $rootScope, debounce, ingest) {
+    controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const Logger = require('../lib/logger');
+      const logger = new Logger(processor, processor.title, false);
 
-      function getDescription() {
-        const source = (processor.sourceField) ? processor.sourceField : '?';
-        return `Date - [${source}]`;
-      }
+      function consumeNewInputObject(event, message) {
+        if (message.processor !== processor) return;
 
-      function checkForNewInputObject() {
+        logger.log('consuming new inputObject', processor.inputObject);
+
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
+
+        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
@@ -51,41 +54,15 @@ app.directive('processorDate', function() {
       }
 
       function applyProcessor() {
-        checkForNewInputObject();
-
-        $rootScope.$broadcast('processor_started', {
-          processor: processor
-        });
-
-        let output;
-        const description = processor.getDescription();
-
-        ingest.simulate(processor)
-        .then(function(result) {
-          //TODO: this flow needs to be streamlined
-          if (!result) {
-            output = _.cloneDeep(processor.inputObject);
-          } else {
-            output = result;
-          }
-
-          const message = {
-            processor: processor,
-            output: output,
-            description: description
-          };
-
-          $rootScope.$broadcast('processor_finished', message);
-        });
-      }
-      applyProcessor = debounce(applyProcessor, 200);
-
-      function processorStart(event, message) {
-        if (message.processor !== processor) return;
-
-        applyProcessor();
+        logger.log('processor properties changed. force update');
+        $rootScope.$broadcast('processor_force_update', { processor: processor });
       }
 
+      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
+
+      $scope.$on('$destroy', () => {
+        inputObjectChangingListener();
+      });
       function selectableArray(array) {
         return array.map((item) => {
           return {
@@ -94,16 +71,6 @@ app.directive('processorDate', function() {
           };
         });
       }
-
-      const startListener = $scope.$on('processor_start', processorStart);
-
-      $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom']);
-      $scope.timezones = ['UTC', 'Europe/Amsterdam', 'Load list from somewhere'];
-      $scope.locales = ['ENGLISH', 'Load list from somewhere'];
-      processor.timezone = 'UTC';
-      processor.locale = 'ENGLISH';
-      processor.targetField = "@timestamp";
-      $scope.customFormatSelected = false;
 
       function updateFormats() {
         const formats = [];
@@ -123,11 +90,15 @@ app.directive('processorDate', function() {
         applyProcessor();
       }
       updateFormats = debounce(updateFormats, 200);
-      $scope.updateFormats = updateFormats;
 
-      $scope.$on('$destroy', () => {
-        startListener();
-      });
+      $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom']);
+      $scope.timezones = ['UTC', 'Europe/Amsterdam', 'Load list from somewhere'];
+      $scope.locales = ['ENGLISH', 'Load list from somewhere'];
+      processor.timezone = 'UTC';
+      processor.locale = 'ENGLISH';
+      processor.targetField = "@timestamp";
+      $scope.customFormatSelected = false;
+      $scope.updateFormats = updateFormats;
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();

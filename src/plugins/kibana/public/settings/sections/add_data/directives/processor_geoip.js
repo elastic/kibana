@@ -31,68 +31,38 @@ app.directive('processorGeoip', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_geoip.html'),
-    controller : function ($scope, $rootScope, debounce, ingest) {
+    controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorGeoIp', false);
+      const logger = new Logger(processor, processor.title, false);
 
-      function getDescription() {
-        const source = (processor.sourceField) ? processor.sourceField : '?';
-        const target = (processor.targetField) ? processor.targetField : '?';
-        return `Geo IP - [${source}] -> [${target}]`;
-      }
-
-      function checkForNewInputObject() {
-        logger.log('consuming new inputObject', processor.inputObject);
-        $scope.fields = keysDeep(processor.inputObject);
-        refreshFieldData();
-      }
-
-      function applyProcessor() {
-        checkForNewInputObject();
-
-        logger.log('I am processing!');
-        $rootScope.$broadcast('processor_started', { processor: processor });
-
-        let output;
-        const description = processor.getDescription();
-
-        ingest.simulate(processor)
-        .then(function (result) {
-          //TODO: this flow needs to be streamlined
-          if (!result) {
-            output = _.cloneDeep(processor.inputObject);
-          } else {
-            output = result;
-          }
-
-          const message = {
-            processor: processor,
-            output: output,
-            description: description
-          };
-
-          logger.log('I am DONE processing!');
-          $rootScope.$broadcast('processor_finished', message);
-        });
-      }
-      applyProcessor = debounce(applyProcessor, 200);
-
-      function processorStart(event, message) {
+      function consumeNewInputObject(event, message) {
         if (message.processor !== processor) return;
 
-        applyProcessor();
+        logger.log('consuming new inputObject', processor.inputObject);
+
+        $scope.fields = keysDeep(processor.inputObject);
+        refreshFieldData();
+
+        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
-      const startListener = $scope.$on('processor_start', processorStart);
+      function applyProcessor() {
+        logger.log('processor properties changed. force update');
+        $rootScope.$broadcast('processor_force_update', { processor: processor });
+      }
+
+      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
 
       $scope.$on('$destroy', () => {
-        startListener();
+        inputObjectChangingListener();
       });
+
+      processor.targetField = 'geoip';
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
@@ -100,9 +70,6 @@ app.directive('processorGeoip', function () {
       });
 
       $scope.$watch('processor.targetField', applyProcessor);
-
-      processor.targetField = 'geoip';
     }
   }
 });
-
