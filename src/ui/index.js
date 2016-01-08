@@ -76,7 +76,7 @@ module.exports = async (kbnServer, server, config) => {
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
-      vars: defaults(app.getInjectedVars(), defaultInjectedVars),
+      vars: defaults(app.getInjectedVars() || {}, defaultInjectedVars),
     };
 
     return this.view(app.templateName, {
