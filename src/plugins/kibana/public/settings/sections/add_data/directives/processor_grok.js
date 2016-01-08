@@ -39,12 +39,13 @@ app.directive('processorGrok', function () {
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorGrok', true);
+      const logger = new Logger(processor, 'processorGrok', false);
 
       function consumeNewInputObject(event, message) {
         if (message.processor !== processor) return;
 
         logger.log('consuming new inputObject', processor.inputObject);
+
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
 

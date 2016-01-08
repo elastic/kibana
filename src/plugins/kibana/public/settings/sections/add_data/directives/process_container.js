@@ -20,7 +20,7 @@ app.directive('processContainer', function ($compile) {
     controller: function ($scope, $rootScope, ingest) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processContainer', true);
+      const logger = new Logger(processor, 'processContainer', false);
 
       function updateInputObject() {
         //checks to see if the parent is a basic object or a processor
@@ -39,28 +39,16 @@ app.directive('processContainer', function ($compile) {
         logger.log('I am processing!');
         setDirty();
 
-        let output;
-
         ingest.simulate(processor)
         .then(function (result) {
           if (!result) {
-            output = _.cloneDeep(processor.inputObject);
+            processor.outputObject = _.cloneDeep(processor.inputObject);
           } else {
-            output = result;
+            processor.outputObject = result;
           }
 
-          processor.outputObject = result;
-          const description = processor.getDescription();
-
-          const message = {
-            processor: processor,
-            output: output,
-            description: description
-          };
-
           logger.log('I am DONE processing!');
-          processor.outputObject = message.output;
-          $scope.processorDescription = message.description;
+          $scope.processorDescription = processor.getDescription();
           $scope.isDirty = false;
 
           $rootScope.$broadcast('processor_update', { processor: processor });
