@@ -36,82 +36,44 @@ app.directive('processorGrok', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_grok.html'),
-    controller : function ($scope, $rootScope, debounce, ingest) {
+    controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processorGeoIp', false);
+      const logger = new Logger(processor, 'processorGrok', true);
 
-      function getDescription() {
-        const source = (processor.sourceField) ? processor.sourceField : '?';
-        return `Grok - [${source}]`;
-      }
+      function consumeNewInputObject(event, message) {
+        if (message.processor !== processor) return;
 
-      function checkForNewInputObject() {
         logger.log('consuming new inputObject', processor.inputObject);
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
-      }
 
-      function applyProcessor() {
-        checkForNewInputObject();
-
-        logger.log('I am processing!');
-        $rootScope.$broadcast('processor_started', { processor: processor });
-
-        let output;
-
-        ingest.simulate(processor)
-        .then(function (result) {
-          //TODO: this flow needs to be streamlined
-          if (!result) {
-            output = _.cloneDeep(processor.inputObject);
-          } else {
-            output = result;
-          }
-
-          //TODO: I ONLY DID THIS FOR THE GROK PROCESSOR. I THINK THIS NEEDS TO HAPPEN HERE FOR ALL AND TAKEN OUT OF THE CONTAINER EVENT HANDLER. Also, I don't think result should be in here anymore either... consumers should just examine the processor object.
-          processor.outputObject = result;
-          const description = processor.getDescription();
-
-          const message = {
-            processor: processor,
-            output: output,
-            description: description
-          };
-
-          logger.log('I am DONE processing!');
-          $rootScope.$broadcast('processor_finished', message);
-        });
-      }
-      applyProcessor = debounce(applyProcessor, 200);
-
-      function processorStart(event, message) {
-        if (message.processor !== processor) return;
-
-        applyProcessor();
+        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
-      const startListener = $scope.$on('processor_start', processorStart);
+      function applyProcessor() {
+        logger.log('processor properties changed. force update');
+        $rootScope.$broadcast('processor_force_update', { processor: processor });
+      }
+
+      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
 
       $scope.$on('$destroy', () => {
-        startListener();
+        inputObjectChangingListener();
       });
+
+      processor.pattern = '';
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
 
-      //processor.pattern = '%{DATE:timestamp} - - %{GREEDYDATA:text}';
-      processor.pattern = '';
       $scope.$watch('processor.pattern', applyProcessor);
-
-      //%{DATE:timestamp} - - src=%{IP:grok_ip}: %{GREEDYDATA:text}
     }
   }
 });
-

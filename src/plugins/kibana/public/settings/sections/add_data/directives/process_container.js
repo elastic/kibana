@@ -17,10 +17,10 @@ app.directive('processContainer', function ($compile) {
 
       $innerEl.appendTo($container);
     },
-    controller: function ($scope, $rootScope) {
+    controller: function ($scope, $rootScope, ingest) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, 'processContainer', false);
+      const logger = new Logger(processor, 'processContainer', true);
 
       function updateInputObject() {
         //checks to see if the parent is a basic object or a processor
@@ -29,37 +29,50 @@ app.directive('processContainer', function ($compile) {
         } else {
           processor.inputObject = _.cloneDeep(processor.parent);
         }
+
+        $rootScope.$broadcast('processor_input_object_changing', { processor: processor });
       }
 
-      function applyProcessor() {
-        //tell the inner processor to start work.
-        $rootScope.$broadcast('processor_start', { processor: processor });
-      }
+      function applyProcessor(event, message) {
+        if (message.processor !== processor) return;
 
-      function processorStarted(event, message) {
-        if (processor !== message.processor) return;
-
-        //the inner processor has started to work (either on it's own or from us telling it to)
+        logger.log('I am processing!');
         setDirty();
+
+        let output;
+
+        ingest.simulate(processor)
+        .then(function (result) {
+          if (!result) {
+            output = _.cloneDeep(processor.inputObject);
+          } else {
+            output = result;
+          }
+
+          processor.outputObject = result;
+          const description = processor.getDescription();
+
+          const message = {
+            processor: processor,
+            output: output,
+            description: description
+          };
+
+          logger.log('I am DONE processing!');
+          processor.outputObject = message.output;
+          $scope.processorDescription = message.description;
+          $scope.isDirty = false;
+
+          $rootScope.$broadcast('processor_update', { processor: processor });
+        });
       }
-
-      //the inner processor has told us it's done.
-      function processorFinished(event, message) {
-        if (processor !== message.processor) return;
-
-        processor.outputObject = message.output;
-        $scope.processorDescription = message.description;
-        $scope.isDirty = false;
-
-        $rootScope.$broadcast('processor_update', { processor: processor });
-      }
+      applyProcessor = debounce(applyProcessor, 200);
 
       function parentUpdated(event, message) {
         if (message.processor !== processor.parent) return;
 
         logger.log('my parent updated');
         updateInputObject();
-        applyProcessor();
       }
 
       function forceUpdate(event, message) {
@@ -67,7 +80,6 @@ app.directive('processContainer', function ($compile) {
 
         logger.log(`I'm being forced to update`);
         updateInputObject();
-        applyProcessor();
       }
 
       function parentDirty(event, message) {
@@ -86,15 +98,13 @@ app.directive('processContainer', function ($compile) {
       const forceUpdateListener = $scope.$on('processor_force_update', forceUpdate);
       const updateListener = $scope.$on('processor_update', parentUpdated);
       const dirtyListener = $scope.$on('processor_dirty', parentDirty);
-      const startedListener = $scope.$on('processor_started', processorStarted);
-      const finishedListener = $scope.$on('processor_finished', processorFinished);
+      const inputObjectChangedListener = $scope.$on('processor_input_object_changed', applyProcessor);
 
       $scope.$on('$destroy', () => {
         forceUpdateListener();
         updateListener();
         dirtyListener();
-        startedListener();
-        finishedListener();
+        inputObjectChangedListener();
       });
     }
   };
