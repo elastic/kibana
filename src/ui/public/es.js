@@ -1,7 +1,6 @@
-import 'elasticsearch-browser/elasticsearch.angular.js';
+import 'elasticsearch-browser';
 import _ from 'lodash';
 define(function (require) {
-
   var es; // share the client amoungst all apps
   require('ui/modules')
     .get('kibana', ['elasticsearch', 'kibana/config'])
