@@ -39,7 +39,7 @@ function loadSavedState() {
     }
   }
   else if (/^https?:\/\//.test(sourceLocation)) {
-    var loadFrom = {url: sourceLocation, dataType: "text"};
+    var loadFrom = {url: sourceLocation, dataType: "text", kbnXsrfToken: false};
     if (/https?:\/\/api.github.com/.test(sourceLocation)) {
       loadFrom.headers = {Accept: "application/vnd.github.v3.raw"};
     }
