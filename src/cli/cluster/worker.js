@@ -28,8 +28,12 @@ module.exports = class Worker extends EventEmitter {
     this.title = opts.title || opts.type;
     this.watch = (opts.watch !== false);
     this.startCount = 0;
-    this.online = false;
-    this.listening = false;
+
+    // status flags
+    this.online = false; // the fork can accept messages
+    this.listening = false; // the fork is listening for connections
+    this.crashed = false; // the fork crashed
+
     this.changes = [];
 
     this.forkBinder = null; // defined when the fork is
@@ -56,8 +60,10 @@ module.exports = class Worker extends EventEmitter {
     this.online = false;
     this.listening = false;
     this.emit('fork:exit');
+    this.crashed = code > 0;
 
-    if (code) {
+    if (this.crashed) {
+      this.emit('crashed');
       this.log.bad(`${this.title} crashed`, 'with status code', code);
       if (!this.watch) process.exit(code);
     } else {
@@ -109,6 +115,7 @@ module.exports = class Worker extends EventEmitter {
   onOnline() {
     this.online = true;
     this.emit('fork:online');
+    this.crashed = false;
   }
 
   onDisconnect() {
