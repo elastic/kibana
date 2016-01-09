@@ -3,7 +3,7 @@ let Squeeze = require('good-squeeze').Squeeze;
 let writeStr = require('fs').createWriteStream;
 
 let LogFormatJson = require('./LogFormatJson');
-let LogFormatString = require('./LogFormatString');
+let LogFormatString = require('./log_format_string');
 
 module.exports = class KbnLogger {
   constructor(events, config) {
