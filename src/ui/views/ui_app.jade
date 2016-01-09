@@ -56,9 +56,21 @@ block content
         var file = files.shift();
         if (!file) return;
 
+        function failure() {
+          var err = document.createElement('h1');
+          err.style['color'] = 'white';
+          err.style['font-family'] = 'monospace';
+          err.style['text-align'] = 'center';
+          err.style['background'] = '#F44336';
+          err.style['padding'] = '25px';
+          err.innerText = 'failed to load ' + file;
+          document.body.appendChild(err);
+        }
+
         var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
         var dom = document.createElement(type);
         dom.setAttribute('async', '');
+        dom.addEventListener('error', failure);
 
         if (type === 'script') {
           dom.setAttribute('src', file);
