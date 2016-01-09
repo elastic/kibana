@@ -2,6 +2,9 @@ let _ = require('lodash');
 let fromNode = require('bluebird').fromNode;
 
 module.exports = function (kbnServer, server, config) {
+  // prevent relying on kbnServer so this can be used with other hapi servers
+  kbnServer = null;
+
   return fromNode(function (cb) {
     let events = config.get('logging.events');
 
