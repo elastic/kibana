@@ -5,7 +5,7 @@ let Hapi = require('hapi');
 let { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
 let Log = require('../Log');
-let Worker = require('./Worker');
+let Worker = require('./worker');
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
