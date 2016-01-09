@@ -1,5 +1,6 @@
 let { constant, once, compact, flatten } = require('lodash');
 let { promisify, resolve, fromNode } = require('bluebird');
+let { isWorker } = require('cluster');
 let Hapi = require('hapi');
 
 let utils = require('requirefrom')('src/utils');
@@ -75,6 +76,11 @@ module.exports = class KbnServer {
     await this.ready();
     await fromNode(cb => server.start(cb));
     await require('./pid')(this, server, config);
+
+    if (isWorker) {
+      // help parent process know when we are ready
+      process.send(['WORKER_LISTENING']);
+    }
 
     server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
     return server;
