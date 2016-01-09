@@ -36,6 +36,7 @@ module.exports = class Worker extends EventEmitter {
     this.watch = (opts.watch !== false);
     this.startCount = 0;
     this.online = false;
+    this.listening = false;
     this.changes = [];
 
     let argv = _.union(baseArgv, opts.argv || []);
@@ -56,6 +57,8 @@ module.exports = class Worker extends EventEmitter {
 
     // our fork is gone, clear our ref so we don't try to talk to it anymore
     this.fork = null;
+    this.online = false;
+    this.listening = false;
 
     if (code) {
       this.log.bad(`${this.title} crashed`, 'with status code', code);
@@ -82,8 +85,15 @@ module.exports = class Worker extends EventEmitter {
   }
 
   onMessage(msg) {
-    if (!_.isArray(msg) || msg[0] !== 'WORKER_BROADCAST') return;
-    this.emit('broadcast', msg[1]);
+    switch (_.isArray(msg) && msg[0]) {
+      case 'WORKER_BROADCAST':
+        this.emit('broadcast', msg[1]);
+        break;
+      case 'WORKER_LISTENING':
+        this.listening = true;
+        this.emit('listening');
+        break;
+    }
   }
 
   onOnline() {
@@ -92,6 +102,7 @@ module.exports = class Worker extends EventEmitter {
 
   onDisconnect() {
     this.online = false;
+    this.listening = false;
   }
 
   flushChangeBuffer() {
