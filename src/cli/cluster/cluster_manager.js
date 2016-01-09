@@ -6,15 +6,16 @@ let { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash'
 
 let Log = require('../Log');
 let Worker = require('./worker');
+let BasePathProxy = require('./base_path_proxy');
 
-const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
+process.env.kbnWorkerType = 'managr';
 
 module.exports = class ClusterManager {
   constructor(opts, settings) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
-    const basePath = get(settings, 'server.basePath') || `/${sample(alphabet, 3).join('')}`;
+    this.basePathProxy = new BasePathProxy(this, settings);
 
     this.workers = [
       this.optimizer = new Worker({
@@ -24,7 +25,7 @@ module.exports = class ClusterManager {
         argv: compact([
           '--plugins.initialize=false',
           '--server.autoListen=false',
-          `--server.basePath=${basePath}`
+          `--server.basePath=${this.basePathProxy.basePath}`
         ]),
         watch: false
       }),
@@ -33,7 +34,8 @@ module.exports = class ClusterManager {
         type: 'server',
         log: this.log,
         argv: compact([
-          `--server.basePath=${basePath}`
+          `--server.port=${this.basePathProxy.targetPort}`,
+          `--server.basePath=${this.basePathProxy.basePath}`
         ])
       })
     ];
@@ -51,12 +53,6 @@ module.exports = class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
-    this.startBasePathProxy({
-      proxyPort: get(settings, 'server.port', 5601),
-      targetPort: get(settings, 'server.devProxyPort', 5603),
-      basePath
-    });
-
     if (opts.watch) this.setupWatching();
     else this.startCluster();
   }
@@ -64,6 +60,7 @@ module.exports = class ClusterManager {
   startCluster() {
     this.setupManualRestart();
     invoke(this.workers, 'start');
+    this.basePathProxy.listen();
   }
 
   setupWatching() {
@@ -125,41 +122,6 @@ module.exports = class ClusterManager {
       rl.pause();
       process.kill(process.pid, 'SIGINT');
     });
-  }
-
-  startBasePathProxy({ proxyPort, targetPort, basePath }) {
-    const server = this.basePathProxy = new Hapi.Server();
-    server.connection({ host: '0.0.0.0', port: proxyPort });
-
-    server.route({
-      method: 'GET',
-      path: '/',
-      handler(req, reply) {
-        return reply.redirect(basePath);
-      }
-    });
-
-    server.route({
-      method: '*',
-      path: `${basePath}/{kbnPath*}`,
-      handler: {
-        proxy: {
-          passThrough: true,
-          xforward: true,
-          mapUri(req, callback) {
-            callback(null, formatUrl({
-              protocol: server.info.protocol,
-              hostname: '0.0.0.0',
-              port: targetPort,
-              pathname: req.params.kbnPath,
-              query: req.query,
-            }));
-          }
-        }
-      }
-    });
-
-    server.start();
   }
 
   onWatcherAdd() {

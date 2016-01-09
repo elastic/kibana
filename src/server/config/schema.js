@@ -20,6 +20,10 @@ module.exports = () => Joi.object({
     prod: Joi.boolean().default(Joi.ref('$prod'))
   }).default(),
 
+  dev: Joi.object({
+    basePathProxyTarget: Joi.number().default(5603),
+  }),
+
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
@@ -47,7 +51,6 @@ module.exports = () => Joi.object({
       disableProtection: Joi.boolean().default(false),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
-    devProxyPort: Joi.number().default(5603),
   }).default(),
 
   logging: Joi.object().keys({

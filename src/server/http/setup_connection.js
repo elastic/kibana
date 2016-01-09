@@ -7,7 +7,7 @@ export default function (kbnServer, server, config) {
   // Create a new connection
   var connectionOptions = {
     host: config.get('server.host'),
-    port: config.get(config.get('env.dev') ? 'server.devProxyPort' : 'server.port'),
+    port: config.get('server.port'),
     state: {
       strictHeader: false
     },
