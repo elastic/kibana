@@ -22,7 +22,7 @@ module.exports = () => Joi.object({
 
   dev: Joi.object({
     basePathProxyTarget: Joi.number().default(5603),
-  }),
+  }).default(),
 
   pid: Joi.object({
     file: Joi.string(),
