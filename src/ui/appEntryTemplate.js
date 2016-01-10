@@ -20,7 +20,7 @@ ${pluginSlug}
  *
  */
 
-require('ui/chrome')
+require('ui/chrome');
 ${requires}
 require('ui/chrome').bootstrap(/* xoxo */);
 

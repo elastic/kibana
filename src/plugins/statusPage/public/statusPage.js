@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('lodash');
 var notify = require('ui/notify');
 
+require('ui/autoload/styles');
 require('plugins/statusPage/statusPageMetric');
 require('plugins/statusPage/statusPage.less');
 
