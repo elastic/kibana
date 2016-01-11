@@ -180,7 +180,8 @@
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
-    "source-map": "0.4.4"
+    "source-map": "0.4.4",
+    "supertest-as-promised": "2.0.2"
   },
   "engines": {
     "node": "4.2.4",
