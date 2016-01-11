@@ -13,10 +13,6 @@ describe('createMappingsFromPatternFields', function () {
         'type': 'ip'
       },
       {
-        'name': 'geo.coordinates',
-        'type': 'geo_point'
-      },
-      {
         'name': 'agent',
         'type': 'string'
       },
@@ -42,13 +38,13 @@ describe('createMappingsFromPatternFields', function () {
   it('should set the same default mapping for all non-strings', function () {
     let mappings = createMappingsFromPatternFields(testFields);
 
-    _.forEach(function (mapping) {
+    _.forEach(mappings, function (mapping) {
       if (mapping.type !== 'string') {
         expect(_.isEqual(mapping, {
           type: mapping.type,
           index: 'not_analyzed',
           doc_values: true
-        }));
+        })).to.be.ok();
       }
     });
   });
@@ -56,20 +52,25 @@ describe('createMappingsFromPatternFields', function () {
   it('should give strings a multi-field mapping', function () {
     let mappings = createMappingsFromPatternFields(testFields);
 
-    _.forEach(function (mapping) {
+    _.forEach(mappings, function (mapping) {
       if (mapping.type === 'string') {
-        expect(mapping.to.have.property('fields'));
+        expect(mapping).to.have.property('fields');
       }
     });
   });
 
   it('should handle nested fields', function () {
+    testFields.push({name: 'geo.coordinates', type: 'geo_point'});
     let mappings = createMappingsFromPatternFields(testFields);
 
     expect(mappings).to.have.property('geo');
     expect(mappings.geo).to.have.property('properties');
     expect(mappings.geo.properties).to.have.property('coordinates');
-    expect(_.isEqual(mappings.geo.properties.coordinates, {type: 'geo_point'}));
+    expect(_.isEqual(mappings.geo.properties.coordinates, {
+      type: 'geo_point',
+      index: 'not_analyzed',
+      doc_values: true
+    })).to.be.ok();
   });
 
   it('should map all number fields as an ES double', function () {
