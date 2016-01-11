@@ -78,16 +78,21 @@ module.exports = class Worker extends EventEmitter {
   shutdown() {
     if (this.fork && !dead(this.fork)) {
       kill(this.fork);
-      this.fork.removeListener('message', this.onMessage);
+      this.fork.removeListener('message', this.parseIncomingMessage);
       this.fork.removeListener('online', this.onOnline);
       this.fork.removeListener('disconnect', this.onDisconnect);
     }
   }
 
-  onMessage(msg) {
-    switch (_.isArray(msg) && msg[0]) {
+  parseIncomingMessage(msg) {
+    if (!_.isArray(msg)) return;
+    this.onMessage(...msg);
+  }
+
+  onMessage(type, data) {
+    switch (type) {
       case 'WORKER_BROADCAST':
-        this.emit('broadcast', msg[1]);
+        this.emit('broadcast', data);
         break;
       case 'WORKER_LISTENING':
         this.listening = true;
