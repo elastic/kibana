@@ -284,28 +284,28 @@ function (angular, app, _, kbn, moment) {
       for (var i = allRows.length - 1; i >= 0; i--) {
         allRows[i].kibana.details = _d.show;
         allRows[i].kibana.view = allRows[i].kibana.view || 'table';
-      };
-    }
+      }
+    };
 
     $scope.is_info = function(row) {
       return row._source.level ? row._source.level.toLowerCase() === 'info' : '';
-    }
+    };
 
     $scope.is_warn = function(row) {
       return row._source.level ? row._source.level.toLowerCase() === 'warn' : '';
-    }
+    };
 
     $scope.is_error = function(row) {
       return row._source.level ? row._source.level.toLowerCase() === 'error' : '';
-    }
+    };
 
     $scope.is_debug = function(row) {
       return row._source.level ? row._source.level.toLowerCase() === 'debug' : '';
-    }
+    };
 
     $scope.is_xml= function(key) {
       return key === 'request' || key === 'response';
-    }
+    };
 
     $scope.page = function(page) {
       $scope.panel.offset = page*$scope.panel.size;
