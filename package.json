@@ -56,7 +56,8 @@
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
     "mocha": "mocha --compilers js:babel/register",
-    "mocha:debug": "mocha --debug-brk --compilers js:babel/register"
+    "mocha:debug": "mocha --debug-brk --compilers js:babel/register",
+    "clean": "grunt scrub"
   },
   "repository": {
     "type": "git",
