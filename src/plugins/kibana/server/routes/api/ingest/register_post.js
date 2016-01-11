@@ -95,12 +95,14 @@ module.exports = function registerPost(server) {
           });
         });
       })
-      .then(() => {
-        reply().code(204);
-      })
-      .catch(function (error) {
-        reply(handleESError(error));
-      });
+      .then(
+        function () {
+          reply().code(204);
+        },
+        function (error) {
+          reply(handleESError(error));
+        }
+      );
     }
   });
 };

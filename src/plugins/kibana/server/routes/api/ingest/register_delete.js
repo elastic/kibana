@@ -16,18 +16,16 @@ module.exports = function registerDelete(server) {
 
       Promise.all([
         callWithRequest(req, 'delete', deletePatternParams),
-        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id)})
-            .catch((error) => {
-              if (!error.status || error.status !== 404) {
-                throw error;
-              }
-            })
+        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id), ignore: [404]})
       ])
-        .then(function (pattern) {
+      .then(
+        function (pattern) {
           reply({success: true});
-        }, function (error) {
+        },
+        function (error) {
           reply(handleESError(error));
-        });
+        }
+      );
     }
   });
 };
