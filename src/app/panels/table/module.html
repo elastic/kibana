@@ -52,6 +52,24 @@
       padding: 10px;
       border: 1px solid #666;
     }
+    .toggle-all-details {
+      cursor: pointer;
+      text-align: center;
+      color: #4abde8;
+      text-decoration: underline;
+    }
+    .toggle-all-details i {
+      margin-left: 5px;
+    }
+    pre {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background-color: transparent;
+    }
+    .text-debug {
+      color: #CC66FF;
+    }
   </style>
 
   <div class="table-container">
@@ -128,6 +146,9 @@
             <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='icon-arrow-right pointer'></i>
           </div>
         </div>
+
+        <div class="toggle-all-details" ng-click="toggle_all_details()">toggle All<i class="icon-list"></i></div>
+
         <table class="table-hover table table-condensed" ng-style="panel.style">
           <thead ng-show="panel.header">
             <th ng-show="panel.fields.length<1">_source (select columns from the list to the left)</th>
@@ -147,8 +168,8 @@
             <tr ng-click="toggle_details(event)" class="pointer">
               <td ng-if="panel.fields.length<1" bo-text="event._source|stringify|tableTruncate:panel.trimFactor:1"></td>
               <td ng-show="panel.fields.length>0" ng-repeat="field in panel.fields">
-                <span ng-if="!panel.localTime || panel.timeField != field" ng-bind-html="(event.kibana.highlight[field]||event.kibana._source[field]) |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length" class="table-field-value"></span>
-                <span ng-if="panel.localTime && panel.timeField == field" ng-bind-html="event.sort[1]|tableLocalTime:event" class="table-field-value"></span>
+                <span ng-if="!panel.localTime || panel.timeField != field" ng-bind-html="(event.kibana.highlight[field]||event.kibana._source[field]) |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length" class="table-field-value"  ng-class="{ 'text-info': is_info(event), 'text-warning': is_warn(event), 'text-error': is_error(event), 'text-debug': is_debug(event)}"></span>
+                <span ng-if="panel.localTime && panel.timeField == field" ng-bind-html="event.sort[1]|tableLocalTime:event" class="table-field-value"  ng-class="{ 'text-info': is_info(event), 'text-warning': is_warn(event), 'text-error': is_error(event)}, 'text-debug': is_debug(event)"></span>
               </td>
             </tr>
             <tr ng-if="event.kibana.details">
@@ -174,10 +195,14 @@
                       <i class="pointer icon-th" ng-click="toggle_field(key)" bs-tooltip="'Toggle table column'"></i>
                     </td>
                     <!-- At some point we need to create a more efficient way of applying the filter pipeline -->
-                    <td style="white-space:pre-wrap;word-wrap:break-word" ng-bind-html="value|noXml|urlLink|stringify"></td>
+                    <td ng-if="!is_xml(key)" style="white-space:pre-wrap;word-wrap:break-word" ng-bind-html="value|noXml|urlLink|stringify"></td>
+                    <td ng-if="is_xml(key)">
+                      <div hljs hljs-source="value">
+                      </div>
+                    </td>
                   </tr>
                 </table>
-                <pre style="white-space:pre-wrap;word-wrap:break-word"  ng-bind-html="without_kibana(event)|tableJson:2" ng-switch-when="json"></pre>
+                <pre style="white-space:pre-wrap;word-wrap:break-word" ng-bind-html="without_kibana(event)|tableJson:2" ng-switch-when="json"></pre>
                 <pre ng-bind-html="without_kibana(event)|tableJson:1" ng-switch-when="raw"></pre>
               </td>
             </tr>

@@ -8,6 +8,7 @@ require.config({
     config:                   '../config',
     settings:                 'components/settings',
     kbn:                      'components/kbn',
+    hljs:                     '//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min',
 
     vendor:                   '../vendor',
     css:                      '../vendor/require/css',
@@ -24,6 +25,7 @@ require.config({
     timepicker:               '../vendor/angular/timepicker',
     datepicker:               '../vendor/angular/datepicker',
     bindonce:                 '../vendor/angular/bindonce',
+    ahljs:                    '../vendor/angular/angular-highlightjs',
 
     lodash:                   'components/lodash.extended',
     'lodash-src':             '../vendor/lodash',
@@ -84,6 +86,7 @@ require.config({
     'jquery.flot.time':     ['jquery', 'jquery.flot'],
 
     'angular-sanitize':     ['angular'],
+    'ahljs':                ['angular', 'hljs'],
     'angular-cookies':      ['angular'],
     'angular-dragdrop':     ['jquery','jquery-ui','angular'],
     'angular-loader':       ['angular'],
