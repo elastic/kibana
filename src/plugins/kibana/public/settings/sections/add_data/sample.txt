@@ -1,0 +1,3 @@
+%{GREEDYDATA:source} - - %{GREEDYDATA:message}
+
+\[%{GREEDYDATA:datestamp}] "%{WORD:action} %{GREEDYDATA:document} %{GREEDYDATA:protocol}" %{WORD:response_code} %{WORD:extended_code}

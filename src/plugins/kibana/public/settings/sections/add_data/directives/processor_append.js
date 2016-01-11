@@ -11,6 +11,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'set' : {
+        'processor_id': self.processorId,
         'field' : self.targetField,
         'value': self.values
       }

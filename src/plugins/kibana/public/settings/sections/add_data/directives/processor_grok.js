@@ -12,6 +12,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'grok' : {
+        'processor_id': self.processorId,
         'field' : self.sourceField,
         'pattern': self.pattern
       }

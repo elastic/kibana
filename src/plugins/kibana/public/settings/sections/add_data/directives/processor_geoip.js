@@ -12,6 +12,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'geoip' : {
+        'processor_id': self.processorId,
         'source_field' : self.sourceField,
         'target_field': self.targetField
       }

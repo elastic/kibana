@@ -11,6 +11,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'date' : {
+        'processor_id': self.processorId,
         'match_field' : self.sourceField,
         'target_field' : self.targetField,
         'match_formats' : self.formats,

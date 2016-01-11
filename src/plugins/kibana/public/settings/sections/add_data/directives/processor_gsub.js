@@ -11,6 +11,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'gsub' : {
+        'processor_id': self.processorId,
         'field' : self.sourceField,
         'pattern' : self.pattern,
         'replacement' : self.replacement

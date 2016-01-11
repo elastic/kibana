@@ -11,6 +11,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'rename' : {
+        'processor_id': self.processorId,
         'field' : self.sourceField,
         'to': self.targetField
       }

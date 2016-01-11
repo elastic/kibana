@@ -11,6 +11,7 @@ require('../lib/processor_registry').register({
     const self = this;
     return {
       'join' : {
+        'processor_id': self.processorId,
         'field' : self.sourceField,
         'separator' : self.separator
       }
