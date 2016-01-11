@@ -440,6 +440,14 @@ function (angular, app, _, kbn, moment) {
             $scope.data.reverse();
           }
 
+          for (var i = 0; i < $scope.data.length; i++) {
+            var item = $scope.data[i].kibana._source;
+            if (item.timestamp !== undefined) {
+               var updateDate = moment(item.timestamp).format("YYYY-MM-DD HH:mm:ss.SSS");
+               $scope.data[i].kibana._source.timestamp = updateDate;
+            }
+          }
+
           // Keep only what we need for the set
           $scope.data = $scope.data.slice(0,$scope.panel.size * $scope.panel.pages);
 
