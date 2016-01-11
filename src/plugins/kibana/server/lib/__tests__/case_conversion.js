@@ -1,11 +1,11 @@
 const expect = require('expect.js');
-const { convertToSnakeCase, convertToCamelCase } = require('../case_conversion');
+const { keysToSnakeCaseShallow, keysToCamelCaseShallow } = require('../case_conversion');
 const _ = require('lodash');
 
-describe('convertToSnakeCase', function () {
+describe('keysToSnakeCaseShallow', function () {
 
   it('should convert all of an object\'s keys to snake case', function () {
-    const result = convertToSnakeCase({
+    const result = keysToSnakeCaseShallow({
       camelCase: 'camel_case',
       'kebab-case': 'kebab_case',
       snake_case: 'snake_case'
@@ -18,10 +18,10 @@ describe('convertToSnakeCase', function () {
 
 });
 
-describe('convertToCamelCase', function () {
+describe('keysToCamelCaseShallow', function () {
 
   it('should convert all of an object\'s keys to camel case', function () {
-    const result = convertToCamelCase({
+    const result = keysToCamelCaseShallow({
       camelCase: 'camelCase',
       'kebab-case': 'kebabCase',
       snake_case: 'snakeCase'

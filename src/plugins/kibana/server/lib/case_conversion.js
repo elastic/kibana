@@ -1,13 +1,13 @@
 const _ = require('lodash');
 
 module.exports = {
-  convertToSnakeCase: function (object) {
+  keysToSnakeCaseShallow: function (object) {
     return _.mapKeys(object, (value, key) => {
       return _.snakeCase(key);
     });
   },
 
-  convertToCamelCase: function (object) {
+  keysToCamelCaseShallow: function (object) {
     return _.mapKeys(object, (value, key) => {
       return _.camelCase(key);
     });

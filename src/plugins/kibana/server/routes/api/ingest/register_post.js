@@ -3,7 +3,7 @@ const _ = require('lodash');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
 const handleESError = require('../../../lib/handle_es_error');
-const { convertToCamelCase } = require('../../../lib/case_conversion');
+const { keysToCamelCaseShallow } = require('../../../lib/case_conversion');
 const createMappingsFromPatternFields = require('../../../lib/create_mappings_from_pattern_fields');
 const initDefaultFieldProps = require('../../../lib/init_default_field_props');
 
@@ -20,7 +20,7 @@ module.exports = function registerPost(server) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const requestDocument = _.cloneDeep(req.payload);
       const indexPatternId = requestDocument.id;
-      const indexPattern = convertToCamelCase(requestDocument);
+      const indexPattern = keysToCamelCaseShallow(requestDocument);
       delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
