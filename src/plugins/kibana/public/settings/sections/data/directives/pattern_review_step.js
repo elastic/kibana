@@ -19,13 +19,14 @@ modules.get('apps/settings')
     return {
       template: template,
       scope: {
-        docs: '=',
-        save: '&onSave'
+        sampleDocs: '=',
+        indexPattern: '=',
+        pipeline: '='
       },
       controller: function ($scope, Private) {
-        $scope.docs = testData;
+        $scope.sampleDocs = testData;
         $scope.indexPattern = {id: 'filebeat-*', title: 'filebeat-*'};
-        $scope.indexPattern.fields = _.map($scope.docs, (value, key) => {
+        $scope.indexPattern.fields = _.map($scope.sampleDocs, (value, key) => {
           return {name: key, type: typeof value};
         });
 
@@ -46,7 +47,7 @@ modules.get('apps/settings')
               markup: editFieldTypeHTML,
               scope: _.assign($scope.$new(), {field: field})
             },
-            $scope.docs[field.name]
+            $scope.sampleDocs[field.name]
           ];
         });
       }
