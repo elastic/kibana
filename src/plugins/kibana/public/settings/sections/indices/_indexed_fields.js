@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var isRetrieved = require('./retrieved_field');
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
@@ -24,6 +25,7 @@ define(function (require) {
           { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
+          { title: 'retrieved', info: 'Fields that are not retrieved as part of the _source object per hit' },
           { title: 'controls', sortable: false }
         ];
 
@@ -33,6 +35,7 @@ define(function (require) {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
 
+          var sourceFiltering = $scope.indexPattern.getSourceFiltering();
           var fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
           _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
@@ -59,6 +62,9 @@ define(function (require) {
               {
                 markup: field.indexed ? yesTemplate : noTemplate,
                 value: field.indexed
+              },
+              {
+                markup: isRetrieved(sourceFiltering, field.displayName) ? yesTemplate : noTemplate
               },
               {
                 markup: controlsHtml,

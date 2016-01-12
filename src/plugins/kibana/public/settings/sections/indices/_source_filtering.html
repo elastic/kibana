@@ -1,0 +1,114 @@
+<h3>Retrieved fields
+
+<span class="pull-right text-info hintbox-label" ng-click="showHelp = !showHelp">
+  <h4><i class="fa fa-info"></i> Retrieved Fields Help</h4>
+</span>
+</h3>
+
+<div class="hintbox" ng-if="showHelp">
+  <h4 class="hintbox-heading">
+    <i class="fa fa-question-circle text-info"></i> Retrieved Fields Help
+  </h4>
+
+  <p>
+  All fields are by default retrieved and are available inside the "_source" object of each hit. Thanks to the
+  <a target="_window" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html">
+    source filtering API
+    <i aria-hidden="true" class="fa-link fa"></i>
+  </a>
+  of Elasticsearch, you can choose which fields are actually retrieved. The value needs to be a JSON object.
+  </p>
+
+  <br/>
+  <strong>Examples</strong>
+
+  <p style="color: #b4bcc2;">Exclusion of a single field</p>
+
+  <div
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "exclude": "user"
+}</div>
+
+  <p style="color: #b4bcc2;">Exclusion with a path pattern</p>
+  <div
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "exclude": [
+    "obj1.*",
+    "*.value"
+  ]
+}</div>
+
+  <p style="color: #b4bcc2;">Complete control with exclusions and inclusion</p>
+  <div
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "exclude": "obj1.*",
+  "include": "obj2.*.val"
+}</div>
+</div>
+
+<p>
+By default, all fields are retrieved to populate results table.
+Sometimes however some fields can be very large and seriously affect performance. This can be often the case when you have materialized one to many relationships, e.g., an entity having many nested entities. Those fields are still useful for searching or analytics but not in a result table.<br/><br/>
+Use this setting to decide what to include or exclude in the data retrieved from the Elasticsearch index.<br/>
+If empty, all fields are retrieved.
+</p>
+
+<form ng-submit="save()" name="form">
+  <div
+    id="json-ace"
+    ng-model="sourceFiltering"
+    ui-ace="{
+      useWrapMode: true,
+      advanced: {
+        highlightActiveLine: false
+      },
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{{ sourceFiltering | json }}</div>
+
+  <div class="form-group">
+    <button
+       ng-disabled="form.$invalid"
+       type="submit"
+       aria-label="Submit"
+       class="btn btn-success">
+      Submit
+    </button>
+  </div>
+</form>

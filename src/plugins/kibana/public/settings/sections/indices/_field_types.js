@@ -20,6 +20,9 @@ define(function (require) {
         title: 'scripted fields',
         index: 'scriptedFields',
         count: fieldCount.scripted
+      }, {
+        title: 'Retrieved Fields',
+        index: 'sourceFiltering'
       }];
     };
   };

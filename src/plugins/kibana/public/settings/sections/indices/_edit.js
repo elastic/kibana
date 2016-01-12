@@ -3,6 +3,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/indices/_indexed_fields');
   require('plugins/kibana/settings/sections/indices/_scripted_fields');
   require('plugins/kibana/settings/sections/indices/_index_header');
+  require('plugins/kibana/settings/sections/indices/_source_filtering');
 
   require('ui/routes')
   .when('/settings/indices/:indexPatternId', {
