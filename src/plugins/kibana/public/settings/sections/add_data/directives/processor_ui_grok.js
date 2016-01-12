@@ -68,6 +68,7 @@ app.directive('processorUiGrok', function () {
         inputObjectChangingListener();
       });
 
+      processor.sourceField = '';
       processor.pattern = '';
 
       $scope.$watch('processor.sourceField', () => {

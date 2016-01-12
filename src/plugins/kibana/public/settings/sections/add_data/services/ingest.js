@@ -7,8 +7,8 @@ app.service('ingest', function ($http) {
     simulatePipeline: simulatePipeline
   };
 
-  function buildBody() {
-    return {
+  function buildBody(sourceObject, processors) {
+    const body = {
       'pipeline': {
         'description': '_description',
         'processors': []
@@ -21,12 +21,18 @@ app.service('ingest', function ($http) {
         }
       ]
     };
+
+    body.docs[0]._source = sourceObject;
+
+    processors.forEach((processor) => {
+      body.pipeline.processors.push(processor.getDefinition());
+    });
+
+    return body;
   }
 
   function simulate(processor) {
-    const body = buildBody();
-    body.docs[0]._source = processor.inputObject;
-    body.pipeline.processors.push(processor.getDefinition());
+    const body = buildBody(processor.inputObject, [processor]);
 
     console.log('simulate request', body);
 
@@ -34,25 +40,26 @@ app.service('ingest', function ($http) {
     return $http.post(`/api/kibana/simulate`, body)
     .then(function (result) {
       console.log('simulate response', result);
-      let outputObject = {};
+      if (!result.data)
+        return;
 
-      if (result.data) {
-        const processorResults = _.get(result, 'data.docs[0].processor_results');
-        const processorResult = processorResults[0];
-        outputObject = _.get(processorResult, 'doc._source');
+      const processorResults = _.get(result, 'data.docs[0].processor_results');
+      const output = processorResults.map((processorResult) => {
+        return {
+          processorId: _.get(processorResult, 'processor_id'),
+          output: _.get(processorResult, 'doc._source'),
+          error: _.get(processorResult, 'error')
+        }
+      });
 
-        return outputObject;
-      }
-
+      return output;
     });
   }
 
   function simulatePipeline(pipeline) {
-    const body = buildBody();
-    body.docs[0]._source = processor.inputObject;
-    pipeline.forEach((processor) => {
-      body.pipeline.processors.push(processor.getDefinition());
-    });
+    const body = buildBody(pipeline.rootObject, pipeline.processors);
+
+    console.log('simulate request', body);
 
     //TODO: How to handle errors
     return $http.post(`/api/kibana/simulate`, body)
@@ -60,12 +67,16 @@ app.service('ingest', function ($http) {
       if (!result.data)
         return;
 
-      debugger;
       const processorResults = _.get(result, 'data.docs[0].processor_results');
-      const processorResult = processorResults[0];
-      const outputObject = _.get(processorResult, 'doc._source');
+      const output = processorResults.map((processorResult) => {
+        return {
+          processorId: _.get(processorResult, 'processor_id'),
+          output: _.get(processorResult, 'doc._source'),
+          error: _.get(processorResult, 'error')
+        }
+      });
 
-      return outputObject;
+      return output;
     });
   }
 });

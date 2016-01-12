@@ -40,12 +40,17 @@ app.directive('processContainer', function ($compile) {
         setDirty();
 
         ingest.simulate(processor)
-        .then(function (result) {
-          if (!result) {
+        .then(function (pipelineResult) {
+          //In a full pipeline simulation, we would find the pipeline by id instead of
+          //just grabbing the first index.
+          const processorResult = pipelineResult[0];
+
+          if (!processorResult.output) {
             processor.outputObject = _.cloneDeep(processor.inputObject);
           } else {
-            processor.outputObject = result;
+            processor.outputObject = processorResult.output;
           }
+          processor.error = processorResult.error;
 
           logger.log('I am DONE processing!');
           $scope.processorDescription = processor.getDescription();
