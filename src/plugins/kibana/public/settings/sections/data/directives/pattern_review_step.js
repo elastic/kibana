@@ -6,8 +6,9 @@ modules.get('apps/settings')
     return {
       template: template,
       scope: {
-        docs: '=',
-        save: '&onSave'
+        sampleDocs: '=',
+        indexPattern: '=',
+        pipeline: '='
       }
     };
   });

@@ -6,7 +6,7 @@ modules.get('apps/settings')
     return {
       template: template,
       scope: {
-        save: '&onSave'
+        samples: '='
       }
     };
   });

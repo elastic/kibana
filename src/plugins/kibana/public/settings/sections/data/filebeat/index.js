@@ -16,7 +16,7 @@ modules.get('apps/settings')
   .controller('kbnSettingsDataFilebeat', function ($scope) {
     var totalSteps = 4;
     $scope.currentStep = 0;
-    $scope.stepResults = [];
+    $scope.stepResults = {};
 
     $scope.nextStep = function () {
       if ($scope.currentStep + 1 < totalSteps) {
@@ -30,9 +30,5 @@ modules.get('apps/settings')
     };
     $scope.setCurrentStep = function (step) {
       $scope.currentStep = step;
-    };
-
-    $scope.saveStepResults = function (step, results) {
-      $scope.stepResults[step] = results;
     };
   });
