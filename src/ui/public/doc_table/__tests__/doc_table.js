@@ -72,6 +72,10 @@ describe('docTable', function () {
     expect($elem.text()).to.not.be.empty();
   });
 
+  it('should set the source filtering defintion', function () {
+    expect($scope.indexPattern.getSourceFiltering.called).to.be(true);
+  });
+
   it('should set the indexPattern to that of the searchSource', function () {
     expect($scope.indexPattern).to.be(searchSource.get('index'));
   });

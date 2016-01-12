@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import isRetrieved from 'plugins/kibana/settings/sections/indices/retrieved_field';
 import 'ui/paginated_table';
 import nameHtml from 'plugins/kibana/settings/sections/indices/_field_name.html';
 import typeHtml from 'plugins/kibana/settings/sections/indices/_field_type.html';
@@ -25,6 +26,7 @@ uiModules.get('apps/settings')
         { title: 'format' },
         { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
         { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
+        { title: 'retrieved', info: 'Fields that are not retrieved as part of the _source object per hit' },
         { title: 'controls', sortable: false }
       ];
 
@@ -34,6 +36,7 @@ uiModules.get('apps/settings')
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
 
+        const sourceFiltering = $scope.indexPattern.getSourceFiltering();
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
         _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
@@ -41,6 +44,7 @@ uiModules.get('apps/settings')
           const childScope = _.assign($scope.$new(), { field: field });
           rowScopes.push(childScope);
 
+<<<<<<< HEAD
           return [
             {
               markup: nameHtml,
@@ -60,6 +64,9 @@ uiModules.get('apps/settings')
             {
               markup: field.indexed ? yesTemplate : noTemplate,
               value: field.indexed
+            },
+            {
+              markup: isRetrieved(sourceFiltering, field.displayName) ? yesTemplate : noTemplate
             },
             {
               markup: controlsHtml,

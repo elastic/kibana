@@ -41,13 +41,14 @@
         <li class="kbn-settings-tab" ng-class="{ active: state.tab === fieldType.index }" ng-repeat="fieldType in fieldTypes">
           <a ng-click="changeTab(fieldType)">
             {{ fieldType.title }}
-            <small>({{ fieldType.count }})</small>
+            <small ng-if="fieldType.count !== undefined">({{ fieldType.count }})</small>
           </a>
         </li>
       </ul>
 
       <indexed-fields ng-show="state.tab == 'indexedFields'" class="fields indexed-fields"></indexed-fields>
       <scripted-fields ng-show="state.tab == 'scriptedFields'" class="fields scripted-fields"></scripted-fields>
+      <source-filtering ng-show="state.tab == 'sourceFiltering'" class="fields source-filtering"></source-filtering>
 
     </div>
   </kbn-settings-indices>

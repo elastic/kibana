@@ -11,14 +11,21 @@ export default function GetFieldTypes() {
       scripted: 0
     });
 
-    return [{
-      title: 'fields',
-      index: 'indexedFields',
-      count: fieldCount.indexed
-    }, {
-      title: 'scripted fields',
-      index: 'scriptedFields',
-      count: fieldCount.scripted
-    }];
+    return [
+      {
+        title: 'fields',
+        index: 'indexedFields',
+        count: fieldCount.indexed
+      },
+      {
+        title: 'scripted fields',
+        index: 'scriptedFields',
+        count: fieldCount.scripted
+      },
+      {
+        title: 'Retrieved Fields',
+        index: 'sourceFiltering'
+      }
+    ];
   };
 };

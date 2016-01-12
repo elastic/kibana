@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import _ from 'lodash';
 import errors from 'ui/errors';
 import angular from 'angular';
@@ -35,6 +36,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     timeFieldName: 'string',
     notExpandable: 'boolean',
     intervalName: 'string',
+    sourceFiltering: 'json',
     fields: 'json',
     fieldFormatMap: {
       type: 'string',
@@ -117,6 +119,17 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
         // return our obj as the result of init()
         return self;
       });
+    };
+
+    // Set the source filtering configuration for that index
+    self.setSourceFiltering = function (config) {
+      self.sourceFiltering = config;
+      self.save();
+    };
+
+    // Get the source filtering configuration for that index
+    self.getSourceFiltering = function () {
+      return self.sourceFiltering;
     };
 
     function initFields(fields) {
@@ -328,7 +341,8 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     edit: '/settings/indices/{{id}}',
     addField: '/settings/indices/{{id}}/create-field',
     indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+    scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFiltering: '/settings/indices/{{id}}?_a=(tab:sourceFiltering)'
   };
 
   return IndexPattern;

@@ -80,6 +80,10 @@ uiModules.get('kibana')
 
         $scope.searchSource.size(config.get('discover:sampleSize'));
         $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
+        const sourceFiltering = $scope.indexPattern.getSourceFiltering();
+        if (sourceFiltering) {
+          $scope.searchSource.source(sourceFiltering);
+        }
 
         // Set the watcher after initialization
         $scope.$watchCollection('sorting', function (newSort, oldSort) {
