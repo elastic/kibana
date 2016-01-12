@@ -6,11 +6,11 @@
   <label>Processor Pipeline:</label>
   <ul
     class="pipeline-container"
-    ng-show="manager.processors.length > 0">
+    ng-show="pipeline.processors.length > 0">
   </ul>
   <div
     class="empty-pipeline"
-    ng-hide="manager.processors.length > 0">
+    ng-hide="pipeline.processors.length > 0">
     <p>Your pipeline is currently empty. Add a processor to get started!</p>
   </div>
 </div>
@@ -23,4 +23,4 @@
     ng-model="processorType">
   </select>
 </div>
-<button ng-click="manager.add(processorType)">Add Processor</button>
+<button ng-click="pipeline.add(processorType)">Add Processor</button>

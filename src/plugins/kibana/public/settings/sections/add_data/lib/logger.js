@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-export default function ProcessorManager(processor, area, enabled) {
+export default function Logger(processor, area, enabled) {
   const self = this;
 
   self.enabled = !!enabled;
@@ -8,7 +8,7 @@ export default function ProcessorManager(processor, area, enabled) {
   self.processor = processor;
 };
 
-ProcessorManager.prototype.log = function(message, extra) {
+Logger.prototype.log = function(message, extra) {
   const self = this;
 
   if (!self.enabled) return;

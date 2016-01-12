@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const Processor = require('./processor');
 
-export default function ProcessorManager() {
+export default function Pipeline() {
   const self = this;
 
   self.processors = [];
@@ -9,7 +9,7 @@ export default function ProcessorManager() {
   self.rootObject = {};
 };
 
-ProcessorManager.prototype.remove = function(processor) {
+Pipeline.prototype.remove = function(processor) {
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
@@ -17,7 +17,7 @@ ProcessorManager.prototype.remove = function(processor) {
   processors.splice(index, 1);
 }
 
-ProcessorManager.prototype.moveUp = function(processor) {
+Pipeline.prototype.moveUp = function(processor) {
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
@@ -29,7 +29,7 @@ ProcessorManager.prototype.moveUp = function(processor) {
   processors[index] = temp;
 }
 
-ProcessorManager.prototype.moveDown = function(processor) {
+Pipeline.prototype.moveDown = function(processor) {
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
@@ -41,7 +41,7 @@ ProcessorManager.prototype.moveDown = function(processor) {
   processors[index] = temp;
 }
 
-ProcessorManager.prototype.add = function(processorType) {
+Pipeline.prototype.add = function(processorType) {
   const self = this;
   const processors = self.processors;
   self.counter += 1;
@@ -51,7 +51,7 @@ ProcessorManager.prototype.add = function(processorType) {
   processors.push(newProcessor);
 }
 
-ProcessorManager.prototype.updateParents = function() {
+Pipeline.prototype.updateParents = function() {
   const self = this;
   const processors = self.processors;
 

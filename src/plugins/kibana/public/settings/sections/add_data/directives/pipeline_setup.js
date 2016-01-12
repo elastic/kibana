@@ -1,7 +1,7 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
-const ProcessorManager = require('../lib/processor_manager');
+const Pipeline = require('../lib/pipeline');
 
 require('./processors');
 require('./list_of_values');
@@ -17,7 +17,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       function addProcessor(processor) {
         const scope = $scope.$new();
         scope.processor = processor;
-        scope.manager = $scope.manager;
+        scope.pipeline = $scope.pipeline;
 
         const template = `<li><process-container></process-container></li>`;
         const $newEl = $compile(template)(scope);
@@ -33,7 +33,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       }
 
       function updateProcessorChain() {
-        const { topProcessorChanged, lastProcessor } = $scope.manager.updateParents();
+        const { topProcessorChanged, lastProcessor } = $scope.pipeline.updateParents();
         if (topProcessorChanged) {
           $rootScope.$broadcast('processor_force_update', { processor: topProcessorChanged });
         }
@@ -41,7 +41,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       }
 
       function reorderDom() {
-        const processors = $scope.manager.processors;
+        const processors = $scope.pipeline.processors;
         const $parent = $scope.$el;
 
         processors.forEach((processor, index) => {
@@ -63,7 +63,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
         });
       }
 
-      $scope.$watchCollection('manager.processors', function (newVal, oldVal) {
+      $scope.$watchCollection('pipeline.processors', function (newVal, oldVal) {
         var removed = _.difference(oldVal, newVal);
         var added = _.difference(newVal, oldVal);
 
@@ -75,7 +75,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
       });
 
       $scope.$watch('sampleData', function(newVal) {
-        $scope.manager.rootObject = $scope.sampleData;
+        $scope.pipeline.rootObject = $scope.sampleData;
         updateProcessorChain();
       });
     },
@@ -85,7 +85,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope) {
 
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
-      $scope.manager = new ProcessorManager();
+      $scope.pipeline = new Pipeline();
       $scope.$elements = {}; //keeps track of the dom elements associated with processors as jquery objects
       $scope.sampleData = {};
 

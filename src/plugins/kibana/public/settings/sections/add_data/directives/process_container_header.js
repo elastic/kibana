@@ -10,7 +10,7 @@ app.directive('processContainerHeader', function () {
       field: '=',
       collapsed: '=',
       description: '=',
-      manager: '='
+      pipeline: '='
     },
     template: require('../views/process_container_header.html'),
     controller: function ($scope) {}
