@@ -25,10 +25,14 @@ modules.get('apps/settings')
       },
       controller: function ($scope, Private) {
         $scope.sampleDocs = testData;
-        $scope.indexPattern = {id: 'filebeat-*', title: 'filebeat-*'};
-        $scope.indexPattern.fields = _.map($scope.sampleDocs, (value, key) => {
-          return {name: key, type: typeof value};
-        });
+        if (_.isEmpty($scope.indexPattern)) {
+          $scope.indexPattern = {id: 'filebeat-*', title: 'filebeat-*'};
+        }
+        if (_.isEmpty($scope.indexPattern.fields)) {
+          $scope.indexPattern.fields = _.map($scope.sampleDocs, (value, key) => {
+            return {name: key, type: typeof value};
+          });
+        }
 
         $scope.$watch('indexPattern.id', function (value) {
           $scope.indexPattern.title = value;
