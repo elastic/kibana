@@ -14,3 +14,11 @@ Processor.prototype.setParent = function(newParent) {
 
   return (oldParent !== self.parent);
 }
+
+Processor.prototype.setError = function(error) {
+  const self = this;
+
+  const root_cause = _.get(error, 'root_cause[0]');
+
+  self.errorMessage = _.get(root_cause, 'reason') || _.get(root_cause, 'type');
+}

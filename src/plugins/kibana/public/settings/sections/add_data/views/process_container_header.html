@@ -11,8 +11,16 @@
 
   <div class="process-container-header-title">
     <span class="processor-title">
-      {{processor.title}} -
-      <span class="processor-description">{{ description }}</span>
+      {{processor.title}}
+    </span>
+
+    <span ng-if="!processor.errorMessage" class="processor-description">
+      - {{ description }}
+    </span>
+
+    <!-- error -->
+    <span ng-if="processor.errorMessage" class="processor-description danger">
+      - Error
     </span>
   </div>
 

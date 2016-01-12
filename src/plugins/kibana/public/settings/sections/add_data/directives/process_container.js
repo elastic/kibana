@@ -50,7 +50,8 @@ app.directive('processContainer', function ($compile) {
           } else {
             processor.outputObject = processorResult.output;
           }
-          processor.error = processorResult.error;
+
+          processor.setError(processorResult.error);
 
           logger.log('I am DONE processing!');
           $scope.processorDescription = processor.getDescription();

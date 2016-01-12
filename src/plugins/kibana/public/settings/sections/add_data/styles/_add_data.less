@@ -145,9 +145,17 @@ kbn-settings-add-data {
           .ellipsis();
           font-weight: bold;
 
+          .processor-title {
+            width: 100%;
+          }
+
           .processor-description {
             font-weight: normal;
-            font-style: italic;
+          }
+
+          .processor-description.danger {
+            font-weight: bold;
+            color: @brand-danger;
           }
         }
 

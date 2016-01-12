@@ -10,6 +10,11 @@
   <div
     class="process-container-content"
     ng-hide="contentCollapsed">
+    <div
+      ng-show="processor.errorMessage"
+      class="alert alert-danger">
+      {{processor.errorMessage}}
+    </div>
     <div class="process-worker-container"></div>
     <div class="form-group">
       <output-preview new-object="processor.outputObject"></output-preview>
