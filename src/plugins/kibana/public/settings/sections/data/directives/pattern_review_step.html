@@ -1,15 +1,14 @@
 <h2>Pattern review step</h2>
 
 <div>
+  <input ng-model="indexPattern.id" />
+</div>
+
+<div>
   <paginated-table
     columns="columns"
     rows="rows">
   </paginated-table>
 </div>
 
-<div>
-  Docs: {{docs}}
-</div>
-
-
-<button ng-click="save({results: fields})">Create an index pattern</button>
+<button ng-click="save({results: indexPattern})">Create an index pattern</button>

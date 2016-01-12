@@ -24,8 +24,13 @@ modules.get('apps/settings')
       },
       controller: function ($scope, Private) {
         $scope.docs = testData;
-        $scope.fields = _.map($scope.docs, (value, key) => {
+        $scope.indexPattern = {id: 'filebeat-*', title: 'filebeat-*'};
+        $scope.indexPattern.fields = _.map($scope.docs, (value, key) => {
           return {name: key, type: typeof value};
+        });
+
+        $scope.$watch('indexPattern.id', function (value) {
+          $scope.indexPattern.title = value;
         });
 
         $scope.columns = [
@@ -34,7 +39,7 @@ modules.get('apps/settings')
           {title: 'Example', sortable: false}
         ];
 
-        $scope.rows = _.map($scope.fields, (field) => {
+        $scope.rows = _.map($scope.indexPattern.fields, (field) => {
           return [
             field.name,
             {
