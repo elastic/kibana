@@ -1,15 +1,15 @@
-var _ = require('lodash');
-let Boom = require('boom');
+const _ = require('lodash');
+const Boom = require('boom');
 
 module.exports = function (kibana) {
-  var healthCheck = require('./lib/health_check');
-  var exposeClient = require('./lib/expose_client');
-  var createProxy = require('./lib/create_proxy');
+  const healthCheck = require('./lib/health_check');
+  const exposeClient = require('./lib/expose_client');
+  const createProxy = require('./lib/create_proxy');
 
   return new kibana.Plugin({
     require: ['kibana'],
 
-    config: function (Joi) {
+    config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
@@ -31,8 +31,8 @@ module.exports = function (kibana) {
       }).default();
     },
 
-    init: function (server, options) {
-      var config = server.config();
+    init(server, options) {
+      const config = server.config();
 
       // Expose the client to the server
       exposeClient(server);
@@ -78,7 +78,7 @@ module.exports = function (kibana) {
       );
 
       // Set up the health check service and start it.
-      var hc = healthCheck(this, server);
+      const hc = healthCheck(this, server);
       server.expose('waitUntilReady', hc.waitUntilReady);
       hc.start();
     }
