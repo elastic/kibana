@@ -1,42 +1,57 @@
 <kbn-settings-app section="data">
   <div ng-controller="kbnSettingsDataFilebeat" class="container">
-    <div class="btn-group">
-      <button ng-class="{active: currentStep === 0}"
-              ng-click="setCurrentStep(0)">
-        Paste
-      </button>
-      <button ng-class="{active: currentStep === 1}"
-              ng-click="setCurrentStep(1)">
-        Parse
-      </button>
-      <button ng-class="{active: currentStep === 2}"
-              ng-click="setCurrentStep(2)">
-        Review
-      </button>
-      <button ng-class="{active: currentStep === 3}"
-              ng-click="setCurrentStep(3)">
-        Install Filebeat
-      </button>
+    <div class="wizard-step-headings">
+      <span ng-class="{active: currentStep === 0}" class="wizard-step-heading">
+        1. Paste
+      </span>
+      <span ng-class="{active: currentStep === 1}" class="wizard-step-heading">
+        2. Parse
+      </span>
+      <span ng-class="{active: currentStep === 2}" class="wizard-step-heading">
+        3. Review
+      </span>
+      <span ng-class="{active: currentStep === 3}" class="wizard-step-heading">
+        4. Install Filebeat
+      </span>
     </div>
 
     <div ng-switch="currentStep">
-      <paste-samples-step samples="stepResults.samples" ng-switch-when="0"></paste-samples-step>
-      <pipeline-step
-        samples="stepResults.samples"
-        pipeline="stepResults.pipeline"
-        sample-docs="stepResults.sampleDocs"
-        ng-switch-when="1">
-      </pipeline-step>
-      <pattern-review-step
-        index-pattern="stepResults.indexPattern"
-        sample-docs="stepResults.sampleDocs"
-        pipeline="stepResults.pipeline"
-        ng-switch-when="2">
-      </pattern-review-step>
-      <install-filebeat-step results="stepResults" ng-switch-when="3"></install-filebeat-step>
-    </div>
+      <div ng-switch-when="0">
+        <paste-samples-step samples="stepResults.samples"></paste-samples-step>
+        <div class="nav-buttons">
+          <button ng-disabled="!stepResults.samples" ng-click="nextStep()">Next</button>
+        </div>
+      </div>
 
-    <button ng-click="prevStep()">Prev</button>
-    <button ng-click="nextStep()">Next</button>
+      <div ng-switch-when="1">
+        <pipeline-step
+          samples="stepResults.samples"
+          pipeline="stepResults.pipeline"
+          sample-docs="stepResults.sampleDocs">
+        </pipeline-step>
+
+        <div class="nav-buttons">
+          <button ng-click="prevStep()">Prev</button>
+          <button ng-disabled="!stepResults.pipeline || !stepResults.sampleDocs" ng-click="nextStep()">Next</button>
+        </div>
+      </div>
+
+      <div ng-switch-when="2">
+        <pattern-review-step
+          index-pattern="stepResults.indexPattern"
+          sample-docs="stepResults.sampleDocs"
+          pipeline="stepResults.pipeline">
+        </pattern-review-step>
+
+        <div class="nav-buttons">
+          <button ng-click="prevStep()">Prev</button>
+          <button ng-disabled="!stepResults.indexPattern" ng-click="nextStep()">Save</button>
+        </div>
+      </div>
+
+      <div ng-switch-when="3">
+        <install-filebeat-step results="stepResults"></install-filebeat-step>
+      </div>
+    </div>
   </div>
 </kbn-settings-app>
