@@ -58,7 +58,12 @@ define((require) => (Private, config, $rootScope) => {
       // Generate a color palette big enough that all new keys can have unique color values
       const allColors = _(this.mapping).values().union(configColors).union(oldColors).value();
       const colorPalette = createColorPalette(allColors.length + keysToMap.length);
-      const newColors = _.difference(colorPalette, allColors);
+      let newColors = _.difference(colorPalette, allColors);
+
+      while (keysToMap.length > newColors.length) {
+        newColors = newColors.concat(_.sample(allColors, keysToMap.length - newColors.length));
+      }
+
       _.merge(this.mapping, _.zipObject(keysToMap, newColors));
     }
   }

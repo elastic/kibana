@@ -59,7 +59,9 @@ module.exports = function (kibana) {
       );
 
       // Set up the health check service and start it.
-      healthCheck(this, server).start();
+      var hc = healthCheck(this, server);
+      server.expose('waitUntilReady', hc.waitUntilReady);
+      hc.start();
     }
   });
 

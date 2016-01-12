@@ -56,9 +56,25 @@ block content
         var file = files.shift();
         if (!file) return;
 
+        var failure = function () {
+          // make subsequent calls to failure() noop
+          failure = function () {};
+
+          var err = document.createElement('h1');
+          err.style['color'] = 'white';
+          err.style['font-family'] = 'monospace';
+          err.style['text-align'] = 'center';
+          err.style['background'] = '#F44336';
+          err.style['padding'] = '25px';
+          err.innerText = 'Kibana did not load properly. Check the server output for more information.';
+
+          document.body.innerHTML = err.outerHTML;
+        }
+
         var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
         var dom = document.createElement(type);
         dom.setAttribute('async', '');
+        dom.addEventListener('error', failure);
 
         if (type === 'script') {
           dom.setAttribute('src', file);

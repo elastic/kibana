@@ -9,6 +9,12 @@ var NoConnections = elasticsearch.errors.NoConnections;
 var util = require('util');
 var format = util.format;
 
+var NO_INDEX = 'no_index';
+var INITIALIZING = 'initializing';
+var READY = 'ready';
+
+var REQUEST_DELAY = 2500;
+
 module.exports = function (plugin, server) {
   var config = server.config();
   var client = server.plugins.elasticsearch.client;
@@ -21,11 +27,12 @@ module.exports = function (plugin, server) {
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
 
-      return Promise.delay(2500).then(waitForPong);
+      return Promise.delay(REQUEST_DELAY).then(waitForPong);
     });
   }
 
-  function waitForShards() {
+  // just figure out the current "health" of the es setup
+  function getHealth() {
     return client.cluster.health({
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
@@ -35,15 +42,39 @@ module.exports = function (plugin, server) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
       if (!resp || resp.timed_out) {
-        plugin.status.yellow('No existing Kibana index found');
-        return createKibanaIndex(server);
+        return NO_INDEX;
       }
 
       // If status === "red" that means that index(es) were found
       // but the shards are not ready for queries
       if (resp.status === 'red') {
+        return INITIALIZING;
+      }
+
+      return READY;
+    });
+  }
+
+  function waitUntilReady() {
+    return getHealth()
+    .then(function (health) {
+      if (health !== READY) {
+        return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
+      }
+    });
+  }
+
+  function waitForShards() {
+    return getHealth()
+    .then(function (health) {
+      if (health === NO_INDEX) {
+        plugin.status.yellow('No existing Kibana index found');
+        return createKibanaIndex(server);
+      }
+
+      if (health === INITIALIZING) {
         plugin.status.red('Elasticsearch is still initializing the kibana index.');
-        return Promise.delay(2500).then(waitForShards);
+        return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
 
       // otherwise we are g2g
@@ -74,7 +105,7 @@ module.exports = function (plugin, server) {
   }
 
   function startorRestartChecking() {
-    scheduleCheck(stopChecking() ? 2500 : 1);
+    scheduleCheck(stopChecking() ? REQUEST_DELAY : 1);
   }
 
   function stopChecking() {
@@ -85,6 +116,7 @@ module.exports = function (plugin, server) {
   }
 
   return {
+    waitUntilReady: waitUntilReady,
     run: check,
     start: startorRestartChecking,
     stop: stopChecking,

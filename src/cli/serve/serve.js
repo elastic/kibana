@@ -8,7 +8,7 @@ let fromRoot = src('utils/fromRoot');
 
 let canCluster;
 try {
-  require.resolve('../cluster/ClusterManager');
+  require.resolve('../cluster/cluster_manager');
   canCluster = true;
 } catch (e) {
   canCluster = false;
@@ -71,7 +71,7 @@ module.exports = function (program) {
   .action(async function (opts) {
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
-      let ClusterManager = require('../cluster/ClusterManager');
+      let ClusterManager = require('../cluster/cluster_manager');
       new ClusterManager(opts);
       return;
     }
