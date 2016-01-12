@@ -1,38 +1,38 @@
-const _ = require('lodash');
-const Boom = require('boom');
+import { trim, trimRight } from 'lodash';
+import { methodNotAllowed } from 'boom';
 
-module.exports = function (kibana) {
-  const healthCheck = require('./lib/health_check');
-  const exposeClient = require('./lib/expose_client');
-  const createProxy = require('./lib/create_proxy');
+import healthCheck from './lib/health_check';
+import exposeClient from './lib/expose_client';
+import createProxy, { createPath } from './lib/create_proxy';
 
-  return new kibana.Plugin({
+module.exports = function ({ Plugin }) {
+  return new Plugin({
     require: ['kibana'],
 
-    config(Joi) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
-        preserveHost: Joi.boolean().default(true),
-        username: Joi.string(),
-        password: Joi.string(),
-        shardTimeout: Joi.number().default(0),
-        requestTimeout: Joi.number().default(30000),
-        pingTimeout: Joi.number().default(30000),
-        startupTimeout: Joi.number().default(5000),
-        ssl: Joi.object({
-          verify: Joi.boolean().default(true),
-          ca: Joi.array().single().items(Joi.string()),
-          cert: Joi.string(),
-          key: Joi.string()
+    config({ array, boolean, number, object, string }) {
+      return object({
+        enabled: boolean().default(true),
+        url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        preserveHost: boolean().default(true),
+        username: string(),
+        password: string(),
+        shardTimeout: number().default(0),
+        requestTimeout: number().default(30000),
+        pingTimeout: number().default(30000),
+        startupTimeout: number().default(5000),
+        ssl: object({
+          verify: boolean().default(true),
+          ca: array().single().items(string()),
+          cert: string(),
+          key: string()
         }).default(),
-        apiVersion: Joi.string().default('2.0'),
-        engineVersion: Joi.string().valid('^2.1.0').default('^2.1.0')
+        apiVersion: string().default('2.0'),
+        engineVersion: string().valid('^2.1.0').default('^2.1.0')
       }).default();
     },
 
     init(server, options) {
-      const config = server.config();
+      const kibanaIndex = server.config().get('kibana.index');
 
       // Expose the client to the server
       exposeClient(server);
@@ -43,8 +43,8 @@ module.exports = function (kibana) {
       createProxy(server, 'POST', '/_msearch');
       createProxy(server, 'POST', '/_search/scroll');
 
-      function noBulkCheck(request, reply) {
-        if (/\/_bulk/.test(request.path)) {
+      function noBulkCheck({ path }, reply) {
+        if (/\/_bulk/.test(path)) {
           return reply({
             error: 'You can not send _bulk requests to this interface.'
           }).code(400).takeover();
@@ -52,12 +52,12 @@ module.exports = function (kibana) {
         return reply.continue();
       }
 
-      function noCreateIndex(request, reply) {
-        const requestPath = _.trimRight(_.trim(request.path), '/');
-        const matchPath = createProxy.createPath(config.get('kibana.index'));
+      function noCreateIndex({ path }, reply) {
+        const requestPath = trimRight(trim(path), '/');
+        const matchPath = createPath(kibanaIndex);
 
         if (requestPath === matchPath) {
-          return reply(Boom.methodNotAllowed('You cannot modify the primary kibana index through this interface.'));
+          return reply(methodNotAllowed('You cannot modify the primary kibana index through this interface.'));
         }
 
         reply.continue();
@@ -71,16 +71,16 @@ module.exports = function (kibana) {
       createProxy(
         server,
         ['PUT', 'POST', 'DELETE'],
-        '/' + config.get('kibana.index') + '/{paths*}',
+        `/${kibanaIndex}/{paths*}`,
         {
           pre: [ noCreateIndex, noBulkCheck ]
         }
       );
 
       // Set up the health check service and start it.
-      const hc = healthCheck(this, server);
-      server.expose('waitUntilReady', hc.waitUntilReady);
-      hc.start();
+      const { start, waitUntilReady } = healthCheck(this, server);
+      server.expose('waitUntilReady', waitUntilReady);
+      start();
     }
   });
 
