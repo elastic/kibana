@@ -2,33 +2,41 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
+require('../services/ingest');
 
 require('../lib/processor_registry').register({
-  typeid: 'remove',
-  title: 'Remove',
-  template: '<processor-remove></processor-remove>',
+  typeid: 'grok',
+  title: 'Grok',
+  template: '<processor-ui-grok></processor-ui-grok>',
   getDefinition: function() {
     const self = this;
     return {
-      'remove' : {
+      'grok' : {
         'processor_id': self.processorId,
-        'field' : self.sourceField
+        'field' : self.sourceField,
+        'pattern': self.pattern
       }
     };
   },
   getDescription: function() {
     const self = this;
 
+    let inputKeys = keysDeep(self.inputObject);
+    let outputKeys = keysDeep(self.outputObject);
+    let added = _.difference(outputKeys, inputKeys);
+
+    let addedDescription = added.sort().map(field => `[${field}]`).join(', ');
+
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `[${source}]`;
+    return `[${source}] -> ${addedDescription}`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorRemove', function () {
+app.directive('processorUiGrok', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_remove.html'),
+    template: require('../views/processor_ui_grok.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -60,12 +68,14 @@ app.directive('processorRemove', function () {
         inputObjectChangingListener();
       });
 
-      processor.targetField = '';
+      processor.pattern = '';
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
+
+      $scope.$watch('processor.pattern', applyProcessor);
     }
   }
 });

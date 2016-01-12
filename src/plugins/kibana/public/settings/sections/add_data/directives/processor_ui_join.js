@@ -4,15 +4,16 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_registry').register({
-  typeid: 'uppercase',
-  title: 'Uppercase',
-  template: '<processor-uppercase></processor-uppercase>',
+  typeid: 'join',
+  title: 'Join',
+  template: '<processor-ui-join></processor-ui-join>',
   getDefinition: function() {
     const self = this;
     return {
-      'uppercase' : {
+      'join' : {
         'processor_id': self.processorId,
-        'field' : self.sourceField
+        'field' : self.sourceField,
+        'separator' : self.separator
       }
     };
   },
@@ -20,15 +21,16 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `[${source}]`;
+    const separator = (self.separator) ? self.separator : '?';
+    return `[${source}] on '${separator}'`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorUppercase', function () {
+app.directive('processorUiJoin', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_uppercase.html'),
+    template: require('../views/processor_ui_join.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -39,7 +41,14 @@ app.directive('processorUppercase', function () {
 
         logger.log('consuming new inputObject', processor.inputObject);
 
-        $scope.fields = keysDeep(processor.inputObject);
+        const allKeys = keysDeep(processor.inputObject);
+        const keys = [];
+        allKeys.forEach((key) => {
+          if (_.isArray(_.get(processor.inputObject, key))) {
+            keys.push(key);
+          }
+        })
+        $scope.fields = keys;
         refreshFieldData();
 
         $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
@@ -60,10 +69,14 @@ app.directive('processorUppercase', function () {
         inputObjectChangingListener();
       });
 
+      processor.separator = '';
+
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
+
+      $scope.$watch('processor.separator', applyProcessor);
     }
   }
 });

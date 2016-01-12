@@ -2,19 +2,17 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
-require('../services/ingest');
 
 require('../lib/processor_registry').register({
-  typeid: 'geoip',
-  title: 'Geo IP',
-  template: '<processor-geoip></processor-geoip>',
+  typeid: 'remove',
+  title: 'Remove',
+  template: '<processor-ui-remove></processor-ui-remove>',
   getDefinition: function() {
     const self = this;
     return {
-      'geoip' : {
+      'remove' : {
         'processor_id': self.processorId,
-        'source_field' : self.sourceField,
-        'target_field': self.targetField
+        'field' : self.sourceField
       }
     };
   },
@@ -22,16 +20,15 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    const target = (self.targetField) ? self.targetField : '?';
-    return `[${source}] -> [${target}]`;
+    return `[${source}]`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorGeoip', function () {
+app.directive('processorUiRemove', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_geoip.html'),
+    template: require('../views/processor_ui_remove.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -63,14 +60,12 @@ app.directive('processorGeoip', function () {
         inputObjectChangingListener();
       });
 
-      processor.targetField = 'geoip';
+      processor.targetField = '';
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
-
-      $scope.$watch('processor.targetField', applyProcessor);
     }
   }
 });

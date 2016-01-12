@@ -4,16 +4,16 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_registry').register({
-  typeid: 'join',
-  title: 'Join',
-  template: '<processor-join></processor-join>',
+  typeid: 'convert',
+  title: 'Convert',
+  template: '<processor-ui-convert></processor-ui-convert>',
   getDefinition: function() {
     const self = this;
     return {
-      'join' : {
+      'convert' : {
         'processor_id': self.processorId,
         'field' : self.sourceField,
-        'separator' : self.separator
+        'type' : self.type
       }
     };
   },
@@ -21,16 +21,16 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    const separator = (self.separator) ? self.separator : '?';
-    return `[${source}] on '${separator}'`;
+    const type = (self.type) ? self.type : '?';
+    return `[${source}] to ${type}`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorJoin', function () {
+app.directive('processorUiConvert', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_join.html'),
+    template: require('../views/processor_ui_convert.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -41,14 +41,7 @@ app.directive('processorJoin', function () {
 
         logger.log('consuming new inputObject', processor.inputObject);
 
-        const allKeys = keysDeep(processor.inputObject);
-        const keys = [];
-        allKeys.forEach((key) => {
-          if (_.isArray(_.get(processor.inputObject, key))) {
-            keys.push(key);
-          }
-        })
-        $scope.fields = keys;
+        $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
 
         $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
@@ -69,14 +62,14 @@ app.directive('processorJoin', function () {
         inputObjectChangingListener();
       });
 
-      processor.separator = '';
+      $scope.types = ['integer', 'float', 'string', 'boolean'];
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
 
-      $scope.$watch('processor.separator', applyProcessor);
+      $scope.$watch('processor.type', applyProcessor);
     }
   }
 });

@@ -4,16 +4,16 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_registry').register({
-  typeid: 'convert',
-  title: 'Convert',
-  template: '<processor-convert></processor-convert>',
+  typeid: 'split',
+  title: 'Split',
+  template: '<processor-ui-split></processor-ui-split>',
   getDefinition: function() {
     const self = this;
     return {
-      'convert' : {
+      'split' : {
         'processor_id': self.processorId,
         'field' : self.sourceField,
-        'type' : self.type
+        'separator' : self.separator
       }
     };
   },
@@ -21,16 +21,16 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    const type = (self.type) ? self.type : '?';
-    return `[${source}] to ${type}`;
+    const separator = (self.separator) ? self.separator : '?';
+    return `[${source}] on '${separator}'`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorConvert', function () {
+app.directive('processorUiSplit', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_convert.html'),
+    template: require('../views/processor_ui_split.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -62,14 +62,14 @@ app.directive('processorConvert', function () {
         inputObjectChangingListener();
       });
 
-      $scope.types = ['integer', 'float', 'string', 'boolean'];
+      processor.separator = '';
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
 
-      $scope.$watch('processor.type', applyProcessor);
+      $scope.$watch('processor.separator', applyProcessor);
     }
   }
 });

@@ -4,16 +4,15 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_registry').register({
-  typeid: 'split',
-  title: 'Split',
-  template: '<processor-split></processor-split>',
+  typeid: 'uppercase',
+  title: 'Uppercase',
+  template: '<processor-ui-uppercase></processor-ui-uppercase>',
   getDefinition: function() {
     const self = this;
     return {
-      'split' : {
+      'uppercase' : {
         'processor_id': self.processorId,
-        'field' : self.sourceField,
-        'separator' : self.separator
+        'field' : self.sourceField
       }
     };
   },
@@ -21,16 +20,15 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    const separator = (self.separator) ? self.separator : '?';
-    return `[${source}] on '${separator}'`;
+    return `[${source}]`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorSplit', function () {
+app.directive('processorUiUppercase', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_split.html'),
+    template: require('../views/processor_ui_uppercase.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -62,14 +60,10 @@ app.directive('processorSplit', function () {
         inputObjectChangingListener();
       });
 
-      processor.separator = '';
-
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
-
-      $scope.$watch('processor.separator', applyProcessor);
     }
   }
 });

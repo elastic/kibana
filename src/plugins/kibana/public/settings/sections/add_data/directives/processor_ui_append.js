@@ -4,16 +4,16 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_registry').register({
-  typeid: 'set',
-  title: 'Set',
-  template: '<processor-set></processor-set>',
+  typeid: 'append',
+  title: 'Append',
+  template: '<processor-ui-append></processor-ui-append>',
   getDefinition: function() {
     const self = this;
     return {
       'set' : {
         'processor_id': self.processorId,
         'field' : self.targetField,
-        'value': self.value
+        'value': self.values
       }
     };
   },
@@ -26,10 +26,10 @@ require('../lib/processor_registry').register({
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorSet', function () {
+app.directive('processorUiAppend', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_set.html'),
+    template: require('../views/processor_ui_append.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -55,10 +55,11 @@ app.directive('processorSet', function () {
       });
 
       processor.targetField = '';
-      processor.value = '';
+      processor.values = [];
 
       $scope.$watch('processor.targetField', applyProcessor);
-      $scope.$watch('processor.value', applyProcessor);
+      $scope.$watchCollection('processor.values', applyProcessor);
     }
   }
 });
+

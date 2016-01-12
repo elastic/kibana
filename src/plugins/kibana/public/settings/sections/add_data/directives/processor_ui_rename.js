@@ -6,7 +6,7 @@ const keysDeep = require('../lib/keys_deep');
 require('../lib/processor_registry').register({
   typeid: 'rename',
   title: 'Rename',
-  template: '<processor-rename></processor-rename>',
+  template: '<processor-ui-rename></processor-ui-rename>',
   getDefinition: function() {
     const self = this;
     return {
@@ -27,10 +27,10 @@ require('../lib/processor_registry').register({
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorRename', function () {
+app.directive('processorUiRename', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_rename.html'),
+    template: require('../views/processor_ui_rename.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');

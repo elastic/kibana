@@ -4,15 +4,17 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_registry').register({
-  typeid: 'trim',
-  title: 'Trim',
-  template: '<processor-trim></processor-trim>',
+  typeid: 'gsub',
+  title: 'Gsub',
+  template: '<processor-ui-gsub></processor-ui-gsub>',
   getDefinition: function() {
     const self = this;
     return {
-      'trim' : {
+      'gsub' : {
         'processor_id': self.processorId,
-        'field' : self.sourceField
+        'field' : self.sourceField,
+        'pattern' : self.pattern,
+        'replacement' : self.replacement
       }
     };
   },
@@ -20,15 +22,15 @@ require('../lib/processor_registry').register({
     const self = this;
 
     const source = (self.sourceField) ? self.sourceField : '?';
-    return `[${source}]`;
+    return `[${source}] - '${self.pattern}' -> '${self.replacement}'`;
   }
 });
 
 //scope.processor is attached by the process_container.
-app.directive('processorTrim', function () {
+app.directive('processorUiGsub', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_trim.html'),
+    template: require('../views/processor_ui_gsub.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
@@ -60,10 +62,16 @@ app.directive('processorTrim', function () {
         inputObjectChangingListener();
       });
 
+      processor.pattern = '';
+      processor.replacement = '';
+
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
         applyProcessor();
       });
+
+      $scope.$watch('processor.pattern', applyProcessor);
+      $scope.$watch('processor.replacement', applyProcessor);
     }
   }
 });
