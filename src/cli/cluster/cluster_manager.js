@@ -6,7 +6,7 @@ let Log = require('../Log');
 let Worker = require('./worker');
 
 module.exports = class ClusterManager {
-  constructor(opts) {
+  constructor(opts = {}) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
