@@ -48,8 +48,6 @@ module.exports = class Worker extends EventEmitter {
     _.bindAll(this, ['onExit', 'onMessage', 'onOnline', 'onDisconnect', 'shutdown', 'start']);
 
     this.start = _.debounce(this.start, 25);
-    cluster.on('exit', this.onExit);
-    process.on('exit', this.shutdown);
   }
 
   onExit(fork, code) {
@@ -59,6 +57,7 @@ module.exports = class Worker extends EventEmitter {
     this.fork = null;
     this.online = false;
     this.listening = false;
+    cluster.removeListener('exit', this.onExit);
 
     if (code) {
       this.log.bad(`${this.title} crashed`, 'with status code', code);
@@ -81,6 +80,7 @@ module.exports = class Worker extends EventEmitter {
       this.fork.removeListener('message', this.parseIncomingMessage);
       this.fork.removeListener('online', this.onOnline);
       this.fork.removeListener('disconnect', this.onDisconnect);
+      process.removeListener('exit', this.shutdown);
     }
   }
 
@@ -133,5 +133,8 @@ module.exports = class Worker extends EventEmitter {
     this.fork.on('message', this.parseIncomingMessage);
     this.fork.on('online', this.onOnline);
     this.fork.on('disconnect', this.onDisconnect);
+
+    process.on('exit', this.shutdown);
+    cluster.on('exit', this.onExit);
   }
 };
