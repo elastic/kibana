@@ -8,7 +8,11 @@
   </label>
   <label ng-if="isTimeBased">
     Time Field
-    <input ng-model="indexPattern.timeFieldName"/>
+    <select ng-model="indexPattern.timeFieldName" name="time_field_name">
+      <option ng-repeat="field in dateFields" value="{{field}}">
+        {{field}}
+      </option>
+    </select>
   </label>
 </div>
 

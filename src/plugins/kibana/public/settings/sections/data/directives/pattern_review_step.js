@@ -53,6 +53,19 @@ var testPipeline = [
   }
 ];
 
+function pickDefaultTimeFieldName(dateFields) {
+  if (_.isEmpty(dateFields)) {
+    return undefined;
+  }
+
+  let fieldName = dateFields[0];
+  if (_.includes(dateFields, '@timestamp')) {
+    fieldName = '@timestamp';
+  }
+
+  return fieldName;
+}
+
 modules.get('apps/settings')
   .directive('patternReviewStep', function () {
     return {
@@ -71,6 +84,7 @@ modules.get('apps/settings')
         }
 
         const knownFieldTypes = {};
+        $scope.dateFields = [];
         $scope.pipeline.forEach(function (processor) {
           if (processor.geoip) {
             let field = processor.geoip.target_field || 'geoip';
@@ -79,13 +93,14 @@ modules.get('apps/settings')
           if (processor.date) {
             let field = processor.date.target_field || '@timestamp';
             knownFieldTypes[field] = 'date';
+            $scope.dateFields.push(field);
           }
         });
 
         _.defaults($scope.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
-          timeFieldName: '@timestamp',
+          timeFieldName: pickDefaultTimeFieldName($scope.dateFields),
           fields: _.map($scope.sampleDocs, (value, key) => {
             let type = knownFieldTypes[key] || typeof value;
             if (type === 'object' && _.isArray(value) && !_.isEmpty(value)) {
@@ -100,6 +115,17 @@ modules.get('apps/settings')
         $scope.$watch('indexPattern.id', function (value) {
           $scope.indexPattern.title = value;
         });
+        $scope.$watch('isTimeBased', function (value) {
+          if (value) {
+            $scope.indexPattern.timeFieldName = pickDefaultTimeFieldName($scope.dateFields);
+          }
+          else {
+            delete $scope.indexPattern.timeFieldName;
+          }
+        });
+        $scope.$watch('indexPattern.fields', (fields) => {
+          $scope.dateFields = _.map(_.filter(fields, {type: 'date'}), 'name');
+        }, true);
 
         $scope.columns = [
           {title: 'Field'},
