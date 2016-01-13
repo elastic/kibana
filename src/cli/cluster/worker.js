@@ -130,7 +130,7 @@ module.exports = class Worker extends EventEmitter {
     }
 
     this.fork = cluster.fork(this.env);
-    this.fork.on('message', this.onMessage);
+    this.fork.on('message', this.parseIncomingMessage);
     this.fork.on('online', this.onOnline);
     this.fork.on('disconnect', this.onDisconnect);
   }
