@@ -23,20 +23,6 @@ module.exports = function (kibana) {
           'fieldFormats'
         ],
 
-        autoload: kibana.autoload.require.concat(
-          'plugins/kibana/discover',
-          'plugins/kibana/visualize',
-          'plugins/kibana/dashboard',
-          'plugins/kibana/settings',
-          'plugins/kibana/settings/sections',
-          'plugins/kibana/doc',
-          'plugins/kibana/settings/sections',
-          'ui/vislib',
-          'ui/agg_response',
-          'ui/agg_types',
-          'leaflet'
-        ),
-
         injectVars: function (server, options) {
           let config = server.config();
 
