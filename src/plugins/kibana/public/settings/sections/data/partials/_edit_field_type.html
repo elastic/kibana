@@ -1,4 +1,4 @@
-<select name="field_type" ng-model="field.type">
+<select ng-if="field.type !== 'geo_point'" name="field_type" ng-model="field.type">
   <option value="string">string</option>
   <option value="number">number</option>
   <option value="boolean">boolean</option>
@@ -7,3 +7,7 @@
   <option value="geo_shape">geo_shape</option>
   <option value="ip">ip</option>
 </select>
+
+<span ng-if="field.type === 'geo_point'">
+  geo_point
+</span>
