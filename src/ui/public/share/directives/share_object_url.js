@@ -67,7 +67,11 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       $scope.getUrl = function () {
-        return $location.absUrl();
+        let url = $location.absUrl();
+        if ($scope.shareAsEmbed) {
+          url = url.replace('?', '?embed=true&');
+        }
+        return url;
       };
 
       $scope.$watch('getUrl()', updateUrl);
