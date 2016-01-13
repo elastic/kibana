@@ -1,3 +1,11 @@
+var wrap = require('lodash').wrap;
+var Mocha = require('mocha');
+
+Mocha.prototype.run = wrap(Mocha.prototype.run, function (orig) {
+  require('../../test/mocha_setup');
+  orig.call(this);
+});
+
 module.exports = {
   options: {
     timeout: 10000,

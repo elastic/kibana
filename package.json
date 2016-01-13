@@ -55,8 +55,8 @@
     "elasticsearch": "grunt esvm:dev:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
-    "mocha": "mocha --compilers js:babel/register",
-    "mocha:debug": "mocha --debug-brk --compilers js:babel/register"
+    "mocha": "mocha",
+    "mocha:debug": "mocha --debug-brk"
   },
   "repository": {
     "type": "git",
@@ -180,7 +180,8 @@
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
-    "source-map": "0.4.4"
+    "source-map": "0.4.4",
+    "supertest-as-promised": "2.0.2"
   },
   "engines": {
     "node": "4.2.4",
