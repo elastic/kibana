@@ -37,25 +37,30 @@ app.directive('processContainer', function ($compile) {
         if (message.processor !== processor) return;
 
         logger.log('I am processing!');
-        setDirty();
 
         ingest.simulate(processor)
         .then(function (pipelineResult) {
           //In a full pipeline simulation, we would find the pipeline by id instead of
           //just grabbing the first index.
-          const processorResult = pipelineResult[0];
+          let processorResult;
 
-          if (!processorResult.output) {
-            processor.outputObject = _.cloneDeep(processor.inputObject);
+          //START temp checking...
+          if (pipelineResult && pipelineResult.length > 0) {
+            processorResult = pipelineResult[0]
+          }
+          const output = _.get(processorResult, 'output');
+          const error = _.get(processorResult, 'error');
+
+          if (output) {
+            processor.outputObject = output;
           } else {
-            processor.outputObject = processorResult.output;
+            processor.outputObject = _.cloneDeep(processor.inputObject);
           }
 
-          processor.setError(processorResult.error);
+          processor.setError(error);
 
           logger.log('I am DONE processing!');
           $scope.processorDescription = processor.getDescription();
-          $scope.isDirty = false;
 
           $rootScope.$broadcast('processor_update', { processor: processor });
         });
@@ -76,28 +81,13 @@ app.directive('processContainer', function ($compile) {
         updateInputObject();
       }
 
-      function parentDirty(event, message) {
-        if (message.processor !== processor.parent) return;
-
-        setDirty();
-      }
-
-      function setDirty() {
-        $scope.isDirty = true;
-
-        //alert my child if one exists.
-        $rootScope.$broadcast('processor_dirty', { processor: processor });
-      }
-
       const forceUpdateListener = $scope.$on('processor_force_update', forceUpdate);
       const updateListener = $scope.$on('processor_update', parentUpdated);
-      const dirtyListener = $scope.$on('processor_dirty', parentDirty);
       const inputObjectChangedListener = $scope.$on('processor_input_object_changed', applyProcessor);
 
       $scope.$on('$destroy', () => {
         forceUpdateListener();
         updateListener();
-        dirtyListener();
         inputObjectChangedListener();
       });
     }
