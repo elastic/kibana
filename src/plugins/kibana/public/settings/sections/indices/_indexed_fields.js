@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import isRetrieved from 'plugins/kibana/settings/sections/indices/retrieved_field';
 import 'ui/paginated_table';
 import nameHtml from 'plugins/kibana/settings/sections/indices/_field_name.html';
 import typeHtml from 'plugins/kibana/settings/sections/indices/_field_type.html';
@@ -44,7 +43,6 @@ uiModules.get('apps/settings')
           const childScope = _.assign($scope.$new(), { field: field });
           rowScopes.push(childScope);
 
-<<<<<<< HEAD
           return [
             {
               markup: nameHtml,
@@ -66,7 +64,8 @@ uiModules.get('apps/settings')
               value: field.indexed
             },
             {
-              markup: isRetrieved(sourceFiltering, field.displayName) ? yesTemplate : noTemplate
+              markup: field.exclude ? noTemplate : yesTemplate,
+              value: field.exclude
             },
             {
               markup: controlsHtml,

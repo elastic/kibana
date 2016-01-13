@@ -51,6 +51,7 @@ import {
               'format',
               'analyzed',
               'indexed',
+              'retrieved',
               'controls'
             ];
 

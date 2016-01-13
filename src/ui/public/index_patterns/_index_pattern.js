@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import _ from 'lodash';
 import errors from 'ui/errors';
 import angular from 'angular';
@@ -36,7 +35,6 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     timeFieldName: 'string',
     notExpandable: 'boolean',
     intervalName: 'string',
-    sourceFiltering: 'json',
     fields: 'json',
     fieldFormatMap: {
       type: 'string',
@@ -127,9 +125,15 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
       self.save();
     };
 
-    // Get the source filtering configuration for that index
-    self.getSourceFiltering = function () {
-      return self.sourceFiltering;
+    // Get the source filtering configuration for that index.
+    // Fields which name appears in the given columns array will not be excluded.
+    self.getSourceFiltering = function (columns) {
+      return {
+        exclude: _(self.getNonScriptedFields())
+          .filter((field) => field.exclude && !_.contains(columns, field.name))
+          .map((field) => field.name)
+          .value()
+      };
     };
 
     function initFields(fields) {
