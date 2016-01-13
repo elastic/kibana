@@ -88,6 +88,9 @@ modules.get('apps/settings')
           timeFieldName: '@timestamp',
           fields: _.map($scope.sampleDocs, (value, key) => {
             let type = knownFieldTypes[key] || typeof value;
+            if (type === 'object' && _.isArray(value) && !_.isEmpty(value)) {
+              type = typeof value[0];
+            }
             return {name: key, type: type};
           })
         });
