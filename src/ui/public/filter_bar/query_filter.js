@@ -23,11 +23,21 @@ define(function (require) {
     queryFilter.getAppFilters = function () {
       var appState = getAppState();
       if (!appState || !appState.filters) return [];
+
+      // Work around for https://github.com/elastic/kibana/issues/5896
+      appState.filters = _.compact(appState.filters);
+      appState.replace();
+
       return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
 
     queryFilter.getGlobalFilters = function () {
       if (!globalState.filters) return [];
+
+      // Work around for https://github.com/elastic/kibana/issues/5896
+      globalState.filters = _.compact(globalState.filters);
+      globalState.replace();
+
       return _.map(globalState.filters, appendStoreType('globalState'));
     };
 
