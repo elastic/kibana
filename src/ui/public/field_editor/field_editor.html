@@ -83,6 +83,32 @@
     </div>
   </div>
 
+  <div class="form-group">
+    <span class="pull-right text-info hintbox-label" ng-click="editor.showExcludeHelp = !editor.showExcludeHelp">
+      <i class="fa fa-info"></i> Help
+    </span>
+
+    <label><input type="checkbox" ng-model="editor.field.exclude"> Exclude from _source</label>
+
+    <div class="hintbox" ng-if="editor.showExcludeHelp">
+      <h4 class="hintbox-heading">
+        <i class="fa fa-info text-info"></i> Field Exclusion
+      </h4>
+
+      <p>
+      If checked, this field will not be retrieved as part of the <b>_source</b> object. This is thanks to the
+      <a target="_window" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html">
+        source filtering API
+        <i aria-hidden="true" class="fa-link fa"></i>
+      </a>
+      of Elasticsearch.
+      </p>
+      <p>
+      If this field is explicitly selected in your saved search, then it will not be excluded.
+      </p>
+    </div>
+  </div>
+
   <div ng-if="editor.field.scripted">
     <div class="form-group">
       <label>Script</label>

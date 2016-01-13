@@ -45,6 +45,7 @@ define(function (require) {
       obj.fact('name');
       obj.fact('type');
       obj.writ('count', spec.count || 0);
+      obj.writ('exclude', spec.exclude);
 
       // scripted objs
       obj.fact('scripted', scripted);

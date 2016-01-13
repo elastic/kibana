@@ -27,7 +27,6 @@ define(function (require) {
       timeFieldName: 'string',
       notExpandable: 'boolean',
       intervalName: 'string',
-      sourceFiltering: 'json',
       fields: 'json',
       fieldFormatMap: {
         type: 'string',
@@ -123,15 +122,15 @@ define(function (require) {
         }
       };
 
-      // Set the source filtering configuration for that index
-      self.setSourceFiltering = function (config) {
-        self.sourceFiltering = config;
-        self.save();
-      };
-
-      // Get the source filtering configuration for that index
-      self.getSourceFiltering = function () {
-        return self.sourceFiltering;
+      // Get the source filtering configuration for that index.
+      // Fields which name appears in the given columns array will not be excluded.
+      self.getSourceFiltering = function (columns) {
+        return {
+          exclude: _(self.getNonScriptedFields())
+            .filter((field) => field.exclude && !_.contains(columns, field.name))
+            .map((field) => field.name)
+            .value()
+        };
       };
 
       self.addScriptedField = function (name, script, type, lang) {
@@ -329,8 +328,7 @@ define(function (require) {
       edit: '/settings/indices/{{id}}',
       addField: '/settings/indices/{{id}}/create-field',
       indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)',
-      sourceFiltering: '/settings/indices/{{id}}?_a=(tab:sourceFiltering)'
+      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
     };
 
     return IndexPattern;

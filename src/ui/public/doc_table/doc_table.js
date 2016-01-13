@@ -81,7 +81,7 @@ define(function (require) {
           $scope.searchSource.size(config.get('discover:sampleSize'));
           $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
-          var sourceFiltering = $scope.indexPattern.getSourceFiltering();
+          var sourceFiltering = $scope.indexPattern.getSourceFiltering($scope.columns);
           if (sourceFiltering) {
             $scope.searchSource.source(sourceFiltering);
           }
