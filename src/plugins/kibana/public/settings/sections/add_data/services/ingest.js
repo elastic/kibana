@@ -10,19 +10,14 @@ app.service('ingest', function ($http) {
   function buildBody(sourceObject, processors) {
     const body = {
       'pipeline': {
-        'description': '_description',
         'processors': []
       },
       'docs': [
         {
-          '_index': 'index',
-          '_type': 'type',
-          '_id': 'id'
+          _source: sourceObject
         }
       ]
     };
-
-    body.docs[0]._source = sourceObject;
 
     processors.forEach((processor) => {
       body.pipeline.processors.push(processor.getDefinition());
