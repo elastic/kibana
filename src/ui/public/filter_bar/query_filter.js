@@ -25,8 +25,7 @@ define(function (require) {
       if (!appState || !appState.filters) return [];
 
       // Work around for https://github.com/elastic/kibana/issues/5896
-      appState.filters = _.compact(appState.filters);
-      appState.replace();
+      appState.filters = validateStateFilters(appState);
 
       return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
@@ -35,8 +34,7 @@ define(function (require) {
       if (!globalState.filters) return [];
 
       // Work around for https://github.com/elastic/kibana/issues/5896
-      globalState.filters = _.compact(globalState.filters);
-      globalState.replace();
+      globalState.filters = validateStateFilters(globalState);
 
       return _.map(globalState.filters, appendStoreType('globalState'));
     };
@@ -214,6 +212,19 @@ define(function (require) {
     initWatchers();
 
     return queryFilter;
+
+    /**
+     * Rids filter list of null values and replaces state if any nulls are found
+     */
+    function validateStateFilters(state) {
+      var compacted = _.compact(state.filters);
+      if (state.filters.length !== compacted.length) {
+        state.filters = compacted;
+        state.replace();
+      }
+      return state.filters;
+    }
+
 
     /**
      * Saves both app and global states, ensuring filters are persisted
