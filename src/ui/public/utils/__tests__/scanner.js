@@ -1,10 +1,14 @@
 import Scanner from 'ui/utils/scanner';
 import expect from 'expect.js';
+import Bluebird from 'bluebird';
 import elasticsearch from 'elasticsearch-browser';
 import sinon from 'sinon';
 
 var es = new elasticsearch.Client({
   host: 'http://localhost:9210',
+  defer: function () {
+    return Bluebird.defer();
+  }
 });
 
 
