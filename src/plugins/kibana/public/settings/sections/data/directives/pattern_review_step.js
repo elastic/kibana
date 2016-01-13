@@ -25,14 +25,20 @@ modules.get('apps/settings')
       },
       controller: function ($scope, Private) {
         $scope.sampleDocs = testData;
-        if (_.isEmpty($scope.indexPattern)) {
-          $scope.indexPattern = {id: 'filebeat-*', title: 'filebeat-*'};
+        if (_.isUndefined($scope.indexPattern)) {
+          $scope.indexPattern = {};
         }
-        if (_.isEmpty($scope.indexPattern.fields)) {
-          $scope.indexPattern.fields = _.map($scope.sampleDocs, (value, key) => {
+
+        _.defaults($scope.indexPattern, {
+          id: 'filebeat-*',
+          title: 'filebeat-*',
+          timeFieldName: '@timestamp',
+          fields: _.map($scope.sampleDocs, (value, key) => {
             return {name: key, type: typeof value};
-          });
-        }
+          })
+        });
+
+        $scope.isTimeBased = !!$scope.indexPattern.timeFieldName;
 
         $scope.$watch('indexPattern.id', function (value) {
           $scope.indexPattern.title = value;

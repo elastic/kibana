@@ -1,7 +1,15 @@
 <h2>Pattern review step</h2>
 
 <div>
-  <input ng-model="indexPattern.id" />
+  <input ng-model="indexPattern.id"/>
+  <label>
+    <input ng-model="isTimeBased" type="checkbox"/>
+    time based
+  </label>
+  <label ng-if="isTimeBased">
+    Time Field
+    <input ng-model="indexPattern.timeFieldName"/>
+  </label>
 </div>
 
 <div>
