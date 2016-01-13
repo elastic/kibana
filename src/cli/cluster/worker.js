@@ -46,8 +46,6 @@ module.exports = class Worker extends EventEmitter {
     };
 
     _.bindAll(this, ['onExit', 'onMessage', 'onOnline', 'onDisconnect', 'shutdown', 'start']);
-
-    this.start = _.debounce(this.start, 25);
   }
 
   onExit(fork, code) {
@@ -58,6 +56,7 @@ module.exports = class Worker extends EventEmitter {
     this.online = false;
     this.listening = false;
     cluster.removeListener('exit', this.onExit);
+    this.emit('fork:exit');
 
     if (code) {
       this.log.bad(`${this.title} crashed`, 'with status code', code);
@@ -74,13 +73,15 @@ module.exports = class Worker extends EventEmitter {
     this.start();
   }
 
-  shutdown() {
+  async shutdown() {
     if (this.fork && !dead(this.fork)) {
       kill(this.fork);
       this.fork.removeListener('message', this.parseIncomingMessage);
       this.fork.removeListener('online', this.onOnline);
       this.fork.removeListener('disconnect', this.onDisconnect);
       process.removeListener('exit', this.shutdown);
+
+      await new Promise(cb => this.once('fork:exit', cb));
     }
   }
 
@@ -103,6 +104,7 @@ module.exports = class Worker extends EventEmitter {
 
   onOnline() {
     this.online = true;
+    this.emit('fork:online');
   }
 
   onDisconnect() {
@@ -118,9 +120,13 @@ module.exports = class Worker extends EventEmitter {
     }, '');
   }
 
-  start() {
+  async start() {
     // once "exit" event is received with 0 status, start() is called again
-    if (this.fork) return this.shutdown();
+    if (this.fork) {
+      this.shutdown();
+      await new Promise(cb => this.once('online', cb));
+      return;
+    }
 
     if (this.changes.length) {
       this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
@@ -136,5 +142,7 @@ module.exports = class Worker extends EventEmitter {
 
     process.on('exit', this.shutdown);
     cluster.on('exit', this.onExit);
+
+    await new Promise(cb => this.once('fork:online', cb));
   }
 };
