@@ -86,7 +86,7 @@ describe('get filters', function () {
       });
     });
 
-    it('should replace the replace the state, not save it', function () {
+    it('should replace the state, not save it', function () {
       var states = [
         [ globalState, queryFilter.getGlobalFilters ],
         [ appState, queryFilter.getAppFilters ],
