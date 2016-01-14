@@ -71,3 +71,13 @@ Pipeline.prototype.getProcessorById = function(processorId) {
   const self = this;
   return _.find(self.processors, (processor) => {return processor.processorId === processorId; });
 }
+
+Pipeline.prototype.updateOutput = function() {
+  const self = this;
+  const processors = self.processors;
+
+  self.output = undefined;
+  if (processors.length > 0) {
+    self.output = processors[processors.length-1].outputObject;
+  }
+}

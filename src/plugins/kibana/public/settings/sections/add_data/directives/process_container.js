@@ -35,7 +35,6 @@ app.directive('processContainer', function ($compile) {
         //a normal watcher in the processor_ui would work.
       }
 
-      //TODO: Clean this up!!!!
       function onPipelineSimulated(event, message) {
         if (message.processor != processor) return;
         logger.log('on(pipeline_simulated)', message);
@@ -43,29 +42,30 @@ app.directive('processContainer', function ($compile) {
         const output = _.get(message.result, 'output');
         const error = _.get(message.result, 'error');
 
-        //This is questionable... since the inputObject won't get updated until later, so this input object is stale.
-        //attempting to move updateInputObject above.
-        //
-        //This also may not be what we want to display... since it's showing output from an invalid pipeline... where
-        //in production this would not be the case.
-        //if (output) {
-          processor.outputObject = output;
-        //} else {
-        //  processor.outputObject = _.cloneDeep(processor.inputObject);
-        //}
+        processor.outputObject = output;
         processor.setError(error);
         processor.updateDescription();
 
-        updateInputObject();
+        //TODO: updating the input objects may need to happen after all the outputobjects have been set.
+        //updateInputObject();
 
-        logger.log('broadcast(simulation_results_consumed_by_processor)');
-        $rootScope.$broadcast('simulation_results_consumed_by_processor', { processor: processor });
+        logger.log('broadcast(processor_simulation_consumed)');
+        $rootScope.$broadcast('processor_simulation_consumed', { processor: processor });
+      }
+
+      function onProcessorUpdateInput(event, message) {
+        if (message.processor != processor) return;
+        logger.log('on(processor_update_input)', message);
+
+        updateInputObject();
       }
 
       const pipelineSimulatedListener = $scope.$on('pipeline_simulated', onPipelineSimulated);
+      const processorUpdateInputListener = $scope.$on('processor_update_input', onProcessorUpdateInput);
 
       $scope.$on('$destroy', () => {
         pipelineSimulatedListener();
+        processorUpdateInputListener();
       });
 
       //This may be replaced with a normal watcher in the processor_ui...

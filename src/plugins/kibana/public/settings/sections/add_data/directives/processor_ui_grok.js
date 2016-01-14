@@ -58,9 +58,10 @@ app.directive('processorUiGrok', function () {
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
-      function applyProcessor() {
-        logger.log('applyProcessor', processor);
-        // $rootScope.$broadcast('processor_force_update', { processor: processor });
+      function processorUiChanged() {
+        logger.log('processorUiChanged', processor);
+        logger.log('broadcast(processor_ui_changed)');
+        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
       processor.sourceField = '';
@@ -74,12 +75,12 @@ app.directive('processorUiGrok', function () {
       $scope.$watch('processor.sourceField', () => {
         logger.log('$watch processor.sourceField', processor.sourceField);
         refreshFieldData();
-        applyProcessor();
+        processorUiChanged();
       });
 
       $scope.$watch('processor.pattern', () => {
         logger.log('$watch processor.pattern', processor.pattern);
-        applyProcessor();
+        processorUiChanged();
       });
     }
   }

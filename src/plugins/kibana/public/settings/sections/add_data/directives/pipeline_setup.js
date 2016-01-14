@@ -19,6 +19,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
       const pipeline = $scope.pipeline;
 
+      const nameThisWell = [];
       function simulatePipeline(event, message) {
         logger.log('simulatePipeline', pipeline);
         if (pipeline.processors.length === 0) {
@@ -32,8 +33,15 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
           //TODO: It is important that these resolve in order. Can not simply send the messages
           //into the void and assume they will resolve in the correct order.
+          //
+          //OR: We could update the output and the input in two steps... first step, update all of the
+          //outputs... second step, update all of the inputs. Then we just need to know that they all happened,
+          //not that they happened in the right order.
+          //However, once that has been proven to work, we need to uniquely identify a particular simulation so
+          //we only listen to events from the latest one and ignore stale events
           result.forEach((processorResult) => {
             const processor = pipeline.getProcessorById(processorResult.processorId);
+            nameThisWell.push(processor);
             logger.log('broadcast(pipeline_simulated)');
             $rootScope.$broadcast('pipeline_simulated', { processor: processor, result: processorResult });
           });
@@ -108,6 +116,37 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         pipeline.rootObject = $scope.sampleData;
         updateProcessorChain();
         simulatePipeline();
+      });
+
+      function onProcessorSimulationConsumed(event, message) {
+        logger.log('on(processor_simulation_consumed)', message);
+
+        //remove processor from nameThisWell. If nameThisWell is empty, update the inputs.
+        _.remove(nameThisWell, message.processor);
+        if (nameThisWell.length === 0) {
+          logger.log('onProcessorSimulationConsumed - all processors reported in. Update inputObjects.');
+
+          pipeline.updateOutput();
+
+          pipeline.processors.forEach((processor) => {
+            logger.log('broadcast(processor_update_input)');
+            $rootScope.$broadcast('processor_update_input', { processor: processor });
+          });
+        }
+      }
+
+      function onProcessorUiChanged(event, message) {
+        logger.log('on(processor_ui_changed)', message);
+        simulatePipeline();
+      }
+
+      const processorSimulationConsumedListener =
+        $scope.$on('processor_simulation_consumed', onProcessorSimulationConsumed);
+      const processorUiChangedListener = $scope.$on('processor_ui_changed', onProcessorUiChanged);
+
+      $scope.$on('$destroy', () => {
+        processorSimulationConsumedListener();
+        processorUiChangedListener();
       });
     },
     controller: function ($scope, AppState, ingest) {

@@ -7,21 +7,9 @@ app.directive('pipelineOutput', function () {
     restrict: 'E',
     template: require('../views/pipeline_output.html'),
     scope: {
-      lastProcessor: '='
+      pipeline: '='
     },
     controller: function ($scope) {
-      function processorUpdated(event, message) {
-        if (message.processor !== $scope.lastProcessor) return;
-
-        $scope.outputObject = message.processor.outputObject;
-      }
-
-      const updateListener = $scope.$on('processor_update', processorUpdated);
-
-      $scope.$on('$destroy', () => {
-        updateListener();
-      });
-
       $scope.collapsed = true;
     }
   };
