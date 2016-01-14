@@ -15,15 +15,21 @@
       <div>
        <form class="inline-form" ng-if="showFormTitle" ng-show="chrome.getVisible()" role="form">
           <input type="text" name="title" ng-model="panel.title" placeholder="{{::savedObj.title}}" input-focus>
-          <a class="title-confirm" ng-click="confirmTitle()">
-            <i class="fa fa-save"></i>
-          </a>
-          <a class="title-cancel" ng-click="cancelTitle()">
-            <i class="fa fa-times"></i>
-          </a>
-          <a class="title-reset" ng-click="resetTitle()">
-            <i class="fa fa-undo"></i>
-          </a>
+          <kbn-tooltip text="Set Title" placement="bottom" append-to-body="1">
+           <a class="title-confirm" ng-click="confirmTitle()">
+             <i class="fa fa-save"></i>
+           </a>
+          </kbn-tooltip>
+          <kbn-tooltip text="Cancel Title" placement="bottom" append-to-body="1">
+           <a class="title-cancel" ng-click="cancelTitle()">
+             <i class="fa fa-times"></i>
+           </a>
+          </kbn-tooltip>
+          <kbn-tooltip text="Restore Title" placement="bottom" append-to-body="1">
+           <a class="title-reset" ng-click="resetTitle()">
+             <i class="fa fa-undo"></i>
+           </a>
+          </kbn-tooltip>
        </form>
       </div>
 
