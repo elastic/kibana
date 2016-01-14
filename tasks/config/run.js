@@ -24,6 +24,23 @@ module.exports = function (grunt) {
       ]
     },
 
+    apiTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--server.xsrf.disableProtection=true',
+        '--optimize.enabled=false',
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--logging.json=false'
+      ]
+    },
+
     testUIServer: {
       options: {
         wait: false,
@@ -31,7 +48,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana',
+      cmd: binScript,
       args: [
         '--server.port=' + uiConfig.servers.kibana.port,
         '--env.name=development',
@@ -88,7 +105,7 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.47.1.jar',
+        'selenium/selenium-server-standalone-2.48.2.jar',
         '-port',
         uiConfig.servers.webdriver.port
       ]
@@ -104,7 +121,7 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.47.1.jar',
+        'selenium/selenium-server-standalone-2.48.2.jar',
         '-port',
         uiConfig.servers.webdriver.port
       ]

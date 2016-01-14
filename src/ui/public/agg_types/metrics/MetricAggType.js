@@ -19,10 +19,17 @@ define(function (require) {
     /**
      * Read the values for this metric from the
      * @param  {[type]} bucket [description]
-     * @return {[type]}        [description]
+     * @return {*}        [description]
      */
     MetricAggType.prototype.getValue = function (agg, bucket) {
-      return bucket[agg.id].value;
+      // Metric types where an empty set equals `zero`
+      var isSettableToZero = ['cardinality', 'sum'].indexOf(agg.__type.name) !== -1;
+
+      // Return proper values when no buckets are present
+      // `Count` handles empty sets properly
+      if (!bucket[agg.id] && isSettableToZero) return 0;
+
+      return bucket[agg.id] && bucket[agg.id].value;
     };
 
     /**

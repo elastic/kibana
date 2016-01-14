@@ -825,7 +825,7 @@ Angular modules are defined using a custom require module named `ui/modules`. It
 var app = require('ui/modules').get('app/namespace');
 ```
 
-`app` above is a reference to an Angular module, and can be used to define controllers, providers and anything else used in Angular.
+`app` above is a reference to an Angular module, and can be used to define controllers, providers and anything else used in Angular. While you can use this module to create/get any module with ui/modules, we generally use the "kibana" module for everything.
 
 ### Private modules
 
@@ -837,6 +837,8 @@ app.controller('myController', function($scope, otherDeps, Private) {
   ...
 });
 ```
+
+*Use `Private` modules for everything except directives, filters, and controllers.*
 
 ### Promises
 

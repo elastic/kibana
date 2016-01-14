@@ -103,6 +103,12 @@ define(function (require) {
         self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
       }
 
+      // visState doesn't yet exist when importing a visualization, so we can't
+      // assume that exists at this point. If it does exist, then we're not
+      // importing a visualization, so we want to sync the title.
+      if (self.visState) {
+        self.visState.title = self.title;
+      }
       self.vis = new Vis(
         self.searchSource.get('index'),
         self.visState
@@ -115,6 +121,7 @@ define(function (require) {
       var self = this;
 
       self.vis.indexPattern = self.searchSource.get('index');
+      self.visState.title = self.title;
       self.vis.setState(self.visState);
     };
 

@@ -1,0 +1,21 @@
+<div class="input-group">
+  <input
+    ng-model="formattedUrl"
+    type="text"
+    readonly=""
+    class="form-control url">
+  </input>
+  <button
+    class="shorten-button"
+    tooltip="Generate Short URL"
+    ng-click="generateShortUrl()"
+    ng-disabled="shortGenerated">
+    <span aria-hidden="true" class="fa fa-compress"></span>
+  </button>
+  <button
+    class="clipboard-button"
+    tooltip="Copy to Clipboard"
+    ng-click="copyToClipboard()">
+    <span aria-hidden="true" class="fa fa-clipboard"></span>
+  </button>
+</div>

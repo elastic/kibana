@@ -1,12 +1,10 @@
 module.exports = [{
   'index': {
     '_index': '.kibana',
-    '_type': 'config'
+    '_type': 'config',
+    '_id': require('../../../../package.json').version
   }
 }, {
-  'index': '.kibana',
-  'body': {
-    'buildNum': '@@buildNum'
-  },
-  'id': '@@version'
+  'buildNum': require('../../../../package.json').build.number,
+  'dateFormat:tz': 'UTC'
 }];

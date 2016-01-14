@@ -1,19 +1,25 @@
 # Kibana 5.0.0-snapshot
 
-[![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
-
 Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/blob/master/LICENSE.md)), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
 
 ## Requirements
 
-- Elasticsearch version 2.1.0 or later
+- Elasticsearch version 2.2.0 or later
 - Kibana binary package
 
 ## Installation
 
 * Download: [http://www.elastic.co/downloads/kibana](http://www.elastic.co/downloads/kibana)
+* Extract the files
 * Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
+
+
+## Upgrade from previous version
+
+* Move any custom configurations in your old kibana.yml to your new one
+* Reinstall plugins
+* Start or restart Kibana
 
 ## Quick Start
 
