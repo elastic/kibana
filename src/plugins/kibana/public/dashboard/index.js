@@ -10,6 +10,7 @@ define(function (require) {
   require('ui/config');
   require('ui/notify');
   require('ui/typeahead');
+  require('ui/share');
 
   require('plugins/kibana/dashboard/directives/grid');
   require('plugins/kibana/dashboard/components/panel/panel');
@@ -233,15 +234,7 @@ define(function (require) {
           ui: $state.options,
           save: $scope.save,
           addVis: $scope.addVis,
-          addSearch: $scope.addSearch,
-          shareData: function () {
-            return {
-              link: $location.absUrl(),
-              // This sucks, but seems like the cleanest way. Uhg.
-              embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-                '" height="600" width="800"></iframe>'
-            };
-          }
+          addSearch: $scope.addSearch
         };
 
         init();

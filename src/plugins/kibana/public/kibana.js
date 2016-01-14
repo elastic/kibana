@@ -1,16 +1,27 @@
+// autoloading
+require('ui/autoload/all');
+
+// preloading (for faster webpack builds)
 require('plugins/kibana/discover/index');
 require('plugins/kibana/visualize/index');
 require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
-require('plugins/kibana/doc/index');
+require('plugins/kibana/settings/sections');
+require('plugins/kibana/doc');
+require('ui/vislib');
+require('ui/agg_response');
+require('ui/agg_types');
+require('ui/timepicker');
+require('leaflet');
 
 var moment = require('moment-timezone');
-
 var chrome = require('ui/chrome');
 var routes = require('ui/routes');
 var modules = require('ui/modules');
 
 var kibanaLogoUrl = require('ui/images/kibana.svg');
+
+routes.enable();
 
 routes
 .otherwise({

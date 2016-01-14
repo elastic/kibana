@@ -10,7 +10,7 @@ describe('plugins/elasticsearch', function () {
     var plugin;
 
     beforeEach(function () {
-      var get = sinon.stub().withArgs('elasticserach.minimumVersion').returns('1.4.3');
+      var get = sinon.stub().withArgs('elasticsearch.engineVersion').returns('^1.4.3');
       var config = function () { return { get: get }; };
       server = {
         log: _.noop,
@@ -22,7 +22,8 @@ describe('plugins/elasticsearch', function () {
             },
             status: {
               red: sinon.stub()
-            }
+            },
+            url: 'http://localhost:9210'
           }
         }
       };

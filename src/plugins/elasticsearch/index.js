@@ -1,3 +1,6 @@
+var _ = require('lodash');
+let Boom = require('boom');
+
 module.exports = function (kibana) {
   var healthCheck = require('./lib/health_check');
   var exposeClient = require('./lib/expose_client');
@@ -24,7 +27,7 @@ module.exports = function (kibana) {
           key: Joi.string()
         }).default(),
         apiVersion: Joi.string().default('2.0'),
-        minimumVersion: Joi.string().default('2.1.0')
+        engineVersion: Joi.string().valid('^2.1.0').default('^2.1.0')
       }).default();
     },
 
@@ -38,6 +41,7 @@ module.exports = function (kibana) {
       createProxy(server, 'POST', '/{index}/_search');
       createProxy(server, 'POST', '/{index}/_field_stats');
       createProxy(server, 'POST', '/_msearch');
+      createProxy(server, 'POST', '/_search/scroll');
 
       function noBulkCheck(request, reply) {
         if (/\/_bulk/.test(request.path)) {
@@ -48,17 +52,35 @@ module.exports = function (kibana) {
         return reply.continue();
       }
 
+      function noCreateIndex(request, reply) {
+        const requestPath = _.trimRight(_.trim(request.path), '/');
+        const matchPath = createProxy.createPath(config.get('kibana.index'));
+
+        if (requestPath === matchPath) {
+          return reply(Boom.methodNotAllowed('You cannot modify the primary kibana index through this interface.'));
+        }
+
+        reply.continue();
+      }
+
+      // These routes are actually used to deal with things such as managing
+      // index patterns and advanced settings, but since hapi treats route
+      // wildcards as zero-or-more, the routes also match the kibana index
+      // itself. The client-side kibana code does not deal with creating nor
+      // destroying the kibana index, so we limit that ability here.
       createProxy(
         server,
         ['PUT', 'POST', 'DELETE'],
         '/' + config.get('kibana.index') + '/{paths*}',
         {
-          pre: [ noBulkCheck ]
+          pre: [ noCreateIndex, noBulkCheck ]
         }
       );
 
       // Set up the health check service and start it.
-      healthCheck(this, server).start();
+      var hc = healthCheck(this, server);
+      server.expose('waitUntilReady', hc.waitUntilReady);
+      hc.start();
     }
   });
 

@@ -30,7 +30,7 @@ describe('Vislib Color Module Test Suite', function () {
       seedColors = Private(require('ui/vislib/components/color/seed_colors'));
       getColors = Private(require('ui/vislib/components/color/color'));
       mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
-      color = getColors(arr);
+      color = getColors(arr, {});
     }));
 
     afterEach(ngMock.inject((config) => {
@@ -110,6 +110,11 @@ describe('Vislib Color Module Test Suite', function () {
     it('should return the value from the mapped colors', function () {
       expect(color(arr[1])).to.be(mappedColors.get(arr[1]));
     });
+
+    it('should return the value from the specified color mapping overrides', function () {
+      const colorFn = getColors(arr, {good: 'red'});
+      expect(colorFn('good')).to.be('red');
+    });
   });
 
   describe('Seed Colors', function () {
@@ -125,6 +130,7 @@ describe('Vislib Color Module Test Suite', function () {
     beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
       mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
+      seedColors = Private(require('ui/vislib/components/color/seed_colors'));
       mappedColors.mapping = {};
     }));
 
@@ -178,6 +184,58 @@ describe('Vislib Color Module Test Suite', function () {
       expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
       expect(mappedColors.get('bar')).to.be(seedColors[0]);
     }));
+
+    it('should have a flush method that moves the current map to the old map', function () {
+      const arr = [1, 2, 3, 4, 5];
+      mappedColors.mapKeys(arr);
+      expect(_.keys(mappedColors.mapping).length).to.be(5);
+      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+
+      mappedColors.flush();
+
+      expect(_.keys(mappedColors.oldMap).length).to.be(5);
+      expect(_.keys(mappedColors.mapping).length).to.be(0);
+
+      mappedColors.flush();
+
+      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+      expect(_.keys(mappedColors.mapping).length).to.be(0);
+    });
+
+    it('should use colors in the oldMap if they are available', function () {
+      const arr = [1, 2, 3, 4, 5];
+      mappedColors.mapKeys(arr);
+      expect(_.keys(mappedColors.mapping).length).to.be(5);
+      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+
+      mappedColors.flush();
+
+      mappedColors.mapKeys([3, 4, 5]);
+      expect(_.keys(mappedColors.oldMap).length).to.be(5);
+      expect(_.keys(mappedColors.mapping).length).to.be(3);
+
+      expect(mappedColors.mapping[1]).to.be(undefined);
+      expect(mappedColors.mapping[2]).to.be(undefined);
+      expect(mappedColors.mapping[3]).to.equal(mappedColors.oldMap[3]);
+      expect(mappedColors.mapping[4]).to.equal(mappedColors.oldMap[4]);
+      expect(mappedColors.mapping[5]).to.equal(mappedColors.oldMap[5]);
+    });
+
+    it('should have a purge method that clears both maps', function () {
+      const arr = [1, 2, 3, 4, 5];
+      mappedColors.mapKeys(arr);
+      mappedColors.flush();
+      mappedColors.mapKeys(arr);
+
+      expect(_.keys(mappedColors.mapping).length).to.be(5);
+      expect(_.keys(mappedColors.oldMap).length).to.be(5);
+
+      mappedColors.purge();
+
+      expect(_.keys(mappedColors.mapping).length).to.be(0);
+      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+
+    });
   });
 
   describe('Color Palette', function () {

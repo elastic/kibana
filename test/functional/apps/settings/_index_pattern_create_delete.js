@@ -1,8 +1,7 @@
 define(function (require) {
   var Common = require('../../../support/pages/Common');
-  var SettingsPage = require('../../../support/pages/SettingsPage');
+  var SettingsPage = require('../../../support/pages/settings_page');
   var expect = require('intern/dojo/node!expect.js');
-  var Promise = require('bluebird');
 
   return function (bdd, scenarioManager) {
     bdd.describe('creating and deleting default index', function describeIndexTests() {
@@ -47,6 +46,7 @@ define(function (require) {
         bdd.it('should have expected table headers', function checkingHeader() {
           return settingsPage.getTableHeader()
           .then(function (headers) {
+            common.debug('header.length = ' + headers.length);
             var expectedHeaders = [
               'name',
               'type',
@@ -93,6 +93,7 @@ define(function (require) {
           return common.tryForTime(5000, function () {
             return remote.getCurrentUrl()
             .then(function (currentUrl) {
+              common.debug('currentUrl = ' + currentUrl);
               expect(currentUrl).to.not.contain('logstash-*');
             });
           })

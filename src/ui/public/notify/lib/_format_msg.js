@@ -1,4 +1,6 @@
 define(function (require) {
+  var _ = require('lodash');
+  var has = _.has;
   var formatESMsg = require('ui/notify/lib/_format_es_msg');
 
   /**
@@ -8,7 +10,7 @@ define(function (require) {
    * @param  {String} from - Prefix for message indicating source (optional)
    * @returns {string}
    */
-  return function formatMsg(err, from) {
+  function formatMsg(err, from) {
     var rtn = '';
     if (from) {
       rtn += from + ': ';
@@ -21,9 +23,21 @@ define(function (require) {
     } else if (esMsg) {
       rtn += esMsg;
     } else if (err instanceof Error) {
-      rtn += err.message;
+      rtn += formatMsg.describeError(err);
+    } else if (has(err, 'status') && has(err, 'data')) {
+      // is an Angular $http "error object"
+      rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
     }
 
     return rtn;
   };
+
+  formatMsg.describeError = function (err) {
+    if (!err) return undefined;
+    if (err.body && err.body.message) return err.body.message;
+    if (err.message) return err.message;
+    return '' + err;
+  };
+
+  return formatMsg;
 });
