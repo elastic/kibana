@@ -15,10 +15,15 @@ app.directive('sourceDataNew', function () {
       }
       refreshFieldData = debounce(refreshFieldData, 100);
 
+      let counter = 0;
       function getProcessorOutput() {
-        let newObj = {
+        counter = counter += 1;
+        const fieldname = `field${counter}`;
+        const timestamp = new Date().toString();
+        const newObj = {
           _raw: $scope.selectedLine
         };
+        newObj[fieldname] = timestamp;
 
         return newObj
       }

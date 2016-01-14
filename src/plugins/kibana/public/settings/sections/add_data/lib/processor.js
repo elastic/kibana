@@ -22,3 +22,9 @@ Processor.prototype.setError = function(error) {
 
   self.errorMessage = _.get(root_cause, 'reason') || _.get(root_cause, 'type');
 }
+
+Processor.prototype.updateDescription = function() {
+  const self = this;
+
+  self.description = self.getDescription();
+}

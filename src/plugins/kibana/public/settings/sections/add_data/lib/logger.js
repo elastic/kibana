@@ -1,11 +1,10 @@
 const _ = require('lodash');
 
-export default function Logger(processor, area, enabled) {
+export default function Logger(source, enabled) {
   const self = this;
 
   self.enabled = !!enabled;
-  self.area = area;
-  self.processor = processor;
+  self.source = source;
 };
 
 Logger.prototype.log = function(message, extra) {
@@ -14,8 +13,8 @@ Logger.prototype.log = function(message, extra) {
   if (!self.enabled) return;
 
   if (extra) {
-    console.log(self.processor.processorId, self.area, message, extra);
+    console.log(self.source, message, _.cloneDeep(extra));
   } else {
-    console.log(self.processor.processorId, self.area, message);
+    console.log(self.source, message);
   }
 }

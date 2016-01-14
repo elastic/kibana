@@ -9,7 +9,6 @@ app.directive('processContainerHeader', function () {
       processor: '=',
       field: '=',
       collapsed: '=',
-      description: '=',
       pipeline: '='
     },
     template: require('../views/process_container_header.html'),

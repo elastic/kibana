@@ -55,7 +55,6 @@ Pipeline.prototype.updateParents = function() {
   const self = this;
   const processors = self.processors;
 
-  let topIndexChanged = Infinity;
   processors.forEach((processor, index) => {
     let newParent;
     if (index === 0) {
@@ -64,22 +63,11 @@ Pipeline.prototype.updateParents = function() {
       newParent = processors[index - 1];
     }
 
-    let changed = processor.setParent(newParent);
-    if (changed) {
-      topIndexChanged = Math.min(index, topIndexChanged);
-    }
+    processor.setParent(newParent);
   });
+}
 
-  let topProcessorChanged;
-  let lastProcessor;
-  if (topIndexChanged < Infinity) {
-    topProcessorChanged = processors[topIndexChanged];
-  }
-  if (processors.length > 0) {
-    lastProcessor = processors[processors.length-1];
-  }
-  if (!topProcessorChanged){
-    topProcessorChanged = lastProcessor;
-  }
-  return { topProcessorChanged, lastProcessor };
+Pipeline.prototype.getProcessorById = function(processorId) {
+  const self = this;
+  return _.find(self.processors, (processor) => {return processor.processorId === processorId; });
 }

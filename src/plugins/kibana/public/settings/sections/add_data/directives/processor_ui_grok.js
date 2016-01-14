@@ -39,44 +39,48 @@ app.directive('processorUiGrok', function () {
     template: require('../views/processor_ui_grok.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+
       const Logger = require('../lib/logger');
-      const logger = new Logger(processor, processor.title, false);
+      const logger = new Logger(`processor_ui_grok(${processor.processorId})`, true);
 
-      function consumeNewInputObject(event, message) {
-        if (message.processor !== processor) return;
-
-        logger.log('consuming new inputObject', processor.inputObject);
+      function consumeNewInputObject() {
+        logger.log('consumeNewInputObject', processor);
 
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
 
-        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
+        //this is where we fired the processor_input_object_changed event
+        //$rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
+        logger.log('refreshFieldData', processor);
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
       function applyProcessor() {
-        logger.log('processor properties changed. force update');
-        $rootScope.$broadcast('processor_force_update', { processor: processor });
+        logger.log('applyProcessor', processor);
+        // $rootScope.$broadcast('processor_force_update', { processor: processor });
       }
-
-      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
-
-      $scope.$on('$destroy', () => {
-        inputObjectChangingListener();
-      });
 
       processor.sourceField = '';
       processor.pattern = '';
 
+      $scope.$watch('processor.inputObject', () => {
+        logger.log('$watch processor.inputObject', processor.inputObject);
+        consumeNewInputObject();
+      });
+
       $scope.$watch('processor.sourceField', () => {
+        logger.log('$watch processor.sourceField', processor.sourceField);
         refreshFieldData();
         applyProcessor();
       });
 
-      $scope.$watch('processor.pattern', applyProcessor);
+      $scope.$watch('processor.pattern', () => {
+        logger.log('$watch processor.pattern', processor.pattern);
+        applyProcessor();
+      });
     }
   }
 });
