@@ -43,6 +43,7 @@ module.exports = function (server) {
     return new elasticsearch.Client({
       host: url.format(uri),
       ssl: ssl,
+      plugins: options.plugins,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
       pingTimeout: options.pingTimeout,
@@ -70,6 +71,7 @@ module.exports = function (server) {
 
   server.expose('client', client);
   server.expose('createClient', createClient);
+  server.expose('callWithRequestFactory', callWithRequest);
   server.expose('callWithRequest', callWithRequest(noAuthClient));
   server.expose('errors', elasticsearch.errors);
 
