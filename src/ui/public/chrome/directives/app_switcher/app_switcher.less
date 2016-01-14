@@ -1,55 +1,87 @@
+@import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
 
-@app-icon-size: 48px;
-@app-icon-padding: 10px;
+// as - App Switcher
+@as-open-width: 160px;
+@as-closed-width: 50px;
+@app-icon-height: 30px;
+@transition-time: .65s;
+@transition-delay: .2s;
 
+.app-links-wrapper {
+  flex: 0 0 @as-closed-width;
+  background-color: #3caed2;
+  overflow: hidden;
+  transition: flex-basis @transition-time;
+  transition-delay: @transition-delay;
+
+  &:hover {
+    flex-basis: @as-open-width;
+
+    .app-title {
+      display: inline-block;
+    }
+    + .app-wrapper {
+      padding-right: @as-open-width;
+    }
+  }
+
+  .logo {
+    height: 70px;
+    list-style-type: none;
+  }
+}
+.app-wrapper {
+  .real-flex-parent();
+  flex: 0 0 100%;
+  // flex: 0 0 calc(100% - @as-closed-width);
+  // flex: 0 0 auto;
+  margin: 0 auto;
+  padding-right: @as-closed-width;
+  transition: padding-right @transition-time;
+  transition-delay: @transition-delay;
+
+
+  .navbar-right {
+    margin-right: 0;
+  }
+}
 .app-links {
   text-align: justify;
 
   .app-link {
-    display: inline-block;
-    vertical-align: top;
-    text-align: left;
-    width: @app-icon-size + (@app-icon-padding * 2);
-    margin: 0px 10px;
-    padding: @app-icon-padding;
-    border-radius: @border-radius-base;
-
-    .app-icon {
+    width: @as-open-width;
+    height: @app-icon-height;
+    > a {
       display: block;
-      height: @app-icon-size;
-      width: @app-icon-size;
+      height: 100%;
+      color: #fff;
+    }
+    .app-icon {
+      float: left;
+      text-align: center;
+      font-size: 1.7em;
+      display: inline-block;
+      height: @app-icon-height;
+      width: @as-closed-width;
       background-position: center;
       background-size: contain;
-      border-radius: @border-radius-base;
-      background-color: @gray-light;
-      width: 100%;
-
-      &-missing {
-        text-align: center;
-        font-size: 2.7em;
-        font-weight: bold;
-        font-family: @font-family-sans-serif;
-        color: #fff;
-      }
     }
 
     .app-title {
-      color: @text-color;
+      width: calc(@as-open-width - @as-closed-width);
+      display: inline-block;
+      float: left;
       font-size: 0.9em;
-      width: 100%;
       text-align: center;
-      margin-top: 3px;
-    }
-
-    &:hover .app-title {
-      text-decoration: underline;
+      line-height: @app-icon-height;
     }
 
     &.active {
-      background: @gray-lighter;
-      .app-title {
-        text-decoration: underline;
+      background-color: #73c6e0;
+      > a {
+        color: #333;
+        text-decoration: none;
       }
     }
 

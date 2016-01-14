@@ -76,16 +76,17 @@ ul.navbar-inline li {
 }
 
 .content {
-  .flex-parent();
-  position: relative;
-  z-index: 0;
+  .real-flex-parent(@flow: row nowrap);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 
   > nav {
     position: relative;
     z-index: 1;
 
     .navbar-right {
-      margin-right: 0;
+      margin-right: 0 !important;
     }
   }
 }

@@ -63,6 +63,7 @@ class BaseOptimizer {
 
   getConfig() {
     let mapQ = this.sourceMaps ? '?sourceMap' : '';
+    let mapQPre = mapQ ? mapQ + '&' : '?';
 
     return {
       context: fromRoot('.'),
@@ -101,7 +102,7 @@ class BaseOptimizer {
             test: /\.less$/,
             loader: ExtractTextPlugin.extract(
               'style',
-              `css${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+              `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQPre}dumpLineNumbers=comments`
             )
           },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
@@ -109,7 +110,7 @@ class BaseOptimizer {
           { test: /\.json$/, loader: 'json' },
           { test: /\.(html|tmpl)$/, loader: 'raw' },
           { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
-          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
+          { test: /\.(woff|woff2|ttf|eot|svg|ico|gif)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
           { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack${mapQ}` },
           {
             test: /\.js$/,
