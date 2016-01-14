@@ -13,8 +13,8 @@ require('../lib/processor_registry').register({
     return {
       'grok' : {
         'processor_id': self.processorId,
-        'field' : self.sourceField,
-        'pattern': self.pattern
+        'field' : self.sourceField ? self.sourceField : '',
+        'pattern': self.pattern ? self.pattern : '',
       }
     };
   },
@@ -39,7 +39,6 @@ app.directive('processorUiGrok', function () {
     template: require('../views/processor_ui_grok.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
-
       const Logger = require('../lib/logger');
       const logger = new Logger(`processor_ui_grok(${processor.processorId})`, true);
 
@@ -48,9 +47,6 @@ app.directive('processorUiGrok', function () {
 
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
-
-        //this is where we fired the processor_input_object_changed event
-        //$rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
@@ -63,9 +59,6 @@ app.directive('processorUiGrok', function () {
         logger.log('broadcast(processor_ui_changed)');
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
-      processor.pattern = '';
 
       $scope.$watch('processor.inputObject', () => {
         logger.log('$watch processor.inputObject', processor.inputObject);

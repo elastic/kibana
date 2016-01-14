@@ -39,6 +39,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
           //not that they happened in the right order.
           //However, once that has been proven to work, we need to uniquely identify a particular simulation so
           //we only listen to events from the latest one and ignore stale events
+
           result.forEach((processorResult) => {
             const processor = pipeline.getProcessorById(processorResult.processorId);
             nameThisWell.push(processor);
@@ -151,12 +152,13 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
     },
     controller: function ($scope, AppState, ingest) {
       const types = require('../lib/processor_registry.js').all();
+      const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
-      $scope.pipeline = new Pipeline();
       $scope.$elements = {}; //keeps track of the dom elements associated with processors as jquery objects
       $scope.sampleData = {};
+      $scope.pipeline = pipeline;
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));

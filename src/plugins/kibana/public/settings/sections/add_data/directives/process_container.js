@@ -19,7 +19,6 @@ app.directive('processContainer', function ($compile) {
     },
     controller: function ($scope, $rootScope) {
       const processor = $scope.processor;
-
       const Logger = require('../lib/logger');
       const logger = new Logger(`process_container(${processor.processorId})`, true);
 
@@ -30,9 +29,10 @@ app.directive('processContainer', function ($compile) {
         } else {
           processor.inputObject = _.cloneDeep(processor.parent);
         }
+        processor.updateDescription();
+        //processor.initialized = true;
+
         logger.log('updateInputObject', processor.inputObject);
-        //this is where we would raise the processor_input_object_changing event, but I'm trying to see if
-        //a normal watcher in the processor_ui would work.
       }
 
       function onPipelineSimulated(event, message) {
@@ -44,10 +44,6 @@ app.directive('processContainer', function ($compile) {
 
         processor.outputObject = output;
         processor.setError(error);
-        processor.updateDescription();
-
-        //TODO: updating the input objects may need to happen after all the outputobjects have been set.
-        //updateInputObject();
 
         logger.log('broadcast(processor_simulation_consumed)');
         $rootScope.$broadcast('processor_simulation_consumed', { processor: processor });
@@ -67,15 +63,6 @@ app.directive('processContainer', function ($compile) {
         pipelineSimulatedListener();
         processorUpdateInputListener();
       });
-
-      //This may be replaced with a normal watcher in the processor_ui...
-      //const inputObjectChangedListener = $scope.$on('processor_input_object_changed', applyProcessor);
-
-      // $scope.$on('$destroy', () => {
-      //   forceUpdateListener();
-      //   updateListener();
-      //   inputObjectChangedListener();
-      // });
     }
   };
 });

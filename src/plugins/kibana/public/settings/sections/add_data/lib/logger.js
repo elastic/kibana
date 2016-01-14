@@ -10,7 +10,7 @@ export default function Logger(source, enabled) {
 Logger.prototype.log = function(message, extra) {
   const self = this;
 
-  if (!self.enabled) return;
+  if (!self.enabled || self.disableAll) return;
 
   if (extra) {
     console.log(self.source, message, _.cloneDeep(extra));
@@ -18,3 +18,5 @@ Logger.prototype.log = function(message, extra) {
     console.log(self.source, message);
   }
 }
+
+Logger.prototype.disableAll = true;

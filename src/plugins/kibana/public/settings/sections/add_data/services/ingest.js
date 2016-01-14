@@ -1,9 +1,11 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 
+const Logger = require('../lib/logger');
+const logger = new Logger('ingest service', true);
+
 app.service('ingest', function ($http) {
   return {
-    simulate: simulate,
     simulatePipeline: simulatePipeline
   };
 
@@ -26,52 +28,49 @@ app.service('ingest', function ($http) {
     return body;
   }
 
-  function simulate(processor) {
-    const body = buildBody(processor.inputObject, [processor]);
+  function translateError(esError) {
+    const root_cause = _.get(esError, 'root_cause[0]');
 
-    console.log('simulate request', body);
-
-    //TODO: How to handle errors
-    return $http.post(`/api/kibana/simulate`, body)
-    .then(function (result) {
-      console.log('simulate response', result);
-      if (!result.data)
-        return;
-
-      const processorResults = _.get(result, 'data.docs[0].processor_results');
-      const output = processorResults.map((processorResult) => {
-        return {
-          processorId: _.get(processorResult, 'processor_id'),
-          output: _.get(processorResult, 'doc._source'),
-          error: _.get(processorResult, 'error')
-        }
-      });
-
-      return output;
-    });
+    return _.get(root_cause, 'reason') || _.get(root_cause, 'type');
   }
 
   function simulatePipeline(pipeline) {
     const body = buildBody(pipeline.rootObject, pipeline.processors);
 
-    console.log('simulate request', body);
+    logger.log('simulate request', body);
 
     //TODO: How to handle errors
     return $http.post(`/api/kibana/simulate`, body)
     .then(function (result) {
-      if (!result.data)
+      if (!result.data) {
+        logger.log('WEIRD WEIRD WEIRD!!! There IS no result object?', result);
         return;
+      }
 
-      const processorResults = _.get(result, 'data.docs[0].processor_results');
-      const output = processorResults.map((processorResult) => {
+      //prepopulate the response with 'invalid parent processor' state
+      //because if a processor fails in the middle of the pipeline,
+      //_simulate does not return results for any child processors
+      const outputDefaults = pipeline.processors.map((processor) => {
         return {
-          processorId: _.get(processorResult, 'processor_id'),
-          output: _.get(processorResult, 'doc._source'),
-          error: _.get(processorResult, 'error')
-        }
+          processorId: processor.processorId,
+          output: undefined,
+          error: 'invalid parent processor'
+        };
       });
 
-      return output;
+      const processorResults = _.get(result, 'data.docs[0].processor_results');
+      processorResults.forEach((processorResult) => {
+        const processorId = _.get(processorResult, 'processor_id');
+        const output = _.get(processorResult, 'doc._source');
+        const error = _.get(processorResult, 'error');
+        const errorMessage = translateError(error);
+
+        const outputDefault = _.find(outputDefaults, { 'processorId': processorId });
+        outputDefault.output = output;
+        outputDefault.error = errorMessage;
+      });
+
+      return outputDefaults;
     });
   }
 });
