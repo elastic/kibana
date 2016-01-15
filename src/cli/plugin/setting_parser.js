@@ -1,6 +1,6 @@
 const { resolve } = require('path');
 const expiry = require('expiry-js');
-import intersection from 'lodash';
+import { intersection } from 'lodash';
 
 export default function createSettingParser(options) {
   function parseMilliseconds(val) {
