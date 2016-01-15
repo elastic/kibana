@@ -24,9 +24,11 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl) {
+    controller: function ($scope, Notifier, kbnUrl, config) {
       let self = this;
       let notify = new Notifier({ location: 'Field Editor' });
+
+      const metaFields = config.get('metaFields');
 
       self.scriptingInfo = scriptingInfo;
       self.scriptingWarning = scriptingWarning;
@@ -34,6 +36,7 @@ uiModules
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
       self.formatParams = self.field.format.params();
+      $scope.isMetaField = _.contains(metaFields, self.field.name);
 
       // only init on first create
       self.creating = !self.indexPattern.fields.byName[self.field.name];

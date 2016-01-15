@@ -7,7 +7,7 @@ import uiModules from 'ui/modules';
 import indexedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_indexed_fields.html';
 
 uiModules.get('apps/settings')
-.directive('indexedFields', function ($filter) {
+.directive('indexedFields', function ($filter, config) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const filter = $filter('filter');
@@ -35,12 +35,14 @@ uiModules.get('apps/settings')
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
 
+        const metaFields = config.get('metaFields');
         const sourceFiltering = $scope.indexPattern.getSourceFiltering();
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
         _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });
+          const isMetaField = _.contains(metaFields, field.name);
           rowScopes.push(childScope);
 
           return [
@@ -64,8 +66,8 @@ uiModules.get('apps/settings')
               value: field.indexed
             },
             {
-              markup: field.exclude ? noTemplate : yesTemplate,
-              value: field.exclude
+              markup: isMetaField || !!field.exclude ? noTemplate : yesTemplate,
+              value: isMetaField || !!field.exclude
             },
             {
               markup: controlsHtml,
