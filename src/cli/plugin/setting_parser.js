@@ -1,5 +1,6 @@
 const { resolve } = require('path');
 const expiry = require('expiry-js');
+import intersection from 'lodash';
 
 export default function createSettingParser(options) {
   function parseMilliseconds(val) {
@@ -23,13 +24,7 @@ export default function createSettingParser(options) {
   }
 
   function areMultipleOptionsChosen(options, choices) {
-    let numChosen = 0;
-    choices.forEach(function (choice) {
-      if (options[choice]) {
-        ++numChosen;
-      }
-    });
-    return (numChosen > 1);
+    return intersection(Object.keys(options), choices).length > 1;
   }
 
   function parse() {
