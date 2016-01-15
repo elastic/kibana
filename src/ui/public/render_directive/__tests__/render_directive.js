@@ -19,7 +19,7 @@ function init(markup = '', definition = {}) {
     // create the markup
     $elem = angular.element('<render-directive>');
     $elem.html(markup);
-    if (definition !== false) {
+    if (definition !== null) {
       $parentScope.definition = definition;
       $elem.attr('definition', 'definition');
     }
@@ -35,7 +35,7 @@ function init(markup = '', definition = {}) {
 describe('render_directive', function () {
   describe('directive requirements', function () {
     it('should throw if not given a definition', function () {
-      expect(() => init('', false)).to.throwException(/must have a definition/);
+      expect(() => init('', null)).to.throwException(/must have a definition/);
     });
   });
 
@@ -48,7 +48,7 @@ describe('render_directive', function () {
 
       init(markup, definition);
 
-      expect(definition.link.callCount).to.equal(1);
+      sinon.assert.callCount(definition.link, 1);
     });
 
     it('should call controller method', function () {
@@ -59,7 +59,7 @@ describe('render_directive', function () {
 
       init(markup, definition);
 
-      expect(definition.controller.callCount).to.equal(1);
+      sinon.assert.callCount(definition.controller, 1);
     });
   });
 });
