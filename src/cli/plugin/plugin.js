@@ -3,6 +3,7 @@ const fromRoot = utils('fromRoot');
 const settingParser = require('./setting_parser');
 const installer = require('./plugin_installer');
 const remover = require('./plugin_remover');
+const lister = require('./plugin_lister');
 const pluginLogger = require('./plugin_logger');
 
 export default function pluginCli(program) {
@@ -24,12 +25,17 @@ export default function pluginCli(program) {
     if (settings.action === 'remove') {
       remover.remove(settings, logger);
     }
+    if (settings.action === 'list') {
+      lister.list(settings, logger);
+    }
+
   }
 
   program
     .command('plugin')
     .option('-i, --install <org>/<plugin>/<version>', 'The plugin to install')
     .option('-r, --remove <plugin>', 'The plugin to remove')
+    .option('-l, --list', 'List installed plugins')
     .option('-q, --quiet', 'Disable all process messaging except errors')
     .option('-s, --silent', 'Disable all process messaging')
     .option('-u, --url <url>', 'Specify download url')
