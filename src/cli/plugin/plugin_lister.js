@@ -1,10 +1,6 @@
 const fs = require('fs');
 
-module.exports = {
-  list: list
-};
-
-function list(settings, logger) {
+export function list(settings, logger) {
   fs.readdir(settings.pluginDir, function (err, files) {
 
     files
