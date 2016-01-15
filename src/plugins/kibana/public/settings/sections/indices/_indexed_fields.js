@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
-  .directive('indexedFields', function ($filter) {
+  .directive('indexedFields', function ($filter, config) {
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';
     var nameHtml = require('plugins/kibana/settings/sections/indices/_field_name.html');
@@ -34,11 +34,13 @@ define(function (require) {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
 
+          const metaFields = config.get('metaFields');
           var fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
           _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
           $scope.rows = fields.map(function (field) {
             var childScope = _.assign($scope.$new(), { field: field });
+            const isMetaField = _.contains(metaFields, field.name);
             rowScopes.push(childScope);
 
             return [
@@ -62,8 +64,8 @@ define(function (require) {
                 value: field.indexed
               },
               {
-                markup: field.exclude ? noTemplate : yesTemplate,
-                value: field.exclude
+                markup: isMetaField || !!field.exclude ? noTemplate : yesTemplate,
+                value: isMetaField || !!field.exclude
               },
               {
                 markup: controlsHtml,

@@ -88,7 +88,17 @@
       <i class="fa fa-info"></i> Help
     </span>
 
-    <label><input type="checkbox" ng-model="editor.field.exclude"> Exclude from _source</label>
+    <label><input ng-disabled="isMetaField" type="checkbox" ng-model="editor.field.exclude"> Exclude from _source</label>
+
+    <div class="hintbox" ng-if="isMetaField">
+      <h4 class="hintbox-heading">
+        <i class="fa fa-warning text-warning"></i> Field Exclusion
+      </h4>
+
+      <p>
+      You cannot exclude metadata fields.
+      </p>
+    </div>
 
     <div class="hintbox" ng-if="editor.showExcludeHelp">
       <h4 class="hintbox-heading">
