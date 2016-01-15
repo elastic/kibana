@@ -19,16 +19,17 @@ export default function pluginCli(program) {
 
     const logger = pluginLogger(settings);
 
-    if (settings.action === 'install') {
-      installer.install(settings, logger);
+    switch (settings.action) {
+      case 'install':
+        installer.install(settings, logger);
+        break;
+      case 'remove':
+        remover.remove(settings, logger);
+        break;
+      case 'list':
+        lister.list(settings, logger);
+        break;
     }
-    if (settings.action === 'remove') {
-      remover.remove(settings, logger);
-    }
-    if (settings.action === 'list') {
-      lister.list(settings, logger);
-    }
-
   }
 
   program
