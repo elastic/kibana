@@ -13,10 +13,11 @@ define(function (require) {
       };
       filter.meta.field = field.name;
     } else {
-      filter.query = { match: {} };
-      filter.query.match[field.name] = {
-        query: value,
-        type: 'phrase'
+      filter.match = {
+        [field.name]: {
+          query: value,
+          type: 'phrase'
+        }
       };
     }
     return filter;
