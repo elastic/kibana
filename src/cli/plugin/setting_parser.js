@@ -22,6 +22,16 @@ export default function createSettingParser(options) {
     return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
   }
 
+  function areMultipleOptionsChosen(options, choices) {
+    let numChosen = 0;
+    choices.forEach(function (choice) {
+      if (options[choice]) {
+        ++numChosen;
+      }
+    });
+    return (numChosen > 1);
+  }
+
   function parse() {
     let parts;
     let settings = {
@@ -88,7 +98,7 @@ export default function createSettingParser(options) {
       settings.action = 'list';
     }
 
-    if (!settings.action || (options.install && options.remove && options.list)) {
+    if (!settings.action || areMultipleOptionsChosen(options, [ 'install', 'remove', 'list' ])) {
       throw new Error('Please specify either --install, --remove, or --list.');
     }
 
