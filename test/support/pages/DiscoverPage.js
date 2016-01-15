@@ -85,7 +85,6 @@ define(function (require) {
     },
 
     getBarChartData: function getBarChartData() {
-      var barArray = [];
       common.debug('in getBarChartData');
       return thisTime
       .findAllByCssSelector('rect[data-label="Count"]')
