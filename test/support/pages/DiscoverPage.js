@@ -85,7 +85,6 @@ define(function (require) {
     },
 
     getBarChartData: function getBarChartData() {
-      // var barMap = {};
       var barArray = [];
       common.debug('in getBarChartData');
       return thisTime
