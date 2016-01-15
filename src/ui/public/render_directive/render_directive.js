@@ -26,5 +26,5 @@ module.directive('renderDirective', function () {
         link($scope, $el, $attrs);
       }
     }
-  }
+  };
 });
