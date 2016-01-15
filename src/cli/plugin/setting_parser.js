@@ -84,8 +84,12 @@ export default function createSettingParser(options) {
       settings.package = parts.shift();
     }
 
-    if (!settings.action || (options.install && options.remove)) {
-      throw new Error('Please specify either --install or --remove.');
+    if (options.list) {
+      settings.action = 'list';
+    }
+
+    if (!settings.action || (options.install && options.remove && options.list)) {
+      throw new Error('Please specify either --install, --remove, or --list.');
     }
 
     settings.pluginDir = options.pluginDir;
