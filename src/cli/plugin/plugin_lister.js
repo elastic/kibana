@@ -1,8 +1,7 @@
 const fs = require('fs');
 
 export function list(settings, logger) {
-  const files = fs.readdirSync(settings.pluginDir);
-  files
+  fs.readdirSync(settings.pluginDir)
   .forEach(function (pluginFile) {
     logger.log(pluginFile);
   });
