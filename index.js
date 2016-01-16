@@ -13,7 +13,6 @@ module.exports = function (kibana) {
       description: 'JSON aware developer\'s interface to ElasticSearch',
       icon: 'plugins/sense/bonsai.png',
       main: 'plugins/sense/sense',
-      autoload: kibana.autoload.styles,
       injectVars: function (server, options) {
         return options;
       }
@@ -25,7 +24,6 @@ module.exports = function (kibana) {
       title: 'Sense Tests',
       id: 'sense-tests',
       main: 'plugins/sense/tests',
-      autoload: kibana.autoload.styles,
       hidden: true
       //listed: false // uncomment after https://github.com/elastic/kibana/pull/4755
     });
