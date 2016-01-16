@@ -63,10 +63,10 @@ module.exports = function (grunt) {
         }
       }
     },
-    withShield: {
+    withPlugins: {
       options: {
         version: '2.1.0',
-        directory: resolve(directory, 'withShield'),
+        directory: resolve(directory, 'withPlugins'),
         plugins: [
           'license',
           'shield',
