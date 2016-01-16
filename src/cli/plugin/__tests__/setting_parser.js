@@ -312,7 +312,7 @@ describe('kibana cli', function () {
             expect(settings).to.have.property('package', 'test-plugin');
           });
 
-          it('should not allow more than one part to the install parameter', function () {
+          it('should not allow more than one part to the remove parameter', function () {
             options.install = null;
             options.remove = 'kibana/test-plugin';
             parser = settingParser(options);
