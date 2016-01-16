@@ -92,20 +92,28 @@ define(function (require) {
         });
 
         bdd.it('should show the correct bar chart', function () {
-          var expectedBarChartData = [0,0,0,0,1.0968749999999972,7.6781250000000085,
-            37.87875,92.210625,108.590625,71.80875,23.54625,4.753124999999997,
-            2.1206249999999898,7.60499999999999,35.319374999999994,85.044375,110.199375,
-            70.05375000000001,23.180625000000006,4.0218750000000085,1.2431250000000063,
-            6.435000000000002,36.416250000000005,88.408125,108.81,
-            69.395625,22.522499999999994,5.4112499999999955,0.29249999999998977,0,0,0,0,0,0,0,0];
+          var expectedBarChartData = [ '0', '0', '0', '0', '0', '0',
+            '2.7056249999999977', '14.771249999999995', '54.112500000000004',
+            '105.080625', '100.25437500000001', '54.916875', '13.747499999999988',
+            '2.266874999999999', '3.0712500000000063', '14.771249999999995',
+            '49.944374999999994', '99.523125', '103.471875', '51.699375',
+            '12.943124999999995', '1.9743749999999949', '2.3400000000000034',
+            '12.796875', '51.699375', '102.96000000000001', '99.08437500000001',
+            '53.08875', '14.698125000000005', '2.1206249999999898', '0', '0',
+            '0', '0', '0', '0', '0'
+          ];
           return common.sleep(4000)
           .then(function () {
-            return common.tryForTime(60 * 1000, function tryingForTime() {
+            return common.tryForTime(20 * 1000, function tryingForTime() {
               return discoverPage.getBarChartData()
               .then(function compareData(paths) {
                 // the largest bars are over 100 pixels high so this is less than 1% tolerance
                 var barHeightTolerance = 1;
-                for (var x = 0; x < expectedBarChartData.size; x++) {
+                for (var y = 0; y < expectedBarChartData.length; y++) {
+                  common.debug(y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
+                   ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance));
+                };
+                for (var x = 0; x < expectedBarChartData.length; x++) {
                   expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
                 }
               });

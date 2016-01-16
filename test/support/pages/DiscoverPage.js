@@ -85,33 +85,21 @@ define(function (require) {
     },
 
     getBarChartData: function getBarChartData() {
-      // var barMap = {};
-      var barArray = [];
       common.debug('in getBarChartData');
       return thisTime
-      .findAllByCssSelector('rect')
+      .findAllByCssSelector('rect[data-label="Count"]')
       .then(function (chartData) {
 
         function getChartData(chart) {
-          return chart.getAttribute('fill')
-          .then(function (fillColor) {
-            // we're only getting the Green Bars
-            if (fillColor === '#57c17b') {
-              return chart
-              .getAttribute('height')
-              .then(function (height) {
-                common.debug(': ' + height + ', ');
-                barArray.push(height);
-              });
-            }
-          });
+          return chart
+          .getAttribute('height');
         }
 
         var getChartDataPromises = chartData.map(getChartData);
         return Promise.all(getChartDataPromises);
       })
-      .then(function () {
-        return barArray;
+      .then(function (bars) {
+        return bars;
       });
     }
 
