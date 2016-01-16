@@ -31,6 +31,8 @@ For example, a chart of dates with incident counts can display dates in chronolo
 priority of the incident-reporting aggregation to show the most active dates first. The chronological order might show 
 a time-dependent pattern in incident count, and sorting by active dates can reveal particular outliers in your data.
 
+include::color-picker.asciidoc[]
+
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
