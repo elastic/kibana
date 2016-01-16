@@ -318,7 +318,7 @@ describe('kibana cli', function () {
         describe('remove option', function () {
 
           it('should set settings.action property to "remove"', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'package';
             parser = settingParser(options);
 
@@ -328,7 +328,7 @@ describe('kibana cli', function () {
           });
 
           it('should allow one part to the remove parameter', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'test-plugin';
             parser = settingParser(options);
 
@@ -338,7 +338,7 @@ describe('kibana cli', function () {
           });
 
           it('should not allow more than one part to the remove parameter', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'kibana/test-plugin';
             parser = settingParser(options);
 
@@ -347,7 +347,7 @@ describe('kibana cli', function () {
           });
 
           it('should populate the pluginPath', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'test-plugin';
             parser = settingParser(options);
 
