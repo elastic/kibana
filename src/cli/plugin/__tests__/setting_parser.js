@@ -76,11 +76,11 @@ describe('kibana cli', function () {
           options = { install: 'dummy/dummy', pluginDir: fromRoot('installedPlugins') };
         });
 
-        it('should require the user to specify either install and remove', function () {
+        it('should require the user to specify either install, remove, or list', function () {
           options.install = null;
           parser = settingParser(options);
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install or --remove./);
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
         });
 
         it('should not allow the user to specify both install and remove', function () {
@@ -88,7 +88,32 @@ describe('kibana cli', function () {
           options.install = 'org/package/version';
           parser = settingParser(options);
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install or --remove./);
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
+        });
+
+        it('should not allow the user to specify both install and list', function () {
+          options.list = true;
+          options.install = 'org/package/version';
+          parser = settingParser(options);
+
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
+        });
+
+        it('should not allow the user to specify both remove and list', function () {
+          options.list = true;
+          options.remove = 'package';
+          parser = settingParser(options);
+
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
+        });
+
+        it('should not allow the user to specify install, remove, and list', function () {
+          options.list = true;
+          options.install = 'org/package/version';
+          options.remove = 'package';
+          parser = settingParser(options);
+
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
         });
 
         describe('quiet option', function () {
