@@ -9,7 +9,9 @@ module.exports = function ({ Plugin }) {
   return new Plugin({
     require: ['kibana'],
 
-    config({ array, boolean, number, object, string }) {
+    config(Joi) {
+      const { array, boolean, number, object, string } = Joi;
+
       return object({
         enabled: boolean().default(true),
         url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
