@@ -334,6 +334,21 @@ describe('kibana cli', function () {
 
         });
 
+        describe('list option', function () {
+
+          it('should set settings.action property to "list"', function () {
+            delete options.install;
+            delete options.remove;
+            options.list = true;
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+
+            expect(settings).to.have.property('action', 'list');
+          });
+
+        });
+
       });
 
     });
