@@ -109,6 +109,9 @@ define(function (require) {
           .then(function () {
             return headerPage.getSpinnerDone(); // only matches the hidden spinner
           })
+          .then(function sleep() {
+            return common.sleep(4000);
+          })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
             common.saveScreenshot('./screenshot-' + testSubName + '.png');
