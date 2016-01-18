@@ -118,8 +118,8 @@ define(function (require) {
             common.debug('Waiting...');
             return headerPage.getSpinnerDone();
           })
-          .then(function sleep() {
-            return common.sleep(4000);
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
           })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');

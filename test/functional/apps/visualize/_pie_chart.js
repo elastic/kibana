@@ -111,8 +111,8 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
-          .then(function sleep() {
-            return common.sleep(4000);
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
           })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
