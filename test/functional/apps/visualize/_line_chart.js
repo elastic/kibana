@@ -104,6 +104,9 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
+          .then(function sleep() {
+            return common.sleep(4000);
+          })
           .then(function takeScreenshot() {
             // take a snapshot just as an example.
             common.debug('Take screenshot');
