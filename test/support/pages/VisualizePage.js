@@ -673,6 +673,12 @@ define(function (require) {
       });
     },
 
+    waitForVisualization: function waitForVisualization() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('visualize-legend');
+    }
+
   };
 
   return VisualizePage;

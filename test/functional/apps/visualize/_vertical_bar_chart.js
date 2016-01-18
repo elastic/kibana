@@ -80,8 +80,8 @@ define(function (require) {
         .then(function () {
           return headerPage.getSpinnerDone(); // only matches the hidden spinner
         })
-        .then(function sleep() {
-          return common.sleep(1000);
+        .then(function waitForVisualization() {
+          return visualizePage.waitForVisualization();
         });
       });
 
@@ -109,8 +109,8 @@ define(function (require) {
           .then(function () {
             return headerPage.getSpinnerDone(); // only matches the hidden spinner
           })
-          .then(function sleep() {
-            return common.sleep(4000);
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
           })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
