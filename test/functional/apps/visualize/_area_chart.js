@@ -118,6 +118,9 @@ define(function (require) {
             common.debug('Waiting...');
             return headerPage.getSpinnerDone();
           })
+          .then(function sleep() {
+            return common.sleep(10000);
+          })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
             common.saveScreenshot('./screenshot-' + testSubName + '.png');
