@@ -16,6 +16,7 @@ define(function (require) {
       // TODO: On array fields, negating does not negate the combination, rather all terms
       _.each(values, function (value) {
         var filter;
+
         var existing = _.find(filters, function (filter) {
           if (!filter) return;
 
@@ -65,8 +66,8 @@ define(function (require) {
                 }
               };
             } else {
-              filter = { meta: { negate: negate, index: index }, query: { match: {} } };
-              filter.query.match[fieldName] = { query: value, type: 'phrase' };
+              filter = { meta: { negate: negate, index: index }, match: {} };
+              filter.match[fieldName] = { query: value, type: 'phrase' };
             }
 
             break;
