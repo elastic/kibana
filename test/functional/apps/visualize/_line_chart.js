@@ -119,6 +119,7 @@ define(function (require) {
           // it could also check the legend to verify the extensions
           var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
+          // sleep a bit before trying to get the chart data
           return common.sleep(3000)
           .then(function () {
             return visualizePage.getLineChartData()

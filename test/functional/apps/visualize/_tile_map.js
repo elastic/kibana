@@ -107,6 +107,7 @@ define(function (require) {
           .then(function waitForVisualization() {
             return visualizePage.waitForVisualization();
           })
+          // sleep a bit before taking the screenshot or it won't show data
           .then(function sleep() {
             return common.sleep(4000);
           })

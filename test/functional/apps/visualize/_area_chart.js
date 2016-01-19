@@ -115,6 +115,9 @@ define(function (require) {
           .then(function () {
             return visualizePage.waitForVisualization();
           })
+          // We have to sleep sometime between loading the saved visTitle
+          // and trying to access the chart below with getXAxisLabels
+          // otherwise it hangs.
           .then(function sleep() {
             return common.sleep(2000);
           })
