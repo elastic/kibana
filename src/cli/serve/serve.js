@@ -42,6 +42,7 @@ function initServerSettings(opts, extraCliOptions) {
     set('env', 'development');
     set('optimize.lazy', true);
     if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
+      set('server.host', 'localhost');
       set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
       set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
     }

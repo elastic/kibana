@@ -3,6 +3,8 @@ import { notFound } from 'boom';
 import { merge, sample } from 'lodash';
 import { format as formatUrl } from 'url';
 import { fromNode } from 'bluebird';
+import { Agent as HttpsAgent } from 'https';
+import { readFileSync } from 'fs';
 
 import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
@@ -19,6 +21,14 @@ export default class BasePathProxy {
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
+
+    const { cert } = config.get('server.ssl.cert');
+    if (cert) {
+      this.proxyAgent = new HttpsAgent({
+        ca: readFileSync(cert)
+      });
+    }
+
     if (!this.basePath) {
       this.basePath = `/${sample(alphabet, 3).join('')}`;
       config.set('server.basePath', this.basePath);
@@ -47,10 +57,11 @@ export default class BasePathProxy {
         proxy: {
           passThrough: true,
           xforward: true,
+          agent: this.proxyAgent,
           mapUri(req, callback) {
             callback(null, formatUrl({
               protocol: server.info.protocol,
-              hostname: '0.0.0.0',
+              hostname: server.info.host,
               port: targetPort,
               pathname: req.params.kbnPath,
               query: req.query,
