@@ -11,14 +11,14 @@
  * The table panel contains a sortable, pagable view of documents that. It can be arranged into
  * defined columns and offers several interactions, such as performing adhoc terms aggregations.
  *
- */
+ */ 
 define([
   'angular',
   'app',
   'lodash',
   'kbn',
   'moment',
-  'jsonpath'
+  'jsonpath',
 ],
 function (angular, app, _, kbn, moment) {
   'use strict';
@@ -132,6 +132,7 @@ function (angular, app, _, kbn, moment) {
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
        * queries.ids::: In +selected+ mode, which query ids are selected.
        */
+      show: false,
       queries     : {
         mode        : 'all',
         ids         : []
@@ -270,9 +271,40 @@ function (angular, app, _, kbn, moment) {
     };
 
     $scope.toggle_details = function(row) {
+      
       row.kibana.details = row.kibana.details ? false : true;
       row.kibana.view = row.kibana.view || 'table';
       //row.kibana.details = !row.kibana.details ? $scope.without_kibana(row) : false;
+    };
+
+    $scope.toggle_all_details = function () {
+      var allRows = $scope.data;
+      _d.show = !_d.show;
+
+      for (var i = allRows.length - 1; i >= 0; i--) {
+        allRows[i].kibana.details = _d.show;
+        allRows[i].kibana.view = allRows[i].kibana.view || 'table';
+      }
+    };
+
+    $scope.is_info = function(row) {
+      return row._source.level ? row._source.level.toLowerCase() === 'info' : '';
+    };
+
+    $scope.is_warn = function(row) {
+      return row._source.level ? row._source.level.toLowerCase() === 'warn' : '';
+    };
+
+    $scope.is_error = function(row) {
+      return row._source.level ? row._source.level.toLowerCase() === 'error' : '';
+    };
+
+    $scope.is_debug = function(row) {
+      return row._source.level ? row._source.level.toLowerCase() === 'debug' : '';
+    };
+
+    $scope.is_xml= function(key) {
+      return key === 'request' || key === 'response';
     };
 
     $scope.page = function(page) {
@@ -406,6 +438,14 @@ function (angular, app, _, kbn, moment) {
           // Reverse if needed
           if($scope.panel.sort[1] === 'desc') {
             $scope.data.reverse();
+          }
+
+          for (var i = 0; i < $scope.data.length; i++) {
+            var item = $scope.data[i].kibana._source;
+            if (item.timestamp !== undefined) {
+               var updateDate = moment(item.timestamp).format("YYYY-MM-DD HH:mm:ss.SSS");
+               $scope.data[i].kibana._source.timestamp = updateDate;
+            }
           }
 
           // Keep only what we need for the set

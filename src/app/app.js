@@ -1,6 +1,7 @@
 /**
  * main app level module
  */
+
 define([
   'angular',
   'jquery',
@@ -8,12 +9,13 @@ define([
   'require',
   'elasticjs',
   'bootstrap',
+  'ahljs',
   'angular-sanitize',
   'angular-strap',
   'angular-dragdrop',
   'angular-cookies',
   'extend-jquery',
-  'bindonce',
+  'bindonce'
 ],
 function (angular, $, _, appLevelRequire) {
 
@@ -116,7 +118,8 @@ function (angular, $, _, appLevelRequire) {
     'ngDragDrop',
     'ngCookies',
     'kibana',
-    'pasvaz.bindonce'
+    'pasvaz.bindonce',
+    'hljs',
   ];
 
   _.each('controllers directives factories services filters'.split(' '),
