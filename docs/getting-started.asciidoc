@@ -195,7 +195,8 @@ yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb    
 [[tutorial-define-index]]
 === Defining Your Index Patterns
 
-Each set of data loaded to Elasticsearch has an <<settings-create-pattern,index pattern>>. In the previous section, the Shakespeare data set has an index named `shakespeare`, and the accounts 
+Each set of data loaded to Elasticsearch has an <<settings-create-pattern,index pattern>>. In the previous section, the 
+Shakespeare data set has an index named `shakespeare`, and the accounts 
 data set has an index named `bank`. An _index pattern_ is a string with optional wildcards that can match multiple 
 indices. For example, in the common logging use case, a typical index name contains the date in MM-DD-YYYY 
 format, and an index pattern for May would look something like `logstash-2015.05*`.
@@ -210,6 +211,9 @@ define a second index pattern named `ba*`.
 The Logstash data set does contain time-series data, so after clicking *Add New* to define the index for this data
 set, make sure the *Index contains time-based events* box is checked and select the `@timestamp` field from the 
 *Time-field name* drop-down.
+
+NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must 
+contain data.
 
 [float]
 [[tutorial-discovering]]
@@ -288,8 +292,10 @@ This shows you what proportion of the 1000 accounts fall in these balance ranges
 we're going to add another bucket aggregation. We can break down each of the balance ranges further by the account 
 holder's age.
 
-Click *Add sub-buckets* at the bottom, then select *Split Slices*. Choose the *Terms* aggregation and the *age* field from the drop-downs. 
-Click the green *Apply changes* button image:images/apply-changes-button.png[] to add an external ring with the new results.
+Click *Add sub-buckets* at the bottom, then select *Split Slices*. Choose the *Terms* aggregation and the *age* field from 
+the drop-downs. 
+Click the green *Apply changes* button image:images/apply-changes-button.png[] to add an external ring with the new 
+results.
 
 image::images/tutorial-visualize-pie-3.png[]
 
@@ -321,7 +327,8 @@ as well as change many other options for your visualizations, by clicking the *O
 Now that you have a list of the smallest casts for Shakespeare plays, you might also be curious to see which of these 
 plays makes the greatest demands on an individual actor by showing the maximum number of speeches for a given part. Add 
 a Y-axis aggregation with the *Add metrics* button, then choose the *Max* aggregation for the *speech_number* field. In 
-the *Options* tab, change the *Bar Mode* drop-down to *grouped*, then click the green *Apply changes* button image:images/apply-changes-button.png[]. Your 
+the *Options* tab, change the *Bar Mode* drop-down to *grouped*, then click the green *Apply changes* button 
+image:images/apply-changes-button.png[]. Your 
 chart should now look like this:
 
 image::images/tutorial-visualize-bar-3.png[]
@@ -371,7 +378,8 @@ Write the following text in the field:
 The Markdown widget uses **markdown** syntax.
 > Blockquotes in Markdown use the > character.
 
-Click the green *Apply changes* button image:images/apply-changes-button.png[] to display the rendered Markdown in the preview pane:
+Click the green *Apply changes* button image:images/apply-changes-button.png[] to display the rendered Markdown in the 
+preview pane:
 
 image::images/tutorial-visualize-md-2.png[]
 

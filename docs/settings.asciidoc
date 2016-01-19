@@ -35,10 +35,16 @@ list.
 contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index 
 mapping to list all of the fields that contain a timestamp.
 
+. By default, Kibana restricts wildcard expansion of time-based index patterns to indices with data within the currently 
+selected time range. Click *Do not expand index pattern when search* to disable this behavior.
+
 . Click *Create* to add the index pattern. 
 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite* 
 button. 
+
+NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must 
+contain data.
 
 To use an event time in an index name, enclose the static text in the pattern and specify the date format using the 
 tokens described in the following table.
@@ -194,6 +200,8 @@ the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format defini
 Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on 
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
 Scripted field values are computed at query time so they aren't indexed and cannot be searched.
+
+NOTE: Kibana cannot query scripted fields.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on 
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are 
@@ -449,10 +457,12 @@ To export a set of objects:
 . Click the selection box for the objects you want to export, or click the *Select All* box.
 . Click *Export* to select a location to write the exported JSON.
 
+WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before 
+importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
+
 To import a set of objects:
 
 . Go to *Settings > Objects*.
 . Click *Import* to navigate to the JSON file representing the set of objects to import.
 . Click *Open* after selecting the JSON file.
 . If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
-
