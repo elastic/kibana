@@ -87,7 +87,7 @@ define(function (require) {
 
       bdd.describe('tile map chart', function indexPatternCreation() {
 
-        bdd.it('should save and load', function pageHeader() {
+        bdd.it('should save and load, take screenshot', function pageHeader() {
           var testSubName = 'TileMap';
           common.debug('Start of test' + testSubName + 'Visualization');
           var vizName1 = 'Visualization ' + testSubName;
@@ -104,13 +104,17 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
-          .then(function waitForVisualization() {
-            return visualizePage.waitForVisualization();
+          .then(function sleep() {
+            return common.sleep(4000);
+          })
+          .then(function takeScreenshot() {
+            common.debug('Take screenshot');
+            common.saveScreenshot('./screenshot-' + testSubName + '.png');
           })
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show correct tile map data, take screenshot', function pageHeader() {
+        bdd.it('should show correct tile map data', function pageHeader() {
           var testSubName = 'TileMap';
           common.debug('Start of test' + testSubName + 'Visualization');
           // var remote = this.remote;
@@ -133,9 +137,8 @@ define(function (require) {
               expect(data.trim().split('\n')).to.eql(expectedTableData);
             });
           })
-          .then(function takeScreenshot() {
-            common.debug('Take screenshot');
-            common.saveScreenshot('./screenshot-' + testSubName + '.png');
+          .then(function () {
+            return visualizePage.collapseChart();
           })
           .catch(common.handleError(this));
         });
