@@ -41,6 +41,10 @@ function initServerSettings(opts, extraCliOptions) {
   if (opts.dev) {
     set('env', 'development');
     set('optimize.lazy', true);
+    if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
+      set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
+      set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
+    }
   }
 
   if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
@@ -101,6 +105,7 @@ module.exports = function (program) {
   if (canCluster) {
     command
     .option('--dev', 'Run the server with development mode defaults')
+    .option('--no-ssl', 'Don\'t run the dev server using HTTPS')
     .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
   }
 
