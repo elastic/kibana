@@ -97,12 +97,10 @@ define(function (require) {
       });
 
       bdd.describe('area charts', function indexPatternCreation() {
+        var testSubName = 'AreaChart';
+        var vizName1 = 'Visualization ' + testSubName;
 
-        bdd.it('should save and load, take screenshot', function pageHeader() {
-
-          var testSubName = 'AreaChart';
-          var vizName1 = 'Visualization ' + testSubName;
-
+        bdd.it('should save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
             common.debug('Saved viz message = ' + message);
@@ -114,9 +112,50 @@ define(function (require) {
           .then(function loadSavedVisualization() {
             return visualizePage.loadSavedVisualization(vizName1);
           })
-          .then(function getSpinnerDone() {
-            common.debug('Waiting...');
-            return headerPage.getSpinnerDone();
+          .then(function () {
+            return visualizePage.waitForVisualization();
+          })
+          // We have to sleep sometime between loading the saved visTitle
+          // and trying to access the chart below with getXAxisLabels
+          // otherwise it hangs.
+          .then(function sleep() {
+            return common.sleep(2000);
+          })
+          .catch(common.handleError(this));
+        });
+
+
+        bdd.it('should show correct chart, take screenshot', function pageHeader() {
+          var chartHeight = 0;
+          var xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
+            '2015-09-22 00:00', '2015-09-23 00:00'
+          ];
+          var yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
+          var expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
+            683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
+          ];
+
+          return common.tryForTime(5000, function () {
+            return visualizePage.getXAxisLabels()
+            .then(function compareLabels(labels) {
+              common.debug('X-Axis labels = ' + labels);
+              expect(labels).to.eql(xAxisLabels);
+            });
+          })
+          .then(function getYAxisLabels() {
+            return visualizePage.getYAxisLabels();
+          })
+          .then(function (labels) {
+            common.debug('Y-Axis labels = ' + labels);
+            expect(labels).to.eql(yAxisLabels);
+          })
+          .then(function getAreaChartData() {
+            return visualizePage.getAreaChartData();
+          })
+          .then(function (paths) {
+            common.debug('expectedAreaChartData = ' + expectedAreaChartData);
+            common.debug('actual chart data =     ' + paths);
+            expect(paths).to.eql(expectedAreaChartData);
           })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
@@ -127,7 +166,6 @@ define(function (require) {
 
 
         bdd.it('should show correct data', function pageHeader() {
-
           var expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
             'September 20th 2015, 03:00:00.000 202',
             'September 20th 2015, 06:00:00.000 740',
@@ -165,50 +203,10 @@ define(function (require) {
             common.debug('getDataTableData = ' + data.split('\n'));
             expect(data.trim().split('\n')).to.eql(expectedTableData);
           })
-          .then(function collapseChart() {
-            return visualizePage.collapseChart();
-          })
-          .then(function sleep() {
-            return common.sleep(2000);
-          })
           .catch(common.handleError(this));
         });
 
 
-        bdd.it('should show correct chart', function pageHeader() {
-
-          var chartHeight = 0;
-          var xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
-            '2015-09-22 00:00', '2015-09-23 00:00'
-          ];
-          var yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
-          var expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
-            683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
-          ];
-
-          return visualizePage.getXAxisLabels()
-          .then(function (labels) {
-            common.debug('X-Axis labels = ' + labels);
-            expect(labels).to.eql(xAxisLabels);
-          })
-          .then(function getYAxisLabels() {
-            return visualizePage.getYAxisLabels();
-          })
-          .then(function (labels) {
-            common.debug('Y-Axis labels = ' + labels);
-            expect(labels).to.eql(yAxisLabels);
-          })
-          .then(function getAreaChartData() {
-            //return common.tryForTime(500, function () {
-            return visualizePage.getAreaChartData();
-          })
-          .then(function (paths) {
-            common.debug('expectedAreaChartData = ' + expectedAreaChartData);
-            common.debug('actual chart data =     ' + paths);
-            expect(paths).to.eql(expectedAreaChartData);
-          })
-          .catch(common.handleError(this));
-        });
 
       });
     });

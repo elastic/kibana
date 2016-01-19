@@ -92,12 +92,12 @@ define(function (require) {
 
 
       bdd.describe('pie chart', function indexPatternCreation() {
+        var testSubName = 'PieChart';
+        var vizName1 = 'Visualization ' + testSubName;
 
 
-        bdd.it('should save and load, take screenshot', function pageHeader() {
-          var testSubName = 'PieChart';
+        bdd.it('should save and load', function pageHeader() {
           common.debug('Start of test' + testSubName + 'Visualization');
-          var vizName1 = 'Visualization ' + testSubName;
           var remote = this.remote;
 
           return visualizePage.saveVisualization(vizName1)
@@ -110,6 +110,26 @@ define(function (require) {
           })
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
+          })
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
+          })
+          // sleep a bit before trying to get the pie chart data below
+          .then(function sleep() {
+            return common.sleep(2000);
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should show 10 slices in pie chart, take screenshot', function pageHeader() {
+          var remote = this.remote;
+          var expectedPieChartSliceCount = 10;
+
+          return visualizePage.getPieChartData()
+          .then(function (pieData) {
+            var barHeightTolerance = 1;
+            common.debug('pieData.length = ' + pieData.length);
+            expect(pieData.length).to.be(expectedPieChartSliceCount);
           })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
@@ -135,28 +155,9 @@ define(function (require) {
             common.debug(data.split('\n'));
             expect(data.trim().split('\n')).to.eql(expectedTableData);
           })
-          // expandChart (toggle)
-          .then(function () {
-            return visualizePage.collapseChart();
-          })
-          .then(function sleep() {
-            return common.sleep(500);
-          })
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show 10 slices in pie chart', function pageHeader() {
-          var remote = this.remote;
-          var expectedPieChartSliceCount = 10;
-
-          return visualizePage.getPieChartData()
-          .then(function (pieData) {
-            var barHeightTolerance = 1;
-            common.debug('pieData.length = ' + pieData.length);
-            expect(pieData.length).to.be(expectedPieChartSliceCount);
-          })
-          .catch(common.handleError(this));
-        });
 
       });
     });
