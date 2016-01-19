@@ -1,10 +1,10 @@
-let _ = require('lodash');
-let { isWorker } = require('cluster');
-let { resolve } = require('path');
+const _ = require('lodash');
+const { isWorker } = require('cluster');
+const { resolve } = require('path');
 
-let cwd = process.cwd();
-let src = require('requirefrom')('src');
-let fromRoot = src('utils/fromRoot');
+const cwd = process.cwd();
+const src = require('requirefrom')('src');
+const fromRoot = src('utils/fromRoot');
 
 let canCluster;
 try {
@@ -14,19 +14,61 @@ try {
   canCluster = false;
 }
 
-let pathCollector = function () {
-  let paths = [];
+const pathCollector = function () {
+  const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
 };
 
-let pluginDirCollector = pathCollector();
-let pluginPathCollector = pathCollector();
+const pluginDirCollector = pathCollector();
+const pluginPathCollector = pathCollector();
+
+function initServerSettings(opts, extraCliOptions) {
+  const readYamlConfig = require('./read_yaml_config');
+  const settings = readYamlConfig(opts.config);
+  const set = _.partial(_.set, settings);
+  const get = _.partial(_.get, settings);
+  const has = _.partial(_.has, settings);
+  const merge = _.partial(_.merge, settings);
+
+  if (opts.dev) {
+    try { merge(readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
+    catch (e) { null; }
+  }
+
+  if (opts.dev) {
+    set('env', 'development');
+    set('optimize.lazy', true);
+    if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
+      set('server.host', 'localhost');
+      set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
+      set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
+    }
+  }
+
+  if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
+  if (opts.port) set('server.port', opts.port);
+  if (opts.host) set('server.host', opts.host);
+  if (opts.quiet) set('logging.quiet', true);
+  if (opts.silent) set('logging.silent', true);
+  if (opts.verbose) set('logging.verbose', true);
+  if (opts.logFile) set('logging.dest', opts.logFile);
+
+  set('plugins.scanDirs', _.compact([].concat(
+    get('plugins.scanDirs'),
+    opts.pluginDir
+  )));
+
+  set('plugins.paths', [].concat(opts.pluginPath || []));
+  merge(extraCliOptions);
+
+  return settings;
+}
 
 module.exports = function (program) {
-  let command = program.command('serve');
+  const command = program.command('serve');
 
   command
   .description('Run the kibana server')
@@ -70,59 +112,23 @@ module.exports = function (program) {
 
   command
   .action(async function (opts) {
+    const settings = initServerSettings(opts, this.getUnknownOptions());
+
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
-      let ClusterManager = require('../cluster/cluster_manager');
-      new ClusterManager(opts);
+      const ClusterManager = require('../cluster/cluster_manager');
+      new ClusterManager(opts, settings);
       return;
     }
 
-    let readYamlConfig = require('./read_yaml_config');
-    let KbnServer = src('server/KbnServer');
-
-    let settings = readYamlConfig(opts.config);
-
-    if (opts.dev) {
-      try { _.merge(settings, readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
-      catch (e) { null; }
-    }
-
-    let set = _.partial(_.set, settings);
-    let get = _.partial(_.get, settings);
-    const has = _.partial(_.has, settings);
-
-    if (opts.dev) {
-      set('env', 'development');
-      set('optimize.lazy', true);
-      if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
-        set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
-        set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
-      }
-    }
-
-    if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
-    if (opts.port) set('server.port', opts.port);
-    if (opts.host) set('server.host', opts.host);
-    if (opts.quiet) set('logging.quiet', true);
-    if (opts.silent) set('logging.silent', true);
-    if (opts.verbose) set('logging.verbose', true);
-    if (opts.logFile) set('logging.dest', opts.logFile);
-
-    set('plugins.scanDirs', _.compact([].concat(
-      get('plugins.scanDirs'),
-      opts.pluginDir
-    )));
-
-    set('plugins.paths', [].concat(opts.pluginPath || []));
-
     let kbnServer = {};
-
+    const KbnServer = src('server/KbnServer');
     try {
-      kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
+      kbnServer = new KbnServer(settings);
       await kbnServer.ready();
     }
     catch (err) {
-      let { server } = kbnServer;
+      const { server } = kbnServer;
 
       if (server) server.log(['fatal'], err);
       console.error('FATAL', err);
