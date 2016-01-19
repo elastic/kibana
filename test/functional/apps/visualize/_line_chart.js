@@ -85,12 +85,12 @@ define(function (require) {
       });
 
       bdd.describe('line charts', function indexPatternCreation() {
+        var testSubName = 'LineChart';
+        var vizName1 = 'Visualization ' + testSubName;
 
-        bdd.it('should be able to save and load, take screenshot', function pageHeader() {
+        bdd.it('should be able to save and load', function pageHeader() {
 
-          var testSubName = 'LineChart';
           common.debug('Start of test' + testSubName + 'Visualization');
-          var vizName1 = 'Visualization ' + testSubName;
           var remote = this.remote;
 
           return visualizePage.saveVisualization(vizName1)
@@ -107,16 +107,11 @@ define(function (require) {
           .then(function waitForVisualization() {
             return visualizePage.waitForVisualization();
           })
-          .then(function takeScreenshot() {
-            // take a snapshot just as an example.
-            common.debug('Take screenshot');
-            common.saveScreenshot('./screenshot-' + testSubName + '.png');
-          })
           .catch(common.handleError(this));
         });
 
 
-        bdd.it('should show correct chart', function pageHeader() {
+        bdd.it('should show correct chart, take screenshot', function pageHeader() {
 
           var remote = this.remote;
 
@@ -137,6 +132,11 @@ define(function (require) {
               }
               common.debug('Done');
             });
+          })
+          .then(function takeScreenshot() {
+            // take a snapshot just as an example.
+            common.debug('Take screenshot');
+            common.saveScreenshot('./screenshot-' + testSubName + '.png');
           })
           .catch(common.handleError(this));
         });

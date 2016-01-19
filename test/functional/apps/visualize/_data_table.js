@@ -101,10 +101,13 @@ define(function (require) {
             common.debug('Saved viz message = ' + message);
             expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
           })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return visualizePage.waitForToastMessageGone();
+          })
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
-          .then(function waitForVisualization() {
+          .then(function () {
             return visualizePage.waitForVisualization();
           })
           .then(function takeScreenshot() {
