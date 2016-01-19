@@ -1,10 +1,10 @@
-let _ = require('lodash');
-let { isWorker } = require('cluster');
-let { resolve } = require('path');
+const _ = require('lodash');
+const { isWorker } = require('cluster');
+const { resolve } = require('path');
 
-let cwd = process.cwd();
-let src = require('requirefrom')('src');
-let fromRoot = src('utils/fromRoot');
+const cwd = process.cwd();
+const src = require('requirefrom')('src');
+const fromRoot = src('utils/fromRoot');
 
 let canCluster;
 try {
@@ -14,24 +14,24 @@ try {
   canCluster = false;
 }
 
-let pathCollector = function () {
-  let paths = [];
+const pathCollector = function () {
+  const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
 };
 
-let pluginDirCollector = pathCollector();
-let pluginPathCollector = pathCollector();
+const pluginDirCollector = pathCollector();
+const pluginPathCollector = pathCollector();
 
 function initServerSettings(opts, extraCliOptions) {
-  let readYamlConfig = require('./read_yaml_config');
-  let settings = readYamlConfig(opts.config);
-  let set = _.partial(_.set, settings);
-  let get = _.partial(_.get, settings);
-  let has = _.partial(_.has, settings);
-  let merge = _.partial(_.merge, settings);
+  const readYamlConfig = require('./read_yaml_config');
+  const settings = readYamlConfig(opts.config);
+  const set = _.partial(_.set, settings);
+  const get = _.partial(_.get, settings);
+  const has = _.partial(_.has, settings);
+  const merge = _.partial(_.merge, settings);
 
   if (opts.dev) {
     try { merge(readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
@@ -63,7 +63,7 @@ function initServerSettings(opts, extraCliOptions) {
 }
 
 module.exports = function (program) {
-  let command = program.command('serve');
+  const command = program.command('serve');
 
   command
   .description('Run the kibana server')
@@ -110,19 +110,19 @@ module.exports = function (program) {
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
-      let ClusterManager = require('../cluster/cluster_manager');
+      const ClusterManager = require('../cluster/cluster_manager');
       new ClusterManager(opts, settings);
       return;
     }
 
     let kbnServer = {};
-    let KbnServer = src('server/KbnServer');
+    const KbnServer = src('server/KbnServer');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
     }
     catch (err) {
-      let { server } = kbnServer;
+      const { server } = kbnServer;
 
       if (server) server.log(['fatal'], err);
       console.error('FATAL', err);

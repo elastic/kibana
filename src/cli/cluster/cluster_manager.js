@@ -1,12 +1,12 @@
-let cluster = require('cluster');
-let { join } = require('path');
-let { format: formatUrl } = require('url');
-let Hapi = require('hapi');
-let { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
+const cluster = require('cluster');
+const { join } = require('path');
+const { format: formatUrl } = require('url');
+const Hapi = require('hapi');
+const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
-let Log = require('../Log');
-let Worker = require('./worker');
-let BasePathProxy = require('./base_path_proxy');
+const Log = require('../Log');
+const Worker = require('./worker');
+const BasePathProxy = require('./base_path_proxy');
 
 process.env.kbnWorkerType = 'managr';
 
@@ -64,9 +64,9 @@ module.exports = class ClusterManager {
   }
 
   setupWatching() {
-    var chokidar = require('chokidar');
-    let utils = require('requirefrom')('src/utils');
-    let fromRoot = utils('fromRoot');
+    const chokidar = require('chokidar');
+    const utils = require('requirefrom')('src/utils');
+    const fromRoot = utils('fromRoot');
 
     this.watcher = chokidar.watch([
       'src/plugins',
@@ -94,12 +94,12 @@ module.exports = class ClusterManager {
   }
 
   setupManualRestart() {
-    let readline = require('readline');
-    let rl = readline.createInterface(process.stdin, process.stdout);
+    const readline = require('readline');
+    const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;
-    let clear = () => nls = 0;
-    let clearSoon = debounce(clear, 2000);
+    const clear = () => nls = 0;
+    const clearSoon = debounce(clear, 2000);
 
     rl.setPrompt('');
     rl.prompt();
