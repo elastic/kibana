@@ -8,6 +8,10 @@ module.exports = class PluginApi {
     this.rootDir = kibana.rootDir;
     this.package = require(join(pluginPath, 'package.json'));
     this.Plugin = Plugin.scoped(kibana, pluginPath, this.package);
+
+    this.support = {
+      autoload: false
+    };
   }
 
   get uiExports() {
