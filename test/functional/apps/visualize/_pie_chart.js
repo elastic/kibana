@@ -114,6 +114,7 @@ define(function (require) {
           .then(function waitForVisualization() {
             return visualizePage.waitForVisualization();
           })
+          // sleep a bit before trying to get the pie chart data below
           .then(function sleep() {
             return common.sleep(2000);
           })
