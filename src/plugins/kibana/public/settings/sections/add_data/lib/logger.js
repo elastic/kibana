@@ -19,4 +19,4 @@ Logger.prototype.log = function(message, extra) {
   }
 }
 
-Logger.prototype.disableAll = true;
+Logger.prototype.disableAll = false;

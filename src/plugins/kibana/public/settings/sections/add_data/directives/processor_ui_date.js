@@ -12,11 +12,11 @@ require('../lib/processor_registry').register({
     return {
       'date' : {
         'processor_id': self.processorId,
-        'match_field' : self.sourceField,
-        'target_field' : self.targetField,
+        'match_field' : self.sourceField ? self.sourceField : '',
+        'target_field' : self.targetField ? self.targetField : '',
         'match_formats' : self.formats,
-        'timezone': self.timezone,
-        'locale': self.locale
+        'timezone': self.timezone ? self.timezone : '',
+        'locale': self.locale ? self.locale : ''
       }
     };
   },
@@ -36,34 +36,20 @@ app.directive('processorUiDate', function() {
     template: require('../views/processor_ui_date.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
-      const Logger = require('../lib/logger');
-      const logger = new Logger(processor, processor.title, false);
 
-      function consumeNewInputObject(event, message) {
-        if (message.processor !== processor) return;
-
-        logger.log('consuming new inputObject', processor.inputObject);
-
+      function consumeNewInputObject() {
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
-
-        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
-      function applyProcessor() {
-        logger.log('processor properties changed. force update');
-        $rootScope.$broadcast('processor_force_update', { processor: processor });
+      function processorUiChanged() {
+        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
-      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
-
-      $scope.$on('$destroy', () => {
-        inputObjectChangingListener();
-      });
       function selectableArray(array) {
         return array.map((item) => {
           return {
@@ -88,28 +74,31 @@ app.directive('processorUiDate', function() {
         });
 
         processor.formats = formats;
-        applyProcessor();
+        processorUiChanged();
       }
       updateFormats = debounce(updateFormats, 200);
 
       $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom']);
       $scope.timezones = ['UTC', 'Europe/Amsterdam', 'Load list from somewhere'];
       $scope.locales = ['ENGLISH', 'Load list from somewhere'];
+      processor.sourceField = '';
       processor.timezone = 'UTC';
       processor.locale = 'ENGLISH';
       processor.targetField = "@timestamp";
       $scope.customFormatSelected = false;
       $scope.updateFormats = updateFormats;
 
+      $scope.$watch('processor.inputObject', consumeNewInputObject);
+
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
-        applyProcessor();
+        processorUiChanged();
       });
 
       $scope.$watch('customFormat', updateFormats);
-      $scope.$watch('processor.targetField', applyProcessor);
-      $scope.$watch('processor.timezone', applyProcessor);
-      $scope.$watch('processor.locale', applyProcessor);
+      $scope.$watch('processor.targetField', processorUiChanged);
+      $scope.$watch('processor.timezone', processorUiChanged);
+      $scope.$watch('processor.locale', processorUiChanged);
     }
   }
 });

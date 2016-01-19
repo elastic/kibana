@@ -12,8 +12,8 @@ require('../lib/processor_registry').register({
     return {
       'set' : {
         'processor_id': self.processorId,
-        'field' : self.targetField,
-        'value': self.value
+        'field' : self.targetField ? self.targetField : '',
+        'value': self.value ? self.value : ''
       }
     };
   },
@@ -32,33 +32,13 @@ app.directive('processorUiSet', function () {
     template: require('../views/processor_ui_set.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
-      const Logger = require('../lib/logger');
-      const logger = new Logger(processor, processor.title, false);
 
-      function consumeNewInputObject(event, message) {
-        if (message.processor !== processor) return;
-
-        logger.log('consuming new inputObject', processor.inputObject);
-
-        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
+      function processorUiChanged() {
+        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
-      function applyProcessor() {
-        logger.log('processor properties changed. force update');
-        $rootScope.$broadcast('processor_force_update', { processor: processor });
-      }
-
-      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
-
-      $scope.$on('$destroy', () => {
-        inputObjectChangingListener();
-      });
-
-      processor.targetField = '';
-      processor.value = '';
-
-      $scope.$watch('processor.targetField', applyProcessor);
-      $scope.$watch('processor.value', applyProcessor);
+      $scope.$watch('processor.targetField', processorUiChanged);
+      $scope.$watch('processor.value', processorUiChanged);
     }
   }
 });

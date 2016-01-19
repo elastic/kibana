@@ -12,8 +12,8 @@ require('../lib/processor_registry').register({
     return {
       'split' : {
         'processor_id': self.processorId,
-        'field' : self.sourceField,
-        'separator' : self.separator
+        'field' : self.sourceField ? self.sourceField : '',
+        'separator' : self.separator ? self.separator : ''
       }
     };
   },
@@ -33,43 +33,31 @@ app.directive('processorUiSplit', function () {
     template: require('../views/processor_ui_split.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
-      const Logger = require('../lib/logger');
-      const logger = new Logger(processor, processor.title, false);
 
-      function consumeNewInputObject(event, message) {
-        if (message.processor !== processor) return;
-
-        logger.log('consuming new inputObject', processor.inputObject);
-
+      function consumeNewInputObject() {
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
-
-        $rootScope.$broadcast('processor_input_object_changed', { processor: processor });
       }
 
       function refreshFieldData() {
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
-      function applyProcessor() {
-        logger.log('processor properties changed. force update');
-        $rootScope.$broadcast('processor_force_update', { processor: processor });
+      function processorUiChanged() {
+        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
-      const inputObjectChangingListener = $scope.$on('processor_input_object_changing', consumeNewInputObject);
-
-      $scope.$on('$destroy', () => {
-        inputObjectChangingListener();
-      });
-
+      processor.sourceField = '';
       processor.separator = '';
+
+      $scope.$watch('processor.inputObject', consumeNewInputObject);
 
       $scope.$watch('processor.sourceField', () => {
         refreshFieldData();
-        applyProcessor();
+        processorUiChanged();
       });
 
-      $scope.$watch('processor.separator', applyProcessor);
+      $scope.$watch('processor.separator', processorUiChanged);
     }
   }
 });

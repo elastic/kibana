@@ -20,7 +20,7 @@ app.directive('processContainer', function ($compile) {
     controller: function ($scope, $rootScope) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
-      const logger = new Logger(`process_container(${processor.processorId})`, true);
+      const logger = new Logger(`process_container(${processor.processorId})`, false);
 
       function updateInputObject() {
         //checks to see if the parent is a basic object or a processor
@@ -30,7 +30,6 @@ app.directive('processContainer', function ($compile) {
           processor.inputObject = _.cloneDeep(processor.parent);
         }
         processor.updateDescription();
-        //processor.initialized = true;
 
         logger.log('updateInputObject', processor.inputObject);
       }

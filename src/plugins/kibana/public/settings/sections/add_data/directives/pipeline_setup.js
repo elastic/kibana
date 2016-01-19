@@ -24,6 +24,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         logger.log('simulatePipeline', pipeline);
         if (pipeline.processors.length === 0) {
           logger.log('simulatePipeline - zero-length pipeline', pipeline);
+          pipeline.updateOutput(undefined);
           return;
         }
 
@@ -31,15 +32,8 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         .then(function (result) {
           logger.log('simulatePipeline result', result);
 
-          //TODO: It is important that these resolve in order. Can not simply send the messages
-          //into the void and assume they will resolve in the correct order.
-          //
-          //OR: We could update the output and the input in two steps... first step, update all of the
-          //outputs... second step, update all of the inputs. Then we just need to know that they all happened,
-          //not that they happened in the right order.
           //However, once that has been proven to work, we need to uniquely identify a particular simulation so
           //we only listen to events from the latest one and ignore stale events
-
           result.forEach((processorResult) => {
             const processor = pipeline.getProcessorById(processorResult.processorId);
             nameThisWell.push(processor);

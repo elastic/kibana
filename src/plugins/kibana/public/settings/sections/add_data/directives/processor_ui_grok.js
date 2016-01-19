@@ -39,42 +39,31 @@ app.directive('processorUiGrok', function () {
     template: require('../views/processor_ui_grok.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
-      const Logger = require('../lib/logger');
-      const logger = new Logger(`processor_ui_grok(${processor.processorId})`, true);
 
       function consumeNewInputObject() {
-        logger.log('consumeNewInputObject', processor);
-
         $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
       }
 
       function refreshFieldData() {
-        logger.log('refreshFieldData', processor);
         $scope.fieldData = _.get(processor.inputObject, processor.sourceField);
       }
 
       function processorUiChanged() {
-        logger.log('processorUiChanged', processor);
-        logger.log('broadcast(processor_ui_changed)');
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
-      $scope.$watch('processor.inputObject', () => {
-        logger.log('$watch processor.inputObject', processor.inputObject);
-        consumeNewInputObject();
-      });
+      processor.sourceField = '';
+      processor.pattern = '';
+
+      $scope.$watch('processor.inputObject', consumeNewInputObject);
 
       $scope.$watch('processor.sourceField', () => {
-        logger.log('$watch processor.sourceField', processor.sourceField);
         refreshFieldData();
         processorUiChanged();
       });
 
-      $scope.$watch('processor.pattern', () => {
-        logger.log('$watch processor.pattern', processor.pattern);
-        processorUiChanged();
-      });
+      $scope.$watch('processor.pattern', processorUiChanged);
     }
   }
 });
