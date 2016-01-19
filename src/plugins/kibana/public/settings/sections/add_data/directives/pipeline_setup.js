@@ -21,23 +21,24 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
       const nameThisWell = [];
       function simulatePipeline(event, message) {
-        logger.log('simulatePipeline', pipeline);
+        //console.log(angular.toJson(pipeline, true));
+        //logger.log('simulatePipeline', pipeline);
         if (pipeline.processors.length === 0) {
-          logger.log('simulatePipeline - zero-length pipeline', pipeline);
+          //logger.log('simulatePipeline - zero-length pipeline', pipeline);
           pipeline.updateOutput(undefined);
           return;
         }
 
         ingest.simulatePipeline(pipeline)
         .then(function (result) {
-          logger.log('simulatePipeline result', result);
+          //logger.log('simulatePipeline result', result);
 
           //However, once that has been proven to work, we need to uniquely identify a particular simulation so
           //we only listen to events from the latest one and ignore stale events
           result.forEach((processorResult) => {
             const processor = pipeline.getProcessorById(processorResult.processorId);
             nameThisWell.push(processor);
-            logger.log('broadcast(pipeline_simulated)');
+            //logger.log('broadcast(pipeline_simulated)');
             $rootScope.$broadcast('pipeline_simulated', { processor: processor, result: processorResult });
           });
         });
@@ -45,7 +46,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       simulatePipeline = debounce(simulatePipeline, 200);
 
       function addProcessor(processor) {
-        logger.log('addProcessor');
+        //logger.log('addProcessor');
         const scope = $scope.$new();
         scope.processor = processor;
         scope.pipeline = pipeline;
@@ -57,7 +58,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       function removeProcessor(processor) {
-        logger.log('removeProcessor');
+        //logger.log('removeProcessor');
         const $el = $scope.$elements[processor.processorId];
         $el.slideUp(200, () => {
           $el.remove();
@@ -65,12 +66,12 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       function updateProcessorChain() {
-        logger.log('updateProcessorChain');
+        //logger.log('updateProcessorChain');
         pipeline.updateParents();
       }
 
       function reorderDom() {
-        logger.log('reorderDom');
+        //logger.log('reorderDom');
         const processors = pipeline.processors;
         const $parent = $scope.$el;
 
@@ -94,7 +95,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       $scope.$watchCollection('pipeline.processors', function (newVal, oldVal) {
-        logger.log('$watch pipeline.processors');
+        //logger.log('$watch pipeline.processors');
         var removed = _.difference(oldVal, newVal);
         var added = _.difference(newVal, oldVal);
 
@@ -107,31 +108,31 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       });
 
       $scope.$watch('sampleData', function(newVal) {
-        logger.log('$watch sampleData');
+        //logger.log('$watch sampleData');
         pipeline.rootObject = $scope.sampleData;
         updateProcessorChain();
         simulatePipeline();
       });
 
       function onProcessorSimulationConsumed(event, message) {
-        logger.log('on(processor_simulation_consumed)', message);
+        //logger.log('on(processor_simulation_consumed)', message);
 
         //remove processor from nameThisWell. If nameThisWell is empty, update the inputs.
         _.remove(nameThisWell, message.processor);
         if (nameThisWell.length === 0) {
-          logger.log('onProcessorSimulationConsumed - all processors reported in. Update inputObjects.');
+          //logger.log('onProcessorSimulationConsumed - all processors reported in. Update inputObjects.');
 
           pipeline.updateOutput();
 
           pipeline.processors.forEach((processor) => {
-            logger.log('broadcast(processor_update_input)');
+            //logger.log('broadcast(processor_update_input)');
             $rootScope.$broadcast('processor_update_input', { processor: processor });
           });
         }
       }
 
       function onProcessorUiChanged(event, message) {
-        logger.log('on(processor_ui_changed)', message);
+        //logger.log('on(processor_ui_changed)', message);
         simulatePipeline();
       }
 
@@ -145,6 +146,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       });
     },
     controller: function ($scope, AppState, ingest) {
+      const savedPipeline = require('../sample_pipeline.json');
       const types = require('../lib/processor_registry.js').all();
       const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
@@ -156,6 +158,14 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
       function getDefaultProcessorType() {
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
+      }
+
+      $scope.loadPipeline = function() {
+        pipeline.load(savedPipeline);
+      }
+
+      $scope.savePipeline = function() {
+        console.log(angular.toJson(pipeline, true));
       }
     }
   };

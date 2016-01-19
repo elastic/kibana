@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const Processor = require('./processor');
+const types = require('./processor_registry').all();
 
 export default function Pipeline() {
   const self = this;
@@ -7,7 +8,20 @@ export default function Pipeline() {
   self.processors = [];
   self.counter = 0;
   self.rootObject = {};
+  self.output = undefined;
 };
+
+Pipeline.prototype.load = function(pipeline) {
+  const self = this;
+
+  while (self.processors.length > 0) {
+    self.processors.pop();
+  }
+
+  pipeline.processors.forEach((processor) => {
+    self.add(null, processor);
+  });
+}
 
 Pipeline.prototype.remove = function(processor) {
   const self = this;
@@ -41,13 +55,39 @@ Pipeline.prototype.moveDown = function(processor) {
   processors[index] = temp;
 }
 
-Pipeline.prototype.add = function(processorType) {
+function remove(array, arrayToRemove) {
+  arrayToRemove.forEach((itemToRemove) => {
+    _.remove(array, (o) => {return o == itemToRemove});
+  });
+}
+
+Pipeline.prototype.add = function(processorType, existingProcessor) {
   const self = this;
   const processors = self.processors;
   self.counter += 1;
 
+  if (existingProcessor) {
+    console.log('existingProcessor', existingProcessor);
+    processorType = _.find(types, (o) => { return o.typeid === existingProcessor.typeid });
+  }
+
   const newProcessor = new Processor(processorType);
-  newProcessor.processorId = `processor_${self.counter}`; //Keep the processorId value a string.
+
+  if (existingProcessor) {
+    const keys = _.keys(existingProcessor);
+    remove(keys, ['title', 'template', 'typeid', 'processorId', 'outputObject', 'inputObject', 'description']);
+    keys.forEach((key) => {
+      // if (key === 'formats') {
+      //   debugger;
+      // }
+      _.set(newProcessor, key, _.get(existingProcessor, key));
+    });
+  }
+
+  console.log('New Processor: ', newProcessor);
+
+  //Keep the processorId value a string. This is used as a property index.
+  newProcessor.processorId = `processor_${self.counter}`;
   processors.push(newProcessor);
 }
 

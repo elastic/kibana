@@ -1,0 +1,78 @@
+{
+  "processors": [
+    {
+      "typeid": "set",
+      "title": "Set",
+      "template": "<processor-ui-set></processor-ui-set>",
+      "parent": {
+        "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+      },
+      "targetField": "date_text",
+      "value": "07/05/1979",
+      "processorId": "processor_1",
+      "outputObject": {
+        "date_text": "07/05/1979",
+        "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+      },
+      "inputObject": {
+        "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+      },
+      "description": "[date_text]"
+    },
+    {
+      "typeid": "date",
+      "title": "Date",
+      "template": "<processor-ui-date></processor-ui-date>",
+      "formats": [
+        "ISO8601",
+        "UNIX_MS",
+        "TAI64N",
+        "Custom"
+      ],
+      "sourceField": "date_text",
+      "timezone": "UTC",
+      "locale": "ENGLISH",
+      "targetField": "@timestamp",
+      "customFormat": "dd/MM/yyyy",
+      "parent": {
+        "typeid": "set",
+        "title": "Set",
+        "template": "<processor-ui-set></processor-ui-set>",
+        "parent": {
+          "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+        },
+        "targetField": "date_text",
+        "value": "07/05/1979",
+        "processorId": "processor_1",
+        "outputObject": {
+          "date_text": "07/05/1979",
+          "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+        },
+        "inputObject": {
+          "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+        },
+        "description": "[date_text]"
+      },
+      "processorId": "processor_2",
+      "inputObject": {
+        "date_text": "07/05/1979",
+        "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+      },
+      "description": "[date_text] -> [@timestamp]",
+      "outputObject": {
+        "@timestamp": "1979-05-07T00:00:00.000Z",
+        "date_text": "07/05/1979",
+        "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+      }
+    }
+  ],
+  "counter": 2,
+  "rootObject": {
+    "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+  },
+  "output": {
+    "@timestamp": "1979-05-07T00:00:00.000Z",
+    "date_text": "07/05/1979",
+    "field2": "Tue Jan 19 2016 14:49:57 GMT-0600 (Central Standard Time)"
+  }
+}

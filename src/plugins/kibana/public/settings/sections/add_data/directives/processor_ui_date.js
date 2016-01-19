@@ -2,19 +2,38 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
+const selectableArray = require('../lib/selectable_array');
 
 require('../lib/processor_registry').register({
   typeid: 'date',
   title: 'Date',
   template: '<processor-ui-date></processor-ui-date>',
+  formats: [],
+  sourceField: '',
+  timezone: 'UTC',
+  locale: 'ENGLISH',
+  targetField: '@timestamp',
+  customFormat: '',
   getDefinition: function() {
     const self = this;
+
+    const formats = [];
+    self.formats.forEach((format) => {
+      if (format === 'Custom') {
+        if (self.customFormat) {
+          formats.push(self.customFormat);
+        }
+      } else {
+        formats.push(format);
+      }
+    });
+
     return {
       'date' : {
         'processor_id': self.processorId,
         'match_field' : self.sourceField ? self.sourceField : '',
         'target_field' : self.targetField ? self.targetField : '',
-        'match_formats' : self.formats,
+        'match_formats' : formats,
         'timezone': self.timezone ? self.timezone : '',
         'locale': self.locale ? self.locale : ''
       }
@@ -50,42 +69,23 @@ app.directive('processorUiDate', function() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
-      function selectableArray(array) {
-        return array.map((item) => {
-          return {
-            title: item,
-            selected: false
-          };
-        });
-      }
-
       function updateFormats() {
-        const formats = [];
-        $scope.customFormatSelected = false;
-        $scope.formats.forEach((format) => {
-          if (format.selected) {
-            if (format.title === 'Custom') {
-              $scope.customFormatSelected = true;
-              formats.push($scope.customFormat);
-            } else {
-              formats.push(format.title);
-            }
-          }
+        const selectedFormats = $scope.formats.map((o) => {
+          if (!o.selected) return;
+          return o.title;
         });
+        processor.formats = _.compact(selectedFormats);
 
-        processor.formats = formats;
+        $scope.customFormatSelected = !_.isUndefined(_.find(processor.formats, (o) => {
+          return o === 'Custom';
+        }));
         processorUiChanged();
       }
       updateFormats = debounce(updateFormats, 200);
 
-      $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom']);
+      $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom'], processor.formats);
       $scope.timezones = ['UTC', 'Europe/Amsterdam', 'Load list from somewhere'];
       $scope.locales = ['ENGLISH', 'Load list from somewhere'];
-      processor.sourceField = '';
-      processor.timezone = 'UTC';
-      processor.locale = 'ENGLISH';
-      processor.targetField = "@timestamp";
-      $scope.customFormatSelected = false;
       $scope.updateFormats = updateFormats;
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

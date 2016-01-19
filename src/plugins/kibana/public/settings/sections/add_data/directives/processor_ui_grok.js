@@ -8,6 +8,8 @@ require('../lib/processor_registry').register({
   typeid: 'grok',
   title: 'Grok',
   template: '<processor-ui-grok></processor-ui-grok>',
+  sourceField: '',
+  pattern: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -52,9 +54,6 @@ app.directive('processorUiGrok', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
-      processor.pattern = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 
