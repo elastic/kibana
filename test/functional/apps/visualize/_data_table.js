@@ -90,12 +90,10 @@ define(function (require) {
 
 
       bdd.describe('data table', function indexPatternCreation() {
+        var testSubName = 'DataTable';
+        var vizName1 = 'Visualization ' + testSubName;
 
-        bdd.it('should be able to save and load, take screenshot', function pageHeader() {
-
-          var testSubName = 'DataTable';
-          var vizName1 = 'Visualization ' + testSubName;
-
+        bdd.it('should be able to save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
             common.debug('Saved viz message = ' + message);
@@ -110,16 +108,11 @@ define(function (require) {
           .then(function () {
             return visualizePage.waitForVisualization();
           })
-          .then(function takeScreenshot() {
-            common.debug('Take screenshot');
-            common.saveScreenshot('./screenshot-' + testSubName + '.png');
-          })
           .catch(common.handleError(this));
         });
 
 
-        bdd.it('should show correct data', function pageHeader() {
-
+        bdd.it('should show correct data, take screenshot', function pageHeader() {
           var chartHeight = 0;
           var expectedChartData = [ '0 2,088', '2,000 2,748', '4,000 2,707', '6,000 2,876',
           '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
@@ -129,6 +122,10 @@ define(function (require) {
           .then(function showData(data) {
             common.debug(data.split('\n'));
             expect(data.split('\n')).to.eql(expectedChartData);
+          })
+          .then(function takeScreenshot() {
+            common.debug('Take screenshot');
+            common.saveScreenshot('./screenshot-' + testSubName + '.png');
           })
           .catch(common.handleError(this));
         });
