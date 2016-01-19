@@ -22,7 +22,7 @@ export default class BasePathProxy {
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
 
-    const { cert } = config.get('server.ssl.cert');
+    const { cert } = config.get('server.ssl');
     if (cert) {
       this.proxyAgent = new HttpsAgent({
         ca: readFileSync(cert)
