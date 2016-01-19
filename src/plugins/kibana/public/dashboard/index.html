@@ -1,5 +1,5 @@
 <div dashboard-app class="app-container dashboard-container">
-  <navbar ng-show="chrome.getVisible()">
+  <navbar ng-show="chrome.getVisible()" name="dashboard">
     <span class="name" ng-if="dash.id" ng-bind="::dash.title" tooltip="{{::dash.title}}"></span>
 
     <form name="queryInput"
