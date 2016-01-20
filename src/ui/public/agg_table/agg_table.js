@@ -26,8 +26,6 @@ define(function (require) {
       controller: function ($scope) {
         var self = this;
 
-        // Do I need this code?
-        self.sort = $scope.sort || null;
         self._saveAs = require('@spalger/filesaver').saveAs;
         self.csv = {
           separator: config.get('csv:separator'),

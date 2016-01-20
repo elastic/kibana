@@ -9,6 +9,7 @@ define(function (require) {
 
       this.$scope = $rootScope.$new();
       this.$scope.vis = vis;
+      this.$scope.uiState = uiState;
 
       $el.html($compile(this.vis.type.template)(this.$scope));
     }

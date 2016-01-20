@@ -57,6 +57,13 @@ define(function (require) {
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
+        var uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
+        _.assign($scope.vis.params.sort, uiStateSort);
+
+        $scope.$watchCollection('vis.params.sort', function (newSort) {
+          $scope.uiState.set('vis.params.sort', newSort);
+        });
+
         var applyClassNames = function () {
           var $visEl = getVisContainer();
           var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
@@ -156,11 +163,6 @@ define(function (require) {
           if (oldRenderbot && newRenderbot !== oldRenderbot) {
             oldRenderbot.destroy();
           }
-        });
-
-        // Enable the visualizations to update the the vis.params
-        $scope.$on('updateParams', function (evt, params) {
-          _.assign($scope.editableVis.params, params);
         });
 
         $scope.$on('$destroy', function () {

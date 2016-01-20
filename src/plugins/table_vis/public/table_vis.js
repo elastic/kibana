@@ -17,7 +17,7 @@ define(function (require) {
 
   // define the TableVisType
   function TableVisTypeProvider(Private) {
-    var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
     var Schemas = Private(require('ui/Vis/Schemas'));
 
     // define the TableVisController which is used in the template

@@ -9,7 +9,7 @@ define(function (require) {
   require('ui/registry/vis_types').register(MetricVisProvider);
 
   function MetricVisProvider(Private) {
-    var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
     var Schemas = Private(require('ui/Vis/Schemas'));
 
     // return the visType object, which kibana will use to display and configure new

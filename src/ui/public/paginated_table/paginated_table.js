@@ -3,6 +3,7 @@ define(function (require) {
   .get('kibana')
   .directive('paginatedTable', function ($filter) {
     var _ = require('lodash');
+    var angular = require('angular');
     var orderBy = $filter('orderBy');
 
     return {
@@ -46,14 +47,9 @@ define(function (require) {
 
           self.sort.columnIndex = colIndex;
           self.sort.direction = sortDirection;
-          // Tell the vis it's time to update it's params
-          // FIXME, why the hell doesn't $scope.$emit work?!?!?!
-          $scope.$root.$broadcast('updateParams', {
-            sort: {
-              columnIndex: colIndex,
-              direction: sortDirection
-            }
-          });
+          if ($scope.sort) {
+            _.assign($scope.sort, self.sort);
+          }
           self._setSortGetter(colIndex);
         };
 
@@ -76,12 +72,20 @@ define(function (require) {
           self.sortColumn($scope.sort.columnIndex, $scope.sort.direction);
         }
 
+        $scope.$watchCollection('sort', function (newSort) {
+          if (!angular.equals(newSort, self.sort)) {
+            self.sortColumn(newSort.columnIndex, newSort.direction);
+            resortRows();
+          }
+        });
+
         // update the sordedRows result
         $scope.$watchMulti([
           'rows',
           'columns',
           '[]paginatedTable.sort'
-        ], function resortRows() {
+        ], resortRows);
+        function resortRows() {
           if (!$scope.rows || !$scope.columns) {
             $scope.sortedRows = false;
             return;
@@ -93,7 +97,7 @@ define(function (require) {
           } else {
             $scope.sortedRows = orderBy($scope.rows, sort.getter, sort.direction === 'desc');
           }
-        });
+        }
       }
     };
   });

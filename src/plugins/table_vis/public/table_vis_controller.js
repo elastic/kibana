@@ -8,6 +8,10 @@ define(function (require) {
   module.controller('KbnTableVisController', function ($scope, Private) {
     var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
+    $scope.sort = $scope.vis.params.sort;
+    $scope.$watchCollection('sort', function (newSort) {
+      $scope.uiState.set('vis.params.sort', newSort);
+    });
     $scope.$watch('esResponse', function (resp, oldResp) {
       var tableGroups = $scope.tableGroups = null;
       var hasSomeRows = $scope.hasSomeRows = null;
