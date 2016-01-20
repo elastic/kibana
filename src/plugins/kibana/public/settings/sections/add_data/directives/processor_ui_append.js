@@ -15,7 +15,7 @@ require('../lib/processor_registry').register({
       'append' : {
         'processor_id': self.processorId,
         'field' : self.targetField ? self.targetField : '',
-        'values': self.values
+        'value': self.values
       }
     };
   },
@@ -38,6 +38,22 @@ app.directive('processorUiAppend', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
+
+      function splitValues(delimitedList) {
+        return delimitedList.split('\n');
+      }
+
+      function joinValues(valueArray) {
+        return valueArray.join('\n');
+      }
+
+      function updateValues() {
+        processor.values = splitValues($scope.values);
+      }
+
+      $scope.values = joinValues(processor.values);
+
+      $scope.$watch('values', updateValues);
 
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watchCollection('processor.values', processorUiChanged);
