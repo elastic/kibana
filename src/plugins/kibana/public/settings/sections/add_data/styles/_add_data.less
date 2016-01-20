@@ -165,9 +165,25 @@ kbn-settings-add-data {
       }
     }
 
-    pre.output {
-      max-height: 100px;
-      min-height: 100px;
+    output-preview {
+      .visual {
+        max-height: 125px;
+        min-height: 125px;
+        overflow-y: scroll;
+        background-color: #ecf0f1;
+        border: 1px solid #ccc;
+      }
+
+      pre {
+        background-color: transparent;
+        border: none;
+      }
+
+      .hide-unchanged {
+        .jsondiffpatch-unchanged {
+          display: none;
+        }
+      }
     }
 
     .custom-date-format {

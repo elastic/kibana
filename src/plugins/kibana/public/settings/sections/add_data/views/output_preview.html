@@ -1,1 +1,14 @@
-<pre class="output">{{ newObject | json }}</pre>
+<div class="form-group">
+  <label>Processor Changes:</label>
+  <a
+    style="float: right"
+    ng-click="showAll = false"
+    ng-show="showAll">show changes</a>
+  <a
+    style="float: right"
+    ng-click="showAll = true"
+    ng-hide="showAll">show all</a>
+  <div
+    class="visual"
+    ng-class="{'hide-unchanged': !showAll}"></div>
+</div>

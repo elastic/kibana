@@ -109,6 +109,7 @@
     "js-yaml": "3.4.1",
     "json-loader": "0.5.3",
     "json-stringify-safe": "5.0.1",
+    "jsondiffpatch": "0.1.38",
     "jstimezonedetect": "1.0.5",
     "leaflet": "0.7.5",
     "less": "2.5.1",
