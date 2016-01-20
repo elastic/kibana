@@ -96,13 +96,16 @@ module.exports = function (kibana) {
         }
       });
 
-      server.route({
-        path: '/app/sense-tests',
-        method: 'GET',
-        handler: function (req, reply) {
-          return reply.renderApp(kibana.uiExports.apps.hidden.byId['sense-tests']);
-        }
-      });
+      const testApp = kibana.uiExports.apps.hidden.byId['sense-tests'];
+      if (testApp) {
+        server.route({
+          path: '/app/sense-tests',
+          method: 'GET',
+          handler: function (req, reply) {
+            return reply.renderApp(testApp);
+          }
+        });
+      }
     },
 
     uiExports: {
