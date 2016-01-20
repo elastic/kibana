@@ -3,7 +3,6 @@ define(function (require) {
   // are used to create the nav bar
   return [
     require('plugins/kibana/settings/sections/indices/index'),
-    require('plugins/kibana/settings/sections/data/index'),
     require('plugins/kibana/settings/sections/advanced/index'),
     require('plugins/kibana/settings/sections/objects/index'),
     require('plugins/kibana/settings/sections/status/index'),

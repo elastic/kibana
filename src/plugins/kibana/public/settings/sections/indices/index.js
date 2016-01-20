@@ -3,6 +3,7 @@ define(function (require) {
 
   require('plugins/kibana/settings/sections/indices/directives/kbn_settings_indices');
   require('plugins/kibana/settings/sections/indices/_create');
+  require('plugins/kibana/settings/sections/indices/filebeat/index');
   require('plugins/kibana/settings/sections/indices/_edit');
   require('plugins/kibana/settings/sections/indices/_field_editor');
 
