@@ -35,7 +35,6 @@ define(function (require) {
     getChartTimespan: function getChartTimespan() {
       return thisTime
       .findByCssSelector('center.small > span:nth-child(1)')
-      // .findByCssSelector('center.small > span.ng-binding')
       .getVisibleText();
     },
 

@@ -253,7 +253,6 @@ define(function (require) {
           return common.tryForTime(20 * 1000, function tryingForTime() {
             return discoverPage.getBarChartData()
             .then(function compareData(paths) {
-              // console.log(paths);
               // the largest bars are over 100 pixels high so this is less than 1% tolerance
               var barHeightTolerance = 1;
               var stringResults = '';
@@ -267,6 +266,7 @@ define(function (require) {
               };
               if (hasFailure) {
                 common.log(stringResults);
+                common.log(paths);
               }
               for (var x = 0; x < expectedBarChartData.length; x++) {
                 expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
