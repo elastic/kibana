@@ -27,7 +27,6 @@ rules:
   new-cap: [0]
   wrap-iife: [0]
   eqeqeq: [0]
-  no-use-before-define: [0]
   no-else-return: [0]
   indent: [0]
   spaced-comment: [0]
