@@ -1,7 +1,7 @@
-
 {
   "processors": [
     {
+      "collapsed": true,
       "typeid": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
@@ -11,6 +11,7 @@
       "description": "[_raw] -> [message], [source]"
     },
     {
+      "collapsed": true,
       "typeid": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
@@ -20,6 +21,7 @@
       "description": "[message] -> [action], [datestamp], [document], [extended_response_code], [protocol], [response_code]"
     },
     {
+      "collapsed": true,
       "typeid": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
@@ -29,6 +31,7 @@
       "description": "[datestamp] -> [timestamp], [timezone]"
     },
     {
+      "collapsed": true,
       "typeid": "date",
       "title": "Date",
       "template": "<processor-ui-date></processor-ui-date>",
@@ -44,6 +47,7 @@
       "description": "[timestamp] -> [timestamp]"
     },
     {
+      "collapsed": true,
       "typeid": "set",
       "title": "Set",
       "template": "<processor-ui-set></processor-ui-set>",
@@ -53,6 +57,7 @@
       "description": "[tags_text]"
     },
     {
+      "collapsed": true,
       "typeid": "trim",
       "title": "Trim",
       "template": "<processor-ui-trim></processor-ui-trim>",
@@ -61,6 +66,7 @@
       "description": "[tags_text]"
     },
     {
+      "collapsed": true,
       "typeid": "gsub",
       "title": "Gsub",
       "template": "<processor-ui-gsub></processor-ui-gsub>",
@@ -71,6 +77,7 @@
       "description": "[tags_text] - '\\s' -> ','"
     },
     {
+      "collapsed": true,
       "typeid": "uppercase",
       "title": "Uppercase",
       "template": "<processor-ui-uppercase></processor-ui-uppercase>",
@@ -79,6 +86,7 @@
       "description": "[tags_text]"
     },
     {
+      "collapsed": true,
       "typeid": "split",
       "title": "Split",
       "template": "<processor-ui-split></processor-ui-split>",
@@ -88,6 +96,7 @@
       "description": "[tags_text] on ','"
     },
     {
+      "collapsed": true,
       "typeid": "rename",
       "title": "Rename",
       "template": "<processor-ui-rename></processor-ui-rename>",
@@ -97,6 +106,7 @@
       "description": "[tags_text] -> [tags]"
     },
     {
+      "collapsed": true,
       "typeid": "lowercase",
       "title": "Lowercase",
       "template": "<processor-ui-lowercase></processor-ui-lowercase>",
@@ -105,6 +115,7 @@
       "description": "[document]"
     },
     {
+      "collapsed": true,
       "typeid": "geoip",
       "title": "Geo IP",
       "template": "<processor-ui-geoip></processor-ui-geoip>",
@@ -114,6 +125,7 @@
       "description": "[source] -> [source_geoip]"
     },
     {
+      "collapsed": true,
       "typeid": "append",
       "title": "Append",
       "template": "<processor-ui-append></processor-ui-append>",
@@ -132,6 +144,7 @@
       "description": "[sentence]"
     },
     {
+      "collapsed": true,
       "typeid": "join",
       "title": "Join",
       "template": "<processor-ui-join></processor-ui-join>",
@@ -141,6 +154,7 @@
       "description": "[sentence] on ' '"
     },
     {
+      "collapsed": false,
       "typeid": "remove",
       "title": "Remove",
       "template": "<processor-ui-remove></processor-ui-remove>",
@@ -149,43 +163,8 @@
       "description": "[_raw]"
     }
   ],
-  "counter": 15,
-  "rootObject": {
-    "_raw": "64.242.88.10 - - [07/Mar/2004:16:53:46 -0800] \"GET /twiki/bin/rdiff/TWiki/TWikiRegistration HTTP/1.1\" 200 34395",
-    "field4": "Tue Jan 19 2016 15:40:52 GMT-0600 (Central Standard Time)"
-  },
-  "output": {
-    "sentence": "i am the words of a new sentence",
-    "response_code": "200",
-    "extended_response_code": "34395",
-    "timezone": "-0800",
-    "document": "/twiki/bin/rdiff/twiki/twikiregistration",
-    "source": "64.242.88.10",
-    "message": "[07/Mar/2004:16:53:46 -0800] \"GET /twiki/bin/rdiff/TWiki/TWikiRegistration HTTP/1.1\" 200 34395",
-    "tags": [
-      "NEW",
-      "HOT",
-      "SUPER",
-      "DUPER"
-    ],
-    "datestamp": "07/Mar/2004:16:53:46 -0800",
-    "protocol": "HTTP/1.1",
-    "source_geoip": {
-      "continent_name": "North America",
-      "city_name": "Chesterfield",
-      "country_iso_code": "US",
-      "region_name": "Missouri",
-      "location": [
-        -90.5771,
-        38.6631
-      ]
-    },
-    "action": "GET",
-    "field4": "Tue Jan 19 2016 15:40:52 GMT-0600 (Central Standard Time)",
-    "timestamp": "2004-01-07T16:53:46.000Z"
-  }
+  "counter": 15
 }
-
 
 {
   "processors": [

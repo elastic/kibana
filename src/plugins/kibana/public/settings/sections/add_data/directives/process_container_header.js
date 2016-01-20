@@ -8,10 +8,8 @@ app.directive('processContainerHeader', function () {
     scope: {
       processor: '=',
       field: '=',
-      collapsed: '=',
       pipeline: '='
     },
-    template: require('../views/process_container_header.html'),
-    controller: function ($scope) {}
+    template: require('../views/process_container_header.html')
   };
 });

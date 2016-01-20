@@ -3,12 +3,11 @@
   <process-container-header
     processor="processor"
     field="sourceField"
-    collapsed="contentCollapsed"
     pipeline="pipeline">
   </process-container-header>
   <div
     class="process-container-content"
-    ng-hide="contentCollapsed">
+    ng-hide="processor.collapsed">
     <div
       ng-show="processor.errorMessage"
       class="alert alert-danger">
