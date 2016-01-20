@@ -32,6 +32,13 @@ define(function (require) {
       .getVisibleText();
     },
 
+    getChartTimespan: function getChartTimespan() {
+      return thisTime
+      .findByCssSelector('center.small > span:nth-child(1)')
+      // .findByCssSelector('center.small > span.ng-binding')
+      .getVisibleText();
+    },
+
     saveSearch: function saveSearch(searchName) {
       var self = this;
       return self.clickSaveSearchButton()
@@ -85,7 +92,6 @@ define(function (require) {
     },
 
     getBarChartData: function getBarChartData() {
-      common.debug('in getBarChartData');
       return thisTime
       .findAllByCssSelector('rect[data-label="Count"]')
       .then(function (chartData) {
@@ -101,7 +107,29 @@ define(function (require) {
       .then(function (bars) {
         return bars;
       });
+    },
+
+    getChartInterval: function getChartInterval() {
+      return thisTime
+      .findByCssSelector('span.results-interval:nth-child(2) > a:nth-child(1)')
+      .getVisibleText();
+    },
+
+    setChartInterval: function setChartInterval(interval) {
+      return thisTime
+      .findByCssSelector('span.results-interval:nth-child(2) > a:nth-child(1)')
+      .click()
+      .catch(function () {
+        // in some cases we have the link above, but after we've made a
+        // selection we just have a select list.
+      })
+      .then(function () {
+        return thisTime
+        .findByCssSelector('option[label="' + interval + '"]')
+        .click();
+      });
     }
+
 
   };
 
