@@ -28,6 +28,7 @@ let typeColors = {
   debug: 'brightBlack',
   server: 'brightBlack',
   optmzr: 'white',
+  managr: 'green',
   optimize: 'magenta',
   listening: 'magenta'
 };
