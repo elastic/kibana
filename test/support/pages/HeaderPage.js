@@ -142,11 +142,6 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout * 10)
       .findByCssSelector('span.spinner.ng-hide');
-      // .then(function () {
-      //   return self.remote
-      //   .setFindTimeout(defaultTimeout * 10)
-      //   .findByCssSelector('div.spinner.large.ng-hide');
-      // });
     }
 
   };

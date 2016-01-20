@@ -1,10 +1,10 @@
 import { resolve } from 'path';
 import { fromNode as fn } from 'bluebird';
 import expect from 'expect.js';
+import requirefrom from 'requirefrom';
 
-import KbnServer from '../KbnServer';
-
-const src = resolve.bind(__dirname, '../../');
+const requireFromTest = requirefrom('test');
+const kbnTestServer = requireFromTest('utils/kbn_server');
 const basePath = '/kibana';
 
 describe('Server basePath config', function () {
@@ -13,14 +13,8 @@ describe('Server basePath config', function () {
 
   let kbnServer;
   before(async function () {
-    kbnServer = new KbnServer({
-      server: { autoListen: false, basePath },
-      plugins: { scanDirs: [src('plugins')] },
-      logging: { quiet: true },
-      optimize: { enabled: false },
-      elasticsearch: {
-        url: 'http://localhost:9210'
-      }
+    kbnServer = kbnTestServer.createServer({
+      server: { basePath }
     });
     await kbnServer.ready();
     return kbnServer;
@@ -30,12 +24,18 @@ describe('Server basePath config', function () {
     await kbnServer.close();
   });
 
-  it('appends the basePath to root redirect', async function () {
-    const response = await kbnServer.inject({
+  it('appends the basePath to root redirect', function (done) {
+    const options = {
       url: '/',
       method: 'GET'
+    };
+    kbnTestServer.makeRequest(kbnServer, options, function (res) {
+      try {
+        expect(res.payload).to.match(/defaultRoute = '\/kibana\/app\/kibana'/);
+        done();
+      } catch (e) {
+        done(e);
+      }
     });
-
-    expect(response.payload).to.match(/defaultRoute = '\/kibana\/app\/kibana'/);
   });
 });

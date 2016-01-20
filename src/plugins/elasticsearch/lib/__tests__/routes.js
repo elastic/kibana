@@ -1,10 +1,10 @@
-var src = require('requirefrom')('src');
 var expect = require('expect.js');
 var util = require('util');
+var requireFromTest = require('requirefrom')('test');
+var kbnTestServer = requireFromTest('utils/kbn_server');
+
 var format = util.format;
 
-var KbnServer = src('server/KbnServer');
-var fromRoot = src('utils/fromRoot');
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
@@ -12,27 +12,7 @@ describe('plugins/elasticsearch', function () {
     var kbnServer;
 
     before(function () {
-      kbnServer = new KbnServer({
-        server: {
-          autoListen: false,
-          xsrf: {
-            disableProtection: true
-          }
-        },
-        logging: { quiet: true },
-        plugins: {
-          scanDirs: [
-            fromRoot('src/plugins')
-          ]
-        },
-        optimize: {
-          enabled: false
-        },
-        elasticsearch: {
-          url: 'http://localhost:9210'
-        }
-      });
-
+      kbnServer = kbnTestServer.createServer();
       return kbnServer.ready()
       .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });
@@ -51,7 +31,7 @@ describe('plugins/elasticsearch', function () {
       var statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
-          kbnServer.server.inject(options, function (res) {
+          kbnTestServer.makeRequest(kbnServer, options, function (res) {
             try {
               expect(res.statusCode).to.be(statusCode);
               done();

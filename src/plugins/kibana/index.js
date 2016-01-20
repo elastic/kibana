@@ -20,7 +20,8 @@ module.exports = function (kibana) {
         uses: [
           'visTypes',
           'spyModes',
-          'fieldFormats'
+          'fieldFormats',
+          'navbarExtensions'
         ],
 
         injectVars: function (server, options) {

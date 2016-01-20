@@ -1,7 +1,8 @@
 define(function (require) {
   return require('ui/registry/_registry')({
-    name: 'spyModes',
+    name: 'navbarExtensions',
     index: ['name'],
+    group: ['appName'],
     order: ['order']
   });
 });

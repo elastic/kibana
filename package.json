@@ -53,6 +53,7 @@
     "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
+    "elasticsearchWithPlugins": "grunt esvm:withPlugins:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
     "mocha": "mocha --compilers js:babel/register",
