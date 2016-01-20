@@ -40,7 +40,7 @@ define(function (require) {
             }
 
             if (!field.indexed) {
-              warnings.push('This field is not indexed and can not be visualized.');
+              warnings.push('This field is not indexed and might not be usable in visualizations.');
             }
           }
 
