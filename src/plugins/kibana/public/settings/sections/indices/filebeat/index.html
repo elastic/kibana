@@ -1,6 +1,13 @@
 <kbn-settings-app section="indices">
-  <div ng-controller="kbnSettingsIndicesFilebeat" class="container">
-    <div class="wizard-step-headings">
+  <kbn-settings-indices>
+    <div ng-controller="settingsIndicesCreate" class="kbn-settings-indices-create">
+      <div class="page-header">
+        <h1>Tail a File</h1>
+        Let's send some log data to Elasticsearch.
+      </div>
+    </div>
+    <div ng-controller="kbnSettingsIndicesFilebeat">
+      <div class="wizard-step-headings">
       <span ng-class="{active: currentStep === 0}" class="wizard-step-heading">
         1. Paste
       </span>
@@ -13,45 +20,46 @@
       <span ng-class="{active: currentStep === 3}" class="wizard-step-heading">
         4. Install Filebeat
       </span>
+      </div>
+
+      <div ng-switch="currentStep">
+        <div ng-switch-when="0">
+          <paste-samples-step samples="stepResults.samples"></paste-samples-step>
+          <div class="nav-buttons">
+            <button ng-disabled="!stepResults.samples" ng-click="nextStep()">Next</button>
+          </div>
+        </div>
+
+        <div ng-switch-when="1">
+          <pipeline-step
+            samples="stepResults.samples"
+            pipeline="stepResults.pipeline"
+            sample-docs="stepResults.sampleDocs">
+          </pipeline-step>
+
+          <div class="nav-buttons">
+            <button ng-click="prevStep()">Prev</button>
+            <button ng-disabled="!stepResults.pipeline || !stepResults.sampleDocs" ng-click="nextStep()">Next</button>
+          </div>
+        </div>
+
+        <div ng-switch-when="2">
+          <pattern-review-step
+            index-pattern="stepResults.indexPattern"
+            sample-docs="stepResults.sampleDocs"
+            pipeline="stepResults.pipeline">
+          </pattern-review-step>
+
+          <div class="nav-buttons">
+            <button ng-click="prevStep()">Prev</button>
+            <button ng-disabled="!stepResults.indexPattern" ng-click="nextStep()">Save</button>
+          </div>
+        </div>
+
+        <div ng-switch-when="3">
+          <install-filebeat-step results="stepResults"></install-filebeat-step>
+        </div>
+      </div>
     </div>
-
-    <div ng-switch="currentStep">
-      <div ng-switch-when="0">
-        <paste-samples-step samples="stepResults.samples"></paste-samples-step>
-        <div class="nav-buttons">
-          <button ng-disabled="!stepResults.samples" ng-click="nextStep()">Next</button>
-        </div>
-      </div>
-
-      <div ng-switch-when="1">
-        <pipeline-step
-          samples="stepResults.samples"
-          pipeline="stepResults.pipeline"
-          sample-docs="stepResults.sampleDocs">
-        </pipeline-step>
-
-        <div class="nav-buttons">
-          <button ng-click="prevStep()">Prev</button>
-          <button ng-disabled="!stepResults.pipeline || !stepResults.sampleDocs" ng-click="nextStep()">Next</button>
-        </div>
-      </div>
-
-      <div ng-switch-when="2">
-        <pattern-review-step
-          index-pattern="stepResults.indexPattern"
-          sample-docs="stepResults.sampleDocs"
-          pipeline="stepResults.pipeline">
-        </pattern-review-step>
-
-        <div class="nav-buttons">
-          <button ng-click="prevStep()">Prev</button>
-          <button ng-disabled="!stepResults.indexPattern" ng-click="nextStep()">Save</button>
-        </div>
-      </div>
-
-      <div ng-switch-when="3">
-        <install-filebeat-step results="stepResults"></install-filebeat-step>
-      </div>
-    </div>
-  </div>
+  </kbn-settings-indices>
 </kbn-settings-app>
