@@ -1,38 +1,18 @@
-<div class="col-md-2 sidebar-container">
-  <div class="sidebar-list">
-    <div class="sidebar-list-header">
-      <h5>
-        Index Patterns&nbsp;
-        <a
-          ng-if="edittingId"
-          href="#/settings/indices"
-          class="btn btn-primary btn-xs"
-          aria-label="Add New">
-          <span class="sr-only">Add New</span>
-          <i aria-hidden="true" class="fa fa-plus"></i> Add New
-        </a>
-      </h5>
-    </div>
-    <ul class="list-unstyled">
-      <li
-        ng-if="!defaultIndex"
-        class="sidebar-item">
-        <div class="sidebar-item-title full-title">
-            <span class="label label-warning">Warning</span> No default index pattern. You must select or create one to continue.
-        </div>
-      </li>
-      <li
-        ng-repeat="pattern in indexPatternList | orderBy:['-default','id'] track by pattern.id "
-        class="sidebar-item">
-        <a href="{{::pattern.url}}">
-          <div class="{{::pattern.class}}">
-            <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
-            <span ng-bind="::pattern.id"></span>
-          </div>
-        </a>
-      </li>
-    </ul>
-  </div>
-</div>
+<kbn-settings-app section="indices">
+  <kbn-settings-indices>
+    <div ng-controller="settingsIndicesCreate" class="kbn-settings-indices-create">
+      <div class="page-header">
+        <h1>Add Data</h1>
+        Before we can get to the fun stuff, we'll have to get some data into your Elasticsearch cluster.
+        Pick the option that best suits your use case below, and we'll guide you through the process!
+      </div>
 
-<div class="col-md-10" ng-transclude></div>
+      <h4>
+        <a href="#/settings/indices/existing">Existing Indices</a>
+      </h4>
+      <div>
+        Pick this option if you already have data in Elasticsearch.
+      </div>
+    </div>
+  </kbn-settings-indices>
+</kbn-settings-app>
