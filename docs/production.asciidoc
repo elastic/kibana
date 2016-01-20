@@ -42,7 +42,7 @@ kibana_elasticsearch_password: kibana4-password
 ----
 
 Kibana 4 users also need access to the `.kibana` index so they can save and load searches, visualizations, and dashboards.
-For more information, see {shield}/kibana.html#kibana4-server-role[Configuring Roles for Kibana 4 Users] in
+For more information, see {shield}/kibana.html[Using Kibana with Shield] in
 the Shield documentation.
 
 TIP: See <<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>> for important information on Kibana and
