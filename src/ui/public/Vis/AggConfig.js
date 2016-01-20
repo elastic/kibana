@@ -262,7 +262,7 @@ define(function (require) {
       var label = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
       label += this.type.makeLabel(this);
 
-      if (this.params.customLabel !== '') {
+      if (this.params.customLabel && this.params.customLabel !== '') {
         label = this.params.customLabel;
       }
 
