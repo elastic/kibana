@@ -7,6 +7,9 @@ require('../lib/processor_registry').register({
   typeid: 'gsub',
   title: 'Gsub',
   template: '<processor-ui-gsub></processor-ui-gsub>',
+  sourceField: '',
+  pattern: '',
+  replacement: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -46,10 +49,6 @@ app.directive('processorUiGsub', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
-      processor.pattern = '';
-      processor.replacement = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

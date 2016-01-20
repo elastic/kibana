@@ -23,7 +23,7 @@ app.directive('sourceDataNew', function () {
         const newObj = {
           _raw: $scope.selectedLine
         };
-        newObj[fieldname] = timestamp;
+        //newObj[fieldname] = timestamp;
 
         return newObj
       }

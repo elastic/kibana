@@ -8,6 +8,8 @@ require('../lib/processor_registry').register({
   typeid: 'geoip',
   title: 'Geo IP',
   template: '<processor-ui-geoip></processor-ui-geoip>',
+  sourceField: '',
+  targetField: 'geoip',
   getDefinition: function() {
     const self = this;
     return {
@@ -47,9 +49,6 @@ app.directive('processorUiGeoip', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
-      processor.targetField = 'geoip';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

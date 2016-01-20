@@ -7,6 +7,8 @@ require('../lib/processor_registry').register({
   typeid: 'join',
   title: 'Join',
   template: '<processor-ui-join></processor-ui-join>',
+  sourceField: '',
+  separator: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -53,8 +55,6 @@ app.directive('processorUiJoin', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.separator = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

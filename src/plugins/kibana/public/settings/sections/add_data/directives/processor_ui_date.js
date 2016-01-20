@@ -8,11 +8,11 @@ require('../lib/processor_registry').register({
   typeid: 'date',
   title: 'Date',
   template: '<processor-ui-date></processor-ui-date>',
-  formats: [],
   sourceField: '',
+  targetField: '@timestamp',
+  formats: [],
   timezone: 'UTC',
   locale: 'ENGLISH',
-  targetField: '@timestamp',
   customFormat: '',
   getDefinition: function() {
     const self = this;
@@ -95,7 +95,7 @@ app.directive('processorUiDate', function() {
         processorUiChanged();
       });
 
-      $scope.$watch('customFormat', updateFormats);
+      $scope.$watch('processor.customFormat', updateFormats);
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watch('processor.timezone', processorUiChanged);
       $scope.$watch('processor.locale', processorUiChanged);

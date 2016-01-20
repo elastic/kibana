@@ -7,13 +7,15 @@ require('../lib/processor_registry').register({
   typeid: 'append',
   title: 'Append',
   template: '<processor-ui-append></processor-ui-append>',
+  targetField: '',
+  values: [],
   getDefinition: function() {
     const self = this;
     return {
-      'set' : {
+      'append' : {
         'processor_id': self.processorId,
         'field' : self.targetField ? self.targetField : '',
-        'value': self.values
+        'values': self.values
       }
     };
   },
@@ -36,9 +38,6 @@ app.directive('processorUiAppend', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.targetField = '';
-      processor.values = [];
 
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watchCollection('processor.values', processorUiChanged);

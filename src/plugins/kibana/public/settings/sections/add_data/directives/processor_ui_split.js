@@ -7,6 +7,8 @@ require('../lib/processor_registry').register({
   typeid: 'split',
   title: 'Split',
   template: '<processor-ui-split></processor-ui-split>',
+  sourceField: '',
+  separator: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -46,9 +48,6 @@ app.directive('processorUiSplit', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
-      processor.separator = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

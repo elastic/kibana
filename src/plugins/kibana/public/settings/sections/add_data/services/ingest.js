@@ -2,7 +2,7 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 
 const Logger = require('../lib/logger');
-const logger = new Logger('ingest service', false);
+const logger = new Logger('ingest service', true);
 
 app.service('ingest', function ($http) {
   return {

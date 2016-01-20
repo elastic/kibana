@@ -7,6 +7,7 @@ require('../lib/processor_registry').register({
   typeid: 'uppercase',
   title: 'Uppercase',
   template: '<processor-ui-uppercase></processor-ui-uppercase>',
+  sourceField: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -44,8 +45,6 @@ app.directive('processorUiUppercase', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      self.sourceField = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

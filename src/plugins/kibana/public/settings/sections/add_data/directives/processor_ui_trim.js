@@ -7,6 +7,7 @@ require('../lib/processor_registry').register({
   typeid: 'trim',
   title: 'Trim',
   template: '<processor-ui-trim></processor-ui-trim>',
+  sourceField: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -44,8 +45,6 @@ app.directive('processorUiTrim', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

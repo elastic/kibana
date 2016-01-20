@@ -7,6 +7,7 @@ require('../lib/processor_registry').register({
   typeid: 'remove',
   title: 'Remove',
   template: '<processor-ui-remove></processor-ui-remove>',
+  sourceField: '',
   getDefinition: function() {
     const self = this;
     return {

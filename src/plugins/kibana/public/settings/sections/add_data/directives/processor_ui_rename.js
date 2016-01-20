@@ -7,6 +7,8 @@ require('../lib/processor_registry').register({
   typeid: 'rename',
   title: 'Rename',
   template: '<processor-ui-rename></processor-ui-rename>',
+  sourceField: '',
+  targetField: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -46,9 +48,6 @@ app.directive('processorUiRename', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.targetField = '';
-      processor.sourceField = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

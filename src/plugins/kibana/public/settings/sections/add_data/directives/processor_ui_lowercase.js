@@ -7,6 +7,7 @@ require('../lib/processor_registry').register({
   typeid: 'lowercase',
   title: 'Lowercase',
   template: '<processor-ui-lowercase></processor-ui-lowercase>',
+  sourceField: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -44,8 +45,6 @@ app.directive('processorUiLowercase', function () {
       function processorUiChanged() {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
-
-      processor.sourceField = '';
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 

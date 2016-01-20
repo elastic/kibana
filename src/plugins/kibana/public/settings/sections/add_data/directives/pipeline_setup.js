@@ -165,7 +165,16 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       $scope.savePipeline = function() {
-        console.log(angular.toJson(pipeline, true));
+        const tempPipeline = _.cloneDeep(pipeline);
+        tempPipeline.processors.forEach((processor) => {
+          delete processor.inputObject;
+          delete processor.outputObject;
+          delete processor.parent;
+        });
+        delete tempPipeline.rootObject;
+        delete tempPipeline.output;
+
+        console.log(angular.toJson(tempPipeline, true));
       }
     }
   };

@@ -7,6 +7,7 @@ require('../lib/processor_registry').register({
   typeid: 'set',
   title: 'Set',
   template: '<processor-ui-set></processor-ui-set>',
+  targetField: '',
   getDefinition: function() {
     const self = this;
     return {

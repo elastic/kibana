@@ -7,6 +7,8 @@ require('../lib/processor_registry').register({
   typeid: 'convert',
   title: 'Convert',
   template: '<processor-ui-convert></processor-ui-convert>',
+  sourceField: '',
+  type: '',
   getDefinition: function() {
     const self = this;
     return {
@@ -47,7 +49,6 @@ app.directive('processorUiConvert', function () {
         $rootScope.$broadcast('processor_ui_changed', { processor: processor });
       }
 
-      processor.sourceField = '';
       $scope.types = ['integer', 'float', 'string', 'boolean'];
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
