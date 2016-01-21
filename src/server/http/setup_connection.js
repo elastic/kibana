@@ -34,20 +34,17 @@ export default function (kbnServer, server, config) {
     return;
   }
 
-  // for https servers we have some extra settings
-  const tls = {
-    key: readFileSync(config.get('server.ssl.key')),
-    cert: readFileSync(config.get('server.ssl.cert')),
-
-    ciphers: tlsCiphers,
-    // We use the server's cipher order rather than the client's to prevent the BEAST attack
-    honorCipherOrder: true
-  };
-
   server.connection({
     ...connectionOptions,
-    tls: tls,
-    listener: httpolyglot.createServer(tls)
+    tls: true,
+    listener: httpolyglot.createServer({
+      key: readFileSync(config.get('server.ssl.key')),
+      cert: readFileSync(config.get('server.ssl.cert')),
+
+      ciphers: tlsCiphers,
+      // We use the server's cipher order rather than the client's to prevent the BEAST attack
+      honorCipherOrder: true
+    })
   });
 
   server.ext('onRequest', function (req, reply) {
