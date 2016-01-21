@@ -18,18 +18,22 @@ navbar.directive('navbar', function (Private, $compile) {
       if ($buttonGroup.length !== 1) throw new Error('navbar must have exactly 1 button group');
 
       const extensions = getExtensions($attrs.name);
-      const controls = $buttonGroup.children().detach().toArray().map(function (button) {
-        return {
-          order: 0,
-          $el: $(button),
-        };
-      }).concat(extensions.map(function (extension, i) {
-        return {
-          order: extension.order,
-          index: i,
-          extension: extension,
-        };
-      }));
+      const buttons = $buttonGroup.children().detach().toArray();
+      const controls = [
+        ...buttons.map(function (button) {
+          return {
+            order: 0,
+            $el: $(button),
+          };
+        }),
+        ...extensions.map(function (extension, i) {
+          return {
+            order: extension.order,
+            index: i,
+            extension: extension,
+          };
+        }),
+      ];
 
       _.sortBy(controls, 'order').forEach(function (control) {
         if (control.$el) {
