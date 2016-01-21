@@ -43,9 +43,7 @@ app.directive('processContainer', function ($compile) {
 
         processor.outputObject = output;
         processor.setError(error);
-
-        logger.log('broadcast(processor_simulation_consumed)');
-        $rootScope.$broadcast('processor_simulation_consumed', { processor: processor });
+        message.callback(processor);
       }
 
       function onProcessorUpdateInput(event, message) {

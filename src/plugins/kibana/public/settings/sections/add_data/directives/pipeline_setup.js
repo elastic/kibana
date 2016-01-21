@@ -31,12 +31,30 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
         ingest.simulatePipeline(pipeline)
         .then(function (result) {
+
+          let responses = 0;
+          function processorResponse(processor) {
+            responses += 1;
+
+            if (responses === result.length) {
+              pipeline.updateOutput();
+
+              pipeline.processors.forEach((processor) => {
+                //logger.log('broadcast(processor_update_input)');
+                $rootScope.$broadcast('processor_update_input', { processor: processor });
+              });
+            }
+          }
+
           //logger.log('simulatePipeline result', result);
           result.forEach((processorResult) => {
             const processor = pipeline.getProcessorById(processorResult.processorId);
             pendingProcessorResponses.push(processor);
             //logger.log('broadcast(pipeline_simulated)');
-            $rootScope.$broadcast('pipeline_simulated', { processor: processor, result: processorResult });
+            $rootScope.$broadcast('pipeline_simulated', {
+              processor: processor,
+              result: processorResult,
+              callback: processorResponse });
           });
         });
       }
@@ -111,34 +129,14 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         simulatePipeline();
       });
 
-      function onProcessorSimulationConsumed(event, message) {
-        //logger.log('on(processor_simulation_consumed)', message);
-
-        //remove processor from pendingProcessorResponses. If pendingProcessorResponses is empty, update the inputs.
-        _.remove(pendingProcessorResponses, message.processor);
-        if (pendingProcessorResponses.length === 0) {
-          //logger.log('onProcessorSimulationConsumed - all processors reported in. Update inputObjects.');
-
-          pipeline.updateOutput();
-
-          pipeline.processors.forEach((processor) => {
-            //logger.log('broadcast(processor_update_input)');
-            $rootScope.$broadcast('processor_update_input', { processor: processor });
-          });
-        }
-      }
-
       function onProcessorUiChanged(event, message) {
         //logger.log('on(processor_ui_changed)', message);
         simulatePipeline();
       }
 
-      const processorSimulationConsumedListener =
-        $scope.$on('processor_simulation_consumed', onProcessorSimulationConsumed);
       const processorUiChangedListener = $scope.$on('processor_ui_changed', onProcessorUiChanged);
 
       $scope.$on('$destroy', () => {
-        processorSimulationConsumedListener();
         processorUiChangedListener();
       });
     },

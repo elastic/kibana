@@ -31,7 +31,7 @@ app.directive('outputPreview', function () {
         const left = $scope.oldObject;
         const delta = meow.diff($scope.oldObject, $scope.newObject);
 
-        console.log('delta', delta);
+        //console.log('delta', delta);
         // console.log('jsondiffpatch', jsondiffpatch);
         // console.log('meow', meow);
         // console.log(jsondiffpatch.formatters.html.format(delta, left));
@@ -41,7 +41,7 @@ app.directive('outputPreview', function () {
     controller: function ($scope) {
 
       function updateOutput() {
-        console.log('controller', $scope.oldObject, $scope.newObject);
+        //console.log('controller', $scope.oldObject, $scope.newObject);
         $scope.updateUi();
       }
 
