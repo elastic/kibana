@@ -25,7 +25,7 @@ uiModules.get('apps/settings')
         { title: 'format' },
         { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
         { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-        { title: 'retrieved', info: 'Fields that are not retrieved as part of the _source object per hit' },
+        { title: 'exclude', info: 'Fields that are not excluded from _source when _source is fetched' },
         { title: 'controls', sortable: false }
       ];
 
@@ -35,7 +35,6 @@ uiModules.get('apps/settings')
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
 
-<<<<<<< HEAD
         const metaFields = config.get('metaFields');
         const sourceFiltering = $scope.indexPattern.getSourceFiltering();
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
@@ -66,8 +65,8 @@ uiModules.get('apps/settings')
               value: field.indexed
             },
             {
-              markup: !field.exclude ? yesTemplate : noTemplate,
-              value: !field.exclude
+              markup: field.exclude ? yesTemplate : noTemplate,
+              value: field.exclude
             },
             {
               markup: controlsHtml,
