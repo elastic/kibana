@@ -17,7 +17,7 @@ module.exports = {
       protocol: process.env.TEST_UI_ES_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_ES_HOSTNAME || 'localhost',
       port: parseInt(process.env.TEST_UI_ES_PORT, 10) || 9220,
-      auth: 'admin:notsecure'
+      auth: 'kibana:notsecure'
     }
   },
   apps: {
