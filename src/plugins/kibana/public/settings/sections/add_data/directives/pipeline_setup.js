@@ -19,7 +19,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
       const pipeline = $scope.pipeline;
 
-      const nameThisWell = [];
+      const pendingProcessorResponses = [];
       function simulatePipeline(event, message) {
         //console.log(angular.toJson(pipeline, true));
         //logger.log('simulatePipeline', pipeline);
@@ -32,12 +32,9 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         ingest.simulatePipeline(pipeline)
         .then(function (result) {
           //logger.log('simulatePipeline result', result);
-
-          //However, once that has been proven to work, we need to uniquely identify a particular simulation so
-          //we only listen to events from the latest one and ignore stale events
           result.forEach((processorResult) => {
             const processor = pipeline.getProcessorById(processorResult.processorId);
-            nameThisWell.push(processor);
+            pendingProcessorResponses.push(processor);
             //logger.log('broadcast(pipeline_simulated)');
             $rootScope.$broadcast('pipeline_simulated', { processor: processor, result: processorResult });
           });
@@ -117,9 +114,9 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       function onProcessorSimulationConsumed(event, message) {
         //logger.log('on(processor_simulation_consumed)', message);
 
-        //remove processor from nameThisWell. If nameThisWell is empty, update the inputs.
-        _.remove(nameThisWell, message.processor);
-        if (nameThisWell.length === 0) {
+        //remove processor from pendingProcessorResponses. If pendingProcessorResponses is empty, update the inputs.
+        _.remove(pendingProcessorResponses, message.processor);
+        if (pendingProcessorResponses.length === 0) {
           //logger.log('onProcessorSimulationConsumed - all processors reported in. Update inputObjects.');
 
           pipeline.updateOutput();
