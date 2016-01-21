@@ -310,8 +310,18 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self._fetchFields = function () {
+      const existingFieldsByName = self.fields.byName;
+
       return mapper.getFieldsForIndexPattern(self, true)
       .then(function (fields) {
+        // copy over kibana-added properties from existing fields
+        fields.forEach(function (field) {
+          var existingField = existingFieldsByName[field.name];
+          if (existingField) {
+            field.exclude = existingField.exclude;
+          }
+        });
+
         // append existing scripted fields
         fields = fields.concat(self.getScriptedFields());
 
