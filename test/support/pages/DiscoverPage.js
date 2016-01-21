@@ -35,7 +35,6 @@ define(function (require) {
     getChartTimespan: function getChartTimespan() {
       return thisTime
       .findByCssSelector('center.small > span:nth-child(1)')
-      // .findByCssSelector('center.small > span.ng-binding')
       .getVisibleText();
     },
 
@@ -128,8 +127,55 @@ define(function (require) {
         .findByCssSelector('option[label="' + interval + '"]')
         .click();
       });
-    }
+    },
 
+    getHitCount: function getHitCount() {
+      return thisTime
+      .findByCssSelector('strong.discover-info-hits')
+      .getVisibleText();
+    },
+
+    query: function query(queryString) {
+      return thisTime
+      .findByCssSelector('input[aria-label="Search input"]')
+      .clearValue()
+      .type(queryString)
+      .then(function () {
+        return thisTime
+        .findByCssSelector('button[aria-label="Search"]')
+        .click();
+      });
+    },
+
+    getDocHeader: function getDocHeader() {
+      return thisTime
+      .findByCssSelector('thead.ng-isolate-scope > tr:nth-child(1)')
+      .getVisibleText();
+    },
+
+    getDocTableIndex: function getDocTableIndex(index) {
+      return thisTime
+      .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
+      .getVisibleText();
+    },
+
+    clickDocSortDown: function clickDocSortDown() {
+      return thisTime
+      .findByCssSelector('.fa-sort-down')
+      .click();
+    },
+
+    clickDocSortUp: function clickDocSortUp() {
+      return thisTime
+      .findByCssSelector('.fa-sort-up')
+      .click();
+    },
+
+    getMarks: function getMarks() {
+      return thisTime
+      .findAllByCssSelector('mark')
+      .getVisibleText();
+    }
 
   };
 
