@@ -21,45 +21,6 @@ app.directive('processContainer', function ($compile) {
       const processor = $scope.processor;
       const Logger = require('../lib/logger');
       const logger = new Logger(`process_container(${processor.processorId})`, false);
-
-      function updateInputObject() {
-        //checks to see if the parent is a basic object or a processor
-        if (processor.parent.processorId) {
-          processor.inputObject = _.cloneDeep(processor.parent.outputObject);
-        } else {
-          processor.inputObject = _.cloneDeep(processor.parent);
-        }
-        processor.updateDescription();
-
-        logger.log('updateInputObject', processor.inputObject);
-      }
-
-      function onPipelineSimulated(event, message) {
-        if (message.processor != processor) return;
-        logger.log('on(pipeline_simulated)', message);
-
-        const output = _.get(message.result, 'output');
-        const error = _.get(message.result, 'error');
-
-        processor.outputObject = output;
-        processor.setError(error);
-        message.callback(processor);
-      }
-
-      function onProcessorUpdateInput(event, message) {
-        if (message.processor != processor) return;
-        logger.log('on(processor_update_input)', message);
-
-        updateInputObject();
-      }
-
-      const pipelineSimulatedListener = $scope.$on('pipeline_simulated', onPipelineSimulated);
-      const processorUpdateInputListener = $scope.$on('processor_update_input', onProcessorUpdateInput);
-
-      $scope.$on('$destroy', () => {
-        pipelineSimulatedListener();
-        processorUpdateInputListener();
-      });
     }
   };
 });

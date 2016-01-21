@@ -19,42 +19,36 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
       const pipeline = $scope.pipeline;
 
-      const pendingProcessorResponses = [];
       function simulatePipeline(event, message) {
-        //console.log(angular.toJson(pipeline, true));
-        //logger.log('simulatePipeline', pipeline);
         if (pipeline.processors.length === 0) {
-          //logger.log('simulatePipeline - zero-length pipeline', pipeline);
           pipeline.updateOutput(undefined);
           return;
         }
 
         ingest.simulatePipeline(pipeline)
-        .then(function (result) {
+        .then(function (results) {
+          //update the outputObject of each processor
+          results.forEach((result) => {
+            const processor = pipeline.getProcessorById(result.processorId);
+            const output = _.get(result, 'output');
+            const error = _.get(result, 'error');
 
-          let responses = 0;
-          function processorResponse(processor) {
-            responses += 1;
+            processor.outputObject = output;
+            processor.setError(error);
+          });
 
-            if (responses === result.length) {
-              pipeline.updateOutput();
+          //update the inputObject of each processor
+          results.forEach((result) => {
+            const processor = pipeline.getProcessorById(result.processorId);
 
-              pipeline.processors.forEach((processor) => {
-                //logger.log('broadcast(processor_update_input)');
-                $rootScope.$broadcast('processor_update_input', { processor: processor });
-              });
+            //this can probably be cleaned up a little.
+            if (processor.parent.processorId) {
+              processor.inputObject = _.cloneDeep(processor.parent.outputObject);
+            } else {
+              processor.inputObject = _.cloneDeep(processor.parent);
             }
-          }
 
-          //logger.log('simulatePipeline result', result);
-          result.forEach((processorResult) => {
-            const processor = pipeline.getProcessorById(processorResult.processorId);
-            pendingProcessorResponses.push(processor);
-            //logger.log('broadcast(pipeline_simulated)');
-            $rootScope.$broadcast('pipeline_simulated', {
-              processor: processor,
-              result: processorResult,
-              callback: processorResponse });
+            processor.updateDescription();
           });
         });
       }
@@ -73,7 +67,6 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       function removeProcessor(processor) {
-        //logger.log('removeProcessor');
         const $el = $scope.$elements[processor.processorId];
         $el.slideUp(200, () => {
           $el.remove();
@@ -81,12 +74,10 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       function updateProcessorChain() {
-        //logger.log('updateProcessorChain');
         pipeline.updateParents();
       }
 
       function reorderDom() {
-        //logger.log('reorderDom');
         const processors = pipeline.processors;
         const $parent = $scope.$el;
 
@@ -110,7 +101,6 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       }
 
       $scope.$watchCollection('pipeline.processors', function (newVal, oldVal) {
-        //logger.log('$watch pipeline.processors');
         var removed = _.difference(oldVal, newVal);
         var added = _.difference(newVal, oldVal);
 
@@ -123,14 +113,12 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       });
 
       $scope.$watch('sampleData', function(newVal) {
-        //logger.log('$watch sampleData');
         pipeline.rootObject = $scope.sampleData;
         updateProcessorChain();
         simulatePipeline();
       });
 
       function onProcessorUiChanged(event, message) {
-        //logger.log('on(processor_ui_changed)', message);
         simulatePipeline();
       }
 
