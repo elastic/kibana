@@ -35,6 +35,7 @@ uiModules.get('apps/settings')
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
 
+<<<<<<< HEAD
         const metaFields = config.get('metaFields');
         const sourceFiltering = $scope.indexPattern.getSourceFiltering();
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
@@ -42,7 +43,6 @@ uiModules.get('apps/settings')
 
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });
-          const isMetaField = _.contains(metaFields, field.name);
           rowScopes.push(childScope);
 
           return [
@@ -66,8 +66,8 @@ uiModules.get('apps/settings')
               value: field.indexed
             },
             {
-              markup: isMetaField || !!field.exclude ? noTemplate : yesTemplate,
-              value: isMetaField || !!field.exclude
+              markup: !field.exclude ? yesTemplate : noTemplate,
+              value: !field.exclude
             },
             {
               markup: controlsHtml,
