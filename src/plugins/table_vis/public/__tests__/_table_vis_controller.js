@@ -13,6 +13,7 @@ describe('Controller', function () {
   var $el;
   var Vis;
   var fixtures;
+  var AppState;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -22,6 +23,7 @@ describe('Controller', function () {
     fixtures = require('fixtures/fake_hierarchical_data');
     TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
     Vis = Private(require('ui/Vis'));
+    AppState = Private(require('ui/state_management/app_state'));
   }));
 
   function OneRangeVis(params) {
@@ -53,6 +55,7 @@ describe('Controller', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
+    $rootScope.uiState = new AppState({uiState: {}}).makeStateful('uiState');
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')

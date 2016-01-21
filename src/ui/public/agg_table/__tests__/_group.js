@@ -33,6 +33,10 @@ describe('AggTableGroup Directive', function () {
   it('renders a simple split response properly', function () {
     var vis = new Vis(indexPattern, 'table');
     $scope.group = tabifyAggResponse(vis, fixtures.metricOnly);
+    $scope.sort = {
+      columnIndex: null,
+      direction: null
+    };
     var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
 
     $compile($el)($scope);

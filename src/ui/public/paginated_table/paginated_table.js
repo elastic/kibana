@@ -73,7 +73,7 @@ define(function (require) {
         }
 
         $scope.$watchCollection('sort', function (newSort) {
-          if (!angular.equals(newSort, self.sort)) {
+          if (newSort && !angular.equals(newSort, self.sort)) {
             self.sortColumn(newSort.columnIndex, newSort.direction);
             resortRows();
           }
