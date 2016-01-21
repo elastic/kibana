@@ -15,7 +15,9 @@ module.exports = class ClusterManager {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
-    this.basePathProxy = new BasePathProxy(this, settings);
+    if (opts.basePathProxy) {
+      this.basePathProxy = new BasePathProxy(this, settings);
+    }
 
     this.workers = [
       this.optimizer = new Worker({
@@ -25,7 +27,7 @@ module.exports = class ClusterManager {
         argv: compact([
           '--plugins.initialize=false',
           '--server.autoListen=false',
-          `--server.basePath=${this.basePathProxy.basePath}`
+          this.basePathProxy && `--server.basePath=${this.basePathProxy.basePath}`
         ]),
         watch: false
       }),
@@ -34,8 +36,8 @@ module.exports = class ClusterManager {
         type: 'server',
         log: this.log,
         argv: compact([
-          `--server.port=${this.basePathProxy.targetPort}`,
-          `--server.basePath=${this.basePathProxy.basePath}`
+          this.basePathProxy && `--server.port=${this.basePathProxy.targetPort}`,
+          this.basePathProxy && `--server.basePath=${this.basePathProxy.basePath}`
         ])
       })
     ];
@@ -60,7 +62,9 @@ module.exports = class ClusterManager {
   startCluster() {
     this.setupManualRestart();
     invoke(this.workers, 'start');
-    this.basePathProxy.listen();
+    if (this.basePathProxy) {
+      this.basePathProxy.listen();
+    }
   }
 
   setupWatching() {

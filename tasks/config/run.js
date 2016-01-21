@@ -86,6 +86,8 @@ module.exports = function (grunt) {
       args: [
         '--dev',
         '--no-watch',
+        '--no-ssl',
+        '--no-base-path',
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
