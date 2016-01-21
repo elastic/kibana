@@ -53,7 +53,7 @@ define(function (require) {
               'format',
               'analyzed',
               'indexed',
-              'retrieved',
+              'exclude',
               'controls'
             ];
 

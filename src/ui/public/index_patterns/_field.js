@@ -1,5 +1,5 @@
 define(function (require) {
-  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
+  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier, config) {
     var notify = new Notifier({ location: 'IndexPattern Field' });
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
     var fieldTypes = Private(require('ui/index_patterns/_field_types'));
@@ -41,11 +41,12 @@ define(function (require) {
       var sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
       var bucketable = indexed || scripted;
       var filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
+      var isMetaField = config.get('metaFields').includes(spec.name);
 
       obj.fact('name');
       obj.fact('type');
       obj.writ('count', spec.count || 0);
-      obj.writ('exclude', spec.exclude);
+      obj.fact('exclude', Boolean(!isMetaField && spec.exclude));
 
       // scripted objs
       obj.fact('scripted', scripted);

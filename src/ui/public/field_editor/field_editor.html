@@ -106,12 +106,8 @@
       </h4>
 
       <p>
-      If checked, this field will not be retrieved as part of the <b>_source</b> object. This is thanks to the
-      <a target="_window" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html">
-        source filtering API
-        <i aria-hidden="true" class="fa-link fa"></i>
-      </a>
-      of Elasticsearch.
+      If checked, this field will be filtered from the <b>_source</b> of each document using
+      <a target="_window" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html">source filtering<i aria-hidden="true" class="fa-link fa"></i></a>. This only impacts views that fetch the _source for documents, like Discover or the doc table.
       </p>
       <p>
       If this field is explicitly selected in your saved search, then it will not be excluded.
