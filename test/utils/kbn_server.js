@@ -1,6 +1,7 @@
 import { defaultsDeep, set } from 'lodash';
 import requirefrom from 'requirefrom';
 import { header as basicAuthHeader } from './base_auth';
+import { kibanaUser, kibanaServer } from '../shield';
 
 const src = requirefrom('src');
 const KbnServer = src('server/KbnServer');
@@ -26,8 +27,8 @@ const SERVER_DEFAULTS = {
   },
   elasticsearch: {
     url: 'http://localhost:9210',
-    username: 'kibana',
-    password: 'notsecure'
+    username: kibanaServer.username,
+    password: kibanaServer.password
   }
 };
 
@@ -46,7 +47,8 @@ export function createServer(params = {}) {
  * Creates request configuration with a basic auth header
  */
 export function authOptions() {
-  const authHeader = basicAuthHeader('user', 'notsecure');
+  const { username, password } = kibanaUser;
+  const authHeader = basicAuthHeader(username, password);
   return set({}, 'headers.Authorization', authHeader);
 };
 
