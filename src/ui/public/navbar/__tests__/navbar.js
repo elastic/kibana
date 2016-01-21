@@ -58,14 +58,37 @@ describe('navbar directive', function () {
   }
 
   describe('incorrect use', function () {
-
     it('should throw if missing a name property', function () {
-      let markup = `<navbar><div class="button-group" role="toolbar"></div></navbar>`;
+      const markup = `<navbar><div class="button-group" role="toolbar"></div></navbar>`;
       expect(() => init(markup)).to.throwException(/requires a name attribute/);
     });
 
     it('should throw if missing a button group', function () {
-      let markup = `<navbar name="testing"></navbar>`;
+      const markup = `<navbar name="testing"></navbar>`;
+      expect(() => init(markup)).to.throwException(/must have exactly 1 button group/);
+    });
+
+    it('should throw if multiple button groups', function () {
+      const markup = `  <navbar name="testing">
+          <div class="button-group" role="toolbar">
+            <button>
+              <i aria-hidden="true" class="fa fa-file-new-o"></i>
+            </button>
+            <button>
+              <i aria-hidden="true" class="fa fa-save"></i>
+            </button>
+          </div>
+          <div class="button-group" role="toolbar">
+            <button>
+              <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+            </button>
+          </div>
+        </navbar>`;
+      expect(() => init(markup)).to.throwException(/must have exactly 1 button group/);
+    });
+
+    it('should throw if button group not direct child', function () {
+      const markup = `<navbar><div><div class="button-group" role="toolbar"></div></div></navbar>`;
       expect(() => init(markup)).to.throwException(/must have exactly 1 button group/);
     });
   });
