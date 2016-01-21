@@ -4,7 +4,7 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 const selectableArray = require('../lib/selectable_array');
 
-require('../lib/processor_registry').register({
+require('../lib/processor_type_registry').register({
   typeid: 'date',
   title: 'Date',
   template: '<processor-ui-date></processor-ui-date>',

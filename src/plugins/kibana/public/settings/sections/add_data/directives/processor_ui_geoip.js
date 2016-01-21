@@ -4,7 +4,7 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 require('../services/ingest');
 
-require('../lib/processor_registry').register({
+require('../lib/processor_type_registry').register({
   typeid: 'geoip',
   title: 'Geo IP',
   template: '<processor-ui-geoip></processor-ui-geoip>',

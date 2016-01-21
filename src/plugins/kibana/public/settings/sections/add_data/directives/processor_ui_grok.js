@@ -4,7 +4,7 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 require('../services/ingest');
 
-require('../lib/processor_registry').register({
+require('../lib/processor_type_registry').register({
   typeid: 'grok',
   title: 'Grok',
   template: '<processor-ui-grok></processor-ui-grok>',

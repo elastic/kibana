@@ -3,7 +3,7 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-require('../lib/processor_registry').register({
+require('../lib/processor_type_registry').register({
   typeid: 'rename',
   title: 'Rename',
   template: '<processor-ui-rename></processor-ui-rename>',

@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Processor = require('./processor');
-const types = require('./processor_registry').all();
+const types = require('./processor_type_registry').all();
 
 export default function Pipeline() {
   const self = this;

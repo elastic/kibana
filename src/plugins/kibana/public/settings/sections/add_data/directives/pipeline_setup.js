@@ -144,7 +144,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
     },
     controller: function ($scope, AppState, ingest) {
       const savedPipeline = require('../sample_pipeline.json');
-      const types = require('../lib/processor_registry.js').all();
+      const types = require('../lib/processor_type_registry.js').all();
       const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
       $scope.defaultProcessorType = getDefaultProcessorType();
@@ -157,10 +157,12 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
       }
 
+      //temp for debugging purposes
       $scope.loadPipeline = function() {
         pipeline.load(savedPipeline);
       }
 
+      //temp for debugging purposes
       $scope.savePipeline = function() {
         const tempPipeline = _.cloneDeep(pipeline);
         tempPipeline.processors.forEach((processor) => {

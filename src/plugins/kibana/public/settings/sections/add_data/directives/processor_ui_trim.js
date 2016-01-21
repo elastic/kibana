@@ -3,7 +3,7 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-require('../lib/processor_registry').register({
+require('../lib/processor_type_registry').register({
   typeid: 'trim',
   title: 'Trim',
   template: '<processor-ui-trim></processor-ui-trim>',
