@@ -34,13 +34,11 @@ define(function (require) {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
 
-          const metaFields = config.get('metaFields');
           var fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
           _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
           $scope.rows = fields.map(function (field) {
             var childScope = _.assign($scope.$new(), { field: field });
-            const isMetaField = _.contains(metaFields, field.name);
             rowScopes.push(childScope);
 
             return [
@@ -64,8 +62,8 @@ define(function (require) {
                 value: field.indexed
               },
               {
-                markup: isMetaField || !!field.exclude ? noTemplate : yesTemplate,
-                value: isMetaField || !!field.exclude
+                markup: !field.exclude ? yesTemplate : noTemplate,
+                value: !field.exclude
               },
               {
                 markup: controlsHtml,
