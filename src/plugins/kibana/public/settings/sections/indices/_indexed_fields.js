@@ -25,7 +25,7 @@ uiModules.get('apps/settings')
         { title: 'format' },
         { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
         { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-        { title: 'exclude', info: 'Fields that are not excluded from _source when _source is fetched' },
+        { title: 'exclude', info: 'Fields that are excluded from _source when it is fetched' },
         { title: 'controls', sortable: false }
       ];
 
