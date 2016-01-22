@@ -93,6 +93,19 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
+        bdd.it('should show the correct hit count', function () {
+          var expectedHitCount = '14,004';
+          return common.tryForTime(20 * 1000, function tryingForTime() {
+            return discoverPage.getHitCount()
+            .then(function compareData(hitCount) {
+              expect(hitCount).to.be(expectedHitCount);
+            });
+          })
+          .catch(common.handleError(this));
+        });
+
+
+
         bdd.it('should show the correct bar chart', function () {
           var expectedBarChartData = [ '0', '0', '0', '0', '0', '0',
             '2.7056249999999977', '14.771249999999995', '54.112500000000004',

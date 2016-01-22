@@ -137,6 +137,13 @@ define(function (require) {
       });
     },
 
+    clickToastOK: function clickToastOK() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('button[ng-if="notif.accept"]')
+      .click();
+    },
+
     getSpinnerDone: function getSpinnerDone() {
       var self = this;
       return this.remote
