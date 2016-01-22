@@ -122,6 +122,17 @@ define(function (require) {
         }
       };
 
+      // Get the source filtering configuration for that index.
+      // Fields which name appears in the given columns array will not be excluded.
+      self.getSourceFiltering = function (columns) {
+        return {
+          exclude: _(self.getNonScriptedFields())
+            .filter((field) => field.exclude && !_.contains(columns, field.name))
+            .map((field) => field.name)
+            .value()
+        };
+      };
+
       self.addScriptedField = function (name, script, type, lang) {
         type = type || 'string';
 
@@ -282,8 +293,19 @@ define(function (require) {
       };
 
       self._fetchFields = function () {
+        var existingFieldsByName = self.fields.byName;
+
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
+
+          // copy over kibana-added properties from existing fields
+          fields.forEach(function (field) {
+            var existingField = existingFieldsByName[field.name];
+            if (existingField) {
+              field.exclude = existingField.exclude;
+            }
+          });
+
           // append existing scripted fields
           fields = fields.concat(self.getScriptedFields());
 

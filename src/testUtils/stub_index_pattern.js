@@ -18,6 +18,7 @@ define(function (require) {
       this.timeFieldName = timeField;
       this.getNonScriptedFields = sinon.spy();
       this.getScriptedFields = sinon.spy();
+      this.getSourceFiltering = sinon.spy();
       this.metaFields = ['_id', '_type', '_source'];
       this.fieldFormatMap = {};
       this.routes = IndexPattern.prototype.routes;

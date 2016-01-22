@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
-  .directive('indexedFields', function ($filter) {
+  .directive('indexedFields', function ($filter, config) {
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';
     var nameHtml = require('plugins/kibana/settings/sections/indices/_field_name.html');
@@ -24,6 +24,7 @@ define(function (require) {
           { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
+          { title: 'exclude', info: 'Fields that are excluded from _source when it is fetched' },
           { title: 'controls', sortable: false }
         ];
 
@@ -59,6 +60,10 @@ define(function (require) {
               {
                 markup: field.indexed ? yesTemplate : noTemplate,
                 value: field.indexed
+              },
+              {
+                markup: field.exclude ? yesTemplate : noTemplate,
+                value: field.exclude
               },
               {
                 markup: controlsHtml,
