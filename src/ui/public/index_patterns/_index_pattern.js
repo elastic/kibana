@@ -293,7 +293,7 @@ define(function (require) {
       };
 
       self._fetchFields = function () {
-        var existingFieldsByName = self.fields.byName;
+        var existingFieldsByName = _.get(self, 'fields.byName', {});
 
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
