@@ -55,6 +55,8 @@ types.
 When multiple aggregations are defined on a chart's axis, you can use the up or down arrows to the right of the 
 aggregation's type to change the aggregation's priority.
 
+include::color-picker.asciidoc[]
+
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.

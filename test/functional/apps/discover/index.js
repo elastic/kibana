@@ -4,6 +4,7 @@ define(function (require) {
   var url = require('intern/dojo/node!url');
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
   var discoverTest = require('./_discover');
+  var fieldData = require('./_field_data');
 
   bdd.describe('discover app', function () {
     var scenarioManager;
@@ -21,6 +22,8 @@ define(function (require) {
     });
 
     discoverTest(bdd, scenarioManager);
+
+    fieldData(bdd, scenarioManager);
 
   });
 });
