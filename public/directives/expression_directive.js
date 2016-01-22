@@ -34,7 +34,7 @@ Must be inside a function, and start must be adjacent to the argument name
 
 */
 
-app.directive('timelionExpression', function ($compile, $http, $timeout, $rootScope) {
+app.directive('timelionExpression', function ($compile, $http, $timeout, $rootScope, config) {
   return {
     restrict: 'A',
     require: 'ngModel',
@@ -65,7 +65,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         });
 
         $elem.after($compile(template)($scope));
-        $http.get('/timelion/functions').then(function (resp) {
+        $http.get('timelion/functions').then(function (resp) {
           functionReference.byName = _.indexBy(resp.data, 'name');
           functionReference.list = resp.data;
         });

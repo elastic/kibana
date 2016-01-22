@@ -151,7 +151,7 @@ app.controller('timelion', function (
     $scope.state.save();
     $scope.running = true;
 
-    $http.post('/timelion/run', {
+    $http.post('timelion/run', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
         interval: getInterval($scope.state),

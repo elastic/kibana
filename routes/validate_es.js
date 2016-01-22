@@ -1,7 +1,7 @@
 module.exports = function (server) {
   server.route({
     method: 'GET',
-    path: '/timelion/validate/es',
+    path: '/app/timelion/validate/es',
     handler: function (request, reply) {
       var config = require('../timelion.json');
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
@@ -9,7 +9,7 @@ module.exports = function (server) {
       var body = {
         index: config.es.default_index,
         fields: config.es.timefield
-      }
+      };
 
       callWithRequest(request, 'fieldStats', body).then(function (resp) {
         reply({
