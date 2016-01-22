@@ -11,7 +11,7 @@ module.exports = function (server) {
 
   server.route({
     method: ['POST', 'GET'],
-    path: '/timelion/run',
+    path: '/app/timelion/run',
     handler: function (request, reply) {
       var tlConfig = require('../handlers/lib/tl_config.js')({
         server: server,
