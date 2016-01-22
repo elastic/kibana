@@ -7,7 +7,7 @@ define(function (require) {
   require('ui/directives/auto_select_if_only_one');
 
   require('ui/routes')
-  .when('/settings/indices/existing', {
+  .when('/settings/indices/create/existing', {
     template: require('plugins/kibana/settings/sections/indices/_create.html')
   });
 

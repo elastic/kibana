@@ -16,7 +16,7 @@ define(function (require) {
 
         return scenarioManager.reload('emptyKibana')
         .then(function () {
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         });
       });
 
@@ -25,7 +25,7 @@ define(function (require) {
       });
 
       bdd.afterEach(function ae() {
-        return settingsPage.removeIndexPattern();
+        return settingsPage.removeIndexPattern().then(settingsPage.clickExistingIndicesAddDataLink);
       });
 
       bdd.describe('change popularity', function indexPatternCreation() {

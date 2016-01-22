@@ -1,6 +1,6 @@
 <kbn-settings-app section="indices">
   <kbn-settings-indices>
-    <div ng-controller="settingsIndicesCreate" class="kbn-settings-indices-create">
+    <div data-test-subj="addData">
       <div class="page-header">
         <h1>Add Data</h1>
         Before we can get to the fun stuff, we'll have to get some data into your Elasticsearch cluster.
@@ -8,7 +8,7 @@
       </div>
 
       <h4>
-        <a href="#/settings/indices/existing">Existing Indices</a>
+        <a href="#/settings/indices/create/existing" data-test-subj="existingIndices">Existing Indices</a>
       </h4>
       <div>
         Pick this option if you already have data in Elasticsearch.
