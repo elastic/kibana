@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var { join } = require('path');
-var autoload = require('./autoload');
 
 class UiApp {
   constructor(uiExports, spec) {
@@ -17,9 +16,15 @@ class UiApp {
     this.description = this.spec.description;
     this.icon = this.spec.icon;
     this.hidden = this.spec.hidden;
-    this.autoloadOverrides = this.spec.autoload;
     this.templateName = this.spec.templateName || 'ui_app';
     this.url = `${spec.urlBasePath || ''}${this.spec.url || `/app/${this.id}`}`;
+
+    if (this.spec.autoload) {
+      console.warn(
+        `"autoload" (used by ${this.id} app) is no longer a valid app configuration directive.` +
+        'Use the \`ui/autoload/*\` modules instead.'
+      );
+    }
 
     // once this resolves, no reason to run it again
     this.getModules = _.once(this.getModules);
@@ -30,7 +35,6 @@ class UiApp {
 
   getModules() {
     return _.chain([
-      this.autoloadOverrides || autoload.require,
       this.uiExports.find(_.get(this, 'spec.uses', [])),
       this.uiExports.find(['chromeNavControls']),
     ])

@@ -3,6 +3,7 @@ let Joi = require('joi');
 let _ = require('lodash');
 let { zipObject } = require('lodash');
 let override = require('./override');
+let createDefaultSchema = require('./schema');
 let pkg = require('requirefrom')('src/utils')('packageJson');
 const clone = require('./deepCloneWithBuffers');
 
@@ -12,6 +13,10 @@ const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
 
 module.exports = class Config {
+  static withDefaultSchema(settings = {}) {
+    return new Config(createDefaultSchema(), settings);
+  }
+
   constructor(initialSchema, initialSettings) {
     this[schemaKeys] = new Map();
 

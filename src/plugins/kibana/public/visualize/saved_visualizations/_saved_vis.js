@@ -48,7 +48,7 @@ define(function (require) {
       uiStateJSON: 'string',
       description: 'string',
       savedSearchId: 'string',
-      version: 'integer'
+      version: 'long'
     };
 
     SavedVis.searchSource = true;

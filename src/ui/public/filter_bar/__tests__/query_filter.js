@@ -39,7 +39,9 @@ describe('Query Filter', function () {
         expect(queryFilter.pinFilter).to.be.a('function');
         expect(queryFilter.pinAll).to.be.a('function');
       });
+
     });
+
   });
 
   describe('Actions', function () {

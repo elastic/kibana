@@ -1,14 +1,21 @@
-let cluster = require('cluster');
-let { join } = require('path');
-let { debounce, compact, invoke, bindAll, once } = require('lodash');
+const cluster = require('cluster');
+const { join } = require('path');
+const { format: formatUrl } = require('url');
+const Hapi = require('hapi');
+const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
-let Log = require('../Log');
-let Worker = require('./worker');
+const Log = require('../Log');
+const Worker = require('./worker');
+const BasePathProxy = require('./base_path_proxy');
+
+process.env.kbnWorkerType = 'managr';
 
 module.exports = class ClusterManager {
-  constructor(opts = {}) {
+  constructor(opts = {}, settings = {}) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
+
+    this.basePathProxy = new BasePathProxy(this, settings);
 
     this.workers = [
       this.optimizer = new Worker({
@@ -17,14 +24,19 @@ module.exports = class ClusterManager {
         log: this.log,
         argv: compact([
           '--plugins.initialize=false',
-          '--server.autoListen=false'
+          '--server.autoListen=false',
+          `--server.basePath=${this.basePathProxy.basePath}`
         ]),
         watch: false
       }),
 
       this.server = new Worker({
         type: 'server',
-        log: this.log
+        log: this.log,
+        argv: compact([
+          `--server.port=${this.basePathProxy.targetPort}`,
+          `--server.basePath=${this.basePathProxy.basePath}`
+        ])
       })
     ];
 
@@ -48,12 +60,13 @@ module.exports = class ClusterManager {
   startCluster() {
     this.setupManualRestart();
     invoke(this.workers, 'start');
+    this.basePathProxy.listen();
   }
 
   setupWatching() {
-    var chokidar = require('chokidar');
-    let utils = require('requirefrom')('src/utils');
-    let fromRoot = utils('fromRoot');
+    const chokidar = require('chokidar');
+    const utils = require('requirefrom')('src/utils');
+    const fromRoot = utils('fromRoot');
 
     this.watcher = chokidar.watch([
       'src/plugins',
@@ -81,12 +94,12 @@ module.exports = class ClusterManager {
   }
 
   setupManualRestart() {
-    let readline = require('readline');
-    let rl = readline.createInterface(process.stdin, process.stdout);
+    const readline = require('readline');
+    const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;
-    let clear = () => nls = 0;
-    let clearSoon = debounce(clear, 2000);
+    const clear = () => nls = 0;
+    const clearSoon = debounce(clear, 2000);
 
     rl.setPrompt('');
     rl.prompt();
