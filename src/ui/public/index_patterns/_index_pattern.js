@@ -310,7 +310,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self._fetchFields = function () {
-      const existingFieldsByName = self.fields.byName;
+      const existingFieldsByName = _.get(self, 'fields.byName', {});
 
       return mapper.getFieldsForIndexPattern(self, true)
       .then(function (fields) {
