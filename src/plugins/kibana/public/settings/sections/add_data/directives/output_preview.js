@@ -20,6 +20,8 @@ app.directive('outputPreview', function () {
         }
       });
 
+      $scope.collapsed = true;
+
 
       //diff.diff($scope.oldObject, $scope.newObject);
 

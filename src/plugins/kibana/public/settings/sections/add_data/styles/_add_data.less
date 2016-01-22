@@ -136,7 +136,6 @@ kbn-settings-add-data {
         display: flex;
         align-items: center;
         flex: 1 0 auto;
-        //margin-bottom: @vis-editor-agg-editor-spacing;
         background-color: #DDD;
         border-bottom: 1px solid #CCC;
 
@@ -172,11 +171,13 @@ kbn-settings-add-data {
 
     output-preview {
       .visual {
-        max-height: 125px;
-        min-height: 125px;
-        overflow-y: scroll;
         background-color: #ecf0f1;
         border: 1px solid #ccc;
+      }
+
+      .visual.collapsed {
+        max-height: 125px;
+        overflow-y: scroll;
       }
 
       pre {
