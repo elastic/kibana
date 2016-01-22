@@ -14,12 +14,12 @@
       {{processor.title}}
     </span>
 
-    <span ng-if="!processor.errorMessage" class="processor-description">
+    <span class="processor-description">
       - {{ processor.description }}
     </span>
 
     <!-- error -->
-    <span ng-if="processor.errorMessage" class="processor-description danger">
+    <span ng-if="processor.error" class="processor-description danger">
       - Error
     </span>
   </div>

@@ -54,7 +54,7 @@ app.service('ingest', function ($http) {
         return {
           processorId: processor.processorId,
           output: undefined,
-          error: 'invalid parent processor'
+          error: { isNested: true, message: 'invalid parent processor' }
         };
       });
 
@@ -67,7 +67,10 @@ app.service('ingest', function ($http) {
 
         const outputDefault = _.find(outputDefaults, { 'processorId': processorId });
         outputDefault.output = output;
-        outputDefault.error = errorMessage;
+        outputDefault.error = undefined;
+        if (errorMessage) {
+          outputDefault.error = { isNested: false, message: errorMessage };
+        }
       });
 
       return outputDefaults;

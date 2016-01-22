@@ -1,17 +1,19 @@
+
+<process-container-header
+  processor="processor"
+  field="sourceField"
+  pipeline="pipeline">
+</process-container-header>
 <div
-  ng-class="{dirty: isDirty}">
-  <process-container-header
-    processor="processor"
-    field="sourceField"
-    pipeline="pipeline">
-  </process-container-header>
+  class="processor_body"
+  ng-class="{dirty: processor.error.isNested}">
   <div
     class="process-container-content"
     ng-hide="processor.collapsed">
     <div
-      ng-show="processor.errorMessage"
+      ng-show="processor.error"
       class="alert alert-danger">
-      {{processor.errorMessage}}
+      {{processor.error.message}}
     </div>
     <div class="process-worker-container"></div>
     <output-preview new-object="processor.outputObject" old-object="processor.inputObject"></output-preview>

@@ -35,18 +35,22 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
             const error = _.get(result, 'error');
 
             processor.outputObject = output;
-            processor.setError(error);
+            processor.error = error;
           });
 
           //update the inputObject of each processor
           results.forEach((result) => {
             const processor = pipeline.getProcessorById(result.processorId);
 
-            //this can probably be cleaned up a little.
-            if (processor.parent.processorId) {
-              processor.inputObject = _.cloneDeep(processor.parent.outputObject);
-            } else {
-              processor.inputObject = _.cloneDeep(processor.parent);
+            //we don't want to change the inputObject if the processor is in error
+            //because that can cause us to lose state.
+            if (!_.get(processor, 'error.isNested')) {
+              //this can probably be cleaned up a little.
+              if (processor.parent.processorId) {
+                processor.inputObject = _.cloneDeep(processor.parent.outputObject);
+              } else {
+                processor.inputObject = _.cloneDeep(processor.parent);
+              }
             }
 
             processor.updateDescription();

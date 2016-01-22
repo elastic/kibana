@@ -92,26 +92,31 @@ kbn-settings-add-data {
 
   process-container {
     display: block;
-    overflow: hidden;
-    position: relative;
+    margin-bottom: 1px;
 
-    .dirty {
+    .processor_body {
+      display: block;
+      overflow: hidden;
+      position: relative;
+
       .overlay {
-        display: block;
+        // TODO: Figure out the best way to disable/gray out the processor
+        display: none;
+        position: absolute;
+
+        top: -5000px;
+        left: -5000px;
+        width: 10000px;
+        height: 10000px;
+        background-color: black;
+        opacity: .10;
       }
-    }
 
-    .overlay {
-      // TODO: Figure out the best way to disable/gray out the processor
-      display: none;
-      position: absolute;
-
-      top: -5000px;
-      left: -5000px;
-      width: 10000px;
-      height: 10000px;
-      background-color: black;
-      opacity: .10;
+      &.dirty {
+        .overlay {
+          display: block;
+        }
+      }
     }
 
     .process-container-content {
@@ -131,7 +136,7 @@ kbn-settings-add-data {
         display: flex;
         align-items: center;
         flex: 1 0 auto;
-        margin-bottom: @vis-editor-agg-editor-spacing;
+        //margin-bottom: @vis-editor-agg-editor-spacing;
         background-color: #DDD;
         border-bottom: 1px solid #CCC;
 
