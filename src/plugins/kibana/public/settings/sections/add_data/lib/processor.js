@@ -4,7 +4,7 @@ export default function Processor(processorType) {
   const self = this;
 
   self.collapsed = false;
-  //_.merge(self, _.pick(processorType, ['title', 'template', 'typeid', 'getDefinition', 'getDescription']));
+  //_.merge(self, _.pick(processorType, ['title', 'template', 'typeId', 'getDefinition', 'getDescription']));
   _.merge(self, processorType);
 };
 

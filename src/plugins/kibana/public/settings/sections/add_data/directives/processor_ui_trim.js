@@ -4,9 +4,8 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_type_registry').register({
-  typeid: 'trim',
+  typeId: 'trim',
   title: 'Trim',
-  template: '<processor-ui-trim></processor-ui-trim>',
   sourceField: '',
   getDefinition: function() {
     const self = this;
@@ -25,13 +24,14 @@ require('../lib/processor_type_registry').register({
   }
 });
 
-//scope.processor is attached by the process_container.
+//scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiTrim', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_trim.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
         $scope.fields = keysDeep(processor.inputObject);
@@ -43,7 +43,7 @@ app.directive('processorUiTrim', function () {
       }
 
       function processorUiChanged() {
-        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
+        pipeline.dirty = true;
       }
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

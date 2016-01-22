@@ -5,9 +5,8 @@ const keysDeep = require('../lib/keys_deep');
 require('../services/ingest');
 
 require('../lib/processor_type_registry').register({
-  typeid: 'grok',
+  typeId: 'grok',
   title: 'Grok',
-  template: '<processor-ui-grok></processor-ui-grok>',
   sourceField: '',
   pattern: '',
   getDefinition: function() {
@@ -34,13 +33,14 @@ require('../lib/processor_type_registry').register({
   }
 });
 
-//scope.processor is attached by the process_container.
+//scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiGrok', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_grok.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
         $scope.fields = keysDeep(processor.inputObject);
@@ -52,7 +52,7 @@ app.directive('processorUiGrok', function () {
       }
 
       function processorUiChanged() {
-        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
+        pipeline.dirty = true;
       }
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

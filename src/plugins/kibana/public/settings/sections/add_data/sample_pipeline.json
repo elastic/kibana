@@ -2,7 +2,7 @@
   "processors": [
     {
       "collapsed": true,
-      "typeid": "grok",
+      "typeId": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
       "sourceField": "_raw",
@@ -12,7 +12,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "grok",
+      "typeId": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
       "sourceField": "message",
@@ -22,7 +22,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "grok",
+      "typeId": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
       "sourceField": "datestamp",
@@ -32,7 +32,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "date",
+      "typeId": "date",
       "title": "Date",
       "template": "<processor-ui-date></processor-ui-date>",
       "sourceField": "timestamp",
@@ -48,7 +48,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "set",
+      "typeId": "set",
       "title": "Set",
       "template": "<processor-ui-set></processor-ui-set>",
       "targetField": "tags_text",
@@ -58,7 +58,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "trim",
+      "typeId": "trim",
       "title": "Trim",
       "template": "<processor-ui-trim></processor-ui-trim>",
       "sourceField": "tags_text",
@@ -67,7 +67,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "gsub",
+      "typeId": "gsub",
       "title": "Gsub",
       "template": "<processor-ui-gsub></processor-ui-gsub>",
       "sourceField": "tags_text",
@@ -78,7 +78,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "uppercase",
+      "typeId": "uppercase",
       "title": "Uppercase",
       "template": "<processor-ui-uppercase></processor-ui-uppercase>",
       "sourceField": "tags_text",
@@ -87,7 +87,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "split",
+      "typeId": "split",
       "title": "Split",
       "template": "<processor-ui-split></processor-ui-split>",
       "sourceField": "tags_text",
@@ -97,7 +97,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "rename",
+      "typeId": "rename",
       "title": "Rename",
       "template": "<processor-ui-rename></processor-ui-rename>",
       "sourceField": "tags_text",
@@ -107,7 +107,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "lowercase",
+      "typeId": "lowercase",
       "title": "Lowercase",
       "template": "<processor-ui-lowercase></processor-ui-lowercase>",
       "sourceField": "document",
@@ -116,7 +116,7 @@
     },
     {
       "collapsed": false,
-      "typeid": "geoip",
+      "typeId": "geoip",
       "title": "Geo IP",
       "template": "<processor-ui-geoip></processor-ui-geoip>",
       "sourceField": "source",
@@ -126,7 +126,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "append",
+      "typeId": "append",
       "title": "Append",
       "template": "<processor-ui-append></processor-ui-append>",
       "targetField": "sentence",
@@ -145,7 +145,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "join",
+      "typeId": "join",
       "title": "Join",
       "template": "<processor-ui-join></processor-ui-join>",
       "sourceField": "sentence",
@@ -155,7 +155,7 @@
     },
     {
       "collapsed": true,
-      "typeid": "remove",
+      "typeId": "remove",
       "title": "Remove",
       "template": "<processor-ui-remove></processor-ui-remove>",
       "sourceField": "_raw",

@@ -4,7 +4,6 @@ const $ = require('jquery');
 const Pipeline = require('../lib/pipeline');
 
 require('./processors');
-require('./list_of_values');
 
 const Logger = require('../lib/logger');
 const logger = new Logger('pipeline_setup', true);
@@ -20,8 +19,10 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
       const pipeline = $scope.pipeline;
 
       function simulatePipeline(event, message) {
+        if (!pipeline.dirty) return;
+
         if (pipeline.processors.length === 0) {
-          pipeline.updateOutput(undefined);
+          pipeline.updateOutput();
           return;
         }
 
@@ -50,83 +51,27 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
             processor.updateDescription();
           });
+
+          pipeline.updateOutput();
+          pipeline.dirty = false;
         });
       }
       simulatePipeline = debounce(simulatePipeline, 200);
 
-      function addProcessor(processor) {
-        //logger.log('addProcessor');
-        const scope = $scope.$new();
-        scope.processor = processor;
-        scope.pipeline = pipeline;
-
-        const template = `<li><process-container></process-container></li>`;
-        const $newEl = $compile(template)(scope);
-        $scope.$elements[processor.processorId] = $newEl;
-        $newEl.appendTo($el);
-      }
-
-      function removeProcessor(processor) {
-        const $el = $scope.$elements[processor.processorId];
-        $el.slideUp(200, () => {
-          $el.remove();
-        });
-      }
-
-      function updateProcessorChain() {
-        pipeline.updateParents();
-      }
-
-      function reorderDom() {
-        const processors = pipeline.processors;
-        const $parent = $scope.$el;
-
-        processors.forEach((processor, index) => {
-          const $el = $scope.$elements[processor.processorId];
-
-          if (index === 0) {
-            if (!$el.is(':first-child')) {
-              $el.detach();
-              $parent.prepend($el);
-            }
-          } else {
-            const previousProcessor = processors[index-1];
-            const $previousEl = $scope.$elements[previousProcessor.processorId];
-            if ($el.prev()[0] !== $previousEl[0]) {
-              $el.detach();
-              $previousEl.after($el);
-            }
-          }
-        });
-      }
-
       $scope.$watchCollection('pipeline.processors', function (newVal, oldVal) {
-        var removed = _.difference(oldVal, newVal);
-        var added = _.difference(newVal, oldVal);
-
-        removed.forEach(removeProcessor);
-        added.forEach(addProcessor);
-
-        updateProcessorChain();
-        reorderDom();
+        pipeline.updateParents();
+        pipeline.dirty = true;
         simulatePipeline();
       });
 
       $scope.$watch('sampleData', function(newVal) {
         pipeline.rootObject = $scope.sampleData;
-        updateProcessorChain();
+        pipeline.updateParents();
+        pipeline.dirty = true;
         simulatePipeline();
       });
 
-      function onProcessorUiChanged(event, message) {
-        simulatePipeline();
-      }
-
-      const processorUiChangedListener = $scope.$on('processor_ui_changed', onProcessorUiChanged);
-
-      $scope.$on('$destroy', () => {
-        processorUiChangedListener();
-      });
+      $scope.$watch('pipeline.dirty', simulatePipeline);
     },
     controller: function ($scope, AppState, ingest) {
       const savedPipeline = require('../sample_pipeline.json');

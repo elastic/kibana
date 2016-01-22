@@ -4,9 +4,8 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_type_registry').register({
-  typeid: 'gsub',
+  typeId: 'gsub',
   title: 'Gsub',
-  template: '<processor-ui-gsub></processor-ui-gsub>',
   sourceField: '',
   pattern: '',
   replacement: '',
@@ -29,13 +28,14 @@ require('../lib/processor_type_registry').register({
   }
 });
 
-//scope.processor is attached by the process_container.
+//scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiGsub', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_gsub.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
         $scope.fields = keysDeep(processor.inputObject);
@@ -47,7 +47,7 @@ app.directive('processorUiGsub', function () {
       }
 
       function processorUiChanged() {
-        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
+        pipeline.dirty = true;
       }
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

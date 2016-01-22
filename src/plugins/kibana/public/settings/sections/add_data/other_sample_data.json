@@ -2,7 +2,7 @@
 {
   "processors": [
     {
-      "typeid": "grok",
+      "typeId": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
       "sourceField": "_raw",
@@ -11,7 +11,7 @@
       "description": "[_raw] -> [message], [source]"
     },
     {
-      "typeid": "grok",
+      "typeId": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
       "sourceField": "message",
@@ -20,7 +20,7 @@
       "description": "[message] -> [action], [datestamp], [document], [extended_response_code], [protocol], [response_code]"
     },
     {
-      "typeid": "grok",
+      "typeId": "grok",
       "title": "Grok",
       "template": "<processor-ui-grok></processor-ui-grok>",
       "sourceField": "datestamp",
@@ -29,7 +29,7 @@
       "description": "[datestamp] -> [timestamp], [timezone]"
     },
     {
-      "typeid": "date",
+      "typeId": "date",
       "title": "Date",
       "template": "<processor-ui-date></processor-ui-date>",
       "sourceField": "timestamp",
@@ -44,7 +44,7 @@
       "description": "[timestamp] -> [timestamp]"
     },
     {
-      "typeid": "set",
+      "typeId": "set",
       "title": "Set",
       "template": "<processor-ui-set></processor-ui-set>",
       "targetField": "tags_text",
@@ -53,7 +53,7 @@
       "description": "[tags_text]"
     },
     {
-      "typeid": "trim",
+      "typeId": "trim",
       "title": "Trim",
       "template": "<processor-ui-trim></processor-ui-trim>",
       "sourceField": "tags_text",
@@ -61,7 +61,7 @@
       "description": "[tags_text]"
     },
     {
-      "typeid": "gsub",
+      "typeId": "gsub",
       "title": "Gsub",
       "template": "<processor-ui-gsub></processor-ui-gsub>",
       "sourceField": "tags_text",
@@ -71,7 +71,7 @@
       "description": "[tags_text] - '\\s' -> ','"
     },
     {
-      "typeid": "uppercase",
+      "typeId": "uppercase",
       "title": "Uppercase",
       "template": "<processor-ui-uppercase></processor-ui-uppercase>",
       "sourceField": "tags_text",
@@ -79,7 +79,7 @@
       "description": "[tags_text]"
     },
     {
-      "typeid": "split",
+      "typeId": "split",
       "title": "Split",
       "template": "<processor-ui-split></processor-ui-split>",
       "sourceField": "tags_text",
@@ -88,7 +88,7 @@
       "description": "[tags_text] on ','"
     },
     {
-      "typeid": "rename",
+      "typeId": "rename",
       "title": "Rename",
       "template": "<processor-ui-rename></processor-ui-rename>",
       "sourceField": "tags_text",
@@ -97,7 +97,7 @@
       "description": "[tags_text] -> [tags]"
     },
     {
-      "typeid": "lowercase",
+      "typeId": "lowercase",
       "title": "Lowercase",
       "template": "<processor-ui-lowercase></processor-ui-lowercase>",
       "sourceField": "document",
@@ -105,7 +105,7 @@
       "description": "[document]"
     },
     {
-      "typeid": "geoip",
+      "typeId": "geoip",
       "title": "Geo IP",
       "template": "<processor-ui-geoip></processor-ui-geoip>",
       "sourceField": "source",
@@ -114,7 +114,7 @@
       "description": "[source] -> [source_geoip]"
     },
     {
-      "typeid": "append",
+      "typeId": "append",
       "title": "Append",
       "template": "<processor-ui-append></processor-ui-append>",
       "targetField": "sentence",
@@ -132,7 +132,7 @@
       "description": "[sentence]"
     },
     {
-      "typeid": "join",
+      "typeId": "join",
       "title": "Join",
       "template": "<processor-ui-join></processor-ui-join>",
       "sourceField": "sentence",
@@ -141,7 +141,7 @@
       "description": "[sentence] on ' '"
     },
     {
-      "typeid": "remove",
+      "typeId": "remove",
       "title": "Remove",
       "template": "<processor-ui-remove></processor-ui-remove>",
       "sourceField": "_raw",

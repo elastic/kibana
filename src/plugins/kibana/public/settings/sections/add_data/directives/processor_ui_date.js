@@ -5,9 +5,8 @@ const keysDeep = require('../lib/keys_deep');
 const selectableArray = require('../lib/selectable_array');
 
 require('../lib/processor_type_registry').register({
-  typeid: 'date',
+  typeId: 'date',
   title: 'Date',
-  template: '<processor-ui-date></processor-ui-date>',
   sourceField: '',
   targetField: '@timestamp',
   formats: [],
@@ -48,13 +47,14 @@ require('../lib/processor_type_registry').register({
   }
 });
 
-//scope.processor is attached by the process_container.
+//scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiDate', function() {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_date.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
         $scope.fields = keysDeep(processor.inputObject);
@@ -66,7 +66,7 @@ app.directive('processorUiDate', function() {
       }
 
       function processorUiChanged() {
-        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
+        pipeline.dirty = true;
       }
 
       function updateFormats() {

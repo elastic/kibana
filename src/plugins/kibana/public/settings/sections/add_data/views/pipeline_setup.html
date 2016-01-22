@@ -7,6 +7,9 @@
   <ul
     class="pipeline-container"
     ng-show="pipeline.processors.length > 0">
+    <li ng-repeat="processor in pipeline.processors track by processor.processorId">
+      <process-container pipeline="pipeline" processor="processor"></process-container>
+    </li>
   </ul>
   <div
     class="empty-pipeline"

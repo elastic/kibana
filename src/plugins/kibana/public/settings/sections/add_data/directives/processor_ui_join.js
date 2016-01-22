@@ -4,9 +4,8 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
 require('../lib/processor_type_registry').register({
-  typeid: 'join',
+  typeId: 'join',
   title: 'Join',
-  template: '<processor-ui-join></processor-ui-join>',
   sourceField: '',
   separator: '',
   getDefinition: function() {
@@ -28,13 +27,14 @@ require('../lib/processor_type_registry').register({
   }
 });
 
-//scope.processor is attached by the process_container.
+//scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiJoin', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_join.html'),
     controller : function ($scope, $rootScope, debounce) {
       const processor = $scope.processor;
+      const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
         const allKeys = keysDeep(processor.inputObject);
@@ -53,7 +53,7 @@ app.directive('processorUiJoin', function () {
       }
 
       function processorUiChanged() {
-        $rootScope.$broadcast('processor_ui_changed', { processor: processor });
+        pipeline.dirty = true;
       }
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

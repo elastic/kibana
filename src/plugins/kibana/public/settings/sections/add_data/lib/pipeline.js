@@ -9,6 +9,7 @@ export default function Pipeline() {
   self.counter = 0;
   self.rootObject = {};
   self.output = undefined;
+  self.dirty = false;
 };
 
 Pipeline.prototype.load = function(pipeline) {
@@ -68,14 +69,14 @@ Pipeline.prototype.add = function(processorType, existingProcessor) {
 
   if (existingProcessor) {
     //console.log('existingProcessor', existingProcessor);
-    processorType = _.find(types, (o) => { return o.typeid === existingProcessor.typeid });
+    processorType = _.find(types, (o) => { return o.typeId === existingProcessor.typeId });
   }
 
   const newProcessor = new Processor(processorType);
 
   if (existingProcessor) {
     const keys = _.keys(existingProcessor);
-    remove(keys, ['title', 'template', 'typeid', 'processorId', 'outputObject', 'inputObject', 'description']);
+    remove(keys, ['title', 'template', 'typeId', 'processorId', 'outputObject', 'inputObject', 'description']);
     keys.forEach((key) => {
       // if (key === 'formats') {
       //   debugger;
