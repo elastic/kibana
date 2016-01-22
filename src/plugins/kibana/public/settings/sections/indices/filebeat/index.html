@@ -8,16 +8,24 @@
     </div>
     <div ng-controller="kbnSettingsIndicesFilebeat">
       <div class="wizard-step-headings">
-      <span ng-class="{active: currentStep === 0}" class="wizard-step-heading">
+      <span ng-class="{active: currentStep === 0}"
+            class="wizard-step-heading"
+            ng-click="setCurrentStep(0)">
         1. Paste
       </span>
-      <span ng-class="{active: currentStep === 1}" class="wizard-step-heading">
+      <span ng-class="{active: currentStep === 1, aheadActive: currentStep < 1}"
+            class="wizard-step-heading"
+            ng-click="currentStep < 1 || setCurrentStep(1)">
         2. Parse
       </span>
-      <span ng-class="{active: currentStep === 2}" class="wizard-step-heading">
+      <span ng-class="{active: currentStep === 2, aheadActive: currentStep < 2}"
+            class="wizard-step-heading"
+            ng-click="currentStep < 2 || setCurrentStep(2)">
         3. Review
       </span>
-      <span ng-class="{active: currentStep === 3}" class="wizard-step-heading">
+      <span ng-class="{active: currentStep === 3, aheadActive: currentStep < 3}"
+            class="wizard-step-heading"
+            ng-click="currentStep < 3 || setCurrentStep(3)">
         4. Install Filebeat
       </span>
       </div>
