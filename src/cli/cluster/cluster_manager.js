@@ -15,8 +15,23 @@ module.exports = class ClusterManager {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
-    if (opts.basePathProxy) {
+    const serverArgv = [];
+    const optimizerArgv = [
+      '--plugins.initialize=false',
+      '--server.autoListen=false',
+    ];
+
+    if (opts.basePath) {
       this.basePathProxy = new BasePathProxy(this, settings);
+
+      optimizerArgv.push(
+        `--server.basePath=${this.basePathProxy.basePath}`
+      );
+
+      serverArgv.push(
+        `--server.port=${this.basePathProxy.targetPort}`,
+        `--server.basePath=${this.basePathProxy.basePath}`
+      );
     }
 
     this.workers = [
@@ -24,21 +39,14 @@ module.exports = class ClusterManager {
         type: 'optmzr',
         title: 'optimizer',
         log: this.log,
-        argv: compact([
-          '--plugins.initialize=false',
-          '--server.autoListen=false',
-          this.basePathProxy && `--server.basePath=${this.basePathProxy.basePath}`
-        ]),
+        argv: optimizerArgv,
         watch: false
       }),
 
       this.server = new Worker({
         type: 'server',
         log: this.log,
-        argv: compact([
-          this.basePathProxy && `--server.port=${this.basePathProxy.targetPort}`,
-          this.basePathProxy && `--server.basePath=${this.basePathProxy.basePath}`
-        ])
+        argv: serverArgv
       })
     ];
 
