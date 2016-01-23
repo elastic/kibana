@@ -7,6 +7,11 @@ define(function (require) {
     var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
     var normalizeSortRequest = Private(require('ui/courier/data_source/_normalize_sort_request'));
     var rootSearchSource = require('ui/courier/data_source/_root_search_source');
+    var forIp = Symbol('for which index pattern?');
+
+    function isIndexPattern(val) {
+      return Boolean(val && typeof val.toIndexList === 'function');
+    }
 
     _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
@@ -36,13 +41,31 @@ define(function (require) {
     ];
 
     SearchSource.prototype.index = function (indexPattern) {
-      if (indexPattern === undefined) return this._state.index;
-      if (indexPattern === null) return delete this._state.index;
-      if (!indexPattern || typeof indexPattern.toIndexList !== 'function') {
+      var state = this._state;
+
+      var hasSource = state.source;
+      var sourceCameFromIp = hasSource && state.source.hasOwnProperty(forIp);
+      var sourceIsForOurIp = sourceCameFromIp && state.source[forIp] === state.index;
+      if (sourceIsForOurIp) {
+        delete state.source;
+      }
+
+      if (indexPattern === undefined) return state.index;
+      if (indexPattern === null) return delete state.index;
+      if (!isIndexPattern(indexPattern)) {
         throw new TypeError('expected indexPattern to be an IndexPattern duck.');
       }
 
-      this._state.index = indexPattern;
+      state.index = indexPattern;
+      if (!state.source) {
+        // imply source filtering based on the index pattern, but allow overriding
+        // it by simply setting another value for "source". When index is changed
+        state.source = function () {
+          return indexPattern.getSourceFiltering();
+        };
+        state.source[forIp] = indexPattern;
+      }
+
       return this;
     };
 
