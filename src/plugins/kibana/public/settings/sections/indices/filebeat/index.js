@@ -7,7 +7,7 @@ require('plugins/kibana/settings/sections/indices/directives/paste_samples_step'
 require('plugins/kibana/settings/sections/indices/directives/pipeline_step');
 require('plugins/kibana/settings/sections/indices/directives/install_filebeat_step');
 
-routes.when('/settings/indices/filebeat', {
+routes.when('/settings/indices/create/filebeat', {
   template: template
 });
 
