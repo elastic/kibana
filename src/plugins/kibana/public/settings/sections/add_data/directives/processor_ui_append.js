@@ -3,29 +3,6 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-require('../lib/processor_type_registry').register({
-  typeId: 'append',
-  title: 'Append',
-  targetField: '',
-  values: [],
-  getDefinition: function() {
-    const self = this;
-    return {
-      'append' : {
-        'processor_id': self.processorId,
-        'field' : self.targetField ? self.targetField : '',
-        'value': self.values
-      }
-    };
-  },
-  getDescription: function() {
-    const self = this;
-
-    const target = (self.targetField) ? self.targetField : '?';
-    return `[${target}]`;
-  }
-});
-
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiAppend', function () {
   return {

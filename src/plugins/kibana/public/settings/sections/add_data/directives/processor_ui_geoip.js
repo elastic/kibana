@@ -4,30 +4,6 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 require('../services/ingest');
 
-require('../lib/processor_type_registry').register({
-  typeId: 'geoip',
-  title: 'Geo IP',
-  sourceField: '',
-  targetField: 'geoip',
-  getDefinition: function() {
-    const self = this;
-    return {
-      'geoip' : {
-        'processor_id': self.processorId,
-        'source_field' : self.sourceField ? self.sourceField : '',
-        'target_field': self.targetField ? self.targetField : ''
-      }
-    };
-  },
-  getDescription: function() {
-    const self = this;
-
-    const source = (self.sourceField) ? self.sourceField : '?';
-    const target = (self.targetField) ? self.targetField : '?';
-    return `[${source}] -> [${target}]`;
-  }
-});
-
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiGeoip', function () {
   return {

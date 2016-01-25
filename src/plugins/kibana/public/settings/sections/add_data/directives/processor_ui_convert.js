@@ -3,30 +3,6 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-require('../lib/processor_type_registry').register({
-  typeId: 'convert',
-  title: 'Convert',
-  sourceField: '',
-  type: '',
-  getDefinition: function() {
-    const self = this;
-    return {
-      'convert' : {
-        'processor_id': self.processorId,
-        'field' : self.sourceField ? self.sourceField : '',
-        'type' : self.type ? self.type : ''
-      }
-    };
-  },
-  getDescription: function() {
-    const self = this;
-
-    const source = (self.sourceField) ? self.sourceField : '?';
-    const type = (self.type) ? self.type : '?';
-    return `[${source}] to ${type}`;
-  }
-});
-
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiConvert', function () {
   return {

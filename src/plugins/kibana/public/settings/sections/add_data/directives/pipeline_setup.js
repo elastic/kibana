@@ -79,7 +79,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
     },
     controller: function ($scope, AppState, ingest) {
       const savedPipeline = require('../sample_pipeline.json');
-      const types = require('../lib/processor_type_registry.js').all();
+      const types = require('../../../../../server/domain/ingest_processor_types');
       const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
       $scope.defaultProcessorType = getDefaultProcessorType();

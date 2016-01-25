@@ -4,49 +4,6 @@ const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 const selectableArray = require('../lib/selectable_array');
 
-require('../lib/processor_type_registry').register({
-  typeId: 'date',
-  title: 'Date',
-  sourceField: '',
-  targetField: '@timestamp',
-  formats: [],
-  timezone: 'UTC',
-  locale: 'ENGLISH',
-  customFormat: '',
-  getDefinition: function() {
-    const self = this;
-
-    const formats = [];
-    self.formats.forEach((format) => {
-      if (format === 'Custom') {
-        if (self.customFormat) {
-          formats.push(self.customFormat);
-        }
-      } else {
-        formats.push(format);
-      }
-    });
-
-    return {
-      'date' : {
-        'processor_id': self.processorId,
-        'match_field' : self.sourceField ? self.sourceField : '',
-        'target_field' : self.targetField ? self.targetField : '',
-        'match_formats' : formats,
-        'timezone': self.timezone ? self.timezone : '',
-        'locale': self.locale ? self.locale : ''
-      }
-    };
-  },
-  getDescription: function() {
-    const self = this;
-
-    const source = (self.sourceField) ? self.sourceField : '?';
-    const target = (self.targetField) ? self.targetField : '?';
-    return `[${source}] -> [${target}]`;
-  }
-});
-
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiDate', function() {
   return {

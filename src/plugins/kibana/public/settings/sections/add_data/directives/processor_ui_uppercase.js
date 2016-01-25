@@ -3,27 +3,6 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-require('../lib/processor_type_registry').register({
-  typeId: 'uppercase',
-  title: 'Uppercase',
-  sourceField: '',
-  getDefinition: function() {
-    const self = this;
-    return {
-      'uppercase' : {
-        'processor_id': self.processorId,
-        'field' : self.sourceField ? self.sourceField : ''
-      }
-    };
-  },
-  getDescription: function() {
-    const self = this;
-
-    const source = (self.sourceField) ? self.sourceField : '?';
-    return `[${source}]`;
-  }
-});
-
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiUppercase', function () {
   return {

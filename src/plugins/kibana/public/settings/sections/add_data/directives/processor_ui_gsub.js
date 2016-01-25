@@ -3,31 +3,6 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 
-require('../lib/processor_type_registry').register({
-  typeId: 'gsub',
-  title: 'Gsub',
-  sourceField: '',
-  pattern: '',
-  replacement: '',
-  getDefinition: function() {
-    const self = this;
-    return {
-      'gsub' : {
-        'processor_id': self.processorId,
-        'field' : self.sourceField ? self.sourceField : '',
-        'pattern' : self.pattern ? self.pattern : '',
-        'replacement' : self.replacement ? self.replacement : ''
-      }
-    };
-  },
-  getDescription: function() {
-    const self = this;
-
-    const source = (self.sourceField) ? self.sourceField : '?';
-    return `[${source}] - '${self.pattern}' -> '${self.replacement}'`;
-  }
-});
-
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiGsub', function () {
   return {
