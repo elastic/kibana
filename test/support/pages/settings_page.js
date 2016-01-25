@@ -130,13 +130,11 @@ define(function (require) {
     },
 
     getCreateButton: function () {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn');
+      return common.findTestSubject('submitCreateIndexPatternFromExistingForm');
     },
 
     clickCreateButton: function () {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn').click();
+      return common.findTestSubject('submitCreateIndexPatternFromExistingForm').click();
     },
 
     clickDefaultIndexButton: function () {
@@ -309,7 +307,7 @@ define(function (require) {
       return common.tryForTime(defaultTimeout, function () {
         return self.selectTimeFieldOption('@timestamp')
         .then(function () {
-          return self.getCreateButton().click();
+          return self.clickCreateButton();
         });
       })
       .then(function () {
