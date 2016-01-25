@@ -314,10 +314,10 @@ define(function (require) {
     }
 
     IndexPattern.prototype.routes = {
-      edit: '/settings/indices/{{id}}',
-      addField: '/settings/indices/{{id}}/create-field',
-      indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+      edit: '/settings/indices/edit/{{id}}',
+      addField: '/settings/indices/edit/{{id}}/create-field',
+      indexedFields: '/settings/indices/edit/{{id}}?_a=(tab:indexedFields)',
+      scriptedFields: '/settings/indices/edit/{{id}}?_a=(tab:scriptedFields)'
     };
 
     return IndexPattern;

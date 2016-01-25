@@ -14,7 +14,7 @@ require('ui/modules').get('apps/settings')
         $scope.indexPatternList = ids.map(function (id) {
           return {
             id: id,
-            url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
+            url: kbnUrl.eval('#/settings/indices/edit/{{id}}', {id: id}),
             class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };

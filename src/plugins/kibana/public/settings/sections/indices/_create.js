@@ -70,7 +70,7 @@ define(function (require) {
                 config.set('defaultIndex', indexPattern.id);
               }
               indexPatterns.cache.clear(indexPattern.id);
-              kbnUrl.change('/settings/indices/' + indexPattern.id);
+              kbnUrl.change('/settings/indices/edit/' + indexPattern.id);
             });
           }
         });

@@ -5,7 +5,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/indices/_index_header');
 
   require('ui/routes')
-  .when('/settings/indices/:indexPatternId', {
+  .when('/settings/indices/edit/:indexPatternId', {
     template: require('plugins/kibana/settings/sections/indices/_edit.html'),
     resolve: {
       indexPattern: function ($route, courier) {

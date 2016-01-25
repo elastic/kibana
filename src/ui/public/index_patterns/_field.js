@@ -69,7 +69,7 @@ define(function (require) {
     }
 
     Field.prototype.routes = {
-      edit: '/settings/indices/{{indexPattern.id}}/field/{{name}}'
+      edit: '/settings/indices/edit/{{indexPattern.id}}/field/{{name}}'
     };
 
     return Field;
