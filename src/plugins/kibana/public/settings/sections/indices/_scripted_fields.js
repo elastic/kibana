@@ -18,7 +18,7 @@ define(function (require) {
       link: function ($scope) {
         var dateScripts = require('plugins/kibana/settings/sections/indices/_date_scripts');
 
-        var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+        var fieldCreatorPath = '/settings/indices/edit/{{ indexPattern }}/scriptedField';
         var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
         $scope.perPage = 25;

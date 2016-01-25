@@ -3,9 +3,9 @@ define(function (require) {
   require('plugins/kibana/settings/sections/indices/_index_header');
 
   require('ui/routes')
-  .when('/settings/indices/:indexPatternId/field/:fieldName', { mode: 'edit' })
-  .when('/settings/indices/:indexPatternId/create-field/', { mode: 'create' })
-  .defaults(/settings\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
+  .when('/settings/indices/edit/:indexPatternId/field/:fieldName', { mode: 'edit' })
+  .when('/settings/indices/edit/:indexPatternId/create-field/', { mode: 'create' })
+  .defaults(/settings\/indices\/edit\/[^\/]+\/(field|create-field)(\/|$)/, {
     template: require('plugins/kibana/settings/sections/indices/_field_editor.html'),
     resolve: {
       indexPattern: function ($route, courier) {

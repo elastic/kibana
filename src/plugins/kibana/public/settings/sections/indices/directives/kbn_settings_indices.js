@@ -6,6 +6,7 @@ require('ui/modules').get('apps/settings')
     transclude: true,
     template: require('plugins/kibana/settings/sections/indices/directives/kbn_settings_indices.html'),
     link: function ($scope) {
+      $scope.showAddNew = !/^\/settings\/indices$/.test($route.current.$$route.originalPath);
       $scope.edittingId = $route.current.params.indexPatternId;
       config.$bind($scope, 'defaultIndex');
 
@@ -14,7 +15,7 @@ require('ui/modules').get('apps/settings')
         $scope.indexPatternList = ids.map(function (id) {
           return {
             id: id,
-            url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
+            url: kbnUrl.eval('#/settings/indices/edit/{{id}}', {id: id}),
             class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };
