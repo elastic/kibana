@@ -6,6 +6,7 @@ require('ui/modules').get('apps/settings')
     transclude: true,
     template: require('plugins/kibana/settings/sections/indices/directives/kbn_settings_indices.html'),
     link: function ($scope) {
+      $scope.showAddNew = !/^\/settings\/indices$/.test($route.current.$$route.originalPath);
       $scope.edittingId = $route.current.params.indexPatternId;
       config.$bind($scope, 'defaultIndex');
 
