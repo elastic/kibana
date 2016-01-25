@@ -111,13 +111,6 @@ define(function (require) {
           aggFilter: 'geohash_grid',
           min: 1,
           max: 1
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: 'Split Chart',
-          min: 0,
-          max: 1
         }
       ])
     });
