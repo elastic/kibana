@@ -23,6 +23,7 @@ app.directive('processorUiDate', function() {
       }
 
       function processorUiChanged() {
+        pipeline.currentProcessorId = processor.processorId;
         pipeline.dirty = true;
       }
 

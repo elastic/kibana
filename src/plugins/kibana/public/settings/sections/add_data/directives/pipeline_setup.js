@@ -58,6 +58,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
 
           pipeline.updateOutput();
           pipeline.dirty = false;
+          pipeline.currentProcessorId = null;
         });
       }
       simulatePipeline = debounce(simulatePipeline, 200);
@@ -79,7 +80,7 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
     },
     controller: function ($scope, AppState, ingest) {
       const savedPipeline = require('../sample_pipeline.json');
-      const types = require('../../../../../server/domain/ingest_processor_types');
+      const types = require('../../../../../domain/ingest_processor_types');
       const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
       $scope.defaultProcessorType = getDefaultProcessorType();

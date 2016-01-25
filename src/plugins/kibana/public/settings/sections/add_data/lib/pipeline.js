@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Processor = require('./processor');
-const types = require('../../../../../server/domain/ingest_processor_types');
+const types = require('../../../../../domain/ingest_processor_types');
 
 export default function Pipeline() {
   const self = this;
@@ -10,6 +10,7 @@ export default function Pipeline() {
   self.rootObject = {};
   self.output = undefined;
   self.dirty = false;
+  self.currentProcessorId = null;
 };
 
 Pipeline.prototype.load = function(pipeline) {

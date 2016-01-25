@@ -13,6 +13,7 @@ app.directive('processorUiSet', function () {
       const pipeline = $scope.pipeline;
 
       function processorUiChanged() {
+        pipeline.currentProcessorId = processor.processorId;
         pipeline.dirty = true;
       }
 

@@ -22,6 +22,7 @@ app.directive('processorUiRemove', function () {
       }
 
       function processorUiChanged() {
+        pipeline.currentProcessorId = processor.processorId;
         pipeline.dirty = true;
       }
 

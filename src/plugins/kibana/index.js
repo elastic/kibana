@@ -1,6 +1,6 @@
 const Boom = require('boom');
 const { join } = require('path');
-const requireAllAndApply = require('./server/lib/require_all_and_apply');
+const requireAllAndApply = require('./lib/require_all_and_apply');
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
@@ -14,7 +14,7 @@ module.exports = function (kibana) {
     },
 
     init: function(server) {
-      requireAllAndApply(join(__dirname, 'server', 'routes', '**', '*.js'), server);
+      requireAllAndApply(join(__dirname, 'routes', '**', '*.js'), server);
     },
 
     uiExports: {

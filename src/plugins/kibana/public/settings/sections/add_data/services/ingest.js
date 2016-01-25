@@ -12,7 +12,6 @@ app.service('ingest', function ($http) {
   function simulatePipeline(pipeline) {
     const data = angular.toJson(pipeline);
 
-    console.log(data);
     return $http.post(`/api/kibana/simulate`, data)
     .then((result) => {
       //if there was an error, then it was in communicating with the kibana server.
