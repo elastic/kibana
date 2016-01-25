@@ -2,6 +2,7 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
 const jsondiffpatch = require('jsondiffpatch');
+const htmlFormat = jsondiffpatch.formatters.html.format;
 
 app.directive('outputPreview', function () {
   return {
@@ -14,7 +15,7 @@ app.directive('outputPreview', function () {
     link: function($scope, $el) {
       const div = $el.find('.visual')[0];
 
-      $scope.jsondiffpatch = jsondiffpatch.create({
+      $scope.diffpatch = jsondiffpatch.create({
         arrays: {
           detectMove: false
         }
@@ -22,28 +23,16 @@ app.directive('outputPreview', function () {
 
       $scope.collapsed = true;
 
-
-      //diff.diff($scope.oldObject, $scope.newObject);
-
-      //div.innerHTML = diff.formatters.format(delta, left);
-      //
       $scope.updateUi = function() {
-        const meow = $scope.jsondiffpatch;
-
         const left = $scope.oldObject;
-        const delta = meow.diff($scope.oldObject, $scope.newObject);
+        const right = $scope.newObject;
+        const delta = $scope.diffpatch.diff(left, right);
 
-        //console.log('delta', delta);
-        // console.log('jsondiffpatch', jsondiffpatch);
-        // console.log('meow', meow);
-        // console.log(jsondiffpatch.formatters.html.format(delta, left));
-        div.innerHTML = jsondiffpatch.formatters.html.format(delta, left);
+        div.innerHTML = htmlFormat(delta, left);
       }
     },
     controller: function ($scope) {
-
       function updateOutput() {
-        //console.log('controller', $scope.oldObject, $scope.newObject);
         $scope.updateUi();
       }
 
