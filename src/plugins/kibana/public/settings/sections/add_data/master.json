@@ -1,6 +1,23 @@
 {
   "processors": [
     {
+      "collapsed": false,
+      "typeId": "grok",
+      "title": "Grok",
+      "sourceField": "_raw",
+      "pattern": "%{GREEDYDATA:source} - - %{GREEDYDATA:message}",
+      "processorId": "processor_1",
+      "description": "[_raw] -> [message], [source]"
+    }
+  ],
+  "counter": 1,
+  "dirty": false
+}
+
+
+{
+  "processors": [
+    {
       "collapsed": true,
       "typeId": "grok",
       "title": "Grok",

@@ -9,71 +9,22 @@ app.service('ingest', function ($http) {
     simulatePipeline: simulatePipeline
   };
 
-  function buildBody(sourceObject, processors) {
-    const body = {
-      'pipeline': {
-        'processors': []
-      },
-      'docs': [
-        {
-          _source: sourceObject
-        }
-      ]
-    };
-
-    processors.forEach((processor) => {
-      body.pipeline.processors.push(processor.getDefinition());
-    });
-
-    return body;
-  }
-
-  function translateError(esError) {
-    const root_cause = _.get(esError, 'root_cause[0]');
-
-    return _.get(root_cause, 'reason') || _.get(root_cause, 'type');
-  }
-
   function simulatePipeline(pipeline) {
-    const body = buildBody(pipeline.rootObject, pipeline.processors);
+    const data = angular.toJson(pipeline);
 
-    logger.log('simulate request', body);
+    console.log(data);
+    return $http.post(`/api/kibana/simulate`, data)
+    .then((result) => {
+      //if there was an error, then it was in communicating with the kibana server.
+      //All error handling of the elastic endpoint should happen on the server. This
+      //request is going to do one of two things:
+      //  1. fail because the server is down
+      //  2. succeed with a packaged response from the server.
+      //output the message to a Notify object..... on second thought this shouldn't happen
+      //on this level... need to think about this more.
 
-    //TODO: How to handle errors
-    return $http.post(`/api/kibana/simulate`, body)
-    .then(function (result) {
-      if (!result.data) {
-        logger.log('WEIRD WEIRD WEIRD!!! There IS no result object?', result);
-        return;
-      }
-
-      //prepopulate the response with 'invalid parent processor' state
-      //because if a processor fails in the middle of the pipeline,
-      //_simulate does not return results for any child processors
-      const outputDefaults = pipeline.processors.map((processor) => {
-        return {
-          processorId: processor.processorId,
-          output: undefined,
-          error: { isNested: true, message: 'invalid parent processor' }
-        };
-      });
-
-      const processorResults = _.get(result, 'data.docs[0].processor_results');
-      processorResults.forEach((processorResult) => {
-        const processorId = _.get(processorResult, 'processor_id');
-        const output = _.get(processorResult, 'doc._source');
-        const error = _.get(processorResult, 'error');
-        const errorMessage = translateError(error);
-
-        const outputDefault = _.find(outputDefaults, { 'processorId': processorId });
-        outputDefault.output = output;
-        outputDefault.error = undefined;
-        if (errorMessage) {
-          outputDefault.error = { isNested: false, message: errorMessage };
-        }
-      });
-
-      return outputDefaults;
+      console.log('client - ingest service', result);
+      return result.data;
     });
   }
 });
