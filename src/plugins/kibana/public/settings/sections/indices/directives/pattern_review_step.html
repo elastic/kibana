@@ -1,12 +1,16 @@
-<h2>Pattern review step</h2>
+<div class="wizard-step-title">
+  <h3>Review the index pattern</h3>
+  Here we'll define how and where to store your parsed events. We've made some intellient guesses for you, but most
+  fields can be changed iw we got it wrong!
+</div>
 
-<div>
-  <input ng-model="indexPattern.id"/>
+<div class="pattern-review">
+  <input ng-model="indexPattern.id" class="pattern-input"/>
   <label>
     <input ng-model="isTimeBased" type="checkbox"/>
     time based
   </label>
-  <label ng-if="isTimeBased">
+  <label ng-if="isTimeBased" class="time-field-input">
     Time Field
     <select ng-model="indexPattern.timeFieldName" name="time_field_name">
       <option ng-repeat="field in dateFields" value="{{field}}">
