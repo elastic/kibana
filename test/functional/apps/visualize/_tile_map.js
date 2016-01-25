@@ -30,7 +30,7 @@ define(function (require) {
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           common.debug('navigateTo');
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
         .then(function () {
           common.debug('createIndexPattern');
@@ -104,6 +104,13 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
+          })
+          // sleep a bit before taking the screenshot or it won't show data
+          .then(function sleep() {
+            return common.sleep(4000);
+          })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
             common.saveScreenshot('./screenshot-' + testSubName + '.png');
@@ -133,9 +140,6 @@ define(function (require) {
               common.debug(data.split('\n'));
               expect(data.trim().split('\n')).to.eql(expectedTableData);
             });
-          })
-          .then(function () {
-            return visualizePage.collapseChart();
           })
           .catch(common.handleError(this));
         });

@@ -2,7 +2,8 @@ import expect from 'expect.js';
 import { fromNode as fn } from 'bluebird';
 import { resolve } from 'path';
 
-import KbnServer from '../../KbnServer';
+const requireFromTest = require('requirefrom')('test');
+const kbnTestServer = requireFromTest('utils/kbn_server');
 
 const nonDestructiveMethods = ['GET'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
@@ -14,20 +15,16 @@ const version = require(src('../package.json')).version;
 describe('xsrf request filter', function () {
   function inject(kbnServer, opts) {
     return fn(cb => {
-      kbnServer.server.inject(opts, (resp) => {
+      kbnTestServer.makeRequest(kbnServer, opts, (resp) => {
         cb(null, resp);
       });
     });
   }
 
   const makeServer = async function () {
-    const kbnServer = new KbnServer({
-      server: { autoListen: false },
-      plugins: { scanDirs: [src('plugins')] },
-      logging: { quiet: true },
-      optimize: { enabled: false },
-      elasticsearch: {
-        url: 'http://localhost:9210'
+    const kbnServer = kbnTestServer.createServer({
+      server: {
+        xsrf: { disableProtection: false }
       }
     });
 

@@ -18,7 +18,7 @@ define(function (require) {
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           common.debug('navigateTo');
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
         .then(function () {
           common.debug('createIndexPattern');
