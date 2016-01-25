@@ -139,7 +139,7 @@ modules.get('apps/settings')
             field.name,
             {
               markup: editFieldTypeHTML,
-              scope: _.assign($scope.$new(), {field: field})
+              scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes})
             },
             typeof sampleValue === 'object' ? JSON.stringify(sampleValue) : sampleValue
           ];
