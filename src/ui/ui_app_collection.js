@@ -1,5 +1,5 @@
 let _ = require('lodash');
-let UiApp = require('./UiApp');
+let UiApp = require('./ui_app');
 let Collection = require('requirefrom')('src')('utils/Collection');
 
 let byIdCache = Symbol('byId');
