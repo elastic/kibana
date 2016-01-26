@@ -5,6 +5,7 @@ define(function (require) {
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
   var discoverTest = require('./_discover');
   var fieldData = require('./_field_data');
+  var sharedLinks = require('./_shared_links');
 
   bdd.describe('discover app', function () {
     var scenarioManager;
@@ -24,6 +25,8 @@ define(function (require) {
     discoverTest(bdd, scenarioManager);
 
     fieldData(bdd, scenarioManager);
+
+    sharedLinks(bdd, scenarioManager);
 
   });
 });

@@ -272,7 +272,7 @@ define(function (require) {
               var hasFailure = false;
               for (var y = 0; y < expectedBarChartData.length; y++) {
                 stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
-                 ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance);
+                 ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
                 if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
                   hasFailure = true;
                 };
