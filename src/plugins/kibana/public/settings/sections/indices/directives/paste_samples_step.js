@@ -1,5 +1,7 @@
-var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/directives/paste_samples_step.html');
+const modules = require('ui/modules');
+const template = require('plugins/kibana/settings/sections/indices/directives/paste_samples_step.html');
+const _ = require('lodash');
+
 
 modules.get('apps/settings')
   .directive('pasteSamplesStep', function () {
@@ -11,7 +13,18 @@ modules.get('apps/settings')
       controller: function ($scope) {
         $scope.userSamples = '';
         $scope.$watch('userSamples', function (newValue) {
-          $scope.samples = newValue.split('\n');
+          const splitUserSamples = newValue.split('\n');
+
+          try {
+            $scope.samples = _.map(splitUserSamples, function (sample) {
+              return JSON.parse(sample);
+            });
+          }
+          catch (error) {
+            $scope.samples = _.map(splitUserSamples, function (sample) {
+              return {message: sample};
+            });
+          }
         });
       }
     };
