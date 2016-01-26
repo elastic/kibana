@@ -47,12 +47,12 @@ define(function (require) {
     // if type:dashboard has no mapping, we push this mapping into ES
     SavedDashboard.mapping = {
       title: 'string',
-      hits: 'long',
+      hits: 'integer',
       description: 'string',
       panelsJSON: 'string',
       optionsJSON: 'string',
       uiStateJSON: 'string',
-      version: 'long',
+      version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',
       timeFrom: 'string',
