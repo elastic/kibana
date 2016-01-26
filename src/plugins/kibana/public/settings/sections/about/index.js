@@ -17,6 +17,9 @@ define(function (require) {
     order: Infinity,
     name: 'about',
     display: 'About',
-    url: '#/settings/about'
+    url: function () {
+      const hash = window.location.hash;
+      return hash.indexOf('/about') === -1 ? '#/settings/about?' + hash.split('?')[1] : '#/settings/about';
+    }
   };
 });
