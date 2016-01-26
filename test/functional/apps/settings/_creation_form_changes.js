@@ -16,7 +16,7 @@ define(function (require) {
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana')
         .then(function () {
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         });
       });
 
