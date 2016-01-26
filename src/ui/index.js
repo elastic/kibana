@@ -6,10 +6,10 @@ module.exports = async (kbnServer, server, config) => {
   let readFile = require('fs').readFileSync;
 
   let fromRoot = require('../utils/fromRoot');
-  let UiExports = require('./UiExports');
-  let UiBundle = require('./UiBundle');
-  let UiBundleCollection = require('./UiBundleCollection');
-  let UiBundlerEnv = require('./UiBundlerEnv');
+  let UiExports = require('./ui_exports');
+  let UiBundle = require('./ui_bundle');
+  let UiBundleCollection = require('./ui_bundle_collection');
+  let UiBundlerEnv = require('./ui_bundler_env');
   let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
   let uiExports = kbnServer.uiExports = new UiExports({
