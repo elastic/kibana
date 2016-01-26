@@ -19,11 +19,13 @@ define(function (require) {
       this._disableTooltips = false;
       HeatmapMarker.Super.apply(this, arguments);
 
+      this._heatArrayScale(this._attr.heatScale || 'linear');
+
       this._createMarkerGroup({
         radius: +this._attr.heatRadius,
         blur: +this._attr.heatBlur,
         maxZoom: +this._attr.heatMaxZoom,
-        minOpacity: +this._attr.heatMinOpacity
+        minOpacity: +this._attr.heatMinOpacity,
       });
     }
 
@@ -175,6 +177,52 @@ define(function (require) {
       return showTip;
     };
 
+    /**
+     * Returns the domain for the heatmap scale
+     *
+     * @method _getDomain
+     * @param features {geoJson Object}
+     * @param scaleType {String}
+     * @return {Array}
+     */
+    HeatmapMarker.prototype._getDomain = function (features, scaleType) {
+      var isLog = Boolean(scaleType === 'log');
+      var getValue = function (d) {
+        return isLog ? Math.abs(d.properties.value) : d.properties.value;
+      };
+      var extent = d3.extent(features, getValue);
+
+      // Log scales cannot have numbers <= 0. Default min value is 1e-9 and max value is 1.
+      if (isLog) return [Math.max(1e-9, extent[0]), Math.max(1, extent[1])];
+      return extent;
+    };
+
+    /**
+     * Returns the range for the heatmap scale
+     *
+     * @method _getRange
+     * @param  scale {Function}
+     * @param  isNormalized {Boolean}
+     * @return {Array}
+     */
+    HeatmapMarker.prototype._getRange = function (scale, isNormalized) {
+      return isNormalized ? [0, 100] : scale.domain();
+    };
+
+    /**
+     * Returns a scale function which determines the heatmap intensity at a given
+     * point. Linear scale by default.
+     *
+     * @method _heatmapScale
+     * @param  {[type]}  features     [description]
+     * @param  {[type]}  scaleType    [description]
+     * @param  {Boolean} isNormalized [description]
+     * @return {[type]}               [description]
+     */
+    HeatmapMarker.prototype._heatmapScale = function (features, scaleType, isNormalized) {
+      var scale = d3.scale[scaleType]().domain(this._getDomain(features, scaleType));
+      return scale.range(this._getRange(scale, isNormalized));
+    };
 
     /**
      * returns data for data for heat map intensity
@@ -187,19 +235,22 @@ define(function (require) {
      */
     HeatmapMarker.prototype._dataToHeatArray = function (max) {
       var self = this;
-      var mapData = this.geoJson;
+      var isNormalized = this._attr.heatNormalizeData;
+      var scaleType = this._attr.heatScaleType;
+      var features = this.geoJson.features;
+      var scale = this._heatmapScale(features, scaleType, isNormalized);
 
-      return this.geoJson.features.map(function (feature) {
+      return features.map(function (feature) {
         var lat = feature.properties.center[0];
         var lng = feature.properties.center[1];
         var heatIntensity;
 
-        if (!self._attr.heatNormalizeData) {
+        if (!isNormalized) {
           // show bucket value on heatmap
-          heatIntensity = feature.properties.value;
+          heatIntensity = scale(feature.properties.value);
         } else {
           // show bucket value normalized to max value
-          heatIntensity = parseInt(feature.properties.value / max * 100);
+          heatIntensity = scale(parseInt(feature.properties.value / max * 100));
         }
 
         return [lat, lng, heatIntensity];

@@ -24,6 +24,7 @@ define(function (require) {
           heatNormalizeData: true,
           wms: config.get('visualization:tileMap:WMSdefaults')
         },
+        scales: [{name: 'Linear', value: 'linear'}, {name: 'Logarithmic', value: 'log'}],
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
         editor: require('plugins/kbn_vislib_vis_types/editors/tile_map.html')

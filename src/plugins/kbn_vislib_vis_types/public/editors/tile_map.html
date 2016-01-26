@@ -13,6 +13,18 @@
 <div ng-if="vis.params.mapType === 'Heatmap'" class="form-group">
   <div>
     <label>
+      Intensity Scale
+      &nbsp;<kbn-info placement="right" info="Intensity Scale. Default: linear"></kbn-info>
+    </label>
+    <div class="vis-editor-agg-form-row">
+      <select
+        ng-model="vis.params.scale"
+        ng-init="vis.params.scale || vis.type.params.scales[0].name"
+        ng-options="scale.value as scale.name for scale in vis.type.params.scales"></select>
+    </div>
+  </div>
+  <div>
+    <label>
       Radius
       &nbsp;<kbn-info placement="right" info="Size of heatmap dots. Default: 25"></kbn-info>
     </label>
@@ -131,9 +143,9 @@
 
 <div ng-show="vis.params.wms.enabled" class="well">
   <div class="vis-option-item form-group">
-    
+
     <p>
-      WMS maps are 3rd party mapping services that have not been verified to work with Kibana. 
+      WMS maps are 3rd party mapping services that have not been verified to work with Kibana.
       These should be considered expert settings.
     </p>
 
@@ -142,7 +154,7 @@
     </label>
     <input type="text" class="form-control"
       name="wms.url"
-      ng-model="vis.params.wms.url">    
+      ng-model="vis.params.wms.url">
   </div>
 
   <div class="vis-option-item form-group">
@@ -151,7 +163,7 @@
     </label>
     <input type="text" class="form-control"
       ng-require="vis.params.wms.enabled"
-      ng-model="vis.params.wms.options.layers"   
+      ng-model="vis.params.wms.options.layers"
       name="wms.options.layers">
   </div>
 
@@ -161,7 +173,7 @@
     </label>
     <input type="text" class="form-control"
       name="wms.options.version"
-      ng-model="vis.params.wms.options.version">    
+      ng-model="vis.params.wms.options.version">
   </div>
 
   <div class="vis-option-item form-group">
@@ -170,16 +182,16 @@
     </label>
     <input type="text" class="form-control"
       name="wms.options.format"
-      ng-model="vis.params.wms.options.format">    
+      ng-model="vis.params.wms.options.format">
   </div>
-  
+
   <div class="vis-option-item form-group">
     <label>
       WMS attribution <kbn-info info="Attribution string for the lower right corner<"></kbn-info>
     </label>
     <input type="text" class="form-control"
       name="wms.options.attribution"
-      ng-model="vis.params.wms.options.attribution">    
+      ng-model="vis.params.wms.options.attribution">
   </div>
 
   <div class="vis-option-item form-group">
@@ -188,7 +200,7 @@
     </label>
     <input type="text" class="form-control"
       name="wms.options.styles"
-      ng-model="vis.params.wms.options.styles">    
+      ng-model="vis.params.wms.options.styles">
   </div>
 
   <p>* if this parameter is incorrect, maps will fail to load.</p>
