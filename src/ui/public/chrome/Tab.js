@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const reEsc = require('lodash').escapeRegExp;
 const { parse, format } = require('url');
+const notify = require('ui/notify');
 
 const urlJoin = (a, b) => {
   if (!b) return a;
@@ -28,7 +29,16 @@ export default class Tab {
 
     this.lastUrlStoreKey = `lastUrl:${this.id}`;
     this.lastUrlStore = spec.lastUrlStore;
-    this.lastUrl = this.lastUrlStore ? this.lastUrlStore.getItem(this.lastUrlStoreKey) : null;
+
+    this.lastUrl = null;
+    if (this.lastUrlStore) {
+      this.lastUrl = this.lastUrlStore.getItem(this.lastUrlStoreKey);
+      if (this.lastUrl && !this.lastUrl.startsWith(this.rootUrl)) {
+        notify.log(`Found invalid lastUrl for tab with root url ${this.rootUrl}: "${this.lastUrl}"`);
+        this.lastUrl = null;
+        this.lastUrlStore.removeItem(this.lastUrlStoreKey);
+      }
+    }
   }
 
   href() {
@@ -54,7 +64,8 @@ export default class Tab {
     let lastUrl = this.getLastUrl();
 
     if (!lastUrl.startsWith(rootUrl)) {
-      throw new Error(`Tab "${id}" has invalid root "${rootUrl}" for last url "${lastUrl}"`);
+      notify.log(`Tab "${id}" has invalid root "${rootUrl}" for last url "${lastUrl}"`);
+      lastUrl = rootUrl;
     }
 
     return lastUrl.slice(rootUrl.length);
