@@ -12,8 +12,11 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var baseUrl;
-      // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.'; pre-Firefox 41
-      var expectedToastMessage = 'Share search: URL copied to clipboard.';
+      // The message changes for Firefox < 41 and Firefox >= 41
+      // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
+      // var expectedToastMessage = 'Share search: URL copied to clipboard.';
+      // Pass either one.
+      var expectedToastMessage = /Share search: URL (selected. Press Ctrl+C to copy|copied to clipboard.)/;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -22,7 +25,6 @@ define(function (require) {
         discoverPage = new DiscoverPage(this.remote);
 
         baseUrl = common.getHostPort();
-        // baseUrl = 'http://localhost:5620';
 
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
@@ -54,9 +56,6 @@ define(function (require) {
 
 
       bdd.describe('shared link', function () {
-        var queryName1 = 'Query # 1';
-        var fromTimeString = 'September 19th 2015, 06:31:44.000';
-        var toTimeString = 'September 23rd 2015, 18:31:44.000';
 
         bdd.it('should show "Share a link" caption', function () {
           var expectedCaption = 'Share a link';
@@ -72,7 +71,6 @@ define(function (require) {
 
 
         bdd.it('should show the correct formatted URL', function () {
-          // this is a BAD URL which includes the nav bar
           var expectedUrl = baseUrl
             + '/app/kibana?_t=1453775307251#'
             + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
@@ -96,7 +94,7 @@ define(function (require) {
             return headerPage.getToastMessage();
           })
           .then(function (toastMessage) {
-            expect(toastMessage).to.be(expectedToastMessage);
+            expect(toastMessage).to.match(expectedToastMessage);
           })
           .then(function () {
             return headerPage.waitForToastMessageGone();
@@ -121,14 +119,13 @@ define(function (require) {
         });
 
         // NOTE: This test has to run immediately after the test above
-        // 'shorten URL button should produce a short URL'
         bdd.it('should show toast message for copy to clipboard', function () {
           return discoverPage.clickCopyToClipboard()
           .then(function () {
             return headerPage.getToastMessage();
           })
           .then(function (toastMessage) {
-            expect(toastMessage).to.be(expectedToastMessage);
+            expect(toastMessage).to.match(expectedToastMessage);
           })
           .then(function () {
             return headerPage.waitForToastMessageGone();
