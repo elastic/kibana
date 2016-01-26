@@ -1,5 +1,5 @@
-var Promise = require('bluebird');
-var portscanner = require('portscanner');
+const Promise = require('bluebird');
+const portscanner = require('portscanner');
 
 module.exports = function findPort(start, end, host) {
   host = host || 'localhost';

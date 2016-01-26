@@ -1,15 +1,15 @@
-var expect = require('expect.js');
-var util = require('util');
-var requireFromTest = require('requirefrom')('test');
-var kbnTestServer = requireFromTest('utils/kbn_server');
+const expect = require('expect.js');
+const util = require('util');
+const requireFromTest = require('requirefrom')('test');
+const kbnTestServer = requireFromTest('utils/kbn_server');
 
-var format = util.format;
+const format = util.format;
 
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
 
-    var kbnServer;
+    let kbnServer;
 
     before(function () {
       kbnServer = kbnTestServer.createServer();
@@ -28,7 +28,7 @@ describe('plugins/elasticsearch', function () {
         options.payload = JSON.stringify(options.payload);
       }
 
-      var statusCode = options.statusCode || 200;
+      const statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
           kbnTestServer.makeRequest(kbnServer, options, function (res) {
