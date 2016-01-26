@@ -60,11 +60,11 @@ define(function (require) {
         };
 
         $scope.toggleDisplay = function (field) {
-          // inheritted param to fieldChooser
+          // This is inherited from fieldChooser
           $scope.toggle(field.name);
           if (field.display) $scope.increaseFieldCounter(field);
 
-          // we are now displaying the field, kill it's details
+          // we are now displaying the field, kill its details
           if (field.details) {
             $scope.toggleDetails(field);
           }
