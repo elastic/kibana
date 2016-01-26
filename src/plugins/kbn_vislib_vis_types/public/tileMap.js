@@ -1,10 +1,10 @@
 define(function (require) {
   return function TileMapVisType(Private, getAppState, courier, config) {
-    var VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
-    var Schemas = Private(require('ui/Vis/Schemas'));
-    var geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
-    var _ = require('lodash');
-    var supports = require('ui/utils/supports');
+    const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
+    const Schemas = Private(require('ui/Vis/Schemas'));
+    const geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
+    const _ = require('lodash');
+    const supports = require('ui/utils/supports');
 
     return new VislibVisType({
       name: 'tile_map',
@@ -30,41 +30,41 @@ define(function (require) {
       },
       listeners: {
         rectangle: function (event) {
-          var agg = _.get(event, 'chart.geohashGridAgg');
+          const agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
-          var pushFilter = Private(require('ui/filter_bar/push_filter'))(getAppState());
-          var indexPatternName = agg.vis.indexPattern.id;
-          var field = agg.fieldName();
-          var filter = {geo_bounding_box: {}};
+          const pushFilter = Private(require('ui/filter_bar/push_filter'))(getAppState());
+          const indexPatternName = agg.vis.indexPattern.id;
+          const field = agg.fieldName();
+          const filter = {geo_bounding_box: {}};
           filter.geo_bounding_box[field] = event.bounds;
 
           pushFilter(filter, false, indexPatternName);
         },
         mapMoveEnd: function (event) {
-          var agg = _.get(event, 'chart.geohashGridAgg');
+          const agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
           agg.params.mapZoom = event.zoom;
           agg.params.mapCenter = [event.center.lat, event.center.lng];
 
-          var editableVis = agg.vis.getEditableVis();
+          const editableVis = agg.vis.getEditableVis();
           if (!editableVis) return;
 
-          var editableAgg = editableVis.aggs.byId[agg.id];
+          const editableAgg = editableVis.aggs.byId[agg.id];
           if (editableAgg) {
             editableAgg.params.mapZoom = event.zoom;
             editableAgg.params.mapCenter = [event.center.lat, event.center.lng];
           }
         },
         mapZoomEnd: function (event) {
-          var agg = _.get(event, 'chart.geohashGridAgg');
+          const agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg || !agg.params.autoPrecision) return;
 
           // zoomPrecision maps event.zoom to a geohash precision value
           // event.limit is the configurable max geohash precision
           // default max precision is 7, configurable up to 12
-          var zoomPrecision = {
+          const zoomPrecision = {
             1: 2,
             2: 2,
             3: 2,
@@ -85,7 +85,7 @@ define(function (require) {
             18: 12
           };
 
-          var precision = config.get('visualization:tileMap:maxPrecision');
+          const precision = config.get('visualization:tileMap:maxPrecision');
           agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
 
           courier.fetch();
