@@ -7,6 +7,12 @@ modules.get('apps/settings')
       template: template,
       scope: {
         samples: '='
+      },
+      controller: function ($scope) {
+        $scope.userSamples = '';
+        $scope.$watch('userSamples', function (newValue) {
+          $scope.samples = newValue.split('\n');
+        });
       }
     };
   });

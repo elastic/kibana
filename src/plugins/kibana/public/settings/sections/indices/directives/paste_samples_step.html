@@ -1,3 +1,9 @@
-<h2>Paste samples step</h2>
+<div class="wizard-step-title">
+  <h3>Provide some sample logs</h3>
+  Paste in one or more lines from the file you intend to tail. We'll use these samples in the following steps to help
+  you interactively build an ingest pipeline and configure a Kibana index pattern.
+</div>
 
-<button ng-click="samples = 'some sample logs'">Do Stuff</button>
+<div class="paste-samples">
+  <textarea ng-model="userSamples" placeholder="Paste your sample log lines here, separated by a newline"></textarea>
+</div>
