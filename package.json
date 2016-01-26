@@ -15,6 +15,7 @@
     "lint": "grunt eslint:source"
   },
   "devDependencies": {
+    "babel-eslint": "^4.1.6",
     "eslint": "^1.7.3",
     "eslint-config-airbnb": "^0.1.0",
     "eslint-plugin-react": "^3.6.3",
