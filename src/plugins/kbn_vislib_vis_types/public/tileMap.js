@@ -22,9 +22,14 @@ define(function (require) {
           heatRadius: 25,
           heatBlur: 15,
           heatNormalizeData: true,
+          scale: 'linear',
           wms: config.get('visualization:tileMap:WMSdefaults')
         },
-        scales: [{name: 'Linear', value: 'linear'}, {name: 'Logarithmic', value: 'log'}],
+        scales: [
+          {name: 'Linear', value: 'linear'},
+          {name: 'Logarithmic', value: 'log'},
+          {name: 'Square root', value: 'sqrt'}
+        ],
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
         editor: require('plugins/kbn_vislib_vis_types/editors/tile_map.html')

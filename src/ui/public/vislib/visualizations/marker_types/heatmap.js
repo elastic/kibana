@@ -19,8 +19,6 @@ define(function (require) {
       this._disableTooltips = false;
       HeatmapMarker.Super.apply(this, arguments);
 
-      this._heatArrayScale(this._attr.heatScale || 'linear');
-
       this._createMarkerGroup({
         radius: +this._attr.heatRadius,
         blur: +this._attr.heatBlur,
@@ -198,18 +196,6 @@ define(function (require) {
     };
 
     /**
-     * Returns the range for the heatmap scale
-     *
-     * @method _getRange
-     * @param  scale {Function}
-     * @param  isNormalized {Boolean}
-     * @return {Array}
-     */
-    HeatmapMarker.prototype._getRange = function (scale, isNormalized) {
-      return isNormalized ? [0, 100] : scale.domain();
-    };
-
-    /**
      * Returns a scale function which determines the heatmap intensity at a given
      * point. Linear scale by default.
      *
@@ -219,9 +205,10 @@ define(function (require) {
      * @param  {Boolean} isNormalized [description]
      * @return {[type]}               [description]
      */
-    HeatmapMarker.prototype._heatmapScale = function (features, scaleType, isNormalized) {
-      var scale = d3.scale[scaleType]().domain(this._getDomain(features, scaleType));
-      return scale.range(this._getRange(scale, isNormalized));
+    HeatmapMarker.prototype._heatmapScale = function (features, scaleType) {
+      return d3.scale[scaleType]()
+      .domain(this._getDomain(features, scaleType))
+      .range([0, 1]);
     };
 
     /**
@@ -235,17 +222,16 @@ define(function (require) {
      */
     HeatmapMarker.prototype._dataToHeatArray = function (max) {
       var self = this;
-      var isNormalized = this._attr.heatNormalizeData;
-      var scaleType = this._attr.heatScaleType;
+      var scaleType = this._attr.scale || 'linear';
       var features = this.geoJson.features;
-      var scale = this._heatmapScale(features, scaleType, isNormalized);
+      var scale = this._heatmapScale(features, scaleType);
 
       return features.map(function (feature) {
         var lat = feature.properties.center[0];
         var lng = feature.properties.center[1];
         var heatIntensity;
 
-        if (!isNormalized) {
+        if (!self._attr.heatNormalizeData) {
           // show bucket value on heatmap
           heatIntensity = scale(feature.properties.value);
         } else {
