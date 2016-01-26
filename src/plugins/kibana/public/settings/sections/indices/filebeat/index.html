@@ -66,6 +66,11 @@
 
         <div ng-switch-when="3">
           <install-filebeat-step results="stepResults"></install-filebeat-step>
+
+          <div class="nav-buttons">
+            Click Done to go explore your data
+            <button ng-click="nextStep()">Done</button>
+          </div>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ routes.when('/settings/indices/create/filebeat', {
 
 // wrapper directive, which sets up the breadcrumb for all filebeat steps
 modules.get('apps/settings')
-.controller('kbnSettingsIndicesFilebeat', function ($scope, AppState, safeConfirm) {
+.controller('kbnSettingsIndicesFilebeat', function ($scope, AppState, safeConfirm, kbnUrl) {
   var $state = $scope.state = new AppState();
   var totalSteps = 4;
   $scope.stepResults = {};
@@ -27,6 +27,9 @@ modules.get('apps/settings')
   $scope.nextStep = function () {
     if ($state.currentStep + 1 < totalSteps) {
       $scope.setCurrentStep($state.currentStep + 1);
+    }
+    else if ($state.currentStep + 1 === totalSteps) {
+      kbnUrl.change('/discover');
     }
   };
   $scope.prevStep = function () {
