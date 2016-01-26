@@ -1,7 +1,7 @@
 <div class="app-links">
   <div
     class="app-link"
-    ng-repeat="link in switcher.getNavLinks() | orderBy:'title'"
+    ng-repeat="link in switcher.getNavLinks()"
     ng-class="{ active: link.active }">
 
     <a

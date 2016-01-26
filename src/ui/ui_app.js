@@ -1,5 +1,7 @@
-var _ = require('lodash');
-var { join } = require('path');
+import _ from 'lodash';
+import { join } from 'path';
+
+import UiNavLink from './ui_nav_link';
 
 class UiApp {
   constructor(uiExports, spec) {
@@ -16,8 +18,17 @@ class UiApp {
     this.description = this.spec.description;
     this.icon = this.spec.icon;
     this.hidden = this.spec.hidden;
+    this.listed = this.spec.listed == null ? !this.hidden : this.spec.listed;
     this.templateName = this.spec.templateName || 'ui_app';
-    this.url = `${spec.urlBasePath || ''}${this.spec.url || `/app/${this.id}`}`;
+
+    if (this.listed) {
+      this.navLink = this.uiExports.navLinks.new({
+        title: this.title,
+        description: this.description,
+        icon: this.icon,
+        url: this.spec.url || `/app/${this.id}`
+      });
+    }
 
     if (this.spec.autoload) {
       console.warn(
@@ -45,7 +56,7 @@ class UiApp {
   }
 
   toJSON() {
-    return _.pick(this, ['id', 'title', 'description', 'icon', 'main', 'url']);
+    return _.pick(this, ['id', 'title', 'description', 'icon', 'main', 'navLink']);
   }
 }
 

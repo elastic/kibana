@@ -14,6 +14,7 @@ module.exports = function (kibana) {
     uiExports: {
       app: {
         title: 'Kibana',
+        listed: false,
         description: 'the kibana you know and love',
         //icon: 'plugins/kibana/settings/sections/about/barcode.svg',
         main: 'plugins/kibana/kibana',
@@ -30,8 +31,39 @@ module.exports = function (kibana) {
           return {
             kbnDefaultAppId: config.get('kibana.defaultAppId')
           };
+        },
+      },
+
+      links: [
+        {
+          title: 'Discover',
+          order: -1003,
+          url: '/app/kibana#/discover',
+          description: 'interactively explore your data',
+          icon: 'plugins/kibana/settings/sections/about/barcode.svg',
+        },
+        {
+          title: 'Visualize',
+          order: -1002,
+          url: '/app/kibana#/visualize',
+          description: 'design data visualizations',
+          icon: 'plugins/kibana/settings/sections/about/barcode.svg',
+        },
+        {
+          title: 'Dashboard',
+          order: -1001,
+          url: '/app/kibana#/dashboard',
+          description: 'compose visualizations for much win',
+          icon: 'plugins/kibana/settings/sections/about/barcode.svg',
+        },
+        {
+          title: 'Settings',
+          order: 1000,
+          url: '/app/kibana#/settings',
+          description: 'define index patterns, change config, and more',
+          icon: 'plugins/kibana/settings/sections/about/barcode.svg',
         }
-      }
+      ]
     },
 
     init: function (server, options) {

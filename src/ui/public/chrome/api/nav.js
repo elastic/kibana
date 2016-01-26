@@ -34,12 +34,24 @@ export default function (chrome, internals) {
     });
   };
 
-  internals.trackPossibleSubUrl = function (url) {
-    for (const link of internals.nav) {
-      if (startsWith(url, link.url)) {
-        link.lastSubUrl = url;
-        internals.appUrlStore.setItem(`lastSubUrl:${link.url}`, url);
+  internals.navTrackers = [];
+  chrome.addNavigationTracker = function (url, handler) {
+    internals.navTrackers.push({
+      url, handler
+    });
+  };
+
+  internals.trackPossibleSubUrl = function (url, persist) {
+    for (const tracker of internals.navTrackers) {
+      if (startsWith(url, tracker.url)) {
+        if (persist) {
+          tracker.lastSubUrl = url;
+          internals.appUrlStore.setItem(`lastSubUrl:${tracker.url}`, url);
+        }
+        tracker.active = true;
       }
+
+      tracker.handler(tracker.active, tracker.lastSubUrl);
     }
   };
 

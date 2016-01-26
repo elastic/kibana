@@ -1,10 +1,11 @@
 var _ = require('lodash');
 var minimatch = require('minimatch');
-
 var UiAppCollection = require('./ui_app_collection');
+var UiNavLinkCollection = require('./ui_nav_link_collection');
 
 class UiExports {
   constructor({ urlBasePath }) {
+    this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {};
     this.urlBasePath = urlBasePath;
@@ -48,12 +49,18 @@ class UiExports {
       case 'app':
       case 'apps':
         return (plugin, specs) => {
+          const id = plugin.id;
           for (let spec of [].concat(specs || [])) {
-            let app = this.apps.new(_.defaults({}, spec, {
-              id: plugin.id,
-              urlBasePath: this.urlBasePath
-            }));
+            const app = this.apps.new({ id, ...spec });
             plugin.apps.add(app);
+          }
+        };
+
+      case 'link':
+      case 'links':
+        return (plugin, spec) => {
+          for (const spec of [].concat(spec || [])) {
+            this.navLinks.new(spec);
           }
         };
 
