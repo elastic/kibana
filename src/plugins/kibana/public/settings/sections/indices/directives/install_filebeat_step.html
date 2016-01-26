@@ -1,10 +1,34 @@
-<h2>Install filebeat step</h2>
+<div class="wizard-step-title">
+  <h3>Follow these instructions to install Filebeat</h3>
+  Now that you've got a fresh pipeline and index pattern, let's throw some data at it!
+</div>
 
 <div>
-Results:
-  <ul>
-    <li>Logs: {{results.samples}}</li>
-    <li>Docs: {{results.sampleDocs}}</li>
-    <li>Pattern: {{results.indexPattern}}</li>
-  </ul>
+  <ol>
+    <li>Install Filebeat on all servers on which you want to tail logs
+      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html#filebeat-installation">
+        instructions
+      </a>)
+    </li>
+    <li>
+      Point Filebeat at the log files you want to tail
+      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html#filebeat-configuration">
+        instructions
+      </a>)
+    </li>
+    <li>Configure Filebeat on each server to send data to your Elasticsearch instances
+      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html#elasticsearch-output">
+        instructions
+      </a>)
+    </li>
+    <li>Set the index name in filebeat.yml based on the index pattern you configured in the previous step. The Filebeat
+      config takes a base index name and automatically rotates the target index by appending "-{date}" to the end, so if
+      your pattern was "foo-*" you would make the index name "foo" in filebeat.yml.
+    </li>
+    <li>Run Filebeat on each server
+      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html#_running_filebeat">
+        instructions
+      </a>)
+    </li>
+  </ol>
 </div>
