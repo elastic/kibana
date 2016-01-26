@@ -21,9 +21,6 @@
     .app-title {
       display: inline-block;
     }
-    + .app-wrapper {
-      padding-right: @as-open-width;
-    }
   }
 
   .logo {
@@ -33,11 +30,8 @@
 }
 .app-wrapper {
   .real-flex-parent();
-  flex: 0 0 100%;
-  // flex: 0 0 calc(100% - @as-closed-width);
-  // flex: 0 0 auto;
+  flex: 1;
   margin: 0 auto;
-  padding-right: @as-closed-width;
   transition: padding-right @transition-time;
   transition-delay: @transition-delay;
 
