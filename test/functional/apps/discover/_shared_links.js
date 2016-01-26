@@ -22,7 +22,6 @@ define(function (require) {
         discoverPage = new DiscoverPage(this.remote);
 
         baseUrl = common.getHostPort();
-        // baseUrl = 'http://localhost:5620';
 
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
@@ -54,9 +53,6 @@ define(function (require) {
 
 
       bdd.describe('shared link', function () {
-        var queryName1 = 'Query # 1';
-        var fromTimeString = 'September 19th 2015, 06:31:44.000';
-        var toTimeString = 'September 23rd 2015, 18:31:44.000';
 
         bdd.it('should show "Share a link" caption', function () {
           var expectedCaption = 'Share a link';
