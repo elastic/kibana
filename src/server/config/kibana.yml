@@ -15,6 +15,10 @@ elasticsearch_preserve_host: true
 # and dashboards. It will create a new index if it doesn't already exist.
 kibana_index: ".kibana"
 
+# The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.
+# If not defined, the default value is "logstash-*".
+#index_pattern_placeholder: ""
+
 # If your Elasticsearch is protected with basic auth, this is the user credentials
 # used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
 # users will still need to authenticate with Elasticsearch (which is proxied thorugh

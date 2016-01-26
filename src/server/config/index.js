@@ -23,6 +23,9 @@ kibana.elasticsearch_url = kibana.elasticsearch_url || 'http://localhost:9200';
 kibana.maxSockets = kibana.maxSockets || Infinity;
 kibana.log_file = kibana.log_file || null;
 kibana.xsrf_token = kibana.xsrf_token || 'kibana';
+if (typeof kibana.index_pattern_placeholder === 'undefined') {
+  kibana.index_pattern_placeholder = 'logstash-*';
+}
 
 kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
@@ -46,22 +49,23 @@ try {
 }
 
 var config = module.exports = {
-  port                    : kibana.port,
-  host                    : kibana.host,
-  elasticsearch           : kibana.elasticsearch_url,
-  root                    : path.normalize(path.join(__dirname, '..')),
-  quiet                   : false,
-  public_folder           : public_folder,
-  external_plugins_folder : process.env.PLUGINS_FOLDER || null,
-  bundled_plugins_folder  : path.resolve(public_folder, 'plugins'),
-  kibana                  : kibana,
-  package                 : require(packagePath),
-  htpasswd                : htpasswdPath,
-  buildNum                : '@@buildNum',
-  maxSockets              : kibana.maxSockets,
-  log_file                : kibana.log_file,
-  request_timeout         : kibana.request_timeout,
-  ping_timeout            : kibana.ping_timeout
+  port                      : kibana.port,
+  host                      : kibana.host,
+  elasticsearch             : kibana.elasticsearch_url,
+  index_pattern_placeholder : kibana.index_pattern_placeholder,
+  root                      : path.normalize(path.join(__dirname, '..')),
+  quiet                     : false,
+  public_folder             : public_folder,
+  external_plugins_folder   : process.env.PLUGINS_FOLDER || null,
+  bundled_plugins_folder    : path.resolve(public_folder, 'plugins'),
+  kibana                    : kibana,
+  package                   : require(packagePath),
+  htpasswd                  : htpasswdPath,
+  buildNum                  : '@@buildNum',
+  maxSockets                : kibana.maxSockets,
+  log_file                  : kibana.log_file,
+  request_timeout           : kibana.request_timeout,
+  ping_timeout              : kibana.ping_timeout
 };
 
 config.plugins = listPlugins(config);

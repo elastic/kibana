@@ -21,7 +21,7 @@ define(function (require) {
 
     // this and child scopes will write pattern vars here
     var index = $scope.index = {
-      name: 'logstash-*',
+      name: config.file.index_pattern_placeholder,
 
       isTimeBased: true,
       nameIsPattern: false,

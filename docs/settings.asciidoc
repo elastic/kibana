@@ -376,9 +376,8 @@ Default: `elasticsearch_preserve_host: true`.
 |`kibana_index`
 |The name of the index where saved searched, visualizations, and dashboards will be stored. Default: `kibana_index: .kibana`.
 
-|`default_app_id` 
-|The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`. Default: 
-`default_app_id: "discover"`. 
+|`index_pattern_placeholder`
+|The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab. Default: `index_pattern_placeholder: "logstash-*"`.
 
 |`request_timeout` 
 |How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds. Default: `request_timeout: 500000`.
