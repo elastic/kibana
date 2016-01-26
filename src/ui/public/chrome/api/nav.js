@@ -1,13 +1,9 @@
-const { startsWith, isString } = require('lodash');
+const { startsWith, isString, find } = require('lodash');
 import { parse, format } from 'url';
 
 export default function (chrome, internals) {
   chrome.getNavLinks = function () {
     return internals.nav;
-  };
-
-  chrome.getLastSubUrlFor = function (url) {
-    return internals.appUrlStore.getItem(`lastSubUrl:${url}`);
   };
 
   chrome.getBasePath = function () {
@@ -34,38 +30,46 @@ export default function (chrome, internals) {
     });
   };
 
-  internals.navTrackers = [];
-  chrome.addNavigationTracker = function (url, handler) {
-    internals.navTrackers.push({
-      url, handler
-    });
-  };
+  function lastSubUrlKey(link) {
+    return `lastSubUrl:${link.url}`;
+  }
 
-  internals.trackPossibleSubUrl = function (url, persist) {
-    for (const tracker of internals.navTrackers) {
-      if (startsWith(url, tracker.url)) {
-        if (persist) {
-          tracker.lastSubUrl = url;
-          internals.appUrlStore.setItem(`lastSubUrl:${tracker.url}`, url);
-        }
-        tracker.active = true;
+  function setLastUrl(link, url) {
+    link.lastSubUrl = url;
+    internals.appUrlStore.setItem(lastSubUrlKey(link), url);
+  }
+
+  function refreshLastUrl(link) {
+    link.lastSubUrl = internals.appUrlStore.getItem(lastSubUrlKey(link));
+  }
+
+  internals.trackPossibleSubUrl = function (url) {
+    for (const link of internals.nav) {
+      link.active = startsWith(url, link.url);
+
+      if (link.active) {
+        setLastUrl(link, url);
+        continue;
       }
 
-      tracker.handler(tracker.active, tracker.lastSubUrl);
+      const matchingTab = find(internals.tabs, { rootUrl: link.url });
+      if (matchingTab) {
+        setLastUrl(link, matchingTab.getLastUrl());
+        continue;
+      }
+
+      refreshLastUrl(link);
     }
   };
 
   internals.nav.forEach(link => {
     // convert all link urls to absolute urls
-
     var a = document.createElement('a');
     a.setAttribute('href', link.url);
     link.url = a.href;
-    link.lastSubUrl = chrome.getLastSubUrlFor(link.url);
-
-    if (link.url === chrome.getAppUrl()) {
-      link.active = true;
-    }
   });
 
+  // simulate a possible change in url to initialize the
+  // link.active and link.lastUrl properties
+  internals.trackPossibleSubUrl(document.location.href);
 };

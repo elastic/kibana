@@ -17,17 +17,23 @@ class UiApp {
     this.title = this.spec.title;
     this.description = this.spec.description;
     this.icon = this.spec.icon;
-    this.hidden = this.spec.hidden;
+    this.hidden = !!this.spec.hidden;
     this.listed = this.spec.listed == null ? !this.hidden : this.spec.listed;
     this.templateName = this.spec.templateName || 'ui_app';
 
-    if (this.listed) {
+    if (!this.hidden) {
+      // any non-hidden app has a url, so it gets a "navLink"
       this.navLink = this.uiExports.navLinks.new({
         title: this.title,
         description: this.description,
         icon: this.icon,
         url: this.spec.url || `/app/${this.id}`
       });
+
+      if (!this.listed) {
+        // unlisted apps remove their navLinks from the uiExports collection though
+        this.uiExports.navLinks.delete(this.navLink);
+      }
     }
 
     if (this.spec.autoload) {
