@@ -8,7 +8,8 @@ var url = require('url');
 *   {
 *      protocol: 'http',
 *      hostname: 'localhost',
-*      port: 9220
+*      port: 9220,
+*      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password
 *   }
 * @param {object} app The params to append
 *   example:
@@ -30,4 +31,11 @@ getUrl.noAuth = function getUrlNoAuth(config, app) {
     return param !== 'auth';
   });
   return getUrl(config, app);
+};
+
+getUrl.baseUrl = function getBaseUrl(config) {
+  config = _.pick(config, function (val, param) {
+    return param !== 'auth' & param !== 'pathname' & param !== 'hash';
+  });
+  return url.format(config);
 };

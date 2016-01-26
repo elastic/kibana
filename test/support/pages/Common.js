@@ -51,6 +51,10 @@ define(function (require) {
   Common.prototype = {
     constructor: Common,
 
+    getHostPort: function getHostPort() {
+      return getUrl.baseUrl(config.servers.kibana);
+    },
+
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
       // navUrl includes user:password@ for use with Shield
