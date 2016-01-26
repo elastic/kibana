@@ -211,6 +211,42 @@ define(function (require) {
       return thisTime
       .findByCssSelector('.url')
       .getProperty('value');
+    },
+
+    clickLegendExpand: function clickLegendExpand() {
+      return thisTime
+      .findByCssSelector('.fa-chevron-left')
+      .click();
+    },
+
+    clickLegendCollapse: function clickLegendCollapse() {
+      return thisTime
+      .findByCssSelector('div.legend-toggle > i.fa-chevron-right')
+      .click();
+    },
+
+    getLegendWidth: function getLegendWidth() {
+      return thisTime
+      .findByCssSelector('.legend-col-wrapper')
+      .getProperty('clientWidth');
+    },
+
+    clickSidebarExpand: function clickSidebarExpand() {
+      return thisTime
+      .findByCssSelector('.chevron-cont')
+      .click();
+    },
+
+    clickSidebarCollapse: function clickSidebarCollapse() {
+      return thisTime
+      .findByCssSelector('.chevron-cont')
+      .click();
+    },
+
+    getSidebarWidth: function getSidebarWidth() {
+      return thisTime
+      .findByCssSelector('.sidebar-list')
+      .getProperty('clientWidth');
     }
 
   };
