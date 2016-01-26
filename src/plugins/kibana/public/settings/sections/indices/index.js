@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('plugins/kibana/settings/sections/indices/_create');
   require('plugins/kibana/settings/sections/indices/_edit');
@@ -27,7 +27,7 @@ define(function (require) {
         config.$bind($scope, 'defaultIndex');
 
         $scope.$watch('defaultIndex', function () {
-          var ids = $route.current.locals.indexPatternIds;
+          const ids = $route.current.locals.indexPatternIds;
           $scope.indexPatternList = ids.map(function (id) {
             return {
               id: id,

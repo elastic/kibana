@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var getValType = require('./get_val_type');
-  var getEditorType = require('./get_editor_type');
+  const _ = require('lodash');
+  const getValType = require('./get_val_type');
+  const getEditorType = require('./get_editor_type');
 
   /**
    * @param {object} advanced setting definition object
@@ -10,10 +10,10 @@ define(function (require) {
    * @returns {object} the editable config object
    */
   function toEditableConfig(def, name, value) {
-    var isCustom = !def;
+    const isCustom = !def;
     if (isCustom) def = {};
 
-    var conf = {
+    const conf = {
       name,
       value,
       isCustom,
@@ -24,7 +24,7 @@ define(function (require) {
       options: def.options
     };
 
-    var editor = getEditorType(conf);
+    const editor = getEditorType(conf);
     conf.json = editor === 'json';
     conf.select = editor === 'select';
     conf.bool = editor === 'boolean';

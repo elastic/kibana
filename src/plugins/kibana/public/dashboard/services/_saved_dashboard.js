@@ -1,8 +1,8 @@
 define(function (require) {
-  var module = require('ui/modules').get('app/dashboard');
-  var angular = require('angular');
-  var _ = require('lodash');
-  var moment = require('moment');
+  const module = require('ui/modules').get('app/dashboard');
+  const angular = require('angular');
+  const _ = require('lodash');
+  const moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
   module.factory('SavedDashboard', function (courier, config) {

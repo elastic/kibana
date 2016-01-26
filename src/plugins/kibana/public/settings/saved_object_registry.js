@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var registry = [];
+  const _ = require('lodash');
+  const registry = [];
   return {
     register: function (service) {
       registry.push(service);
