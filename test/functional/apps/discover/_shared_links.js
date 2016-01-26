@@ -12,6 +12,8 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var baseUrl;
+      // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.'; pre-Firefox 41
+      var expectedToastMessage = 'Share search: URL copied to clipboard.';
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -89,13 +91,12 @@ define(function (require) {
         });
 
         bdd.it('should show toast message for copy to clipboard', function () {
-          var expectedMsg = 'Share search: URL copied to clipboard.';
           return discoverPage.clickCopyToClipboard()
           .then(function () {
             return headerPage.getToastMessage();
           })
           .then(function (toastMessage) {
-            expect(toastMessage).to.be(expectedMsg);
+            expect(toastMessage).to.be(expectedToastMessage);
           })
           .then(function () {
             return headerPage.waitForToastMessageGone();
@@ -122,13 +123,12 @@ define(function (require) {
         // NOTE: This test has to run immediately after the test above
         // 'shorten URL button should produce a short URL'
         bdd.it('should show toast message for copy to clipboard', function () {
-          var expectedMsg = 'Share search: URL copied to clipboard.';
           return discoverPage.clickCopyToClipboard()
           .then(function () {
             return headerPage.getToastMessage();
           })
           .then(function (toastMessage) {
-            expect(toastMessage).to.be(expectedMsg);
+            expect(toastMessage).to.be(expectedToastMessage);
           })
           .then(function () {
             return headerPage.waitForToastMessageGone();
