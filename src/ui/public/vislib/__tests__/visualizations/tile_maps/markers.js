@@ -280,7 +280,6 @@ describe('Marker Tests', function () {
         var arr = markerLayer._dataToHeatArray(max);
         expect(arr).to.be.an('array');
         expect(arr).to.have.length(mapData.features.length);
-
       });
 
       it('should return an array item with lat, lng, metric for each feature', function () {

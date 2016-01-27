@@ -208,13 +208,12 @@ define(function (require) {
     HeatmapMarker.prototype._heatmapScale = function (features, scaleType) {
       return d3.scale[scaleType]()
       .domain(this._getDomain(features, scaleType))
-      .range([0, 1]);
+      .range([0, 1]) // Heatmap plugin expects output between 0 and 1
+      .clamp(true); // Clamps the output to keep it between 0 and 1
     };
 
     /**
      * returns data for data for heat map intensity
-     * if heatNormalizeData attribute is checked/true
-     • normalizes data for heat map intensity
      *
      * @method _dataToHeatArray
      * @param max {Number}
@@ -229,15 +228,7 @@ define(function (require) {
       return features.map(function (feature) {
         var lat = feature.properties.center[0];
         var lng = feature.properties.center[1];
-        var heatIntensity;
-
-        if (!self._attr.heatNormalizeData) {
-          // show bucket value on heatmap
-          heatIntensity = scale(feature.properties.value);
-        } else {
-          // show bucket value normalized to max value
-          heatIntensity = scale(parseInt(feature.properties.value / max * 100));
-        }
+        var heatIntensity = scale(feature.properties.value);
 
         return [lat, lng, heatIntensity];
       });

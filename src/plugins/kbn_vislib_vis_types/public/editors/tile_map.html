@@ -5,8 +5,7 @@
     class="form-control"
     ng-model="vis.params.mapType"
     ng-init="vis.params.mapType || vis.type.params.mapTypes[0]"
-    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes"
-    >
+    ng-options="mapType as mapType for mapType in vis.type.params.mapTypes">
   </select>
 </div>
 
@@ -17,10 +16,12 @@
       &nbsp;<kbn-info placement="right" info="Transformation Scale. Default: linear"></kbn-info>
     </label>
     <div class="vis-editor-agg-form-row">
-      <select
+      <select name="scale"
+        class="form-control"
         ng-model="vis.params.scale"
         ng-init="vis.params.scale || vis.type.params.scales[0].name"
-        ng-options="scale.value as scale.name for scale in vis.type.params.scales"></select>
+        ng-options="scale.value as scale.name for scale in vis.type.params.scales">
+      </select>
     </div>
   </div>
   <div>
