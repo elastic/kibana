@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var minimatch = require('minimatch');
 
-var UiAppCollection = require('./UiAppCollection');
+var UiAppCollection = require('./ui_app_collection');
 
 class UiExports {
   constructor({ urlBasePath }) {
