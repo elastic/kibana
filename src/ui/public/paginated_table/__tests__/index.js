@@ -47,12 +47,13 @@ describe('paginated table', function () {
     };
   };
 
-  var renderTable = function (cols, rows, perPage) {
+  var renderTable = function (cols, rows, perPage, sort) {
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
+    $scope.sort = sort || {};
 
-    $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage">')($scope);
+    $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage" sort="sort">')($scope);
 
     $scope.$digest();
   };
@@ -158,6 +159,16 @@ describe('paginated table', function () {
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
+    });
+
+    it('should allow you to explicitly set the sort direction', function () {
+      paginatedTable.sortColumn(1, 'desc');
+      $scope.$digest();
+
+      var tableRows = $el.find('tbody tr');
+      expect(tableRows.eq(0).find('td').eq(1).text()).to.be('zzzz');
+      expect(tableRows.eq(1).find('td').eq(1).text()).to.be('cccc');
+      expect(tableRows.eq(2).find('td').eq(1).text()).to.be('bbbb');
     });
 
     it('should sort ascending on first invocation', function () {
