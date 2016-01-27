@@ -21,11 +21,10 @@ define(function (require) {
           heatMinOpacity: 0.1,
           heatRadius: 25,
           heatBlur: 15,
-          heatNormalizeData: true,
-          scale: 'linear',
+          intensityScale: 'linear',
           wms: config.get('visualization:tileMap:WMSdefaults')
         },
-        scales: [
+        intensityScales: [
           {name: 'Linear', value: 'linear'},
           {name: 'Logarithmic', value: 'log'},
           {name: 'Square root', value: 'sqrt'}

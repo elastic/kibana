@@ -269,6 +269,49 @@ describe('Marker Tests', function () {
       markerLayer = createMarker(MarkerClass);
     }));
 
+    describe('getDomain', function () {
+      var scaleTypes = ['linear', 'log', 'sqrt'];
+      var callback = function (d) { return d; };
+      var features = [-50000, -40000, -3000, -200, -10, 0, 10, 200, 3000, 40000, 500000];
+
+      scaleTypes.forEach(function (scale) {
+        var scaleDomain = markerLayer._getDomain(features, scale, callback);
+        var min = Math.min(features);
+        var max = Math.max(features);
+
+        if (scale !== 'log') {
+          it('should return the min and max value of the dataset for each scale type', function () {
+            expect(scaleDomain[0]).to.be.eql(min);
+            expect(scaleDomain[1]).to.be.eql(max);
+          });
+        } else {
+          it('should default the min value to 1e-9 for log scales when the min value is less than 1e-9', function () {
+            expect(scaleDomain[0]).to.be.gte(1e-9);
+          });
+
+          it('should default the max value to 1 for log scales when the max value is less than 1', function () {
+            expect(scaleDomain[1]).to.be.gte(1);
+          });
+        }
+      });
+    });
+
+    describe('heatmapScale', function () {
+      var scaleType = 'linear';
+      var callback = function (d) { return d; };
+      var features = [10, 20, 30, 40, 50];
+      var index = features.length - 1;
+      var intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
+
+      it('should return a function', function () {
+        expect(intensityScale).to.be.a('function');
+      });
+
+      it('should return a value between 0 and 1', function () {
+        expect(intensityScale(features[index])).to.be.within(0, 1);
+      });
+    });
+
     describe('dataToHeatArray', function () {
       var max;
 
@@ -282,27 +325,15 @@ describe('Marker Tests', function () {
         expect(arr).to.have.length(mapData.features.length);
       });
 
-      it('should return an array item with lat, lng, metric for each feature', function () {
-        _.times(3, function () {
-          var arr = markerLayer._dataToHeatArray(max);
-          var index = _.random(mapData.features.length - 1);
-          var feature = mapData.features[index];
-          var featureValue = feature.properties.value;
-          var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
-          expect(arr[index]).to.eql(featureArr);
-        });
-      });
-
-      it('should return an array item with lat, lng, normalized metric for each feature', function () {
+      it('should return an array item with lat, lng, normalized metric between 0 and 1 for each feature', function () {
         _.times(5, function () {
-          markerLayer._attr.heatNormalizeData = true;
-
           var arr = markerLayer._dataToHeatArray(max);
           var index = _.random(mapData.features.length - 1);
           var feature = mapData.features[index];
-          var featureValue = parseInt(feature.properties.value / max * 100);
+          var featureValue = feature.properties.value / max;
           var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
+          expect(arr[index]).to.be.within(0, 1);
         });
       });
     });

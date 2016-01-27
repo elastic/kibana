@@ -181,17 +181,15 @@ define(function (require) {
      * @method _getDomain
      * @param features {geoJson Object}
      * @param scaleType {String}
+     * @param callback {Function}
      * @return {Array}
      */
-    HeatmapMarker.prototype._getDomain = function (features, scaleType) {
+    HeatmapMarker.prototype._getDomain = function (features, scaleType, callback) {
       var isLog = Boolean(scaleType === 'log');
-      var getValue = function (d) {
-        return isLog ? Math.abs(d.properties.value) : d.properties.value;
-      };
-      var extent = d3.extent(features, getValue);
+      var extent = d3.extent(features, callback);
 
       // Log scales cannot have numbers <= 0. Default min value is 1e-9 and max value is 1.
-      if (isLog) return [Math.max(1e-9, extent[0]), Math.max(1, extent[1])];
+      if (isLog) return [ Math.max(1e-9, extent[0]), Math.max(1, extent[1]) ];
       return extent;
     };
 
@@ -200,14 +198,14 @@ define(function (require) {
      * point. Linear scale by default.
      *
      * @method _heatmapScale
-     * @param  {[type]}  features     [description]
-     * @param  {[type]}  scaleType    [description]
-     * @param  {Boolean} isNormalized [description]
-     * @return {[type]}               [description]
+     * @param features {Array}
+     * @param scaleType {String}
+     * @param callback {Function}
+     * @return {Function}
      */
-    HeatmapMarker.prototype._heatmapScale = function (features, scaleType) {
+    HeatmapMarker.prototype._heatmapScale = function (features, scaleType, callback) {
       return d3.scale[scaleType]()
-      .domain(this._getDomain(features, scaleType))
+      .domain(this._getDomain(features, scaleType, callback))
       .range([0, 1]) // Heatmap plugin expects output between 0 and 1
       .clamp(true); // Clamps the output to keep it between 0 and 1
     };
@@ -221,14 +219,17 @@ define(function (require) {
      */
     HeatmapMarker.prototype._dataToHeatArray = function (max) {
       var self = this;
-      var scaleType = this._attr.scale || 'linear';
+      var scaleType = this._attr.intensityScale || 'linear';
       var features = this.geoJson.features;
-      var scale = this._heatmapScale(features, scaleType);
+      var getValue = function (d) {
+        return scaleType === 'log' ? Math.abs(d.properties.value) : d.properties.value;
+      };
+      var intensityScale = this._heatmapScale(features, scaleType, getValue);
 
       return features.map(function (feature) {
         var lat = feature.properties.center[0];
         var lng = feature.properties.center[1];
-        var heatIntensity = scale(feature.properties.value);
+        var heatIntensity = intensityScale(feature.properties.value);
 
         return [lat, lng, heatIntensity];
       });
