@@ -1,7 +1,7 @@
 const Boom = require('boom');
 const _ = require('lodash');
 const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
-const indexPatternSchema = require('../../../lib/schemas/resources/index_pattern_schema');
+const ingestConfigSchema = require('../../../lib/schemas/resources/ingest_config_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const { keysToCamelCaseShallow } = require('../../../lib/case_conversion');
 const createMappingsFromPatternFields = require('../../../lib/create_mappings_from_pattern_fields');
@@ -13,14 +13,14 @@ module.exports = function registerPost(server) {
     method: 'POST',
     config: {
       validate: {
-        payload: indexPatternSchema
+        payload: ingestConfigSchema
       }
     },
     handler: function (req, reply) {
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const requestDocument = _.cloneDeep(req.payload);
-      const indexPatternId = requestDocument.id;
-      const indexPattern = keysToCamelCaseShallow(requestDocument);
+      const indexPattern = keysToCamelCaseShallow(requestDocument.index_pattern);
+      const indexPatternId = indexPattern.id;
       delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
