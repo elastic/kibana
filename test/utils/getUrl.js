@@ -34,8 +34,5 @@ getUrl.noAuth = function getUrlNoAuth(config, app) {
 };
 
 getUrl.baseUrl = function getBaseUrl(config) {
-  config = _.pick(config, function (val, param) {
-    return param !== 'auth' & param !== 'pathname' & param !== 'hash';
-  });
-  return url.format(config);
+  return url.format(_.pick(config, 'protocol', 'hostname', 'port'));
 };
