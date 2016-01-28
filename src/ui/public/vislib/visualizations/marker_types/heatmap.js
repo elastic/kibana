@@ -221,10 +221,9 @@ define(function (require) {
       var self = this;
       var scaleType = this._attr.intensityScale || 'linear';
       var features = this.geoJson.features;
-      var getValue = function (d) {
+      var intensityScale = this._heatmapScale(features, scaleType, function (d) {
         return scaleType === 'log' ? Math.abs(d.properties.value) : d.properties.value;
-      };
-      var intensityScale = this._heatmapScale(features, scaleType, getValue);
+      });
 
       return features.map(function (feature) {
         var lat = feature.properties.center[0];
