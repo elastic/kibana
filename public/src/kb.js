@@ -220,7 +220,7 @@ function loadApisFromJson(json, urlParametrizedComponentFactories, bodyParametri
 function setActiveApi(api) {
   if (_.isString(api)) {
     $.ajax({
-        url: '/api/sense/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + "&apis=" + encodeURIComponent(api),
+        url: '../api/sense/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + "&apis=" + encodeURIComponent(api),
         dataType: "json", // disable automatic guessing
       }
     ).then(
