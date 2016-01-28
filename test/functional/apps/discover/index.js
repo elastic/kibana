@@ -6,6 +6,7 @@ define(function (require) {
   var discoverTest = require('./_discover');
   var fieldData = require('./_field_data');
   var sharedLinks = require('./_shared_links');
+  var collapseExpand = require('./_collapse_expand');
 
   bdd.describe('discover app', function () {
     var scenarioManager;
@@ -27,6 +28,8 @@ define(function (require) {
     fieldData(bdd, scenarioManager);
 
     sharedLinks(bdd, scenarioManager);
+
+    collapseExpand(bdd, scenarioManager);
 
   });
 });
