@@ -1,6 +1,8 @@
 const Joi = require('joi');
-const ingestPatternSchema = require('./index_pattern_schema');
+const indexPatternSchema = require('./index_pattern_schema');
+const pipelineSchema = require('./pipeline_schema');
 
 module.exports = Joi.object({
-  index_pattern: ingestPatternSchema.required()
+  index_pattern: indexPatternSchema.required(),
+  pipeline: pipelineSchema.required()
 });

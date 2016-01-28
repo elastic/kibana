@@ -23,6 +23,14 @@ module.exports = function createTestData() {
           'type': 'geo_point'
         }
       ]
-    }
+    },
+    pipeline: [
+      {
+        date: {
+          match_field: 'initialDate',
+          match_formats: ['dd/MM/yyyy hh:mm:ss']
+        }
+      }
+    ]
   };
 };
