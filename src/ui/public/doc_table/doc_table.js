@@ -60,6 +60,9 @@ define(function (require) {
           if (columns.length !== 0) return;
 
           var $state = getAppState();
+          if ($scope.indexPattern.timeFieldName) {
+            $scope.columns.push($scope.indexPattern.timeFieldName);
+          }
           $scope.columns.push('_source');
           if ($state) $state.replace();
         });
