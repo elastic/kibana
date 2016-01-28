@@ -1,6 +1,6 @@
 const Promise = require('bluebird');
 const handleESError = require('../../../lib/handle_es_error');
-const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
+const {ingestToPattern, patternToIngest} = require('../../../lib/convert_pattern_and_ingest_name');
 
 module.exports = function registerDelete(server) {
   server.route({
@@ -16,9 +16,9 @@ module.exports = function registerDelete(server) {
 
       Promise.all([
         callWithRequest(req, 'delete', deletePatternParams),
-        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id), ignore: [404]}),
+        callWithRequest(req, 'indices.deleteTemplate', {name: patternToIngest(req.params.id), ignore: [404]}),
         callWithRequest(req, 'transport.request', {
-          path: `_ingest/pipeline/${patternToTemplate(req.params.id)}`,
+          path: `_ingest/pipeline/${patternToIngest(req.params.id)}`,
           method: 'DELETE'
         })
       ])

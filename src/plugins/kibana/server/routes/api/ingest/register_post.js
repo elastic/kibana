@@ -1,6 +1,6 @@
 const Boom = require('boom');
 const _ = require('lodash');
-const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
+const {ingestToPattern, patternToIngest} = require('../../../lib/convert_pattern_and_ingest_name');
 const ingestConfigSchema = require('../../../lib/schemas/resources/ingest_config_schema');
 const handleESError = require('../../../lib/handle_es_error');
 const { keysToCamelCaseShallow } = require('../../../lib/case_conversion');
@@ -66,7 +66,7 @@ module.exports = function registerPost(server) {
       const requestDocument = _.cloneDeep(req.payload);
       const indexPattern = keysToCamelCaseShallow(requestDocument.index_pattern);
       const indexPatternId = indexPattern.id;
-      const ingestConfigName = patternToTemplate(indexPatternId);
+      const ingestConfigName = patternToIngest(indexPatternId);
       delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
