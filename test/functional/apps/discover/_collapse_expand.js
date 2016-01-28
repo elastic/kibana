@@ -1,5 +1,5 @@
 define(function (require) {
-  var Common = require('../../../support/pages/Common');
+  var Common = require('../../../support/pages/common');
   var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/discover_page');
