@@ -16,7 +16,11 @@ module.exports = function registerDelete(server) {
 
       Promise.all([
         callWithRequest(req, 'delete', deletePatternParams),
-        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id), ignore: [404]})
+        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id), ignore: [404]}),
+        callWithRequest(req, 'transport.request', {
+          path: `_ingest/pipeline/${patternToTemplate(req.params.id)}`,
+          method: 'DELETE'
+        })
       ])
       .then(
         function (pattern) {
