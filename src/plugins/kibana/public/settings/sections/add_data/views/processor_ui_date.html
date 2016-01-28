@@ -45,18 +45,30 @@
   </div>
 </div>
 <div class="form-group">
-  <label>Timezone:</label>
-  <select
-    class="form-control"
-    ng-options="timezone as timezone for timezone in timezones"
-    ng-model="processor.timezone">
-  </select>
+  <label>
+    Timezone:
+    <a
+      aria-label="Timezone Help"
+      tooltip="Timezone Help"
+      tooltip-append-to-body="true"
+      href="http://joda-time.sourceforge.net/timezones.html"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <input type="text" class="form-control" ng-model="processor.timezone"></div>
 </div>
 <div class="form-group">
-  <label>Locale:</label>
-  <select
-    class="form-control"
-    ng-options="locale as locale for locale in locales"
-    ng-model="processor.locale">
-  </select>
+  <label>
+    Locale:
+    <a
+      aria-label="Locale Help"
+      tooltip="Locale Help"
+      tooltip-append-to-body="true"
+      href="https://www.elastic.co/guide/index.html"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <input type="text" class="form-control" ng-model="processor.locale"></div>
 </div>

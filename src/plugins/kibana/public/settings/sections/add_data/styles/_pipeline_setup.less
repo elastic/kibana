@@ -1,0 +1,28 @@
+//TODO: Move to variables file
+@pipeline-setup-border: #CCC;
+
+pipeline-setup {
+  label {
+    margin-bottom: 0px;
+  }
+
+  ul.pipeline-container {
+    list-style-type: none;
+    padding: 0px;
+
+    &>li {
+      border: 1px solid;
+      border-color: @pipeline-setup-border;
+    }
+  }
+
+  .empty-pipeline {
+    border: 1px solid;
+    border-color: @pipeline-setup-border;
+    padding: 5px;
+
+    p {
+      font-size: 15px;
+    }
+  }
+}

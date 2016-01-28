@@ -52,7 +52,7 @@ const processor_types = [
     sourceField: '',
     targetField: '@timestamp',
     formats: [],
-    timezone: 'UTC',
+    timezone: 'Etc/UTC',
     locale: 'ENGLISH',
     customFormat: '',
     getDefinition: function() {

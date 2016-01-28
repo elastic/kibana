@@ -6,7 +6,6 @@ export default function Processor(processorType) {
   self.collapsed = false;
   self.error = undefined;
 
-  //_.merge(self, _.pick(processorType, ['title', 'template', 'typeId', 'getDefinition', 'getDescription']));
   _.merge(self, processorType);
 };
 

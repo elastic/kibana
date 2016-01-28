@@ -69,7 +69,6 @@ Pipeline.prototype.add = function(processorType, existingProcessor) {
   self.counter += 1;
 
   if (existingProcessor) {
-    //console.log('existingProcessor', existingProcessor);
     processorType = _.find(types, (o) => { return o.typeId === existingProcessor.typeId });
   }
 
@@ -79,14 +78,9 @@ Pipeline.prototype.add = function(processorType, existingProcessor) {
     const keys = _.keys(existingProcessor);
     remove(keys, ['title', 'template', 'typeId', 'processorId', 'outputObject', 'inputObject', 'description']);
     keys.forEach((key) => {
-      // if (key === 'formats') {
-      //   debugger;
-      // }
       _.set(newProcessor, key, _.get(existingProcessor, key));
     });
   }
-
-  //console.log('New Processor: ', newProcessor);
 
   //Keep the processorId value a string. This is used as a property index.
   newProcessor.processorId = `processor_${self.counter}`;

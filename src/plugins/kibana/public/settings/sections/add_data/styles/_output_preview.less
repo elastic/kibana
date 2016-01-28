@@ -1,0 +1,28 @@
+//TODO: Move into variables file.
+@output-preview-border: #CCC;
+@output-preview-bg: #ECF0F1;
+
+output-preview {
+  .visual {
+    background-color: @output-preview-bg;
+    border: 1px solid;
+    border-color: @output-preview-border;
+    overflow-x: auto;
+  }
+
+  .visual.collapsed {
+    max-height: 125px;
+    overflow-y: scroll;
+  }
+
+  pre {
+    background-color: transparent;
+    border: none;
+  }
+
+  .hide-unchanged {
+    .jsondiffpatch-unchanged {
+      display: none;
+    }
+  }
+}

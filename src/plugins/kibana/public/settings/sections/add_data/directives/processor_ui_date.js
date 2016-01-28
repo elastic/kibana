@@ -3,6 +3,8 @@ const _ = require('lodash');
 const $ = require('jquery');
 const keysDeep = require('../lib/keys_deep');
 const selectableArray = require('../lib/selectable_array');
+const timezones = require('../lib/get_time_zones')();
+require('../styles/_processor_ui_date.less');
 
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiDate', function() {
@@ -42,8 +44,6 @@ app.directive('processorUiDate', function() {
       updateFormats = debounce(updateFormats, 200);
 
       $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom'], processor.formats);
-      $scope.timezones = ['UTC', 'Europe/Amsterdam', 'Load list from somewhere'];
-      $scope.locales = ['ENGLISH', 'Load list from somewhere'];
       $scope.updateFormats = updateFormats;
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

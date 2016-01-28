@@ -3,20 +3,58 @@ const _ = require('lodash');
 const $ = require('jquery');
 const Pipeline = require('../lib/pipeline');
 
+require('../styles/_pipeline_setup.less');
 require('./processors');
 
 const Logger = require('../lib/logger');
 const logger = new Logger('pipeline_setup', true);
 
-app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce) {
+app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
   return {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),
     link: function ($scope, $el) {
+      const notify = new Notifier({
+        location: `Ingest Pipeline Setup`
+      });
       const $container = $el;
       $el = $scope.$el = $container.find('.pipeline-container');
 
       const pipeline = $scope.pipeline;
+
+      function updateProcessors(results) {
+        //update the outputObject of each processor
+        results.forEach((result) => {
+          const processor = pipeline.getProcessorById(result.processorId);
+          const output = _.get(result, 'output');
+          const error = _.get(result, 'error');
+
+          processor.outputObject = output;
+          processor.error = error;
+        });
+
+        //update the inputObject of each processor
+        results.forEach((result) => {
+          const processor = pipeline.getProcessorById(result.processorId);
+
+          //we don't want to change the inputObject if the processor is in error
+          //because that can cause us to lose state.
+          if (!_.get(processor, 'error.isNested')) {
+            //this can probably be cleaned up a little.
+            if (processor.parent.processorId) {
+              processor.inputObject = _.cloneDeep(processor.parent.outputObject);
+            } else {
+              processor.inputObject = _.cloneDeep(processor.parent);
+            }
+          }
+
+          processor.updateDescription();
+        });
+
+        pipeline.updateOutput();
+        pipeline.dirty = false;
+        pipeline.currentProcessorId = null;
+      }
 
       function simulatePipeline(event, message) {
         if (!pipeline.dirty) return;
@@ -27,39 +65,8 @@ app.directive('pipelineSetup', function ($compile, $rootScope, ingest, debounce)
         }
 
         ingest.simulatePipeline(pipeline)
-        .then(function (results) {
-          //update the outputObject of each processor
-          results.forEach((result) => {
-            const processor = pipeline.getProcessorById(result.processorId);
-            const output = _.get(result, 'output');
-            const error = _.get(result, 'error');
-
-            processor.outputObject = output;
-            processor.error = error;
-          });
-
-          //update the inputObject of each processor
-          results.forEach((result) => {
-            const processor = pipeline.getProcessorById(result.processorId);
-
-            //we don't want to change the inputObject if the processor is in error
-            //because that can cause us to lose state.
-            if (!_.get(processor, 'error.isNested')) {
-              //this can probably be cleaned up a little.
-              if (processor.parent.processorId) {
-                processor.inputObject = _.cloneDeep(processor.parent.outputObject);
-              } else {
-                processor.inputObject = _.cloneDeep(processor.parent);
-              }
-            }
-
-            processor.updateDescription();
-          });
-
-          pipeline.updateOutput();
-          pipeline.dirty = false;
-          pipeline.currentProcessorId = null;
-        });
+        .then(updateProcessors)
+        .catch(notify.error);
       }
       simulatePipeline = debounce(simulatePipeline, 200);
 

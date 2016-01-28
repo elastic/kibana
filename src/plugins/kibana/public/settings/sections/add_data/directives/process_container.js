@@ -1,6 +1,7 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 const $ = require('jquery');
+require('../styles/_process_container.less');
 require('./process_container_header');
 
 app.directive('processContainer', function ($compile) {
@@ -16,12 +17,12 @@ app.directive('processContainer', function ($compile) {
       const pipeline = $scope.pipeline;
       const $container = $el.find('.process-worker-container');
 
-      const scope = $scope.$new();
-      scope.pipeline = pipeline;
-      scope.processor = processor;
+      const newScope = $scope.$new();
+      newScope.pipeline = pipeline;
+      newScope.processor = processor;
 
       const template = `<processor-ui-${processor.typeId}></processor-ui-${processor.typeId}>`;
-      const $innerEl = $compile(template)(scope);
+      const $innerEl = $compile(template)(newScope);
 
       $innerEl.appendTo($container);
     }

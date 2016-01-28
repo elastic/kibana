@@ -35,6 +35,20 @@ app.directive('processorUiGrok', function () {
       });
 
       $scope.$watch('processor.pattern', processorUiChanged);
+
+      $scope.debug = function() {
+        const samples = [
+          '%{GREEDYDATA:source} - - %{GREEDYDATA:message}',
+          '\\[%{GREEDYDATA:datestamp}] "%{WORD:action} %{GREEDYDATA:document} %{GREEDYDATA:protocol}" %{WORD:response_code} %{WORD:extended_response_code}',
+          '%{GREEDYDATA:timestamp} %{GREEDYDATA:timezone}'
+        ];
+
+        let index = _.indexOf(samples, processor.pattern);
+        index += 1;
+        if (index >= samples.length) index = 0;
+
+        processor.pattern = samples[index];
+      }
     }
   }
 });
