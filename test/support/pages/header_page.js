@@ -1,4 +1,4 @@
-// in test/support/pages/HeaderPage.js
+// in test/support/pages/header_page.js
 define(function (require) {
   var config = require('intern').config;
   var Common = require('./Common');
