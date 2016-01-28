@@ -2,7 +2,7 @@ var expect = require('expect.js');
 var sinon = require('sinon');
 var Promise = require('bluebird');
 
-var ScenarioManager = require('../scenarioManager');
+var ScenarioManager = require('../scenario_manager');
 
 describe('scenario manager', function () {
   var manager = new ScenarioManager('http://localhost:9200');
