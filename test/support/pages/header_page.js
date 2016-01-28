@@ -1,7 +1,7 @@
 // in test/support/pages/HeaderPage.js
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var common;
 
