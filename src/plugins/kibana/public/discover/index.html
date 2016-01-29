@@ -23,43 +23,35 @@
     </form>
 
     <div class="button-group" role="toolbar">
-      <kbn-tooltip text="New Search" placement="bottom" append-to-body="1">
-        <button
-          ng-click="newQuery()"
-          aria-label="New Search">
-          <i aria-hidden="true" class="fa fa-file-new-o"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
-        <button
-          ng-click="configTemplate.toggle('save');"
-          ng-class="{active: configTemplate.is('save')}"
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('save') }}"
-          aria-label="Save Search">
-          <i aria-hidden="true" class="fa fa-save"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
-        <button
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('load') }}"
-          ng-click="configTemplate.toggle('load');"
-          ng-class="{active: configTemplate.is('load')}"
-          aria-label="Load Saved Search">
-          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
-        <button
-          aria-label="Share Search"
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('share') }}"
-          ng-class="{active: configTemplate.is('share')}"
-          ng-click="configTemplate.toggle('share');">
-          <i aria-hidden="true" class="fa fa-external-link"></i>
-        </button>
-      </kbn-tooltip>
+      <button
+        ng-click="newQuery()"
+        aria-label="New Search">
+        <span>New</span>
+      </button>
+      <button
+        ng-click="configTemplate.toggle('save');"
+        ng-class="{active: configTemplate.is('save')}"
+        aria-haspopup="false"
+        aria-expanded="{{ configTemplate.is('save') }}"
+        aria-label="Save Search">
+        <span>Save</span>
+      </button>
+      <button
+        aria-haspopup="false"
+        aria-expanded="{{ configTemplate.is('load') }}"
+        ng-click="configTemplate.toggle('load');"
+        ng-class="{active: configTemplate.is('load')}"
+        aria-label="Load Saved Search">
+        <span>Open</span>
+      </button>
+      <button
+        aria-label="Share Search"
+        aria-haspopup="false"
+        aria-expanded="{{ configTemplate.is('share') }}"
+        ng-class="{active: configTemplate.is('share')}"
+        ng-click="configTemplate.toggle('share');">
+        <span>Share</span>
+      </button>
     </div>
   </navbar>
 
