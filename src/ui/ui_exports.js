@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var minimatch = require('minimatch');
 
-var UiAppCollection = require('./UiAppCollection');
+var UiAppCollection = require('./ui_app_collection');
 
 class UiExports {
   constructor({ urlBasePath }) {
@@ -61,6 +61,7 @@ class UiExports {
       case 'fieldFormats':
       case 'spyModes':
       case 'chromeNavControls':
+      case 'navbarExtensions':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import UiExports from '../UiExports';
+import UiExports from '../ui_exports';
 
 describe('UiExports', function () {
   describe('#find()', function () {

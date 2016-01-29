@@ -2,7 +2,7 @@ define(function (require) {
 
   var config = require('intern').config;
   var registerSuite = require('intern!object');
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var defaultTimeout = config.timeouts.default;
   var common;
@@ -339,14 +339,7 @@ define(function (require) {
         return self.remote
         .setFindTimeout(defaultTimeout)
         .findByLinkText(vizName)
-        .click()
-        .then(function getSpinnerDone() {
-          return self.getSpinnerDone(); // only matches the hidden spinners
-        })
-        .catch(function () {
-          common.debug('didn\'t find vis name on first page');
-          return;
-        });
+        .click();
       });
     },
 
@@ -357,10 +350,7 @@ define(function (require) {
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart
-          .getVisibleText()
-          .then(function (theText) {
-            return theText;
-          });
+          .getVisibleText();
         }
         var getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
@@ -379,10 +369,7 @@ define(function (require) {
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart
-          .getVisibleText()
-          .then(function (theText) {
-            return theText;
-          });
+          .getVisibleText();
         }
         var getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
@@ -672,6 +659,12 @@ define(function (require) {
         });
       });
     },
+
+    waitForVisualization: function waitForVisualization() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('visualize-legend');
+    }
 
   };
 

@@ -112,7 +112,6 @@ describe('index pattern', function () {
 
   describe('fields', function () {
     it('should have expected properties on fields', function () {
-      expect(indexPattern.fields[0]).to.have.property('bucketable');
       expect(indexPattern.fields[0]).to.have.property('displayName');
       expect(indexPattern.fields[0]).to.have.property('filterable');
       expect(indexPattern.fields[0]).to.have.property('format');

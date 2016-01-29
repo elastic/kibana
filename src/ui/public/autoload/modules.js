@@ -27,6 +27,7 @@ require('ui/storage');
 require('ui/stringify/register');
 require('ui/styleCompile');
 require('ui/timefilter');
+require('ui/timepicker');
 require('ui/tooltip');
 require('ui/typeahead');
 require('ui/url');

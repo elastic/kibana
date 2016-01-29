@@ -1,5 +1,6 @@
 const { resolve } = require('path');
 const expiry = require('expiry-js');
+import { intersection } from 'lodash';
 
 export default function createSettingParser(options) {
   function parseMilliseconds(val) {
@@ -20,6 +21,10 @@ export default function createSettingParser(options) {
     const filename = settings.package + '-' + version + '.tar.gz';
 
     return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
+  }
+
+  function areMultipleOptionsChosen(options, choices) {
+    return intersection(Object.keys(options), choices).length > 1;
   }
 
   function parse() {
@@ -84,8 +89,12 @@ export default function createSettingParser(options) {
       settings.package = parts.shift();
     }
 
-    if (!settings.action || (options.install && options.remove)) {
-      throw new Error('Please specify either --install or --remove.');
+    if (options.list) {
+      settings.action = 'list';
+    }
+
+    if (!settings.action || areMultipleOptionsChosen(options, [ 'install', 'remove', 'list' ])) {
+      throw new Error('Please specify either --install, --remove, or --list.');
     }
 
     settings.pluginDir = options.pluginDir;

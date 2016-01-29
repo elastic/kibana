@@ -1,7 +1,7 @@
-// in test/support/pages/HeaderPage.js
+// in test/support/pages/header_page.js
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var common;
 
@@ -137,16 +137,18 @@ define(function (require) {
       });
     },
 
+    clickToastOK: function clickToastOK() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('button[ng-if="notif.accept"]')
+      .click();
+    },
+
     getSpinnerDone: function getSpinnerDone() {
       var self = this;
       return this.remote
       .setFindTimeout(defaultTimeout * 10)
       .findByCssSelector('span.spinner.ng-hide');
-      // .then(function () {
-      //   return self.remote
-      //   .setFindTimeout(defaultTimeout * 10)
-      //   .findByCssSelector('div.spinner.large.ng-hide');
-      // });
     }
 
   };
