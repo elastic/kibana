@@ -1,27 +1,14 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover">
-    <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
-      <div class="typeahead" kbn-typeahead="discover">
-        <div class="input-group"
-          ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-          <input
-            parse-query
-            input-focus
-            kbn-typeahead-input
-            ng-model="state.query"
-            placeholder="Search..."
-            aria-label="Search input"
-            type="text"
-            class="form-control">
-          <button type="submit"
-            ng-disabled="discoverSearch.$invalid"
-            aria-label="Search">
-            <span aria-hidden="true" class="fa fa-search"></span></button>
-        </div>
-        <kbn-typeahead-items></kbn-typeahead-items>
-      </div>
-    </form>
+  <navbar name="discover-options">
+    <div class="discover-info">
+      <span ng-show="opts.savedSearch.id" class="discover-info-title">
+        <span ng-bind="::opts.savedSearch.title"></span>
+        <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
+      </span>
 
+      <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
+      <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
+    </div>
     <div class="button-group" role="toolbar">
       <button
         ng-click="newQuery()"
@@ -54,6 +41,30 @@
       </button>
     </div>
   </navbar>
+  <navbar name="discover-search">
+    <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
+      <div class="typeahead" kbn-typeahead="discover">
+        <div class="input-group"
+          ng-class="discoverSearch.$invalid ? 'has-error' : ''">
+          <input
+            parse-query
+            input-focus
+            kbn-typeahead-input
+            ng-model="state.query"
+            placeholder="Search..."
+            aria-label="Search input"
+            type="text"
+            class="form-control">
+          <button type="submit"
+            ng-disabled="discoverSearch.$invalid"
+            aria-label="Search">
+            <span aria-hidden="true" class="fa fa-search"></span></button>
+        </div>
+        <kbn-typeahead-items></kbn-typeahead-items>
+      </div>
+    </form>
+    <div class="button-group" role="toolbar"></div>
+  </navbar>
 
   <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
 
@@ -76,17 +87,6 @@
       </div>
 
       <div class="discover-wrapper col-md-10">
-
-        <div class="discover-info">
-          <span ng-show="opts.savedSearch.id" class="discover-info-title">
-            <span ng-bind="::opts.savedSearch.title"></span>
-            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
-          </span>
-
-          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
-          <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
-        </div>
-
         <div class="discover-content">
           <!-- no results -->
           <div ng-show="resultState === 'none'">
