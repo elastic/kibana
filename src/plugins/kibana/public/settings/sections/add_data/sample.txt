@@ -1,7 +1,0 @@
-%{GREEDYDATA:source} - - %{GREEDYDATA:message}
-
-\[%{GREEDYDATA:datestamp}] "%{WORD:action} %{GREEDYDATA:document} %{GREEDYDATA:protocol}" %{WORD:response_code} %{WORD:extended_response_code}
-
-%{GREEDYDATA:timestamp} %{GREEDYDATA:timezone}
-
-DD/MMM/yyyy:HH:mm:ss
