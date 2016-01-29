@@ -321,20 +321,14 @@ define(function (require) {
               });
 
               flatState.body.query = {
-                bool: {
-                  must:
-                    [flatState.body.query]
-                    .concat(
-                      _(flatState.filters)
-                      .filter(filterNegate(false))
-                      .map(cleanFilter)
-                      .value()
-                    ),
-
-                  must_not:
-                    _(flatState.filters)
-                    .filter(filterNegate(true))
-                    .map(cleanFilter).value()
+                filtered: {
+                  query: flatState.body.query,
+                  filter: {
+                    bool: {
+                      must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
+                      must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
+                    }
+                  }
                 }
               };
             }
