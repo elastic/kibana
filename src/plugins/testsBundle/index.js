@@ -24,7 +24,7 @@ module.exports = (kibana) => {
         }
 
         const testGlobs = [
-          'src/ui/public/__tests__/**/*.js',
+          'src/ui/public/**/__tests__/**/*.js',
         ];
 
         for (const plugin of plugins) {
