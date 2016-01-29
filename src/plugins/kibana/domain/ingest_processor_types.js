@@ -1,12 +1,13 @@
 const keysDeep = require('../lib/keys_deep');
+const _ = require('lodash');
 
-const processor_types = [
+export default [
   { // append
     typeId: 'append',
     title: 'Append',
     targetField: '',
     values: [],
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'append' : {
@@ -16,7 +17,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const target = (self.targetField) ? self.targetField : '?';
@@ -28,7 +29,7 @@ const processor_types = [
     title: 'Convert',
     sourceField: '',
     type: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'convert' : {
@@ -38,7 +39,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -55,7 +56,7 @@ const processor_types = [
     timezone: 'Etc/UTC',
     locale: 'ENGLISH',
     customFormat: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
 
       const formats = [];
@@ -80,7 +81,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -93,7 +94,7 @@ const processor_types = [
     title: 'Geo IP',
     sourceField: '',
     targetField: 'geoip',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'geoip' : {
@@ -103,7 +104,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -116,7 +117,7 @@ const processor_types = [
     title: 'Grok',
     sourceField: '',
     pattern: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'grok' : {
@@ -126,7 +127,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       let inputKeys = keysDeep(self.inputObject);
@@ -145,7 +146,7 @@ const processor_types = [
     sourceField: '',
     pattern: '',
     replacement: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'gsub' : {
@@ -156,7 +157,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -168,7 +169,7 @@ const processor_types = [
     title: 'Join',
     sourceField: '',
     separator: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'join' : {
@@ -178,7 +179,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -190,7 +191,7 @@ const processor_types = [
     typeId: 'lowercase',
     title: 'Lowercase',
     sourceField: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'lowercase' : {
@@ -199,7 +200,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -210,7 +211,7 @@ const processor_types = [
     typeId: 'remove',
     title: 'Remove',
     sourceField: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'remove' : {
@@ -219,7 +220,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -231,7 +232,7 @@ const processor_types = [
     title: 'Rename',
     sourceField: '',
     targetField: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'rename' : {
@@ -241,7 +242,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -253,7 +254,7 @@ const processor_types = [
     typeId: 'set',
     title: 'Set',
     targetField: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'set' : {
@@ -263,7 +264,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const target = (self.targetField) ? self.targetField : '?';
@@ -275,7 +276,7 @@ const processor_types = [
     title: 'Split',
     sourceField: '',
     separator: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'split' : {
@@ -285,7 +286,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -297,7 +298,7 @@ const processor_types = [
     typeId: 'trim',
     title: 'Trim',
     sourceField: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'trim' : {
@@ -306,7 +307,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -317,7 +318,7 @@ const processor_types = [
     typeId: 'uppercase',
     title: 'Uppercase',
     sourceField: '',
-    getDefinition: function() {
+    getDefinition: function () {
       const self = this;
       return {
         'uppercase' : {
@@ -326,7 +327,7 @@ const processor_types = [
         }
       };
     },
-    getDescription: function() {
+    getDescription: function () {
       const self = this;
 
       const source = (self.sourceField) ? self.sourceField : '?';
@@ -334,5 +335,3 @@ const processor_types = [
     }
   },
 ];
-
-export default processor_types;

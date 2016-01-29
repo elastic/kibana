@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const processor_types = require('../domain/ingest_processor_types');
+const processorTypes = require('../domain/ingest_processor_types');
 
 export default function ingestBuildRequest(pipeline) {
   const processors = pipeline.processors;
@@ -15,8 +15,8 @@ export default function ingestBuildRequest(pipeline) {
   };
 
   processors.forEach((processor) => {
-    const processor_type = _.find(processor_types, { 'typeId': processor.typeId });
-    const definition = processor_type.getDefinition.call(processor);
+    const processorType = _.find(processorTypes, { 'typeId': processor.typeId });
+    const definition = processorType.getDefinition.call(processor);
     body.pipeline.processors.push(definition);
   });
 

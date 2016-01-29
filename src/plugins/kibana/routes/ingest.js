@@ -8,7 +8,7 @@ export default function defineKibanaServerRoutes(server) {
   server.route({
     path: '/api/kibana/simulate',
     method: 'POST',
-    handler: function(request, reply) {
+    handler: function (request, reply) {
       const client = server.plugins.elasticsearch.client;
       const pipeline = request.payload;
       const body = buildRequest(pipeline);
@@ -19,7 +19,7 @@ export default function defineKibanaServerRoutes(server) {
         method: 'POST',
         body: body
       },
-      function(err, resp) {
+      function (err, resp) {
         reply(processResponse(pipeline, err, resp));
       });
     }

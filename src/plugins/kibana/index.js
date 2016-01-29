@@ -13,7 +13,7 @@ module.exports = function (kibana) {
       }).default();
     },
 
-    init: function(server) {
+    init: function (server) {
       requireAllAndApply(join(__dirname, 'routes', '**', '*.js'), server);
     },
 

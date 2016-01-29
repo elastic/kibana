@@ -1,9 +1,9 @@
 const _ = require('lodash');
 
 function translateError(esError) {
-  const root_cause = _.get(esError, 'root_cause[0]');
+  const rootCause = _.get(esError, 'root_cause[0]');
 
-  return _.get(root_cause, 'reason') || _.get(root_cause, 'type');
+  return _.get(rootCause, 'reason') || _.get(rootCause, 'type');
 }
 
 export default function ingestProcessResponse(pipeline, err, resp) {
@@ -40,7 +40,7 @@ export default function ingestProcessResponse(pipeline, err, resp) {
 
   const errorIndex = _.findIndex(results, (result) => { return result.error !== undefined; });
   if (errorIndex !== -1) {
-    for (let i=errorIndex+1; i<results.length; i++) {
+    for (let i = errorIndex + 1; i < results.length; i++) {
       const badResult = results[i];
 
       badResult.output = undefined;

@@ -9,17 +9,17 @@ export default function Processor(processorType) {
   _.merge(self, processorType);
 };
 
-Processor.prototype.setParent = function(newParent) {
+Processor.prototype.setParent = function (newParent) {
   const self = this;
 
   const oldParent = self.parent;
   self.parent = newParent;
 
   return (oldParent !== self.parent);
-}
+};
 
-Processor.prototype.updateDescription = function() {
+Processor.prototype.updateDescription = function () {
   const self = this;
 
   self.description = self.getDescription();
-}
+};

@@ -1,13 +1,11 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const $ = require('jquery');
 const Pipeline = require('../lib/pipeline');
+const angular = require('angular');
 
+require('../services/ingest');
 require('../styles/_pipeline_setup.less');
 require('./processors');
-
-const Logger = require('../lib/logger');
-const logger = new Logger('pipeline_setup', true);
 
 app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
   return {
@@ -18,7 +16,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
         location: `Ingest Pipeline Setup`
       });
       const $container = $el;
-      $el = $scope.$el = $container.find('.pipeline-container');
+      $el = $container.find('.pipeline-container');
 
       const pipeline = $scope.pipeline;
 
@@ -70,13 +68,13 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
       }
       simulatePipeline = debounce(simulatePipeline, 200);
 
-      $scope.$watchCollection('pipeline.processors', function (newVal, oldVal) {
+      $scope.$watchCollection('pipeline.processors', (newVal, oldVal) => {
         pipeline.updateParents();
         pipeline.dirty = true;
         simulatePipeline();
       });
 
-      $scope.$watch('sampleData', function(newVal) {
+      $scope.$watch('sampleData', (newVal) => {
         pipeline.rootObject = $scope.sampleData;
         pipeline.updateParents();
         pipeline.dirty = true;
@@ -85,7 +83,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
 
       $scope.$watch('pipeline.dirty', simulatePipeline);
     },
-    controller: function ($scope, AppState, ingest) {
+    controller: function ($scope) {
       const savedPipeline = require('../sample_pipeline.json');
       const types = require('../../../../../domain/ingest_processor_types');
       const pipeline = new Pipeline();
@@ -97,16 +95,16 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
       $scope.pipeline = pipeline;
 
       function getDefaultProcessorType() {
-        return _.first(_.filter($scope.processorTypes, processor => { return processor.default }));
+        return _.first(_.filter($scope.processorTypes, processor => { return processor.default; }));
       }
 
       //temp for debugging purposes
-      $scope.loadPipeline = function() {
+      $scope.loadPipeline = function () {
         pipeline.load(savedPipeline);
-      }
+      };
 
       //temp for debugging purposes
-      $scope.savePipeline = function() {
+      $scope.savePipeline = function () {
         const tempPipeline = _.cloneDeep(pipeline);
         tempPipeline.processors.forEach((processor) => {
           delete processor.inputObject;
@@ -117,7 +115,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
         delete tempPipeline.output;
 
         console.log(angular.toJson(tempPipeline, true));
-      }
+      };
     }
   };
 });

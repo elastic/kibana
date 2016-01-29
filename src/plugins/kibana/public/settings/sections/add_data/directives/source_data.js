@@ -9,13 +9,7 @@ app.directive('sourceDataNew', function () {
       outputObject: '='
     },
     template: require('../views/source_data.html'),
-    controller: function ($scope, debounce) {
-      function refreshFieldData() {
-        $scope.fieldData = _.get($scope.inputObject, $scope.sourceField);
-        refreshOutput();
-      }
-      refreshFieldData = debounce(refreshFieldData, 100);
-
+    controller: function ($scope) {
       function getProcessorOutput() {
         const newObj = {
           _raw: $scope.selectedLine
@@ -29,27 +23,25 @@ app.directive('sourceDataNew', function () {
 
         if (newOutput) {
           $scope.outputObject = getProcessorOutput();
-        }
+        };
       }
-      refreshOutput = debounce(refreshOutput, 200);
 
-      const data = require('../sample_data.txt');
-      $scope.documentLines = data.split('\n');
+      $scope.documentLines = require('../source_data.txt').split('\n');
       $scope.$watch('selectedLine', refreshOutput);
 
-      $scope.previousLine = function() {
+      $scope.previousLine = function () {
         let currentIndex = $scope.documentLines.indexOf($scope.selectedLine);
         if (currentIndex <= 0) return;
 
-        $scope.selectedLine = $scope.documentLines[currentIndex-1];
-      }
+        $scope.selectedLine = $scope.documentLines[currentIndex - 1];
+      };
 
-      $scope.nextLine = function() {
+      $scope.nextLine = function () {
         let currentIndex = $scope.documentLines.indexOf($scope.selectedLine);
         if (currentIndex >= $scope.documentLines.length - 1) return;
 
-        $scope.selectedLine = $scope.documentLines[currentIndex+1];
-      }
+        $scope.selectedLine = $scope.documentLines[currentIndex + 1];
+      };
     }
   };
 });

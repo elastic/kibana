@@ -13,7 +13,7 @@ export default function Pipeline() {
   self.currentProcessorId = null;
 };
 
-Pipeline.prototype.load = function(pipeline) {
+Pipeline.prototype.load = function (pipeline) {
   const self = this;
 
   while (self.processors.length > 0) {
@@ -23,17 +23,17 @@ Pipeline.prototype.load = function(pipeline) {
   pipeline.processors.forEach((processor) => {
     self.add(null, processor);
   });
-}
+};
 
-Pipeline.prototype.remove = function(processor) {
+Pipeline.prototype.remove = function (processor) {
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
 
   processors.splice(index, 1);
-}
+};
 
-Pipeline.prototype.moveUp = function(processor) {
+Pipeline.prototype.moveUp = function (processor) {
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
@@ -43,9 +43,9 @@ Pipeline.prototype.moveUp = function(processor) {
   const temp = processors[index - 1];
   processors[index - 1] = processors[index];
   processors[index] = temp;
-}
+};
 
-Pipeline.prototype.moveDown = function(processor) {
+Pipeline.prototype.moveDown = function (processor) {
   const self = this;
   const processors = self.processors;
   const index = processors.indexOf(processor);
@@ -55,21 +55,21 @@ Pipeline.prototype.moveDown = function(processor) {
   const temp = processors[index + 1];
   processors[index + 1] = processors[index];
   processors[index] = temp;
-}
+};
 
 function remove(array, arrayToRemove) {
   arrayToRemove.forEach((itemToRemove) => {
-    _.remove(array, (o) => {return o == itemToRemove});
+    _.remove(array, (o) => { return o === itemToRemove; });
   });
-}
+};
 
-Pipeline.prototype.add = function(processorType, existingProcessor) {
+Pipeline.prototype.add = function (processorType, existingProcessor) {
   const self = this;
   const processors = self.processors;
   self.counter += 1;
 
   if (existingProcessor) {
-    processorType = _.find(types, (o) => { return o.typeId === existingProcessor.typeId });
+    processorType = _.find(types, (o) => { return o.typeId === existingProcessor.typeId; });
   }
 
   const newProcessor = new Processor(processorType);
@@ -85,9 +85,9 @@ Pipeline.prototype.add = function(processorType, existingProcessor) {
   //Keep the processorId value a string. This is used as a property index.
   newProcessor.processorId = `processor_${self.counter}`;
   processors.push(newProcessor);
-}
+};
 
-Pipeline.prototype.updateParents = function() {
+Pipeline.prototype.updateParents = function () {
   const self = this;
   const processors = self.processors;
 
@@ -101,19 +101,19 @@ Pipeline.prototype.updateParents = function() {
 
     processor.setParent(newParent);
   });
-}
+};
 
-Pipeline.prototype.getProcessorById = function(processorId) {
+Pipeline.prototype.getProcessorById = function (processorId) {
   const self = this;
   return _.find(self.processors, (processor) => {return processor.processorId === processorId; });
-}
+};
 
-Pipeline.prototype.updateOutput = function() {
+Pipeline.prototype.updateOutput = function () {
   const self = this;
   const processors = self.processors;
 
   self.output = undefined;
   if (processors.length > 0) {
-    self.output = processors[processors.length-1].outputObject;
+    self.output = processors[processors.length - 1].outputObject;
   }
-}
+};

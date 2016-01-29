@@ -1,17 +1,15 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const $ = require('jquery');
-const keysDeep = require('../lib/keys_deep');
+const keysDeep = require('../../../../../lib/keys_deep');
 const selectableArray = require('../lib/selectable_array');
-const timezones = require('../lib/get_time_zones')();
 require('../styles/_processor_ui_date.less');
 
 //scope.processor, scope.pipeline are attached by the process_container.
-app.directive('processorUiDate', function() {
+app.directive('processorUiDate', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_date.html'),
-    controller : function ($scope, $rootScope, debounce) {
+    controller : function ($scope, debounce) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
@@ -58,5 +56,5 @@ app.directive('processorUiDate', function() {
       $scope.$watch('processor.timezone', processorUiChanged);
       $scope.$watch('processor.locale', processorUiChanged);
     }
-  }
+  };
 });

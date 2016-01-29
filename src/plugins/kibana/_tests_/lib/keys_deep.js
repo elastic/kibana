@@ -3,7 +3,7 @@ var sinon = require('sinon');
 
 var keysDeep = require('../../lib/keys_deep');
 
-describe('keys deep', function() {
+describe('keys deep', function () {
 
   it('should list first level properties', function () {
     let object = {

@@ -1,8 +1,6 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-
-const Logger = require('../lib/logger');
-const logger = new Logger('ingest service', true);
+const angular = require('angular');
 
 app.service('ingest', function ($http) {
   return {
@@ -17,7 +15,7 @@ app.service('ingest', function ($http) {
       return result.data;
     })
     .catch((err) => {
-      throw('Error communicating with Kibana server');
+      throw ('Error communicating with Kibana server');
     });
   }
 });

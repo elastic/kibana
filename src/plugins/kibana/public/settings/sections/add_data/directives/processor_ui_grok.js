@@ -1,15 +1,13 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const $ = require('jquery');
-const keysDeep = require('../lib/keys_deep');
-require('../services/ingest');
+const keysDeep = require('../../../../../lib/keys_deep');
 
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiGrok', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_grok.html'),
-    controller : function ($scope, $rootScope, debounce) {
+    controller : function ($scope) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
@@ -35,20 +33,6 @@ app.directive('processorUiGrok', function () {
       });
 
       $scope.$watch('processor.pattern', processorUiChanged);
-
-      $scope.debug = function() {
-        const samples = [
-          '%{GREEDYDATA:source} - - %{GREEDYDATA:message}',
-          '\\[%{GREEDYDATA:datestamp}] "%{WORD:action} %{GREEDYDATA:document} %{GREEDYDATA:protocol}" %{WORD:response_code} %{WORD:extended_response_code}',
-          '%{GREEDYDATA:timestamp} %{GREEDYDATA:timezone}'
-        ];
-
-        let index = _.indexOf(samples, processor.pattern);
-        index += 1;
-        if (index >= samples.length) index = 0;
-
-        processor.pattern = samples[index];
-      }
     }
-  }
+  };
 });
