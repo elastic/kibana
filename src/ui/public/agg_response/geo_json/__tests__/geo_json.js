@@ -23,7 +23,6 @@ describe('GeoJson Agg Response Converter', function () {
       type: 'tile_map',
       aggs: [
         { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
-        { schema: 'split', type: 'terms', params: { field: '@tags' } },
         { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } }
       ],
       params: {
@@ -34,7 +33,6 @@ describe('GeoJson Agg Response Converter', function () {
 
     aggs = {
       metric: vis.aggs[0],
-      split: vis.aggs[1],
       geo: vis.aggs[2]
     };
   }));
