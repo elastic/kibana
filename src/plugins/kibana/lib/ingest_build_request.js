@@ -16,7 +16,7 @@ export default function ingestBuildRequest(pipeline) {
 
   processors.forEach((processor) => {
     const processorType = _.find(processorTypes, { 'typeId': processor.typeId });
-    const definition = processorType.getDefinition.call(processor);
+    const definition = processorType.getDefinition(processor);
     body.pipeline.processors.push(definition);
   });
 

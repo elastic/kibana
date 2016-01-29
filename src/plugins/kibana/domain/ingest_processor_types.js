@@ -7,20 +7,17 @@ export default [
     title: 'Append',
     targetField: '',
     values: [],
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'append' : {
-          'processor_id': self.processorId,
-          'field' : self.targetField ? self.targetField : '',
-          'value': self.values
+          'processor_id': processor.processorId,
+          'field' : processor.targetField ? processor.targetField : '',
+          'value': processor.values
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const target = (self.targetField) ? self.targetField : '?';
+    getDescription: function (processor) {
+      const target = (processor.targetField) ? processor.targetField : '?';
       return `[${target}]`;
     }
   },
@@ -29,21 +26,18 @@ export default [
     title: 'Convert',
     sourceField: '',
     type: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'convert' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : '',
-          'type' : self.type ? self.type : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : '',
+          'type' : processor.type ? processor.type : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      const type = (self.type) ? self.type : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      const type = (processor.type) ? processor.type : '?';
       return `[${source}] to ${type}`;
     }
   },
@@ -56,14 +50,12 @@ export default [
     timezone: 'Etc/UTC',
     locale: 'ENGLISH',
     customFormat: '',
-    getDefinition: function () {
-      const self = this;
-
+    getDefinition: function (processor) {
       const formats = [];
-      self.formats.forEach((format) => {
+      processor.formats.forEach((format) => {
         if (format === 'Custom') {
-          if (self.customFormat) {
-            formats.push(self.customFormat);
+          if (processor.customFormat) {
+            formats.push(processor.customFormat);
           }
         } else {
           formats.push(format);
@@ -72,20 +64,18 @@ export default [
 
       return {
         'date' : {
-          'processor_id': self.processorId,
-          'match_field' : self.sourceField ? self.sourceField : '',
-          'target_field' : self.targetField ? self.targetField : '',
+          'processor_id': processor.processorId,
+          'match_field' : processor.sourceField ? processor.sourceField : '',
+          'target_field' : processor.targetField ? processor.targetField : '',
           'match_formats' : formats,
-          'timezone': self.timezone ? self.timezone : '',
-          'locale': self.locale ? self.locale : ''
+          'timezone': processor.timezone ? processor.timezone : '',
+          'locale': processor.locale ? processor.locale : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      const target = (self.targetField) ? self.targetField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      const target = (processor.targetField) ? processor.targetField : '?';
       return `[${source}] -> [${target}]`;
     }
   },
@@ -94,21 +84,18 @@ export default [
     title: 'Geo IP',
     sourceField: '',
     targetField: 'geoip',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'geoip' : {
-          'processor_id': self.processorId,
-          'source_field' : self.sourceField ? self.sourceField : '',
-          'target_field': self.targetField ? self.targetField : ''
+          'processor_id': processor.processorId,
+          'source_field' : processor.sourceField ? processor.sourceField : '',
+          'target_field': processor.targetField ? processor.targetField : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      const target = (self.targetField) ? self.targetField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      const target = (processor.targetField) ? processor.targetField : '?';
       return `[${source}] -> [${target}]`;
     }
   },
@@ -117,26 +104,23 @@ export default [
     title: 'Grok',
     sourceField: '',
     pattern: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'grok' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : '',
-          'pattern': self.pattern ? self.pattern : '',
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : '',
+          'pattern': processor.pattern ? processor.pattern : '',
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      let inputKeys = keysDeep(self.inputObject);
-      let outputKeys = keysDeep(self.outputObject);
+    getDescription: function (processor) {
+      let inputKeys = keysDeep(processor.inputObject);
+      let outputKeys = keysDeep(processor.outputObject);
       let added = _.difference(outputKeys, inputKeys);
 
       let addedDescription = added.sort().map(field => `[${field}]`).join(', ');
 
-      const source = (self.sourceField) ? self.sourceField : '?';
+      const source = (processor.sourceField) ? processor.sourceField : '?';
       return `[${source}] -> ${addedDescription}`;
     }
   },
@@ -146,22 +130,19 @@ export default [
     sourceField: '',
     pattern: '',
     replacement: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'gsub' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : '',
-          'pattern' : self.pattern ? self.pattern : '',
-          'replacement' : self.replacement ? self.replacement : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : '',
+          'pattern' : processor.pattern ? processor.pattern : '',
+          'replacement' : processor.replacement ? processor.replacement : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      return `[${source}] - '${self.pattern}' -> '${self.replacement}'`;
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      return `[${source}] - '${processor.pattern}' -> '${processor.replacement}'`;
     }
   },
   { // join
@@ -169,21 +150,18 @@ export default [
     title: 'Join',
     sourceField: '',
     separator: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'join' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : '',
-          'separator' : self.separator ? self.separator : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : '',
+          'separator' : processor.separator ? processor.separator : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      const separator = (self.separator) ? self.separator : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      const separator = (processor.separator) ? processor.separator : '?';
       return `[${source}] on '${separator}'`;
     }
   },
@@ -191,19 +169,16 @@ export default [
     typeId: 'lowercase',
     title: 'Lowercase',
     sourceField: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'lowercase' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
       return `[${source}]`;
     }
   },
@@ -211,19 +186,16 @@ export default [
     typeId: 'remove',
     title: 'Remove',
     sourceField: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'remove' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
       return `[${source}]`;
     }
   },
@@ -232,21 +204,18 @@ export default [
     title: 'Rename',
     sourceField: '',
     targetField: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'rename' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : '',
-          'to': self.targetField ? self.targetField : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : '',
+          'to': processor.targetField ? processor.targetField : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      const target = (self.targetField) ? self.targetField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      const target = (processor.targetField) ? processor.targetField : '?';
       return `[${source}] -> [${target}]`;
     }
   },
@@ -254,20 +223,17 @@ export default [
     typeId: 'set',
     title: 'Set',
     targetField: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'set' : {
-          'processor_id': self.processorId,
-          'field' : self.targetField ? self.targetField : '',
-          'value': self.value ? self.value : ''
+          'processor_id': processor.processorId,
+          'field' : processor.targetField ? processor.targetField : '',
+          'value': processor.value ? processor.value : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const target = (self.targetField) ? self.targetField : '?';
+    getDescription: function (processor) {
+      const target = (processor.targetField) ? processor.targetField : '?';
       return `[${target}]`;
     }
   },
@@ -276,21 +242,18 @@ export default [
     title: 'Split',
     sourceField: '',
     separator: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'split' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : '',
-          'separator' : self.separator ? self.separator : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : '',
+          'separator' : processor.separator ? processor.separator : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
-      const separator = (self.separator) ? self.separator : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
+      const separator = (processor.separator) ? processor.separator : '?';
       return `[${source}] on '${separator}'`;
     }
   },
@@ -298,19 +261,16 @@ export default [
     typeId: 'trim',
     title: 'Trim',
     sourceField: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'trim' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
       return `[${source}]`;
     }
   },
@@ -318,19 +278,16 @@ export default [
     typeId: 'uppercase',
     title: 'Uppercase',
     sourceField: '',
-    getDefinition: function () {
-      const self = this;
+    getDefinition: function (processor) {
       return {
         'uppercase' : {
-          'processor_id': self.processorId,
-          'field' : self.sourceField ? self.sourceField : ''
+          'processor_id': processor.processorId,
+          'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
     },
-    getDescription: function () {
-      const self = this;
-
-      const source = (self.sourceField) ? self.sourceField : '?';
+    getDescription: function (processor) {
+      const source = (processor.sourceField) ? processor.sourceField : '?';
       return `[${source}]`;
     }
   },

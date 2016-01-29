@@ -21,5 +21,5 @@ Processor.prototype.setParent = function (newParent) {
 Processor.prototype.updateDescription = function () {
   const self = this;
 
-  self.description = self.getDescription();
+  self.description = self.getDescription(self);
 };
