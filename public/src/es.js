@@ -32,7 +32,7 @@ module.exports.send = function (method, path, data, server, disable_auth_alert) 
   var settings = require("./settings");
 
   var options = {
-    url: '/api/sense/proxy?uri=' + encodeURIComponent(path),
+    url: '../api/sense/proxy?uri=' + encodeURIComponent(path),
     data: method == "GET" ? null : data,
     cache: false,
     crossDomain: true,
