@@ -10,7 +10,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'append' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.targetField ? processor.targetField : '',
           'value': processor.values
         }
@@ -29,7 +29,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'convert' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : '',
           'type' : processor.type ? processor.type : ''
         }
@@ -64,7 +64,7 @@ export default [
 
       return {
         'date' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'match_field' : processor.sourceField ? processor.sourceField : '',
           'target_field' : processor.targetField ? processor.targetField : '',
           'match_formats' : formats,
@@ -87,7 +87,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'geoip' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'source_field' : processor.sourceField ? processor.sourceField : '',
           'target_field': processor.targetField ? processor.targetField : ''
         }
@@ -107,7 +107,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'grok' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : '',
           'pattern': processor.pattern ? processor.pattern : '',
         }
@@ -133,7 +133,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'gsub' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : '',
           'pattern' : processor.pattern ? processor.pattern : '',
           'replacement' : processor.replacement ? processor.replacement : ''
@@ -153,7 +153,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'join' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : '',
           'separator' : processor.separator ? processor.separator : ''
         }
@@ -172,7 +172,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'lowercase' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
@@ -189,7 +189,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'remove' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
@@ -207,7 +207,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'rename' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : '',
           'to': processor.targetField ? processor.targetField : ''
         }
@@ -226,7 +226,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'set' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.targetField ? processor.targetField : '',
           'value': processor.value ? processor.value : ''
         }
@@ -245,7 +245,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'split' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : '',
           'separator' : processor.separator ? processor.separator : ''
         }
@@ -264,7 +264,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'trim' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : ''
         }
       };
@@ -281,7 +281,7 @@ export default [
     getDefinition: function (processor) {
       return {
         'uppercase' : {
-          'processor_id': processor.processorId,
+          'tag': processor.processorId,
           'field' : processor.sourceField ? processor.sourceField : ''
         }
       };

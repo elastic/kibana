@@ -16,6 +16,7 @@ export default function ingestProcessResponse(pipeline, err, resp) {
   });
 
   if (resp.error) {
+    console.log(resp.error);
     //TODO: Hopefully currentProcessorId can go away if this new error flow returns
     //the invalid processor id.
     //TODO: process this new type of message after you get new version of simulate.
@@ -27,7 +28,7 @@ export default function ingestProcessResponse(pipeline, err, resp) {
   } else {
     const processorResults = _.get(resp, 'docs[0].processor_results');
     processorResults.forEach((processorResult) => {
-      const processorId = _.get(processorResult, 'processor_id');
+      const processorId = _.get(processorResult, 'tag');
       const output = _.get(processorResult, 'doc._source');
       const error = _.get(processorResult, 'error');
       const errorMessage = translateError(error);
