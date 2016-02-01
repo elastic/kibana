@@ -1,29 +1,29 @@
-const {templateToPattern, patternToTemplate} = require('../convert_pattern_and_template_name');
+const {ingestToPattern, patternToIngest} = require('../convert_pattern_and_ingest_name');
 const expect = require('expect.js');
 
 describe('convertPatternAndTemplateName', function () {
 
-  describe('templateToPattern', function () {
+  describe('ingestToPattern', function () {
 
     it('should convert an index template\'s name to its matching index pattern\'s title', function () {
-      expect(templateToPattern('kibana-logstash-*')).to.be('logstash-*');
+      expect(ingestToPattern('kibana-logstash-*')).to.be('logstash-*');
     });
 
     it('should throw an error if the template name isn\'t a valid kibana namespaced name', function () {
-      expect(templateToPattern).withArgs('logstash-*').to.throwException('not a valid kibana namespaced template name');
-      expect(templateToPattern).withArgs('').to.throwException(/not a valid kibana namespaced template name/);
+      expect(ingestToPattern).withArgs('logstash-*').to.throwException('not a valid kibana namespaced template name');
+      expect(ingestToPattern).withArgs('').to.throwException(/not a valid kibana namespaced template name/);
     });
 
   });
 
-  describe('patternToTemplate', function () {
+  describe('patternToIngest', function () {
 
     it('should convert an index pattern\'s title to its matching index template\'s name', function () {
-      expect(patternToTemplate('logstash-*')).to.be('kibana-logstash-*');
+      expect(patternToIngest('logstash-*')).to.be('kibana-logstash-*');
     });
 
     it('should throw an error if the pattern is empty', function () {
-      expect(patternToTemplate).withArgs('').to.throwException(/pattern must not be empty/);
+      expect(patternToIngest).withArgs('').to.throwException(/pattern must not be empty/);
     });
 
   });
