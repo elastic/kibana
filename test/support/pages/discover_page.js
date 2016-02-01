@@ -1,7 +1,7 @@
-// in test/support/pages/DiscoverPage.js
+// in test/support/pages/discover_page.js
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var defaultTimeout = config.timeouts.default;
   var common;
@@ -211,6 +211,42 @@ define(function (require) {
       return thisTime
       .findByCssSelector('.url')
       .getProperty('value');
+    },
+
+    clickLegendExpand: function clickLegendExpand() {
+      return thisTime
+      .findByCssSelector('.fa-chevron-left')
+      .click();
+    },
+
+    clickLegendCollapse: function clickLegendCollapse() {
+      return thisTime
+      .findByCssSelector('div.legend-toggle > i.fa-chevron-right')
+      .click();
+    },
+
+    getLegendWidth: function getLegendWidth() {
+      return thisTime
+      .findByCssSelector('.legend-col-wrapper')
+      .getProperty('clientWidth');
+    },
+
+    clickSidebarExpand: function clickSidebarExpand() {
+      return thisTime
+      .findByCssSelector('.chevron-cont')
+      .click();
+    },
+
+    clickSidebarCollapse: function clickSidebarCollapse() {
+      return thisTime
+      .findByCssSelector('.chevron-cont')
+      .click();
+    },
+
+    getSidebarWidth: function getSidebarWidth() {
+      return thisTime
+      .findByCssSelector('.sidebar-list')
+      .getProperty('clientWidth');
     }
 
   };

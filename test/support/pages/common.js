@@ -1,4 +1,4 @@
-// in test/support/pages/Common.js
+// in test/support/pages/common.js
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
