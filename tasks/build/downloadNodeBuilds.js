@@ -37,7 +37,7 @@ module.exports = function (grunt) {
     // use an async iife to store promise for download
     // then store platform in active downloads list
     // which we will read from in the finish task
-    platform.downloadPromise = (async () => {
+    platform.downloadPromise = (async function () {
       grunt.file.mkdir(downloadDir);
 
       if (platform.name === 'windows') {
@@ -82,4 +82,3 @@ module.exports = function (grunt) {
     .nodeify(this.async());
   });
 };
-
