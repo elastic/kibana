@@ -56,8 +56,8 @@
     "elasticsearchWithPlugins": "grunt esvm:withPlugins:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
-    "mocha": "mocha --compilers js:babel/register",
-    "mocha:debug": "mocha --debug-brk --compilers js:babel/register"
+    "mocha": "mocha",
+    "mocha:debug": "mocha --debug-brk"
   },
   "repository": {
     "type": "git",
