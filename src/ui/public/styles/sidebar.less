@@ -123,10 +123,8 @@
   }
 
   .index-pattern {
-    background-color: @sidebar-active-bg;
     font-weight: bold;
     padding: 5px 10px;
-    color: @sidebar-active-color;
     display: flex;
     justify-content: space-between;
 
@@ -137,5 +135,9 @@
 
   .index-pattern-selection .sidebar-item-title {
     background-color: @sidebar-index-pattern-selection-bg;
+    &:hover {
+      background-color: @sidebar-index-pattern-selection-bg-hover;
+    }
   }
+
 }
