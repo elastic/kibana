@@ -1,10 +1,10 @@
-var createAgent = require('./create_agent');
-var mapUri = require('./map_uri');
-var { resolve } = require('url');
+const createAgent = require('./create_agent');
+const mapUri = require('./map_uri');
+const { resolve } = require('url');
 
 function createProxy(server, method, route, config) {
 
-  var options = {
+  const options = {
     method: method,
     path: createProxy.createPath(route),
     handler: {

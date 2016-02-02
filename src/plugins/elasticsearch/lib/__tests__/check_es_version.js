@@ -1,17 +1,17 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
-var sinon = require('sinon');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const sinon = require('sinon');
 
-var checkEsVersion = require('../check_es_version');
+const checkEsVersion = require('../check_es_version');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/check_es_version', function () {
-    var server;
-    var plugin;
+    let server;
+    let plugin;
 
     beforeEach(function () {
-      var get = sinon.stub().withArgs('elasticsearch.engineVersion').returns('^1.4.3');
-      var config = function () { return { get: get }; };
+      const get = sinon.stub().withArgs('elasticsearch.engineVersion').returns('^1.4.3');
+      const config = function () { return { get: get }; };
       server = {
         log: _.noop,
         config: config,
@@ -30,15 +30,15 @@ describe('plugins/elasticsearch', function () {
     });
 
     function setNodes(/* ...versions */) {
-      var versions = _.shuffle(arguments);
-      var nodes = {};
-      var i = 0;
+      const versions = _.shuffle(arguments);
+      const nodes = {};
+      let i = 0;
 
       while (versions.length) {
-        var name = 'node-' + (++i);
-        var version = versions.shift();
+        const name = 'node-' + (++i);
+        const version = versions.shift();
 
-        var node = {
+        const node = {
           version: version,
           http_address: 'http_address',
           ip: 'ip'
@@ -48,7 +48,7 @@ describe('plugins/elasticsearch', function () {
         nodes[name] = node;
       }
 
-      var client = server.plugins.elasticsearch.client;
+      const client = server.plugins.elasticsearch.client;
       client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
 
     }
