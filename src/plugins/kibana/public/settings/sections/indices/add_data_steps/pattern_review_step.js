@@ -1,9 +1,9 @@
-var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html');
-var _ = require('lodash');
-var editFieldTypeHTML = require('plugins/kibana/settings/sections/indices/partials/_edit_field_type.html');
+const modules = require('ui/modules');
+const template = require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html');
+const _ = require('lodash');
+const editFieldTypeHTML = require('plugins/kibana/settings/sections/indices/partials/_edit_field_type.html');
 
-var testData = {
+const testData = {
   message: '11/24/2015 ip=1.1.1.1 bytes=1234',
   clientip: '1.1.1.1',
   bytes: 1234,
@@ -20,7 +20,7 @@ var testData = {
   codes: [1, 2, 3, 4]
 };
 
-var testPipeline = [
+const testPipeline = [
   {
     grok: {
       match_field: 'message',
