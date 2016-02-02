@@ -322,19 +322,18 @@ define(function (require) {
 
               flatState.body.query = {
                 bool: {
-                  must:
-                    [flatState.body.query]
-                    .concat(
-                      _(flatState.filters)
+                  must: (
+                    [flatState.body.query].concat(
+                      (flatState.filters || [])
                       .filter(filterNegate(false))
                       .map(cleanFilter)
-                      .value()
-                    ),
-
-                  must_not:
-                    _(flatState.filters)
+                    )
+                  ),
+                  must_not: (
+                    (flatState.filters || [])
                     .filter(filterNegate(true))
-                    .map(cleanFilter).value()
+                    .map(cleanFilter)
+                  )
                 }
               };
             }
