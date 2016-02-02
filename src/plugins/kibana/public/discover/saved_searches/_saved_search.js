@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('ui/notify');
 
-  var module = require('ui/modules').get('discover/saved_searches', [
+  const module = require('ui/modules').get('discover/saved_searches', [
     'kibana/notify',
     'kibana/courier'
   ]);

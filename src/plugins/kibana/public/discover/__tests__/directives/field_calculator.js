@@ -1,13 +1,13 @@
 
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
-var expect = require('expect.js');
+const _ = require('lodash');
+const ngMock = require('ngMock');
+const fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
+const expect = require('expect.js');
 
 // Load the kibana app dependencies.
 require('ui/private');
 
-var indexPattern;
+let indexPattern;
 
 describe('fieldCalculator', function () {
   beforeEach(ngMock.module('kibana'));
@@ -17,14 +17,14 @@ describe('fieldCalculator', function () {
 
 
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {
-    var values = [['foo', 'bar'], 'foo', 'foo', undefined, ['foo', 'bar'], 'bar', 'baz', null, null, null, 'foo', undefined];
+    const values = [['foo', 'bar'], 'foo', 'foo', undefined, ['foo', 'bar'], 'bar', 'baz', null, null, null, 'foo', undefined];
     expect(fieldCalculator._countMissing(values)).to.be(5);
   });
 
   describe('_groupValues', function () {
-    var groups;
-    var params;
-    var values;
+    let groups;
+    let params;
+    let values;
     beforeEach(function () {
       values = [['foo', 'bar'], 'foo', 'foo', undefined, ['foo', 'bar'], 'bar', 'baz', null, null, null, 'foo', undefined];
       params = {};
@@ -78,21 +78,21 @@ describe('fieldCalculator', function () {
   });
 
   describe('getFieldValues', function () {
-    var hits;
+    let hits;
 
     beforeEach(function () {
       hits = _.each(require('fixtures/real_hits.js'), indexPattern.flattenHit);
     });
 
     it('Should return an array of values for _source fields', function () {
-      var extensions = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName.extension);
+      const extensions = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName.extension);
       expect(extensions).to.be.an(Array);
       expect(_.filter(extensions, function (v) { return v === 'html'; }).length).to.be(8);
       expect(_.uniq(_.clone(extensions)).sort()).to.eql(['gif', 'html', 'php', 'png']);
     });
 
     it('Should return an array of values for core meta fields', function () {
-      var types = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName._type);
+      const types = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName._type);
       expect(types).to.be.an(Array);
       expect(_.filter(types, function (v) { return v === 'apache'; }).length).to.be(18);
       expect(_.uniq(_.clone(types)).sort()).to.eql(['apache', 'nginx']);
@@ -101,7 +101,7 @@ describe('fieldCalculator', function () {
 
 
   describe('getFieldValueCounts', function () {
-    var params;
+    let params;
     beforeEach(function () {
       params = {
         hits: require('fixtures/real_hits.js'),
@@ -111,7 +111,7 @@ describe('fieldCalculator', function () {
     });
 
     it('counts the top 3 values', function () {
-      var extensions = fieldCalculator.getFieldValueCounts(params);
+      const extensions = fieldCalculator.getFieldValueCounts(params);
       expect(extensions).to.be.an(Object);
       expect(extensions.buckets).to.be.an(Array);
       expect(extensions.buckets.length).to.be(3);

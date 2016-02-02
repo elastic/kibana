@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
   require('ui/elastic_textarea');
 
   require('ui/modules').get('apps/settings')
@@ -13,9 +13,9 @@ define(function (require) {
         configs: '='
       },
       link: function ($scope) {
-        var configDefaults = Private(require('ui/config/defaults'));
-        var notify = new Notifier();
-        var keyCodes = {
+        const configDefaults = Private(require('ui/config/defaults'));
+        const notify = new Notifier();
+        const keyCodes = {
           ESC: 27
         };
 
@@ -23,7 +23,7 @@ define(function (require) {
         $scope.forms = {};
 
         // setup loading flag, run async op, then clear loading and editing flag (just in case)
-        var loading = function (conf, fn) {
+        const loading = function (conf, fn) {
           conf.loading = true;
           fn()
           .finally(function () {

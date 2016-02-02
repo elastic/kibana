@@ -1,7 +1,7 @@
 define(function (require, module, exports) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var sections = require('plugins/kibana/settings/sections/index');
+  const sections = require('plugins/kibana/settings/sections/index');
   require('plugins/kibana/settings/styles/main.less');
   require('ui/filters/start_from');
 

@@ -1,24 +1,24 @@
 
-var angular = require('angular');
-var ngMock = require('ngMock');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
+const angular = require('angular');
+const ngMock = require('ngMock');
+const $ = require('jquery');
+const _ = require('lodash');
+const sinon = require('auto-release-sinon');
+const expect = require('expect.js');
 
 // Load the kibana app dependencies.
 require('ui/private');
 require('plugins/kibana/discover/components/field_chooser/field_chooser');
 
-var $parentScope;
-var $scope;
-var config;
-var hits;
-var indexPattern;
-var indexPatternList;
+let $parentScope;
+let $scope;
+let config;
+let hits;
+let indexPattern;
+let indexPatternList;
 
 // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-var init = function ($elem, props) {
+const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, $timeout, _config_) {
     config = _config_;
     $parentScope = $rootScope;
@@ -34,13 +34,13 @@ var init = function ($elem, props) {
   });
 };
 
-var destroy = function () {
+const destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };
 
 describe('discover field chooser directives', function () {
-  var $elem = angular.element(
+  const $elem = angular.element(
     '<disc-field-chooser' +
     '  columns="columns"' +
     '  toggle="toggle"' +
@@ -59,7 +59,7 @@ describe('discover field chooser directives', function () {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     indexPatternList = [ 'b', 'a', 'c' ];
 
-    var fieldCounts = _.transform(hits, function (counts, hit) {
+    const fieldCounts = _.transform(hits, function (counts, hit) {
       _.keys(indexPattern.flattenHit(hit)).forEach(function (key) {
         counts[key] = (counts[key] || 0) + 1;
       });
@@ -82,7 +82,7 @@ describe('discover field chooser directives', function () {
     destroy();
   });
 
-  var getSections = function (ctx) {
+  const getSections = function (ctx) {
     return {
       selected: $('.discover-selected-fields', ctx),
       popular: $('.discover-popular-fields', ctx),
@@ -99,13 +99,13 @@ describe('discover field chooser directives', function () {
 
   describe('Field listing', function () {
     it('should have Selected Fields, Fields and Popular Fields sections', function (done) {
-      var headers = $elem.find('.sidebar-list-header');
+      const headers = $elem.find('.sidebar-list-header');
       expect(headers.length).to.be(3);
       done();
     });
 
     it('should have 2 popular fields, 1 unpopular field and no selected fields', function (done) {
-      var section = getSections($elem);
+      const section = getSections($elem);
 
       expect(section.selected.find('li').length).to.be(0);
 
@@ -121,7 +121,7 @@ describe('discover field chooser directives', function () {
 
 
     it('should show the popular fields header if there are popular fields', function (done) {
-      var section = getSections($elem);
+      const section = getSections($elem);
       expect(section.popular.hasClass('ng-hide')).to.be(false);
       expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be.above(0);
       done();
@@ -141,7 +141,7 @@ describe('discover field chooser directives', function () {
         indexPattern: indexPattern
       });
 
-      var section = getSections($elem);
+      const section = getSections($elem);
 
       $scope.$digest();
       expect(section.popular.hasClass('ng-hide')).to.be(true);
@@ -150,7 +150,7 @@ describe('discover field chooser directives', function () {
     });
 
     it('should move the field into selected when it is added to the columns array', function (done) {
-      var section = getSections($elem);
+      const section = getSections($elem);
       $scope.columns.push('bytes');
       $scope.$digest();
 
@@ -169,7 +169,7 @@ describe('discover field chooser directives', function () {
   });
 
   describe('details processing', function () {
-    var field;
+    let field;
     function getField() { return _.find($scope.fields, { name: 'bytes' }); }
 
     beforeEach(function () {

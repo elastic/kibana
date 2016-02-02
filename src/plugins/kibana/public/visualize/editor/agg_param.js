@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('ui/modules')
   .get('app/visualize')

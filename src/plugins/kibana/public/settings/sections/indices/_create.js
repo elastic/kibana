@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var moment = require('moment');
-  var { IndexPatternMissingIndices } = require('ui/errors');
+  const _ = require('lodash');
+  const moment = require('moment');
+  const { IndexPatternMissingIndices } = require('ui/errors');
 
   require('ui/directives/validate_index_name');
   require('ui/directives/auto_select_if_only_one');
@@ -13,13 +13,13 @@ define(function (require) {
 
   require('ui/modules').get('apps/settings')
   .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
-    var notify = new Notifier();
-    var refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
-    var intervals = indexPatterns.intervals;
-    var samplePromise;
+    const notify = new Notifier();
+    const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
+    const intervals = indexPatterns.intervals;
+    let samplePromise;
 
     // this and child scopes will write pattern vars here
-    var index = $scope.index = {
+    const index = $scope.index = {
       name: 'logstash-*',
 
       isTimeBased: true,
@@ -92,10 +92,10 @@ define(function (require) {
       'index.nameIsPattern',
       'index.nameInterval.name'
     ], function (newVal, oldVal) {
-      var isTimeBased = newVal[0];
-      var nameIsPattern = newVal[1];
-      var newDefault = getPatternDefault(newVal[2]);
-      var oldDefault = getPatternDefault(oldVal[2]);
+      const isTimeBased = newVal[0];
+      const nameIsPattern = newVal[1];
+      const newDefault = getPatternDefault(newVal[2]);
+      const oldDefault = getPatternDefault(oldVal[2]);
 
       if (index.name === oldDefault) {
         index.name = newDefault;
@@ -123,7 +123,7 @@ define(function (require) {
       'index.name',
       'index.nameInterval'
     ], function (newVal, oldVal) {
-      var lastPromise;
+      let lastPromise;
       resetIndex();
       samplePromise = lastPromise = updateSamples()
       .then(function () {
@@ -157,13 +157,13 @@ define(function (require) {
     ], $scope.refreshFieldList);
 
     function updateSamples() {
-      var patternErrors = [];
+      const patternErrors = [];
 
       if (!index.nameInterval || !index.name) {
         return Promise.resolve();
       }
 
-      var pattern = mockIndexPattern(index);
+      const pattern = mockIndexPattern(index);
 
       return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
       .catch(function (err) {
@@ -171,8 +171,8 @@ define(function (require) {
         notify.error(err);
       })
       .then(function (existing) {
-        var all = _.get(existing, 'all', []);
-        var matches = _.get(existing, 'matches', []);
+        const all = _.get(existing, 'all', []);
+        const matches = _.get(existing, 'matches', []);
         if (all.length) {
           index.existing = {
             class: 'success',
@@ -185,8 +185,8 @@ define(function (require) {
         }
 
         patternErrors.push('Pattern does not match any existing indices');
-        var radius = Math.round(index.sampleCount / 2);
-        var samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
+        const radius = Math.round(index.sampleCount / 2);
+        const samples = intervals.toIndexList(index.name, index.nameInterval, -radius, radius);
 
         if (_.uniq(samples).length !== samples.length) {
           patternErrors.push('Invalid pattern, interval does not create unique index names');
@@ -200,9 +200,9 @@ define(function (require) {
 
     function fetchFieldList() {
       index.dateFields = index.timeField = index.listUsed = null;
-      var useIndexList = index.isTimeBased && index.nameIsPattern;
-      var fetchFieldsError;
-      var dateFields;
+      const useIndexList = index.isTimeBased && index.nameIsPattern;
+      let fetchFieldsError;
+      let dateFields;
 
       // we don't have enough info to continue
       if (!index.name) {
@@ -217,7 +217,7 @@ define(function (require) {
 
       return indexPatterns.mapper.clearCache(index.name)
       .then(function () {
-        var pattern = mockIndexPattern(index);
+        const pattern = mockIndexPattern(index);
 
         return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
         .catch(function (err) {

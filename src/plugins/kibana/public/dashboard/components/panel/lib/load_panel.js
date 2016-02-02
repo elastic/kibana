@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
   return function loadPanelFunction(Private) { // Inject services here
     return function (panel, $scope) { // Function parameters here
-      var panelTypes = {
+      const panelTypes = {
         visualization: Private(require('plugins/kibana/dashboard/components/panel/lib/visualization')),
         search: Private(require('plugins/kibana/dashboard/components/panel/lib/search'))
       };
