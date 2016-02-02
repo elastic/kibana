@@ -35,7 +35,7 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   for (let gen of uiExports.getBundleProviders()) {
-    let bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps());
+    let bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps(), kbnServer.plugins);
     if (bundle) bundles.add(bundle);
   }
 
