@@ -1,7 +1,7 @@
-// in test/support/pages/HeaderPage.js
+// in test/support/pages/header_page.js
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var common;
 
@@ -135,6 +135,13 @@ define(function (require) {
           return;
         });
       });
+    },
+
+    clickToastOK: function clickToastOK() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('button[ng-if="notif.accept"]')
+      .click();
     },
 
     getSpinnerDone: function getSpinnerDone() {

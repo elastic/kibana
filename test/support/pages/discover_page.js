@@ -1,7 +1,7 @@
-// in test/support/pages/DiscoverPage.js
+// in test/support/pages/discover_page.js
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var defaultTimeout = config.timeouts.default;
   var common;
@@ -127,8 +127,127 @@ define(function (require) {
         .findByCssSelector('option[label="' + interval + '"]')
         .click();
       });
-    }
+    },
 
+    getHitCount: function getHitCount() {
+      return thisTime
+      .findByCssSelector('strong.discover-info-hits')
+      .getVisibleText();
+    },
+
+    query: function query(queryString) {
+      return thisTime
+      .findByCssSelector('input[aria-label="Search input"]')
+      .clearValue()
+      .type(queryString)
+      .then(function () {
+        return thisTime
+        .findByCssSelector('button[aria-label="Search"]')
+        .click();
+      });
+    },
+
+    getDocHeader: function getDocHeader() {
+      return thisTime
+      .findByCssSelector('thead.ng-isolate-scope > tr:nth-child(1)')
+      .getVisibleText();
+    },
+
+    getDocTableIndex: function getDocTableIndex(index) {
+      return thisTime
+      .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
+      .getVisibleText();
+    },
+
+    clickDocSortDown: function clickDocSortDown() {
+      return thisTime
+      .findByCssSelector('.fa-sort-down')
+      .click();
+    },
+
+    clickDocSortUp: function clickDocSortUp() {
+      return thisTime
+      .findByCssSelector('.fa-sort-up')
+      .click();
+    },
+
+    getMarks: function getMarks() {
+      return thisTime
+      .findAllByCssSelector('mark')
+      .getVisibleText();
+    },
+
+    clickShare: function clickShare() {
+      return thisTime
+      .findByCssSelector('button[aria-label="Share Search"]')
+      .click();
+    },
+
+    clickShortenUrl: function clickShortenUrl() {
+      return thisTime
+      .findByCssSelector('button.shorten-button')
+      .click();
+    },
+
+    clickCopyToClipboard: function clickCopyToClipboard() {
+      return thisTime
+      .findByCssSelector('button.clipboard-button')
+      .click();
+    },
+
+    getShareCaption: function getShareCaption() {
+      return thisTime
+      .findByCssSelector('div.form-group > label')
+      .getVisibleText();
+    },
+
+    getSharedUrl: function getSharedUrl() {
+      return thisTime
+      .findByCssSelector('.url')
+      .getProperty('baseURI');
+    },
+
+    getShortenedUrl: function getShortenedUrl() {
+      return thisTime
+      .findByCssSelector('.url')
+      .getProperty('value');
+    },
+
+    clickLegendExpand: function clickLegendExpand() {
+      return thisTime
+      .findByCssSelector('.fa-chevron-left')
+      .click();
+    },
+
+    clickLegendCollapse: function clickLegendCollapse() {
+      return thisTime
+      .findByCssSelector('div.legend-toggle > i.fa-chevron-right')
+      .click();
+    },
+
+    getLegendWidth: function getLegendWidth() {
+      return thisTime
+      .findByCssSelector('.legend-col-wrapper')
+      .getProperty('clientWidth');
+    },
+
+    clickSidebarExpand: function clickSidebarExpand() {
+      return thisTime
+      .findByCssSelector('.chevron-cont')
+      .click();
+    },
+
+    clickSidebarCollapse: function clickSidebarCollapse() {
+      return thisTime
+      .findByCssSelector('.chevron-cont')
+      .click();
+    },
+
+    getSidebarWidth: function getSidebarWidth() {
+      return thisTime
+      .findByCssSelector('.sidebar-list')
+      .getProperty('clientWidth');
+    }
 
   };
 

@@ -4,9 +4,9 @@ define(function (require) {
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
   var _ = require('intern/dojo/node!lodash');
-  var Common = require('../../../support/pages/Common');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
-  var HeaderPage = require('../../../support/pages/HeaderPage');
+  var Common = require('../../../support/pages/common');
+  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
+  var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
 
   var chartTypeTest = require('./_chart_types');
