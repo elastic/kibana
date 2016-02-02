@@ -1,5 +1,5 @@
 var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/directives/pipeline_step.html');
+var template = require('plugins/kibana/settings/sections/indices/add_data_steps/pipeline_step.html');
 
 modules.get('apps/settings')
   .directive('pipelineStep', function () {

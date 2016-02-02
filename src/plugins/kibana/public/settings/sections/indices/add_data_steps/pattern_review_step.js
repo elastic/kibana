@@ -1,5 +1,5 @@
 var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/directives/pattern_review_step.html');
+var template = require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html');
 var _ = require('lodash');
 var editFieldTypeHTML = require('plugins/kibana/settings/sections/indices/partials/_edit_field_type.html');
 

@@ -88,9 +88,9 @@ define(function (require) {
     /**
      * Return the current bounds, if we have any.
      *
-     * THIS DOES NOT CLONE THE BOUNDS, so editting them
+     * THIS DOES NOT CLONE THE BOUNDS, so editing them
      * may have unexpected side-effects. Always
-     * call bounds.min.clone() before editting
+     * call bounds.min.clone() before editing
      *
      * @return {object|undefined} - If bounds are not defined, this
      *                      returns undefined, else it returns the bounds
