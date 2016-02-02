@@ -40,7 +40,7 @@ define(function (require) {
             }
 
             if (!field.indexed) {
-              warnings.push('This field is not indexed and can not be visualized.');
+              warnings.push('This field is not indexed and might not be usable in visualizations.');
             }
           }
 
@@ -60,11 +60,11 @@ define(function (require) {
         };
 
         $scope.toggleDisplay = function (field) {
-          // inheritted param to fieldChooser
+          // This is inherited from fieldChooser
           $scope.toggle(field.name);
           if (field.display) $scope.increaseFieldCounter(field);
 
-          // we are now displaying the field, kill it's details
+          // we are now displaying the field, kill its details
           if (field.details) {
             $scope.toggleDetails(field);
           }

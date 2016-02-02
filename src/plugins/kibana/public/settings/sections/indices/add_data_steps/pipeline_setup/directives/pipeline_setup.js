@@ -116,7 +116,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
         delete tempPipeline.rootObject;
         delete tempPipeline.output;
 
-        console.log(angular.toJson(tempPipeline, true));
+        //console.log(angular.toJson(tempPipeline, true));
       };
     }
   };

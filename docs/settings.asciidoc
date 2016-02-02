@@ -35,10 +35,16 @@ list.
 contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index 
 mapping to list all of the fields that contain a timestamp.
 
+. By default, Kibana restricts wildcard expansion of time-based index patterns to indices with data within the currently 
+selected time range. Click *Do not expand index pattern when search* to disable this behavior.
+
 . Click *Create* to add the index pattern. 
 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite* 
 button. 
+
+NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must 
+contain data.
 
 To use an event time in an index name, enclose the static text in the pattern and specify the date format using the 
 tokens described in the following table.
@@ -195,6 +201,8 @@ Scripted fields compute data on the fly from the data in your Elasticsearch indi
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
 Scripted field values are computed at query time so they aren't indexed and cannot be searched.
 
+NOTE: Kibana cannot query scripted fields.
+
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on 
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are 
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
@@ -267,6 +275,8 @@ include::advanced-settings.asciidoc[]
 The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run 
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine, 
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
+
+include::kibana-yml.asciidoc[]
 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
@@ -447,10 +457,12 @@ To export a set of objects:
 . Click the selection box for the objects you want to export, or click the *Select All* box.
 . Click *Export* to select a location to write the exported JSON.
 
+WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before 
+importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
+
 To import a set of objects:
 
 . Go to *Settings > Objects*.
 . Click *Import* to navigate to the JSON file representing the set of objects to import.
 . Click *Open* after selecting the JSON file.
 . If any objects in the set would overwrite objects already present in Kibana, confirm the overwrite.
-

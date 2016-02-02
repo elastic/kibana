@@ -1,6 +1,7 @@
 const Boom = require('boom');
 const { join } = require('path');
 const requireAllAndApply = require('./lib/require_all_and_apply');
+const ingest = require('./server/routes/api/ingest');
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
@@ -14,7 +15,8 @@ module.exports = function (kibana) {
     },
 
     init: function (server) {
-      requireAllAndApply(join(__dirname, 'routes', '**', '*.js'), server);
+      //requireAllAndApply(join(__dirname, 'routes', '**', '*.js'), server);
+      ingest(server);
     },
 
     uiExports: {
@@ -25,22 +27,10 @@ module.exports = function (kibana) {
         main: 'plugins/kibana/kibana',
         uses: [
           'visTypes',
-          'spyModes'
+          'spyModes',
+          'fieldFormats',
+          'navbarExtensions'
         ],
-
-        autoload: kibana.autoload.require.concat(
-          'plugins/kibana/discover',
-          'plugins/kibana/visualize',
-          'plugins/kibana/dashboard',
-          'plugins/kibana/settings',
-          'plugins/kibana/settings/sections',
-          'plugins/kibana/doc',
-          'plugins/kibana/settings/sections',
-          'ui/vislib',
-          'ui/agg_response',
-          'ui/agg_types',
-          'leaflet'
-        ),
 
         injectVars: function (server, options) {
           let config = server.config();

@@ -10,7 +10,7 @@ app.service('ingest', function ($http) {
   function simulatePipeline(pipeline) {
     const data = angular.toJson(pipeline);
 
-    return $http.post(`/api/kibana/simulate`, data)
+    return $http.post(`../api/kibana/ingest/simulate`, data)
     .then((result) => {
       return result.data;
     })

@@ -5,62 +5,54 @@ define(function (require) {
 
     var seedColors = Private(require('ui/vislib/components/color/seed_colors'));
 
-    // Shamelessly borrowed from flot.colorhelpers
-    function scale(color, toVary, variation) {
-      for (var i = 0; i < toVary.length; ++i) {
-        color[toVary.charAt(i)] *= variation;
-      }
-      return normalize(color);
+
+    /*
+     * Generates an array of hex colors the length of the input number.
+     * If the number is greater than the length of seed colors available,
+     * new colors are generated up to the value of the input number.
+     */
+
+    var offset = 300; // Hue offset to start at
+
+    var fraction = function (goal) {
+      var walkTree = function (numerator, denominator, bytes) {
+        if (bytes.length) {
+          return walkTree(
+            (numerator * 2) + (bytes.pop() ? 1 : -1),
+            denominator * 2,
+            bytes
+          );
+
+        } else {
+          return numerator / denominator;
+        }
+      };
+
+      var b = (goal + 2)
+        .toString(2)
+        .split('')
+        .map(function (num) {
+          return parseInt(num, 10);
+        });
+      b.shift();
+
+      return walkTree(1, 2, b);
+
     };
-
-    function normalize(color) {
-      function clamp(min, value, max) {
-        if (value < min) return min;
-        if (value > max) return max;
-        return value;
-      }
-
-      color.r = clamp(0, parseInt(color.r), 255);
-      color.g = clamp(0, parseInt(color.g), 255);
-      color.b = clamp(0, parseInt(color.b), 255);
-      color.a = clamp(0, color.a, 1);
-      return color;
-    };
-
 
     return function (num) {
-      // Also shamelessly ported from flot.
-      // Generate all the colors, using first the option colors and then
-      // variations on those colors once they're exhausted.
-
-      var color;
-      var colors = [];
-      var colorPool = seedColors;
-      var colorPoolSize = colorPool.length;
-      var variation = 0;
-
-      for (var i = 0; i < num; i++) {
-
-        color = d3.rgb(colorPool[i % colorPoolSize]);
-
-        // Each time we exhaust the colors in the pool we adjust
-        // a scaling factor used to produce more variations on
-        // those colors. The factor alternates negative/positive
-        // to produce lighter/darker colors.
-
-        // Reset the variation after every few cycles, or else
-        // it will end up producing only white or black colors.
-
-        if (i % colorPoolSize === 0 && i) {
-          if (variation >= 0) {
-            if (variation < 0.5) {
-              variation = -variation - 0.2;
-            } else variation = 0;
-          } else variation = -variation;
-        }
-
-        colors[i] = scale(color, 'rgb', 1 + variation).toString();
+      if (!_.isNumber(num)) {
+        throw new TypeError('ColorPaletteUtilService expects a number');
       }
+
+      var colors = seedColors;
+
+      var seedLength = seedColors.length;
+
+      _.times(num - seedLength, function (i) {
+        colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());
+      });
+
       return colors;
 
     };

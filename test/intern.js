@@ -5,7 +5,7 @@ define(function (require) {
   return _.assign({
     debug: true,
     capabilities: {
-      'selenium-version': '2.47.1',
+      'selenium-version': '2.48.2',
       'idle-timeout': 99
     },
     environments: [{
@@ -15,7 +15,8 @@ define(function (require) {
     functionalSuites: [
       'test/functional/status_page/index',
       'test/functional/apps/settings/index',
-      'test/functional/apps/discover/index'
+      'test/functional/apps/discover/index',
+      'test/functional/apps/visualize/index'
     ],
     excludeInstrumentation: /(fixtures|node_modules)\//,
     loaderOptions: {
@@ -25,6 +26,7 @@ define(function (require) {
       }
     },
     timeouts: {
+      // this is how long a test can run before timing out
       default: 90000
     },
   }, serverConfig);

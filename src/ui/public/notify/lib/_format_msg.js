@@ -1,4 +1,6 @@
 define(function (require) {
+  var _ = require('lodash');
+  var has = _.has;
   var formatESMsg = require('ui/notify/lib/_format_es_msg');
 
   /**
@@ -22,6 +24,9 @@ define(function (require) {
       rtn += esMsg;
     } else if (err instanceof Error) {
       rtn += formatMsg.describeError(err);
+    } else if (has(err, 'status') && has(err, 'data')) {
+      // is an Angular $http "error object"
+      rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
     }
 
     return rtn;

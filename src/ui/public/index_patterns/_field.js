@@ -39,7 +39,6 @@ define(function (require) {
       var indexed = !!spec.indexed;
       var scripted = !!spec.scripted;
       var sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
-      var bucketable = indexed || scripted;
       var filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
 
       obj.fact('name');
@@ -59,7 +58,6 @@ define(function (require) {
       // usage flags, read-only and won't be saved
       obj.comp('format', format);
       obj.comp('sortable', sortable);
-      obj.comp('bucketable', bucketable);
       obj.comp('filterable', filterable);
 
       // computed values
@@ -71,7 +69,7 @@ define(function (require) {
     }
 
     Field.prototype.routes = {
-      edit: '/settings/indices/{{indexPattern.id}}/field/{{name}}'
+      edit: '/settings/indices/edit/{{indexPattern.id}}/field/{{name}}'
     };
 
     return Field;

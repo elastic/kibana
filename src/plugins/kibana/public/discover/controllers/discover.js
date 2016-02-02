@@ -11,7 +11,6 @@ define(function (require) {
   require('ui/doc_table');
   require('ui/visualize');
   require('ui/notify');
-  require('ui/timepicker');
   require('ui/fixedScroll');
   require('ui/directives/validate_json');
   require('ui/filters/moment');
@@ -495,7 +494,7 @@ define(function (require) {
         },
         listeners: {
           click: function (e) {
-            console.log(e);
+            notify.log(e);
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';

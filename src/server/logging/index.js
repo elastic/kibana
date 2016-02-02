@@ -2,6 +2,9 @@ let _ = require('lodash');
 let fromNode = require('bluebird').fromNode;
 
 module.exports = function (kbnServer, server, config) {
+  // prevent relying on kbnServer so this can be used with other hapi servers
+  kbnServer = null;
+
   return fromNode(function (cb) {
     let events = config.get('logging.events');
 
@@ -11,6 +14,7 @@ module.exports = function (kbnServer, server, config) {
     else if (config.get('logging.quiet')) {
       _.defaults(events, {
         log: ['listening', 'error', 'fatal'],
+        request: ['error'],
         error: '*'
       });
     }
@@ -27,6 +31,7 @@ module.exports = function (kbnServer, server, config) {
       _.defaults(events, {
         log: ['info', 'warning', 'error', 'fatal'],
         response: config.get('logging.json') ? '*' : '!',
+        request: ['info', 'warning', 'error', 'fatal'],
         error: '*'
       });
     }

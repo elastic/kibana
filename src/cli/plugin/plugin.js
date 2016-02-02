@@ -1,14 +1,14 @@
-var utils = require('requirefrom')('src/utils');
-var fromRoot = utils('fromRoot');
+const utils = require('requirefrom')('src/utils');
+const fromRoot = utils('fromRoot');
+const settingParser = require('./setting_parser');
+const installer = require('./plugin_installer');
+const remover = require('./plugin_remover');
+const lister = require('./plugin_lister');
+const pluginLogger = require('./plugin_logger');
 
-var settingParser = require('./settingParser');
-var installer = require('./plugin_installer');
-var remover = require('./pluginRemover');
-var pluginLogger = require('./pluginLogger');
-
-module.exports = function (program) {
+export default function pluginCli(program) {
   function processCommand(command, options) {
-    var settings;
+    let settings;
     try {
       settings = settingParser(command).parse();
     } catch (ex) {
@@ -17,13 +17,18 @@ module.exports = function (program) {
       process.exit(64); // eslint-disable-line no-process-exit
     }
 
-    var logger = pluginLogger(settings);
+    const logger = pluginLogger(settings);
 
-    if (settings.action === 'install') {
-      installer.install(settings, logger);
-    }
-    if (settings.action === 'remove') {
-      remover.remove(settings, logger);
+    switch (settings.action) {
+      case 'install':
+        installer.install(settings, logger);
+        break;
+      case 'remove':
+        remover.remove(settings, logger);
+        break;
+      case 'list':
+        lister.list(settings, logger);
+        break;
     }
   }
 
@@ -31,6 +36,7 @@ module.exports = function (program) {
     .command('plugin')
     .option('-i, --install <org>/<plugin>/<version>', 'The plugin to install')
     .option('-r, --remove <plugin>', 'The plugin to remove')
+    .option('-l, --list', 'List installed plugins')
     .option('-q, --quiet', 'Disable all process messaging except errors')
     .option('-s, --silent', 'Disable all process messaging')
     .option('-u, --url <url>', 'Specify download url')
@@ -54,14 +60,12 @@ module.exports = function (program) {
 `
   Common examples:
     -i username/sample
-      attempts to download the latest version from the following urls:
+      attempts to download the latest version from the following url:
         https://download.elastic.co/username/sample/sample-latest.tar.gz
-        https://github.com/username/sample/archive/master.tar.gz
 
     -i username/sample/v1.1.1
-      attempts to download version v1.1.1 from the following urls:
+      attempts to download version v1.1.1 from the following url:
         https://download.elastic.co/username/sample/sample-v1.1.1.tar.gz
-        https://github.com/username/sample/archive/v1.1.1.tar.gz
 
     -i sample -u http://www.example.com/other_name.tar.gz
       attempts to download from the specified url,

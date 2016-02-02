@@ -73,6 +73,36 @@
               </small>
             </div>
 
+          <div class="form-group" ng-if="canExpandIndices()">
+            <label>
+              <input ng-model="index.notExpandable" type="checkbox">
+              Do not expand index pattern when searching <small>(Not recommended)</small>
+            </label>
+
+            <div ng-if="index.notExpandable" class="alert alert-info">
+              This index pattern will be queried directly rather than being
+              expanded into more performant searches against individual indices.
+
+              Elasticsearch will receive a query against <em>{{index.name}}</em>
+              and will have to search through all matching indices regardless
+              of whether they have data that matches the current time range.
+            </div>
+
+            <p class="help-block">
+              By default, searches against any time-based index pattern that
+              contains a wildcard will automatically be expanded to query only
+              the indices that contain data within the currently selected time
+              range.
+            </p>
+
+            <p class="help-block">
+              Searching against the index pattern <em>logstash-*</em> will
+              actually query elasticsearch for the specific matching indices
+              (e.g. <em>logstash-2015.12.21</em>) that fall within the current
+              time range.
+            </p>
+          </div>
+
           <section>
             <div class="alert alert-danger" ng-repeat="err in index.patternErrors">
               {{err}}
@@ -137,6 +167,7 @@
           </div>
 
           <button
+            data-test-subj="submitCreateIndexPatternFromExistingForm"
             ng-disabled="form.$invalid || index.fetchFieldsError"
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"

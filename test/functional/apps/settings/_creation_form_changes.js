@@ -1,5 +1,5 @@
 define(function (require) {
-  var Common = require('../../../support/pages/Common');
+  var Common = require('../../../support/pages/common');
   var SettingsPage = require('../../../support/pages/settings_page');
   var expect = require('intern/dojo/node!expect.js');
 
@@ -16,7 +16,7 @@ define(function (require) {
       bdd.beforeEach(function () {
         return scenarioManager.reload('emptyKibana')
         .then(function () {
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         });
       });
 

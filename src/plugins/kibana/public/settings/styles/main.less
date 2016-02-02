@@ -187,3 +187,28 @@ kbn-settings-indices {
 .kbn-settings-indices-create {
   .time-and-pattern > div {}
 }
+
+.wizard-step-headings{
+  margin-top: 1em;
+
+  .wizard-step-heading {
+    font-size: 1.5em;
+    padding-right: 1.5em;
+
+    &.active {
+      cursor: default;
+      font-weight: bold;
+    }
+    &.aheadActive {
+      cursor: default;
+      font-weight: 300;
+    }
+  }
+
+  &.complete {
+    .wizard-step-heading:not(.active) {
+      color: #dddddd;
+      cursor: default;
+    }
+  }
+}

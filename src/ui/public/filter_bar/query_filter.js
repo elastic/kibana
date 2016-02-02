@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Private, $rootScope, getAppState, globalState) {
+  return function (Private, $rootScope, getAppState, globalState, config) {
     var EventEmitter = Private(require('ui/events'));
     var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
     var onlyStateChanged = require('ui/filter_bar/lib/onlyStateChanged');
@@ -23,23 +23,41 @@ define(function (require) {
     queryFilter.getAppFilters = function () {
       var appState = getAppState();
       if (!appState || !appState.filters) return [];
+
+      // Work around for https://github.com/elastic/kibana/issues/5896
+      appState.filters = validateStateFilters(appState);
+
       return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
     };
 
     queryFilter.getGlobalFilters = function () {
       if (!globalState.filters) return [];
+
+      // Work around for https://github.com/elastic/kibana/issues/5896
+      globalState.filters = validateStateFilters(globalState);
+
       return _.map(globalState.filters, appendStoreType('globalState'));
     };
 
     /**
      * Adds new filters to the scope and state
-     * @param {object|array} fitlers Filter(s) to add
-     * @param {bool} global Should be added to global state
-     * @retuns {Promise} filter map promise
+     * @param {object|array} filters Filter(s) to add
+     * @param {bool} global Whether the filter should be added to global state
+     * @returns {Promise} filter map promise
      */
     queryFilter.addFilters = function (filters, global) {
+
+      if (global === undefined) {
+        var configDefault = config.get('filters:pinnedByDefault');
+
+        if (configDefault === false || configDefault === true) {
+          global = configDefault;
+        }
+      }
+
+      // Determine the state for the new filter (whether to pass the filter through other apps or not)
       var appState = getAppState();
-      var state = (global) ? globalState : appState;
+      var filterState = (global) ? globalState : appState;
 
       if (!_.isArray(filters)) {
         filters = [filters];
@@ -47,13 +65,11 @@ define(function (require) {
 
       return mapAndFlattenFilters(filters)
       .then(function (filters) {
-        if (global) {
-          // simply concat global filters, they will be deduped
-          globalState.filters = globalState.filters.concat(filters);
-        } else if (appState) {
-          if (!appState.filters) appState.filters = [];
-          appState.filters = appState.filters.concat(filters);
+        if (!filterState.filters) {
+          filterState.filters = [];
         }
+
+        filterState.filters = filterState.filters.concat(filters);
       });
     };
 
@@ -204,6 +220,19 @@ define(function (require) {
     initWatchers();
 
     return queryFilter;
+
+    /**
+     * Rids filter list of null values and replaces state if any nulls are found
+     */
+    function validateStateFilters(state) {
+      var compacted = _.compact(state.filters);
+      if (state.filters.length !== compacted.length) {
+        state.filters = compacted;
+        state.replace();
+      }
+      return state.filters;
+    }
+
 
     /**
      * Saves both app and global states, ensuring filters are persisted

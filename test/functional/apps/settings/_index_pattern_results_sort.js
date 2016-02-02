@@ -1,9 +1,8 @@
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('../../../support/pages/Common');
+  var Common = require('../../../support/pages/common');
   var SettingsPage = require('../../../support/pages/settings_page');
   var expect = require('intern/dojo/node!expect.js');
-  var Promise = require('bluebird');
 
   return function (bdd, scenarioManager) {
     bdd.describe('index result field sort', function describeIndexTests() {
@@ -39,7 +38,7 @@ define(function (require) {
       columns.forEach(function (col) {
         bdd.describe('sort by heading - ' + col.heading, function indexPatternCreation() {
           bdd.before(function () {
-            return settingsPage.navigateTo();
+            return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
           });
 
           bdd.beforeEach(function () {
@@ -47,7 +46,7 @@ define(function (require) {
           });
 
           bdd.afterEach(function () {
-            return settingsPage.removeIndexPattern();
+            return settingsPage.removeIndexPattern().then(settingsPage.clickExistingIndicesAddDataLink);
           });
 
           bdd.it('should sort ascending', function pageHeader() {
@@ -85,6 +84,7 @@ define(function (require) {
 
         bdd.before(function () {
           return settingsPage.navigateTo()
+          .then(settingsPage.clickExistingIndicesAddDataLink)
           .then(function () {
             return settingsPage.createIndexPattern();
           });

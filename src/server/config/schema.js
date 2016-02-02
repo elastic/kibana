@@ -20,6 +20,10 @@ module.exports = () => Joi.object({
     prod: Joi.boolean().default(Joi.ref('$prod'))
   }).default(),
 
+  dev: Joi.object({
+    basePathProxyTarget: Joi.number().default(5603),
+  }).default(),
+
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
@@ -28,6 +32,7 @@ module.exports = () => Joi.object({
   server: Joi.object({
     host: Joi.string().hostname().default('0.0.0.0'),
     port: Joi.number().default(5601),
+    maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string(),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),

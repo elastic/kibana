@@ -48,20 +48,23 @@
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
     "build": "grunt build",
+    "build:ospackages": "grunt build --os-packages",
     "start": "./bin/kibana --dev",
     "precommit": "grunt precommit",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
+    "elasticsearchWithPlugins": "grunt esvm:withPlugins:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
-    "mocha": "mocha --compilers js:babel/register",
-    "mocha:debug": "mocha --debug-brk --compilers js:babel/register"
+    "mocha": "mocha",
+    "mocha:debug": "mocha --debug-brk"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
+    "@bigfunger/decompress-zip": "0.2.0-stripfix2",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -101,6 +104,7 @@
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",
     "hapi": "8.8.1",
+    "httpolyglot": "0.1.1",
     "imports-loader": "0.6.4",
     "jade": "1.11.0",
     "jade-loader": "0.7.1",
@@ -132,13 +136,14 @@
     "url-loader": "0.5.6",
     "webpack": "1.12.1",
     "webpack-directory-name-as-main": "1.0.0",
-    "whatwg-fetch": "0.9.0"
+    "whatwg-fetch": "0.9.0",
+    "wreck": "6.2.0"
   },
   "devDependencies": {
     "Nonsense": "0.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
-    "babel-eslint": "4.1.3",
+    "babel-eslint": "4.1.7",
     "chokidar": "1.0.5",
     "eslint": "1.5.1",
     "eslint-plugin-mocha": "1.0.0",
@@ -150,7 +155,7 @@
     "grunt-cli": "0.1.13",
     "grunt-contrib-clean": "0.6.0",
     "grunt-contrib-copy": "0.8.1",
-    "grunt-esvm": "1.1.8",
+    "grunt-esvm": "2.0.0",
     "grunt-karma": "0.12.0",
     "grunt-run": "0.5.0",
     "grunt-s3": "0.2.0-alpha.3",
@@ -168,7 +173,7 @@
     "karma-ie-launcher": "0.2.0",
     "karma-mocha": "0.2.0",
     "karma-safari-launcher": "0.1.1",
-    "libesvm": "3.2.0",
+    "libesvm": "3.3.0",
     "license-checker": "3.1.0",
     "load-grunt-config": "0.7.2",
     "marked-text-renderer": "0.1.0",
@@ -179,10 +184,10 @@
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
-    "wreck": "6.2.0"
+    "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "0.12.9",
-    "npm": "2.14.3"
+    "node": "4.2.4",
+    "npm": "2.14.15"
   }
 }

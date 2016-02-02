@@ -112,7 +112,6 @@ describe('index pattern', function () {
 
   describe('fields', function () {
     it('should have expected properties on fields', function () {
-      expect(indexPattern.fields[0]).to.have.property('bucketable');
       expect(indexPattern.fields[0]).to.have.property('displayName');
       expect(indexPattern.fields[0]).to.have.property('filterable');
       expect(indexPattern.fields[0]).to.have.property('format');
@@ -294,6 +293,84 @@ describe('index pattern', function () {
     });
   });
 
+  describe('#toDetailedIndexList', function () {
+    require('testUtils/noDigestPromises').activateForSuite();
+    context('when index pattern is an interval', function () {
+      var interval;
+      beforeEach(function () {
+        interval = 'result:getInterval';
+        sinon.stub(indexPattern, 'getInterval').returns(interval);
+      });
+
+      it('invokes interval toDetailedIndexList with given start/stop times', async function () {
+        await indexPattern.toDetailedIndexList(1, 2);
+        var id = indexPattern.id;
+        expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
+      });
+      it('is fulfilled by the result of interval toDetailedIndexList', async function () {
+        var indexList = await indexPattern.toDetailedIndexList();
+        expect(indexList[0].index).to.equal('foo');
+        expect(indexList[1].index).to.equal('bar');
+      });
+
+      context('with sort order', function () {
+        it('passes the sort order to the intervals module', function () {
+          return indexPattern.toDetailedIndexList(1, 2, 'SORT_DIRECTION')
+          .then(function () {
+            expect(intervals.toIndexList.callCount).to.be(1);
+            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+          });
+        });
+      });
+    });
+
+    context('when index pattern is a time-base wildcard', function () {
+      beforeEach(function () {
+        sinon.stub(indexPattern, 'getInterval').returns(false);
+        sinon.stub(indexPattern, 'hasTimeField').returns(true);
+        sinon.stub(indexPattern, 'isWildcard').returns(true);
+      });
+
+      it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
+        await indexPattern.toDetailedIndexList(1, 2, 'sortOrder');
+        var id = indexPattern.id;
+        var field = indexPattern.timeFieldName;
+        expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
+      });
+
+      it('is fulfilled by the result of calculateIndices', async function () {
+        var indexList = await indexPattern.toDetailedIndexList();
+        expect(indexList[0].index).to.equal('foo');
+        expect(indexList[1].index).to.equal('bar');
+      });
+    });
+
+    context('when index pattern is a time-base wildcard that is configured not to expand', function () {
+      beforeEach(function () {
+        sinon.stub(indexPattern, 'getInterval').returns(false);
+        sinon.stub(indexPattern, 'hasTimeField').returns(true);
+        sinon.stub(indexPattern, 'isWildcard').returns(true);
+        sinon.stub(indexPattern, 'canExpandIndices').returns(false);
+      });
+
+      it('is fulfilled by id', async function () {
+        var indexList = await indexPattern.toDetailedIndexList();
+        expect(indexList.index).to.equal(indexPattern.id);
+      });
+    });
+
+    context('when index pattern is neither an interval nor a time-based wildcard', function () {
+      beforeEach(function () {
+        sinon.stub(indexPattern, 'getInterval').returns(false);
+      });
+
+      it('is fulfilled by id', async function () {
+        var indexList = await indexPattern.toDetailedIndexList();
+        expect(indexList.index).to.equal(indexPattern.id);
+      });
+    });
+  });
+
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
       require('testUtils/noDigestPromises').activateForSuite();
@@ -348,6 +425,21 @@ describe('index pattern', function () {
       });
     });
 
+    context('when index pattern is a time-base wildcard that is configured not to expand', function () {
+      require('testUtils/noDigestPromises').activateForSuite();
+      beforeEach(function () {
+        sinon.stub(indexPattern, 'getInterval').returns(false);
+        sinon.stub(indexPattern, 'hasTimeField').returns(true);
+        sinon.stub(indexPattern, 'isWildcard').returns(true);
+        sinon.stub(indexPattern, 'canExpandIndices').returns(false);
+      });
+
+      it('is fulfilled by id', async function () {
+        var indexList = await indexPattern.toIndexList();
+        expect(indexList).to.equal(indexPattern.id);
+      });
+    });
+
     context('when index pattern is neither an interval nor a time-based wildcard', function () {
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
@@ -362,6 +454,21 @@ describe('index pattern', function () {
 
         expect(indexList).to.equal(indexPattern.id);
       });
+    });
+  });
+
+  describe('#canExpandIndices()', function () {
+    it('returns true if notExpandable is false', function () {
+      indexPattern.notExpandable = false;
+      expect(indexPattern.canExpandIndices()).to.be(true);
+    });
+    it('returns true if notExpandable is not defined', function () {
+      delete indexPattern.notExpandable;
+      expect(indexPattern.canExpandIndices()).to.be(true);
+    });
+    it('returns false if notExpandable is true', function () {
+      indexPattern.notExpandable = true;
+      expect(indexPattern.canExpandIndices()).to.be(false);
     });
   });
 
