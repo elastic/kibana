@@ -3,15 +3,21 @@ share-object-url {
     display: flex;
 
     .clipboard-button {
-       border-top-left-radius: 0;
-       border-bottom-left-radius: 0;
+      .right-trim();
     }
 
     .shorten-button {
-       border-top-right-radius: 0;
-       border-top-left-radius: 0;
-       border-bottom-right-radius: 0;
+      .right-trim();
+    }
+
+    .left-trim {
        border-bottom-left-radius: 0;
+       border-top-left-radius: 0;
+    }
+
+    .right-trim {
+       border-top-right-radius: 0;
+       border-bottom-right-radius: 0;
     }
 
     .form-control.url {
