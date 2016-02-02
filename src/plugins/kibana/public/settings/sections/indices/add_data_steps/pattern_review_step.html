@@ -5,15 +5,15 @@
 </div>
 
 <div class="pattern-review">
-  <input ng-model="indexPattern.id" class="pattern-input"/>
+  <input ng-model="reviewStep.indexPattern.id" class="pattern-input"/>
   <label>
-    <input ng-model="isTimeBased" type="checkbox"/>
+    <input ng-model="reviewStep.isTimeBased" type="checkbox"/>
     time based
   </label>
-  <label ng-if="isTimeBased" class="time-field-input">
+  <label ng-if="reviewStep.isTimeBased" class="time-field-input">
     Time Field
-    <select ng-model="indexPattern.timeFieldName" name="time_field_name">
-      <option ng-repeat="field in dateFields" value="{{field}}">
+    <select ng-model="reviewStep.indexPattern.timeFieldName" name="time_field_name">
+      <option ng-repeat="field in reviewStep.dateFields" value="{{field}}">
         {{field}}
       </option>
     </select>
@@ -22,7 +22,7 @@
 
 <div>
   <paginated-table
-    columns="columns"
-    rows="rows">
+    columns="reviewStep.columns"
+    rows="reviewStep.rows">
   </paginated-table>
 </div>

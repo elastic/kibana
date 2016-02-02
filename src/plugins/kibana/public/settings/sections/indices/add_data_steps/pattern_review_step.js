@@ -75,17 +75,19 @@ modules.get('apps/settings')
         indexPattern: '=',
         pipeline: '='
       },
+      controllerAs: 'reviewStep',
+      bindToController: true,
       controller: function ($scope, Private) {
-        $scope.sampleDocs = testData;
-        $scope.pipeline = testPipeline;
+        this.sampleDocs = testData;
+        this.pipeline = testPipeline;
 
-        if (_.isUndefined($scope.indexPattern)) {
-          $scope.indexPattern = {};
+        if (_.isUndefined(this.indexPattern)) {
+          this.indexPattern = {};
         }
 
         const knownFieldTypes = {};
-        $scope.dateFields = [];
-        $scope.pipeline.forEach(function (processor) {
+        this.dateFields = [];
+        this.pipeline.forEach((processor) => {
           if (processor.geoip) {
             let field = processor.geoip.target_field || 'geoip';
             knownFieldTypes[field] = 'geo_point';
@@ -93,15 +95,15 @@ modules.get('apps/settings')
           if (processor.date) {
             let field = processor.date.target_field || '@timestamp';
             knownFieldTypes[field] = 'date';
-            $scope.dateFields.push(field);
+            this.dateFields.push(field);
           }
         });
 
-        _.defaults($scope.indexPattern, {
+        _.defaults(this.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
-          timeFieldName: pickDefaultTimeFieldName($scope.dateFields),
-          fields: _.map($scope.sampleDocs, (value, key) => {
+          timeFieldName: pickDefaultTimeFieldName(this.dateFields),
+          fields: _.map(this.sampleDocs, (value, key) => {
             let type = knownFieldTypes[key] || typeof value;
             if (type === 'object' && _.isArray(value) && !_.isEmpty(value)) {
               type = typeof value[0];
@@ -110,31 +112,31 @@ modules.get('apps/settings')
           })
         });
 
-        $scope.isTimeBased = !!$scope.indexPattern.timeFieldName;
+        this.isTimeBased = !!this.indexPattern.timeFieldName;
 
-        $scope.$watch('indexPattern.id', function (value) {
-          $scope.indexPattern.title = value;
+        $scope.$watch('reviewStep.indexPattern.id', (value) => {
+          this.indexPattern.title = value;
         });
-        $scope.$watch('isTimeBased', function (value) {
+        $scope.$watch('reviewStep.isTimeBased', (value) => {
           if (value) {
-            $scope.indexPattern.timeFieldName = pickDefaultTimeFieldName($scope.dateFields);
+            this.indexPattern.timeFieldName = pickDefaultTimeFieldName(this.dateFields);
           }
           else {
-            delete $scope.indexPattern.timeFieldName;
+            delete this.indexPattern.timeFieldName;
           }
         });
-        $scope.$watch('indexPattern.fields', (fields) => {
-          $scope.dateFields = _.map(_.filter(fields, {type: 'date'}), 'name');
+        $scope.$watch('reviewStep.indexPattern.fields', (fields) => {
+          this.dateFields = _.map(_.filter(fields, {type: 'date'}), 'name');
         }, true);
 
-        $scope.columns = [
+        this.columns = [
           {title: 'Field'},
           {title: 'Type'},
           {title: 'Example', sortable: false}
         ];
 
-        $scope.rows = _.map($scope.indexPattern.fields, (field) => {
-          const sampleValue = $scope.sampleDocs[field.name];
+        this.rows = _.map(this.indexPattern.fields, (field) => {
+          const sampleValue = this.sampleDocs[field.name];
           return [
             field.name,
             {
