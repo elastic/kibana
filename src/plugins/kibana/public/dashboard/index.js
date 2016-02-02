@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var $ = require('jquery');
   var angular = require('angular');
   var ConfigTemplate = require('ui/ConfigTemplate');
   var chrome = require('ui/chrome');
@@ -20,6 +19,7 @@ define(function (require) {
 
   require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
 
+  var dashboardTemplate = require('plugins/kibana/dashboard/index.html');
 
   var app = require('ui/modules').get('app/dashboard', [
     'elasticsearch',
@@ -32,15 +32,44 @@ define(function (require) {
 
   require('ui/routes')
   .when('/dashboard', {
-    template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (savedDashboards, config) {
+      dash: function (savedDashboards, config, kbnUrl, Notifier) {
+        var defaultDashboard = config.get('dashboard:defaultDashboard', '');
+
+        var notify = new Notifier({
+          location: 'Dashboard'
+        });
+
+        if (defaultDashboard !== '') {
+          return savedDashboards.get(defaultDashboard)
+            .then(function (result) {
+
+              // If the default dashboard has been found redirect to that dashboard
+              var dashboardUrl = savedDashboards.urlFor(result.id).substring(1);
+              kbnUrl.change(dashboardUrl);
+            })
+            .catch(function (error) {
+
+              // If the given config dashboard has not been found redirect to making new dashboard
+              notify.error(error);
+              kbnUrl.change('/dashboard/new');
+            });
+        }
+
+        kbnUrl.change('/dashboard/new');
+      }
+    }
+  })
+  .when('/dashboard/new', {
+    template: dashboardTemplate,
+    resolve: {
+      dash: function (savedDashboards) {
         return savedDashboards.get();
       }
     }
   })
   .when('/dashboard/:id', {
-    template: require('plugins/kibana/dashboard/index.html'),
+    template: dashboardTemplate,
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
@@ -53,9 +82,10 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
+      controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
+        var configDefaults = Private(require('ui/config/defaults'));
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -69,6 +99,8 @@ define(function (require) {
         }
 
         $scope.$on('$destroy', dash.destroy);
+
+        var configDefaultDashboard = config.get('dashboard:defaultDashboard', '');
 
         var matchQueryFilter = function (filter) {
           return filter.query && filter.query.query_string && !filter.meta;
@@ -85,7 +117,7 @@ define(function (require) {
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
           query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
-          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
+          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
@@ -94,7 +126,9 @@ define(function (require) {
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
           if (!angular.equals(newVal, oldVal)) $state.save();
         });
+
         $scope.$watch('state.options.darkTheme', setDarkTheme);
+        $scope.$watch('opts.isDefaultDashboard', toggleDefaultDashboard);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
@@ -161,6 +195,28 @@ define(function (require) {
           chrome.addApplicationClass(theme);
         }
 
+        // Returns whether this dashboard is now default
+        function toggleDefaultDashboard(isChecked) {
+          if (isChecked) {
+            setDefaultDashboard(dash.id);
+            return true;
+          }
+
+          if (dash.id === configDefaultDashboard) {
+            /* If the default option is turned off and the previous default
+             dashboard was this dashboard set no default dashboard */
+            setDefaultDashboard(configDefaults['dashboard:defaultDashboard'].value);
+            return false;
+          }
+
+          setDefaultDashboard(configDefaultDashboard);
+          return false;
+        }
+
+        function setDefaultDashboard(id) {
+          config.set('dashboard:defaultDashboard', id);
+        }
+
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
           updateQueryOnRootSource();
@@ -171,7 +227,7 @@ define(function (require) {
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {});
+          kbnUrl.change('/dashboard/new', {});
         };
 
         $scope.filterResults = function () {
@@ -232,6 +288,7 @@ define(function (require) {
         // Setup configurable values for config directive, after objects are initialized
         $scope.opts = {
           dashboard: dash,
+          isDefaultDashboard: configDefaultDashboard === dash.id,
           ui: $state.options,
           save: $scope.save,
           addVis: $scope.addVis,
