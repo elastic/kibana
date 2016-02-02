@@ -5,18 +5,23 @@
 .vis-wizard {
   h1 {
     margin-top: 45px;
+    padding: 0px 15px;
   }
+  margin-right: 0px !important;
+  margin-left: 0px !important;
 }
 
 .wizard-vis-type {
   .list-group-item();
   .list-group-menu .list-group-menu-item();
 
-  // overrided for tablet and desktop
-  @media (min-width: @screen-md-min) {
-    display: flex;
-    align-items: flex-start;
-  }
+  border: none !important;
+  border-radius: 0 !important;
+  // // overrided for tablet and desktop
+  // @media (min-width: @screen-md-min) {
+  //   display: flex;
+  //   align-items: flex-start;
+  // }
 
   &-heading {
     flex: 0 0 200px;
