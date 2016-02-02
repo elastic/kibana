@@ -16,12 +16,9 @@ export default function ingestProcessResponse(pipeline, err, resp) {
   });
 
   if (resp.error) {
-    console.log(resp.error);
-    //TODO: Hopefully currentProcessorId can go away if this new error flow returns
-    //the invalid processor id.
-    //TODO: process this new type of message after you get new version of simulate.
-    const message = 'There was an error compiling the pipeline.';
-    const badResult = _.find(results, { 'processorId': pipeline.currentProcessorId });
+    const processorId = _.get(resp.error, 'root_cause[0].header.processor_tag');
+    const message = _.get(resp.error, 'root_cause[0].reason');
+    const badResult = _.find(results, { 'processorId': processorId });
 
     badResult.output = undefined;
     badResult.error = { isNested: false, message: message };

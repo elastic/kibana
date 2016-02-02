@@ -25,7 +25,7 @@ export default [
     typeId: 'convert',
     title: 'Convert',
     sourceField: '',
-    type: '',
+    type: 'string',
     getDefinition: function (processor) {
       return {
         'convert' : {

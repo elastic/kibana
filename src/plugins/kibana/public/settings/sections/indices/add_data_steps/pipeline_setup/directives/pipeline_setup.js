@@ -53,7 +53,6 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
 
         pipeline.updateOutput();
         pipeline.dirty = false;
-        pipeline.currentProcessorId = null;
       }
 
       function simulatePipeline(event, message) {

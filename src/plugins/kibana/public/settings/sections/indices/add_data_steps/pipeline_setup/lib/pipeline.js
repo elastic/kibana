@@ -10,7 +10,6 @@ export default function Pipeline() {
   self.rootObject = {};
   self.output = undefined;
   self.dirty = false;
-  self.currentProcessorId = null;
 };
 
 Pipeline.prototype.load = function (pipeline) {
