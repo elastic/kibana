@@ -3,7 +3,7 @@ const { resolve } = require('url');
 
 module.exports = function (chrome, internals) {
 
-  if (internals.app && internals.app.navLink) {
+  if (get(internals, 'app.navLink.url')) {
     internals.app.navLink.url = resolve(window.location.href, internals.app.navLink.url);
   }
 
