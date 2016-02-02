@@ -210,6 +210,36 @@ describe('AggConfig', function () {
     });
   });
 
+  describe('#makeLabel', function () {
+    it('uses the custom label if it is defined', function () {
+      var vis = new Vis(indexPattern, {});
+      var aggConfig = vis.aggs[0];
+      aggConfig.params.customLabel = 'Custom label';
+      var label = aggConfig.makeLabel();
+      expect(label).to.be(aggConfig.params.customLabel);
+    });
+    it('default label should be "Count"', function () {
+      var vis = new Vis(indexPattern, {});
+      var aggConfig = vis.aggs[0];
+      var label = aggConfig.makeLabel();
+      expect(label).to.be('Count');
+    });
+    it('default label should be "Percentage of Count" when Vis is in percentage mode', function () {
+      var vis = new Vis(indexPattern, {});
+      var aggConfig = vis.aggs[0];
+      aggConfig.vis.params.mode = 'percentage';
+      var label = aggConfig.makeLabel();
+      expect(label).to.be('Percentage of Count');
+    });
+    it('empty label if the Vis type is not defined', function () {
+      var vis = new Vis(indexPattern, {});
+      var aggConfig = vis.aggs[0];
+      aggConfig.type = undefined;
+      var label = aggConfig.makeLabel();
+      expect(label).to.be('');
+    });
+  });
+
   describe('#fieldFormatter', function () {
     it('returns the fields format unless the agg type has a custom getFormat handler', function () {
       var vis = new Vis(indexPattern, {
