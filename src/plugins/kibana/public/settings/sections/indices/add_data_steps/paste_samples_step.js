@@ -7,20 +7,24 @@ modules.get('apps/settings')
     return {
       template: template,
       scope: {
-        samples: '='
+        samples: '=',
+        rawSamples: '='
       },
       controller: function ($scope) {
-        $scope.userSamples = '';
-        $scope.$watch('userSamples', function (newValue) {
-          const splitUserSamples = newValue.split('\n');
+        if (_.isUndefined($scope.rawSamples)) {
+          $scope.rawSamples = '';
+        }
+
+        $scope.$watch('rawSamples', function (newValue) {
+          const splitRawSamples = newValue.split('\n');
 
           try {
-            $scope.samples = _.map(splitUserSamples, function (sample) {
+            $scope.samples = _.map(splitRawSamples, function (sample) {
               return JSON.parse(sample);
             });
           }
           catch (error) {
-            $scope.samples = _.map(splitUserSamples, function (sample) {
+            $scope.samples = _.map(splitRawSamples, function (sample) {
               return {message: sample};
             });
           }
