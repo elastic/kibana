@@ -130,6 +130,7 @@ describe('AggType Class', function () {
           expect(aggType.params).to.be.an(AggParams);
           expect(aggType.params.length).to.be(2);
           expect(aggType.params[0].name).to.be('json');
+          expect(aggType.params[1].name).to.be('customLabel');
         });
 
         it('passes the params arg directly to the AggParams constructor', function () {
