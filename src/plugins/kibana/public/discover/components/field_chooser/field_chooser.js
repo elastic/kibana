@@ -1,5 +1,5 @@
 define(function (require) {
-  var app = require('ui/modules').get('apps/discover');
+  const app = require('ui/modules').get('apps/discover');
 
 
   require('ui/directives/css_truncate');
@@ -8,11 +8,11 @@ define(function (require) {
   require('plugins/kibana/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var rison = require('ui/utils/rison');
-    var fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
-    var FieldList = Private(require('ui/index_patterns/_field_list'));
+    const _ = require('lodash');
+    const $ = require('jquery');
+    const rison = require('ui/utils/rison');
+    const fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
+    const FieldList = Private(require('ui/index_patterns/_field_list'));
 
     return {
       restrict: 'E',
@@ -37,7 +37,7 @@ define(function (require) {
           $route.reload();
         });
 
-        var filter = $scope.filter = {
+        const filter = $scope.filter = {
           props: [
             'type',
             'indexed',
@@ -64,11 +64,11 @@ define(function (require) {
             return field.display;
           },
           isFieldFiltered: function (field) {
-            var matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
-            var isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
-            var isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
-            var scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
-            var matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
+            const matchFilter = (filter.vals.type == null || field.type === filter.vals.type);
+            const isAnalyzed = (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed);
+            const isIndexed = (filter.vals.indexed == null || field.indexed === filter.vals.indexed);
+            const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
+            const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
 
             return !field.display
               && matchFilter
@@ -105,10 +105,10 @@ define(function (require) {
           '[]columns',
           '[]hits'
         ], function (cur, prev) {
-          var newHits = cur[2] !== prev[2];
-          var fields = $scope.fields;
-          var columns = $scope.columns || [];
-          var fieldCounts = $scope.fieldCounts;
+          const newHits = cur[2] !== prev[2];
+          let fields = $scope.fields;
+          const columns = $scope.columns || [];
+          const fieldCounts = $scope.fieldCounts;
 
           if (!fields || newHits) {
             $scope.fields = fields = getFields();
@@ -137,7 +137,7 @@ define(function (require) {
             groups.unpopular = groups.unpopular || [];
 
             // move excess popular fields to un-popular list
-            var extras = groups.popular.splice(config.get('fields:popularLimit'));
+            const extras = groups.popular.splice(config.get('fields:popularLimit'));
             groups.unpopular = extras.concat(groups.unpopular);
           })
           .each(function (group, name) {
@@ -156,9 +156,9 @@ define(function (require) {
         $scope.vizLocation = function (field) {
           if (!$scope.state) {return '';}
 
-          var agg = {};
-          var isGeoPoint = field.type === 'geo_point';
-          var type = isGeoPoint ? 'tile_map' : 'histogram';
+          let agg = {};
+          const isGeoPoint = field.type === 'geo_point';
+          const type = isGeoPoint ? 'tile_map' : 'histogram';
           // If we're visualizing a date field, and our index is time based (and thus has a time filter),
           // then run a date histogram
           if (field.type === 'date' && $scope.indexPattern.timeFieldName === field.name) {
@@ -227,16 +227,16 @@ define(function (require) {
         };
 
         function getFields() {
-          var prevFields = $scope.fields;
-          var indexPattern = $scope.indexPattern;
-          var hits = $scope.hits;
-          var fieldCounts = $scope.fieldCounts;
+          const prevFields = $scope.fields;
+          const indexPattern = $scope.indexPattern;
+          const hits = $scope.hits;
+          const fieldCounts = $scope.fieldCounts;
 
           if (!indexPattern || !hits || !fieldCounts) return;
 
-          var fieldSpecs = indexPattern.fields.slice(0);
-          var fieldNamesInDocs = _.keys(fieldCounts);
-          var fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
+          const fieldSpecs = indexPattern.fields.slice(0);
+          const fieldNamesInDocs = _.keys(fieldCounts);
+          const fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
 
           _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
           .forEach(function (unknownFieldName) {
@@ -246,7 +246,7 @@ define(function (require) {
             });
           });
 
-          var fields = new FieldList(indexPattern, fieldSpecs);
+          const fields = new FieldList(indexPattern, fieldSpecs);
 
           if (prevFields) {
             fields.forEach(function (field) {

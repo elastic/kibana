@@ -1,4 +1,4 @@
-var angular = require('angular');
+const angular = require('angular');
 if (angular.mocks) {
   throw new Error(
     'Don\'t require angular-mocks directly or the tests ' +

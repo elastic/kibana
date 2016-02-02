@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var saveAs = require('@spalger/filesaver').saveAs;
-  var registry = require('plugins/kibana/settings/saved_object_registry');
-  var objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
+  const _ = require('lodash');
+  const angular = require('angular');
+  const saveAs = require('@spalger/filesaver').saveAs;
+  const registry = require('plugins/kibana/settings/saved_object_registry');
+  const objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
   const MAX_SIZE = Math.pow(2, 31) - 1;
 
   require('ui/directives/file_upload');
@@ -18,15 +18,15 @@ define(function (require) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, AppState, es) {
-        var notify = new Notifier({ location: 'Saved Objects' });
+        const notify = new Notifier({ location: 'Saved Objects' });
 
-        var $state = $scope.state = new AppState();
+        const $state = $scope.state = new AppState();
         $scope.currentTab = null;
         $scope.selectedItems = [];
 
-        var getData = function (filter) {
-          var services = registry.all().map(function (obj) {
-            var service = $injector.get(obj.service);
+        const getData = function (filter) {
+          const services = registry.all().map(function (obj) {
+            const service = $injector.get(obj.service);
             return service.find(filter).then(function (data) {
               return {
                 service: service,
@@ -41,7 +41,7 @@ define(function (require) {
 
           $q.all(services).then(function (data) {
             $scope.services = _.sortBy(data, 'title');
-            var tab = $scope.services[0];
+            let tab = $scope.services[0];
             if ($state.tab) $scope.currentTab = tab = _.find($scope.services, {title: $state.tab});
 
             $scope.$watch('state.tab', function (tab) {
@@ -60,7 +60,7 @@ define(function (require) {
         };
 
         $scope.toggleItem = function (item) {
-          var i = $scope.selectedItems.indexOf(item);
+          const i = $scope.selectedItems.indexOf(item);
           if (i >= 0) {
             $scope.selectedItems.splice(i, 1);
           } else {
@@ -73,7 +73,7 @@ define(function (require) {
         };
 
         $scope.edit = function (service, item) {
-          var params = {
+          const params = {
             service: service.serviceName,
             id: item.id
           };
@@ -88,7 +88,7 @@ define(function (require) {
         };
 
         $scope.bulkExport = function () {
-          var objs = $scope.selectedItems.map(_.partialRight(_.extend, {type: $scope.currentTab.type}));
+          const objs = $scope.selectedItems.map(_.partialRight(_.extend, {type: $scope.currentTab.type}));
           retrieveAndExportDocs(objs);
         };
 
@@ -117,12 +117,12 @@ define(function (require) {
         }
 
         function saveToFile(results) {
-          var blob = new Blob([angular.toJson(results, true)], {type: 'application/json'});
+          const blob = new Blob([angular.toJson(results, true)], {type: 'application/json'});
           saveAs(blob, 'export.json');
         }
 
         $scope.importAll = function (fileContents) {
-          var docs;
+          let docs;
           try {
             docs = JSON.parse(fileContents);
           } catch (e) {
@@ -130,7 +130,7 @@ define(function (require) {
           }
 
           return Promise.map(docs, function (doc) {
-            var service = _.find($scope.services, {type: doc._type}).service;
+            const service = _.find($scope.services, {type: doc._type}).service;
             return service.get().then(function (obj) {
               obj.id = doc._id;
               return obj.applyESResp(doc).then(function () {

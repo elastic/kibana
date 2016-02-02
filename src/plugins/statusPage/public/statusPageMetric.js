@@ -1,14 +1,14 @@
-var _ = require('lodash');
-var moment = require('moment');
-var numeral = require('numeral');
+const _ = require('lodash');
+const moment = require('moment');
+const numeral = require('numeral');
 
-var toTitleCase = require('./lib/toTitleCase');
-var formatNumber = require('./lib/formatNumber');
-var readStatData = require('./lib/readStatData');
+const toTitleCase = require('./lib/toTitleCase');
+const formatNumber = require('./lib/formatNumber');
+const readStatData = require('./lib/readStatData');
 
 function calcAvg(metricList, metricNumberType) {
   return metricList.map(function (data) {
-    var uglySum = data.values.reduce(function (sumSoFar, vector) {
+    const uglySum = data.values.reduce(function (sumSoFar, vector) {
       return sumSoFar + vector.y;
     }, 0);
     return formatNumber(uglySum / data.values.length, metricNumberType);
@@ -27,7 +27,7 @@ require('ui/modules')
     },
     controllerAs: 'metric',
     controller: function ($scope) {
-      var self = this;
+      const self = this;
 
       self.name = $scope.name;
       self.title = toTitleCase(self.name);
@@ -56,10 +56,10 @@ require('ui/modules')
         self.chartData = readStatData(self.rawData, self.seriesNames);
         self.averages = calcAvg(self.chartData, self.numberType);
 
-        var unit = '';
+        let unit = '';
         self.averages = self.averages.map(function (average) {
-          var parts = average.split(' ');
-          var value = parts.shift();
+          const parts = average.split(' ');
+          const value = parts.shift();
           unit = parts.join(' ');
           return value;
         });

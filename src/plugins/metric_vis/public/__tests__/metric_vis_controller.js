@@ -1,10 +1,10 @@
 
 describe('metric vis', function () {
-  var $scope;
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
+  let $scope;
+  const ngMock = require('ngMock');
+  const expect = require('expect.js');
 
-  var formatter = function (value) {
+  const formatter = function (value) {
     return value.toFixed(3);
   };
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   return {
     order: 3,

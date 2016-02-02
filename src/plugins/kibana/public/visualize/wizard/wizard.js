@@ -1,16 +1,16 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
   require('ui/directives/saved_object_finder');
   require('plugins/kibana/discover/saved_searches/saved_searches');
 
-  var templateStep = function (num, txt) {
+  const templateStep = function (num, txt) {
     return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
   };
 
-  var module = require('ui/modules').get('app/visualize', ['kibana/courier']);
-  var routes = require('ui/routes');
+  const module = require('ui/modules').get('app/visualize', ['kibana/courier']);
+  const routes = require('ui/routes');
 
   /********
   /** Wizard Step 1
@@ -42,7 +42,7 @@ define(function (require) {
   });
 
   module.controller('VisualizeWizardStep2', function ($route, $scope, $location, timefilter, kbnUrl) {
-    var type = $route.current.params.type;
+    const type = $route.current.params.type;
 
     $scope.step2WithSearchUrl = function (hit) {
       return kbnUrl.eval('#/visualize/create?&type={{type}}&savedSearchId={{id}}', {type: type, id: hit.id});
