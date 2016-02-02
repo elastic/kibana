@@ -84,16 +84,18 @@
 "<"                   return 'LT'
 ">="                   return 'GTE'
 "<="                   return 'LTE'
+"-"                    return 'DASH'
 "AND"                  return 'AND'
 "OR"                  return 'OR'
 "NOT"                   return 'NOT'
 "NULL"                 return 'NULL'
 "ANY"                   return 'ANY'
+"*"                    return 'ANY'
 "IN"                   return 'IN'
 "IS"                   return 'IS'
 "EXISTS"                  return 'EXISTS'
-"TRUE"                  return 'TRUE'
-"FALSE"                  return 'FALSE'
+("TRUE"|"true")                  return 'TRUE'
+("FALSE"|"false")                  return 'FALSE'
 (?:[0-9]{1,3}\.){3}[0-9]{1,3}  return 'IPV4'
 T[0-2][0-9]\:[0-5][0-9]\:[0-5][0-9](Z|\.[0-9]{3}Z) return 'TIME'
 [0-9]+             return 'NUMBER'
@@ -119,19 +121,25 @@ expressions
     : e EOF
       {return new yy.Query($1);}
     | ANY EOF
+      {return new yy.Query(new yy.MatchAll()); }
     ;
 
 booleanValue
-    : TRUE | FALSE
+    : TRUE
+      { $$ = 'true'; } 
+    | FALSE
+      { $$ = 'false'; }
     ;
     
 fieldPath
     : FIELD
     | fieldPath DOT FIELD
+      { $$ = $1 + '.' + $3; }
     ;
 
 decimal
     : NUMBER DOT NUMBER
+      { $$ = parseFloat($1 + "." + $3); }
     ;
     
 dateTime
@@ -146,31 +154,48 @@ date
     
 rangeLiteral
     : OBRACK simpleValue COMMA simpleValue CBRACK
+      { $$ = new yy.RangeLiteral($2, $4, false, false); }
     | OBRACK simpleValue COMMA simpleValue CPAREN
+      { $$ = new yy.RangeLiteral($2, $4, false, true); }
     | OPAREN simpleValue COMMA simpleValue CPAREN
+      { $$ = new yy.RangeLiteral($2, $4, true, true); }
     | OPAREN simpleValue COMMA simpleValue CBRACK
+      { $$ = new yy.RangeLiteral($2, $4, true, false); }
     ;
     
 setValue
     : simpleValue
+      { var arVal = [$1]; 
+        $$ = arVal; }
     | setValue COMMA simpleValue
+      {$1.push($3);
+       $$ = $1;}
     ;
 
 setLiteral
     : OCURLY setValue CCURLY
+      { $$ = $2 }
     ;
     
 inClause
     : fieldPath IN rangeLiteral
+      { $$ = new yy.Range($1, $3); }
     | fieldPath IN setLiteral
+      { var boolQ = new yy.BoolExpr();
+        for(var i=0; i<$3.length; i++) {
+          boolQ.or(new yy.Term($1, '=', $3[i]), boolQ);
+        }
+        $$ = boolQ;
+      }
     ;
     
 isClause
     :  fieldPath IS NULL
+      { $$ = new yy.Missing($1); }
     ;
     
 simpleValue
-    : decimal | NUMBER | STRING | NULL | booleanValue | IPV4 | date | dateTime
+    : decimal | NUMBER | STRING | NULL | booleanValue | IPV4
     ;
 
 operator
@@ -179,15 +204,45 @@ operator
 
 comparison
     : fieldPath operator simpleValue
+       { $$ = new yy.Term($1, $2, $3); }
+    | fieldPath operator date
+       { $$ = new yy.Term($1, $2, yy.moment.utc($3).valueOf()); }
+    | fieldPath operator dateTime
+       { $$ = new yy.Term($1, $2, yy.moment.utc($3).valueOf()); }
     ;
 
 boolExpression
     : e AND e
+      { if ($1 instanceof yy.BoolExpr) {
+          $1.and($1, $3);
+          $$ = $1;
+        } else if ($3 instanceof yy.BoolExpr) {
+          $3.and($1, $3);
+          $$ = $3;
+        } else {
+          var bExpr = new yy.BoolExpr();
+          bExpr.and($1, $3);
+          $$ = bExpr;
+        }
+      }
     | e OR e
+      { if ($1 instanceof yy.BoolExpr) {
+          $1.or($1, $3);
+          $$ = $1;
+        } else if ($3 instanceof yy.BoolExpr) {
+          $3.or($1, $3);
+          $$ = $3;
+        } else {
+          var bExpr = new yy.BoolExpr();
+          bExpr.or($1, $3);
+          $$ = bExpr;
+        }
+      }
     ;
 
 unaryExpression
     : NOT e
+      { $$ = new yy.Not($2); }
     | EXISTS e
     ;
 
@@ -196,10 +251,11 @@ e
     | unaryExpression
     | comparison
     | fieldPath
-      { $$ = new yy.TermQuery($1, true); }
+      { $$ = new yy.Term($1, '=', true); }
     | inClause
     | isClause
     | OPAREN e CPAREN
+      { $$ = new yy.ScopedExpr($2); }
     ;
 
 /* see https://zaach.github.io/jison/try/usf/index.html to test */

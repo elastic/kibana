@@ -1,16 +1,35 @@
 define(function (require) {
   var _ = require('lodash');
+  var jison = require('jison');
+
+  var bnf = require('raw!./queryLang.jison');
+  var parser = new jison.Parser(bnf, {
+    type : 'slr',
+    noDefaultResolve : true,
+    moduleType : 'js'
+  });
+  parser.yy = require('ui/parse_query/lib/queryAdapter');
+
   return function GetQueryFromUser(es, Private) {
     var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 
     /**
      * Take text from the user and make it into a query object
-     * @param {text} user's query input
+     *
+     * @param {text}
+     *          user's query input
      * @returns {object}
      */
-    return function (text) {
+    function fromUser(text) {
+      text = parser.parse(text).toJson();
+      console.log(text);
+
       function getQueryStringQuery(text) {
-        return decorateQuery({query_string: {query: text}});
+        return decorateQuery({
+          query_string : {
+            query : text
+          }
+        });
       }
 
       var matchAll = getQueryStringQuery('*');
@@ -26,7 +45,9 @@ define(function (require) {
 
       // Nope, not an object.
       text = (text || '').trim();
-      if (text.length === 0) return matchAll;
+      if (text.length === 0) {
+        return matchAll;
+      }
 
       if (text[0] === '{') {
         try {
@@ -38,6 +59,12 @@ define(function (require) {
         return getQueryStringQuery(text);
       }
     };
-  };
-});
 
+    fromUser.setIndexPattern = function (fieldMap) {
+      parser.yy.fieldDictionary = fieldMap;
+    };
+
+    return fromUser;
+  };
+
+});
