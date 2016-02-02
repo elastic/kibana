@@ -1,7 +1,6 @@
 const modules = require('ui/modules');
-const template = require('plugins/kibana/settings/sections/indices/directives/paste_samples_step.html');
+const template = require('plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step.html');
 const _ = require('lodash');
-
 
 modules.get('apps/settings')
   .directive('pasteSamplesStep', function () {

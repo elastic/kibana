@@ -7,7 +7,7 @@ require('ui/modules').get('apps/settings')
     template: require('plugins/kibana/settings/sections/indices/directives/kbn_settings_indices.html'),
     link: function ($scope) {
       $scope.showAddNew = !/^\/settings\/indices$/.test($route.current.$$route.originalPath);
-      $scope.edittingId = $route.current.params.indexPatternId;
+      $scope.editingId = $route.current.params.indexPatternId;
       config.$bind($scope, 'defaultIndex');
 
       $scope.$watch('defaultIndex', function () {
@@ -16,7 +16,7 @@ require('ui/modules').get('apps/settings')
           return {
             id: id,
             url: kbnUrl.eval('#/settings/indices/edit/{{id}}', {id: id}),
-            class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
+            class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };
         });

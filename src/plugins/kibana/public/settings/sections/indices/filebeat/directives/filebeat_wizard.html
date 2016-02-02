@@ -1,0 +1,70 @@
+<div>
+  <div class="page-header">
+    <h1>Tail a File</h1>
+    Let's send some log data to Elasticsearch.
+  </div>
+</div>
+
+<div>
+  <div class="wizard-step-headings" ng-class="{complete: wizard.complete}">
+      <span ng-class="{active: wizard.currentStep === 0}"
+            class="wizard-step-heading"
+            ng-click="wizard.setCurrentStep(0)">
+        1. Paste
+      </span>
+      <span ng-class="{active: wizard.currentStep === 1, aheadActive: wizard.currentStep < 1}"
+            class="wizard-step-heading"
+            ng-click="wizard.currentStep < 1 || wizard.setCurrentStep(1)">
+        2. Parse
+      </span>
+      <span ng-class="{active: wizard.currentStep === 2, aheadActive: wizard.currentStep < 2}"
+            class="wizard-step-heading"
+            ng-click="wizard.currentStep < 2 || wizard.setCurrentStep(2)">
+        3. Review
+      </span>
+      <span ng-class="{active: wizard.currentStep === 3, aheadActive: wizard.currentStep < 3}"
+            class="wizard-step-heading"
+            ng-click="wizard.currentStep < 3 || wizard.setCurrentStep(3)">
+        4. Install Filebeat
+      </span>
+  </div>
+
+  <div ng-switch="wizard.currentStep">
+    <div ng-switch-when="0">
+      <paste-samples-step samples="wizard.stepResults.samples"></paste-samples-step>
+      <div class="nav-buttons">
+        <button ng-disabled="!wizard.stepResults.samples" ng-click="wizard.nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div ng-switch-when="1">
+      <pipeline-step
+        samples="wizard.stepResults.samples"
+        pipeline="wizard.stepResults.pipeline"
+        sample-docs="wizard.stepResults.sampleDocs">
+      </pipeline-step>
+
+      <div class="nav-buttons">
+        <button ng-click="wizard.prevStep()">Prev</button>
+        <button ng-disabled="!wizard.stepResults.pipeline || !wizard.stepResults.sampleDocs" ng-click="wizard.nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div ng-switch-when="2">
+      <pattern-review-step
+        index-pattern="wizard.stepResults.indexPattern"
+        sample-docs="wizard.stepResults.sampleDocs"
+        pipeline="wizard.stepResults.pipeline">
+      </pattern-review-step>
+
+      <div class="nav-buttons">
+        <button ng-click="wizard.prevStep()">Prev</button>
+        <button ng-disabled="!wizard.stepResults.indexPattern" ng-click="wizard.nextStep()">Save</button>
+      </div>
+    </div>
+
+    <div ng-switch-when="3">
+      <install-filebeat-step results="wizard.stepResults"></install-filebeat-step>
+    </div>
+  </div>
+</div>
