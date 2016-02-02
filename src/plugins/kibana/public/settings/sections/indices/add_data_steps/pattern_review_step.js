@@ -1,13 +1,13 @@
 var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/directives/pipeline_step.html');
+var template = require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html');
 
 modules.get('apps/settings')
-  .directive('pipelineStep', function () {
+  .directive('patternReviewStep', function () {
     return {
       template: template,
       scope: {
-        samples: '=',
         sampleDocs: '=',
+        indexPattern: '=',
         pipeline: '='
       }
     };

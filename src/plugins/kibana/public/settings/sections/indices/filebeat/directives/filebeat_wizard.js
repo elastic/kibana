@@ -1,10 +1,10 @@
 var modules = require('ui/modules');
 var template = require('plugins/kibana/settings/sections/indices/filebeat/directives/filebeat_wizard.html');
 
-require('plugins/kibana/settings/sections/indices/directives/pattern_review_step');
-require('plugins/kibana/settings/sections/indices/directives/paste_samples_step');
-require('plugins/kibana/settings/sections/indices/directives/pipeline_step');
-require('plugins/kibana/settings/sections/indices/directives/install_filebeat_step');
+require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step');
+require('plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step');
+require('plugins/kibana/settings/sections/indices/add_data_steps/pipeline_step');
+require('plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step');
 
 // wrapper directive, which sets up the breadcrumb for all filebeat steps
 modules.get('apps/settings')
