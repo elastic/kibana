@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var propFilter = require('ui/filters/_prop_filter');
+  const _ = require('lodash');
+  const propFilter = require('ui/filters/_prop_filter');
 
   require('ui/modules')
   .get('kibana')

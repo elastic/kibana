@@ -1,10 +1,10 @@
 define(function (require) {
   function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
-    var _ = require('lodash');
-    var saveAs = require('@spalger/filesaver').saveAs;
-    var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+    const _ = require('lodash');
+    const saveAs = require('@spalger/filesaver').saveAs;
+    const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
-    var PER_PAGE_DEFAULT = 10;
+    const PER_PAGE_DEFAULT = 10;
 
     require('ui/agg_table');
 

@@ -1,23 +1,23 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
-var elasticsearch = require('elasticsearch');
-var exposeClient = require('./expose_client');
-var migrateConfig = require('./migrate_config');
-var createKibanaIndex = require('./create_kibana_index');
-var checkEsVersion = require('./check_es_version');
-var NoConnections = elasticsearch.errors.NoConnections;
-var util = require('util');
-var format = util.format;
+const _ = require('lodash');
+const Promise = require('bluebird');
+const elasticsearch = require('elasticsearch');
+const exposeClient = require('./expose_client');
+const migrateConfig = require('./migrate_config');
+const createKibanaIndex = require('./create_kibana_index');
+const checkEsVersion = require('./check_es_version');
+const NoConnections = elasticsearch.errors.NoConnections;
+const util = require('util');
+const format = util.format;
 
-var NO_INDEX = 'no_index';
-var INITIALIZING = 'initializing';
-var READY = 'ready';
+const NO_INDEX = 'no_index';
+const INITIALIZING = 'initializing';
+const READY = 'ready';
 
-var REQUEST_DELAY = 2500;
+const REQUEST_DELAY = 2500;
 
 module.exports = function (plugin, server) {
-  var config = server.config();
-  var client = server.plugins.elasticsearch.client;
+  const config = server.config();
+  const client = server.plugins.elasticsearch.client;
 
   plugin.status.yellow('Waiting for Elasticsearch');
 
@@ -90,12 +90,12 @@ module.exports = function (plugin, server) {
     .catch(err => plugin.status.red(err));
   }
 
-  var timeoutId = null;
+  let timeoutId = null;
 
   function scheduleCheck(ms) {
     if (timeoutId) return;
 
-    var myId = setTimeout(function () {
+    const myId = setTimeout(function () {
       check().finally(function () {
         if (timeoutId === myId) startorRestartChecking();
       });

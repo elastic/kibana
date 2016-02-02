@@ -1,4 +1,4 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = function readStatData(data, seriesNames) {
   // Metric Values format
@@ -13,13 +13,13 @@ module.exports = function readStatData(data, seriesNames) {
   // Go through all of the metric values and split the values out.
   // returns an array of all of the averages
 
-  var metricList = [];
+  const metricList = [];
   seriesNames = seriesNames || [];
   data.forEach(function (vector) {
     vector = _.flatten(vector);
-    var x = vector.shift();
+    const x = vector.shift();
     vector.forEach(function (yValue, i) {
-      var series = seriesNames[i] || '';
+      const series = seriesNames[i] || '';
 
       if (!metricList[i]) {
         metricList[i] = {

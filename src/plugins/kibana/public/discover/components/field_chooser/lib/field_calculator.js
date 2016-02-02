@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   function getFieldValues(hits, field) {
-    var name = field.name;
-    var flattenHit = field.indexPattern.flattenHit;
+    const name = field.name;
+    const flattenHit = field.indexPattern.flattenHit;
     return _.map(hits, function (hit) {
       return flattenHit(hit)[name];
     });
@@ -23,12 +23,12 @@ define(function (require) {
       return { error: 'Analysis is not available for geo fields.' };
     }
 
-    var allValues = getFieldValues(params.hits, params.field);
-    var counts;
-    var missing = _countMissing(allValues);
+    const allValues = getFieldValues(params.hits, params.field);
+    let counts;
+    const missing = _countMissing(allValues);
 
     try {
-      var groups = _groupValues(allValues, params);
+      const groups = _groupValues(allValues, params);
       counts = _.map(
         _.sortBy(groups, 'count').reverse().slice(0, params.count),
         function (bucket) {
@@ -66,8 +66,8 @@ define(function (require) {
 
 
   function _groupValues(allValues, params) {
-    var groups = {};
-    var k;
+    const groups = {};
+    let k;
 
     allValues.forEach(function (value) {
       if (_.isObject(value) && !_.isArray(value)) {

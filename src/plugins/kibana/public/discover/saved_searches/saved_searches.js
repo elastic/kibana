@@ -1,11 +1,11 @@
 define(function (require) {
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/discover/saved_searches/_saved_search');
   require('ui/notify');
 
-  var module = require('ui/modules').get('discover/saved_searches', [
+  const module = require('ui/modules').get('discover/saved_searches', [
     'kibana/notify'
   ]);
 
@@ -17,12 +17,12 @@ define(function (require) {
   });
 
   module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl) {
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'search'
     });
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Saved Searches'
     });
 
@@ -60,14 +60,14 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       return source;
     };
 
     this.find = function (searchString, size = 100) {
-      var body;
+      let body;
       if (searchString) {
         body = {
           query: {

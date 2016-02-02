@@ -10,6 +10,6 @@ define(function (require, module, exports) {
   // preload
   require('ui/doc_table/components/table_row');
 
-  var savedObjectRegistry = require('ui/saved_objects/saved_object_registry');
+  const savedObjectRegistry = require('ui/saved_objects/saved_object_registry');
   savedObjectRegistry.register(require('plugins/kibana/discover/saved_searches/saved_search_register'));
 });

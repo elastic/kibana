@@ -1,12 +1,12 @@
-var elasticsearch = require('elasticsearch');
-var _ = require('lodash');
-var readFile = (file) => require('fs').readFileSync(file, 'utf8');
-var util = require('util');
-var url = require('url');
-var callWithRequest = require('./call_with_request');
+const elasticsearch = require('elasticsearch');
+const _ = require('lodash');
+const readFile = (file) => require('fs').readFileSync(file, 'utf8');
+const util = require('util');
+const url = require('url');
+const callWithRequest = require('./call_with_request');
 
 module.exports = function (server) {
-  var config = server.config();
+  const config = server.config();
 
   function createClient(options) {
     options = _.defaults(options || {}, {
@@ -22,14 +22,14 @@ module.exports = function (server) {
       auth: true
     });
 
-    var uri = url.parse(options.url);
+    const uri = url.parse(options.url);
 
-    var authorization;
+    let authorization;
     if (options.auth && options.username && options.password) {
       uri.auth = util.format('%s:%s', options.username, options.password);
     }
 
-    var ssl = { rejectUnauthorized: options.verifySsl };
+    const ssl = { rejectUnauthorized: options.verifySsl };
     if (options.clientCrt && options.clientKey) {
       ssl.cert = readFile(options.clientCrt);
       ssl.key = readFile(options.clientKey);
@@ -59,10 +59,10 @@ module.exports = function (server) {
     });
   }
 
-  var client = createClient();
+  const client = createClient();
   server.on('close', _.bindKey(client, 'close'));
 
-  var noAuthClient = createClient({ auth: false });
+  const noAuthClient = createClient({ auth: false });
   server.on('close', _.bindKey(noAuthClient, 'close'));
 
   server.expose('client', client);

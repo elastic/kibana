@@ -15,9 +15,9 @@ define(function (require) {
     },
     controllerAs: 'fieldSettings',
     controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
-      var Field = Private(require('ui/index_patterns/_field'));
-      var notify = new Notifier({ location: 'Field Editor' });
-      var kbnUrl = Private(require('ui/url'));
+      const Field = Private(require('ui/index_patterns/_field'));
+      const notify = new Notifier({ location: 'Field Editor' });
+      const kbnUrl = Private(require('ui/url'));
 
 
       this.mode = $route.current.mode;
@@ -25,7 +25,7 @@ define(function (require) {
 
 
       if (this.mode === 'edit') {
-        var fieldName = $route.current.params.fieldName;
+        const fieldName = $route.current.params.fieldName;
         this.field = this.indexPattern.fields.byName[fieldName];
 
         if (!this.field) {

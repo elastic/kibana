@@ -1,6 +1,6 @@
 
-var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
-var expect = require('expect.js');
+const toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
+const expect = require('expect.js');
 
 describe('Settings', function () {
   describe('Advanced', function () {
@@ -20,7 +20,7 @@ describe('Settings', function () {
       });
 
       context('when given a setting definition object', function () {
-        var def;
+        let def;
         beforeEach(function () {
           def = {
             value: 'the original',
