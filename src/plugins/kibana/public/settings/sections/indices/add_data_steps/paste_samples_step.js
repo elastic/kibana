@@ -10,21 +10,23 @@ modules.get('apps/settings')
         samples: '=',
         rawSamples: '='
       },
+      bindToController: true,
+      controllerAs: 'pasteStep',
       controller: function ($scope) {
-        if (_.isUndefined($scope.rawSamples)) {
-          $scope.rawSamples = '';
+        if (_.isUndefined(this.rawSamples)) {
+          this.rawSamples = '';
         }
 
-        $scope.$watch('rawSamples', function (newValue) {
+        $scope.$watch('pasteStep.rawSamples', (newValue) => {
           const splitRawSamples = newValue.split('\n');
 
           try {
-            $scope.samples = _.map(splitRawSamples, function (sample) {
+            this.samples = _.map(splitRawSamples, (sample) => {
               return JSON.parse(sample);
             });
           }
           catch (error) {
-            $scope.samples = _.map(splitRawSamples, function (sample) {
+            this.samples = _.map(splitRawSamples, (sample) => {
               return {message: sample};
             });
           }
