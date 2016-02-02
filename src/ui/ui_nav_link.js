@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var { join } = require('path');
+import { pick } from 'lodash';
+import { join } from 'path';
 
 export default class UiNavLink {
   constructor(uiExports, spec) {
@@ -11,6 +11,6 @@ export default class UiNavLink {
   }
 
   toJSON() {
-    return _.pick(this, ['title', 'url', 'order', 'description', 'icon']);
+    return pick(this, ['title', 'url', 'order', 'description', 'icon']);
   }
 }

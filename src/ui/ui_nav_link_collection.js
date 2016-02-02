@@ -1,10 +1,10 @@
-import _ from 'lodash';
+import { sortBy } from 'lodash';
 import UiNavLink from './ui_nav_link';
 import Collection from '../utils/Collection';
 
-let inOrderCache = Symbol('inOrder');
+const inOrderCache = Symbol('inOrder');
 
-module.exports = class UiNavLinkCollection extends Collection {
+export default class UiNavLinkCollection extends Collection {
 
   constructor(uiExports, parent) {
     super();
@@ -12,7 +12,7 @@ module.exports = class UiNavLinkCollection extends Collection {
   }
 
   new(spec) {
-    let link = new UiNavLink(this.uiExports, spec);
+    const link = new UiNavLink(this.uiExports, spec);
     this[inOrderCache] = null;
     this.add(link);
     return link;
@@ -20,7 +20,7 @@ module.exports = class UiNavLinkCollection extends Collection {
 
   get inOrder() {
     if (!this[inOrderCache]) {
-      this[inOrderCache] = _.sortBy([...this], 'order');
+      this[inOrderCache] = sortBy([...this], 'order');
     }
 
     return this[inOrderCache];
