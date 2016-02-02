@@ -1,4 +1,4 @@
-// in test/support/pages/Common.js
+// in test/support/pages/common.js
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
@@ -50,6 +50,10 @@ define(function (require) {
 
   Common.prototype = {
     constructor: Common,
+
+    getHostPort: function getHostPort() {
+      return getUrl.baseUrl(config.servers.kibana);
+    },
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
