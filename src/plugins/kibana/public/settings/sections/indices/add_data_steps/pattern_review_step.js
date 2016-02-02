@@ -58,12 +58,7 @@ function pickDefaultTimeFieldName(dateFields) {
     return undefined;
   }
 
-  let fieldName = dateFields[0];
-  if (_.includes(dateFields, '@timestamp')) {
-    fieldName = '@timestamp';
-  }
-
-  return fieldName;
+  return _.includes(dateFields, '@timestamp') ? '@timestamp' : dateFields[0];
 }
 
 modules.get('apps/settings')
@@ -89,11 +84,11 @@ modules.get('apps/settings')
         this.dateFields = [];
         this.pipeline.forEach((processor) => {
           if (processor.geoip) {
-            let field = processor.geoip.target_field || 'geoip';
+            const field = processor.geoip.target_field || 'geoip';
             knownFieldTypes[field] = 'geo_point';
           }
-          if (processor.date) {
-            let field = processor.date.target_field || '@timestamp';
+          else if (processor.date) {
+            const field = processor.date.target_field || '@timestamp';
             knownFieldTypes[field] = 'date';
             this.dateFields.push(field);
           }
