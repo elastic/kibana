@@ -1,10 +1,10 @@
-var angular = require('angular');
-var moment = require('moment');
-var expect = require('expect.js');
-var _ = require('lodash');
+import angular from 'angular';
+import moment from 'moment';
+import expect from 'expect.js';
+import _ from 'lodash';
 var $ = require('jquery');
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
 
 require('plugins/kibana/visualize/index');
 require('plugins/kibana/dashboard/index');

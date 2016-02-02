@@ -1,7 +1,7 @@
 
 require('ui/fixedScroll');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('FixedScroll directive', function () {
   var $ = require('jquery');

@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 const reEsc = require('lodash').escapeRegExp;
 const { parse, format } = require('url');
 

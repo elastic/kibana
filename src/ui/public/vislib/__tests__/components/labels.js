@@ -1,7 +1,7 @@
-var angular = require('angular');
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 var getLabels;
 var seriesLabels;

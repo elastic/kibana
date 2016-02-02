@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var d3 = require('d3');
+import d3 from 'd3';
 var callEach = require('lodash').callEach;
 var bindKey = require('lodash').bindKey;
 var rest = require('lodash').rest;

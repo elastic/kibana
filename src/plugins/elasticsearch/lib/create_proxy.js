@@ -1,5 +1,5 @@
-const createAgent = require('./create_agent');
-const mapUri = require('./map_uri');
+import createAgent from './create_agent';
+import mapUri from './map_uri';
 const { resolve } = require('url');
 
 function createProxy(server, method, route, config) {

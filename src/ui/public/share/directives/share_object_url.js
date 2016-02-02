@@ -1,5 +1,5 @@
 const app = require('ui/modules').get('kibana');
-const Clipboard = require('clipboard');
+import Clipboard from 'clipboard';
 
 require('../styles/index.less');
 

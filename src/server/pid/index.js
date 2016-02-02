@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var Boom = require('boom');
-var Promise = require('bluebird');
+import _ from 'lodash';
+import Boom from 'boom';
+import Promise from 'bluebird';
 var writeFile = Promise.promisify(require('fs').writeFile);
 var unlink = require('fs').unlinkSync;
 

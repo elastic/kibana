@@ -1,4 +1,4 @@
-var expect = require('expect.js');
+import expect from 'expect.js';
 
 describe('Tooltip Positioning', function () {
   var $ = require('jquery');

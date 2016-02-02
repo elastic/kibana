@@ -1,18 +1,18 @@
 
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
 var $ = require('jquery');
-var d3 = require('d3');
+import d3 from 'd3';
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-var seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-var termsColumns = require('fixtures/vislib/mock_data/terms/_columns');
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
 //var histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 
 // tuple, with the format [description, mode, data]
 var dataTypesArray = [

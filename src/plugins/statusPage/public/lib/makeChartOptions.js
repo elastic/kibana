@@ -1,5 +1,5 @@
 
-const formatNumber = require('./formatNumber');
+import formatNumber from './formatNumber';
 
 module.exports = function makeChartOptions(type) {
   return {

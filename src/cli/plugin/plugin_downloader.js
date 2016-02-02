@@ -1,7 +1,7 @@
-const _ = require('lodash');
+import _ from 'lodash';
 const urlParse = require('url').parse;
-const downloadHttpFile = require('./downloaders/http');
-const downloadLocalFile = require('./downloaders/file');
+import downloadHttpFile from './downloaders/http';
+import downloadLocalFile from './downloaders/file';
 
 export default function createPluginDownloader(settings, logger) {
   let archiveType;

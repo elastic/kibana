@@ -1,4 +1,4 @@
-const upgrade = require('./upgrade_config');
+import upgrade from './upgrade_config';
 
 module.exports = function (server) {
   const config = server.config();

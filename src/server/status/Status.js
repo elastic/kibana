@@ -1,6 +1,6 @@
-let _ = require('lodash');
+import _ from 'lodash';
 let EventEmitter = require('events').EventEmitter;
-let states = require('./states');
+import states from './states';
 
 class Status extends EventEmitter {
   constructor(name, server) {

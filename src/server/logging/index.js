@@ -1,4 +1,4 @@
-let _ = require('lodash');
+import _ from 'lodash';
 let fromNode = require('bluebird').fromNode;
 
 module.exports = function (kbnServer, server, config) {

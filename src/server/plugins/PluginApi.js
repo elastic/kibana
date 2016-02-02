@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let Plugin = require('./Plugin');
+import _ from 'lodash';
+import Plugin from './Plugin';
 let { basename, join } = require('path');
 
 module.exports = class PluginApi {

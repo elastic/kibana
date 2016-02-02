@@ -1,4 +1,4 @@
-var RouteManager = require('./RouteManager');
+import RouteManager from './RouteManager';
 var defaultRouteManager = new RouteManager();
 
 module.exports = {

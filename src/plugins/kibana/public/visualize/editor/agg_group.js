@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 define(function (require) {
   require('ui/modules')

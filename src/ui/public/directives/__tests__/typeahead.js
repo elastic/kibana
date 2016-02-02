@@ -1,7 +1,7 @@
-var angular = require('angular');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 require('ui/typeahead');
 
 // TODO: This should not be needed, timefilter is only included here, it should move

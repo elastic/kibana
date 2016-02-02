@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 var root = require('./packageJson').__dirname;
 var { join, dirname, normalize } = require('path');
 

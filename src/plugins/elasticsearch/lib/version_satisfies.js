@@ -1,4 +1,4 @@
-const semver = require('semver');
+import semver from 'semver';
 
 module.exports = function (actual, expected) {
   try {

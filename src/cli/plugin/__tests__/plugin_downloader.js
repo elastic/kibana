@@ -1,12 +1,12 @@
-const expect = require('expect.js');
-const sinon = require('sinon');
-const nock = require('nock');
-const glob = require('glob');
-const rimraf = require('rimraf');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import nock from 'nock';
+import glob from 'glob';
+import rimraf from 'rimraf';
 const { join } = require('path');
-const mkdirp = require('mkdirp');
-const pluginLogger = require('../plugin_logger');
-const pluginDownloader = require('../plugin_downloader');
+import mkdirp from 'mkdirp';
+import pluginLogger from '../plugin_logger';
+import pluginDownloader from '../plugin_downloader';
 
 describe('kibana cli', function () {
 

@@ -1,4 +1,4 @@
-const angular = require('angular');
+import angular from 'angular';
 if (angular.mocks) {
   throw new Error(
     'Don\'t require angular-mocks directly or the tests ' +

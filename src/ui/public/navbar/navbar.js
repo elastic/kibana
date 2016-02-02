@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 const $ = require('jquery');
 const navbar = require('ui/modules').get('kibana/navbar');
 

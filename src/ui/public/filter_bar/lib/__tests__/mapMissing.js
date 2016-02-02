@@ -1,5 +1,5 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
 

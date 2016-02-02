@@ -1,7 +1,7 @@
 let { get, indexBy } = require('lodash');
 let inspect = require('util').inspect;
 
-let PluginApi = require('./PluginApi');
+import PluginApi from './PluginApi';
 let Collection = require('requirefrom')('src')('utils/Collection');
 
 let byIdCache = Symbol('byIdCache');

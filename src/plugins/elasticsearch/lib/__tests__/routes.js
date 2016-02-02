@@ -1,5 +1,5 @@
-const expect = require('expect.js');
-const util = require('util');
+import expect from 'expect.js';
+import util from 'util';
 const requireFromTest = require('requirefrom')('test');
 const kbnTestServer = requireFromTest('utils/kbn_server');
 

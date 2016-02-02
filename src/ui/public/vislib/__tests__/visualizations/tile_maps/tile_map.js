@@ -1,12 +1,12 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
 var $ = require('jquery');
-var sinon = require('auto-release-sinon');
+import sinon from 'auto-release-sinon';
 
-var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
-var MockMap = require('fixtures/tilemap_map');
+import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
+import MockMap from 'fixtures/tilemap_map';
 var mockChartEl = $('<div>');
 
 var TileMap;

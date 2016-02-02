@@ -1,9 +1,9 @@
-let _ = require('lodash');
+import _ from 'lodash';
 let Command = require('commander').Command;
 
 let red = require('./color').red;
 let yellow = require('./color').yellow;
-let help = require('./help');
+import help from './help';
 
 Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;

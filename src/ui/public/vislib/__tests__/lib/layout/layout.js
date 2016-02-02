@@ -1,14 +1,14 @@
-var d3 = require('d3');
-var angular = require('angular');
+import d3 from 'd3';
+import angular from 'angular';
 var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
+import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 var dateHistogramArray = [
   series,
   columns,

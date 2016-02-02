@@ -1,10 +1,10 @@
-const _ = require('lodash');
-const sinon = require('sinon');
-const expect = require('expect.js');
-const Promise = require('bluebird');
+import _ from 'lodash';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import Promise from 'bluebird';
 
-const createKibanaIndex = require('../create_kibana_index');
-const SetupError = require('../setup_error');
+import createKibanaIndex from '../create_kibana_index';
+import SetupError from '../setup_error';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {

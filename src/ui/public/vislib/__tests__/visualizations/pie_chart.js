@@ -1,10 +1,10 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
 var $ = require('jquery');
-var fixtures = require('fixtures/fake_hierarchical_data');
+import fixtures from 'fixtures/fake_hierarchical_data';
 
 var rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },

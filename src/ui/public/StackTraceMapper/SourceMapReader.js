@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 var SourceMapConsumer = require('source-map/lib/source-map/source-map-consumer').SourceMapConsumer;
 var parse = require('url').parse;
 

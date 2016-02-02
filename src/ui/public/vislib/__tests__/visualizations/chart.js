@@ -1,7 +1,7 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('Vislib _chart Test Suite', function () {
   var ColumnChart;

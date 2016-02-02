@@ -1,6 +1,6 @@
-const Boom = require('boom');
+import Boom from 'boom';
 const esErrors = require('elasticsearch').errors;
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function handleESError(error) {
   if (!(error instanceof Error)) {

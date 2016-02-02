@@ -1,12 +1,12 @@
-let Stream = require('stream');
-let moment = require('moment');
-let _ = require('lodash');
-let numeral = require('@spalger/numeral');
-let ansicolors = require('ansicolors');
-let stringify = require('json-stringify-safe');
-let querystring = require('querystring');
+import Stream from 'stream';
+import moment from 'moment';
+import _ from 'lodash';
+import numeral from '@spalger/numeral';
+import ansicolors from 'ansicolors';
+import stringify from 'json-stringify-safe';
+import querystring from 'querystring';
 let inspect = require('util').inspect;
-let applyFiltersToKeys = require('./applyFiltersToKeys');
+import applyFiltersToKeys from './applyFiltersToKeys';
 
 function serializeError(err) {
   return {
