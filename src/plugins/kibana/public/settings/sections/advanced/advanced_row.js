@@ -22,12 +22,12 @@ define(function (require) {
         // To allow passing form validation state back
         $scope.forms = {};
 
-        // setup loading flag, run async op, then clear loading and editting flag (just in case)
+        // setup loading flag, run async op, then clear loading and editing flag (just in case)
         var loading = function (conf, fn) {
           conf.loading = true;
           fn()
           .finally(function () {
-            conf.loading = conf.editting = false;
+            conf.loading = conf.editing = false;
           })
           .catch(notify.fatal);
         };
@@ -41,7 +41,7 @@ define(function (require) {
         $scope.edit = function (conf) {
           conf.unsavedValue = conf.value == null ? conf.defVal : conf.value;
           $scope.configs.forEach(function (c) {
-            c.editting = (c === conf);
+            c.editing = (c === conf);
           });
         };
 
@@ -56,7 +56,7 @@ define(function (require) {
         };
 
         $scope.cancelEdit = function (conf) {
-          conf.editting = false;
+          conf.editing = false;
         };
 
         $scope.clear = function (conf) {
