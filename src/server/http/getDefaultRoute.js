@@ -1,4 +1,4 @@
-let _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = _.once(function (kbnServer) {
   const { uiExports, config } = kbnServer;

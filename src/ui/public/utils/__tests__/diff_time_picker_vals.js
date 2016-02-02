@@ -1,7 +1,7 @@
 
-var moment = require('moment');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import moment from 'moment';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 describe('Diff Time Picker Values', function () {
   var diffTimePickerValues;

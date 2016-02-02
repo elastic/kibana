@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var flattenWith = require('./flattenWith');
-var explodeBy = require('./explodeBy');
+import _ from 'lodash';
+import flattenWith from './flattenWith';
+import explodeBy from './explodeBy';
 
 module.exports = function (target, source) {
   var _target = flattenWith('.', target);

@@ -1,12 +1,12 @@
-const ngMock = require('ngMock');
-const sinon = require('sinon');
-const expect = require('expect.js');
-const angular = require('angular');
-const _ = require('lodash');
+import ngMock from 'ngMock';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import angular from 'angular';
+import _ from 'lodash';
 
 require('ui/navbar');
-const navbarExtensionsRegistry = require('ui/registry/navbar_extensions');
-const Registry = require('ui/registry/_registry');
+import navbarExtensionsRegistry from 'ui/registry/navbar_extensions';
+import Registry from 'ui/registry/_registry';
 
 const defaultMarkup = `
   <navbar name="testing">

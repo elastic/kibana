@@ -1,10 +1,10 @@
 
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var faker = require('faker');
-var _ = require('lodash');
-var MockState = require('fixtures/mock_state');
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import faker from 'faker';
+import _ from 'lodash';
+import MockState from 'fixtures/mock_state';
 
 // global vars, injected and mocked in init()
 var kbnUrl;

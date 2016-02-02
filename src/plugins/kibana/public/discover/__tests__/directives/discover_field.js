@@ -1,10 +1,10 @@
 
-const angular = require('angular');
+import angular from 'angular';
 const $ = require('jquery');
-const _ = require('lodash');
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 // Load the kibana app dependencies.
 require('ui/private');

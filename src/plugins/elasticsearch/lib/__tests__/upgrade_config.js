@@ -1,9 +1,9 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const sinon = require('sinon');
-const expect = require('expect.js');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import expect from 'expect.js';
 
-const upgradeConfig = require('../upgrade_config');
+import upgradeConfig from '../upgrade_config';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/upgrade_config', function () {

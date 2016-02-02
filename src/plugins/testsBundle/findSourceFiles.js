@@ -3,7 +3,7 @@ let { resolve } = require('path');
 let { map, fromNode } = require('bluebird');
 let { Glob } = require('glob');
 
-let fromRoot = require('../../utils/fromRoot');
+import fromRoot from '../../utils/fromRoot';
 
 let findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   patterns = [].concat(patterns || []);

@@ -1,10 +1,10 @@
-const _ = require('lodash');
-const moment = require('moment');
-const numeral = require('numeral');
+import _ from 'lodash';
+import moment from 'moment';
+import numeral from 'numeral';
 
-const toTitleCase = require('./lib/toTitleCase');
-const formatNumber = require('./lib/formatNumber');
-const readStatData = require('./lib/readStatData');
+import toTitleCase from './lib/toTitleCase';
+import formatNumber from './lib/formatNumber';
+import readStatData from './lib/readStatData';
 
 function calcAvg(metricList, metricNumberType) {
   return metricList.map(function (data) {

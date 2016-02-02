@@ -1,9 +1,9 @@
 let { once, pick, size } = require('lodash');
 let { join } = require('path');
-let Boom = require('boom');
+import Boom from 'boom';
 
-let BaseOptimizer = require('../BaseOptimizer');
-let WeirdControlFlow = require('./WeirdControlFlow');
+import BaseOptimizer from '../BaseOptimizer';
+import WeirdControlFlow from './WeirdControlFlow';
 
 module.exports = class LazyOptimizer extends BaseOptimizer {
   constructor(opts) {

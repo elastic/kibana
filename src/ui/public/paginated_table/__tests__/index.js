@@ -1,10 +1,10 @@
 
 require('ui/paginated_table');
-var _ = require('lodash');
+import _ from 'lodash';
 var $ = require('jquery');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('paginated table', function () {
   var $el;

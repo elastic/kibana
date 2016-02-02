@@ -1,7 +1,7 @@
-var angular = require('angular');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 // Load the kibana app dependencies.
 require('ui/parse_query');
@@ -18,7 +18,7 @@ var $elem;
 var cycleIndex = 0;
 var markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 var fromUser;
-var toUser = require('ui/parse_query/lib/to_user');
+import toUser from 'ui/parse_query/lib/to_user';
 
 var init = function () {
   // Load the application

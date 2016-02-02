@@ -1,5 +1,5 @@
 
-var _ = require('lodash');
+import _ from 'lodash';
 describe('Filter Bar Directive', function () {
   describe('mapFlattenAndWrapFilters()', function () {
     var sinon = require('auto-release-sinon');

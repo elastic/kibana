@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 var { join } = require('path');
 
 class UiApp {

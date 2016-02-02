@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 const { isWorker } = require('cluster');
 const { resolve } = require('path');
 

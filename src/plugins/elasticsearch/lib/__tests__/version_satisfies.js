@@ -1,5 +1,5 @@
-const versionSatisfies = require('../version_satisfies');
-const expect = require('expect.js');
+import versionSatisfies from '../version_satisfies';
+import expect from 'expect.js';
 
 const versionChecks = [
   // order is: ['actual version', 'match expression', satisfied (true/false)]

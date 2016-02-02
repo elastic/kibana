@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var noDigestPromises = require('testUtils/noDigestPromises');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var errors = require('ui/errors');
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import noDigestPromises from 'testUtils/noDigestPromises';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import errors from 'ui/errors';
 
 var PersistedState;
 var Events;

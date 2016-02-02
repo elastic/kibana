@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let Joi = require('joi');
+import _ from 'lodash';
+import Joi from 'joi';
 let { attempt, fromNode } = require('bluebird');
 let { basename, resolve } = require('path');
 let { inherits } = require('util');

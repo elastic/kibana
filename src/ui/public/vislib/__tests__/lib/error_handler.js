@@ -1,7 +1,7 @@
 
-var expect = require('expect.js');
-var angular = require('angular');
-var ngMock = require('ngMock');
+import expect from 'expect.js';
+import angular from 'angular';
+import ngMock from 'ngMock';
 
 describe('Vislib ErrorHandler Test Suite', function () {
   var ErrorHandler;

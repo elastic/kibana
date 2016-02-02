@@ -1,4 +1,4 @@
-const SetupError = require('./setup_error');
+import SetupError from './setup_error';
 const format = require('util').format;
 module.exports = function (server) {
   const client = server.plugins.elasticsearch.client;

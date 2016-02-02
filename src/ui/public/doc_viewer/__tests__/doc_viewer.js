@@ -1,9 +1,9 @@
-var angular = require('angular');
+import angular from 'angular';
 var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 var hit = {
   '_index': 'logstash-2014.09.09',
   '_type': 'apache',

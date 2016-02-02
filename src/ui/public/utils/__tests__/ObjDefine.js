@@ -1,4 +1,4 @@
-var expect = require('expect.js');
+import expect from 'expect.js';
 
 describe('ObjDefine Utility', function () {
   var ObjDefine = require('ui/utils/ObjDefine');

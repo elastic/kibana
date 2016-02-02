@@ -1,6 +1,6 @@
-let _ = require('lodash');
+import _ from 'lodash';
 let { NoDefaultIndexPattern, NoDefinedIndexPatterns } = require('ui/errors');
-let Notifier = require('ui/notify/notifier');
+import Notifier from 'ui/notify/notifier';
 let notify = new Notifier({
   location: 'Index Patterns'
 });

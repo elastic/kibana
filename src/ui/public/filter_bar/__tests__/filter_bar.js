@@ -1,12 +1,12 @@
-var angular = require('angular');
-var _ = require('lodash');
+import angular from 'angular';
+import _ from 'lodash';
 var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var sinon = require('sinon');
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
 require('ui/filter_bar');
-var MockState = require('fixtures/mock_state');
+import MockState from 'fixtures/mock_state';
 
 describe('Filter Bar Directive', function () {
   var $rootScope;

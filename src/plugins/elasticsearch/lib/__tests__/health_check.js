@@ -1,9 +1,9 @@
-const Promise = require('bluebird');
-const sinon = require('sinon');
-const expect = require('expect.js');
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import expect from 'expect.js';
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
-const healthCheck = require('../health_check');
+import healthCheck from '../health_check';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {

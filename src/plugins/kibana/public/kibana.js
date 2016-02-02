@@ -14,12 +14,12 @@ require('ui/agg_types');
 require('ui/timepicker');
 require('leaflet');
 
-const moment = require('moment-timezone');
-const chrome = require('ui/chrome');
-const routes = require('ui/routes');
-const modules = require('ui/modules');
+import moment from 'moment-timezone';
+import chrome from 'ui/chrome';
+import routes from 'ui/routes';
+import modules from 'ui/modules';
 
-const kibanaLogoUrl = require('ui/images/kibana.svg');
+import kibanaLogoUrl from 'ui/images/kibana.svg';
 
 routes.enable();
 

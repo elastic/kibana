@@ -1,6 +1,6 @@
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 require('ui/state_management/app_state');
 
 describe('State Management', function () {

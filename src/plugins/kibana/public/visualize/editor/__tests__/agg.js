@@ -1,9 +1,9 @@
 
-const angular = require('angular');
+import angular from 'angular';
 const $ = require('jquery');
-const _ = require('lodash');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 require('plugins/kibana/visualize/editor/agg');
 
