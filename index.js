@@ -2,6 +2,13 @@
 var path = require('path');
 
 module.exports = function (kibana) {
+  var mainFile = 'plugins/timelion/app';
+  if (Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload').get) {
+    // the autoload list has been replaced with a getter that complains about
+    // improper access, bypass that getter by seeing if it is defined
+    mainFile = 'plugins/timelion/app_with_autoload';
+  }
+
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
     uiExports: {
@@ -9,7 +16,7 @@ module.exports = function (kibana) {
         title: 'Timelion',
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
-        main: 'plugins/timelion/app',
+        main: mainFile,
         injectVars: function (server, options) {
           var config = server.config();
           return {
@@ -51,4 +58,4 @@ module.exports = function (kibana) {
     },
     init: require('./init.js'),
   });
-};;
+};
