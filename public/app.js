@@ -11,6 +11,7 @@ require('./directives/docs');
 require('./main.less');
 
 var timelionLogo = require('plugins/timelion/header.png');
+document.title = 'Timelion - Kibana';
 
 require('ui/chrome')
 .setBrand({
@@ -53,6 +54,8 @@ app.controller('timelion', function (
   });
 
   var timezone = Private(require('plugins/timelion/services/timezone'))();
+  var docTitle = Private(require('ui/doc_title'));
+
   var defaultExpression = '.es(*)';
   var savedSheet = $route.current.locals.savedSheet;
   var blankSheet = [defaultExpression];
@@ -117,6 +120,10 @@ app.controller('timelion', function (
   $scope.$watch('state.interval', function (newInterval, oldInterval) {
     if (oldInterval === 'other') return;
     $scope.state.otherInterval = oldInterval;
+  });
+
+  $scope.$watch(function () { return savedSheet.title; }, function (newTitle) {
+    docTitle.change(savedSheet.id ? newTitle : undefined);
   });
 
   $scope.drop = function (item, partFrom, partTo, indexFrom, indexTo) {
