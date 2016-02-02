@@ -1,31 +1,31 @@
-var parse = require('url').parse;
-var bindKey = require('lodash').bindKey;
+import { parse } from 'url';
+import { bindKey } from 'lodash';
 
 require('../app_switcher/app_switcher.less');
-var DomLocationProvider = require('ui/domLocation');
+const DomLocationProvider = require('ui/domLocation');
 
 require('ui/modules')
 .get('kibana')
 .provider('appSwitcherEnsureNavigation', function () {
-  var forceNavigation = false;
+  let forceNavigation = false;
 
   this.forceNavigation = function (val) {
     forceNavigation = !!val;
   };
 
   this.$get = ['Private', function (Private) {
-    var domLocation = Private(DomLocationProvider);
+    const domLocation = Private(DomLocationProvider);
 
     return function (event) {
       if (!forceNavigation || event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
         return;
       }
 
-      var toParsed = parse(event.delegateTarget.href);
-      var fromParsed = parse(domLocation.href);
-      var sameProto = toParsed.protocol === fromParsed.protocol;
-      var sameHost = toParsed.host === fromParsed.host;
-      var samePath = toParsed.path === fromParsed.path;
+      const toParsed = parse(event.delegateTarget.href);
+      const fromParsed = parse(domLocation.href);
+      const sameProto = toParsed.protocol === fromParsed.protocol;
+      const sameHost = toParsed.host === fromParsed.host;
+      const samePath = toParsed.path === fromParsed.path;
 
       if (sameProto && sameHost && samePath) {
         toParsed.hash && domLocation.reload();
@@ -44,7 +44,7 @@ require('ui/modules')
     restrict: 'E',
     template: require('./app_switcher.html'),
     controllerAs: 'switcher',
-    controller: function ($scope, appSwitcherEnsureNavigation) {
+    controller($scope, appSwitcherEnsureNavigation) {
       // since we render this in an isolate scope we can't "require: ^chrome", but
       // rather than remove all helpfull checks we can just check here.
       if (!$scope.chrome || !$scope.chrome.getNavLinks) {
