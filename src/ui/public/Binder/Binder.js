@@ -1,8 +1,8 @@
 var $ = require('jquery');
 import d3 from 'd3';
-var callEach = require('lodash').callEach;
-var bindKey = require('lodash').bindKey;
-var rest = require('lodash').rest;
+import { callEach } from 'lodash';
+import { bindKey } from 'lodash';
+import { rest } from 'lodash';
 
 function Binder($scope) {
   this.disposal = [];

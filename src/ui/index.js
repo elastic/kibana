@@ -1,9 +1,9 @@
+import { format as formatUrl } from 'url';
+import { readFileSync as readFile } from 'fs';
 module.exports = async (kbnServer, server, config) => {
   let { defaults } = require('lodash');
   let Boom = require('boom');
-  let formatUrl = require('url').format;
   let { resolve } = require('path');
-  let readFile = require('fs').readFileSync;
 
   let fromRoot = require('../utils/fromRoot');
   let UiExports = require('./ui_exports');

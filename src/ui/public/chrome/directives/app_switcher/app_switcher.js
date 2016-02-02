@@ -1,8 +1,8 @@
-var parse = require('url').parse;
-var bindKey = require('lodash').bindKey;
 
 require('../app_switcher/app_switcher.less');
 import DomLocationProvider from 'ui/domLocation';
+import { parse } from 'url';
+import { bindKey } from 'lodash';
 
 require('ui/modules')
 .get('kibana')

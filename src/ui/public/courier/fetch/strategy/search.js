@@ -1,8 +1,8 @@
+import { toJson } from 'ui/utils/aggressive_parse';
 define(function (require) {
   return function FetchStrategyForSearch(Private, Promise, timefilter) {
     var _ = require('lodash');
     var angular = require('angular');
-    var toJson = require('ui/utils/aggressive_parse').toJson;
 
     return {
       clientMethod: 'msearch',

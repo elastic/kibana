@@ -1,8 +1,8 @@
+import { values } from 'lodash';
 describe('Range Agg', function () {
   var _ = require('lodash');
   var ngMock = require('ngMock');
   var expect = require('expect.js');
-  var values = require('lodash').values;
 
   var resp = require('fixtures/agg_resp/range');
   var buckets = values(resp.aggregations[1].buckets);

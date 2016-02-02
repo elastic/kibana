@@ -6,10 +6,10 @@ let rimraf = promisify(require('rimraf'));
 let mkdirp = promisify(require('mkdirp'));
 let unlink = promisify(require('fs').unlink);
 let readdir = promisify(require('fs').readdir);
-let readSync = require('fs').readFileSync;
 
 import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
+import { readFileSync as readSync } from 'fs';
 
 class UiBundleCollection {
   constructor(bundlerEnv, filter) {

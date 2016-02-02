@@ -1,6 +1,6 @@
+import { pluck } from 'lodash';
 describe('ui/index_patterns/_calculate_indices', () => {
   const _ = require('lodash');
-  const pluck = require('lodash').pluck;
   const sinon = require('auto-release-sinon');
   const expect = require('expect.js');
   const ngMock = require('ngMock');

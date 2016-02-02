@@ -1,12 +1,12 @@
+import { SearchTimeout } from 'ui/errors';
+import { RequestFailure } from 'ui/errors';
+import { ShardFailure } from 'ui/errors';
 define(function (require) {
   return function CourierFetchCallResponseHandlers(Private, Promise) {
     var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
     var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
     var notify = Private(require('ui/courier/fetch/_notifier'));
 
-    var SearchTimeout = require('ui/errors').SearchTimeout;
-    var RequestFailure = require('ui/errors').RequestFailure;
-    var ShardFailure = require('ui/errors').ShardFailure;
 
     function callResponseHandlers(requests, responses) {
       return Promise.map(requests, function (req, i) {
