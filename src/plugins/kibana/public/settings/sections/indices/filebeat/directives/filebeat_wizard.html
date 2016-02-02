@@ -6,7 +6,7 @@
 </div>
 
 <div>
-  <div class="wizard-step-headings">
+  <div class="wizard-step-headings" ng-class="{complete: wizard.complete}">
       <span ng-class="{active: wizard.currentStep === 0}"
             class="wizard-step-heading"
             ng-click="wizard.setCurrentStep(0)">

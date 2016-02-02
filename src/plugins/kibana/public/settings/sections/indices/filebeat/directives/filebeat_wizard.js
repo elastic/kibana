@@ -21,8 +21,10 @@ modules.get('apps/settings')
       this.stepResults = {};
 
       this.setCurrentStep = (step) => {
-        $state.currentStep = step;
-        $state.save();
+        if (!this.complete) {
+          $state.currentStep = step;
+          $state.save();
+        }
       };
       this.setCurrentStep(0);
 
@@ -38,6 +40,14 @@ modules.get('apps/settings')
       };
 
       $scope.$watch('wizard.state.currentStep', (newValue, oldValue) => {
+        if (this.complete) {
+          $state.currentStep = totalSteps - 1;
+          $state.save();
+          return;
+        }
+        if (newValue + 1 === totalSteps) {
+          this.complete = true;
+        }
         if (newValue < oldValue) {
           return safeConfirm('Going back will reset any changes you\'ve made to this step, do you want to continue?')
             .then(
