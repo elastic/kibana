@@ -1,4 +1,3 @@
-<kbn-notifications list="notifList"></kbn-notifications>
 <div class="content" chrome-context >
   <!-- TODO: These config dropdowns shouldn't be hard coded -->
   <nav class="app-links-wrapper">
@@ -20,6 +19,7 @@
   </nav>
 
   <div class="app-wrapper">
+    <kbn-notifications list="notifList"></kbn-notifications>
     <nav
       ng-style="::{ background: chrome.getNavBackground() }"
       ng-class="{ show: chrome.getVisible() }"

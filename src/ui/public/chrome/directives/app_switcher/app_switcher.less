@@ -9,14 +9,19 @@
 @transition-delay: .2s;
 
 .app-links-wrapper {
-  flex: 0 0 @as-closed-width;
+  width: @as-closed-width;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
   background-color: #3caed2;
   overflow: hidden;
-  transition: flex-basis @transition-time;
+  transition: width @transition-time;
   transition-delay: @transition-delay;
 
   &:hover {
-    flex-basis: @as-open-width;
+    width: @as-open-width;
 
     .app-title {
       display: inline-block;
@@ -31,7 +36,12 @@
 }
 .app-wrapper {
   .real-flex-parent();
-  flex: 1;
+  position: absolute;
+  left: @as-closed-width;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
   margin: 0 auto;
 
   .navbar-right {
