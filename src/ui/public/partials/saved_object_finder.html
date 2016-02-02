@@ -1,44 +1,66 @@
-<form role="form">
-  <div class="form-group finder-form">
-    <div class="finder-form-options">
-      <a class="small" ng-click="finder.manageObjects(finder.properties.name)">manage {{finder.properties.nouns}}</a>
+<form role="form" class="form-inline">
+  <div class="container-fluid">
+    <div class="row" style="background-color: #f6f6f6; padding: 10px;">
+      <div class="input-group form-group finder-form col-md-8" style="float: left">
+        <span class="input-group-addon" style="padding: 5px 0px !important; background-color: #ffffff; border: none;">
+          <i class="fa fa-search"></i>
+        </span>
+        <input
+          input-focus
+          style="border: none; padding: 5px 0px; border-radius: 4px;"
+          ng-model="filter"
+          placeholder="Filter..."
+          ng-keydown="finder.filterKeyDown($event)"
+          class="form-control"
+          name="filter"
+          type="text" />
+      </div>
+      <div class="col-md-2" style="vertical-align: middle; padding: 5px;">
+        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
+      </div>
+      <div class="col-md-2" style="padding: 5px;">
+        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage</a>
+      </div>
     </div>
-    <div class="clearfix visible-xs-block"></div>
-    <input
-      input-focus
-      ng-model="filter"
-      ng-attr-placeholder="{{finder.properties.noun}} Filter"
-      ng-keydown="finder.filterKeyDown($event)"
-      class="form-control"
-      name="filter"
-      type="text" />
-
-    <span class="finder-hit-count"><strong>{{finder.hitCount}}</strong> {{finder.hitCountNoun()}}</span>
   </div>
 </form>
 <paginate list="finder.hits" per-page="5">
-  <table class="list-group list-group-menu table-striped" style="width: 100%;" ng-class="{'select-mode': finder.selector.enabled}">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Name</th>
-      </tr>
-    </thead>
+  <table style="width: 100%" class="list-group list-group-menu table-striped" ng-class="{'select-mode': finder.selector.enabled}">
 
-    <tbody>
-      <tr class="wizard-vis-type" ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}" ng-repeat="hit in page" ng-keydown="finder.hitKeyDown($event, page, paginate)" ng-click="finder.onChoose(hit, $event)">
-        <th>
-          <a ng-href="{{finder.makeUrl(hit)}}" ng-blur="finder.hitBlur($event)" ng-click="finder.preventClick($event)">
-            <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
-          </a>
-        </th>
-        <th>
-          <p ng-if="hit.description" ng-bind="hit.description"></p>
-        </th>
-        <th class="list-group-item list-group-no-results" ng-if="finder.hits.length === 0">
-          <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
-        </th>
-      </tr>
-    </tbody>
+    <!-- Table Headers -->
+    <tr>
+      <th scope="row">Type</th>
+      <th>Name</th>
+    </tr>
+
+    <!-- Table body -->
+    <tr class=""
+        scope="row"
+        style="padding: 0px 10px;"
+        ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
+        ng-repeat="hit in page"
+        ng-keydown="finder.hitKeyDown($event, page, paginate)"
+        ng-click="finder.onChoose(hit, $event)">
+
+      <td>
+        <a ng-href="{{finder.makeUrl(hit)}}"
+          ng-blur="finder.hitBlur($event)"
+          ng-click="finder.preventClick($event)">
+          <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+        </a>
+      </td>
+
+      <td>
+        {{hit.title}}
+        <p ng-if="hit.description" ng-bind="hit.description"></p>
+      </td>
+    </tr>
+
+    <tr ng-if="finder.hits.length === 0">
+      <td>
+        <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
+      </td>
+    </tr>
+
   </table>
 </paginate>

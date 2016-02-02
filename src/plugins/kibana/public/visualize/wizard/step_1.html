@@ -1,28 +1,30 @@
-<div class="row">
-  <div class="col-md-6">
-    <h1>
-      Create New Visualization <br class="visible-xs">
-    </h1>
+<div class="container-fluid" style="padding: 0px;">
+  <div class="row">
+    <div class="col-md-6" style="padding-left: 0px; padding-right: 5px">
+      <h1>
+        Create New Visualization <br class="visible-xs">
+      </h1>
 
-    <div class="wizard-vis-types">
-      <a class="wizard-vis-type"
-         ng-repeat="type in visTypes.inTitleOrder"
-         ng-href="{{ visTypeUrl(type) }}">
-        <div class="wizard-vis-type-heading">
-          <i aria-hidden="true" class="fa fa-fw" ng-class="type.icon"></i>
-          <h4>{{type.title}}</h4>
-        </div>
-        <p class="wizard-vis-type-description">{{type.description}}</p>
-      </a>
+      <div class="wizard-vis-types">
+        <a class="wizard-vis-type"
+           ng-repeat="type in visTypes.inTitleOrder"
+           ng-href="{{ visTypeUrl(type) }}">
+          <div class="wizard-vis-type-heading">
+            <i aria-hidden="true" class="fa fa-fw" ng-class="type.icon"></i>
+            <h4>{{type.title}}</h4>
+          </div>
+          <p class="wizard-vis-type-description">{{type.description}}</p>
+        </a>
+      </div>
     </div>
-  </div>
 
-  <div class="col-md-6">
-    <h1>Or, open a saved visualization</h1>
+    <div class="col-md-6" style="padding-left: 0px; padding-right: 5px;">
+      <h1>Or, Open a Saved Visualization</h1>
 
-    <saved-object-finder
-            title="Saved Visualizations"
-            type="visualizations">
-    </saved-object-finder>
+      <saved-object-finder
+              title="Saved Visualizations"
+              type="visualizations">
+      </saved-object-finder>
+    </div>
   </div>
 </div>
