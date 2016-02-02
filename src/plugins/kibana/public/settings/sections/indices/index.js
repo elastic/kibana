@@ -23,7 +23,7 @@ define(function (require) {
       transclude: true,
       template: require('plugins/kibana/settings/sections/indices/index.html'),
       link: function ($scope) {
-        $scope.edittingId = $route.current.params.indexPatternId;
+        $scope.editingId = $route.current.params.indexPatternId;
         config.$bind($scope, 'defaultIndex');
 
         $scope.$watch('defaultIndex', function () {
@@ -32,7 +32,7 @@ define(function (require) {
             return {
               id: id,
               url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
-              class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
+              class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
               default: $scope.defaultIndex === id
             };
           });
