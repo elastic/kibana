@@ -28,7 +28,7 @@ in the index pattern name.
 * {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display
 correctly.
 * {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-* {k4issue}5824[Issue 5284]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
+* {k4issue}5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
 
 [float]
 [[plugin-system]]
