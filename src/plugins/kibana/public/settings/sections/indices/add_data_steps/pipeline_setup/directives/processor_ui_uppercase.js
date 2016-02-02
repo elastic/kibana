@@ -1,12 +1,12 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const keysDeep = require('../../../../../lib/keys_deep');
+const keysDeep = require('../../../../../../../lib/keys_deep');
 
 //scope.processor, scope.pipeline are attached by the process_container.
-app.directive('processorUiTrim', function () {
+app.directive('processorUiUppercase', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_ui_trim.html'),
+    template: require('../views/processor_ui_uppercase.html'),
     controller : function ($scope) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;

@@ -1,5 +1,6 @@
-//TODO: Move to variables file
-@process-container-overlay-bg: fade(#000, 10%);
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
 
 process-container {
   display: block;
@@ -15,7 +16,6 @@ process-container {
     }
 
     .overlay {
-      // TODO: Figure out the best way to disable/gray out the processor
       display: none;
       position: absolute;
 
@@ -23,7 +23,7 @@ process-container {
       left: -5000px;
       width: 10000px;
       height: 10000px;
-      background-color: @process-container-overlay-bg;
+      background-color: @settings-pipeline-setup-processor-container-overlay-bg;
     }
 
     &.dirty {

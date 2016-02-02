@@ -5,6 +5,8 @@ const angular = require('angular');
 
 require('../services/ingest');
 require('../styles/_pipeline_setup.less');
+require('./pipeline_output');
+require('./source_data');
 require('./processors');
 
 app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
@@ -85,7 +87,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
     },
     controller: function ($scope) {
       const savedPipeline = require('../sample_pipeline.json');
-      const types = require('../../../../../domain/ingest_processor_types');
+      const types = require('../../../../../../../domain/ingest_processor_types');
       const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
       $scope.defaultProcessorType = getDefaultProcessorType();

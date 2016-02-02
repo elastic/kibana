@@ -22,6 +22,7 @@ module.exports = function (server) {
       return !versionSatisfies(node.version, engineVersion);
     });
 
+return true;
     if (!badNodes.length) return true;
 
     var badNodeNames = badNodes.map(function (node) {

@@ -1,25 +1,18 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const keysDeep = require('../../../../../lib/keys_deep');
+const keysDeep = require('../../../../../../../lib/keys_deep');
 
 //scope.processor, scope.pipeline are attached by the process_container.
-app.directive('processorUiJoin', function () {
+app.directive('processorUiLowercase', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_ui_join.html'),
+    template: require('../views/processor_ui_lowercase.html'),
     controller : function ($scope) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
-        const allKeys = keysDeep(processor.inputObject);
-        const keys = [];
-        allKeys.forEach((key) => {
-          if (_.isArray(_.get(processor.inputObject, key))) {
-            keys.push(key);
-          }
-        });
-        $scope.fields = keys;
+        $scope.fields = keysDeep(processor.inputObject);
         refreshFieldData();
       }
 
@@ -38,8 +31,6 @@ app.directive('processorUiJoin', function () {
         refreshFieldData();
         processorUiChanged();
       });
-
-      $scope.$watch('processor.separator', processorUiChanged);
     }
   };
 });

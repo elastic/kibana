@@ -1,12 +1,12 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const keysDeep = require('../../../../../lib/keys_deep');
+const keysDeep = require('../../../../../../../lib/keys_deep');
 
 //scope.processor, scope.pipeline are attached by the process_container.
-app.directive('processorUiGeoip', function () {
+app.directive('processorUiGrok', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_ui_geoip.html'),
+    template: require('../views/processor_ui_grok.html'),
     controller : function ($scope) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
@@ -32,7 +32,7 @@ app.directive('processorUiGeoip', function () {
         processorUiChanged();
       });
 
-      $scope.$watch('processor.targetField', processorUiChanged);
+      $scope.$watch('processor.pattern', processorUiChanged);
     }
   };
 });

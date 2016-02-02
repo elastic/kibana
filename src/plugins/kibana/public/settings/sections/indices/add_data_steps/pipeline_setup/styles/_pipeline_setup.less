@@ -1,5 +1,6 @@
-//TODO: Move to variables file
-@pipeline-setup-border: #CCC;
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
 
 pipeline-setup {
   label {
@@ -12,13 +13,13 @@ pipeline-setup {
 
     &>li {
       border: 1px solid;
-      border-color: @pipeline-setup-border;
+      border-color: @settings-pipeline-setup-pipeline-border;
     }
   }
 
   .empty-pipeline {
     border: 1px solid;
-    border-color: @pipeline-setup-border;
+    border-color: @settings-pipeline-setup-pipeline-border;
     padding: 5px;
 
     p {

@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
+  require('plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup');
   require('plugins/kibana/settings/sections/indices/_create');
   require('plugins/kibana/settings/sections/indices/_edit');
   require('plugins/kibana/settings/sections/indices/_field_editor');

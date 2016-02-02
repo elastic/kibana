@@ -1,12 +1,12 @@
-//TODO: Move into variables file.
-@output-preview-border: #CCC;
-@output-preview-bg: #ECF0F1;
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
 
 output-preview {
   .visual {
-    background-color: @output-preview-bg;
+    background-color: @settings-pipeline-setup-output-preview-bg;
     border: 1px solid;
-    border-color: @output-preview-border;
+    border-color: @settings-pipeline-setup-output-preview-border;
     overflow-x: auto;
   }
 

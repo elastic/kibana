@@ -2,18 +2,14 @@
 @import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/theme";
 
-//TODO: Move to variables file.
-@process-container-header-bg: #DDD;
-@process-container-header-border: #CCC;
-
 process-container-header {
   .process-container-header {
     display: flex;
     align-items: center;
     flex: 1 0 auto;
-    background-color: @process-container-header-bg;
+    background-color: @settings-pipeline-setup-processor-container-overlay-bg;
     border-bottom: 1px solid;
-    border-bottom-color: @process-container-header-border;
+    border-bottom-color: @settings-pipeline-setup-processor-container-header-border;
 
     &-toggle {
       flex: 0 0 auto;
