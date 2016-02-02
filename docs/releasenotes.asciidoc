@@ -3,15 +3,14 @@
 
 The 4.4 release of Kibana requires Elasticsearch 2.2 or later.
 
-Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch  
-include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates 
+Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch
+include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates
 in the index pattern name.
 
 [float]
 [[enhancements]]
 == Enhancements
 
-* {k4issue}5897[Issue 5897]: Embedding links now include navigation and search bars.
 * {k4issue}1362[Issue 1362]: Color palette selector added.
 * {k4issue}1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
 * {k4issue}5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
@@ -25,10 +24,9 @@ in the index pattern name.
 [[bugfixes]]
 == Bug Fixes
 
-* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display 
+* {k4issue}5897[Issue 5897]: Embedding links no longer include navigation and search bars.
+* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display
 correctly.
-* {k4issue}5191[Issue 5191]: Timepicker is now available for dashboards that contain a chart based on an index that is not 
-time-based.
 * {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
 * {k4issue}5824[Issue 5284]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
 
