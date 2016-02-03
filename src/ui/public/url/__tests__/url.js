@@ -5,6 +5,7 @@ import ngMock from 'ngMock';
 import faker from 'faker';
 import _ from 'lodash';
 import MockState from 'fixtures/mock_state';
+import 'ui/url';
 
 // global vars, injected and mocked in init()
 var kbnUrl;
@@ -14,7 +15,6 @@ var $rootScope;
 var globalStateMock;
 var appState;
 
-require('ui/url');
 
 function init() {
   ngMock.module('kibana/url', 'kibana', function ($provide) {

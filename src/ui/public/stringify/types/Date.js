@@ -1,3 +1,4 @@
+import 'ui/field_format_editor/pattern/pattern';
 define(function (require) {
   return function DateTimeFormatProvider(Private) {
     var _ = require('lodash');
@@ -5,7 +6,6 @@ define(function (require) {
     var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
     var moment = require('moment');
 
-    require('ui/field_format_editor/pattern/pattern');
 
     _.class(DateTime).inherits(FieldFormat);
     function DateTime(params) {

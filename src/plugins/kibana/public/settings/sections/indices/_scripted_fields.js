@@ -1,6 +1,6 @@
+import 'ui/paginated_table';
 define(function (require) {
   const _ = require('lodash');
-  require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {

@@ -1,3 +1,4 @@
+import 'ui/number_list';
 describe('NumberList directive', function () {
   var $ = require('jquery');
   var _ = require('lodash');
@@ -5,7 +6,6 @@ describe('NumberList directive', function () {
   var simulateKeys = require('testUtils/simulateKeys');
   var ngMock = require('ngMock');
 
-  require('ui/number_list');
 
   var $el;
   var $scope;

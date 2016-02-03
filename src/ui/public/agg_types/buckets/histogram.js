@@ -1,3 +1,4 @@
+import 'ui/validateDateInterval';
 define(function (require) {
   return function HistogramAggDefinition(Private) {
     var _ = require('lodash');
@@ -5,7 +6,6 @@ define(function (require) {
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/histogram'));
 
-    require('ui/validateDateInterval');
 
     return new BucketAggType({
       name: 'histogram',

@@ -1,11 +1,11 @@
+import 'ui/timepicker/quick_ranges';
+import 'ui/timepicker/time_units';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
   var _ = require('lodash');
   var dateMath = require('ui/utils/dateMath');
   var moment = require('moment');
 
-  require('ui/timepicker/quick_ranges');
-  require('ui/timepicker/time_units');
 
   module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
     return {

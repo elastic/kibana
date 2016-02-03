@@ -2,8 +2,8 @@ import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ngMock';
+import 'plugins/kibana/discover/index';
 
-require('plugins/kibana/discover/index');
 
 var filter;
 

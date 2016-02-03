@@ -3,8 +3,8 @@ import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import moment from 'moment';
 import ngMock from 'ngMock';
+import 'ui/filters/moment';
 
-require('ui/filters/moment');
 
 var filter;
 

@@ -1,9 +1,9 @@
+import 'plugins/kibana/visualize/editor/agg_params';
+import 'plugins/kibana/visualize/editor/agg_add';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
-    require('plugins/kibana/visualize/editor/agg_params');
-    require('plugins/kibana/visualize/editor/agg_add');
 
     const _ = require('lodash');
     const $ = require('jquery');

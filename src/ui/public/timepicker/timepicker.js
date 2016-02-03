@@ -1,3 +1,9 @@
+import 'ui/directives/input_datetime';
+import 'ui/directives/inequality';
+import 'ui/timepicker/quick_ranges';
+import 'ui/timepicker/refresh_intervals';
+import 'ui/timepicker/time_units';
+import 'ui/timepicker/toggle';
 define(function (require) {
   var html = require('ui/timepicker/timepicker.html');
   var module = require('ui/modules').get('ui/timepicker');
@@ -9,12 +15,6 @@ define(function (require) {
     location: 'timepicker',
   });
 
-  require('ui/directives/input_datetime');
-  require('ui/directives/inequality');
-  require('ui/timepicker/quick_ranges');
-  require('ui/timepicker/refresh_intervals');
-  require('ui/timepicker/time_units');
-  require('ui/timepicker/toggle');
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {

@@ -1,7 +1,7 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-require('ui/state_management/app_state');
+import 'ui/state_management/app_state';
 
 describe('State Management', function () {
   var $rootScope;

@@ -1,11 +1,11 @@
+import 'ui/watch_multi';
+import 'ui/directives/input_focus';
 define(function (require) {
   var _ = require('lodash');
-  require('ui/watch_multi');
   var ConfigTemplate = require('ui/ConfigTemplate');
   var angular = require('angular');
   var module = require('ui/modules').get('kibana');
 
-  require('ui/directives/input_focus');
 
   /**
    * config directive

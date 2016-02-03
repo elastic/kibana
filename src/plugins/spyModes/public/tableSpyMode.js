@@ -1,4 +1,5 @@
 import { saveAs } from '@spalger/filesaver';
+import 'ui/agg_table';
 define(function (require) {
   function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     const _ = require('lodash');
@@ -6,7 +7,6 @@ define(function (require) {
 
     const PER_PAGE_DEFAULT = 10;
 
-    require('ui/agg_table');
 
     return {
       name: 'table',

@@ -1,8 +1,8 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import 'ui/directives/validate_cidr_mask';
 
-require('ui/directives/validate_cidr_mask');
 
 describe('Validate CIDR mask directive', function () {
   var $compile;

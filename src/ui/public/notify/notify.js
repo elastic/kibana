@@ -1,3 +1,4 @@
+import 'ui/notify/directives';
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
@@ -7,7 +8,6 @@ define(function (require) {
   var Notifier = require('ui/notify/notifier');
   var rootNotifier = new Notifier();
 
-  require('ui/notify/directives');
 
   module.factory('createNotifier', function () {
     return function (opts) {

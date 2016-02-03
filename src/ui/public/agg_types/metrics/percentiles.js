@@ -1,3 +1,4 @@
+import 'ui/number_list';
 define(function (require) {
   return function AggTypeMetricPercentilesProvider(Private) {
     var _ = require('lodash');
@@ -9,7 +10,6 @@ define(function (require) {
 
     var percentsEditor = require('ui/agg_types/controls/percentiles.html');
     // required by the percentiles editor
-    require('ui/number_list');
 
     var valueProps = {
       makeLabel: function () {

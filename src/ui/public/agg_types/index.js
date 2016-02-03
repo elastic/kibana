@@ -1,3 +1,4 @@
+import 'ui/agg_types/AggParams';
 define(function (require) {
   return function AggTypeService(Private) {
     var IndexedArray = require('ui/IndexedArray');
@@ -60,5 +61,4 @@ define(function (require) {
   };
 
   // preload
-  require('ui/agg_types/AggParams');
 });

@@ -1,3 +1,15 @@
+import 'ui/doc_table';
+import 'ui/visualize';
+import 'ui/notify';
+import 'ui/fixedScroll';
+import 'ui/directives/validate_json';
+import 'ui/filters/moment';
+import 'ui/courier';
+import 'ui/index_patterns';
+import 'ui/state_management/app_state';
+import 'ui/timefilter';
+import 'ui/highlight/highlight_tags';
+import 'ui/share';
 define(function (require) {
   const _ = require('lodash');
   const angular = require('angular');
@@ -8,18 +20,6 @@ define(function (require) {
 
   const dateMath = require('ui/utils/dateMath');
 
-  require('ui/doc_table');
-  require('ui/visualize');
-  require('ui/notify');
-  require('ui/fixedScroll');
-  require('ui/directives/validate_json');
-  require('ui/filters/moment');
-  require('ui/courier');
-  require('ui/index_patterns');
-  require('ui/state_management/app_state');
-  require('ui/timefilter');
-  require('ui/highlight/highlight_tags');
-  require('ui/share');
 
   const app = require('ui/modules').get('apps/discover', [
     'kibana/notify',

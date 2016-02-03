@@ -5,10 +5,10 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import searchResponse from 'fixtures/search_response';
 import ngMock from 'ngMock';
+import 'ui/private';
+import 'ui/doc_table';
 
 // Load the kibana app dependencies.
-require('ui/private');
-require('ui/doc_table');
 
 
 var $parentScope;

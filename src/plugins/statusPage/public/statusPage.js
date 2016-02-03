@@ -1,10 +1,10 @@
 const $ = require('jquery');
 import _ from 'lodash';
 import notify from 'ui/notify';
+import 'ui/autoload/styles';
+import 'plugins/statusPage/statusPageMetric';
+import 'plugins/statusPage/statusPage.less';
 
-require('ui/autoload/styles');
-require('plugins/statusPage/statusPageMetric');
-require('plugins/statusPage/statusPage.less');
 
 const chrome = require('ui/chrome')
 .setTabs([

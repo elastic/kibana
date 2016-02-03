@@ -1,11 +1,11 @@
+import 'ui/notify';
+import 'ui/courier';
+import 'ui/doc_viewer';
+import 'ui/index_patterns';
 define(function (require) {
   const _ = require('lodash');
   const angular = require('angular');
 
-  require('ui/notify');
-  require('ui/courier');
-  require('ui/doc_viewer');
-  require('ui/index_patterns');
 
   const app = require('ui/modules').get('apps/doc', [
     'kibana/notify',

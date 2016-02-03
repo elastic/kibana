@@ -1,3 +1,4 @@
+import 'ui/private';
 describe('AggType Class', function () {
   var _ = require('lodash');
   var expect = require('expect.js');
@@ -10,7 +11,6 @@ describe('AggType Class', function () {
   var fieldFormat;
   var Vis;
 
-  require('ui/private');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

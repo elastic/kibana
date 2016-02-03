@@ -2,7 +2,7 @@ import angular from 'angular';
 var $ = require('jquery');
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-require('plugins/kibana/discover/index');
+import 'plugins/kibana/discover/index';
 
 var $parentScope;
 

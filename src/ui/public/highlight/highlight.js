@@ -1,5 +1,5 @@
+import 'ui/highlight/highlight_tags';
 define(function (require) {
-  require('ui/highlight/highlight_tags');
 
   var _ = require('lodash');
   var angular = require('angular');

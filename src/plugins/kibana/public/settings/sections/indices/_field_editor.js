@@ -1,6 +1,6 @@
+import 'ui/field_editor';
+import 'plugins/kibana/settings/sections/indices/_index_header';
 define(function (require) {
-  require('ui/field_editor');
-  require('plugins/kibana/settings/sections/indices/_index_header');
 
   require('ui/routes')
   .when('/settings/indices/:indexPatternId/field/:fieldName', { mode: 'edit' })

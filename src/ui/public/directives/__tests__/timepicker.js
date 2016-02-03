@@ -5,12 +5,12 @@ import _ from 'lodash';
 var $ = require('jquery');
 import sinon from 'auto-release-sinon';
 import ngMock from 'ngMock';
+import 'plugins/kibana/visualize/index';
+import 'plugins/kibana/dashboard/index';
+import 'plugins/kibana/discover/index';
 
-require('plugins/kibana/visualize/index');
-require('plugins/kibana/dashboard/index');
 
 // TODO: This should not be needed, timefilter is only included here, it should move
-require('plugins/kibana/discover/index');
 
 var $parentScope;
 

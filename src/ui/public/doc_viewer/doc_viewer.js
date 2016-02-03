@@ -1,10 +1,10 @@
+import 'ace';
+import 'ui/doc_viewer/doc_viewer.less';
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  require('ace');
 
   var html = require('ui/doc_viewer/doc_viewer.html');
-  require('ui/doc_viewer/doc_viewer.less');
 
   require('ui/modules').get('kibana')
   .directive('docViewer', function (config, Private) {

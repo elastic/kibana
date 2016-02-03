@@ -1,3 +1,4 @@
+import 'ui/state_management/global_state';
 define(function (require) {
   require('ui/routes')
   .addSetupWork(function (timefilter) {
@@ -15,7 +16,6 @@ define(function (require) {
     var Events = Private(require('ui/events'));
     var diff = Private(require('ui/utils/diff_time_picker_vals'));
 
-    require('ui/state_management/global_state');
 
     function convertISO8601(stringTime) {
       var obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);

@@ -1,7 +1,7 @@
+import 'ui/directives/validate_ip';
+import 'ui/directives/validate_cidr_mask';
 define(function (require) {
   var _ = require('lodash');
-  require('ui/directives/validate_ip');
-  require('ui/directives/validate_cidr_mask');
 
   return function RangeAggDefinition(Private) {
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));

@@ -1,3 +1,4 @@
+import 'ui/directives/json_input';
 define(function (require) {
   var _ = require('lodash');
   var module = require('ui/modules').get('kibana');
@@ -5,7 +6,6 @@ define(function (require) {
   var moment = require('moment');
   var angular = require('angular');
 
-  require('ui/directives/json_input');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));

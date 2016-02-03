@@ -1,7 +1,7 @@
+import 'ui/paginated_table';
+import 'ui/compile_recursive_directive';
+import 'ui/agg_table/agg_table.less';
 define(function (require) {
-  require('ui/paginated_table');
-  require('ui/compile_recursive_directive');
-  require('ui/agg_table/agg_table.less');
 
   require('ui/modules')
   .get('kibana')

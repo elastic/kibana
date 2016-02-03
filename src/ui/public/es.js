@@ -1,5 +1,5 @@
+import 'elasticsearch-browser/elasticsearch.angular.js';
 define(function (require) {
-  require('elasticsearch-browser/elasticsearch.angular.js');
   var _ = require('lodash');
 
   var es; // share the client amoungst all apps

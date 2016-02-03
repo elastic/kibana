@@ -1,8 +1,8 @@
 
-require('../app_switcher/app_switcher.less');
 import DomLocationProvider from 'ui/domLocation';
 import { parse } from 'url';
 import { bindKey } from 'lodash';
+import '../app_switcher/app_switcher.less';
 
 require('ui/modules')
 .get('kibana')

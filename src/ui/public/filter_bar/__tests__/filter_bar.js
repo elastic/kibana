@@ -5,8 +5,8 @@ import ngMock from 'ngMock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-require('ui/filter_bar');
 import MockState from 'fixtures/mock_state';
+import 'ui/filter_bar';
 
 describe('Filter Bar Directive', function () {
   var $rootScope;

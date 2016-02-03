@@ -1,5 +1,5 @@
+import 'ui/collapsible_sidebar/collapsible_sidebar.less';
 define(function (require) {
-  require('ui/collapsible_sidebar/collapsible_sidebar.less');
 
   var _ = require('lodash');
   var $ = require('jquery');

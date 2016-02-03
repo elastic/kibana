@@ -1,7 +1,7 @@
+import 'ui/notify';
 define(function (require) {
   const _ = require('lodash');
 
-  require('ui/notify');
 
   const module = require('ui/modules').get('discover/saved_searches', [
     'kibana/notify',
