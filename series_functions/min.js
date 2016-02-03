@@ -1,7 +1,7 @@
 var reduce = require('../lib/reduce.js');
 
 var Chainable = require('../lib/classes/chainable');
-module.exports = new Chainable('max', {
+module.exports = new Chainable('min', {
   args: [
     {
       name: 'inputSeries',

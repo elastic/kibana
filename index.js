@@ -3,7 +3,11 @@ var path = require('path');
 
 module.exports = function (kibana) {
   var mainFile = 'plugins/timelion/app';
-  if (Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload').get) {
+
+  var ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');
+  var protoDescriptor = Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload');
+  var descriptor = ownDescriptor || protoDescriptor || {};
+  if (descriptor.get) {
     // the autoload list has been replaced with a getter that complains about
     // improper access, bypass that getter by seeing if it is defined
     mainFile = 'plugins/timelion/app_with_autoload';
