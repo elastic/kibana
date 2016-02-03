@@ -1,6 +1,6 @@
-let { constant, once, compact, flatten } = require('lodash');
-let { promisify, resolve, fromNode } = require('bluebird');
 import Hapi from 'hapi';
+import { constant, once, compact, flatten } from 'lodash';
+import { promisify, resolve, fromNode } from 'bluebird';
 
 let utils = require('requirefrom')('src/utils');
 let rootDir = utils('fromRoot')('.');

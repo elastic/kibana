@@ -1,11 +1,11 @@
 import Promise from 'bluebird';
 import Joi from 'joi';
 import _ from 'lodash';
-let { zipObject } = require('lodash');
 import override from './override';
 import createDefaultSchema from './schema';
 let pkg = require('requirefrom')('src/utils')('packageJson');
 import clone from './deepCloneWithBuffers';
+import { zipObject } from 'lodash';
 
 const schema = Symbol('Joi Schema');
 const schemaKeys = Symbol('Schema Extensions');

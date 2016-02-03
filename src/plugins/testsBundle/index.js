@@ -1,5 +1,5 @@
+import { union } from 'lodash';
 module.exports = (kibana) => {
-  let { union } = require('lodash');
 
   let utils = require('requirefrom')('src/utils');
   let fromRoot = utils('fromRoot');

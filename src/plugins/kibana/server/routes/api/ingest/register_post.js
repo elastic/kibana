@@ -1,11 +1,11 @@
 import Boom from 'boom';
 import _ from 'lodash';
-const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
 import indexPatternSchema from '../../../lib/schemas/resources/index_pattern_schema';
 import handleESError from '../../../lib/handle_es_error';
-const { keysToCamelCaseShallow } = require('../../../lib/case_conversion');
 import createMappingsFromPatternFields from '../../../lib/create_mappings_from_pattern_fields';
 import initDefaultFieldProps from '../../../lib/init_default_field_props';
+import {templateToPattern, patternToTemplate} from '../../../lib/convert_pattern_and_template_name';
+import { keysToCamelCaseShallow } from '../../../lib/case_conversion';
 
 module.exports = function registerPost(server) {
   server.route({

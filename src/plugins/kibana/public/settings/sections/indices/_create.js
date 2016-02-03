@@ -1,7 +1,7 @@
+import { IndexPatternMissingIndices } from 'ui/errors';
 define(function (require) {
   const _ = require('lodash');
   const moment = require('moment');
-  const { IndexPatternMissingIndices } = require('ui/errors');
 
   require('ui/directives/validate_index_name');
   require('ui/directives/auto_select_if_only_one');

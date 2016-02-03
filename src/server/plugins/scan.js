@@ -1,9 +1,9 @@
+import { fromNode } from 'bluebird';
+import { readdir, stat } from 'fs';
+import { resolve } from 'path';
+import { each } from 'bluebird';
 module.exports = async (kbnServer, server, config) => {
   let _ = require('lodash');
-  let { fromNode } = require('bluebird');
-  let { readdir, stat } = require('fs');
-  let { resolve } = require('path');
-  let { each } = require('bluebird');
 
   var PluginCollection = require('./PluginCollection');
   var plugins = kbnServer.plugins = new PluginCollection(kbnServer);

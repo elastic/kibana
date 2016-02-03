@@ -1,5 +1,5 @@
-let { fromNode } = require('bluebird');
-let { get, once } = require('lodash');
+import { fromNode } from 'bluebird';
+import { get, once } from 'lodash';
 
 module.exports = (kbnServer, server, config) => {
 

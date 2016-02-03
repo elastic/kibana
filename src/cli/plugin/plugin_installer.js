@@ -6,8 +6,8 @@ import pluginCleaner from './plugin_cleaner';
 import pluginExtractor from './plugin_extractor';
 import KbnServer from '../../server/KbnServer';
 import readYamlConfig from '../serve/read_yaml_config';
-const { statSync, renameSync } = require('fs');
 import Promise from 'bluebird';
+import { statSync, renameSync } from 'fs';
 const rimrafSync = require('rimraf').sync;
 const mkdirp = Promise.promisify(require('mkdirp'));
 
