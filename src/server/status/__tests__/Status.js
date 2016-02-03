@@ -59,12 +59,24 @@ describe('Status class', function () {
     expect(json.message).to.eql('Ready');
   });
 
-  it('should call handler if status is already matched', function (done) {
+  it('should call on handler if status is already matched', function (done) {
     var status = serverStatus.create('test');
     var msg = 'Test Ready';
     status.green(msg);
 
     status.on('green', function () {
+      expect(arguments.length).to.equal(0);
+      expect(status.message).to.equal(msg);
+      done();
+    });
+  });
+
+  it('should call once handler if status is already matched', function (done) {
+    var status = serverStatus.create('test');
+    var msg = 'Test Ready';
+    status.green(msg);
+
+    status.once('green', function () {
       expect(arguments.length).to.equal(0);
       expect(status.message).to.equal(msg);
       done();
