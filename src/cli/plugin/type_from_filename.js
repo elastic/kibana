@@ -8,4 +8,7 @@ export default function typeFromFilename(filename) {
   if (/\.tar\.gz$/i.test(filename)) {
     return TAR;
   }
+  if (/\.tgz$/i.test(filename)) {
+    return TAR;
+  }
 }
