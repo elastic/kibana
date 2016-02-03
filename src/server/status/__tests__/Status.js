@@ -59,6 +59,18 @@ describe('Status class', function () {
     expect(json.message).to.eql('Ready');
   });
 
+  it('should call handler if status is already matched', function (done) {
+    var status = serverStatus.create('test');
+    var msg = 'Test Ready';
+    status.green(msg);
+
+    status.on('green', function () {
+      expect(arguments.length).to.equal(0);
+      expect(status.message).to.equal(msg);
+      done();
+    });
+  });
+
   function testState(color) {
     it(`should change the state to ${color} when #${color}() is called`, function () {
       var status = serverStatus.create('test');
