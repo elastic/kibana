@@ -7,32 +7,30 @@ import VisSchemasProvider from 'ui/Vis/Schemas';
 import VisVisTypeProvider from 'ui/Vis/VisType';
 import AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_series/point_series';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/VislibRenderbot';
-define(function (require) {
-  return function VislibVisTypeFactory(Private) {
+export default function VislibVisTypeFactory(Private) {
 
-    var VisTypeSchemas = Private(VisSchemasProvider);
-    var VisType = Private(VisVisTypeProvider);
-    var pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
-    var VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
+  var VisTypeSchemas = Private(VisSchemasProvider);
+  var VisType = Private(VisVisTypeProvider);
+  var pointSeries = Private(AggResponsePointSeriesPointSeriesProvider);
+  var VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
 
 
-    _.class(VislibVisType).inherits(VisType);
-    function VislibVisType(opts) {
-      opts = opts || {};
+  _.class(VislibVisType).inherits(VisType);
+  function VislibVisType(opts) {
+    opts = opts || {};
 
-      VislibVisType.Super.call(this, opts);
+    VislibVisType.Super.call(this, opts);
 
-      if (this.responseConverter == null) {
-        this.responseConverter = pointSeries;
-      }
-
-      this.listeners = opts.listeners || {};
+    if (this.responseConverter == null) {
+      this.responseConverter = pointSeries;
     }
 
-    VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-      return new VislibRenderbot(vis, $el, uiState);
-    };
+    this.listeners = opts.listeners || {};
+  }
 
-    return VislibVisType;
+  VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
+    return new VislibRenderbot(vis, $el, uiState);
   };
-});
+
+  return VislibVisType;
+};

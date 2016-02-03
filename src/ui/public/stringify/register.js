@@ -1,13 +1,11 @@
 import fieldFormats from 'ui/registry/field_formats';
-define(function (require) {
-  fieldFormats.register(require('ui/stringify/types/Url'));
-  fieldFormats.register(require('ui/stringify/types/Bytes'));
-  fieldFormats.register(require('ui/stringify/types/Date'));
-  fieldFormats.register(require('ui/stringify/types/Ip'));
-  fieldFormats.register(require('ui/stringify/types/Number'));
-  fieldFormats.register(require('ui/stringify/types/Percent'));
-  fieldFormats.register(require('ui/stringify/types/String'));
-  fieldFormats.register(require('ui/stringify/types/Source'));
-  fieldFormats.register(require('ui/stringify/types/Color'));
-  fieldFormats.register(require('ui/stringify/types/truncate'));
-});
+fieldFormats.register(require('ui/stringify/types/Url'));
+fieldFormats.register(require('ui/stringify/types/Bytes'));
+fieldFormats.register(require('ui/stringify/types/Date'));
+fieldFormats.register(require('ui/stringify/types/Ip'));
+fieldFormats.register(require('ui/stringify/types/Number'));
+fieldFormats.register(require('ui/stringify/types/Percent'));
+fieldFormats.register(require('ui/stringify/types/String'));
+fieldFormats.register(require('ui/stringify/types/Source'));
+fieldFormats.register(require('ui/stringify/types/Color'));
+fieldFormats.register(require('ui/stringify/types/truncate'));

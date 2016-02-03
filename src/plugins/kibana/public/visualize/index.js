@@ -13,17 +13,15 @@ import 'plugins/kibana/visualize/editor/sidebar';
 import 'plugins/kibana/visualize/editor/vis_options';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
-define(function (require) {
 
 
-  require('ui/routes')
-  .when('/visualize', {
-    redirectTo: '/visualize/step/1'
-  });
-
-  // preloading
-
-  require('ui/saved_objects/saved_object_registry')
-  .register(require('plugins/kibana/visualize/saved_visualizations/saved_visualization_register'));
-
+require('ui/routes')
+.when('/visualize', {
+  redirectTo: '/visualize/step/1'
 });
+
+// preloading
+
+require('ui/saved_objects/saved_object_registry')
+.register(require('plugins/kibana/visualize/saved_visualizations/saved_visualization_register'));
+

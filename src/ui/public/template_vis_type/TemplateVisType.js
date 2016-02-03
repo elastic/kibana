@@ -1,25 +1,23 @@
 import _ from 'lodash';
 import VisVisTypeProvider from 'ui/Vis/VisType';
 import TemplateVisTypeTemplateRenderbotProvider from 'ui/template_vis_type/TemplateRenderbot';
-define(function (require) {
-  return function TemplateVisTypeFactory(Private) {
-    var VisType = Private(VisVisTypeProvider);
-    var TemplateRenderbot = Private(TemplateVisTypeTemplateRenderbotProvider);
+export default function TemplateVisTypeFactory(Private) {
+  var VisType = Private(VisVisTypeProvider);
+  var TemplateRenderbot = Private(TemplateVisTypeTemplateRenderbotProvider);
 
-    _.class(TemplateVisType).inherits(VisType);
-    function TemplateVisType(opts) {
-      TemplateVisType.Super.call(this, opts);
+  _.class(TemplateVisType).inherits(VisType);
+  function TemplateVisType(opts) {
+    TemplateVisType.Super.call(this, opts);
 
-      this.template = opts.template;
-      if (!this.template) {
-        throw new Error('Missing template for TemplateVisType');
-      }
+    this.template = opts.template;
+    if (!this.template) {
+      throw new Error('Missing template for TemplateVisType');
     }
+  }
 
-    TemplateVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-      return new TemplateRenderbot(vis, $el, uiState);
-    };
-
-    return TemplateVisType;
+  TemplateVisType.prototype.createRenderbot = function (vis, $el, uiState) {
+    return new TemplateRenderbot(vis, $el, uiState);
   };
-});
+
+  return TemplateVisType;
+};
