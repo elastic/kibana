@@ -1,23 +1,21 @@
-define(function (require) {
-  var parseInterval = require('ui/utils/parse_interval');
+var parseInterval = require('ui/utils/parse_interval');
 
-  require('ui/modules')
-  .get('kibana')
-  .directive('validateDateInterval', function () {
-    return {
-      restrict: 'A',
-      require: 'ngModel',
-      link: function ($scope, $el, attrs, ngModelCntrl) {
+require('ui/modules')
+.get('kibana')
+.directive('validateDateInterval', function () {
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function ($scope, $el, attrs, ngModelCntrl) {
 
-        ngModelCntrl.$parsers.push(check);
-        ngModelCntrl.$formatters.push(check);
+      ngModelCntrl.$parsers.push(check);
+      ngModelCntrl.$formatters.push(check);
 
-        function check(value) {
-          ngModelCntrl.$setValidity('dateInterval', parseInterval(value) != null);
-          return value;
-        }
+      function check(value) {
+        ngModelCntrl.$setValidity('dateInterval', parseInterval(value) != null);
+        return value;
       }
-    };
-  });
-
+    }
+  };
 });
+

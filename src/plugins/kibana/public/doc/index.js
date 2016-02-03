@@ -1,3 +1,1 @@
-define(function (require) {
-  require('plugins/kibana/doc/controllers/doc');
-});
+require('plugins/kibana/doc/controllers/doc');

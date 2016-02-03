@@ -1,10 +1,8 @@
-define(function (require) {
-  const _ = require('lodash');
+const _ = require('lodash');
 
-  return {
-    order: 3,
-    name: 'status',
-    display: 'Status',
-    url: '/status'
-  };
-});
+export default {
+  order: 3,
+  name: 'status',
+  display: 'Status',
+  url: '/status'
+};

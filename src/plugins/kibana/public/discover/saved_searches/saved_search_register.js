@@ -1,5 +1,3 @@
-define(function (require) {
-  return function savedSearchObjectFn(savedSearches) {
-    return savedSearches;
-  };
-});
+export default function savedSearchObjectFn(savedSearches) {
+  return savedSearches;
+};

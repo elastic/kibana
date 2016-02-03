@@ -1,14 +1,12 @@
-define(function (require) {
-  var module = require('ui/modules').get('kibana');
+var module = require('ui/modules').get('kibana');
 
-  module.constant('timeUnits', {
-    s: 'second',
-    m: 'minute',
-    h: 'hour',
-    d: 'day',
-    w: 'week',
-    M: 'month',
-    y: 'year'
-  });
-
+module.constant('timeUnits', {
+  s: 'second',
+  m: 'minute',
+  h: 'hour',
+  d: 'day',
+  w: 'week',
+  M: 'month',
+  y: 'year'
 });
+
