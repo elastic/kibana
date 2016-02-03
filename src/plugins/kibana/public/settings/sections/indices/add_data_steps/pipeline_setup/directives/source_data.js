@@ -13,6 +13,10 @@ app.directive('sourceData', function () {
     controller: function ($scope) {
       const sampleDocs = $scope.sampleDocs;
 
+      if (sampleDocs.length > 0) {
+        $scope.outputObject = sampleDocs[0];
+      }
+
       $scope.previousLine = function () {
         let currentIndex = sampleDocs.indexOf($scope.outputObject);
         if (currentIndex <= 0) return;

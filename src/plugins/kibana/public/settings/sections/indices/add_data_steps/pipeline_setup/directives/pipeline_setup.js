@@ -91,12 +91,16 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
     controller: function ($scope) {
       const savedPipeline = require('../sample_pipeline.json');
       const types = require('../../../../../../../domain/ingest_processor_types');
-      const pipeline = new Pipeline();
       $scope.processorTypes = _.sortBy(types, 'title');
       $scope.defaultProcessorType = getDefaultProcessorType();
       $scope.processorType = $scope.defaultProcessorType;
-      $scope.$elements = {}; //keeps track of the dom elements associated with processors as jquery objects
       $scope.sampleData = {};
+
+      const pipeline = new Pipeline();
+      if ($scope.pipeline) {
+        pipeline.load($scope.pipeline);
+        $scope.sampleData = $scope.pipeline.rootObject;
+      }
       $scope.pipeline = pipeline;
 
       function getDefaultProcessorType() {

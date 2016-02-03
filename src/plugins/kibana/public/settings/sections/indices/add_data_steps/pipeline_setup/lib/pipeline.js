@@ -22,6 +22,7 @@ Pipeline.prototype.load = function (pipeline) {
   pipeline.processors.forEach((processor) => {
     self.add(null, processor);
   });
+
 };
 
 Pipeline.prototype.remove = function (processor) {
