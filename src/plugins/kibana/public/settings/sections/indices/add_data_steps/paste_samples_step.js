@@ -7,7 +7,18 @@ modules.get('apps/settings')
       template: template,
       scope: {
         samples: '='
+      },
+      controller: function ($scope) {
+        const lines = require('./paste_samples_step_data.txt').split('\n');
+
+        $scope.updateData = function () {
+          $scope.samples = lines.map((line) => {
+            return {
+              '_raw': line
+            };
+          });
+        };
+
       }
     };
   });
-

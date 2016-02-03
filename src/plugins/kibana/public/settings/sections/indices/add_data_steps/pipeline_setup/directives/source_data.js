@@ -2,45 +2,29 @@ const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
 require('../styles/_source_data.less');
 
-app.directive('sourceDataNew', function () {
+app.directive('sourceData', function () {
   return {
     restrict: 'E',
     scope: {
+      sampleDocs: '=',
       outputObject: '='
     },
     template: require('../views/source_data.html'),
     controller: function ($scope) {
-      function getProcessorOutput() {
-        const newObj = {
-          _raw: $scope.selectedLine
-        };
-
-        return newObj;
-      }
-
-      function refreshOutput() {
-        const newOutput = getProcessorOutput();
-
-        if (newOutput) {
-          $scope.outputObject = getProcessorOutput();
-        };
-      }
-
-      $scope.documentLines = require('../source_data.txt').split('\n');
-      $scope.$watch('selectedLine', refreshOutput);
+      const sampleDocs = $scope.sampleDocs;
 
       $scope.previousLine = function () {
-        let currentIndex = $scope.documentLines.indexOf($scope.selectedLine);
+        let currentIndex = sampleDocs.indexOf($scope.outputObject);
         if (currentIndex <= 0) return;
 
-        $scope.selectedLine = $scope.documentLines[currentIndex - 1];
+        $scope.outputObject = sampleDocs[currentIndex - 1];
       };
 
       $scope.nextLine = function () {
-        let currentIndex = $scope.documentLines.indexOf($scope.selectedLine);
-        if (currentIndex >= $scope.documentLines.length - 1) return;
+        let currentIndex = sampleDocs.indexOf($scope.outputObject);
+        if (currentIndex >= sampleDocs.length - 1) return;
 
-        $scope.selectedLine = $scope.documentLines[currentIndex + 1];
+        $scope.outputObject = sampleDocs[currentIndex + 1];
       };
     }
   };

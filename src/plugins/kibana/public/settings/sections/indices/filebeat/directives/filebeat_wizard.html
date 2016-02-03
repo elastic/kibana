@@ -31,15 +31,17 @@
 
   <div ng-switch="wizard.currentStep">
     <div ng-switch-when="0">
-      <paste-samples-step samples="wizard.stepResults.samples"></paste-samples-step>
+      <paste-samples-step samples="wizard.stepResults.sampleDocs"></paste-samples-step>
       <div class="nav-buttons">
-        <button ng-disabled="!wizard.stepResults.samples" ng-click="wizard.nextStep()">Next</button>
+        <button ng-disabled="!wizard.stepResults.sampleDocs" ng-click="wizard.nextStep()">Next</button>
       </div>
     </div>
 
     <div ng-switch-when="1">
-      <pipeline-setup></pipeline-setup>
-
+      <pipeline-setup
+        pipeline="wizard.stepResults.pipeline"
+        sample-docs="wizard.stepResults.sampleDocs">
+      </pipeline-setup>
       <div class="nav-buttons">
         <button ng-click="wizard.prevStep()">Prev</button>
         <button ng-disabled="!wizard.stepResults.pipeline || !wizard.stepResults.sampleDocs" ng-click="wizard.nextStep()">Next</button>

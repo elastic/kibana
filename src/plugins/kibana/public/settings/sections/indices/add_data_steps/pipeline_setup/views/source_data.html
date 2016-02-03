@@ -3,8 +3,8 @@
   <div class="controls">
     <select
       class="form-control"
-      ng-options="documentLine as documentLine for documentLine in documentLines"
-      ng-model="selectedLine">
+      ng-options="sampleDoc as sampleDoc._raw for sampleDoc in sampleDocs"
+      ng-model="outputObject">
     </select>
     <button
       aria-label="Previous Line"

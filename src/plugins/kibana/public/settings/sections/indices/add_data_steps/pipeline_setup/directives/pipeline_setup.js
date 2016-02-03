@@ -13,6 +13,10 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
   return {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),
+    scope: {
+      sampleDocs: '=',
+      pipeline: '='
+    },
     link: function ($scope, $el) {
       const notify = new Notifier({
         location: `Ingest Pipeline Setup`
