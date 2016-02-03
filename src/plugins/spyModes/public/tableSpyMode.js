@@ -1,9 +1,10 @@
 import { saveAs } from '@spalger/filesaver';
 import _ from 'lodash';
 import 'ui/agg_table';
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 define(function (require) {
   function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
-    const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+    const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
     const PER_PAGE_DEFAULT = 10;
 

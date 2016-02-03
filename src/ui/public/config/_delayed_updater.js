@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import angular from 'angular';
+import ConfigValsProvider from 'ui/config/_vals';
 define(function (require) {
   return function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
     var notify = new Notifier();
 
-    var vals = Private(require('ui/config/_vals'));
+    var vals = Private(ConfigValsProvider);
 
     return function DelayedUpdater(doc) {
       var updater = this;

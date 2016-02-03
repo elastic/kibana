@@ -1,10 +1,13 @@
 import _ from 'lodash';
+import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
+import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/components/zero_injection/zero_filled_array';
+import VislibComponentsZeroInjectionZeroFillDataArrayProvider from 'ui/vislib/components/zero_injection/zero_fill_data_array';
 define(function (require) {
   return function ZeroInjectionUtilService(Private) {
 
-    var orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
-    var createZeroFilledArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
-    var zeroFillDataArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
+    var orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+    var createZeroFilledArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
+    var zeroFillDataArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
 
     /*
      * A Kibana data object may have multiple series with different array lengths.

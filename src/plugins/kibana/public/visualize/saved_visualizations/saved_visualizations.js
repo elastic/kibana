@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
 define(function (require) {
   const app = require('ui/modules').get('app/visualize');
 
@@ -13,7 +14,7 @@ define(function (require) {
   });
 
   app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
-    const visTypes = Private(require('ui/registry/vis_types'));
+    const visTypes = Private(RegistryVisTypesProvider);
 
     const scanner = new Scanner(es, {
       index: kbnIndex,

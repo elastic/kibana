@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import VislibComponentsColorMappedColorsProvider from 'ui/vislib/components/color/mapped_colors';
 define(function (require) {
   return function ColorUtilService(Private) {
-    var mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
+    var mappedColors = Private(VislibComponentsColorMappedColorsProvider);
 
     /*
      * Accepts an array of strings or numbers that are used to create a

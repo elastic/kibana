@@ -6,13 +6,14 @@ import d3 from 'd3';
 
 import angular from 'angular';
 import 'ui/vislib/styles/main.less';
+import VislibProvider from 'ui/vislib';
 
 describe('Vislib Index Test Suite', function () {
   var vislib;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    vislib = Private(require('ui/vislib'));
+    vislib = Private(VislibProvider);
   }));
 
   it('should return an object', function () {

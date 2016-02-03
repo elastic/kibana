@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import modules from 'ui/modules';
+import StateManagementStateProvider from 'ui/state_management/state';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 define(function (require) {
   var urlParam = '_a';
 
   function AppStateProvider(Private, $rootScope, getAppState) {
-    var State = Private(require('ui/state_management/state'));
-    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
+    var State = Private(StateManagementStateProvider);
+    var PersistedState = Private(PersistedStatePersistedStateProvider);
     var persistedStates;
     var eventUnsubscribers;
 

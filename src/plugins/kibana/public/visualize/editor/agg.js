@@ -3,12 +3,13 @@ import 'plugins/kibana/visualize/editor/agg_add';
 import _ from 'lodash';
 import $ from 'jquery';
 import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
+import AggTypesIndexProvider from 'ui/agg_types/index';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
 
-    const aggTypes = Private(require('ui/agg_types/index'));
+    const aggTypes = Private(AggTypesIndexProvider);
 
     const notify = new Notifier({
       location: 'visAggGroup'

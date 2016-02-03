@@ -2,12 +2,13 @@ import _ from 'lodash';
 import angular from 'angular';
 import qs from 'ui/utils/query_string';
 import rison from 'ui/utils/rison';
+import StateManagementStateProvider from 'ui/state_management/state';
 define(function (require) {
 
   var module = require('ui/modules').get('kibana/global_state');
 
   module.service('globalState', function (Private, $rootScope, $location) {
-    var State = Private(require('ui/state_management/state'));
+    var State = Private(StateManagementStateProvider);
 
     _.class(GlobalState).inherits(State);
     function GlobalState(defaults) {

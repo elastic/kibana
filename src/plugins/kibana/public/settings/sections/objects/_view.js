@@ -3,6 +3,7 @@ import angular from 'angular';
 import rison from 'ui/utils/rison';
 import registry from 'plugins/kibana/settings/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/settings/sections/objects/_view.html';
+import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 define(function (require) {
 
   require('ui/routes')
@@ -16,7 +17,7 @@ define(function (require) {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
         const notify = new Notifier({ location: 'SavedObject view' });
-        const castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
+        const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
         const serviceObj = registry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
 

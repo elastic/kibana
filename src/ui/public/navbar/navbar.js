@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import 'ui/render_directive';
+import RegistryNavbarExtensionsProvider from 'ui/registry/navbar_extensions';
 const navbar = require('ui/modules').get('kibana/navbar');
 
 
 navbar.directive('navbar', function (Private, $compile) {
-  const navbarExtensions = Private(require('ui/registry/navbar_extensions'));
+  const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
   const getExtensions = _.memoize(function (name) {
     if (!name) throw new Error('navbar directive requires a name attribute');
     return _.sortBy(navbarExtensions.byAppName[name], 'order');

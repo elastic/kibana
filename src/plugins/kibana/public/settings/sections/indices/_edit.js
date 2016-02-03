@@ -2,6 +2,9 @@ import _ from 'lodash';
 import 'plugins/kibana/settings/sections/indices/_indexed_fields';
 import 'plugins/kibana/settings/sections/indices/_scripted_fields';
 import 'plugins/kibana/settings/sections/indices/_index_header';
+import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
+import UrlProvider from 'ui/url';
+import PluginsKibanaSettingsSectionsIndicesFieldTypesProvider from 'plugins/kibana/settings/sections/indices/_field_types';
 define(function (require) {
 
   require('ui/routes')
@@ -20,14 +23,14 @@ define(function (require) {
 
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
-    const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
+    const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
 
-    $scope.kbnUrl = Private(require('ui/url'));
+    $scope.kbnUrl = Private(UrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
     docTitle.change($scope.indexPattern.id);
     const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-    const fieldTypes = Private(require('plugins/kibana/settings/sections/indices/_field_types'));
+    const fieldTypes = Private(PluginsKibanaSettingsSectionsIndicesFieldTypesProvider);
     $scope.$watch('indexPattern.fields', function () {
       $scope.fieldTypes = fieldTypes($scope.indexPattern);
     });

@@ -1,5 +1,6 @@
 import 'plugins/markdown_vis/markdown_vis.less';
 import 'plugins/markdown_vis/markdown_vis_controller';
+import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
 define(function (require) {
   // we need to load the css ourselves
 
@@ -9,7 +10,7 @@ define(function (require) {
   require('ui/registry/vis_types').register(MarkdownVisProvider);
 
   function MarkdownVisProvider(Private) {
-    const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.

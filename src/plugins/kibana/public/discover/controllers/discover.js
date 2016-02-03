@@ -17,6 +17,13 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/highlight/highlight_tags';
 import 'ui/share';
+import VisProvider from 'ui/Vis';
+import DocTitleProvider from 'ui/doc_title';
+import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import FilterManagerProvider from 'ui/filter_manager';
+import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 define(function (require) {
 
 
@@ -66,18 +73,18 @@ define(function (require) {
   app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
     AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
-    const Vis = Private(require('ui/Vis'));
-    const docTitle = Private(require('ui/doc_title'));
-    const brushEvent = Private(require('ui/utils/brush_event'));
-    const HitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
-    const queryFilter = Private(require('ui/filter_bar/query_filter'));
-    const filterManager = Private(require('ui/filter_manager'));
+    const Vis = Private(VisProvider);
+    const docTitle = Private(DocTitleProvider);
+    const brushEvent = Private(UtilsBrushEventProvider);
+    const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
+    const queryFilter = Private(FilterBarQueryFilterProvider);
+    const filterManager = Private(FilterManagerProvider);
 
     const notify = new Notifier({
       location: 'Discover'
     });
 
-    $scope.intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
+    $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
     $scope.showInterval = false;
 
     $scope.intervalEnabled = function (interval) {

@@ -2,6 +2,7 @@
 import expect from 'expect.js';
 import angular from 'angular';
 import ngMock from 'ngMock';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 
 describe('Vislib ErrorHandler Test Suite', function () {
   var ErrorHandler;
@@ -9,7 +10,7 @@ describe('Vislib ErrorHandler Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    ErrorHandler = Private(VislibLibErrorHandlerProvider);
     errorHandler = new ErrorHandler();
   }));
 

@@ -1,13 +1,17 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import errors from 'ui/errors';
+import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
+import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
+import VislibComponentsLabelsLabelsProvider from 'ui/vislib/components/labels/labels';
+import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
 define(function (require) {
   return function DataFactory(Private) {
 
-    var injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
-    var orderKeys = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
-    var getLabels = Private(require('ui/vislib/components/labels/labels'));
-    var color = Private(require('ui/vislib/components/color/color'));
+    var injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+    var orderKeys = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+    var getLabels = Private(VislibComponentsLabelsLabelsProvider);
+    var color = Private(VislibComponentsColorColorProvider);
 
     /**
      * Provides an API for pulling values off the data

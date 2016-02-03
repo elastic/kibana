@@ -6,6 +6,8 @@ import expect from 'expect.js';
 import dataSeries from 'fixtures/vislib/mock_data/date_histogram/_series';
 import dataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
 import dataStacked from 'fixtures/vislib/mock_data/stacked/_stacked';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 var seriesData = {
   'label': '',
@@ -105,8 +107,8 @@ describe('Vislib Data Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
   }));
 
   describe('Data Class (main)', function () {

@@ -1,8 +1,9 @@
 import _ from 'lodash';
+import VislibComponentsZeroInjectionFlattenDataProvider from 'ui/vislib/components/zero_injection/flatten_data';
 define(function (require) {
   return function UniqueXValuesUtilService(Private) {
 
-    var flattenDataArray = Private(require('ui/vislib/components/zero_injection/flatten_data'));
+    var flattenDataArray = Private(VislibComponentsZeroInjectionFlattenDataProvider);
 
     /*
      * Accepts a Kibana data object.

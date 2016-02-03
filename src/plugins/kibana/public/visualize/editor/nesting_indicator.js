@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
 define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('nestingIndicator', function ($rootScope, $parse, Private) {
-    const getColors = Private(require('ui/vislib/components/color/color_palette'));
+    const getColors = Private(VislibComponentsColorColorPaletteProvider);
 
     return {
       restrict: 'E',

@@ -1,7 +1,10 @@
+import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+
 define(function (require) {
   return function visualizationLoader(savedVisualizations, Private) { // Inject services here
-    const brushEvent = Private(require('ui/utils/brush_event'));
-    const filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    const brushEvent = Private(UtilsBrushEventProvider);
+    const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
     return function (panel, $scope) { // Function parameters here
       return savedVisualizations.get(panel.id)

@@ -3,6 +3,7 @@ import moment from 'moment';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
+import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
 define(function (require) {
 
 
@@ -14,7 +15,7 @@ define(function (require) {
   require('ui/modules').get('apps/settings')
   .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
     const notify = new Notifier();
-    const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
+    const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
     const intervals = indexPatterns.intervals;
     let samplePromise;
 

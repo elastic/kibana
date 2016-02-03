@@ -2,10 +2,11 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 define(function (require) {
   return function PieChartFactory(Private) {
 
-    var Chart = Private(require('ui/vislib/visualizations/_chart'));
+    var Chart = Private(VislibVisualizationsChartProvider);
 
     /**
      * Pie Chart Visualization

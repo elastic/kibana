@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
+import CourierRequestQueueProvider from 'ui/courier/_request_queue';
+import CourierFetchRequestErrorHandlerProvider from 'ui/courier/fetch/request/_error_handler';
 define(function (require) {
   return function AbstractReqProvider(Private, Promise) {
-    var requestQueue = Private(require('ui/courier/_request_queue'));
-    var requestErrorHandler = Private(require('ui/courier/fetch/request/_error_handler'));
+    var requestQueue = Private(CourierRequestQueueProvider);
+    var requestErrorHandler = Private(CourierFetchRequestErrorHandlerProvider);
 
     function AbstractReq(source, defer) {
       if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {

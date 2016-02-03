@@ -1,9 +1,12 @@
 import _ from 'lodash';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import VisAggConfigsProvider from 'ui/Vis/AggConfigs';
 define(function (require) {
   return function VisFactory(Notifier, Private) {
-    var aggTypes = Private(require('ui/agg_types/index'));
-    var visTypes = Private(require('ui/registry/vis_types'));
-    var AggConfigs = Private(require('ui/Vis/AggConfigs'));
+    var aggTypes = Private(AggTypesIndexProvider);
+    var visTypes = Private(RegistryVisTypesProvider);
+    var AggConfigs = Private(VisAggConfigsProvider);
 
     var notify = new Notifier({
       location: 'Vis'

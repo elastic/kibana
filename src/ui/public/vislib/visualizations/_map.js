@@ -1,6 +1,10 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import L from 'leaflet';
+import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
+import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
+import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visualizations/marker_types/geohash_grid';
+import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
 define(function (require) {
   return function MapFactory(Private) {
 
@@ -19,10 +23,10 @@ define(function (require) {
     };
 
     var markerTypes = {
-      'Scaled Circle Markers': Private(require('ui/vislib/visualizations/marker_types/scaled_circles')),
-      'Shaded Circle Markers': Private(require('ui/vislib/visualizations/marker_types/shaded_circles')),
-      'Shaded Geohash Grid': Private(require('ui/vislib/visualizations/marker_types/geohash_grid')),
-      'Heatmap': Private(require('ui/vislib/visualizations/marker_types/heatmap')),
+      'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
+      'Shaded Circle Markers': Private(VislibVisualizationsMarkerTypesShadedCirclesProvider),
+      'Shaded Geohash Grid': Private(VislibVisualizationsMarkerTypesGeohashGridProvider),
+      'Heatmap': Private(VislibVisualizationsMarkerTypesHeatmapProvider),
     };
 
     /**

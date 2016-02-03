@@ -1,14 +1,18 @@
 import { IndexPatternMissingIndices } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
+import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
+import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 define(function (require) {
   return function MapperService(Private, Promise, es, config, kbnIndex) {
 
-    var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
-    var intervals = Private(require('ui/index_patterns/_intervals'));
-    var patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
+    var transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
+    var intervals = Private(IndexPatternsIntervalsProvider);
+    var patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
-    var LocalCache = Private(require('ui/index_patterns/_local_cache'));
+    var LocalCache = Private(IndexPatternsLocalCacheProvider);
 
     function Mapper() {
 

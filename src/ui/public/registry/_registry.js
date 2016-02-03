@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import IndexedArray from 'ui/IndexedArray';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
 define(function (require) {
   var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
@@ -24,7 +25,7 @@ define(function (require) {
    *
    * + get all registered modules
    * ```js
-   * var visTypes = Private(require('ui/registry/vis_types'));
+   * var visTypes = Private(RegistryVisTypesProvider);
    * ```
    *
    *

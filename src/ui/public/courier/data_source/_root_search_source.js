@@ -1,6 +1,8 @@
+import CourierDataSourceSearchSourceProvider from 'ui/courier/data_source/search_source';
+
 define(function (require) {
   return function RootSearchSource(Private, $rootScope, timefilter, Notifier) {
-    var SearchSource = Private(require('ui/courier/data_source/search_source'));
+    var SearchSource = Private(CourierDataSourceSearchSourceProvider);
 
     var notify = new Notifier({ location: 'Root Search Source' });
 

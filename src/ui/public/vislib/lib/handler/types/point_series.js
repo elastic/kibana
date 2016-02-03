@@ -1,13 +1,22 @@
+import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
+import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
+import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
+import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
+import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
+
 define(function (require) {
   return function ColumnHandler(Private) {
-    var injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
-    var Handler = Private(require('ui/vislib/lib/handler/handler'));
-    var Data = Private(require('ui/vislib/lib/data'));
-    var XAxis = Private(require('ui/vislib/lib/x_axis'));
-    var YAxis = Private(require('ui/vislib/lib/y_axis'));
-    var AxisTitle = Private(require('ui/vislib/lib/axis_title'));
-    var ChartTitle = Private(require('ui/vislib/lib/chart_title'));
-    var Alerts = Private(require('ui/vislib/lib/alerts'));
+    var injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+    var Handler = Private(VislibLibHandlerHandlerProvider);
+    var Data = Private(VislibLibDataProvider);
+    var XAxis = Private(VislibLibXAxisProvider);
+    var YAxis = Private(VislibLibYAxisProvider);
+    var AxisTitle = Private(VislibLibAxisTitleProvider);
+    var ChartTitle = Private(VislibLibChartTitleProvider);
+    var Alerts = Private(VislibLibAlertsProvider);
 
     /*
      * Create handlers for Area, Column, and Line charts which

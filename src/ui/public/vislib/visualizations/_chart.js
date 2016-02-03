@@ -2,11 +2,13 @@ import d3 from 'd3';
 import _ from 'lodash';
 import errors from 'ui/errors';
 import dataLabel from 'ui/vislib/lib/_data_label';
+import VislibLibDispatchProvider from 'ui/vislib/lib/dispatch';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
 define(function (require) {
   return function ChartBaseClass(Private) {
 
-    var Dispatch = Private(require('ui/vislib/lib/dispatch'));
-    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
+    var Dispatch = Private(VislibLibDispatchProvider);
+    var Tooltip = Private(VislibComponentsTooltipProvider);
 
     /**
      * The Base Class for all visualizations.

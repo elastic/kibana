@@ -1,3 +1,5 @@
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+
 define(function (require) {
   // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
@@ -6,7 +8,7 @@ define(function (require) {
   // add a controller to tha module, which will transform the esResponse into a
   // tabular format that we can pass to the table directive
   module.controller('KbnTableVisController', function ($scope, Private) {
-    const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+    const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
     $scope.$watch('esResponse', function (resp, oldResp) {
       let tableGroups = $scope.tableGroups = null;

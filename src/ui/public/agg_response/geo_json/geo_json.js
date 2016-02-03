@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import rowsToFeatures from 'ui/agg_response/geo_json/rowsToFeatures';
+import AggResponseGeoJsonTooltipFormatterProvider from 'ui/agg_response/geo_json/_tooltip_formatter';
 define(function (require) {
   return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
 
-    var tooltipFormatter = Private(require('ui/agg_response/geo_json/_tooltip_formatter'));
+    var tooltipFormatter = Private(AggResponseGeoJsonTooltipFormatterProvider);
 
     return function (vis, table) {
 

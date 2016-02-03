@@ -9,6 +9,11 @@ import 'ui/share';
 import angular from 'angular';
 import ConfigTemplate from 'ui/ConfigTemplate';
 import Notifier from 'ui/notify/notifier';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import DocTitleProvider from 'ui/doc_title';
+import UtilsBrushEventProvider from 'ui/utils/brush_event';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 define(function (require) {
 
 
@@ -17,7 +22,7 @@ define(function (require) {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route, Private) {
-        const visTypes = Private(require('ui/registry/vis_types'));
+        const visTypes = Private(RegistryVisTypesProvider);
         const visType = _.find(visTypes, {name: $route.current.params.type});
         if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
           throw new Error('You must provide either an indexPattern or a savedSearchId');
@@ -52,10 +57,10 @@ define(function (require) {
   ])
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
-    const docTitle = Private(require('ui/doc_title'));
-    const brushEvent = Private(require('ui/utils/brush_event'));
-    const queryFilter = Private(require('ui/filter_bar/query_filter'));
-    const filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    const docTitle = Private(DocTitleProvider);
+    const brushEvent = Private(UtilsBrushEventProvider);
+    const queryFilter = Private(FilterBarQueryFilterProvider);
+    const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
     const notify = new Notifier({
       location: 'Visualization Editor'

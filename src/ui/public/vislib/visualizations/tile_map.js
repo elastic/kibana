@@ -1,11 +1,13 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
+import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 define(function (require) {
   return function TileMapFactory(Private) {
 
-    var Chart = Private(require('ui/vislib/visualizations/_chart'));
-    var TileMapMap = Private(require('ui/vislib/visualizations/_map'));
+    var Chart = Private(VislibVisualizationsChartProvider);
+    var TileMapMap = Private(VislibVisualizationsMapProvider);
 
     /**
      * Tile Map Visualization: renders maps

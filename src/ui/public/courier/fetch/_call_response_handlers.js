@@ -1,11 +1,13 @@
 import { SearchTimeout } from 'ui/errors';
 import { RequestFailure } from 'ui/errors';
 import { ShardFailure } from 'ui/errors';
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+import CourierFetchNotifierProvider from 'ui/courier/fetch/_notifier';
 define(function (require) {
   return function CourierFetchCallResponseHandlers(Private, Promise) {
-    var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
-    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
-    var notify = Private(require('ui/courier/fetch/_notifier'));
+    var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
+    var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
+    var notify = Private(CourierFetchNotifierProvider);
 
 
     function callResponseHandlers(requests, responses) {

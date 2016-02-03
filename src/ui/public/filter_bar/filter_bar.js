@@ -4,17 +4,23 @@ import moment from 'moment';
 import angular from 'angular';
 import 'ui/directives/json_input';
 import filterAppliedAndUnwrap from 'ui/filter_bar/lib/filterAppliedAndUnwrap';
+import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/mapAndFlattenFilters';
+import FilterBarLibMapFlattenAndWrapFiltersProvider from 'ui/filter_bar/lib/mapFlattenAndWrapFilters';
+import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extractTimeFilter';
+import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filterOutTimeBasedFilter';
+import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/changeTimeFilter';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
 
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
-    var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
-    var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
-    var extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
-    var filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
-    var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
+    var mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
+    var mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
+    var extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
+    var filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
+    var changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
+    var queryFilter = Private(FilterBarQueryFilterProvider);
     var privateFilterFieldRegex = /(^\$|meta)/;
 
     return {

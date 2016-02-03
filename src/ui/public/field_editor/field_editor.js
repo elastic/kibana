@@ -2,14 +2,16 @@ import 'ui/field_format_editor';
 import 'angular-bootstrap-colorpicker';
 import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 import _ from 'lodash';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 define(function (require) {
 
 
   require('ui/modules')
   .get('kibana', ['colorpicker.module'])
   .directive('fieldEditor', function (Private, $sce) {
-    var fieldFormats = Private(require('ui/registry/field_formats'));
-    var Field = Private(require('ui/index_patterns/_field'));
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
+    var Field = Private(IndexPatternsFieldProvider);
     var scriptingInfo = $sce.trustAsHtml(require('ui/field_editor/scripting_info.html'));
     var scriptingWarning = $sce.trustAsHtml(require('ui/field_editor/scripting_warning.html'));
 

@@ -3,12 +3,15 @@ import $ from 'jquery';
 import _ from 'lodash';
 import 'ui/visualize';
 import 'ui/doc_table';
+import PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider from 'plugins/kibana/dashboard/components/panel/lib/load_panel';
+import FilterManagerProvider from 'ui/filter_manager';
+import UtilsBrushEventProvider from 'ui/utils/brush_event';
 define(function (require) {
   require('ui/modules')
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
-    const loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
-    const filterManager = Private(require('ui/filter_manager'));
+    const loadPanel = Private(PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider);
+    const filterManager = Private(FilterManagerProvider);
     const notify = new Notifier();
 
     const services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
@@ -20,7 +23,7 @@ define(function (require) {
     });
 
 
-    const brushEvent = Private(require('ui/utils/brush_event'));
+    const brushEvent = Private(UtilsBrushEventProvider);
 
     const getPanelId = function (panel) {
       return ['P', panel.panelIndex].join('-');

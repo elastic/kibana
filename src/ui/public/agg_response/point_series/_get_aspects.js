@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
 define(function (require) {
   return function PointSeriesGetAspects(Private) {
-    var fakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
+    var fakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
 
     var map = {
       segment: 'x',

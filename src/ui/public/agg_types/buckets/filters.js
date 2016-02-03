@@ -1,10 +1,13 @@
 import _ from 'lodash';
 import angular from 'angular';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import AggTypesBucketsCreateFilterFiltersProvider from 'ui/agg_types/buckets/create_filter/filters';
+import CourierDataSourceDecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 define(function (require) {
   return function FiltersAggDefinition(Private, Notifier) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
-    var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
+    var decorateQuery = Private(CourierDataSourceDecorateQueryProvider);
     var notif = new Notifier({ location: 'Filters Agg' });
 
     return new BucketAggType({

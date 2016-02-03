@@ -1,10 +1,12 @@
 import _ from 'lodash';
+import PluginsKibanaDashboardComponentsPanelLibVisualizationProvider from 'plugins/kibana/dashboard/components/panel/lib/visualization';
+import PluginsKibanaDashboardComponentsPanelLibSearchProvider from 'plugins/kibana/dashboard/components/panel/lib/search';
 define(function (require) {
   return function loadPanelFunction(Private) { // Inject services here
     return function (panel, $scope) { // Function parameters here
       const panelTypes = {
-        visualization: Private(require('plugins/kibana/dashboard/components/panel/lib/visualization')),
-        search: Private(require('plugins/kibana/dashboard/components/panel/lib/search'))
+        visualization: Private(PluginsKibanaDashboardComponentsPanelLibVisualizationProvider),
+        search: Private(PluginsKibanaDashboardComponentsPanelLibSearchProvider)
       };
 
       try {

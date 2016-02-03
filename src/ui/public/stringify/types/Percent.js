@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
+import StringifyTypesNumeralProvider from 'ui/stringify/types/_Numeral';
 define(function (require) {
   return function NumberFormatProvider(Private) {
-    var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
-    var Numeral = Private(require('ui/stringify/types/_Numeral'));
+    var BoundToConfigObj = Private(BoundToConfigObjProvider);
+    var Numeral = Private(StringifyTypesNumeralProvider);
 
     return Numeral.factory({
       id: 'percent',

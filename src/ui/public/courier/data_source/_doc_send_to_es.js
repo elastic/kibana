@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import errors from 'ui/errors';
+import CourierRequestQueueProvider from 'ui/courier/_request_queue';
+import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
 define(function (require) {
 
   return function (Promise, Private, es) {
-    var requestQueue = Private(require('ui/courier/_request_queue'));
-    var courierFetch = Private(require('ui/courier/fetch/fetch'));
+    var requestQueue = Private(CourierRequestQueueProvider);
+    var courierFetch = Private(CourierFetchFetchProvider);
 
     /**
      * Backend for doUpdate and doIndex

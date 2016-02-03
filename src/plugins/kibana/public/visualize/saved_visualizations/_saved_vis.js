@@ -1,9 +1,10 @@
 import _ from 'lodash';
+import VisProvider from 'ui/Vis';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
-    const Vis = Private(require('ui/Vis'));
+    const Vis = Private(VisProvider);
 
     const notify = new Notifier({
       location: 'SavedVis'

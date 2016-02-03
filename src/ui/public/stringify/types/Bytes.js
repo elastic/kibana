@@ -1,6 +1,8 @@
+import StringifyTypesNumeralProvider from 'ui/stringify/types/_Numeral';
+
 define(function (require) {
   return function BytesFormatProvider(Private) {
-    var Numeral = Private(require('ui/stringify/types/_Numeral'));
+    var Numeral = Private(StringifyTypesNumeralProvider);
     return Numeral.factory({
       id: 'bytes',
       title: 'Bytes',

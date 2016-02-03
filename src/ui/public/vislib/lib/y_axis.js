@@ -2,10 +2,11 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 define(function (require) {
   return function YAxisFactory(Private) {
 
-    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    var ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
     /**
      * Appends y axis to the visualization

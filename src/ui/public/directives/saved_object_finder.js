@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import rison from 'ui/utils/rison';
 import keymap from 'ui/utils/key_map';
+import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
 
-    var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
+    var services = Private(SavedObjectsSavedObjectRegistryProvider).byLoaderPropertiesName;
 
     return {
       restrict: 'E',

@@ -1,5 +1,7 @@
 import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
+import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
+import VisSchemasProvider from 'ui/Vis/Schemas';
 define(function (require) {
   // we need to load the css ourselves
 
@@ -9,8 +11,8 @@ define(function (require) {
   require('ui/registry/vis_types').register(MetricVisProvider);
 
   function MetricVisProvider(Private) {
-    const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-    const Schemas = Private(require('ui/Vis/Schemas'));
+    const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+    const Schemas = Private(VisSchemasProvider);
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.

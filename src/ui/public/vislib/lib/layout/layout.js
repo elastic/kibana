@@ -1,9 +1,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
 define(function (require) {
   return function LayoutFactory(Private) {
 
-    var layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
+    var layoutType = Private(VislibLibLayoutLayoutTypesProvider);
 
     /**
      * Builds the visualization DOM layout

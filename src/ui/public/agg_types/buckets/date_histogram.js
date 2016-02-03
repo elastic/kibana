@@ -3,13 +3,18 @@ import _ from 'lodash';
 import moment from 'moment';
 import 'ui/filters/field_type';
 import 'ui/validateDateInterval';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import TimeBucketsProvider from 'ui/time_buckets';
+import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';
+import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
+import ConfigDefaultsProvider from 'ui/config/defaults';
 define(function (require) {
   return function DateHistogramAggType(timefilter, config, Private) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var TimeBuckets = Private(require('ui/time_buckets'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-    var intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
-    var configDefaults = Private(require('ui/config/defaults'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var TimeBuckets = Private(TimeBucketsProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
+    var intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
+    var configDefaults = Private(ConfigDefaultsProvider);
 
     var detectedTimezone = tzDetect.determine().name();
     var tzOffset = moment().format('Z');

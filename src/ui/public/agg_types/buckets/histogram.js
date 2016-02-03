@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import 'ui/validateDateInterval';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
 define(function (require) {
   return function HistogramAggDefinition(Private) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/histogram'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
 
 
     return new BucketAggType({

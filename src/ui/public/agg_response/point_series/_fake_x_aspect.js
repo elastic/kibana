@@ -1,7 +1,10 @@
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import AggTypesAggTypeProvider from 'ui/agg_types/AggType';
+
 define(function (require) {
   return function PointSeriesFakeXAxis(Private) {
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
-    var AggType = Private(require('ui/agg_types/AggType'));
+    var AggConfig = Private(VisAggConfigProvider);
+    var AggType = Private(AggTypesAggTypeProvider);
 
     var allAgg = new AggType({
       name: 'all',

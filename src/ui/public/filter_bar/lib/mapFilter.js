@@ -1,8 +1,18 @@
 import _ from 'lodash';
+import GenerateMappingChainProvider from './generateMappingChain';
+import MapMatchAllProvider from './mapMatchAll';
+import MapTermsProvider from './mapTerms';
+import MapRangeProvider from './mapRange';
+import MapExistsProvider from './mapExists';
+import MapMissingProvider from './mapMissing';
+import MapQueryStringProvider from './mapQueryString';
+import MapGeoBoundingBoxProvider from './mapGeoBoundingBox';
+import MapScriptProvider from './mapScript';
+import MapDefaultProvider from './mapDefault';
 define(function (require) {
   return function mapFilterProvider(Promise, Private) {
 
-    var generateMappingChain = Private(require('./generateMappingChain'));
+    var generateMappingChain = Private(GenerateMappingChainProvider);
 
     /** Mappers **/
 
@@ -21,15 +31,15 @@ define(function (require) {
     // that either handles the mapping operation or not
     // and add it here. ProTip: These are executed in order listed
     var mappers = [
-      Private(require('./mapMatchAll')),
-      Private(require('./mapTerms')),
-      Private(require('./mapRange')),
-      Private(require('./mapExists')),
-      Private(require('./mapMissing')),
-      Private(require('./mapQueryString')),
-      Private(require('./mapGeoBoundingBox')),
-      Private(require('./mapScript')),
-      Private(require('./mapDefault'))
+      Private(MapMatchAllProvider),
+      Private(MapTermsProvider),
+      Private(MapRangeProvider),
+      Private(MapExistsProvider),
+      Private(MapMissingProvider),
+      Private(MapQueryStringProvider),
+      Private(MapGeoBoundingBoxProvider),
+      Private(MapScriptProvider),
+      Private(MapDefaultProvider)
     ];
 
     var noop = function () {

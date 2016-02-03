@@ -1,12 +1,15 @@
 import _ from 'lodash';
+import CourierFetchIsRequestProvider from 'ui/courier/fetch/_is_request';
+import CourierFetchMergeDuplicateRequestsProvider from 'ui/courier/fetch/_merge_duplicate_requests';
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
 define(function (require) {
   return function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
 
-    var isRequest = Private(require('ui/courier/fetch/_is_request'));
-    var mergeDuplicateRequests = Private(require('ui/courier/fetch/_merge_duplicate_requests'));
+    var isRequest = Private(CourierFetchIsRequestProvider);
+    var mergeDuplicateRequests = Private(CourierFetchMergeDuplicateRequestsProvider);
 
-    var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
-    var DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
+    var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
+    var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
 
     function callClient(strategy, requests) {
       // merging docs can change status to DUPLICATE, capture new statuses

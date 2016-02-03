@@ -1,10 +1,11 @@
 const app = require('ui/modules').get('kibana');
 import Clipboard from 'clipboard';
 import '../styles/index.less';
+import LibUrlShortenerProvider from '../lib/url_shortener';
 
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
-  const urlShortener = Private(require('../lib/url_shortener'));
+  const urlShortener = Private(LibUrlShortenerProvider);
 
   return {
     restrict: 'E',

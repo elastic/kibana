@@ -1,8 +1,12 @@
+import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
+import CourierLooperLooperProvider from 'ui/courier/looper/_looper';
+import CourierFetchStrategyDocProvider from 'ui/courier/fetch/strategy/doc';
+
 define(function (require) {
   return function DocLooperService(Private) {
-    var fetch = Private(require('ui/courier/fetch/fetch'));
-    var Looper = Private(require('ui/courier/looper/_looper'));
-    var docStrategy = Private(require('ui/courier/fetch/strategy/doc'));
+    var fetch = Private(CourierFetchFetchProvider);
+    var Looper = Private(CourierLooperLooperProvider);
+    var docStrategy = Private(CourierFetchStrategyDocProvider);
 
     /**
      * The Looper which will manage the doc fetch interval

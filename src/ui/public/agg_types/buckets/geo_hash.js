@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 define(function (require) {
   return function GeoHashAggDefinition(Private, config) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
     var defaultPrecision = 2;
 
     function getPrecision(precision) {

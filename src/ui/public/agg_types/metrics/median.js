@@ -1,9 +1,12 @@
 import _ from 'lodash';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
+import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
+import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 define(function (require) {
   return function AggTypeMetricMaxProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
-    var percentiles = Private(require('ui/agg_types/metrics/percentiles'));
+    var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+    var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+    var percentiles = Private(AggTypesMetricsPercentilesProvider);
 
     return new MetricAggType({
       name: 'median',

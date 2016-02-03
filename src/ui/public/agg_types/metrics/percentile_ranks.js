@@ -1,12 +1,15 @@
 import _ from 'lodash';
 import valuesEditor from 'ui/agg_types/controls/percentile_ranks.html';
 import 'ui/number_list';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
+import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 define(function (require) {
   return function AggTypeMetricPercentileRanksProvider(Private) {
 
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+    var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
 
     // required by the values editor
 

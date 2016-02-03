@@ -1,6 +1,7 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import FilterBarLibMapTermsProvider from 'ui/filter_bar/lib/mapTerms';
 
 describe('Filter Bar Directive', function () {
   describe('mapTerms()', function () {
@@ -17,7 +18,7 @@ describe('Filter Bar Directive', function () {
 
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapTerms = Private(require('ui/filter_bar/lib/mapTerms'));
+      mapTerms = Private(FilterBarLibMapTermsProvider);
     }));
 
     it('should return the key and value for matching filters', function (done) {

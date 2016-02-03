@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import IndexPatternsMapFieldProvider from 'ui/index_patterns/_map_field';
 define(function (require) {
   return function transformMappingIntoFields(Private, kbnIndex, config) {
-    var mapField = Private(require('ui/index_patterns/_map_field'));
+    var mapField = Private(IndexPatternsMapFieldProvider);
 
 
     /**

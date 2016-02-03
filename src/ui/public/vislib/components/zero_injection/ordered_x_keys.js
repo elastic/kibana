@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
+import VislibComponentsZeroInjectionUniqKeysProvider from 'ui/vislib/components/zero_injection/uniq_keys';
 define(function (require) {
   return function OrderedXKeysUtilService(Private) {
-    var getUniqKeys = Private(require('ui/vislib/components/zero_injection/uniq_keys'));
+    var getUniqKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
 
     /*
      * Accepts a Kibana data object and returns

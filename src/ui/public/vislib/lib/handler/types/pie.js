@@ -1,8 +1,12 @@
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
+
 define(function (require) {
   return function PieHandler(Private) {
-    var Handler = Private(require('ui/vislib/lib/handler/handler'));
-    var Data = Private(require('ui/vislib/lib/data'));
-    var ChartTitle = Private(require('ui/vislib/lib/chart_title'));
+    var Handler = Private(VislibLibHandlerHandlerProvider);
+    var Data = Private(VislibLibDataProvider);
+    var ChartTitle = Private(VislibLibChartTitleProvider);
 
     /*
      * Handler for Pie visualizations.

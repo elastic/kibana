@@ -2,11 +2,13 @@ import _ from 'lodash';
 import moment from 'moment';
 import dateMath from 'ui/utils/dateMath';
 import parseInterval from 'ui/utils/parse_interval';
+import TimeBucketsCalcAutoIntervalProvider from 'ui/time_buckets/calc_auto_interval';
+import TimeBucketsCalcEsIntervalProvider from 'ui/time_buckets/calc_es_interval';
 define(function (require) {
   return function IntervalHelperProvider(Private, timefilter, config) {
 
-    var calcAuto = Private(require('ui/time_buckets/calc_auto_interval'));
-    var calcEsInterval = Private(require('ui/time_buckets/calc_es_interval'));
+    var calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
+    var calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
     var tzOffset = moment().format('Z');
 
     function isValidMoment(m) {

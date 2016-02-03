@@ -4,11 +4,13 @@ import onlyStateChanged from 'ui/filter_bar/lib/onlyStateChanged';
 import uniqFilters from 'ui/filter_bar/lib/uniqFilters';
 import compareFilters from 'ui/filter_bar/lib/compareFilters';
 import angular from 'angular';
+import EventsProvider from 'ui/events';
+import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/mapAndFlattenFilters';
 define(function (require) {
 
   return function (Private, $rootScope, getAppState, globalState, config) {
-    var EventEmitter = Private(require('ui/events'));
-    var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+    var EventEmitter = Private(EventsProvider);
+    var mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
 
     var queryFilter = new EventEmitter();
 
