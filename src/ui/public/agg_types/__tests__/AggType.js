@@ -133,6 +133,16 @@ describe('AggType Class', function () {
           expect(aggType.params[1].name).to.be('customLabel');
         });
 
+        it('can disable customLabel', function () {
+          var aggType = new AggType({
+            name: 'smart agg',
+            customLabels: false
+          });
+
+          expect(aggType.params.length).to.be(1);
+          expect(aggType.params[0].name).to.be('json');
+        });
+
         it('passes the params arg directly to the AggParams constructor', function () {
           var params = [
             {name: 'one'},
