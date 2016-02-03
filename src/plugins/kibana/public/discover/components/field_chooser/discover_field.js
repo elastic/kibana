@@ -1,11 +1,12 @@
+import $ from 'jquery';
+import html from 'plugins/kibana/discover/components/field_chooser/discover_field.html';
+import _ from 'lodash';
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
+import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
 define(function (require) {
-  const $ = require('jquery');
   const app = require('ui/modules').get('apps/discover');
-  const html = require('plugins/kibana/discover/components/field_chooser/discover_field.html');
-  const _ = require('lodash');
 
-  require('ui/directives/css_truncate');
-  require('ui/directives/field_name');
 
 
   app.directive('discoverField', function ($compile) {
@@ -17,7 +18,6 @@ define(function (require) {
         let detailsElem;
         let detailScope = $scope.$new();
 
-        const detailsHtml = require('plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html');
 
         const init = function () {
           if ($scope.field.details) {

@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   function create(min, max, length, mod) {
     var seq = new Array(length);

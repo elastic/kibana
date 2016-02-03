@@ -1,5 +1,5 @@
-var Bluebird = require('bluebird');
-require('ui/promises');
+import Bluebird from 'bluebird';
+import 'ui/promises';
 
 Bluebird.longStackTraces();
 

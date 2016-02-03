@@ -1,14 +1,14 @@
-const _ = require('lodash');
+import _ from 'lodash';
 const utils = require('requirefrom')('src/utils');
 const fromRoot = utils('fromRoot');
-const pluginDownloader = require('./plugin_downloader');
-const pluginCleaner = require('./plugin_cleaner');
-const pluginExtractor = require('./plugin_extractor');
-const KbnServer = require('../../server/KbnServer');
-const readYamlConfig = require('../serve/read_yaml_config');
-const { statSync, renameSync } = require('fs');
-const Promise = require('bluebird');
-const rimrafSync = require('rimraf').sync;
+import pluginDownloader from './plugin_downloader';
+import pluginCleaner from './plugin_cleaner';
+import pluginExtractor from './plugin_extractor';
+import KbnServer from '../../server/KbnServer';
+import readYamlConfig from '../serve/read_yaml_config';
+import Promise from 'bluebird';
+import { sync as rimrafSync } from 'rimraf';
+import { statSync, renameSync } from 'fs';
 const mkdirp = Promise.promisify(require('mkdirp'));
 
 export default {

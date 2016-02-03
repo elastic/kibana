@@ -1,16 +1,16 @@
+import _ from 'lodash';
+import d3 from 'd3';
+import Binder from 'ui/Binder';
+import errors from 'ui/errors';
+import 'ui/vislib/styles/main.less';
 define(function (require) {
   return function VisFactory(Private) {
-    var _ = require('lodash');
-    var d3 = require('d3');
 
-    var Binder = require('ui/Binder');
 
     var ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     var Events = Private(require('ui/events'));
     var handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
-    var errors = require('ui/errors');
-    require('ui/vislib/styles/main.less');
 
     /**
      * Creates the visualizations.

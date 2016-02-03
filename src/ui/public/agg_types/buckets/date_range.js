@@ -1,7 +1,7 @@
+import moment from 'moment';
+import dateRange from 'ui/utils/date_range';
+import 'ui/directives/validate_date_math';
 define(function (require) {
-  var moment = require('moment');
-  var dateRange = require('ui/utils/date_range');
-  require('ui/directives/validate_date_math');
 
   return function DateRangeAggDefinition(Private, config) {
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));

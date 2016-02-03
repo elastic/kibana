@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import $ from 'jquery';
 require('ui/modules')
 .get('apps/discover')
 .directive('discoverTimechart', function (Private, $compile) {
-  const _ = require('lodash');
-  const $ = require('jquery');
   const vislib = Private(require('ui/vislib'));
 
   return {

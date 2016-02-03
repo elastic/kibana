@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PatternCache() {
-    var _ = require('lodash');
 
     var vals = {};
 

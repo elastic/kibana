@@ -1,10 +1,10 @@
 
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
 
 describe('$scope.$watchMulti', function () {
-  var sinon = require('auto-release-sinon');
 
   var $rootScope;
   var $scope;

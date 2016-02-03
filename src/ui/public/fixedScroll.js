@@ -1,6 +1,6 @@
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
-  var $ = require('jquery');
-  var _ = require('lodash');
 
   var SCROLLER_HEIGHT = 20;
 

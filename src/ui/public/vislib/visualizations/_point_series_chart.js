@@ -1,7 +1,7 @@
+import d3 from 'd3';
+import _ from 'lodash';
 define(function (require) {
   return function PointSeriesChartProvider(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
     var Tooltip = Private(require('ui/vislib/components/Tooltip'));

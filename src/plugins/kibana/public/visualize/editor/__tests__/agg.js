@@ -1,11 +1,11 @@
 
-const angular = require('angular');
-const $ = require('jquery');
-const _ = require('lodash');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import angular from 'angular';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import $ from 'jquery';
+import 'plugins/kibana/visualize/editor/agg';
 
-require('plugins/kibana/visualize/editor/agg');
 
 describe('Vis-Editor-Agg plugin directive', function () {
   const $parentScope = {};

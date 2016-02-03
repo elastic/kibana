@@ -1,8 +1,8 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 describe('Vislib Column Layout Test Suite', function () {
   var layoutType;

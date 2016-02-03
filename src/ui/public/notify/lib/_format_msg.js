@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import formatESMsg from 'ui/notify/lib/_format_es_msg';
 define(function (require) {
-  var _ = require('lodash');
   var has = _.has;
-  var formatESMsg = require('ui/notify/lib/_format_es_msg');
 
   /**
    * Formats the error message from an error object, extended elasticsearch

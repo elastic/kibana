@@ -1,8 +1,8 @@
+import 'ui/collapsible_sidebar/collapsible_sidebar.less';
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
-  require('ui/collapsible_sidebar/collapsible_sidebar.less');
 
-  var _ = require('lodash');
-  var $ = require('jquery');
 
   require('ui/modules')
   .get('kibana')

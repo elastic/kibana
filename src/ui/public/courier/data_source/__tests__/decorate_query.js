@@ -1,10 +1,10 @@
-var moment = require('moment');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import moment from 'moment';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
 
 describe('Query decorator', function () {
 
-  var _ = require('lodash');
   var config;
 
   var indexPattern;

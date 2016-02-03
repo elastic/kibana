@@ -1,19 +1,20 @@
 /* global mocha */
 
 // chrome expects to be loaded first, let it get its way
-var chrome = require('ui/chrome');
+import chrome from 'ui/chrome';
 
-var Nonsense = require('Nonsense');
-var sinon = require('sinon');
-var $ = require('jquery');
-var _ = require('lodash');
-var parse = require('url').parse;
+import Nonsense from 'Nonsense';
+import sinon from 'sinon';
+import _ from 'lodash';
 
-var StackTraceMapper = require('ui/StackTraceMapper');
+import StackTraceMapper from 'ui/StackTraceMapper';
+import { parse } from 'url';
+import $ from 'jquery';
+import './testHarness.less';
+import 'ngMock';
 
 /*** the vislib tests have certain style requirements, so lets make sure they are met ***/
 $('body').attr('id', 'test-harness-body'); // so we can make high priority selectors
-require('./testHarness.less');
 
 
 /*** Setup seeded random ***/
@@ -29,7 +30,6 @@ require('auto-release-sinon').setupAutoRelease(sinon, window.afterEach);
 
 
 /*** Make sure that angular-mocks gets setup in the global suite **/
-require('ngMock');
 
 
 /*** manually map error stack traces using the sourcemap ***/

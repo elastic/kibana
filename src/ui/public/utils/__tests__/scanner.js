@@ -1,7 +1,7 @@
-var Scanner = require('ui/utils/scanner');
-var expect = require('expect.js');
-var elasticsearch = require('elasticsearch-browser');
-var sinon = require('sinon');
+import Scanner from 'ui/utils/scanner';
+import expect from 'expect.js';
+import elasticsearch from 'elasticsearch-browser';
+import sinon from 'sinon';
 
 var es = new elasticsearch.Client({
   host: 'http://localhost:9210',

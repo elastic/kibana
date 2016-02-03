@@ -1,12 +1,12 @@
-var _ = require('lodash');
-var $ = require('jquery');
-var resolve = require('bluebird').resolve;
-var fetch = require('exports?window.fetch!imports?Promise=bluebird!whatwg-fetch');
+import _ from 'lodash';
+import fetch from 'exports?window.fetch!imports?Promise=bluebird!whatwg-fetch';
 
-var setErrorStack = require('./setErrorStack');
-var translateStackLine = require('./translateStackLine');
-var stackLineFormat = require('./stackLineFormat');
-var SourceMapReader = require('./SourceMapReader');
+import setErrorStack from './setErrorStack';
+import translateStackLine from './translateStackLine';
+import stackLineFormat from './stackLineFormat';
+import SourceMapReader from './SourceMapReader';
+import { resolve } from 'bluebird';
+import $ from 'jquery';
 
 function StackTraceMapper() {
   this.maps = [];

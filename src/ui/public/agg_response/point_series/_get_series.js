@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PointSeriesGetSeries(Private) {
-    var _ = require('lodash');
     var getPoint = Private(require('ui/agg_response/point_series/_get_point'));
     var addToSiri = Private(require('ui/agg_response/point_series/_add_to_siri'));
 

@@ -1,7 +1,7 @@
-const _ = require('lodash');
-const esBool = require('./es_bool');
-const versionSatisfies = require('./version_satisfies');
-const SetupError = require('./setup_error');
+import _ from 'lodash';
+import esBool from './es_bool';
+import versionSatisfies from './version_satisfies';
+import SetupError from './setup_error';
 
 module.exports = function (server) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');

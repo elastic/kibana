@@ -1,11 +1,11 @@
 
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
-const expect = require('expect.js');
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
+import expect from 'expect.js';
+import 'ui/private';
 
 // Load the kibana app dependencies.
-require('ui/private');
 
 let indexPattern;
 

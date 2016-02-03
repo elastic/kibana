@@ -1,14 +1,14 @@
 
-const angular = require('angular');
-const ngMock = require('ngMock');
-const $ = require('jquery');
-const _ = require('lodash');
-const sinon = require('auto-release-sinon');
-const expect = require('expect.js');
+import angular from 'angular';
+import ngMock from 'ngMock';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import $ from 'jquery';
+import 'ui/private';
+import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 
 // Load the kibana app dependencies.
-require('ui/private');
-require('plugins/kibana/discover/components/field_chooser/field_chooser');
 
 let $parentScope;
 let $scope;

@@ -1,14 +1,14 @@
+import _ from 'lodash';
+import 'ui/paginated_table';
+import nameHtml from 'plugins/kibana/settings/sections/indices/_field_name.html';
+import typeHtml from 'plugins/kibana/settings/sections/indices/_field_type.html';
+import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
 define(function (require) {
-  const _ = require('lodash');
-  require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
   .directive('indexedFields', function ($filter) {
     const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     const noTemplate = '';
-    const nameHtml = require('plugins/kibana/settings/sections/indices/_field_name.html');
-    const typeHtml = require('plugins/kibana/settings/sections/indices/_field_type.html');
-    const controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');
     const filter = $filter('filter');
 
     return {

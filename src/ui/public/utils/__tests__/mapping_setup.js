@@ -1,6 +1,6 @@
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 let mappingSetup;
 

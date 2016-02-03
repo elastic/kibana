@@ -1,5 +1,5 @@
+import angular from 'angular';
 define(function (require) {
-  var angular = require('angular');
   var module = require('ui/modules').get('kibana');
 
   // Simple filter to allow using ng-bind-html without explicitly calling $sce.trustAsHtml in a controller

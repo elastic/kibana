@@ -1,10 +1,9 @@
+import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
+import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
+import 'plugins/kibana/settings/sections/advanced/advanced_row';
+
 define(function (require) {
-  const _ = require('lodash');
-  const registry = require('ui/registry/settings_sections');
-  const toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
-
-  require('plugins/kibana/settings/sections/advanced/advanced_row');
-
   require('ui/routes')
   .when('/settings/advanced', {
     template: require('plugins/kibana/settings/sections/advanced/index.html')

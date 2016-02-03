@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 var opts = [
   /@((?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+\.js)\:(\d+)(?:\:(\d+)|())/ig,

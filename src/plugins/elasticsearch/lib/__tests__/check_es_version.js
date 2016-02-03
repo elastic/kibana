@@ -1,8 +1,8 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const sinon = require('sinon');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import sinon from 'sinon';
 
-const checkEsVersion = require('../check_es_version');
+import checkEsVersion from '../check_es_version';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/check_es_version', function () {

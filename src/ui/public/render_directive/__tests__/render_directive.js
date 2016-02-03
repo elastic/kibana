@@ -1,9 +1,9 @@
-const angular = require('angular');
-const sinon = require('sinon');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/render_directive';
 
-require('ui/render_directive');
 
 let $parentScope;
 let $elem;

@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function GetColumnsProvider(Private) {
-    var _ = require('lodash');
     var AggConfig = Private(require('ui/Vis/AggConfig'));
 
     return function getColumns(vis, minimal) {

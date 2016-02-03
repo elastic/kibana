@@ -1,9 +1,9 @@
+import 'plugins/markdown_vis/markdown_vis.less';
+import 'plugins/markdown_vis/markdown_vis_controller';
 define(function (require) {
   // we need to load the css ourselves
-  require('plugins/markdown_vis/markdown_vis.less');
 
   // we also need to load the controller and used by the template
-  require('plugins/markdown_vis/markdown_vis_controller');
 
   // register the provider with the visTypes registry so that other know it exists
   require('ui/registry/vis_types').register(MarkdownVisProvider);

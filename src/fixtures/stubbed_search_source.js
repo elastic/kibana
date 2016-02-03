@@ -1,6 +1,6 @@
+import sinon from 'auto-release-sinon';
+import searchResponse from 'fixtures/search_response';
 define(function (require) {
-  var sinon = require('auto-release-sinon');
-  var searchResponse = require('fixtures/search_response');
 
   return function stubSearchSource(Private, $q, Promise) {
     var deferedResult = $q.defer();

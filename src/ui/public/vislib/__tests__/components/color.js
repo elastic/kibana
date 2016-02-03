@@ -1,8 +1,8 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-const _ = require('lodash');
-const d3 = require('d3');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
+import d3 from 'd3';
 
 describe('Vislib Color Module Test Suite', function () {
   var seedColors;

@@ -1,16 +1,16 @@
+import IndexedArray from 'ui/IndexedArray';
+import _ from 'lodash';
+import $ from 'jquery';
+import aggSelectHtml from 'plugins/kibana/visualize/editor/agg_select.html';
+import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
+import 'ui/filters/match_any';
+import 'plugins/kibana/visualize/editor/agg_param';
 define(function (require) {
-  const IndexedArray = require('ui/IndexedArray');
 
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
-    const _ = require('lodash');
-    const $ = require('jquery');
     const aggTypes = Private(require('ui/agg_types/index'));
-    const aggSelectHtml = require('plugins/kibana/visualize/editor/agg_select.html');
-    const advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
-    require('ui/filters/match_any');
-    require('plugins/kibana/visualize/editor/agg_param');
 
     const notify = new Notifier({
       location: 'visAggGroup'

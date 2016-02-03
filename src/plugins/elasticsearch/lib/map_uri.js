@@ -1,5 +1,5 @@
-const querystring = require('querystring');
-const resolve = require('url').resolve;
+import querystring from 'querystring';
+import { resolve } from 'url';
 module.exports = function mapUri(server, prefix) {
   const config = server.config();
   return function (request, done) {

@@ -1,7 +1,7 @@
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 describe('FieldEditor directive', function () {
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var Field;
   var StringFormat;

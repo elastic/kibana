@@ -1,9 +1,9 @@
-const elasticsearch = require('elasticsearch');
-const _ = require('lodash');
+import elasticsearch from 'elasticsearch';
+import _ from 'lodash';
 const readFile = (file) => require('fs').readFileSync(file, 'utf8');
-const util = require('util');
-const url = require('url');
-const callWithRequest = require('./call_with_request');
+import util from 'util';
+import url from 'url';
+import callWithRequest from './call_with_request';
 
 module.exports = function (server) {
   const config = server.config();

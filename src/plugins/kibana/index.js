@@ -1,4 +1,4 @@
-const ingest = require('./server/routes/api/ingest');
+import ingest from './server/routes/api/ingest';
 
 module.exports = function (kibana) {
   return new kibana.Plugin({

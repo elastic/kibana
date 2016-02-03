@@ -1,11 +1,11 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import errors from 'ui/errors';
 define(function (require) {
   return function PieChartFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var $ = require('jquery');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
-    var errors = require('ui/errors');
 
     /**
      * Pie Chart Visualization

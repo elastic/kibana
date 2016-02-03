@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PendingRequestList() {
-    var _ = require('lodash');
 
     /**
      * Queue of pending requests, requests are removed as

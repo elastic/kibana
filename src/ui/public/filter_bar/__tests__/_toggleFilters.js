@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import MockState from 'fixtures/mock_state';
 describe('toggle filters', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var sinon = require('auto-release-sinon');
-  var MockState = require('fixtures/mock_state');
   var storeNames = {
     app: 'appState',
     global: 'globalState'

@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   return function GetQueryFromUser(es, Private) {
     var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 

@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function TermsAggDefinition(Private) {
-    var _ = require('lodash');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var bucketCountBetween = Private(require('ui/agg_types/buckets/_bucket_count_between'));
     var AggConfig = Private(require('ui/Vis/AggConfig'));

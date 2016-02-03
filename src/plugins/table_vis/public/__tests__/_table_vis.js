@@ -1,9 +1,9 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
 describe('Integration', function () {
-  const $ = require('jquery');
-  const _ = require('lodash');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
-  const sinon = require('auto-release-sinon');
 
   let $rootScope;
   let TableGroup;

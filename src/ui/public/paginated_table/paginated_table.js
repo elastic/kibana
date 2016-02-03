@@ -1,8 +1,8 @@
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('paginatedTable', function ($filter) {
-    var _ = require('lodash');
     var orderBy = $filter('orderBy');
 
     return {

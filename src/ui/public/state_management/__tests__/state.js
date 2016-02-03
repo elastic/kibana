@@ -1,9 +1,9 @@
 
-var _ = require('lodash');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/private');
+import _ from 'lodash';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/private';
 
 describe('State Management', function () {
   var $rootScope;

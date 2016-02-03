@@ -1,7 +1,7 @@
 const app = require('ui/modules').get('kibana');
-const Clipboard = require('clipboard');
+import Clipboard from 'clipboard';
+import '../styles/index.less';
 
-require('../styles/index.less');
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
   const urlShortener = Private(require('../lib/url_shortener'));

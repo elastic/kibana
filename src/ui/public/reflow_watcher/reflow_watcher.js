@@ -1,8 +1,8 @@
+import angular from 'angular';
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   return function ReflowWatcherService(Private, $rootScope, $http) {
-    var angular = require('angular');
-    var $ = require('jquery');
-    var _ = require('lodash');
 
     var EventEmitter = Private(require('ui/events'));
     var $body = $(document.body);

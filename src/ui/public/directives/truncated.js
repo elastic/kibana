@@ -1,6 +1,6 @@
+import $ from 'jquery';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
-  var $ = require('jquery');
 
   module.directive('kbnTruncated', function ($compile) {
     return {

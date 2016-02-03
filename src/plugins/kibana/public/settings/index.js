@@ -1,14 +1,16 @@
-define(function (require, module, exports) {
-  const _ = require('lodash');
+import _ from 'lodash';
+import 'plugins/kibana/settings/sections/indices/index';
+import 'plugins/kibana/settings/sections/advanced/index';
+import 'plugins/kibana/settings/sections/objects/index';
+import 'plugins/kibana/settings/sections/status/index';
+import 'plugins/kibana/settings/sections/about/index';
+import 'plugins/kibana/settings/styles/main.less';
+import 'ui/filters/start_from';
+import 'ui/field_editor';
+import 'plugins/kibana/settings/sections/indices/_indexed_fields';
+import 'plugins/kibana/settings/sections/indices/_scripted_fields';
 
-  require('plugins/kibana/settings/sections/indices/index');
-  require('plugins/kibana/settings/sections/advanced/index');
-  require('plugins/kibana/settings/sections/objects/index');
-  require('plugins/kibana/settings/sections/status/index');
-  require('plugins/kibana/settings/sections/about/index');
-  require('plugins/kibana/settings/styles/main.less');
-  require('ui/filters/start_from');
-
+define(function (require) {
   require('ui/routes')
   .when('/settings', {
     redirectTo: '/settings/indices'
@@ -43,7 +45,4 @@ define(function (require, module, exports) {
   });
 
   // preload
-  require('ui/field_editor');
-  require('plugins/kibana/settings/sections/indices/_indexed_fields');
-  require('plugins/kibana/settings/sections/indices/_scripted_fields');
 });

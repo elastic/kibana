@@ -1,10 +1,10 @@
+import 'angular';
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
 describe('Reflow watcher', function () {
-  require('angular');
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var sinon = require('auto-release-sinon');
-  var ngMock = require('ngMock');
 
   var $body = $(document.body);
   var $window = $(window);

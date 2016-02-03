@@ -1,11 +1,11 @@
 
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var d3 = require('d3');
-require('ui/vislib/styles/main.less');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import d3 from 'd3';
 
-var angular = require('angular');
+import angular from 'angular';
+import 'ui/vislib/styles/main.less';
 
 describe('Vislib Index Test Suite', function () {
   var vislib;

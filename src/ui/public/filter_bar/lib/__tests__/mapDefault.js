@@ -1,8 +1,8 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {
 
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
     var mapDefault;
     var $rootScope;
     beforeEach(ngMock.module('kibana'));

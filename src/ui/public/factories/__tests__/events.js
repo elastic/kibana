@@ -1,10 +1,10 @@
 
-var angular = require('angular');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/private');
+import angular from 'angular';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/private';
 
 describe('Events', function () {
   require('testUtils/noDigestPromises').activateForSuite();

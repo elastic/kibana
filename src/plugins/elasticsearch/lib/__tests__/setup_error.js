@@ -1,5 +1,5 @@
-const SetupError = require('../setup_error');
-const expect = require('expect.js');
+import SetupError from '../setup_error';
+import expect from 'expect.js';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/setup_error', function () {

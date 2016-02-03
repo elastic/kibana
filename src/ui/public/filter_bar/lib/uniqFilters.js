@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import dedupFilters from 'ui/filter_bar/lib/dedupFilters';
 define(function (require) {
-  var _ = require('lodash');
-  var dedupFilters = require('ui/filter_bar/lib/dedupFilters');
 
   /**
    * Remove duplicate filters from an array of filters

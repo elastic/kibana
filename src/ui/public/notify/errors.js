@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   var errors = {};
-  var _ = require('lodash');
 
   var canStack = (function () {
     var err = new Error();

@@ -1,10 +1,10 @@
-var pluck = require('lodash').pluck;
-var moment = require('moment');
+import moment from 'moment';
+import { pluck } from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('Index Patterns', function () {
   describe('interval.toIndexList()', function () {
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
 
     var intervals;
     beforeEach(ngMock.module('kibana'));

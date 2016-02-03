@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import angular from 'angular';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
 
   /**
    * Take text from the model and present it to the user as a string

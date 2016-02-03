@@ -1,12 +1,12 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
 
-var woahLotsOfVariables = require('fixtures/vislib/mock_data/date_histogram/_series');
-var notQuiteEnoughVariables = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
+import woahLotsOfVariables from 'fixtures/vislib/mock_data/date_histogram/_series';
+import notQuiteEnoughVariables from 'fixtures/vislib/mock_data/not_enough_data/_one_point';
+import $ from 'jquery';
 var someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),

@@ -1,9 +1,9 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('config component', function () {
   var $scope;
   var config;
   var defaults;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {

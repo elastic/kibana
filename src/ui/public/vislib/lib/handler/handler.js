@@ -1,9 +1,9 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import errors from 'ui/errors';
+import Binder from 'ui/Binder';
 define(function (require) {
   return function HandlerBaseClass(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var errors = require('ui/errors');
-    var Binder = require('ui/Binder');
 
     var Data = Private(require('ui/vislib/lib/data'));
     var Layout = Private(require('ui/vislib/lib/layout/layout'));

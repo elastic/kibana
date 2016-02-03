@@ -1,12 +1,12 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
 
 describe('Vislib Resize Checker', function () {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var Promise = require('bluebird');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
-  var sinon = require('auto-release-sinon');
   require('testUtils/noDigestPromises').activateForSuite();
 
   var ResizeChecker;

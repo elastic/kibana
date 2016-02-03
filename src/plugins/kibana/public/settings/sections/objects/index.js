@@ -1,13 +1,10 @@
+import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
+import 'plugins/kibana/settings/sections/objects/_view';
+import 'plugins/kibana/settings/sections/objects/_objects';
+import 'ace';
+import 'ui/directives/confirm_click';
 define(function (require) {
-  const _ = require('lodash');
-  const registry = require('ui/registry/settings_sections');
-
-  require('plugins/kibana/settings/sections/objects/_view');
-  require('plugins/kibana/settings/sections/objects/_objects');
-
-  require('ace');
-  require('ui/directives/confirm_click');
-
   // add the module deps to this module
   require('ui/modules').get('apps/settings');
 

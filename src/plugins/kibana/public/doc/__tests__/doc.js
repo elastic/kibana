@@ -1,7 +1,7 @@
 // Load the kibana app dependencies.
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-require('plugins/kibana/doc/index');
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import 'plugins/kibana/doc/index';
 
 let $scope;
 let createController;

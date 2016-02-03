@@ -1,12 +1,12 @@
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var d3 = require('d3');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import angular from 'angular';
+import _ from 'lodash';
+import d3 from 'd3';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 // Data
-var data = require('fixtures/vislib/mock_data/date_histogram/_series');
+import data from 'fixtures/vislib/mock_data/date_histogram/_series';
+import $ from 'jquery';
 
 describe('Vislib Dispatch Class Test Suite', function () {
 

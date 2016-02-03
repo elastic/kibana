@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import 'ui/notify/directives';
 define(function (require) {
-  var _ = require('lodash');
   var typeahead = require('ui/modules').get('kibana/typeahead');
 
-  require('ui/notify/directives');
 
   typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
 

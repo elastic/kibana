@@ -1,8 +1,8 @@
+import angular from 'angular';
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   const module = require('ui/modules').get('app/dashboard');
-  const angular = require('angular');
-  const _ = require('lodash');
-  const moment = require('moment');
 
   // Used only by the savedDashboards service, usually no reason to change this
   module.factory('SavedDashboard', function (courier, config) {

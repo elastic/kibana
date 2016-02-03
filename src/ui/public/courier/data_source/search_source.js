@@ -1,12 +1,12 @@
+import _ from 'lodash';
+import rootSearchSource from 'ui/courier/data_source/_root_search_source';
 define(function (require) {
   return function SearchSourceFactory(Promise, Private) {
-    var _ = require('lodash');
     var SourceAbstract = Private(require('ui/courier/data_source/_abstract'));
     var SearchRequest = Private(require('ui/courier/fetch/request/search'));
     var SegmentedRequest = Private(require('ui/courier/fetch/request/segmented'));
     var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
     var normalizeSortRequest = Private(require('ui/courier/data_source/_normalize_sort_request'));
-    var rootSearchSource = require('ui/courier/data_source/_root_search_source');
 
     _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {

@@ -1,7 +1,7 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('ui/courier/fetch/request/segmented', () => {
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
 
   let Promise;
   let $rootScope;

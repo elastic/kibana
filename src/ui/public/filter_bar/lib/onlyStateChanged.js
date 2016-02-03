@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import compareFilters from 'ui/filter_bar/lib/compareFilters';
 define(function (require) {
-  var _ = require('lodash');
-  var compareFilters = require('ui/filter_bar/lib/compareFilters');
   var compareOptions = { disabled: true, negate: true };
 
   /**

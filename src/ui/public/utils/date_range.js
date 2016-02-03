@@ -1,5 +1,5 @@
+import moment from 'moment';
 define(function (require) {
-  var moment = require('moment');
 
   return {
     toString: function (range, format) {

@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import inflector from 'ui/IndexedArray/inflector';
 define(function (require) {
 
-  var _ = require('lodash');
 
-  var inflector = require('ui/IndexedArray/inflector');
   var pathGetter = _(_.get).rearg(1, 0).ary(2);
   var inflectIndex = inflector('by');
   var inflectOrder = inflector('in', 'Order');

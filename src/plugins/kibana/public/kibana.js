@@ -1,24 +1,23 @@
 // autoloading
-require('ui/autoload/all');
 
 // preloading (for faster webpack builds)
-require('plugins/kibana/discover/index');
-require('plugins/kibana/visualize/index');
-require('plugins/kibana/dashboard/index');
-require('plugins/kibana/settings/index');
-require('plugins/kibana/doc');
-require('ui/vislib');
-require('ui/agg_response');
-require('ui/agg_types');
-require('ui/timepicker');
-require('leaflet');
+import moment from 'moment-timezone';
+import chrome from 'ui/chrome';
+import routes from 'ui/routes';
+import modules from 'ui/modules';
 
-const moment = require('moment-timezone');
-const chrome = require('ui/chrome');
-const routes = require('ui/routes');
-const modules = require('ui/modules');
-
-const kibanaLogoUrl = require('ui/images/kibana.svg');
+import kibanaLogoUrl from 'ui/images/kibana.svg';
+import 'ui/autoload/all';
+import 'plugins/kibana/discover/index';
+import 'plugins/kibana/visualize/index';
+import 'plugins/kibana/dashboard/index';
+import 'plugins/kibana/settings/index';
+import 'plugins/kibana/doc';
+import 'ui/vislib';
+import 'ui/agg_response';
+import 'ui/agg_types';
+import 'ui/timepicker';
+import 'leaflet';
 
 routes.enable();
 

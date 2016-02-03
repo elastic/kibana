@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('tooltipFormatter', function () {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var tooltipFormatter;
 

@@ -1,5 +1,5 @@
+import errors from 'ui/errors';
 define(function (require) {
-  var errors = require('ui/errors');
 
   return function RedirectWhenMissingFn($location, kbnUrl, Notifier, Promise) {
     var SavedObjectNotFound = errors.SavedObjectNotFound;

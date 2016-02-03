@@ -1,5 +1,5 @@
+import buildRangeFilter from 'ui/filter_manager/lib/range';
 define(function (require) {
-  var buildRangeFilter = require('ui/filter_manager/lib/range');
 
   return function createHistogramFitlerProvider(Private) {
     return function (aggConfig, key) {

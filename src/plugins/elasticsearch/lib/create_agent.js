@@ -1,8 +1,8 @@
-const url = require('url');
-const _ = require('lodash');
+import url from 'url';
+import _ from 'lodash';
 const readFile = (file) => require('fs').readFileSync(file, 'utf8');
-const http = require('http');
-const https = require('https');
+import http from 'http';
+import https from 'https';
 
 module.exports = _.memoize(function (server) {
   const config = server.config();

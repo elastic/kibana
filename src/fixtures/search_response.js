@@ -1,5 +1,5 @@
+import hits from 'fixtures/real_hits';
 define(function (require) {
-  var hits = require('fixtures/real_hits');
 
   return {
     took: 73,

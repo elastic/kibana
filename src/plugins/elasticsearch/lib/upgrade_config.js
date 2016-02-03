@@ -1,7 +1,7 @@
-const Promise = require('bluebird');
-const isUpgradeable = require('./is_upgradeable');
-const _ = require('lodash');
-const format = require('util').format;
+import Promise from 'bluebird';
+import isUpgradeable from './is_upgradeable';
+import _ from 'lodash';
+import { format } from 'util';
 
 const utils = require('requirefrom')('src/utils');
 
