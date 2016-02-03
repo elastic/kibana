@@ -5,6 +5,8 @@ define(function (require) {
     order: 3,
     name: 'status',
     display: 'Status',
-    url: '/status'
+    url: function () {
+      return '/status';
+    }
   };
 });

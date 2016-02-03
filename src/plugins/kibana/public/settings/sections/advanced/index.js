@@ -56,6 +56,9 @@ define(function (require) {
     order: 2,
     name: 'advanced',
     display: 'Advanced',
-    url: '#/settings/advanced'
+    url: function () {
+      const hash = window.location.hash;
+      return hash.indexOf('/advanced') === -1 ? '#/settings/advanced?' + hash.split('?')[1] : '#/settings/advanced';
+    }
   };
 });

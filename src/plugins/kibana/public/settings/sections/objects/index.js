@@ -11,6 +11,9 @@ define(function (require) {
   return {
     name: 'objects',
     display: 'Objects',
-    url: '#/settings/objects'
+    url: function () {
+      const hash = window.location.hash;
+      return hash.indexOf('/objects') === -1 ? '#/settings/objects?' + hash.split('?')[1] : '#/settings/objects';
+    }
   };
 });

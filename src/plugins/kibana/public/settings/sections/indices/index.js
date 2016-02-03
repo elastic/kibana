@@ -46,6 +46,9 @@ define(function (require) {
   return {
     name: 'indices',
     display: 'Indices',
-    url: '#/settings/indices',
+    url: function () {
+      const hash = window.location.hash;
+      return hash.indexOf('/indices') === -1 ? '#/settings/indices?' + hash.split('?')[1] : '#/settings/indices';
+    }
   };
 });
