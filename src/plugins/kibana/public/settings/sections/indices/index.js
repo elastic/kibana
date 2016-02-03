@@ -45,6 +45,7 @@ define(function (require) {
   });
 
   registry.register(() => ({
+    order: 1,
     name: 'indices',
     display: 'Indices',
     url: '#/settings/indices',

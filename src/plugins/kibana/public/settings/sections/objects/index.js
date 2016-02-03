@@ -11,6 +11,7 @@ define(function (require) {
   require('ui/modules').get('apps/settings');
 
   registry.register(() => ({
+    order: 3,
     name: 'objects',
     display: 'Objects',
     url: '#/settings/objects'
