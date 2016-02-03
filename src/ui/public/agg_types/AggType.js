@@ -97,11 +97,14 @@ define(function (require) {
           advanced: true
         });
         // always append custom label
-        this.params.push({
-          name: 'customLabel',
-          type: 'string',
-          write: _.noop
-        });
+
+        if (config.customLabels !== false) {
+          this.params.push({
+            name: 'customLabel',
+            type: 'string',
+            write: _.noop
+          });
+        }
 
         this.params = new AggParams(this.params);
       }
