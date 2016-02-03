@@ -1,7 +1,9 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import RegistrySpyModesProvider from 'ui/registry/spy_modes';
-require('ui/modules')
+import uiModules from 'ui/modules';
+import spyTemplate from 'ui/visualize/spy.html';
+uiModules
   .get('app/visualize')
   .directive('visualizeSpy', function (Private, $compile) {
 
@@ -10,7 +12,7 @@ require('ui/modules')
 
     return {
       restrict: 'E',
-      template: require('ui/visualize/spy.html'),
+      template: spyTemplate,
       link: function ($scope, $el) {
         var currentSpy;
         var $container = $el.find('.visualize-spy-container');

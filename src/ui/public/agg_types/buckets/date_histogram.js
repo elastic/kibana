@@ -8,6 +8,7 @@ import TimeBucketsProvider from 'ui/time_buckets';
 import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 import ConfigDefaultsProvider from 'ui/config/defaults';
+import intervalTemplate from 'ui/agg_types/controls/interval.html';
 export default function DateHistogramAggType(timefilter, config, Private) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var TimeBuckets = Private(TimeBucketsProvider);
@@ -89,7 +90,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
         },
         default: 'auto',
         options: intervalOptions,
-        editor: require('ui/agg_types/controls/interval.html'),
+        editor: intervalTemplate,
         onRequest: function (agg) {
           setBounds(agg, true);
         },

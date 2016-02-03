@@ -1,7 +1,8 @@
 import angular from 'angular';
 import _ from 'lodash';
 import moment from 'moment';
-const module = require('ui/modules').get('app/dashboard');
+import uiModules from 'ui/modules';
+const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
 module.factory('SavedDashboard', function (courier, config) {

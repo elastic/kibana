@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
+import uiModules from 'ui/modules';
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .config(function ($provide) {
 
   function strictEquality(a, b) {

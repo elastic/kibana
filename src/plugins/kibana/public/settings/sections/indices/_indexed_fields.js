@@ -3,8 +3,10 @@ import 'ui/paginated_table';
 import nameHtml from 'plugins/kibana/settings/sections/indices/_field_name.html';
 import typeHtml from 'plugins/kibana/settings/sections/indices/_field_type.html';
 import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
+import uiModules from 'ui/modules';
+import indexedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_indexed_fields.html';
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('indexedFields', function ($filter) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
@@ -12,7 +14,7 @@ require('ui/modules').get('apps/settings')
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/settings/sections/indices/_indexed_fields.html'),
+    template: indexedFieldsTemplate,
     scope: true,
     link: function ($scope) {
       const rowScopes = []; // track row scopes, so they can be destroyed as needed

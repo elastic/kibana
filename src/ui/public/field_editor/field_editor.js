@@ -4,9 +4,11 @@ import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 import _ from 'lodash';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import uiModules from 'ui/modules';
+import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
 
 
-require('ui/modules')
+uiModules
 .get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce) {
   var fieldFormats = Private(RegistryFieldFormatsProvider);
@@ -16,7 +18,7 @@ require('ui/modules')
 
   return {
     restrict: 'E',
-    template: require('ui/field_editor/field_editor.html'),
+    template: fieldEditorTemplate,
     scope: {
       getIndexPattern: '&indexPattern',
       getField: '&field'

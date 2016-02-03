@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import Ipv4Address from 'ui/utils/Ipv4Address';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
   .get('kibana')
   .directive('validateIp', function () {
     return {

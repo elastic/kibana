@@ -3,6 +3,9 @@ import moment from 'moment';
 import 'ui/validateDateInterval';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
+import intervalTemplate from 'ui/agg_types/controls/interval.html';
+import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
+import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 export default function HistogramAggDefinition(Private) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
@@ -24,7 +27,7 @@ export default function HistogramAggDefinition(Private) {
 
       {
         name: 'interval',
-        editor: require('ui/agg_types/controls/interval.html'),
+        editor: intervalTemplate,
         write: function (aggConfig, output) {
           output.params.interval = parseInt(aggConfig.params.interval, 10);
         }
@@ -33,7 +36,7 @@ export default function HistogramAggDefinition(Private) {
       {
         name: 'min_doc_count',
         default: null,
-        editor: require('ui/agg_types/controls/min_doc_count.html'),
+        editor: minDocCountTemplate,
         write: function (aggConfig, output) {
           if (aggConfig.params.min_doc_count) {
             output.params.min_doc_count = 0;
@@ -44,7 +47,7 @@ export default function HistogramAggDefinition(Private) {
       {
         name: 'extended_bounds',
         default: {},
-        editor: require('ui/agg_types/controls/extended_bounds.html'),
+        editor: extendedBoundsTemplate,
         write: function (aggConfig, output) {
           var val = aggConfig.params.extended_bounds;
 

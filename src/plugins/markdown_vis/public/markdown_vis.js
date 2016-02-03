@@ -1,6 +1,8 @@
 import 'plugins/markdown_vis/markdown_vis.less';
 import 'plugins/markdown_vis/markdown_vis_controller';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
+import markdownVisTemplate from 'plugins/markdown_vis/markdown_vis.html';
+import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -18,9 +20,9 @@ function MarkdownVisProvider(Private) {
     title: 'Markdown widget',
     icon: 'fa-code',
     description: 'Useful for displaying explanations or instructions for dashboards.',
-    template: require('plugins/markdown_vis/markdown_vis.html'),
+    template: markdownVisTemplate,
     params: {
-      editor: require('plugins/markdown_vis/markdown_vis_params.html')
+      editor: markdownVisParamsTemplate
     },
     requiresSearch: false
   });

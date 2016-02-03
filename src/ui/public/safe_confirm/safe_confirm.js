@@ -1,4 +1,5 @@
-require('ui/modules').get('kibana')
+import uiModules from 'ui/modules';
+uiModules.get('kibana')
 
 /*
  * Angular doesn't play well with thread blocking calls such as

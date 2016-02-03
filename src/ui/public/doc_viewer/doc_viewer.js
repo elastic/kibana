@@ -3,9 +3,10 @@ import angular from 'angular';
 import 'ace';
 import html from 'ui/doc_viewer/doc_viewer.html';
 import 'ui/doc_viewer/doc_viewer.less';
+import uiModules from 'ui/modules';
 
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .directive('docViewer', function (config, Private) {
   return {
     restrict: 'E',

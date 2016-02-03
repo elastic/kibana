@@ -5,9 +5,12 @@ import 'ui/filters/start_from';
 import 'ui/field_editor';
 import 'plugins/kibana/settings/sections/indices/_indexed_fields';
 import 'plugins/kibana/settings/sections/indices/_scripted_fields';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import appTemplate from 'plugins/kibana/settings/app.html';
 
 
-require('ui/routes')
+uiRoutes
 .when('/settings', {
   redirectTo: '/settings/indices'
 });
@@ -17,12 +20,12 @@ require('ui/index_patterns/routeSetup/loadDefault')({
   whenMissingRedirectTo: '/settings/indices'
 });
 
-require('ui/modules')
+uiModules
 .get('apps/settings')
 .directive('kbnSettingsApp', function (Private, $route, timefilter) {
   return {
     restrict: 'E',
-    template: require('plugins/kibana/settings/app.html'),
+    template: appTemplate,
     transclude: true,
     scope: {
       sectionName: '@section'

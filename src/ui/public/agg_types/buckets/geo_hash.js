@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import precisionTemplate from 'ui/agg_types/controls/precision.html';
 export default function GeoHashAggDefinition(Private, config) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var defaultPrecision = 2;
@@ -45,7 +46,7 @@ export default function GeoHashAggDefinition(Private, config) {
       {
         name: 'precision',
         default: defaultPrecision,
-        editor: require('ui/agg_types/controls/precision.html'),
+        editor: precisionTemplate,
         controller: function ($scope) {
           $scope.$watchMulti([
             'agg.params.autoPrecision',

@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .config(function ($provide) {
 
   $provide.decorator('$rootScope', function ($delegate) {

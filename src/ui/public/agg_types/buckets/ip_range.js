@@ -3,6 +3,7 @@ import 'ui/directives/validate_ip';
 import 'ui/directives/validate_cidr_mask';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterIpRangeProvider from 'ui/agg_types/buckets/create_filter/ip_range';
+import ipRangesTemplate from 'ui/agg_types/controls/ip_ranges.html';
 
 export default function RangeAggDefinition(Private) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -35,7 +36,7 @@ export default function RangeAggDefinition(Private) {
             {mask: '128.0.0.0/2'}
           ]
         },
-        editor: require('ui/agg_types/controls/ip_ranges.html'),
+        editor: ipRangesTemplate,
         write: function (aggConfig, output) {
           var ipRangeType = aggConfig.params.ipRangeType;
           output.params.ranges = aggConfig.params.ranges[ipRangeType];

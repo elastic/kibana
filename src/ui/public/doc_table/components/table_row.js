@@ -9,7 +9,8 @@ import 'ui/filters/short_dots';
 import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
-var module = require('ui/modules').get('app/discover');
+import uiModules from 'ui/modules';
+var module = uiModules.get('app/discover');
 
 
 

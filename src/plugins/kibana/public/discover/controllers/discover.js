@@ -24,18 +24,21 @@ import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import FilterManagerProvider from 'ui/filter_manager';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import indexTemplate from 'plugins/kibana/discover/index.html';
 
 
 
-const app = require('ui/modules').get('apps/discover', [
+const app = uiModules.get('apps/discover', [
   'kibana/notify',
   'kibana/courier',
   'kibana/index_patterns'
 ]);
 
-require('ui/routes')
+uiRoutes
 .when('/discover/:id?', {
-  template: require('plugins/kibana/discover/index.html'),
+  template: indexTemplate,
   reloadOnSearch: false,
   resolve: {
     ip: function (Promise, courier, config, $location) {

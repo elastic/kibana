@@ -4,13 +4,15 @@ import rison from 'ui/utils/rison';
 import registry from 'plugins/kibana/settings/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/settings/sections/objects/_view.html';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
 
-require('ui/routes')
+uiRoutes
 .when('/settings/objects/:service/:id', {
   template: objectViewHTML
 });
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('kbnSettingsObjectsView', function (kbnIndex, Notifier) {
   return {
     restrict: 'E',

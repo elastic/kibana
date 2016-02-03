@@ -16,13 +16,16 @@ import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import indexTemplate from 'plugins/kibana/dashboard/index.html';
 
 
 
 require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
 
 
-const app = require('ui/modules').get('app/dashboard', [
+const app = uiModules.get('app/dashboard', [
   'elasticsearch',
   'ngRoute',
   'kibana/courier',
@@ -31,9 +34,9 @@ const app = require('ui/modules').get('app/dashboard', [
   'kibana/typeahead'
 ]);
 
-require('ui/routes')
+uiRoutes
 .when('/dashboard', {
-  template: require('plugins/kibana/dashboard/index.html'),
+  template: indexTemplate,
   resolve: {
     dash: function (savedDashboards, config) {
       return savedDashboards.get();
@@ -41,7 +44,7 @@ require('ui/routes')
   }
 })
 .when('/dashboard/:id', {
-  template: require('plugins/kibana/dashboard/index.html'),
+  template: indexTemplate,
   resolve: {
     dash: function (savedDashboards, Notifier, $route, $location, courier) {
       return savedDashboards.get($route.current.params.id)

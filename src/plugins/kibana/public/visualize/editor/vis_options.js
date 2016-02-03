@@ -1,12 +1,14 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import uiModules from 'ui/modules';
+import visOptionsTemplate from 'plugins/kibana/visualize/editor/vis_options.html';
 
-require('ui/modules')
+uiModules
 .get('app/visualize')
 .directive('visEditorVisOptions', function (Private, $timeout, $compile) {
   return {
     restrict: 'E',
-    template: require('plugins/kibana/visualize/editor/vis_options.html'),
+    template: visOptionsTemplate,
     scope: {
       vis: '=',
     },

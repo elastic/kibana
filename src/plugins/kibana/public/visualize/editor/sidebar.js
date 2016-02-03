@@ -1,14 +1,16 @@
 import _ from 'lodash';
 import 'plugins/kibana/visualize/editor/agg_group';
 import 'plugins/kibana/visualize/editor/vis_options';
-require('ui/modules')
+import uiModules from 'ui/modules';
+import sidebarTemplate from 'plugins/kibana/visualize/editor/sidebar.html';
+uiModules
 .get('app/visualize')
 .directive('visEditorSidebar', function () {
 
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/visualize/editor/sidebar.html'),
+    template: sidebarTemplate,
     scope: true,
     controllerAs: 'sidebar',
     controller: function ($scope) {

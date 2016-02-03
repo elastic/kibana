@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import VisProvider from 'ui/Vis';
-require('ui/modules')
+import uiModules from 'ui/modules';
+uiModules
 .get('app/visualize')
 .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
   const Vis = Private(VisProvider);

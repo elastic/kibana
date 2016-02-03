@@ -1,12 +1,14 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import 'ui/directives/inequality';
-const module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+import pointSeriesOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/point_series_options.html';
+const module = uiModules.get('kibana');
 
 module.directive('pointSeriesOptions', function ($parse, $compile) {
   return {
     restrict: 'E',
-    template: require('plugins/kbn_vislib_vis_types/controls/point_series_options.html'),
+    template: pointSeriesOptionsTemplate,
     replace: true
   };
 });

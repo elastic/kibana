@@ -6,10 +6,11 @@ import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
+import uiModules from 'ui/modules';
 
 
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .directive('docTable', function (config, Notifier, getAppState) {
   return {
     restrict: 'E',

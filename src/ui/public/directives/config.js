@@ -3,7 +3,8 @@ import 'ui/watch_multi';
 import ConfigTemplate from 'ui/ConfigTemplate';
 import angular from 'angular';
 import 'ui/directives/input_focus';
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 
 /**

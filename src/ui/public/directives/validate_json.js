@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import uiModules from 'ui/modules';
 
-var module = require('ui/modules').get('kibana');
+var module = uiModules.get('kibana');
 
 module.directive('validateJson', function ($compile) {
   return {

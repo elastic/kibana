@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
 .get('app/settings')
 .directive('fieldFormatEditor', function (Private, $compile) {
   return {

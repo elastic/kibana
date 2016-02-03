@@ -2,7 +2,9 @@ import _ from 'lodash';
 import rison from 'ui/utils/rison';
 import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
+var module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
 
@@ -18,7 +20,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       // optional on-choose attr, sets the userOnChoose in our scope
       userOnChoose: '=?onChoose'
     },
-    template: require('ui/partials/saved_object_finder.html'),
+    template: savedObjectFinderTemplate,
     controllerAs: 'finder',
     controller: function ($scope, $element, $timeout) {
       var self = this;

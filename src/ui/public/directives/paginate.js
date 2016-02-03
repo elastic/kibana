@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
+import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
 
 var PER_PAGE_DEFAULT = 10;
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .directive('paginate', function ($parse, $compile) {
   return {
     restrict: 'E',
@@ -189,7 +191,7 @@ require('ui/modules').get('kibana')
   // this directive is automatically added by paginate if not found within it's $el
   return {
     restrict: 'E',
-    template: require('ui/partials/paginate_controls.html')
+    template: paginateControlsTemplate
   };
 });
 

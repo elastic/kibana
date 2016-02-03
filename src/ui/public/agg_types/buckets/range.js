@@ -3,6 +3,7 @@ import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_a
 import AggTypesBucketsCreateFilterRangeProvider from 'ui/agg_types/buckets/create_filter/range';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
 import RangeKeyProvider from './RangeKey';
+import rangesTemplate from 'ui/agg_types/controls/ranges.html';
 export default function RangeAggDefinition(Private) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var createFilter = Private(AggTypesBucketsCreateFilterRangeProvider);
@@ -62,7 +63,7 @@ export default function RangeAggDefinition(Private) {
           { from: 0, to: 1000 },
           { from: 1000, to: 2000 }
         ],
-        editor: require('ui/agg_types/controls/ranges.html'),
+        editor: rangesTemplate,
         write: function (aggConfig, output) {
           output.params.ranges = aggConfig.params.ranges;
           output.params.keyed = true;

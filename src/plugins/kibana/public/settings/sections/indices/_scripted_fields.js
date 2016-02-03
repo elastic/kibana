@@ -3,8 +3,10 @@ import 'ui/paginated_table';
 import popularityHtml from 'plugins/kibana/settings/sections/indices/_field_popularity.html';
 import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
 import dateScripts from 'plugins/kibana/settings/sections/indices/_date_scripts';
+import uiModules from 'ui/modules';
+import scriptedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_scripted_fields.html';
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
   const filter = $filter('filter');
@@ -13,7 +15,7 @@ require('ui/modules').get('apps/settings')
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/settings/sections/indices/_scripted_fields.html'),
+    template: scriptedFieldsTemplate,
     scope: true,
     link: function ($scope) {
 

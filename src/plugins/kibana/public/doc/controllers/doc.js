@@ -5,9 +5,11 @@ import 'ui/courier';
 import 'ui/doc_viewer';
 import 'ui/index_patterns';
 import html from 'plugins/kibana/doc/index.html';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
 
 
-const app = require('ui/modules').get('apps/doc', [
+const app = uiModules.get('apps/doc', [
   'kibana/notify',
   'kibana/courier',
   'kibana/index_patterns'
@@ -20,7 +22,7 @@ const resolveIndexPattern = {
   }
 };
 
-require('ui/routes')
+uiRoutes
 .when('/doc/:indexPattern/:index/:type/:id', {
   template: html,
   resolve: resolveIndexPattern

@@ -9,7 +9,8 @@ import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
 import 'ui/timepicker/toggle';
-var module = require('ui/modules').get('ui/timepicker');
+import uiModules from 'ui/modules';
+var module = uiModules.get('ui/timepicker');
 var notify = new Notifier({
   location: 'timepicker',
 });

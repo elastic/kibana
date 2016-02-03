@@ -8,7 +8,8 @@ import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-var module = require('ui/modules').get('kibana/index_patterns');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana/index_patterns');
 
 function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
   var self = this;

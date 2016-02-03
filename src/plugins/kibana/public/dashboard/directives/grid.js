@@ -2,8 +2,9 @@ import _ from 'lodash';
 import $ from 'jquery';
 import Binder from 'ui/Binder';
 import 'gridster';
+import uiModules from 'ui/modules';
 
-const app = require('ui/modules').get('app/dashboard');
+const app = uiModules.get('app/dashboard');
 
 app.directive('dashboardGrid', function ($compile, Notifier) {
   return {

@@ -1,5 +1,6 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType';
 import VisSchemasProvider from 'ui/Vis/Schemas';
+import areaTemplate from 'plugins/kbn_vislib_vis_types/editors/area.html';
 
 export default function HistogramVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
@@ -30,7 +31,7 @@ export default function HistogramVisType(Private) {
       },
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
-      editor: require('plugins/kbn_vislib_vis_types/editors/area.html')
+      editor: areaTemplate
     },
     schemas: new Schemas([
       {

@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import 'ui/config';
+import uiModules from 'ui/modules';
 var $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .run(function ($rootScope, $compile, config) {
   var truncateGradientHeight = 15;

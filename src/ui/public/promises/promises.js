@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
-var module = require('ui/modules').get('kibana');
+var module = uiModules.get('kibana');
 
 // Provides a tiny subset of the excelent API from
 // bluebird, reimplemented using the $q service

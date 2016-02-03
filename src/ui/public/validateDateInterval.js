@@ -1,6 +1,7 @@
 import parseInterval from 'ui/utils/parse_interval';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('validateDateInterval', function () {
   return {

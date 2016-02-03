@@ -1,13 +1,15 @@
 import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import uiModules from 'ui/modules';
+import aggAddTemplate from 'plugins/kibana/visualize/editor/agg_add.html';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('visEditorAggAdd', function (Private) {
   const AggConfig = Private(VisAggConfigProvider);
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/visualize/editor/agg_add.html'),
+    template: aggAddTemplate,
     controllerAs: 'add',
     controller: function ($scope) {
       const self = this;

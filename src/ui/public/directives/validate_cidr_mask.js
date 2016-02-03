@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import CidrMask from 'ui/utils/CidrMask';
+import uiModules from 'ui/modules';
 
-require('ui/modules').get('kibana').directive('validateCidrMask', function () {
+uiModules.get('kibana').directive('validateCidrMask', function () {
   return {
     restrict: 'A',
     require: 'ngModel',

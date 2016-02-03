@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
-const module = require('ui/modules').get('kibana/render_directive');
+import uiModules from 'ui/modules';
+const module = uiModules.get('kibana/render_directive');
 
 module.directive('renderDirective', function () {
   return {

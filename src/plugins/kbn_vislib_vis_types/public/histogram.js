@@ -1,5 +1,6 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType';
 import VisSchemasProvider from 'ui/Vis/Schemas';
+import histogramTemplate from 'plugins/kbn_vislib_vis_types/editors/histogram.html';
 
 export default function HistogramVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
@@ -26,7 +27,7 @@ export default function HistogramVisType(Private) {
       },
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'percentage', 'grouped'],
-      editor: require('plugins/kbn_vislib_vis_types/editors/histogram.html')
+      editor: histogramTemplate
     },
     schemas: new Schemas([
       {

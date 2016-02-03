@@ -3,7 +3,8 @@ import dateMath from 'ui/utils/dateMath';
 import moment from 'moment';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 
 module.directive('prettyDuration', function (config, quickRanges, timeUnits) {

@@ -2,6 +2,8 @@ import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_controller';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
 import VisSchemasProvider from 'ui/Vis/Schemas';
+import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
+import metricVisParamsTemplate from 'plugins/metric_vis/metric_vis_params.html';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -21,13 +23,13 @@ function MetricVisProvider(Private) {
     description: 'One big number for all of your one big number needs. Perfect for showing ' +
       'a count of hits, or the exact average a numeric field.',
     icon: 'fa-calculator',
-    template: require('plugins/metric_vis/metric_vis.html'),
+    template: metricVisTemplate,
     params: {
       defaults: {
         handleNoResults: true,
         fontSize: 60
       },
-      editor: require('plugins/metric_vis/metric_vis_params.html')
+      editor: metricVisParamsTemplate
     },
     schemas: new Schemas([
       {

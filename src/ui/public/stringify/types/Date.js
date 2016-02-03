@@ -3,6 +3,7 @@ import moment from 'moment';
 import 'ui/field_format_editor/pattern/pattern';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
 import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
+import dateTemplate from 'ui/stringify/editors/date.html';
 export default function DateTimeFormatProvider(Private) {
   var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
   var BoundToConfigObj = Private(BoundToConfigObjProvider);
@@ -23,7 +24,7 @@ export default function DateTimeFormatProvider(Private) {
   });
 
   DateTime.editor = {
-    template: require('ui/stringify/editors/date.html'),
+    template: dateTemplate,
     controllerAs: 'cntrl',
     controller: function ($interval, $scope) {
       var self = this;

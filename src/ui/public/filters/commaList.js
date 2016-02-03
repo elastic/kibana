@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .filter('commaList', function () {
   /**

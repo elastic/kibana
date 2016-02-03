@@ -1,4 +1,5 @@
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 module.constant('refreshIntervals', [
   { value : 0, display: 'Off', section: 0},

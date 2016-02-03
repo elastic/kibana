@@ -2,12 +2,14 @@ import 'ui/field_editor';
 import 'plugins/kibana/settings/sections/indices/_index_header';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 import UrlProvider from 'ui/url';
+import uiRoutes from 'ui/routes';
+import fieldEditorTemplate from 'plugins/kibana/settings/sections/indices/_field_editor.html';
 
-require('ui/routes')
+uiRoutes
 .when('/settings/indices/:indexPatternId/field/:fieldName', { mode: 'edit' })
 .when('/settings/indices/:indexPatternId/create-field/', { mode: 'create' })
 .defaults(/settings\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
-  template: require('plugins/kibana/settings/sections/indices/_field_editor.html'),
+  template: fieldEditorTemplate,
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPatternId)

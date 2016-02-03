@@ -4,13 +4,14 @@ import 'ui/directives/saved_object_finder';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import uiModules from 'ui/modules';
 
 
 const templateStep = function (num, txt) {
   return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
 };
 
-const module = require('ui/modules').get('app/visualize', ['kibana/courier']);
+const module = uiModules.get('app/visualize', ['kibana/courier']);
 
 /********
 /** Wizard Step 1

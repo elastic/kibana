@@ -2,7 +2,8 @@ import _ from 'lodash';
 import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';
-var typeahead = require('ui/modules').get('kibana/typeahead');
+import uiModules from 'ui/modules';
+var typeahead = uiModules.get('kibana/typeahead');
 
 
 typeahead.directive('kbnTypeahead', function () {

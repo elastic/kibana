@@ -1,10 +1,12 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
+import tableVisParamsTemplate from 'plugins/table_vis/table_vis_params.html';
 
-require('ui/modules').get('kibana/table_vis')
+uiModules.get('kibana/table_vis')
 .directive('tableVisParams', function () {
   return {
     restrict: 'E',
-    template: require('plugins/table_vis/table_vis_params.html'),
+    template: tableVisParamsTemplate,
     link: function ($scope) {
       $scope.$watchMulti([
         'vis.params.showPartialRows',

@@ -1,9 +1,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
 var SCROLLER_HEIGHT = 20;
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('fixedScroll', function ($timeout) {
   return {

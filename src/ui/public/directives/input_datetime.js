@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import moment from 'moment';
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 module.directive('inputDatetime', function () {
   return {

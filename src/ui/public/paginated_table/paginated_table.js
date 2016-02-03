@@ -1,12 +1,14 @@
 import _ from 'lodash';
-require('ui/modules')
+import uiModules from 'ui/modules';
+import paginatedTableTemplate from 'ui/paginated_table/paginated_table.html';
+uiModules
 .get('kibana')
 .directive('paginatedTable', function ($filter) {
   var orderBy = $filter('orderBy');
 
   return {
     restrict: 'E',
-    template: require('ui/paginated_table/paginated_table.html'),
+    template: paginatedTableTemplate,
     transclude: true,
     scope: {
       rows: '=',

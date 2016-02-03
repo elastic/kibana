@@ -1,11 +1,13 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
+import samplesTemplate from 'ui/field_format_editor/samples/samples.html';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('fieldFormatEditorSamples', function ($sce, Promise) {
   return {
     restrict: 'E',
-    template: require('ui/field_format_editor/samples/samples.html'),
+    template: samplesTemplate,
     require: ['?^ngModel', '^fieldEditor'],
     scope: true,
     link: function ($scope, $el, attrs, cntrls) {

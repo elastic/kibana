@@ -3,6 +3,7 @@ import angular from 'angular';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterFiltersProvider from 'ui/agg_types/buckets/create_filter/filters';
 import CourierDataSourceDecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
+import filtersTemplate from 'ui/agg_types/controls/filters.html';
 export default function FiltersAggDefinition(Private, Notifier) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
@@ -17,7 +18,7 @@ export default function FiltersAggDefinition(Private, Notifier) {
     params: [
       {
         name: 'filters',
-        editor: require('ui/agg_types/controls/filters.html'),
+        editor: filtersTemplate,
         default: [ {input: {}, label: ''} ],
         write: function (aggConfig, output) {
           var inFilters = aggConfig.params.filters;

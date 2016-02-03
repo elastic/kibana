@@ -6,7 +6,9 @@ import 'ui/doc_table';
 import PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider from 'plugins/kibana/dashboard/components/panel/lib/load_panel';
 import FilterManagerProvider from 'ui/filter_manager';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
-require('ui/modules')
+import uiModules from 'ui/modules';
+import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
+uiModules
 .get('app/dashboard')
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
   const loadPanel = Private(PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider);
@@ -30,7 +32,7 @@ require('ui/modules')
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/dashboard/components/panel/panel.html'),
+    template: panelTemplate,
     requires: '^dashboardGrid',
     link: function ($scope, $el) {
       // using $scope inheritance, panels are available in AppState

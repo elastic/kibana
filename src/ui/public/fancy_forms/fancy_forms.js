@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import KbnFormController from 'ui/fancy_forms/KbnFormController';
+import uiModules from 'ui/modules';
 
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .config(function ($provide) {
   function decorateDirectiveController(DecorativeController) {

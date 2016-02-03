@@ -1,4 +1,5 @@
-require('ui/modules')
+import uiModules from 'ui/modules';
+uiModules
 .get('kibana')
 .directive('confirmClick', function () {
   return {

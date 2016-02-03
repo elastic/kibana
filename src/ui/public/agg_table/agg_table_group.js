@@ -1,12 +1,14 @@
 import 'ui/compile_recursive_directive';
 import 'ui/agg_table';
+import uiModules from 'ui/modules';
+import aggTableGroupTemplate from 'ui/agg_table/agg_table_group.html';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('kbnAggTableGroup', function (compileRecursiveDirective) {
   return {
     restrict: 'E',
-    template: require('ui/agg_table/agg_table_group.html'),
+    template: aggTableGroupTemplate,
     scope: {
       group: '=',
       perPage: '=?',

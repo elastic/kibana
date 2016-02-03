@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import dateMath from 'ui/utils/dateMath';
+import uiModules from 'ui/modules';
 
-require('ui/modules').get('kibana').directive('validateDateMath', function () {
+uiModules.get('kibana').directive('validateDateMath', function () {
   return {
     restrict: 'A',
     require: 'ngModel',

@@ -1,11 +1,13 @@
 import 'ui/field_format_editor/samples/samples';
+import uiModules from 'ui/modules';
+import patternTemplate from 'ui/field_format_editor/pattern/pattern.html';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('fieldFormatEditorPattern', function () {
   return {
     restrict: 'E',
-    template: require('ui/field_format_editor/pattern/pattern.html'),
+    template: patternTemplate,
     require: ['ngModel', '^fieldEditor'],
     scope: true,
     link: function ($scope, $el, attrs, cntrls) {

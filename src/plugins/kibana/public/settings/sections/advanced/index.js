@@ -2,15 +2,18 @@ import _ from 'lodash';
 import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
 import 'plugins/kibana/settings/sections/advanced/advanced_row';
 import ConfigDefaultsProvider from 'ui/config/defaults';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import indexTemplate from 'plugins/kibana/settings/sections/advanced/index.html';
 
 
 
-require('ui/routes')
+uiRoutes
 .when('/settings/advanced', {
-  template: require('plugins/kibana/settings/sections/advanced/index.html')
+  template: indexTemplate
 });
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('kbnSettingsAdvanced', function (config, Notifier, Private, $rootScope) {
   return {
     restrict: 'E',

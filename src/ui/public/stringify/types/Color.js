@@ -1,6 +1,7 @@
 import 'ui/stringify/editors/color.less';
 import _ from 'lodash';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+import colorTemplate from 'ui/stringify/editors/color.html';
 export default function _StringProvider(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
@@ -22,7 +23,7 @@ export default function _StringProvider(Private) {
   ];
 
   _Color.editor = {
-    template: require('ui/stringify/editors/color.html'),
+    template: colorTemplate,
     controller($scope) {
       $scope.addColor = function () {
         $scope.editor.formatParams.colors.push(_.cloneDeep(DEFAULT_COLOR));
