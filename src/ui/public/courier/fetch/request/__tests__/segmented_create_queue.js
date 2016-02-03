@@ -2,6 +2,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
 describe('ui/courier/fetch/request/segmented/_createQueue', () => {
 
   let Promise;
@@ -15,7 +16,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
+    SegmentedReq = Private(CourierFetchRequestSegmentedProvider);
 
     MockSource = class {
       constructor() {

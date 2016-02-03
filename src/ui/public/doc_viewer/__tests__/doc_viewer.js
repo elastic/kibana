@@ -6,6 +6,7 @@ import ngMock from 'ngMock';
 import $ from 'jquery';
 import 'ui/private';
 import 'ui/doc_viewer';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 var hit = {
   '_index': 'logstash-2014.09.09',
   '_type': 'apache',
@@ -57,7 +58,7 @@ describe('docViewer', function () {
   beforeEach(function () {
     $elem = angular.element('<doc-viewer index-pattern="indexPattern" hit="hit" filter="filter"></doc-viewer>');
     ngMock.inject(function (Private) {
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       flattened = indexPattern.flattenHit(hit);
     });
     init($elem, {

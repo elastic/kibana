@@ -5,6 +5,13 @@ import expect from 'expect.js';
 import Promise from 'bluebird';
 import errors from 'ui/errors';
 import IndexedArray from 'ui/IndexedArray';
+import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
+import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
+import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
+import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
+import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
 describe('index pattern', function () {
   var IndexPattern;
   var mapper;
@@ -23,21 +30,21 @@ describe('index pattern', function () {
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
     $rootScope = $injector.get('$rootScope');
     config = _config_;
-    mockLogstashFields = Private(require('fixtures/logstash_fields'));
-    docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
+    mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+    docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
-    DocSource = Private(require('ui/courier/data_source/doc_source'));
+    DocSource = Private(CourierDataSourceDocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
 
     // stub mapper
-    mapper = Private(require('ui/index_patterns/_mapper'));
+    mapper = Private(IndexPatternsMapperProvider);
     sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
       return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
     });
 
     // stub mappingSetup
-    mappingSetup = Private(require('ui/utils/mapping_setup'));
+    mappingSetup = Private(UtilsMappingSetupProvider);
     sinon.stub(mappingSetup, 'isDefined', function () {
       return Promise.resolve(true);
     });
@@ -52,13 +59,13 @@ describe('index pattern', function () {
     Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
 
     // spy on intervals
-    intervals = Private(require('ui/index_patterns/_intervals'));
+    intervals = Private(IndexPatternsIntervalsProvider);
     sinon.stub(intervals, 'toIndexList').returns([
       { index: 'foo', max: Infinity, min: -Infinity },
       { index: 'bar', max: Infinity, min: -Infinity }
     ]);
 
-    IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
+    IndexPattern = Private(IndexPatternsIndexPatternProvider);
   }));
 
   // create an indexPattern instance for each test
