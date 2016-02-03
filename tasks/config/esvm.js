@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      branch: '2.1',
+      branch: '2.3',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         network: {
@@ -65,7 +65,7 @@ module.exports = function (grunt) {
     },
     withPlugins: {
       options: {
-        version: '2.1.0',
+        version: '2.3.0',
         directory: resolve(directory, 'withPlugins'),
         plugins: [
           'license',
