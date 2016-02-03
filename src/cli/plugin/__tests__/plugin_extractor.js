@@ -2,12 +2,12 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import glob from 'glob';
 import rimraf from 'rimraf';
-const { join } = require('path');
 import mkdirp from 'mkdirp';
 
 import pluginLogger from '../plugin_logger';
 import extract from '../plugin_extractor';
 import pluginDownloader from '../plugin_downloader';
+import { join } from 'path';
 
 describe('kibana cli', function () {
 

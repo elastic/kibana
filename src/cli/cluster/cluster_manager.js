@@ -1,12 +1,12 @@
 import cluster from 'cluster';
-const { join } = require('path');
-const { format: formatUrl } = require('url');
 import Hapi from 'hapi';
-const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
 import Log from '../Log';
 import Worker from './worker';
 import BasePathProxy from './base_path_proxy';
+import { join } from 'path';
+import { format as formatUrl } from 'url';
+import { debounce, compact, get, invoke, bindAll, once, sample } from 'lodash';
 
 process.env.kbnWorkerType = 'managr';
 

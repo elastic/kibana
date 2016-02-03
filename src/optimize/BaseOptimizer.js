@@ -1,7 +1,3 @@
-let { inherits } = require('util');
-let { defaults } = require('lodash');
-let { resolve } = require('path');
-let { writeFile } = require('fs');
 import webpack from 'webpack';
 import Boom from 'boom';
 import DirectoryNameAsMain from 'webpack-directory-name-as-main';
@@ -11,6 +7,10 @@ import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 import babelOptions from './babelOptions';
+import { inherits } from 'util';
+import { defaults } from 'lodash';
+import { resolve } from 'path';
+import { writeFile } from 'fs';
 let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
 class BaseOptimizer {

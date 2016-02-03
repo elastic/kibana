@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import handleESError from '../../../lib/handle_es_error';
-const {templateToPattern, patternToTemplate} = require('../../../lib/convert_pattern_and_template_name');
+import {templateToPattern, patternToTemplate} from '../../../lib/convert_pattern_and_template_name';
 
 module.exports = function registerDelete(server) {
   server.route({

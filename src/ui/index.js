@@ -1,8 +1,8 @@
+import { defaults } from 'lodash';
+import { resolve } from 'path';
 module.exports = async (kbnServer, server, config) => {
-  let { defaults } = require('lodash');
   let Boom = require('boom');
   let formatUrl = require('url').format;
-  let { resolve } = require('path');
   let readFile = require('fs').readFileSync;
 
   let fromRoot = require('../utils/fromRoot');

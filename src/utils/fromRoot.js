@@ -1,5 +1,5 @@
 import _ from 'lodash';
+import { join, dirname, normalize } from 'path';
 var root = require('./packageJson').__dirname;
-var { join, dirname, normalize } = require('path');
 
 module.exports = _.flow(_.partial(join, root), normalize);

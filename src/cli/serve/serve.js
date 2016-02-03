@@ -1,6 +1,6 @@
 import _ from 'lodash';
-const { isWorker } = require('cluster');
-const { resolve } = require('path');
+import { isWorker } from 'cluster';
+import { resolve } from 'path';
 
 const cwd = process.cwd();
 const src = require('requirefrom')('src');

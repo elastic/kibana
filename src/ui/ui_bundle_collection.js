@@ -1,7 +1,3 @@
-let { pull, transform, pluck } = require('lodash');
-let { join } = require('path');
-let { resolve, promisify } = require('bluebird');
-let { makeRe } = require('minimatch');
 let rimraf = promisify(require('rimraf'));
 let mkdirp = promisify(require('mkdirp'));
 let unlink = promisify(require('fs').unlink);
@@ -10,6 +6,10 @@ let readSync = require('fs').readFileSync;
 
 import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
+import { pull, transform, pluck } from 'lodash';
+import { join } from 'path';
+import { resolve, promisify } from 'bluebird';
+import { makeRe } from 'minimatch';
 
 class UiBundleCollection {
   constructor(bundlerEnv, filter) {
