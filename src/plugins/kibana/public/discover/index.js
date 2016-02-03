@@ -1,4 +1,4 @@
-define(function (require, module, exports) {
+define(function (require) {
   require('plugins/kibana/discover/saved_searches/saved_searches');
   require('plugins/kibana/discover/directives/timechart');
   require('ui/navbar');
