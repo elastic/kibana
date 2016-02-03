@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('tabifyAggResponse Integration', function () {
-  var _ = require('lodash');
-  var fixtures = require('fixtures/fake_hierarchical_data');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var Vis;
   var Buckets;

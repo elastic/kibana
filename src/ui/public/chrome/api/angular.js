@@ -1,9 +1,9 @@
 import _ from 'lodash';
+import modules from 'ui/modules';
 
 module.exports = function (chrome, internals) {
 
   chrome.setupAngular = function () {
-    var modules = require('ui/modules');
     var kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {

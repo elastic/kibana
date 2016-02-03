@@ -1,6 +1,8 @@
 import _ from 'lodash';
-const { isWorker } = require('cluster');
-const { resolve } = require('path');
+import { isWorker } from 'cluster';
+import { resolve } from 'path';
+import readYamlConfig from './read_yaml_config';
+import ClusterManager from '../cluster/cluster_manager';
 
 const cwd = process.cwd();
 const src = require('requirefrom')('src');
@@ -26,7 +28,6 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function initServerSettings(opts, extraCliOptions) {
-  const readYamlConfig = require('./read_yaml_config');
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
@@ -117,7 +118,6 @@ module.exports = function (program) {
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
-      const ClusterManager = require('../cluster/cluster_manager');
       new ClusterManager(opts, settings);
       return;
     }

@@ -1,5 +1,5 @@
+import 'ui/field_format_editor/samples/samples';
 define(function (require) {
-  require('ui/field_format_editor/samples/samples');
 
   require('ui/modules')
   .get('kibana')

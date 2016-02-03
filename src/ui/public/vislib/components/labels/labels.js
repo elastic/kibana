@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function LabelUtilService(Private) {
-    var _ = require('lodash');
 
     var createArr = Private(require('ui/vislib/components/labels/data_array'));
     var getArrOfUniqLabels = Private(require('ui/vislib/components/labels/uniq_labels'));

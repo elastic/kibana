@@ -1,8 +1,8 @@
 import { IndexPatternMissingIndices } from 'ui/errors';
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   return function MapperService(Private, Promise, es, config, kbnIndex) {
-    var _ = require('lodash');
-    var moment = require('moment');
 
     var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
     var intervals = Private(require('ui/index_patterns/_intervals'));

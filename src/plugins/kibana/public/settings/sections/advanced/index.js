@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
+import 'plugins/kibana/settings/sections/advanced/advanced_row';
 define(function (require) {
-  const _ = require('lodash');
-  const toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
 
 
-  require('plugins/kibana/settings/sections/advanced/advanced_row');
 
   require('ui/routes')
   .when('/settings/advanced', {

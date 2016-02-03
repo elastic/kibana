@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import 'ui/elastic_textarea';
 define(function (require) {
-  const _ = require('lodash');
-  require('ui/elastic_textarea');
 
   require('ui/modules').get('apps/settings')
   .directive('advancedRow', function (config, Notifier, Private) {

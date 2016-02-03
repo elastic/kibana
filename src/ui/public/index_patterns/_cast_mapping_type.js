@@ -1,6 +1,6 @@
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function CastMappingTypeFn() {
-    var IndexedArray = require('ui/IndexedArray');
 
     castMappingType.types = new IndexedArray({
       index: ['name'],

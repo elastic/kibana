@@ -1,7 +1,7 @@
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
-  var $ = require('jquery');
-  var _ = require('lodash');
 
   module.directive('cssTruncate', function ($timeout) {
     return {

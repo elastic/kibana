@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function MapHandlerProvider(Private) {
-    var _ = require('lodash');
 
     var Handler = Private(require('ui/vislib/lib/handler/handler'));
     var Data = Private(require('ui/vislib/lib/data'));

@@ -1,10 +1,10 @@
 import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import _ from 'lodash';
 
 describe('Query decorator', function () {
 
-  var _ = require('lodash');
   var config;
 
   var indexPattern;

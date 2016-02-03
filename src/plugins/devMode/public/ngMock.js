@@ -1,4 +1,5 @@
 import angular from 'angular';
+import 'angular-mocks';
 if (angular.mocks) {
   throw new Error(
     'Don\'t require angular-mocks directly or the tests ' +
@@ -6,5 +7,4 @@ if (angular.mocks) {
   );
 }
 
-require('angular-mocks');
 module.exports = angular.mock;

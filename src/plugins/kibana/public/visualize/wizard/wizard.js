@@ -1,16 +1,16 @@
+import _ from 'lodash';
+import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
+import 'ui/directives/saved_object_finder';
+import 'plugins/kibana/discover/saved_searches/saved_searches';
+import routes from 'ui/routes';
 define(function (require) {
-  const _ = require('lodash');
 
-  require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
-  require('ui/directives/saved_object_finder');
-  require('plugins/kibana/discover/saved_searches/saved_searches');
 
   const templateStep = function (num, txt) {
     return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
   };
 
   const module = require('ui/modules').get('app/visualize', ['kibana/courier']);
-  const routes = require('ui/routes');
 
   /********
   /** Wizard Step 1

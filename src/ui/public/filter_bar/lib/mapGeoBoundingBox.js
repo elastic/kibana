@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   return function mapGeoBoundBoxProvider(Promise, courier) {
     return function (filter) {
       var key;

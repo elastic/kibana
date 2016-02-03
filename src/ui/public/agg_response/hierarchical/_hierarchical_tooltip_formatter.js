@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
+import numeral from 'numeral';
 define(function (require) {
   return function HierarchicalTooltipFormaterProvider($rootScope, $compile, $sce) {
-    var _ = require('lodash');
-    var $ = require('jquery');
     var $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
-    var collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
     var $tooltipScope = $rootScope.$new();
-    var numeral = require('numeral');
 
     $compile($tooltip)($tooltipScope);
 

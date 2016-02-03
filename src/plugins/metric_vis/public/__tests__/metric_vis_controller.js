@@ -1,8 +1,8 @@
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 describe('metric vis', function () {
   let $scope;
-  const ngMock = require('ngMock');
-  const expect = require('expect.js');
 
   const formatter = function (value) {
     return value.toFixed(3);

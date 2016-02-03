@@ -1,12 +1,12 @@
 import _ from 'lodash';
+import 'plugins/kibana/visualize/editor/agg';
+import 'plugins/kibana/visualize/editor/agg_add';
+import 'plugins/kibana/visualize/editor/nesting_indicator';
 
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAggGroup', function (Private) {
-    require('plugins/kibana/visualize/editor/agg');
-    require('plugins/kibana/visualize/editor/agg_add');
-    require('plugins/kibana/visualize/editor/nesting_indicator');
 
     return {
       restrict: 'E',

@@ -1,8 +1,8 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('Color Format', function () {
   var fieldFormats;
   var ColorFormat;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-var $ = require('jquery');
+import $ from 'jquery';
 
 var OFFSET = 10;
 var $clone;

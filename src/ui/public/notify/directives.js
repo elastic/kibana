@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   var notify = require('ui/modules').get('kibana/notify');
-  var _ = require('lodash');
 
   notify.directive('kbnNotifications', function () {
     return {

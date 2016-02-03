@@ -1,8 +1,8 @@
+import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 define(function (require) {
   return function FlattenHitProvider(config, $rootScope) {
-    var _ = require('lodash');
 
     var metaFields = config.get('metaFields');
     $rootScope.$on('change:config.metaFields', function () {

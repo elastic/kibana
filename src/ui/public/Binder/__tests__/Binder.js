@@ -1,9 +1,9 @@
-var $ = require('jquery');
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 
 import Binder from 'ui/Binder';
+import $ from 'jquery';
 
 describe('Binder class', function () {
   var $scope;

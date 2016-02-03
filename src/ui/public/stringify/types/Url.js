@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import 'ui/field_format_editor/pattern/pattern';
+import 'ui/stringify/icons';
 define(function (require) {
   return function UrlFormatProvider(Private, highlightFilter) {
-    var _ = require('lodash');
 
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
 
-    require('ui/field_format_editor/pattern/pattern');
-    require('ui/stringify/icons');
 
     _.class(Url).inherits(FieldFormat);
     function Url(params) {

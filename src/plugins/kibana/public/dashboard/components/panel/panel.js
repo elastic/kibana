@@ -1,10 +1,12 @@
+import moment from 'moment';
+import $ from 'jquery';
+import _ from 'lodash';
+import 'ui/visualize';
+import 'ui/doc_table';
 define(function (require) {
-  const moment = require('moment');
-  const $ = require('jquery');
   require('ui/modules')
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
-    const _ = require('lodash');
     const loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
     const filterManager = Private(require('ui/filter_manager'));
     const notify = new Notifier();
@@ -17,8 +19,6 @@ define(function (require) {
       };
     });
 
-    require('ui/visualize');
-    require('ui/doc_table');
 
     const brushEvent = Private(require('ui/utils/brush_event'));
 

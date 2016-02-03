@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import noWhiteSpace from 'ui/utils/no_white_space';
+import angular from 'angular';
 define(function (require) {
   return function _SourceProvider(Private, shortDotsFilter) {
-    var _ = require('lodash');
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
-    var noWhiteSpace = require('ui/utils/no_white_space');
     var template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
-    var angular = require('angular');
 
     _.class(Source).inherits(FieldFormat);
     function Source(params) {

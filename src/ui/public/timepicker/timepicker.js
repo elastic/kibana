@@ -1,20 +1,20 @@
+import html from 'ui/timepicker/timepicker.html';
+import _ from 'lodash';
+import dateMath from 'ui/utils/dateMath';
+import moment from 'moment';
+import Notifier from 'ui/notify/notifier';
+import 'ui/directives/input_datetime';
+import 'ui/directives/inequality';
+import 'ui/timepicker/quick_ranges';
+import 'ui/timepicker/refresh_intervals';
+import 'ui/timepicker/time_units';
+import 'ui/timepicker/toggle';
 define(function (require) {
-  var html = require('ui/timepicker/timepicker.html');
   var module = require('ui/modules').get('ui/timepicker');
-  var _ = require('lodash');
-  var dateMath = require('ui/utils/dateMath');
-  var moment = require('moment');
-  var Notifier = require('ui/notify/notifier');
   var notify = new Notifier({
     location: 'timepicker',
   });
 
-  require('ui/directives/input_datetime');
-  require('ui/directives/inequality');
-  require('ui/timepicker/quick_ranges');
-  require('ui/timepicker/refresh_intervals');
-  require('ui/timepicker/time_units');
-  require('ui/timepicker/toggle');
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {

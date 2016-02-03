@@ -1,13 +1,16 @@
+import _ from 'lodash';
+import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
+import 'plugins/kibana/visualize/editor/sidebar';
+import 'plugins/kibana/visualize/editor/agg_filter';
+import 'ui/navbar';
+import 'ui/visualize';
+import 'ui/collapsible_sidebar';
+import 'ui/share';
+import angular from 'angular';
+import ConfigTemplate from 'ui/ConfigTemplate';
+import Notifier from 'ui/notify/notifier';
 define(function (require) {
-  const _ = require('lodash');
-  require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
-  require('plugins/kibana/visualize/editor/sidebar');
-  require('plugins/kibana/visualize/editor/agg_filter');
 
-  require('ui/navbar');
-  require('ui/visualize');
-  require('ui/collapsible_sidebar');
-  require('ui/share');
 
   require('ui/routes')
   .when('/visualize/create', {
@@ -49,9 +52,6 @@ define(function (require) {
   ])
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
 
-    const angular = require('angular');
-    const ConfigTemplate = require('ui/ConfigTemplate');
-    const Notifier = require('ui/notify/notifier');
     const docTitle = Private(require('ui/doc_title'));
     const brushEvent = Private(require('ui/utils/brush_event'));
     const queryFilter = Private(require('ui/filter_bar/query_filter'));

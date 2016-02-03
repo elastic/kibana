@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import moment from 'moment';
+import 'ui/field_format_editor/pattern/pattern';
 define(function (require) {
   return function DateTimeFormatProvider(Private) {
-    var _ = require('lodash');
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
     var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
-    var moment = require('moment');
 
-    require('ui/field_format_editor/pattern/pattern');
 
     _.class(DateTime).inherits(FieldFormat);
     function DateTime(params) {

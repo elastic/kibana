@@ -1,5 +1,4 @@
 import _ from 'lodash';
-var $ = require('jquery');
 import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
@@ -8,6 +7,7 @@ import series from 'fixtures/vislib/mock_data/date_histogram/_series';
 import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
 
 var dataArray = [
   series,

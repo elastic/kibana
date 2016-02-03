@@ -1,6 +1,6 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('addToSiri', function () {
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var addToSiri;
 
   beforeEach(ngMock.module('kibana'));

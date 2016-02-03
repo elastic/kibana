@@ -1,7 +1,7 @@
 import { duration as d } from 'moment';
+import moment from 'moment';
 define(function (require) {
   return function DateIntervalRoundingRulesProvider() {
-    var moment = require('moment');
     // these are the rounding rules used by roundInterval()
 
     var roundingRules = [

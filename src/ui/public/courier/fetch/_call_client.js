@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
-    var _ = require('lodash');
 
     var isRequest = Private(require('ui/courier/fetch/_is_request'));
     var mergeDuplicateRequests = Private(require('ui/courier/fetch/_merge_duplicate_requests'));

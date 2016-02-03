@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  const _ = require('lodash');
 
   function getFieldValues(hits, field) {
     const name = field.name;

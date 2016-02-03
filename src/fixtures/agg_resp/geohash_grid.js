@@ -1,7 +1,7 @@
+import _ from 'lodash';
 define(function (require) {
   return function GeoHashGridAggResponseFixture() {
 
-    var _ = require('lodash');
 
     // for vis:
     //

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-var { join } = require('path');
+import { join } from 'path';
 
 class UiApp {
   constructor(uiExports, spec) {

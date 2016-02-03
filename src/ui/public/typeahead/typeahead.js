@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import 'ui/typeahead/typeahead.less';
+import 'ui/typeahead/_input';
+import 'ui/typeahead/_items';
 define(function (require) {
-  var _ = require('lodash');
   var typeahead = require('ui/modules').get('kibana/typeahead');
 
-  require('ui/typeahead/typeahead.less');
-  require('ui/typeahead/_input');
-  require('ui/typeahead/_items');
 
   typeahead.directive('kbnTypeahead', function () {
     var keyMap = {

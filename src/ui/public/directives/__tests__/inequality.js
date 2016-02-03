@@ -1,7 +1,7 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-require('ui/directives/inequality');
+import 'ui/directives/inequality';
 
 describe('greater_than model validator directive', function () {
   var $compile;

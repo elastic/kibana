@@ -1,3 +1,5 @@
+import angular from 'angular';
+import _ from 'lodash';
 /**
  * This module is used by Kibana to create and reuse angular modules. Angular modules
  * can only be created once and need to have their dependencies at creation. This is
@@ -46,9 +48,7 @@
  *
  */
 define(function (require) {
-  var angular = require('angular');
   var existingModules = {};
-  var _ = require('lodash');
   var links = [];
 
   /**

@@ -1,6 +1,6 @@
+import _ from 'lodash';
 // Filters out all duplicate items in an array
 define(function (require) {
-  var _ = require('lodash');
 
   require('ui/modules')
     .get('kibana')

@@ -1,10 +1,10 @@
 
 import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('Filter Bar Directive', function () {
   describe('mapFlattenAndWrapFilters()', function () {
-    var sinon = require('auto-release-sinon');
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
     var mapFlattenAndWrapFilters;
     var $rootScope;
 

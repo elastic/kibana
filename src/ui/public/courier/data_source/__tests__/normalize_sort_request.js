@@ -1,9 +1,9 @@
+import 'ui/private';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
 describe('SearchSource#normalizeSortRequest', function () {
-  require('ui/private');
 
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var normalizeSortRequest;
   var indexPattern;

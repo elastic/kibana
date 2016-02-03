@@ -1,6 +1,6 @@
+import d3 from 'd3';
 define(function (require) {
   return function ColumnLayoutFactory(Private) {
-    var d3 = require('d3');
     var mapSplit = Private(require('ui/vislib/lib/layout/splits/tile_map/map_split'));
 
     /*

@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import html from 'ui/visualize/visualize_legend.html';
+import $ from 'jquery';
+import d3 from 'd3';
+import findByParam from 'ui/utils/find_by_param';
 define(function (require) {
-  var _ = require('lodash');
-  var html = require('ui/visualize/visualize_legend.html');
 
-  var $ = require('jquery');
-  var d3 = require('d3');
-  var findByParam = require('ui/utils/find_by_param');
 
   require('ui/modules').get('kibana')
   .directive('visualizeLegend', function (Private, getAppState) {

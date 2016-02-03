@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import ConfigTemplate from 'ui/ConfigTemplate';
 define(function (require) {
-  var _ = require('lodash');
-  var ConfigTemplate = require('ui/ConfigTemplate');
 
   require('ui/modules')
   .get('kibana')

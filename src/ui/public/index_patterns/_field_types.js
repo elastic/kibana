@@ -1,6 +1,6 @@
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function IndexPatternFieldTypes() {
-    var IndexedArray = require('ui/IndexedArray');
 
     return new IndexedArray({
       index: ['name'],

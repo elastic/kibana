@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
-  var _ = require('lodash');
-  var $ = require('jquery');
 
   module.directive('clickFocus', function () {
     return {

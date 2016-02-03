@@ -1,9 +1,9 @@
+import d3 from 'd3';
+import $ from 'jquery';
+import _ from 'lodash';
+import Binder from 'ui/Binder';
 define(function (require) {
   return function AlertsFactory(Private) {
-    var d3 = require('d3');
-    var $ = require('jquery');
-    var _ = require('lodash');
-    var Binder = require('ui/Binder');
 
     /**
      * Adds allerts that float in front of a visualization

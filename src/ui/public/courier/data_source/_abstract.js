@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import angular from 'angular';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
 
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
     var requestQueue = Private(require('ui/courier/_request_queue'));

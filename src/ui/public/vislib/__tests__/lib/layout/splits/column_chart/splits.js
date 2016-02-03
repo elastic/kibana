@@ -1,8 +1,8 @@
 import d3 from 'd3';
 import angular from 'angular';
-var $ = require('jquery');
 import ngMock from 'ngMock';
 import expect from 'expect.js';
+import $ from 'jquery';
 
 describe('Vislib Split Function Test Suite', function () {
   describe('Column Chart', function () {

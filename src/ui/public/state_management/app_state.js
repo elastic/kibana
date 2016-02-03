@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import modules from 'ui/modules';
 define(function (require) {
-  var _ = require('lodash');
-  var modules = require('ui/modules');
   var urlParam = '_a';
 
   function AppStateProvider(Private, $rootScope, getAppState) {

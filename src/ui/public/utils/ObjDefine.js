@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   function ObjDefine(defaults, prototype) {
     this.obj; // created by this.create()

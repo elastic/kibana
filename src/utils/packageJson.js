@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-var { join } = require('path');
+import { join } from 'path';
 
 var packageDir;
 var packagePath;

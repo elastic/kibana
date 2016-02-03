@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import 'plugins/kibana/visualize/editor/agg_group';
+import 'plugins/kibana/visualize/editor/vis_options';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorSidebar', function () {
-    const _ = require('lodash');
 
-    require('plugins/kibana/visualize/editor/agg_group');
-    require('plugins/kibana/visualize/editor/vis_options');
 
     return {
       restrict: 'E',

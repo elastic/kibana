@@ -1,9 +1,9 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('get columns', function () {
   var getColumns;
   var Vis;
   var indexPattern;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

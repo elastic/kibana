@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import dedupFilters from './lib/dedupFilters';
+import uniqFilters from './lib/uniqFilters';
+import findByParam from 'ui/utils/find_by_param';
 define(function (require) {
-  var _ = require('lodash');
-  var dedupFilters = require('./lib/dedupFilters');
-  var uniqFilters = require('./lib/uniqFilters');
-  var findByParam = require('ui/utils/find_by_param');
 
   return function (Notifier) {
     return function ($state) {

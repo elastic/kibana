@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import angular from 'angular';
+import qs from 'ui/utils/query_string';
+import rison from 'ui/utils/rison';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var qs = require('ui/utils/query_string');
-  var rison = require('ui/utils/rison');
 
   var module = require('ui/modules').get('kibana/global_state');
 

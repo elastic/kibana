@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import rison from 'ui/utils/rison';
+import keymap from 'ui/utils/key_map';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
-  var keymap = require('ui/utils/key_map');
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
 

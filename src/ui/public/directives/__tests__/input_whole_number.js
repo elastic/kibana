@@ -1,7 +1,7 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-require('ui/directives/input_whole_number');
+import 'ui/directives/input_whole_number';
 
 describe('Whole number input directive', function () {
   var $compile;

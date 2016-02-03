@@ -1,8 +1,8 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import L from 'leaflet';
 define(function (require) {
   return function HeatmapMarkerFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var L = require('leaflet');
 
     var BaseMarker = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
 
