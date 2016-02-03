@@ -65,7 +65,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
         });
 
         $elem.after($compile(template)($scope));
-        $http.get('timelion/functions').then(function (resp) {
+        $http.get('../api/timelion/functions').then(function (resp) {
           functionReference.byName = _.indexBy(resp.data, 'name');
           functionReference.list = resp.data;
         });

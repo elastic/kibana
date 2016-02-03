@@ -1,7 +1,7 @@
 module.exports = function (server) {
   server.route({
     method: 'GET',
-    path: '/app/timelion/validate/es',
+    path: '/api/timelion/validate/es',
     handler: function (request, reply) {
       var config = require('../timelion.json');
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;

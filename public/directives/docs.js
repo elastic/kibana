@@ -25,7 +25,7 @@ define(function (require) {
         };
 
         function getFunctions() {
-          return $http.get('timelion/functions').then(function (resp) {
+          return $http.get('../api/timelion/functions').then(function (resp) {
             $scope.functions.list = resp.data;
           });
         }
@@ -37,7 +37,7 @@ define(function (require) {
         };
 
         function checkElasticsearch() {
-          return $http.get('timelion/validate/es').then(function (resp) {
+          return $http.get('../api/timelion/validate/es').then(function (resp) {
             if (resp.data.ok) {
 
               $scope.es.valid = true;
