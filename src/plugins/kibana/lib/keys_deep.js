@@ -4,11 +4,9 @@ export default function keysDeep(object, base) {
   let result = [];
   let delimitedBase = base ? base + '.' : '';
 
-  _.forIn(object, (value, key) => {
+  _.forEach(object, (value, key) => {
     var fullKey = delimitedBase + key;
-    if (_.isArray(value)) {
-      result.push(fullKey);
-    } else if (_.isObject(value)) {
+    if (_.isPlainObject(value)) {
       result = result.concat(keysDeep(value, fullKey));
     } else {
       result.push(fullKey);
