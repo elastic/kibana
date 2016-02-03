@@ -1,7 +1,6 @@
 require('babel/polyfill');
 
 import _ from 'lodash';
-var $ = require('jquery');
 import angular from 'angular';
 
 require('ui/timefilter');
@@ -9,6 +8,7 @@ require('ui/private');
 require('ui/promises');
 
 import metadata from 'ui/metadata';
+import $ from 'jquery';
 
 var chrome = {};
 var internals = _.defaults(

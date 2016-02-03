@@ -1,3 +1,6 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
@@ -5,10 +8,7 @@ define(function (require) {
     require('plugins/kibana/visualize/editor/agg_params');
     require('plugins/kibana/visualize/editor/agg_add');
 
-    const _ = require('lodash');
-    const $ = require('jquery');
     const aggTypes = Private(require('ui/agg_types/index'));
-    const advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
 
     const notify = new Notifier({
       location: 'visAggGroup'

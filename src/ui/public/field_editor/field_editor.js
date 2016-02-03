@@ -1,3 +1,4 @@
+import _ from 'lodash';
 define(function (require) {
 
   require('ui/field_format_editor');
@@ -7,7 +8,6 @@ define(function (require) {
   require('ui/modules')
   .get('kibana', ['colorpicker.module'])
   .directive('fieldEditor', function (Private, $sce) {
-    var _ = require('lodash');
     var fieldFormats = Private(require('ui/registry/field_formats'));
     var Field = Private(require('ui/index_patterns/_field'));
     var scriptingInfo = $sce.trustAsHtml(require('ui/field_editor/scripting_info.html'));

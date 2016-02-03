@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import ServerStatus from './ServerStatus';
 module.exports = function (kbnServer, server, config) {
-  var _ = require('lodash');
-  var ServerStatus = require('./ServerStatus');
   var { join } = require('path');
 
   kbnServer.status = new ServerStatus(kbnServer.server);

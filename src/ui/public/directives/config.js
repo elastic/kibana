@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import ConfigTemplate from 'ui/ConfigTemplate';
+import angular from 'angular';
 define(function (require) {
-  var _ = require('lodash');
   require('ui/watch_multi');
-  var ConfigTemplate = require('ui/ConfigTemplate');
-  var angular = require('angular');
   var module = require('ui/modules').get('kibana');
 
   require('ui/directives/input_focus');

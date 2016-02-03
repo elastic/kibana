@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
-  var _ = require('lodash');
-  var IndexedArray = require('ui/IndexedArray');
   var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
   /**

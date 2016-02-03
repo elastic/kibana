@@ -1,6 +1,6 @@
+import moment from 'moment';
+import dateRange from 'ui/utils/date_range';
 define(function (require) {
-  var moment = require('moment');
-  var dateRange = require('ui/utils/date_range');
   require('ui/directives/validate_date_math');
 
   return function DateRangeAggDefinition(Private, config) {

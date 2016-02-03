@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   require('ui/directives/validate_ip');
   require('ui/directives/validate_cidr_mask');
 

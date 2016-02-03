@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function BaseAggParamFactory() {
-    var _ = require('lodash');
 
     function BaseAggParam(config) {
       _.assign(this, config);

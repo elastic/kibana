@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  const _ = require('lodash');
 
   require('plugins/kibana/settings/sections/indices/_create');
   require('plugins/kibana/settings/sections/indices/_edit');

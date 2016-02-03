@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import html from 'ui/doc_table/doc_table.html';
+import getSort from 'ui/doc_table/lib/get_sort';
 define(function (require) {
-  var _ = require('lodash');
 
-  var html = require('ui/doc_table/doc_table.html');
-  var getSort = require('ui/doc_table/lib/get_sort');
 
   require('ui/doc_table/doc_table.less');
   require('ui/directives/truncated');

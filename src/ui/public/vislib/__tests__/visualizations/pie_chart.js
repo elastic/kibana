@@ -3,8 +3,8 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import _ from 'lodash';
-var $ = require('jquery');
 import fixtures from 'fixtures/fake_hierarchical_data';
+import $ from 'jquery';
 
 var rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },

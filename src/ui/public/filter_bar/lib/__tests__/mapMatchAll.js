@@ -1,8 +1,8 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('ui/filter_bar/lib', function () {
   describe('mapMatchAll()', function () {
-    const expect = require('expect.js');
-    const ngMock = require('ngMock');
     let $rootScope;
     let mapMatchAll;
     let filter;

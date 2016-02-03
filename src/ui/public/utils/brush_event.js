@@ -1,5 +1,5 @@
+import moment from 'moment';
 define(function (require) {
-  var moment = require('moment');
   return function brushEventProvider(timefilter) {
     return function (event) {
       var from = moment(event.range[0]);

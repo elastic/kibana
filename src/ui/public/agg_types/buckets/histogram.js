@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   return function HistogramAggDefinition(Private) {
-    var _ = require('lodash');
-    var moment = require('moment');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/histogram'));
 

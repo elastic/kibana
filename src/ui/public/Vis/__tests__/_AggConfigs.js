@@ -1,8 +1,9 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import RealAggConfigPM from 'ui/Vis/AggConfig';
 describe('AggConfigs', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var Vis;
   var IndexedArray;
@@ -15,7 +16,6 @@ describe('AggConfigs', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy
-    var RealAggConfigPM = require('ui/Vis/AggConfig');
     AggConfig = Private(RealAggConfigPM);
     var spy = sinon.spy(AggConfig);
     Object.defineProperty(spy, 'aggTypes', {

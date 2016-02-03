@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import moment from 'moment';
 describe('ui/index_patterns/_calculate_indices', () => {
-  const _ = require('lodash');
   const pluck = require('lodash').pluck;
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
-  const moment = require('moment');
 
   let Promise;
   let $rootScope;

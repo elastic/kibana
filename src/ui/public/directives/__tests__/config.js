@@ -1,7 +1,7 @@
 import ngMock from 'ngMock';
-var $ = require('jquery');
 var assign = require('lodash').assign;
 import expect from 'expect.js';
+import $ from 'jquery';
 
 describe('Config Directive', function () {
 

@@ -1,6 +1,6 @@
+import modules from 'ui/modules';
+import _ from 'lodash';
 define(function (require) {
-  var modules = require('ui/modules');
-  var _ = require('lodash');
 
   modules.get('kibana/persisted_log')
   .factory('PersistedLog', function ($window, localStorage) {

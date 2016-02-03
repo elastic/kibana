@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import Notifier from 'ui/notify/notifier';
+import SimpleEmitter from 'ui/utils/SimpleEmitter';
 define(function (require) {
-  var _ = require('lodash');
-  var Notifier = require('ui/notify/notifier');
 
   return function EventsProvider(Private, Promise) {
-    var SimpleEmitter = require('ui/utils/SimpleEmitter');
     var notify = new Notifier({ location: 'EventEmitter' });
 
     _.class(Events).inherits(SimpleEmitter);

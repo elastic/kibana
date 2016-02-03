@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import propFilter from 'ui/filters/_prop_filter';
 define(function (require) {
-  const _ = require('lodash');
-  const propFilter = require('ui/filters/_prop_filter');
 
   require('ui/modules')
   .get('kibana')

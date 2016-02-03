@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function FetchForEachRequestStrategy(Private, Promise) {
-    var _ = require('lodash');
 
     function forEachStrategy(requests, block) {
       block = Promise.method(block);

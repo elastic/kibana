@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function VislibVisTypeFactory(Private) {
-    var _ = require('lodash');
 
     require('ui/vislib');
     var VisTypeSchemas = Private(require('ui/Vis/Schemas'));

@@ -1,5 +1,5 @@
+import marked from 'marked';
 define(function (require) {
-  const marked = require('marked');
   marked.setOptions({
     gfm: true, // Github-flavored markdown
     sanitize: true // Sanitize HTML tags

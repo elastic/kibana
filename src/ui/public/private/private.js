@@ -1,3 +1,4 @@
+import _ from 'lodash';
 define(function (require) {
   /**
    * # `Private()`
@@ -86,7 +87,6 @@ define(function (require) {
    */
 
 
-  var _ = require('lodash');
   var nextId = _.partial(_.uniqueId, 'privateProvider#');
 
   function name(fn) {

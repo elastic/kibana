@@ -1,9 +1,10 @@
+import _ from 'lodash';
+import template from 'ui/filter_bar/filter_bar.html';
+import moment from 'moment';
+import angular from 'angular';
+import filterAppliedAndUnwrap from 'ui/filter_bar/lib/filterAppliedAndUnwrap';
 define(function (require) {
-  var _ = require('lodash');
   var module = require('ui/modules').get('kibana');
-  var template = require('ui/filter_bar/filter_bar.html');
-  var moment = require('moment');
-  var angular = require('angular');
 
   require('ui/directives/json_input');
 
@@ -12,7 +13,6 @@ define(function (require) {
     var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
     var extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
     var filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
-    var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var privateFilterFieldRegex = /(^\$|meta)/;

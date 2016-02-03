@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   return function DateHistogramAggType(timefilter, config, Private) {
-    var _ = require('lodash');
-    var moment = require('moment');
     var tzDetect = require('jstimezonedetect').jstz;
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var TimeBuckets = Private(require('ui/time_buckets'));

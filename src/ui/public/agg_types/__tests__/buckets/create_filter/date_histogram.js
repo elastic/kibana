@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import moment from 'moment';
+import sinon from 'auto-release-sinon';
+import aggResp from 'fixtures/agg_resp/date_histogram';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
-    var _ = require('lodash');
-    var moment = require('moment');
-    var sinon = require('auto-release-sinon');
-    var aggResp = require('fixtures/agg_resp/date_histogram');
-    var ngMock = require('ngMock');
-    var expect = require('expect.js');
 
     var vis;
     var agg;

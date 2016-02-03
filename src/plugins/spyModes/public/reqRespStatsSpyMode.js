@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import reqRespStatsHTML from 'plugins/spyModes/reqRespStatsSpyMode.html';
 define(function (require) {
-  const _ = require('lodash');
-  const reqRespStatsHTML = require('plugins/spyModes/reqRespStatsSpyMode.html');
 
   const linkReqRespStats = function ($scope, config) {
     $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');

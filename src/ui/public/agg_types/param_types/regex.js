@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import editorHtml from 'ui/agg_types/controls/regular_expression.html';
 define(function (require) {
   return function RegexAggParamFactory(Private) {
-    var _ = require('lodash');
 
     var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    var editorHtml = require('ui/agg_types/controls/regular_expression.html');
 
     _.class(RegexAggParam).inherits(BaseAggParam);
     function RegexAggParam(config) {

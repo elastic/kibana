@@ -1,13 +1,13 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import errors from 'ui/errors';
 define(function (require) {
   return function DataFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
 
     var injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
     var orderKeys = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
     var getLabels = Private(require('ui/vislib/components/labels/labels'));
     var color = Private(require('ui/vislib/components/color/color'));
-    var errors = require('ui/errors');
 
     /**
      * Provides an API for pulling values off the data

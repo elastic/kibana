@@ -1,7 +1,7 @@
+import angular from 'angular';
+import _ from 'lodash';
 define(function (require) {
   return function mapDefaultProvider(Promise) {
-    var angular = require('angular');
-    var _ = require('lodash');
 
     var metaProperty = /(^\$|meta)/;
 

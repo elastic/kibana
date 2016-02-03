@@ -1,7 +1,7 @@
 import expect from 'expect.js';
+import ObjDefine from 'ui/utils/ObjDefine';
 
 describe('ObjDefine Utility', function () {
-  var ObjDefine = require('ui/utils/ObjDefine');
 
   function flatten(obj) {
     return JSON.parse(JSON.stringify(obj));

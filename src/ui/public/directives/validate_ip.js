@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import Ipv4Address from 'ui/utils/Ipv4Address';
 define(function (require) {
-  var _ = require('lodash');
-  var Ipv4Address = require('ui/utils/Ipv4Address');
 
   require('ui/modules')
     .get('kibana')

@@ -1,6 +1,5 @@
 import sinon from 'auto-release-sinon';
 import ngMock from 'ngMock';
-var $ = require('jquery');
 import expect from 'expect.js';
 var constant = require('lodash').constant;
 var set = require('lodash').set;
@@ -10,6 +9,7 @@ var indexBy = require('lodash').indexBy;
 require('ui/chrome');
 require('../app_switcher');
 import DomLocationProvider from 'ui/domLocation';
+import $ from 'jquery';
 
 describe('appSwitcher directive', function () {
   var env;

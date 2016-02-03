@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('IndexPattern#flattenHit()', function () {
 
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var flattenHit;
   var config;

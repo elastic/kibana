@@ -1,6 +1,6 @@
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function AggTypeService(Private) {
-    var IndexedArray = require('ui/IndexedArray');
 
     var aggs = {
       metrics: [

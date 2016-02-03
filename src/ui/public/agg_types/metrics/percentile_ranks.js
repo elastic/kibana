@@ -1,12 +1,12 @@
+import _ from 'lodash';
+import valuesEditor from 'ui/agg_types/controls/percentile_ranks.html';
 define(function (require) {
   return function AggTypeMetricPercentileRanksProvider(Private) {
-    var _ = require('lodash');
 
     var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
     var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
     var fieldFormats = Private(require('ui/registry/field_formats'));
 
-    var valuesEditor = require('ui/agg_types/controls/percentile_ranks.html');
     // required by the values editor
     require('ui/number_list');
 

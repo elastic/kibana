@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('ui/courier/fetch/strategy/search', () => {
-  const _ = require('lodash');
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
 
   let Promise;
   let $rootScope;

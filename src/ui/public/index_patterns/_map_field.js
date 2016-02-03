@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function MapFieldFn(Private, config) {
-    var _ = require('lodash');
     var castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
 
     /**

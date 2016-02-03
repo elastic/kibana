@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
 define(function (require) {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
 
   function MockState(defaults) {
     this.on = _.noop;

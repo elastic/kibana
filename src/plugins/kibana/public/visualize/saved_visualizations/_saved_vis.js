@@ -1,8 +1,8 @@
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
-    const _ = require('lodash');
     const Vis = Private(require('ui/Vis'));
 
     const notify = new Notifier({

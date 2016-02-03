@@ -1,12 +1,13 @@
+import _ from 'lodash';
+import popularityHtml from 'plugins/kibana/settings/sections/indices/_field_popularity.html';
+import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
+import dateScripts from 'plugins/kibana/settings/sections/indices/_date_scripts';
 define(function (require) {
-  const _ = require('lodash');
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
     const rowScopes = []; // track row scopes, so they can be destroyed as needed
-    const popularityHtml = require('plugins/kibana/settings/sections/indices/_field_popularity.html');
-    const controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');
     const filter = $filter('filter');
 
     const notify = new Notifier();
@@ -16,7 +17,6 @@ define(function (require) {
       template: require('plugins/kibana/settings/sections/indices/_scripted_fields.html'),
       scope: true,
       link: function ($scope) {
-        const dateScripts = require('plugins/kibana/settings/sections/indices/_date_scripts');
 
         const fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
         const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';

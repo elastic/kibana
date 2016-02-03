@@ -1,9 +1,9 @@
+import angular from 'angular';
+import errors from 'ui/errors';
+import _ from 'lodash';
+import slugifyId from 'ui/utils/slugify_id';
 define(function (require) {
   return function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
-    var angular = require('angular');
-    var errors = require('ui/errors');
-    var _ = require('lodash');
-    var slugifyId = require('ui/utils/slugify_id');
 
     var DocSource = Private(require('ui/courier/data_source/doc_source'));
     var SearchSource = Private(require('ui/courier/data_source/search_source'));

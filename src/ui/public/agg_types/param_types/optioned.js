@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function OptionedAggParamFactory(Private) {
-    var _ = require('lodash');
 
-    var IndexedArray = require('ui/IndexedArray');
     var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
 
     _.class(OptionedAggParam).inherits(BaseAggParam);

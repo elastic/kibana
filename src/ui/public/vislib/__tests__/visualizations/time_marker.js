@@ -3,10 +3,10 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import _ from 'lodash';
-var $ = require('jquery');
 import fixtures from 'fixtures/fake_hierarchical_data';
 import series from 'fixtures/vislib/mock_data/date_histogram/_series';
 import terms from 'fixtures/vislib/mock_data/terms/_columns';
+import $ from 'jquery';
 
 describe('Vislib Time Marker Test Suite', function () {
   var height = 50;

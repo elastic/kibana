@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function fetchService(Private, Promise) {
-    var _ = require('lodash');
 
     var requestQueue = Private(require('ui/courier/_request_queue'));
     var fetchThese = Private(require('ui/courier/fetch/_fetch_these'));

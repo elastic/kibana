@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PointSeriesProvider(Private) {
-    var _ = require('lodash');
 
     var getSeries = Private(require('ui/agg_response/point_series/_get_series'));
     var getAspects = Private(require('ui/agg_response/point_series/_get_aspects'));

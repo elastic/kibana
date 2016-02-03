@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import d3 from 'd3';
-var $ = require('jquery');
 import ngMock from 'ngMock';
 import expect from 'expect.js';
+import $ from 'jquery';
 
 var YAxis;
 var Data;

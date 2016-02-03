@@ -1,8 +1,9 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import AggParamsPM from 'ui/agg_types/AggParams';
 describe('AggType Class', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var sinon = require('auto-release-sinon');
   var AggType;
   var AggParams;
   var AggConfig;
@@ -14,7 +15,6 @@ describe('AggType Class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    var AggParamsPM = require('ui/agg_types/AggParams');
     AggParams = sinon.spy(Private(AggParamsPM));
     Private.stub(AggParamsPM, AggParams);
 

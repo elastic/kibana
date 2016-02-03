@@ -1,6 +1,6 @@
+import moment from 'moment';
+import _ from 'lodash';
 define(function (require) {
-  var moment = require('moment');
-  var _ = require('lodash');
 
   require('ui/modules')
     .get('kibana')

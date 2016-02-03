@@ -1,3 +1,4 @@
+import _ from 'lodash';
 define(function (require) {
   require('ui/paginated_table');
   require('ui/compile_recursive_directive');
@@ -6,7 +7,6 @@ define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
-    var _ = require('lodash');
 
     return {
       restrict: 'E',

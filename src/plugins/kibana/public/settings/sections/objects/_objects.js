@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import angular from 'angular';
+import registry from 'plugins/kibana/settings/saved_object_registry';
+import objectIndexHTML from 'plugins/kibana/settings/sections/objects/_objects.html';
 define(function (require) {
-  const _ = require('lodash');
-  const angular = require('angular');
   const saveAs = require('@spalger/filesaver').saveAs;
-  const registry = require('plugins/kibana/settings/saved_object_registry');
-  const objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
   const MAX_SIZE = Math.pow(2, 31) - 1;
 
   require('ui/directives/file_upload');

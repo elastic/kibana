@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import angular from 'angular';
 define(function (require) {
   return function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
     var notify = new Notifier();
-    var _ = require('lodash');
-    var angular = require('angular');
 
     var vals = Private(require('ui/config/_vals'));
 

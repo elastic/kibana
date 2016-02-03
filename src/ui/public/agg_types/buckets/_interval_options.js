@@ -1,6 +1,6 @@
+import moment from 'moment';
 define(function (require) {
   return function IntervalOptionsService(Private) {
-    var moment = require('moment');
     require('ui/directives/input_whole_number');
 
     // shorthand

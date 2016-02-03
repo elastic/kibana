@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('nestingIndicator', function ($rootScope, $parse, Private) {
-    const _ = require('lodash');
-    const $ = require('jquery');
     const getColors = Private(require('ui/vislib/components/color/color_palette'));
 
     return {

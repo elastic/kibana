@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import angular from 'angular';
 define(function (require) {
   return function DiffTimePickerValuesFn() {
-    var _ = require('lodash');
-    var angular = require('angular');
 
     var valueOf = function (o) {
       if (o) return o.valueOf();

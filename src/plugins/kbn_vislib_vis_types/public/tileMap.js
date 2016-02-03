@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import supports from 'ui/utils/supports';
 define(function (require) {
   return function TileMapVisType(Private, getAppState, courier, config) {
     const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
     const Schemas = Private(require('ui/Vis/Schemas'));
     const geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
-    const _ = require('lodash');
-    const supports = require('ui/utils/supports');
 
     return new VislibVisType({
       name: 'tile_map',

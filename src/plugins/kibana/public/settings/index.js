@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import sections from 'plugins/kibana/settings/sections/index';
 define(function (require) {
-  const _ = require('lodash');
 
-  const sections = require('plugins/kibana/settings/sections/index');
   require('plugins/kibana/settings/styles/main.less');
   require('ui/filters/start_from');
 

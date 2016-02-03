@@ -1,8 +1,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
-var $ = require('jquery');
 import Binder from 'ui/Binder';
 import positionTooltip from './positionTooltip';
+import $ from 'jquery';
 
 var allContents = [];
 

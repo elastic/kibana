@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
-  const _ = require('lodash');
-  const moment = require('moment');
   const { IndexPatternMissingIndices } = require('ui/errors');
 
   require('ui/directives/validate_index_name');

@@ -1,6 +1,6 @@
+import modules from 'ui/modules';
+import angular from 'angular';
 define(function (require) {
-  var modules = require('ui/modules');
-  var angular = require('angular');
 
   function Storage(store) {
     var self = this;

@@ -1,6 +1,6 @@
+import formatMsg from 'ui/notify/lib/_format_msg';
+import expect from 'expect.js';
 describe('formatMsg', function () {
-  var formatMsg = require('ui/notify/lib/_format_msg');
-  var expect = require('expect.js');
 
   it('should prepend the second argument to result', function () {
     var actual = formatMsg('error message', 'unit_test');

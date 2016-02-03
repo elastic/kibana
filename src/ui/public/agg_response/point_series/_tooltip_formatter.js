@@ -1,6 +1,6 @@
+import $ from 'jquery';
 define(function (require) {
   return function PointSeriesTooltipFormatter($compile, $rootScope) {
-    var $ = require('jquery');
 
     var $tooltipScope = $rootScope.$new();
     var $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));

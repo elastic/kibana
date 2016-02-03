@@ -3,7 +3,6 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import _ from 'lodash';
-var $ = require('jquery');
 
 // Data
 import seriesPos from 'fixtures/vislib/mock_data/date_histogram/_series';
@@ -12,6 +11,7 @@ import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
 import histogramColumns from 'fixtures/vislib/mock_data/histogram/_columns';
 import rangeRows from 'fixtures/vislib/mock_data/range/_rows';
 import termSeries from 'fixtures/vislib/mock_data/terms/_series';
+import $ from 'jquery';
 
 var dataTypes = [
   ['series pos', seriesPos],

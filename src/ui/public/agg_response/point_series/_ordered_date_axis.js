@@ -1,6 +1,6 @@
+import moment from 'moment';
 define(function (require) {
   return function PointSeriesOrderedDateAxis(timefilter) {
-    var moment = require('moment');
 
     return function orderedDateAxis(vis, chart) {
       var xAgg = chart.aspects.x.agg;

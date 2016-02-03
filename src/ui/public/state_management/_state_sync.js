@@ -1,8 +1,8 @@
+import angular from 'angular';
+import _ from 'lodash';
+import rison from 'ui/utils/rison';
 define(function (require) {
 
-  var angular = require('angular');
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
 
   // invokable/private angular dep
   return function ($location) {

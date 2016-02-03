@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PointSeriesGetAspects(Private) {
-    var _ = require('lodash');
     var fakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
 
     var map = {

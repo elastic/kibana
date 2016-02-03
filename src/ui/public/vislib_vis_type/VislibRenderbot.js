@@ -1,5 +1,5 @@
+import _ from 'lodash';
 module.exports = function VislibRenderbotFactory(Private) {
-  var _ = require('lodash');
   var vislib = Private(require('ui/vislib'));
   var Renderbot = Private(require('ui/Vis/Renderbot'));
   var buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));

@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import angular from 'angular';
 define(function (require) {
   require('ui/highlight/highlight_tags');
 
-  var _ = require('lodash');
-  var angular = require('angular');
   var module = require('ui/modules').get('kibana');
 
   module.filter('highlight', function (highlightTags) {

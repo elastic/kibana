@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import parseRange from 'ui/utils/range';
 define(function (require) {
-  var _ = require('lodash');
-  var parseRange = require('ui/utils/range');
 
   require('ui/number_list/number_list_input');
   require('ui/modules')

@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
-  const _ = require('lodash');
-  const $ = require('jquery');
 
   require('ui/modules')
   .get('app/visualize')

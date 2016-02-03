@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function AggTypeFactory(Private) {
-    var _ = require('lodash');
     var AggParams = Private(require('ui/agg_types/AggParams'));
     var fieldFormats = Private(require('ui/registry/field_formats'));
 

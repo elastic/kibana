@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
 
   require('ui/modules')
   .get('app/settings')

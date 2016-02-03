@@ -3,10 +3,10 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import _ from 'lodash';
-var $ = require('jquery');
 
 import woahLotsOfVariables from 'fixtures/vislib/mock_data/date_histogram/_series';
 import notQuiteEnoughVariables from 'fixtures/vislib/mock_data/not_enough_data/_one_point';
+import $ from 'jquery';
 var someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),

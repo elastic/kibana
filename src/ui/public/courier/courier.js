@@ -1,6 +1,6 @@
+import errors from 'ui/errors';
+import _ from 'lodash';
 define(function (require) {
-  var errors = require('ui/errors');
-  var _ = require('lodash');
 
   require('ui/es');
   require('ui/promises');

@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  const _ = require('lodash');
 
   require('ui/notify');
 

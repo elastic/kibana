@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import errors from 'ui/errors';
 define(function (require) {
-  var _ = require('lodash');
-  var errors = require('ui/errors');
 
   return function (Promise, Private, es) {
     var requestQueue = Private(require('ui/courier/_request_queue'));

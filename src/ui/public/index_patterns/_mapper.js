@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   return function MapperService(Private, Promise, es, config, kbnIndex) {
-    var _ = require('lodash');
-    var moment = require('moment');
 
     var IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
     var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));

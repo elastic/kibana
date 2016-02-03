@@ -2,9 +2,9 @@ import angular from 'angular';
 import moment from 'moment';
 import expect from 'expect.js';
 import _ from 'lodash';
-var $ = require('jquery');
 import sinon from 'auto-release-sinon';
 import ngMock from 'ngMock';
+import $ from 'jquery';
 
 require('plugins/kibana/visualize/index');
 require('plugins/kibana/dashboard/index');

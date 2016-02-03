@@ -1,7 +1,7 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import keyMap from 'ui/utils/key_map';
 define(function (require) {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var keyMap = require('ui/utils/key_map');
 
   var INVALID = {}; // invalid flag
   var FLOATABLE = /^[\d\.e\-\+]+$/i;

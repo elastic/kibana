@@ -1,8 +1,8 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import keyMap from 'ui/utils/key_map';
 define(function (require) {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var Promise = require('bluebird');
-  var keyMap = require('ui/utils/key_map');
   var reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
   var KeyboardEvent = window.KeyboardEvent;
 
