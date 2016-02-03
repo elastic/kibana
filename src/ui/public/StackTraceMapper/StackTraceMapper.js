@@ -1,5 +1,4 @@
 import _ from 'lodash';
-var $ = require('jquery');
 var resolve = require('bluebird').resolve;
 import fetch from 'exports?window.fetch!imports?Promise=bluebird!whatwg-fetch';
 
@@ -7,6 +6,7 @@ import setErrorStack from './setErrorStack';
 import translateStackLine from './translateStackLine';
 import stackLineFormat from './stackLineFormat';
 import SourceMapReader from './SourceMapReader';
+import $ from 'jquery';
 
 function StackTraceMapper() {
   this.maps = [];

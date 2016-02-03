@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function LooperFactory($timeout, Notifier, Promise) {
-    var _ = require('lodash');
     var notify = new Notifier();
 
     function Looper(ms, fn) {

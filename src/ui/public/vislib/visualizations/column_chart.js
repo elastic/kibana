@@ -1,15 +1,15 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import moment from 'moment';
+import errors from 'ui/errors';
 define(function (require) {
   return function ColumnChartFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var moment = require('moment');
 
     var DataClass = Private(require('ui/vislib/lib/data'));
 
     var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
-    var errors = require('ui/errors');
 
     /**
      * Vertical Bar Chart Visualization: renders vertical and/or stacked bars

@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import angular from 'angular';
+import html from 'ui/doc_viewer/doc_viewer.html';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
   require('ace');
 
-  var html = require('ui/doc_viewer/doc_viewer.html');
   require('ui/doc_viewer/doc_viewer.less');
 
   require('ui/modules').get('kibana')

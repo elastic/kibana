@@ -1,6 +1,6 @@
+import _ from 'lodash';
 // See https://github.com/elastic/elasticsearch/issues/6736
 define(function (require) {
-  var _ = require('lodash');
 
   require('ui/modules')
     .get('kibana')

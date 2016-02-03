@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   // adopted from http://stackoverflow.com/questions/3109978/php-display-number-with-ordinal-suffix
-  var _ = require('lodash');
   return function addOrdinalSuffix(num) {
     return num + '' + suffix(num);
   };

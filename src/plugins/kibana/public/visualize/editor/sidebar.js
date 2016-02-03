@@ -1,8 +1,8 @@
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorSidebar', function () {
-    const _ = require('lodash');
 
     require('plugins/kibana/visualize/editor/agg_group');
     require('plugins/kibana/visualize/editor/vis_options');

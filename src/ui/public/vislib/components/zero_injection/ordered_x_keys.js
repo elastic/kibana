@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   return function OrderedXKeysUtilService(Private) {
-    var _ = require('lodash');
-    var moment = require('moment');
     var getUniqKeys = Private(require('ui/vislib/components/zero_injection/uniq_keys'));
 
     /*

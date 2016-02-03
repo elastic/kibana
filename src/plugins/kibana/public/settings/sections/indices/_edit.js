@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  const _ = require('lodash');
   require('plugins/kibana/settings/sections/indices/_indexed_fields');
   require('plugins/kibana/settings/sections/indices/_scripted_fields');
   require('plugins/kibana/settings/sections/indices/_index_header');

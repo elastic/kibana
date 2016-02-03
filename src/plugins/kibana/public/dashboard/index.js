@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import angular from 'angular';
+import ConfigTemplate from 'ui/ConfigTemplate';
+import chrome from 'ui/chrome';
 define(function (require) {
-  const _ = require('lodash');
-  const $ = require('jquery');
-  const angular = require('angular');
-  const ConfigTemplate = require('ui/ConfigTemplate');
-  const chrome = require('ui/chrome');
 
   require('ui/directives/config');
   require('ui/courier');

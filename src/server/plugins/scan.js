@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import PluginCollection from './PluginCollection';
 module.exports = async (kbnServer, server, config) => {
-  let _ = require('lodash');
   let { fromNode } = require('bluebird');
   let { readdir, stat } = require('fs');
   let { resolve } = require('path');
   let { each } = require('bluebird');
 
-  var PluginCollection = require('./PluginCollection');
   var plugins = kbnServer.plugins = new PluginCollection(kbnServer);
 
   let scanDirs = [].concat(config.get('plugins.scanDirs') || []);

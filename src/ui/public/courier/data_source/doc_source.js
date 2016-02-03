@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   return function DocSourceFactory(Private, Promise, es, sessionStorage) {
     var sendToEs = Private(require('ui/courier/data_source/_doc_send_to_es'));

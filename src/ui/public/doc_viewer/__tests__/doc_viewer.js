@@ -1,9 +1,9 @@
 import angular from 'angular';
-var $ = require('jquery');
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import $ from 'jquery';
 var hit = {
   '_index': 'logstash-2014.09.09',
   '_type': 'apache',

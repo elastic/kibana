@@ -1,9 +1,9 @@
+import findSourceFiles from './findSourceFiles';
 module.exports = (kibana) => {
   let { union } = require('lodash');
 
   let utils = require('requirefrom')('src/utils');
   let fromRoot = utils('fromRoot');
-  let findSourceFiles = require('./findSourceFiles');
 
   return new kibana.Plugin({
     config: (Joi) => {

@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import Scanner from 'ui/utils/scanner';
 define(function (require) {
-  const _ = require('lodash');
-  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/discover/saved_searches/_saved_search');
   require('ui/notify');

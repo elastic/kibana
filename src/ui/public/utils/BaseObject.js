@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import rison from 'ui/utils/rison';
+import angular from 'angular';
 define(function (require) {
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
-  var angular = require('angular');
 
   function BaseObject(attributes) {
     // Set the attributes or default to an empty object

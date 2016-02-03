@@ -1,3 +1,5 @@
+import angular from 'angular';
+import _ from 'lodash';
 define(function (require) {
   var module = require('ui/modules').get('kibana/config', [
     'kibana/notify'
@@ -11,8 +13,6 @@ define(function (require) {
   module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
     var config = this;
 
-    var angular = require('angular');
-    var _ = require('lodash');
     var defaults = Private(require('ui/config/defaults'));
     var DelayedUpdater = Private(require('ui/config/_delayed_updater'));
     var vals = Private(require('ui/config/_vals'));

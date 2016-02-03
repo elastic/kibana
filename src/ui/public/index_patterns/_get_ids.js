@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function GetIndexPatternIdsFn(es, kbnIndex) {
-    var _ = require('lodash');
 
     // many places may require the id list, so we will cache it seperately
     // didn't incorportate with the indexPattern cache to prevent id collisions.

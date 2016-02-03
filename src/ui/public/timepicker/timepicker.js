@@ -1,10 +1,10 @@
+import html from 'ui/timepicker/timepicker.html';
+import _ from 'lodash';
+import dateMath from 'ui/utils/dateMath';
+import moment from 'moment';
+import Notifier from 'ui/notify/notifier';
 define(function (require) {
-  var html = require('ui/timepicker/timepicker.html');
   var module = require('ui/modules').get('ui/timepicker');
-  var _ = require('lodash');
-  var dateMath = require('ui/utils/dateMath');
-  var moment = require('moment');
-  var Notifier = require('ui/notify/notifier');
   var notify = new Notifier({
     location: 'timepicker',
   });

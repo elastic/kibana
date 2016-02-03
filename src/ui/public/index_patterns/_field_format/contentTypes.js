@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import angular from 'angular';
 define(function (require) {
   return function contentTypesProvider(highlightFilter) {
-    var _ = require('lodash');
-    var angular = require('angular');
     require('ui/highlight');
 
     var types = {

@@ -1,12 +1,12 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import errors from 'ui/errors';
+import dataLabel from 'ui/vislib/lib/_data_label';
 define(function (require) {
   return function ChartBaseClass(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var errors = require('ui/errors');
 
     var Dispatch = Private(require('ui/vislib/lib/dispatch'));
     var Tooltip = Private(require('ui/vislib/components/Tooltip'));
-    var dataLabel = require('ui/vislib/lib/_data_label');
 
     /**
      * The Base Class for all visualizations.

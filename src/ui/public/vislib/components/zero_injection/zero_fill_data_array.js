@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function ZeroFillDataArrayUtilService(Private) {
-    var _ = require('lodash');
 
     /*
      * Accepts an array of zero-filled y value objects (arr1)

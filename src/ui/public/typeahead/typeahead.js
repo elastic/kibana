@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   var typeahead = require('ui/modules').get('kibana/typeahead');
 
   require('ui/typeahead/typeahead.less');

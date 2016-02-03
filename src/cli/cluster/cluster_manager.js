@@ -7,6 +7,8 @@ const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodas
 import Log from '../Log';
 import Worker from './worker';
 import BasePathProxy from './base_path_proxy';
+import chokidar from 'chokidar';
+import readline from 'readline';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -76,7 +78,6 @@ module.exports = class ClusterManager {
   }
 
   setupWatching() {
-    const chokidar = require('chokidar');
     const utils = require('requirefrom')('src/utils');
     const fromRoot = utils('fromRoot');
 
@@ -106,7 +107,6 @@ module.exports = class ClusterManager {
   }
 
   setupManualRestart() {
-    const readline = require('readline');
     const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;

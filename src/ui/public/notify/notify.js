@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import modules from 'ui/modules';
+import errors from 'ui/notify/errors';
+import Notifier from 'ui/notify/notifier';
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var modules = require('ui/modules');
   var module = modules.get('kibana/notify');
-  var errors = require('ui/notify/errors');
-  var Notifier = require('ui/notify/notifier');
   var rootNotifier = new Notifier();
 
   require('ui/notify/directives');

@@ -1,8 +1,8 @@
+import d3 from 'd3';
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   return function AxisTitleFactory(Private) {
-    var d3 = require('d3');
-    var $ = require('jquery');
-    var _ = require('lodash');
 
     var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
 

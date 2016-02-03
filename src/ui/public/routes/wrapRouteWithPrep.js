@@ -1,9 +1,9 @@
+import angular from 'angular';
+import _ from 'lodash';
+import WorkQueue from 'ui/routes/WorkQueue';
+import errors from 'ui/errors';
 define(function (require) {
-  var angular = require('angular');
-  var _ = require('lodash');
 
-  var WorkQueue = require('ui/routes/WorkQueue');
-  var errors = require('ui/errors');
 
   function wrapRouteWithPrep(route, setup) {
     if (!route.resolve && route.redirectTo) return;

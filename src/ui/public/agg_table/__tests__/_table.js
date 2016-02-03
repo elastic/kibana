@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import sinon from 'auto-release-sinon';
 describe('AggTable Directive', function () {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var fixtures = require('fixtures/fake_hierarchical_data');
-  var sinon = require('auto-release-sinon');
 
   var $rootScope;
   var $compile;

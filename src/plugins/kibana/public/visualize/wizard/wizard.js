@@ -1,5 +1,6 @@
+import _ from 'lodash';
+import routes from 'ui/routes';
 define(function (require) {
-  const _ = require('lodash');
 
   require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
   require('ui/directives/saved_object_finder');
@@ -10,7 +11,6 @@ define(function (require) {
   };
 
   const module = require('ui/modules').get('app/visualize', ['kibana/courier']);
-  const routes = require('ui/routes');
 
   /********
   /** Wizard Step 1

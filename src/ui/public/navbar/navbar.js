@@ -1,5 +1,5 @@
 import _ from 'lodash';
-const $ = require('jquery');
+import $ from 'jquery';
 const navbar = require('ui/modules').get('kibana/navbar');
 
 require('ui/render_directive');

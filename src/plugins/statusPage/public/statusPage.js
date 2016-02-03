@@ -1,6 +1,6 @@
-const $ = require('jquery');
 import _ from 'lodash';
 import notify from 'ui/notify';
+import $ from 'jquery';
 
 require('ui/autoload/styles');
 require('plugins/statusPage/statusPageMetric');

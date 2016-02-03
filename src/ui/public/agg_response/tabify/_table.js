@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function TableProvider() {
-    var _ = require('lodash');
 
     /**
      * Simple table class that is used to contain the rows and columns that create

@@ -1,6 +1,6 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('AggConfig Filters', function () {
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   describe('IP range', function () {
     var AggConfig;

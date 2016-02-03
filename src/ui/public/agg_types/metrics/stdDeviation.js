@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function AggTypeMetricStandardDeviationProvider(Private) {
-    var _ = require('lodash');
     var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
     var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
 

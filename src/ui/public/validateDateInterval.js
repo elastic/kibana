@@ -1,5 +1,5 @@
+import parseInterval from 'ui/utils/parse_interval';
 define(function (require) {
-  var parseInterval = require('ui/utils/parse_interval');
 
   require('ui/modules')
   .get('kibana')

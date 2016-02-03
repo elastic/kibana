@@ -1,7 +1,10 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import addWordBreaks from 'ui/utils/add_word_breaks';
+import noWhiteSpace from 'ui/utils/no_white_space';
+import openRowHtml from 'ui/doc_table/components/table_row/open.html';
+import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var addWordBreaks = require('ui/utils/add_word_breaks');
   var module = require('ui/modules').get('app/discover');
 
   require('ui/highlight');
@@ -23,9 +26,6 @@ define(function (require) {
    * ```
    */
   module.directive('kbnTableRow', function ($compile) {
-    var noWhiteSpace = require('ui/utils/no_white_space');
-    var openRowHtml = require('ui/doc_table/components/table_row/open.html');
-    var detailsHtml = require('ui/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
     var truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 

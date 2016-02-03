@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function transformMappingIntoFields(Private, kbnIndex, config) {
-    var _ = require('lodash');
     var mapField = Private(require('ui/index_patterns/_map_field'));
 
 

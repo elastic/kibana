@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import MockState from 'fixtures/mock_state';
 describe('get filters', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var MockState = require('fixtures/mock_state');
   var storeNames = {
     app: 'appState',
     global: 'globalState'

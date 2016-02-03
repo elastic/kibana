@@ -1,6 +1,7 @@
+import _ from 'lodash';
+import angular from 'angular';
+import html from 'plugins/kibana/doc/index.html';
 define(function (require) {
-  const _ = require('lodash');
-  const angular = require('angular');
 
   require('ui/notify');
   require('ui/courier');
@@ -13,7 +14,6 @@ define(function (require) {
     'kibana/index_patterns'
   ]);
 
-  const html = require('plugins/kibana/doc/index.html');
 
   const resolveIndexPattern = {
     indexPattern: function (courier, savedSearches, $route) {

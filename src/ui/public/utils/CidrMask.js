@@ -1,5 +1,5 @@
+import Ipv4Address from 'ui/utils/Ipv4Address';
 define(function (require) {
-  var Ipv4Address = require('ui/utils/Ipv4Address');
   var NUM_BITS = 32;
 
   function throwError(mask) {

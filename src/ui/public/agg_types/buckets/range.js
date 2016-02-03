@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function RangeAggDefinition(Private) {
-    var _ = require('lodash');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/range'));
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));

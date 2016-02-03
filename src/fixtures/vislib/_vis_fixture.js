@@ -1,5 +1,5 @@
-var $ = require('jquery');
 import _ from 'lodash';
+import $ from 'jquery';
 
 var $visCanvas = $('<div>').attr('id', 'vislib-vis-fixtures').appendTo('body');
 var count = 0;

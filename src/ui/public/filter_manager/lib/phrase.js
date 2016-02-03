@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   return function buildPhraseFilter(field, value, indexPattern) {
     var filter = { meta: { index: indexPattern.id} };
 

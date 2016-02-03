@@ -1,10 +1,10 @@
 import angular from 'angular';
 import expect from 'expect.js';
-var $ = require('jquery');
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import searchResponse from 'fixtures/search_response';
 import ngMock from 'ngMock';
+import $ from 'jquery';
 
 // Load the kibana app dependencies.
 require('ui/private');

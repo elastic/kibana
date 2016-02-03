@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
-  const _ = require('lodash');
-  const $ = require('jquery');
   const module = require('ui/modules').get('kibana');
 
   module.directive('vislibBasicOptions', function ($parse, $compile) {

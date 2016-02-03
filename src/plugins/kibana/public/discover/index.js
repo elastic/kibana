@@ -1,3 +1,4 @@
+import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
 define(function (require) {
   require('plugins/kibana/discover/saved_searches/saved_searches');
   require('plugins/kibana/discover/directives/timechart');
@@ -10,6 +11,5 @@ define(function (require) {
   // preload
   require('ui/doc_table/components/table_row');
 
-  const savedObjectRegistry = require('ui/saved_objects/saved_object_registry');
   savedObjectRegistry.register(require('plugins/kibana/discover/saved_searches/saved_search_register'));
 });

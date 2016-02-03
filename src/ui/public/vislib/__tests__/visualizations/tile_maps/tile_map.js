@@ -2,11 +2,11 @@ import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import _ from 'lodash';
-var $ = require('jquery');
 import sinon from 'auto-release-sinon';
 
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import MockMap from 'fixtures/tilemap_map';
+import $ from 'jquery';
 var mockChartEl = $('<div>');
 
 var TileMap;

@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 describe('editor', function () {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var indexPattern;
   var vis;

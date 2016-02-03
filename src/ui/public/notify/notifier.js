@@ -1,11 +1,12 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import metadata from 'ui/metadata';
+import formatMsg from 'ui/notify/lib/_format_msg';
+import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 /* eslint no-console: 0 */
 
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
 
-  var metadata = require('ui/metadata');
-  var formatMsg = require('ui/notify/lib/_format_msg');
 
   var notifs = [];
   var setTO = setTimeout;
@@ -14,7 +15,6 @@ define(function (require) {
   var buildNum = metadata.buildNum;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
-  var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
 
   var log = _.bindKey(console, 'log');
 

@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  const _ = require('lodash');
   return function loadPanelFunction(Private) { // Inject services here
     return function (panel, $scope) { // Function parameters here
       const panelTypes = {

@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
-  var _ = require('lodash');
-  var moment = require('moment');
 
   var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
   var unitsAsc = _.sortBy(units, function (unit) {

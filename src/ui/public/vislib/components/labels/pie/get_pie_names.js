@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   return function GetPieNames(Private) {
     var returnNames = Private(require('ui/vislib/components/labels/pie/return_pie_names'));

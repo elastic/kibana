@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import Binder from 'ui/Binder';
 define(function (require) {
-  const _ = require('lodash');
-  const $ = require('jquery');
-  const Binder = require('ui/Binder');
   require('gridster');
 
   const app = require('ui/modules').get('app/dashboard');

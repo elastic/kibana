@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   /**
    * Utilize the extended error information returned from elasticsearch

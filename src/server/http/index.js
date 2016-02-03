@@ -1,12 +1,12 @@
+import _ from 'lodash';
+import fs from 'fs';
+import Boom from 'boom';
+import Hapi from 'hapi';
+import getDefaultRoute from './getDefaultRoute';
 module.exports = async function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
   let parse = require('url').parse;
   let format = require('url').format;
 
-  let getDefaultRoute = require('./getDefaultRoute');
 
   server = kbnServer.server = new Hapi.Server();
 

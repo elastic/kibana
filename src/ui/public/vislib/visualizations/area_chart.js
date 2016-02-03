@@ -1,12 +1,12 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import errors from 'ui/errors';
 define(function (require) {
   return function AreaChartFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var $ = require('jquery');
 
     var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
     var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
-    var errors = require('ui/errors');
 
     /**
      * Area chart visualization

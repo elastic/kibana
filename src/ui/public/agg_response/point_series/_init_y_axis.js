@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PointSeriesInitYAxis() {
-    var _ = require('lodash');
 
     return function initYAxis(chart) {
       var y = chart.aspects.y;

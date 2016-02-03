@@ -1,5 +1,5 @@
+import d3 from 'd3';
 define(function (require) {
-  var d3 = require('d3');
   /**
    * Creates a string based on the hex color passed in
    *

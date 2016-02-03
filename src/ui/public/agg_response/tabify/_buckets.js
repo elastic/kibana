@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function AggResponseBucketsProvider() {
-    var _ = require('lodash');
 
     function Buckets(aggResp) {
       aggResp = aggResp || false;

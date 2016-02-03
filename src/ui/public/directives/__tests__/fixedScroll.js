@@ -2,11 +2,11 @@
 require('ui/fixedScroll');
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import $ from 'jquery';
+import sinon from 'auto-release-sinon';
+import Promise from 'bluebird';
 
 describe('FixedScroll directive', function () {
-  var $ = require('jquery');
-  var sinon = require('auto-release-sinon');
-  var Promise = require('bluebird');
 
   var compile;
   var trash = [];

@@ -1,9 +1,9 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import simulateKeys from 'testUtils/simulateKeys';
+import ngMock from 'ngMock';
 describe('NumberList directive', function () {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var simulateKeys = require('testUtils/simulateKeys');
-  var ngMock = require('ngMock');
 
   require('ui/number_list');
 

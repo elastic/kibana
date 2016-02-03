@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   // given an object or array of objects, return the value of the passed param
   // if the param is missing, return undefined
   return function findByParam(values, param) {

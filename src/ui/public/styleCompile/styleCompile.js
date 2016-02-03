@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
   var $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
   require('ui/config');

@@ -1,12 +1,12 @@
+import _ from 'lodash';
+import angular from 'angular';
+import moment from 'moment';
+import ConfigTemplate from 'ui/ConfigTemplate';
+import getSort from 'ui/doc_table/lib/get_sort';
+import rison from 'ui/utils/rison';
+import dateMath from 'ui/utils/dateMath';
 define(function (require) {
-  const _ = require('lodash');
-  const angular = require('angular');
-  const moment = require('moment');
-  const ConfigTemplate = require('ui/ConfigTemplate');
-  const getSort = require('ui/doc_table/lib/get_sort');
-  const rison = require('ui/utils/rison');
 
-  const dateMath = require('ui/utils/dateMath');
 
   require('ui/doc_table');
   require('ui/visualize');

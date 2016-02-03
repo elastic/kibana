@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function tabifyAggResponseProvider(Private, Notifier) {
-    var _ = require('lodash');
 
     var AggConfig = Private(require('ui/Vis/AggConfig'));
     var TabbedAggResponseWriter = Private(require('ui/agg_response/tabify/_response_writer'));

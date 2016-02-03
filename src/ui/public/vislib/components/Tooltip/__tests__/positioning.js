@@ -1,11 +1,11 @@
 import expect from 'expect.js';
+import $ from 'jquery';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import posTT from '../positionTooltip';
 
 describe('Tooltip Positioning', function () {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
 
-  var posTT = require('../positionTooltip');
   var positions = ['north', 'south', 'east', 'west'];
   var bounds = ['top', 'left', 'bottom', 'right'];
   var $window;

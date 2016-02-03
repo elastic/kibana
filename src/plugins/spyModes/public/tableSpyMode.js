@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
-    const _ = require('lodash');
     const saveAs = require('@spalger/filesaver').saveAs;
     const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
