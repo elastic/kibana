@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function ZeroInjectionUtilService(Private) {
-    var _ = require('lodash');
 
     var orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
     var createZeroFilledArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));

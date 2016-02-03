@@ -1,9 +1,9 @@
+import toUser from 'ui/parse_query/lib/to_user';
 define(function (require) {
   require('ui/modules')
     .get('kibana')
     .directive('parseQuery', function (Private) {
       var fromUser = Private(require('ui/parse_query/lib/from_user'));
-      var toUser = require('ui/parse_query/lib/to_user');
 
       return {
         restrict: 'A',

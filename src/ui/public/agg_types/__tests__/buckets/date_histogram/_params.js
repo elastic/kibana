@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import moment from 'moment';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('params', function () {
-  var _ = require('lodash');
-  var moment = require('moment');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var paramWriter;
   var writeInterval;

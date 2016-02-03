@@ -1,10 +1,10 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import rimraf from 'rimraf';
-const { mkdirSync } = require('fs');
-const { join } = require('path');
 import pluginLogger from '../plugin_logger';
 import pluginInstaller from '../plugin_installer';
+import { mkdirSync } from 'fs';
+import { join } from 'path';
 
 describe('kibana cli', function () {
 

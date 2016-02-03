@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import AggConfigResult from 'ui/Vis/AggConfigResult';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('AggConfigResult', function () {
-  var _ = require('lodash');
-  var AggConfigResult = require('ui/Vis/AggConfigResult');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var AggConfig;
   var indexPattern;

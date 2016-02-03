@@ -3,7 +3,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-require('ui/private');
+import 'ui/private';
 
 describe('Base Object', function () {
   var $rootScope;

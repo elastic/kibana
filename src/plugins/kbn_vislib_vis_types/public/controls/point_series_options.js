@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import 'ui/directives/inequality';
 define(function (require) {
-  const _ = require('lodash');
-  const $ = require('jquery');
   const module = require('ui/modules').get('kibana');
-  require('ui/directives/inequality');
 
   module.directive('pointSeriesOptions', function ($parse, $compile) {
     return {

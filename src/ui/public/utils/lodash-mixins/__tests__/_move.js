@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import expect from 'expect.js';
 describe('_.move', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
 
   it('accepts previous from->to syntax', function () {
     var list = [

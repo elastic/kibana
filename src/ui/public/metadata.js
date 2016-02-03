@@ -1,6 +1,6 @@
+import _ from 'lodash';
 // singleton for immutable copy of window.__KBN__
 define(function (require) {
-  const _ = require('lodash');
 
   if (!_.has(window, '__KBN__')) {
     throw new Error('window.__KBN__ must be set for metadata');

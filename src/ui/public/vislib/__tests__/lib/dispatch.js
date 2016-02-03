@@ -1,12 +1,12 @@
 import angular from 'angular';
 import _ from 'lodash';
-var $ = require('jquery');
 import d3 from 'd3';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 
 // Data
 import data from 'fixtures/vislib/mock_data/date_histogram/_series';
+import $ from 'jquery';
 
 describe('Vislib Dispatch Class Test Suite', function () {
 

@@ -1,9 +1,9 @@
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
     .get('app/visualize')
     .directive('visualizeSpy', function (Private, $compile) {
-      var $ = require('jquery');
-      var _ = require('lodash');
 
       var spyModes = Private(require('ui/registry/spy_modes'));
       var defaultMode = spyModes.inOrder[0].name;

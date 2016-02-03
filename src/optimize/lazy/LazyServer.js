@@ -1,7 +1,7 @@
 
-let { Server } = require('hapi');
-let { fromNode } = require('bluebird');
 import Boom from 'boom';
+import { Server } from 'hapi';
+import { fromNode } from 'bluebird';
 
 
 module.exports = class LazyServer {

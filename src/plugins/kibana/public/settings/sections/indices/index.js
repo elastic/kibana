@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import 'plugins/kibana/settings/sections/indices/_create';
+import 'plugins/kibana/settings/sections/indices/_edit';
+import 'plugins/kibana/settings/sections/indices/_field_editor';
 define(function (require) {
-  const _ = require('lodash');
 
-  require('plugins/kibana/settings/sections/indices/_create');
-  require('plugins/kibana/settings/sections/indices/_edit');
-  require('plugins/kibana/settings/sections/indices/_field_editor');
 
   // add a dependency to all of the subsection routes
   require('ui/routes')

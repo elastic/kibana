@@ -1,8 +1,8 @@
 import _ from 'lodash';
-const $ = require('jquery');
+import $ from 'jquery';
+import 'ui/render_directive';
 const navbar = require('ui/modules').get('kibana/navbar');
 
-require('ui/render_directive');
 
 navbar.directive('navbar', function (Private, $compile) {
   const navbarExtensions = Private(require('ui/registry/navbar_extensions'));

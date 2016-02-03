@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import Scanner from 'ui/utils/scanner';
+import 'plugins/kibana/dashboard/services/_saved_dashboard';
 define(function (require) {
   const module = require('ui/modules').get('app/dashboard');
-  const _ = require('lodash');
-  const Scanner = require('ui/utils/scanner');
 
   // bring in the factory
-  require('plugins/kibana/dashboard/services/_saved_dashboard');
 
 
   // Register this service with the saved object registry so it can be

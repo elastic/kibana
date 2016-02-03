@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import angular from 'angular';
+import rison from 'ui/utils/rison';
+import registry from 'plugins/kibana/settings/saved_object_registry';
+import objectViewHTML from 'plugins/kibana/settings/sections/objects/_view.html';
 define(function (require) {
-  const _ = require('lodash');
-  const angular = require('angular');
-  const rison = require('ui/utils/rison');
-  const registry = require('plugins/kibana/settings/saved_object_registry');
-  const objectViewHTML = require('plugins/kibana/settings/sections/objects/_view.html');
 
   require('ui/routes')
   .when('/settings/objects/:service/:id', {

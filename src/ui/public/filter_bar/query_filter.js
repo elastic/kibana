@@ -1,14 +1,14 @@
+import _ from 'lodash';
+import onlyDisabled from 'ui/filter_bar/lib/onlyDisabled';
+import onlyStateChanged from 'ui/filter_bar/lib/onlyStateChanged';
+import uniqFilters from 'ui/filter_bar/lib/uniqFilters';
+import compareFilters from 'ui/filter_bar/lib/compareFilters';
+import angular from 'angular';
 define(function (require) {
-  var _ = require('lodash');
 
   return function (Private, $rootScope, getAppState, globalState, config) {
     var EventEmitter = Private(require('ui/events'));
-    var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
-    var onlyStateChanged = require('ui/filter_bar/lib/onlyStateChanged');
-    var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
-    var compareFilters = require('ui/filter_bar/lib/compareFilters');
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
-    var angular = require('angular');
 
     var queryFilter = new EventEmitter();
 

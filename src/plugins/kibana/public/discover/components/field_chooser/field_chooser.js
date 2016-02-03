@@ -1,17 +1,17 @@
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
+import 'ui/filters/unique';
+import 'plugins/kibana/discover/components/field_chooser/discover_field';
+import _ from 'lodash';
+import $ from 'jquery';
+import rison from 'ui/utils/rison';
+import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
 define(function (require) {
   const app = require('ui/modules').get('apps/discover');
 
 
-  require('ui/directives/css_truncate');
-  require('ui/directives/field_name');
-  require('ui/filters/unique');
-  require('plugins/kibana/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
-    const _ = require('lodash');
-    const $ = require('jquery');
-    const rison = require('ui/utils/rison');
-    const fieldCalculator = require('plugins/kibana/discover/components/field_chooser/lib/field_calculator');
     const FieldList = Private(require('ui/index_patterns/_field_list'));
 
     return {

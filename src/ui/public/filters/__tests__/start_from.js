@@ -1,8 +1,8 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import 'ui/filters/start_from';
 
-require('ui/filters/start_from');
 
 var filter;
 

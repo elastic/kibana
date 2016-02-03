@@ -1,9 +1,9 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import L from 'leaflet';
 define(function (require) {
   return function MarkerFactory() {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var L = require('leaflet');
 
     /**
      * Base map marker overlay, all other markers inherit from this class

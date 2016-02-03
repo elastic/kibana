@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('bucketCountBetween util', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var indexPattern;
   var Vis;
   var visTypes;

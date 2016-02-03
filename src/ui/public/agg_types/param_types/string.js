@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import editorHtml from 'ui/agg_types/controls/string.html';
 define(function (require) {
   return function FieldAggParamFactory(Private) {
-    var _ = require('lodash');
 
-    var editorHtml = require('ui/agg_types/controls/string.html');
     var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
 
     _.class(ScriptAggParam).inherits(BaseAggParam);

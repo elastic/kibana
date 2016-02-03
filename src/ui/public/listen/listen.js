@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   require('ui/modules').get('kibana')
   .run(function ($rootScope) {

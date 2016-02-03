@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import angular from 'angular';
+import compareFilters from 'ui/filter_bar/lib/compareFilters';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var compareFilters = require('ui/filter_bar/lib/compareFilters');
 
   /**
    * Combine 2 filter collections, removing duplicates

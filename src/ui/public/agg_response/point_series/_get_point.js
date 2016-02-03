@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function PointSeriesGetPoint() {
-    var _ = require('lodash');
     function unwrap(aggConfigResult, def) {
       return aggConfigResult ? aggConfigResult.value : def;
     }

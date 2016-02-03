@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import editorHtml from 'ui/agg_types/controls/raw_json.html';
 define(function (require) {
   return function RawJSONAggParamFactory(Private) {
-    var _ = require('lodash');
 
     var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    var editorHtml = require('ui/agg_types/controls/raw_json.html');
 
     _.class(RawJSONAggParam).inherits(BaseAggParam);
     function RawJSONAggParam(config) {

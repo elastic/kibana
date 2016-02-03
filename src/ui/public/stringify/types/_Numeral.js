@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import 'ui/field_format_editor/numeral/numeral';
 define(function (require) {
   return function AbstractNumeralFormatProvider(Private) {
-    var _ = require('lodash');
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
     var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
     var numeral = require('numeral')();
-    require('ui/field_format_editor/numeral/numeral');
 
     _.class(Numeral).inherits(FieldFormat);
     function Numeral(params) {

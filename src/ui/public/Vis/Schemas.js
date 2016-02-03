@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function VisTypeSchemasFactory(Private) {
-    var _ = require('lodash');
-    var IndexedArray = require('ui/IndexedArray');
     var AggParams = Private(require('ui/agg_types/AggParams'));
 
     function Schemas(schemas) {

@@ -1,6 +1,6 @@
+import 'ui/filters/short_dots';
 define(function (require) {
   var module = require('ui/modules').get('kibana');
-  require('ui/filters/short_dots');
 
   module.directive('fieldName', function ($compile, $rootScope, $filter) {
     return {

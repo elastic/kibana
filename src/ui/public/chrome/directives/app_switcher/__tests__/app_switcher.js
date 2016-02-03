@@ -1,15 +1,15 @@
 import sinon from 'auto-release-sinon';
 import ngMock from 'ngMock';
-var $ = require('jquery');
 import expect from 'expect.js';
 
-require('ui/chrome');
-require('../app_switcher');
 import DomLocationProvider from 'ui/domLocation';
 import { constant } from 'lodash';
 import { set } from 'lodash';
 import { cloneDeep } from 'lodash';
 import { indexBy } from 'lodash';
+import $ from 'jquery';
+import 'ui/chrome';
+import '../app_switcher';
 
 describe('appSwitcher directive', function () {
   var env;

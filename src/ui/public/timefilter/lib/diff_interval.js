@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   return function diffTimeProvider(Private) {
     var diff = Private(require('ui/utils/diff_time_picker_vals'));
 

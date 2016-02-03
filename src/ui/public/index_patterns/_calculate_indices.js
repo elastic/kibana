@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
-  const _ = require('lodash');
-  const moment = require('moment');
 
   // gets parsed value if given arg is a moment object
   function timeValue(val) {

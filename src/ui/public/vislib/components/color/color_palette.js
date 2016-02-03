@@ -1,7 +1,7 @@
+import d3 from 'd3';
+import _ from 'lodash';
 define(function (require) {
   return function ColorPaletteUtilService(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
 
     var seedColors = Private(require('ui/vislib/components/color/seed_colors'));
 

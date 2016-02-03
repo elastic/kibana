@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   return function PieLabels(Private) {
     var removeZeroSlices = Private(require('ui/vislib/components/labels/pie/remove_zero_slices'));

@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import getValType from './get_val_type';
+import getEditorType from './get_editor_type';
 define(function (require) {
-  const _ = require('lodash');
-  const getValType = require('./get_val_type');
-  const getEditorType = require('./get_editor_type');
 
   /**
    * @param {object} advanced setting definition object

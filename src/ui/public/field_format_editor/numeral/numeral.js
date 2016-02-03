@@ -1,5 +1,5 @@
+import 'ui/field_format_editor/pattern/pattern';
 define(function (require) {
-  require('ui/field_format_editor/pattern/pattern');
 
   require('ui/modules')
   .get('kibana')

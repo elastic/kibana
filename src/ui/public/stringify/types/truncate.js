@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function TruncateFormatProvider(Private) {
-    var _ = require('lodash');
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
     var omission = '...';
 

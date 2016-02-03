@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function AggConfigsFactory(Private) {
-    var _ = require('lodash');
     var AggConfig = Private(require('ui/Vis/AggConfig'));
-    var IndexedArray = require('ui/IndexedArray');
 
     AggConfig.aggTypes = Private(require('ui/agg_types/index'));
 

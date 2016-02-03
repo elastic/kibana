@@ -4,7 +4,6 @@ import expect from 'expect.js';
 import ngMock from 'ngMock';
 
 // Load the kibana app dependencies.
-require('ui/parse_query');
 
 var $rootScope;
 var $timeout;
@@ -19,6 +18,7 @@ var cycleIndex = 0;
 var markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 var fromUser;
 import toUser from 'ui/parse_query/lib/to_user';
+import 'ui/parse_query';
 
 var init = function () {
   // Load the application

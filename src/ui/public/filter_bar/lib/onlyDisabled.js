@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   var pluckDisabled = function (filter) {
     return _.get(filter, 'meta.disabled');

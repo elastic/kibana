@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function ResponseAggConfigProvider() {
-    var _ = require('lodash');
 
     /**
      * Get the ResponseAggConfig class for an aggConfig,

@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import chrome from 'ui/chrome';
 define(function (require) {
-  var _ = require('lodash');
-  var chrome = require('ui/chrome');
 
   require('ui/modules').get('kibana')
   .run(function ($rootScope, docTitle) {

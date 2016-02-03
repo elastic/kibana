@@ -1,9 +1,12 @@
+import _ from 'lodash';
+import sections from 'plugins/kibana/settings/sections/index';
+import 'plugins/kibana/settings/styles/main.less';
+import 'ui/filters/start_from';
+import 'ui/field_editor';
+import 'plugins/kibana/settings/sections/indices/_indexed_fields';
+import 'plugins/kibana/settings/sections/indices/_scripted_fields';
 define(function (require) {
-  const _ = require('lodash');
 
-  const sections = require('plugins/kibana/settings/sections/index');
-  require('plugins/kibana/settings/styles/main.less');
-  require('ui/filters/start_from');
 
   require('ui/routes')
   .when('/settings', {
@@ -38,7 +41,4 @@ define(function (require) {
   });
 
   // preload
-  require('ui/field_editor');
-  require('plugins/kibana/settings/sections/indices/_indexed_fields');
-  require('plugins/kibana/settings/sections/indices/_scripted_fields');
 });

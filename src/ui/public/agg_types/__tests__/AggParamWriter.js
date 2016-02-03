@@ -1,5 +1,5 @@
+import _ from 'lodash';
 module.exports = function AggParamWriterHelper(Private) {
-  var _ = require('lodash');
   var Vis = Private(require('ui/Vis'));
   var aggTypes = Private(require('ui/agg_types/index'));
   var visTypes = Private(require('ui/registry/vis_types'));

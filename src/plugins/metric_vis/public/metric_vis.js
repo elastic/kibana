@@ -1,9 +1,9 @@
+import 'plugins/metric_vis/metric_vis.less';
+import 'plugins/metric_vis/metric_vis_controller';
 define(function (require) {
   // we need to load the css ourselves
-  require('plugins/metric_vis/metric_vis.less');
 
   // we also need to load the controller and used by the template
-  require('plugins/metric_vis/metric_vis_controller');
 
   // register the provider with the visTypes registry
   require('ui/registry/vis_types').register(MetricVisProvider);

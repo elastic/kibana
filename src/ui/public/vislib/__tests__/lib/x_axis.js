@@ -1,9 +1,9 @@
 import d3 from 'd3';
 import angular from 'angular';
 import _ from 'lodash';
-var $ = require('jquery');
 import ngMock from 'ngMock';
 import expect from 'expect.js';
+import $ from 'jquery';
 
 describe('Vislib xAxis Class Test Suite', function () {
   var XAxis;

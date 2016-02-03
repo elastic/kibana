@@ -1,12 +1,12 @@
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import './AggType';
+import './AggParams';
+import './bucketCountBetween';
+import './buckets/_histogram';
+import './buckets/_range';
 
 describe('AggTypesComponent', function () {
-  require('./AggType');
-  require('./AggParams');
-  require('./bucketCountBetween');
-  require('./buckets/_histogram');
-  require('./buckets/_range');
 
   describe('bucket aggs', function () {
     var bucketAggs;

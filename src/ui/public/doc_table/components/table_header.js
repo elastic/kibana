@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import 'ui/filters/short_dots';
+import headerHtml from 'ui/doc_table/components/table_header.html';
 define(function (require) {
-  var _ = require('lodash');
   var module = require('ui/modules').get('app/discover');
 
-  require('ui/filters/short_dots');
 
   module.directive('kbnTableHeader', function (shortDotsFilter) {
-    var headerHtml = require('ui/doc_table/components/table_header.html');
     return {
       restrict: 'A',
       scope: {

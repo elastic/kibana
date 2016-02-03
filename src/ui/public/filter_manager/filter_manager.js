@@ -1,7 +1,7 @@
+import _ from 'lodash';
 // Adds a filter to a passed state
 define(function (require) {
   return function (Private) {
-    var _ = require('lodash');
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterManager = {};
 

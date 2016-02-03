@@ -1,20 +1,20 @@
+import _ from 'lodash';
+import errors from 'ui/errors';
+import angular from 'angular';
+import getComputedFields from 'ui/index_patterns/_get_computed_fields';
+import formatHit from 'ui/index_patterns/_format_hit';
 define(function (require) {
   return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
-    var _ = require('lodash');
-    var errors = require('ui/errors');
-    var angular = require('angular');
 
     var fieldformats = Private(require('ui/registry/field_formats'));
     var getIds = Private(require('ui/index_patterns/_get_ids'));
     var mapper = Private(require('ui/index_patterns/_mapper'));
     var intervals = Private(require('ui/index_patterns/_intervals'));
-    var getComputedFields = require('ui/index_patterns/_get_computed_fields');
     var DocSource = Private(require('ui/courier/data_source/doc_source'));
     var mappingSetup = Private(require('ui/utils/mapping_setup'));
     var FieldList = Private(require('ui/index_patterns/_field_list'));
 
     var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    var formatHit = require('ui/index_patterns/_format_hit');
     var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
     var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 

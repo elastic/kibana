@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import extractBuckets from 'ui/agg_response/hierarchical/_extract_buckets';
 define(function (require) {
-  var _ = require('lodash');
-  var extractBuckets = require('ui/agg_response/hierarchical/_extract_buckets');
   return function (vis, resp) {
 
     // Create the initial results structure

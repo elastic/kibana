@@ -1,13 +1,13 @@
 import angular from 'angular';
-var $ = require('jquery');
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import getFakeRow from 'fixtures/fake_row';
+import $ from 'jquery';
+import 'plugins/kibana/discover/index';
 
 describe('Doc Table', function () {
-  require('plugins/kibana/discover/index');
 
   var $parentScope;
 

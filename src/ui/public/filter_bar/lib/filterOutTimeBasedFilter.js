@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   return function filterOutTimeBaseFilter(courier, Promise) {
     return Promise.method(function (filters) {
       var id = _.get(filters, '[0].meta.index');

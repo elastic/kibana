@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function FlattenDataObjectUtilService() {
-    var _ = require('lodash');
 
     /*
      * Accepts a Kibana data object, flattens the data.series values array,

@@ -1,9 +1,9 @@
-let { chain, memoize } = require('lodash');
-let { resolve } = require('path');
-let { map, fromNode } = require('bluebird');
-let { Glob } = require('glob');
 
 import fromRoot from '../../utils/fromRoot';
+import { chain, memoize } from 'lodash';
+import { resolve } from 'path';
+import { map, fromNode } from 'bluebird';
+import { Glob } from 'glob';
 
 let findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   patterns = [].concat(patterns || []);

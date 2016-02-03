@@ -1,5 +1,5 @@
+import html from 'ui/partials/info.html';
 define(function (require) {
-  var html = require('ui/partials/info.html');
 
   require('ui/modules')
     .get('kibana')

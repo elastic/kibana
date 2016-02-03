@@ -1,9 +1,9 @@
 import { SavedObjectNotFound } from 'ui/errors';
+import _ from 'lodash';
+import editorHtml from 'ui/agg_types/controls/field.html';
 define(function (require) {
   return function FieldAggParamFactory(Private) {
-    var _ = require('lodash');
 
-    var editorHtml = require('ui/agg_types/controls/field.html');
     var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
 
     _.class(FieldAggParam).inherits(BaseAggParam);
