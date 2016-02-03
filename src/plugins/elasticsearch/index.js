@@ -29,7 +29,7 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: string().default('2.0'),
-        engineVersion: string().valid('^3.0.0').default('^3.0.0')
+        engineVersion: string().valid('^2.1.0').default('^2.1.0')
       }).default();
     },
 
