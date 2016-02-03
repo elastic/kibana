@@ -1,4 +1,4 @@
-define(function (require, module, exports) {
+define(function (require) {
   const _ = require('lodash');
 
   const sections = require('plugins/kibana/settings/sections/index');
