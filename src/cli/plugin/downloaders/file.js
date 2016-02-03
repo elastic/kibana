@@ -1,5 +1,6 @@
 import getProgressReporter from '../progress_reporter';
 import { createWriteStream, createReadStream, unlinkSync, statSync } from 'fs';
+import typeFromFilename from '../type_from_filename';
 
 function openSourceFile({ sourcePath }) {
   try {
@@ -36,15 +37,6 @@ async function copyFile({ readStream, writeStream, progressReporter }) {
   });
 }
 
-function getArchiveTypeFromFilename(path) {
-  if (/\.zip$/i.test(path)) {
-    return '.zip';
-  }
-  if (/\.tar\.gz$/i.test(path)) {
-    return '.tar.gz';
-  }
-}
-
 /*
 // Responsible for managing local file transfers
 */
@@ -67,7 +59,7 @@ export default async function copyLocalFile(logger, sourcePath, targetPath) {
     }
 
     // all is well, return our archive type
-    const archiveType = getArchiveTypeFromFilename(sourcePath);
+    const archiveType = typeFromFilename(sourcePath);
     return { archiveType };
   } catch (err) {
     logger.error(err);
