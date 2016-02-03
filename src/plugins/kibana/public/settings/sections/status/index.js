@@ -1,10 +1,10 @@
 define(function (require) {
-  const _ = require('lodash');
+  const registry = require('ui/registry/settings_sections');
 
-  return {
+  registry.register(() => ({
     order: 3,
     name: 'status',
     display: 'Status',
     url: '/status'
-  };
+  }));
 });

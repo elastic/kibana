@@ -1,7 +1,11 @@
 define(function (require, module, exports) {
   const _ = require('lodash');
 
-  const sections = require('plugins/kibana/settings/sections/index');
+  require('plugins/kibana/settings/sections/indices/index');
+  require('plugins/kibana/settings/sections/advanced/index');
+  require('plugins/kibana/settings/sections/objects/index');
+  require('plugins/kibana/settings/sections/status/index');
+  require('plugins/kibana/settings/sections/about/index');
   require('plugins/kibana/settings/styles/main.less');
   require('ui/filters/start_from');
 
@@ -18,6 +22,7 @@ define(function (require, module, exports) {
   require('ui/modules')
   .get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
+    const sections = Private(require('ui/registry/settings_sections'));
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/app.html'),
@@ -27,7 +32,7 @@ define(function (require, module, exports) {
       },
       link: function ($scope, $el) {
         timefilter.enabled = false;
-        $scope.sections = sections;
+        $scope.sections = sections.inOrder;
         $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 
         $scope.sections.forEach(function (section) {

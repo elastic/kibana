@@ -6,7 +6,6 @@ require('plugins/kibana/discover/index');
 require('plugins/kibana/visualize/index');
 require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
-require('plugins/kibana/settings/sections');
 require('plugins/kibana/doc');
 require('ui/vislib');
 require('ui/agg_response');

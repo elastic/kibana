@@ -1,5 +1,6 @@
 define(function (require) {
   const _ = require('lodash');
+  const registry = require('ui/registry/settings_sections');
 
   require('plugins/kibana/settings/sections/indices/_create');
   require('plugins/kibana/settings/sections/indices/_edit');
@@ -43,9 +44,9 @@ define(function (require) {
     };
   });
 
-  return {
+  registry.register(() => ({
     name: 'indices',
     display: 'Indices',
     url: '#/settings/indices',
-  };
+  }));
 });

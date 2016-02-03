@@ -1,5 +1,5 @@
 define(function (require) {
-  const _ = require('lodash');
+  const registry = require('ui/registry/settings_sections');
 
   require('ui/routes')
   .when('/settings/about', {
@@ -13,10 +13,10 @@ define(function (require) {
     $scope.buildSha = buildSha;
   });
 
-  return {
+  registry.register(() => ({
     order: Infinity,
     name: 'about',
     display: 'About',
     url: '#/settings/about'
-  };
+  }));
 });
