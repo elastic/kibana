@@ -11,6 +11,10 @@ describe('kibana cli', function () {
       const type = typeFromFilename('wat.tar.gz');
       expect(type).to.equal(TAR);
     });
+    it('returns TAR for .tgz filename', function () {
+      const type = typeFromFilename('wat.tgz');
+      expect(type).to.equal(TAR);
+    });
     it('returns undefined for unknown file type', function () {
       const type = typeFromFilename('wat.unknown');
       expect(type).to.equal(undefined);
