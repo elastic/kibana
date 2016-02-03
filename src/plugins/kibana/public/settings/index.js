@@ -9,6 +9,7 @@ import 'ui/filters/start_from';
 import 'ui/field_editor';
 import 'plugins/kibana/settings/sections/indices/_indexed_fields';
 import 'plugins/kibana/settings/sections/indices/_scripted_fields';
+import registry from 'ui/registry/settings_sections';
 
 define(function (require) {
   require('ui/routes')
@@ -24,7 +25,7 @@ define(function (require) {
   require('ui/modules')
   .get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
-    const sections = Private(require('ui/registry/settings_sections'));
+    const sections = Private(registry);
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/app.html'),
