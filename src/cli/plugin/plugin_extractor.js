@@ -1,6 +1,6 @@
 import zipExtract from './extractors/zip';
 import tarGzExtract from './extractors/tar_gz';
-import { ZIP, TAR } from './type_from_filename';
+import { ZIP, TAR } from './file_type';
 
 export default function extractArchive(settings, logger, archiveType) {
   switch (archiveType) {

@@ -2,7 +2,7 @@ import Wreck from 'wreck';
 import getProgressReporter from '../progress_reporter';
 import { fromNode as fn } from 'bluebird';
 import { createWriteStream, unlinkSync } from 'fs';
-import typeFromFilename, { ZIP, TAR } from '../type_from_filename';
+import fileType, { ZIP, TAR } from '../file_type';
 
 function sendRequest({ sourceUrl, timeout }) {
   const maxRedirects = 11; //Because this one goes to 11.
@@ -55,7 +55,7 @@ function getArchiveTypeFromResponse(resp, sourceUrl) {
     default:
       //If we can't infer the archive type from the content-type header,
       //fall back to checking the extension in the url
-      return typeFromFilename(sourceUrl);
+      return fileType(sourceUrl);
   }
 }
 

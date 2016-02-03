@@ -1,6 +1,6 @@
 import getProgressReporter from '../progress_reporter';
 import { createWriteStream, createReadStream, unlinkSync, statSync } from 'fs';
-import typeFromFilename from '../type_from_filename';
+import fileType from '../file_type';
 
 function openSourceFile({ sourcePath }) {
   try {
@@ -59,7 +59,7 @@ export default async function copyLocalFile(logger, sourcePath, targetPath) {
     }
 
     // all is well, return our archive type
-    const archiveType = typeFromFilename(sourcePath);
+    const archiveType = fileType(sourcePath);
     return { archiveType };
   } catch (err) {
     logger.error(err);
