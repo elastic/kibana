@@ -1,30 +1,30 @@
 import expect from 'expect.js';
-import typeFromFilename, { ZIP, TAR } from '../type_from_filename';
+import fileType, { ZIP, TAR } from '../file_type';
 
 describe('kibana cli', function () {
-  describe('type_from_filename', function () {
+  describe('file_type', function () {
     it('returns ZIP for .zip filename', function () {
-      const type = typeFromFilename('wat.zip');
+      const type = fileType('wat.zip');
       expect(type).to.equal(ZIP);
     });
     it('returns TAR for .tar.gz filename', function () {
-      const type = typeFromFilename('wat.tar.gz');
+      const type = fileType('wat.tar.gz');
       expect(type).to.equal(TAR);
     });
     it('returns TAR for .tgz filename', function () {
-      const type = typeFromFilename('wat.tgz');
+      const type = fileType('wat.tgz');
       expect(type).to.equal(TAR);
     });
     it('returns undefined for unknown file type', function () {
-      const type = typeFromFilename('wat.unknown');
+      const type = fileType('wat.unknown');
       expect(type).to.equal(undefined);
     });
     it('accepts paths', function () {
-      const type = typeFromFilename('/some/path/to/wat.zip');
+      const type = fileType('/some/path/to/wat.zip');
       expect(type).to.equal(ZIP);
     });
     it('accepts urls', function () {
-      const type = typeFromFilename('http://example.com/wat.zip');
+      const type = fileType('http://example.com/wat.zip');
       expect(type).to.equal(ZIP);
     });
   });
