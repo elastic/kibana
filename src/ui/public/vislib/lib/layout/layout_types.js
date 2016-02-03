@@ -1,3 +1,7 @@
+import VislibLibLayoutTypesColumnLayoutProvider from 'ui/vislib/lib/layout/types/column_layout';
+import VislibLibLayoutTypesPieLayoutProvider from 'ui/vislib/lib/layout/types/pie_layout';
+import VislibLibLayoutTypesMapLayoutProvider from 'ui/vislib/lib/layout/types/map_layout';
+
 define(function (require) {
   return function LayoutTypeFactory(Private) {
 
@@ -10,11 +14,11 @@ define(function (require) {
      * @return {Function} Returns an Object of HTML layouts for each visualization class
      */
     return {
-      histogram: Private(require('ui/vislib/lib/layout/types/column_layout')),
-      line: Private(require('ui/vislib/lib/layout/types/column_layout')),
-      area: Private(require('ui/vislib/lib/layout/types/column_layout')),
-      pie: Private(require('ui/vislib/lib/layout/types/pie_layout')),
-      tile_map: Private(require('ui/vislib/lib/layout/types/map_layout'))
+      histogram: Private(VislibLibLayoutTypesColumnLayoutProvider),
+      line: Private(VislibLibLayoutTypesColumnLayoutProvider),
+      area: Private(VislibLibLayoutTypesColumnLayoutProvider),
+      pie: Private(VislibLibLayoutTypesPieLayoutProvider),
+      tile_map: Private(VislibLibLayoutTypesMapLayoutProvider)
     };
   };
 });

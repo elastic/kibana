@@ -3,6 +3,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
+import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
 
 describe('Vislib Column Layout Test Suite', function () {
   var layoutType;
@@ -69,7 +70,7 @@ describe('Vislib Column Layout Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
+    layoutType = Private(VislibLibLayoutLayoutTypesProvider);
     el = d3.select('body').append('div').attr('class', 'visualization');
     columnLayout = layoutType.histogram(el, data);
   }));

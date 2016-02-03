@@ -14,6 +14,8 @@ import 'plugins/kibana/dashboard/directives/grid';
 import 'plugins/kibana/dashboard/components/panel/panel';
 import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import DocTitleProvider from 'ui/doc_title';
 define(function (require) {
 
 
@@ -55,7 +57,7 @@ define(function (require) {
     return {
       controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
-        const queryFilter = Private(require('ui/filter_bar/query_filter'));
+        const queryFilter = Private(FilterBarQueryFilterProvider);
 
         const notify = new Notifier({
           location: 'Dashboard'
@@ -115,7 +117,7 @@ define(function (require) {
         function init() {
           updateQueryOnRootSource();
 
-          const docTitle = Private(require('ui/doc_title'));
+          const docTitle = Private(DocTitleProvider);
           if (dash.id) {
             docTitle.change(dash.title);
           }

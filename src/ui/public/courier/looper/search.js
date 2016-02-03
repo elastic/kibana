@@ -1,10 +1,15 @@
+import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
+import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
+import CourierRequestQueueProvider from 'ui/courier/_request_queue';
+import CourierLooperLooperProvider from 'ui/courier/looper/_looper';
+
 define(function (require) {
   return function SearchLooperService(Private, Promise, Notifier, $rootScope) {
-    var fetch = Private(require('ui/courier/fetch/fetch'));
-    var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
-    var requestQueue = Private(require('ui/courier/_request_queue'));
+    var fetch = Private(CourierFetchFetchProvider);
+    var searchStrategy = Private(CourierFetchStrategySearchProvider);
+    var requestQueue = Private(CourierRequestQueueProvider);
 
-    var Looper = Private(require('ui/courier/looper/_looper'));
+    var Looper = Private(CourierLooperLooperProvider);
     var notif = new Notifier({ location: 'Search Looper' });
 
     /**

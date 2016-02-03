@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import AggResponsePointSeriesGetPointProvider from 'ui/agg_response/point_series/_get_point';
+import AggResponsePointSeriesAddToSiriProvider from 'ui/agg_response/point_series/_add_to_siri';
 define(function (require) {
   return function PointSeriesGetSeries(Private) {
-    var getPoint = Private(require('ui/agg_response/point_series/_get_point'));
-    var addToSiri = Private(require('ui/agg_response/point_series/_add_to_siri'));
+    var getPoint = Private(AggResponsePointSeriesGetPointProvider);
+    var addToSiri = Private(AggResponsePointSeriesAddToSiriProvider);
 
     return function getSeries(rows, chart) {
       var aspects = chart.aspects;

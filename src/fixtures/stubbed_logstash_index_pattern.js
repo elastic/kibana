@@ -1,9 +1,12 @@
 import _ from 'lodash';
+import TestUtilsStubIndexPatternProvider from 'testUtils/stub_index_pattern';
+import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
+import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 define(function (require) {
   return function stubbedLogstashIndexPatternService(Private) {
-    var StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
-    var fieldTypes = Private(require('ui/index_patterns/_field_types'));
-    var mockLogstashFields = Private(require('fixtures/logstash_fields'));
+    var StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);
+    var fieldTypes = Private(IndexPatternsFieldTypesProvider);
+    var mockLogstashFields = Private(FixturesLogstashFieldsProvider);
 
 
     var fields = mockLogstashFields.map(function (field) {

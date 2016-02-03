@@ -4,6 +4,9 @@ import _ from 'lodash';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 import $ from 'jquery';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
 
 describe('Vislib xAxis Class Test Suite', function () {
   var XAxis;
@@ -77,9 +80,9 @@ describe('Vislib xAxis Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    XAxis = Private(require('ui/vislib/lib/x_axis'));
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    XAxis = Private(VislibLibXAxisProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'x-axis-wrapper')

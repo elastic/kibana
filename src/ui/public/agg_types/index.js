@@ -1,31 +1,50 @@
 import IndexedArray from 'ui/IndexedArray';
 import 'ui/agg_types/AggParams';
+import AggTypesMetricsCountProvider from 'ui/agg_types/metrics/count';
+import AggTypesMetricsAvgProvider from 'ui/agg_types/metrics/avg';
+import AggTypesMetricsSumProvider from 'ui/agg_types/metrics/sum';
+import AggTypesMetricsMedianProvider from 'ui/agg_types/metrics/median';
+import AggTypesMetricsMinProvider from 'ui/agg_types/metrics/min';
+import AggTypesMetricsMaxProvider from 'ui/agg_types/metrics/max';
+import AggTypesMetricsStdDeviationProvider from 'ui/agg_types/metrics/stdDeviation';
+import AggTypesMetricsCardinalityProvider from 'ui/agg_types/metrics/cardinality';
+import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
+import AggTypesMetricsPercentileRanksProvider from 'ui/agg_types/metrics/percentile_ranks';
+import AggTypesBucketsDateHistogramProvider from 'ui/agg_types/buckets/date_histogram';
+import AggTypesBucketsHistogramProvider from 'ui/agg_types/buckets/histogram';
+import AggTypesBucketsRangeProvider from 'ui/agg_types/buckets/range';
+import AggTypesBucketsDateRangeProvider from 'ui/agg_types/buckets/date_range';
+import AggTypesBucketsIpRangeProvider from 'ui/agg_types/buckets/ip_range';
+import AggTypesBucketsTermsProvider from 'ui/agg_types/buckets/terms';
+import AggTypesBucketsFiltersProvider from 'ui/agg_types/buckets/filters';
+import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/significant_terms';
+import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
 define(function (require) {
   return function AggTypeService(Private) {
 
     var aggs = {
       metrics: [
-        Private(require('ui/agg_types/metrics/count')),
-        Private(require('ui/agg_types/metrics/avg')),
-        Private(require('ui/agg_types/metrics/sum')),
-        Private(require('ui/agg_types/metrics/median')),
-        Private(require('ui/agg_types/metrics/min')),
-        Private(require('ui/agg_types/metrics/max')),
-        Private(require('ui/agg_types/metrics/stdDeviation')),
-        Private(require('ui/agg_types/metrics/cardinality')),
-        Private(require('ui/agg_types/metrics/percentiles')),
-        Private(require('ui/agg_types/metrics/percentile_ranks'))
+        Private(AggTypesMetricsCountProvider),
+        Private(AggTypesMetricsAvgProvider),
+        Private(AggTypesMetricsSumProvider),
+        Private(AggTypesMetricsMedianProvider),
+        Private(AggTypesMetricsMinProvider),
+        Private(AggTypesMetricsMaxProvider),
+        Private(AggTypesMetricsStdDeviationProvider),
+        Private(AggTypesMetricsCardinalityProvider),
+        Private(AggTypesMetricsPercentilesProvider),
+        Private(AggTypesMetricsPercentileRanksProvider)
       ],
       buckets: [
-        Private(require('ui/agg_types/buckets/date_histogram')),
-        Private(require('ui/agg_types/buckets/histogram')),
-        Private(require('ui/agg_types/buckets/range')),
-        Private(require('ui/agg_types/buckets/date_range')),
-        Private(require('ui/agg_types/buckets/ip_range')),
-        Private(require('ui/agg_types/buckets/terms')),
-        Private(require('ui/agg_types/buckets/filters')),
-        Private(require('ui/agg_types/buckets/significant_terms')),
-        Private(require('ui/agg_types/buckets/geo_hash'))
+        Private(AggTypesBucketsDateHistogramProvider),
+        Private(AggTypesBucketsHistogramProvider),
+        Private(AggTypesBucketsRangeProvider),
+        Private(AggTypesBucketsDateRangeProvider),
+        Private(AggTypesBucketsIpRangeProvider),
+        Private(AggTypesBucketsTermsProvider),
+        Private(AggTypesBucketsFiltersProvider),
+        Private(AggTypesBucketsSignificantTermsProvider),
+        Private(AggTypesBucketsGeoHashProvider)
       ]
     };
 

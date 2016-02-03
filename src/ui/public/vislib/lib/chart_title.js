@@ -1,11 +1,13 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
 define(function (require) {
   return function ChartTitleFactory(Private) {
 
-    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
-    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
+    var ErrorHandler = Private(VislibLibErrorHandlerProvider);
+    var Tooltip = Private(VislibComponentsTooltipProvider);
 
     /**
      * Appends chart titles to the visualization

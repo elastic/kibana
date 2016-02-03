@@ -3,20 +3,30 @@ import errors from 'ui/errors';
 import angular from 'angular';
 import getComputedFields from 'ui/index_patterns/_get_computed_fields';
 import formatHit from 'ui/index_patterns/_format_hit';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
+import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
+import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
+import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
+import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
+import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 define(function (require) {
   return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
 
-    var fieldformats = Private(require('ui/registry/field_formats'));
-    var getIds = Private(require('ui/index_patterns/_get_ids'));
-    var mapper = Private(require('ui/index_patterns/_mapper'));
-    var intervals = Private(require('ui/index_patterns/_intervals'));
-    var DocSource = Private(require('ui/courier/data_source/doc_source'));
-    var mappingSetup = Private(require('ui/utils/mapping_setup'));
-    var FieldList = Private(require('ui/index_patterns/_field_list'));
+    var fieldformats = Private(RegistryFieldFormatsProvider);
+    var getIds = Private(IndexPatternsGetIdsProvider);
+    var mapper = Private(IndexPatternsMapperProvider);
+    var intervals = Private(IndexPatternsIntervalsProvider);
+    var DocSource = Private(CourierDataSourceDocSourceProvider);
+    var mappingSetup = Private(UtilsMappingSetupProvider);
+    var FieldList = Private(IndexPatternsFieldListProvider);
 
-    var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
-    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
+    var flattenHit = Private(IndexPatternsFlattenHitProvider);
+    var calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
+    var patternCache = Private(IndexPatternsPatternCacheProvider);
 
     var type = 'index-pattern';
 

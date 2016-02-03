@@ -1,9 +1,11 @@
 import _ from 'lodash';
+import CourierFetchStrategyDocProvider from 'ui/courier/fetch/strategy/doc';
+import CourierFetchRequestRequestProvider from 'ui/courier/fetch/request/request';
 define(function (require) {
   return function DocRequestProvider(Private) {
 
-    var docStrategy = Private(require('ui/courier/fetch/strategy/doc'));
-    var AbstractRequest = Private(require('ui/courier/fetch/request/request'));
+    var docStrategy = Private(CourierFetchStrategyDocProvider);
+    var AbstractRequest = Private(CourierFetchRequestRequestProvider);
 
     _.class(DocRequest).inherits(AbstractRequest);
     function DocRequest(source, defer) {

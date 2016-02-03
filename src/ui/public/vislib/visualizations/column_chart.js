@@ -3,13 +3,16 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment';
 import errors from 'ui/errors';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
+import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 define(function (require) {
   return function ColumnChartFactory(Private) {
 
-    var DataClass = Private(require('ui/vislib/lib/data'));
+    var DataClass = Private(VislibLibDataProvider);
 
-    var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
-    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    var PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+    var TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
     /**
      * Vertical Bar Chart Visualization: renders vertical and/or stacked bars

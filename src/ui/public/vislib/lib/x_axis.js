@@ -2,10 +2,11 @@ import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
 import moment from 'moment';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 define(function (require) {
   return function XAxisFactory(Private) {
 
-    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    var ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
     /**
      * Adds an x axis to the visualization

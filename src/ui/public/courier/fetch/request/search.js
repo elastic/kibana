@@ -1,9 +1,11 @@
 import _ from 'lodash';
+import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
+import CourierFetchRequestRequestProvider from 'ui/courier/fetch/request/request';
 define(function (require) {
   return function SearchReqProvider(Private) {
 
-    var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
-    var AbstractRequest = Private(require('ui/courier/fetch/request/request'));
+    var searchStrategy = Private(CourierFetchStrategySearchProvider);
+    var AbstractRequest = Private(CourierFetchRequestRequestProvider);
 
     _.class(SearchReq).inherits(AbstractRequest);
     var Super = SearchReq.Super;

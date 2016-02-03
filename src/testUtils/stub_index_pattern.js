@@ -5,12 +5,15 @@ import IndexedArray from 'ui/IndexedArray';
 import IndexPattern from 'ui/index_patterns/_index_pattern';
 import formatHit from 'ui/index_patterns/_format_hit';
 import getComputedFields from 'ui/index_patterns/_get_computed_fields';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 define(function (require) {
   return function (Private) {
-    var fieldFormats = Private(require('ui/registry/field_formats'));
-    var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
+    var flattenHit = Private(IndexPatternsFlattenHitProvider);
 
-    var Field = Private(require('ui/index_patterns/_field'));
+    var Field = Private(IndexPatternsFieldProvider);
 
     function StubIndexPattern(pattern, timeField, fields) {
       this.id = pattern;

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import 'ui/elastic_textarea';
+import ConfigDefaultsProvider from 'ui/config/defaults';
 define(function (require) {
 
   require('ui/modules').get('apps/settings')
@@ -13,7 +14,7 @@ define(function (require) {
         configs: '='
       },
       link: function ($scope) {
-        const configDefaults = Private(require('ui/config/defaults'));
+        const configDefaults = Private(ConfigDefaultsProvider);
         const notify = new Notifier();
         const keyCodes = {
           ESC: 27

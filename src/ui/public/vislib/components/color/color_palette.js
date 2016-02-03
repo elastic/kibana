@@ -1,9 +1,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
 define(function (require) {
   return function ColorPaletteUtilService(Private) {
 
-    var seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+    var seedColors = Private(VislibComponentsColorSeedColorsProvider);
 
 
     /*

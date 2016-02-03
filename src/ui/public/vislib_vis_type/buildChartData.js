@@ -1,7 +1,10 @@
+import AggResponseIndexProvider from 'ui/agg_response/index';
+import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
+
 define(function (require) {
   return function VislibVisBuildChartData(Private) {
-    var aggResponse = Private(require('ui/agg_response/index'));
-    var Table = Private(require('ui/agg_response/tabify/_table'));
+    var aggResponse = Private(AggResponseIndexProvider);
+    var Table = Private(AggResponseTabifyTableProvider);
 
     return function (esResponse) {
       var vis = this.vis;

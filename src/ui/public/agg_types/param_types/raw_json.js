@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import editorHtml from 'ui/agg_types/controls/raw_json.html';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 define(function (require) {
   return function RawJSONAggParamFactory(Private) {
 
-    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    var BaseAggParam = Private(AggTypesParamTypesBaseProvider);
 
     _.class(RawJSONAggParam).inherits(BaseAggParam);
     function RawJSONAggParam(config) {

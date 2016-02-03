@@ -1,11 +1,15 @@
 import _ from 'lodash';
+import CourierDataSourceDocSendToEsProvider from 'ui/courier/data_source/_doc_send_to_es';
+import CourierDataSourceAbstractProvider from 'ui/courier/data_source/_abstract';
+import CourierFetchRequestDocProvider from 'ui/courier/fetch/request/doc';
+import CourierFetchStrategyDocProvider from 'ui/courier/fetch/strategy/doc';
 define(function (require) {
 
   return function DocSourceFactory(Private, Promise, es, sessionStorage) {
-    var sendToEs = Private(require('ui/courier/data_source/_doc_send_to_es'));
-    var SourceAbstract = Private(require('ui/courier/data_source/_abstract'));
-    var DocRequest = Private(require('ui/courier/fetch/request/doc'));
-    var docStrategy = Private(require('ui/courier/fetch/strategy/doc'));
+    var sendToEs = Private(CourierDataSourceDocSendToEsProvider);
+    var SourceAbstract = Private(CourierDataSourceAbstractProvider);
+    var DocRequest = Private(CourierFetchRequestDocProvider);
+    var docStrategy = Private(CourierFetchStrategyDocProvider);
 
     _.class(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {

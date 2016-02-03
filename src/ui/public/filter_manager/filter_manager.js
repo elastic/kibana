@@ -1,8 +1,9 @@
 import _ from 'lodash';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 // Adds a filter to a passed state
 define(function (require) {
   return function (Private) {
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
+    var queryFilter = Private(FilterBarQueryFilterProvider);
     var filterManager = {};
 
     filterManager.add = function (field, values, operation, index) {

@@ -1,10 +1,14 @@
 import _ from 'lodash';
 import supports from 'ui/utils/supports';
+import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType';
+import VisSchemasProvider from 'ui/Vis/Schemas';
+import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
+import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 define(function (require) {
   return function TileMapVisType(Private, getAppState, courier, config) {
-    const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
-    const Schemas = Private(require('ui/Vis/Schemas'));
-    const geoJsonConverter = Private(require('ui/agg_response/geo_json/geo_json'));
+    const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
+    const Schemas = Private(VisSchemasProvider);
+    const geoJsonConverter = Private(AggResponseGeoJsonGeoJsonProvider);
 
     return new VislibVisType({
       name: 'tile_map',
@@ -33,7 +37,7 @@ define(function (require) {
           const agg = _.get(event, 'chart.geohashGridAgg');
           if (!agg) return;
 
-          const pushFilter = Private(require('ui/filter_bar/push_filter'))(getAppState());
+          const pushFilter = Private(FilterBarPushFilterProvider)(getAppState());
           const indexPatternName = agg.vis.indexPattern.id;
           const field = agg.fieldName();
           const filter = {geo_bounding_box: {}};

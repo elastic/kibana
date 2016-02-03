@@ -2,6 +2,12 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
+import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
+import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
+import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
+import VisProvider from 'ui/Vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('ResponseWriter class', function () {
 
   var Vis;
@@ -23,12 +29,12 @@ describe('ResponseWriter class', function () {
         Private.stub(require('ui/agg_response/tabify/_get_columns'), getColumns);
       }
 
-      ResponseWriter = Private(require('ui/agg_response/tabify/_response_writer'));
-      TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-      Buckets = Private(require('ui/agg_response/tabify/_buckets'));
-      Table = Private(require('ui/agg_response/tabify/_table'));
-      Vis = Private(require('ui/Vis'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      ResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
+      TableGroup = Private(AggResponseTabifyTableGroupProvider);
+      Buckets = Private(AggResponseTabifyBucketsProvider);
+      Table = Private(AggResponseTabifyTableProvider);
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     }));
   }
 

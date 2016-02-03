@@ -1,10 +1,14 @@
 import _ from 'lodash';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import AggTypesBucketsCreateFilterRangeProvider from 'ui/agg_types/buckets/create_filter/range';
+import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+import RangeKeyProvider from './RangeKey';
 define(function (require) {
   return function RangeAggDefinition(Private) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/range'));
-    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
-    var RangeKey = Private(require('./RangeKey'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterRangeProvider);
+    var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+    var RangeKey = Private(RangeKeyProvider);
 
     var keyCaches = new WeakMap();
     var formats = new WeakMap();

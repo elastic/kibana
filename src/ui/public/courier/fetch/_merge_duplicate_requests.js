@@ -1,7 +1,10 @@
+import CourierFetchIsRequestProvider from 'ui/courier/fetch/_is_request';
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+
 define(function (require) {
   return function FetchMergeDuplicateRequests(Private) {
-    var isRequest = Private(require('ui/courier/fetch/_is_request'));
-    var DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
+    var isRequest = Private(CourierFetchIsRequestProvider);
+    var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
 
     function mergeDuplicateRequests(requests) {
       // dedupe requests

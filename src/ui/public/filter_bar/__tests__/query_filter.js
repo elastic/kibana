@@ -8,6 +8,8 @@ import './_updateFilters';
 import './_toggleFilters';
 import './_invertFilters';
 import './_pinFilters';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import EventsProvider from 'ui/events';
 var queryFilter;
 var EventEmitter;
 var $rootScope;
@@ -17,8 +19,8 @@ describe('Query Filter', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       $rootScope = _$rootScope_;
-      queryFilter = Private(require('ui/filter_bar/query_filter'));
-      EventEmitter = Private(require('ui/events'));
+      queryFilter = Private(FilterBarQueryFilterProvider);
+      EventEmitter = Private(EventsProvider);
     }));
 
     describe('module instance', function () {

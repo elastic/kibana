@@ -3,6 +3,8 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
+import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
+import VisSchemasProvider from 'ui/Vis/Schemas';
 define(function (require) {
   // we need to load the css ourselves
 
@@ -17,8 +19,8 @@ define(function (require) {
 
   // define the TableVisType
   function TableVisTypeProvider(Private) {
-    const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-    const Schemas = Private(require('ui/Vis/Schemas'));
+    const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+    const Schemas = Private(VisSchemasProvider);
 
     // define the TableVisController which is used in the template
     // by angular's ng-controller directive

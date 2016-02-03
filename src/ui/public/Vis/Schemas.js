@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import IndexedArray from 'ui/IndexedArray';
+import AggTypesAggParamsProvider from 'ui/agg_types/AggParams';
 define(function (require) {
   return function VisTypeSchemasFactory(Private) {
-    var AggParams = Private(require('ui/agg_types/AggParams'));
+    var AggParams = Private(AggTypesAggParamsProvider);
 
     function Schemas(schemas) {
       var self = this;

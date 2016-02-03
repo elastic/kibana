@@ -2,11 +2,13 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import errors from 'ui/errors';
+import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
+import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 define(function (require) {
   return function AreaChartFactory(Private) {
 
-    var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
-    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    var PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+    var TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
     /**
      * Area chart visualization

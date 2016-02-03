@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 define(function (require) {
   return function MapFieldFn(Private, config) {
-    var castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
+    var castMappingType = Private(IndexPatternsCastMappingTypeProvider);
 
     /**
      * Accepts a field object and its name, and tries to give it a mapping

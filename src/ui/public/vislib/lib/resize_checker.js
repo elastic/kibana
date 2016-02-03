@@ -1,11 +1,13 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import sequencer from 'ui/utils/sequencer';
+import EventsProvider from 'ui/events';
+import ReflowWatcherProvider from 'ui/reflow_watcher';
 define(function (require) {
   return function ResizeCheckerFactory(Private, Notifier, $rootScope) {
 
-    var EventEmitter = Private(require('ui/events'));
-    var reflowWatcher = Private(require('ui/reflow_watcher'));
+    var EventEmitter = Private(EventsProvider);
+    var reflowWatcher = Private(ReflowWatcherProvider);
 
     var SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
       100,      // shortest delay

@@ -1,8 +1,10 @@
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+
 define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('visEditorAggAdd', function (Private) {
-    const AggConfig = Private(require('ui/Vis/AggConfig'));
+    const AggConfig = Private(VisAggConfigProvider);
 
     return {
       restrict: 'E',

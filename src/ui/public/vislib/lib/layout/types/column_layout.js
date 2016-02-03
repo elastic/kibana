@@ -1,11 +1,15 @@
 import d3 from 'd3';
+import VislibLibLayoutSplitsColumnChartChartSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_split';
+import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/y_axis_split';
+import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/x_axis_split';
+import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_title_split';
 define(function (require) {
   return function ColumnLayoutFactory(Private) {
 
-    var chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
-    var yAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/y_axis_split'));
-    var xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));
-    var chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_title_split'));
+    var chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
+    var yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
+    var xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
+    var chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
 
     /**
      * Specifies the visualization layout for column charts.

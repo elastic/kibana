@@ -6,13 +6,14 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'ui/utils/rison';
 import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
+import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 define(function (require) {
   const app = require('ui/modules').get('apps/discover');
 
 
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
-    const FieldList = Private(require('ui/index_patterns/_field_list'));
+    const FieldList = Private(IndexPatternsFieldListProvider);
 
     return {
       restrict: 'E',

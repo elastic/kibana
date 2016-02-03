@@ -1,8 +1,9 @@
 import IndexedArray from 'ui/IndexedArray';
 import _ from 'lodash';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 define(function (require) {
   return function FieldListProvider(Private) {
-    var Field = Private(require('ui/index_patterns/_field'));
+    var Field = Private(IndexPatternsFieldProvider);
 
     _.class(FieldList).inherits(IndexedArray);
     function FieldList(indexPattern, specs) {

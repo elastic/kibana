@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import EventsProvider from 'ui/events';
 define(function (require) {
   return function CourierSegmentedReqHandle(Private) {
-    var Events = Private(require('ui/events'));
+    var Events = Private(EventsProvider);
 
 
     /**

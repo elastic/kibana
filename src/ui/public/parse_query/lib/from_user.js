@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import CourierDataSourceDecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 define(function (require) {
   return function GetQueryFromUser(es, Private) {
-    var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
+    var decorateQuery = Private(CourierDataSourceDecorateQueryProvider);
 
     /**
      * Take text from the user and make it into a query object

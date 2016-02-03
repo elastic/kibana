@@ -1,10 +1,11 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import L from 'leaflet';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
 define(function (require) {
   return function HeatmapMarkerFactory(Private) {
 
-    var BaseMarker = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
+    var BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
 
     /**
      * Map overlay: canvas layer with leaflet.heat plugin

@@ -2,11 +2,13 @@ import d3 from 'd3';
 import _ from 'lodash';
 import errors from 'ui/errors';
 import Binder from 'ui/Binder';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 define(function (require) {
   return function HandlerBaseClass(Private) {
 
-    var Data = Private(require('ui/vislib/lib/data'));
-    var Layout = Private(require('ui/vislib/lib/layout/layout'));
+    var Data = Private(VislibLibDataProvider);
+    var Layout = Private(VislibLibLayoutLayoutProvider);
 
     /**
      * Handles building all the components of the visualization

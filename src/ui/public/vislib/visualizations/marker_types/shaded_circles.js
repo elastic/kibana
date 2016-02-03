@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import L from 'leaflet';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
 define(function (require) {
   return function ShadedCircleMarkerFactory(Private) {
 
-    var BaseMarker = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
+    var BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
 
     /**
      * Map overlay: circle markers that are shaded to illustrate values

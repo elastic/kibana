@@ -1,10 +1,11 @@
 import sinon from 'auto-release-sinon';
 import searchResponse from 'fixtures/search_response';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 define(function (require) {
 
   return function stubSearchSource(Private, $q, Promise) {
     var deferedResult = $q.defer();
-    var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    var indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     return {
       sort: sinon.spy(),

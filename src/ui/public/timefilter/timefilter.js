@@ -3,6 +3,10 @@ import angular from 'angular';
 import moment from 'moment';
 import dateMath from 'ui/utils/dateMath';
 import 'ui/state_management/global_state';
+import EventsProvider from 'ui/events';
+import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
+import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
+import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
 define(function (require) {
   require('ui/routes')
   .addSetupWork(function (timefilter) {
@@ -13,8 +17,8 @@ define(function (require) {
   .get('kibana')
   .service('timefilter', function (Private, globalState, $rootScope, config) {
 
-    var Events = Private(require('ui/events'));
-    var diff = Private(require('ui/utils/diff_time_picker_vals'));
+    var Events = Private(EventsProvider);
+    var diff = Private(UtilsDiffTimePickerValsProvider);
 
 
     function convertISO8601(stringTime) {
@@ -27,8 +31,8 @@ define(function (require) {
       Timefilter.Super.call(this);
 
       var self = this;
-      var diffTime = Private(require('ui/timefilter/lib/diff_time'))(self);
-      var diffInterval = Private(require('ui/timefilter/lib/diff_interval'))(self);
+      var diffTime = Private(TimefilterLibDiffTimeProvider)(self);
+      var diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
 
       self.enabled = false;
 

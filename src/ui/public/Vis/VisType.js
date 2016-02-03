@@ -1,6 +1,8 @@
+import VisSchemasProvider from 'ui/Vis/Schemas';
+
 define(function (require) {
   return function VisTypeFactory(Private) {
-    var VisTypeSchemas = Private(require('ui/Vis/Schemas'));
+    var VisTypeSchemas = Private(VisSchemasProvider);
 
     function VisType(opts) {
       opts = opts || {};

@@ -1,10 +1,11 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
+import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 define(function (require) {
   return function AxisTitleFactory(Private) {
 
-    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    var ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
     /**
      * Appends axis title(s) to the visualization

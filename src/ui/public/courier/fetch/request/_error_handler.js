@@ -1,6 +1,8 @@
+import CourierErrorHandlersProvider from 'ui/courier/_error_handlers';
+
 define(function (require) {
   return function RequestErrorHandlerFactory(Private, Notifier) {
-    var errHandlers = Private(require('ui/courier/_error_handlers'));
+    var errHandlers = Private(CourierErrorHandlersProvider);
 
     var notify = new Notifier({
       location: 'Courier Fetch Error'

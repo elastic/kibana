@@ -1,10 +1,11 @@
 import angular from 'angular';
 import $ from 'jquery';
 import _ from 'lodash';
+import EventsProvider from 'ui/events';
 define(function (require) {
   return function ReflowWatcherService(Private, $rootScope, $http) {
 
-    var EventEmitter = Private(require('ui/events'));
+    var EventEmitter = Private(EventsProvider);
     var $body = $(document.body);
     var $window = $(window);
 

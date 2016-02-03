@@ -2,11 +2,12 @@ import _ from 'lodash';
 import rison from 'ui/utils/rison';
 import applyDiff from 'ui/utils/diff_object';
 import qs from 'ui/utils/query_string';
+import EventsProvider from 'ui/events';
 define(function (require) {
 
 
   return function StateProvider(Notifier, Private, $rootScope, $location) {
-    var Events = Private(require('ui/events'));
+    var Events = Private(EventsProvider);
 
     _.class(State).inherits(Events);
     function State(urlParam, defaults) {

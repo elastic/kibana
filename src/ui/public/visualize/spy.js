@@ -1,11 +1,12 @@
 import $ from 'jquery';
 import _ from 'lodash';
+import RegistrySpyModesProvider from 'ui/registry/spy_modes';
 define(function (require) {
   require('ui/modules')
     .get('app/visualize')
     .directive('visualizeSpy', function (Private, $compile) {
 
-      var spyModes = Private(require('ui/registry/spy_modes'));
+      var spyModes = Private(RegistrySpyModesProvider);
       var defaultMode = spyModes.inOrder[0].name;
 
       return {

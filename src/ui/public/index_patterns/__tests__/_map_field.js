@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import IndexPatternsMapFieldProvider from 'ui/index_patterns/_map_field';
 describe('field mapping normalizer (mapField)', function () {
 
   var fn;
@@ -8,7 +9,7 @@ describe('field mapping normalizer (mapField)', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, config) {
     config.set('metaFields', ['_id', '_timestamp']);
-    fn = Private(require('ui/index_patterns/_map_field'));
+    fn = Private(IndexPatternsMapFieldProvider);
     fields = require('fixtures/field_mapping').test.mappings.testType;
   }));
 

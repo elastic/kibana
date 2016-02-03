@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 define(function (require) {
   return function SignificantTermsAggDefinition(Private) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
 
     return new BucketAggType({
       name: 'significant_terms',

@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
 define(function (require) {
   return function GetColumnsProvider(Private) {
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
+    var AggConfig = Private(VisAggConfigProvider);
 
     return function getColumns(vis, minimal) {
       var aggs = vis.aggs.getResponseAggs();

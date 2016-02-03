@@ -1,12 +1,15 @@
 import moment from 'moment';
 import dateRange from 'ui/utils/date_range';
 import 'ui/directives/validate_date_math';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/create_filter/date_range';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 define(function (require) {
 
   return function DateRangeAggDefinition(Private, config) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
 
 
     return new BucketAggType({

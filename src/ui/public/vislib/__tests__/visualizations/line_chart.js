@@ -12,6 +12,8 @@ import histogramColumns from 'fixtures/vislib/mock_data/histogram/_columns';
 import rangeRows from 'fixtures/vislib/mock_data/range/_rows';
 import termSeries from 'fixtures/vislib/mock_data/terms/_series';
 import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 var dataTypes = [
   ['series pos', seriesPos],
@@ -40,8 +42,8 @@ describe('Vislib Line Chart', function () {
           drawLinesBetweenPoints: true
         };
 
-        vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+        vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+        persistedState = new (Private(PersistedStatePersistedStateProvider))();
         vis.on('brush', _.noop);
         vis.render(data, persistedState);
       }));

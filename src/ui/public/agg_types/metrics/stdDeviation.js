@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
+import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
 define(function (require) {
   return function AggTypeMetricStandardDeviationProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
+    var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+    var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
 
     var responseAggConfigProps = {
       valProp: function () {

@@ -2,9 +2,10 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
 define(function (require) {
   return function DispatchClass(Private) {
-    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
+    var Tooltip = Private(VislibComponentsTooltipProvider);
 
     /**
      * Handles event responses

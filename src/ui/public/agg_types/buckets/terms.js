@@ -1,11 +1,16 @@
 import _ from 'lodash';
+import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
+import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import VisSchemasProvider from 'ui/Vis/Schemas';
+import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 define(function (require) {
   return function TermsAggDefinition(Private) {
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var bucketCountBetween = Private(require('ui/agg_types/buckets/_bucket_count_between'));
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
-    var Schemas = Private(require('ui/Vis/Schemas'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+    var bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
+    var AggConfig = Private(VisAggConfigProvider);
+    var Schemas = Private(VisSchemasProvider);
+    var createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
 
     var orderAggSchema = (new Schemas([
       {

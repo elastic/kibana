@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
 import 'plugins/kibana/settings/sections/advanced/advanced_row';
+import ConfigDefaultsProvider from 'ui/config/defaults';
 define(function (require) {
 
 
@@ -15,7 +16,7 @@ define(function (require) {
     return {
       restrict: 'E',
       link: function ($scope) {
-        const configDefaults = Private(require('ui/config/defaults'));
+        const configDefaults = Private(ConfigDefaultsProvider);
         const keyCodes = {
           ESC: 27
         };

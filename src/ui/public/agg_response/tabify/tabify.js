@@ -1,10 +1,13 @@
 import _ from 'lodash';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
+import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
 define(function (require) {
   return function tabifyAggResponseProvider(Private, Notifier) {
 
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
-    var TabbedAggResponseWriter = Private(require('ui/agg_response/tabify/_response_writer'));
-    var Buckets = Private(require('ui/agg_response/tabify/_buckets'));
+    var AggConfig = Private(VisAggConfigProvider);
+    var TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
+    var Buckets = Private(AggResponseTabifyBucketsProvider);
     var notify = new Notifier({ location: 'agg_response/tabify'});
 
     function tabifyAggResponse(vis, esResponse, respOpts) {

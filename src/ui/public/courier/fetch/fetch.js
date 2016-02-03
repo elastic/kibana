@@ -1,12 +1,16 @@
 import _ from 'lodash';
+import CourierRequestQueueProvider from 'ui/courier/_request_queue';
+import CourierFetchFetchTheseProvider from 'ui/courier/fetch/_fetch_these';
+import CourierFetchCallResponseHandlersProvider from 'ui/courier/fetch/_call_response_handlers';
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
 define(function (require) {
   return function fetchService(Private, Promise) {
 
-    var requestQueue = Private(require('ui/courier/_request_queue'));
-    var fetchThese = Private(require('ui/courier/fetch/_fetch_these'));
+    var requestQueue = Private(CourierRequestQueueProvider);
+    var fetchThese = Private(CourierFetchFetchTheseProvider);
 
-    var callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
-    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+    var callResponseHandlers = Private(CourierFetchCallResponseHandlersProvider);
+    var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
 
     function fetchQueued(strategy) {
       var requests = requestQueue.getStartable(strategy);

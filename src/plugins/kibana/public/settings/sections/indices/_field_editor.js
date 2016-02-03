@@ -1,5 +1,7 @@
 import 'ui/field_editor';
 import 'plugins/kibana/settings/sections/indices/_index_header';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import UrlProvider from 'ui/url';
 define(function (require) {
 
   require('ui/routes')
@@ -15,9 +17,9 @@ define(function (require) {
     },
     controllerAs: 'fieldSettings',
     controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
-      const Field = Private(require('ui/index_patterns/_field'));
+      const Field = Private(IndexPatternsFieldProvider);
       const notify = new Notifier({ location: 'Field Editor' });
-      const kbnUrl = Private(require('ui/url'));
+      const kbnUrl = Private(UrlProvider);
 
 
       this.mode = $route.current.mode;

@@ -1,10 +1,12 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
 define(function (require) {
   return function PointSeriesChartProvider(Private) {
 
-    var Chart = Private(require('ui/vislib/visualizations/_chart'));
-    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
+    var Chart = Private(VislibVisualizationsChartProvider);
+    var Tooltip = Private(VislibComponentsTooltipProvider);
     var touchdownTmpl = _.template(require('ui/vislib/partials/touchdown.tmpl.html'));
 
     _.class(PointSeriesChart).inherits(Chart);

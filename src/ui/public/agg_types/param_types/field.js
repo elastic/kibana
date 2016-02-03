@@ -1,10 +1,11 @@
 import { SavedObjectNotFound } from 'ui/errors';
 import _ from 'lodash';
 import editorHtml from 'ui/agg_types/controls/field.html';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 define(function (require) {
   return function FieldAggParamFactory(Private) {
 
-    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    var BaseAggParam = Private(AggTypesParamTypesBaseProvider);
 
     _.class(FieldAggParam).inherits(BaseAggParam);
     function FieldAggParam(config) {

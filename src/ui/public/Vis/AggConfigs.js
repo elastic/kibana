@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import IndexedArray from 'ui/IndexedArray';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import AggTypesIndexProvider from 'ui/agg_types/index';
 define(function (require) {
   return function AggConfigsFactory(Private) {
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
+    var AggConfig = Private(VisAggConfigProvider);
 
-    AggConfig.aggTypes = Private(require('ui/agg_types/index'));
+    AggConfig.aggTypes = Private(AggTypesIndexProvider);
 
     _.class(AggConfigs).inherits(IndexedArray);
     function AggConfigs(vis, configStates) {

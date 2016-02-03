@@ -1,7 +1,10 @@
+import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType';
+import VisSchemasProvider from 'ui/Vis/Schemas';
+
 define(function (require) {
   return function HistogramVisType(Private) {
-    const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
-    const Schemas = Private(require('ui/Vis/Schemas'));
+    const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
+    const Schemas = Private(VisSchemasProvider);
 
     return new VislibVisType({
       name: 'pie',

@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import AggTypesAggParamsProvider from 'ui/agg_types/AggParams';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 define(function (require) {
   return function AggTypeFactory(Private) {
-    var AggParams = Private(require('ui/agg_types/AggParams'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var AggParams = Private(AggTypesAggParamsProvider);
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
 
     /**
      * Generic AggType Constructor

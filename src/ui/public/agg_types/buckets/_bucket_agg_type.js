@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import AggTypesAggTypeProvider from 'ui/agg_types/AggType';
 define(function (require) {
   return function BucketAggTypeProvider(Private) {
-    var AggType = Private(require('ui/agg_types/AggType'));
+    var AggType = Private(AggTypesAggTypeProvider);
 
     _.class(BucketAggType).inherits(AggType);
     function BucketAggType(config) {

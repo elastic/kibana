@@ -3,14 +3,17 @@ import html from 'ui/visualize/visualize_legend.html';
 import $ from 'jquery';
 import d3 from 'd3';
 import findByParam from 'ui/utils/find_by_param';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
+import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 define(function (require) {
 
 
   require('ui/modules').get('kibana')
   .directive('visualizeLegend', function (Private, getAppState) {
-    var Data = Private(require('ui/vislib/lib/data'));
-    var colorPalette = Private(require('ui/vislib/components/color/color'));
-    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    var Data = Private(VislibLibDataProvider);
+    var colorPalette = Private(VislibComponentsColorColorProvider);
+    var filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
     return {
       restrict: 'E',

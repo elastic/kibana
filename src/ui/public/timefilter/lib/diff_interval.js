@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
 define(function (require) {
   return function diffTimeProvider(Private) {
-    var diff = Private(require('ui/utils/diff_time_picker_vals'));
+    var diff = Private(UtilsDiffTimePickerValsProvider);
 
     return function (self) {
       var oldRefreshInterval = _.clone(self.refreshInterval);

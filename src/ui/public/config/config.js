@@ -1,5 +1,9 @@
 import angular from 'angular';
 import _ from 'lodash';
+import ConfigDefaultsProvider from 'ui/config/defaults';
+import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
+import ConfigValsProvider from 'ui/config/_vals';
+import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
 define(function (require) {
   var module = require('ui/modules').get('kibana/config', [
     'kibana/notify'
@@ -13,9 +17,9 @@ define(function (require) {
   module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
     var config = this;
 
-    var defaults = Private(require('ui/config/defaults'));
-    var DelayedUpdater = Private(require('ui/config/_delayed_updater'));
-    var vals = Private(require('ui/config/_vals'));
+    var defaults = Private(ConfigDefaultsProvider);
+    var DelayedUpdater = Private(ConfigDelayedUpdaterProvider);
+    var vals = Private(ConfigValsProvider);
 
     var notify = new Notifier({
       location: 'Config'
@@ -25,7 +29,7 @@ define(function (require) {
     // update once it is requested by calling #set() or #clear().
     var updater;
 
-    var DocSource = Private(require('ui/courier/data_source/doc_source'));
+    var DocSource = Private(CourierDataSourceDocSourceProvider);
     var doc = (new DocSource())
       .index(kbnIndex)
       .type('config')

@@ -1,11 +1,15 @@
 import _ from 'lodash';
 import angular from 'angular';
+import CourierRequestQueueProvider from 'ui/courier/_request_queue';
+import CourierErrorHandlersProvider from 'ui/courier/_error_handlers';
+import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
+import CourierDataSourceDecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 define(function (require) {
 
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
-    var requestQueue = Private(require('ui/courier/_request_queue'));
-    var errorHandlers = Private(require('ui/courier/_error_handlers'));
-    var courierFetch = Private(require('ui/courier/fetch/fetch'));
+    var requestQueue = Private(CourierRequestQueueProvider);
+    var errorHandlers = Private(CourierErrorHandlersProvider);
+    var courierFetch = Private(CourierFetchFetchProvider);
 
     function SourceAbstract(initialState, strategy) {
       var self = this;
@@ -265,7 +269,7 @@ define(function (require) {
       .then(function () {
         if (type === 'search') {
           // This is down here to prevent the circular dependency
-          var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
+          var decorateQuery = Private(CourierDataSourceDecorateQueryProvider);
 
           flatState.body = flatState.body || {};
 

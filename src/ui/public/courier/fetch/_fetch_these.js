@@ -1,16 +1,23 @@
+import CourierFetchNotifierProvider from 'ui/courier/fetch/_notifier';
+import CourierFetchForEachStrategyProvider from 'ui/courier/fetch/_for_each_strategy';
+import CourierFetchCallClientProvider from 'ui/courier/fetch/_call_client';
+import CourierFetchCallResponseHandlersProvider from 'ui/courier/fetch/_call_response_handlers';
+import CourierFetchContinueIncompleteProvider from 'ui/courier/fetch/_continue_incomplete';
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+
 define(function (require) {
   return function FetchTheseProvider(Private, Promise) {
-    var notify = Private(require('ui/courier/fetch/_notifier'));
-    var forEachStrategy = Private(require('ui/courier/fetch/_for_each_strategy'));
+    var notify = Private(CourierFetchNotifierProvider);
+    var forEachStrategy = Private(CourierFetchForEachStrategyProvider);
 
     // core tasks
-    var callClient = Private(require('ui/courier/fetch/_call_client'));
-    var callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
-    var continueIncomplete = Private(require('ui/courier/fetch/_continue_incomplete'));
+    var callClient = Private(CourierFetchCallClientProvider);
+    var callResponseHandlers = Private(CourierFetchCallResponseHandlersProvider);
+    var continueIncomplete = Private(CourierFetchContinueIncompleteProvider);
 
-    var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
-    var DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
-    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+    var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
+    var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
+    var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
 
     function fetchThese(requests) {
       return forEachStrategy(requests, function (strategy, reqsForStrategy) {

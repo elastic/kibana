@@ -3,14 +3,18 @@ import d3 from 'd3';
 import Binder from 'ui/Binder';
 import errors from 'ui/errors';
 import 'ui/vislib/styles/main.less';
+import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
+import EventsProvider from 'ui/events';
+import VislibLibHandlerHandlerTypesProvider from 'ui/vislib/lib/handler/handler_types';
+import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
 define(function (require) {
   return function VisFactory(Private) {
 
 
-    var ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
-    var Events = Private(require('ui/events'));
-    var handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
-    var chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
+    var ResizeChecker = Private(VislibLibResizeCheckerProvider);
+    var Events = Private(EventsProvider);
+    var handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
+    var chartTypes = Private(VislibVisualizationsVisTypesProvider);
 
     /**
      * Creates the visualizations.

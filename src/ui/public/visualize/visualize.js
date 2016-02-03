@@ -3,13 +3,14 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import $ from 'jquery';
 import _ from 'lodash';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
 
-    var visTypes = Private(require('ui/registry/vis_types'));
+    var visTypes = Private(RegistryVisTypesProvider);
 
     var notify = new Notifier({
       location: 'Visualize'

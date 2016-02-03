@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 define(function (require) {
   return function AggConfigFactory(Private, fieldTypeFilter) {
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
 
     function AggConfig(vis, opts) {
       var self = this;

@@ -1,7 +1,10 @@
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+
 define(function (require) {
   return function AggTypeMetricCardinalityProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+    var fieldFormats = Private(RegistryFieldFormatsProvider);
 
     return new MetricAggType({
       name: 'cardinality',

@@ -3,10 +3,12 @@ import extractBuckets from 'ui/agg_response/hierarchical/_extract_buckets';
 import createRawData from 'ui/agg_response/hierarchical/_create_raw_data';
 import arrayToLinkedList from 'ui/agg_response/hierarchical/_array_to_linked_list';
 import AggConfigResult from 'ui/Vis/AggConfigResult';
+import AggResponseHierarchicalBuildSplitProvider from 'ui/agg_response/hierarchical/_build_split';
+import AggResponseHierarchicalHierarchicalTooltipFormatterProvider from 'ui/agg_response/hierarchical/_hierarchical_tooltip_formatter';
 define(function (require) {
   return function buildHierarchicalDataProvider(Private, Notifier) {
-    var buildSplit = Private(require('ui/agg_response/hierarchical/_build_split'));
-    var tooltipFormatter = Private(require('ui/agg_response/hierarchical/_hierarchical_tooltip_formatter'));
+    var buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
+    var tooltipFormatter = Private(AggResponseHierarchicalHierarchicalTooltipFormatterProvider);
 
 
     var notify = new Notifier({
