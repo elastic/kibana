@@ -5,8 +5,8 @@ import numeral from '@spalger/numeral';
 import ansicolors from 'ansicolors';
 import stringify from 'json-stringify-safe';
 import querystring from 'querystring';
-let inspect = require('util').inspect;
 import applyFiltersToKeys from './applyFiltersToKeys';
+import { inspect } from 'util';
 
 function serializeError(err) {
   return {

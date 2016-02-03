@@ -1,7 +1,7 @@
+import { isNumber } from 'lodash';
 define(function (require) {
   return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
     var _ = require('lodash');
-    var isNumber = require('lodash').isNumber;
     var SearchReq = Private(require('ui/courier/fetch/request/search'));
     var SegmentedHandle = Private(require('ui/courier/fetch/request/_segmented_handle'));
 

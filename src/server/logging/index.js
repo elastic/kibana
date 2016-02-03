@@ -1,5 +1,5 @@
 import _ from 'lodash';
-let fromNode = require('bluebird').fromNode;
+import { fromNode } from 'bluebird';
 
 module.exports = function (kbnServer, server, config) {
   // prevent relying on kbnServer so this can be used with other hapi servers

@@ -8,7 +8,7 @@ import KbnServer from '../../server/KbnServer';
 import readYamlConfig from '../serve/read_yaml_config';
 const { statSync, renameSync } = require('fs');
 import Promise from 'bluebird';
-const rimrafSync = require('rimraf').sync;
+import { sync as rimrafSync } from 'rimraf';
 const mkdirp = Promise.promisify(require('mkdirp'));
 
 export default {

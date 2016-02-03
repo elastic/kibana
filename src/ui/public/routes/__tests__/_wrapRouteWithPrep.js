@@ -5,7 +5,7 @@ import ngMock from 'ngMock';
 import wrapRouteWithPrep from 'ui/routes/wrapRouteWithPrep';
 import Promise from 'bluebird';
 import _ from 'lodash';
-var stub = require('auto-release-sinon').stub;
+import { stub } from 'auto-release-sinon';
 
 require('ui/private');
 

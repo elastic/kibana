@@ -1,5 +1,5 @@
-var pluck = require('lodash').pluck;
 import moment from 'moment';
+import { pluck } from 'lodash';
 
 describe('Index Patterns', function () {
   describe('interval.toIndexList()', function () {
