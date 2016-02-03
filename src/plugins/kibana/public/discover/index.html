@@ -1,5 +1,5 @@
 <div ng-controller="discover" class="app-container">
-  <navbar class="discover-options" name="discover-options">
+  <navbar name="discover-options">
     <div class="discover-info">
       <span ng-show="opts.savedSearch.id" class="discover-info-title">
         <span ng-bind="::opts.savedSearch.title"></span>
@@ -41,10 +41,8 @@
       </button>
     </div>
   </navbar>
-
   <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
-
-  <navbar class="discover-search" name="discover-search">
+  <navbar name="discover-search">
     <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
@@ -68,6 +66,7 @@
     </form>
     <div class="button-group" role="toolbar"></div>
   </navbar>
+
 
   <div class="container-fluid" role="main">
     <div class="row">
