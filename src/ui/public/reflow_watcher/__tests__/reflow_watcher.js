@@ -1,5 +1,5 @@
+import 'angular';
 describe('Reflow watcher', function () {
-  require('angular');
   var $ = require('jquery');
   var _ = require('lodash');
   var expect = require('expect.js');

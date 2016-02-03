@@ -1,11 +1,11 @@
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
+import 'ui/filters/unique';
+import 'plugins/kibana/discover/components/field_chooser/discover_field';
 define(function (require) {
   const app = require('ui/modules').get('apps/discover');
 
 
-  require('ui/directives/css_truncate');
-  require('ui/directives/field_name');
-  require('ui/filters/unique');
-  require('plugins/kibana/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config, $route, Private) {
     const _ = require('lodash');

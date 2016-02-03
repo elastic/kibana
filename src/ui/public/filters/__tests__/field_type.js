@@ -2,8 +2,8 @@ import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ngMock';
-require('plugins/kibana/discover/index');
-require('ui/filters/field_type');
+import 'plugins/kibana/discover/index';
+import 'ui/filters/field_type';
 
 var filter;
 

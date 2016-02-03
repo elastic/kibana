@@ -1,6 +1,6 @@
+import 'ui/filters/label';
 define(function (require) {
   return function AggParamsFactory(Private) {
-    require('ui/filters/label');
 
     var _ = require('lodash');
     var IndexedArray = require('ui/IndexedArray');

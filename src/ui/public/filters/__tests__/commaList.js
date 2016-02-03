@@ -1,6 +1,6 @@
-require('ui/filters/commaList');
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import 'ui/filters/commaList';
 
 describe('Comma-List filter', function () {
 

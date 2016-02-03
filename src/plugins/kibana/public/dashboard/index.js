@@ -1,3 +1,14 @@
+import 'ui/directives/config';
+import 'ui/courier';
+import 'ui/config';
+import 'ui/notify';
+import 'ui/typeahead';
+import 'ui/navbar';
+import 'ui/share';
+import 'plugins/kibana/dashboard/directives/grid';
+import 'plugins/kibana/dashboard/components/panel/panel';
+import 'plugins/kibana/dashboard/services/saved_dashboards';
+import 'plugins/kibana/dashboard/styles/main.less';
 define(function (require) {
   const _ = require('lodash');
   const $ = require('jquery');
@@ -5,18 +16,7 @@ define(function (require) {
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
 
-  require('ui/directives/config');
-  require('ui/courier');
-  require('ui/config');
-  require('ui/notify');
-  require('ui/typeahead');
-  require('ui/navbar');
-  require('ui/share');
 
-  require('plugins/kibana/dashboard/directives/grid');
-  require('plugins/kibana/dashboard/components/panel/panel');
-  require('plugins/kibana/dashboard/services/saved_dashboards');
-  require('plugins/kibana/dashboard/styles/main.less');
 
   require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
 

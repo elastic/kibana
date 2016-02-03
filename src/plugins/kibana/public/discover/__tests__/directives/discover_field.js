@@ -5,10 +5,10 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
+import 'ui/private';
+import 'plugins/kibana/discover/components/field_chooser/discover_field';
 
 // Load the kibana app dependencies.
-require('ui/private');
-require('plugins/kibana/discover/components/field_chooser/discover_field');
 
 describe('discoverField', function () {
   let $scope;

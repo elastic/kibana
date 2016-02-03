@@ -1,11 +1,11 @@
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
 define(function (require) {
   const $ = require('jquery');
   const app = require('ui/modules').get('apps/discover');
   const html = require('plugins/kibana/discover/components/field_chooser/discover_field.html');
   const _ = require('lodash');
 
-  require('ui/directives/css_truncate');
-  require('ui/directives/field_name');
 
 
   app.directive('discoverField', function ($compile) {

@@ -4,8 +4,8 @@ const $ = require('jquery');
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import 'plugins/kibana/visualize/editor/agg';
 
-require('plugins/kibana/visualize/editor/agg');
 
 describe('Vis-Editor-Agg plugin directive', function () {
   const $parentScope = {};

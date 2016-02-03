@@ -1,3 +1,5 @@
+import 'ui/filters/match_any';
+import 'plugins/kibana/visualize/editor/agg_param';
 define(function (require) {
   const IndexedArray = require('ui/IndexedArray');
 
@@ -9,8 +11,6 @@ define(function (require) {
     const aggTypes = Private(require('ui/agg_types/index'));
     const aggSelectHtml = require('plugins/kibana/visualize/editor/agg_select.html');
     const advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
-    require('ui/filters/match_any');
-    require('plugins/kibana/visualize/editor/agg_param');
 
     const notify = new Notifier({
       location: 'visAggGroup'

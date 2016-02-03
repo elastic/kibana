@@ -1,11 +1,11 @@
+import 'ui/es';
+import 'ui/promises';
+import 'ui/safe_confirm';
+import 'ui/index_patterns';
 define(function (require) {
   var errors = require('ui/errors');
   var _ = require('lodash');
 
-  require('ui/es');
-  require('ui/promises');
-  require('ui/safe_confirm');
-  require('ui/index_patterns');
 
   require('ui/modules').get('kibana/courier')
   .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {

@@ -1,3 +1,5 @@
+import 'ui/visualize';
+import 'ui/doc_table';
 define(function (require) {
   const moment = require('moment');
   const $ = require('jquery');
@@ -17,8 +19,6 @@ define(function (require) {
       };
     });
 
-    require('ui/visualize');
-    require('ui/doc_table');
 
     const brushEvent = Private(require('ui/utils/brush_event'));
 

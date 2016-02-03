@@ -6,8 +6,8 @@ import wrapRouteWithPrep from 'ui/routes/wrapRouteWithPrep';
 import Promise from 'bluebird';
 import _ from 'lodash';
 import { stub } from 'auto-release-sinon';
+import 'ui/private';
 
-require('ui/private');
 
 var routes;
 

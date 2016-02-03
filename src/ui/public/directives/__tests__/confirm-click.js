@@ -3,9 +3,9 @@ var $ = require('jquery');
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import 'ui/directives/confirm_click';
+import 'plugins/kibana/discover/index';
 
-require('ui/directives/confirm_click');
-require('plugins/kibana/discover/index');
 
 var $parentScope;
 

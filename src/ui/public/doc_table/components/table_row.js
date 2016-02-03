@@ -1,14 +1,14 @@
+import 'ui/highlight';
+import 'ui/highlight/highlight_tags';
+import 'ui/doc_viewer';
+import 'ui/filters/trust_as_html';
+import 'ui/filters/short_dots';
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var addWordBreaks = require('ui/utils/add_word_breaks');
   var module = require('ui/modules').get('app/discover');
 
-  require('ui/highlight');
-  require('ui/highlight/highlight_tags');
-  require('ui/doc_viewer');
-  require('ui/filters/trust_as_html');
-  require('ui/filters/short_dots');
 
 
   // guesstimate at the minimum number of chars wide cells in the table should be

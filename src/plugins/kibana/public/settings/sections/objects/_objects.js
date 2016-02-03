@@ -1,4 +1,5 @@
 import { saveAs } from '@spalger/filesaver';
+import 'ui/directives/file_upload';
 define(function (require) {
   const _ = require('lodash');
   const angular = require('angular');
@@ -6,7 +7,6 @@ define(function (require) {
   const objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
   const MAX_SIZE = Math.pow(2, 31) - 1;
 
-  require('ui/directives/file_upload');
 
   require('ui/routes')
   .when('/settings/objects', {

@@ -2,7 +2,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-require('ui/state_management/global_state');
+import 'ui/state_management/global_state';
 
 describe('State Management', function () {
   var $rootScope;

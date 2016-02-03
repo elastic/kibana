@@ -1,11 +1,11 @@
+import 'ui/visualize/spy';
+import 'ui/visualize/visualize.less';
+import 'ui/visualize/visualize_legend';
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
-    require('ui/visualize/spy');
-    require('ui/visualize/visualize.less');
-    require('ui/visualize/visualize_legend');
 
     var $ = require('jquery');
     var _ = require('lodash');

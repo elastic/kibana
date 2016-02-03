@@ -1,3 +1,4 @@
+import 'ui/listen';
 
 describe('listen component', function () {
   var sinon = require('auto-release-sinon');
@@ -7,7 +8,6 @@ describe('listen component', function () {
   var $rootScope;
   var Events;
 
-  require('ui/listen');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {

@@ -1,4 +1,6 @@
 import { jstz as tzDetect } from 'jstimezonedetect';
+import 'ui/filters/field_type';
+import 'ui/validateDateInterval';
 define(function (require) {
   return function DateHistogramAggType(timefilter, config, Private) {
     var _ = require('lodash');
@@ -24,8 +26,6 @@ define(function (require) {
       agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
     }
 
-    require('ui/filters/field_type');
-    require('ui/validateDateInterval');
 
     return new BucketAggType({
       name: 'date_histogram',

@@ -1,6 +1,6 @@
+import 'ui/stringify/editors/color.less';
 define(function (require) {
   return function _StringProvider(Private) {
-    require('ui/stringify/editors/color.less');
 
     const _ = require('lodash');
     const FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));

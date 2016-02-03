@@ -1,8 +1,8 @@
+import 'ui/number_list/number_list_input';
 define(function (require) {
   var _ = require('lodash');
   var parseRange = require('ui/utils/range');
 
-  require('ui/number_list/number_list_input');
   require('ui/modules')
   .get('kibana')
   .directive('kbnNumberList', function () {

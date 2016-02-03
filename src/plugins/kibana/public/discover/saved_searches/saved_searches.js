@@ -1,9 +1,9 @@
+import 'plugins/kibana/discover/saved_searches/_saved_search';
+import 'ui/notify';
 define(function (require) {
   const _ = require('lodash');
   const Scanner = require('ui/utils/scanner');
 
-  require('plugins/kibana/discover/saved_searches/_saved_search');
-  require('ui/notify');
 
   const module = require('ui/modules').get('discover/saved_searches', [
     'kibana/notify'

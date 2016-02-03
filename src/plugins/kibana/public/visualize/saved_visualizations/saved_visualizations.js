@@ -1,9 +1,9 @@
+import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 define(function (require) {
   const app = require('ui/modules').get('app/visualize');
   const _ = require('lodash');
   const Scanner = require('ui/utils/scanner');
 
-  require('plugins/kibana/visualize/saved_visualizations/_saved_vis');
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.

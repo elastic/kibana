@@ -2,6 +2,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import 'ui/persisted_log';
 
 var storage;
 var config;
@@ -15,7 +16,6 @@ var payload = [
   { first: 'bruce', last: 'wayne' }
 ];
 
-require('ui/persisted_log');
 
 function init() {
   ngMock.module('kibana/persisted_log', function ($provide) {

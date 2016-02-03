@@ -1,6 +1,6 @@
+import 'ui/filters/short_dots';
 define(function (require) {
   var module = require('ui/modules').get('kibana/index_patterns');
-  require('ui/filters/short_dots');
 
   function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
     var self = this;

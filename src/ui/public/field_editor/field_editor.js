@@ -1,8 +1,8 @@
+import 'ui/field_format_editor';
+import 'angular-bootstrap-colorpicker';
+import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 define(function (require) {
 
-  require('ui/field_format_editor');
-  require('angular-bootstrap-colorpicker');
-  require('angular-bootstrap-colorpicker/css/colorpicker.css');
 
   require('ui/modules')
   .get('kibana', ['colorpicker.module'])

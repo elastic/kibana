@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-require('ui/promises');
+import 'ui/promises';
 
 Bluebird.longStackTraces();
 

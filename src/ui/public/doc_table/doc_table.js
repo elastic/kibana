@@ -1,14 +1,14 @@
+import 'ui/doc_table/doc_table.less';
+import 'ui/directives/truncated';
+import 'ui/directives/infinite_scroll';
+import 'ui/doc_table/components/table_header';
+import 'ui/doc_table/components/table_row';
 define(function (require) {
   var _ = require('lodash');
 
   var html = require('ui/doc_table/doc_table.html');
   var getSort = require('ui/doc_table/lib/get_sort');
 
-  require('ui/doc_table/doc_table.less');
-  require('ui/directives/truncated');
-  require('ui/directives/infinite_scroll');
-  require('ui/doc_table/components/table_header');
-  require('ui/doc_table/components/table_row');
 
   require('ui/modules').get('kibana')
   .directive('docTable', function (config, Notifier, getAppState) {

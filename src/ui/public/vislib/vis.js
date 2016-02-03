@@ -1,3 +1,4 @@
+import 'ui/vislib/styles/main.less';
 define(function (require) {
   return function VisFactory(Private) {
     var _ = require('lodash');
@@ -10,7 +11,6 @@ define(function (require) {
     var handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
     var errors = require('ui/errors');
-    require('ui/vislib/styles/main.less');
 
     /**
      * Creates the visualizations.
