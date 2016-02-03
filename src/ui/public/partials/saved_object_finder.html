@@ -24,25 +24,24 @@
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="5">
+
+<paginate list="finder.hits" per-page="25">
   <table style="width: 100%" class="list-group list-group-menu table-striped" ng-class="{'select-mode': finder.selector.enabled}">
 
     <!-- Table Headers -->
-    <tr>
-      <th scope="row">Type</th>
-      <th>Name</th>
+    <tr ng-hide="finder.hits.length === 0">
+      <th align="center" style="padding: 10px;">Type</th>
+      <th align="left" style="padding: 10px;">Name</th>
     </tr>
 
     <!-- Table body -->
     <tr class=""
-        scope="row"
-        style="padding: 0px 10px;"
         ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
         ng-repeat="hit in page"
         ng-keydown="finder.hitKeyDown($event, page, paginate)"
         ng-click="finder.onChoose(hit, $event)">
 
-      <td>
+      <td style="padding: 6px 20px; align: center">
         <a ng-href="{{finder.makeUrl(hit)}}"
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
@@ -50,7 +49,7 @@
         </a>
       </td>
 
-      <td>
+      <td style="padding: 6px 20px;">
         {{hit.title}}
         <p ng-if="hit.description" ng-bind="hit.description"></p>
       </td>
