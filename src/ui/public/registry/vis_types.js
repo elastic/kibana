@@ -1,7 +1,5 @@
-define(function (require) {
-  return require('ui/registry/_registry')({
-    name: 'visTypes',
-    index: ['name'],
-    order: ['title']
-  });
+export default require('ui/registry/_registry')({
+  name: 'visTypes',
+  index: ['name'],
+  order: ['title']
 });
