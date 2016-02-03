@@ -1,6 +1,6 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const keysDeep = require('../../../../../../../lib/keys_deep');
+const keysDeep = require('../../../../../../../common/lib/keys_deep');
 
 //scope.processor, scope.pipeline are attached by the process_container.
 app.directive('processorUiTrim', function () {

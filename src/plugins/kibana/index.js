@@ -1,6 +1,6 @@
 const Boom = require('boom');
 const { join } = require('path');
-const requireAllAndApply = require('./lib/require_all_and_apply');
+const requireAllAndApply = require('./server/lib/require_all_and_apply');
 const ingest = require('./server/routes/api/ingest');
 
 module.exports = function (kibana) {

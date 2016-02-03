@@ -1,6 +1,6 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
-const keysDeep = require('../../../../../../../lib/keys_deep');
+const keysDeep = require('../../../../../../../common/lib/keys_deep');
 const selectableArray = require('../lib/selectable_array');
 require('../styles/_processor_ui_date.less');
 

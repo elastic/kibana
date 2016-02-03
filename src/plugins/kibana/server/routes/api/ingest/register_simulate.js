@@ -1,6 +1,6 @@
 const _ = require('lodash');
-const buildRequest = require('../../../../lib/ingest_build_request');
-const processResponse = require('../../../../lib/ingest_process_response');
+const buildRequest = require('../../../lib/ingest_build_request');
+const processResponse = require('../../../lib/ingest_process_response');
 
 module.exports = function registerSimulate(server) {
   server.route({

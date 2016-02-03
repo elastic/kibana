@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const processorTypes = require('../domain/ingest_processor_types');
+const processorTypes = require('../../common/ingest_processor_types');
 
 export default function ingestBuildRequest(pipeline) {
   const processors = pipeline.processors;

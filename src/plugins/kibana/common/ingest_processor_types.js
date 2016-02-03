@@ -1,4 +1,4 @@
-const keysDeep = require('../lib/keys_deep');
+const keysDeep = require('./lib/keys_deep');
 const _ = require('lodash');
 
 export default [
