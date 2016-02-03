@@ -44,10 +44,10 @@ define(function (require) {
     };
   });
 
-  registry.register(() => ({
+  registry.register(_.constant({
     order: 1,
     name: 'indices',
     display: 'Indices',
-    url: '#/settings/indices',
+    url: '#/settings/indices'
   }));
 });

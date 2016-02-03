@@ -52,7 +52,7 @@ define(function (require) {
     };
   });
 
-  registry.register(() => ({
+  registry.register(_.constant({
     order: 2,
     name: 'advanced',
     display: 'Advanced',
