@@ -3,6 +3,51 @@ define(function (require) {
     var _ = require('lodash');
     var mapField = Private(require('ui/index_patterns/_map_field'));
 
+    /**
+     * This function will recursively define all of the properties/mappings
+     * contained in the index. This will build out full name paths
+     * detect nested paths for any child attributes.
+     */
+    function defineMapping(fields, parentPath, name, rawField, nestedPath) {
+      var fullName = name;
+      // build the fullName first
+      if (parentPath !== undefined) {
+        fullName = parentPath + '.' + name;
+      }
+
+      if (rawField.type !== undefined) {
+        var field = {};
+
+        if (rawField.type === 'nested') {
+          nestedPath = fullName;
+        } else {
+          if (nestedPath !== undefined) {
+            rawField.nestedPath = nestedPath;
+          }
+          field.mapping = {};
+          field.mapping[name] = rawField;
+          field.fullName = fullName;
+
+          var keys = Object.keys(field.mapping);
+          if (keys.length === 0 || (fullName[0] === '_') && !_.contains(config.get('metaFields'), fullName)) return;
+
+          var mapping = mapField(field, fullName);
+
+          if (fields[fullName]) {
+            if (fields[fullName].type !== mapping.type) {
+              // conflict fields are not available for much except showing in the discover table
+              mapping.type = 'conflict';
+              mapping.indexed = false;
+            }
+          }
+          fields[fullName] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values', 'nestedPath');
+        }
+      }
+
+      _.each(rawField.properties, function (field, name) {
+        defineMapping(fields, fullName, name, field, nestedPath);
+      });
+    }
 
     /**
      * Convert the ES response into the simple map for fields to
@@ -18,20 +63,9 @@ define(function (require) {
       _.each(response, function (index, indexName) {
         if (indexName === kbnIndex) return;
         _.each(index.mappings, function (mappings) {
-          _.each(mappings, function (field, name) {
-            var keys = Object.keys(field.mapping);
-            if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
-
-            var mapping = mapField(field, name);
-
-            if (fields[name]) {
-              if (fields[name].type !== mapping.type) {
-                // conflict fields are not available for much except showing in the discover table
-                mapping.type = 'conflict';
-                mapping.indexed = false;
-              }
-            }
-            fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values');
+          _.each(mappings.properties, function (field, name) {
+            // call the define mapping recursive function
+            defineMapping(fields, undefined, name, field, undefined);
           });
         });
       });

@@ -126,9 +126,9 @@ expressions
 
 booleanValue
     : TRUE
-      { $$ = 'true'; } 
+      { $$ = true; } 
     | FALSE
-      { $$ = 'false'; }
+      { $$ = false; }
     ;
     
 fieldPath
@@ -196,6 +196,10 @@ isClause
     
 simpleValue
     : decimal | NUMBER | STRING | NULL | booleanValue | IPV4
+    | date
+      { $$ = yy.moment.utc($1); }
+    | dateTime
+      { $$ = yy.moment.utc($1); }
     ;
 
 operator
@@ -205,10 +209,6 @@ operator
 comparison
     : fieldPath operator simpleValue
        { $$ = new yy.Term($1, $2, $3); }
-    | fieldPath operator date
-       { $$ = new yy.Term($1, $2, yy.moment.utc($3).valueOf()); }
-    | fieldPath operator dateTime
-       { $$ = new yy.Term($1, $2, yy.moment.utc($3).valueOf()); }
     ;
 
 boolExpression

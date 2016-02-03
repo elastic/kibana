@@ -8,6 +8,7 @@ scope.fieldDictionary = {};
 
 scope.moment = require('moment');
 scope.errors = require('ui/errors');
+scope._ = require('lodash');
 
 scope.NOVALUE = {};
 
@@ -72,13 +73,50 @@ scope.Range.prototype = {
   }
 };
 
+function validateValue(mapping, value) {
+  switch (mapping.type) {
+    case 'string':
+      if (!scope._.isString(value)) {
+        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+      }
+      return value;
+      break;
+    case 'date':
+      if (!value._isAMomentObject) {
+        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+      }
+      return value.valueOf();
+      break;
+    case 'ip':
+      return value;
+      break;
+    case 'number':
+      if (!scope._.isNumber(value)) {
+        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+      }
+      return value;
+      break;
+    case 'boolean':
+      if (!scope._.isBoolean(value)) {
+        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+      }
+      return value;
+      break;
+    case 'geo_point':
+      return value;
+      break;
+  }
+}
+
 scope.Term = function (field, operation, value) {
-  if (scope.fieldDictionary[field] === undefined) {
+  var mapping = scope.fieldDictionary[field];
+  if (mapping === undefined) {
     throw new scope.errors.FieldNotFoundInSelectedIndex(field);
   }
   this.field = field;
   this.operation = operation;
-  this.value = value;
+  this.value = validateValue(mapping, value);
+  this.nestedPath = mapping.nestedPath;
 };
 
 scope.Term.prototype = {
