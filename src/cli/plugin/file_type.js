@@ -1,7 +1,7 @@
 export const TAR = '.tar.gz';
 export const ZIP = '.zip';
 
-export default function typeFromFilename(filename) {
+export default function fileType(filename) {
   if (/\.zip$/i.test(filename)) {
     return ZIP;
   }
