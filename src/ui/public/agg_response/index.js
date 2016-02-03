@@ -3,13 +3,11 @@ import AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_ser
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 
-define(function (require) {
-  return function NormalizeChartDataFactory(Private) {
-    return {
-      hierarchical: Private(AggResponseHierarchicalBuildHierarchicalDataProvider),
-      pointSeries: Private(AggResponsePointSeriesPointSeriesProvider),
-      tabify: Private(AggResponseTabifyTabifyProvider),
-      geoJson: Private(AggResponseGeoJsonGeoJsonProvider)
-    };
+export default function NormalizeChartDataFactory(Private) {
+  return {
+    hierarchical: Private(AggResponseHierarchicalBuildHierarchicalDataProvider),
+    pointSeries: Private(AggResponsePointSeriesPointSeriesProvider),
+    tabify: Private(AggResponseTabifyTabifyProvider),
+    geoJson: Private(AggResponseGeoJsonGeoJsonProvider)
   };
-});
+};

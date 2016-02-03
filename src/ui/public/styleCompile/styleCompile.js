@@ -1,30 +1,28 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import 'ui/config';
-define(function (require) {
-  var $style = $('<style>').appendTo('head').attr('id', 'style-compile');
+var $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
 
-  require('ui/modules')
-  .get('kibana')
-  .run(function ($rootScope, $compile, config) {
-    var truncateGradientHeight = 15;
-    var template = _.template(require('./styleCompile.css.tmpl'));
-    var locals = {};
+require('ui/modules')
+.get('kibana')
+.run(function ($rootScope, $compile, config) {
+  var truncateGradientHeight = 15;
+  var template = _.template(require('./styleCompile.css.tmpl'));
+  var locals = {};
 
-    // watch the value of the truncate:maxHeight config param
-    $rootScope.$watch(function () {
-      return config.get('truncate:maxHeight');
-    }, function (maxHeight) {
-      if (maxHeight > 0) {
-        locals.truncateMaxHeight = maxHeight + 'px !important';
-        locals.truncateGradientTop = maxHeight - truncateGradientHeight + 'px';
-      } else {
-        locals.truncateMaxHeight = 'none';
-        locals.truncateGradientTop = '-' + truncateGradientHeight + 'px';
-      }
+  // watch the value of the truncate:maxHeight config param
+  $rootScope.$watch(function () {
+    return config.get('truncate:maxHeight');
+  }, function (maxHeight) {
+    if (maxHeight > 0) {
+      locals.truncateMaxHeight = maxHeight + 'px !important';
+      locals.truncateGradientTop = maxHeight - truncateGradientHeight + 'px';
+    } else {
+      locals.truncateMaxHeight = 'none';
+      locals.truncateGradientTop = '-' + truncateGradientHeight + 'px';
+    }
 
-      $style.html(template(locals));
-    });
+    $style.html(template(locals));
   });
 });
