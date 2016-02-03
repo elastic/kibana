@@ -1,5 +1,5 @@
 const app = require('ui/modules').get('kibana');
-const jsondiffpatch = require('jsondiffpatch');
+const jsondiffpatch = require('@bigfunger/jsondiffpatch');
 const htmlFormat = jsondiffpatch.formatters.html.format;
 require('../styles/_output_preview.less');
 

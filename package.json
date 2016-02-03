@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "@bigfunger/decompress-zip": "0.2.0-stripfix2",
+    "@bigfunger/jsondiffpatch": "0.1.38-webpack",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -113,7 +114,6 @@
     "js-yaml": "3.4.1",
     "json-loader": "0.5.3",
     "json-stringify-safe": "5.0.1",
-    "jsondiffpatch": "0.1.38",
     "jstimezonedetect": "1.0.5",
     "leaflet": "0.7.5",
     "less": "2.5.1",
