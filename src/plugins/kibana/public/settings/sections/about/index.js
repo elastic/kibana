@@ -15,7 +15,7 @@ define(function (require) {
   });
 
   registry.register(_.constant({
-    order: Infinity,
+    order: 1001,
     name: 'about',
     display: 'About',
     url: '#/settings/about'
