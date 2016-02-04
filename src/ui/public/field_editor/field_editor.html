@@ -10,7 +10,7 @@
   </div>
   <div ng-if="editor.creating && editor.indexPattern.fields.byName[editor.field.name]" class="hintbox">
     <p>
-      <i class="fa fa-danger text-danger"></i>
+      <i class="oi oi-danger text-danger"></i>
       <strong>Mapping Conflict:</strong>
       You already have a field with the name {{ editor.field.name }}. Naming your scripted
       field with the same name means you won't be able to query both fields at the same time.
@@ -27,14 +27,14 @@
 
   <div class="form-group">
     <span class="pull-right text-warning hintbox-label" ng-click="editor.showFormatHelp = !editor.showFormatHelp">
-      <i class="fa fa-warning"></i> Warning
+      <i class="oi oi-warning"></i> Warning
     </span>
 
     <label>Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
 
     <div class="hintbox" ng-if="editor.showFormatHelp">
       <h4 class="hintbox-heading">
-        <i class="fa fa-warning text-warning"></i> Format Warning
+        <i class="oi oi-warning text-warning"></i> Format Warning
       </h4>
 
       <p>
@@ -70,14 +70,14 @@
           ng-click="editor.field.count = editor.field.count + 1"
           aria-label="Plus"
           class="btn btn-default">
-          <i aria-hidden="true" class="fa fa-plus"></i>
+          <i aria-hidden="true" class="oi oi-plus"></i>
         </button>
         <button
           type="button"
           ng-click="editor.field.count = editor.field.count - 1"
           aria-label="Minus"
           class="btn btn-default">
-          <i aria-hidden="true" class="fa fa-minus"></i>
+          <i aria-hidden="true" class="oi oi-minus"></i>
         </button>
       </span>
     </div>

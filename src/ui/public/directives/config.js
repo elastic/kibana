@@ -58,7 +58,7 @@ define(function (require) {
               '<div class="config" ng-show="configTemplate">' +
                 wrapTmpl(tmpl) +
               '  <div class="config-close remove" ng-click="close()">' +
-              '    <i class="fa fa-chevron-up"></i>' +
+              '    <i class="fa oi-chevron-top"></i>' +
               '  </div>' +
               '</div>' +
               ''

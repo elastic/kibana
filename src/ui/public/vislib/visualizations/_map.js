@@ -93,7 +93,7 @@ define(function (require) {
           position: 'topleft'
         },
         onAdd: function (map) {
-          $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
+          $(fitContainer).html('<a class="fa oi-crop" href="#" title="Fit Data Bounds"></a>')
           .on('click', function (e) {
             e.preventDefault();
             self._fitBounds();

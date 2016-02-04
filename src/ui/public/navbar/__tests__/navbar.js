@@ -12,13 +12,13 @@ const defaultMarkup = `
   <navbar name="testing">
     <div class="button-group" role="toolbar">
       <button>
-        <i aria-hidden="true" class="fa fa-file-new-o"></i>
+        <i aria-hidden="true" class="fa oi-file-new-o"></i>
       </button>
       <button>
-        <i aria-hidden="true" class="fa fa-save"></i>
+        <i aria-hidden="true" class="fa oi-save"></i>
       </button>
       <button>
-        <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+        <i aria-hidden="true" class="fa oi-folder-open-o"></i>
       </button>
     </div>
   </navbar>`;
@@ -72,15 +72,15 @@ describe('navbar directive', function () {
       const markup = `  <navbar name="testing">
           <div class="button-group" role="toolbar">
             <button>
-              <i aria-hidden="true" class="fa fa-file-new-o"></i>
+              <i aria-hidden="true" class="fa oi-file-new-o"></i>
             </button>
             <button>
-              <i aria-hidden="true" class="fa fa-save"></i>
+              <i aria-hidden="true" class="fa oi-save"></i>
             </button>
           </div>
           <div class="button-group" role="toolbar">
             <button>
-              <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+              <i aria-hidden="true" class="fa oi-folder-open-o"></i>
             </button>
           </div>
         </navbar>`;
@@ -102,7 +102,7 @@ describe('navbar directive', function () {
           order: 0,
           template: `
             <button class="test-button">
-              <i aria-hidden="true" class="fa fa-rocket"></i>
+              <i aria-hidden="true" class="fa oi-rocket"></i>
             </button>`
         });
       });

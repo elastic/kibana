@@ -6,7 +6,7 @@ define(function (require) {
     return new VislibVisType({
       name: 'histogram',
       title: 'Vertical bar chart',
-      icon: 'fa-bar-chart',
+      icon: 'oi-bar-chart',
       description: 'The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, ' +
       'exact numbers or percentages. If you are not sure which chart your need, you could do worse than to start here.',
       params: {

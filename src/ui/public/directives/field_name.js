@@ -15,7 +15,7 @@ define(function (require) {
         var typeIcon = function (fieldType) {
           switch (fieldType) {
             case 'source':
-              return '<i class="fa fa-file-text-o "></i>';
+              return '<i class="fa oi-file-text-o "></i>';
             case 'string':
               return '<i><strong>t</strong></i>';
             case 'murmur3':
@@ -23,15 +23,15 @@ define(function (require) {
             case 'number':
               return '<i><strong>#</strong></i>';
             case 'date':
-              return '<i class="fa fa-clock-o"></i>';
+              return '<i class="fa oi-clock-o"></i>';
             case 'ip':
-              return '<i class="fa fa-laptop"></i>';
+              return '<i class="fa oi-laptop"></i>';
             case 'geo_point':
-              return '<i class="fa fa-globe"></i>';
+              return '<i class="fa oi-globe"></i>';
             case 'boolean':
-              return '<i class="fa fa-adjust"></i>';
+              return '<i class="fa oi-adjust"></i>';
             case 'conflict':
-              return '<i class="fa fa-warning"></i>';
+              return '<i class="fa oi-warning"></i>';
             default:
               return '<i><strong>?</strong></i>';
           }

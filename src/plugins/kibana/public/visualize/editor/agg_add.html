@@ -19,10 +19,10 @@
 
   <div ng-if="!add.form">
     <div class="vis-editor-agg-wide-btn-add" ng-if="groupName !== 'buckets' || !stats.count">
-      <i aria-hidden="true" class="fa fa-plus"></i> Add {{ groupName }}
+      <i aria-hidden="true" class="oi oi-plus"></i> Add {{ groupName }}
     </div>
     <div class="vis-editor-agg-wide-btn-add" ng-if="groupName === 'buckets' && stats.count > 0">
-      <i aria-hidden="true" class="fa fa-code-fork"></i> Add sub-{{ groupName }}
+      <i aria-hidden="true" class="oi oi-code-fork"></i> Add sub-{{ groupName }}
     </div>
   </div>
   <div class="vis-editor-agg-wide-btn-add" ng-if="add.form">
