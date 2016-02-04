@@ -11,6 +11,10 @@ module.exports = function (kibana) {
       }).default();
     },
 
+    init: function (server) {
+      ingest(server);
+    },
+
     uiExports: {
       app: {
         title: 'Kibana',
@@ -32,10 +36,6 @@ module.exports = function (kibana) {
           };
         }
       }
-    },
-
-    init: function (server, options) {
-      ingest(server);
     }
   });
 

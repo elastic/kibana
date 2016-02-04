@@ -3,7 +3,7 @@ var template = require('plugins/kibana/settings/sections/indices/filebeat/direct
 
 require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step');
 require('plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step');
-require('plugins/kibana/settings/sections/indices/add_data_steps/pipeline_step');
+require('plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup');
 require('plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step');
 
 // wrapper directive, which sets up the breadcrumb for all filebeat steps

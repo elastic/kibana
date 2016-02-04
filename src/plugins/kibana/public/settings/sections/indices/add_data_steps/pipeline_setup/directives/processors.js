@@ -1,0 +1,16 @@
+require('./process_container');
+require('./output_preview');
+require('./processor_ui_geoip');
+require('./processor_ui_grok');
+require('./processor_ui_set');
+require('./processor_ui_append');
+require('./processor_ui_rename');
+require('./processor_ui_remove');
+require('./processor_ui_lowercase');
+require('./processor_ui_uppercase');
+require('./processor_ui_trim');
+require('./processor_ui_split');
+require('./processor_ui_join');
+require('./processor_ui_convert');
+require('./processor_ui_gsub');
+require('./processor_ui_date');
