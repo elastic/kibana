@@ -2,27 +2,91 @@
 @import (reference) "~bootstrap/less/list-group";
 @import (reference) "~ui/styles/list-group-menu";
 
+/* saved_object_finder.html striped table colors */
+.table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #F6F6F6; //@kibanaGray6;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #FFFFFF; //
+}
+
+
+.table > tbody > tr > th,
+.table > tbody > tr > td {
+  border-top: none;
+}
+
+.table > thead > tr {
+  background-color: #F6F6F6 //@kibanaGray6;
+}
+
+.table > thead > tr > th {
+  border-bottom: none;
+}
+
+.table > tbody > tr > th.first-cell {
+  text-align: center;
+}
+
+.saved-object-finder-row {
+  background-color: #F6F6F6; //@kibanaGray6;
+  padding: 10px;
+}
+
+.saved-object-finder-input {
+  float: left !important;
+
+  span {
+    padding: 5px 0px;
+    background-color: #FFFFFF;
+    border: none;
+  }
+
+  input {
+    border: none;
+    padding: 5px 0px;
+    border-radius: 4px;
+  }
+}
+
+.saved-object-finder-column {
+  text-align: center;
+  padding: 5px;
+}
+
+.saved-object-finder-table {
+  width: 100%;
+}
+
+/* ****************************** */
+
+.wizard-vis-container {
+  padding: 0px;
+}
+
+.wizard-vis-column {
+  padding-left: 0px;
+  padding-right: 5px
+}
+
 .vis-wizard {
+  margin-right: 0px;
+  margin-left: 0px;
+
   h1 {
     margin-top: 45px;
     padding: 0px 15px;
   }
-  margin-right: 0px !important;
-  margin-left: 0px !important;
 }
 
 .wizard-vis-type {
   .list-group-item();
   .list-group-menu .list-group-menu-item();
 
-  background-color: #f6f6f6;
-  border: none !important;
-  border-radius: 0 !important;
-  // // overrided for tablet and desktop
-  // @media (min-width: @screen-md-min) {
-  //   display: flex;
-  //   align-items: flex-start;
-  // }
+  background-color: #F6F6F6; //@kibanaGray6;
+  border: none;
+  border-radius: 0;
 
   &-heading {
     flex: 0 0 200px;

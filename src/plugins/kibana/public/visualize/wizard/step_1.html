@@ -1,6 +1,6 @@
-<div class="container-fluid" style="padding: 0px;">
+<div class="wizard-vis-container container-fluid">
   <div class="row">
-    <div class="col-md-6" style="padding-left: 0px; padding-right: 5px">
+    <div class="wizard-vis-column col-md-6">
       <h1>
         Create New Visualization <br class="visible-xs">
       </h1>
@@ -9,6 +9,7 @@
         <a class="wizard-vis-type"
            ng-repeat="type in visTypes.inTitleOrder"
            ng-href="{{ visTypeUrl(type) }}">
+
           <div class="wizard-vis-type-heading">
             <i aria-hidden="true" class="fa fa-fw" ng-class="type.icon"></i>
             <h4>{{type.title}}</h4>
@@ -18,13 +19,9 @@
       </div>
     </div>
 
-    <div class="col-md-6" style="padding-left: 0px; padding-right: 5px;">
+    <div class="wizard-vis-column col-md-6">
       <h1>Or, Open a Saved Visualization</h1>
-
-      <saved-object-finder
-              title="Saved Visualizations"
-              type="visualizations">
-      </saved-object-finder>
+      <saved-object-finder title="Saved Visualizations" type="visualizations"></saved-object-finder>
     </div>
   </div>
 </div>
