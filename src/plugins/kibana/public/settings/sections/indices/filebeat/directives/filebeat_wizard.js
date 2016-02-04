@@ -15,7 +15,7 @@ modules.get('apps/settings')
     scope: {},
     bindToController: true,
     controllerAs: 'wizard',
-    controller: function ($scope, AppState, safeConfirm) {
+    controller: function ($scope, AppState, safeConfirm, kbnUrl) {
       var $state = this.state = new AppState();
       var totalSteps = 4;
       this.stepResults = {};
@@ -31,6 +31,9 @@ modules.get('apps/settings')
       this.nextStep = () => {
         if ($state.currentStep + 1 < totalSteps) {
           this.setCurrentStep($state.currentStep + 1);
+        }
+        else if ($state.currentStep + 1 === totalSteps) {
+          kbnUrl.change('/discover');
         }
       };
       this.prevStep = () => {
