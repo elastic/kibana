@@ -9,7 +9,7 @@ export default function ingestBuildRequest(pipeline) {
     },
     'docs': [
       {
-        _source: pipeline.rootObject
+        _source: pipeline.input
       }
     ]
   };

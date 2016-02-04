@@ -4,19 +4,19 @@
       "collapsed": true,
       "typeId": "grok",
       "title": "Grok",
-      "sourceField": "_raw",
-      "pattern": "%{GREEDYDATA:source} - - %{GREEDYDATA:message}",
+      "sourceField": "message",
+      "pattern": "%{GREEDYDATA:source} - - %{GREEDYDATA:content}",
       "processorId": "processor_18",
-      "description": "[_raw] -> [message], [source]"
+      "description": "[message] -> [message], [source]"
     },
     {
       "collapsed": true,
       "typeId": "grok",
       "title": "Grok",
-      "sourceField": "message",
+      "sourceField": "content",
       "pattern": "\\[%{GREEDYDATA:datestamp}] \"%{WORD:action} %{GREEDYDATA:document} %{GREEDYDATA:protocol}\" %{WORD:response_code} %{WORD:extended_response_code}",
       "processorId": "processor_19",
-      "description": "[message] -> [action], [datestamp], [document], [extended_response_code], [protocol], [response_code]"
+      "description": "[content] -> [action], [datestamp], [document], [extended_response_code], [protocol], [response_code]"
     },
     {
       "collapsed": true,
@@ -143,9 +143,9 @@
       "collapsed": true,
       "typeId": "remove",
       "title": "Remove",
-      "sourceField": "_raw",
+      "sourceField": "message",
       "processorId": "processor_32",
-      "description": "[_raw]"
+      "description": "[message]"
     }
   ],
   "counter": 32,

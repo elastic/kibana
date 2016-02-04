@@ -1,4 +1,4 @@
-<source-data output-object="sampleData" sample-docs="sampleDocs"></source-data>
+<source-data sample="sample" samples="samples"></source-data>
 
 <pipeline-output pipeline="pipeline"></pipeline-output>
 
@@ -26,6 +26,11 @@
     ng-model="processorType">
   </select>
 </div>
-<button ng-click="pipeline.add(processorType)">Add Processor</button>
+<button
+  ng-click="pipeline.add(processorType)"
+  ng-disabled="!processorType">
+  Add Processor
+</button>
+
 <button style="float:right; margin-left:5px;" ng-click="savePipeline()">Write Pipeline To Console</button>
 <button style="float:right;" ng-click="loadPipeline()">Load Pipeline From File</button>

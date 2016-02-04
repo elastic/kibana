@@ -14,7 +14,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),
     scope: {
-      sampleDocs: '=',
+      samples: '=',
       pipeline: '='
     },
     link: function ($scope, $el) {
@@ -44,7 +44,6 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
           //we don't want to change the inputObject if the processor is in error
           //because that can cause us to lose state.
           if (!_.get(processor, 'error.isNested')) {
-            //this can probably be cleaned up a little.
             if (processor.parent.processorId) {
               processor.inputObject = _.cloneDeep(processor.parent.outputObject);
             } else {
@@ -79,8 +78,8 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
         simulatePipeline();
       });
 
-      $scope.$watch('sampleData', (newVal) => {
-        pipeline.rootObject = $scope.sampleData;
+      $scope.$watch('sample', (newVal) => {
+        pipeline.input = $scope.sample;
         pipeline.updateParents();
         pipeline.dirty = true;
         simulatePipeline();
@@ -92,20 +91,14 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
       const savedPipeline = require('../sample_pipeline.json');
       const types = require('../../../../../../../common/ingest_processor_types');
       $scope.processorTypes = _.sortBy(types, 'title');
-      $scope.defaultProcessorType = getDefaultProcessorType();
-      $scope.processorType = $scope.defaultProcessorType;
-      $scope.sampleData = {};
+      $scope.sample = {};
 
       const pipeline = new Pipeline();
       if ($scope.pipeline) {
         pipeline.load($scope.pipeline);
-        $scope.sampleData = $scope.pipeline.rootObject;
+        $scope.sample = $scope.pipeline.input;
       }
       $scope.pipeline = pipeline;
-
-      function getDefaultProcessorType() {
-        return _.first(_.filter($scope.processorTypes, processor => { return processor.default; }));
-      }
 
       //temp for debugging purposes
       $scope.loadPipeline = function () {
@@ -120,7 +113,7 @@ app.directive('pipelineSetup', function (ingest, debounce, Notifier) {
           delete processor.outputObject;
           delete processor.parent;
         });
-        delete tempPipeline.rootObject;
+        delete tempPipeline.input;
         delete tempPipeline.output;
 
         //console.log(angular.toJson(tempPipeline, true));

@@ -17,6 +17,9 @@ app.directive('outputPreview', function () {
       $scope.diffpatch = jsondiffpatch.create({
         arrays: {
           detectMove: false
+        },
+        textDiff: {
+          minLength: 120
         }
       });
 

@@ -6,29 +6,29 @@ app.directive('sourceData', function () {
   return {
     restrict: 'E',
     scope: {
-      sampleDocs: '=',
-      outputObject: '='
+      samples: '=',
+      sample: '='
     },
     template: require('../views/source_data.html'),
     controller: function ($scope) {
-      const sampleDocs = $scope.sampleDocs;
+      const samples = $scope.samples;
 
-      if (sampleDocs.length > 0) {
-        $scope.outputObject = sampleDocs[0];
+      if (samples.length > 0) {
+        $scope.sample = samples[0];
       }
 
       $scope.previousLine = function () {
-        let currentIndex = sampleDocs.indexOf($scope.outputObject);
+        let currentIndex = samples.indexOf($scope.sample);
         if (currentIndex <= 0) return;
 
-        $scope.outputObject = sampleDocs[currentIndex - 1];
+        $scope.sample = samples[currentIndex - 1];
       };
 
       $scope.nextLine = function () {
-        let currentIndex = sampleDocs.indexOf($scope.outputObject);
-        if (currentIndex >= sampleDocs.length - 1) return;
+        let currentIndex = samples.indexOf($scope.sample);
+        if (currentIndex >= samples.length - 1) return;
 
-        $scope.outputObject = sampleDocs[currentIndex + 1];
+        $scope.sample = samples[currentIndex + 1];
       };
     }
   };

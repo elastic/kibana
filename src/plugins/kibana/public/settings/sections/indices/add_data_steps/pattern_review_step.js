@@ -6,7 +6,6 @@ modules.get('apps/settings')
     return {
       template: template,
       scope: {
-        sampleDocs: '=',
         indexPattern: '=',
         pipeline: '='
       }

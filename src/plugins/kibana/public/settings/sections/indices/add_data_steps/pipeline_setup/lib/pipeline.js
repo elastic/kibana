@@ -7,7 +7,7 @@ export default function Pipeline() {
 
   self.processors = [];
   self.counter = 0;
-  self.rootObject = {};
+  self.input = {};
   self.output = undefined;
   self.dirty = false;
 };
@@ -94,7 +94,7 @@ Pipeline.prototype.updateParents = function () {
   processors.forEach((processor, index) => {
     let newParent;
     if (index === 0) {
-      newParent = self.rootObject;
+      newParent = self.input;
     } else {
       newParent = processors[index - 1];
     }
