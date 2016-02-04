@@ -6,7 +6,7 @@ define(function (require) {
   require('plugins/kibana/discover/saved_searches/saved_searches');
 
   var templateStep = function (num, txt) {
-    return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
+    return '<div ng-controller="VisualizeWizardStep' + num + '" class="container-fluid vis-wizard">' + txt + '</div>';
   };
 
   var module = require('ui/modules').get('app/visualize', ['kibana/courier']);

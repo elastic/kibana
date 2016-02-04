@@ -23,14 +23,19 @@
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="24">
+
+<paginate list="finder.hits" per-page="25" style="padding-bottom: 1px; background-color: #f6f6f6;">
   <table class="list-group list-group-menu table table-striped"
     ng-class="{'select-mode': finder.selector.enabled}">
 
     <thead>
       <tr ng-hide="finder.hits.length === 0">
         <th class="col-md-1">Type</th>
-        <th class="col-md-11">Name</th>
+        <th class="col-md-11">
+          Name
+          <!-- <span class="fa fa-caret-up"></span> -->
+          <span class="fa fa-caret-down"></span>
+        </th>
       </tr>
     <thead>
 
