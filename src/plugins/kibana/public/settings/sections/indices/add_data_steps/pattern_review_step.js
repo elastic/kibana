@@ -124,23 +124,28 @@ modules.get('apps/settings')
           this.dateFields = _.map(_.filter(fields, {type: 'date'}), 'name');
         }, true);
 
+        const buildRows = () => {
+          this.rows = _.map(this.indexPattern.fields, (field) => {
+            const sampleValue = this.sampleDocs[field.name];
+            return [
+              _.escape(field.name),
+              {
+                markup: editFieldTypeHTML,
+                scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes, buildRows: buildRows}),
+                value: field.type
+              },
+              typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
+            ];
+          });
+        };
+
         this.columns = [
           {title: 'Field'},
           {title: 'Type'},
           {title: 'Example', sortable: false}
         ];
 
-        this.rows = _.map(this.indexPattern.fields, (field) => {
-          const sampleValue = this.sampleDocs[field.name];
-          return [
-            _.escape(field.name),
-            {
-              markup: editFieldTypeHTML,
-              scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes})
-            },
-            typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
-          ];
-        });
+        buildRows();
       }
     };
   });

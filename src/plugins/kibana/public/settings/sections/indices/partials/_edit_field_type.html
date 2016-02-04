@@ -1,4 +1,4 @@
-<select ng-if="knownFieldTypes[field.name] !== 'geo_point'" name="field_type" ng-model="field.type">
+<select ng-if="knownFieldTypes[field.name] !== 'geo_point'" name="field_type" ng-model="field.type" ng-change="buildRows()">
   <option value="string">string</option>
   <option value="number">number</option>
   <option value="boolean">boolean</option>
