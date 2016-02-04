@@ -4,9 +4,6 @@ import uiModules from 'ui/modules';
 
 import 'ui/doc_viewer/doc_viewer.less';
 
-import 'ui/doc_viewer/viewers/table.js';
-import 'ui/doc_viewer/viewers/json.js';
-
 import DocViews from 'ui/registry/doc_views';
 
 uiModules.get('kibana')
