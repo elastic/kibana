@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         '--package', targetDir,
         '-s', 'dir', // input type
         '--name', 'kibana',
-        '--description', '"Explore and visualize your Elasticsearch data."',
+        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
         '--version', version,
         '--after-install', resolve(userScriptsDir, 'installer.sh'),
         '--after-remove', resolve(userScriptsDir, 'remover.sh'),
