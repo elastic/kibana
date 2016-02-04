@@ -1,5 +1,5 @@
-var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step.html');
+import modules from 'ui/modules';
+import template from 'plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step.html';
 
 modules.get('apps/settings')
   .directive('installFilebeatStep', function () {
