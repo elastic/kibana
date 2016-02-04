@@ -100,8 +100,9 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setRefreshInterval() that sets interval variable', function (done) {
-      $scope.setRefreshInterval('interval');
-      expect($scope.interval).to.be('interval');
+      var interval = {};
+      $scope.setRefreshInterval(interval);
+      expect($scope.interval).to.be(interval);
       done();
     });
 
