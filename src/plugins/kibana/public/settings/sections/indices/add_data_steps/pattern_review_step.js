@@ -133,12 +133,12 @@ modules.get('apps/settings')
         this.rows = _.map(this.indexPattern.fields, (field) => {
           const sampleValue = this.sampleDocs[field.name];
           return [
-            field.name,
+            _.escape(field.name),
             {
               markup: editFieldTypeHTML,
               scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes})
             },
-            typeof sampleValue === 'object' ? JSON.stringify(sampleValue) : sampleValue
+            typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
           ];
         });
       }
