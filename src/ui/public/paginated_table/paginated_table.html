@@ -15,14 +15,14 @@
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
             <i
               ng-if="col.sortable !== false"
-              class="fa"
+              class="oi"
               ng-class="{
-                'fa-sort-asc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'asc',
-                'fa-sort-desc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'desc',
-                'fa-sort': paginatedTable.sort.columnIndex !== $index || paginatedTable.sort.direction === null
+                'oi-sort-asc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'asc',
+                'oi-sort-desc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'desc',
+                'oi-sort': paginatedTable.sort.columnIndex !== $index || paginatedTable.sort.direction === null
               }">
             </i>
-            <i aria-label="Click on a cell to filter" ng-if="col.filterable" class="fa fa-search" ng-click="$event.stopPropagation()" tooltip="Click on a cell to filter"></i>
+            <i aria-label="Click on a cell to filter" ng-if="col.filterable" class="oi oi-magnifying-glass" ng-click="$event.stopPropagation()" tooltip="Click on a cell to filter"></i>
           </th>
         </tr>
       </thead>

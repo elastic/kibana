@@ -16,7 +16,7 @@
           <button type="submit"
             ng-disabled="discoverSearch.$invalid"
             aria-label="Search">
-            <span aria-hidden="true" class="fa fa-search"></span></button>
+            <span aria-hidden="true" class="oi oi-magnifying-glass"></span></button>
         </div>
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>
@@ -27,7 +27,7 @@
         <button
           ng-click="newQuery()"
           aria-label="New Search">
-          <i aria-hidden="true" class="fa fa-file-new-o"></i>
+          <i aria-hidden="true" class="oi oi-file-new-o"></i>
         </button>
       </kbn-tooltip>
       <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
@@ -37,7 +37,7 @@
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('save') }}"
           aria-label="Save Search">
-          <i aria-hidden="true" class="fa fa-save"></i>
+          <i aria-hidden="true" class="oi oi-save"></i>
         </button>
       </kbn-tooltip>
       <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
@@ -47,7 +47,7 @@
           ng-click="configTemplate.toggle('load');"
           ng-class="{active: configTemplate.is('load')}"
           aria-label="Load Saved Search">
-          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
+          <i aria-hidden="true" class="oi oi-folder-open-o"></i>
         </button>
       </kbn-tooltip>
       <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
@@ -57,7 +57,7 @@
           aria-expanded="{{ configTemplate.is('share') }}"
           ng-class="{active: configTemplate.is('share')}"
           ng-click="configTemplate.toggle('share');">
-          <i aria-hidden="true" class="fa fa-external-link"></i>
+          <i aria-hidden="true" class="oi oi-external-link"></i>
         </button>
       </kbn-tooltip>
     </div>
@@ -88,7 +88,7 @@
         <div class="discover-info">
           <span ng-show="opts.savedSearch.id" class="discover-info-title">
             <span ng-bind="::opts.savedSearch.title"></span>
-            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
+            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="oi oi-undo small"></i>
           </span>
 
           <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
@@ -100,7 +100,7 @@
           <div ng-show="resultState === 'none'">
               <div class="col-md-10 col-md-offset-1">
 
-                <h1>No results found <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
+                <h1>No results found <i aria-hidden="true" class="oi oi-meh-o"></i></h1>
 
                 <p>
                   Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here are some ideas:
@@ -119,7 +119,7 @@
                 <div ng-show="opts.timefield">
                   <p>
                     <h3>Expand your time range</h3>
-                    <p>I see you are looking at an index with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range. Click the button below to open the time picker. For future reference you can open the time picker by clicking the <a class="btn btn-xs navbtn" ng-click="toggleTimepicker(); toggledTimepicker = !toggledTimepicker" aria-expanded="{{toggledTimepicker}}" aria-label="time picker">time picker <i aria-hidden="true" class="fa fa-clock-o"></i></a> in the top right corner of your screen.
+                    <p>I see you are looking at an index with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range. Click the button below to open the time picker. For future reference you can open the time picker by clicking the <a class="btn btn-xs navbtn" ng-click="toggleTimepicker(); toggledTimepicker = !toggledTimepicker" aria-expanded="{{toggledTimepicker}}" aria-label="time picker">time picker <i aria-hidden="true" class="oi oi-clock-o"></i></a> in the top right corner of your screen.
                   </p>
                 </div>
 

@@ -11,13 +11,13 @@
           ng-click="showConfig = !showConfig"
           type="button"
           class="btn btn-default btn-xs">
-          <i class="fa fa-tag"></i>
+          <i class="oi oi-tag"></i>
         </button>
         <button
           type="button"
           ng-click="agg.params.filters.splice($index, 1)"
           class="btn btn-danger btn-xs">
-          <i class="fa fa-times"></i>
+          <i class="oi oi-times"></i>
         </button>
       </div>
     </div>
@@ -46,7 +46,7 @@
 <input ng-model="agg.params.filters.length" name="filterLength" required min="1" type="number" class="ng-hide" />
 <div class="hintbox" ng-show="aggForm.filterLength.$invalid">
   <p>
-    <i class="fa fa-danger text-danger"></i>
+    <i class="oi oi-danger text-danger"></i>
     <strong>Required:</strong> You must specify at least one filter.
   </p>
 </div>

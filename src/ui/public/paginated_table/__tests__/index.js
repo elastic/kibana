@@ -282,9 +282,9 @@ describe('paginated table', function () {
       $scope.$digest();
 
       var sorters = $el.find('thead th i');
-      expect(sorters.eq(0).hasClass('fa-sort')).to.be(true);
-      expect(sorters.eq(1).hasClass('fa-sort')).to.be(false);
-      expect(sorters.eq(2).hasClass('fa-sort')).to.be(true);
+      expect(sorters.eq(0).hasClass('oi-sort')).to.be(true);
+      expect(sorters.eq(1).hasClass('oi-sort')).to.be(false);
+      expect(sorters.eq(2).hasClass('oi-sort')).to.be(true);
     });
 
   });

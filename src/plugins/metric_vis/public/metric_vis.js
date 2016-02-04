@@ -19,7 +19,7 @@ define(function (require) {
       title: 'Metric',
       description: 'One big number for all of your one big number needs. Perfect for showing ' +
         'a count of hits, or the exact average a numeric field.',
-      icon: 'fa-calculator',
+      icon: 'oi-calculator',
       template: require('plugins/metric_vis/metric_vis.html'),
       params: {
         defaults: {
