@@ -9,40 +9,48 @@
 @transition-delay: .2s;
 
 .app-links-wrapper {
-  width: @as-closed-width;
+  width: @as-open-width;
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 0;
   background-color: #3caed2;
   overflow: hidden;
   transition: width @transition-time;
   transition-delay: @transition-delay;
 
   &:hover {
-    width: @as-open-width;
-
     .app-title {
       display: inline-block;
+    }
+    + .app-wrapper {
+      transform: translateX(@as-open-width - @as-closed-width);
     }
   }
 
   .logo {
     height: 70px;
-    width: 165px;
+    width: @as-open-width;
     list-style-type: none;
+  }
+  .bottom-apps {
+    position: absolute;
+    bottom: 0;
   }
 }
 .app-wrapper {
   .real-flex-parent();
   position: absolute;
+  transition: transform @transition-time;
+  transition-delay: @transition-delay;
   left: @as-closed-width;
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 0;
+  z-index: 1;
   margin: 0 auto;
+  background-color: #fff;
 
   .navbar-right {
     margin-right: 0;
@@ -68,12 +76,14 @@
       width: @as-closed-width;
       background-position: center;
       background-size: contain;
+      > i {
+      }
     }
 
     .app-title {
       width: calc(@as-open-width - @as-closed-width);
       display: inline-block;
-      float: left;
+      float: right;
       font-size: 0.9em;
       text-align: center;
       line-height: @app-icon-height;
