@@ -7,7 +7,7 @@ define(function (require) {
 
   require('ui/modules').get('apps/settings')
   .directive('indexedFields', function ($filter) {
-    const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
+    const yesTemplate = '<i class="fa oi-check" aria-label="yes"></i>';
     const noTemplate = '';
     const filter = $filter('filter');
 

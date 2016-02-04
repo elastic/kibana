@@ -35,10 +35,10 @@ define(function (require) {
           if (!sortableField(column)) return;
 
           var sorting = $scope.sorting;
-          var defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
+          var defaultClass = ['fa', 'oi-sort-up', 'table-header-sortchange'];
 
           if (!sorting || column !== sorting[0]) return defaultClass;
-          return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
+          return ['fa', sorting[1] === 'asc' ? 'oi-sort-up' : 'oi-sort-down'];
         };
 
         $scope.moveLeft = function (column) {

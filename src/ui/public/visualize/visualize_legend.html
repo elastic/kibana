@@ -1,6 +1,6 @@
 <div class="legend-col-wrapper" ng-if="labels.length">
   <div ng-click="toggleLegend()" class="legend-toggle">
-    <i class="fa" ng-class="open ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+    <i class="oi" ng-class="open ? 'oi-chevron-right' : 'oi-chevron-left'"></i>
   </div>
   <ul class="legend-ul" ng-show="open">
 
@@ -16,20 +16,20 @@
           ng-click="showDetails = !showDetails"
           ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
           class="legend-value-title">
-          <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
+          <i class="oi oi-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
         </div>
 
         <div ng-if="showDetails" class="legend-value-details">
           <div ng-show="canFilter(legendData)">
-            <button class="btn btn-xs filter-button" ng-click="filter(legendData, false)"><i class="fa fa-search-plus"></i></button>
-            <button class="btn btn-xs filter-button" ng-click="filter(legendData, true)"><i class="fa fa-search-minus"></i></button>
+            <button class="btn btn-xs filter-button" ng-click="filter(legendData, false)"><i class="oi oi-magnifying-glass-plus"></i></button>
+            <button class="btn btn-xs filter-button" ng-click="filter(legendData, true)"><i class="oi oi-magnifying-glass-minus"></i></button>
           </div>
 
           <div class="legend-value-color-picker">
             <i ng-repeat="choice in colors"
               ng-click="setColor(legendData.label, choice)"
-              ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
-              ng-style="{color: choice}" class="fa dot">
+              ng-class="choice == getColor(legendData.label) ? 'oi-circle-o' : 'oi-circle'"
+              ng-style="{color: choice}" class="oi dot">
             </i>
           </div>
 

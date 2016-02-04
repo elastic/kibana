@@ -99,7 +99,6 @@
     "expose-loader": "0.7.0",
     "extract-text-webpack-plugin": "0.8.2",
     "file-loader": "0.8.4",
-    "font-awesome": "4.4.0",
     "good": "6.3.0",
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",

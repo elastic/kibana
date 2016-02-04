@@ -31,14 +31,14 @@
             type="button"
             ng-click="agg.params.ranges.splice($index, 1)"
             class="btn btn-danger btn-xs">
-            <i class="fa fa-times" ></i>
+            <i class="oi oi-times" ></i>
           </button>
         </td>
       </tr>
       <tr>
         <td colspan="3">
           <small>
-            <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#date-math">Accepted Date Formats <i class="fa-link fa"></i></a>
+            <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#date-math">Accepted Date Formats <i class="oi-link oi"></i></a>
           </small>
         </td>
       </tr>
@@ -47,7 +47,7 @@
     <input ng-model="agg.params.ranges.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
     <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
       <p>
-        <i class="fa fa-danger text-danger"></i>
+        <i class="oi oi-danger text-danger"></i>
         <strong>Required:</strong> You must specify at least one date range.
       </p>
     </div>
