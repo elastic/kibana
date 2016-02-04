@@ -3,7 +3,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins', 'Jenkins build script', compact([
     'test',
-    process.env.JOB_NAME === 'kibana_core' ? 'build' : null
+    process.env.JOB_NAME === 'kibana_core' ? 'build:ospackages' : null
   ]));
 
 };

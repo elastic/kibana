@@ -1,6 +1,6 @@
 define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
-  var Common = require('../../../support/pages/Common');
+  var Common = require('../../../support/pages/common');
   var SettingsPage = require('../../../support/pages/settings_page');
 
   return function (bdd, scenarioManager) {

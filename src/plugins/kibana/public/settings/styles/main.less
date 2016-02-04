@@ -203,8 +203,34 @@ kbn-settings-indices {
       font-weight: 300;
     }
   }
+
+  &.complete {
+    .wizard-step-heading:not(.active) {
+      color: #dddddd;
+      cursor: default;
+    }
+  }
 }
 
 .wizard-step-title {
   padding-bottom: 1em;
 }
+
+.pattern-review {
+  .time-field-input {
+    padding-left: 1em;
+    margin-bottom: 0;
+  }
+
+  .pattern-input {
+    width: 300px;
+  }
+}
+
+.paste-samples {
+  textarea {
+    width: 100%;
+    height: 250px;
+  }
+}
+

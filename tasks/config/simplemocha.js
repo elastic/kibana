@@ -1,3 +1,5 @@
+require('../../test/mocha_setup');
+
 module.exports = {
   options: {
     timeout: 10000,
