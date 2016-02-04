@@ -34,8 +34,7 @@ uiModules
   return {
     restrict: 'E',
     scope: {
-      'definition': '=',
-      'scope': '=?'
+      'definition': '='
     },
     template: function ($el, $attrs) {
       return $el.html();

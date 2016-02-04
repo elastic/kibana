@@ -23,7 +23,7 @@ module.exports = function (kibana) {
           'fieldFormats',
           'navbarExtensions',
           'settingsSections',
-          'docTableDetailViews'
+          'docViews'
         ],
 
         injectVars: function (server, options) {
