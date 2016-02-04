@@ -1,6 +1,7 @@
 import _ from 'lodash';
-define(function (require) {
+import registry from 'ui/registry/settings_sections';
 
+define(function (require) {
   require('ui/routes')
   .when('/settings/about', {
     template: require('plugins/kibana/settings/sections/about/index.html')
@@ -13,10 +14,10 @@ define(function (require) {
     $scope.buildSha = buildSha;
   });
 
-  return {
-    order: Infinity,
+  registry.register(_.constant({
+    order: 1001,
     name: 'about',
     display: 'About',
     url: '#/settings/about'
-  };
+  }));
 });

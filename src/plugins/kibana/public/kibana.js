@@ -1,7 +1,6 @@
 // autoloading
 
 // preloading (for faster webpack builds)
-
 import moment from 'moment-timezone';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
@@ -13,7 +12,6 @@ import 'plugins/kibana/discover/index';
 import 'plugins/kibana/visualize/index';
 import 'plugins/kibana/dashboard/index';
 import 'plugins/kibana/settings/index';
-import 'plugins/kibana/settings/sections';
 import 'plugins/kibana/doc';
 import 'ui/vislib';
 import 'ui/agg_response';
