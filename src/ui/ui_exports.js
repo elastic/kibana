@@ -62,6 +62,7 @@ class UiExports {
       case 'spyModes':
       case 'chromeNavControls':
       case 'navbarExtensions':
+      case 'docTableDetailViews':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };

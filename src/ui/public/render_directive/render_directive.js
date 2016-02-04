@@ -6,7 +6,8 @@ module.directive('renderDirective', function () {
   return {
     restrict: 'E',
     scope: {
-      'definition': '='
+      'definition': '=',
+      'scope': '=?'
     },
     template: function ($el, $attrs) {
       return $el.html();
