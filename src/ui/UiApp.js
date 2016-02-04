@@ -32,7 +32,7 @@ class UiApp {
     return _.chain([
       this.autoloadOverrides || autoload.require,
       this.uiExports.find(_.get(this, 'spec.uses', [])),
-      this.uiExports.find(['chromeNavControls']),
+      this.uiExports.find(['chromeNavControls', 'sledgehammers']),
     ])
     .flatten()
     .uniq()
