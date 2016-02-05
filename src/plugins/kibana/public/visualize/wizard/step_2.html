@@ -1,33 +1,31 @@
-<h1>
-  Select a search source
-  <span class="pull-right label label-default hidden-xs">Step 2</span>
-  <span class="label label-default visible-xs">Step 2</span>
-</h1>
-<ul class="list-group list-group-menu" ng-switch on="stepTwoMode">
-  <li ng-click="stepTwoMode='new'"
+<h2>Create New Visualization: Select Source</h2>
+<ul class="list-group list-group-menu">
+  <!-- <li ng-click="stepTwoMode='new'"
       ng-class="{'active': stepTwoMode=='new'}"
       class="list-group-item list-group-menu-item">
-    From a new search
-  </li>
-  <li class="list-group-item" ng-switch-when="new">
+    From a New Search
+  </li> -->
+  <li class="list-group-item">
     <!-- Index patterns -->
-    Select an index pattern
+    From a New Search
+    <!-- Select an index pattern... -->
     <div class="form-group">
-      <select
-              class="form-control"
+      <select class="form-control"
               ng-model="indexPattern.selection"
               ng-options="pattern as pattern for pattern in indexPattern.list | orderBy:'toString()'">
+        <option value="">Select an index pattern...</option>
       </select>
     </div>
   </li>
 
-  <li ng-click="stepTwoMode='saved'"
+  <!-- <li ng-click="stepTwoMode='saved'"
       ng-class="{'active': stepTwoMode=='saved'}"
       class="list-group-item list-group-menu-item">
-    From a saved search
-  </li>
-  <li class="list-group-item" ng-switch-when="saved">
+    Or, From a Saved Search
+  </li> -->
+  <li class="list-group-item">
     <!-- Saved searches -->
+    Or, From a Saved Search
     <saved-object-finder
             title="Saved Searches"
             type="searches"
