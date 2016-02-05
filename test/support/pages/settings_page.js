@@ -20,6 +20,10 @@ define(function (require) {
       return common.findTestSubject('settingsNav advanced').click();
     },
 
+    clickExistingIndicesAddDataLink: function () {
+      return common.findTestSubject('addData existingIndices').click();
+    },
+
     setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
       var self = this;
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
@@ -126,13 +130,11 @@ define(function (require) {
     },
 
     getCreateButton: function () {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn');
+      return common.findTestSubject('submitCreateIndexPatternFromExistingForm');
     },
 
     clickCreateButton: function () {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn').click();
+      return common.findTestSubject('submitCreateIndexPatternFromExistingForm').click();
     },
 
     clickDefaultIndexButton: function () {
@@ -305,17 +307,17 @@ define(function (require) {
       return common.tryForTime(defaultTimeout, function () {
         return self.selectTimeFieldOption('@timestamp')
         .then(function () {
-          return self.getCreateButton().click();
+          return self.clickCreateButton();
         });
       })
       .then(function () {
         return common.tryForTime(defaultTimeout, function () {
-          return self.remote.getCurrentUrl()
-          .then(function (currentUrl) {
-            if (!currentUrl.match(/indices\/.+\?/)) {
+          return common.findTestSubject('editIndexPattern')
+          .then(function (editPatternContainer) {
+            if (!editPatternContainer) {
               throw new Error('Index pattern not created');
             } else {
-              common.debug('Index pattern created: ' + currentUrl);
+              common.debug('Index pattern created');
             }
           });
         });

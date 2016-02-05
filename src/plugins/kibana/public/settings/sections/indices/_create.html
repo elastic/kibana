@@ -167,6 +167,7 @@
           </div>
 
           <button
+            data-test-subj="submitCreateIndexPatternFromExistingForm"
             ng-disabled="form.$invalid || index.fetchFieldsError"
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"

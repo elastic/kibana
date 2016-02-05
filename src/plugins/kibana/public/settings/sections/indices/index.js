@@ -1,7 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
 
+  require('plugins/kibana/settings/sections/indices/directives/kbn_settings_indices');
   require('plugins/kibana/settings/sections/indices/_create');
+  require('plugins/kibana/settings/sections/indices/filebeat/index');
   require('plugins/kibana/settings/sections/indices/_edit');
   require('plugins/kibana/settings/sections/indices/_field_editor');
 
@@ -15,37 +17,14 @@ define(function (require) {
     }
   });
 
-  // wrapper directive, which sets some global stuff up like the left nav
-  require('ui/modules').get('apps/settings')
-  .directive('kbnSettingsIndices', function ($route, config, kbnUrl) {
-    return {
-      restrict: 'E',
-      transclude: true,
-      template: require('plugins/kibana/settings/sections/indices/index.html'),
-      link: function ($scope) {
-        $scope.edittingId = $route.current.params.indexPatternId;
-        config.$bind($scope, 'defaultIndex');
-
-        $scope.$watch('defaultIndex', function () {
-          var ids = $route.current.locals.indexPatternIds;
-          $scope.indexPatternList = ids.map(function (id) {
-            return {
-              id: id,
-              url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
-              class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
-              default: $scope.defaultIndex === id
-            };
-          });
-        });
-
-        $scope.$emit('application.load');
-      }
-    };
-  });
+  require('ui/routes')
+    .when('/settings/indices', {
+      template: require('plugins/kibana/settings/sections/indices/index.html')
+    });
 
   return {
     name: 'indices',
     display: 'Indices',
-    url: '#/settings/indices',
+    url: '#/settings/indices'
   };
 });

@@ -32,7 +32,7 @@ define(function (require) {
         })
         .then(function (navigateTo) {
           common.debug('navigateTo');
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
         .then(function () {
           common.debug('createIndexPattern');

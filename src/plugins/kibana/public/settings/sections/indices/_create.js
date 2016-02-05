@@ -7,7 +7,7 @@ define(function (require) {
   require('ui/directives/auto_select_if_only_one');
 
   require('ui/routes')
-  .when('/settings/indices/', {
+  .when('/settings/indices/create/existing', {
     template: require('plugins/kibana/settings/sections/indices/_create.html')
   });
 
@@ -70,7 +70,7 @@ define(function (require) {
                 config.set('defaultIndex', indexPattern.id);
               }
               indexPatterns.cache.clear(indexPattern.id);
-              kbnUrl.change('/settings/indices/' + indexPattern.id);
+              kbnUrl.change('/settings/indices/edit/' + indexPattern.id);
             });
           }
         });
