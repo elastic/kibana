@@ -27,7 +27,6 @@ app.directive('pipelineSetup', function () {
 
       const pipeline = new Pipeline(processorTypes, Processor);
       if ($scope.pipeline) {
-        //debugger;
         pipeline.load($scope.pipeline);
         $scope.sample = $scope.pipeline.input;
       }

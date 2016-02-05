@@ -3,8 +3,8 @@
   <div class="controls">
     <select
       class="form-control"
-      ng-options="sample as sample.message for sample in samples track by $index"
-      ng-model="sample">
+      ng-options="sample as sample.message for sample in samples"
+      ng-model="selectedSample">
     </select>
     <button
       aria-label="Previous Line"

@@ -1,5 +1,6 @@
 const app = require('ui/modules').get('kibana');
 const _ = require('lodash');
+const angular = require('angular');
 require('../styles/_source_data.less');
 
 app.directive('sourceData', function () {
@@ -14,21 +15,25 @@ app.directive('sourceData', function () {
       const samples = $scope.samples;
 
       if (samples.length > 0) {
-        $scope.sample = samples[0];
+        $scope.selectedSample = samples[0];
       }
 
+      $scope.$watch('selectedSample', (newValue) => {
+        $scope.sample = angular.copy(newValue);
+      });
+
       $scope.previousLine = function () {
-        let currentIndex = samples.indexOf($scope.sample);
+        let currentIndex = samples.indexOf($scope.selectedSample);
         if (currentIndex <= 0) return;
 
-        $scope.sample = samples[currentIndex - 1];
+        $scope.selectedSample = samples[currentIndex - 1];
       };
 
       $scope.nextLine = function () {
-        let currentIndex = samples.indexOf($scope.sample);
+        let currentIndex = samples.indexOf($scope.selectedSample);
         if (currentIndex >= samples.length - 1) return;
 
-        $scope.sample = samples[currentIndex + 1];
+        $scope.selectedSample = samples[currentIndex + 1];
       };
     }
   };
