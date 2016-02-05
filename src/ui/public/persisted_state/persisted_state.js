@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import errors from 'ui/errors';
-import SimpleEmitter from 'ui/utils/SimpleEmitter';
+import { EventEmitter } from 'events';
 define(function (require) {
 
   return function (Private) {
@@ -46,7 +46,7 @@ define(function (require) {
     }
 
     _.class(PersistedState).inherits(Events);
-    parentDelegationMixin(SimpleEmitter, PersistedState);
+    parentDelegationMixin(EventEmitter, PersistedState);
     parentDelegationMixin(Events, PersistedState);
 
     function PersistedState(value, path, parent, silent) {
