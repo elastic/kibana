@@ -11,6 +11,7 @@ define(function (require) {
       name: 'filters',
       title: 'Filters',
       createFilter: createFilter,
+      customLabels: false,
       params: [
         {
           name: 'filters',
