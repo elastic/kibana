@@ -311,6 +311,21 @@ define(function (require) {
             return _.omit(filter, ['meta']);
           };
 
+          /**
+           * Translate a filter into a query to support es 3+
+           * @param  {Object} filter - The fitler to translate
+           * @return {Object} the query version of that filter
+           */
+          var translateToQuery = function (filter) {
+            if (!filter) return;
+
+            if (filter.query) {
+              return filter.query;
+            }
+
+            return filter;
+          };
+
           // switch to filtered query if there are filters
           if (flatState.filters) {
             if (flatState.filters.length) {
@@ -326,12 +341,14 @@ define(function (require) {
                     [flatState.body.query].concat(
                       (flatState.filters || [])
                       .filter(filterNegate(false))
+                      .map(translateToQuery)
                       .map(cleanFilter)
                     )
                   ),
                   must_not: (
                     (flatState.filters || [])
                     .filter(filterNegate(true))
+                    .map(translateToQuery)
                     .map(cleanFilter)
                   )
                 }
@@ -339,6 +356,25 @@ define(function (require) {
             }
             delete flatState.filters;
           }
+
+          // re-write filters within filter aggregations
+          (function recurse(aggBranch) {
+            if (!aggBranch) return;
+            Object.keys(aggBranch).forEach(function (id) {
+              const agg = aggBranch[id];
+
+              if (agg.filters) {
+                // translate filters aggregations
+                const filters = agg.filters.filters;
+
+                Object.keys(filters).forEach(function (filterId) {
+                  filters[filterId] = translateToQuery(filters[filterId]);
+                });
+              }
+
+              recurse(agg.aggs);
+            });
+          }(flatState.body.aggs || flatState.body.aggregations));
         }
 
         return flatState;

@@ -17,4 +17,3 @@ define(function (require) {
     };
   };
 });
-
