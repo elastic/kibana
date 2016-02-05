@@ -46,7 +46,7 @@ module.exports = function (grunt) {
 
       grunt.file.mkdir(targetDir);
       if (buildDeb || noneSpecified) {
-        fpm(args.concat('-t', 'deb', '-a', arch, files, sysv, systemd));
+        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files, sysv, systemd));
       }
       if (buildRpm || noneSpecified) {
         fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv, systemd));
