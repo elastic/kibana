@@ -14,7 +14,7 @@ module.exports = new Chainable('cusum', {
     }
   ],
   help: 'Return the cumulative sum of a series, starting at a base.',
-  fn: function derivativeFn(args) {
+  fn: function cusumFn(args) {
     return alter(args, function (eachSeries, base) {
       var pairs = eachSeries.data;
       var total = base || 0;

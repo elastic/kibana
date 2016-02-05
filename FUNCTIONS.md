@@ -7,10 +7,10 @@ Pull data from an elasticsearch instance
 
 ##### Arguments
 **q** (*string*) *optional*: Query in lucene query string syntax  
-**metric** (*string*) *optional*: An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality  
+**metric** (*string*) *optional*: An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes"  
 **index** (*string*) *optional*: Index to query, wildcards accepted  
 **timefield** (*string*) *optional*: Field of type "date" to use for x-axis  
-**interval** (*string*) *optional*: Interval to use for date histogram **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker  
+**interval** (*string*) *optional*: **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker  
 **url** (*string*) *optional*: Elasticsearch server URL, eg http://localhost:9200  
 **offset** (*string*) *optional*: Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
 **fit** (*string*) *optional*: Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  

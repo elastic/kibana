@@ -62,7 +62,7 @@ module.exports = new Datasource('es', {
     {
       name: 'metric',
       types: ['string', 'null'],
-      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality'
+      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes"'
     },
     {
       name: 'index',
@@ -77,7 +77,7 @@ module.exports = new Datasource('es', {
     {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
-      help: 'Interval to use for date histogram **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker'
+      help: '**DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker'
     },
     {
       name: 'url',
@@ -135,4 +135,3 @@ module.exports = new Datasource('es', {
     });
   }
 });
-
