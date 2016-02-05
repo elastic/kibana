@@ -3,56 +3,6 @@ const template = require('plugins/kibana/settings/sections/indices/add_data_step
 const _ = require('lodash');
 const editFieldTypeHTML = require('plugins/kibana/settings/sections/indices/partials/_edit_field_type.html');
 
-const testData = {
-  message: '11/24/2015 ip=1.1.1.1 bytes=1234',
-  clientip: '1.1.1.1',
-  bytes: 1234,
-  geoip: {
-    lat: 37.3894,
-    lon: 122.0819
-  },
-  location: {
-    lat: 37.3894,
-    lon: 122.0819
-  },
-  '@timestamp': '2015-11-24T00:00:00.000Z',
-  otherdate: '2015-11-24T00:00:00.000Z',
-  codes: [1, 2, 3, 4]
-};
-
-const testPipeline = [
-  {
-    grok: {
-      match_field: 'message',
-      match_pattern: 'foo'
-    }
-  },
-  {
-    geoip: {
-      source_field: 'ip'
-    }
-  },
-  {
-    geoip: {
-      source_field: 'ip',
-      target_field: 'location'
-    }
-  },
-  {
-    date: {
-      match_field: 'initialDate',
-      match_formats: ['dd/MM/yyyy hh:mm:ss']
-    }
-  },
-  {
-    date: {
-      match_field: 'initialDate',
-      match_formats: ['dd/MM/yyyy hh:mm:ss'],
-      target_field: 'otherdate'
-    }
-  }
-];
-
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
     return undefined;
@@ -73,16 +23,13 @@ modules.get('apps/settings')
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
-        this.sampleDocs = testData;
-        this.pipeline = testPipeline;
-
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
 
         const knownFieldTypes = {};
         this.dateFields = [];
-        this.pipeline.forEach((processor) => {
+        this.pipeline.processors.forEach((processor) => {
           if (processor.geoip) {
             const field = processor.geoip.target_field || 'geoip';
             knownFieldTypes[field] = 'geo_point';
