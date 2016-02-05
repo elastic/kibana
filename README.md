@@ -6,14 +6,22 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 ## Requirements
 
-- Elasticsearch version 2.1.0 or later
+- Elasticsearch version 2.2.0 or later
 - Kibana binary package
 
 ## Installation
 
 * Download: [http://www.elastic.co/downloads/kibana](http://www.elastic.co/downloads/kibana)
+* Extract the files
 * Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
+
+
+## Upgrade from previous version
+
+* Move any custom configurations in your old kibana.yml to your new one
+* Reinstall plugins
+* Start or restart Kibana
 
 ## Quick Start
 

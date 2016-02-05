@@ -62,7 +62,8 @@ define(function (require) {
         return new Promise(function (resolve) {
           var action = req.started ? req.continue : req.start;
           resolve(action.call(req));
-        });
+        })
+        .catch(err => req.handleFailure(err));
       });
     }
 

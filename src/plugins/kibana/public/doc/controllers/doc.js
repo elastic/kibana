@@ -1,21 +1,21 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
+  const _ = require('lodash');
+  const angular = require('angular');
 
   require('ui/notify');
   require('ui/courier');
   require('ui/doc_viewer');
   require('ui/index_patterns');
 
-  var app = require('ui/modules').get('apps/doc', [
+  const app = require('ui/modules').get('apps/doc', [
     'kibana/notify',
     'kibana/courier',
     'kibana/index_patterns'
   ]);
 
-  var html = require('plugins/kibana/doc/index.html');
+  const html = require('plugins/kibana/doc/index.html');
 
-  var resolveIndexPattern = {
+  const resolveIndexPattern = {
     indexPattern: function (courier, savedSearches, $route) {
       return courier.indexPatterns.get($route.current.params.indexPattern);
     }
@@ -38,7 +38,7 @@ define(function (require) {
     // Pretty much only need this for formatting, not actually using it for fetching anything.
     $scope.indexPattern = $route.current.locals.indexPattern;
 
-    var computedFields = $scope.indexPattern.getComputedFields();
+    const computedFields = $scope.indexPattern.getComputedFields();
 
     es.search({
       index: $route.current.params.index,

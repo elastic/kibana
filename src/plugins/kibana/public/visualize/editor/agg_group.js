@@ -1,4 +1,4 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
 define(function (require) {
   require('ui/modules')
@@ -21,7 +21,7 @@ define(function (require) {
           'schemas',
           '[]group'
         ], function () {
-          var stats = $scope.stats = {
+          const stats = $scope.stats = {
             min: 0,
             max: 0,
             count: $scope.group ? $scope.group.length : 0
@@ -35,7 +35,7 @@ define(function (require) {
           });
 
           $scope.availableSchema = $scope.schemas.filter(function (schema) {
-            var count = _.where($scope.group, { schema }).length;
+            const count = _.where($scope.group, { schema }).length;
             if (count < schema.max) return true;
           });
         });

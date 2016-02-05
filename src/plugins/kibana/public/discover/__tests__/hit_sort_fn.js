@@ -1,10 +1,10 @@
 
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const _ = require('lodash');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 
 describe('hit sort function', function () {
-  var createHitSortFn;
+  let createHitSortFn;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -12,17 +12,17 @@ describe('hit sort function', function () {
   }));
 
 
-  var runSortTest = function (dir, sortOpts) {
-    var groupSize = _.random(10, 30);
-    var total = sortOpts.length * groupSize;
+  const runSortTest = function (dir, sortOpts) {
+    const groupSize = _.random(10, 30);
+    const total = sortOpts.length * groupSize;
 
     sortOpts = sortOpts.map(function (opt) {
       if (_.isArray(opt)) return opt;
       else return [opt];
     });
-    var sortOptLength = sortOpts.length;
+    const sortOptLength = sortOpts.length;
 
-    var hits = _.times(total, function (i) {
+    const hits = _.times(total, function (i) {
       return {
         _source: {},
         sort: sortOpts[i % sortOptLength]
@@ -31,7 +31,7 @@ describe('hit sort function', function () {
 
     hits.sort(createHitSortFn(dir))
     .forEach(function (hit, i) {
-      var group = Math.floor(i / groupSize);
+      const group = Math.floor(i / groupSize);
       expect(hit.sort).to.eql(sortOpts[group]);
     });
   };

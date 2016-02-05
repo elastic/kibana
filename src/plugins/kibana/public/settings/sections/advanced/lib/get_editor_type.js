@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
-  var NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
+  const NAMED_EDITORS = ['json', 'array', 'boolean', 'select'];
+  const NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
   /**
    * @param {object} advanced setting configuration object

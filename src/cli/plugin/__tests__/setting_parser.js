@@ -76,11 +76,11 @@ describe('kibana cli', function () {
           options = { install: 'dummy/dummy', pluginDir: fromRoot('installedPlugins') };
         });
 
-        it('should require the user to specify either install and remove', function () {
+        it('should require the user to specify either install, remove, or list', function () {
           options.install = null;
           parser = settingParser(options);
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install or --remove./);
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
         });
 
         it('should not allow the user to specify both install and remove', function () {
@@ -88,7 +88,32 @@ describe('kibana cli', function () {
           options.install = 'org/package/version';
           parser = settingParser(options);
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install or --remove./);
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
+        });
+
+        it('should not allow the user to specify both install and list', function () {
+          options.list = true;
+          options.install = 'org/package/version';
+          parser = settingParser(options);
+
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
+        });
+
+        it('should not allow the user to specify both remove and list', function () {
+          options.list = true;
+          options.remove = 'package';
+          parser = settingParser(options);
+
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
+        });
+
+        it('should not allow the user to specify install, remove, and list', function () {
+          options.list = true;
+          options.install = 'org/package/version';
+          options.remove = 'package';
+          parser = settingParser(options);
+
+          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
         });
 
         describe('quiet option', function () {
@@ -293,7 +318,7 @@ describe('kibana cli', function () {
         describe('remove option', function () {
 
           it('should set settings.action property to "remove"', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'package';
             parser = settingParser(options);
 
@@ -303,7 +328,7 @@ describe('kibana cli', function () {
           });
 
           it('should allow one part to the remove parameter', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'test-plugin';
             parser = settingParser(options);
 
@@ -312,8 +337,8 @@ describe('kibana cli', function () {
             expect(settings).to.have.property('package', 'test-plugin');
           });
 
-          it('should not allow more than one part to the install parameter', function () {
-            options.install = null;
+          it('should not allow more than one part to the remove parameter', function () {
+            delete options.install;
             options.remove = 'kibana/test-plugin';
             parser = settingParser(options);
 
@@ -322,7 +347,7 @@ describe('kibana cli', function () {
           });
 
           it('should populate the pluginPath', function () {
-            options.install = null;
+            delete options.install;
             options.remove = 'test-plugin';
             parser = settingParser(options);
 
@@ -330,6 +355,21 @@ describe('kibana cli', function () {
             var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
+          });
+
+        });
+
+        describe('list option', function () {
+
+          it('should set settings.action property to "list"', function () {
+            delete options.install;
+            delete options.remove;
+            options.list = true;
+            parser = settingParser(options);
+
+            var settings = parser.parse();
+
+            expect(settings).to.have.property('action', 'list');
           });
 
         });

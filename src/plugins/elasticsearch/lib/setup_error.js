@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var util = require('util');
+const _ = require('lodash');
+const util = require('util');
 
 function SetupError(server, template, err) {
-  var config = server.config().get();
+  const config = server.config().get();
   // don't override other setup errors
   if (err && err instanceof SetupError) return err;
   Error.captureStackTrace(this, this.constructor);

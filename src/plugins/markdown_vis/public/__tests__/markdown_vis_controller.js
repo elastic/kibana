@@ -1,9 +1,9 @@
 
 describe('markdown vis controller', function () {
-  var $scope;
-  var $el;
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
+  let $scope;
+  let $el;
+  const ngMock = require('ngMock');
+  const expect = require('expect.js');
 
   beforeEach(ngMock.module('kibana/markdown_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {

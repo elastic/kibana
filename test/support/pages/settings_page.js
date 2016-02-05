@@ -2,7 +2,7 @@
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var defaultTimeout = config.timeouts.default;
   var common;
@@ -41,9 +41,40 @@ define(function (require) {
     },
 
 
+    clickAdvancedTab: function () {
+      common.debug('in clickAdvancedTab');
+      return common.findTestSubject('settingsNav advanced').click();
+    },
+
+    setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
+      var self = this;
+      return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
+      .click()
+      .then(function () {
+        return common.sleep(1000);
+      })
+      .then(function setAdvancedSettingsClickPropertyValue(selectList) {
+        return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
+        .click();
+      })
+      .then(function setAdvancedSettingsClickSaveButton() {
+        return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
+        .click();
+      });
+    },
+
+    getAdvancedSettings: function getAdvancedSettings(propertyName) {
+      var self = this;
+      common.debug('in setAdvancedSettings');
+      return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+      .getVisibleText();
+    },
+
+
     navigateTo: function () {
       return common.navigateToApp('settings');
     },
+
 
     getTimeBasedEventsCheckbox: function () {
       return this.remote.setFindTimeout(defaultTimeout)
@@ -283,6 +314,8 @@ define(function (require) {
           .then(function (currentUrl) {
             if (!currentUrl.match(/indices\/.+\?/)) {
               throw new Error('Index pattern not created');
+            } else {
+              common.debug('Index pattern created: ' + currentUrl);
             }
           });
         });

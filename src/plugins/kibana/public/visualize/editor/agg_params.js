@@ -1,18 +1,18 @@
 define(function (require) {
-  var IndexedArray = require('ui/IndexedArray');
+  const IndexedArray = require('ui/IndexedArray');
 
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var aggTypes = Private(require('ui/agg_types/index'));
-    var aggSelectHtml = require('plugins/kibana/visualize/editor/agg_select.html');
-    var advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
+    const _ = require('lodash');
+    const $ = require('jquery');
+    const aggTypes = Private(require('ui/agg_types/index'));
+    const aggSelectHtml = require('plugins/kibana/visualize/editor/agg_select.html');
+    const advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
     require('ui/filters/match_any');
     require('plugins/kibana/visualize/editor/agg_param');
 
-    var notify = new Notifier({
+    const notify = new Notifier({
       location: 'visAggGroup'
     });
 
@@ -29,7 +29,7 @@ define(function (require) {
 
         // this will contain the controls for the schema (rows or columns?), which are unrelated to
         // controls for the agg, which is why they are first
-        var $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($el);
+        const $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($el);
 
         if ($scope.agg.schema.editor) {
           $schemaEditor.append($scope.agg.schema.editor);
@@ -37,12 +37,12 @@ define(function (require) {
         }
 
         // allow selection of an aggregation
-        var $aggSelect = $(aggSelectHtml).appendTo($el);
+        const $aggSelect = $(aggSelectHtml).appendTo($el);
         $compile($aggSelect)($scope);
 
         // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
-        var $aggParamEditors; //  container for agg type param editors
-        var $aggParamEditorsScope;
+        let $aggParamEditors; //  container for agg type param editors
+        let $aggParamEditorsScope;
         $scope.$watch('agg.type', function updateAggParamEditor(newType, oldType) {
           if ($aggParamEditors) {
             $aggParamEditors.remove();
@@ -58,10 +58,10 @@ define(function (require) {
           // create child scope, used in the editors
           $aggParamEditorsScope = $scope.$new();
 
-          var agg = $scope.agg;
+          const agg = $scope.agg;
           if (!agg) return;
 
-          var type = $scope.agg.type;
+          const type = $scope.agg.type;
 
           if (newType !== oldType) {
             // don't reset on initial load, the
@@ -71,29 +71,29 @@ define(function (require) {
 
           if (!type) return;
 
-          var aggParamHTML = {
+          const aggParamHTML = {
             basic: [],
             advanced: []
           };
 
           // build collection of agg params html
           type.params.forEach(function (param, i) {
-            var aggParam;
+            let aggParam;
             // if field param exists, compute allowed fields
             if (param.name === 'field') {
               $aggParamEditorsScope.indexedFields = getIndexedFields(param);
             }
 
             if ($aggParamEditorsScope.indexedFields) {
-              var hasIndexedFields = $aggParamEditorsScope.indexedFields.length > 0;
-              var isExtraParam = i > 0;
+              const hasIndexedFields = $aggParamEditorsScope.indexedFields.length > 0;
+              const isExtraParam = i > 0;
               if (!hasIndexedFields && isExtraParam) { // don't draw the rest of the options if their are no indexed fields.
                 return;
               }
             }
 
 
-            var type = 'basic';
+            let type = 'basic';
             if (param.advanced) type = 'advanced';
 
             if (aggParam = getAggParamHTML(param, i)) {
@@ -103,7 +103,7 @@ define(function (require) {
           });
 
           // compile the paramEditors html elements
-          var paramEditors = aggParamHTML.basic;
+          let paramEditors = aggParamHTML.basic;
 
           if (aggParamHTML.advanced.length) {
             paramEditors.push($(advancedToggleHtml).get(0));
@@ -121,7 +121,7 @@ define(function (require) {
             return;
           }
 
-          var attrs = {
+          const attrs = {
             'agg-param': 'agg.type.params[' + idx + ']'
           };
 
@@ -136,8 +136,8 @@ define(function (require) {
         }
 
         function getIndexedFields(param) {
-          var fields = $scope.agg.vis.indexPattern.fields.raw;
-          var fieldTypes = param.filterFieldTypes;
+          let fields = $scope.agg.vis.indexPattern.fields.raw;
+          const fieldTypes = param.filterFieldTypes;
 
           if (fieldTypes) {
             fields = $filter('fieldType')(fields, fieldTypes);

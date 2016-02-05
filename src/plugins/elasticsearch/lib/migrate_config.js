@@ -1,9 +1,9 @@
-var upgrade = require('./upgrade_config');
+const upgrade = require('./upgrade_config');
 
 module.exports = function (server) {
-  var config = server.config();
-  var client = server.plugins.elasticsearch.client;
-  var options =  {
+  const config = server.config();
+  const client = server.plugins.elasticsearch.client;
+  const options =  {
     index: config.get('kibana.index'),
     type: 'config',
     body: {

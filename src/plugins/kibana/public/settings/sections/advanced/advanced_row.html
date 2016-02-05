@@ -16,7 +16,7 @@
     <!-- Settings editors -->
     <form
       name="forms.configEdit"
-      ng-if="conf.editting"
+      ng-if="conf.editing"
       ng-submit="save(conf)"
       role="form">
 
@@ -65,7 +65,7 @@
     </form>
 
     <!-- Setting display formats -->
-    <span ng-if="!conf.editting" data-test-subj="currentValue">
+    <span ng-if="!conf.editing" data-test-subj="currentValue">
       <span ng-show="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
       <span ng-show="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
       <span ng-show="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
@@ -74,7 +74,7 @@
   </td>
   <td class="actions">
     <button
-      ng-if="!conf.editting"
+      ng-if="!conf.editing"
       ng-click="edit(conf)"
       class="btn btn-default"
       ng-disabled="conf.tooComplex"
@@ -85,7 +85,7 @@
     </button>
 
     <button
-      ng-if="conf.editting"
+      ng-if="conf.editing"
       ng-click="save(conf)"
       class="btn btn-success"
       ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
@@ -97,7 +97,7 @@
     </button>
 
     <button
-      ng-if="!conf.editting"
+      ng-if="!conf.editing"
       ng-click="clear(conf)"
       ng-hide="conf.value === undefined"
       class="btn btn-danger"
@@ -108,7 +108,7 @@
     </button>
 
     <button
-      ng-if="conf.editting"
+      ng-if="conf.editing"
       ng-click="cancelEdit(conf)"
       class="btn btn-default"
       aria-label="Cancel edit"

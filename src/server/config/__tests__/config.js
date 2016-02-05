@@ -1,4 +1,4 @@
-var Config = require('../Config');
+var Config = require('../config');
 var expect = require('expect.js');
 var _ = require('lodash');
 var Joi = require('joi');
@@ -228,4 +228,3 @@ describe('lib/config/config', function () {
 
   });
 });
-

@@ -1,7 +1,7 @@
 // in test/support/pages/HeaderPage.js
 define(function (require) {
   var config = require('intern').config;
-  var Common = require('./Common');
+  var Common = require('./common');
 
   var common;
 
@@ -82,8 +82,12 @@ define(function (require) {
 
     setAbsoluteRange: function setAbsoluteRange(fromTime, toTime) {
       var self = this;
-      common.debug('--Clicking Absolute button');
-      return self.clickAbsoluteButton()
+      common.debug('clickTimepicker');
+      return self.clickTimepicker()
+      .then(function () {
+        common.debug('--Clicking Absolute button');
+        return self.clickAbsoluteButton();
+      })
       .then(function () {
         common.debug('--Setting From Time : ' + fromTime);
         return self.setFromTime(fromTime);
@@ -94,6 +98,9 @@ define(function (require) {
       })
       .then(function () {
         return self.clickGoButton();
+      })
+      .then(function () {
+        self.collapseTimepicker();
       });
     },
 
@@ -128,8 +135,21 @@ define(function (require) {
           return;
         });
       });
-    }
+    },
 
+    clickToastOK: function clickToastOK() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('button[ng-if="notif.accept"]')
+      .click();
+    },
+
+    getSpinnerDone: function getSpinnerDone() {
+      var self = this;
+      return this.remote
+      .setFindTimeout(defaultTimeout * 10)
+      .findByCssSelector('span.spinner.ng-hide');
+    }
 
   };
 

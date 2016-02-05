@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var module = require('ui/modules').get('kibana');
+  const _ = require('lodash');
+  const $ = require('jquery');
+  const module = require('ui/modules').get('kibana');
 
   module.directive('vislibBasicOptions', function ($parse, $compile) {
     return {
