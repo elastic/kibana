@@ -1,18 +1,18 @@
-var Promise = require('bluebird');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var NoConnections = require('elasticsearch').errors.NoConnections;
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import expect from 'expect.js';
+const NoConnections = require('elasticsearch').errors.NoConnections;
 
-var healthCheck = require('../health_check');
+import healthCheck from '../health_check';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {
 
-    var health;
-    var plugin;
-    var server;
-    var get;
-    var client;
+    let health;
+    let plugin;
+    let server;
+    let get;
+    let client;
 
     beforeEach(function () {
       // setup the plugin stub
@@ -85,7 +85,7 @@ describe('plugins/elasticsearch', function () {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
           expect(plugin.status.red.args[0][0]).to.be(
-            'Unable to connect to Elasticsearch at http://localhost:9210. Retrying in 2.5 seconds.'
+            'Unable to connect to Elasticsearch at http://localhost:9210.'
           );
           sinon.assert.calledTwice(client.ping);
           sinon.assert.calledOnce(client.nodes.info);
@@ -109,7 +109,7 @@ describe('plugins/elasticsearch', function () {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
           expect(plugin.status.red.args[0][0]).to.be(
-            'Elasticsearch is still initializing the kibana index... Trying again in 2.5 second.'
+            'Elasticsearch is still initializing the kibana index.'
           );
           sinon.assert.calledOnce(client.ping);
           sinon.assert.calledOnce(client.nodes.info);
@@ -139,5 +139,16 @@ describe('plugins/elasticsearch', function () {
         });
     });
 
+    describe('#waitUntilReady', function () {
+      it('polls health until index is ready', function () {
+        client.cluster.health.onCall(0).returns(Promise.resolve({ timed_out: true })); // no index
+        client.cluster.health.onCall(1).returns(Promise.resolve({ status: 'red' }));   // initializing
+        client.cluster.health.onCall(2).returns(Promise.resolve({ status: 'green' })); // ready
+
+        return health.waitUntilReady().then(function () {
+          sinon.assert.calledThrice(client.cluster.health);
+        });
+      });
+    });
   });
 });

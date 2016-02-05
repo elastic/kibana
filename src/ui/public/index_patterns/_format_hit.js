@@ -1,7 +1,7 @@
+import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formated version
 define(function (require) {
-  var _ = require('lodash');
 
   return function (indexPattern, defaultFormat) {
 

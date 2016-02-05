@@ -1,5 +1,5 @@
-const { createWriteStream, createReadStream, unlinkSync, statSync } = require('fs');
-const getProgressReporter = require('../progress_reporter');
+import getProgressReporter from '../progress_reporter';
+import { createWriteStream, createReadStream, unlinkSync, statSync } from 'fs';
 
 function openSourceFile({ sourcePath }) {
   try {

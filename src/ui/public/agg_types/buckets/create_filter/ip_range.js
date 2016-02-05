@@ -1,6 +1,6 @@
+import CidrMask from 'ui/utils/CidrMask';
+import buildRangeFilter from 'ui/filter_manager/lib/range';
 define(function (require) {
-  var CidrMask = require('ui/utils/CidrMask');
-  var buildRangeFilter = require('ui/filter_manager/lib/range');
   return function createIpRangeFilterProvider() {
     return function (aggConfig, key) {
       var range;

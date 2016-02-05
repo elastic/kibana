@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var MockState = require('fixtures/mock_state');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import MockState from 'fixtures/mock_state';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 var $rootScope;
 var queryFilter;
 var filterManager;

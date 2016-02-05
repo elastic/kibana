@@ -1,28 +1,28 @@
+import moment from 'moment';
+import $ from 'jquery';
+import _ from 'lodash';
+import 'ui/visualize';
+import 'ui/doc_table';
 define(function (require) {
-  var moment = require('moment');
-  var $ = require('jquery');
   require('ui/modules')
   .get('app/dashboard')
   .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector) {
-    var _ = require('lodash');
-    var loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
-    var filterManager = Private(require('ui/filter_manager'));
-    var notify = new Notifier();
+    const loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
+    const filterManager = Private(require('ui/filter_manager'));
+    const notify = new Notifier();
 
-    var services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
-      var service = $injector.get(serviceObj.service);
+    const services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
+      const service = $injector.get(serviceObj.service);
       return {
         type: service.type,
         name: serviceObj.service
       };
     });
 
-    require('ui/visualize');
-    require('ui/doc_table');
 
-    var brushEvent = Private(require('ui/utils/brush_event'));
+    const brushEvent = Private(require('ui/utils/brush_event'));
 
-    var getPanelId = function (panel) {
+    const getPanelId = function (panel) {
       return ['P', panel.panelIndex].join('-');
     };
 
@@ -32,7 +32,7 @@ define(function (require) {
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState
-        var $state = $scope.state;
+        const $state = $scope.state;
 
         // receives $scope.panel from the dashboard grid directive, seems like should be isolate?
         $scope.$watch('id', function () {
@@ -49,11 +49,11 @@ define(function (require) {
             });
 
             // create child ui state from the savedObj
-            var uiState = panelConfig.uiState || {};
+            const uiState = panelConfig.uiState || {};
             $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
 
             $scope.filter = function (field, value, operator) {
-              var index = $scope.savedObj.searchSource.get('index').id;
+              const index = $scope.savedObj.searchSource.get('index').id;
               filterManager.add(field, value, operator, index);
             };
           })
@@ -63,12 +63,12 @@ define(function (require) {
             // If the savedObjectType matches the panel type, this means the object itself has been deleted,
             // so we shouldn't even have an edit link. If they don't match, it means something else is wrong
             // with the object (but the object still exists), so we link to the object editor instead.
-            var objectItselfDeleted = e.savedObjectType === $scope.panel.type;
+            const objectItselfDeleted = e.savedObjectType === $scope.panel.type;
             if (objectItselfDeleted) return;
 
-            var type = $scope.panel.type;
-            var id = $scope.panel.id;
-            var service = _.find(services, { type: type });
+            const type = $scope.panel.type;
+            const id = $scope.panel.id;
+            const service = _.find(services, { type: type });
             if (!service) return;
 
             $scope.editUrl = '#settings/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;

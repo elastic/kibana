@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import dateMath from 'ui/utils/dateMath';
 define(function (require) {
-  var _ = require('lodash');
-  var dateMath = require('ui/utils/dateMath');
 
   require('ui/modules').get('kibana').directive('validateDateMath', function () {
     return {

@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import angular from 'angular';
+import rison from 'ui/utils/rison';
+import registry from 'plugins/kibana/settings/saved_object_registry';
+import objectViewHTML from 'plugins/kibana/settings/sections/objects/_view.html';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var rison = require('ui/utils/rison');
-  var registry = require('plugins/kibana/settings/saved_object_registry');
-  var objectViewHTML = require('plugins/kibana/settings/sections/objects/_view.html');
 
   require('ui/routes')
   .when('/settings/objects/:service/:id', {
@@ -15,10 +15,10 @@ define(function (require) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
-        var notify = new Notifier({ location: 'SavedObject view' });
-        var castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
-        var serviceObj = registry.get($routeParams.service);
-        var service = $injector.get(serviceObj.service);
+        const notify = new Notifier({ location: 'SavedObject view' });
+        const castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
+        const serviceObj = registry.get($routeParams.service);
+        const service = $injector.get(serviceObj.service);
 
         /**
          * Creates a field definition and pushes it to the memo stack. This function
@@ -33,14 +33,14 @@ define(function (require) {
          * @param {array} parents The parent keys to the field
          * @returns {array}
          */
-        var createField = function (memo, val, key, collection, parents) {
+        const createField = function (memo, val, key, collection, parents) {
           if (_.isArray(parents)) {
             parents.push(key);
           } else {
             parents = [key];
           }
 
-          var field = { type: 'text', name: parents.join('.'), value: val };
+          const field = { type: 'text', name: parents.join('.'), value: val };
 
           if (_.isString(field.value)) {
             try {
@@ -70,8 +70,8 @@ define(function (require) {
           return memo;
         };
 
-        var readObjectClass = function (fields, Class) {
-          var fieldMap = _.indexBy(fields, 'name');
+        const readObjectClass = function (fields, Class) {
+          const fieldMap = _.indexBy(fields, 'name');
 
           _.forOwn(Class.mapping, function (esType, name) {
             if (fieldMap[name]) return;
@@ -111,7 +111,7 @@ define(function (require) {
           $scope.obj = obj;
           $scope.link = service.urlFor(obj._id);
 
-          var fields =  _.reduce(obj._source, createField, []);
+          const fields =  _.reduce(obj._source, createField, []);
           if (service.Class) readObjectClass(fields, service.Class);
           $scope.fields = _.sortBy(fields, 'name');
         })
@@ -122,7 +122,7 @@ define(function (require) {
         // we need to use the annotations to see if they have any errors. If they
         // do then we push the field.name to aceInvalidEditor variable.
         // Otherwise we remove it.
-        var loadedEditors = [];
+        const loadedEditors = [];
         $scope.aceInvalidEditors = [];
 
         $scope.aceLoaded = function (editor) {
@@ -131,13 +131,13 @@ define(function (require) {
 
           editor.$blockScrolling = Infinity;
 
-          var session = editor.getSession();
-          var fieldName = editor.container.id;
+          const session = editor.getSession();
+          const fieldName = editor.container.id;
 
           session.setTabSize(2);
           session.setUseSoftTabs(true);
           session.on('changeAnnotation', function () {
-            var annotations = session.getAnnotations();
+            const annotations = session.getAnnotations();
             if (_.some(annotations, { type: 'error'})) {
               if (!_.contains($scope.aceInvalidEditors, fieldName)) {
                 $scope.aceInvalidEditors.push(fieldName);
@@ -173,10 +173,10 @@ define(function (require) {
         };
 
         $scope.submit = function () {
-          var source = _.cloneDeep($scope.obj._source);
+          const source = _.cloneDeep($scope.obj._source);
 
           _.each($scope.fields, function (field) {
-            var value = field.value;
+            let value = field.value;
 
             if (field.type === 'number') {
               value = Number(field.value);
@@ -206,7 +206,7 @@ define(function (require) {
             index: kbnIndex
           })
           .then(function (resp) {
-            var msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+            const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
 
             $location.path('/settings/objects').search({
               _a: rison.encode({

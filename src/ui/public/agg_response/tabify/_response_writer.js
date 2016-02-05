@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import AggConfigResult from 'ui/Vis/AggConfigResult';
 define(function (require) {
   return function TabbedAggResponseWriterProvider(Private) {
-    var _ = require('lodash');
     var Table = Private(require('ui/agg_response/tabify/_table'));
     var TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
     var getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
 
-    var AggConfigResult = require('ui/Vis/AggConfigResult');
 
     _.class(SplitAcr).inherits(AggConfigResult);
     function SplitAcr(agg, parent, key) {

@@ -1,9 +1,9 @@
-let _ = require('lodash');
-let Squeeze = require('good-squeeze').Squeeze;
-let writeStr = require('fs').createWriteStream;
+import _ from 'lodash';
 
-let LogFormatJson = require('./LogFormatJson');
-let LogFormatString = require('./LogFormatString');
+import LogFormatJson from './LogFormatJson';
+import LogFormatString from './log_format_string';
+import { Squeeze } from 'good-squeeze';
+import { createWriteStream as writeStr } from 'fs';
 
 module.exports = class KbnLogger {
   constructor(events, config) {

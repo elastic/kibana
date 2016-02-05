@@ -1,6 +1,6 @@
+import moment from 'moment-timezone';
+import _ from 'lodash';
 define(function (require) {
-  var moment = require('moment-timezone');
-  var _ = require('lodash');
 
   return function configDefaultsProvider() {
     // wraped in provider so that a new instance is given to each app/test
@@ -200,7 +200,11 @@ define(function (require) {
       },
       'dashboard:defaultDarkTheme': {
         value: false,
-        description: 'New dashboards use dark theme by default',
+        description: 'New dashboards use dark theme by default'
+      },
+      'filters:pinnedByDefault': {
+        value: false,
+        description: 'Whether the filters should have a global state (be pinned) by default'
       }
     };
   };

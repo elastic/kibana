@@ -1,5 +1,7 @@
+import _ from 'lodash';
+import formatESMsg from 'ui/notify/lib/_format_es_msg';
 define(function (require) {
-  var formatESMsg = require('ui/notify/lib/_format_es_msg');
+  var has = _.has;
 
   /**
    * Formats the error message from an error object, extended elasticsearch
@@ -22,6 +24,9 @@ define(function (require) {
       rtn += esMsg;
     } else if (err instanceof Error) {
       rtn += formatMsg.describeError(err);
+    } else if (has(err, 'status') && has(err, 'data')) {
+      // is an Angular $http "error object"
+      rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
     }
 
     return rtn;

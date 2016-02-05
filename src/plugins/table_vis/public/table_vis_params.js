@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   require('ui/modules').get('kibana/table_vis')
   .directive('tableVisParams', function () {
@@ -13,7 +13,7 @@ define(function (require) {
         ], function () {
           if (!$scope.vis) return;
 
-          var params = $scope.vis.params;
+          const params = $scope.vis.params;
           if (params.showPartialRows || params.showMeticsAtAllLevels) {
             $scope.metricsAtAllLevels = true;
           } else {

@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('Histogram Agg', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   describe('ordered', function () {
     var histogram;

@@ -1,3 +1,5 @@
+import angular from 'angular';
+import _ from 'lodash';
 /**
  * This module is used by Kibana to create and reuse angular modules. Angular modules
  * can only be created once and need to have their dependencies at creation. This is
@@ -8,8 +10,8 @@
  *
  * 	In the scenario below, require.js would load directive.js first because it is a
  * 	dependency of app.js. This would cause the call to `angular.module('app')` to
- * 	execute before the module is actually created. This causes angular to through an
- * 	error. This effect is magnifies when app.js links off to many different modules.
+ * 	execute before the module is actually created. This causes angular to throw an
+ * 	error. This effect is magnified when app.js links off to many different modules.
  *
  * 	This is normally solved by creating unique modules per file, listed as the 1st
  * 	alternate solution below. Unfortunately this solution would have required that
@@ -46,9 +48,7 @@
  *
  */
 define(function (require) {
-  var angular = require('angular');
   var existingModules = {};
-  var _ = require('lodash');
   var links = [];
 
   /**

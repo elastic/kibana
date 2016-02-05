@@ -1,9 +1,9 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import errors from 'ui/errors';
 define(function (require) {
   return function YAxisFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var errors = require('ui/errors');
 
     var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
 

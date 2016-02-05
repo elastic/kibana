@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import MockState from 'fixtures/mock_state';
 describe('get filters', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var MockState = require('fixtures/mock_state');
   var storeNames = {
     app: 'appState',
     global: 'globalState'
@@ -39,7 +39,8 @@ describe('get filters', function () {
     beforeEach(function () {
       filters = [
         { query: { match: { extension: { query: 'jpg', type: 'phrase' } } } },
-        { query: { match: { '@tags': { query: 'info', type: 'phrase' } } } }
+        { query: { match: { '@tags': { query: 'info', type: 'phrase' } } } },
+        null
       ];
     });
 
@@ -69,16 +70,40 @@ describe('get filters', function () {
       expect(res[1].$state.store).to.be(storeNames.app);
     });
 
-    it('should return filters from specific states', function () {
+    it('should return non-null filters from specific states', function () {
       var states = [
         [ globalState, queryFilter.getGlobalFilters ],
         [ appState, queryFilter.getAppFilters ],
       ];
 
       _.each(states, function (state) {
-        state[0].filters = filters;
+        state[0].filters = filters.slice(0);
+        expect(state[0].filters).to.contain(null);
+
         var res = state[1]();
         expect(res.length).to.be(state[0].filters.length);
+        expect(state[0].filters).to.not.contain(null);
+      });
+    });
+
+    it('should replace the state, not save it', function () {
+      var states = [
+        [ globalState, queryFilter.getGlobalFilters ],
+        [ appState, queryFilter.getAppFilters ],
+      ];
+
+      expect(appState.save.called).to.be(false);
+      expect(appState.replace.called).to.be(false);
+
+
+      _.each(states, function (state) {
+        expect(state[0].save.called).to.be(false);
+        expect(state[0].replace.called).to.be(false);
+
+        state[0].filters = filters.slice(0);
+        var res = state[1]();
+        expect(state[0].save.called).to.be(false);
+        expect(state[0].replace.called).to.be(true);
       });
     });
   });

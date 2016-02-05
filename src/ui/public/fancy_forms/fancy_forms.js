@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import KbnFormController from 'ui/fancy_forms/KbnFormController';
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
 
-  var KbnFormController = require('ui/fancy_forms/KbnFormController');
 
   require('ui/modules')
   .get('kibana')

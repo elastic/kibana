@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
-  var registry = [];
+  const registry = [];
   return {
     register: function (service) {
       registry.push(service);

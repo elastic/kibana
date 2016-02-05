@@ -1,9 +1,9 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
-    var sinon = require('auto-release-sinon');
     var mapAndFlattenFilters;
     var $rootScope;
 

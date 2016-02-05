@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import moment from 'moment';
 define(function (require) {
   return function GeoHashAggDefinition(Private, config) {
-    var _ = require('lodash');
-    var moment = require('moment');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var defaultPrecision = 2;
 

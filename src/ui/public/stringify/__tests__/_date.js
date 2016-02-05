@@ -1,7 +1,7 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import moment from 'moment-timezone';
 describe('Date Format', function () {
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var moment = require('moment-timezone');
   var fieldFormats;
   var settings;
   var convert;

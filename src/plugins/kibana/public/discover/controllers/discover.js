@@ -1,27 +1,27 @@
+import _ from 'lodash';
+import angular from 'angular';
+import moment from 'moment';
+import ConfigTemplate from 'ui/ConfigTemplate';
+import getSort from 'ui/doc_table/lib/get_sort';
+import rison from 'ui/utils/rison';
+import dateMath from 'ui/utils/dateMath';
+import 'ui/doc_table';
+import 'ui/visualize';
+import 'ui/notify';
+import 'ui/fixedScroll';
+import 'ui/directives/validate_json';
+import 'ui/filters/moment';
+import 'ui/courier';
+import 'ui/index_patterns';
+import 'ui/state_management/app_state';
+import 'ui/timefilter';
+import 'ui/highlight/highlight_tags';
+import 'ui/share';
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var moment = require('moment');
-  var ConfigTemplate = require('ui/ConfigTemplate');
-  var getSort = require('ui/doc_table/lib/get_sort');
-  var rison = require('ui/utils/rison');
 
-  var dateMath = require('ui/utils/dateMath');
 
-  require('ui/doc_table');
-  require('ui/visualize');
-  require('ui/notify');
-  require('ui/fixedScroll');
-  require('ui/directives/validate_json');
-  require('ui/filters/moment');
-  require('ui/courier');
-  require('ui/index_patterns');
-  require('ui/state_management/app_state');
-  require('ui/timefilter');
-  require('ui/highlight/highlight_tags');
-  require('ui/share');
 
-  var app = require('ui/modules').get('apps/discover', [
+  const app = require('ui/modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',
     'kibana/index_patterns'
@@ -35,15 +35,15 @@ define(function (require) {
       ip: function (Promise, courier, config, $location) {
         return courier.indexPatterns.getIds()
         .then(function (list) {
-          var stateRison = $location.search()._a;
+          const stateRison = $location.search()._a;
 
-          var state;
+          let state;
           try { state = rison.decode(stateRison); }
           catch (e) { state = {}; }
 
-          var specified = !!state.index;
-          var exists = _.contains(list, state.index);
-          var id = exists ? state.index : config.get('defaultIndex');
+          const specified = !!state.index;
+          const exists = _.contains(list, state.index);
+          const id = exists ? state.index : config.get('defaultIndex');
 
           return Promise.props({
             list: list,
@@ -66,14 +66,14 @@ define(function (require) {
   app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
     AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
-    var Vis = Private(require('ui/Vis'));
-    var docTitle = Private(require('ui/doc_title'));
-    var brushEvent = Private(require('ui/utils/brush_event'));
-    var HitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var filterManager = Private(require('ui/filter_manager'));
+    const Vis = Private(require('ui/Vis'));
+    const docTitle = Private(require('ui/doc_title'));
+    const brushEvent = Private(require('ui/utils/brush_event'));
+    const HitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const filterManager = Private(require('ui/filter_manager'));
 
-    var notify = new Notifier({
+    const notify = new Notifier({
       location: 'Discover'
     });
 
@@ -98,7 +98,7 @@ define(function (require) {
     $scope.timefilter = timefilter;
 
     // the saved savedSearch
-    var savedSearch = $route.current.locals.savedSearch;
+    const savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
     // the actual courier.SearchSource
@@ -110,7 +110,7 @@ define(function (require) {
       docTitle.change(savedSearch.title);
     }
 
-    var $state = $scope.state = new AppState(getStateDefaults());
+    const $state = $scope.state = new AppState(getStateDefaults());
     $scope.uiState = $state.makeStateful('uiState');
 
     function getStateDefaults() {
@@ -141,8 +141,8 @@ define(function (require) {
       indexPatternList: $route.current.locals.ip.list
     };
 
-    var init = _.once(function () {
-      var showTotal = 5;
+    const init = _.once(function () {
+      const showTotal = 5;
       $scope.failuresShown = showTotal;
       $scope.showAllFailures = function () {
         $scope.failuresShown = $scope.failures.length;
@@ -161,7 +161,7 @@ define(function (require) {
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
-          var currentSort = _.pairs($scope.searchSource.get('sort')).pop();
+          const currentSort = _.pairs($scope.searchSource.get('sort')).pop();
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -197,7 +197,7 @@ define(function (require) {
           // no timefield, no vis, nothing to update
           if (!$scope.opts.timefield) return;
 
-          var buckets = $scope.vis.aggs.bySchemaGroup.buckets;
+          const buckets = $scope.vis.aggs.bySchemaGroup.buckets;
 
           if (buckets && buckets.length === 1) {
             $scope.intervalName = 'by ' + buckets[0].buckets.getInterval().description;
@@ -210,8 +210,8 @@ define(function (require) {
           'rows',
           'fetchStatus'
         ], (function updateResultState() {
-          var prev = {};
-          var status = {
+          let prev = {};
+          const status = {
             LOADING: 'loading', // initial data load
             READY: 'ready', // results came back
             NO_RESULTS: 'none' // no results came back
@@ -221,12 +221,12 @@ define(function (require) {
             // initial state, pretend we are loading
             if (rows == null && oldRows == null) return status.LOADING;
 
-            var rowsEmpty = _.isEmpty(rows);
+            const rowsEmpty = _.isEmpty(rows);
             // An undefined fetchStatus means the requests are still being
             // prepared to be sent. When all requests are completed,
             // fetchStatus is set to null, so it's important that we
             // specifically check for undefined to determine a loading status.
-            var preparingForFetch = _.isUndefined(fetchStatus);
+            const preparingForFetch = _.isUndefined(fetchStatus);
             if (preparingForFetch) return status.LOADING;
             else if (rowsEmpty && fetchStatus) return status.LOADING;
             else if (!rowsEmpty) return status.READY;
@@ -234,7 +234,7 @@ define(function (require) {
           }
 
           return function () {
-            var current = {
+            const current = {
               rows: $scope.rows,
               fetchStatus: $scope.fetchStatus
             };
@@ -318,9 +318,9 @@ define(function (require) {
 
       if (!$scope.rows) flushResponseData();
 
-      var sort = $state.sort;
-      var timeField = $scope.indexPattern.timeFieldName;
-      var totalSize = $scope.size || $scope.opts.sampleSize;
+      const sort = $state.sort;
+      const timeField = $scope.indexPattern.timeFieldName;
+      const totalSize = $scope.size || $scope.opts.sampleSize;
 
       /**
        * Basically an emum.
@@ -332,14 +332,14 @@ define(function (require) {
        *
        * @type {String}
        */
-      var sortBy = (function () {
+      const sortBy = (function () {
         if (!_.isArray(sort)) return 'implicit';
         else if (sort[0] === '_score') return 'implicit';
         else if (sort[0] === timeField) return 'time';
         else return 'non-time';
       }());
 
-      var sortFn = null;
+      let sortFn = null;
       if (sortBy !== 'implicit') {
         sortFn = new HitSortFn(sort[1]);
       }
@@ -372,13 +372,13 @@ define(function (require) {
         $scope.mergedEsResp = merged;
         $scope.hits = merged.hits.total;
 
-        var indexPattern = $scope.searchSource.get('index');
+        const indexPattern = $scope.searchSource.get('index');
 
         // the merge rows, use a new array to help watchers
         $scope.rows = merged.hits.hits.slice();
 
         notify.event('flatten hit and count fields', function () {
-          var counts = $scope.fieldCounts;
+          let counts = $scope.fieldCounts;
 
           // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
           if (!counts || sortFn) counts = $scope.fieldCounts = {};
@@ -391,9 +391,9 @@ define(function (require) {
             // "top 500" may change with each response, so don't mark this as counted
             if (!sortFn) hit.$$_counted = true;
 
-            var fields = _.keys(indexPattern.flattenHit(hit));
-            var n = fields.length;
-            var field;
+            const fields = _.keys(indexPattern.flattenHit(hit));
+            let n = fields.length;
+            let field;
             while (field = fields[--n]) {
               if (counts[field]) counts[field] += 1;
               else counts[field] = 1;
@@ -454,13 +454,13 @@ define(function (require) {
       $window.scrollTo(0, 0);
     };
 
-    var loadingVis;
+    let loadingVis;
     function setupVisualization() {
       // If we're not setting anything up we need to return an empty promise
       if (!$scope.opts.timefield) return Promise.resolve();
       if (loadingVis) return loadingVis;
 
-      var visStateAggs = [
+      const visStateAggs = [
         {
           type: 'count',
           schema: 'metric'
@@ -478,7 +478,7 @@ define(function (require) {
 
       // we have a vis, just modify the aggs
       if ($scope.vis) {
-        var visState = $scope.vis.getState();
+        const visState = $scope.vis.getState();
         visState.aggs = visStateAggs;
 
         $scope.vis.setState(visState);
@@ -494,7 +494,7 @@ define(function (require) {
         },
         listeners: {
           click: function (e) {
-            console.log(e);
+            notify.log(e);
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
@@ -524,16 +524,16 @@ define(function (require) {
     }
 
     function resolveIndexPatternLoading() {
-      var props = $route.current.locals.ip;
-      var loaded = props.loaded;
-      var stateVal = props.stateVal;
-      var stateValFound = props.stateValFound;
+      const props = $route.current.locals.ip;
+      const loaded = props.loaded;
+      const stateVal = props.stateVal;
+      const stateValFound = props.stateValFound;
 
-      var own = $scope.searchSource.getOwn('index');
+      const own = $scope.searchSource.getOwn('index');
 
       if (own && !stateVal) return own;
       if (stateVal && !stateValFound) {
-        var err = '"' + stateVal + '" is not a configured pattern. ';
+        const err = '"' + stateVal + '" is not a configured pattern. ';
         if (own) {
           notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
           return own;

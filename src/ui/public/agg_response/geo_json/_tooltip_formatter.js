@@ -1,7 +1,7 @@
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   return function TileMapTooltipFormatter($compile, $rootScope, Private) {
-    var $ = require('jquery');
-    var _ = require('lodash');
 
     var fieldFormats = Private(require('ui/registry/field_formats'));
     var $tooltipScope = $rootScope.$new();

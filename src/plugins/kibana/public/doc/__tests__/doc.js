@@ -1,13 +1,13 @@
 // Load the kibana app dependencies.
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-require('plugins/kibana/doc/index');
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import 'plugins/kibana/doc/index';
 
-var $scope;
-var createController;
-var timefilter;
+let $scope;
+let createController;
+let timefilter;
 
-var init = function (index, type, id) {
+const init = function (index, type, id) {
 
   ngMock.module('kibana');
 
@@ -28,7 +28,7 @@ var init = function (index, type, id) {
 
     $provide.service('es', function (Private, $q) {
       this.search = function (config) {
-        var deferred = $q.defer();
+        const deferred = $q.defer();
 
         switch (config.index) {
           case 'goodSearch':

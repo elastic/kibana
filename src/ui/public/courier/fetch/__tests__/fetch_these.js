@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('ui/courier/fetch/_fetch_these', () => {
-  const _ = require('lodash');
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
 
   let Promise;
   let $rootScope;
@@ -52,6 +52,13 @@ describe('ui/courier/fetch/_fetch_these', () => {
       $rootScope.$apply();
       expect(fakeResponses.callCount).to.be(3);
     });
+
+    it('invokes request failure handler if starting fails', () => {
+      request.start = sinon.stub().returns(Promise.reject('some error'));
+      fetchThese(requests);
+      $rootScope.$apply();
+      sinon.assert.calledWith(request.handleFailure, 'some error');
+    });
   });
 
   context('when request has already started', () => {
@@ -69,6 +76,12 @@ describe('ui/courier/fetch/_fetch_these', () => {
       $rootScope.$apply();
       expect(fakeResponses.callCount).to.be(3);
     });
+    it('invokes request failure handler if continuing fails', () => {
+      request.continue = sinon.stub().returns(Promise.reject('some error'));
+      fetchThese(requests);
+      $rootScope.$apply();
+      sinon.assert.calledWith(request.handleFailure, 'some error');
+    });
   });
 
   function mockRequest() {
@@ -76,6 +89,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
       strategy: 'mock',
       started: true,
       aborted: false,
+      handleFailure: sinon.spy(),
       retry: sinon.spy(function () { return this; }),
       continue: sinon.spy(function () { return this; }),
       start: sinon.spy(function () { return this; })

@@ -1,16 +1,16 @@
+import 'plugins/kibana/visualize/editor/agg_params';
+import 'plugins/kibana/visualize/editor/agg_add';
+import _ from 'lodash';
+import $ from 'jquery';
+import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
-    require('plugins/kibana/visualize/editor/agg_params');
-    require('plugins/kibana/visualize/editor/agg_add');
 
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var aggTypes = Private(require('ui/agg_types/index'));
-    var advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
+    const aggTypes = Private(require('ui/agg_types/index'));
 
-    var notify = new Notifier({
+    const notify = new Notifier({
       location: 'visAggGroup'
     });
 
@@ -41,7 +41,7 @@ define(function (require) {
          */
         $scope.describe = function () {
           if (!$scope.agg.type.makeLabel) return '';
-          var label = $scope.agg.type.makeLabel($scope.agg);
+          const label = $scope.agg.type.makeLabel($scope.agg);
           return label ? label : '';
         };
 
@@ -54,16 +54,16 @@ define(function (require) {
         $scope.moveDown = _.partial(move, true);
 
         $scope.remove = function (agg) {
-          var aggs = $scope.vis.aggs;
+          const aggs = $scope.vis.aggs;
 
-          var index = aggs.indexOf(agg);
+          const index = aggs.indexOf(agg);
           if (index === -1) return notify.log('already removed');
 
           aggs.splice(index, 1);
         };
 
         $scope.canRemove = function (aggregation) {
-          var metricCount = _.reduce($scope.group, function (count, agg) {
+          const metricCount = _.reduce($scope.group, function (count, agg) {
             return (agg.schema.name === aggregation.schema.name) ? ++count : count;
           }, 0);
 
@@ -76,7 +76,7 @@ define(function (require) {
             return false;
           }
 
-          var firstDifferentSchema = _.findIndex($scope.group, function (agg) {
+          const firstDifferentSchema = _.findIndex($scope.group, function (agg) {
             return agg.schema !== $scope.agg.schema;
           });
 

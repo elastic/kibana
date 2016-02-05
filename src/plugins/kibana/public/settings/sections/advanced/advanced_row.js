@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import 'ui/elastic_textarea';
 define(function (require) {
-  var _ = require('lodash');
-  require('ui/elastic_textarea');
 
   require('ui/modules').get('apps/settings')
   .directive('advancedRow', function (config, Notifier, Private) {
@@ -13,21 +13,21 @@ define(function (require) {
         configs: '='
       },
       link: function ($scope) {
-        var configDefaults = Private(require('ui/config/defaults'));
-        var notify = new Notifier();
-        var keyCodes = {
+        const configDefaults = Private(require('ui/config/defaults'));
+        const notify = new Notifier();
+        const keyCodes = {
           ESC: 27
         };
 
         // To allow passing form validation state back
         $scope.forms = {};
 
-        // setup loading flag, run async op, then clear loading and editting flag (just in case)
-        var loading = function (conf, fn) {
+        // setup loading flag, run async op, then clear loading and editing flag (just in case)
+        const loading = function (conf, fn) {
           conf.loading = true;
           fn()
           .finally(function () {
-            conf.loading = conf.editting = false;
+            conf.loading = conf.editing = false;
           })
           .catch(notify.fatal);
         };
@@ -41,7 +41,7 @@ define(function (require) {
         $scope.edit = function (conf) {
           conf.unsavedValue = conf.value == null ? conf.defVal : conf.value;
           $scope.configs.forEach(function (c) {
-            c.editting = (c === conf);
+            c.editing = (c === conf);
           });
         };
 
@@ -56,7 +56,7 @@ define(function (require) {
         };
 
         $scope.cancelEdit = function (conf) {
-          conf.editting = false;
+          conf.editing = false;
         };
 
         $scope.clear = function (conf) {

@@ -4,9 +4,9 @@ import { stub } from 'auto-release-sinon';
 import ngMock from 'ngMock';
 
 import xsrfChromeApi from '../xsrf';
+import { version } from '../../../../../../package.json';
 
 const xsrfHeader = 'kbn-version';
-const { version } = require('../../../../../../package.json');
 
 describe('chrome xsrf apis', function () {
   describe('#getXsrfToken()', function () {

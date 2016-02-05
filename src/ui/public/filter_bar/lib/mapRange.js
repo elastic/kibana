@@ -1,5 +1,5 @@
+import {has} from 'lodash';
 define(function (require) {
-  var {has} = require('lodash');
   return function mapRangeProvider(Promise, courier) {
     return function (filter) {
       if (!filter.range) return Promise.reject(filter);

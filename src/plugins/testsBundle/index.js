@@ -1,9 +1,9 @@
+import { union } from 'lodash';
+import findSourceFiles from './findSourceFiles';
 module.exports = (kibana) => {
-  let { union } = require('lodash');
 
   let utils = require('requirefrom')('src/utils');
   let fromRoot = utils('fromRoot');
-  let findSourceFiles = require('./findSourceFiles');
 
   return new kibana.Plugin({
     config: (Joi) => {
@@ -14,7 +14,7 @@ module.exports = (kibana) => {
     },
 
     uiExports: {
-      bundle: async (UiBundle, env, apps) => {
+      bundle: async (UiBundle, env, apps, plugins) => {
         let modules = [];
         let config = kibana.config;
 
@@ -23,10 +23,15 @@ module.exports = (kibana) => {
           modules = union(modules, app.getModules());
         }
 
-        let testFiles = await findSourceFiles([
-          'src/**/public/**/__tests__/**/*.js',
-          'installedPlugins/*/public/**/__tests__/**/*.js'
-        ]);
+        const testGlobs = [
+          'src/ui/public/**/__tests__/**/*.js',
+        ];
+
+        for (const plugin of plugins) {
+          testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+        }
+
+        const testFiles = await findSourceFiles(testGlobs);
 
         for (let f of testFiles) modules.push(f);
 

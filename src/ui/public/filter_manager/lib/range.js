@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  const _ = require('lodash');
   const OPERANDS_IN_RANGE = 2;
 
   return function buildRangeFilter(field, params, indexPattern, formattedValue) {

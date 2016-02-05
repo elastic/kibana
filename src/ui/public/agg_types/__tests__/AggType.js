@@ -1,8 +1,10 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import 'ui/private';
+import AggParamsPM from 'ui/agg_types/AggParams';
 describe('AggType Class', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var sinon = require('auto-release-sinon');
   var AggType;
   var AggParams;
   var AggConfig;
@@ -10,11 +12,9 @@ describe('AggType Class', function () {
   var fieldFormat;
   var Vis;
 
-  require('ui/private');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    var AggParamsPM = require('ui/agg_types/AggParams');
     AggParams = sinon.spy(Private(AggParamsPM));
     Private.stub(AggParamsPM, AggParams);
 
@@ -128,6 +128,17 @@ describe('AggType Class', function () {
           });
 
           expect(aggType.params).to.be.an(AggParams);
+          expect(aggType.params.length).to.be(2);
+          expect(aggType.params[0].name).to.be('json');
+          expect(aggType.params[1].name).to.be('customLabel');
+        });
+
+        it('can disable customLabel', function () {
+          var aggType = new AggType({
+            name: 'smart agg',
+            customLabels: false
+          });
+
           expect(aggType.params.length).to.be(1);
           expect(aggType.params[0].name).to.be('json');
         });
@@ -137,7 +148,7 @@ describe('AggType Class', function () {
             {name: 'one'},
             {name: 'two'}
           ];
-          var paramLength = params.length + 1; // json is always appended
+          var paramLength = params.length + 2; // json and custom label are always appended
 
           var aggType = new AggType({
             name: 'bucketeer',

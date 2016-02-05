@@ -1,9 +1,9 @@
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
     .get('app/visualize')
     .directive('visualizeSpy', function (Private, $compile) {
-      var $ = require('jquery');
-      var _ = require('lodash');
 
       var spyModes = Private(require('ui/registry/spy_modes'));
       var defaultMode = spyModes.inOrder[0].name;
@@ -16,6 +16,7 @@ define(function (require) {
           var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = _.get($scope.spy, 'mode.fill', false);
           $scope.modes = spyModes;
+          $scope.spy.params = $scope.spy.params || {};
 
           function getSpyObject(name) {
             name = _.isUndefined(name) ? $scope.spy.mode.name : name;

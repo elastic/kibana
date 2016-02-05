@@ -1,8 +1,8 @@
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
   return function TileMapFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var $ = require('jquery');
 
     var Chart = Private(require('ui/vislib/visualizations/_chart'));
     var TileMapMap = Private(require('ui/vislib/visualizations/_map'));

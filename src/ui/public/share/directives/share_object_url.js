@@ -1,7 +1,7 @@
 const app = require('ui/modules').get('kibana');
-const Clipboard = require('clipboard');
+import Clipboard from 'clipboard';
+import '../styles/index.less';
 
-require('../styles/index.less');
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
   const urlShortener = Private(require('../lib/url_shortener'));
@@ -67,7 +67,11 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       $scope.getUrl = function () {
-        return $location.absUrl();
+        let url = $location.absUrl();
+        if ($scope.shareAsEmbed) {
+          url = url.replace('?', '?embed=true&');
+        }
+        return url;
       };
 
       $scope.$watch('getUrl()', updateUrl);

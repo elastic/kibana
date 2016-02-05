@@ -1,9 +1,9 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
 
   return function (indexPattern) {
-    var dateScripts = {};
-    var scripts = {
+    const dateScripts = {};
+    const scripts = {
       __dayOfMonth:   'dayOfMonth',
       __dayOfWeek:    'dayOfWeek',
       __dayOfYear:    'dayOfYear',

@@ -1,9 +1,9 @@
+import _ from 'lodash';
 define(function (require) {
   return function GetFieldTypes() {
-    var _ = require('lodash');
 
     return function (indexPattern) {
-      var fieldCount = _.countBy(indexPattern.fields, function (field) {
+      const fieldCount = _.countBy(indexPattern.fields, function (field) {
         return (field.scripted) ? 'scripted' : 'indexed';
       });
 

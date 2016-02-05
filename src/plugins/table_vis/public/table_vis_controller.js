@@ -1,24 +1,24 @@
 define(function (require) {
   // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
-  var module = require('ui/modules').get('kibana/table_vis', ['kibana']);
+  const module = require('ui/modules').get('kibana/table_vis', ['kibana']);
 
   // add a controller to tha module, which will transform the esResponse into a
   // tabular format that we can pass to the table directive
   module.controller('KbnTableVisController', function ($scope, Private) {
-    var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+    const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
     $scope.sort = $scope.vis.params.sort;
     $scope.$watchCollection('sort', function (newSort) {
       $scope.uiState.set('vis.params.sort', newSort);
     });
     $scope.$watch('esResponse', function (resp, oldResp) {
-      var tableGroups = $scope.tableGroups = null;
-      var hasSomeRows = $scope.hasSomeRows = null;
+      let tableGroups = $scope.tableGroups = null;
+      let hasSomeRows = $scope.hasSomeRows = null;
 
       if (resp) {
-        var vis = $scope.vis;
-        var params = vis.params;
+        const vis = $scope.vis;
+        const params = vis.params;
 
         tableGroups = tabifyAggResponse(vis, resp, {
           partialRows: params.showPartialRows,

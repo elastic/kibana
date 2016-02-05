@@ -1,17 +1,17 @@
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
-    var _ = require('lodash');
-    var Vis = Private(require('ui/Vis'));
+    const Vis = Private(require('ui/Vis'));
 
-    var notify = new Notifier({
+    const notify = new Notifier({
       location: 'SavedVis'
     });
 
     _.class(SavedVis).inherits(courier.SavedObject);
     function SavedVis(opts) {
-      var self = this;
+      const self = this;
       opts = opts || {};
       if (typeof opts !== 'object') opts = { id: opts };
 
@@ -26,7 +26,7 @@ define(function (require) {
           title: 'New Visualization',
           visState: (function () {
             if (!opts.type) return null;
-            var def = {};
+            const def = {};
             def.type = opts.type;
             return def;
           }()),
@@ -54,7 +54,7 @@ define(function (require) {
     SavedVis.searchSource = true;
 
     SavedVis.prototype._afterEsResp = function () {
-      var self = this;
+      const self = this;
 
       return self._getLinkedSavedSearch()
       .then(function () {
@@ -73,9 +73,9 @@ define(function (require) {
     };
 
     SavedVis.prototype._getLinkedSavedSearch = Promise.method(function () {
-      var self = this;
-      var linkedSearch = !!self.savedSearchId;
-      var current = self.savedSearch;
+      const self = this;
+      const linkedSearch = !!self.savedSearchId;
+      const current = self.savedSearch;
 
       if (linkedSearch && current && current.id === self.savedSearchId) {
         return;
@@ -97,13 +97,18 @@ define(function (require) {
     });
 
     SavedVis.prototype._createVis = function () {
-      var self = this;
+      const self = this;
 
       if (self.stateJSON) {
         self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
       }
 
-      self.visState.title = self.title;
+      // visState doesn't yet exist when importing a visualization, so we can't
+      // assume that exists at this point. If it does exist, then we're not
+      // importing a visualization, so we want to sync the title.
+      if (self.visState) {
+        self.visState.title = self.title;
+      }
       self.vis = new Vis(
         self.searchSource.get('index'),
         self.visState
@@ -113,7 +118,7 @@ define(function (require) {
     };
 
     SavedVis.prototype._updateVis = function () {
-      var self = this;
+      const self = this;
 
       self.vis.indexPattern = self.searchSource.get('index');
       self.visState.title = self.title;

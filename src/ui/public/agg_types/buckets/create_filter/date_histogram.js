@@ -1,7 +1,7 @@
+import moment from 'moment';
+import buildRangeFilter from 'ui/filter_manager/lib/range';
 define(function (require) {
   return function createDateHistogramFilterProvider(Private) {
-    var moment = require('moment');
-    var buildRangeFilter = require('ui/filter_manager/lib/range');
 
     return function (agg, key) {
       var start = moment(key);

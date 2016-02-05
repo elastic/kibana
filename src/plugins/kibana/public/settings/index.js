@@ -1,10 +1,17 @@
-define(function (require, module, exports) {
-  var _ = require('lodash');
+import _ from 'lodash';
+import 'plugins/kibana/settings/sections/indices/index';
+import 'plugins/kibana/settings/sections/advanced/index';
+import 'plugins/kibana/settings/sections/objects/index';
+import 'plugins/kibana/settings/sections/status/index';
+import 'plugins/kibana/settings/sections/about/index';
+import 'plugins/kibana/settings/styles/main.less';
+import 'ui/filters/start_from';
+import 'ui/field_editor';
+import 'plugins/kibana/settings/sections/indices/_indexed_fields';
+import 'plugins/kibana/settings/sections/indices/_scripted_fields';
+import registry from 'ui/registry/settings_sections';
 
-  var sections = require('plugins/kibana/settings/sections/index');
-  require('plugins/kibana/settings/styles/main.less');
-  require('ui/filters/start_from');
-
+define(function (require) {
   require('ui/routes')
   .when('/settings', {
     redirectTo: '/settings/indices'
@@ -18,6 +25,7 @@ define(function (require, module, exports) {
   require('ui/modules')
   .get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
+    const sections = Private(registry);
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/app.html'),
@@ -27,7 +35,7 @@ define(function (require, module, exports) {
       },
       link: function ($scope, $el) {
         timefilter.enabled = false;
-        $scope.sections = sections;
+        $scope.sections = sections.inOrder;
         $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 
         $scope.sections.forEach(function (section) {
@@ -38,7 +46,4 @@ define(function (require, module, exports) {
   });
 
   // preload
-  require('ui/field_editor');
-  require('plugins/kibana/settings/sections/indices/_indexed_fields');
-  require('plugins/kibana/settings/sections/indices/_scripted_fields');
 });

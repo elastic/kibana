@@ -1,24 +1,24 @@
+import 'plugins/table_vis/table_vis.less';
+import 'plugins/table_vis/table_vis_controller';
+import 'plugins/table_vis/table_vis_params';
+import 'ui/agg_table';
+import 'ui/agg_table/agg_table_group';
 define(function (require) {
   // we need to load the css ourselves
-  require('plugins/table_vis/table_vis.less');
 
   // we also need to load the controller and used by the template
-  require('plugins/table_vis/table_vis_controller');
 
   // our params are a bit complex so we will manage them with a directive
-  require('plugins/table_vis/table_vis_params');
 
   // require the directives that we use as well
-  require('ui/agg_table');
-  require('ui/agg_table/agg_table_group');
 
   // register the provider with the visTypes registry
   require('ui/registry/vis_types').register(TableVisTypeProvider);
 
   // define the TableVisType
   function TableVisTypeProvider(Private) {
-    var TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
-    var Schemas = Private(require('ui/Vis/Schemas'));
+    const TemplateVisType = Private(require('ui/template_vis_type/template_vis_type'));
+    const Schemas = Private(require('ui/Vis/Schemas'));
 
     // define the TableVisController which is used in the template
     // by angular's ng-controller directive

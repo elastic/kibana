@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function FieldFormatClassProvider(config, $rootScope, Private) {
-    var _ = require('lodash');
     var contentTypes = Private(require('ui/index_patterns/_field_format/contentTypes'));
 
     function FieldFormat(params) {

@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function UniqueXValuesUtilService(Private) {
-    var _ = require('lodash');
 
     var flattenDataArray = Private(require('ui/vislib/components/zero_injection/flatten_data'));
 

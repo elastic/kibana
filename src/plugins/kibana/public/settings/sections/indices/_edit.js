@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import 'plugins/kibana/settings/sections/indices/_indexed_fields';
+import 'plugins/kibana/settings/sections/indices/_scripted_fields';
+import 'plugins/kibana/settings/sections/indices/_index_header';
 define(function (require) {
-  var _ = require('lodash');
-  require('plugins/kibana/settings/sections/indices/_indexed_fields');
-  require('plugins/kibana/settings/sections/indices/_scripted_fields');
-  require('plugins/kibana/settings/sections/indices/_index_header');
 
   require('ui/routes')
   .when('/settings/indices/:indexPatternId', {
@@ -18,16 +18,16 @@ define(function (require) {
   require('ui/modules').get('apps/settings')
   .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
 
-    var notify = new Notifier();
-    var $state = $scope.state = new AppState();
-    var refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
+    const notify = new Notifier();
+    const $state = $scope.state = new AppState();
+    const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
 
     $scope.kbnUrl = Private(require('ui/url'));
     $scope.indexPattern = $route.current.locals.indexPattern;
     docTitle.change($scope.indexPattern.id);
-    var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
+    const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-    var fieldTypes = Private(require('plugins/kibana/settings/sections/indices/_field_types'));
+    const fieldTypes = Private(require('plugins/kibana/settings/sections/indices/_field_types'));
     $scope.$watch('indexPattern.fields', function () {
       $scope.fieldTypes = fieldTypes($scope.indexPattern);
     });

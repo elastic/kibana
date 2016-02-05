@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import moment from 'moment';
+import AggConfigResult from 'ui/Vis/AggConfigResult';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('pointSeriesChartDataFromTable', function () {
   this.slow(1000);
 
-  var _ = require('lodash');
-  var moment = require('moment');
-  var AggConfigResult = require('ui/Vis/AggConfigResult');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var pointSeriesChartDataFromTable;
   var indexPattern;

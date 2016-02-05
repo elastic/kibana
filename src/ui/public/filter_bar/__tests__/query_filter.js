@@ -1,6 +1,13 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import './_getFilters';
+import './_addFilters';
+import './_removeFilters';
+import './_updateFilters';
+import './_toggleFilters';
+import './_invertFilters';
+import './_pinFilters';
 var queryFilter;
 var EventEmitter;
 var $rootScope;
@@ -39,16 +46,11 @@ describe('Query Filter', function () {
         expect(queryFilter.pinFilter).to.be.a('function');
         expect(queryFilter.pinAll).to.be.a('function');
       });
+
     });
+
   });
 
   describe('Actions', function () {
-    require('./_getFilters');
-    require('./_addFilters');
-    require('./_removeFilters');
-    require('./_updateFilters');
-    require('./_toggleFilters');
-    require('./_invertFilters');
-    require('./_pinFilters');
   });
 });

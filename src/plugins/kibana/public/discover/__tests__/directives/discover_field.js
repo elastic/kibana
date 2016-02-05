@@ -1,19 +1,19 @@
 
-var angular = require('angular');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import angular from 'angular';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import $ from 'jquery';
+import 'ui/private';
+import 'plugins/kibana/discover/components/field_chooser/discover_field';
 
 // Load the kibana app dependencies.
-require('ui/private');
-require('plugins/kibana/discover/components/field_chooser/discover_field');
 
 describe('discoverField', function () {
-  var $scope;
-  var indexPattern;
-  var $elem;
+  let $scope;
+  let indexPattern;
+  let $elem;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $rootScope, $compile) {

@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 var fieldFormats;
 var FieldFormat;

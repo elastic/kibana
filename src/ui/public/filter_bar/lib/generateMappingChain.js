@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   return function generateMappingChainProvider(Promise) {
 
     var noop = function () {

@@ -1,6 +1,6 @@
+import errors from 'ui/errors';
 define(function (require) {
   return function EnsureSomeIndexPatternsFn(Private, Notifier, $location, kbnUrl) {
-    var errors = require('ui/errors');
     var notify = new Notifier();
 
     return function ensureSomeIndexPatterns() {

@@ -1,8 +1,8 @@
-let { fromNode } = require('bluebird');
-let { writeFile } = require('fs');
 
-let BaseOptimizer = require('./BaseOptimizer');
-let fromRoot = require('../utils/fromRoot');
+import BaseOptimizer from './BaseOptimizer';
+import fromRoot from '../utils/fromRoot';
+import { fromNode } from 'bluebird';
+import { writeFile } from 'fs';
 
 module.exports = class FsOptimizer extends BaseOptimizer {
   async init() {

@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import $ from 'jquery';
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var module = require('ui/modules').get('kibana');
+  const module = require('ui/modules').get('kibana');
 
   module.directive('lineInterpolationOption', function ($parse, $compile) {
     return {

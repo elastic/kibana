@@ -1,5 +1,5 @@
-var flattenWith = require('../flattenWith');
-var expect = require('expect.js');
+import flattenWith from '../flattenWith';
+import expect from 'expect.js';
 
 describe('flatten_with(dot, nestedObj)', function () {
 

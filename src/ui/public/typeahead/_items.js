@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import listTemplate from 'ui/typeahead/partials/typeahead-items.html';
+import 'ui/notify/directives';
 define(function (require) {
-  var _ = require('lodash');
   var typeahead = require('ui/modules').get('kibana/typeahead');
-  var listTemplate = require('ui/typeahead/partials/typeahead-items.html');
 
-  require('ui/notify/directives');
 
   typeahead.directive('kbnTypeaheadItems', function () {
     return {

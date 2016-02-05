@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import BaseObject from 'ui/utils/BaseObject';
 define(function (require) {
-  var _ = require('lodash');
-  var BaseObject = require('ui/utils/BaseObject');
 
   /**
    * Simple event emitter class used in the vislib. Calls

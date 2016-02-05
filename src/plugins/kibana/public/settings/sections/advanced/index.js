@@ -1,10 +1,9 @@
+import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
+import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
+import 'plugins/kibana/settings/sections/advanced/advanced_row';
+
 define(function (require) {
-  var _ = require('lodash');
-  var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
-
-
-  require('plugins/kibana/settings/sections/advanced/advanced_row');
-
   require('ui/routes')
   .when('/settings/advanced', {
     template: require('plugins/kibana/settings/sections/advanced/index.html')
@@ -15,8 +14,8 @@ define(function (require) {
     return {
       restrict: 'E',
       link: function ($scope) {
-        var configDefaults = Private(require('ui/config/defaults'));
-        var keyCodes = {
+        const configDefaults = Private(require('ui/config/defaults'));
+        const keyCodes = {
           ESC: 27
         };
 
@@ -29,9 +28,9 @@ define(function (require) {
         }
 
         function readConfigVals() {
-          var configVals = config._vals();
+          const configVals = config._vals();
 
-          var customConfig = Object.keys(configVals)
+          const customConfig = Object.keys(configVals)
           .filter(notDefaultConfig)
           .map(name => toEditableConfig(false, name, configVals[name]));
 
@@ -43,7 +42,7 @@ define(function (require) {
         }
 
         // react to changes of the config values
-        var unhook = $rootScope.$on('change:config', readConfigVals);
+        const unhook = $rootScope.$on('change:config', readConfigVals);
         $scope.$on('$destroy', unhook);
 
         // initial config setup
@@ -52,10 +51,10 @@ define(function (require) {
     };
   });
 
-  return {
+  registry.register(_.constant({
     order: 2,
     name: 'advanced',
     display: 'Advanced',
     url: '#/settings/advanced'
-  };
+  }));
 });

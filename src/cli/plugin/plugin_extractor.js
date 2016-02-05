@@ -1,5 +1,5 @@
-const zipExtract = require('./extractors/zip');
-const tarGzExtract = require('./extractors/tar_gz');
+import zipExtract from './extractors/zip';
+import tarGzExtract from './extractors/tar_gz';
 
 export default function extractArchive(settings, logger, archiveType) {
   switch (archiveType) {

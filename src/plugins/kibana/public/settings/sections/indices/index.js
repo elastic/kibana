@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
+import 'plugins/kibana/settings/sections/indices/_create';
+import 'plugins/kibana/settings/sections/indices/_edit';
+import 'plugins/kibana/settings/sections/indices/_field_editor';
+
 define(function (require) {
-  var _ = require('lodash');
-
-  require('plugins/kibana/settings/sections/indices/_create');
-  require('plugins/kibana/settings/sections/indices/_edit');
-  require('plugins/kibana/settings/sections/indices/_field_editor');
-
   // add a dependency to all of the subsection routes
   require('ui/routes')
   .defaults(/settings\/indices/, {
@@ -23,16 +23,16 @@ define(function (require) {
       transclude: true,
       template: require('plugins/kibana/settings/sections/indices/index.html'),
       link: function ($scope) {
-        $scope.edittingId = $route.current.params.indexPatternId;
+        $scope.editingId = $route.current.params.indexPatternId;
         config.$bind($scope, 'defaultIndex');
 
         $scope.$watch('defaultIndex', function () {
-          var ids = $route.current.locals.indexPatternIds;
+          const ids = $route.current.locals.indexPatternIds;
           $scope.indexPatternList = ids.map(function (id) {
             return {
               id: id,
               url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
-              class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
+              class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
               default: $scope.defaultIndex === id
             };
           });
@@ -43,9 +43,10 @@ define(function (require) {
     };
   });
 
-  return {
+  registry.register(_.constant({
+    order: 1,
     name: 'indices',
     display: 'Indices',
-    url: '#/settings/indices',
-  };
+    url: '#/settings/indices'
+  }));
 });

@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   var NL_RE = /\n/g;
   var events = 'keydown keypress keyup change';
 

@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function BoundToConfigObjProvider($rootScope, config) {
-    var _ = require('lodash');
 
     /**
      * Create an object with properties that may be bound to config values.

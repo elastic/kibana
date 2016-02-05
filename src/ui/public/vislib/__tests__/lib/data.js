@@ -1,11 +1,11 @@
-var angular = require('angular');
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
-var dataSeries = require('fixtures/vislib/mock_data/date_histogram/_series');
-var dataSeriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-var dataStacked = require('fixtures/vislib/mock_data/stacked/_stacked');
+import dataSeries from 'fixtures/vislib/mock_data/date_histogram/_series';
+import dataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import dataStacked from 'fixtures/vislib/mock_data/stacked/_stacked';
 
 var seriesData = {
   'label': '',

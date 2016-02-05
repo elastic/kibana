@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import L from 'leaflet';
 define(function (require) {
   return function MapFactory(Private) {
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var L = require('leaflet');
 
     var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];

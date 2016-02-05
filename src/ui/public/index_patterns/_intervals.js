@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import moment from 'moment';
+import IndexedArray from 'ui/IndexedArray';
 define(function (require) {
   return function IndexNameIntervalsService(timefilter) {
-    var _ = require('lodash');
-    var moment = require('moment');
-    var IndexedArray = require('ui/IndexedArray');
 
     var intervals = new IndexedArray({
       index: ['name'],

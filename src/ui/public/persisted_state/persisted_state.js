@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import toPath from 'lodash/internal/toPath';
+import errors from 'ui/errors';
+import SimpleEmitter from 'ui/utils/SimpleEmitter';
 define(function (require) {
-  var _ = require('lodash');
-  var toPath = require('lodash/internal/toPath');
-  var errors = require('ui/errors');
 
   return function (Private) {
     var Events = Private(require('ui/events'));
-    var SimpleEmitter = require('ui/utils/SimpleEmitter');
 
     function validateParent(parent, path) {
       if (path.length <= 0) {

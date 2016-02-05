@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import rison from 'ui/utils/rison';
+import applyDiff from 'ui/utils/diff_object';
+import qs from 'ui/utils/query_string';
 define(function (require) {
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
 
-  var applyDiff = require('ui/utils/diff_object');
-  var qs = require('ui/utils/query_string');
 
   return function StateProvider(Notifier, Private, $rootScope, $location) {
     var Events = Private(require('ui/events'));
@@ -23,7 +23,7 @@ define(function (require) {
           self.fetch();
         }),
 
-        // begining of full route update, new app will be initialized before
+        // beginning of full route update, new app will be initialized before
         // $routeChangeSuccess or $routeChangeError
         $rootScope.$on('$routeChangeStart', function () {
           if (self._persistAcrossApps) {
@@ -136,8 +136,8 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.destroy = function () {
-      this.off(); // removes all listners
-      this._cleanUpListeners(); // Removes the $routeUpdate listner
+      this.off(); // removes all listeners
+      this._cleanUpListeners(); // Removes the $routeUpdate listener
     };
 
     State.prototype.setDefaults = function (defaults) {

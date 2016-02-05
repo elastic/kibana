@@ -1,10 +1,10 @@
+import _ from 'lodash';
+import moment from 'moment';
+import dateMath from 'ui/utils/dateMath';
+import parseInterval from 'ui/utils/parse_interval';
 define(function (require) {
   return function IntervalHelperProvider(Private, timefilter, config) {
-    var _ = require('lodash');
-    var moment = require('moment');
 
-    var dateMath = require('ui/utils/dateMath');
-    var parseInterval = require('ui/utils/parse_interval');
     var calcAuto = Private(require('ui/time_buckets/calc_auto_interval'));
     var calcEsInterval = Private(require('ui/time_buckets/calc_es_interval'));
     var tzOffset = moment().format('Z');
@@ -88,9 +88,9 @@ define(function (require) {
     /**
      * Return the current bounds, if we have any.
      *
-     * THIS DOES NOT CLONE THE BOUNDS, so editting them
+     * THIS DOES NOT CLONE THE BOUNDS, so editing them
      * may have unexpected side-effects. Always
-     * call bounds.min.clone() before editting
+     * call bounds.min.clone() before editing
      *
      * @return {object|undefined} - If bounds are not defined, this
      *                      returns undefined, else it returns the bounds

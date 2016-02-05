@@ -1,9 +1,9 @@
+import moment from 'moment';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('orderedDateAxis', function () {
-  var moment = require('moment');
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var baseArgs = {
     vis: {

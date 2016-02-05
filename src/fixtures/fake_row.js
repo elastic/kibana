@@ -1,5 +1,5 @@
+import _ from 'lodash';
 define(function (require) {
-  var _ = require('lodash');
   var longString = Array(200).join('_');
 
   return function (id, mapping) {

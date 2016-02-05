@@ -1,25 +1,25 @@
+import _ from 'lodash';
+import 'ui/paginated_table';
+import popularityHtml from 'plugins/kibana/settings/sections/indices/_field_popularity.html';
+import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
+import dateScripts from 'plugins/kibana/settings/sections/indices/_date_scripts';
 define(function (require) {
-  var _ = require('lodash');
-  require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
   .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
-    var rowScopes = []; // track row scopes, so they can be destroyed as needed
-    var popularityHtml = require('plugins/kibana/settings/sections/indices/_field_popularity.html');
-    var controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');
-    var filter = $filter('filter');
+    const rowScopes = []; // track row scopes, so they can be destroyed as needed
+    const filter = $filter('filter');
 
-    var notify = new Notifier();
+    const notify = new Notifier();
 
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/sections/indices/_scripted_fields.html'),
       scope: true,
       link: function ($scope) {
-        var dateScripts = require('plugins/kibana/settings/sections/indices/_date_scripts');
 
-        var fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
-        var fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
+        const fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+        const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
         $scope.perPage = 25;
         $scope.columns = [
@@ -35,17 +35,17 @@ define(function (require) {
           _.invoke(rowScopes, '$destroy');
           rowScopes.length = 0;
 
-          var fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
+          const fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
           _.find($scope.fieldTypes, {index: 'scriptedFields'}).count = fields.length; // Update the tab count
 
           $scope.rows = fields.map(function (field) {
-            var rowScope = $scope.$new();
+            const rowScope = $scope.$new();
             rowScope.field = field;
             rowScopes.push(rowScope);
 
             return [
-              field.name,
-              field.script,
+              _.escape(field.name),
+              _.escape(field.script),
               _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
               {
                 markup: controlsHtml,
@@ -56,8 +56,8 @@ define(function (require) {
         }
 
         $scope.addDateScripts = function () {
-          var conflictFields = [];
-          var fieldsAdded = 0;
+          const conflictFields = [];
+          let fieldsAdded = 0;
           _.each(dateScripts($scope.indexPattern), function (script, field) {
             try {
               $scope.indexPattern.addScriptedField(field, script, 'number');
@@ -77,7 +77,7 @@ define(function (require) {
         };
 
         $scope.create = function () {
-          var params = {
+          const params = {
             indexPattern: $scope.indexPattern.id
           };
 
@@ -85,7 +85,7 @@ define(function (require) {
         };
 
         $scope.edit = function (field) {
-          var params = {
+          const params = {
             indexPattern: $scope.indexPattern.id,
             fieldName: field.name
           };

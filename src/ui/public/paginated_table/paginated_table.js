@@ -1,10 +1,10 @@
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('paginatedTable', function ($filter) {
-    var _ = require('lodash');
-    var angular = require('angular');
-    var orderBy = $filter('orderBy');
+    const _ = require('lodash');
+    const orderBy = $filter('orderBy');
 
     return {
       restrict: 'E',
@@ -73,7 +73,7 @@ define(function (require) {
         }
 
         $scope.$watchCollection('sort', function (newSort) {
-          if (newSort && !angular.equals(newSort, self.sort)) {
+          if (newSort && !_.isEqual(newSort, self.sort)) {
             self.sortColumn(newSort.columnIndex, newSort.direction);
             resortRows();
           }

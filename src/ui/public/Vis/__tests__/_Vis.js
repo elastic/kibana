@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 describe('Vis Class', function () {
 
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var indexPattern;
   var Vis;

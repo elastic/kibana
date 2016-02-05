@@ -1,12 +1,12 @@
+import 'ui/paginated_table';
+import 'ui/compile_recursive_directive';
+import 'ui/agg_table/agg_table.less';
+import _ from 'lodash';
 define(function (require) {
-  require('ui/paginated_table');
-  require('ui/compile_recursive_directive');
-  require('ui/agg_table/agg_table.less');
 
   require('ui/modules')
   .get('kibana')
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
-    var _ = require('lodash');
 
     return {
       restrict: 'E',

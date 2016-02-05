@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 describe('type normalizer (castMappingType)', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var fn;
   var fields;

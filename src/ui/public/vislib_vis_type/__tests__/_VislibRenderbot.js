@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
 describe('renderbot', function exportWrapper() {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var sinon = require('auto-release-sinon');
   var vislib;
   var Vis;
   var Renderbot;

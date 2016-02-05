@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function (require) {
   return function AggConfigFactory(Private, fieldTypeFilter) {
-    var _ = require('lodash');
     var fieldFormats = Private(require('ui/registry/field_formats'));
 
     function AggConfig(vis, opts) {
@@ -259,6 +259,10 @@ define(function (require) {
     };
 
     AggConfig.prototype.makeLabel = function () {
+      if (this.params.customLabel) {
+        return this.params.customLabel;
+      }
+
       if (!this.type) return '';
       var pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
       return pre += this.type.makeLabel(this);

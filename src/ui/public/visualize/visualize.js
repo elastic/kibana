@@ -1,14 +1,14 @@
+import 'ui/visualize/spy';
+import 'ui/visualize/visualize.less';
+import 'ui/visualize/visualize_legend';
+import $ from 'jquery';
+import _ from 'lodash';
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
-    require('ui/visualize/spy');
-    require('ui/visualize/visualize.less');
-    require('ui/visualize/visualize_legend');
 
-    var $ = require('jquery');
-    var _ = require('lodash');
     var visTypes = Private(require('ui/registry/vis_types'));
 
     var notify = new Notifier({
@@ -53,7 +53,6 @@ define(function (require) {
           return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
         };
 
-        $scope.fullScreenSpy = false;
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
@@ -66,10 +65,8 @@ define(function (require) {
 
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
 
-          // Basically a magic number, chart must be at least this big or only the spy will show
-          var visTooSmall = 100;
           $timeout(function () {
-            if ($visEl.height() < visTooSmall) {
+            if (shouldHaveFullSpy()) {
               $visEl.addClass('spy-only');
             };
           }, 0);
@@ -102,18 +99,20 @@ define(function (require) {
           'transition-delay': loadingDelay
         };
 
-        // spy watchers
-        $scope.$watch('fullScreenSpy', applyClassNames);
-
-        $scope.$watchCollection('spy.mode', function (spyMode, oldSpyMode) {
+        function shouldHaveFullSpy() {
           var $visEl = getVisEl();
           if (!$visEl) return;
 
-          // if the spy has been opened, check chart height
-          if (spyMode && !oldSpyMode) {
-            $scope.fullScreenSpy = $visEl.height() < minVisChartHeight;
-          }
+          return ($visEl.height() < minVisChartHeight)
+            && _.get($scope.spy, 'mode.fill')
+            && _.get($scope.spy, 'mode.name');
+        }
 
+        // spy watchers
+        $scope.$watch('fullScreenSpy', applyClassNames);
+
+        $scope.$watchCollection('spy.mode', function () {
+          $scope.fullScreenSpy = shouldHaveFullSpy();
           applyClassNames();
         });
 

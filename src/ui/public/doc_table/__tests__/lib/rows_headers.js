@@ -1,13 +1,13 @@
-var angular = require('angular');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var getFakeRow = require('fixtures/fake_row');
+import angular from 'angular';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import getFakeRow from 'fixtures/fake_row';
+import $ from 'jquery';
+import 'plugins/kibana/discover/index';
 
 describe('Doc Table', function () {
-  require('plugins/kibana/discover/index');
 
   var $parentScope;
 

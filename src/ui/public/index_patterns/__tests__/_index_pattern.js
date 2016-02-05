@@ -1,11 +1,11 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import Promise from 'bluebird';
+import errors from 'ui/errors';
+import IndexedArray from 'ui/IndexedArray';
 describe('index pattern', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var Promise = require('bluebird');
-  var errors = require('ui/errors');
-  var IndexedArray = require('ui/IndexedArray');
   var IndexPattern;
   var mapper;
   var mappingSetup;
@@ -112,7 +112,6 @@ describe('index pattern', function () {
 
   describe('fields', function () {
     it('should have expected properties on fields', function () {
-      expect(indexPattern.fields[0]).to.have.property('bucketable');
       expect(indexPattern.fields[0]).to.have.property('displayName');
       expect(indexPattern.fields[0]).to.have.property('filterable');
       expect(indexPattern.fields[0]).to.have.property('format');

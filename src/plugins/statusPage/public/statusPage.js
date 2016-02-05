@@ -1,11 +1,12 @@
-var $ = require('jquery');
-var _ = require('lodash');
-var notify = require('ui/notify');
+import _ from 'lodash';
+import notify from 'ui/notify';
+import $ from 'jquery';
+import 'ui/autoload/styles';
+import 'plugins/statusPage/statusPageMetric';
+import 'plugins/statusPage/statusPage.less';
 
-require('plugins/statusPage/statusPageMetric');
-require('plugins/statusPage/statusPage.less');
 
-var chrome = require('ui/chrome')
+const chrome = require('ui/chrome')
 .setTabs([
   {
     id: '',
@@ -15,7 +16,7 @@ var chrome = require('ui/chrome')
 ])
 .setRootTemplate(require('plugins/statusPage/statusPage.html'))
 .setRootController('ui', function ($http, $scope) {
-  var ui = this;
+  const ui = this;
   ui.loading = false;
 
   ui.refresh = function () {
@@ -31,11 +32,11 @@ var chrome = require('ui/chrome')
         ui.fetchError = null;
       }
 
-      var data = resp.data;
+      const data = resp.data;
       ui.metrics = data.metrics;
       ui.statuses = data.status.statuses;
 
-      var overall = data.status.overall;
+      const overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {
         ui.serverState = overall.state;
         ui.serverStateMessage = overall.title;

@@ -1,9 +1,9 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 describe('Private module loader', function () {
 
   var Private;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -102,6 +102,27 @@ describe('Private module loader', function () {
 
       var instance3 = Private(Provider1);
       expect(instance3).to.be(instance1);
+    });
+
+    it('gives the new Provider access to the Provider it replaced via an injectable dependency called $decorate', function () {
+      function Provider1() {
+        return {};
+      }
+
+      function Provider2($decorate) {
+        return {
+          instance1: $decorate()
+        };
+      }
+
+      var instance1 = Private(Provider1);
+      expect(instance1).to.be.an('object');
+
+      Private.swap(Provider1, Provider2);
+
+      var instance2 = Private(Provider1);
+      expect(instance2).to.have.property('instance1');
+      expect(instance2.instance1).to.be(instance1);
     });
   });
 });
