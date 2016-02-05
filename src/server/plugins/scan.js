@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { fromNode } from 'bluebird';
 import { readdir, stat } from 'fs';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { each } from 'bluebird';
 import PluginCollection from './PluginCollection';
 module.exports = async (kbnServer, server, config) => {
@@ -45,15 +45,20 @@ module.exports = async (kbnServer, server, config) => {
   });
 
   for (let path of pluginPaths) {
-    let modulePath;
     try {
-      modulePath = require.resolve(path);
-    } catch (e) {
-      warning({ tmpl: 'Skipping non-plugin directory at <%= path %>', path: path });
-      continue;
+      const modulePath = require.resolve(path);
+      await plugins.new(path);
+      debug({ tmpl: 'Found plugin at <%= path %>', path: modulePath });
+    } catch (err) {
+      debug({ tmpl: 'Failed to load plugin at <%= path %>: <%= err.message %>', path, err });
+      try {
+        await plugins.newFromPackageJson(path);
+        debug({ tmpl: 'Found package.json plugin at <%= path %>', path: join(path, 'package.json') });
+      } catch (err) {
+        debug({ tmpl: 'Failed to load plugin from package.json at <%= path %>: <%= err.message %>', path, err });
+        warning({ tmpl: 'Skipping non-plugin directory at <%= path %>', path: path });
+        continue;
+      }
     }
-
-    await plugins.new(path);
-    debug({ tmpl: 'Found plugin at <%= path %>', path: modulePath });
   }
 };

@@ -1,7 +1,9 @@
 
 import PluginApi from './PluginApi';
+import Plugin from './Plugin';
 import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
+import { join } from 'path';
 let Collection = require('requirefrom')('src')('utils/Collection');
 
 let byIdCache = Symbol('byIdCache');
@@ -28,7 +30,6 @@ module.exports = class Plugins extends Collection {
     this[byIdCache] = null;
 
     for (let product of output) {
-
       if (product instanceof api.Plugin) {
         let plugin = product;
         this.add(plugin);
@@ -40,6 +41,15 @@ module.exports = class Plugins extends Collection {
 
       throw new TypeError('unexpected plugin export ' + inspect(product));
     }
+  }
+
+  async newFromPackageJson(path) {
+    const pkgPath = join(path, 'package.json');
+    const pkg = require(pkgPath);
+    if (!pkg.kibana) throw new Error('package.json does not have a kibana section');
+    if (!pkg.kibana.plugin) throw new Error('package.json does not define a plugin');
+
+    this.add(new Plugin(this.kbnServer, pkgPath, pkg, pkg.kibana.plugin));
   }
 
   get byId() {
