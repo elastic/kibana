@@ -11,17 +11,17 @@ define(function (require) {
       },
       'query:queryString:options': {
         value: '{ "analyze_wildcard": true }',
-        description: 'Options for the lucene query string parser',
+        description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
         type: 'json'
       },
       'sort:options': {
         value: '{ "unmapped_type": "boolean" }',
-        description: 'Options the Elasticsearch sort parameter',
+        description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank">Options</a> for the Elasticsearch sort parameter',
         type: 'json'
       },
       'dateFormat': {
         value: 'MMMM Do YYYY, HH:mm:ss.SSS',
-        description: 'When displaying a pretty formatted date, use this format',
+        description: 'When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">format</a>',
       },
       'dateFormat:tz': {
         value: 'Browser',
@@ -104,7 +104,7 @@ define(function (require) {
           }
         }, null, '  '),
         type: 'json',
-        description: 'Default properties for the WMS map server support in the tile map'
+        description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
       },
       'visualization:colorMapping': {
         type: 'json',
@@ -159,22 +159,22 @@ define(function (require) {
       'format:number:defaultPattern': {
         type: 'string',
         value: '0,0.[000]',
-        description: 'Default numeral format for the "number" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "number" format'
       },
       'format:bytes:defaultPattern': {
         type: 'string',
         value: '0,0.[000]b',
-        description: 'Default numeral format for the "bytes" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "bytes" format'
       },
       'format:percent:defaultPattern': {
         type: 'string',
         value: '0,0.[000]%',
-        description: 'Default numeral format for the "percent" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "percent" format'
       },
       'format:currency:defaultPattern': {
         type: 'string',
         value: '($0,0.[00])',
-        description: 'Default numeral format for the "currency" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "currency" format'
       },
       'timepicker:timeDefaults': {
         type: 'json',
