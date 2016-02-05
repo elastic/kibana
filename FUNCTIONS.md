@@ -1,8 +1,8 @@
 ## Timelion function reference
-This is the timelion function reference. Please note this document is auto generated from the Timelion code. Do not submit pulls against this document. You want to submit a pull against something in the `series_functions/` directory.
+This document is auto generated from the timelion code. Do not submit pulls against this document. You want to submit a pull against something in the `series_functions/` directory.
 
 ### Data sources
-#### .es()
+Data sources can start a chain, they don't need to be attached to anything, but they still need to start with a `.` (dot). Data retreived from a data source can be passed into the chainable functions in the next section.#### .es()
 Pull data from an elasticsearch instance
 
 Argument | Accepts | Description
@@ -55,7 +55,7 @@ offset | *string* | Offset the series retrieval by a date expression. Eg -1M to 
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
 
 ### Chainable functions
-#### .abs()
+Chainable functions can not start a chain. Somewhere before them must be a data source function. Chainable functions modify the data output directly from a data source, or from another chainable function that has a data source somewhere before it.#### .abs()
 Return the absolute value of each value in the series list
 
 *This function does not accept any arguments.*
