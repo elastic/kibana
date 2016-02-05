@@ -22,7 +22,7 @@ module.exports = new Datasource ('quandl', {
       help: 'Some quandl sources return multiple series, which one should I use? 1 based index.'
     }
   ],
-  help: 'Pull data from quandl.com using the quandl code',
+  help: 'Pull data from quandl.com using the quandl code. Stick your free API key in timelion.json. API is rate limited without a key',
   fn: function quandlFn(args, tlConfig) {
     var intervalMap = {
       '1d': 'daily',

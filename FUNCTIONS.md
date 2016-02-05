@@ -24,7 +24,7 @@ Pull data from grahite. Configure your graphite server in timelion.json
 **fit** (*string*) *optional*: Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
 
 #### .quandl()
-Pull data from quandl.com using the quandl code
+Pull data from quandl.com using the quandl code. Stick your free API key in timelion.json. API is rate limited without a key
 
 ##### Arguments
 **code** (*string*) *optional*: The quandl code to plot. You can find these on quandl.com.  

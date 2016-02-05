@@ -14,8 +14,9 @@ module.exports = new Chainable('movingstd', {
     }
   ],
   aliases: ['mvstd'],
-  help: 'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. Rounding errors may become more noticeable with very long series, or series with very large numbers.',
-  fn: function movingaverageFn(args) {
+  help: 'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. Rounding errors ' +
+    'may become more noticeable with very long series, or series with very large numbers.',
+  fn: function movingstdFn(args) {
     return alter(args, function (eachSeries, _window) {
 
       var pairs = eachSeries.data;

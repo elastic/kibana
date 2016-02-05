@@ -19,7 +19,7 @@ module.exports = new Chainable('legend', {
     },
   ],
   help: 'Set the position and style of the legend on the plot',
-  fn: function yaxisFn(args) {
+  fn: function legendFn(args) {
     return alter(args, function (eachSeries, position, columns) {
       eachSeries._global = eachSeries._global || {};
       eachSeries._global.legend = eachSeries._global.legend || {};
