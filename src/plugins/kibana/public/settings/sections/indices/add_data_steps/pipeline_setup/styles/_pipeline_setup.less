@@ -1,0 +1,29 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+pipeline-setup {
+  label {
+    margin-bottom: 0px;
+  }
+
+  ul.pipeline-container {
+    list-style-type: none;
+    padding: 0px;
+
+    &>li {
+      border: 1px solid;
+      border-color: @settings-pipeline-setup-pipeline-border;
+    }
+  }
+
+  .empty-pipeline {
+    border: 1px solid;
+    border-color: @settings-pipeline-setup-pipeline-border;
+    padding: 5px;
+
+    p {
+      font-size: 15px;
+    }
+  }
+}

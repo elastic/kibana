@@ -1,0 +1,153 @@
+{
+  "processors": [
+    {
+      "collapsed": true,
+      "typeId": "grok",
+      "title": "Grok",
+      "sourceField": "message",
+      "pattern": "%{GREEDYDATA:source} - - %{GREEDYDATA:content}",
+      "processorId": "processor_18",
+      "description": "[message] -> [message], [source]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "grok",
+      "title": "Grok",
+      "sourceField": "content",
+      "pattern": "\\[%{GREEDYDATA:datestamp}] \"%{WORD:action} %{GREEDYDATA:document} %{GREEDYDATA:protocol}\" %{WORD:response_code} %{WORD:extended_response_code}",
+      "processorId": "processor_19",
+      "description": "[content] -> [action], [datestamp], [document], [extended_response_code], [protocol], [response_code]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "grok",
+      "title": "Grok",
+      "sourceField": "datestamp",
+      "pattern": "%{GREEDYDATA:timestamp} %{GREEDYDATA:timezone}",
+      "processorId": "processor_20",
+      "description": "[datestamp] -> [timestamp], [timezone]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "date",
+      "title": "Date",
+      "sourceField": "timestamp",
+      "targetField": "timestamp",
+      "formats": [
+        "Custom"
+      ],
+      "timezone": "UTC",
+      "locale": "ENGLISH",
+      "customFormat": "DD/MMM/yyyy:HH:mm:ss",
+      "processorId": "processor_21",
+      "description": "[timestamp] -> [timestamp]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "set",
+      "title": "Set",
+      "targetField": "tags_text",
+      "value": "          new hot super duper          ",
+      "processorId": "processor_22",
+      "description": "[tags_text]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "trim",
+      "title": "Trim",
+      "sourceField": "tags_text",
+      "processorId": "processor_23",
+      "description": "[tags_text]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "gsub",
+      "title": "Gsub",
+      "sourceField": "tags_text",
+      "pattern": "\\s",
+      "replacement": ",",
+      "processorId": "processor_24",
+      "description": "[tags_text] - '\\s' -> ','"
+    },
+    {
+      "collapsed": true,
+      "typeId": "uppercase",
+      "title": "Uppercase",
+      "sourceField": "tags_text",
+      "processorId": "processor_25",
+      "description": "[tags_text]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "split",
+      "title": "Split",
+      "sourceField": "tags_text",
+      "separator": ",",
+      "processorId": "processor_26",
+      "description": "[tags_text] on ','"
+    },
+    {
+      "collapsed": true,
+      "typeId": "rename",
+      "title": "Rename",
+      "sourceField": "tags_text",
+      "targetField": "tags",
+      "processorId": "processor_27",
+      "description": "[tags_text] -> [tags]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "lowercase",
+      "title": "Lowercase",
+      "sourceField": "document",
+      "processorId": "processor_28",
+      "description": "[document]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "geoip",
+      "title": "Geo IP",
+      "sourceField": "source",
+      "targetField": "source_geoip",
+      "processorId": "processor_29",
+      "description": "[source] -> [source_geoip]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "append",
+      "title": "Append",
+      "targetField": "sentence",
+      "values": [
+        "i",
+        "am",
+        "the",
+        "words",
+        "of",
+        "a",
+        "new",
+        "sentence"
+      ],
+      "processorId": "processor_30",
+      "description": "[sentence]"
+    },
+    {
+      "collapsed": true,
+      "typeId": "join",
+      "title": "Join",
+      "sourceField": "sentence",
+      "separator": " ",
+      "processorId": "processor_31",
+      "description": "[sentence] on ' '"
+    },
+    {
+      "collapsed": true,
+      "typeId": "remove",
+      "title": "Remove",
+      "sourceField": "message",
+      "processorId": "processor_32",
+      "description": "[message]"
+    }
+  ],
+  "counter": 32,
+  "dirty": false
+}

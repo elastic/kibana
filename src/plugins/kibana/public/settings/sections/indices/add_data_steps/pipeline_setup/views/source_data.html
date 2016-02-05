@@ -1,0 +1,28 @@
+<div class="form-group">
+  <label>Current Line:</label>
+  <div class="controls">
+    <select
+      class="form-control"
+      ng-options="sample as sample.message for sample in samples track by $index"
+      ng-model="sample">
+    </select>
+    <button
+      aria-label="Previous Line"
+      tooltip="Previous Line"
+      tooltip-append-to-body="true"
+      ng-click="previousLine()"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-chevron-left"></i>
+    </button>
+    <button
+      aria-label="Next Line"
+      tooltip="Next Line"
+      tooltip-append-to-body="true"
+      ng-click="nextLine()"
+      type="button"
+      class="btn btn-xs btn-default">
+      <i aria-hidden="true" class="fa fa-chevron-right"></i>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<process-container-header
+  processor="processor"
+  field="sourceField"
+  pipeline="pipeline">
+</process-container-header>
+<div
+  class="process-container-body"
+  ng-class="{dirty: processor.error.isNested}">
+  <div
+    class="process-container-body-content"
+    ng-hide="processor.collapsed">
+    <div
+      ng-show="processor.error"
+      class="alert alert-danger">
+      {{processor.error.message}}
+    </div>
+    <div class="process-worker-container"></div>
+    <output-preview new-object="processor.outputObject" old-object="processor.inputObject"></output-preview>
+  </div>
+  <div class="overlay"></div>
+</div>
