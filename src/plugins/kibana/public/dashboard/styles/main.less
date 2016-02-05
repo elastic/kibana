@@ -3,6 +3,12 @@
 
 .tab-dashboard {
   background-color: @dashboard-bg;
+  navbar[name="dashboard-options"] {
+    padding-bottom: 0;
+  }
+  navbar[name="dashboard-search"] {
+    padding-bottom: 5px;
+  }
 }
 
 dashboard-grid {
@@ -117,6 +123,10 @@ dashboard-grid {
       }
     }
   }
+}
+
+.dashboard-actions {
+  margin-left: auto;
 }
 
 .dashboard-panel-picker > li.list-group-item {
