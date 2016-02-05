@@ -1,3 +1,4 @@
+
 var gulp = require('gulp');
 var _ = require('lodash');
 var yargs = require('yargs').argv;
@@ -39,6 +40,20 @@ var exclude = Object.keys(pkg.devDependencies).map(function (name) {
   return path.join('node_modules', name);
 });
 
+function writeDocs(done) {
+  require('babel-register');
+  var fs = require('fs');
+  var helpish = require('./lib/functions_md');
+
+  fs.writeFile(path.resolve(__dirname, 'FUNCTIONS.md'), helpish, function (err) {
+    if (err) {
+      return done(err);
+    } else {
+      done();
+    }
+  });
+}
+
 function syncPluginTo(dest, done) {
   mkdirp(dest, function (err) {
     if (err) return done(err);
@@ -74,6 +89,10 @@ function syncPluginTo(dest, done) {
 
 gulp.task('sync', function (done) {
   syncPluginTo(kibanaPluginDir, done);
+});
+
+gulp.task('docs', function (done) {
+  writeDocs(done);
 });
 
 gulp.task('lint', function (done) {
@@ -162,4 +181,3 @@ gulp.task('dev', ['sync'], function (done) {
     'timelion.json'
   ], ['sync', 'lint']);
 });
-
