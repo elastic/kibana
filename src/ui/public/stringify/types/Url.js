@@ -2,6 +2,7 @@ import _ from 'lodash';
 import 'ui/field_format_editor/pattern/pattern';
 import 'ui/stringify/icons';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+import urlTemplate from 'ui/stringify/editors/url.html';
 export default function UrlFormatProvider(Private, highlightFilter) {
 
   var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
@@ -27,7 +28,7 @@ export default function UrlFormatProvider(Private, highlightFilter) {
   ];
 
   Url.editor = {
-    template: require('ui/stringify/editors/url.html'),
+    template: urlTemplate,
     controllerAs: 'url',
     controller: function ($scope) {
       var iconPattern = '/bundles/src/ui/public/stringify/icons/{{value}}.png';

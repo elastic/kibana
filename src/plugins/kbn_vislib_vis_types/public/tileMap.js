@@ -4,6 +4,7 @@ import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType
 import VisSchemasProvider from 'ui/Vis/Schemas';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
+import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
 export default function TileMapVisType(Private, getAppState, courier, config) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
@@ -29,7 +30,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       },
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
       canDesaturate: !!supports.cssFilters,
-      editor: require('plugins/kbn_vislib_vis_types/editors/tile_map.html')
+      editor: tileMapTemplate
     },
     listeners: {
       rectangle: function (event) {

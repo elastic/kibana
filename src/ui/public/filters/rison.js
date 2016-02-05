@@ -1,5 +1,6 @@
 import rison from 'ui/utils/rison';
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 module.filter('rison', function () {
   return function (str) {

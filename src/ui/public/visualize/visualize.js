@@ -4,7 +4,9 @@ import 'ui/visualize/visualize_legend';
 import $ from 'jquery';
 import _ from 'lodash';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
-require('ui/modules')
+import uiModules from 'ui/modules';
+import visualizeTemplate from 'ui/visualize/visualize.html';
+uiModules
 .get('kibana/directive')
 .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
@@ -25,7 +27,7 @@ require('ui/modules')
       editableVis: '=?',
       esResp: '=?',
     },
-    template: require('ui/visualize/visualize.html'),
+    template: visualizeTemplate,
     link: function ($scope, $el, attr) {
       var chart; // set in "vis" watcher
       var minVisChartHeight = 180;

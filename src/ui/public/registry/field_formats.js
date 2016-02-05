@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import uiRegistry from 'ui/registry/_registry';
 
-export default require('ui/registry/_registry')({
+export default uiRegistry({
   name: 'fieldFormats',
   index: ['id'],
   group: ['fieldType'],

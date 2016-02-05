@@ -1,5 +1,7 @@
 import _ from 'lodash';
-var notify = require('ui/modules').get('kibana/notify');
+import uiModules from 'ui/modules';
+import toasterTemplate from 'ui/notify/partials/toaster.html';
+var notify = uiModules.get('kibana/notify');
 
 notify.directive('kbnNotifications', function () {
   return {
@@ -8,6 +10,6 @@ notify.directive('kbnNotifications', function () {
       list: '=list'
     },
     replace: true,
-    template: require('ui/notify/partials/toaster.html')
+    template: toasterTemplate
   };
 });

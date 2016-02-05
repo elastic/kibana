@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
+import uiModules from 'ui/modules';
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .run(function ($rootScope, docTitle) {
   // always bind to the route events
   $rootScope.$on('$routeChangeStart', docTitle.reset);

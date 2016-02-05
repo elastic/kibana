@@ -7,7 +7,9 @@ import $ from 'jquery';
 import rison from 'ui/utils/rison';
 import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
 import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
-const app = require('ui/modules').get('apps/discover');
+import uiModules from 'ui/modules';
+import fieldChooserTemplate from 'plugins/kibana/discover/components/field_chooser/field_chooser.html';
+const app = uiModules.get('apps/discover');
 
 
 
@@ -25,7 +27,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
       indexPatternList: '=',
       updateFilterInQuery: '=filter'
     },
-    template: require('plugins/kibana/discover/components/field_chooser/field_chooser.html'),
+    template: fieldChooserTemplate,
     link: function ($scope) {
       $scope.setIndexPattern = function (id) {
         $scope.state.index = id;

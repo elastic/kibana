@@ -15,9 +15,10 @@ import CourierLooperSearchProvider from 'ui/courier/looper/search';
 import CourierDataSourceRootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
 import CourierSavedObjectSavedObjectProvider from 'ui/courier/saved_object/saved_object';
 import CourierRedirectWhenMissingProvider from 'ui/courier/_redirect_when_missing';
+import uiModules from 'ui/modules';
 
 
-require('ui/modules').get('kibana/courier')
+uiModules.get('kibana/courier')
 .service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {
   function Courier() {
     var self = this;

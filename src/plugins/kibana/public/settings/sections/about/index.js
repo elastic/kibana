@@ -1,11 +1,14 @@
 import _ from 'lodash';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import indexTemplate from 'plugins/kibana/settings/sections/about/index.html';
 
-require('ui/routes')
+uiRoutes
 .when('/settings/about', {
-  template: require('plugins/kibana/settings/sections/about/index.html')
+  template: indexTemplate
 });
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .controller('settingsAbout', function ($scope, kbnVersion, buildNum, buildSha) {
   $scope.kbnVersion = kbnVersion;
   $scope.buildNum = buildNum;

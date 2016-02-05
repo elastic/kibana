@@ -1,13 +1,15 @@
 import _ from 'lodash';
 import parseRange from 'ui/utils/range';
 import 'ui/number_list/number_list_input';
+import uiModules from 'ui/modules';
+import numberListTemplate from 'ui/number_list/number_list.html';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('kbnNumberList', function () {
   return {
     restrict: 'E',
-    template: require('ui/number_list/number_list.html'),
+    template: numberListTemplate,
     controllerAs: 'numberListCntr',
     require: 'ngModel',
     controller: function ($scope, $attrs, $parse) {

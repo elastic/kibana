@@ -1,8 +1,9 @@
 import 'elasticsearch-browser/elasticsearch.angular.js';
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
 var es; // share the client amoungst all apps
-require('ui/modules')
+uiModules
   .get('kibana', ['elasticsearch', 'kibana/config'])
   .service('es', function (esFactory, esUrl, $q, esApiVersion) {
     if (es) return es;

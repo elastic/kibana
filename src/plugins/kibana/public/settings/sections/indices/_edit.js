@@ -5,10 +5,13 @@ import 'plugins/kibana/settings/sections/indices/_index_header';
 import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
 import UrlProvider from 'ui/url';
 import PluginsKibanaSettingsSectionsIndicesFieldTypesProvider from 'plugins/kibana/settings/sections/indices/_field_types';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import editTemplate from 'plugins/kibana/settings/sections/indices/_edit.html';
 
-require('ui/routes')
+uiRoutes
 .when('/settings/indices/:indexPatternId', {
-  template: require('plugins/kibana/settings/sections/indices/_edit.html'),
+  template: editTemplate,
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPatternId)
@@ -17,7 +20,7 @@ require('ui/routes')
   }
 });
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
 
   const notify = new Notifier();

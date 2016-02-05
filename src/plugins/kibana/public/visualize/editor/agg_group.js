@@ -2,14 +2,16 @@ import _ from 'lodash';
 import 'plugins/kibana/visualize/editor/agg';
 import 'plugins/kibana/visualize/editor/agg_add';
 import 'plugins/kibana/visualize/editor/nesting_indicator';
+import uiModules from 'ui/modules';
+import aggGroupTemplate from 'plugins/kibana/visualize/editor/agg_group.html';
 
-require('ui/modules')
+uiModules
 .get('app/visualize')
 .directive('visEditorAggGroup', function (Private) {
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/visualize/editor/agg_group.html'),
+    template: aggGroupTemplate,
     scope: true,
     link: function ($scope, $el, attr) {
       $scope.groupName = attr.groupName;

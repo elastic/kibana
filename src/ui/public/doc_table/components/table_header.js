@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import 'ui/filters/short_dots';
 import headerHtml from 'ui/doc_table/components/table_header.html';
-var module = require('ui/modules').get('app/discover');
+import uiModules from 'ui/modules';
+var module = uiModules.get('app/discover');
 
 
 module.directive('kbnTableHeader', function (shortDotsFilter) {

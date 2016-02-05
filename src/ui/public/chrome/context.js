@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import ConfigTemplate from 'ui/ConfigTemplate';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 // TODO: all of this really belongs in the timepicker
 .directive('chromeContext', function (timefilter, globalState) {

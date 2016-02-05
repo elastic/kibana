@@ -2,10 +2,13 @@ import _ from 'lodash';
 import 'plugins/kibana/settings/sections/indices/_create';
 import 'plugins/kibana/settings/sections/indices/_edit';
 import 'plugins/kibana/settings/sections/indices/_field_editor';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import indexTemplate from 'plugins/kibana/settings/sections/indices/index.html';
 
 
 // add a dependency to all of the subsection routes
-require('ui/routes')
+uiRoutes
 .defaults(/settings\/indices/, {
   resolve: {
     indexPatternIds: function (courier) {
@@ -15,12 +18,12 @@ require('ui/routes')
 });
 
 // wrapper directive, which sets some global stuff up like the left nav
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('kbnSettingsIndices', function ($route, config, kbnUrl) {
   return {
     restrict: 'E',
     transclude: true,
-    template: require('plugins/kibana/settings/sections/indices/index.html'),
+    template: indexTemplate,
     link: function ($scope) {
       $scope.editingId = $route.current.params.indexPatternId;
       config.$bind($scope, 'defaultIndex');

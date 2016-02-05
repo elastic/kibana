@@ -6,9 +6,10 @@ import findByParam from 'ui/utils/find_by_param';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import uiModules from 'ui/modules';
 
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .directive('visualizeLegend', function (Private, getAppState) {
   var Data = Private(VislibLibDataProvider);
   var colorPalette = Private(VislibComponentsColorColorProvider);

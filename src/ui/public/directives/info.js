@@ -1,6 +1,7 @@
 import html from 'ui/partials/info.html';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
   .get('kibana')
   .directive('kbnInfo', function () {
     return {

@@ -1,7 +1,8 @@
 import moment from 'moment';
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
-require('ui/modules')
+uiModules
   .get('kibana')
   .filter('moment', function (config) {
     return function (datetime) {

@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import keyMap from 'ui/utils/key_map';
+import uiModules from 'ui/modules';
 
 var INVALID = {}; // invalid flag
 var FLOATABLE = /^[\d\.e\-\+]+$/i;
@@ -8,7 +9,7 @@ var FLOATABLE = /^[\d\.e\-\+]+$/i;
 var VALIDATION_ERROR = 'numberListRangeAndOrder';
 var DIRECTIVE_ATTR = 'kbn-number-list-input';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('kbnNumberListInput', function ($parse) {
   return {

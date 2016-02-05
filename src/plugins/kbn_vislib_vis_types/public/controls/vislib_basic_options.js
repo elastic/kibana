@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import $ from 'jquery';
-const module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+import vislibBasicOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options.html';
+const module = uiModules.get('kibana');
 
 module.directive('vislibBasicOptions', function ($parse, $compile) {
   return {
     restrict: 'E',
-    template: require('plugins/kbn_vislib_vis_types/controls/vislib_basic_options.html'),
+    template: vislibBasicOptionsTemplate,
     replace: true
   };
 });

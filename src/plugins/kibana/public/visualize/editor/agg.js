@@ -4,7 +4,9 @@ import _ from 'lodash';
 import $ from 'jquery';
 import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
 import AggTypesIndexProvider from 'ui/agg_types/index';
-require('ui/modules')
+import uiModules from 'ui/modules';
+import aggTemplate from 'plugins/kibana/visualize/editor/agg.html';
+uiModules
 .get('app/visualize')
 .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
 
@@ -16,7 +18,7 @@ require('ui/modules')
 
   return {
     restrict: 'A',
-    template: require('plugins/kibana/visualize/editor/agg.html'),
+    template: aggTemplate,
     require: 'form',
     link: function ($scope, $el, attrs, kbnForm) {
       $scope.$bind('outputAgg', 'outputVis.aggs.byId[agg.id]', $scope);

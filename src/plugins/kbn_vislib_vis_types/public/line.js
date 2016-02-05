@@ -1,5 +1,6 @@
 import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType';
 import VisSchemasProvider from 'ui/Vis/Schemas';
+import lineTemplate from 'plugins/kbn_vislib_vis_types/editors/line.html';
 
 export default function HistogramVisType(Private) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
@@ -29,7 +30,7 @@ export default function HistogramVisType(Private) {
         yAxis: {}
       },
       scales: ['linear', 'log', 'square root'],
-      editor: require('plugins/kbn_vislib_vis_types/editors/line.html')
+      editor: lineTemplate
     },
     schemas: new Schemas([
       {

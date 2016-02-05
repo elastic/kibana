@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import 'ui/notify';
+import uiModules from 'ui/modules';
 
 
-const module = require('ui/modules').get('discover/saved_searches', [
+const module = uiModules.get('discover/saved_searches', [
   'kibana/notify',
   'kibana/courier'
 ]);

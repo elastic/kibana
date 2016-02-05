@@ -1,3 +1,4 @@
+import uiModules from 'ui/modules';
 
 function makeDirectiveDef(id, compare) {
   return function ($parse) {
@@ -28,7 +29,7 @@ function makeDirectiveDef(id, compare) {
   };
 }
 
-require('ui/modules')
+uiModules
   .get('kibana')
   .directive('greaterThan', makeDirectiveDef('greaterThan', function (a, b) {
     return a > b;

@@ -1,9 +1,11 @@
-require('ui/modules')
+import uiModules from 'ui/modules';
+import indexHeaderTemplate from 'plugins/kibana/settings/sections/indices/_index_header.html';
+uiModules
 .get('apps/settings')
 .directive('kbnSettingsIndexHeader', function (config) {
   return {
     restrict: 'E',
-    template: require('plugins/kibana/settings/sections/indices/_index_header.html'),
+    template: indexHeaderTemplate,
     scope: {
       indexPattern: '=',
       setDefault: '&',

@@ -5,6 +5,7 @@ import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
 import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
 import VisSchemasProvider from 'ui/Vis/Schemas';
+import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -32,7 +33,7 @@ function TableVisTypeProvider(Private) {
     icon: 'fa-table',
     description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
       'aggregation. Tip, a data table is available from many other charts by clicking grey bar at the bottom of the chart.',
-    template: require('plugins/table_vis/table_vis.html'),
+    template: tableVisTemplate,
     params: {
       defaults: {
         perPage: 10,

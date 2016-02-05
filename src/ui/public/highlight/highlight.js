@@ -1,8 +1,9 @@
 import 'ui/highlight/highlight_tags';
 import _ from 'lodash';
 import angular from 'angular';
+import uiModules from 'ui/modules';
 
-var module = require('ui/modules').get('kibana');
+var module = uiModules.get('kibana');
 
 module.filter('highlight', function (highlightTags) {
   return function (formatted, highlight) {

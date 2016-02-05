@@ -4,14 +4,17 @@ import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_name';
 import 'ui/directives/auto_select_if_only_one';
 import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import createTemplate from 'plugins/kibana/settings/sections/indices/_create.html';
 
 
-require('ui/routes')
+uiRoutes
 .when('/settings/indices/', {
-  template: require('plugins/kibana/settings/sections/indices/_create.html')
+  template: createTemplate
 });
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
   const notify = new Notifier();
   const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);

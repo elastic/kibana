@@ -4,11 +4,13 @@ import ConfigDefaultsProvider from 'ui/config/defaults';
 import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
 import ConfigValsProvider from 'ui/config/_vals';
 import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
-var module = require('ui/modules').get('kibana/config', [
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana/config', [
   'kibana/notify'
 ]);
 
-require('ui/routes').addSetupWork(function (config) {
+uiRoutes.addSetupWork(function (config) {
   return config.init();
 });
 

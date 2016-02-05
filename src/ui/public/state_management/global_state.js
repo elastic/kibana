@@ -3,8 +3,9 @@ import angular from 'angular';
 import qs from 'ui/utils/query_string';
 import rison from 'ui/utils/rison';
 import StateManagementStateProvider from 'ui/state_management/state';
+import uiModules from 'ui/modules';
 
-var module = require('ui/modules').get('kibana/global_state');
+var module = uiModules.get('kibana/global_state');
 
 module.service('globalState', function (Private, $rootScope, $location) {
   var State = Private(StateManagementStateProvider);

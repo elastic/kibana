@@ -4,6 +4,8 @@ import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_buc
 import VisAggConfigProvider from 'ui/Vis/AggConfig';
 import VisSchemasProvider from 'ui/Vis/Schemas';
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
+import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
+import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 export default function TermsAggDefinition(Private) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
@@ -61,7 +63,7 @@ export default function TermsAggDefinition(Private) {
         name: 'orderAgg',
         type: AggConfig,
         default: null,
-        editor: require('ui/agg_types/controls/order_agg.html'),
+        editor: orderAggTemplate,
         serialize: function (orderAgg) {
           return orderAgg.toJSON();
         },
@@ -164,7 +166,7 @@ export default function TermsAggDefinition(Private) {
         name: 'order',
         type: 'optioned',
         default: 'desc',
-        editor: require('ui/agg_types/controls/order_and_size.html'),
+        editor: orderAndSizeTemplate,
         options: [
           { display: 'Descending', val: 'desc' },
           { display: 'Ascending', val: 'asc' }

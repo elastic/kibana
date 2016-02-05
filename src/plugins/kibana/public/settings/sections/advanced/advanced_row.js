@@ -1,13 +1,15 @@
 import _ from 'lodash';
 import 'ui/elastic_textarea';
 import ConfigDefaultsProvider from 'ui/config/defaults';
+import uiModules from 'ui/modules';
+import advancedRowTemplate from 'plugins/kibana/settings/sections/advanced/advanced_row.html';
 
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('advancedRow', function (config, Notifier, Private) {
   return {
     restrict: 'A',
     replace: true,
-    template: require('plugins/kibana/settings/sections/advanced/advanced_row.html'),
+    template: advancedRowTemplate,
     scope: {
       conf: '=advancedRow',
       configs: '='

@@ -6,8 +6,10 @@ import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.
 import 'ui/filters/match_any';
 import 'plugins/kibana/visualize/editor/agg_param';
 import AggTypesIndexProvider from 'ui/agg_types/index';
+import uiModules from 'ui/modules';
+import aggParamsTemplate from 'plugins/kibana/visualize/editor/agg_params.html';
 
-require('ui/modules')
+uiModules
 .get('app/visualize')
 .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
   const aggTypes = Private(AggTypesIndexProvider);
@@ -18,7 +20,7 @@ require('ui/modules')
 
   return {
     restrict: 'E',
-    template: require('plugins/kibana/visualize/editor/agg_params.html'),
+    template: aggParamsTemplate,
     scope: true,
     link: function ($scope, $el, attr) {
       $scope.$bind('agg', attr.agg);

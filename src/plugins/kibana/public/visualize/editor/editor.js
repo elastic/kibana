@@ -14,11 +14,14 @@ import DocTitleProvider from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 
 
-require('ui/routes')
+uiRoutes
 .when('/visualize/create', {
-  template: require('plugins/kibana/visualize/editor/editor.html'),
+  template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
       const visTypes = Private(RegistryVisTypesProvider);
@@ -35,7 +38,7 @@ require('ui/routes')
   }
 })
 .when('/visualize/edit/:id', {
-  template: require('plugins/kibana/visualize/editor/editor.html'),
+  template: editorTemplate,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route) {
       return savedVisualizations.get($route.current.params.id)
@@ -49,7 +52,7 @@ require('ui/routes')
   }
 });
 
-require('ui/modules')
+uiModules
 .get('app/visualize', [
   'kibana/notify',
   'kibana/courier'

@@ -4,6 +4,7 @@ import 'ui/directives/validate_date_math';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/create_filter/date_range';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import dateRangesTemplate from 'ui/agg_types/controls/date_ranges.html';
 
 export default function DateRangeAggDefinition(Private, config) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -37,7 +38,7 @@ export default function DateRangeAggDefinition(Private, config) {
         from: 'now-1w/w',
         to: 'now'
       }],
-      editor: require('ui/agg_types/controls/date_ranges.html')
+      editor: dateRangesTemplate
     }]
   });
 };

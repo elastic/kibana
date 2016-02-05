@@ -7,12 +7,14 @@ import EventsProvider from 'ui/events';
 import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
 import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
 import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
-require('ui/routes')
+import uiRoutes from 'ui/routes';
+import uiModules from 'ui/modules';
+uiRoutes
 .addSetupWork(function (timefilter) {
   return timefilter.init();
 });
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
 

@@ -1,8 +1,9 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 // Debounce service, angularized version of lodash debounce
 // borrowed heavily from https://github.com/shahata/angular-debounce
 
-var module = require('ui/modules').get('kibana');
+var module = uiModules.get('kibana');
 
 module.service('debounce', ['$timeout', function ($timeout) {
   return function (func, wait, options) {

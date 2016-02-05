@@ -1,11 +1,12 @@
 import _ from 'lodash';
+import uiModules from 'ui/modules';
 
 /**
  * Angular can't render directives that render themselves recursively:
  * http://stackoverflow.com/a/18609594/296172
  */
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .service('compileRecursiveDirective', function ($compile) {
   return {

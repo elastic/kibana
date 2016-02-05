@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import 'ui/filters/uriescape';
 import 'ui/filters/rison';
+import uiModules from 'ui/modules';
 
 
-require('ui/modules').get('kibana/url')
+uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
 function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {

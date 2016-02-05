@@ -10,7 +10,8 @@ import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extractTime
 import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filterOutTimeBasedFilter';
 import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/changeTimeFilter';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 
 module.directive('filterBar', function (Private, Promise, getAppState) {
