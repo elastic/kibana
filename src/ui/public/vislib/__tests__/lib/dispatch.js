@@ -22,25 +22,25 @@ describe('Vislib Dispatch Class Test Suite', function () {
   describe('', function () {
     var vis;
     var persistedState;
-    var EventEmitter;
+    var SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))();
       persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
       vis.render(data, persistedState);
-      EventEmitter = require('events').EventEmitter;
+      SimpleEmitter = require('ui/utils/SimpleEmitter');
     }));
 
     afterEach(function () {
       destroyVis(vis);
     });
 
-    it('extends the EventEmitter class', function () {
+    it('extends the SimpleEmitter class', function () {
       var events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function (dispatch) {
-        expect(dispatch).to.be.a(EventEmitter);
+        expect(dispatch).to.be.a(SimpleEmitter);
       });
     });
   });

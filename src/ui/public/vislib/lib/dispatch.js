@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { EventEmitter } from 'events';
+import SimpleEmitter from 'ui/utils/SimpleEmitter';
 define(function (require) {
   return function DispatchClass(Private) {
     var Tooltip = Private(require('ui/vislib/components/Tooltip'));
@@ -14,7 +14,7 @@ define(function (require) {
      * @param handler {Object} Reference to Handler Class Object
      */
 
-    _.class(Dispatch).inherits(EventEmitter);
+    _.class(Dispatch).inherits(SimpleEmitter);
     function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler);

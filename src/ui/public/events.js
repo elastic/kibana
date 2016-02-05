@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
-import { EventEmitter } from 'events';
+import SimpleEmitter from 'ui/utils/SimpleEmitter';
 define(function (require) {
 
   return function EventsProvider(Private, Promise) {
     var notify = new Notifier({ location: 'EventEmitter' });
 
-    _.class(Events).inherits(EventEmitter);
+    _.class(Events).inherits(SimpleEmitter);
     function Events() {
       Events.Super.call(this);
       this._listeners = {};
