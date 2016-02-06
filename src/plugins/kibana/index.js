@@ -21,7 +21,9 @@ module.exports = function (kibana) {
           'visTypes',
           'spyModes',
           'fieldFormats',
-          'navbarExtensions'
+          'navbarExtensions',
+          'settingsSections',
+          'docViews'
         ],
 
         injectVars: function (server, options) {

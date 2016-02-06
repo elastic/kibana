@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
 import 'plugins/kibana/settings/sections/indices/_create';
 import 'plugins/kibana/settings/sections/indices/_edit';
 import 'plugins/kibana/settings/sections/indices/_field_editor';
@@ -45,8 +46,9 @@ uiModules.get('apps/settings')
   };
 });
 
-export default {
+registry.register(_.constant({
+  order: 1,
   name: 'indices',
   display: 'Indices',
-  url: '#/settings/indices',
-};
+  url: '#/settings/indices'
+}));

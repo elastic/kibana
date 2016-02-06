@@ -1,12 +1,11 @@
 import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
 import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
 import 'plugins/kibana/settings/sections/advanced/advanced_row';
 import ConfigDefaultsProvider from 'ui/config/defaults';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/settings/sections/advanced/index.html';
-
-
 
 uiRoutes
 .when('/settings/advanced', {
@@ -55,9 +54,9 @@ uiModules.get('apps/settings')
   };
 });
 
-export default {
+registry.register(_.constant({
   order: 2,
   name: 'advanced',
   display: 'Advanced',
   url: '#/settings/advanced'
-};
+}));

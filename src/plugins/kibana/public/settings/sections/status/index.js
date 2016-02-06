@@ -1,8 +1,9 @@
 import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
 
-export default {
-  order: 3,
+registry.register(_.constant({
+  order: 1000,
   name: 'status',
   display: 'Status',
   url: '/status'
-};
+}));
