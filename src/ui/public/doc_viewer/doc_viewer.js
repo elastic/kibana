@@ -3,46 +3,45 @@ import angular from 'angular';
 import 'ace';
 import html from 'ui/doc_viewer/doc_viewer.html';
 import 'ui/doc_viewer/doc_viewer.less';
-define(function (require) {
+import uiModules from 'ui/modules';
 
 
-  require('ui/modules').get('kibana')
-  .directive('docViewer', function (config, Private) {
-    return {
-      restrict: 'E',
-      template: html,
-      scope: {
-        hit: '=',
-        indexPattern: '=',
-        filter: '=?',
-        columns: '=?'
+uiModules.get('kibana')
+.directive('docViewer', function (config, Private) {
+  return {
+    restrict: 'E',
+    template: html,
+    scope: {
+      hit: '=',
+      indexPattern: '=',
+      filter: '=?',
+      columns: '=?'
+    },
+    link: {
+      pre($scope) {
+        $scope.aceLoaded = (editor) => {
+          editor.$blockScrolling = Infinity;
+        };
       },
-      link: {
-        pre($scope) {
-          $scope.aceLoaded = (editor) => {
-            editor.$blockScrolling = Infinity;
-          };
-        },
 
-        post($scope, $el, attr) {
-          // If a field isn't in the mapping, use this
-          $scope.mode = 'table';
-          $scope.mapping = $scope.indexPattern.fields.byName;
-          $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
-          $scope.hitJson = angular.toJson($scope.hit, true);
-          $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-          $scope.fields = _.keys($scope.flattened).sort();
+      post($scope, $el, attr) {
+        // If a field isn't in the mapping, use this
+        $scope.mode = 'table';
+        $scope.mapping = $scope.indexPattern.fields.byName;
+        $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
+        $scope.hitJson = angular.toJson($scope.hit, true);
+        $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
+        $scope.fields = _.keys($scope.flattened).sort();
 
-          $scope.toggleColumn = function (fieldName) {
-            _.toggleInOut($scope.columns, fieldName);
-          };
+        $scope.toggleColumn = function (fieldName) {
+          _.toggleInOut($scope.columns, fieldName);
+        };
 
-          $scope.showArrayInObjectsWarning = function (row, field) {
-            var value = $scope.flattened[field];
-            return _.isArray(value) && typeof value[0] === 'object';
-          };
-        }
+        $scope.showArrayInObjectsWarning = function (row, field) {
+          var value = $scope.flattened[field];
+          return _.isArray(value) && typeof value[0] === 'object';
+        };
       }
-    };
-  });
+    }
+  };
 });

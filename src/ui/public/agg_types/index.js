@@ -19,65 +19,63 @@ import AggTypesBucketsTermsProvider from 'ui/agg_types/buckets/terms';
 import AggTypesBucketsFiltersProvider from 'ui/agg_types/buckets/filters';
 import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/significant_terms';
 import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
-define(function (require) {
-  return function AggTypeService(Private) {
+export default function AggTypeService(Private) {
 
-    var aggs = {
-      metrics: [
-        Private(AggTypesMetricsCountProvider),
-        Private(AggTypesMetricsAvgProvider),
-        Private(AggTypesMetricsSumProvider),
-        Private(AggTypesMetricsMedianProvider),
-        Private(AggTypesMetricsMinProvider),
-        Private(AggTypesMetricsMaxProvider),
-        Private(AggTypesMetricsStdDeviationProvider),
-        Private(AggTypesMetricsCardinalityProvider),
-        Private(AggTypesMetricsPercentilesProvider),
-        Private(AggTypesMetricsPercentileRanksProvider)
-      ],
-      buckets: [
-        Private(AggTypesBucketsDateHistogramProvider),
-        Private(AggTypesBucketsHistogramProvider),
-        Private(AggTypesBucketsRangeProvider),
-        Private(AggTypesBucketsDateRangeProvider),
-        Private(AggTypesBucketsIpRangeProvider),
-        Private(AggTypesBucketsTermsProvider),
-        Private(AggTypesBucketsFiltersProvider),
-        Private(AggTypesBucketsSignificantTermsProvider),
-        Private(AggTypesBucketsGeoHashProvider)
-      ]
-    };
-
-    Object.keys(aggs).forEach(function (type) {
-      aggs[type].forEach(function (agg) {
-        agg.type = type;
-      });
-    });
-
-
-    /**
-     * IndexedArray of Aggregation Types.
-     *
-     * These types form two groups, metric and buckets.
-     *
-     * @module agg_types
-     * @type {IndexedArray}
-     */
-    return new IndexedArray({
-
-      /**
-       * @type {Array}
-       */
-      index: ['name'],
-
-      /**
-       * [group description]
-       * @type {Array}
-       */
-      group: ['type'],
-      initialSet: aggs.metrics.concat(aggs.buckets)
-    });
+  var aggs = {
+    metrics: [
+      Private(AggTypesMetricsCountProvider),
+      Private(AggTypesMetricsAvgProvider),
+      Private(AggTypesMetricsSumProvider),
+      Private(AggTypesMetricsMedianProvider),
+      Private(AggTypesMetricsMinProvider),
+      Private(AggTypesMetricsMaxProvider),
+      Private(AggTypesMetricsStdDeviationProvider),
+      Private(AggTypesMetricsCardinalityProvider),
+      Private(AggTypesMetricsPercentilesProvider),
+      Private(AggTypesMetricsPercentileRanksProvider)
+    ],
+    buckets: [
+      Private(AggTypesBucketsDateHistogramProvider),
+      Private(AggTypesBucketsHistogramProvider),
+      Private(AggTypesBucketsRangeProvider),
+      Private(AggTypesBucketsDateRangeProvider),
+      Private(AggTypesBucketsIpRangeProvider),
+      Private(AggTypesBucketsTermsProvider),
+      Private(AggTypesBucketsFiltersProvider),
+      Private(AggTypesBucketsSignificantTermsProvider),
+      Private(AggTypesBucketsGeoHashProvider)
+    ]
   };
 
-  // preload
-});
+  Object.keys(aggs).forEach(function (type) {
+    aggs[type].forEach(function (agg) {
+      agg.type = type;
+    });
+  });
+
+
+  /**
+   * IndexedArray of Aggregation Types.
+   *
+   * These types form two groups, metric and buckets.
+   *
+   * @module agg_types
+   * @type {IndexedArray}
+   */
+  return new IndexedArray({
+
+    /**
+     * @type {Array}
+     */
+    index: ['name'],
+
+    /**
+     * [group description]
+     * @type {Array}
+     */
+    group: ['type'],
+    initialSet: aggs.metrics.concat(aggs.buckets)
+  });
+};
+
+// preload

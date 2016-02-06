@@ -1,22 +1,20 @@
 import _ from 'lodash';
 import VislibComponentsLabelsPieReturnPieNamesProvider from 'ui/vislib/components/labels/pie/return_pie_names';
-define(function (require) {
 
-  return function GetPieNames(Private) {
-    var returnNames = Private(VislibComponentsLabelsPieReturnPieNamesProvider);
+export default function GetPieNames(Private) {
+  var returnNames = Private(VislibComponentsLabelsPieReturnPieNamesProvider);
 
-    return function (data, columns) {
-      var slices = data.slices;
+  return function (data, columns) {
+    var slices = data.slices;
 
-      if (slices.children) {
-        return _(returnNames(slices.children, 0, columns))
-        .sortBy(function (obj) {
-          return obj.index;
-        })
-        .pluck('key')
-        .unique()
-        .value();
-      }
-    };
+    if (slices.children) {
+      return _(returnNames(slices.children, 0, columns))
+      .sortBy(function (obj) {
+        return obj.index;
+      })
+      .pluck('key')
+      .unique()
+      .value();
+    }
   };
-});
+};
