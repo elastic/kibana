@@ -244,6 +244,15 @@ unaryExpression
     : NOT e
       { $$ = new yy.Not($2); }
     | EXISTS e
+      { if ($2 instanceof yy.ScopedExpr) {
+          $2.exists = true;
+          $$ = $2;
+        } else {
+          var expr = new yy.ScopedExpr($2);
+          expr.exists = true;
+          $$ = expr;
+        }
+      }
     ;
 
 e

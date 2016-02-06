@@ -10,68 +10,13 @@ scope.moment = require('moment');
 scope.errors = require('ui/errors');
 scope._ = require('lodash');
 
-scope.NOVALUE = {};
-
-scope.Query = function (expression) {
-  this.expression = expression;
-};
-
-scope.Query.prototype = {
-  toJson : function () {
-    return '{"query":' + this.expression.toJson() + '}';
+function getMapping(fieldName) {
+  var mapping = scope.fieldDictionary[fieldName];
+  if (mapping === undefined) {
+    throw new scope.errors.FieldNotFoundInSelectedIndex(fieldName);
   }
-};
-
-scope.MatchAll = function () {
-};
-
-scope.MatchAll.prototype = {
-  toJson : function () {
-    return '{ "match_all": {} }';
-  }
-};
-
-scope.Missing = function (fieldName) {
-  this.fieldName = fieldName;
-};
-
-scope.Missing.prototype = {
-  toJson : function () {
-    return '{"filtered":{"filter":{"missing":{"field":"' + this.fieldName
-        + '"}}}}';
-  }
-};
-
-scope.SetLiteral = function (value) {
-  this.set = [ value ];
-};
-
-scope.SetLiteral.prototype = {
-  add : function (value) {
-    this.set.push(value);
-  }
-};
-
-scope.RangeLiteral = function (from, to, includeLower, includeUpper) {
-  this.from = from;
-  this.to = to;
-  this.includeLower = includeLower;
-  this.includeUpper = includeUpper;
-};
-
-scope.Range = function (field, rangeLiteral) {
-  this.field = field;
-  this.rangeLiteral = rangeLiteral;
-};
-
-scope.Range.prototype = {
-  toJson : function () {
-    return '{"range":{"' + this.field + '":{"from":' + this.rangeLiteral.from
-        + ',"to":' + this.rangeLiteral.to + ',"include_lower":'
-        + this.rangeLiteral.includeLower + ',"include_upper":'
-        + this.rangeLiteral.includeUpper + '}}}';
-  }
-};
+  return mapping;
+}
 
 function validateValue(mapping, value) {
   switch (mapping.type) {
@@ -108,11 +53,74 @@ function validateValue(mapping, value) {
   }
 }
 
-scope.Term = function (field, operation, value) {
-  var mapping = scope.fieldDictionary[field];
-  if (mapping === undefined) {
-    throw new scope.errors.FieldNotFoundInSelectedIndex(field);
+
+scope.NOVALUE = {};
+
+scope.Query = function (expression) {
+  this.expression = expression;
+};
+
+scope.Query.prototype = {
+  toJson : function () {
+    return '{"query":' + this.expression.toJson() + '}';
   }
+};
+
+scope.MatchAll = function () {
+};
+
+scope.MatchAll.prototype = {
+  toJson : function () {
+    return '{ "match_all": {} }';
+  }
+};
+
+scope.Missing = function (fieldName) {
+  var mapping = getMapping(fieldName);
+  this.fieldName = fieldName;
+};
+
+scope.Missing.prototype = {
+  toJson : function () {
+    return '{"filtered":{"filter":{"missing":{"field":"' + this.fieldName
+        + '"}}}}';
+  }
+};
+
+scope.SetLiteral = function (value) {
+  this.set = [ value ];
+};
+
+scope.SetLiteral.prototype = {
+  add : function (value) {
+    this.set.push(value);
+  }
+};
+
+scope.RangeLiteral = function (from, to, includeLower, includeUpper) {
+  this.from = from;
+  this.to = to;
+  this.includeLower = includeLower;
+  this.includeUpper = includeUpper;
+};
+
+scope.Range = function (field, rangeLiteral) {
+  var mapping = getMapping(field);
+  this.field = field;
+  this.rangeLiteral = rangeLiteral;
+};
+
+scope.Range.prototype = {
+  toJson : function () {
+    return '{"range":{"' + this.field + '":{"from":' + this.rangeLiteral.from
+        + ',"to":' + this.rangeLiteral.to + ',"include_lower":'
+        + this.rangeLiteral.includeLower + ',"include_upper":'
+        + this.rangeLiteral.includeUpper + '}}}';
+  }
+};
+
+scope.Term = function (field, operation, value) {
+  var mapping = getMapping(field);
   this.field = field;
   this.operation = operation;
   this.value = validateValue(mapping, value);
@@ -120,69 +128,158 @@ scope.Term = function (field, operation, value) {
 };
 
 scope.Term.prototype = {
-  toJson : function () {
+  toJson : function (ignoreNested) {
+    var jsonString = '';
+    if (this.nestedPath) {
+      jsonString = '{"nested":{"path":"' + this.nestedPath + '","query":';
+    }
     switch (this.operation) {
       case '=':
-        return '{"term":{"' + this.field + '":' + this.value + '}}';
+        jsonString += '{"term":{"' + this.field + '":' + this.value + '}}';
         break;
       case '>':
-        return '{"range":{"' + this.field + '":{"from":' + this.value
+        jsonString += '{"range":{"' + this.field + '":{"from":' + this.value
             + ',"to":null,"include_lower":false,"include_upper":true}}}';
         break;
       case '<':
-        return '{"range":{"' + this.field + '":{"from":null,"to":' + this.value
+        jsonString += '{"range":{"' + this.field + '":{"from":null,"to":' + this.value
             + ',"include_lower":true,"include_upper":false}}}';
         break;
       case '>=':
-        return '{"range":{"' + this.field + '":{"from":' + this.value
+        jsonString += '{"range":{"' + this.field + '":{"from":' + this.value
             + ',"to":null,"include_lower":true,"include_upper":true}}}';
         break;
       case '<=':
-        return '{"range":{"' + this.field + '":{"from":null,"to":' + this.value
+        jsonString += '{"range":{"' + this.field + '":{"from":null,"to":' + this.value
             + ',"include_lower":true,"include_upper":true}}}';
         break;
       case '~=':
-        return '{"wildcard":{"' + this.field + '":' + this.value + '}}';
+        jsonString += '{"wildcard":{"' + this.field + '":' + this.value + '}}';
         break;
       default:
         break;
     }
+    if (this.nestedPath) {
+      jsonString += '}}';
+    }
+    return jsonString;
   }
 };
 
 scope.BoolExpr = function () {
   this.andExpr = [];
   this.orExpr = [];
+  this.nestedPath;
 };
 
 scope.BoolExpr.prototype = {
+
+  sameNested : function (left, right) {
+    if (left.nestedPath && right.nestedPath && left.nestedPath === right.nestedPath) {
+      if (left instanceof scope.ScopedExpr && left.exists === true) {
+        return false;
+      } else if (right instanceof scope.ScopedExpr && right.exists === true) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  },
+
+  setAnd : function (andExprs) {
+    this.andExpr = andExprs;
+  },
+
+  setOr : function (orExprs) {
+    this.orExpr = orExprs;
+  },
+
   and : function (left, right) {
-    if (left !== this) {
+    var newAnd;
+    var newBool;
+    // If neither side is a Bool/this object, this means this is the first
+    // set of expressions to be AND/OR together
+    if (left !== this && right !== this) {
+      if (this.sameNested(left, right)) {
+        this.nestedPath = left.nestedPath;
+        left.nestedPath = undefined;
+        right.nestedPath = undefined;
+      }
       this.andExpr.push(left);
-    }
-    if (right !== this) {
       this.andExpr.push(right);
+      return;
     }
+    if (left !== this) {
+      newAnd = left;
+    } else {
+      newAnd = right;
+    }
+
+    if (this.sameNested(this, newAnd)) {
+      newAnd.nestedPath = undefined;
+      this.andExpr.push(newAnd);
+    } else {
+      // Create a new BoolExpr move our contents to the left side, put the newAnd to the right, and set it in
+      // our and.
+      newBool = new scope.BoolExpr();
+      newBool.setAnd(this.andExpr);
+      newBool.and(newBool, newAnd);
+    }
+
   },
 
   or : function (left, right) {
-    if (left !== this) {
+    var newOr;
+    var newBool;
+
+    // If neither side is a Bool/this object, this means this is the first
+    // set of expressions to be AND/OR together
+    if (left !== this && right !== this) {
+      if (this.sameNested(left, right)) {
+        this.nestedPath = left.nestedPath;
+        left.nestedPath = undefined;
+        right.nestedPath = undefined;
+      }
       this.orExpr.push(left);
-    }
-    if (right !== this) {
       this.orExpr.push(right);
+      return;
+    }
+    if (left !== this) {
+      newOr = left;
+    } else {
+      newOr = right;
+    }
+
+    if (this.sameNested(this, newOr)) {
+      newOr.nestedPath = undefined;
+      this.andExpr.push(newOr);
+    } else {
+      // Create a new BoolExpr move our contents to the left side, put the newAnd to the right, and set it in
+      // our and.
+      newBool = new scope.BoolExpr();
+      newBool.setOr(this.orExpr);
+      newBool.and(newBool, newOr);
     }
   },
 
   toJson : function () {
-    var json = '{"bool":';
+    var json = '';
     var i;
+
+    if (this.nestedPath) {
+      json = '{"nested":{"path":"' + this.nestedPath + '","query":';
+    }
+
+    json += '{"bool":';
 
     if (this.andExpr.length > 0) {
       json += '{"must":[';
       for (i = 0; i < this.andExpr.length; i++) {
         if (i > 0) {
           json += ',';
+        }
+        if (this.andExpr[i].nestedPath === this.nestedPath) {
+          this.andExpr[i].nestedPath = undefined;
         }
         json += this.andExpr[i].toJson();
       }
@@ -203,11 +300,17 @@ scope.BoolExpr.prototype = {
         if (i > 0) {
           json += ',';
         }
+        if (this.orExpr[i].nestedPath === this.nestedPath) {
+          this.orExpr[i].nestedPath = undefined;
+        }
         json += this.orExpr[i].toJson();
       }
       json += ']}';
     }
     json += '}';
+    if (this.nestedPath) {
+      json += '}}';
+    }
     return json;
   }
 };
@@ -224,10 +327,17 @@ scope.Not.prototype = {
 
 scope.ScopedExpr = function (expression) {
   this.expression = expression;
+  this.nestedPath = expression.nestedPath;
+  this.expression.nestedPath = undefined;
+  this.exists = false;
 };
 
 scope.ScopedExpr.prototype = {
+
   toJson : function () {
+    if (this.nestedPath) {
+      return '{"nested":{"path":"' + this.nestedPath + '","query":' + this.expression.toJson() + '}}';
+    }
     return this.expression.toJson();
   }
 };
