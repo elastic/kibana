@@ -187,7 +187,9 @@ inClause
         term.nestedPath = undefined;
         boolQ.orExpr.push(term);
         for(var i=1; i<$3.length; i++) {
-          boolQ.orExpr.push(new yy.Term($1, '=', $3[i]));
+          term = new yy.Term($1, '=', $3[i]);
+          term.nestedPath = undefined;
+          boolQ.orExpr.push(term);
         }
         $$ = boolQ;
       }
