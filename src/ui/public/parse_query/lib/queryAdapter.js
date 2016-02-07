@@ -78,6 +78,7 @@ scope.MatchAll.prototype = {
 scope.Missing = function (fieldName) {
   var mapping = getMapping(fieldName);
   this.fieldName = fieldName;
+  this.nestedPath = mapping.nestedPath;
 };
 
 scope.Missing.prototype = {
@@ -175,6 +176,9 @@ scope.BoolExpr = function () {
 scope.BoolExpr.prototype = {
 
   sameNested : function (left, right) {
+    if (left.nestedPath === undefined && right.nestedPath === undefined) {
+      return true;
+    }
     if (left.nestedPath && right.nestedPath && left.nestedPath === right.nestedPath) {
       if (left instanceof scope.ScopedExpr && left.exists === true) {
         return false;
@@ -205,8 +209,8 @@ scope.BoolExpr.prototype = {
         left.nestedPath = undefined;
         right.nestedPath = undefined;
       }
-      this.andExpr.push(left);
-      this.andExpr.push(right);
+      this.andExpr.unshift(right);
+      this.andExpr.unshift(left);
       return;
     }
     if (left !== this) {
@@ -217,13 +221,13 @@ scope.BoolExpr.prototype = {
 
     if (this.sameNested(this, newAnd)) {
       newAnd.nestedPath = undefined;
-      this.andExpr.push(newAnd);
+      this.andExpr.unshift(newAnd);
     } else {
       // Create a new BoolExpr move our contents to the left side, put the newAnd to the right, and set it in
       // our and.
       newBool = new scope.BoolExpr();
       newBool.setAnd(this.andExpr);
-      newBool.and(newBool, newAnd);
+      this.andExpr = [newBool, newAnd];
     }
 
   },
@@ -240,8 +244,8 @@ scope.BoolExpr.prototype = {
         left.nestedPath = undefined;
         right.nestedPath = undefined;
       }
-      this.orExpr.push(left);
-      this.orExpr.push(right);
+      this.orExpr.unshift(right);
+      this.orExpr.unshift(left);
       return;
     }
     if (left !== this) {
@@ -252,13 +256,13 @@ scope.BoolExpr.prototype = {
 
     if (this.sameNested(this, newOr)) {
       newOr.nestedPath = undefined;
-      this.andExpr.push(newOr);
+      this.orExpr.unshift(newOr);
     } else {
       // Create a new BoolExpr move our contents to the left side, put the newAnd to the right, and set it in
       // our and.
       newBool = new scope.BoolExpr();
       newBool.setOr(this.orExpr);
-      newBool.and(newBool, newOr);
+      this.orExpr = [newBool, newOr];
     }
   },
 
@@ -317,11 +321,17 @@ scope.BoolExpr.prototype = {
 
 scope.Not = function (expression) {
   this.expression = expression;
+  this.nestedPath = expression.nestedPath;
+  this.expression.nestedPath = undefined;
 };
 
 scope.Not.prototype = {
   toJson : function () {
-    return '{"bool":{"must_not":' + this.expression.toJson() + '}}';
+    var json = '{"bool":{"must_not":' + this.expression.toJson() + '}}';
+    if (this.nestedPath) {
+      json = '{"nested":{"path":"' + this.nestedPath + '","query":' + json + '}}';
+    }
+    return json;
   }
 };
 

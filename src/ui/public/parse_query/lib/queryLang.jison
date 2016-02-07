@@ -182,8 +182,12 @@ inClause
       { $$ = new yy.Range($1, $3); }
     | fieldPath IN setLiteral
       { var boolQ = new yy.BoolExpr();
-        for(var i=0; i<$3.length; i++) {
-          boolQ.or(new yy.Term($1, '=', $3[i]), boolQ);
+        var term = new yy.Term($1, '=', $3[0]);
+        boolQ.nestedPath = term.nestedPath;
+        term.nestedPath = undefined;
+        boolQ.orExpr.push(term);
+        for(var i=1; i<$3.length; i++) {
+          boolQ.or(boolQ, new yy.Term($1, '=', $3[i]));
         }
         $$ = boolQ;
       }
@@ -195,7 +199,10 @@ isClause
     ;
     
 simpleValue
-    : decimal | NUMBER | STRING | NULL | booleanValue | IPV4
+    : decimal 
+    | NUMBER 
+      { $$ = parseInt($1); }
+    | STRING | NULL | booleanValue | IPV4
     | date
       { $$ = yy.moment.utc($1); }
     | dateTime
