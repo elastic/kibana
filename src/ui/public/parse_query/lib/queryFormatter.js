@@ -17,6 +17,15 @@ define(function () {
       return '*';
     }
 
+    if (query.nested) {
+      if (query.nested.query.must_not) {
+        return 'NOT EXISTS ' + fromQuery(query.nested.query.must_not);
+      } else if (query.nested.query.bool && query.nested.query.bool.must_not) {
+        return '(NOT EXISTS ' + fromQuery(query.nested.query.bool.must_not) + ')';
+      }
+      return 'EXISTS ' + fromQuery(query.nested.query);
+    }
+
     if (query.term) {
       return fromTerm(query.term);
     }
@@ -68,7 +77,7 @@ define(function () {
           + valueToString(fieldName, rangeObj.from);
     } else {
       return fieldName + (rangeObj.include_upper ? '<=' : '<')
-          + valueToString(fieldName, rangeObj.from);
+          + valueToString(fieldName, rangeObj.to);
     }
   }
 
@@ -101,7 +110,7 @@ define(function () {
         isIn = true;
         var fieldName = Object.keys(bool.should[0].term)[0];
         for (i = 1; i < bool.should.length; i++) {
-          if (fieldName !== Object.keys(bool.should[i].term)[0]) {
+          if (bool.should[i].term === undefined || fieldName !== Object.keys(bool.should[i].term)[0]) {
             isIn = false;
             break;
           }

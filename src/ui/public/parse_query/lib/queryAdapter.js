@@ -184,6 +184,10 @@ scope.BoolExpr.prototype = {
         return false;
       } else if (right instanceof scope.ScopedExpr && right.exists === true) {
         return false;
+      } else if (left instanceof scope.Not && left.expression instanceof scope.ScopedExpr && left.expression.exists === true) {
+        return false;
+      } else if (right instanceof scope.Not && right.expression instanceof scope.ScopedExpr && right.expression.exists === true) {
+        return false;
       }
       return true;
     }
@@ -227,7 +231,9 @@ scope.BoolExpr.prototype = {
       // our and.
       newBool = new scope.BoolExpr();
       newBool.setAnd(this.andExpr);
-      this.andExpr = [newBool, newAnd];
+      newBool.nestedPath = this.nestedPath;
+      this.nestedPath = undefined;
+      this.andExpr = [newAnd, newBool];
     }
 
   },
@@ -262,7 +268,9 @@ scope.BoolExpr.prototype = {
       // our and.
       newBool = new scope.BoolExpr();
       newBool.setOr(this.orExpr);
-      this.orExpr = [newBool, newOr];
+      newBool.nestedPath = this.nestedPath;
+      this.nestedPath = undefined;
+      this.orExpr = [newOr, newBool];
     }
   },
 
