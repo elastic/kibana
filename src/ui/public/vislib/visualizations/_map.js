@@ -8,16 +8,6 @@ define(function (require) {
     var defaultMapCenter = [15, 5];
     var defaultMarkerType = 'Scaled Circle Markers';
 
-    var mapTiles = {
-      url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
-      options: {
-        attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-          'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-        subdomains: '1234'
-      }
-    };
-
     var markerTypes = {
       'Scaled Circle Markers': Private(require('ui/vislib/visualizations/marker_types/scaled_circles')),
       'Shaded Circle Markers': Private(require('ui/vislib/visualizations/marker_types/shaded_circles')),
@@ -265,11 +255,12 @@ define(function (require) {
       this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
       this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
 
-      // add map tiles layer, using the mapTiles object settings
-      if (this._attr.wms && this._attr.wms.enabled) {
+      // add map tiles layer
+      if (this._attr.serverType === 'WMS' ||
+          (this._attr.serverType === 'Default' && this._attr.defaultServerType === 'WMS')) {
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
       } else {
-        this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
+        this._tileLayer = L.tileLayer(this._attr.tms.url, this._attr.tms.options);
       }
 
       // append tile layers, center and zoom to the map options
