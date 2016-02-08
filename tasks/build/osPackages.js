@@ -24,7 +24,7 @@ module.exports = function (grunt) {
         '--name', 'kibana',
         '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
         '--version', version,
-        '--url', 'https://elastic.co',
+        '--url', 'https://www.elastic.co',
         '--vendor', 'Elasticsearch,\ Inc.',
         '--maintainer', 'Kibana Team\ \<info@elastic.co\>',
         '--license', 'Apache\ 2.0',
