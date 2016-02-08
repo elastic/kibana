@@ -81,7 +81,7 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 +
 [source,sh]
 --------------------------------------------------
-[kibana-{branch}]
+[kibana-4.4]
 name=Kibana repository for 4.4.x packages
 baseurl=http://packages.elastic.co/kibana/4.4/centos
 gpgcheck=1
