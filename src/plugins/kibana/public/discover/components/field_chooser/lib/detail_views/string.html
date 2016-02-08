@@ -3,8 +3,8 @@
           <h5 ng-show="!field.details.error">Quick Count <kbn-info info="Top 5 values based on documents in the table" placement="right"></kbn-info>
             <span ng-if="!field.details.error" class="small discover-field-details-count">
               (
-              <a ng-show="indexPattern.metaFields.indexOf(field.name) === -1" ng-click="updateFilterInQuery('_exists_', field.name, '+')">{{::field.details.exists}}</a>
-              <span ng-show="indexPattern.metaFields.indexOf(field.name) > -1">{{::field.details.exists}}</span>
+              <a ng-show="field.indexed" ng-click="updateFilterInQuery('_exists_', field.name, '+')">{{::field.details.exists}}</a>
+              <span ng-show="!field.indexed">{{::field.details.exists}}</span>
               /{{::field.details.total}} records
               )
             </span>
