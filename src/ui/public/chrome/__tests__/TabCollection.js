@@ -1,9 +1,9 @@
-const expect = require('expect.js');
-const { indexBy, random } = require('lodash');
+import expect from 'expect.js';
 
-const TabFakeStore = require('./_TabFakeStore');
-const TabCollection = require('../TabCollection');
-const Tab = require('../Tab');
+import TabFakeStore from './_TabFakeStore';
+import TabCollection from '../TabCollection';
+import Tab from '../Tab';
+import { indexBy, random } from 'lodash';
 
 describe('Chrome TabCollection', function () {
   describe('empty state', function () {

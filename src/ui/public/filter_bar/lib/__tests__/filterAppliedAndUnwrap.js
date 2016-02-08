@@ -1,5 +1,5 @@
-var expect = require('expect.js');
-var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
+import expect from 'expect.js';
+import filterAppliedAndUnwrap from 'ui/filter_bar/lib/filterAppliedAndUnwrap';
 describe('Filter Bar Directive', function () {
   describe('filterAppliedAndUnwrap()', function () {
 

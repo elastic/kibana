@@ -1,6 +1,5 @@
 <div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
-
-  <navbar ng-if="chrome.getVisible()">
+  <navbar ng-if="chrome.getVisible()" name="visualize">
     <div class="fill bitty-modal-container">
       <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
         ng-dblclick="unlink()"

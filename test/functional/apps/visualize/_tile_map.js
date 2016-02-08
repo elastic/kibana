@@ -1,9 +1,9 @@
 define(function (require) {
-  var Common = require('../../../support/pages/Common');
-  var HeaderPage = require('../../../support/pages/HeaderPage');
+  var Common = require('../../../support/pages/common');
+  var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/DiscoverPage');
-  var VisualizePage = require('../../../support/pages/VisualizePage');
+  var DiscoverPage = require('../../../support/pages/discover_page');
+  var VisualizePage = require('../../../support/pages/visualize_page');
   var expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager) {
@@ -104,6 +104,13 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
+          })
+          // sleep a bit before taking the screenshot or it won't show data
+          .then(function sleep() {
+            return common.sleep(4000);
+          })
           .then(function takeScreenshot() {
             common.debug('Take screenshot');
             common.saveScreenshot('./screenshot-' + testSubName + '.png');
@@ -133,9 +140,6 @@ define(function (require) {
               common.debug(data.split('\n'));
               expect(data.trim().split('\n')).to.eql(expectedTableData);
             });
-          })
-          .then(function () {
-            return visualizePage.collapseChart();
           })
           .catch(common.handleError(this));
         });

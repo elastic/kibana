@@ -1,6 +1,15 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import './_getFilters';
+import './_addFilters';
+import './_removeFilters';
+import './_updateFilters';
+import './_toggleFilters';
+import './_invertFilters';
+import './_pinFilters';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import EventsProvider from 'ui/events';
 var queryFilter;
 var EventEmitter;
 var $rootScope;
@@ -10,8 +19,8 @@ describe('Query Filter', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       $rootScope = _$rootScope_;
-      queryFilter = Private(require('ui/filter_bar/query_filter'));
-      EventEmitter = Private(require('ui/events'));
+      queryFilter = Private(FilterBarQueryFilterProvider);
+      EventEmitter = Private(EventsProvider);
     }));
 
     describe('module instance', function () {
@@ -39,16 +48,11 @@ describe('Query Filter', function () {
         expect(queryFilter.pinFilter).to.be.a('function');
         expect(queryFilter.pinAll).to.be.a('function');
       });
+
     });
+
   });
 
   describe('Actions', function () {
-    require('./_getFilters');
-    require('./_addFilters');
-    require('./_removeFilters');
-    require('./_updateFilters');
-    require('./_toggleFilters');
-    require('./_invertFilters');
-    require('./_pinFilters');
   });
 });

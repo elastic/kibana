@@ -1,17 +1,20 @@
-const app = require('ui/modules').get('kibana');
-const Clipboard = require('clipboard');
+const app = uiModules.get('kibana');
+import Clipboard from 'clipboard';
+import '../styles/index.less';
+import LibUrlShortenerProvider from '../lib/url_shortener';
+import uiModules from 'ui/modules';
+import shareObjectUrlTemplate from 'ui/share/views/share_object_url.html';
 
-require('../styles/index.less');
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
-  const urlShortener = Private(require('../lib/url_shortener'));
+  const urlShortener = Private(LibUrlShortenerProvider);
 
   return {
     restrict: 'E',
     scope: {
       getShareAsEmbed: '&shareAsEmbed'
     },
-    template: require('ui/share/views/share_object_url.html'),
+    template: shareObjectUrlTemplate,
     link: function ($scope, $el) {
       const notify = new Notifier({
         location: `Share ${$scope.$parent.objectType}`
@@ -67,7 +70,11 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       $scope.getUrl = function () {
-        return $location.absUrl();
+        let url = $location.absUrl();
+        if ($scope.shareAsEmbed) {
+          url = url.replace('?', '?embed=true&');
+        }
+        return url;
       };
 
       $scope.$watch('getUrl()', updateUrl);

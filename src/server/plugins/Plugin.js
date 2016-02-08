@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let Joi = require('joi');
-let { attempt, fromNode } = require('bluebird');
-let { resolve } = require('path');
-let { inherits } = require('util');
+import _ from 'lodash';
+import Joi from 'joi';
+import { attempt, fromNode } from 'bluebird';
+import { basename, resolve } from 'path';
+import { inherits } from 'util';
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)
@@ -18,11 +18,23 @@ module.exports = class Plugin {
     this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
-    this.publicDir = opts.publicDir !== false ? resolve(path, 'public') : null;
     this.externalCondition = opts.initCondition || _.constant(true);
     this.externalInit = opts.init || _.noop;
     this.getConfigSchema = opts.config || _.noop;
     this.init = _.once(this.init);
+
+    if (opts.publicDir === false) {
+      this.publicDir = null;
+    }
+    else if (!opts.publicDir) {
+      this.publicDir = resolve(this.path, 'public');
+    }
+    else {
+      this.publicDir = opts.publicDir;
+      if (basename(this.publicDir) !== 'public') {
+        throw new Error(`publicDir for plugin ${this.id} must end with a "public" directory.`);
+      }
+    }
   }
 
   static scoped(kbnServer, path, pkg) {

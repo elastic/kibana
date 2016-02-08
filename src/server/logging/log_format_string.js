@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let ansicolors = require('ansicolors');
-let moment = require('moment');
+import _ from 'lodash';
+import ansicolors from 'ansicolors';
+import moment from 'moment';
 
-let LogFormat = require('./LogFormat');
+import LogFormat from './LogFormat';
 
 let statuses = [
   'err',
@@ -28,6 +28,7 @@ let typeColors = {
   debug: 'brightBlack',
   server: 'brightBlack',
   optmzr: 'white',
+  managr: 'green',
   optimize: 'magenta',
   listening: 'magenta'
 };

@@ -1,9 +1,12 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import $ from 'jquery';
+import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   var ChartTitle;
@@ -73,9 +76,9 @@ describe('Vislib ChartTitle Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    ChartTitle = Private(require('ui/vislib/lib/chart_title'));
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+    ChartTitle = Private(VislibLibChartTitleProvider);
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')

@@ -1,3 +1,5 @@
+import ingest from './server/routes/api/ingest';
+
 module.exports = function (kibana) {
   return new kibana.Plugin({
 
@@ -18,22 +20,11 @@ module.exports = function (kibana) {
         uses: [
           'visTypes',
           'spyModes',
-          'fieldFormats'
+          'fieldFormats',
+          'navbarExtensions',
+          'settingsSections',
+          'docViews'
         ],
-
-        autoload: kibana.autoload.require.concat(
-          'plugins/kibana/discover',
-          'plugins/kibana/visualize',
-          'plugins/kibana/dashboard',
-          'plugins/kibana/settings',
-          'plugins/kibana/settings/sections',
-          'plugins/kibana/doc',
-          'plugins/kibana/settings/sections',
-          'ui/vislib',
-          'ui/agg_response',
-          'ui/agg_types',
-          'leaflet'
-        ),
 
         injectVars: function (server, options) {
           let config = server.config();
@@ -43,6 +34,10 @@ module.exports = function (kibana) {
           };
         }
       }
+    },
+
+    init: function (server, options) {
+      ingest(server);
     }
   });
 

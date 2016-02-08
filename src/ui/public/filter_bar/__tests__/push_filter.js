@@ -1,13 +1,14 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 describe('Filter Bar pushFilter()', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var pushFilterFn;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    pushFilterFn = Private(require('ui/filter_bar/push_filter'));
+    pushFilterFn = Private(FilterBarPushFilterProvider);
   }));
 
   it('is a function that returns a function', function () {

@@ -8,6 +8,12 @@ module.exports = function (grunt) {
       config: 'test/intern',
       reporters: ['Console']
     },
-    dev: {}
+    dev: {},
+    api: {
+      options: {
+        runType: 'client',
+        config: 'test/apiIntern'
+      }
+    }
   };
 };

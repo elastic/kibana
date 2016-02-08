@@ -1,18 +1,18 @@
-var Promise = require('bluebird');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var NoConnections = require('elasticsearch').errors.NoConnections;
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import expect from 'expect.js';
+const NoConnections = require('elasticsearch').errors.NoConnections;
 
-var healthCheck = require('../health_check');
+import healthCheck from '../health_check';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {
 
-    var health;
-    var plugin;
-    var server;
-    var get;
-    var client;
+    let health;
+    let plugin;
+    let server;
+    let get;
+    let client;
 
     beforeEach(function () {
       // setup the plugin stub
@@ -139,5 +139,16 @@ describe('plugins/elasticsearch', function () {
         });
     });
 
+    describe('#waitUntilReady', function () {
+      it('polls health until index is ready', function () {
+        client.cluster.health.onCall(0).returns(Promise.resolve({ timed_out: true })); // no index
+        client.cluster.health.onCall(1).returns(Promise.resolve({ status: 'red' }));   // initializing
+        client.cluster.health.onCall(2).returns(Promise.resolve({ status: 'green' })); // ready
+
+        return health.waitUntilReady().then(function () {
+          sinon.assert.calledThrice(client.cluster.health);
+        });
+      });
+    });
   });
 });
