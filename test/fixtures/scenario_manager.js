@@ -42,6 +42,18 @@ ScenarioManager.prototype.load = function (id) {
         body: body
       });
     })
+    .then(function (response) {
+      if (response.errors) {
+        throw new Error(
+          'bulk failed\n' +
+            response.items
+            .map(i => i[Object.keys(i)[0]].error)
+            .filter(Boolean)
+            .map(err => '  ' + JSON.stringify(err))
+            .join('\n')
+        );
+      }
+    })
     .catch(function (err) {
       if (bulk.haltOnFailure === false) return;
       throw err;
