@@ -176,6 +176,11 @@ define(function (require) {
         value: '($0,0.[00])',
         description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "currency" format'
       },
+      'savedObjects:perPage': {
+        type: 'number',
+        value: 5,
+        description: 'Number of objects to show per page in the load dialog'
+      },
       'timepicker:timeDefaults': {
         type: 'json',
         value: [
