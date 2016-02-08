@@ -24,20 +24,20 @@ define(function (require) {
             .expect(400),
 
           request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'title', false))
+            .send(_.set(createTestData(), 'index_pattern.title', false))
             .expect(400),
 
           request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'fields', {}))
+            .send(_.set(createTestData(), 'index_pattern.fields', {}))
             .expect(400),
 
           request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'fields', []))
+            .send(_.set(createTestData(), 'index_pattern.fields', []))
             .expect(400),
 
           // Fields must have a name and type
           request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'fields', [{count: 0}]))
+            .send(_.set(createTestData(), 'index_pattern.fields', [{count: 0}]))
             .expect(400)
         ]);
       });
@@ -144,22 +144,22 @@ define(function (require) {
 
       bdd.it('should return 409 conflict when the pattern matches existing indices',
         function existingIndicesConflict() {
-          var pattern = createTestData();
-          pattern.id = pattern.title = '.kib*';
+          var ingestConfig = createTestData();
+          ingestConfig.index_pattern.id = ingestConfig.index_pattern.title = '.kib*';
 
           return request.post('/kibana/ingest')
-            .send(pattern)
+            .send(ingestConfig)
             .expect(409);
         });
 
       bdd.it('should enforce snake_case in the request body', function () {
-        var pattern = createTestData();
-        pattern = _.mapKeys(pattern, function (value, key) {
+        var ingestConfig = createTestData();
+        ingestConfig.index_pattern = _.mapKeys(ingestConfig.index_pattern, function (value, key) {
           return _.camelCase(key);
         });
 
         return request.post('/kibana/ingest')
-          .send(pattern)
+          .send(ingestConfig)
           .expect(400);
       });
 

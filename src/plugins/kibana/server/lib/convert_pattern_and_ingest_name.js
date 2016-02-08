@@ -4,7 +4,7 @@
 // This module provides utility functions for easily converting between template and pattern names.
 
 module.exports = {
-  templateToPattern: (templateName) => {
+  ingestToPattern: (templateName) => {
     if (templateName.indexOf('kibana-') === -1) {
       throw new Error('not a valid kibana namespaced template name');
     }
@@ -12,7 +12,7 @@ module.exports = {
     return templateName.slice(templateName.indexOf('-') + 1);
   },
 
-  patternToTemplate: (patternName) => {
+  patternToIngest: (patternName) => {
     if (patternName === '') {
       throw new Error('pattern must not be empty');
     }
