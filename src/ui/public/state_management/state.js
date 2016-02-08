@@ -23,7 +23,7 @@ define(function (require) {
           self.fetch();
         }),
 
-        // begining of full route update, new app will be initialized before
+        // beginning of full route update, new app will be initialized before
         // $routeChangeSuccess or $routeChangeError
         $rootScope.$on('$routeChangeStart', function () {
           if (self._persistAcrossApps) {
@@ -136,8 +136,8 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.destroy = function () {
-      this.off(); // removes all listners
-      this._cleanUpListeners(); // Removes the $routeUpdate listner
+      this.off(); // removes all listeners
+      this._cleanUpListeners(); // Removes the $routeUpdate listener
     };
 
     State.prototype.setDefaults = function (defaults) {
