@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
 import { NoDefaultIndexPattern, NoDefinedIndexPatterns } from 'ui/errors';
+import GetIdsProvider from '../_get_ids';
+import CourierDataSourceRootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
+import uiRoutes from 'ui/routes';
 let notify = new Notifier({
   location: 'Index Patterns'
 });
@@ -11,10 +14,10 @@ module.exports = function (opts) {
   let whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
 
-  require('ui/routes')
+  uiRoutes
   .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, indexPatterns) {
-    let getIds = Private(require('../_get_ids'));
-    let rootSearchSource = Private(require('ui/courier/data_source/_root_search_source'));
+    let getIds = Private(GetIdsProvider);
+    let rootSearchSource = Private(CourierDataSourceRootSearchSourceProvider);
     let path = _.get($route, 'current.$$route.originalPath');
 
     return config.init()

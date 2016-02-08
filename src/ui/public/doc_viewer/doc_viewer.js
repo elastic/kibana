@@ -1,14 +1,13 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
+import DocViewsProvider from 'ui/registry/doc_views';
 
 import 'ui/doc_viewer/doc_viewer.less';
 
-import DocViews from 'ui/registry/doc_views';
-
 uiModules.get('kibana')
 .directive('docViewer', function (config, Private) {
-  const docViews = Private(DocViews);
+  const docViews = Private(DocViewsProvider);
   return {
     restrict: 'E',
     scope: {

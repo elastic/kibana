@@ -1,39 +1,39 @@
 import 'elasticsearch-browser';
 import _ from 'lodash';
-define(function (require) {
-  var es; // share the client amoungst all apps
-  require('ui/modules')
-    .get('kibana', ['elasticsearch', 'kibana/config'])
-    .service('es', function (esFactory, esUrl, $q, esApiVersion) {
-      if (es) return es;
+import uiModules from 'ui/modules';
 
-      es = esFactory({
-        host: esUrl,
-        log: 'info',
-        requestTimeout: 0,
-        apiVersion: esApiVersion,
-        plugins: [function (Client, config) {
+var es; // share the client amoungst all apps
+uiModules
+  .get('kibana', ['elasticsearch', 'kibana/config'])
+  .service('es', function (esFactory, esUrl, $q, esApiVersion) {
+    if (es) return es;
 
-          // esFactory automatically injects the AngularConnector to the config
-          // https://github.com/elastic/elasticsearch-js/blob/master/src/lib/connectors/angular.js
-          _.class(CustomAngularConnector).inherits(config.connectionClass);
-          function CustomAngularConnector(host, config) {
-            CustomAngularConnector.Super.call(this, host, config);
+    es = esFactory({
+      host: esUrl,
+      log: 'info',
+      requestTimeout: 0,
+      apiVersion: esApiVersion,
+      plugins: [function (Client, config) {
 
-            this.request = _.wrap(this.request, function (request, params, cb) {
-              if (String(params.method).toUpperCase() === 'GET') {
-                params.query = _.defaults({ _: Date.now() }, params.query);
-              }
+        // esFactory automatically injects the AngularConnector to the config
+        // https://github.com/elastic/elasticsearch-js/blob/master/src/lib/connectors/angular.js
+        _.class(CustomAngularConnector).inherits(config.connectionClass);
+        function CustomAngularConnector(host, config) {
+          CustomAngularConnector.Super.call(this, host, config);
 
-              return request.call(this, params, cb);
-            });
-          }
+          this.request = _.wrap(this.request, function (request, params, cb) {
+            if (String(params.method).toUpperCase() === 'GET') {
+              params.query = _.defaults({ _: Date.now() }, params.query);
+            }
 
-          config.connectionClass = CustomAngularConnector;
+            return request.call(this, params, cb);
+          });
+        }
 
-        }]
-      });
+        config.connectionClass = CustomAngularConnector;
 
-      return es;
+      }]
     });
-});
+
+    return es;
+  });

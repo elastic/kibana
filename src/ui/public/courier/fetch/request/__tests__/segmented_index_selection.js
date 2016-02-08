@@ -6,6 +6,7 @@ import sinon from 'auto-release-sinon';
 import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';
 import NoDigestPromises from 'testUtils/noDigestPromises';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
 
 describe('Segmented Request Index Selection', function () {
   let Promise;
@@ -21,7 +22,7 @@ describe('Segmented Request Index Selection', function () {
     Promise = $injector.get('Promise');
     HitSortFn = Private(HitSortFnProv);
     $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
+    SegmentedReq = Private(CourierFetchRequestSegmentedProvider);
 
     MockSource = class {
       constructor() {
