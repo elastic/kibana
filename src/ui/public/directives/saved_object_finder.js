@@ -6,7 +6,7 @@ import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
 var module = uiModules.get('kibana');
 
-module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
+module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
 
   var services = Private(SavedObjectsSavedObjectRegistryProvider).byLoaderPropertiesName;
 
@@ -27,6 +27,9 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       // the text input element
       var $input = $element.find('input[ng-model=filter]');
+
+      // The number of items to show in the list
+      $scope.perPage = config.get('savedObjects:perPage');
 
       // the list that will hold the suggestions
       var $list = $element.find('ul');
