@@ -230,7 +230,12 @@ define(function (require) {
     Dispatch.prototype.highlightLegend = function (element) {
       var label = this.getAttribute('data-label');
       if (!label) return;
-      $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
+      var hasOtherLabels = !!$('[data-label]', element.parentNode).not('[data-label="' + label + '"]')[0];
+      if (hasOtherLabels) {
+        hasOtherLabels.css('opacity', 0.5);
+      } else {
+        $(this).css('opacity', 0.65);
+      }
     };
 
     /**
