@@ -2,6 +2,29 @@
 @import (reference) "~bootstrap/less/list-group";
 @import (reference) "~ui/styles/list-group-menu";
 
+.link-color {
+  color: @kibanaBlue2;
+}
+
+.icon-color {
+  color: #416376;
+}
+
+.search-icon {
+  color: #9C9C9C;
+}
+
+.table-type-label {
+  color: #5A5A5A;
+  font-weight: normal;
+  text-align: center;
+}
+
+.table-label {
+  color: #2D2D2D;
+  font-weight: normal;
+}
+
 /* saved_object_finder.html striped table colors */
 .table-striped > tbody > tr:nth-of-type(even) {
   background-color: @kibanaGray6;
@@ -52,6 +75,10 @@
 .saved-object-finder-column {
   text-align: center;
   padding: 5px;
+
+  span {
+    color: #9C9C9C;
+  }
 }
 
 .saved-object-finder-table {

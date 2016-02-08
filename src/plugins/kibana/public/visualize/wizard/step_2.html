@@ -1,14 +1,8 @@
 <h2>Create New Visualization: Select Source</h2>
 <ul class="list-group list-group-menu">
-  <!-- <li ng-click="stepTwoMode='new'"
-      ng-class="{'active': stepTwoMode=='new'}"
-      class="list-group-item list-group-menu-item">
-    From a New Search
-  </li> -->
-  <li class="list-group-item">
+  <li class="list-group-item" style="border: none; background-color: #F6F6F6; border-radius: 0;">
     <!-- Index patterns -->
     From a New Search
-    <!-- Select an index pattern... -->
     <div class="form-group">
       <select class="form-control"
               ng-model="indexPattern.selection"
@@ -17,15 +11,11 @@
       </select>
     </div>
   </li>
-
-  <!-- <li ng-click="stepTwoMode='saved'"
-      ng-class="{'active': stepTwoMode=='saved'}"
-      class="list-group-item list-group-menu-item">
-    Or, From a Saved Search
-  </li> -->
-  <li class="list-group-item">
+  <li class="list-group-item" style="border: none; background-color: #F6F6F6; border-radius: 0;">
     <!-- Saved searches -->
-    Or, From a Saved Search
+    <div>
+      <label>Or, From a Saved Search<label>
+    </div>
     <saved-object-finder
             title="Saved Searches"
             type="searches"
