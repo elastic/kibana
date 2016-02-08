@@ -4,6 +4,9 @@ import Promise from 'bluebird';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
+import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
+import EventsProvider from 'ui/events';
+import ReflowWatcherProvider from 'ui/reflow_watcher';
 
 describe('Vislib Resize Checker', function () {
 
@@ -18,9 +21,9 @@ describe('Vislib Resize Checker', function () {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(function (Private) {
-    ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
-    EventEmitter = Private(require('ui/events'));
-    reflowWatcher = Private(require('ui/reflow_watcher'));
+    ResizeChecker = Private(VislibLibResizeCheckerProvider);
+    EventEmitter = Private(EventsProvider);
+    reflowWatcher = Private(ReflowWatcherProvider);
     reflowSpies.on = sinon.spy(reflowWatcher, 'on');
     reflowSpies.off = sinon.spy(reflowWatcher, 'off');
 

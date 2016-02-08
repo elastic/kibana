@@ -3,6 +3,12 @@ import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
+import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
+import VislibComponentsZeroInjectionUniqKeysProvider from 'ui/vislib/components/zero_injection/uniq_keys';
+import VislibComponentsZeroInjectionFlattenDataProvider from 'ui/vislib/components/zero_injection/flatten_data';
+import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/components/zero_injection/zero_filled_array';
+import VislibComponentsZeroInjectionZeroFillDataArrayProvider from 'ui/vislib/components/zero_injection/zero_fill_data_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
   var dateHistogramRows = {
@@ -256,7 +262,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
+      injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
       sample1 = injectZeros(seriesData);
       sample2 = injectZeros(multiSeriesData);
       sample3 = injectZeros(multiSeriesNumberedData);
@@ -362,7 +368,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
+      orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
       results = orderXValues(multiSeriesData);
       numberedResults = orderXValues(multiSeriesNumberedData);
     }));
@@ -421,7 +427,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      uniqueKeys = Private(require('ui/vislib/components/zero_injection/uniq_keys'));
+      uniqueKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
       results = uniqueKeys(multiSeriesData);
     }));
 
@@ -470,7 +476,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      flattenData = Private(require('ui/vislib/components/zero_injection/flatten_data'));
+      flattenData = Private(VislibComponentsZeroInjectionFlattenDataProvider);
       results = flattenData(multiSeriesData);
     }));
 
@@ -498,7 +504,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
+      createZeroArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
       results1 = createZeroArray(arr1);
       results2 = createZeroArray(arr2);
     }));
@@ -580,8 +586,8 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      zeroFillArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
-      createZeroArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
+      zeroFillArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
+      createZeroArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
       arr1 = createZeroArray(xValueArr);
 
       // Takes zero array as 1st arg and data array as 2nd arg
@@ -642,7 +648,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
+      injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
       results = injectZeros(dateHistogramRows);
     }));
 

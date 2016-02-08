@@ -4,6 +4,11 @@ import ngMock from 'ngMock';
 import sinon from 'auto-release-sinon';
 import 'ui/private';
 import AggParamsPM from 'ui/agg_types/AggParams';
+import VisProvider from 'ui/Vis';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import AggTypesAggTypeProvider from 'ui/agg_types/AggType';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggType Class', function () {
   var AggType;
   var AggParams;
@@ -18,11 +23,11 @@ describe('AggType Class', function () {
     AggParams = sinon.spy(Private(AggParamsPM));
     Private.stub(AggParamsPM, AggParams);
 
-    Vis = Private(require('ui/Vis'));
-    fieldFormat = Private(require('ui/registry/field_formats'));
-    AggType = Private(require('ui/agg_types/AggType'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    Vis = Private(VisProvider);
+    fieldFormat = Private(RegistryFieldFormatsProvider);
+    AggType = Private(AggTypesAggTypeProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {

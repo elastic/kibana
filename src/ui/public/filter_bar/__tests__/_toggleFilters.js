@@ -3,6 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ngMock';
 import sinon from 'auto-release-sinon';
 import MockState from 'fixtures/mock_state';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('toggle filters', function () {
   var storeNames = {
     app: 'appState',
@@ -35,7 +36,7 @@ describe('toggle filters', function () {
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    queryFilter = Private(require('ui/filter_bar/query_filter'));
+    queryFilter = Private(FilterBarQueryFilterProvider);
     filters = [
       {
         query: { match: { extension: { query: 'jpg', type: 'phrase' } } },

@@ -2,6 +2,7 @@
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 import 'plugins/kibana/doc/index';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 let $scope;
 let createController;
@@ -16,7 +17,7 @@ const init = function (index, type, id) {
     $provide.service('$route', function (Private) {
       this.current = {
         locals: {
-          indexPattern: Private(require('fixtures/stubbed_logstash_index_pattern'))
+          indexPattern: Private(FixturesStubbedLogstashIndexPatternProvider)
         },
         params: {
           index: index || 'myIndex',

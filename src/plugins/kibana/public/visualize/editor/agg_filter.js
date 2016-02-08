@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import propFilter from 'ui/filters/_prop_filter';
-define(function (require) {
+import uiModules from 'ui/modules';
 
-  require('ui/modules')
-  .get('kibana')
-  .filter('aggFilter', function () {
-    return propFilter('name');
-  });
+uiModules
+.get('kibana')
+.filter('aggFilter', function () {
+  return propFilter('name');
 });

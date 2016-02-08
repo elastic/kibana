@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesRawJsonProvider from 'ui/agg_types/param_types/raw_json';
 
 
 module.exports = describe('JSON', function () {
@@ -28,8 +30,8 @@ module.exports = describe('JSON', function () {
     aggConfig = { params: {} };
     output = { params: {} };
 
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    JsonAggParam = Private(require('ui/agg_types/param_types/raw_json'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    JsonAggParam = Private(AggTypesParamTypesRawJsonProvider);
 
     initAggParam();
   }));

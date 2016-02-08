@@ -3,13 +3,15 @@ import DomLocationProvider from 'ui/domLocation';
 import { parse } from 'url';
 import { bindKey } from 'lodash';
 import '../app_switcher/app_switcher.less';
+import uiModules from 'ui/modules';
+import appSwitcherTemplate from './app_switcher.html';
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .directive('appSwitcher', function () {
   return {
     restrict: 'E',
-    template: require('./app_switcher.html'),
+    template: appSwitcherTemplate,
     controllerAs: 'switcher',
     controller: function ($scope, Private) {
       var domLocation = Private(DomLocationProvider);
