@@ -16,7 +16,7 @@ define(function (require) {
       // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
       // var expectedToastMessage = 'Share search: URL copied to clipboard.';
       // Pass either one.
-      var expectedToastMessage = /Share search: URL (selected. Press Ctrl+C to copy.|copied to clipboard.)/;
+      var expectedToastMessage = /Share search: URL (selected. Press Ctrl\+C to copy.|copied to clipboard.)/;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -75,7 +75,7 @@ define(function (require) {
             + '/app/kibana?_t=1453775307251#'
             + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
             + ':(from:%272015-09-19T06:31:44.000Z%27,mode:absolute,to:%272015-09'
-            + '-23T18:31:44.000Z%27))&_a=(columns:!(_source),index:%27logstash-'
+            + '-23T18:31:44.000Z%27))&_a=(columns:!(%27@timestamp%27,_source),index:%27logstash-'
             + '*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query'
             + ':%27*%27)),sort:!(%27@timestamp%27,desc))';
           return discoverPage.getSharedUrl()
