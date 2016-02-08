@@ -372,7 +372,7 @@ define(function (require) {
                 });
               }
 
-              recurse(agg.aggs);
+              recurse(agg.aggs || agg.aggregations);
             });
           }(flatState.body.aggs || flatState.body.aggregations));
         }
