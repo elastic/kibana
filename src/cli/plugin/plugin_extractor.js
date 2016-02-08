@@ -1,12 +1,13 @@
 const zipExtract = require('./extractors/zip');
 const tarGzExtract = require('./extractors/tar_gz');
+import { ZIP, TAR } from './file_type';
 
 export default function extractArchive(settings, logger, archiveType) {
   switch (archiveType) {
-    case '.zip':
+    case ZIP:
       return zipExtract(settings, logger);
       break;
-    case '.tar.gz':
+    case TAR:
       return tarGzExtract(settings, logger);
       break;
     default:

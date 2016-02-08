@@ -124,6 +124,25 @@ describe('kibana cli', function () {
           });
         });
 
+        it('should consider .tgz files as archive type .tar.gz', function () {
+          const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
+
+          const couchdb = nock('http://www.files.com')
+            .defaultReplyHeaders({
+              'content-length': '10'
+            })
+            .get('/plugin.tgz')
+            .replyWithFile(200, filePath);
+
+          const sourceUrl = 'http://www.files.com/plugin.tgz';
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be('.tar.gz');
+            expectWorkingPathNotEmpty();
+          });
+        });
+
         it('should download a zip from a valid http url', function () {
           const filePath = join(__dirname, 'replies/test_plugin_master.zip');
 
