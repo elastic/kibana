@@ -22,7 +22,6 @@ module.exports = {
             'type': 'string',
             'index': 'analyzed',
             'omit_norms': true,
-            'doc_values': true,
             'fields': {
               'raw': {
                 'index': 'not_analyzed',
