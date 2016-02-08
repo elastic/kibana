@@ -73,31 +73,38 @@
      transform="translate(-408.94 -254.5)"
      id="path15" />
   <g
-     style="font-style:normal;font-weight:normal;font-size:33.04906845px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:0.72413791;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     id="text4159">
+     style="font-style:normal;font-weight:normal;font-size:33.04906845px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:0.92528737;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="text4159"
+     transform="translate(0,-13.509761)">
     <path
        d="m 53.346838,50.53812 0,-6.74201 2.14819,-0.231343 4.031986,6.973353 4.065036,0 -5.023459,-8.791052 4.759066,-7.733482 -4.031986,0 -3.89979,6.444568 -2.049043,0.198295 0,-13.517069 -3.602348,0 0,23.39874 3.602348,0 z"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.72413791"
-       id="path4891" />
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.92528737"
+       id="path4891"
+       inkscape:connector-curvature="0" />
     <path
        d="m 66.269024,50.53812 3.602349,0 0,-16.524534 -3.602349,0 0,16.524534 z m 0,-19.333705 3.602349,0 0,-3.800643 -3.602349,0 0,3.800643 z"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.72413791"
-       id="path4893" />
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.92528737"
+       id="path4893"
+       inkscape:connector-curvature="0" />
     <path
        d="m 81.973529,33.650046 c -1.850747,0 -4.131133,0.991472 -4.131133,0.991472 l 0,-7.502138 -3.5693,0 0,23.365691 c 0,0 4.296379,0.396589 6.04798,0.396589 5.915783,0 8.063973,-2.015993 8.063973,-8.85715 0,-6.180176 -1.916846,-8.394464 -6.41152,-8.394464 z M 80.321076,47.6959 c -0.660981,0 -2.47868,-0.132196 -2.47868,-0.132196 l 0,-10.046917 c 0,0 1.949895,-0.660981 3.701495,-0.660981 2.214288,0 3.172711,1.454159 3.172711,5.188704 0,4.031986 -0.727079,5.65139 -4.395526,5.65139 z"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.72413791"
-       id="path4895" />
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.92528737"
+       id="path4895"
+       inkscape:connector-curvature="0" />
     <path
        d="m 104.18766,39.103143 c 0,-3.767594 -1.65245,-5.453097 -5.684435,-5.453097 -3.040515,0 -6.642863,0.859276 -6.642863,0.859276 l 0.132196,2.544778 c 0,0 3.998938,-0.33049 6.213225,-0.33049 1.619405,0 2.412587,0.561834 2.412587,2.379533 l 0,1.189766 -4.263335,0.36354 c -3.53625,0.297441 -5.453096,1.487208 -5.453096,4.990409 0,3.437103 1.652453,5.254802 4.924311,5.254802 2.676975,0 5.3209,-1.222816 5.3209,-1.222816 1.22282,0.958423 2.37953,1.222816 4.39553,1.222816 l 0.0991,-2.743073 c -0.95842,-0.132196 -1.38806,-0.528785 -1.45416,-1.520257 l 0,-7.535187 z m -3.56929,3.734544 0,4.395526 c 0,0 -2.214292,0.72708 -4.098089,0.72708 -1.388061,0 -2.015993,-0.925374 -2.015993,-2.412582 0,-1.487208 0.760128,-2.214288 2.280385,-2.346484 l 3.833697,-0.36354 z"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.72413791"
-       id="path4897" />
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.92528737"
+       id="path4897"
+       inkscape:connector-curvature="0" />
     <path
        d="m 112.28004,50.53812 0,-12.823038 c 0,0 1.8177,-0.859276 3.73454,-0.859276 2.51173,0 2.94137,1.619404 2.94137,4.924311 l 0,8.758003 3.5693,0 0,-8.85715 c 0,-5.420047 -1.12367,-8.030924 -5.71749,-8.030924 -2.14819,0 -4.56077,1.388061 -4.56077,1.388061 l 0,-1.024521 -3.5693,0 0,16.524534 3.60235,0 z"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.72413791"
-       id="path4899" />
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.92528737"
+       id="path4899"
+       inkscape:connector-curvature="0" />
     <path
        d="m 138.91501,39.103143 c 0,-3.767594 -1.65246,-5.453097 -5.68444,-5.453097 -3.04052,0 -6.64287,0.859276 -6.64287,0.859276 l 0.1322,2.544778 c 0,0 3.99894,-0.33049 6.21322,-0.33049 1.61941,0 2.41259,0.561834 2.41259,2.379533 l 0,1.189766 -4.26333,0.36354 c -3.53625,0.297441 -5.4531,1.487208 -5.4531,4.990409 0,3.437103 1.65245,5.254802 4.92431,5.254802 2.67698,0 5.3209,-1.222816 5.3209,-1.222816 1.22282,0.958423 2.37953,1.222816 4.39553,1.222816 l 0.0991,-2.743073 c -0.95842,-0.132196 -1.38806,-0.528785 -1.45415,-1.520257 l 0,-7.535187 z m -3.5693,3.734544 0,4.395526 c 0,0 -2.21429,0.72708 -4.09809,0.72708 -1.38806,0 -2.01599,-0.925374 -2.01599,-2.412582 0,-1.487208 0.76013,-2.214288 2.28038,-2.346484 l 3.8337,-0.36354 z"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.72413791"
-       id="path4901" />
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Titillium;-inkscape-font-specification:'Titillium Semi-Bold';fill:#ffffff;fill-opacity:0.92528737"
+       id="path4901"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>
