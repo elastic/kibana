@@ -4,6 +4,9 @@ import ngMock from 'ngMock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'auto-release-sinon';
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisProvider from 'ui/Vis';
 describe('AggTable Directive', function () {
 
   var $rootScope;
@@ -14,9 +17,9 @@ describe('AggTable Directive', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
-    tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Vis = Private(require('ui/Vis'));
+    tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    Vis = Private(VisProvider);
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');

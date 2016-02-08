@@ -3,69 +3,70 @@ import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
-define(function (require) {
-  // we need to load the css ourselves
+import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/TemplateVisType';
+import VisSchemasProvider from 'ui/Vis/Schemas';
+import tableVisTemplate from 'plugins/table_vis/table_vis.html';
+// we need to load the css ourselves
 
-  // we also need to load the controller and used by the template
+// we also need to load the controller and used by the template
 
-  // our params are a bit complex so we will manage them with a directive
+// our params are a bit complex so we will manage them with a directive
 
-  // require the directives that we use as well
+// require the directives that we use as well
 
-  // register the provider with the visTypes registry
-  require('ui/registry/vis_types').register(TableVisTypeProvider);
+// register the provider with the visTypes registry
+require('ui/registry/vis_types').register(TableVisTypeProvider);
 
-  // define the TableVisType
-  function TableVisTypeProvider(Private) {
-    const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-    const Schemas = Private(require('ui/Vis/Schemas'));
+// define the TableVisType
+function TableVisTypeProvider(Private) {
+  const TemplateVisType = Private(TemplateVisTypeTemplateVisTypeProvider);
+  const Schemas = Private(VisSchemasProvider);
 
-    // define the TableVisController which is used in the template
-    // by angular's ng-controller directive
+  // define the TableVisController which is used in the template
+  // by angular's ng-controller directive
 
-    // return the visType object, which kibana will use to display and configure new
-    // Vis object of this type.
-    return new TemplateVisType({
-      name: 'table',
-      title: 'Data table',
-      icon: 'fa-table',
-      description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
-        'aggregation. Tip, a data table is available from many other charts by clicking grey bar at the bottom of the chart.',
-      template: require('plugins/table_vis/table_vis.html'),
-      params: {
-        defaults: {
-          perPage: 10,
-          showPartialRows: false,
-          showMeticsAtAllLevels: false
-        },
-        editor: '<table-vis-params></table-vis-params>'
+  // return the visType object, which kibana will use to display and configure new
+  // Vis object of this type.
+  return new TemplateVisType({
+    name: 'table',
+    title: 'Data table',
+    icon: 'fa-table',
+    description: 'The data table provides a detailed breakdown, in tabular format, of the results of a composed ' +
+      'aggregation. Tip, a data table is available from many other charts by clicking grey bar at the bottom of the chart.',
+    template: tableVisTemplate,
+    params: {
+      defaults: {
+        perPage: 10,
+        showPartialRows: false,
+        showMeticsAtAllLevels: false
       },
-      hierarchicalData: function (vis) {
-        return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
+      editor: '<table-vis-params></table-vis-params>'
+    },
+    hierarchicalData: function (vis) {
+      return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
+    },
+    schemas: new Schemas([
+      {
+        group: 'metrics',
+        name: 'metric',
+        title: 'Metric',
+        min: 1,
+        defaults: [
+          { type: 'count', schema: 'metric' }
+        ]
       },
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: 'Metric',
-          min: 1,
-          defaults: [
-            { type: 'count', schema: 'metric' }
-          ]
-        },
-        {
-          group: 'buckets',
-          name: 'bucket',
-          title: 'Split Rows'
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: 'Split Table'
-        }
-      ])
-    });
-  }
+      {
+        group: 'buckets',
+        name: 'bucket',
+        title: 'Split Rows'
+      },
+      {
+        group: 'buckets',
+        name: 'split',
+        title: 'Split Table'
+      }
+    ])
+  });
+}
 
-  return TableVisTypeProvider;
-});
+export default TableVisTypeProvider;

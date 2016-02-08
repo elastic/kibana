@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import FilterBarLibMapDefaultProvider from 'ui/filter_bar/lib/mapDefault';
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {
 
@@ -8,7 +9,7 @@ describe('Filter Bar Directive', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapDefault = Private(require('ui/filter_bar/lib/mapDefault'));
+      mapDefault = Private(FilterBarLibMapDefaultProvider);
     }));
 
     it('should return the key and value for matching filters', function (done) {

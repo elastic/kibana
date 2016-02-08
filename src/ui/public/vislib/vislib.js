@@ -7,6 +7,7 @@ import 'ui/vislib/lib/data';
 import 'ui/vislib/visualizations/_map.js';
 import 'ui/vislib/visualizations/vis_types';
 import 'ui/vislib/styles/main.less';
+import VislibVisProvider from 'ui/vislib/vis';
 // prefetched for faster optimization runs
 // end prefetching
 
@@ -21,6 +22,6 @@ module.exports = function VislibProvider(Private) {
 
   return {
     version: '0.0.0',
-    Vis: Private(require('ui/vislib/vis'))
+    Vis: Private(VislibVisProvider)
   };
 };

@@ -1,4 +1,6 @@
-const app = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+import shareTemplate from 'ui/share/views/share.html';
+const app = uiModules.get('kibana');
 
 app.directive('share', function () {
   return {
@@ -8,7 +10,7 @@ app.directive('share', function () {
       objectId: '@',
       setAllowEmbed: '&?allowEmbed'
     },
-    template: require('ui/share/views/share.html'),
+    template: shareTemplate,
     controller: function ($scope) {
       $scope.allowEmbed = $scope.setAllowEmbed ? $scope.setAllowEmbed() : true;
     }

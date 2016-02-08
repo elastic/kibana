@@ -7,6 +7,8 @@ import _ from 'lodash';
 import woahLotsOfVariables from 'fixtures/vislib/mock_data/date_histogram/_series';
 import notQuiteEnoughVariables from 'fixtures/vislib/mock_data/not_enough_data/_one_point';
 import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 var someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
@@ -30,8 +32,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.on('brush', _.noop);
       vis.render(variablesAreCool, persistedState);
     }));
