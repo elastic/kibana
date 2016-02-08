@@ -9,7 +9,12 @@ export default function () {
   fielddataFields = _.pluck(self.fields.byType.date, 'name');
 
   _.each(self.getScriptedFields(), function (field) {
-    scriptFields[field.name] = { script: field.script, lang: field.lang };
+    scriptFields[field.name] = {
+      script: {
+        script: field.script,
+        lang: field.lang
+      }
+    };
   });
 
   return {
