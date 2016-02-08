@@ -2,21 +2,26 @@
   <!-- TODO: These config dropdowns shouldn't be hard coded -->
   <nav class="app-links-wrapper">
     <li
+      ng-if="!chrome.getBrand('logo')  && !chrome.getBrand('smallLogo')"
+      aria-label="{{ chrome.getAppTitle() }} Logo"
+      class="logo kibana hidden-sm"
+      ></li>
+    <li
       ng-if="chrome.getBrand('logo')"
       ng-style="{ 'background': chrome.getBrand('logo') }"
       aria-label="{{ chrome.getAppTitle() }} Logo"
       class="logo hidden-sm"
       ></li>
-
     <li
       ng-if="chrome.getBrand('smallLogo')"
       ng-style="{ 'background': chrome.getBrand('smallLogo') }"
       aria-label="{{ chrome.getAppTitle() }} Logo"
       class="logo-small visible-sm hidden-xs"
       ></li>
+
     <app-switcher>
     </app-switcher>
-    <div class="bottom-apps app-links">
+    <div class="bottom-apps hide app-links">
       <div class="app-link">
         <a href="http://elastic.co">
           <div class="app-icon">

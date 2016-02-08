@@ -8,6 +8,8 @@
 @transition-time: .65s;
 @transition-delay: .2s;
 
+body { overflow-x: hidden; }
+
 .app-links-wrapper {
   width: @as-open-width;
   position: fixed;
@@ -33,6 +35,9 @@
     height: 70px;
     width: @as-open-width;
     list-style-type: none;
+    &.kibana {
+      background: url("~ui/images/kibana.svg") center / 160px 70px no-repeat #e8488b;
+    }
   }
   .bottom-apps {
     position: absolute;
