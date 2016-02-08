@@ -5,8 +5,9 @@
 @as-open-width: 170px;
 @as-closed-width: 53px;
 @app-icon-height: 30px;
-@transition-time: .65s;
-@transition-delay: .2s;
+@transition-time: .35s;
+@transition-delay: .1s;
+@app-links-wrapper-background: #3caed2;
 
 body { overflow-x: hidden; }
 
@@ -17,7 +18,7 @@ body { overflow-x: hidden; }
   top: 0;
   bottom: 0;
   z-index: 0;
-  background-color: #3caed2;
+  background-color: @app-links-wrapper-background;
   overflow: hidden;
   transition: width @transition-time;
   transition-delay: @transition-delay;
@@ -36,7 +37,7 @@ body { overflow-x: hidden; }
     width: @as-open-width;
     list-style-type: none;
     &.kibana {
-      background: url("~ui/images/kibana.svg") center / 160px 70px no-repeat #e8488b;
+      background: url("~ui/images/kibana.svg") 6px 10px / 140px 50px no-repeat #e8488b;
     }
   }
   .bottom-apps {
@@ -46,6 +47,7 @@ body { overflow-x: hidden; }
 }
 .app-wrapper {
   .real-flex-parent();
+  box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
   position: absolute;
   transition: transform @transition-time;
   transition-delay: @transition-delay;
@@ -67,13 +69,20 @@ body { overflow-x: hidden; }
   .app-link {
     width: @as-open-width;
     height: @app-icon-height;
+    line-height:  @app-icon-height;
+
     > a {
       display: block;
       height: 100%;
       color: #fff;
     }
+
+    &:hover {
+      background-color: lighten(@app-links-wrapper-background, 7.5%);
+    }
     .app-icon {
       float: left;
+      font-weight: bold;
       text-align: center;
       font-size: 1.7em;
       display: inline-block;
@@ -81,6 +90,7 @@ body { overflow-x: hidden; }
       width: @as-closed-width;
       background-position: center;
       background-size: contain;
+      background-repeat: no-repeat;
       > i {
       }
     }
@@ -90,12 +100,13 @@ body { overflow-x: hidden; }
       display: inline-block;
       float: right;
       font-size: 0.9em;
-      text-align: center;
+      text-align: left;
+      padding-left: 3px;
       line-height: @app-icon-height;
     }
 
     &.active {
-      background-color: #73c6e0;
+      background-color: lighten(@app-links-wrapper-background, 10%);
       > a {
         color: #333;
         text-decoration: none;

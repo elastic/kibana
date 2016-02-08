@@ -10,7 +10,7 @@
       data-test-subj="appLink">
 
       <div ng-if="link.icon" ng-style="{ 'background-image': 'url(../' + link.icon + ')' }" class="app-icon"></div>
-      <div ng-if="!link.icon" class="app-icon app-icon-missing">{{ link.title[0] }}</div>
+      <div ng-if="!link.icon" class="app-icon app-icon-missing"><span>{{ link.title[0] }}</span></div>
 
       <div class="app-title">{{ link.title }}</div>
     </a>
