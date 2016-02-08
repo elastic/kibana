@@ -1,5 +1,5 @@
 <kbn-notifications list="notifList"></kbn-notifications>
-<div class="content" chrome-context >
+<div class="content">
   <nav
     ng-style="::{ background: chrome.getNavBackground() }"
     ng-class="{ show: chrome.getVisible() }"
@@ -56,18 +56,13 @@
     <!-- /Full navbar -->
   </nav>
 
+  <div kbn-chrome-config-controls>
+  </div>
   <!-- TODO: These config dropdowns shouldn't be hard coded -->
   <config
     config-template="appSwitcherTemplate"
     config-object="chrome"
     config-close="appSwitcherTemplate.close">
-  </config>
-
-  <config
-    ng-show="timefilter.enabled"
-    config-template="pickerTemplate"
-    config-object="timefilter"
-    config-close="pickerTemplate.close">
   </config>
 
   <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-') + ' ' + chrome.getApplicationClasses()" ng-view></div>
