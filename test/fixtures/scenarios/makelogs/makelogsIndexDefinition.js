@@ -43,6 +43,7 @@ module.exports = {
         },
         'id': {
           'type': 'integer',
+          'index': true,
           'include_in_all': false
         },
         'clientip': {
@@ -92,7 +93,8 @@ module.exports = {
                   'type': 'string'
                 },
                 'lastname': {
-                  'type': 'integer'
+                  'type': 'integer',
+                  'index': true
                 }
               }
             }
