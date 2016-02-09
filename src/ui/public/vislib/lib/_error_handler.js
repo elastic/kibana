@@ -1,35 +1,33 @@
-define(function (require) {
-  var _ = require('lodash');
-  var errors = require('ui/errors');
+import _ from 'lodash';
+import errors from 'ui/errors';
 
-  return function ErrorHandlerFactory() {
+export default function ErrorHandlerFactory() {
 
-    /**
-     * Common errors shared between constructors
-     *
-     * @class ErrorHandler
-     * @constructor
-     */
-    function ErrorHandler() {}
+  /**
+   * Common errors shared between constructors
+   *
+   * @class ErrorHandler
+   * @constructor
+   */
+  function ErrorHandler() {}
 
-    /**
-     * Validates the height and width are > 0
-     * min size must be at least 1 px
-     *
-     * @method validateWidthandHeight
-     * @param width {Number} HTMLElement width
-     * @param height {Number} HTMLElement height
-     * @returns {HTMLElement} HTML div with an error message
-     */
-    ErrorHandler.prototype.validateWidthandHeight = function (width, height) {
-      var badWidth = _.isNaN(width) || width <= 0;
-      var badHeight = _.isNaN(height) || height <= 0;
+  /**
+   * Validates the height and width are > 0
+   * min size must be at least 1 px
+   *
+   * @method validateWidthandHeight
+   * @param width {Number} HTMLElement width
+   * @param height {Number} HTMLElement height
+   * @returns {HTMLElement} HTML div with an error message
+   */
+  ErrorHandler.prototype.validateWidthandHeight = function (width, height) {
+    var badWidth = _.isNaN(width) || width <= 0;
+    var badHeight = _.isNaN(height) || height <= 0;
 
-      if (badWidth || badHeight) {
-        throw new errors.ContainerTooSmall();
-      }
-    };
-
-    return ErrorHandler;
+    if (badWidth || badHeight) {
+      throw new errors.ContainerTooSmall();
+    }
   };
-});
+
+  return ErrorHandler;
+};

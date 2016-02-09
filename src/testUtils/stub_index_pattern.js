@@ -1,54 +1,55 @@
-define(function (require) {
-  return function (Private) {
-    var _ = require('lodash');
-    var sinon = require('sinon');
-    var Promise = require('bluebird');
-    var IndexedArray = require('ui/IndexedArray');
-    var IndexPattern = require('ui/index_patterns/_index_pattern');
-    var fieldFormats = Private(require('ui/registry/field_formats'));
-    var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    var formatHit = require('ui/index_patterns/_format_hit');
-    var getComputedFields = require('ui/index_patterns/_get_computed_fields');
+import _ from 'lodash';
+import sinon from 'sinon';
+import Promise from 'bluebird';
+import IndexedArray from 'ui/IndexedArray';
+import IndexPattern from 'ui/index_patterns/_index_pattern';
+import formatHit from 'ui/index_patterns/_format_hit';
+import getComputedFields from 'ui/index_patterns/_get_computed_fields';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+export default function (Private) {
+  var fieldFormats = Private(RegistryFieldFormatsProvider);
+  var flattenHit = Private(IndexPatternsFlattenHitProvider);
 
-    var Field = Private(require('ui/index_patterns/_field'));
+  var Field = Private(IndexPatternsFieldProvider);
 
-    function StubIndexPattern(pattern, timeField, fields) {
-      this.id = pattern;
-      this.popularizeField = sinon.spy();
-      this.timeFieldName = timeField;
-      this.getNonScriptedFields = sinon.spy();
-      this.getScriptedFields = sinon.spy();
-      this.getSourceFiltering = sinon.spy();
-      this.metaFields = ['_id', '_type', '_source'];
-      this.fieldFormatMap = {};
-      this.routes = IndexPattern.prototype.routes;
+  function StubIndexPattern(pattern, timeField, fields) {
+    this.id = pattern;
+    this.popularizeField = sinon.spy();
+    this.timeFieldName = timeField;
+    this.getNonScriptedFields = sinon.spy();
+    this.getScriptedFields = sinon.spy();
+    this.getSourceFiltering = sinon.spy();
+    this.metaFields = ['_id', '_type', '_source'];
+    this.fieldFormatMap = {};
+    this.routes = IndexPattern.prototype.routes;
 
-      this.toIndexList = _.constant(Promise.resolve([pattern]));
-      this.toDetailedIndexList = _.constant(Promise.resolve([
-        {
-          index: pattern,
-          min: 0,
-          max: 1
-        }
-      ]));
-      this.getComputedFields = _.bind(getComputedFields, this);
-      this.flattenHit = flattenHit(this);
-      this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
-      this.formatField = this.formatHit.formatField;
+    this.toIndexList = _.constant(Promise.resolve([pattern]));
+    this.toDetailedIndexList = _.constant(Promise.resolve([
+      {
+        index: pattern,
+        min: 0,
+        max: 1
+      }
+    ]));
+    this.getComputedFields = _.bind(getComputedFields, this);
+    this.flattenHit = flattenHit(this);
+    this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
+    this.formatField = this.formatHit.formatField;
 
-      this._indexFields = function () {
-        this.fields = new IndexedArray({
-          index: ['name'],
-          group: ['type'],
-          initialSet: fields.map(function (field) {
-            return new Field(this, field);
-          }, this)
-        });
-      };
+    this._indexFields = function () {
+      this.fields = new IndexedArray({
+        index: ['name'],
+        group: ['type'],
+        initialSet: fields.map(function (field) {
+          return new Field(this, field);
+        }, this)
+      });
+    };
 
-      this._indexFields();
-    }
+    this._indexFields();
+  }
 
-    return StubIndexPattern;
-  };
-});
+  return StubIndexPattern;
+};

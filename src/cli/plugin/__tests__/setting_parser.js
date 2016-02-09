@@ -1,9 +1,9 @@
-var path = require('path');
-var expect = require('expect.js');
+import path from 'path';
+import expect from 'expect.js';
 
 var utils = require('requirefrom')('src/utils');
 var fromRoot = utils('fromRoot');
-var settingParser = require('../setting_parser');
+import settingParser from '../setting_parser';
 
 describe('kibana cli', function () {
 

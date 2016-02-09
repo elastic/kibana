@@ -1,11 +1,11 @@
-var angular = require('angular');
-var $ = require('jquery');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import $ from 'jquery';
+import 'ui/directives/confirm_click';
+import 'plugins/kibana/discover/index';
 
-require('ui/directives/confirm_click');
-require('plugins/kibana/discover/index');
 
 var $parentScope;
 

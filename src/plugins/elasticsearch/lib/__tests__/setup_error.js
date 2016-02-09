@@ -1,10 +1,10 @@
-var SetupError = require('../setup_error');
-var expect = require('expect.js');
+import SetupError from '../setup_error';
+import expect from 'expect.js';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/setup_error', function () {
 
-    var server = {
+    const server = {
       config: function () {
         return {
           get: function () {
@@ -14,7 +14,7 @@ describe('plugins/elasticsearch', function () {
       }
     };
 
-    var err = new SetupError(server, 'Oops! <%= kibana.index %>');
+    const err = new SetupError(server, 'Oops! <%= kibana.index %>');
 
     it('should allow config values in the message template', function () {
       expect(err).to.have.property('message', 'Oops! .my-kibana');
@@ -30,19 +30,19 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should return the passed error if it is a SetupError', function () {
-      var error = new SetupError(server, 'Oh Boy!', err);
+      const error = new SetupError(server, 'Oh Boy!', err);
       expect(error).to.have.property('message', 'Oops! .my-kibana');
     });
 
     it('should store the original error', function () {
-      var origError = new Error('Boom!');
-      var error = new SetupError(server, 'Oh Boy!', origError);
+      const origError = new Error('Boom!');
+      const error = new SetupError(server, 'Oh Boy!', origError);
       expect(error).to.have.property('origError', origError);
     });
 
     it('should copy the stack from the origError', function () {
-      var origError = new Error('Boom!');
-      var error = new SetupError(server, 'Oh Boy!', origError);
+      const origError = new Error('Boom!');
+      const error = new SetupError(server, 'Oh Boy!', origError);
       expect(error).to.have.property('stack', origError.stack);
     });
 

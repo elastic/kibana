@@ -1,13 +1,13 @@
-define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var module = require('ui/modules').get('kibana');
+import _ from 'lodash';
+import $ from 'jquery';
+import uiModules from 'ui/modules';
+import lineInterpolationOptionTemplate from 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option.html';
+const module = uiModules.get('kibana');
 
-  module.directive('lineInterpolationOption', function ($parse, $compile) {
-    return {
-      restrict: 'E',
-      template: require('plugins/kbn_vislib_vis_types/controls/line_interpolation_option.html'),
-      replace: true
-    };
-  });
+module.directive('lineInterpolationOption', function ($parse, $compile) {
+  return {
+    restrict: 'E',
+    template: lineInterpolationOptionTemplate,
+    replace: true
+  };
 });

@@ -1,8 +1,11 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisProvider from 'ui/Vis';
+import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('editor', function () {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var indexPattern;
   var vis;
@@ -12,9 +15,9 @@ describe('editor', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    var Vis = Private(require('ui/Vis'));
+    var Vis = Private(VisProvider);
 
     /**
      * Render the AggParams editor for the date histogram aggregation
@@ -72,7 +75,7 @@ describe('editor', function () {
 
     beforeEach(ngMock.inject(function (Private) {
       field = _.sample(indexPattern.fields);
-      interval = _.sample(Private(require('ui/agg_types/buckets/_interval_options')));
+      interval = _.sample(Private(AggTypesBucketsIntervalOptionsProvider));
       params = render({ field: field, interval: interval });
     }));
 

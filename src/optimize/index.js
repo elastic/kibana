@@ -1,3 +1,4 @@
+import FsOptimizer from './FsOptimizer';
 module.exports = async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
@@ -33,7 +34,6 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   // only require the FsOptimizer when we need to
-  let FsOptimizer = require('./FsOptimizer');
   let optimizer = new FsOptimizer({
     env: bundles.env,
     bundles: bundles,

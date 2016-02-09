@@ -1,18 +1,18 @@
-var Promise = require('bluebird');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var NoConnections = require('elasticsearch').errors.NoConnections;
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import expect from 'expect.js';
+const NoConnections = require('elasticsearch').errors.NoConnections;
 
-var healthCheck = require('../health_check');
+import healthCheck from '../health_check';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {
 
-    var health;
-    var plugin;
-    var server;
-    var get;
-    var client;
+    let health;
+    let plugin;
+    let server;
+    let get;
+    let client;
 
     beforeEach(function () {
       // setup the plugin stub

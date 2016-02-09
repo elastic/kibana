@@ -1,10 +1,10 @@
-const expect = require('expect.js');
-const sinon = require('sinon');
-const fs = require('fs');
-const rimraf = require('rimraf');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import fs from 'fs';
+import rimraf from 'rimraf';
 
-const pluginCleaner = require('../plugin_cleaner');
-const pluginLogger = require('../plugin_logger');
+import pluginCleaner from '../plugin_cleaner';
+import pluginLogger from '../plugin_logger';
 
 describe('kibana cli', function () {
 

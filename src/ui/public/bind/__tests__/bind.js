@@ -1,7 +1,7 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('$scope.$bind', function () {
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var $rootScope;
   var $scope;

@@ -1,9 +1,10 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import MockState from 'fixtures/mock_state';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('pin filters', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var MockState = require('fixtures/mock_state');
   var storeNames = {
     app: 'appState',
     global: 'globalState'
@@ -35,7 +36,7 @@ describe('pin filters', function () {
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    queryFilter = Private(require('ui/filter_bar/query_filter'));
+    queryFilter = Private(FilterBarQueryFilterProvider);
 
     filters = [
       {
