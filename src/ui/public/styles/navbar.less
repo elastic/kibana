@@ -9,9 +9,7 @@ navbar {
   padding: @padding-base-vertical @navbar-padding-horizontal;
   color: @navbar-default-color;
   background-color: @navbar-default-bg;
-  border-style: solid;
-  border-color: @navbar-default-border;
-  border-width: 0 0 1px;
+  border: none;
   z-index: @zindex-navbar;
 
   /***
@@ -47,6 +45,7 @@ navbar {
     &:active, &.active {
       color: @navbar-default-link-active-color;
       background-color: @navbar-default-link-active-bg;
+      box-shadow: none;
     }
 
     &[disabled] {
@@ -59,9 +58,7 @@ navbar {
     button {
       color: @navbar-button-color;
       background-color: @navbar-button-bg;
-      border: 2px solid;
-      border-left: 0;
-      border-color: @navbar-button-border;
+      border: none;
     }
   }
 

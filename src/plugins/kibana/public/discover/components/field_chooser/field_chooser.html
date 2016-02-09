@@ -1,6 +1,7 @@
 <div class="sidebar-list">
   <div ng-show="indexPatternList.length > 1">
-    <div class="index-pattern" ng-click="showIndexPatternSelection = !showIndexPatternSelection">
+    <div class="index-pattern" ng-click="showIndexPatternSelection = !showIndexPatternSelection"
+    ng-class="{active: showIndexPatternSelection === true}">
       <div css-truncate title="{{indexPattern.id}}">{{indexPattern.id}}</div>
       <i ng-hide="showIndexPatternSelection" class="fa fa-caret-down"></i>
       <i ng-show="showIndexPatternSelection" class="fa fa-caret-up"></i>
