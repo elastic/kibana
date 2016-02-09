@@ -84,19 +84,21 @@ body { overflow-x: hidden; }
     &:hover {
       background-color: lighten(@app-links-wrapper-background, 7.5%);
     }
+    
     .app-icon {
       float: left;
+      filter: invert(100%);
       font-weight: bold;
       text-align: center;
       font-size: 1.7em;
       display: inline-block;
       height: @app-icon-height;
       width: @as-closed-width;
-      background-color: @white;
-      mask-position: center;
-      mask-size: 60% 60%;
-      mask-repeat: no-repeat;
       > i {
+      }
+
+      > img {
+        height: 20px;
       }
     }
 
@@ -127,6 +129,9 @@ body { overflow-x: hidden; }
       > a {
         color: #333;
         text-decoration: none;
+      }
+      img {
+        filter: invert(100%);
       }
     }
 
