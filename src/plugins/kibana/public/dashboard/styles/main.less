@@ -55,6 +55,8 @@ dashboard-grid {
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+      border: none 0 transparent;
+
 
       .panel-heading {
         flex: 0 0 auto;
@@ -62,8 +64,11 @@ dashboard-grid {
         display: flex;
         border-top-right-radius: 0;
         border-top-left-radius: 0;
+        background-color: #fff;
+        border: none 0 transparent;
 
-        div.btn-group {
+        .btn-group {
+          display: none;
           white-space: nowrap;
           flex: 0 0 auto;
         }
@@ -93,6 +98,19 @@ dashboard-grid {
           &:hover {
             color: @dashboard-panel-heading-link-hover-color;
           }
+        }
+      }
+
+      .visualize-show-spy {
+        visibility: hidden;
+      }
+
+      &:hover {
+        .visualize-show-spy {
+          visibility: visible;
+        }
+        .btn-group {
+          display: block;
         }
       }
 
