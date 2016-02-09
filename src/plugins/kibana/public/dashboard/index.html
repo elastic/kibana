@@ -45,8 +45,16 @@
         ng-click="configTemplate.toggle('options');">
         <span>Options</span>
       </button>
+      <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
+
+  <config
+    ng-show="timefilter.enabled"
+    config-template="pickerTemplate"
+    config-object="timefilter"
+    config-close="pickerTemplate.close">
+  </config>
 
   <config config-template="configTemplate" config-object="opts"></config>
 
