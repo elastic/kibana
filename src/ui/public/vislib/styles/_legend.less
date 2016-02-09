@@ -8,7 +8,6 @@ visualize-legend {
 
 .legend-col-wrapper {
   .flex-parent(0, 0, auto);
-  flex-direction: row;
   z-index: 10;
   min-height: 0;
   overflow: hidden;
@@ -24,11 +23,9 @@ visualize-legend {
       background-color: @sidebar-hover-bg;
     }
 
-    background-color: @sidebar-bg;
-    font-size: 10px;
-    height: 30px;
-    padding: 8px 3px;
-    border-bottom-left-radius: @border-radius-small;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 14px;
   }
 
   .column-labels {
@@ -36,7 +33,6 @@ visualize-legend {
   }
 
   .legend-ul {
-    border-left: 1px solid @sidebar-bg;
     width: 150px;
     flex: 1 1 auto;
     overflow-x: hidden;
@@ -44,6 +40,7 @@ visualize-legend {
     color: @legend-item-color;
     list-style-type: none;
     padding: 0;
+    padding-top: 10px;
     margin-bottom: 0;
     visibility: visible;
     min-height: 0;
@@ -116,5 +113,3 @@ visualize-legend {
 .legend-value:hover {
   cursor: pointer;
 }
-
-
