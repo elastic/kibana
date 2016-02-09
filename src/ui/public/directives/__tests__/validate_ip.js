@@ -1,8 +1,8 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/directives/validate_ip';
 
-require('ui/directives/validate_ip');
 
 describe('Validate IP directive', function () {
   var $compile;

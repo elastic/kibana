@@ -1,5 +1,5 @@
-const rimraf = require('rimraf');
-const fs = require('fs');
+import rimraf from 'rimraf';
+import fs from 'fs';
 
 export default function createPluginCleaner(settings, logger) {
   function cleanPrevious() {

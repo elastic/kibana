@@ -1,7 +1,7 @@
-const expect = require('expect.js');
+import expect from 'expect.js';
 
-const setup = require('../apps');
-const TabFakeStore = require('../../__tests__/_TabFakeStore');
+import setup from '../apps';
+import TabFakeStore from '../../__tests__/_TabFakeStore';
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {

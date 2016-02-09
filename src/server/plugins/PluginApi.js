@@ -1,6 +1,6 @@
-let _ = require('lodash');
-let Plugin = require('./Plugin');
-let { basename, join } = require('path');
+import _ from 'lodash';
+import Plugin from './Plugin';
+import { basename, join } from 'path';
 
 module.exports = class PluginApi {
   constructor(kibana, pluginPath) {

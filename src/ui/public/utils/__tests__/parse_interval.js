@@ -1,5 +1,5 @@
-var parseInterval = require('ui/utils/parse_interval');
-var expect = require('expect.js');
+import parseInterval from 'ui/utils/parse_interval';
+import expect from 'expect.js';
 
 describe('parseInterval', function () {
   it('should correctly parse an interval containing unit and value', function () {

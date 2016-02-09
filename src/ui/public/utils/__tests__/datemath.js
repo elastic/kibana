@@ -1,8 +1,8 @@
-var dateMath = require('ui/utils/dateMath');
-var expect = require('expect.js');
-var moment = require('moment');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
+import dateMath from 'ui/utils/dateMath';
+import expect from 'expect.js';
+import moment from 'moment';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
 
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time

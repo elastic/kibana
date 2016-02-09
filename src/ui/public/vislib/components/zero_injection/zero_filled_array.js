@@ -1,6 +1,6 @@
+import _ from 'lodash';
 define(function () {
   return function ZeroFilledArrayUtilService() {
-    var _ = require('lodash');
 
     /*
      * Accepts an array of x axis values (strings or numbers).

@@ -1,56 +1,54 @@
-define(function (require) {
-  var _ = require('lodash');
+import _ from 'lodash';
 
+/**
+ * Filters out a list by a given filter. This is currently used to impelment:
+ *   - fieldType filters a list of fields by their type property
+ *   - aggFilter filters a list of aggs by their name property
+ *
+ * @returns {function} - the filter function which can be registered with angular
+ */
+function propFilter(prop) {
   /**
-   * Filters out a list by a given filter. This is currently used to impelment:
-   *   - fieldType filters a list of fields by their type property
-   *   - aggFilter filters a list of aggs by their name property
+   * List filtering function which accepts an array or list of values that a property
+   * must contain
    *
-   * @returns {function} - the filter function which can be registered with angular
+   * @param  {array} list - array of items to filter
+   * @param  {array|string} filters - the values to match against the list. Can be
+   *                                an array, a single value as a string, or a comma
+   *                                -seperated list of items
+   * @return {array} - the filtered list
    */
-  function propFilter(prop) {
-    /**
-     * List filtering function which accepts an array or list of values that a property
-     * must contain
-     *
-     * @param  {array} list - array of items to filter
-     * @param  {array|string} filters - the values to match against the list. Can be
-     *                                an array, a single value as a string, or a comma
-     *                                -seperated list of items
-     * @return {array} - the filtered list
-     */
-    return function (list, filters) {
-      if (!filters) return filters;
-      if (!_.isArray(filters)) filters = filters.split(',');
-      if (_.contains(filters, '*')) return list;
+  return function (list, filters) {
+    if (!filters) return filters;
+    if (!_.isArray(filters)) filters = filters.split(',');
+    if (_.contains(filters, '*')) return list;
 
-      var options = filters.reduce(function (options, filter) {
-        var type = 'include';
-        var value = filter;
+    var options = filters.reduce(function (options, filter) {
+      var type = 'include';
+      var value = filter;
 
-        if (filter.charAt(0) === '!') {
-          type = 'exclude';
-          value = filter.substr(1);
-        }
+      if (filter.charAt(0) === '!') {
+        type = 'exclude';
+        value = filter.substr(1);
+      }
 
-        if (!options[type]) options[type] = [];
-        options[type].push(value);
-        return options;
-      }, {});
+      if (!options[type]) options[type] = [];
+      options[type].push(value);
+      return options;
+    }, {});
 
-      return list.filter(function (item) {
-        var value = item[prop];
+    return list.filter(function (item) {
+      var value = item[prop];
 
-        var excluded = options.exclude && _.contains(options.exclude, value);
-        if (excluded) return false;
+      var excluded = options.exclude && _.contains(options.exclude, value);
+      if (excluded) return false;
 
-        var included = !options.include || _.contains(options.include, value);
-        if (included) return true;
+      var included = !options.include || _.contains(options.include, value);
+      if (included) return true;
 
-        return false;
-      });
-    };
-  }
+      return false;
+    });
+  };
+}
 
-  return propFilter;
-});
+export default propFilter;

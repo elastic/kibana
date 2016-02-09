@@ -1,50 +1,49 @@
-define(function (require) {
-  var _ = require('lodash');
-  var typeahead = require('ui/modules').get('kibana/typeahead');
+import _ from 'lodash';
+import 'ui/notify/directives';
+import uiModules from 'ui/modules';
+var typeahead = uiModules.get('kibana/typeahead');
 
-  require('ui/notify/directives');
 
-  typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
+typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
 
-    return {
-      restrict: 'A',
-      require: ['^ngModel', '^kbnTypeahead'],
+  return {
+    restrict: 'A',
+    require: ['^ngModel', '^kbnTypeahead'],
 
-      link: function ($scope, $el, $attr, deps) {
-        var model = deps[0];
-        var typeaheadCtrl = deps[1];
+    link: function ($scope, $el, $attr, deps) {
+      var model = deps[0];
+      var typeaheadCtrl = deps[1];
 
-        typeaheadCtrl.setInputModel(model);
+      typeaheadCtrl.setInputModel(model);
 
-        // disable browser autocomplete
-        $el.attr('autocomplete', 'off');
+      // disable browser autocomplete
+      $el.attr('autocomplete', 'off');
 
-        // handle keypresses
-        $el.on('keydown', function (ev) {
-          typeaheadCtrl.keypressHandler(ev);
-          digest();
-        });
+      // handle keypresses
+      $el.on('keydown', function (ev) {
+        typeaheadCtrl.keypressHandler(ev);
+        digest();
+      });
 
-        // update focus state based on the input focus state
-        $el.on('focus', function () {
-          typeaheadCtrl.setFocused(true);
-          digest();
-        });
+      // update focus state based on the input focus state
+      $el.on('focus', function () {
+        typeaheadCtrl.setFocused(true);
+        digest();
+      });
 
-        $el.on('blur', function () {
-          typeaheadCtrl.setFocused(false);
-          digest();
-        });
+      $el.on('blur', function () {
+        typeaheadCtrl.setFocused(false);
+        digest();
+      });
 
-        // unbind event listeners
-        $scope.$on('$destroy', function () {
-          $el.off();
-        });
+      // unbind event listeners
+      $scope.$on('$destroy', function () {
+        $el.off();
+      });
 
-        function digest() {
-          $rootScope.$$phase || $scope.$digest();
-        }
+      function digest() {
+        $rootScope.$$phase || $scope.$digest();
       }
-    };
-  });
+    }
+  };
 });

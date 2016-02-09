@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let Joi = require('joi');
-let { attempt, fromNode } = require('bluebird');
-let { basename, resolve } = require('path');
-let { inherits } = require('util');
+import _ from 'lodash';
+import Joi from 'joi';
+import { attempt, fromNode } from 'bluebird';
+import { basename, resolve } from 'path';
+import { inherits } from 'util';
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)

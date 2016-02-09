@@ -1,6 +1,6 @@
+import { isWorker } from 'cluster';
 module.exports = async (kbnServer, server, config) => {
 
-  let { isWorker } = require('cluster');
 
   if (!isWorker) {
     throw new Error(`lazy optimization is only available in "watch" mode`);
