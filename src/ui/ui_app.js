@@ -1,5 +1,7 @@
-var _ = require('lodash');
-var { join } = require('path');
+import { chain, get, noop, once, pick } from 'lodash';
+import { join } from 'path';
+
+import UiNavLink from './ui_nav_link';
 
 class UiApp {
   constructor(uiExports, spec) {
@@ -15,9 +17,24 @@ class UiApp {
     this.title = this.spec.title;
     this.description = this.spec.description;
     this.icon = this.spec.icon;
-    this.hidden = this.spec.hidden;
+    this.hidden = !!this.spec.hidden;
+    this.listed = this.spec.listed == null ? !this.hidden : this.spec.listed;
     this.templateName = this.spec.templateName || 'ui_app';
-    this.url = `${spec.urlBasePath || ''}${this.spec.url || `/app/${this.id}`}`;
+
+    if (!this.hidden) {
+      // any non-hidden app has a url, so it gets a "navLink"
+      this.navLink = this.uiExports.navLinks.new({
+        title: this.title,
+        description: this.description,
+        icon: this.icon,
+        url: this.spec.url || `/app/${this.id}`
+      });
+
+      if (!this.listed) {
+        // unlisted apps remove their navLinks from the uiExports collection though
+        this.uiExports.navLinks.delete(this.navLink);
+      }
+    }
 
     if (this.spec.autoload) {
       console.warn(
@@ -27,15 +44,15 @@ class UiApp {
     }
 
     // once this resolves, no reason to run it again
-    this.getModules = _.once(this.getModules);
+    this.getModules = once(this.getModules);
 
     // variables that are injected into the browser, must serialize to JSON
-    this.getInjectedVars = this.spec.injectVars || _.noop;
+    this.getInjectedVars = this.spec.injectVars || noop;
   }
 
   getModules() {
-    return _.chain([
-      this.uiExports.find(_.get(this, 'spec.uses', [])),
+    return chain([
+      this.uiExports.find(get(this, 'spec.uses', [])),
       this.uiExports.find(['chromeNavControls']),
     ])
     .flatten()
@@ -45,7 +62,7 @@ class UiApp {
   }
 
   toJSON() {
-    return _.pick(this, ['id', 'title', 'description', 'icon', 'main', 'url']);
+    return pick(this, ['id', 'title', 'description', 'icon', 'main', 'navLink']);
   }
 }
 
