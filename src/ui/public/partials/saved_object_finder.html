@@ -24,7 +24,7 @@
   </div>
 </form>
 
-<paginate list="finder.hits" per-page="25" style="padding-bottom: 1px; background-color: #f6f6f6;">
+<paginate list="finder.hits" per-page="20" style="padding-bottom: 1px; background-color: #f6f6f6;">
   <table class="list-group list-group-menu table table-striped"
     ng-class="{'select-mode': finder.selector.enabled}">
 
@@ -44,7 +44,7 @@
           ng-repeat="hit in page"
           ng-keydown="finder.hitKeyDown($event, page, paginate)"
           ng-click="finder.onChoose(hit, $event)">
-        <th ng-show="finder.properties.noun === 'Visualization'" 
+        <th ng-show="finder.properties.noun === 'Visualization'"
             class="first-cell col-md-1" scope="row">
           <a ng-href="{{finder.makeUrl(hit)}}"
             ng-blur="finder.hitBlur($event)"
