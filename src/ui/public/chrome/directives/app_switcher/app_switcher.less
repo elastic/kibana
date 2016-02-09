@@ -47,7 +47,6 @@ body { overflow-x: hidden; }
 }
 .app-wrapper {
   .real-flex-parent();
-  box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
   position: absolute;
   transition: transform @transition-time;
   transition-delay: @transition-delay;
@@ -58,6 +57,11 @@ body { overflow-x: hidden; }
   z-index: 1;
   margin: 0 auto;
   background-color: #fff;
+
+  &-panel {
+    .flex-parent(@shrink: 0);
+    box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
+  }
 
   .navbar-right {
     margin-right: 0;
