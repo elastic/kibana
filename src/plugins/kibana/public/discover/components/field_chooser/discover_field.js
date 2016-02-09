@@ -80,10 +80,11 @@ define(function (require) {
 
             detailsElem = $(detailsHtml);
             $compile(detailsElem)(detailScope);
-            $elem.append(detailsElem);
+            $elem.append(detailsElem).addClass('active');
           } else {
             delete field.details;
             detailsElem.remove();
+            $elem.removeClass('active');
           }
         };
 
