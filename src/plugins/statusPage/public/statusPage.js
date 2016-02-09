@@ -54,3 +54,8 @@ var chrome = require('ui/chrome')
 
   ui.refresh();
 });
+
+require('ui/modules').get('kibana')
+.config(function (appSwitcherEnsureNavigationProvider) {
+  appSwitcherEnsureNavigationProvider.forceNavigation(true);
+});

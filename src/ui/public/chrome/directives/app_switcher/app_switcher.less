@@ -88,11 +88,24 @@ body { overflow-x: hidden; }
       display: inline-block;
       height: @app-icon-height;
       width: @as-closed-width;
+      background-color: @white;
+      mask-position: center;
+      mask-size: 60% 60%;
+      mask-repeat: no-repeat;
+      > i {
+      }
+    }
+
+    .app-icon-missing {
+      float: left;
+      text-align: center;
+      font-size: 1.7em;
+      display: inline-block;
+      height: @app-icon-height;
+      width: @as-closed-width;
       background-position: center;
       background-size: contain;
       background-repeat: no-repeat;
-      > i {
-      }
     }
 
     .app-title {

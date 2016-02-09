@@ -86,11 +86,11 @@ describe('Chrome API :: apps', function () {
   describe('#getAppUrl()', function () {
     it('returns the resolved url of the current app', function () {
       const chrome = {};
-      const app = { url: '/foo' };
+      const app = { navLink: { url: '/foo' } };
       setup(chrome, { app });
 
       const a = document.createElement('a');
-      a.setAttribute('href', app.url);
+      a.setAttribute('href', app.navLink.url);
       expect(chrome.getAppUrl()).to.equal(a.href);
     });
 
