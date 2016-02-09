@@ -13,7 +13,8 @@ docViewsRegistry.register(function () {
         hit: '=',
         indexPattern: '=',
         filter: '=',
-        columns: '='
+        columns: '=',
+        updateFilterInQuery: '=filter'
       },
       controller: function ($scope) {
         $scope.mapping = $scope.indexPattern.fields.byName;
