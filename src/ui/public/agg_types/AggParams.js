@@ -11,6 +11,7 @@ define(function (require) {
       regex: Private(require('ui/agg_types/param_types/regex')),
       string: Private(require('ui/agg_types/param_types/string')),
       json: Private(require('ui/agg_types/param_types/raw_json')),
+      nested: Private(require('ui/agg_types/param_types/nested')),
       _default: Private(require('ui/agg_types/param_types/base'))
     };
 

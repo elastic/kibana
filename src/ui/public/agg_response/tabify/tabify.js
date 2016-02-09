@@ -34,11 +34,14 @@ define(function (require) {
       switch (agg.schema.group) {
         case 'buckets':
           var buckets = new Buckets(bucket[agg.id]);
+          if (bucket['nested_' + agg.id] !== undefined) {
+            buckets = new Buckets(bucket['nested_' + agg.id][agg.id]);
+          }
           if (buckets.length) {
             var splitting = write.canSplit && agg.schema.name === 'split';
             if (splitting) {
               write.split(agg, buckets, function forEachBucket(subBucket, key) {
-                collectBucket(write, subBucket, agg.getKey(subBucket), key);
+                collectBucket(write, subBucket, agg.getKey(subBucket, key));
               });
             } else {
               buckets.forEach(function (subBucket, key) {

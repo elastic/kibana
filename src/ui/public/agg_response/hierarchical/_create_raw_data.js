@@ -59,7 +59,7 @@ define(function (require) {
       }
 
       // iterate through all the buckets
-      _.each(extractBuckets(data[agg.id], agg), function (bucket) {
+      _.each(extractBuckets(data[agg.id] || data['nested_' + agg.id][agg.id]), function (bucket) {
 
         var _record = _.flattenDeep([record, bucket.key]);
         _.each(metrics, function (metric) {
@@ -74,7 +74,7 @@ define(function (require) {
         // buckets. If it does then we need to keep on walking the tree.
         // This is where the recursion happens.
         if (agg._next) {
-          var nextBucket = bucket[agg._next.id];
+          var nextBucket = bucket[agg._next.id] || bucket['nested_' + agg._next.id][agg._next.id];
           if (nextBucket && nextBucket.buckets) {
             walkBuckets(agg._next, bucket, _record);
           }
