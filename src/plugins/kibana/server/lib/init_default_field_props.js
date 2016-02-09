@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function initDefaultFieldProps(fields) {
   if (fields === undefined || !_.isArray(fields)) {

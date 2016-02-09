@@ -1,13 +1,14 @@
-var angular = require('angular');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var getFakeRow = require('fixtures/fake_row');
+import angular from 'angular';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import getFakeRow from 'fixtures/fake_row';
+import $ from 'jquery';
+import 'plugins/kibana/discover/index';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Doc Table', function () {
-  require('plugins/kibana/discover/index');
 
   var $parentScope;
 
@@ -22,7 +23,7 @@ describe('Doc Table', function () {
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
     config = _config_;
     $parentScope = $rootScope;
-    $parentScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     mapping = $parentScope.indexPattern.fields.byName;
   }));
 
@@ -324,7 +325,7 @@ describe('Doc Table', function () {
       $root.filtering = sinon.spy();
       $root.maxLength = 50;
       $root.mapping = mapping;
-      $root.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
       $row = $('<tr>')
       .attr({

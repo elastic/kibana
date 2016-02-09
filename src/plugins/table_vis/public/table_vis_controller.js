@@ -1,38 +1,39 @@
-define(function (require) {
-  // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
-  // didn't already
-  var module = require('ui/modules').get('kibana/table_vis', ['kibana']);
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import uiModules from 'ui/modules';
 
-  // add a controller to tha module, which will transform the esResponse into a
-  // tabular format that we can pass to the table directive
-  module.controller('KbnTableVisController', function ($scope, Private) {
-    var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+// get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
+// didn't already
+const module = uiModules.get('kibana/table_vis', ['kibana']);
 
-    $scope.$watch('esResponse', function (resp, oldResp) {
-      var tableGroups = $scope.tableGroups = null;
-      var hasSomeRows = $scope.hasSomeRows = null;
+// add a controller to tha module, which will transform the esResponse into a
+// tabular format that we can pass to the table directive
+module.controller('KbnTableVisController', function ($scope, Private) {
+  const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
-      if (resp) {
-        var vis = $scope.vis;
-        var params = vis.params;
+  $scope.$watch('esResponse', function (resp, oldResp) {
+    let tableGroups = $scope.tableGroups = null;
+    let hasSomeRows = $scope.hasSomeRows = null;
 
-        tableGroups = tabifyAggResponse(vis, resp, {
-          partialRows: params.showPartialRows,
-          minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels,
-          asAggConfigResults: true
-        });
+    if (resp) {
+      const vis = $scope.vis;
+      const params = vis.params;
 
-        hasSomeRows = tableGroups.tables.some(function haveRows(table) {
-          if (table.tables) return table.tables.some(haveRows);
-          return table.rows.length > 0;
-        });
-      }
+      tableGroups = tabifyAggResponse(vis, resp, {
+        partialRows: params.showPartialRows,
+        minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels,
+        asAggConfigResults: true
+      });
 
-      $scope.hasSomeRows = hasSomeRows;
-      if (hasSomeRows) {
-        $scope.tableGroups = tableGroups;
-      }
-    });
+      hasSomeRows = tableGroups.tables.some(function haveRows(table) {
+        if (table.tables) return table.tables.some(haveRows);
+        return table.rows.length > 0;
+      });
+    }
+
+    $scope.hasSomeRows = hasSomeRows;
+    if (hasSomeRows) {
+      $scope.tableGroups = tableGroups;
+    }
   });
-
 });
+

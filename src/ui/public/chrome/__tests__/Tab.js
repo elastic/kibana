@@ -1,6 +1,6 @@
-const Tab = require('../Tab');
-const expect = require('expect.js');
-const TabFakeStore = require('./_TabFakeStore');
+import Tab from '../Tab';
+import expect from 'expect.js';
+import TabFakeStore from './_TabFakeStore';
 
 describe('Chrome Tab', function () {
   describe('construction', function () {

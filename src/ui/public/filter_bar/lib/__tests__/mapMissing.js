@@ -1,5 +1,6 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import FilterBarLibMapMissingProvider from 'ui/filter_bar/lib/mapMissing';
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
 
@@ -9,7 +10,7 @@ describe('Filter Bar Directive', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapMissing = Private(require('ui/filter_bar/lib/mapMissing'));
+      mapMissing = Private(FilterBarLibMapMissingProvider);
     }));
 
     it('should return the key and value for matching filters', function (done) {

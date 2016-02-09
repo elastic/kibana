@@ -1,5 +1,5 @@
-const fs = require('fs');
-const rimraf = require('rimraf');
+import fs from 'fs';
+import rimraf from 'rimraf';
 
 module.exports = {
   remove: remove

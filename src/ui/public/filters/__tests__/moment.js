@@ -1,10 +1,10 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var sinon = require('auto-release-sinon');
-var moment = require('moment');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import moment from 'moment';
+import ngMock from 'ngMock';
+import 'ui/filters/moment';
 
-require('ui/filters/moment');
 
 var filter;
 

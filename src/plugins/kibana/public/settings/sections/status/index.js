@@ -1,10 +1,9 @@
-define(function (require) {
-  var _ = require('lodash');
+import _ from 'lodash';
+import registry from 'ui/registry/settings_sections';
 
-  return {
-    order: 3,
-    name: 'status',
-    display: 'Status',
-    url: '/status'
-  };
-});
+registry.register(_.constant({
+  order: 1000,
+  name: 'status',
+  display: 'Status',
+  url: '/status'
+}));

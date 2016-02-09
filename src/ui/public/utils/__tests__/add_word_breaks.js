@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var addWordBreaks = require('ui/utils/add_word_breaks');
+import _ from 'lodash';
+import expect from 'expect.js';
+import addWordBreaks from 'ui/utils/add_word_breaks';
 
 describe('addWordBreaks', function () {
 

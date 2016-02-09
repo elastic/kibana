@@ -1,7 +1,7 @@
-let _ = require('lodash');
+import _ from 'lodash';
 
-let states = require('./states');
-let Status = require('./Status');
+import states from './states';
+import Status from './Status';
 
 module.exports = class ServerStatus {
   constructor(server) {

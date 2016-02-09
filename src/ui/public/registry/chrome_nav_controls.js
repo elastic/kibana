@@ -1,6 +1,5 @@
-define(function (require) {
-  return require('ui/registry/_registry')({
-    name: 'chromeNavControls',
-    order: ['order']
-  });
+import uiRegistry from 'ui/registry/_registry';
+export default uiRegistry({
+  name: 'chromeNavControls',
+  order: ['order']
 });

@@ -1,5 +1,5 @@
+import { includes, keys } from 'lodash';
 module.exports = async function (kbnServer, server, config) {
-  let { includes, keys } = require('lodash');
 
   if (!config.get('plugins.initialize')) {
     server.log(['info'], 'Plugin initialization disabled.');
