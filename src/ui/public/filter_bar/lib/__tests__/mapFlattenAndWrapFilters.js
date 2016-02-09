@@ -3,6 +3,7 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import FilterBarLibMapFlattenAndWrapFiltersProvider from 'ui/filter_bar/lib/mapFlattenAndWrapFilters';
 describe('Filter Bar Directive', function () {
   describe('mapFlattenAndWrapFilters()', function () {
     var mapFlattenAndWrapFilters;
@@ -17,7 +18,7 @@ describe('Filter Bar Directive', function () {
     ));
 
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
+      mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
       $rootScope = _$rootScope_;
     }));
 

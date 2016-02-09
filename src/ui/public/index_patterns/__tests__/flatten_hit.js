@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 
 describe('IndexPattern#flattenHit()', function () {
 
@@ -32,7 +33,7 @@ describe('IndexPattern#flattenHit()', function () {
       }
     };
 
-    flattenHit = Private(require('ui/index_patterns/_flatten_hit'))(indexPattern).uncached;
+    flattenHit = Private(IndexPatternsFlattenHitProvider)(indexPattern).uncached;
     config = $injector.get('config');
 
     hit = {

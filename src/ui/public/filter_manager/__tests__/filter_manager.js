@@ -3,6 +3,8 @@ import sinon from 'auto-release-sinon';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import FilterManagerProvider from 'ui/filter_manager';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 var $rootScope;
 var queryFilter;
 var filterManager;
@@ -36,10 +38,10 @@ describe('Filter Manager', function () {
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    filterManager = Private(require('ui/filter_manager'));
+    filterManager = Private(FilterManagerProvider);
 
     // mock required queryFilter methods, used in the manager
-    queryFilter = Private(require('ui/filter_bar/query_filter'));
+    queryFilter = Private(FilterBarQueryFilterProvider);
     sinon.stub(queryFilter, 'getAppFilters', function () {
       return appState.filters;
     });

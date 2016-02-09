@@ -1,5 +1,3 @@
-define(function (require) {
-  return function savedVisualizationFn(savedVisualizations) {
-    return savedVisualizations;
-  };
-});
+export default function savedVisualizationFn(savedVisualizations) {
+  return savedVisualizations;
+};

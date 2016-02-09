@@ -3,6 +3,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import MockState from 'fixtures/mock_state';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('update filters', function () {
   var storeNames = {
     app: 'appState',
@@ -34,7 +35,7 @@ describe('update filters', function () {
 
   beforeEach(ngMock.inject(function (Private, _$rootScope_) {
     $rootScope = _$rootScope_;
-    queryFilter = Private(require('ui/filter_bar/query_filter'));
+    queryFilter = Private(FilterBarQueryFilterProvider);
   }));
 
   describe('updating', function () {
