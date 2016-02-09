@@ -22,7 +22,6 @@ define(function (require) {
      */
     function fromUser(text) {
       text = parser.parse(text).toJson();
-      console.log(text);
 
       function getQueryStringQuery(text) {
         return decorateQuery({
