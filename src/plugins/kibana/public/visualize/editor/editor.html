@@ -1,4 +1,4 @@
-<div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
+<div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}" chrome-context>
   <navbar ng-if="chrome.getVisible()" name="visualize-options">
     <div class="button-group vis-editor-actions">
       <button ng-click="startOver()" aria-label="New Visualization">
