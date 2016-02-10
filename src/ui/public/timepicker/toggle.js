@@ -4,11 +4,13 @@ import chromeConfigControlsRegistry from 'ui/registry/chrome_config_controls';
 import ConfigTemplate from 'ui/ConfigTemplate';
 
 import toggleHtml from './toggle.html';
+import filterConfig from './config/filter.html';
+import intervalConfig from './config/interval.html';
 
 chromeConfigControlsRegistry.register(function (timefilter, globalState) {
   let pickerTemplate = new ConfigTemplate({
-    filter: require('ui/timepicker/config/filter.html'),
-    interval: require('ui/timepicker/config/interval.html')
+    filter: filterConfig,
+    interval: intervalConfig
   });
 
   var listenForUpdates = _.once(function ($scope) {

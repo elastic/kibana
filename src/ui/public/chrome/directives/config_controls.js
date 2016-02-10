@@ -10,6 +10,7 @@ export default function (chrome, internals) {
   .directive('kbnChromeConfigControls', function (Private) {
     const controls = Private(chromeConfigControlsRegistry);
     return {
+      restrict: 'E',
       template: require('ui/chrome/directives/config_controls.html'),
       controller: function ($scope) {
         $scope.controls = controls.inOrder;
