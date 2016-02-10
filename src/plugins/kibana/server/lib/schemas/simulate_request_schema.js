@@ -1,7 +1,8 @@
 import Joi from 'joi';
-import ingestProcessorSchema from './resources/ingest_processor_schema';
+import * as ingestProcessorSchemas from './resources/ingest_processor_schemas';
+import _ from 'lodash';
 
 export default Joi.object({
-  processors: Joi.array().items(ingestProcessorSchema).required().min(1),
+  processors: Joi.array().items(_.values(ingestProcessorSchemas)).required().min(1),
   input: Joi.object().required()
 });

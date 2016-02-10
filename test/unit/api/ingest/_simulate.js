@@ -6,9 +6,9 @@ define(function (require) {
 
   const testPipeline = {
     processors: [{
-      processorId: 'processor1',
-      typeId: 'set',
-      targetField: 'foo',
+      processor_id: 'processor1',
+      type_id: 'set',
+      target_field: 'foo',
       value: 'bar'
     }],
     input: {}
@@ -44,7 +44,6 @@ define(function (require) {
         .expect(200);
       });
 
-      // test for 400 when required fields for particular processor are missing, in separate files for each processor type
     });
   };
 });

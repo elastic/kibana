@@ -1,7 +1,7 @@
-const _ = require('lodash');
-import { buildRequest, processResponse } from '../../../lib/ingest_simulate';
-import processorTypes from '../../../../common/ingest_processor_types';
+import _ from 'lodash';
+import { processResponse } from '../../../lib/ingest_simulate';
 import simulateRequestSchema from '../../../lib/schemas/simulate_request_schema';
+import ingestSimulateApiToEsConverter from '../../../lib/converters/ingest_simulate_api_to_es_converter';
 
 module.exports = function registerSimulate(server) {
   server.route({
@@ -14,8 +14,8 @@ module.exports = function registerSimulate(server) {
     },
     handler: function (request, reply) {
       const client = server.plugins.elasticsearch.client;
-      const pipeline = request.payload;
-      const body = buildRequest(processorTypes, pipeline);
+      const simulateApiDocument = request.payload;
+      const body = ingestSimulateApiToEsConverter(simulateApiDocument);
 
       client.transport.request({
         path: '_ingest/pipeline/_simulate',
@@ -24,7 +24,7 @@ module.exports = function registerSimulate(server) {
         body: body
       },
       function (err, resp) {
-        reply(processResponse(pipeline, err, resp));
+        reply(processResponse(simulateApiDocument, err, resp));
       });
     }
   });
