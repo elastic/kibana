@@ -502,7 +502,7 @@ define(function (require) {
             // 5). for each chart element, find the green circle, then the cy position
             function getChartType(chart) {
               return chart
-              .findByCssSelector('circle[fill="#57c17b"]')
+              .findByCssSelector('circle[fill="#6eadc1"]')
               .then(function (circleObject) {
                 // common.debug('circleObject = ' + circleObject + ' yAxisHeight= ' + yAxisHeight + ' yAxisLabel= ' + yAxisLabel);
                 return circleObject
@@ -573,7 +573,7 @@ define(function (require) {
             .getAttribute('fill')
             .then(function (fillColor) {
               // we're only getting the Green Bars
-              if (fillColor === '#57c17b') {
+              if (fillColor === '#6eadc1') {
                 return chart
                 .getAttribute('height')
                 .then(function (barHeight) {

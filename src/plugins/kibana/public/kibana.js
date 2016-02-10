@@ -28,8 +28,8 @@ routes
 
 chrome
 .setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
+  'logo': 'url(' + kibanaLogoUrl + ') center / 160px 70px no-repeat #e8488b',
+  'smallLogo': 'url(' + kibanaLogoUrl + ') center / 160px 70px no-repeat #e8488b'
 })
 .setNavBackground('#222222')
 .setTabDefaults({

@@ -1,55 +1,104 @@
+@import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
 
-@app-icon-size: 48px;
-@app-icon-padding: 10px;
+// as - App Switcher
+@as-open-width: 170px;
+@as-closed-width: 53px;
+@app-icon-height: 30px;
+@transition-time: .65s;
+@transition-delay: .2s;
 
+body { overflow-x: hidden; }
+
+.app-links-wrapper {
+  width: @as-open-width;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  background-color: #3caed2;
+  overflow: hidden;
+  transition: width @transition-time;
+  transition-delay: @transition-delay;
+
+  &:hover {
+    .app-title {
+      display: inline-block;
+    }
+    + .app-wrapper {
+      transform: translateX(@as-open-width - @as-closed-width);
+    }
+  }
+
+  .logo {
+    height: 70px;
+    width: @as-open-width;
+    list-style-type: none;
+    &.kibana {
+      background: url("~ui/images/kibana.svg") center / 160px 70px no-repeat #e8488b;
+    }
+  }
+  .bottom-apps {
+    position: absolute;
+    bottom: 0;
+  }
+}
+.app-wrapper {
+  .real-flex-parent();
+  position: absolute;
+  transition: transform @transition-time;
+  transition-delay: @transition-delay;
+  left: @as-closed-width;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  margin: 0 auto;
+  background-color: #fff;
+
+  .navbar-right {
+    margin-right: 0;
+  }
+}
 .app-links {
   text-align: justify;
 
   .app-link {
-    display: inline-block;
-    vertical-align: top;
-    text-align: left;
-    width: @app-icon-size + (@app-icon-padding * 2);
-    margin: 0px 10px;
-    padding: @app-icon-padding;
-    border-radius: @border-radius-base;
-
-    .app-icon {
+    width: @as-open-width;
+    height: @app-icon-height;
+    > a {
       display: block;
-      height: @app-icon-size;
-      width: @app-icon-size;
+      height: 100%;
+      color: #fff;
+    }
+    .app-icon {
+      float: left;
+      text-align: center;
+      font-size: 1.7em;
+      display: inline-block;
+      height: @app-icon-height;
+      width: @as-closed-width;
       background-position: center;
       background-size: contain;
-      border-radius: @border-radius-base;
-      background-color: @gray-light;
-      width: 100%;
-
-      &-missing {
-        text-align: center;
-        font-size: 2.7em;
-        font-weight: bold;
-        font-family: @font-family-sans-serif;
-        color: #fff;
+      > i {
       }
     }
 
     .app-title {
-      color: @text-color;
+      width: calc(@as-open-width - @as-closed-width);
+      display: inline-block;
+      float: right;
       font-size: 0.9em;
-      width: 100%;
       text-align: center;
-      margin-top: 3px;
-    }
-
-    &:hover .app-title {
-      text-decoration: underline;
+      line-height: @app-icon-height;
     }
 
     &.active {
-      background: @gray-lighter;
-      .app-title {
-        text-decoration: underline;
+      background-color: #73c6e0;
+      > a {
+        color: #333;
+        text-decoration: none;
       }
     }
 

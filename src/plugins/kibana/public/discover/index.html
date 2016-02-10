@@ -1,5 +1,48 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover">
+  <navbar name="discover-options">
+    <div class="discover-info">
+      <span ng-show="opts.savedSearch.id" class="discover-info-title">
+        <span ng-bind="::opts.savedSearch.title"></span>
+        <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
+      </span>
+
+      <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
+      <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
+    </div>
+    <div class="discover-actions button-group" role="toolbar">
+      <button
+        ng-click="newQuery()"
+        aria-label="New Search">
+        <span>New</span>
+      </button>
+      <button
+        ng-click="configTemplate.toggle('save');"
+        ng-class="{active: configTemplate.is('save')}"
+        aria-haspopup="false"
+        aria-expanded="{{ configTemplate.is('save') }}"
+        aria-label="Save Search">
+        <span>Save</span>
+      </button>
+      <button
+        aria-haspopup="false"
+        aria-expanded="{{ configTemplate.is('load') }}"
+        ng-click="configTemplate.toggle('load');"
+        ng-class="{active: configTemplate.is('load')}"
+        aria-label="Load Saved Search">
+        <span>Open</span>
+      </button>
+      <button
+        aria-label="Share Search"
+        aria-haspopup="false"
+        aria-expanded="{{ configTemplate.is('share') }}"
+        ng-class="{active: configTemplate.is('share')}"
+        ng-click="configTemplate.toggle('share');">
+        <span>Share</span>
+      </button>
+    </div>
+  </navbar>
+  <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
+  <navbar name="discover-search">
     <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
@@ -21,49 +64,9 @@
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>
     </form>
-
-    <div class="button-group" role="toolbar">
-      <kbn-tooltip text="New Search" placement="bottom" append-to-body="1">
-        <button
-          ng-click="newQuery()"
-          aria-label="New Search">
-          <i aria-hidden="true" class="fa fa-file-new-o"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
-        <button
-          ng-click="configTemplate.toggle('save');"
-          ng-class="{active: configTemplate.is('save')}"
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('save') }}"
-          aria-label="Save Search">
-          <i aria-hidden="true" class="fa fa-save"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
-        <button
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('load') }}"
-          ng-click="configTemplate.toggle('load');"
-          ng-class="{active: configTemplate.is('load')}"
-          aria-label="Load Saved Search">
-          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
-        <button
-          aria-label="Share Search"
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('share') }}"
-          ng-class="{active: configTemplate.is('share')}"
-          ng-click="configTemplate.toggle('share');">
-          <i aria-hidden="true" class="fa fa-external-link"></i>
-        </button>
-      </kbn-tooltip>
-    </div>
+    <div class="button-group" role="toolbar"></div>
   </navbar>
 
-  <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
 
   <div class="container-fluid" role="main">
     <div class="row">
@@ -84,17 +87,6 @@
       </div>
 
       <div class="discover-wrapper col-md-10">
-
-        <div class="discover-info">
-          <span ng-show="opts.savedSearch.id" class="discover-info-title">
-            <span ng-bind="::opts.savedSearch.title"></span>
-            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
-          </span>
-
-          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
-          <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
-        </div>
-
         <div class="discover-content">
           <!-- no results -->
           <div ng-show="resultState === 'none'">
