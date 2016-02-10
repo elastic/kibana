@@ -37,7 +37,11 @@ body { overflow-x: hidden; }
     width: @as-open-width;
     list-style-type: none;
     &.kibana {
-      background: url("~ui/images/kibana.svg") 6px 10px / 140px 50px no-repeat #e8488b;
+      background-image: url("~ui/images/kibana.svg");
+      background-position: 6px 10px;
+      background-size: 140px 50px;
+      background-repeat: no-repeat;
+      background-color: #e8488b;
     }
   }
   .bottom-apps {
