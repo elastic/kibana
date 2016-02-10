@@ -1,10 +1,10 @@
-define(function (require) {
-  return function BytesFormatProvider(Private) {
-    var Numeral = Private(require('ui/stringify/types/_Numeral'));
-    return Numeral.factory({
-      id: 'bytes',
-      title: 'Bytes',
-      sampleInputs: [1024, 5150000, 1990000000]
-    });
-  };
-});
+import StringifyTypesNumeralProvider from 'ui/stringify/types/_Numeral';
+
+export default function BytesFormatProvider(Private) {
+  var Numeral = Private(StringifyTypesNumeralProvider);
+  return Numeral.factory({
+    id: 'bytes',
+    title: 'Bytes',
+    sampleInputs: [1024, 5150000, 1990000000]
+  });
+};

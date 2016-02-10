@@ -1,6 +1,6 @@
-const zlib = require('zlib');
-const fs = require('fs');
-const tar = require('tar');
+import zlib from 'zlib';
+import fs from 'fs';
+import tar from 'tar';
 
 async function extractArchive(settings) {
   await new Promise((resolve, reject) => {

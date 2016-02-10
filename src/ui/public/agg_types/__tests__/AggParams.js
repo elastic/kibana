@@ -1,7 +1,12 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import AggTypesAggParamsProvider from 'ui/agg_types/AggParams';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesFieldProvider from 'ui/agg_types/param_types/field';
+import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optioned';
+import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
 describe('AggParams class', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var AggParams;
   var BaseAggParam;
@@ -14,11 +19,11 @@ describe('AggParams class', function () {
   beforeEach(ngMock.inject(require('./utils/_stub_agg_params')));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    AggParams = Private(require('ui/agg_types/AggParams'));
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    FieldAggParam = Private(require('ui/agg_types/param_types/field'));
-    OptionedAggParam = Private(require('ui/agg_types/param_types/optioned'));
-    RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
+    AggParams = Private(AggTypesAggParamsProvider);
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    FieldAggParam = Private(AggTypesParamTypesFieldProvider);
+    OptionedAggParam = Private(AggTypesParamTypesOptionedProvider);
+    RegexAggParam = Private(AggTypesParamTypesRegexProvider);
   }));
 
   describe('constructor args', function () {

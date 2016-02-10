@@ -1,8 +1,14 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import RealAggConfigPM from 'ui/Vis/AggConfig';
+import VisProvider from 'ui/Vis';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import VisAggConfigsProvider from 'ui/Vis/AggConfigs';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisSchemasProvider from 'ui/Vis/Schemas';
 describe('AggConfigs', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var Vis;
   var IndexedArray;
@@ -15,7 +21,6 @@ describe('AggConfigs', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy
-    var RealAggConfigPM = require('ui/Vis/AggConfig');
     AggConfig = Private(RealAggConfigPM);
     var spy = sinon.spy(AggConfig);
     Object.defineProperty(spy, 'aggTypes', {
@@ -26,12 +31,12 @@ describe('AggConfigs', function () {
     Private.stub(RealAggConfigPM, spy);
 
     // load main deps
-    Vis = Private(require('ui/Vis'));
-    SpiedAggConfig = Private(require('ui/Vis/AggConfig'));
-    AggConfigs = Private(require('ui/Vis/AggConfigs'));
+    Vis = Private(VisProvider);
+    SpiedAggConfig = Private(VisAggConfigProvider);
+    AggConfigs = Private(VisAggConfigsProvider);
     IndexedArray = require('ui/IndexedArray');
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Schemas = Private(require('ui/Vis/Schemas'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    Schemas = Private(VisSchemasProvider);
   }));
 
   it('extends IndexedArray', function () {

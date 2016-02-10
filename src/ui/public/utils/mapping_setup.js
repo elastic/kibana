@@ -1,7 +1,7 @@
+import angular from 'angular';
+import _ from 'lodash';
 define(function () {
   return function MappingSetupService(kbnIndex, es) {
-    var angular = require('angular');
-    var _ = require('lodash');
     var mappingSetup = this;
 
     var json = {
@@ -30,7 +30,7 @@ define(function () {
         // check all types
         type: '*',
         // limit the response to just the _source field for each index
-        field: '_source'
+        fields: '_source'
       }).then(function (resp) {
         return _.keys(resp[indexName].mappings);
       });

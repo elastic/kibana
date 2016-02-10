@@ -1,5 +1,5 @@
-var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
-var expect = require('expect.js');
+import onlyDisabled from 'ui/filter_bar/lib/onlyDisabled';
+import expect from 'expect.js';
 describe('Filter Bar Directive', function () {
   describe('onlyDisabled()', function () {
 

@@ -1,7 +1,8 @@
 
-var moment = require('moment');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import moment from 'moment';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/changeTimeFilter';
 describe('Filter Bar Directive', function () {
   describe('changeTimeFilter()', function () {
 
@@ -12,7 +13,7 @@ describe('Filter Bar Directive', function () {
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(ngMock.inject(function (Private, _timefilter_) {
-      changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
+      changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
       timefilter = _timefilter_;
     }));
 

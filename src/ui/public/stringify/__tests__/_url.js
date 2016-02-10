@@ -1,13 +1,14 @@
+import $ from 'jquery';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Url Format', function () {
-  var $ = require('jquery');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var fieldFormats;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    fieldFormats = Private(require('ui/registry/field_formats'));
+    fieldFormats = Private(RegistryFieldFormatsProvider);
   }));
 
   describe('Url Format', function () {
