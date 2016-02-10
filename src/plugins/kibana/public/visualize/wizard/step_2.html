@@ -6,7 +6,7 @@
       <label>From a New Search</label>
     </div>
     <div class="form-group" style="padding-left: 5px;">
-      <select class="form-control"
+      <select class="form-text form-control"
               ng-model="indexPattern.selection"
               ng-options="pattern as pattern for pattern in indexPattern.list | orderBy:'toString()'">
         <option value="">Select an index pattern...</option>
