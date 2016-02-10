@@ -215,13 +215,13 @@ define(function (require) {
 
     clickLegendExpand: function clickLegendExpand() {
       return thisTime
-      .findByCssSelector('.fa-chevron-left')
+      .findByCssSelector('.fa-chevron-circle-left')
       .click();
     },
 
     clickLegendCollapse: function clickLegendCollapse() {
       return thisTime
-      .findByCssSelector('div.legend-toggle > i.fa-chevron-right')
+      .findByCssSelector('div.legend-toggle > i.fa-chevron-circle-right')
       .click();
     },
 
