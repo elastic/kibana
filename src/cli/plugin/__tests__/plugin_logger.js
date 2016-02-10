@@ -1,6 +1,6 @@
-const expect = require('expect.js');
-const sinon = require('sinon');
-const pluginLogger = require('../plugin_logger');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import pluginLogger from '../plugin_logger';
 
 describe('kibana cli', function () {
 

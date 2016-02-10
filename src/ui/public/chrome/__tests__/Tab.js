@@ -1,7 +1,7 @@
-const Tab = require('../Tab');
-const expect = require('expect.js');
-const sinon = require('auto-release-sinon');
-const TabFakeStore = require('./_TabFakeStore');
+import sinon from 'auto-release-sinon';
+import Tab from '../Tab';
+import expect from 'expect.js';
+import TabFakeStore from './_TabFakeStore';
 
 describe('Chrome Tab', function () {
   describe('construction', function () {

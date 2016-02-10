@@ -1,5 +1,5 @@
-let LogFormat = require('./LogFormat');
-let stringify = require('json-stringify-safe');
+import LogFormat from './LogFormat';
+import stringify from 'json-stringify-safe';
 
 let stripColors = function (string) {
   return string.replace(/\u001b[^m]+m/g, '');

@@ -1,7 +1,4 @@
 import { chain, get, noop, once, pick } from 'lodash';
-import { join } from 'path';
-
-import UiNavLink from './ui_nav_link';
 
 class UiApp {
   constructor(uiExports, spec) {
@@ -10,6 +7,7 @@ class UiApp {
 
     this.id = this.spec.id;
     if (!this.id) {
+      console.log('-----------Spec Without ID:', this.spec);
       throw new Error('Every app must specify it\'s id');
     }
 
@@ -53,7 +51,7 @@ class UiApp {
   getModules() {
     return chain([
       this.uiExports.find(get(this, 'spec.uses', [])),
-      this.uiExports.find(['chromeNavControls']),
+      this.uiExports.find(['chromeNavControls', 'sledgehammers']),
     ])
     .flatten()
     .uniq()

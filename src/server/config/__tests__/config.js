@@ -1,7 +1,7 @@
-var Config = require('../config');
-var expect = require('expect.js');
-var _ = require('lodash');
-var Joi = require('joi');
+import Config from '../config';
+import expect from 'expect.js';
+import _ from 'lodash';
+import Joi from 'joi';
 
 /**
  * Plugins should defined a config method that takes a joi object. By default

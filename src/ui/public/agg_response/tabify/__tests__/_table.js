@@ -1,13 +1,14 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
 describe('Table class', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    Table = Private(require('ui/agg_response/tabify/_table'));
+    Table = Private(AggResponseTabifyTableProvider);
   }));
 
   it('exposes rows array, but not the columns', function () {

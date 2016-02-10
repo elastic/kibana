@@ -1,10 +1,11 @@
+import DomLocationProvider from 'ui/domLocation';
 import { parse } from 'url';
 import { bindKey } from 'lodash';
+import '../app_switcher/app_switcher.less';
+import uiModules from 'ui/modules';
+import appSwitcherTemplate from './app_switcher.html';
 
-require('../app_switcher/app_switcher.less');
-const DomLocationProvider = require('ui/domLocation');
-
-require('ui/modules')
+uiModules
 .get('kibana')
 .provider('appSwitcherEnsureNavigation', function () {
   let forceNavigation = false;
@@ -42,7 +43,7 @@ require('ui/modules')
 .directive('appSwitcher', function () {
   return {
     restrict: 'E',
-    template: require('./app_switcher.html'),
+    template: appSwitcherTemplate,
     controllerAs: 'switcher',
     controller($scope, appSwitcherEnsureNavigation) {
       // since we render this in an isolate scope we can't "require: ^chrome", but

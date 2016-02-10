@@ -1,10 +1,12 @@
+import 'angular';
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import EventsProvider from 'ui/events';
+import ReflowWatcherProvider from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {
-  require('angular');
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var sinon = require('auto-release-sinon');
-  var ngMock = require('ngMock');
 
   var $body = $(document.body);
   var $window = $(window);
@@ -23,11 +25,11 @@ describe('Reflow watcher', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
-    EventEmitter = Private(require('ui/events'));
+    EventEmitter = Private(EventsProvider);
 
     // stub jQuery's $.on method while creating the reflowWatcher
     $onStub = sinon.stub($.fn, 'on');
-    reflowWatcher = Private(require('ui/reflow_watcher'));
+    reflowWatcher = Private(ReflowWatcherProvider);
     $onStub.restore();
 
     // setup the reflowWatchers $http watcher

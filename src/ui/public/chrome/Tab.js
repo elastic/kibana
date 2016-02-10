@@ -1,7 +1,7 @@
-const _ = require('lodash');
-const reEsc = require('lodash').escapeRegExp;
-const { parse, format } = require('url');
-const notify = require('ui/notify');
+import notify from 'ui/notify';
+import _ from 'lodash';
+import { escapeRegExp as reEsc } from 'lodash';
+import { parse, format } from 'url';
 
 const urlJoin = (a, b) => {
   if (!b) return a;

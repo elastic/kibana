@@ -1,19 +1,19 @@
-var _ = require('lodash');
-var esBool = require('./es_bool');
-var versionSatisfies = require('./version_satisfies');
-var SetupError = require('./setup_error');
+import _ from 'lodash';
+import esBool from './es_bool';
+import versionSatisfies from './version_satisfies';
+import SetupError from './setup_error';
 
 module.exports = function (server) {
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
 
-  var client = server.plugins.elasticsearch.client;
-  var engineVersion = server.config().get('elasticsearch.engineVersion');
+  const client = server.plugins.elasticsearch.client;
+  const engineVersion = server.config().get('elasticsearch.engineVersion');
 
   return client.nodes.info()
   .then(function (info) {
-    var badNodes = _.filter(info.nodes, function (node) {
+    const badNodes = _.filter(info.nodes, function (node) {
       // remove client nodes (Logstash)
-      var isClient = _.get(node, 'attributes.client');
+      const isClient = _.get(node, 'attributes.client');
       if (isClient != null && esBool(isClient) === true) {
         return false;
       }
@@ -24,11 +24,11 @@ module.exports = function (server) {
 
     if (!badNodes.length) return true;
 
-    var badNodeNames = badNodes.map(function (node) {
+    const badNodeNames = badNodes.map(function (node) {
       return 'Elasticsearch v' + node.version + ' @ ' + node.http_address + ' (' + node.ip + ')';
     });
 
-    var message = `This version of Kibana requires Elasticsearch ` +
+    const message = `This version of Kibana requires Elasticsearch ` +
     `${engineVersion} on all nodes. I found ` +
     `the following incompatible nodes in your cluster: ${badNodeNames.join(',')}`;
 

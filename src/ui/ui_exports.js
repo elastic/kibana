@@ -1,7 +1,8 @@
-var _ = require('lodash');
-var minimatch = require('minimatch');
-var UiAppCollection = require('./ui_app_collection');
-var UiNavLinkCollection = require('./ui_nav_link_collection');
+import _ from 'lodash';
+import minimatch from 'minimatch';
+
+import UiAppCollection from './ui_app_collection';
+import UiNavLinkCollection from './ui_nav_link_collection';
 
 class UiExports {
   constructor({ urlBasePath }) {
@@ -69,6 +70,9 @@ class UiExports {
       case 'spyModes':
       case 'chromeNavControls':
       case 'navbarExtensions':
+      case 'settingsSections':
+      case 'docViews':
+      case 'sledgehammers':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };

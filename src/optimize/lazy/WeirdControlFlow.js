@@ -1,5 +1,5 @@
+import { fromNode } from 'bluebird';
 
-let { fromNode } = require('bluebird');
 
 module.exports = class WeirdControlFlow {
   constructor(work) {

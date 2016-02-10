@@ -1,28 +1,29 @@
-define(function (require) {
-  return function FetchMergeDuplicateRequests(Private) {
-    var isRequest = Private(require('ui/courier/fetch/_is_request'));
-    var DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
+import CourierFetchIsRequestProvider from 'ui/courier/fetch/_is_request';
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
 
-    function mergeDuplicateRequests(requests) {
-      // dedupe requests
-      var index = {};
-      return requests.map(function (req) {
-        if (!isRequest(req)) return req;
+export default function FetchMergeDuplicateRequests(Private) {
+  var isRequest = Private(CourierFetchIsRequestProvider);
+  var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
 
-        var iid = req.source._instanceid;
-        if (!index[iid]) {
-          // this request is unique so far
-          index[iid] = req;
-          // keep the request
-          return req;
-        }
+  function mergeDuplicateRequests(requests) {
+    // dedupe requests
+    var index = {};
+    return requests.map(function (req) {
+      if (!isRequest(req)) return req;
 
-        // the source was requested at least twice
-        req._uniq = index[iid];
-        return DUPLICATE;
-      });
-    }
+      var iid = req.source._instanceid;
+      if (!index[iid]) {
+        // this request is unique so far
+        index[iid] = req;
+        // keep the request
+        return req;
+      }
 
-    return mergeDuplicateRequests;
-  };
-});
+      // the source was requested at least twice
+      req._uniq = index[iid];
+      return DUPLICATE;
+    });
+  }
+
+  return mergeDuplicateRequests;
+};

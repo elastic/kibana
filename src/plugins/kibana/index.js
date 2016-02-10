@@ -1,8 +1,8 @@
-const ingest = require('./server/routes/api/ingest');
+import ingest from './server/routes/api/ingest';
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
-
+    id: 'kibana',
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -13,6 +13,7 @@ module.exports = function (kibana) {
 
     uiExports: {
       app: {
+        id: 'kibana',
         title: 'Kibana',
         listed: false,
         description: 'the kibana you know and love',
@@ -22,7 +23,9 @@ module.exports = function (kibana) {
           'visTypes',
           'spyModes',
           'fieldFormats',
-          'navbarExtensions'
+          'navbarExtensions',
+          'settingsSections',
+          'docViews'
         ],
 
         injectVars: function (server, options) {

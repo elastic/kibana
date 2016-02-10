@@ -1,10 +1,9 @@
-var angular = require('angular');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
 // Load the kibana app dependencies.
-require('ui/parse_query');
 
 var $rootScope;
 var $timeout;
@@ -18,7 +17,9 @@ var $elem;
 var cycleIndex = 0;
 var markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 var fromUser;
-var toUser = require('ui/parse_query/lib/to_user');
+import toUser from 'ui/parse_query/lib/to_user';
+import 'ui/parse_query';
+import ParseQueryLibFromUserProvider from 'ui/parse_query/lib/from_user';
 
 var init = function () {
   // Load the application
@@ -65,7 +66,7 @@ describe('parse-query directive', function () {
   describe('user input parser', function () {
 
     beforeEach(function () {
-      fromUser = Private(require('ui/parse_query/lib/from_user'));
+      fromUser = Private(ParseQueryLibFromUserProvider);
       config.set('query:queryString:options', {});
     });
 

@@ -1,8 +1,8 @@
-var SetupError = require('./setup_error');
-var format = require('util').format;
+import SetupError from './setup_error';
+import { format } from 'util';
 module.exports = function (server) {
-  var client = server.plugins.elasticsearch.client;
-  var index = server.config().get('kibana.index');
+  const client = server.plugins.elasticsearch.client;
+  const index = server.config().get('kibana.index');
 
   function handleError(message) {
     return function (err) {

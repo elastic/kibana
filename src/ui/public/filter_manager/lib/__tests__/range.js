@@ -1,15 +1,16 @@
 
-var fn = require('ui/filter_manager/lib/range');
-var expect = require('expect.js');
-var _ = require('lodash');
-var ngMock = require('ngMock');
+import fn from 'ui/filter_manager/lib/range';
+import expect from 'expect.js';
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 var indexPattern;
 var expected;
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       expected = _.cloneDeep(require('fixtures/filter_skeleton'));
     }));
 

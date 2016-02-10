@@ -1,10 +1,10 @@
 const utils = require('requirefrom')('src/utils');
 const fromRoot = utils('fromRoot');
-const settingParser = require('./setting_parser');
-const installer = require('./plugin_installer');
-const remover = require('./plugin_remover');
-const lister = require('./plugin_lister');
-const pluginLogger = require('./plugin_logger');
+import settingParser from './setting_parser';
+import installer from './plugin_installer';
+import remover from './plugin_remover';
+import lister from './plugin_lister';
+import pluginLogger from './plugin_logger';
 
 export default function pluginCli(program) {
   function processCommand(command, options) {

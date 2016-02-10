@@ -1,6 +1,6 @@
 
-var getEditorType = require('plugins/kibana/settings/sections/advanced/lib/get_editor_type');
-var expect = require('expect.js');
+import getEditorType from 'plugins/kibana/settings/sections/advanced/lib/get_editor_type';
+import expect from 'expect.js';
 
 describe('Settings', function () {
   describe('Advanced', function () {
