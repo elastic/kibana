@@ -1,6 +1,6 @@
-const createMappingsFromPatternFields = require('../create_mappings_from_pattern_fields');
-const expect = require('expect.js');
-const _ = require('lodash');
+import createMappingsFromPatternFields from '../create_mappings_from_pattern_fields';
+import expect from 'expect.js';
+import _ from 'lodash';
 
 let testFields;
 

@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   let { flatten } = require('lodash');
 
-  grunt.registerTask('build', 'Build packages', function (arg) {
+  grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
       '_build:getProps',
       'clean:build',
@@ -23,7 +23,7 @@ module.exports = function (grunt) {
       '_build:downloadNodeBuilds:finish',
       '_build:versionedLinks',
       '_build:archives',
-      (grunt.option('os-packages') || arg === 'ospackages') ? [
+      grunt.option('os-packages') ? [
         '_build:pleaseRun',
         '_build:osPackages',
       ] : [],

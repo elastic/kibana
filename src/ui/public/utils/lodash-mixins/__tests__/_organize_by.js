@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import expect from 'expect.js';
 describe('_.organize', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
 
   it('it works', function () {
     var col = [

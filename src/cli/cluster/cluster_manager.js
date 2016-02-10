@@ -1,12 +1,12 @@
-const cluster = require('cluster');
+import cluster from 'cluster';
 const { join } = require('path');
 const { format: formatUrl } = require('url');
-const Hapi = require('hapi');
+import Hapi from 'hapi';
 const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
-const Log = require('../Log');
-const Worker = require('./worker');
-const BasePathProxy = require('./base_path_proxy');
+import Log from '../Log';
+import Worker from './worker';
+import BasePathProxy from './base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 

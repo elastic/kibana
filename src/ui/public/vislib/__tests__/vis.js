@@ -1,13 +1,15 @@
-var _ = require('lodash');
-var $ = require('jquery');
-var d3 = require('d3');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import d3 from 'd3';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
+import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 var dataArray = [
   series,
@@ -35,9 +37,9 @@ dataArray.forEach(function (data, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-      secondVis = Private(require('fixtures/vislib/_vis_fixture'))();
+      vis = Private(FixturesVislibVisFixtureProvider)();
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      secondVis = Private(FixturesVislibVisFixtureProvider)();
     }));
 
     afterEach(function () {

@@ -1,6 +1,6 @@
+import d3 from 'd3';
 define(function () {
   return function ChartTitleSplitFactory() {
-    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to either the `.y-axis-chart-title` element or the

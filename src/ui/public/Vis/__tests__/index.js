@@ -1,6 +1,6 @@
+import './_AggConfig';
+import './_AggConfigResult';
+import './_AggConfigs';
+import './_Vis';
 describe('Vis Component', function () {
-  require('./_AggConfig');
-  require('./_AggConfigResult');
-  require('./_AggConfigs');
-  require('./_Vis');
 });

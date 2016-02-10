@@ -1,8 +1,35 @@
-const _ = require('lodash');
-const $ = require('jquery');
-const module = require('ui/modules').get('kibana/render_directive');
+import { isPlainObject } from 'lodash';
+import $ from 'jquery';
+import uiModules from 'ui/modules';
+import applyScopeBindingsProvider from './apply_scope_bindings';
 
-module.directive('renderDirective', function () {
+/**
+ * The <render-directive> directive is useful for programaticaly modifying or
+ * extending a view. It allows defining the majority of the directives behavior
+ * using a "definition" object, which the implementer can obtain from plugins (for instance).
+ *
+ * The definition object supports the parts of a directive definition that are
+ * easy enough to implement without having to hack angular, and does it's best to
+ * make sure standard directive life-cycle timing is respected.
+ *
+ * @param [Object] definition - the external configuration for this directive to assume
+ * @param [Function] definition.controller - a constructor used to create the controller for this directive
+ * @param [String] definition.controllerAs - a name where the controller should be stored on scope
+ * @param [Object] definition.scope - an object defining the binding properties for values read from
+ *                                  attributes and bound to $scope. The keys of this object are the
+ *                                  local names of $scope properties, and the values are a combination
+ *                                  of the binding style (=, @, or &) and the external attribute name.
+ *                                  See [the Angular docs]
+ *                                  (https://code.angularjs.org/1.4.9/docs/api/ng/service/$compile#-scope-)
+ *                                  for more info
+ * @param [Object|Function] definition.link - either a post link function or an object with pre and/or
+ *                                          post link functions.
+ */
+uiModules
+.get('kibana')
+.directive('renderDirective', function (Private, $parse) {
+  const applyScopeBindings = Private(applyScopeBindingsProvider);
+
   return {
     restrict: 'E',
     scope: {
@@ -14,17 +41,26 @@ module.directive('renderDirective', function () {
     controller: function ($scope, $element, $attrs, $transclude) {
       if (!$scope.definition) throw new Error('render-directive must have a definition attribute');
 
-      const { controller, controllerAs } = $scope.definition;
+      const { controller, controllerAs, scope } = $scope.definition;
+
+      applyScopeBindings(scope, $scope, $attrs);
+
       if (controller) {
         if (controllerAs) $scope[controllerAs] = this;
         $scope.$eval(controller, { $scope, $element, $attrs, $transclude });
       }
     },
-    link: function ($scope, $el, $attrs) {
-      const { link } = $scope.definition;
-      if (link) {
-        link($scope, $el, $attrs);
-      }
+    link: {
+      pre($scope, $el, $attrs, controller) {
+        const { link } = $scope.definition;
+        const preLink = isPlainObject(link) ? link.pre : null;
+        if (preLink) preLink($scope, $el, $attrs, controller);
+      },
+      post($scope, $el, $attrs, controller) {
+        const { link } = $scope.definition;
+        const postLink = isPlainObject(link) ? link.post : link;
+        if (postLink) postLink($scope, $el, $attrs, controller);
+      },
     }
   };
 });

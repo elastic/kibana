@@ -1,25 +1,23 @@
 // autoloading
-require('ui/autoload/all');
 
 // preloading (for faster webpack builds)
-require('plugins/kibana/discover/index');
-require('plugins/kibana/visualize/index');
-require('plugins/kibana/dashboard/index');
-require('plugins/kibana/settings/index');
-require('plugins/kibana/settings/sections');
-require('plugins/kibana/doc');
-require('ui/vislib');
-require('ui/agg_response');
-require('ui/agg_types');
-require('ui/timepicker');
-require('leaflet');
+import moment from 'moment-timezone';
+import chrome from 'ui/chrome';
+import routes from 'ui/routes';
+import modules from 'ui/modules';
 
-var moment = require('moment-timezone');
-var chrome = require('ui/chrome');
-var routes = require('ui/routes');
-var modules = require('ui/modules');
-
-var kibanaLogoUrl = require('ui/images/kibana.svg');
+import kibanaLogoUrl from 'ui/images/kibana.svg';
+import 'ui/autoload/all';
+import 'plugins/kibana/discover/index';
+import 'plugins/kibana/visualize/index';
+import 'plugins/kibana/dashboard/index';
+import 'plugins/kibana/settings/index';
+import 'plugins/kibana/doc';
+import 'ui/vislib';
+import 'ui/agg_response';
+import 'ui/agg_types';
+import 'ui/timepicker';
+import 'leaflet';
 
 routes.enable();
 
@@ -30,8 +28,8 @@ routes
 
 chrome
 .setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
+  'logo': 'url(' + kibanaLogoUrl + ') center / 160px 70px no-repeat #e8488b',
+  'smallLogo': 'url(' + kibanaLogoUrl + ') center / 160px 70px no-repeat #e8488b'
 })
 .setNavBackground('#222222')
 .setTabDefaults({

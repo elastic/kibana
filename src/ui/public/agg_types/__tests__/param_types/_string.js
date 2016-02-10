@@ -1,6 +1,8 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesStringProvider from 'ui/agg_types/param_types/string';
 
 module.exports = describe('String', function () {
   var paramName = 'json_test';
@@ -24,8 +26,8 @@ module.exports = describe('String', function () {
 
   // fetch our deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    StringAggParam = Private(require('ui/agg_types/param_types/string'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    StringAggParam = Private(AggTypesParamTypesStringProvider);
 
     aggConfig = { params: {} };
     output = { params: {} };

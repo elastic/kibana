@@ -1,6 +1,6 @@
 
-var extractBuckets = require('ui/agg_response/hierarchical/_extract_buckets');
-var expect = require('expect.js');
+import extractBuckets from 'ui/agg_response/hierarchical/_extract_buckets';
+import expect from 'expect.js';
 
 describe('buildHierarchicalData()', function () {
   describe('extractBuckets()', function () {

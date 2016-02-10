@@ -3,7 +3,7 @@
 You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
-* Elasticsearch 2.1 or later
+* Elasticsearch master
 * A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
@@ -82,8 +82,8 @@ simply be the name of a single index.
 reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data,
 disable the *Index contains time-based events* option.
 +
-WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Support for this functionality 
-will be removed entirely in the next major Kibana release. Elasticsearch 2.1 includes sophisticated date parsing APIs that 
+WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Support for this functionality
+will be removed entirely in the next major Kibana release. Elasticsearch 2.1 includes sophisticated date parsing APIs that
 Kibana uses to determine date information, removing the need to specify dates in the index pattern name.
 +
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default.

@@ -1,9 +1,9 @@
+import LazyServer from './LazyServer';
+import LazyOptimizer from './LazyOptimizer';
 module.exports = async (kbnServer, kibanaHapiServer, config) => {
 
   let src = require('requirefrom')('src');
   let fromRoot = src('utils/fromRoot');
-  let LazyServer = require('./LazyServer');
-  let LazyOptimizer = require('./LazyOptimizer');
 
   let server = new LazyServer(
     config.get('optimize.lazyHost'),
