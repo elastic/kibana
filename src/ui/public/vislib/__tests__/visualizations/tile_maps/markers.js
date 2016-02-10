@@ -1,12 +1,16 @@
 
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var L = require('leaflet');
-var sinon = require('auto-release-sinon');
-var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
+import L from 'leaflet';
+import sinon from 'auto-release-sinon';
+import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
+import $ from 'jquery';
+import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
+import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
+import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
 // defaults to roughly the lower 48 US states
 var defaultSWCoords = [13.496, -143.789];
 var defaultNECoords = [55.526, -57.919];
@@ -64,7 +68,7 @@ describe('Marker Tests', function () {
 
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
-      MarkerClass = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
+      MarkerClass = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
@@ -198,7 +202,7 @@ describe('Marker Tests', function () {
   describe('Shaded Circles', function () {
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
-      var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/shaded_circles'));
+      var MarkerClass = Private(VislibVisualizationsMarkerTypesShadedCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
@@ -220,7 +224,7 @@ describe('Marker Tests', function () {
     beforeEach(ngMock.inject(function (Private) {
       zoom = _.random(1, 18);
       sinon.stub(mockMap, 'getZoom', _.constant(zoom));
-      var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/scaled_circles'));
+      var MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
@@ -265,7 +269,7 @@ describe('Marker Tests', function () {
   describe('Heatmaps', function () {
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
-      var MarkerClass = Private(require('ui/vislib/visualizations/marker_types/heatmap'));
+      var MarkerClass = Private(VislibVisualizationsMarkerTypesHeatmapProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 

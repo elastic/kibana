@@ -1,14 +1,15 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var searchResponse = require('fixtures/search_response');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import searchResponse from 'fixtures/search_response';
+import ngMock from 'ngMock';
+import $ from 'jquery';
+import 'ui/private';
+import 'ui/doc_table';
+import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 // Load the kibana app dependencies.
-require('ui/private');
-require('ui/doc_table');
 
 
 var $parentScope;
@@ -52,7 +53,7 @@ describe('docTable', function () {
   beforeEach(function () {
     $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
     ngMock.inject(function (Private) {
-      searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource = Private(FixturesStubbedSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,

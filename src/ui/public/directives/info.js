@@ -1,19 +1,18 @@
-define(function (require) {
-  var html = require('ui/partials/info.html');
+import html from 'ui/partials/info.html';
+import uiModules from 'ui/modules';
 
-  require('ui/modules')
-    .get('kibana')
-    .directive('kbnInfo', function () {
-      return {
-        restrict: 'E',
-        scope: {
-          info: '@',
-          placement: '@'
-        },
-        template: html,
-        link: function ($scope) {
-          $scope.placement = $scope.placement || 'top';
-        }
-      };
-    });
-});
+uiModules
+  .get('kibana')
+  .directive('kbnInfo', function () {
+    return {
+      restrict: 'E',
+      scope: {
+        info: '@',
+        placement: '@'
+      },
+      template: html,
+      link: function ($scope) {
+        $scope.placement = $scope.placement || 'top';
+      }
+    };
+  });

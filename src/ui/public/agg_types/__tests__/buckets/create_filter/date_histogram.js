@@ -1,11 +1,16 @@
+import _ from 'lodash';
+import moment from 'moment';
+import sinon from 'auto-release-sinon';
+import aggResp from 'fixtures/agg_resp/date_histogram';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import VisProvider from 'ui/Vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';
+import TimeBucketsProvider from 'ui/time_buckets';
+import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
-    var _ = require('lodash');
-    var moment = require('moment');
-    var sinon = require('auto-release-sinon');
-    var aggResp = require('fixtures/agg_resp/date_histogram');
-    var ngMock = require('ngMock');
-    var expect = require('expect.js');
 
     var vis;
     var agg;
@@ -20,11 +25,11 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      var Vis = Private(require('ui/Vis'));
-      var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-      var TimeBuckets = Private(require('ui/time_buckets'));
-      intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
+      var Vis = Private(VisProvider);
+      var indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      var createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
+      var TimeBuckets = Private(TimeBucketsProvider);
+      intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {
         interval = interval || 'auto';

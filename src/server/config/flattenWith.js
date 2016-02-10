@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 module.exports = function (dot, nestedObj, flattenArrays) {
   var key; // original key
   var stack = []; // track key stack

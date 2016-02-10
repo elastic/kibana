@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var sinon = require('auto-release-sinon');
-var RouteManager = require('ui/routes/RouteManager');
-var expect = require('expect.js');
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import RouteManager from 'ui/routes/RouteManager';
+import expect from 'expect.js';
 
 var routes; // will contain an new instance of RouteManager for each test
 var chainableMethods = [

@@ -1,7 +1,7 @@
 
-var _ = require('lodash');
-var expect = require('expect.js');
-var IndexedArray = require('ui/IndexedArray');
+import _ from 'lodash';
+import expect from 'expect.js';
+import IndexedArray from 'ui/IndexedArray';
 
 // this is generally a data-structure that IndexedArray is good for managing
 var users = [

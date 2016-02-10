@@ -1,10 +1,14 @@
+import { values } from 'lodash';
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import resp from 'fixtures/agg_resp/range';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import VisProvider from 'ui/Vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Range Agg', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var values = require('lodash').values;
 
-  var resp = require('fixtures/agg_resp/range');
   var buckets = values(resp.aggregations[1].buckets);
 
   var range;
@@ -13,11 +17,11 @@ describe('Range Agg', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    range = Private(require('ui/agg_types/index')).byName.range;
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    range = Private(AggTypesIndexProvider).byName.range;
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    var BytesFormat = Private(require('ui/registry/field_formats')).byId.bytes;
+    var BytesFormat = Private(RegistryFieldFormatsProvider).byId.bytes;
 
     indexPattern.fieldFormatMap.bytes = new BytesFormat({
       pattern: '0,0.[000] b'

@@ -1,4 +1,4 @@
-const DecompressZip = require('@bigfunger/decompress-zip');
+import DecompressZip from '@bigfunger/decompress-zip';
 
 async function extractArchive(settings) {
   await new Promise((resolve, reject) => {
