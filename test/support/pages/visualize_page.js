@@ -289,7 +289,7 @@ define(function (require) {
     clickNewVisualization: function clickNewVisualization() {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="New Visualization"]')
+      .findByCssSelector('button[aria-label="New Visualization"]')
       .click();
     },
 
@@ -298,7 +298,7 @@ define(function (require) {
       var self = this;
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="Save Visualization"]')
+      .findByCssSelector('button[aria-label="Save Visualization"]')
       .click()
       .then(function () {
         return common.sleep(1000);
@@ -332,7 +332,7 @@ define(function (require) {
       var self = this;
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="Load Saved Visualization"]')
+      .findByCssSelector('button[aria-label="Load Saved Visualization"]')
       .click()
       .then(function findVizByLinkedText() {
         common.debug('Load Saved Vis button clicked');
