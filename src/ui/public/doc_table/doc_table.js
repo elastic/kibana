@@ -60,7 +60,7 @@ uiModules.get('kibana')
         if (columns.length !== 0) return;
 
         var $state = getAppState();
-        if ($scope.indexPattern.timeFieldName) {
+        if ($scope.indexPattern && $scope.indexPattern.timeFieldName) {
           $scope.columns.push($scope.indexPattern.timeFieldName);
         }
         $scope.columns.push('_source');
