@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import _ from 'lodash';
 
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
 import chromeConfigControlsRegistry from 'ui/registry/chrome_config_controls';
@@ -12,25 +12,31 @@ export default function (chrome, internals) {
     return {
       template: function ($element) {
         const parts = [$element.html()];
-        const controls = Private(chromeNavControlsRegistry);
+        const navs = Private(chromeNavControlsRegistry);
         const configs = Private(chromeConfigControlsRegistry);
 
-        for (const control of controls.inOrder) {
-          parts.unshift(
-            `<!-- nav control ${control.name} -->`,
-            control.template
-          );
-        }
+        const controls = [
+          ...navs.map(function (nav) {
+            return {
+              template: `<!-- nav control ${nav.name} -->${nav.template}`,
+              order: nav.order
+            };
+          }),
 
-        for (const control of configs.inOrder) {
-          const controlHtml = `<render-directive definition="configs['${control.name}'].navbar">
-            ${control.navbar.template}
-          </render-directive>`;
-          parts.unshift(
-            `<!-- nav control ${control.name} -->`,
-            controlHtml
-          );
-        }
+          ...configs.map(function (config) {
+            const configHtml = `<render-directive definition="configs['${config.name}'].navbar">
+              ${config.navbar.template}
+            </render-directive>`;
+            return {
+              template: `<!-- nav control ${config.name} -->${configHtml}`,
+              order: config.order
+            };
+          }),
+        ];
+
+        _.sortBy(controls, 'order').forEach(function (control) {
+          parts.unshift(control.template);
+        });
 
         return parts.join('\n');
       },
