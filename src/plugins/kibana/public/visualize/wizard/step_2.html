@@ -1,11 +1,11 @@
 <h2>Create New Visualization: Select Source</h2>
 <ul class="list-group list-group-menu">
-  <li class="list-group-item" style="border: none; background-color: #F6F6F6; border-radius: 0; padding-left: 5px;">
+  <li class="step-2-list list-group-item">
     <!-- Index patterns -->
-    <div style="padding-left: 5px;">
+    <div class="search-padding">
       <label>From a New Search</label>
     </div>
-    <div class="form-group" style="padding-left: 5px;">
+    <div class="search-padding form-group">
       <select class="form-text form-control"
               ng-model="indexPattern.selection"
               ng-options="pattern as pattern for pattern in indexPattern.list | orderBy:'toString()'">
@@ -13,10 +13,10 @@
       </select>
     </div>
   </li>
-  <li class="list-group-item" style="border: none; background-color: #F6F6F6; border-radius: 0; padding: 0;">
+  <li class="list-search-item list-group-item">
     <!-- Saved searches -->
-    <div style="padding-left: 10px;">
-      <label style="margin-bottom: 0;">Or, From a Saved Search<label>
+    <div class="saved-search-label" >
+      <label>Or, From a Saved Search<label>
     </div>
     <saved-object-finder
             title="Saved Searches"
