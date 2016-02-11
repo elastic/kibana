@@ -56,6 +56,11 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, $location, t
     list: $route.current.locals.indexPatternIds
   };
 
+  $scope.goToUrl = function (pattern) {
+    if (!pattern) return;
+    kbnUrl.change('/visualize/create?type={{type}}&indexPattern={{pattern}}', {type: type, pattern: pattern});
+  };
+
   $scope.$watch('stepTwoMode', function (mode) {
     if (mode === 'new') {
       if ($scope.indexPattern.list && $scope.indexPattern.list.length === 1) {

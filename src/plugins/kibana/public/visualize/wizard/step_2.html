@@ -1,27 +1,34 @@
-<h3>Create New Visualization: Select Source</h3>
-<ul class="list-group list-group-menu">
-  <li class="step-2-list list-group-item">
-    <!-- Index patterns -->
-    <div class="search-padding">
-      <label>From a New Search</label>
+<div class="wizard-vis-container">
+  <div class="wizard">
+
+    <div class="wizard-vis-column first">
+      <h3>From a New Search</h3>
+      <!-- Index patterns -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Indices</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="pattern in indexPattern.list">
+            <td>
+              <a href ng-click="goToUrl(pattern)">{{pattern}}</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="search-padding form-group">
-      <select class="form-text form-control"
-              ng-model="indexPattern.selection"
-              ng-options="pattern as pattern for pattern in indexPattern.list | orderBy:'toString()'">
-        <option value="">Select an index pattern...</option>
-      </select>
+
+    <div class="wizard-vis-column">
+      <h3>Or, From a Saved Search</h3>
+      <!-- Saved searches -->
+      <saved-object-finder
+          title="Saved Searches"
+          type="searches"
+          make-url="step2WithSearchUrl">
+      </saved-object-finder>
     </div>
-  </li>
-  <li class="list-search-item list-group-item">
-    <!-- Saved searches -->
-    <div class="saved-search-label" >
-      <label>Or, From a Saved Search<label>
-    </div>
-    <saved-object-finder
-            title="Saved Searches"
-            type="searches"
-            make-url="step2WithSearchUrl">
-    </saved-object-finder>
-  </li>
-</ul>
+
+  </div>
+</div>
