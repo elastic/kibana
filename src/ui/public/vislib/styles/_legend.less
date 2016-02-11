@@ -6,13 +6,9 @@ visualize-legend {
   flex-direction: row;
 }
 
-.legend-title {
-  display: flex;
-  flex-direction: row;
-
-  i {
-    color: #BEBEBE;
-  }
+.legend-icon {
+  color: #BEBEBE;
+  font-size: 1.5em;
 }
 
 .legend-col-wrapper {
@@ -20,6 +16,8 @@ visualize-legend {
   z-index: 10;
   min-height: 0;
   overflow: hidden;
+  flex-direction: row;
+  padding-top: 5px;
 
   .header {
     cursor: pointer;
@@ -29,10 +27,8 @@ visualize-legend {
   .legend-toggle {
     &:hover {
       color: @sidebar-hover-color;
-      background-color: @sidebar-hover-bg;
     }
 
-    padding-left: 5px;
     padding-right: 5px;
     font-size: 14px;
   }
@@ -49,7 +45,6 @@ visualize-legend {
     color: @legend-item-color;
     list-style-type: none;
     padding: 0;
-    padding-top: 10px;
     margin-bottom: 0;
     visibility: visible;
     min-height: 0;
