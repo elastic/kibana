@@ -3,6 +3,8 @@ import CourierDataSourceDocSendToEsProvider from 'ui/courier/data_source/_doc_se
 import CourierDataSourceAbstractProvider from 'ui/courier/data_source/_abstract';
 import CourierFetchRequestDocProvider from 'ui/courier/fetch/request/doc';
 import CourierFetchStrategyDocProvider from 'ui/courier/fetch/strategy/doc';
+import 'ui/es';
+import 'ui/storage';
 
 export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
   var sendToEs = Private(CourierDataSourceDocSendToEsProvider);
