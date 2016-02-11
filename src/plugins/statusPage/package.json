@@ -1,4 +1,12 @@
 {
   "name": "statusPage",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "app": {
+      "title": "Server Status",
+      "main": "plugins/statusPage/statusPage",
+      "hidden": true,
+      "url": "/status"
+    }
+  }
 }

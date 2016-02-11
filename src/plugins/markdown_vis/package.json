@@ -1,4 +1,9 @@
 {
   "name": "markdown_vis",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "visTypes": [
+      "plugins/markdown_vis/markdown_vis"
+    ]
+  }
 }
