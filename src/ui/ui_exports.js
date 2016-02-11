@@ -3,6 +3,10 @@ import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
 
+function arr(v) {
+  return [].concat(v);
+}
+
 class UiExports {
   constructor({ urlBasePath }) {
     this.apps = new UiAppCollection(this);
@@ -37,19 +41,23 @@ class UiExports {
     this.consumers.push(consumer);
   }
 
+  extendAliases(alias, moduleOrModules) {
+    this.aliases[alias] = _.union(this.aliases[alias] || [], arr(moduleOrModules));
+  }
+
   exportConsumer(type) {
-    for (let consumer of this.consumers) {
+    for (const consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
-      let fn = consumer.exportConsumer(type);
+      const fn = consumer.exportConsumer(type);
       if (fn) return fn;
     }
 
     switch (type) {
       case 'app':
       case 'apps':
-        return (plugin, specs) => {
-          for (let spec of [].concat(specs || [])) {
-            let app = this.apps.new(_.defaults({}, spec, {
+        return (plugin, spec) => {
+          for (const spec of arr(spec)) {
+            const app = this.apps.new(_.defaults({}, spec, {
               id: plugin.id,
               urlBasePath: this.urlBasePath
             }));
@@ -57,28 +65,40 @@ class UiExports {
           }
         };
 
+      case 'visType':
       case 'visTypes':
+      case 'fieldFormat':
       case 'fieldFormats':
+      case 'spyMode':
       case 'spyModes':
+      case 'chromeNavControl':
       case 'chromeNavControls':
+      case 'navbarExtension':
       case 'navbarExtensions':
+      case 'settingsSection':
       case 'settingsSections':
+      case 'docView':
       case 'docViews':
+      case 'sledgehammer':
       case 'sledgehammers':
         return (plugin, spec) => {
-          this.aliases[type] = _.union(this.aliases[type] || [], spec);
+          this.extendAliases(type, spec);
         };
 
       case 'bundle':
-        return (plugin, spec) => {
-          this.bundleProviders.push(spec);
+      case 'bundles':
+        return (plugin, specs) => {
+          this.bundleProviders = this.bundleProviders.concat(arr(specs));
         };
 
+      case 'alias':
       case 'aliases':
         return (plugin, specs) => {
-          _.forOwn(specs, (spec, adhocType) => {
-            this.aliases[adhocType] = _.union(this.aliases[adhocType] || [], spec);
-          });
+          for (const spec of specs) {
+            for (const adhocAlias of Object.keys(spec)) {
+              this.extendAliases(adhocAlias, spec[adhocAlias]);
+            }
+          }
         };
     }
   }
@@ -100,7 +120,7 @@ class UiExports {
   }
 
   getAllApps() {
-    let { apps } = this;
+    const { apps } = this;
     return [...apps].concat(...apps.hidden);
   }
 

@@ -11,7 +11,7 @@ module.exports = function (kibana) {
       }).default();
     },
 
-    uiExports: {
+    ui: {
       app: {
         title: 'Kibana',
         description: 'the kibana you know and love',

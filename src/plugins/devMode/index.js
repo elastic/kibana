@@ -1,7 +1,7 @@
 module.exports = (kibana) => {
   if (!kibana.config.get('env.dev')) return;
   return new kibana.Plugin({
-    uiExports: {
+    ui: {
       spyModes: [
         'plugins/devMode/visDebugSpyPanel'
       ]

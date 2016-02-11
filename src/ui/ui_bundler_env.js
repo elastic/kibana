@@ -70,6 +70,7 @@ module.exports = class UiBundlerEnv {
 
   exportConsumer(type) {
     switch (type) {
+      case 'loader':
       case 'loaders':
         return (plugin, spec) => {
           for (let loader of arr(spec)) this.addLoader(loader);

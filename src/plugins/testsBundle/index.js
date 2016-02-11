@@ -13,7 +13,7 @@ module.exports = (kibana) => {
       }).default();
     },
 
-    uiExports: {
+    ui: {
       bundle: async (UiBundle, env, apps, plugins) => {
         let modules = [];
         let config = kibana.config;
