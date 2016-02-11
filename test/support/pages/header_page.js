@@ -148,7 +148,7 @@ define(function (require) {
       var self = this;
       return this.remote
       .setFindTimeout(defaultTimeout * 10)
-      .findByCssSelector('span.spinner.ng-hide');
+      .findByCssSelector('.navbar-text.ng-hide .spinner');
     }
 
   };
