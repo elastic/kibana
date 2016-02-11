@@ -3,12 +3,14 @@ import angular from 'angular';
 import moment from 'moment';
 import dateMath from 'ui/utils/dateMath';
 import 'ui/state_management/global_state';
+import 'ui/config';
 import EventsProvider from 'ui/events';
 import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
 import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
 import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
+
 uiRoutes
 .addSetupWork(function (timefilter) {
   return timefilter.init();
@@ -111,4 +113,3 @@ uiModules
 
   return new Timefilter();
 });
-

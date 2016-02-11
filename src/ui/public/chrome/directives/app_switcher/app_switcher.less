@@ -4,10 +4,14 @@
 // as - App Switcher
 @as-open-width: 160px;
 @as-closed-width: 53px;
-@app-icon-height: 30px;
+@app-icon-height: 38px;
 @transition-time: .35s;
 @transition-delay: .25s;
 @app-links-wrapper-background: #3caed2;
+
+@firstLinkColor: #E4BB51;
+@secondLinkColor: #8AC336;
+@thirdLinkColor: #59C6C5;
 
 body { overflow-x: hidden; }
 
@@ -79,6 +83,7 @@ body { overflow-x: hidden; }
     height: @app-icon-height;
     line-height:  24px;
 
+
     > a {
       display: block;
       height: 100%;
@@ -102,7 +107,8 @@ body { overflow-x: hidden; }
       }
 
       > img {
-        height: 20px;
+        height: 18px;
+        margin-top: 8px;
       }
     }
 
@@ -136,6 +142,27 @@ body { overflow-x: hidden; }
       }
       img {
         filter: invert(100%);
+      }
+    }
+
+    &:nth-child(1) {
+      background-color: @firstLinkColor;
+      &:hover {
+        background-color: lighten(@firstLinkColor, 5%);
+      }
+    }
+
+    &:nth-child(2) {
+      background-color: @secondLinkColor;
+      &:hover {
+        background-color: lighten(@secondLinkColor, 5%);
+      }
+    }
+
+    &:nth-child(3) {
+      background-color: @thirdLinkColor;
+      &:hover {
+        background-color: lighten(@thirdLinkColor, 5%);
       }
     }
 

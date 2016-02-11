@@ -3,9 +3,10 @@ import rison from 'ui/utils/rison';
 import applyDiff from 'ui/utils/diff_object';
 import qs from 'ui/utils/query_string';
 import EventsProvider from 'ui/events';
+import Notifier from 'ui/notify/notifier';
 
 
-export default function StateProvider(Notifier, Private, $rootScope, $location) {
+export default function StateProvider(Private, $rootScope, $location) {
   var Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
@@ -147,4 +148,3 @@ export default function StateProvider(Notifier, Private, $rootScope, $location) 
   return State;
 
 };
-
