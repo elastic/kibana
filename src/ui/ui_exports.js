@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import { resolve } from 'path';
+import { join, relative } from 'path';
 import minimatch from 'minimatch';
 
+import fromRoot from '../utils/fromRoot';
 import UiAppCollection from './ui_app_collection';
 
 function arr(v) {
@@ -45,14 +46,12 @@ class UiExports {
   // when module ids are defined in a uiExports spec they can
   // be defined as relative to the public directory
   resolveModulePath(plugin, moduleId) {
-    const hardRelative = moduleId.startsWith('./');
-    const hardAbsolute = moduleId.startsWith('/') || moduleId.startsWith('\\');
-    const legacyModId = moduleId.startsWith(`plugins/${plugin.id}`);
-    const softRelative = !hardAbsolute && !legacyModId;
+    const modulePrefix = `plugins/${plugin.id}`;
+    const isAbsolute = moduleId.startsWith('/') || moduleId.startsWith('\\');
+    const isPrefixed = moduleId.startsWith(modulePrefix);
+    const treatRelative = !isAbsolute && !isPrefixed;
 
-    if (hardRelative || softRelative) {
-      return resolve(plugin.publicDir, moduleId);
-    }
+    if (treatRelative) return join(modulePrefix, moduleId);
     return moduleId;
   }
 
