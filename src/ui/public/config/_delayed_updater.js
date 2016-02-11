@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import angular from 'angular';
 import ConfigValsProvider from 'ui/config/_vals';
-export default function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
+import Notifier from 'ui/notify/notifier';
+
+export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
   var notify = new Notifier();
 
   var vals = Private(ConfigValsProvider);
