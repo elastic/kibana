@@ -17,17 +17,29 @@ module.exports = class Plugins extends Collection {
     this[pluginApis] = new Set();
   }
 
+  /**
+   * Initialize a plugin from a path.
+   *
+   * @param  {String} path - the location to find the plugin
+   * @return {Boolean} - true if the plugin loaded successfully, false if no plugin could be found at the path
+   */
   async new(path) {
-    let api = new PluginApi(this.kbnServer, path);
-    this[pluginApis].add(api);
+    try {
+      // if this throws then node can't resolve the path to a module
+      require.resolve(path);
+    } catch (err) {
+      return false;
+    }
 
+    let api = new PluginApi(this.kbnServer, path);
     let output = [].concat(require(path)(api) || []);
     let config = this.kbnServer.config;
 
-    if (!output.length) return;
+    if (!output.length) return true;
 
     // clear the byIdCache
     this[byIdCache] = null;
+    this[pluginApis].add(api);
 
     for (let product of output) {
       if (product instanceof api.Plugin) {
@@ -41,15 +53,30 @@ module.exports = class Plugins extends Collection {
 
       throw new TypeError('unexpected plugin export ' + inspect(product));
     }
+
+    return true;
   }
 
+  /**
+   * Initialize a plugin from the package.json at a path
+   *
+   * @param  {String} path - the location of a directory containing a package.json
+   * @return {Boolean} - true if the plugin loaded successfully, false if no plugin could be found
+   */
   async newFromPackageJson(path) {
     const pkgPath = join(path, 'package.json');
-    const pkg = require(pkgPath);
-    if (!pkg.kibana) throw new Error('package.json does not have a kibana section');
-    if (!pkg.kibana.plugin) throw new Error('package.json does not define a plugin');
 
-    this.add(new Plugin(this.kbnServer, pkgPath, pkg, pkg.kibana.plugin));
+    try {
+      require.resolve(pkgPath);
+    } catch (err) {
+      return false;
+    }
+
+    const pkg = require(pkgPath);
+    if (!pkg.kibana) return false;
+
+    this.add(new Plugin(this.kbnServer, path, pkg, { uiExports: pkg.kibana }));
+    return true;
   }
 
   get byId() {

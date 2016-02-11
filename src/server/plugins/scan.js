@@ -44,21 +44,26 @@ module.exports = async (kbnServer, server, config) => {
     });
   });
 
-  for (let path of pluginPaths) {
+  async function attemptLoad(path, name, method) {
     try {
-      const modulePath = require.resolve(path);
-      await plugins.new(path);
-      debug({ tmpl: 'Found plugin at <%= path %>', path: modulePath });
-    } catch (err) {
-      debug({ tmpl: 'Failed to load plugin at <%= path %>: <%= err.message %>', path, err });
-      try {
-        await plugins.newFromPackageJson(path);
-        debug({ tmpl: 'Found package.json plugin at <%= path %>', path: join(path, 'package.json') });
-      } catch (err) {
-        debug({ tmpl: 'Failed to load plugin from package.json at <%= path %>: <%= err.message %>', path, err });
-        warning({ tmpl: 'Skipping non-plugin directory at <%= path %>', path: path });
-        continue;
+      const success = await plugins[method](path);
+      if (success) {
+        debug({ tmpl: 'Found plugin at "<%= path %>"', path });
+        return true;
       }
+    } catch (err) {
+      warning({ tmpl: 'Failed to load plugin at "<%= path %>": <%= err.message %>', path, err });
+    } finally {
+      debug({ tmpl: 'Non-plugin directory found at "<%= path %>"', path});
+      return false;
+    }
+  }
+
+  for (let path of pluginPaths) {
+    const dirSuccess = attemptLoad(path, 'Plugin directory', 'new');
+    const pkgSuccess = attemptLoad(path, 'Package-based plugin', 'newFromPackageJson');
+    if (!dirSuccess && !pkgSuccess) {
+      warning({ tmpl: 'Unable to load a plugin from directory "<%= path %>"', path: path });
     }
   }
 };
