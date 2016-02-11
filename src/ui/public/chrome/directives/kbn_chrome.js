@@ -44,7 +44,7 @@ export default function (chrome, internals) {
         onRouteChange();
 
         // and some local values
-        $scope.httpActive = $http.pendingRequests;
+        chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
         $scope.appSwitcherTemplate = new ConfigTemplate({
           switcher: '<app-switcher></app-switcher>'
