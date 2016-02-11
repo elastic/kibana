@@ -13,19 +13,18 @@ module.exports = function registerSimulate(server) {
       }
     },
     handler: function (request, reply) {
-      const client = server.plugins.elasticsearch.client;
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, request);
       const simulateApiDocument = request.payload;
       const body = ingestSimulateApiToEsConverter(simulateApiDocument);
 
-      client.transport.request({
+      return boundCallWithRequest('transport.request', {
         path: '_ingest/pipeline/_simulate',
         query: { verbose: true },
         method: 'POST',
         body: body
-      },
-      function (err, resp) {
-        reply(processResponse(simulateApiDocument, err, resp));
-      });
+      })
+      .then(_.partial(processResponse, simulateApiDocument))
+      .then(reply);
     }
   });
 };
