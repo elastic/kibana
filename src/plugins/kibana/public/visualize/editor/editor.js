@@ -128,7 +128,7 @@ uiModules
     $scope.state = $state;
     $scope.uiState = $state.makeStateful('uiState');
     $scope.timefilter = timefilter;
-    $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
     $scope.configTemplate = configTemplate;
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
