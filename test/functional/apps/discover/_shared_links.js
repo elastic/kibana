@@ -51,6 +51,11 @@ define(function (require) {
           common.debug('setAbsoluteRange');
           return headerPage.setAbsoluteRange(fromTime, toTime);
         })
+        .then(function () {
+          //After hiding the time picker, we need to wait for
+          //the refresh button to hide before clicking the share button
+          return common.sleep(1000);
+        })
         .catch(common.handleError(this));
       });
 

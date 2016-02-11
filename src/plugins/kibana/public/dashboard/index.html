@@ -45,9 +45,9 @@
         ng-click="configTemplate.toggle('options');">
         <span>Options</span>
       </button>
+      <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
-
   <config config-template="configTemplate" config-object="opts"></config>
 
   <navbar ng-show="chrome.getVisible()" name="dashboard-search">
