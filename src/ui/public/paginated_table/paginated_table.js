@@ -57,7 +57,8 @@ uiModules
           // use generic sort handler
           self.sort.getter = function (row) {
             var value = row[index];
-            if (value && value.value != null) return value.value;
+            if (value && value.value != null) value = value.value;
+            if (typeof value === 'boolean') value = value ? 0 : 1;
             return value;
           };
         }
