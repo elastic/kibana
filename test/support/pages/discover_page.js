@@ -28,7 +28,7 @@ define(function (require) {
 
     getTimespanText: function getTimespanText() {
       return thisTime
-      .findByCssSelector('a.navbar-timepicker-time-desc pretty-duration.ng-isolate-scope')
+      .findByCssSelector('.navbar-timepicker-time-desc pretty-duration')
       .getVisibleText();
     },
 
