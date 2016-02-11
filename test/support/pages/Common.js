@@ -27,12 +27,16 @@ define(function (require) {
           // since we're using hash URLs, always reload first to force re-render
           return self.remote.get(url)
           .then(function () {
+            self.debug('returned from get, calling refresh');
             return self.remote.refresh();
           })
           .then(function () {
+            self.debug('check testStatusPage');
             if (testStatusPage !== false) {
+              self.debug('self.checkForKibanaApp()');
               return self.checkForKibanaApp()
               .then(function (kibanaLoaded) {
+                self.debug('kibanaLoaded = ' + kibanaLoaded);
                 if (!kibanaLoaded) {
                   var msg = 'Kibana is not loaded, retrying';
                   self.debug(msg);
