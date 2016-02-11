@@ -60,4 +60,47 @@ describe('PluginCollection', function () {
       });
     });
   });
+
+  describe('#newFromPackageJson', function () {
+    function init() {
+      const server = new StubKbnServer();
+      const plugins = new PluginCollection(server);
+      return { plugins };
+    }
+
+    context('path does not exist', function () {
+      it('returns false', async function () {
+        const { plugins } = init();
+        expect(await plugins.newFromPackageJson(notExistingPlugin)).to.be(false);
+      });
+    });
+
+    context('existing js-based plugin', function () {
+      it('returns false', async function () {
+        const { plugins } = init();
+        expect(await plugins.newFromPackageJson(existingJsPlugin)).to.be(false);
+      });
+    });
+
+    context('existing js-based plugin without any output', function () {
+      it('returns false', async function () {
+        const { plugins } = init();
+        expect(await plugins.newFromPackageJson(existingJsPluginNoOutput)).to.be(false);
+      });
+    });
+
+    context('js-based plugin with a syntax error', function () {
+      it('returns false', async function () {
+        const { plugins } = init();
+        expect(await plugins.newFromPackageJson(jsPluginWithSyntaxErr)).to.be(false);
+      });
+    });
+
+    context('existing package.json-based plugin', function () {
+      it('returns true', async function () {
+        const { plugins } = init();
+        expect(await plugins.newFromPackageJson(existingPkgPlugin)).to.be(true);
+      });
+    });
+  });
 });
