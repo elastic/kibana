@@ -6,7 +6,7 @@ navbar {
   max-height: @navbar-collapse-max-height;
   margin-bottom: @navbar-margin-bottom;
   // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
-  padding: @padding-base-vertical @navbar-padding-horizontal;
+  padding: 0 @navbar-padding-horizontal 6px @navbar-padding-horizontal;
   color: @navbar-default-color;
   background-color: @navbar-default-bg;
   border: none;
@@ -18,6 +18,11 @@ navbar {
 
   > * {
     padding-right: @navbar-padding-horizontal;
+  }
+
+  .navbar-text {
+    margin-top: 6px;
+    margin-bottom: 6px;
   }
 
   // the "brand" that is displayed, usually on the left of the navbar
