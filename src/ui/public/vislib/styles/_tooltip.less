@@ -1,10 +1,12 @@
 @import (reference) "~ui/styles/variables";
 
+@semi-bold: 600;
+
 .vis-tooltip,
 .vis-tooltip-sizing-clone {
   visibility: hidden;
   line-height: 1.1;
-  font-size: 14px;
+  font-size: @font-size-base;
   font-weight: normal;
   background: @tooltip-bg;
   color: @tooltip-color;
@@ -28,7 +30,7 @@
     font-family: @font-family-sans-serif;
 
     th {
-      font-weight: 600;
+      font-weight: @semi-bold;
     }
   }
 
