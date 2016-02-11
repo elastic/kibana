@@ -7,6 +7,7 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/private';
 import 'plugins/kibana/discover/components/field_chooser/discover_field';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
 
@@ -18,7 +19,7 @@ describe('discoverField', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $rootScope, $compile) {
     $elem = angular.element('<discover-field></discover-field>');
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     _.assign($rootScope, {
       field: indexPattern.fields.byName.extension,

@@ -1,15 +1,15 @@
 import _ from 'lodash';
-define(function (require) {
-  var notify = require('ui/modules').get('kibana/notify');
+import uiModules from 'ui/modules';
+import toasterTemplate from 'ui/notify/partials/toaster.html';
+var notify = uiModules.get('kibana/notify');
 
-  notify.directive('kbnNotifications', function () {
-    return {
-      restrict: 'E',
-      scope: {
-        list: '=list'
-      },
-      replace: true,
-      template: require('ui/notify/partials/toaster.html')
-    };
-  });
+notify.directive('kbnNotifications', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      list: '=list'
+    },
+    replace: true,
+    template: toasterTemplate
+  };
 });

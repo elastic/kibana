@@ -7,6 +7,7 @@ import L from 'leaflet';
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import $ from 'jquery';
+import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 
 // // Data
 // var dataArray = [
@@ -39,7 +40,7 @@ describe('TileMap Map Tests', function () {
 
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
-    TileMapMap = Private(require('ui/vislib/visualizations/_map'));
+    TileMapMap = Private(VislibVisualizationsMapProvider);
   }));
 
   describe('instantiation', function () {

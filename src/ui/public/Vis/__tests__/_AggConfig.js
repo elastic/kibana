@@ -1,6 +1,11 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import AggTypesAggTypeProvider from 'ui/agg_types/AggType';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('AggConfig', function () {
 
   var Vis;
@@ -11,11 +16,11 @@ describe('AggConfig', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    AggType = Private(require('ui/agg_types/AggType'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    fieldFormat = Private(require('ui/registry/field_formats'));
+    Vis = Private(VisProvider);
+    AggType = Private(AggTypesAggTypeProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    fieldFormat = Private(RegistryFieldFormatsProvider);
   }));
 
   describe('#toDsl', function () {

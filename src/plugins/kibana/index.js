@@ -22,7 +22,8 @@ module.exports = function (kibana) {
           'spyModes',
           'fieldFormats',
           'navbarExtensions',
-          'settingsSections'
+          'settingsSections',
+          'docViews'
         ],
 
         injectVars: function (server, options) {

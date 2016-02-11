@@ -2,6 +2,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
   var vis;
@@ -12,12 +17,12 @@ describe('GeoJson Agg Response Converter', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    var Vis = Private(require('ui/Vis'));
-    var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    var Vis = Private(VisProvider);
+    var indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    esResponse = Private(require('fixtures/agg_resp/geohash_grid'));
-    tabify = Private(require('ui/agg_response/tabify/tabify'));
-    convert = Private(require('ui/agg_response/geo_json/geo_json'));
+    esResponse = Private(FixturesAggRespGeohashGridProvider);
+    tabify = Private(AggResponseTabifyTabifyProvider);
+    convert = Private(AggResponseGeoJsonGeoJsonProvider);
 
     vis = new Vis(indexPattern, {
       type: 'tile_map',

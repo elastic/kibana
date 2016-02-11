@@ -2,6 +2,10 @@
 import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/create_filter/date_range';
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {
@@ -12,10 +16,10 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfig = Private(require('ui/Vis/AggConfig'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
+      Vis = Private(VisProvider);
+      AggConfig = Private(VisAggConfigProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
     }));
 
     it('should return a range filter for date_range agg', function () {

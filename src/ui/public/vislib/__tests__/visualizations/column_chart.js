@@ -13,6 +13,8 @@ import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
 //var histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 // tuple, with the format [description, mode, data]
 var dataTypesArray = [
@@ -42,8 +44,8 @@ dataTypesArray.forEach(function (dataType, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
     }));

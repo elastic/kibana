@@ -2,6 +2,9 @@ import _ from 'lodash';
 import AggConfigResult from 'ui/Vis/AggConfigResult';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggConfigResult', function () {
 
   var AggConfig;
@@ -10,9 +13,9 @@ describe('AggConfigResult', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    Vis = Private(VisProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('initialization', function () {

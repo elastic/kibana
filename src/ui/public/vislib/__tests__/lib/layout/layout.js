@@ -9,6 +9,9 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
+import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 var dateHistogramArray = [
   series,
   columns,
@@ -34,9 +37,9 @@ dateHistogramArray.forEach(function (data, i) {
 
     beforeEach(function () {
       ngMock.inject(function (Private) {
-        Layout = Private(require('ui/vislib/lib/layout/layout'));
-        vis = Private(require('fixtures/vislib/_vis_fixture'))();
-        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+        Layout = Private(VislibLibLayoutLayoutProvider);
+        vis = Private(FixturesVislibVisFixtureProvider)();
+        persistedState = new (Private(PersistedStatePersistedStateProvider))();
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });

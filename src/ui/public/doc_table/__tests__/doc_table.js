@@ -7,6 +7,7 @@ import ngMock from 'ngMock';
 import $ from 'jquery';
 import 'ui/private';
 import 'ui/doc_table';
+import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 // Load the kibana app dependencies.
 
@@ -52,7 +53,7 @@ describe('docTable', function () {
   beforeEach(function () {
     $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
     ngMock.inject(function (Private) {
-      searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource = Private(FixturesStubbedSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,

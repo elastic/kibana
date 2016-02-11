@@ -1,5 +1,6 @@
 import elasticsearch from 'elasticsearch';
 import _ from 'lodash';
+import Bluebird from 'bluebird';
 const readFile = (file) => require('fs').readFileSync(file, 'utf8');
 import util from 'util';
 import url from 'url';
@@ -44,6 +45,9 @@ module.exports = function (server) {
       plugins: options.plugins,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
+      defer: function () {
+        return Bluebird.defer();
+      },
       log: function () {
         this.error = function (err) {
           server.log(['error', 'elasticsearch'], err);
