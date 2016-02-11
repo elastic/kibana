@@ -52,6 +52,7 @@
 
 .search-icon {
   color: #9C9C9C;
+  width: 30px !important;
 }
 
 .table-type-label {
@@ -94,10 +95,13 @@
 .saved-object-finder-row {
   background-color: @kibanaGray6;
   padding: 10px;
+  display: flex;
+  flex-direction: row;
 }
 
 .saved-object-finder-input {
   float: left !important;
+  flex: 10;
 
   span {
     padding: 5px 0px;
@@ -115,6 +119,7 @@
 .saved-object-finder-column {
   text-align: center;
   padding: 5px;
+  flex: 2;
 
   span {
     color: #9C9C9C;
@@ -126,20 +131,22 @@
 }
 
 /* ****************************** */
-.wizard-vis-container {
-  padding: 0px;
+@media (min-width: 1280px) {
+  .wizard-vis-container {
+    padding: 0px;
 
-  .wizard {
-    display: flex;
-
-    .wizard-vis-column {
-      flex: 1;
+    .wizard {
       display: flex;
-      flex-direction: column;
-    }
 
-    .wizard-vis-column.first {
-      padding-right: 5px;
+      .wizard-vis-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .wizard-vis-column.first {
+        padding-right: 5px;
+      }
     }
   }
 }
@@ -147,8 +154,10 @@
 .vis-wizard {
   margin-right: 0px;
   margin-left: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
 
-  h1 {
+  h3 {
     margin-top: 45px;
     padding: 0px 15px;
   }
