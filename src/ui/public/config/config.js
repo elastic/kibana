@@ -6,16 +6,16 @@ import ConfigValsProvider from 'ui/config/_vals';
 import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana/config', [
-  'kibana/notify'
-]);
+import Notifier from 'ui/notify/notifier';
+
+var module = uiModules.get('kibana/config');
 
 uiRoutes.addSetupWork(function (config) {
   return config.init();
 });
 
 // service for delivering config variables to everywhere else
-module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
+module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, buildNum) {
   var config = this;
 
   var defaults = Private(ConfigDefaultsProvider);
