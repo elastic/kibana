@@ -94,13 +94,20 @@ define(function (require) {
           if (!_.isString($scope.panel.title)) $scope.panel.title = null;
           $scope.uiState.set('title', $scope.panel.title);
         };
-
         $scope.confirmTitle = function () {$scope.setTitle();};
         $scope.cancelTitle = function () {
           $scope.panel.title = $scope.uiState.get('title');
           $scope.showFormTitle = false;
         };
         $scope.resetTitle = function () {$scope.panel.title = null;};
+        $scope.maybeCancel = function ($event) {
+          const keyCodes = {
+            ESC: 27
+          };
+          if ($event.keyCode === keyCodes.ESC) {
+            $scope.cancelTitle();
+          }
+        };
       }
     };
   });

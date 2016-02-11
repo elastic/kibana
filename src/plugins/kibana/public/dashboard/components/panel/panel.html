@@ -12,27 +12,46 @@
         <span ng-hide="panel.title">{{::savedObj.title}}</span>
       </a>
 
-      <div>
-       <form class="inline-form" ng-if="showFormTitle" ng-show="chrome.getVisible()" role="form">
-          <input type="text" name="title" ng-model="panel.title" placeholder="{{::savedObj.title}}" input-focus>
-          <kbn-tooltip text="Set Title" placement="bottom" append-to-body="1">
-           <a class="title-confirm" ng-click="confirmTitle()">
-             <i class="fa fa-save"></i>
-           </a>
-          </kbn-tooltip>
-          <kbn-tooltip text="Cancel Title" placement="bottom" append-to-body="1">
-           <a class="title-cancel" ng-click="cancelTitle()">
-             <i class="fa fa-times"></i>
-           </a>
-          </kbn-tooltip>
-          <kbn-tooltip text="Restore Title" placement="bottom" append-to-body="1">
-           <a class="title-reset" ng-click="resetTitle()">
-             <i class="fa fa-undo"></i>
-           </a>
-          </kbn-tooltip>
-       </form>
+      <div ng-if="showFormTitle" >
+        <form class="inline-form" ng-show="chrome.getVisible()" role="form">
+            <input type="text" name="title" ng-model="panel.title"
+              placeholder="{{::savedObj.title}}" input-focus
+              ng-keyup="maybeCancel($event, conf)"
+              class="form-control">
+        </form>
       </div>
-
+      <div ng-if="showFormTitle" class="panel-title-edit" >
+        <kbn-tooltip text="Set Title" placement="bottom" append-to-body="1">
+          <button
+            ng-click="confirmTitle()"
+            class="btn btn-success"
+            aria-label="Confirm"
+            data-test-subj="confirmButton">
+            <span class="sr-only">Confirm</span>
+            <i aria-hidden="true" class="fa fa-save"></i>
+          </button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Cancel Title" placement="bottom" append-to-body="1">
+          <button
+            ng-click="cancelTitle()"
+            class="btn btn-default"
+            aria-label="Cancel"
+            data-test-subj="cancelButton">
+            <span class="sr-only">Cancel</span>
+            <i aria-hidden="true" class="fa fa-times"></i>
+          </button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Restore Title" placement="bottom" append-to-body="1">
+          <button
+            ng-click="resetTitle()"
+            class="btn btn-default"
+            aria-label="Undo"
+            data-test-subj="undoButton">
+            <span class="sr-only">Undo</span>
+            <i aria-hidden="true" class="fa fa-undo"></i>
+          </button>
+        </kbn-tooltip>
+      </div>
     </div>
 
     <div class="btn-group">
