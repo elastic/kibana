@@ -1,6 +1,7 @@
-const Tab = require('../Tab');
-const expect = require('expect.js');
-const TabFakeStore = require('./_TabFakeStore');
+import sinon from 'auto-release-sinon';
+import Tab from '../Tab';
+import expect from 'expect.js';
+import TabFakeStore from './_TabFakeStore';
 
 describe('Chrome Tab', function () {
   describe('construction', function () {
@@ -89,13 +90,24 @@ describe('Chrome Tab', function () {
     it('discovers the lastUrl', function () {
       const lastUrlStore = new TabFakeStore();
       const tab = new Tab({ id: 'foo', lastUrlStore });
-      expect(tab.lastUrl).to.not.equal('bar');
+      expect(tab.lastUrl).to.not.equal('/foo/bar');
 
-      tab.setLastUrl('bar');
-      expect(tab.lastUrl).to.equal('bar');
+      tab.setLastUrl('/foo/bar');
+      expect(tab.lastUrl).to.equal('/foo/bar');
 
       const tab2 = new Tab({ id: 'foo', lastUrlStore });
-      expect(tab2.lastUrl).to.equal('bar');
+      expect(tab2.lastUrl).to.equal('/foo/bar');
+    });
+
+    it('logs a warning about last urls that do not match the rootUrl', function () {
+      const lastUrlStore = new TabFakeStore();
+      const tab = new Tab({ id: 'foo', baseUrl: '/bar', lastUrlStore });
+      tab.setLastUrl('/bar/foo/1');
+
+      const stub = sinon.stub(console, 'log');
+      const tab2 = new Tab({ id: 'foo', baseUrl: '/baz', lastUrlStore });
+      sinon.assert.calledOnce(stub);
+      expect(tab2.lastUrl).to.equal(null);
     });
   });
 
@@ -167,14 +179,14 @@ describe('Chrome Tab', function () {
       expect(tab.getLastPath()).to.equal('/index');
     });
 
-    it('throws an error if the lastUrl does not extend the root url', function () {
-      expect(function () {
-        const baseUrl = 'http://local:5601/app/visualize#';
-        const tab = new Tab({ baseUrl });
+    it('logs a warning if the lastUrl does not extend the root url', function () {
+      const baseUrl = 'http://local:5601/app/visualize#';
+      const tab = new Tab({ baseUrl });
+      sinon.stub(console, 'log');
 
-        tab.setLastUrl('http://local:5601/');
-        tab.getLastPath();
-      }).to.throwError(/invalid.*root/);
+      tab.setLastUrl('http://local:5601/');
+      tab.getLastPath();
+      sinon.assert.calledOnce(console.log);// eslint-disable-line no-console
     });
   });
 

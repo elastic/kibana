@@ -1,9 +1,9 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/directives/validate_json';
 
 // Load the kibana app dependencies.
-require('ui/directives/validate_json');
 
 var $parentScope;
 var $elemScope;

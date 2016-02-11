@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
 
 function ParamClassStub(parent, body) {
   var stub = sinon.spy(body || function () {

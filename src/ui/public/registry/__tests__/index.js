@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import registry from 'ui/registry/_registry';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 describe('Registry', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var registry = require('ui/registry/_registry');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var Private;
   var IndexedArray;
 

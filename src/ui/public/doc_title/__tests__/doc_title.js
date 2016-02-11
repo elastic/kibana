@@ -1,9 +1,10 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import DocTitleProvider from 'ui/doc_title';
 
 describe('docTitle Service', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var initialDocTitle;
   var MAIN_TITLE = 'Kibana 4';
 
@@ -27,7 +28,7 @@ describe('docTitle Service', function () {
     if (_.random(0, 1)) {
       docTitle = $injector.get('docTitle');
     } else {
-      docTitle = Private(require('ui/doc_title'));
+      docTitle = Private(DocTitleProvider);
     }
 
     $rootScope = $injector.get('$rootScope');

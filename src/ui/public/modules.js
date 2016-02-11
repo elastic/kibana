@@ -1,3 +1,5 @@
+import angular from 'angular';
+import _ from 'lodash';
 /**
  * This module is used by Kibana to create and reuse angular modules. Angular modules
  * can only be created once and need to have their dependencies at creation. This is
@@ -45,85 +47,81 @@
  * "kibana" module's injector.
  *
  */
-define(function (require) {
-  var angular = require('angular');
-  var existingModules = {};
-  var _ = require('lodash');
-  var links = [];
+var existingModules = {};
+var links = [];
 
-  /**
-   * Take an angular module and extends the dependencies for that module to include all of the modules
-   * created using `ui/modules`
-   *
-   * @param  {AngularModule} module - the module to extend
-   * @return {undefined}
-   */
-  function link(module) {
-    // as modules are defined they will be set as requirements for this app
-    links.push(module);
+/**
+ * Take an angular module and extends the dependencies for that module to include all of the modules
+ * created using `ui/modules`
+ *
+ * @param  {AngularModule} module - the module to extend
+ * @return {undefined}
+ */
+function link(module) {
+  // as modules are defined they will be set as requirements for this app
+  links.push(module);
 
-    // merge in the existing modules
-    module.requires = _.union(module.requires, _.keys(existingModules));
-  }
+  // merge in the existing modules
+  module.requires = _.union(module.requires, _.keys(existingModules));
+}
 
-  /**
-   * The primary means of interacting with `ui/modules`. Returns an angular module. If the module already
-   * exists the existing version will be returned. `dependencies` are either set as or merged into the
-   * modules total dependencies.
-   *
-   * This is in contrast to the `angular.module(name, [dependencies])` function which will only
-   * create a module if the `dependencies` list is passed and get an existing module if no dependencies
-   * are passed. This requires knowing the order that your files will load, which we can't guarantee.
-   *
-   * @param  {string} moduleName - the unique name for this module
-   * @param  {array[string]} [requires=[]] - the other modules this module requires
-   * @return {AngularModule}
-   */
-  function get(moduleName, requires) {
-    var module = existingModules[moduleName];
+/**
+ * The primary means of interacting with `ui/modules`. Returns an angular module. If the module already
+ * exists the existing version will be returned. `dependencies` are either set as or merged into the
+ * modules total dependencies.
+ *
+ * This is in contrast to the `angular.module(name, [dependencies])` function which will only
+ * create a module if the `dependencies` list is passed and get an existing module if no dependencies
+ * are passed. This requires knowing the order that your files will load, which we can't guarantee.
+ *
+ * @param  {string} moduleName - the unique name for this module
+ * @param  {array[string]} [requires=[]] - the other modules this module requires
+ * @return {AngularModule}
+ */
+function get(moduleName, requires) {
+  var module = existingModules[moduleName];
 
-    if (module === void 0) {
-      // create the module
-      module = existingModules[moduleName] = angular.module(moduleName, []);
+  if (module === void 0) {
+    // create the module
+    module = existingModules[moduleName] = angular.module(moduleName, []);
 
-      module.close = _.partial(close, moduleName);
+    module.close = _.partial(close, moduleName);
 
-      // ensure that it is required by linked modules
-      _.each(links, function (app) {
-        if (!~app.requires.indexOf(moduleName)) app.requires.push(moduleName);
-      });
-    }
-
-    if (requires) {
-      // update requires list with possibly new requirements
-      module.requires = _.union(module.requires, requires);
-    }
-
-    return module;
-  }
-
-  function close(moduleName) {
-    var module = existingModules[moduleName];
-
-    // already closed
-    if (!module) return;
-
-    // if the module is currently linked, unlink it
-    var i = links.indexOf(module);
-    if (i > -1) links.splice(i, 1);
-
-    // remove from linked modules list of required modules
+    // ensure that it is required by linked modules
     _.each(links, function (app) {
-      _.pull(app.requires, moduleName);
+      if (!~app.requires.indexOf(moduleName)) app.requires.push(moduleName);
     });
-
-    // remove module from existingModules
-    delete existingModules[moduleName];
   }
 
-  return {
-    link: link,
-    get: get,
-    close: close
-  };
-});
+  if (requires) {
+    // update requires list with possibly new requirements
+    module.requires = _.union(module.requires, requires);
+  }
+
+  return module;
+}
+
+function close(moduleName) {
+  var module = existingModules[moduleName];
+
+  // already closed
+  if (!module) return;
+
+  // if the module is currently linked, unlink it
+  var i = links.indexOf(module);
+  if (i > -1) links.splice(i, 1);
+
+  // remove from linked modules list of required modules
+  _.each(links, function (app) {
+    _.pull(app.requires, moduleName);
+  });
+
+  // remove module from existingModules
+  delete existingModules[moduleName];
+}
+
+export default {
+  link: link,
+  get: get,
+  close: close
+};

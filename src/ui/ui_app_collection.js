@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let UiApp = require('./ui_app');
+import _ from 'lodash';
+import UiApp from './ui_app';
 let Collection = require('requirefrom')('src')('utils/Collection');
 
 let byIdCache = Symbol('byId');
@@ -21,6 +21,7 @@ module.exports = class UiAppCollection extends Collection {
   }
 
   new(spec) {
+    console.log('--------NewAppSpec:', spec);
     if (this.hidden && spec.hidden) {
       return this.hidden.new(spec);
     }

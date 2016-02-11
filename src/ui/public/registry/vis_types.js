@@ -1,7 +1,6 @@
-define(function (require) {
-  return require('ui/registry/_registry')({
-    name: 'visTypes',
-    index: ['name'],
-    order: ['title']
-  });
+import uiRegistry from 'ui/registry/_registry';
+export default uiRegistry({
+  name: 'visTypes',
+  index: ['name'],
+  order: ['title']
 });

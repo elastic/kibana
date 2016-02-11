@@ -1,13 +1,13 @@
-var RouteManager = require('ui/routes/RouteManager');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import RouteManager from 'ui/routes/RouteManager';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
 
-var wrapRouteWithPrep = require('ui/routes/wrapRouteWithPrep');
-var Promise = require('bluebird');
-var _ = require('lodash');
-var stub = require('auto-release-sinon').stub;
+import wrapRouteWithPrep from 'ui/routes/wrapRouteWithPrep';
+import Promise from 'bluebird';
+import _ from 'lodash';
+import { stub } from 'auto-release-sinon';
+import 'ui/private';
 
-require('ui/private');
 
 var routes;
 

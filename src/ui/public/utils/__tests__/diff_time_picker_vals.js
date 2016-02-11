@@ -1,14 +1,15 @@
 
-var moment = require('moment');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import moment from 'moment';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
 
 describe('Diff Time Picker Values', function () {
   var diffTimePickerValues;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    diffTimePickerValues = Private(require('ui/utils/diff_time_picker_vals'));
+    diffTimePickerValues = Private(UtilsDiffTimePickerValsProvider);
   }));
 
   it('accepts two undefined values', function () {

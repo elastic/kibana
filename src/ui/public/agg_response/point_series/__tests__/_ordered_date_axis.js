@@ -1,9 +1,10 @@
+import moment from 'moment';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggResponsePointSeriesOrderedDateAxisProvider from 'ui/agg_response/point_series/_ordered_date_axis';
 describe('orderedDateAxis', function () {
-  var moment = require('moment');
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var baseArgs = {
     vis: {
@@ -31,7 +32,7 @@ describe('orderedDateAxis', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    orderedDateAxis = Private(require('ui/agg_response/point_series/_ordered_date_axis'));
+    orderedDateAxis = Private(AggResponsePointSeriesOrderedDateAxisProvider);
   }));
 
   describe('xAxisFormatter', function () {

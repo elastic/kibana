@@ -23,7 +23,6 @@
     </div>
   </div>
 </form>
-
 <paginate list="finder.hits" per-page="20" class="paginate-style">
   <table class="list-group list-group-menu table table-striped"
     ng-class="{'select-mode': finder.selector.enabled}">
@@ -38,7 +37,6 @@
         </th>
       </tr>
     <thead>
-
     <tbody>
       <tr ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
           ng-repeat="hit in page"
