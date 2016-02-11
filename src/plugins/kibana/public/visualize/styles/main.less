@@ -2,14 +2,16 @@
 @import (reference) "~bootstrap/less/list-group";
 @import (reference) "~ui/styles/list-group-menu";
 
+@icon-background-color: #416376;
+
 .step-1-wizard {
   flex: 1;
-  background-color: #f6f6f6;
+  background-color: @kibanaGray6;
 }
 
 .step-2-list {
   border: none;
-  background-color: #F6F6F6;
+  background-color: @kibanaGray6;
   border-radius: 0;
   padding-left: 5px;
 }
@@ -20,7 +22,7 @@
 
 .list-search-item {
   border: none;
-  background-color: #F6F6F6;
+  background-color: @kibanaGray6;
   border-radius: 0;
   padding: 0;
 }
@@ -35,11 +37,11 @@
 
 .paginate-style {
   padding-bottom: 1px;
-  background-color: #f6f6f6;
+  background-color: @kibanaGray6;
 }
 
 .form-text {
-  color: #328CAA;
+  color: @kibanaBlue2;
 }
 
 .link-color {
@@ -47,22 +49,22 @@
 }
 
 .icon-color {
-  color: #416376;
+  color: @icon-background-color;
 }
 
 .search-icon {
-  color: #9C9C9C;
+  color: @kibanaGray3;
   width: 30px !important;
 }
 
 .table-type-label {
-  color: #5A5A5A;
+  color: @kibanaGray2;
   font-weight: normal;
   text-align: center;
 }
 
 .table-label {
-  color: #2D2D2D;
+  color: @kibanaGray1;
   font-weight: normal;
 }
 
@@ -105,7 +107,7 @@
 
   span {
     padding: 5px 0px;
-    background-color: #FFFFFF;
+    background-color: @white;
     border: none;
   }
 
@@ -122,7 +124,7 @@
   flex: 2;
 
   span {
-    color: #9C9C9C;
+    color: @kibanaGray3;
   }
 }
 
