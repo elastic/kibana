@@ -15,6 +15,7 @@ module.exports = function (chrome, internals) {
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
     .value('sessionId', Date.now())
+    .value('chrome', chrome)
     .value('esUrl', (function () {
       var a = document.createElement('a');
       a.href = chrome.addBasePath('/elasticsearch');

@@ -8,9 +8,19 @@
 
   // For the vis-editor sidebar nav
   .navbar-default .navbar-nav {
-    &> .active > a:before {
-      border: 7px solid transparent;
-      border-bottom-color: @vis-editor-navbar-current-tab-color;
+    &> .active > a {
+      border-bottom: 2px solid @kibanaGray2;
+      color: @kibanaGray1;
+      &:before {
+        display: none;
+      }
+    }
+    > li {
+      > a {
+        padding: 4px 0;
+        margin: 0 10px;
+        color: @kibanaGray2;
+      }
     }
 
     .danger {
@@ -59,9 +69,6 @@
     padding-bottom: 0;
   }
 
-  navbar[name="visualize-search"] {
-    padding-bottom: 10px;
-  }
 
   &-actions {
     margin-left: auto;
@@ -90,7 +97,9 @@
       max-width: @vis-editor-sidebar-min-width;
     }
 
+    .index-pattern,
     nav {
+      min-height: 34px;
       border-radius: 0px;
     }
 
@@ -126,17 +135,11 @@
     }
 
     .sidebar-item-title {
-      font-size: 20px;
+      font-size: 14px;
       font-weight: bold;
       border: inherit !important;
-      background-color: @vis-editor-sidebar-title-bg;
       margin-bottom: @vis-editor-agg-editor-spacing;
       padding: 2px 5px !important;
-    }
-
-    .sidebar-item-title:hover {
-      color: @vis-editor-sidebar-title-hover-color !important;
-      background-color: @vis-editor-sidebar-title-hover-bg !important;
     }
 
     .hintbox {
@@ -189,7 +192,7 @@
 
     &-group {
       .flex-parent(0, 1, auto);
-      color: @vis-editor-agg-group-color;
+      color: @kibanaGray2;
     }
 
     &-header {
@@ -286,9 +289,7 @@
     }
 
     &-wide-btn {
-      border-radius: 0;
-      border-top: 2px solid;
-      border-top-color: @vis-editor-agg-wide-btn-border;
+      text-align: center;
 
       &-add {
         width: 140px;

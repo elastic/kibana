@@ -39,13 +39,13 @@
         aria-label="Refresh">
         <span>Refresh</span>
       </button>
+      <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
-
   <config
     ng-if="chrome.getVisible()"
     config-template="configTemplate"
-    config-object="conf">
+    config-object="opts">
   </config>
 
   <navbar ng-if="chrome.getVisible()" name="visualize-search">
