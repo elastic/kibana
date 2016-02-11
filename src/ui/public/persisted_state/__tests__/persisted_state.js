@@ -4,6 +4,8 @@ import noDigestPromises from 'testUtils/noDigestPromises';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 import errors from 'ui/errors';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import EventsProvider from 'ui/events';
 
 var PersistedState;
 var Events;
@@ -15,8 +17,8 @@ describe('Persisted State', function () {
     ngMock.module('kibana');
 
     ngMock.inject(function (Private) {
-      PersistedState = Private(require('ui/persisted_state/persisted_state'));
-      Events = Private(require('ui/events'));
+      PersistedState = Private(PersistedStatePersistedStateProvider);
+      Events = Private(EventsProvider);
     });
   });
 

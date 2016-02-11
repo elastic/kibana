@@ -5,6 +5,11 @@ import ngMock from 'ngMock';
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import VisProvider from 'ui/Vis';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 var rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -71,12 +76,12 @@ describe('No global chart settings', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    chart1 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams1);
-    chart2 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams2);
-    Vis = Private(require('ui/Vis'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+    chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
+    chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
+    Vis = Private(VisProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
     var id1 = 1;
     var id2 = 1;
@@ -166,11 +171,11 @@ aggArray.forEach(function (dataAgg, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      Vis = Private(require('ui/Vis'));
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      Vis = Private(VisProvider);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
       var id = 1;
       var stubVis = new Vis(indexPattern, {

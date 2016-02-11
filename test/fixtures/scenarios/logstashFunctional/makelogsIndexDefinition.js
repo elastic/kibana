@@ -22,7 +22,6 @@ module.exports = {
             'type': 'string',
             'index': 'analyzed',
             'omit_norms': true,
-            'doc_values': true,
             'fields': {
               'raw': {
                 'index': 'not_analyzed',
@@ -44,7 +43,7 @@ module.exports = {
         },
         'id': {
           'type': 'integer',
-          'index': 'not_analyzed',
+          'index': true,
           'include_in_all': false
         },
         'clientip': {
@@ -95,7 +94,7 @@ module.exports = {
                 },
                 'lastname': {
                   'type': 'integer',
-                  'index': 'not_analyzed'
+                  'index': true
                 }
               }
             }

@@ -19,9 +19,8 @@ module.exports = {
       'dynamic_templates': [{
         'string_fields': {
           'mapping': {
-            'type': 'string'
+            'type': 'string',
             'index': 'analyzed',
-            'doc_values': true,
             'omit_norms': true,
             'fields': {
               'raw': {
@@ -44,7 +43,7 @@ module.exports = {
         },
         'id': {
           'type': 'integer',
-          'index': 'not_analyzed',
+          'index': true,
           'include_in_all': false
         },
         'clientip': {
@@ -95,7 +94,7 @@ module.exports = {
                 },
                 'lastname': {
                   'type': 'integer',
-                  'index': 'not_analyzed'
+                  'index': true
                 }
               }
             }

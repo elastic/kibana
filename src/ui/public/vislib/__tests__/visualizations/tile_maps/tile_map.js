@@ -7,6 +7,7 @@ import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import MockMap from 'fixtures/tilemap_map';
 import $ from 'jquery';
+import VislibVisualizationsTileMapProvider from 'ui/vislib/visualizations/tile_map';
 var mockChartEl = $('<div>');
 
 var TileMap;
@@ -27,7 +28,7 @@ describe('TileMap Tests', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Private.stub(require('ui/vislib/visualizations/_map'), MockMap);
-    TileMap = Private(require('ui/vislib/visualizations/tile_map'));
+    TileMap = Private(VislibVisualizationsTileMapProvider);
     extentsStub = sinon.stub(TileMap.prototype, '_appendGeoExtents', _.noop);
   }));
 

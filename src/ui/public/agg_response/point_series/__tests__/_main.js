@@ -3,6 +3,10 @@ import moment from 'moment';
 import AggConfigResult from 'ui/Vis/AggConfigResult';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggResponsePointSeriesPointSeriesProvider from 'ui/agg_response/point_series/point_series';
 describe('pointSeriesChartDataFromTable', function () {
   this.slow(1000);
 
@@ -14,10 +18,10 @@ describe('pointSeriesChartDataFromTable', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    Table = Private(require('ui/agg_response/tabify/_table'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    pointSeriesChartDataFromTable = Private(require('ui/agg_response/point_series/point_series'));
+    Vis = Private(VisProvider);
+    Table = Private(AggResponseTabifyTableProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    pointSeriesChartDataFromTable = Private(AggResponsePointSeriesPointSeriesProvider);
   }));
 
   it('handles a table with just a count', function () {

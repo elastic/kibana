@@ -3,6 +3,11 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import RealAggConfigPM from 'ui/Vis/AggConfig';
+import VisProvider from 'ui/Vis';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import VisAggConfigsProvider from 'ui/Vis/AggConfigs';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisSchemasProvider from 'ui/Vis/Schemas';
 describe('AggConfigs', function () {
 
   var Vis;
@@ -26,12 +31,12 @@ describe('AggConfigs', function () {
     Private.stub(RealAggConfigPM, spy);
 
     // load main deps
-    Vis = Private(require('ui/Vis'));
-    SpiedAggConfig = Private(require('ui/Vis/AggConfig'));
-    AggConfigs = Private(require('ui/Vis/AggConfigs'));
+    Vis = Private(VisProvider);
+    SpiedAggConfig = Private(VisAggConfigProvider);
+    AggConfigs = Private(VisAggConfigsProvider);
     IndexedArray = require('ui/IndexedArray');
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Schemas = Private(require('ui/Vis/Schemas'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    Schemas = Private(VisSchemasProvider);
   }));
 
   it('extends IndexedArray', function () {

@@ -2,6 +2,7 @@ import moment from 'moment';
 import { pluck } from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 
 describe('Index Patterns', function () {
   describe('interval.toIndexList()', function () {
@@ -9,7 +10,7 @@ describe('Index Patterns', function () {
     var intervals;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      intervals = Private(require('ui/index_patterns/_intervals'));
+      intervals = Private(IndexPatternsIntervalsProvider);
     }));
 
     it('should return correct indices for hourly [logstash-]YYYY.MM.DD.HH', function () {

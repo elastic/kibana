@@ -5,6 +5,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import 'ui/private';
+import EventsProvider from 'ui/events';
 
 describe('Events', function () {
   require('testUtils/noDigestPromises').activateForSuite();
@@ -19,7 +20,7 @@ describe('Events', function () {
     $rootScope = $injector.get('$rootScope');
     Notifier = $injector.get('Notifier');
     Promise = $injector.get('Promise');
-    Events = Private(require('ui/events'));
+    Events = Private(EventsProvider);
   }));
 
   it('should handle on events', function () {

@@ -28,7 +28,7 @@ module.exports = function ({ Plugin }) {
           cert: string(),
           key: string()
         }).default(),
-        apiVersion: Joi.string().default('2.0'),
+        apiVersion: Joi.string().default('master'),
         engineVersion: Joi.string().valid('^3.0.0').default('^3.0.0')
       }).default();
     },

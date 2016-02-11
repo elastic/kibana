@@ -1,55 +1,141 @@
+@import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
 
-@app-icon-size: 48px;
-@app-icon-padding: 10px;
+// as - App Switcher
+@as-open-width: 160px;
+@as-closed-width: 53px;
+@app-icon-height: 30px;
+@transition-time: .35s;
+@transition-delay: .1s;
+@app-links-wrapper-background: #3caed2;
 
+body { overflow-x: hidden; }
+
+.app-links-wrapper {
+  width: @as-open-width;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  background-color: @app-links-wrapper-background;
+  overflow: hidden;
+  transition: width @transition-time;
+  transition-delay: @transition-delay;
+
+  &:hover {
+    .app-title {
+      display: inline-block;
+    }
+    + .app-wrapper {
+      transform: translateX(@as-open-width - @as-closed-width);
+    }
+  }
+
+  .logo {
+    height: 70px;
+    width: @as-open-width;
+    list-style-type: none;
+    &.kibana {
+      background-image: url("~ui/images/kibana.svg");
+      background-position: 6px 10px;
+      background-size: 140px 50px;
+      background-repeat: no-repeat;
+      background-color: #e8488b;
+    }
+  }
+  .bottom-apps {
+    position: absolute;
+    bottom: 0;
+  }
+}
+.app-wrapper {
+  .real-flex-parent();
+  position: absolute;
+  transition: transform @transition-time;
+  transition-delay: @transition-delay;
+  left: @as-closed-width;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  margin: 0 auto;
+  background-color: #fff;
+
+  &-panel {
+    .flex-parent(@shrink: 0);
+    box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
+  }
+
+  .navbar-right {
+    margin-right: 0;
+  }
+}
 .app-links {
   text-align: justify;
 
   .app-link {
-    display: inline-block;
-    vertical-align: top;
-    text-align: left;
-    width: @app-icon-size + (@app-icon-padding * 2);
-    margin: 0px 10px;
-    padding: @app-icon-padding;
-    border-radius: @border-radius-base;
+    width: @as-open-width;
+    height: @app-icon-height;
+    line-height:  24px;
 
-    .app-icon {
+    > a {
       display: block;
-      height: @app-icon-size;
-      width: @app-icon-size;
-      background-position: center;
-      background-size: contain;
-      border-radius: @border-radius-base;
-      background-color: @gray-light;
-      width: 100%;
+      height: 100%;
+      color: #fff;
+    }
 
-      &-missing {
-        text-align: center;
-        font-size: 2.7em;
-        font-weight: bold;
-        font-family: @font-family-sans-serif;
-        color: #fff;
+    &:hover {
+      background-color: lighten(@app-links-wrapper-background, 7.5%);
+    }
+    
+    .app-icon {
+      float: left;
+      filter: invert(100%);
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.7em;
+      display: inline-block;
+      height: @app-icon-height;
+      width: @as-closed-width;
+      > i {
+      }
+
+      > img {
+        height: 20px;
       }
     }
 
-    .app-title {
-      color: @text-color;
-      font-size: 0.9em;
-      width: 100%;
+    .app-icon-missing {
+      float: left;
       text-align: center;
-      margin-top: 3px;
+      font-size: 1.7em;
+      display: inline-block;
+      height: @app-icon-height;
+      width: @as-closed-width;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
     }
 
-    &:hover .app-title {
-      text-decoration: underline;
+    .app-title {
+      width: calc(@as-open-width - @as-closed-width);
+      display: inline-block;
+      float: right;
+      font-size: 0.9em;
+      text-align: left;
+      padding-left: 3px;
+      line-height: @app-icon-height;
     }
 
     &.active {
-      background: @gray-lighter;
-      .app-title {
-        text-decoration: underline;
+      background-color: lighten(@app-links-wrapper-background, 10%);
+      > a {
+        color: #333;
+        text-decoration: none;
+      }
+      img {
+        filter: invert(100%);
       }
     }
 

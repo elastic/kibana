@@ -6,7 +6,7 @@
 //** Background color for `<body>`.
 @body-bg:                   @white;
 //** Global text color on `<body>`.
-@text-color:                @brand-primary;
+@text-color:                @kibanaGray1;
 
 
 //** Global textual link color.
@@ -26,7 +26,7 @@
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          13px;
+@font-size-base:          14px;
 @font-size-large:         ceil((@font-size-base * 1.25)); // ~18px
 @font-size-small:         ceil((@font-size-base * 0.85)); // ~12px
 
@@ -120,9 +120,9 @@
 @btn-default-bg:            @gray;
 @btn-default-border:        @btn-default-bg;
 
-@btn-primary-color:         @btn-default-color;
-@btn-primary-bg:            @brand-primary;
-@btn-primary-border:        @btn-primary-bg;
+@btn-primary-color:         @kibanaGray6;
+@btn-primary-bg:            @kibanaBlue3;
+@btn-primary-border:        transparent;
 
 @btn-success-color:         @btn-default-color;
 @btn-success-bg:            @kibanaBlue3;
@@ -339,15 +339,15 @@
 @navbar-arrow-size:                7px;
 
 // Default theme
-@navbar-default-bg:                     #656A76;
-@navbar-default-color:                  @white;
-@navbar-default-border:                 darken(@navbar-default-bg, 10%);
-@navbar-default-link-color:             @gray-lighter;
-@navbar-default-link-hover-color:       @white;
+@navbar-default-bg:                     @kibanaGray5;
+@navbar-default-color:                  @kibanaGray2;
+@navbar-default-border:                 transparent;
+@navbar-default-link-color:             @kibanaGray2;
+@navbar-default-link-hover-color:       @kibanaGray2;
 @navbar-default-link-hover-bg:          transparent;
-@navbar-default-link-active-color:      @white;
-@navbar-default-link-active-bg:         darken(@navbar-default-bg, 10%);
-@navbar-default-link-disabled-color:    @gray12;
+@navbar-default-link-active-color:      @kibanaGray1;
+@navbar-default-link-active-bg:         @kibanaGray6;
+@navbar-default-link-disabled-color:    @kibanaGray3;
 @navbar-default-link-disabled-bg:       transparent;
 
 // Navbar brand label
@@ -607,11 +607,11 @@
 @progress-border-radius:      @border-radius-base;
 
 //** Background color of the whole progress component
-@progress-bg:                           @gray-lighter;
+@progress-bg:                           @kibanaGray4;
 //** Progress bar text color
 @progress-bar-color:                    @white;
 //** Default progress bar color
-@progress-bar-bg:                       @brand-primary;
+@progress-bar-bg:                       @kibanaPink1;
 //** Success progress bar color
 @progress-bar-success-bg:               @brand-success;
 //** Warning progress bar color
@@ -708,7 +708,7 @@
 //
 //##
 
-@well-bg:                               @gray-lighter;
+@well-bg:                               @kibanaGray6;
 @well-border:                           transparent;
 
 
@@ -791,7 +791,7 @@
 //** Abbreviations and acronyms border color
 @abbr-border-color:                     @gray-light;
 //** Headings small color
-@headings-small-color:                  @gray-light;
+@headings-small-color:                  @kibanaGray1;
 //** Blockquote small color
 @blockquote-small-color:                @gray-light;
 //** Blockquote border color

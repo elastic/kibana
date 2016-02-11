@@ -147,6 +147,7 @@ Distributable packages can be found in `target/` after the build completes.
 Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
 ```sh
 gem install pleaserun
+apt-get install ruby-dev
 gem install fpm
 npm run build:ospackages
 ```
