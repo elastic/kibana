@@ -1,8 +1,9 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FilterBarLibMapMatchAllProvider from 'ui/filter_bar/lib/mapMatchAll';
 
 describe('ui/filter_bar/lib', function () {
   describe('mapMatchAll()', function () {
-    const expect = require('expect.js');
-    const ngMock = require('ngMock');
     let $rootScope;
     let mapMatchAll;
     let filter;
@@ -11,7 +12,7 @@ describe('ui/filter_bar/lib', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapMatchAll = Private(require('ui/filter_bar/lib/mapMatchAll'));
+      mapMatchAll = Private(FilterBarLibMapMatchAllProvider);
       filter = {
         match_all: {},
         meta: {

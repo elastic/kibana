@@ -1,10 +1,10 @@
-const { clone, get } = require('lodash');
-const { resolve } = require('url');
+import { clone, get } from 'lodash';
+import { resolve } from 'url';
 
 module.exports = function (chrome, internals) {
 
-  if (internals.app) {
-    internals.app.url = resolve(window.location.href, internals.app.url);
+  if (get(internals, 'app.navLink.url')) {
+    internals.app.navLink.url = resolve(window.location.href, internals.app.navLink.url);
   }
 
   internals.appUrlStore = internals.appUrlStore || window.sessionStorage;
@@ -35,7 +35,7 @@ module.exports = function (chrome, internals) {
   };
 
   chrome.getAppUrl = function () {
-    return get(internals, ['app', 'url']);
+    return get(internals, ['app', 'navLink', 'url']);
   };
 
   chrome.getInjected = function (name, def) {

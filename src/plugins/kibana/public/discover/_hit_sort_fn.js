@@ -29,18 +29,18 @@ define(function () {
      * @return {[type]}           [description]
      */
     return function createHitSortFn(direction) {
-      var descending = (direction === 'desc');
+      const descending = (direction === 'desc');
 
       return function sortHits(hitA, hitB) {
-        var bBelowa = null;
+        let bBelowa = null;
 
-        var aSorts = hitA.sort || [];
-        var bSorts = hitB.sort || [];
+        const aSorts = hitA.sort || [];
+        const bSorts = hitB.sort || [];
 
         // walk each sort value, and compair until one is different
-        for (var i = 0; i < bSorts.length; i++) {
-          var a = aSorts[i];
-          var b = bSorts[i];
+        for (let i = 0; i < bSorts.length; i++) {
+          const a = aSorts[i];
+          const b = bSorts[i];
 
           if (a == null || b > a) {
             bBelowa = !descending;

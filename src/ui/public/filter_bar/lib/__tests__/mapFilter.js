@@ -1,8 +1,9 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FilterBarLibMapFilterProvider from 'ui/filter_bar/lib/mapFilter';
 
 describe('Filter Bar Directive', function () {
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var mapFilter;
   var $rootScope;
 
@@ -16,7 +17,7 @@ describe('Filter Bar Directive', function () {
   ));
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-    mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
+    mapFilter = Private(FilterBarLibMapFilterProvider);
     $rootScope = _$rootScope_;
   }));
 

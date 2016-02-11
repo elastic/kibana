@@ -1,7 +1,10 @@
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('FieldEditor directive', function () {
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var Field;
   var StringFormat;
@@ -14,10 +17,10 @@ describe('FieldEditor directive', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
     $rootScope = $injector.get('$rootScope');
-    Field = Private(require('ui/index_patterns/_field'));
-    StringFormat = Private(require('ui/registry/field_formats')).getType('string');
+    Field = Private(IndexPatternsFieldProvider);
+    StringFormat = Private(RegistryFieldFormatsProvider).getType('string');
 
-    $rootScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    $rootScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     // set the field format for this field
     $rootScope.indexPattern.fieldFormatMap.time = new StringFormat({ foo: 1, bar: 2 });
     $rootScope.indexPattern._indexFields();

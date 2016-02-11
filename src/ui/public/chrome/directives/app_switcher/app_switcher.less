@@ -2,11 +2,12 @@
 @import (reference) "~ui/styles/variables";
 
 // as - App Switcher
-@as-open-width: 170px;
+@as-open-width: 160px;
 @as-closed-width: 53px;
 @app-icon-height: 30px;
-@transition-time: .65s;
-@transition-delay: .2s;
+@transition-time: .35s;
+@transition-delay: .1s;
+@app-links-wrapper-background: #3caed2;
 
 body { overflow-x: hidden; }
 
@@ -17,7 +18,7 @@ body { overflow-x: hidden; }
   top: 0;
   bottom: 0;
   z-index: 0;
-  background-color: #3caed2;
+  background-color: @app-links-wrapper-background;
   overflow: hidden;
   transition: width @transition-time;
   transition-delay: @transition-delay;
@@ -36,7 +37,11 @@ body { overflow-x: hidden; }
     width: @as-open-width;
     list-style-type: none;
     &.kibana {
-      background: url("~ui/images/kibana.svg") center / 160px 70px no-repeat #e8488b;
+      background-image: url("~ui/images/kibana.svg");
+      background-position: 6px 10px;
+      background-size: 140px 50px;
+      background-repeat: no-repeat;
+      background-color: #e8488b;
     }
   }
   .bottom-apps {
@@ -57,6 +62,11 @@ body { overflow-x: hidden; }
   margin: 0 auto;
   background-color: #fff;
 
+  &-panel {
+    .flex-parent(@shrink: 0);
+    box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
+  }
+
   .navbar-right {
     margin-right: 0;
   }
@@ -67,12 +77,36 @@ body { overflow-x: hidden; }
   .app-link {
     width: @as-open-width;
     height: @app-icon-height;
+    line-height:  24px;
+
     > a {
       display: block;
       height: 100%;
       color: #fff;
     }
+
+    &:hover {
+      background-color: lighten(@app-links-wrapper-background, 7.5%);
+    }
+    
     .app-icon {
+      float: left;
+      filter: invert(100%);
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.7em;
+      display: inline-block;
+      height: @app-icon-height;
+      width: @as-closed-width;
+      > i {
+      }
+
+      > img {
+        height: 20px;
+      }
+    }
+
+    .app-icon-missing {
       float: left;
       text-align: center;
       font-size: 1.7em;
@@ -81,8 +115,7 @@ body { overflow-x: hidden; }
       width: @as-closed-width;
       background-position: center;
       background-size: contain;
-      > i {
-      }
+      background-repeat: no-repeat;
     }
 
     .app-title {
@@ -90,15 +123,19 @@ body { overflow-x: hidden; }
       display: inline-block;
       float: right;
       font-size: 0.9em;
-      text-align: center;
+      text-align: left;
+      padding-left: 3px;
       line-height: @app-icon-height;
     }
 
     &.active {
-      background-color: #73c6e0;
+      background-color: lighten(@app-links-wrapper-background, 10%);
       > a {
         color: #333;
         text-decoration: none;
+      }
+      img {
+        filter: invert(100%);
       }
     }
 

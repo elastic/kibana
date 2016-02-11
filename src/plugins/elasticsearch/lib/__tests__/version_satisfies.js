@@ -1,7 +1,7 @@
-var versionSatisfies = require('../version_satisfies');
-var expect = require('expect.js');
+import versionSatisfies from '../version_satisfies';
+import expect from 'expect.js';
 
-var versionChecks = [
+const versionChecks = [
   // order is: ['actual version', 'match expression', satisfied (true/false)]
   ['0.90.0', '>=0.90.0', true],
   ['1.2.0', '>=1.2.1 <2.0.0', false],
@@ -30,10 +30,10 @@ var versionChecks = [
 describe('plugins/elasticsearch', function () {
   describe('lib/version_satisfies', function () {
     versionChecks.forEach(function (spec) {
-      var actual = spec[0];
-      var match = spec[1];
-      var satisfied = spec[2];
-      var desc = actual + ' satisfies ' + match;
+      const actual = spec[0];
+      const match = spec[1];
+      const satisfied = spec[2];
+      const desc = actual + ' satisfies ' + match;
 
       describe(desc, function () {
         it('should be ' + satisfied, function () {

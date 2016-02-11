@@ -1,7 +1,7 @@
-const expect = require('expect.js');
+import expect from 'expect.js';
 
-const setup = require('../apps');
-const TabFakeStore = require('../../__tests__/_TabFakeStore');
+import setup from '../apps';
+import TabFakeStore from '../../__tests__/_TabFakeStore';
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {
@@ -86,11 +86,11 @@ describe('Chrome API :: apps', function () {
   describe('#getAppUrl()', function () {
     it('returns the resolved url of the current app', function () {
       const chrome = {};
-      const app = { url: '/foo' };
+      const app = { navLink: { url: '/foo' } };
       setup(chrome, { app });
 
       const a = document.createElement('a');
-      a.setAttribute('href', app.url);
+      a.setAttribute('href', app.navLink.url);
       expect(chrome.getAppUrl()).to.equal(a.href);
     });
 

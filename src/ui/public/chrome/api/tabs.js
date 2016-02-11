@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var TabCollection = require('../TabCollection');
+import _ from 'lodash';
+import TabCollection from '../TabCollection';
 
 module.exports = function (chrome, internals) {
 

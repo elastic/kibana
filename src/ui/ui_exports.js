@@ -1,10 +1,12 @@
-var _ = require('lodash');
-var minimatch = require('minimatch');
+import _ from 'lodash';
+import minimatch from 'minimatch';
 
-var UiAppCollection = require('./ui_app_collection');
+import UiAppCollection from './ui_app_collection';
+import UiNavLinkCollection from './ui_nav_link_collection';
 
 class UiExports {
   constructor({ urlBasePath }) {
+    this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {};
     this.urlBasePath = urlBasePath;
@@ -48,12 +50,18 @@ class UiExports {
       case 'app':
       case 'apps':
         return (plugin, specs) => {
+          const id = plugin.id;
           for (let spec of [].concat(specs || [])) {
-            let app = this.apps.new(_.defaults({}, spec, {
-              id: plugin.id,
-              urlBasePath: this.urlBasePath
-            }));
+            const app = this.apps.new({ id, ...spec });
             plugin.apps.add(app);
+          }
+        };
+
+      case 'link':
+      case 'links':
+        return (plugin, spec) => {
+          for (const spec of [].concat(spec || [])) {
+            this.navLinks.new(spec);
           }
         };
 
@@ -62,6 +70,9 @@ class UiExports {
       case 'spyModes':
       case 'chromeNavControls':
       case 'navbarExtensions':
+      case 'settingsSections':
+      case 'docViews':
+      case 'sledgehammers':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };

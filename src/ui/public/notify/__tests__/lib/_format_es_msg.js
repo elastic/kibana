@@ -1,6 +1,6 @@
+import formatESMsg from 'ui/notify/lib/_format_es_msg';
+import expect from 'expect.js';
 describe('formatESMsg', function () {
-  var formatESMsg = require('ui/notify/lib/_format_es_msg');
-  var expect = require('expect.js');
 
   it('should return undefined if passed a basic error', function () {
     var err = new Error('This is a normal error');

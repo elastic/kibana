@@ -1,8 +1,13 @@
+import _ from 'lodash';
+import moment from 'moment';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import AggResponsePointSeriesAddToSiriProvider from 'ui/agg_response/point_series/_add_to_siri';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import AggResponsePointSeriesGetAspectsProvider from 'ui/agg_response/point_series/_get_aspects';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('getAspects', function () {
-  var _ = require('lodash');
-  var moment = require('moment');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var Vis;
   var Table;
@@ -12,11 +17,11 @@ describe('getAspects', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    Table = Private(require('ui/agg_response/point_series/_add_to_siri'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    getAspects = Private(require('ui/agg_response/point_series/_get_aspects'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    Vis = Private(VisProvider);
+    Table = Private(AggResponsePointSeriesAddToSiriProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    getAspects = Private(AggResponsePointSeriesGetAspectsProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   var vis;

@@ -1,12 +1,12 @@
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/storage';
 
 var storage;
 var $window;
 var payload = { first: 'john', last: 'smith' };
 
-require('ui/storage');
 
 function init() {
   ngMock.module('kibana/storage', function ($provide) {

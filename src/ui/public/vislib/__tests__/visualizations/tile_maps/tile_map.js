@@ -1,12 +1,13 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var sinon = require('auto-release-sinon');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
 
-var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
-var MockMap = require('fixtures/tilemap_map');
+import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
+import MockMap from 'fixtures/tilemap_map';
+import $ from 'jquery';
+import VislibVisualizationsTileMapProvider from 'ui/vislib/visualizations/tile_map';
 var mockChartEl = $('<div>');
 
 var TileMap;
@@ -27,7 +28,7 @@ describe('TileMap Tests', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Private.stub(require('ui/vislib/visualizations/_map'), MockMap);
-    TileMap = Private(require('ui/vislib/visualizations/tile_map'));
+    TileMap = Private(VislibVisualizationsTileMapProvider);
     extentsStub = sinon.stub(TileMap.prototype, '_appendGeoExtents', _.noop);
   }));
 

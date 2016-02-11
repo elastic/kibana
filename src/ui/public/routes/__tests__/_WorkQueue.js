@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var WorkQueue = require('ui/routes/WorkQueue');
-var sinon = require('auto-release-sinon');
-require('ui/promises');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import WorkQueue from 'ui/routes/WorkQueue';
+import sinon from 'auto-release-sinon';
+import 'ui/promises';
 
 describe('work queue', function () {
   var queue;

@@ -1,16 +1,15 @@
-define(function (require) {
-  var rison = require('ui/utils/rison');
-  var module = require('ui/modules').get('kibana');
+import rison from 'ui/utils/rison';
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
-  module.filter('rison', function () {
-    return function (str) {
-      return rison.encode(str);
-    };
-  });
+module.filter('rison', function () {
+  return function (str) {
+    return rison.encode(str);
+  };
+});
 
-  module.filter('risonDecode', function () {
-    return function (str) {
-      return rison.decode(str);
-    };
-  });
+module.filter('risonDecode', function () {
+  return function (str) {
+    return rison.decode(str);
+  };
 });
