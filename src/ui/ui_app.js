@@ -7,7 +7,6 @@ class UiApp {
 
     this.id = this.spec.id;
     if (!this.id) {
-      console.log('-----------Spec Without ID:', this.spec);
       throw new Error('Every app must specify it\'s id');
     }
 
