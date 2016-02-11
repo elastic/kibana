@@ -4,7 +4,7 @@ module.exports = function (kibana) {
 
     ui: {
       visTypes: [
-        'plugins/markdown_vis/markdown_vis'
+        'markdown_vis.js'
       ]
     }
 

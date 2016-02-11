@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { resolve } from 'path';
 import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
@@ -41,8 +42,26 @@ class UiExports {
     this.consumers.push(consumer);
   }
 
-  extendAliases(alias, moduleOrModules) {
-    this.aliases[alias] = _.union(this.aliases[alias] || [], arr(moduleOrModules));
+  // when module ids are defined in a uiExports spec they can
+  // be defined as relative to the public directory
+  resolveModulePath(plugin, moduleId) {
+    const hardRelative = moduleId.startsWith('./');
+    const hardAbsolute = moduleId.startsWith('/') || moduleId.startsWith('\\');
+    const legacyModId = moduleId.startsWith(`plugins/${plugin.id}`);
+    const softRelative = !hardAbsolute && !legacyModId;
+
+    if (hardRelative || softRelative) {
+      return resolve(plugin.publicDir, moduleId);
+    }
+    return moduleId;
+  }
+
+  extendAliases(plugin, alias, idOrIds) {
+    const existingModuleIds = this.aliases[alias] || [];
+    const resolve = id => this.resolveModulePath(plugin, id);
+    const resolvedModuleIds = arr(idOrIds).map(resolve);
+
+    this.aliases[alias] = _.union(existingModuleIds, resolvedModuleIds);
   }
 
   exportConsumer(type) {
@@ -56,11 +75,17 @@ class UiExports {
       case 'app':
       case 'apps':
         return (plugin, spec) => {
-          for (const spec of arr(spec)) {
-            const app = this.apps.new(_.defaults({}, spec, {
+          for (const rawSpec of arr(spec)) {
+            // massage the spec a bit before creating the uiApp
+            const spec = _.defaults({}, rawSpec, {
               id: plugin.id,
               urlBasePath: this.urlBasePath
-            }));
+            });
+
+            if (spec.main) spec.main = this.resolveModulePath(plugin, spec.main);
+            if (spec.icon) spec.icon = this.resolveModulePath(plugin, spec.icon);
+
+            const app = this.apps.new(spec);
             plugin.apps.add(app);
           }
         };
@@ -82,7 +107,7 @@ class UiExports {
       case 'sledgehammer':
       case 'sledgehammers':
         return (plugin, spec) => {
-          this.extendAliases(type, spec);
+          this.extendAliases(plugin, type, spec);
         };
 
       case 'bundle':
@@ -96,7 +121,7 @@ class UiExports {
         return (plugin, specs) => {
           for (const spec of specs) {
             for (const adhocAlias of Object.keys(spec)) {
-              this.extendAliases(adhocAlias, spec[adhocAlias]);
+              this.extendAliases(plugin, adhocAlias, spec[adhocAlias]);
             }
           }
         };

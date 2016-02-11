@@ -4,7 +4,7 @@ module.exports = function (kibana) {
 
     uiExports: {
       docViews: [
-        'plugins/kbn_doc_views/kbn_doc_views'
+        'kbn_doc_views.js'
       ]
     }
 
