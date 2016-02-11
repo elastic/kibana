@@ -1,6 +1,7 @@
 import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
+import pluginsScanMixin from './plugins/scan';
 
 let utils = require('requirefrom')('src/utils');
 let rootDir = utils('fromRoot')('.');
@@ -21,7 +22,7 @@ module.exports = class KbnServer {
       require('./status'),
 
       // find plugins and set this.plugins
-      require('./plugins/scan'),
+      pluginsScanMixin,
 
       // tell the config we are done loading plugins
       require('./config/complete'),
