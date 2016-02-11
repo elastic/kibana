@@ -29,8 +29,8 @@
 
     <thead ng-show="finder.properties.noun === 'Visualization'">
       <tr ng-hide="finder.hits.length === 0">
-        <th class="col-md-1 table-type-label">Type</th>
-        <th class="col-md-11 table-label">
+        <th class="table-type-label col-md-1 ">Type</th>
+        <th class="table-label col-md-11">
           Name
           <!-- <span class="fa fa-caret-up"></span> -->
           <span class="fa fa-caret-down"></span>
@@ -50,7 +50,7 @@
             <i aria-hidden="true" class="fa icon-color" ng-if="hit.icon" ng-class="hit.icon"></i>
           </a>
         </th>
-        <td class="col-md-11 link-color" >
+        <td class="link-color col-md-11" >
           {{hit.title}}
           <p ng-if="hit.description" ng-bind="hit.description"></p>
         </td>
