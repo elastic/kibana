@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import Notifier from 'ui/notify/notifier';
 describe('Notifier', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var Notifier = require('ui/notify/notifier');
 
   var message = 'Oh, the humanity!';
   var notifier;

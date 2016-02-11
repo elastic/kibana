@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import Samples from './Samples';
 module.exports = function (kbnServer, server, config) {
-  var _ = require('lodash');
-  var Samples = require('./Samples');
   let lastReport = Date.now();
 
   kbnServer.metrics = new Samples(12);

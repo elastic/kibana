@@ -1,14 +1,16 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import AggParamWriterProvider from '../AggParamWriter';
 describe('Histogram Agg', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   describe('ordered', function () {
     var histogram;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      histogram = Private(require('ui/agg_types/index')).byName.histogram;
+      histogram = Private(AggTypesIndexProvider).byName.histogram;
     }));
 
     it('is ordered', function () {
@@ -26,7 +28,7 @@ describe('Histogram Agg', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      var AggParamWriter = Private(require('../AggParamWriter'));
+      var AggParamWriter = Private(AggParamWriterProvider);
       paramWriter = new AggParamWriter({ aggType: 'histogram' });
     }));
 

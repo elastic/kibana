@@ -1,5 +1,6 @@
-var Bluebird = require('bluebird');
-require('ui/promises');
+import Bluebird from 'bluebird';
+import 'ui/promises';
+import uiModules from 'ui/modules';
 
 Bluebird.longStackTraces();
 
@@ -17,7 +18,7 @@ Bluebird.longStackTraces();
 
 var active = false;
 
-require('ui/modules')
+uiModules
 .get('kibana')
 .config(function ($provide) {
   $provide.decorator('Promise', function ($delegate) {

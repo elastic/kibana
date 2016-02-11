@@ -1,10 +1,11 @@
-let Promise = require('bluebird');
-let Joi = require('joi');
-let _ = require('lodash');
-let { zipObject } = require('lodash');
-let override = require('./override');
+import Promise from 'bluebird';
+import Joi from 'joi';
+import _ from 'lodash';
+import override from './override';
+import createDefaultSchema from './schema';
 let pkg = require('requirefrom')('src/utils')('packageJson');
-const clone = require('./deepCloneWithBuffers');
+import clone from './deepCloneWithBuffers';
+import { zipObject } from 'lodash';
 
 const schema = Symbol('Joi Schema');
 const schemaKeys = Symbol('Schema Extensions');
@@ -12,6 +13,10 @@ const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
 
 module.exports = class Config {
+  static withDefaultSchema(settings = {}) {
+    return new Config(createDefaultSchema(), settings);
+  }
+
   constructor(initialSchema, initialSettings) {
     this[schemaKeys] = new Map();
 

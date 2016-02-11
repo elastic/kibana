@@ -1,7 +1,7 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
-var wrapRouteWithPrep = require('./wrapRouteWithPrep');
-var RouteSetupManager = require('./RouteSetupManager');
+import wrapRouteWithPrep from './wrapRouteWithPrep';
+import RouteSetupManager from './RouteSetupManager';
 
 function RouteManager() {
   var self = this;

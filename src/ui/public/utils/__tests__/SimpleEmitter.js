@@ -1,7 +1,7 @@
+import SimpleEmitter from 'ui/utils/SimpleEmitter';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
 describe('SimpleEmitter class', function () {
-  var SimpleEmitter = require('ui/utils/SimpleEmitter');
-  var expect = require('expect.js');
-  var sinon = require('auto-release-sinon');
   var emitter;
 
   beforeEach(function () {

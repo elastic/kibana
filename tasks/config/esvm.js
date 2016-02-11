@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      branch: '2.1',
+      branch: 'master',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         network: {
@@ -59,6 +59,44 @@ module.exports = function (grunt) {
           },
           cluster: {
             name: 'esvm-ui'
+          }
+        }
+      }
+    },
+    withPlugins: {
+      options: {
+        version: '2.1.0',
+        directory: resolve(directory, 'withPlugins'),
+        plugins: [
+          'license',
+          'shield',
+          'marvel-agent',
+          'watcher'
+        ],
+        shield: {
+          users: [
+            {
+              username: 'kibana',
+              password: 'notsecure',
+              roles: ['kibana4_server']
+            },
+            {
+              username: 'user',
+              password: 'notsecure',
+              roles: ['kibana4', 'marvel']
+            },
+            {
+              username: 'admin',
+              password: 'notsecure',
+              roles: ['admin']
+            }
+          ]
+        },
+        config: {
+          marvel: {
+            agent: {
+              interval: '60s'
+            }
           }
         }
       }

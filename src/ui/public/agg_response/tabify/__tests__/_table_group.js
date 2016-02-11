@@ -1,11 +1,12 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 describe('Table Group class', function () {
   var TableGroup;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
+    TableGroup = Private(AggResponseTabifyTableGroupProvider);
   }));
 
   it('exposes tables array and empty aggConfig, key and title', function () {

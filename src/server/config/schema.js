@@ -1,11 +1,11 @@
-let get = require('lodash').get;
-let Joi = require('joi');
-let fs = require('fs');
-let path = require('path');
+import Joi from 'joi';
+import fs from 'fs';
+import path from 'path';
+import { get } from 'lodash';
+import { randomBytes } from 'crypto';
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
-const randomBytes = require('crypto').randomBytes;
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -18,6 +18,10 @@ module.exports = () => Joi.object({
     name: Joi.string().default(Joi.ref('$env')),
     dev: Joi.boolean().default(Joi.ref('$dev')),
     prod: Joi.boolean().default(Joi.ref('$prod'))
+  }).default(),
+
+  dev: Joi.object({
+    basePathProxyTarget: Joi.number().default(5603),
   }).default(),
 
   pid: Joi.object({

@@ -1,5 +1,3 @@
-define(function (require) {
-  return function ConfigValsService() {
-    return {};
-  };
-});
+export default function ConfigValsService() {
+  return {};
+};

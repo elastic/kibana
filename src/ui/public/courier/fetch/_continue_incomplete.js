@@ -1,27 +1,27 @@
-define(function (require) {
-  return function CourierFetchContinueIncompleteRequests(Private) {
-    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
 
-    function continueIncompleteRequests(strategy, requests, responses, fetchWithStrategy) {
-      var incomplete = [];
+export default function CourierFetchContinueIncompleteRequests(Private) {
+  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
 
-      responses.forEach(function (resp, i) {
-        if (resp === INCOMPLETE) {
-          incomplete.push(requests[i]);
-        }
+  function continueIncompleteRequests(strategy, requests, responses, fetchWithStrategy) {
+    var incomplete = [];
+
+    responses.forEach(function (resp, i) {
+      if (resp === INCOMPLETE) {
+        incomplete.push(requests[i]);
+      }
+    });
+
+    if (!incomplete.length) return responses;
+
+    return fetchWithStrategy(strategy, incomplete)
+    .then(function (completedResponses) {
+      return responses.map(function (prevResponse) {
+        if (prevResponse !== INCOMPLETE) return prevResponse;
+        return completedResponses.shift();
       });
+    });
+  }
 
-      if (!incomplete.length) return responses;
-
-      return fetchWithStrategy(strategy, incomplete)
-      .then(function (completedResponses) {
-        return responses.map(function (prevResponse) {
-          if (prevResponse !== INCOMPLETE) return prevResponse;
-          return completedResponses.shift();
-        });
-      });
-    }
-
-    return continueIncompleteRequests;
-  };
-});
+  return continueIncompleteRequests;
+};

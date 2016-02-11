@@ -1,13 +1,14 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggResponsePointSeriesInitYAxisProvider from 'ui/agg_response/point_series/_init_y_axis';
 describe('initYAxis', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var initYAxis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    initYAxis = Private(require('ui/agg_response/point_series/_init_y_axis'));
+    initYAxis = Private(AggResponsePointSeriesInitYAxisProvider);
   }));
 
   function agg() {

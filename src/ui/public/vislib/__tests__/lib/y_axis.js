@@ -1,8 +1,11 @@
-var _ = require('lodash');
-var d3 = require('d3');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import _ from 'lodash';
+import d3 from 'd3';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import $ from 'jquery';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
 
 var YAxis;
 var Data;
@@ -94,9 +97,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    YAxis = Private(require('ui/vislib/lib/y_axis'));
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    YAxis = Private(VislibLibYAxisProvider);
 
     expect($('.y-axis-wrapper')).to.have.length(0);
   }));

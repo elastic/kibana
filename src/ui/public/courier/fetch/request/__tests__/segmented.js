@@ -1,7 +1,9 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
+import CourierFetchRequestSearchProvider from 'ui/courier/fetch/request/search';
 describe('ui/courier/fetch/request/segmented', () => {
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
 
   let Promise;
   let $rootScope;
@@ -14,8 +16,8 @@ describe('ui/courier/fetch/request/segmented', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
-    searchReqStart = sinon.spy(Private(require('ui/courier/fetch/request/search')).prototype, 'start');
+    SegmentedReq = Private(CourierFetchRequestSegmentedProvider);
+    searchReqStart = sinon.spy(Private(CourierFetchRequestSearchProvider).prototype, 'start');
   }));
 
   describe('#start()', () => {

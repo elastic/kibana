@@ -1,9 +1,9 @@
 define(function (require) {
-  var Common = require('../../../support/pages/Common');
-  var HeaderPage = require('../../../support/pages/HeaderPage');
+  var Common = require('../../../support/pages/common');
+  var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/DiscoverPage');
-  var VisualizePage = require('../../../support/pages/VisualizePage');
+  var DiscoverPage = require('../../../support/pages/discover_page');
+  var VisualizePage = require('../../../support/pages/visualize_page');
   var expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager) {
@@ -80,21 +80,17 @@ define(function (require) {
         .then(function () {
           return headerPage.getSpinnerDone(); // only matches the hidden spinner
         })
-        .then(function sleep() {
-          return common.sleep(1000);
+        .then(function waitForVisualization() {
+          return visualizePage.waitForVisualization();
         });
       });
 
       bdd.describe('vertical bar chart', function indexPatternCreation() {
+        var testSubName = 'VerticalBarChart';
+        var vizName1 = 'Visualization ' + testSubName;
 
 
-        bdd.it('should save and load, take screenshot', function pageHeader() {
-
-          var testSubName = 'VerticalBarChart';
-          common.debug('Start of test' + testSubName + 'Visualization');
-          var vizName1 = 'Visualization ' + testSubName;
-          // var remote = this.remote;
-
+        bdd.it('should save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
             common.debug('Saved viz message = ' + message);
@@ -109,15 +105,14 @@ define(function (require) {
           .then(function () {
             return headerPage.getSpinnerDone(); // only matches the hidden spinner
           })
-          .then(function takeScreenshot() {
-            common.debug('Take screenshot');
-            common.saveScreenshot('./screenshot-' + testSubName + '.png');
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
           })
           .catch(common.handleError(this));
         });
 
 
-        bdd.it('should show correct chart', function pageHeader() {
+        bdd.it('should show correct chart, take screenshot', function pageHeader() {
 
           var expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
@@ -134,6 +129,10 @@ define(function (require) {
             common.debug('data=' + data);
             common.debug('data.length=' + data.length);
             expect(data).to.eql(expectedChartValues);
+          })
+          .then(function takeScreenshot() {
+            common.debug('Take screenshot');
+            common.saveScreenshot('./screenshot-' + testSubName + '.png');
           })
           .catch(common.handleError(this));
         });

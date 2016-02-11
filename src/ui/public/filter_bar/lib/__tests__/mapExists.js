@@ -1,14 +1,15 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FilterBarLibMapExistsProvider from 'ui/filter_bar/lib/mapExists';
 describe('Filter Bar Directive', function () {
   describe('mapExists()', function () {
 
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
     var mapExists;
     var $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapExists = Private(require('ui/filter_bar/lib/mapExists'));
+      mapExists = Private(FilterBarLibMapExistsProvider);
     }));
 
     it('should return the key and value for matching filters', function (done) {

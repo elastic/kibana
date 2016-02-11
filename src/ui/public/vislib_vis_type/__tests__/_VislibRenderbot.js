@@ -1,9 +1,15 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import VislibProvider from 'ui/vislib';
+import VislibVisProvider from 'ui/vislib/vis';
+import VisRenderbotProvider from 'ui/Vis/Renderbot';
+import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/VislibRenderbot';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import AggResponseIndexProvider from 'ui/agg_response/index';
 describe('renderbot', function exportWrapper() {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var sinon = require('auto-release-sinon');
   var vislib;
   var Vis;
   var Renderbot;
@@ -18,12 +24,12 @@ describe('renderbot', function exportWrapper() {
     ngMock.module('kibana');
 
     ngMock.inject(function ($injector, Private) {
-      vislib = Private(require('ui/vislib'));
-      Vis = Private(require('ui/vislib/vis'));
-      Renderbot = Private(require('ui/Vis/Renderbot'));
-      VislibRenderbot = Private(require('ui/vislib_vis_type/VislibRenderbot'));
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-      normalizeChartData = Private(require('ui/agg_response/index'));
+      vislib = Private(VislibProvider);
+      Vis = Private(VislibVisProvider);
+      Renderbot = Private(VisRenderbotProvider);
+      VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      normalizeChartData = Private(AggResponseIndexProvider);
     });
   }
 

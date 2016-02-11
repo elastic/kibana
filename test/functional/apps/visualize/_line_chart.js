@@ -1,9 +1,9 @@
 define(function (require) {
-  var Common = require('../../../support/pages/Common');
-  var HeaderPage = require('../../../support/pages/HeaderPage');
+  var Common = require('../../../support/pages/common');
+  var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/DiscoverPage');
-  var VisualizePage = require('../../../support/pages/VisualizePage');
+  var DiscoverPage = require('../../../support/pages/discover_page');
+  var VisualizePage = require('../../../support/pages/visualize_page');
   var expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager) {
@@ -85,12 +85,12 @@ define(function (require) {
       });
 
       bdd.describe('line charts', function indexPatternCreation() {
+        var testSubName = 'LineChart';
+        var vizName1 = 'Visualization ' + testSubName;
 
-        bdd.it('should be able to save and load, take screenshot', function pageHeader() {
+        bdd.it('should be able to save and load', function pageHeader() {
 
-          var testSubName = 'LineChart';
           common.debug('Start of test' + testSubName + 'Visualization');
-          var vizName1 = 'Visualization ' + testSubName;
           var remote = this.remote;
 
           return visualizePage.saveVisualization(vizName1)
@@ -104,16 +104,14 @@ define(function (require) {
           .then(function () {
             return visualizePage.loadSavedVisualization(vizName1);
           })
-          .then(function takeScreenshot() {
-            // take a snapshot just as an example.
-            common.debug('Take screenshot');
-            common.saveScreenshot('./screenshot-' + testSubName + '.png');
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
           })
           .catch(common.handleError(this));
         });
 
 
-        bdd.it('should show correct chart', function pageHeader() {
+        bdd.it('should show correct chart, take screenshot', function pageHeader() {
 
           var remote = this.remote;
 
@@ -121,6 +119,7 @@ define(function (require) {
           // it could also check the legend to verify the extensions
           var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
+          // sleep a bit before trying to get the chart data
           return common.sleep(3000)
           .then(function () {
             return visualizePage.getLineChartData()
@@ -134,6 +133,11 @@ define(function (require) {
               }
               common.debug('Done');
             });
+          })
+          .then(function takeScreenshot() {
+            // take a snapshot just as an example.
+            common.debug('Take screenshot');
+            common.saveScreenshot('./screenshot-' + testSubName + '.png');
           })
           .catch(common.handleError(this));
         });

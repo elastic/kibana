@@ -1,13 +1,14 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 describe('type normalizer (castMappingType)', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
   var fn;
   var fields;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    fn = Private(require('ui/index_patterns/_cast_mapping_type'));
+    fn = Private(IndexPatternsCastMappingTypeProvider);
   }));
 
   it('should be a function', function () {

@@ -457,3 +457,14 @@ fieldset {
     overflow-y: hidden;
   }
 }
+
+.list-group {
+  .list-group-item {
+    &.active,
+    &.active:hover,
+    &.active:focus {
+      background-color: @list-group-menu-item-active-bg;
+      cursor: default;
+    }
+  }
+}
