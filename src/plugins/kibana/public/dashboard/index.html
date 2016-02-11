@@ -1,4 +1,4 @@
-<div dashboard-app class="app-container dashboard-container" chrome-context>
+<div dashboard-app class="app-container dashboard-container">
   <navbar name="dashboard-options">
     <div class="button-group dashboard-actions" role="toolbar">
       <button ng-click="newDashboard()"
@@ -48,14 +48,6 @@
       <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
-
-  <config
-    ng-show="timefilter.enabled"
-    config-template="pickerTemplate"
-    config-object="timefilter"
-    config-close="pickerTemplate.close">
-  </config>
-
   <config config-template="configTemplate" config-object="opts"></config>
 
   <navbar ng-show="chrome.getVisible()" name="dashboard-search">

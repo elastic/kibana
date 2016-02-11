@@ -1,4 +1,4 @@
-<div ng-controller="discover" class="app-container" chrome-context>
+<div ng-controller="discover" class="app-container">
   <navbar name="discover-options">
     <div class="discover-info">
       <span ng-show="opts.savedSearch.id" class="discover-info-title">
@@ -42,12 +42,6 @@
     <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
-  <config
-    ng-show="timefilter.enabled"
-    config-template="pickerTemplate"
-    config-object="timefilter"
-    config-close="pickerTemplate.close">
-  </config>
   <config
     config-template="configTemplate"
     config-object="opts"

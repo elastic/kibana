@@ -1,4 +1,4 @@
-<div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}" chrome-context>
+<div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
   <navbar ng-if="chrome.getVisible()" name="visualize-options">
     <div class="button-group vis-editor-actions">
       <button ng-click="startOver()" aria-label="New Visualization">
@@ -42,12 +42,6 @@
       <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
-  <config
-    ng-show="timefilter.enabled"
-    config-template="pickerTemplate"
-    config-object="timefilter"
-    config-close="pickerTemplate.close">
-  </config>
   <config
     ng-if="chrome.getVisible()"
     config-template="configTemplate"
