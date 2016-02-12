@@ -1,16 +1,16 @@
-var url = require('url');
-var _ = require('lodash');
-var readFile = (file) => require('fs').readFileSync(file, 'utf8');
-var http = require('http');
-var https = require('https');
+import url from 'url';
+import _ from 'lodash';
+const readFile = (file) => require('fs').readFileSync(file, 'utf8');
+import http from 'http';
+import https from 'https';
 
 module.exports = _.memoize(function (server) {
-  var config = server.config();
-  var target = url.parse(config.get('elasticsearch.url'));
+  const config = server.config();
+  const target = url.parse(config.get('elasticsearch.url'));
 
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
-  var agentOptions = {
+  const agentOptions = {
     rejectUnauthorized: config.get('elasticsearch.ssl.verify')
   };
 

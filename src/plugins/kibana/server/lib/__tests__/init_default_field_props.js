@@ -1,6 +1,6 @@
-const initDefaultFieldProps = require('../init_default_field_props');
-const expect = require('expect.js');
-const _ = require('lodash');
+import initDefaultFieldProps from '../init_default_field_props';
+import expect from 'expect.js';
+import _ from 'lodash';
 let fields;
 
 const testData = [

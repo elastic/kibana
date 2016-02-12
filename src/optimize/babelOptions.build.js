@@ -1,4 +1,4 @@
-var cloneDeep = require('lodash').cloneDeep;
+import { cloneDeep } from 'lodash';
 var fromRoot = require('path').resolve.bind(null, __dirname, '../../');
 
 if (!process.env.BABEL_CACHE_PATH) {

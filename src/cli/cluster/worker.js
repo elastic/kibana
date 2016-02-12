@@ -1,9 +1,9 @@
-let _ = require('lodash');
-let cluster = require('cluster');
+import _ from 'lodash';
+import cluster from 'cluster';
 let { resolve } = require('path');
 let { EventEmitter } = require('events');
 
-let fromRoot = require('../../utils/fromRoot');
+import fromRoot from '../../utils/fromRoot';
 
 let cliPath = fromRoot('src/cli');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);

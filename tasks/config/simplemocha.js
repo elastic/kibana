@@ -1,10 +1,4 @@
-var wrap = require('lodash').wrap;
-var Mocha = require('mocha');
-
-Mocha.prototype.run = wrap(Mocha.prototype.run, function (orig) {
-  require('../../test/mocha_setup');
-  orig.call(this);
-});
+require('../../test/mocha_setup');
 
 module.exports = {
   options: {

@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function (map, match, filename, line, col) {
   if (!map) return match;

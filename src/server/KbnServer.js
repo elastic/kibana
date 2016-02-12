@@ -1,7 +1,7 @@
-let { constant, once, compact, flatten } = require('lodash');
-let { promisify, resolve, fromNode } = require('bluebird');
-let { isWorker } = require('cluster');
-let Hapi = require('hapi');
+import Hapi from 'hapi';
+import { constant, once, compact, flatten } from 'lodash';
+import { promisify, resolve, fromNode } from 'bluebird';
+import { isWorker } from 'cluster';
 
 let utils = require('requirefrom')('src/utils');
 let rootDir = utils('fromRoot')('.');

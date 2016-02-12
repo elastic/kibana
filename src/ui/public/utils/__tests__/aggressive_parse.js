@@ -1,8 +1,8 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import * as aggressiveParse from 'ui/utils/aggressive_parse';
 describe('aggressiveParse', () => {
-  const _ = require('lodash');
-  const expect = require('expect.js');
-  const sinon = require('sinon');
-  const aggressiveParse = require('ui/utils/aggressive_parse');
 
   let object;
   let jsonFn;

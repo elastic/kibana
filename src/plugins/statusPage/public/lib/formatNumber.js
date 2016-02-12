@@ -1,10 +1,10 @@
 
-var moment = require('moment');
-var numeral = require('numeral');
+import moment from 'moment';
+import numeral from 'numeral';
 
 module.exports = function formatNumber(num, which) {
-  var format = '0.00';
-  var postfix = '';
+  let format = '0.00';
+  let postfix = '';
   switch (which) {
     case 'time':
       return moment(num).format('HH:mm:ss');

@@ -1,8 +1,8 @@
 
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/directives/auto_select_if_only_one');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/directives/auto_select_if_only_one';
 
 describe('Auto-select if only one directive', function () {
   var $compile;
