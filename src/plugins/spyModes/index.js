@@ -1,6 +1,6 @@
 module.exports = function (kibana) {
   return new kibana.Plugin({
-    uiExports: {
+    ui: {
       spyModes: [
         'tableSpyMode.js',
         'reqRespStatsSpyMode.js',
