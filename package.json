@@ -57,7 +57,8 @@
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
     "mocha": "mocha",
-    "mocha:debug": "mocha --debug-brk"
+    "mocha:debug": "mocha --debug-brk",
+    "sterilize": "grunt sterilize"
   },
   "repository": {
     "type": "git",
