@@ -24,6 +24,7 @@ module.exports = (kibana) => {
 
         if (testingPluginId) {
           const plugin = plugins.byId[testingPluginId];
+          if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + testingPluginId);
 
           // add the modules from all of this plugins apps
           for (let app of plugin.apps) {
