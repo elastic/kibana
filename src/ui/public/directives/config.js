@@ -56,10 +56,10 @@ module.directive('config', function ($compile) {
         if (tmpl) {
           html = $compile('' +
             '<div class="config" ng-show="configTemplate">' +
+              wrapTmpl(tmpl) +
             '  <div class="config-close remove">' +
             '    <i class="fa fa-chevron-circle-up" ng-click="close()"></i>' +
             '  </div>' +
-              wrapTmpl(tmpl) +
             '</div>' +
             ''
           )(tmpScope);
