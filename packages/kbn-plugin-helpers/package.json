@@ -1,0 +1,28 @@
+{
+  "name": "kibana-plugin-helpers",
+  "version": "5.0.0-beta1",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "plugin-helper": "bin/plugin-helper.js"
+  },
+  "keywords": [
+    "kibana",
+    "kibana-plugin"
+  ],
+  "author": "Spencer Alger <email@spalger.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "lint": "eslint bin/ help/ tasks/"
+  },
+  "dependencies": {
+    "@elastic/eslint-config-kibana": "0.0.2",
+    "babel-eslint": "4.1.8",
+    "commander": "^2.9.0",
+    "eslint": "1.10.3",
+    "eslint-plugin-mocha": "1.1.0",
+    "gulp-rename": "1.2.2",
+    "gulp-zip": "3.1.0",
+    "vinyl-fs": "2.3.1"
+  }
+}
