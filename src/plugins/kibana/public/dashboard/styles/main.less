@@ -36,6 +36,30 @@ dashboard-grid {
     width: 25px;
   }
 
+  .gs-w {
+    border: 2px dashed transparent;
+
+    &:hover {
+      border-color: @kibanaGray4;
+
+      dashboard-panel {
+        .visualize-show-spy {
+          visibility: visible;
+        }
+        .panel .panel-heading {
+          background-color: @kibanaGray6;
+          &:hover {
+            cursor: pointer;
+          }
+          .btn-group {
+            display: block !important;
+          }
+        }
+      }
+
+    }
+  }
+
   i.remove {
     cursor: pointer;
   }
@@ -58,15 +82,23 @@ dashboard-grid {
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+      border: 0 solid transparent;
 
       .panel-heading {
+        padding: 0px 0px 0px 5px;
         flex: 0 0 auto;
         white-space: nowrap;
         display: flex;
         border-top-right-radius: 0;
         border-top-left-radius: 0;
+        background-color: @white;
+        border: none;
 
-        div.btn-group {
+        .btn-group {
+          a {
+            color: inherit;
+          }
+          display: none;
           white-space: nowrap;
           flex: 0 0 auto;
         }
@@ -97,6 +129,10 @@ dashboard-grid {
             color: @dashboard-panel-heading-link-hover-color;
           }
         }
+      }
+
+      .visualize-show-spy {
+        visibility: hidden;
       }
 
       .load-error {
