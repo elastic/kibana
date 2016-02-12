@@ -3,6 +3,7 @@ import _ from 'lodash';
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
 import chromeConfigControlsRegistry from 'ui/registry/chrome_config_controls';
 import UiModules from 'ui/modules';
+import spinnerHtml from './active_http_spinner.html';
 
 export default function (chrome, internals) {
 
@@ -16,6 +17,12 @@ export default function (chrome, internals) {
         const configs = Private(chromeConfigControlsRegistry);
 
         const controls = [
+          {
+            name: 'active http requests',
+            order: -100,
+            template: spinnerHtml
+          },
+
           ...navs.map(function (nav) {
             return {
               template: `<!-- nav control ${nav.name} -->${nav.template}`,

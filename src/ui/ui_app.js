@@ -36,7 +36,7 @@ class UiApp {
   getModules() {
     return _.chain([
       this.uiExports.find(_.get(this, 'spec.uses', [])),
-      this.uiExports.find(['chromeNavControls', 'sledgehammers', 'chromeConfigControls']),
+      this.uiExports.find(['chromeNavControls', 'hacks', 'chromeConfigControls']),
     ])
     .flatten()
     .uniq()

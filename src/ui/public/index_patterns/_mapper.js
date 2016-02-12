@@ -61,7 +61,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
       return promise.then(function (indexList) {
         return es.indices.getFieldMapping({
           index: indexList,
-          field: '*',
+          fields: '*',
           ignoreUnavailable: _.isArray(indexList),
           allowNoIndices: false,
           includeDefaults: true
