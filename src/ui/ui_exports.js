@@ -67,7 +67,6 @@ class UiExports {
     }
 
     switch (type) {
-      case 'app':
       case 'apps':
         return (plugin, spec) => {
           for (const rawSpec of arr(spec)) {
@@ -85,33 +84,23 @@ class UiExports {
           }
         };
 
-      case 'visType':
       case 'visTypes':
-      case 'fieldFormat':
       case 'fieldFormats':
-      case 'spyMode':
       case 'spyModes':
-      case 'chromeNavControl':
       case 'chromeNavControls':
-      case 'navbarExtension':
       case 'navbarExtensions':
-      case 'settingsSection':
       case 'settingsSections':
-      case 'docView':
       case 'docViews':
-      case 'sledgehammer':
       case 'sledgehammers':
         return (plugin, spec) => {
           this.extendAliases(plugin, type, spec);
         };
 
-      case 'bundle':
       case 'bundles':
         return (plugin, specs) => {
           this.bundleProviders = this.bundleProviders.concat(arr(specs));
         };
 
-      case 'alias':
       case 'aliases':
         return (plugin, specs) => {
           for (const spec of specs) {
@@ -120,6 +109,11 @@ class UiExports {
             }
           }
         };
+
+      default:
+        if (!type.endsWith('s')) {
+          return this.exportConsumer(`${type}s`);
+        }
     }
   }
 
