@@ -7,13 +7,13 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>Indices</th>
+            <th>Index Patterns</th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="pattern in indexPattern.list">
             <td>
-              <a href ng-click="goToUrl(pattern)">{{pattern}}</a>
+              <a class="index-link"  href ng-click="goToUrl(pattern)">{{pattern}}</a>
             </td>
           </tr>
         </tbody>
