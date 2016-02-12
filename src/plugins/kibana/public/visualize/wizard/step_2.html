@@ -4,20 +4,22 @@
     <div class="wizard-vis-column first">
       <h3>From a New Search</h3>
       <!-- Index patterns -->
-      <table class="step-2-table table table-striped">
-        <thead>
-          <tr>
-            <th class="step-2-table-header">Index Patterns</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="pattern in indexPattern.list">
-            <td>
-              <a class="index-link"  href ng-click="goToUrl(pattern)">{{pattern}}</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="step-1-wizard">
+        <table class="step-2-table table table-striped">
+          <thead>
+            <tr>
+              <th class="step-2-table-header">Index Patterns</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="pattern in indexPattern.list">
+              <td>
+                <a class="index-link"  href ng-click="goToUrl(pattern)">{{pattern}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="wizard-vis-column">
