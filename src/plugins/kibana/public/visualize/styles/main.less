@@ -4,6 +4,34 @@
 
 @icon-background-color: #416376;
 
+ul.li-not-striped {
+  li:nth-child(odd) {
+    background-color: transparent !important;
+  }
+
+  li:nth-child(even) {
+    background-color: transparent !important;
+  }
+
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+ul.li-striped {
+  li {
+    border: none;
+  }
+
+  li:nth-child(odd) {
+    background-color: @kibanaGray6;
+  }
+
+  li:nth-child(even) {
+    background-color: @white;
+  }
+}
+
 .step-1-wizard {
   flex: 1;
   background-color: @kibanaGray6;
@@ -72,13 +100,12 @@
 }
 
 .table-type-label {
-  color: @kibanaGray2;
+  color: @kibanaGray2 !important;
   font-weight: normal;
-  text-align: center;
 }
 
 .table-label {
-  color: @kibanaGray1;
+  color: @kibanaGray1 !important;
   font-weight: normal;
 }
 
@@ -117,7 +144,7 @@
 
 .saved-object-finder-input {
   float: left !important;
-  flex: 10;
+  flex: 8;
 
   span {
     padding: 5px 0px;
@@ -132,14 +159,39 @@
   }
 }
 
+.saved-object-finder-column-manage {
+  flex: 3;
+  padding: 5px;
+  text-align: left;
+  min-width: 80px;
+}
+
 .saved-object-finder-column {
   text-align: center;
   padding: 5px;
-  flex: 2;
+  flex: 1;
+  min-width: 80px;
 
   span {
     color: @kibanaGray3;
   }
+}
+
+.list-header {
+  padding-top: 0;
+}
+
+.list-type {
+  width: 50px;
+  text-align: center;
+}
+
+.list-name {
+  flex: 1;
+}
+
+.list-body {
+  padding: 8px 15px;
 }
 
 .saved-object-finder-table {

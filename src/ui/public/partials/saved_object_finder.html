@@ -8,7 +8,7 @@
         <input
           input-focus
           ng-model="filter"
-          placeholder="Filter..."
+          ng-attr-placeholder="{{finder.properties.noun | capitalize}} Filter"
           ng-keydown="finder.filterKeyDown($event)"
           class="form-control"
           name="filter"
@@ -17,49 +17,53 @@
       <div class="saved-object-finder-column col-md-2">
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
-      <div class="saved-object-finder-column col-md-2">
-        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage</a>
+      <div class="saved-object-finder-column-manage col-md-2">
+        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage {{finder.properties.nouns | capitalize}}</a>
       </div>
     </div>
   </div>
 </form>
 <paginate list="finder.hits" per-page="20" class="paginate-style">
-  <table class="list-group list-group-menu table table-striped"
+  <ul class="li-striped list-group list-group-menu"
     ng-class="{'select-mode': finder.selector.enabled}">
 
-    <thead ng-show="finder.properties.noun === 'Visualization'">
-      <tr ng-hide="finder.hits.length === 0">
-        <th class="table-type-label col-md-1 ">Type</th>
-        <th class="table-label col-md-11">
+    <li class="list-header list-group-item list-group-menu-item">
+      <ul class="li-not-striped">
+        <li class="list-type table-type-label" ng-show="finder.properties.noun === 'Visualization'">Type</li>
+        <li class="list-name table-label">
           Name
           <!-- <span class="fa fa-caret-up"></span> -->
           <span class="fa fa-caret-down"></span>
-        </th>
-      </tr>
-    <thead>
-    <tbody>
-      <tr ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
-          ng-repeat="hit in page"
-          ng-keydown="finder.hitKeyDown($event, page, paginate)"
-          ng-click="finder.onChoose(hit, $event)">
-        <th ng-show="finder.properties.noun === 'Visualization'"
-            class="first-cell col-md-1" scope="row">
-          <a ng-href="{{finder.makeUrl(hit)}}"
-            ng-blur="finder.hitBlur($event)"
-            ng-click="finder.preventClick($event)">
-            <i aria-hidden="true" class="fa icon-color" ng-if="hit.icon" ng-class="hit.icon"></i>
-          </a>
-        </th>
-        <td class="link-color col-md-11" >
-          {{hit.title}}
-          <p ng-if="hit.description" ng-bind="hit.description"></p>
-        </td>
-      </tr>
-      <tr ng-if="finder.hits.length === 0">
-        <td>
-          <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </li>
+      </ul>
+    </li>
+
+    <li
+      class="list-body list-group-item list-group-menu-item"
+      ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
+      ng-repeat="hit in page"
+      ng-keydown="finder.hitKeyDown($event, page, paginate)"
+      ng-click="finder.onChoose(hit, $event)">
+
+      <a ng-href="{{finder.makeUrl(hit)}}"
+          ng-blur="finder.hitBlur($event)"
+          ng-click="finder.preventClick($event)">
+        <ul class="li-not-striped">
+          <li ng-show="finder.properties.noun === 'Visualization'" class="list-type">
+            <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+          </li>
+          <li class="list-name">
+            {{hit.title}}
+            <p ng-if="hit.description" ng-bind="hit.description"></p>
+          </li>
+        </ul>
+      </a>
+
+    </li>
+    <li
+      class="list-group-item list-group-no-results"
+      ng-if="finder.hits.length === 0">
+      <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
+    </li>
+  </ul>
 </paginate>
