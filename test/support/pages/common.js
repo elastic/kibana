@@ -154,11 +154,11 @@ define(function (require) {
       var self = this;
 
       return self.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.content > .application')
+      .findByCssSelector('.app-wrapper .application')
       .then(function () {
         return self.runScript(function () {
           var $ = window.$;
-          var $scope = $('.content > .application').scope();
+          var $scope = $('.app-wrapper .application').scope();
           return $scope ? $scope.chrome.getApp() : {};
         });
       });

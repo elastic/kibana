@@ -28,13 +28,13 @@ routes
 
 chrome
 .setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
+  'logo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b',
+  'smallLogo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b'
 })
 .setNavBackground('#222222')
 .setTabDefaults({
   resetWhenActive: true,
-  lastUrlStore: window.sessionStore,
+  lastUrlStore: window.sessionStorage,
   activeIndicatorColor: '#656a76'
 })
 .setTabs([

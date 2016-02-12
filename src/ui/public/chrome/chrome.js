@@ -9,6 +9,7 @@ import $ from 'jquery';
 import 'ui/timefilter';
 import 'ui/private';
 import 'ui/promises';
+import 'ui/directives/kbnSrc';
 
 var chrome = {};
 var internals = _.defaults(

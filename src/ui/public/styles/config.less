@@ -8,16 +8,15 @@
   border-bottom-color: @config-border;
 
   .config-close {
-    width: 100%;
-    background-color: @config-close-bg;
-    border-radius: 0;
-    @shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 5px rgba(0,0,0,.075);
-    .box-shadow(@shadow);
-    text-align: center;
+    text-align: right;
+    line-height: 1em;
+    position: absolute;
+    right: 20px;
+    bottom: 25px;
   }
 
   .container-fluid {
-    padding: 10px 10px;
     background-color: @config-bg;
+    padding: 10px;
   }
 }

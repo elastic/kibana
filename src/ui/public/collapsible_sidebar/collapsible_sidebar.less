@@ -5,8 +5,6 @@
   z-index: 1;
 
   .sidebar-collapser {
-    background-color: @collapser-bg;
-    height: 100%;
     position: absolute;
     top: 0;
     right: -(@collapser-width);
@@ -14,21 +12,15 @@
     cursor: pointer;
     z-index: -1;
 
-    &:hover {
-      background-color: @collapser-hover-bg;
-      border-color: @collapser-hover-bg;
-      color: @collapser-hover-color;
-    }
-
     .chevron-cont{
       position: absolute;
-      left: 2px;
-      top: 8px;
-      font-size: 10px;
+      left: 5px;
+      top: 5px;
+      color: @kibanaGray4;
 
       &:before {
         font-family: FontAwesome;
-        content: "\F053";
+        content: "\F137";
       }
     }
   }
@@ -45,7 +37,7 @@
     .sidebar-collapser {
       visibility: visible;
       .chevron-cont:before {
-        content: "\F054";
+        content: "\F138";
       }
     }
   }

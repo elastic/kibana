@@ -28,7 +28,7 @@ define(function (require) {
 
     getTimespanText: function getTimespanText() {
       return thisTime
-      .findByCssSelector('a.navbar-timepicker-time-desc pretty-duration.ng-isolate-scope')
+      .findByCssSelector('.navbar-timepicker-time-desc pretty-duration')
       .getVisibleText();
     },
 
@@ -211,24 +211,6 @@ define(function (require) {
       return thisTime
       .findByCssSelector('.url')
       .getProperty('value');
-    },
-
-    clickLegendExpand: function clickLegendExpand() {
-      return thisTime
-      .findByCssSelector('.fa-chevron-left')
-      .click();
-    },
-
-    clickLegendCollapse: function clickLegendCollapse() {
-      return thisTime
-      .findByCssSelector('div.legend-toggle > i.fa-chevron-right')
-      .click();
-    },
-
-    getLegendWidth: function getLegendWidth() {
-      return thisTime
-      .findByCssSelector('.legend-col-wrapper')
-      .getProperty('clientWidth');
     },
 
     clickSidebarExpand: function clickSidebarExpand() {
