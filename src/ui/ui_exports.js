@@ -46,12 +46,8 @@ class UiExports {
   // when module ids are defined in a uiExports spec they can
   // be defined as relative to the public directory
   resolveModulePath(plugin, moduleId) {
-    const modulePrefix = `plugins/${plugin.id}`;
-    const isAbsolute = moduleId.startsWith('/') || moduleId.startsWith('\\');
-    const isPrefixed = moduleId.startsWith(modulePrefix);
-    const treatRelative = !isAbsolute && !isPrefixed;
-
-    if (treatRelative) return join(modulePrefix, moduleId);
+    const isRelative = moduleId.startsWith('./') || moduleId.startsWith('.\\');
+    if (isRelative) return join(`plugins/${plugin.id}`, moduleId);
     return moduleId;
   }
 
