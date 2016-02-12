@@ -4,7 +4,7 @@ import { createInterface } from 'readline';
 
 export default function (grunt) {
 
-  grunt.registerTask('scrub', function () {
+  grunt.registerTask('sterilize', function () {
 
     const cmd = 'git clean -fdx';
     const ignores = [
