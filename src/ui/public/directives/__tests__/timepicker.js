@@ -152,7 +152,7 @@ describe('timepicker directive', function () {
 
     it('should default the interval on the courier with incorrect values', function (done) {
       // Change refresh interval and digest
-      $scope.setRefreshInterval('undefined');
+      $scope.setRefreshInterval();
       $elem.scope().$digest();
       expect($courier.searchLooper.loopInterval()).to.be(0);
       done();

@@ -279,9 +279,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
           };
         }
 
-        if (flatState.body.size === 0) {
-          flatState.search_type = 'count';
-        } else {
+        if (flatState.body.size > 0) {
           var computedFields = flatState.index.getComputedFields();
           flatState.body.fields = computedFields.fields;
           flatState.body.script_fields = flatState.body.script_fields || {};
@@ -308,6 +306,21 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
         };
 
         /**
+        * Translate a filter into a query to support es 3+
+        * @param  {Object} filter - The fitler to translate
+        * @return {Object} the query version of that filter
+        */
+        var translateToQuery = function (filter) {
+          if (!filter) return;
+
+          if (filter.query) {
+            return filter.query;
+          }
+
+          return filter;
+        };
+
+        /**
          * Clean out any invalid attributes from the filters
          * @param {object} filter The filter to clean
          * @returns {object}
@@ -326,19 +339,45 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
             });
 
             flatState.body.query = {
-              filtered: {
-                query: flatState.body.query,
-                filter: {
-                  bool: {
-                    must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
-                    must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
-                  }
-                }
+              bool: {
+                must: (
+                  [flatState.body.query].concat(
+                    (flatState.filters || [])
+                    .filter(filterNegate(false))
+                    .map(translateToQuery)
+                    .map(cleanFilter)
+                  )
+                ),
+                must_not: (
+                  (flatState.filters || [])
+                  .filter(filterNegate(true))
+                  .map(translateToQuery)
+                  .map(cleanFilter)
+                )
               }
             };
           }
           delete flatState.filters;
         }
+
+        // re-write filters within filter aggregations
+        (function recurse(aggBranch) {
+          if (!aggBranch) return;
+          Object.keys(aggBranch).forEach(function (id) {
+            const agg = aggBranch[id];
+
+            if (agg.filters) {
+              // translate filters aggregations
+              const filters = agg.filters.filters;
+
+              Object.keys(filters).forEach(function (filterId) {
+                filters[filterId] = translateToQuery(filters[filterId]);
+              });
+            }
+
+            recurse(agg.aggs || agg.aggregations);
+          });
+        }(flatState.body.aggs || flatState.body.aggregations));
       }
 
       return flatState;

@@ -1,6 +1,7 @@
 import CourierErrorHandlersProvider from 'ui/courier/_error_handlers';
+import Notifier from 'ui/notify/notifier';
 
-export default function RequestErrorHandlerFactory(Private, Notifier) {
+export default function RequestErrorHandlerFactory(Private) {
   var errHandlers = Private(CourierErrorHandlersProvider);
 
   var notify = new Notifier({

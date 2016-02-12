@@ -93,8 +93,6 @@ export default function CourierSegmentedReqProvider(es, Private, Promise, Notifi
         params.body.size = self._pickSizeForIndices(indices);
       }
 
-      if (params.body.size === 0) params.search_type = 'count';
-
       return params;
     });
   };
@@ -125,7 +123,6 @@ export default function CourierSegmentedReqProvider(es, Private, Promise, Notifi
     this._handle.emit('complete');
     return SearchReq.prototype.complete.call(this);
   };
-
 
   /*********
    ** SegmentedReq specific methods

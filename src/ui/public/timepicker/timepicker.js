@@ -145,7 +145,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       $scope.setRefreshInterval = function (interval) {
-        interval = _.clone(interval);
+        interval = _.clone(interval || {});
         notify.log('before: ' + interval.pause);
         interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
 
@@ -158,4 +158,3 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
     }
   };
 });
-
