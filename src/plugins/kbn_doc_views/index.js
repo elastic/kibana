@@ -4,7 +4,8 @@ module.exports = function (kibana) {
 
     ui: {
       docViews: [
-        'kbn_doc_views.js'
+        './views/table.js',
+        './views/json.js'
       ]
     }
 

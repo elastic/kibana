@@ -2,9 +2,7 @@ module.exports = function (kibana) {
 
   return new kibana.Plugin({
     ui: {
-      visTypes: [
-        'table_vis.js'
-      ]
+      visType: './table_vis.js'
     }
   });
 

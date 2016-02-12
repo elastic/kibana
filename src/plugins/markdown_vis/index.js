@@ -3,9 +3,7 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
 
     ui: {
-      visTypes: [
-        'markdown_vis.js'
-      ]
+      visType: './markdown_vis.js'
     }
 
   });
