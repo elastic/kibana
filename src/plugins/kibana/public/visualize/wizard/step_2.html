@@ -4,10 +4,10 @@
     <div class="wizard-vis-column first">
       <h3>From a New Search</h3>
       <!-- Index patterns -->
-      <table class="table table-striped">
+      <table class="step-2-table table table-striped">
         <thead>
           <tr>
-            <th>Index Patterns</th>
+            <th class="step-2-table-header">Index Patterns</th>
           </tr>
         </thead>
         <tbody>
@@ -24,6 +24,7 @@
       <h3>Or, From a Saved Search</h3>
       <!-- Saved searches -->
       <saved-object-finder
+          class="step-1-wizard"
           title="Saved Searches"
           type="searches"
           make-url="step2WithSearchUrl">
