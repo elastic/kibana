@@ -1,6 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
+import escapeAttr from 'ui/utils/escape_attr';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
 import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
 export default function DispatchClass(Private) {
@@ -230,7 +231,7 @@ export default function DispatchClass(Private) {
   Dispatch.prototype.highlightLegend = function (element) {
     var label = this.getAttribute('data-label');
     if (!label) return;
-    $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
+    $('[data-label]', element.parentNode).not('[data-label="' + escapeAttr(label) + '"]').css('opacity', 0.5);
   };
 
   /**

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import html from 'ui/visualize/visualize_legend.html';
 import $ from 'jquery';
 import d3 from 'd3';
+import escapeAttr from 'ui/utils/escape_attr';
 import findByParam from 'ui/utils/find_by_param';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
@@ -30,7 +31,7 @@ uiModules.get('kibana')
       });
 
       $scope.highlightSeries = function (label) {
-        $('[data-label]', $elem.siblings()).not('[data-label="' + label + '"]').css('opacity', 0.5);
+        $('[data-label]', $elem.siblings()).not('[data-label="' + escapeAttr(label) + '"]').css('opacity', 0.5);
       };
 
       $scope.unhighlightSeries = function () {
