@@ -1,86 +1,87 @@
 import _ from 'lodash';
 import angular from 'angular';
-define(function (require) {
-  return function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
-    var notify = new Notifier();
+import ConfigValsProvider from 'ui/config/_vals';
+import Notifier from 'ui/notify/notifier';
 
-    var vals = Private(require('ui/config/_vals'));
+export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
+  var notify = new Notifier();
 
-    return function DelayedUpdater(doc) {
-      var updater = this;
-      var queue = [];
-      var log = {};
-      var timer;
+  var vals = Private(ConfigValsProvider);
 
-      updater.fire = function () {
-        clearTimeout(timer);
+  return function DelayedUpdater(doc) {
+    var updater = this;
+    var queue = [];
+    var log = {};
+    var timer;
 
-        // only fire once
-        if (updater.fired) return;
-        updater.fired = true;
+    updater.fire = function () {
+      clearTimeout(timer);
 
-        var method;
-        var body;
-        var updated = [];
-        var deleted = [];
+      // only fire once
+      if (updater.fired) return;
+      updater.fired = true;
 
-        // seperate the log into lists
-        Object.keys(log).forEach(function (key) {
-          if (log[key] === 'updated') updated.push(key);
-          else deleted.push(key);
-        });
+      var method;
+      var body;
+      var updated = [];
+      var deleted = [];
 
-        if (deleted.length) {
-          method = 'doIndex';
-          body = _.clone(vals);
-        } else {
-          method = 'doUpdate';
-          body = _.pick(vals, updated);
+      // seperate the log into lists
+      Object.keys(log).forEach(function (key) {
+        if (log[key] === 'updated') updated.push(key);
+        else deleted.push(key);
+      });
+
+      if (deleted.length) {
+        method = 'doIndex';
+        body = _.clone(vals);
+      } else {
+        method = 'doUpdate';
+        body = _.pick(vals, updated);
+      }
+
+      doc[method](vals)
+      .then(
+        function (resp) {
+          queue.forEach(function (q) { q.resolve(resp); });
+        },
+        function (err) {
+          queue.forEach(function (q) { q.reject(err); });
         }
-
-        doc[method](vals)
-        .then(
-          function (resp) {
-            queue.forEach(function (q) { q.resolve(resp); });
-          },
-          function (err) {
-            queue.forEach(function (q) { q.reject(err); });
-          }
-        )
-        .finally(function () {
-          $rootScope.$broadcast('change:config', updated.concat(deleted));
-        });
-      };
-
-      updater.update = function (key, val, silentAndLocal) {
-        var newVal = val;
-        var oldVal = vals[key];
-
-        if (angular.equals(newVal, oldVal)) {
-          return Promise.resolve();
-        }
-        else if (newVal == null) {
-          delete vals[key];
-          log[key] = 'deleted';
-        }
-        else {
-          vals[key] = newVal;
-          log[key] = 'updated';
-        }
-
-        if (silentAndLocal) return Promise.resolve();
-
-        var defer = Promise.defer();
-        queue.push(defer);
-        notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
-        $rootScope.$broadcast('change:config.' + key, newVal, oldVal);
-
-        // reset the fire timer
-        clearTimeout(timer);
-        timer = setTimeout(updater.fire, 200);
-        return defer.promise;
-      };
+      )
+      .finally(function () {
+        $rootScope.$broadcast('change:config', updated.concat(deleted));
+      });
     };
 
+    updater.update = function (key, val, silentAndLocal) {
+      var newVal = val;
+      var oldVal = vals[key];
+
+      if (angular.equals(newVal, oldVal)) {
+        return Promise.resolve();
+      }
+      else if (newVal == null) {
+        delete vals[key];
+        log[key] = 'deleted';
+      }
+      else {
+        vals[key] = newVal;
+        log[key] = 'updated';
+      }
+
+      if (silentAndLocal) return Promise.resolve();
+
+      var defer = Promise.defer();
+      queue.push(defer);
+      notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
+      $rootScope.$broadcast('change:config.' + key, newVal, oldVal);
+
+      // reset the fire timer
+      clearTimeout(timer);
+      timer = setTimeout(updater.fire, 200);
+      return defer.promise;
+    };
   };
-});
+
+};

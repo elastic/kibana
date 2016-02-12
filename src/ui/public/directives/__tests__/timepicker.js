@@ -100,8 +100,8 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setRefreshInterval() that sets interval variable', function (done) {
-      $scope.setRefreshInterval('interval');
-      expect($scope.interval).to.be('interval');
+      $scope.setRefreshInterval({ value : 10000  });
+      expect($scope.interval).to.have.property('value', 10000);
       done();
     });
 
@@ -152,7 +152,7 @@ describe('timepicker directive', function () {
 
     it('should default the interval on the courier with incorrect values', function (done) {
       // Change refresh interval and digest
-      $scope.setRefreshInterval('undefined');
+      $scope.setRefreshInterval();
       $elem.scope().$digest();
       expect($courier.searchLooper.loopInterval()).to.be(0);
       done();

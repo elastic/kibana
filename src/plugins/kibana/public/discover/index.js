@@ -7,9 +7,7 @@ import 'plugins/kibana/discover/controllers/discover';
 import 'plugins/kibana/discover/styles/main.less';
 import 'ui/doc_table/components/table_row';
 import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
-define(function (require) {
 
-  // preload
+// preload
 
-  savedObjectRegistry.register(require('plugins/kibana/discover/saved_searches/saved_search_register'));
-});
+savedObjectRegistry.register(require('plugins/kibana/discover/saved_searches/saved_search_register'));

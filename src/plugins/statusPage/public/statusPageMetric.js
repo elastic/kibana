@@ -5,6 +5,8 @@ import numeral from 'numeral';
 import toTitleCase from './lib/toTitleCase';
 import formatNumber from './lib/formatNumber';
 import readStatData from './lib/readStatData';
+import uiModules from 'ui/modules';
+import statusPageMetricTemplate from 'plugins/statusPage/statusPageMetric.html';
 
 function calcAvg(metricList, metricNumberType) {
   return metricList.map(function (data) {
@@ -15,12 +17,12 @@ function calcAvg(metricList, metricNumberType) {
   });
 }
 
-require('ui/modules')
+uiModules
 .get('kibana', [])
 .directive('statusPageMetric', function () {
   return {
     restrict: 'E',
-    template: require('plugins/statusPage/statusPageMetric.html'),
+    template: statusPageMetricTemplate,
     scope: {
       name: '@',
       data: '='

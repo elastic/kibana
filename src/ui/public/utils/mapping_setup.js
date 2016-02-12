@@ -30,7 +30,7 @@ define(function () {
         // check all types
         type: '*',
         // limit the response to just the _source field for each index
-        field: '_source'
+        fields: '_source'
       }).then(function (resp) {
         return _.keys(resp[indexName].mappings);
       });

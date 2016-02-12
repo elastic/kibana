@@ -1,51 +1,50 @@
 import _ from 'lodash';
-define(function (require) {
-  return function GetColumnsProvider(Private) {
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+export default function GetColumnsProvider(Private) {
+  var AggConfig = Private(VisAggConfigProvider);
 
-    return function getColumns(vis, minimal) {
-      var aggs = vis.aggs.getResponseAggs();
+  return function getColumns(vis, minimal) {
+    var aggs = vis.aggs.getResponseAggs();
 
-      if (minimal == null) minimal = !vis.isHierarchical();
+    if (minimal == null) minimal = !vis.isHierarchical();
 
-      if (!vis.aggs.bySchemaGroup.metrics) {
-        aggs.push(new AggConfig(vis, {
-          type: 'count',
-          schema: vis.type.schemas.metrics[0].name
-        }));
-      }
+    if (!vis.aggs.bySchemaGroup.metrics) {
+      aggs.push(new AggConfig(vis, {
+        type: 'count',
+        schema: vis.type.schemas.metrics[0].name
+      }));
+    }
 
-      // pick the columns
-      if (minimal) {
-        return aggs.map(function (agg) {
-          return { aggConfig: agg };
-        });
-      }
-
-      // supposed to be bucket,...metrics,bucket,...metrics
-      var columns = [];
-
-      // seperate the metrics
-      var grouped = _.groupBy(aggs, function (agg) {
-        return agg.schema.group;
+    // pick the columns
+    if (minimal) {
+      return aggs.map(function (agg) {
+        return { aggConfig: agg };
       });
+    }
 
-      if (!grouped.buckets) {
-        // return just the metrics, in column format
-        return grouped.metrics.map(function (agg) {
-          return { aggConfig: agg };
-        });
-      }
+    // supposed to be bucket,...metrics,bucket,...metrics
+    var columns = [];
 
-      // return the buckets, and after each place all of the metrics
-      grouped.buckets.forEach(function (agg, i) {
-        columns.push({ aggConfig: agg });
-        grouped.metrics.forEach(function (metric) {
-          columns.push({ aggConfig: metric });
-        });
+    // seperate the metrics
+    var grouped = _.groupBy(aggs, function (agg) {
+      return agg.schema.group;
+    });
+
+    if (!grouped.buckets) {
+      // return just the metrics, in column format
+      return grouped.metrics.map(function (agg) {
+        return { aggConfig: agg };
       });
+    }
 
-      return columns;
-    };
+    // return the buckets, and after each place all of the metrics
+    grouped.buckets.forEach(function (agg, i) {
+      columns.push({ aggConfig: agg });
+      grouped.metrics.forEach(function (metric) {
+        columns.push({ aggConfig: metric });
+      });
+    });
+
+    return columns;
   };
-});
+};

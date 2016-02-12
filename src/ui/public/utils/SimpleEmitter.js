@@ -1,4 +1,3 @@
-
 import { bindKey, reduce, size, uniq } from 'lodash';
 import BaseObject from 'ui/utils/BaseObject';
 import { EventEmitter } from 'events';

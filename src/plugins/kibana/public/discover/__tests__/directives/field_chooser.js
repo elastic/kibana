@@ -7,6 +7,8 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/private';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
+import FixturesHitsProvider from 'fixtures/hits';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
 
@@ -55,8 +57,8 @@ describe('discover field chooser directives', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    hits = Private(require('fixtures/hits'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    hits = Private(FixturesHitsProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     indexPatternList = [ 'b', 'a', 'c' ];
 
     const fieldCounts = _.transform(hits, function (counts, hit) {
