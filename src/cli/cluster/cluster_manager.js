@@ -63,7 +63,13 @@ module.exports = class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
-    if (opts.watch) this.setupWatching();
+    if (opts.watch) {
+      this.setupWatching([
+        ...settings.plugins.paths,
+        ...settings.plugins.scanDirs
+      ]);
+    }
+
     else this.startCluster();
   }
 
@@ -75,7 +81,7 @@ module.exports = class ClusterManager {
     }
   }
 
-  setupWatching() {
+  setupWatching(extraPaths) {
     const chokidar = require('chokidar');
     const utils = require('requirefrom')('src/utils');
     const fromRoot = utils('fromRoot');
@@ -86,7 +92,7 @@ module.exports = class ClusterManager {
       'src/ui',
       'src/utils',
       'config',
-      'installedPlugins'
+      ...extraPaths
     ], {
       cwd: fromRoot('.'),
       ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__)[\\\/]/
