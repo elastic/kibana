@@ -9,7 +9,8 @@ module.exports = (kibana) => {
     config: (Joi) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        instrument: Joi.boolean().default(false)
+        instrument: Joi.boolean().default(false),
+        pluginId: Joi.string()
       }).default();
     },
 
@@ -18,21 +19,35 @@ module.exports = (kibana) => {
         let modules = [];
         let config = kibana.config;
 
-        // add the modules from all of the apps
-        for (let app of apps) {
-          modules = union(modules, app.getModules());
-        }
+        const testGlobs = ['src/ui/public/**/*.js'];
+        const testingPluginId = config.get('testsBundle.pluginId');
 
-        const testGlobs = [
-          'src/ui/public/**/__tests__/**/*.js',
-        ];
+        if (testingPluginId) {
+          const plugin = plugins.byId[testingPluginId];
+          if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + testingPluginId);
 
-        for (const plugin of plugins) {
-          testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+          // add the modules from all of this plugins apps
+          for (let app of plugin.apps) {
+            modules = union(modules, app.getModules());
+          }
+
+          testGlobs.push(
+            '!src/ui/public/**/__tests__/**/*',
+            `${plugin.publicDir}/**/__tests__/**/*.js`
+          );
+        } else {
+
+          // add the modules from all of the apps
+          for (let app of apps) {
+            modules = union(modules, app.getModules());
+          }
+
+          for (const plugin of plugins) {
+            testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+          }
         }
 
         const testFiles = await findSourceFiles(testGlobs);
-
         for (let f of testFiles) modules.push(f);
 
         if (config.get('testsBundle.instrument')) {

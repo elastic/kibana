@@ -18,9 +18,8 @@ module.exports = function (grunt) {
   ];
 
   const kbnServerFlags = grunt.option.flags().reduce(function (flags, flag) {
-    const matches = flag.match(/^--kbnServer(\.\w+)+=/);
-    if (matches) {
-      flags.push(flag.replace(/^--kbnServer\./, '--'));
+    if (flag.startsWith('--kbnServer.')) {
+      flags.push(`--${flag.slice(12)}`);
     }
 
     return flags;
