@@ -1,0 +1,34 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/spalger/.nvm/versions/node/v4.3.0/bin/node',
+1 verbose cli   '/Users/spalger/.nvm/versions/node/v4.3.0/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@2.14.12
+3 info using node@v4.3.0
+4 verbose publish [ '.' ]
+5 verbose stack Error: Failed to parse json
+5 verbose stack Trailing comma in object at 32:3
+5 verbose stack   },
+5 verbose stack   ^
+5 verbose stack     at parseError (/Users/spalger/.nvm/versions/node/v4.3.0/lib/node_modules/npm/node_modules/read-package-json/read-json.js:379:11)
+5 verbose stack     at parseJson (/Users/spalger/.nvm/versions/node/v4.3.0/lib/node_modules/npm/node_modules/read-package-json/read-json.js:68:23)
+5 verbose stack     at /Users/spalger/.nvm/versions/node/v4.3.0/lib/node_modules/npm/node_modules/read-package-json/read-json.js:48:5
+5 verbose stack     at /Users/spalger/.nvm/versions/node/v4.3.0/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:76:16
+5 verbose stack     at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
+6 verbose cwd /Users/spalger/dev/kibana-plugin-helpers
+7 error Darwin 15.4.0
+8 error argv "/Users/spalger/.nvm/versions/node/v4.3.0/bin/node" "/Users/spalger/.nvm/versions/node/v4.3.0/bin/npm" "publish"
+9 error node v4.3.0
+10 error npm  v2.14.12
+11 error file /Users/spalger/dev/kibana-plugin-helpers/package.json
+12 error code EJSONPARSE
+13 error Failed to parse json
+13 error Trailing comma in object at 32:3
+13 error   },
+13 error   ^
+14 error File: /Users/spalger/dev/kibana-plugin-helpers/package.json
+15 error Failed to parse package.json data.
+15 error package.json must be actual JSON, not just JavaScript.
+15 error
+15 error This is not a bug in npm.
+15 error Tell the package author to fix their package.json file. JSON.parse
+16 verbose exit [ 1, true ]

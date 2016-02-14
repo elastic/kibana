@@ -28,7 +28,7 @@
   "devDependencies": {
     "eslint": "1.10.3",
     "babel-eslint": "4.1.8",
-    "eslint-plugin-mocha": "1.1.0",
+    "eslint-plugin-mocha": "1.1.0"
   },
   "repository": {
     "type": "git",
