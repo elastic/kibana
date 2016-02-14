@@ -1,8 +1,7 @@
 import Wreck from 'wreck';
-import getProgressReporter from '../progress_reporter';
+import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
 import { createWriteStream, unlinkSync } from 'fs';
-import fileType, { ZIP, TAR } from '../file_type';
 
 function sendRequest({ sourceUrl, timeout }) {
   const maxRedirects = 11; //Because this one goes to 11.
@@ -25,7 +24,7 @@ function sendRequest({ sourceUrl, timeout }) {
   });
 }
 
-function downloadResponse({ resp, targetPath, progressReporter }) {
+function downloadResponse({ resp, targetPath, progress }) {
   return new Promise((resolve, reject) => {
     const writeStream = createWriteStream(targetPath);
 
@@ -35,7 +34,7 @@ function downloadResponse({ resp, targetPath, progressReporter }) {
 
     // report progress as we download
     resp.on('data', (chunk) => {
-      progressReporter.progress(chunk.length);
+      progress.progress(chunk.length);
     });
 
     // write the download to the file system
@@ -44,19 +43,6 @@ function downloadResponse({ resp, targetPath, progressReporter }) {
     // when the write is done, we are done
     writeStream.on('finish', resolve);
   });
-}
-
-function getArchiveTypeFromResponse(resp, sourceUrl) {
-  const contentType = (resp.headers['content-type'] || '');
-
-  switch (contentType.toLowerCase()) {
-    case 'application/zip': return ZIP;
-    case 'application/x-gzip': return TAR;
-    default:
-      //If we can't infer the archive type from the content-type header,
-      //fall back to checking the extension in the url
-      return fileType(sourceUrl);
-  }
 }
 
 /*
@@ -68,20 +54,16 @@ export default async function downloadUrl(logger, sourceUrl, targetPath, timeout
 
     try {
       let totalSize = parseFloat(resp.headers['content-length']) || 0;
-      const progressReporter = getProgressReporter(logger);
-      progressReporter.init(totalSize);
+      const progress = new Progress(logger);
+      progress.init(totalSize);
 
-      await downloadResponse({ resp, targetPath, progressReporter });
+      await downloadResponse({ resp, targetPath, progress });
 
-      progressReporter.complete();
+      progress.complete();
     } catch (err) {
       req.abort();
       throw err;
     }
-
-    // all is well, return our archive type
-    const archiveType = getArchiveTypeFromResponse(resp, sourceUrl);
-    return { archiveType };
   } catch (err) {
     if (err.message !== 'ENOTFOUND') {
       logger.error(err);

@@ -4,9 +4,9 @@ import glob from 'glob';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 
-import pluginLogger from '../plugin_logger';
-import extract from '../plugin_extractor';
-import pluginDownloader from '../plugin_downloader';
+import Logger from '../../lib/logger';
+import { extract, readMetadata } from '../zip';
+import { download, _downloadSingle }  from '../download';
 import { join } from 'path';
 
 describe('kibana cli', function () {
@@ -16,11 +16,12 @@ describe('kibana cli', function () {
     const testWorkingPath = join(__dirname, '.test.data');
     const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
     let logger;
-    let downloader;
 
     const settings = {
       workingPath: testWorkingPath,
-      tempArchiveFile: tempArchiveFilePath
+      tempArchiveFile: tempArchiveFilePath,
+      plugin: 'test-plugin',
+      setPlugin: function (plugin) {}
     };
 
     function shouldReject() {
@@ -28,17 +29,18 @@ describe('kibana cli', function () {
     }
 
     beforeEach(function () {
-      logger = pluginLogger(false);
+      logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
+      sinon.stub(settings, 'setPlugin');
       rimraf.sync(testWorkingPath);
       mkdirp.sync(testWorkingPath);
-      downloader = pluginDownloader(settings, logger);
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
+      settings.setPlugin.restore();
       rimraf.sync(testWorkingPath);
     });
 
@@ -46,7 +48,7 @@ describe('kibana cli', function () {
       const filePath = join(__dirname, 'replies', filename);
       const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
-      return downloader._downloadSingle(sourceUrl);
+      return _downloadSingle(settings, logger, sourceUrl);
     }
 
     function shouldReject() {
@@ -55,29 +57,12 @@ describe('kibana cli', function () {
 
     describe('extractArchive', function () {
 
-      it('successfully extract a valid tarball', function () {
-        return copyReplyFile('test_plugin_master.tar.gz')
-        .then((data) => {
-          return extract(settings, logger, data.archiveType);
-        })
-        .then(() => {
-          const files = glob.sync('**/*', { cwd: testWorkingPath });
-          const expected = [
-            'archive.part',
-            'README.md',
-            'index.js',
-            'package.json',
-            'public',
-            'public/app.js'
-          ];
-          expect(files.sort()).to.eql(expected.sort());
-        });
-      });
-
+      //Also only extracts the content from the kibana folder.
+      //Ignores the others.
       it('successfully extract a valid zip', function () {
-        return copyReplyFile('test_plugin_master.zip')
-        .then((data) => {
-          return extract(settings, logger, data.archiveType);
+        return copyReplyFile('test_plugin.zip')
+        .then(() => {
+          return extract(settings, logger);
         })
         .then(() => {
           const files = glob.sync('**/*', { cwd: testWorkingPath });
@@ -94,33 +79,48 @@ describe('kibana cli', function () {
         });
       });
 
-      it('throw an error when extracting a corrupt zip', function () {
+      it('throw an error with a corrupt zip', function () {
         return copyReplyFile('corrupt.zip')
         .then((data) => {
-          return extract(settings, logger, data.archiveType);
+          return extract(settings, logger);
         })
         .then(shouldReject, (err) => {
           expect(err.message).to.match(/error extracting/i);
         });
       });
 
-      it('throw an error when extracting a corrupt tarball', function () {
-        return copyReplyFile('corrupt.tar.gz')
-        .then((data) => {
-          return extract(settings, logger, data.archiveType);
+    });
+
+    describe('readMetadata', function () {
+
+      it('return the first folder name within the kibana folder', function () {
+        return copyReplyFile('test_plugin.zip')
+        .then(() => {
+          return readMetadata(settings, logger);
         })
-        .then(shouldReject, (err) => {
-          expect(err.message).to.match(/error extracting/i);
+        .then(() => {
+          const expected = 'test-plugin';
+          expect(settings.setPlugin.calledWith(expected)).to.be(true);
         });
       });
 
-      it('throw an error when passed an unknown archive type', function () {
-        return copyReplyFile('banana.jpg')
+      it('throw an error if there is no kibana plugin', function () {
+        return copyReplyFile('test_plugin_no_kibana.zip')
         .then((data) => {
-          return extract(settings, logger, data.archiveType);
+          return readMetadata(settings, logger);
         })
         .then(shouldReject, (err) => {
-          expect(err.message).to.match(/unsupported archive format/i);
+          expect(err.message).to.match(/No kibana plugins found in archive/i);
+        });
+      });
+
+      it('throw an error with a corrupt zip', function () {
+        return copyReplyFile('corrupt.zip')
+        .then((data) => {
+          return readMetadata(settings, logger);
+        })
+        .then(shouldReject, (err) => {
+          expect(err.message).to.match(/error retrieving/i);
         });
       });
 
