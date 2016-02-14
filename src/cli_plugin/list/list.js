@@ -1,8 +1,11 @@
 import fs from 'fs';
 
-export function list(settings, logger) {
+export default function list(settings, logger) {
   fs.readdirSync(settings.pluginDir)
-  .forEach(function (pluginFile) {
-    logger.log(pluginFile);
+  .forEach((filename) => {
+    if (filename[0] !== '.') {
+      logger.log(filename);
+    }
   });
+  logger.log('');
 }
