@@ -7,9 +7,9 @@ This simple CLI has several tasks that plugin devs can run from to easily debug,
 See the [docs](docs) directory for more info.
 
 ```sh
-$ plugin-helper help
+$ plugin-helpers help
 
-  Usage: plugin-helper [options] [command]
+  Usage: plugin-helpers [options] [command]
 
 
   Commands:

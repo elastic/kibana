@@ -1,10 +1,10 @@
 {
-  "name": "kibana-plugin-helpers",
+  "name": "@elastic/plugin-helpers",
   "version": "5.0.0-beta1",
   "description": "Just some helpers for kibana plugin devs.",
-  "main": "index.js",
+  "main": "bin/plugin-helpers.js",
   "bin": {
-    "plugin-helper": "bin/plugin-helper.js"
+    "plugin-helpers": "bin/plugin-helpers.js"
   },
   "keywords": [
     "kibana",
@@ -17,10 +17,7 @@
   },
   "dependencies": {
     "@elastic/eslint-config-kibana": "0.0.2",
-    "babel-eslint": "4.1.8",
     "commander": "^2.9.0",
-    "eslint": "1.10.3",
-    "eslint-plugin-mocha": "1.1.0",
     "gulp-rename": "1.2.2",
     "gulp-zip": "3.1.0",
     "vinyl-fs": "2.3.1"
@@ -28,7 +25,11 @@
   "directories": {
     "doc": "docs"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "1.10.3",
+    "babel-eslint": "4.1.8",
+    "eslint-plugin-mocha": "1.1.0",
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/spalger/kibana-plugin-helpers.git"
