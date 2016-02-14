@@ -1,15 +1,8 @@
 #!/usr/bin/env node
 
-var pkg = require('../package.json');
-var program = require('commander');
-var help = require('../help');
-var task = require('../tasks/test:browser');
+require('../lib/command')('test:browser', function (program) {
 
-program
-  .version(pkg.version)
-  .description('Run the browser tests in a real web browser')
-  .on('--help', help('test:browser'))
-  .parse(process.argv);
+  program
+  .description('Run the browser tests in a real web browser');
 
-
-task(program);
+});

@@ -1,13 +1,12 @@
-module.exports = function () {
+module.exports = function (plugin) {
 
   var vfs = require('vinyl-fs');
   var zip = require('gulp-zip');
   var rename = require('gulp-rename');
   var join = require('path').join;
 
-  var pkg = require('../package.json');
-  var deps = Object.keys(pkg.dependencies || {});
-  var buildId = `${pkg.name}-${pkg.version}`;
+  var deps = Object.keys(plugin.pkg.dependencies || {});
+  var buildId = `${plugin.id}-${plugin.version}`;
 
   var files = [
     'package.json',
@@ -17,11 +16,11 @@ module.exports = function () {
   ];
 
   vfs
-    .src(files, { base: join(__dirname, '..') })
+    .src(files, { base: plugin.root })
     .pipe(rename(function nestFileInDir(path) {
       path.dirname = join(buildId, path.dirname);
     }))
     .pipe(zip(`${buildId}.zip`))
-    .pipe(vfs.dest('build'));
+    .pipe(vfs.dest(join(plugin.root, 'build')));
 
 };

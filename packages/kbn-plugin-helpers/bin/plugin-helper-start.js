@@ -1,16 +1,8 @@
 #!/usr/bin/env node
 
-var program = require('commander');
+require('../lib/command')('start', function (program) {
 
-var pkg = require('../package.json');
-var help = require('../help');
-var task = require('../tasks/start');
+  program
+  .description('Start kibana and have it include this plugin');
 
-program
-  .version(pkg.version)
-  .description('Start kibana and have it include this plugin')
-  .on('--help', help('start'))
-  .parse(process.argv);
-
-
-task();
+});
