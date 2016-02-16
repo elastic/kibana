@@ -1,13 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
-  var jison = require('jison');
 
-  var bnf = require('raw!./queryLang.jison');
-  var parser = new jison.Parser(bnf, {
-    type : 'slr',
-    noDefaultResolve : true,
-    moduleType : 'js'
-  });
+  var parser = require('ui/parse_query/lib/query_parser');
   parser.yy = require('ui/parse_query/lib/queryAdapter');
 
   return function GetQueryFromUser(es, Private) {
