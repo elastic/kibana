@@ -1,5 +1,12 @@
 <div dashboard-app class="app-container dashboard-container">
   <navbar name="dashboard-options">
+    <div class="dashboard-info">
+      <span ng-show="dash.id" class="dashboard-info-title">
+        <span ng-bind="::dash.title"></span>
+      </span>
+
+    </div>
+
     <div class="button-group dashboard-actions" role="toolbar">
       <button ng-click="newDashboard()"
         aria-label="New Dashboard">
@@ -51,8 +58,6 @@
   <config config-template="configTemplate" config-object="opts"></config>
 
   <navbar ng-show="chrome.getVisible()" name="dashboard-search">
-    <span class="name" ng-if="dash.id" ng-bind="::dash.title" tooltip="{{::dash.title}}"></span>
-
     <form name="queryInput"
       class="fill inline-form"
       ng-submit="filterResults()"
