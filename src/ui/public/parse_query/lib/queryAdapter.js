@@ -11,46 +11,52 @@ scope.errors = require('ui/errors');
 scope._ = require('lodash');
 
 function getMapping(fieldName) {
-  var mapping = scope.fieldDictionary[fieldName];
-  if (mapping === undefined) {
-    throw new scope.errors.FieldNotFoundInSelectedIndex(fieldName);
+  if (scope.fieldDictionary) {
+    var mapping = scope.fieldDictionary[fieldName];
+    if (mapping === undefined) {
+      throw new scope.errors.FieldNotFoundInSelectedIndex(fieldName);
+    }
+    return mapping;
   }
-  return mapping;
+  return undefined;
 }
 
 function validateValue(mapping, value) {
-  switch (mapping.type) {
-    case 'string':
-      if (!scope._.isString(value)) {
-        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
-      }
-      return value;
-      break;
-    case 'date':
-      if (!value._isAMomentObject) {
-        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
-      }
-      return value.valueOf();
-      break;
-    case 'ip':
-      return value;
-      break;
-    case 'number':
-      if (!scope._.isNumber(value)) {
-        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
-      }
-      return value;
-      break;
-    case 'boolean':
-      if (!scope._.isBoolean(value)) {
-        throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
-      }
-      return value;
-      break;
-    case 'geo_point':
-      return value;
-      break;
+  if (mapping) {
+    switch (mapping.type) {
+      case 'string':
+        if (!scope._.isString(value)) {
+          throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+        }
+        return value;
+        break;
+      case 'date':
+        if (!value._isAMomentObject) {
+          throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+        }
+        return value.valueOf();
+        break;
+      case 'ip':
+        return value;
+        break;
+      case 'number':
+        if (!scope._.isNumber(value)) {
+          throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+        }
+        return value;
+        break;
+      case 'boolean':
+        if (!scope._.isBoolean(value)) {
+          throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+        }
+        return value;
+        break;
+      case 'geo_point':
+        return value;
+        break;
+    }
   }
+  return value;
 }
 
 
@@ -78,7 +84,7 @@ scope.MatchAll.prototype = {
 scope.Missing = function (fieldName) {
   var mapping = getMapping(fieldName);
   this.fieldName = fieldName;
-  this.nestedPath = mapping.nestedPath;
+  this.nestedPath = (mapping ? mapping.nestedPath : undefined);
 };
 
 scope.Missing.prototype = {
@@ -125,7 +131,7 @@ scope.Term = function (field, operation, value) {
   this.field = field;
   this.operation = operation;
   this.value = validateValue(mapping, value);
-  this.nestedPath = mapping.nestedPath;
+  this.nestedPath = (mapping ? mapping.nestedPath : undefined);
 };
 
 scope.Term.prototype = {

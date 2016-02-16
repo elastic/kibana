@@ -45,7 +45,6 @@ module.exports = function (grunt) {
       '<%= root %>/tasks/**/*.js',
       '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
-      '!<%= src %>/**/parse_query/lib/query_parser.js', // Ignore the query_parser since it is generated code
       '!<%= src %>/fixtures/**/*.js',
       '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ],

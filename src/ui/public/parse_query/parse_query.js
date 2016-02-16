@@ -17,10 +17,15 @@ define(function (require) {
             $scope.ngModel = fromUser($scope.ngModel);
           };
 
-          var fieldMap = _.chain($scope.$parent.indexPattern.fields).indexBy('name').value();
+          var fieldMap;
+
+          if ($scope.$parent.indexPattern) {
+            fieldMap = _.chain($scope.$parent.indexPattern.fields).indexBy('name').value();
+          }
 
           toUser.setIndexPattern(fieldMap);
           fromUser.setIndexPattern(fieldMap);
+          fromUser.setUseLegacy(true);
           ngModel.$parsers.push(fromUser);
           ngModel.$formatters.push(toUser);
 

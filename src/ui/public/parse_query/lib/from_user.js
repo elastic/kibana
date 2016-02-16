@@ -1,8 +1,16 @@
 define(function (require) {
   var _ = require('lodash');
+  var jison = require('jison');
 
-  var parser = require('ui/parse_query/lib/query_parser');
+  var bnf = require('raw!./queryLang.jison');
+  var parser = new jison.Parser(bnf, {
+    type : 'slr',
+    noDefaultResolve : true,
+    moduleType : 'js'
+  });
   parser.yy = require('ui/parse_query/lib/queryAdapter');
+
+  var useLegacy = true;
 
   return function GetQueryFromUser(es, Private) {
     var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
@@ -15,8 +23,9 @@ define(function (require) {
      * @returns {object}
      */
     function fromUser(text) {
-      text = parser.parse(text).toJson();
-      console.log(text);
+      if (!useLegacy) {
+        text = parser.parse(text).toJson();
+      }
 
       function getQueryStringQuery(text) {
         return decorateQuery({
@@ -58,6 +67,9 @@ define(function (require) {
       parser.yy.fieldDictionary = fieldMap;
     };
 
+    fromUser.setUseLegacy = function (legacy) {
+      useLegacy = legacy;
+    };
     return fromUser;
   };
 

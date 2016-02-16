@@ -66,6 +66,7 @@ describe('parse-query directive', function () {
 
     beforeEach(function () {
       fromUser = Private(require('ui/parse_query/lib/from_user'));
+      fromUser.setUseLegacy(true);
       config.set('query:queryString:options', {});
     });
 

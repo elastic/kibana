@@ -73,7 +73,7 @@ define(function (require) {
       })
       .forEach(function nestEachConfig(config, i, list) {
         var reverseNested = false;
-        var nestedPath = config.params.field.nestedPath;
+        var nestedPath = (config.params.field ? config.params.field.nestedPath : undefined);
         var dsl;
 
         if (prevNestedPath !== undefined) {
