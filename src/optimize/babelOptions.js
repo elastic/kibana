@@ -12,3 +12,5 @@ exports.webpack = {
 };
 
 exports.node = cloneDeep(exports.webpack);
+exports.node.optional = ['asyncToGenerator'];
+exports.node.blacklist = ['regenerator'];
