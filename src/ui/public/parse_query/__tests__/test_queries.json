@@ -1,0 +1,38 @@
+{
+  "stringTerm" : {
+    "query" : "strField=\"test string\"",
+    "result" : "{\"query\":{\"term\":{\"strField\":\"test string\"}}}"
+  },
+  "booleanTermTrue" : {
+    "query" : "boolField=true",
+    "result" : "{\"query\":{\"term\":{\"boolField\":true}}}"
+  },
+  "booleanTermFalse" : {
+    "query" : "boolField=false",
+    "result" : "{\"query\":{\"term\":{\"boolField\":false}}}"
+  },
+  "booleanTerm" : {
+    "query" : "boolField",
+    "result" : "{\"query\":{\"term\":{\"boolField\":FAIL}}}"
+  },
+  "intTerm" : {
+    "query" : "intField=1234",
+    "result" : "{\"query\":{\"term\":{\"intField\":1234}}}"
+  },
+  "decimalTerm" : {
+    "query" : "decimalField=1234.56789",
+    "result" : "{\"query\":{\"term\":{\"decimalField\":1234.56789}}}"
+  },
+  "ipTerm" : {
+    "query" : "ipField=127.0.0.1",
+    "result" : "{\"query\":{\"term\":{\"ipField\":\"127.0.0.1\"}}}"
+  },
+  "dateTerm" : {
+    "query" : "dateField=2015-01-01",
+    "result" : "{\"query\":{\"term\":{\"dateField\":1420070400000}}}"
+  },
+  "dateTimeTerm" : {
+    "query" : "dateTimeField=2015-01-01T12:00:00.000Z",
+    "result" : "{\"query\":{\"term\":{\"dateTimeField\":1420113600000}}}"
+  }
+}

@@ -5,7 +5,7 @@ define(function (require) {
 
     /**
      * This function will recursively define all of the properties/mappings
-     * contained in the index. This will build out full name paths
+     * contained in the index. This will build out full name paths and
      * detect nested paths for any child attributes.
      */
     function defineMapping(fields, parentPath, name, rawField, nestedPath) {
@@ -47,6 +47,11 @@ define(function (require) {
       _.each(rawField.properties, function (field, name) {
         defineMapping(fields, fullName, name, field, nestedPath);
       });
+
+      _.each(rawField.fields, function (field, name) {
+        defineMapping(fields, fullName, name, field, nestedPath);
+      });
+
     }
 
     /**
