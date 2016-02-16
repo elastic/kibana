@@ -1,5 +1,11 @@
 <div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
   <navbar ng-if="chrome.getVisible()" name="visualize-options">
+    <div class="vis-editor-info">
+      <span ng-show="savedVis.id" class="vis-editor-info-title">
+        <span ng-bind="::savedVis.title"></span>
+      </span>
+    </div>
+
     <div class="button-group vis-editor-actions">
       <button ng-click="startOver()" aria-label="New Visualization">
         <span>New</span>
@@ -123,13 +129,6 @@
     </div>
 
     <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">
-      <div class="visualize-info" ng-if="savedVis.id">
-        <div class="visualize-info-tab" title="{{::savedVis.vis.type.title}}">
-          <i class="fa" aria-label="{{::savedVis.vis.type.title}} Icon" ng-class="savedVis.vis.type.icon"></i>
-          <span ng-bind="::savedVis.title"></span>
-        </div>
-      </div>
-
       <visualize
         vis="vis"
         ui-state="uiState"
