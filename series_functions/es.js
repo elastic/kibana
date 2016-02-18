@@ -12,12 +12,12 @@ function buildRequest(config, tlConfig) {
     index: config.index,
     body: {
       query: {
-        filtered: {
-          query: {
+        bool: {
+          must: [{
             query_string: {
               query: config.q
             }
-          },
+          }],
           filter: filter
         }
       },
