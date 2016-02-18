@@ -4,6 +4,7 @@
 // as - App Switcher
 @as-open-width: 160px;
 @as-closed-width: 53px;
+@as-icon-margin-top: 8px;
 @app-icon-height: 38px;
 @transition-time: .35s;
 @transition-delay: .25s;
@@ -108,7 +109,7 @@ body { overflow-x: hidden; }
 
       > img {
         height: 18px;
-        margin-top: 8px;
+        margin-top: @as-icon-margin-top;
       }
     }
 
@@ -117,7 +118,8 @@ body { overflow-x: hidden; }
       text-align: center;
       font-size: 1.7em;
       display: inline-block;
-      height: @app-icon-height;
+      margin-top: @as-icon-margin-top;
+      height: @app-icon-height - @as-icon-margin-top;
       width: @as-closed-width;
       background-position: center;
       background-size: contain;
