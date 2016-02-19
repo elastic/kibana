@@ -199,12 +199,20 @@ Argument | Accepts | Description
 --- | --- | ---
 precision | *number* | Number of digits to round each value to  
 
-#### .scaleinterval()
-Return the absolute value of each value in the series list
+#### .range()
+Changes the max and min of a series while keeping the same shape
 
 Argument | Accepts | Description
 --- | --- | ---
-interval | *string* | *no help available*  
+min | *number* | New minimum value  
+max | *number* | New maximum value  
+
+#### .scale_interval()
+Changes scales a value (usually a sum or a count) to a new interval. For example, as a per-second rate
+
+Argument | Accepts | Description
+--- | --- | ---
+interval | *string* | The new interval in date math notation, eg 1s for 1 second. 1m, 5m, 1M, 1w, 1y, etc.  
 
 #### .subtract()
 Subtract the values of one or more series in a seriesList to each position, in each series, of the input seriesList
