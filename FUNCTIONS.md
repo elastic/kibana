@@ -37,6 +37,16 @@ position | *number* | Some quandl sources return multiple series, which one shou
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
 
+#### .static()
+Draws a single value across the chart
+
+Argument | Accepts | Description
+--- | --- | ---
+value | *number* | The single vale to to display  
+label | *string* | A quick way to set the label for the series. You could also use the .label() function  
+offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+
 #### .worldbank_indicators()
 Pull data from http://data.worldbank.org/ using the country name and indicator. The worldbank provides mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent time ranges.
 

@@ -12,6 +12,11 @@ module.exports = new Datasource ('static', {
       name: 'value', // _test-data.users.*.data
       types: ['number'],
       help: 'The single vale to to display'
+    },
+    {
+      name: 'label',
+      types: ['string'],
+      help: 'A quick way to set the label for the series. You could also use the .label() function'
     }
   ],
   help: 'Draws a single value across the chart',
@@ -27,7 +32,7 @@ module.exports = new Datasource ('static', {
         {
           data: data,
           type: 'series',
-          label: 'static'
+          label: args.byName.label == null ? String(args.byName.value) : args.byName.label
         }
       ]
     });
