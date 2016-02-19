@@ -96,7 +96,7 @@ Argument | Accepts | Description
 base | *number* | Number to start at. Basically just adds this to the beginning of the series  
 
 #### .derivative()
-Show the seriesList as bars
+Plot the change in values over time.
 
 *This function does not accept any arguments.*
 

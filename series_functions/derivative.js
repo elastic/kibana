@@ -8,7 +8,7 @@ module.exports = new Chainable('derivative', {
       types: ['seriesList']
     }
   ],
-  help: 'Show the seriesList as bars',
+  help: 'Plot the change in values over time.',
   fn: function derivativeFn(args) {
     return alter(args, function (eachSeries) {
       var pairs = eachSeries.data;
