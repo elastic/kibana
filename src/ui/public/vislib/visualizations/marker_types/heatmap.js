@@ -36,8 +36,9 @@ define(function (require) {
     HeatmapMarker.prototype.addLegend = _.noop;
 
     HeatmapMarker.prototype._createMarkerGroup = function (options) {
+      var min = _.get(this.geoJson, 'properties.allmin');
       var max = _.get(this.geoJson, 'properties.allmax');
-      var points = this._dataToHeatArray(max);
+      var points = this._dataToHeatArray(min, max);
 
       this._markerGroup = L.heatLayer(points, options);
       this._fixTooltips();
@@ -185,7 +186,7 @@ define(function (require) {
      * @param max {Number}
      * @return {Array}
      */
-    HeatmapMarker.prototype._dataToHeatArray = function (max) {
+    HeatmapMarker.prototype._dataToHeatArray = function (min, max) {
       var self = this;
       var mapData = this.geoJson;
 
@@ -199,7 +200,7 @@ define(function (require) {
           heatIntensity = feature.properties.value;
         } else {
           // show bucket value normalized to max value
-          heatIntensity = parseInt(feature.properties.value / max * 100);
+          heatIntensity = parseInt((feature.properties.value - min) / (max - min) * 100);
         }
 
         return [lat, lng, heatIntensity];
