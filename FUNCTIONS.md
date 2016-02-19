@@ -199,6 +199,13 @@ Argument | Accepts | Description
 --- | --- | ---
 precision | *number* | Number of digits to round each value to  
 
+#### .scaleinterval()
+Return the absolute value of each value in the series list
+
+Argument | Accepts | Description
+--- | --- | ---
+interval | *string* | *no help available*  
+
 #### .subtract()
 Subtract the values of one or more series in a seriesList to each position, in each series, of the input seriesList
 
