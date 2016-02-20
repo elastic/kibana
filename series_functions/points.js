@@ -58,7 +58,7 @@ module.exports = new Chainable('points', {
       }
 
       symbol = symbol || 'circle';
-      var validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle']
+      var validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
       if (!_.contains(['triangle', 'cross', 'square', 'diamond', 'circle'], symbol)) {
         throw new Error('Valid symbols are: ' + validSymbols.join(', '));
       }
