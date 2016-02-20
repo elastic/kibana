@@ -139,7 +139,7 @@ The task above takes a little time to start the servers.  You can also start the
 
 #### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
 
-Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respecitively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
+Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
 
 Once you've got the services running, execute the following:
 
