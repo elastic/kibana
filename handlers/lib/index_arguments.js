@@ -1,15 +1,5 @@
 var _ = require('lodash');
-
-// This BS is why I need an argument object
-function argType(arg) {
-  if (_.isObject(arg) && arg) {
-    return arg.type;
-  }
-  if (arg == null) {
-    return 'null';
-  }
-  return typeof arg;
-}
+var argType = require('./arg_type');
 
 // Only applies to already resolved arguments
 module.exports = function indexArguments(functionDef, unorderedArgs) {

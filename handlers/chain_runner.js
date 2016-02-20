@@ -46,12 +46,12 @@ function invoke(fnName, args) {
         case 'reference':
           var reference;
           if (item.series) {
-            reference = sheet[item.plot - 1][item.series - 1]
+            reference = sheet[item.plot - 1][item.series - 1];
           } else {
             reference = {
               type: 'chainList',
               list: sheet[item.plot - 1]
-            }
+            };
           }
           return invoke('first', [reference]);
         case 'chain':
