@@ -3,7 +3,7 @@ var _ = require('lodash');
 var Chainable = require('../lib/classes/chainable');
 var argType = require('../handlers/lib/arg_type.js');
 
-module.exports = new Chainable('compare', {
+module.exports = new Chainable('condition', {
   args: [
     {
       name: 'inputSeries',
@@ -16,19 +16,25 @@ module.exports = new Chainable('compare', {
         '(less than equal), gt (greater than), gte (greater than equal)'
     },
     {
-      name: 'value',
+      name: 'if',
       types: ['number', 'seriesList', 'null'],
       help: 'The value to which the point will be compared. If you pass a seriesList here the first series will be used'
     },
     {
-      name: 'result',
+      name: 'then',
       types: ['number', 'seriesList', 'null'],
       help: 'The value the point will be set to if the comparison is true. If you pass a seriesList here the first series will be used'
+    },
+    {
+      name: 'else',
+      types: ['number', 'seriesList', 'null'],
+      help: 'The value the point will be set to if the comparison is false. If you pass a seriesList here the first series will be used'
     }
   ],
   help: 'Compares each point to a number, or the same point in another series using an operator, then sets its value' +
-    'to the result if the condition proves true. You can use this to see if 2 series are equal at any or all points',
-  fn: function absFn(args) {
+    'to the result if the condition proves true, with an optional else.',
+  aliases: ['if'],
+  fn: function conditionFn(args) {
     var config = args.byName;
     return alter(args, function (eachSeries) {
       var data = _.map(eachSeries.data, function (point, i) {
@@ -41,23 +47,24 @@ module.exports = new Chainable('compare', {
           throw new Error ('must be a number or a seriesList');
         }
 
-        var value = getNumber(config.value);
-        var result = getNumber(config.result);
+        var ifVal = getNumber(config.if);
+        var thenVal = getNumber(config.then);
+        var elseVal = _.isUndefined(config.else) ? point[1] : getNumber(config.else);
 
         var newValue = (function () {
           switch (config.operator) {
             case 'lt':
-              return point[1] < value ? result : point[1];
+              return point[1] <   ifVal ? thenVal : elseVal;
             case 'lte':
-              return point[1] <= value ? result : point[1];
+              return point[1] <=  ifVal ? thenVal : elseVal;
             case 'gt':
-              return point[1] > value ? result : point[1];
+              return point[1] >   ifVal ? thenVal : elseVal;
             case 'gte':
-              return point[1] >= value ? result : point[1];
+              return point[1] >=  ifVal ? thenVal : elseVal;
             case 'eq':
-              return point[1] === value ? result : point[1];
+              return point[1] === ifVal ? thenVal : elseVal;
             case 'ne':
-              return point[1] !== value ? result : point[1];
+              return point[1] !== ifVal ? thenVal : elseVal;
             default:
               throw new Error ('Unknown operator');
           }

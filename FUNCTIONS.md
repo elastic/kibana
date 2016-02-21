@@ -88,14 +88,15 @@ Argument | Accepts | Description
 --- | --- | ---
 color | *string* | Color of series, as hex, eg #c6c6c6 is a lovely light grey.  
 
-#### .compare()
-Compares each point to a number, or the same point in another series using an operator, then sets its valueto the result if the condition proves true. You can use this to see if 2 series are equal at any or all points
+#### .condition()
+Compares each point to a number, or the same point in another series using an operator, then sets its valueto the result if the condition proves true, with an optional else.
 
 Argument | Accepts | Description
 --- | --- | ---
 operator | *string* | Operator to use for comparison, valid operators are eq (equal), ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (greater than equal)  
-value | *number/seriesList* | The value to which the point will be compared. If you pass a seriesList here the first series will be used  
-result | *number/seriesList* | The value the point will be set to if the comparison is true. If you pass a seriesList here the first series will be used  
+if | *number/seriesList* | The value to which the point will be compared. If you pass a seriesList here the first series will be used  
+then | *number/seriesList* | The value the point will be set to if the comparison is true. If you pass a seriesList here the first series will be used  
+else | *number/seriesList* | The value the point will be set to if the comparison is false. If you pass a seriesList here the first series will be used  
 
 #### .cusum()
 Return the cumulative sum of a series, starting at a base.
