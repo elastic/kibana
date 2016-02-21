@@ -1,0 +1,123 @@
+<li class="sidebar-item">
+
+  <div class="sidebar-item-title">
+    timefilter settings
+  </div>
+
+  <div class="visualization-vis-timefilter-params visualization-options">
+    <div>
+      <span class="pull-right text-info hintbox-label" ng-click="editor.showDateMathHelp = !editor.showDateMathHelp">
+        <i class="fa fa-info"></i> Date &amp; Interval Help
+      </span>
+      <div class="hintbox" ng-if="editor.showDateMathHelp">
+        <h4 class="hintbox-heading">
+          <i class="fa fa-question-circle text-info"></i> Date &amp; Interval Help
+        </h4>
+        <p>
+          The <strong>From</strong> and <strong>To</strong> fields accept either formatted dates or <a target="_window" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math">Elasticsearch date math expressions</a>.
+          For example, select the last 7 days using <code>now-7d</code> for <strong>From</strong> and <code>now</code> for <strong>To</strong>.
+          You can round down to a time unit by appending it with a <code>/</code>: <code>now/d</code>
+        </p>
+        <p>
+          The <strong>Interval</strong> field accepts a specific time interval like <code>2h</code> or <code>7d</code>.
+        </p>
+      </div>
+
+      <label>
+        <input
+          type="checkbox"
+          value="{{vis.params.timeSets.showUi}}"
+          ng-model="vis.params.timeSets.showUi"
+          name="showUi"
+          ng-checked="vis.params.timeSets.showUi">
+        Show UI
+      </label>
+    </div>
+
+    <div class="editor-vis-timefilter-timeset" ng-repeat="timeset in available()">
+      <div class="vis-editor-agg-header">
+        <!-- open/close editor -->
+        <button ng-click="timeset.editorOpen = !timeset.editorOpen" type="button" class="btn btn-default btn-xs vis-editor-agg-header-toggle">
+          <i ng-class="{ 'fa fa-caret-down': timeset.editorOpen, 'fa fa-caret-right': !timeset.editorOpen }"></i>
+        </button>
+
+        <!-- title -->
+        <span class="vis-editor-agg-header-title ng-binding">{{timeset.label}}</span>
+
+        <!-- controls -->
+        <div class="vis-editor-agg-header-controls btn-group">
+          <!-- up button -->
+          <button ng-if="availableCount() &gt; 1" ng-class="{ disabled: $first }" ng-click="moveUp($index)" tooltip="Increase Priority" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-default ng-scope disabled">
+            <i class="fa fa-caret-up"></i>
+          </button>
+
+          <!-- down button -->
+          <button ng-if="availableCount() &gt; 1" ng-class="{ disabled: $last }" ng-click="moveDown($index)" tooltip="Decrease Priority" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-default ng-scope">
+            <i class="fa fa-caret-down"></i>
+          </button>
+
+          <!-- remove button -->
+          <button ng-click="remove($index)" tooltip="Remove Timeset" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger ng-scope">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div ng-show="timeset.editorOpen">
+        <div class="form-group">
+          <label class="small">Label</label>
+          <input
+            type="text"
+            required
+            class="form-control"
+            ng-model="timeset.label">
+        </div>
+        <div class="form-group">
+          <label class="small">From</label>
+          <input
+            type="text"
+            required
+            validate-date-math
+            class="form-control"
+            ng-model="timeset.from">
+        </div>
+        <div class="form-group">
+          <label class="small">To</label>
+          <input
+            type="text"
+            required
+            validate-date-math
+            class="form-control"
+            ng-model="timeset.to">
+        </div>
+        <div class="form-group">
+          <label class="small">Interval</label>
+          <input
+            type="text"
+            required
+            validate-date-interval
+            class="form-control"
+            ng-model="timeset.interval">
+        </div>
+        <div class="form-group">
+          <span class="small">
+            <input
+              type="checkbox"
+              value="{{timeset.showInitially}}"
+              ng-model="timeset.showInitially"
+              name="isShowInitially"
+              ng-checked="timeset.showInitially">
+            Show initially
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div ng-click="addTimeset()">
+      <div class="vis-editor-agg-wide-btn-add">
+        <i aria-hidden="true" class="fa fa-plus"></i> Add Timeset
+      </div>
+    </div>
+
+  </div>
+</li>

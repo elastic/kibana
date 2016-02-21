@@ -1,6 +1,7 @@
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
+import 'plugins/vis_timefilter/vis_timefilter_selection';
 import $ from 'jquery';
 import _ from 'lodash';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
@@ -114,6 +115,26 @@ uiModules
         $scope.fullScreenSpy = shouldHaveFullSpy();
         applyClassNames();
       });
+
+      $scope.$watch('vis.vistime.watchCounter', function () {
+        // Pass reference of vis timehandler to searchSource.
+        // It would be probably enough to do this once when the
+        // searchSource is created but since I don't know where
+        // this happens we assign the same reference in every
+        // watch call.
+        // TODO assert that this does not trigger the watcher on
+        // 'searchSource'...
+        if ($scope.searchSource && $scope.vis) {
+          $scope.searchSource.vistime = $scope.vis.vistime;
+        }
+
+        if (typeof $scope.$parent.fetch === 'function') {
+          $scope.$parent.fetch();
+        } else if (typeof $scope.$parent.refresh === 'function') {
+          $scope.$parent.refresh();
+        }
+      });
+
 
       $scope.$watch('vis', prereq(function (vis, oldVis) {
         var $visEl = getVisEl();

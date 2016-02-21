@@ -41,7 +41,16 @@ export default function AbstractReqProvider(Private, Promise) {
   };
 
   AbstractReq.prototype.getFetchParams = function () {
-    return this.source._flatten();
+    var bounds = null;
+    if (typeof this.source.vistime === 'object') {
+      bounds = this.source.vistime.getBounds();
+    }
+    return this.source._flatten().then(function (fetchParams) {
+      if (bounds) {
+        fetchParams.bounds = bounds;
+      }
+      return fetchParams;
+    });
   };
 
   AbstractReq.prototype.transformResponse = function (resp) {

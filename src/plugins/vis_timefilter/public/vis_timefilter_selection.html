@@ -1,0 +1,10 @@
+<div ng-if="isShowVisTimefilterSelection()">
+	<div class="vis-timefilter-selection">
+		<a
+			ng-click="toggle(timeset)"
+			ng-repeat="timeset in getAvailable()"
+			ng-class="{'btn btn-success': isSelected(timeset), 'btn btn-primary': !isSelected(timeset)}">
+			{{timeset.label}}
+		</a>
+	</div>
+</div>
