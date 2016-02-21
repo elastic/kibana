@@ -12,7 +12,7 @@ module.exports = new Datasource ('graphite', {
       help: 'Graphite metric to pull, eg _test-data.users.*.data'
     }
   ],
-  help: 'Pull data from grahite. Configure your graphite server in timelion.json',
+  help: 'Pull data from graphite. Configure your graphite server in timelion.json',
   fn: function graphite(args, tlConfig) {
 
     var config = args.byName;
