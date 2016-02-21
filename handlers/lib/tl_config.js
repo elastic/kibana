@@ -1,5 +1,7 @@
 var _ = require('lodash');
 var config = require('../../timelion.json');
+try {config = _.merge(config, require('../../timelion.private.json'));} catch (e) {}; //eslint-disable-line no-empty
+
 var buildTarget = require('../../lib/build_target.js');
 var targetSeries;
 
@@ -20,7 +22,7 @@ module.exports = function (setup) {
       targetSeries = buildTarget(this);
     },
     writeTargetSeries: function (series) {
-      targetSeries = _.map(series, function (p) {return p[0]});
+      targetSeries = _.map(series, function (p) {return p[0];});
     }
   };
 

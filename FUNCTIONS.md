@@ -19,7 +19,7 @@ offset | *string* | Offset the series retrieval by a date expression. Eg -1M to 
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
 
 #### .graphite()
-Pull data from grahite. Configure your graphite server in timelion.json
+Pull data from graphite. Configure your graphite server in timelion.json
 
 Argument | Accepts | Description
 --- | --- | ---

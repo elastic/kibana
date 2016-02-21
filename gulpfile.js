@@ -34,7 +34,8 @@ var include = [
   'lib',
   'routes',
   'series_functions',
-  'timelion.json'
+  'timelion.json',
+  'timelion.private.json'
 ];
 var exclude = Object.keys(pkg.devDependencies).map(function (name) {
   return path.join('node_modules', name);
@@ -59,6 +60,7 @@ function syncPluginTo(dest, done) {
     if (err) return done(err);
     Promise.all(include.map(function (name) {
       var source = path.resolve(__dirname, name);
+      try {fs.accessSync(source);} catch (e) {return;};
       return new Promise(function (resolve, reject) {
         var rsync = new Rsync();
         rsync
