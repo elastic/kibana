@@ -228,6 +228,8 @@ uiModules
 
   $scope.doSave = function () {
     savedVis.id = savedVis.title;
+    // vis.title was not bound and it's needed to reflect title into visState
+    $state.vis.title = savedVis.title;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
