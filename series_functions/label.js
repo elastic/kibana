@@ -11,16 +11,22 @@ module.exports = new Chainable('label', {
     {
       name: 'label',
       types: ['string'],
-      help: 'Legend value for series. You can use %s to reference to current label.'
+      help: 'Legend value for series. You can use $1, $2, etc, in the string to match up with the regex capture groups'
+    },
+    {
+      name: 'regex',
+      types: ['string', 'null'],
+      help: 'A regex with capture group support'
     }
   ],
   help: 'Change the label of the series. Use %s reference the existing label',
   fn:  function labelFn(args) {
-    return alter(args, function (eachSeries, label) {
-      if (label.indexOf('%s') !== -1) {
-        eachSeries.label =  util.format(label, eachSeries.label);
+    var config = args.byName;
+    return alter(args, function (eachSeries) {
+      if (config.regex) {
+        eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
       } else {
-        eachSeries.label =  label;
+        eachSeries.label = config.label;
       }
 
       return eachSeries;

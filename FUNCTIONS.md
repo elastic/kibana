@@ -134,7 +134,8 @@ Change the label of the series. Use %s reference the existing label
 
 Argument | Accepts | Description
 --- | --- | ---
-label | *string* | Legend value for series. You can use %s to reference to current label.  
+label | *string* | Legend value for series. You can use $1, $2, etc, in the string to match up with the regex capture groups  
+regex | *string* | A regex with capture group support  
 
 #### .legend()
 Set the position and style of the legend on the plot
