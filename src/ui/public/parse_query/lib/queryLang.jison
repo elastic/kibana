@@ -82,8 +82,6 @@
 "~="                   return 'LIKE'
 ">"                   return 'GT'
 "<"                   return 'LT'
-">="                   return 'GTE'
-"<="                   return 'LTE'
 "-"                    return 'DASH'
 "AND"                  return 'AND'
 "OR"                  return 'OR'
@@ -109,7 +107,7 @@ T[0-2][0-9]\:[0-5][0-9]\:[0-5][0-9](Z|\.[0-9]{3}Z) return 'TIME'
 /* operator associations and precedence */
 
 %right OR AND
-%left EQ LIKE GT LT GTE LTE
+%left EQ LIKE GT LT
 %left NOT EXISTS
 
 
@@ -212,7 +210,12 @@ simpleValue
     ;
 
 operator
-    : EQ | LIKE | GT | LT | GTE | LTE
+    : EQ | LIKE 
+    | GT EQ 
+      { $$ = '>='; }
+    | LT EQ 
+      { $$ = '<='; }
+    | GT | LT
     ;
 
 comparison

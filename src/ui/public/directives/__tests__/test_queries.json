@@ -55,6 +55,34 @@
     "query" : "dateTimeField=2015-01-01T12:00:00.000Z",
     "result" : "{\"query\":{\"term\":{\"dateTimeField\":1420113600000}}}"
   },
+  "notTerm" : {
+    "query" : "NOT intField=1234",
+    "result" : "{\"query\":{\"bool\":{\"must_not\":{\"term\":{\"intField\":1234}}}}}"
+  },
+  "ltTerm" : {
+    "query" : "intField<1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":null,\"to\":1234,\"include_lower\":true,\"include_upper\":false}}}}"
+  },
+  "gtTerm" : {
+    "query" : "intField>1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1234,\"to\":null,\"include_lower\":false,\"include_upper\":true}}}}"
+  },
+  "lteTerm" : {
+    "query" : "intField<=1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":null,\"to\":1234,\"include_lower\":true,\"include_upper\":true}}}}"
+  },
+  "gteTerm" : {
+    "query" : "intField>=1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1234,\"to\":null,\"include_lower\":true,\"include_upper\":true}}}}"
+  },
+  "likeTerm" : {
+    "query" : "strField~=\"abc*123?foo\"",
+    "result" : "{\"query\":{\"wildcard\":{\"strField\":\"abc*123?foo\"}}}"
+  },
+  "isTerm" : {
+    "query" : "intField IS NULL",
+    "result" : "{\"query\":{\"filtered\":{\"filter\":{\"missing\":{\"field\":\"intField\"}}}}}"
+  },
   "rangeExclusive" : {
     "query" : "intField IN [1,10]",
     "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1,\"to\":10,\"include_lower\":false,\"include_upper\":false}}}}"
@@ -90,5 +118,9 @@
   "simpleScope" : {
     "query" : "(dateTimeField=2015-01-01T12:00:00.000Z OR boolField) AND intField=1",
     "result" : "{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"term\":{\"dateTimeField\":1420113600000}},{\"term\":{\"boolField\":true}}]}},{\"term\":{\"intField\":1}}]}}}"
+  },
+  "multiScope" : {
+    "query" : "(dateTimeField=2015-01-01T12:00:00.000Z OR boolField) AND (intField=1 OR boolField)",
+    "result" : "{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"term\":{\"dateTimeField\":1420113600000}},{\"term\":{\"boolField\":true}}]}},{\"bool\":{\"should\":[{\"term\":{\"intField\":1}},{\"term\":{\"boolField\":true}}]}}]}}}"
   }
 }
