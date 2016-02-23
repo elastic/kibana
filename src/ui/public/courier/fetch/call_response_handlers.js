@@ -4,9 +4,9 @@ import ReqStatusProvider from './req_status';
 import NotifierProvider from './notifier';
 
 export default function CourierFetchCallResponseHandlers(Private, Promise) {
-  var ABORTED = Private(ReqStatusProvider).ABORTED;
-  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
-  var notify = Private(NotifierProvider);
+  const ABORTED = Private(ReqStatusProvider).ABORTED;
+  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  const notify = Private(NotifierProvider);
 
 
   function callResponseHandlers(requests, responses) {
@@ -15,7 +15,7 @@ export default function CourierFetchCallResponseHandlers(Private, Promise) {
         return ABORTED;
       }
 
-      var resp = responses[i];
+      let resp = responses[i];
 
       if (resp.timed_out) {
         notify.warning(new SearchTimeout());

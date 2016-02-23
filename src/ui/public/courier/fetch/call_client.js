@@ -6,26 +6,26 @@ import ReqStatusProvider from './req_status';
 
 export default function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
 
-  var isRequest = Private(IsRequestProvider);
-  var mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
+  const isRequest = Private(IsRequestProvider);
+  const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
 
-  var ABORTED = Private(ReqStatusProvider).ABORTED;
-  var DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const ABORTED = Private(ReqStatusProvider).ABORTED;
+  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
 
   function callClient(strategy, requests) {
     // merging docs can change status to DUPLICATE, capture new statuses
-    var statuses = mergeDuplicateRequests(requests);
+    const statuses = mergeDuplicateRequests(requests);
 
     // get the actual list of requests that we will be fetching
-    var executable = statuses.filter(isRequest);
-    var execCount = executable.length;
+    const executable = statuses.filter(isRequest);
+    let execCount = executable.length;
 
     // resolved by respond()
-    var esPromise;
-    var defer = Promise.defer();
+    let esPromise;
+    const defer = Promise.defer();
 
     // for each respond with either the response or ABORTED
-    var respond = function (responses) {
+    const respond = function (responses) {
       responses = responses || [];
       return Promise.map(requests, function (req, i) {
         switch (statuses[i]) {
@@ -45,7 +45,7 @@ export default function CourierFetchCallClient(Private, Promise, es, esShardTime
 
 
     // handle a request being aborted while being fetched
-    var requestWasAborted = Promise.method(function (req, i) {
+    const requestWasAborted = Promise.method(function (req, i) {
       if (statuses[i] === ABORTED) {
         defer.reject(new Error('Request was aborted twice?'));
       }

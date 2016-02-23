@@ -22,7 +22,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
             return indexList;
           }
 
-          var timeBounds = timefilter.getBounds();
+          const timeBounds = timefilter.getBounds();
           return indexList.toIndexList(timeBounds.min, timeBounds.max);
         })
         .then(function (indexList) {

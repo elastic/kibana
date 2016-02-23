@@ -6,17 +6,17 @@ import ContinueIncompleteProvider from './continue_incomplete';
 import ReqStatusProvider from './req_status';
 
 export default function FetchTheseProvider(Private, Promise) {
-  var notify = Private(NotifierProvider);
-  var forEachStrategy = Private(ForEachStrategyProvider);
+  const notify = Private(NotifierProvider);
+  const forEachStrategy = Private(ForEachStrategyProvider);
 
   // core tasks
-  var callClient = Private(CallClientProvider);
-  var callResponseHandlers = Private(CallResponseHandlersProvider);
-  var continueIncomplete = Private(ContinueIncompleteProvider);
+  const callClient = Private(CallClientProvider);
+  const callResponseHandlers = Private(CallResponseHandlersProvider);
+  const continueIncomplete = Private(ContinueIncompleteProvider);
 
-  var ABORTED = Private(ReqStatusProvider).ABORTED;
-  var DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
-  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  const ABORTED = Private(ReqStatusProvider).ABORTED;
+  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchThese(requests) {
     return forEachStrategy(requests, function (strategy, reqsForStrategy) {
@@ -66,7 +66,7 @@ export default function FetchTheseProvider(Private, Promise) {
       }
 
       return new Promise(function (resolve) {
-        var action = req.started ? req.continue : req.start;
+        const action = req.started ? req.continue : req.start;
         resolve(action.call(req));
       })
       .catch(err => req.handleFailure(err));

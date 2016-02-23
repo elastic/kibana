@@ -3,7 +3,7 @@ import _ from 'lodash';
 import EventsProvider from 'ui/events';
 
 export default function CourierSegmentedReqHandle(Private) {
-  var Events = Private(EventsProvider);
+  const Events = Private(EventsProvider);
 
 
   /**

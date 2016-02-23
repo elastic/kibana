@@ -5,8 +5,8 @@ import AbstractRequestProvider from './request';
 
 export default function DocRequestProvider(Private) {
 
-  var docStrategy = Private(DocStrategyProvider);
-  var AbstractRequest = Private(AbstractRequestProvider);
+  const docStrategy = Private(DocStrategyProvider);
+  const AbstractRequest = Private(AbstractRequestProvider);
 
   _.class(DocRequest).inherits(AbstractRequest);
   function DocRequest(source, defer) {
@@ -17,15 +17,15 @@ export default function DocRequestProvider(Private) {
   }
 
   DocRequest.prototype.canStart = function () {
-    var parent = DocRequest.Super.prototype.canStart.call(this);
+    const parent = DocRequest.Super.prototype.canStart.call(this);
     if (!parent) return false;
 
-    var version = this.source._version;
-    var storedVersion = this.source._getStoredVersion();
+    const version = this.source._version;
+    const storedVersion = this.source._getStoredVersion();
 
     // conditions that equal "fetch This DOC!"
-    var unknown = !version && !storedVersion;
-    var mismatch = version !== storedVersion;
+    const unknown = !version && !storedVersion;
+    const mismatch = version !== storedVersion;
 
     return Boolean(mismatch || (unknown && !this.started));
   };

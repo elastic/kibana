@@ -7,10 +7,10 @@ import SearchRequestProvider from './search';
 import SegmentedHandleProvider from './segmented_handle';
 
 export default function SegmentedReqProvider(es, Private, Promise, timefilter, config) {
-  var SearchReq = Private(SearchRequestProvider);
-  var SegmentedHandle = Private(SegmentedHandleProvider);
+  const SearchReq = Private(SearchRequestProvider);
+  const SegmentedHandle = Private(SegmentedHandleProvider);
 
-  var notify = new Notifier({
+  const notify = new Notifier({
     location: 'Segmented Fetch'
   });
 
@@ -42,7 +42,7 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
    *********/
 
   SegmentedReq.prototype.start = function () {
-    var self = this;
+    const self = this;
 
     this._complete = [];
     this._active = null;
@@ -77,20 +77,20 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   };
 
   SegmentedReq.prototype.getFetchParams = function () {
-    var self = this;
+    const self = this;
 
     return self._getFlattenedSource().then(function (flatSource) {
-      var params = _.cloneDeep(flatSource);
+      const params = _.cloneDeep(flatSource);
 
       // calculate the number of indices to fetch in this request in order to prevent
       // more than self._maxSegments requests. We use Math.max(1, n) to ensure that each request
       // has at least one index pattern, and Math.floor() to make sure that if the
       // number of indices does not round out evenly the extra index is tacked onto the last
       // request, making sure the first request returns faster.
-      var remainingSegments = self._maxSegments - self._segments.length;
-      var indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
+      const remainingSegments = self._maxSegments - self._segments.length;
+      const indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
 
-      var indices = self._active = self._queue.splice(0, indexCount);
+      const indices = self._active = self._queue.splice(0, indexCount);
       params.index = _.pluck(indices, 'index');
 
       if (isNumber(self._desiredSize)) {
@@ -113,8 +113,8 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   };
 
   SegmentedReq.prototype.isIncomplete = function () {
-    var queueNotCreated = !this._queueCreated;
-    var queueNotEmpty = this._queue.length > 0;
+    const queueNotCreated = !this._queueCreated;
+    const queueNotEmpty = this._queue.length > 0;
     return queueNotCreated || queueNotEmpty;
   };
 
@@ -181,9 +181,9 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   };
 
   SegmentedReq.prototype._createQueue = function () {
-    var self = this;
-    var timeBounds = timefilter.getBounds();
-    var indexPattern = self.source.get('index');
+    const self = this;
+    const timeBounds = timefilter.getBounds();
+    const indexPattern = self.source.get('index');
     self._queueCreated = false;
 
     return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, self._direction)
@@ -211,14 +211,14 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   };
 
   SegmentedReq.prototype._consumeSegment = function (seg) {
-    var index = this._active;
+    const index = this._active;
     this._complete.push(index);
     if (!seg) return; // segment was ignored/filtered, don't store it
 
-    var hadHits = _.get(this._mergedResp, 'hits.hits.length') > 0;
-    var gotHits = _.get(seg, 'hits.hits.length') > 0;
-    var firstHits = !hadHits && gotHits;
-    var haveHits = hadHits || gotHits;
+    const hadHits = _.get(this._mergedResp, 'hits.hits.length') > 0;
+    const gotHits = _.get(seg, 'hits.hits.length') > 0;
+    const firstHits = !hadHits && gotHits;
+    const haveHits = hadHits || gotHits;
 
     this._mergeSegment(seg);
     this.resp = _.omit(this._mergedResp, '_bucketIndex');
@@ -229,9 +229,9 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   };
 
   SegmentedReq.prototype._mergeHits = function (hits) {
-    var mergedHits = this._mergedResp.hits.hits;
-    var desiredSize = this._desiredSize;
-    var sortFn = this._sortFn;
+    const mergedHits = this._mergedResp.hits.hits;
+    const desiredSize = this._desiredSize;
+    const sortFn = this._sortFn;
 
     _.pushAll(hits, mergedHits);
 
@@ -242,12 +242,12 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
     }
 
     if (isNumber(desiredSize)) {
-      mergedHits = this._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
+      this._mergedResp.hits.hits = mergedHits.slice(0, desiredSize);
     }
   };
 
   SegmentedReq.prototype._mergeSegment = notify.timed('merge response segment', function (seg) {
-    var merged = this._mergedResp;
+    const merged = this._mergedResp;
 
     this._segments.push(seg);
 
@@ -277,7 +277,7 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
       }
 
       seg.aggregations[aggKey].buckets.forEach(function (bucket) {
-        var mbucket = merged._bucketIndex[bucket.key];
+        let mbucket = merged._bucketIndex[bucket.key];
         if (mbucket) {
           mbucket.doc_count += bucket.doc_count;
           return;
@@ -291,10 +291,10 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
 
   SegmentedReq.prototype._detectHitsWindow = function (hits) {
     hits = hits || [];
-    var indexPattern = this.source.get('index');
-    var desiredSize = this._desiredSize;
+    const indexPattern = this.source.get('index');
+    const desiredSize = this._desiredSize;
 
-    var size = _.size(hits);
+    const size = _.size(hits);
     if (!isNumber(desiredSize) || size < desiredSize) {
       this._hitWindow = {
         size: size,
@@ -308,8 +308,8 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
     let max;
 
     hits.forEach(function (deepHit) {
-      var hit = indexPattern.flattenHit(deepHit);
-      var time = hit[indexPattern.timeFieldName];
+      const hit = indexPattern.flattenHit(deepHit);
+      const time = hit[indexPattern.timeFieldName];
       if (min == null || time < min) min = time;
       if (max == null || time > max) max = time;
     });
@@ -318,8 +318,8 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
   };
 
   SegmentedReq.prototype._pickSizeForIndices = function (indices) {
-    var hitWindow = this._hitWindow;
-    var desiredSize = this._desiredSize;
+    const hitWindow = this._hitWindow;
+    const desiredSize = this._desiredSize;
 
     if (!isNumber(desiredSize)) return null;
     // we don't have any hits yet, get us more info!
@@ -327,7 +327,7 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
     // the order of documents isn't important, just get us more
     if (!this._sortFn) return Math.max(desiredSize - hitWindow.size, 0);
     // if all of the documents in every index fall outside of our current doc set, we can ignore them.
-    var someOverlap = indices.some(function (index) {
+    const someOverlap = indices.some(function (index) {
       return index.min <= hitWindow.max && hitWindow.min <= index.max;
     });
 

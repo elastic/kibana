@@ -3,14 +3,14 @@ import Notifier from 'ui/notify/notifier';
 import ErrorHandlersProvider from '../../_error_handlers';
 
 export default function RequestErrorHandlerFactory(Private) {
-  var errHandlers = Private(ErrorHandlersProvider);
+  const errHandlers = Private(ErrorHandlersProvider);
 
-  var notify = new Notifier({
+  const notify = new Notifier({
     location: 'Courier Fetch Error'
   });
 
   function handleError(req, error) {
-    var myHandlers = [];
+    const myHandlers = [];
 
     errHandlers.splice(0).forEach(function (handler) {
       (handler.source === req.source ? myHandlers : errHandlers).push(handler);

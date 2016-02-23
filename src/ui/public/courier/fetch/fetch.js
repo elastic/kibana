@@ -7,14 +7,14 @@ import ReqStatusProvider from './req_status';
 
 export default function fetchService(Private, Promise) {
 
-  var requestQueue = Private(RequestQueueProvider);
-  var fetchThese = Private(FetchTheseProvider);
+  const requestQueue = Private(RequestQueueProvider);
+  const fetchThese = Private(FetchTheseProvider);
 
-  var callResponseHandlers = Private(CallResponseHandlersProvider);
-  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  const callResponseHandlers = Private(CallResponseHandlersProvider);
+  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchQueued(strategy) {
-    var requests = requestQueue.getStartable(strategy);
+    const requests = requestQueue.getStartable(strategy);
     if (!requests.length) return Promise.resolve();
     else return fetchThese(requests);
   }
@@ -22,7 +22,7 @@ export default function fetchService(Private, Promise) {
   this.fetchQueued = fetchQueued;
 
   function fetchASource(source, strategy) {
-    var defer = Promise.defer();
+    const defer = Promise.defer();
 
     fetchThese([
       source._createRequest(defer)

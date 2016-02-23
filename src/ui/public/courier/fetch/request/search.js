@@ -5,11 +5,11 @@ import AbstractRequestProvider from './request';
 
 export default function SearchReqProvider(Private) {
 
-  var searchStrategy = Private(SearchStrategyProvider);
-  var AbstractRequest = Private(AbstractRequestProvider);
+  const searchStrategy = Private(SearchStrategyProvider);
+  const AbstractRequest = Private(AbstractRequestProvider);
 
   _.class(SearchReq).inherits(AbstractRequest);
-  var Super = SearchReq.Super;
+  const Super = SearchReq.Super;
   function SearchReq(source, defer) {
     Super.call(this, source, defer);
 

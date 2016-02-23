@@ -7,8 +7,8 @@ import RequestQueueProvider from '../../_request_queue';
 import ErrorHandlerRequestProvider from './error_handler';
 
 export default function AbstractReqProvider(Private, Promise) {
-  var requestQueue = Private(RequestQueueProvider);
-  var requestErrorHandler = Private(ErrorHandlerRequestProvider);
+  const requestQueue = Private(RequestQueueProvider);
+  const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
   function AbstractReq(source, defer) {
     if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {
@@ -33,7 +33,7 @@ export default function AbstractReqProvider(Private, Promise) {
     this.started = true;
     this.moment = moment();
 
-    var source = this.source;
+    const source = this.source;
     if (source.activeFetchCount) {
       source.activeFetchCount += 1;
     } else {
@@ -76,7 +76,7 @@ export default function AbstractReqProvider(Private, Promise) {
   };
 
   AbstractReq.prototype.retry = function () {
-    var clone = this.clone();
+    const clone = this.clone();
     this.abort();
     return clone;
   };

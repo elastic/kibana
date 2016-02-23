@@ -2,16 +2,16 @@ import IsRequestProvider from './is_request';
 import ReqStatusProvider from './req_status';
 
 export default function FetchMergeDuplicateRequests(Private) {
-  var isRequest = Private(IsRequestProvider);
-  var DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const isRequest = Private(IsRequestProvider);
+  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
 
   function mergeDuplicateRequests(requests) {
     // dedupe requests
-    var index = {};
+    const index = {};
     return requests.map(function (req) {
       if (!isRequest(req)) return req;
 
-      var iid = req.source._instanceid;
+      const iid = req.source._instanceid;
       if (!index[iid]) {
         // this request is unique so far
         index[iid] = req;
