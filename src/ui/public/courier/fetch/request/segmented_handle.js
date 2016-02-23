@@ -5,6 +5,7 @@ import EventsProvider from 'ui/events';
 export default function CourierSegmentedReqHandle(Private) {
   const Events = Private(EventsProvider);
 
+  const segmentedRequest = Symbol('Actual Segmented Request');
 
   /**
    * Simple class for creating an object to send to the
@@ -16,16 +17,26 @@ export default function CourierSegmentedReqHandle(Private) {
    *
    * @param {SegmentedRequest} - req - the requst this handle relates to
    */
-  _.class(SegmentedHandle).inherits(Events);
-  function SegmentedHandle(req) {
-    SegmentedHandle.Super.call(this);
+  return class SegmentedHandle extends Events {
+    constructor(req) {
+      super();
+      this[segmentedRequest] = req;
+    }
 
-    // export a couple methods from the request
-    this.setDirection = _.bindKey(req, 'setDirection');
-    this.setSize = _.bindKey(req, 'setSize');
-    this.setMaxSegments = _.bindKey(req, 'setMaxSegments');
-    this.setSortFn = _.bindKey(req, 'setSortFn');
-  }
+    setDirection(...args) {
+      this[segmentedRequest](...args);
+    }
 
-  return SegmentedHandle;
+    setSize(...args) {
+      this[segmentedRequest](...args);
+    }
+
+    setMaxSegments(...args) {
+      this[segmentedRequest](...args);
+    }
+
+    setSortFn(...args) {
+      this[segmentedRequest](...args);
+    }
+  };
 };

@@ -8,14 +8,12 @@ export default function SearchReqProvider(Private) {
   const searchStrategy = Private(SearchStrategyProvider);
   const AbstractRequest = Private(AbstractRequestProvider);
 
-  _.class(SearchReq).inherits(AbstractRequest);
-  const Super = SearchReq.Super;
-  function SearchReq(source, defer) {
-    Super.call(this, source, defer);
+  return class SearchReq extends AbstractRequest {
+    constructor(...args) {
+      super(...args);
 
-    this.type = 'search';
-    this.strategy = searchStrategy;
-  }
-
-  return SearchReq;
+      this.type = 'search';
+      this.strategy = searchStrategy;
+    }
+  };
 };

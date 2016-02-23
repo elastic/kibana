@@ -8,37 +8,38 @@ export default function DocRequestProvider(Private) {
   const docStrategy = Private(DocStrategyProvider);
   const AbstractRequest = Private(AbstractRequestProvider);
 
-  _.class(DocRequest).inherits(AbstractRequest);
-  function DocRequest(source, defer) {
-    DocRequest.Super.call(this, source, defer);
+  class DocRequest extends AbstractRequest {
+    constructor(...args) {
+      super(...args);
 
-    this.type = 'doc';
-    this.strategy = docStrategy;
-  }
-
-  DocRequest.prototype.canStart = function () {
-    const parent = DocRequest.Super.prototype.canStart.call(this);
-    if (!parent) return false;
-
-    const version = this.source._version;
-    const storedVersion = this.source._getStoredVersion();
-
-    // conditions that equal "fetch This DOC!"
-    const unknown = !version && !storedVersion;
-    const mismatch = version !== storedVersion;
-
-    return Boolean(mismatch || (unknown && !this.started));
-  };
-
-  DocRequest.prototype.handleResponse = function (resp) {
-    if (resp.found) {
-      this.source._storeVersion(resp._version);
-    } else {
-      this.source._clearVersion();
+      this.type = 'doc';
+      this.strategy = docStrategy;
     }
 
-    return DocRequest.Super.prototype.handleResponse.call(this, resp);
-  };
+    canStart() {
+      const parent = super.canStart();
+      if (!parent) return false;
+
+      const version = this.source._version;
+      const storedVersion = this.source._getStoredVersion();
+
+      // conditions that equal "fetch This DOC!"
+      const unknown = !version && !storedVersion;
+      const mismatch = version !== storedVersion;
+
+      return Boolean(mismatch || (unknown && !this.started));
+    }
+
+    handleResponse(resp) {
+      if (resp.found) {
+        this.source._storeVersion(resp._version);
+      } else {
+        this.source._clearVersion();
+      }
+
+      return super.handleResponse(resp);
+    }
+  }
 
   return DocRequest;
 };
