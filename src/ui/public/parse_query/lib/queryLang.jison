@@ -98,9 +98,9 @@
 ("FALSE"|"false")                  return 'FALSE'
 (?:[0-9]{1,3}\.){3}[0-9]{1,3}  return 'IPV4'
 T[0-2][0-9]\:[0-5][0-9]\:[0-5][0-9](Z|\.[0-9]{3}Z) return 'TIME'
-[0-9]+             return 'NUMBER'
+[\-]{0,1}[0-9]+             return 'NUMBER'
 [\w]?\"(\\.|[^\\"])*\"    return 'STRING'
-[A-Za-z0-9_\-]+                   return 'FIELD'
+[A-Za-z0-9_]+                   return 'FIELD'
 <<EOF>>               return 'EOF'
 
 

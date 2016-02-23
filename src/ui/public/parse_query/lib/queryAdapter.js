@@ -22,6 +22,7 @@ function getMapping(fieldName) {
 }
 
 function validateValue(mapping, value) {
+  var temp;
   if (mapping) {
     switch (mapping.type) {
       case 'string':
@@ -37,7 +38,7 @@ function validateValue(mapping, value) {
         return value.valueOf();
         break;
       case 'ip':
-        return value;
+        return '"' + value + '"';
         break;
       case 'number':
         if (!scope._.isNumber(value)) {
@@ -52,6 +53,11 @@ function validateValue(mapping, value) {
         return value;
         break;
       case 'geo_point':
+        // check that the string value is formatted as a geo point
+        temp = value.split(',');
+        if (parseFloat(temp[0]) === NaN || parseFloat(temp[1]) === NaN) {
+          throw new scope.errors.InvalidValueForField(mapping.name, mapping.type, value);
+        }
         return value;
         break;
     }
