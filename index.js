@@ -30,6 +30,9 @@ module.exports = function (kibana) {
           };
         }
       },
+      visTypes: [
+        'plugins/timelion/vis'
+      ],
       modules: {
         flot$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot'),

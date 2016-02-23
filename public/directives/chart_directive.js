@@ -15,11 +15,13 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
   return {
     restrict: 'A',
     scope: {
-      chart: '=',
-      search: '='
+      chart: '=', // The flot object, data, config and all
+      search: '=' // The function to execute to kick off a search
     },
     link: function ($scope, $elem) {
       var timezone = Private(require('plugins/timelion/services/timezone'))();
+
+      $scope.search = $scope.search || _.noop;
 
       var legendValueNumbers;
       var debouncedSetLegendNumbers;
