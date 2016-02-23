@@ -25,7 +25,6 @@ define(function (require) {
 
           toUser.setIndexPattern(fieldMap);
           fromUser.setIndexPattern(fieldMap);
-          fromUser.setUseLegacy(true);
           ngModel.$parsers.push(fromUser);
           ngModel.$formatters.push(toUser);
 

@@ -2,7 +2,6 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var QueryFormatter = require('ui/parse_query/lib/queryFormatter');
-  var useLegacy = true;
 
   /**
    * Take text from the model and present it to the user as a string
@@ -19,10 +18,13 @@ define(function (require) {
       if (text.query_string) {
         return toUser(text.query_string.query);
       }
-      if (useLegacy) {
+      try {
+        var result = QueryFormatter.formatQuery(text);
+        if (result === undefined) {
+          return angular.toJson(text);
+        }
+      } catch (e) {
         return angular.toJson(text);
-      } else {
-        return QueryFormatter.formatQuery(text);
       }
     }
     return '' + text;
@@ -31,10 +33,6 @@ define(function (require) {
 
   toUser.setIndexPattern = function (fieldMap) {
     QueryFormatter.fieldDictionary = fieldMap;
-  };
-
-  toUser.setUseLEgacy = function (legacy) {
-    useLegacy = legacy;
   };
 
   return toUser;

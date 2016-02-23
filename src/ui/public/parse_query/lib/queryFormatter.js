@@ -15,36 +15,26 @@ define(function () {
   function fromQuery(query) {
     if (query.match_all) {
       return '*';
-    }
-
-    if (query.nested) {
+    } else if (query.nested) {
       if (query.nested.query.must_not) {
         return 'NOT EXISTS ' + fromQuery(query.nested.query.must_not);
       } else if (query.nested.query.bool && query.nested.query.bool.must_not) {
         return '(NOT EXISTS ' + fromQuery(query.nested.query.bool.must_not) + ')';
       }
       return 'EXISTS ' + fromQuery(query.nested.query);
-    }
-
-    if (query.term) {
+    } else if (query.term) {
       return fromTerm(query.term);
-    }
-
-    if (query.bool) {
+    } else if (query.bool) {
       return fromBool(query.bool);
-    }
-
-    if (query.range) {
+    } else if (query.range) {
       return fromRange(query.range);
-    }
-
-    if (query.must_not) {
+    } else if (query.must_not) {
       return fromMustNot(query.must_not);
-    }
-
-    if (query.filtered) {
+    } else if (query.filtered) {
       return fromFiltered(query.filtered);
     }
+
+    throw 'Unable to reverse parse';
   }
 
   function fromFiltered(filtered) {

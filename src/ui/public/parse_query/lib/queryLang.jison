@@ -100,7 +100,7 @@
 T[0-2][0-9]\:[0-5][0-9]\:[0-5][0-9](Z|\.[0-9]{3}Z) return 'TIME'
 [0-9]+             return 'NUMBER'
 [\w]?\"(\\.|[^\\"])*\"    return 'STRING'
-[A-Za-z_\-]+                   return 'FIELD'
+[A-Za-z0-9_\-]+                   return 'FIELD'
 <<EOF>>               return 'EOF'
 
 

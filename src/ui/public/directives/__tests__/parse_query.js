@@ -66,7 +66,6 @@ describe('parse-query directive', function () {
 
     beforeEach(function () {
       fromUser = Private(require('ui/parse_query/lib/from_user'));
-      fromUser.setUseLegacy(true);
       config.set('query:queryString:options', {});
     });
 
@@ -84,14 +83,14 @@ describe('parse-query directive', function () {
 
     it('should merge in the query string options', function () {
       config.set('query:queryString:options', {analyze_wildcard: true});
-      expect(fromUser('foo')).to.eql({query_string: {query: 'foo', analyze_wildcard: true}});
+      expect(fromUser('foo:true')).to.eql({query_string: {query: 'foo:true', analyze_wildcard: true}});
       expect(fromUser('')).to.eql({query_string: {query: '*', analyze_wildcard: true}});
     });
 
     it('should treat input that does not start with { as a query string', function () {
-      expect(fromUser('foo')).to.eql({query_string: {query: 'foo'}});
-      expect(fromUser('400')).to.eql({query_string: {query: '400'}});
-      expect(fromUser('true')).to.eql({query_string: {query: 'true'}});
+      expect(fromUser('foo:true')).to.eql({query_string: {query: 'foo:true'}});
+      expect(fromUser('bar:400')).to.eql({query_string: {query: 'bar:400'}});
+      expect(fromUser('tweet:true')).to.eql({query_string: {query: 'tweet:true'}});
     });
 
     it('should parse valid JSON', function () {
