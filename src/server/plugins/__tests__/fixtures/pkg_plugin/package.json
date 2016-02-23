@@ -1,0 +1,9 @@
+{
+  "name": "pkg-plugin",
+  "version": "0.1.1",
+  "kibana": {
+    "app": {
+      "main": "./map.js"
+    }
+  }
+}

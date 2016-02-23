@@ -45,7 +45,7 @@ module.exports = function (grunt) {
       '<%= root %>/tasks/**/*.js',
       '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
-      '!<%= src %>/fixtures/**/*.js',
+      '!<%= src %>/**/fixtures/**/*',
       '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ],
     deepModules: {

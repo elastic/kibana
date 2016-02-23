@@ -1,4 +1,9 @@
 {
   "name": "metric_vis",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "visTypes": [
+      "plugins/metric_vis/metric_vis"
+    ]
+  }
 }

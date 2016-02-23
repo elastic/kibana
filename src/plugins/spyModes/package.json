@@ -1,4 +1,10 @@
 {
   "name": "spyModes",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "spyModes": [
+      "plugins/spyModes/tableSpyMode",
+      "plugins/spyModes/reqRespStatsSpyMode"
+    ]
+  }
 }

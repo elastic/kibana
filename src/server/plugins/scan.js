@@ -1,25 +1,30 @@
-import _ from 'lodash';
+import { partial, bindKey } from 'lodash';
 import { fromNode } from 'bluebird';
 import { readdir, stat } from 'fs';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { each } from 'bluebird';
 import PluginCollection from './PluginCollection';
-module.exports = async (kbnServer, server, config) => {
 
-  var plugins = kbnServer.plugins = new PluginCollection(kbnServer);
+export default async function scanMixin(kbnServer, server, config) {
+  const plugins = kbnServer.plugins = new PluginCollection(kbnServer);
+  const log = {
+    debug: bindKey(server, 'log', ['plugins', 'debug']),
+    warning: bindKey(server, 'log', ['plugins', 'warning']),
+  };
 
-  let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
-  let pluginPaths = [].concat(config.get('plugins.paths') || []);
+  const scanDirs = [].concat(config.get('plugins.scanDirs') || []);
+  const pluginPaths = [].concat(config.get('plugins.paths') || [], await scanForPlugins(log, scanDirs));
+  await loadPluginsFromPaths(plugins, log, pluginPaths);
+}
 
-  let debug = _.bindKey(server, 'log', ['plugins', 'debug']);
-  let warning = _.bindKey(server, 'log', ['plugins', 'warning']);
+export async function scanForPlugins({ debug, warning }, scanDirs) {
+  const pluginPaths = [];
 
   // scan all scanDirs to find pluginPaths
   await each(scanDirs, async dir => {
     debug({ tmpl: 'Scanning `<%= dir %>` for plugins', dir: dir });
 
     let filenames = null;
-
     try {
       filenames = await fromNode(cb => readdir(dir, cb));
     } catch (err) {
@@ -36,24 +41,39 @@ module.exports = async (kbnServer, server, config) => {
     await each(filenames, async name => {
       if (name[0] === '.') return;
 
-      let path = resolve(dir, name);
-      let stats = await fromNode(cb => stat(path, cb));
+      const path = resolve(dir, name);
+      const stats = await fromNode(cb => stat(path, cb));
       if (stats.isDirectory()) {
         pluginPaths.push(path);
       }
     });
   });
 
-  for (let path of pluginPaths) {
-    let modulePath;
+  return pluginPaths;
+}
+
+export async function loadPluginsFromPaths(plugins, { debug, warning }, pluginPaths) {
+
+  async function attemptLoad(path, name, method) {
     try {
-      modulePath = require.resolve(path);
-    } catch (e) {
-      warning({ tmpl: 'Skipping non-plugin directory at <%= path %>', path: path });
-      continue;
+      const success = await plugins[method](path);
+      if (success) {
+        debug({ tmpl: 'Found plugin at "<%= path %>"', path });
+        return true;
+      }
+    } catch (err) {
+      warning({ tmpl: 'Failed to load plugin at "<%= path %>": <%= err.message %>', path, err });
     }
 
-    await plugins.new(path);
-    debug({ tmpl: 'Found plugin at <%= path %>', path: modulePath });
+    debug({ tmpl: 'Non-plugin directory found at "<%= path %>"', path});
+    return false;
   }
-};
+
+  for (let path of pluginPaths) {
+    const dirSuccess = await attemptLoad(path, 'Plugin directory', 'new');
+    const pkgSuccess = await attemptLoad(path, 'Package-based plugin', 'newFromPackageJson');
+    if (!dirSuccess && !pkgSuccess) {
+      warning({ tmpl: 'Unable to load a plugin from directory "<%= path %>"', path: path });
+    }
+  }
+}

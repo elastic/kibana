@@ -1,4 +1,9 @@
 {
   "name": "table_vis",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "visTypes": [
+      "plugins/table_vis/table_vis"
+    ]
+  }
 }

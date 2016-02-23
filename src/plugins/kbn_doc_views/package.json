@@ -1,4 +1,10 @@
 {
   "name": "kbn_doc_views",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "docViews": [
+      "plugins/kbn_doc_views/table",
+      "plugins/kbn_doc_views/json"
+    ]
+  }
 }

@@ -1,4 +1,9 @@
 {
   "name": "kbn_vislib_vis_types",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "kibana": {
+    "visTypes": [
+      "plugins/kbn_vislib_vis_types/kbn_vislib_vis_types"
+    ]
+  }
 }
