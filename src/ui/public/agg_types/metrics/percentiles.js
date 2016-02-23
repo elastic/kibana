@@ -44,11 +44,9 @@ export default function AggTypeMetricPercentilesProvider(Private) {
       });
     },
     getValue: function (agg, bucket) {
-      // percentiles for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
-      // parse the keys and respond with the value that matches
-      return _.find(bucket[agg.parentId] && bucket[agg.parentId].values, function (value, key) {
-        return agg.key === parseFloat(key);
-      });
+      const values = bucket[agg.parentId] && bucket[agg.parentId].values;
+      const percentile = _.find(values, value => agg.key === value.key);
+      return percentile ? percentile.value : null;
     }
   });
 };
