@@ -3,12 +3,12 @@ import moment from 'moment';
 
 import errors from 'ui/errors';
 
-import CourierRequestQueueProvider from '../../_request_queue';
-import CourierFetchRequestErrorHandlerProvider from './error_handler';
+import RequestQueueProvider from '../../_request_queue';
+import ErrorHandlerRequestProvider from './error_handler';
 
 export default function AbstractReqProvider(Private, Promise) {
-  var requestQueue = Private(CourierRequestQueueProvider);
-  var requestErrorHandler = Private(CourierFetchRequestErrorHandlerProvider);
+  var requestQueue = Private(RequestQueueProvider);
+  var requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
   function AbstractReq(source, defer) {
     if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {

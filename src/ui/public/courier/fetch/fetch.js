@@ -1,17 +1,17 @@
 import _ from 'lodash';
 
-import CourierRequestQueueProvider from '../_request_queue';
-import CourierFetchFetchTheseProvider from './fetch_these';
-import CourierFetchCallResponseHandlersProvider from './call_response_handlers';
-import CourierFetchReqStatusProvider from './req_status';
+import RequestQueueProvider from '../_request_queue';
+import FetchTheseProvider from './fetch_these';
+import CallResponseHandlersProvider from './call_response_handlers';
+import ReqStatusProvider from './req_status';
 
 export default function fetchService(Private, Promise) {
 
-  var requestQueue = Private(CourierRequestQueueProvider);
-  var fetchThese = Private(CourierFetchFetchTheseProvider);
+  var requestQueue = Private(RequestQueueProvider);
+  var fetchThese = Private(FetchTheseProvider);
 
-  var callResponseHandlers = Private(CourierFetchCallResponseHandlersProvider);
-  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
+  var callResponseHandlers = Private(CallResponseHandlersProvider);
+  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchQueued(strategy) {
     var requests = requestQueue.getStartable(strategy);

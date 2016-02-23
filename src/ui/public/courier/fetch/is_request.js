@@ -1,7 +1,7 @@
-import CourierFetchRequestRequestProvider from './request';
+import AbstractRequestProvider from './request';
 
-export default function CourierFetchIsRequestProvider(Private) {
-  var AbstractRequest = Private(CourierFetchRequestRequestProvider);
+export default function IsRequestProvider(Private) {
+  var AbstractRequest = Private(AbstractRequestProvider);
 
   return function isRequest(obj) {
     return obj instanceof AbstractRequest;

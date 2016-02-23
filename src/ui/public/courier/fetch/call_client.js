@@ -1,16 +1,16 @@
 import _ from 'lodash';
 
-import CourierFetchIsRequestProvider from './is_request';
-import CourierFetchMergeDuplicateRequestsProvider from './merge_duplicate_requests';
-import CourierFetchReqStatusProvider from './req_status';
+import IsRequestProvider from './is_request';
+import MergeDuplicatesRequestProvider from './merge_duplicate_requests';
+import ReqStatusProvider from './req_status';
 
 export default function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
 
-  var isRequest = Private(CourierFetchIsRequestProvider);
-  var mergeDuplicateRequests = Private(CourierFetchMergeDuplicateRequestsProvider);
+  var isRequest = Private(IsRequestProvider);
+  var mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
 
-  var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
-  var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
+  var ABORTED = Private(ReqStatusProvider).ABORTED;
+  var DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
 
   function callClient(strategy, requests) {
     // merging docs can change status to DUPLICATE, capture new statuses

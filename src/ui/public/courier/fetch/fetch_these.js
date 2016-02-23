@@ -1,22 +1,22 @@
-import CourierFetchNotifierProvider from './notifier';
-import CourierFetchForEachStrategyProvider from './for_each_strategy';
-import CourierFetchCallClientProvider from './call_client';
-import CourierFetchCallResponseHandlersProvider from './call_response_handlers';
-import CourierFetchContinueIncompleteProvider from './continue_incomplete';
-import CourierFetchReqStatusProvider from './req_status';
+import NotifierProvider from './notifier';
+import ForEachStrategyProvider from './for_each_strategy';
+import CallClientProvider from './call_client';
+import CallResponseHandlersProvider from './call_response_handlers';
+import ContinueIncompleteProvider from './continue_incomplete';
+import ReqStatusProvider from './req_status';
 
 export default function FetchTheseProvider(Private, Promise) {
-  var notify = Private(CourierFetchNotifierProvider);
-  var forEachStrategy = Private(CourierFetchForEachStrategyProvider);
+  var notify = Private(NotifierProvider);
+  var forEachStrategy = Private(ForEachStrategyProvider);
 
   // core tasks
-  var callClient = Private(CourierFetchCallClientProvider);
-  var callResponseHandlers = Private(CourierFetchCallResponseHandlersProvider);
-  var continueIncomplete = Private(CourierFetchContinueIncompleteProvider);
+  var callClient = Private(CallClientProvider);
+  var callResponseHandlers = Private(CallResponseHandlersProvider);
+  var continueIncomplete = Private(ContinueIncompleteProvider);
 
-  var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
-  var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
-  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
+  var ABORTED = Private(ReqStatusProvider).ABORTED;
+  var DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchThese(requests) {
     return forEachStrategy(requests, function (strategy, reqsForStrategy) {

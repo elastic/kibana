@@ -2,8 +2,8 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 
-import CourierDataSourceDocSourceProvider from '../../data_source/doc_source';
-import CourierFetchRequestDocProvider from '../request/doc';
+import DocSourceProvider from '../../data_source/doc_source';
+import DocRequestProvider from '../request/doc';
 
 describe('Courier DocFetchRequest class', function () {
 
@@ -16,8 +16,8 @@ describe('Courier DocFetchRequest class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, Promise, $injector) {
-    var DocSource = Private(CourierDataSourceDocSourceProvider);
-    var DocFetchRequest = Private(CourierFetchRequestDocProvider);
+    var DocSource = Private(DocSourceProvider);
+    var DocFetchRequest = Private(DocRequestProvider);
 
     storage =
     $injector.get('localStorage').store =

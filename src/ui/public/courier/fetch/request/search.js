@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
-import CourierFetchStrategySearchProvider from '../strategy/search';
-import CourierFetchRequestRequestProvider from './request';
+import SearchStrategyProvider from '../strategy/search';
+import AbstractRequestProvider from './request';
 
 export default function SearchReqProvider(Private) {
 
-  var searchStrategy = Private(CourierFetchStrategySearchProvider);
-  var AbstractRequest = Private(CourierFetchRequestRequestProvider);
+  var searchStrategy = Private(SearchStrategyProvider);
+  var AbstractRequest = Private(AbstractRequestProvider);
 
   _.class(SearchReq).inherits(AbstractRequest);
   var Super = SearchReq.Super;

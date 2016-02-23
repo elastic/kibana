@@ -1,12 +1,14 @@
 import _ from 'lodash';
 import { isNumber } from 'lodash';
 
-import CourierFetchRequestSearchProvider from './search';
-import CourierFetchRequestSegmentedHandleProvider from './segmented_handle';
+import Notifier from 'ui/notify/notifier';
 
-export default function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
-  var SearchReq = Private(CourierFetchRequestSearchProvider);
-  var SegmentedHandle = Private(CourierFetchRequestSegmentedHandleProvider);
+import SearchRequestProvider from './search';
+import SegmentedHandleProvider from './segmented_handle';
+
+export default function SegmentedReqProvider(es, Private, Promise, timefilter, config) {
+  var SearchReq = Private(SearchRequestProvider);
+  var SegmentedHandle = Private(SegmentedHandleProvider);
 
   var notify = new Notifier({
     location: 'Segmented Fetch'

@@ -3,7 +3,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 
-import CourierFetchStrategySearchProvider from '../search';
+import SearchStrategyProvider from '../search';
 
 describe('ui/courier/fetch/strategy/search', () => {
 
@@ -17,7 +17,7 @@ describe('ui/courier/fetch/strategy/search', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
-    search = Private(CourierFetchStrategySearchProvider);
+    search = Private(SearchStrategyProvider);
     reqsFetchParams = [
       {
         index: ['logstash-123'],

@@ -1,9 +1,9 @@
 import Notifier from 'ui/notify/notifier';
 
-import CourierErrorHandlersProvider from '../../_error_handlers';
+import ErrorHandlersProvider from '../../_error_handlers';
 
 export default function RequestErrorHandlerFactory(Private) {
-  var errHandlers = Private(CourierErrorHandlersProvider);
+  var errHandlers = Private(ErrorHandlersProvider);
 
   var notify = new Notifier({
     location: 'Courier Fetch Error'

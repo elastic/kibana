@@ -1,7 +1,7 @@
-import CourierFetchReqStatusProvider from './req_status';
+import ReqStatusProvider from './req_status';
 
 export default function CourierFetchContinueIncompleteRequests(Private) {
-  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
+  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function continueIncompleteRequests(strategy, requests, responses, fetchWithStrategy) {
     var incomplete = [];

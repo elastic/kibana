@@ -1,9 +1,9 @@
-import CourierFetchIsRequestProvider from './is_request';
-import CourierFetchReqStatusProvider from './req_status';
+import IsRequestProvider from './is_request';
+import ReqStatusProvider from './req_status';
 
 export default function FetchMergeDuplicateRequests(Private) {
-  var isRequest = Private(CourierFetchIsRequestProvider);
-  var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
+  var isRequest = Private(IsRequestProvider);
+  var DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
 
   function mergeDuplicateRequests(requests) {
     // dedupe requests

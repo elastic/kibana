@@ -1,12 +1,12 @@
 import { RequestFailure, SearchTimeout, ShardFailure } from 'ui/errors';
 
-import CourierFetchReqStatusProvider from './req_status';
-import CourierFetchNotifierProvider from './notifier';
+import ReqStatusProvider from './req_status';
+import NotifierProvider from './notifier';
 
 export default function CourierFetchCallResponseHandlers(Private, Promise) {
-  var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
-  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
-  var notify = Private(CourierFetchNotifierProvider);
+  var ABORTED = Private(ReqStatusProvider).ABORTED;
+  var INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  var notify = Private(NotifierProvider);
 
 
   function callResponseHandlers(requests, responses) {

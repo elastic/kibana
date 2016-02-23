@@ -3,7 +3,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 
-import CourierFetchFetchTheseProvider from '../fetch/fetch_these';
+import FetchTheseProvider from '../fetch/fetch_these';
 
 describe('ui/courier/fetch/_fetch_these', () => {
 
@@ -32,7 +32,7 @@ describe('ui/courier/fetch/_fetch_these', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
     Promise = $injector.get('Promise');
-    fetchThese = Private(CourierFetchFetchTheseProvider);
+    fetchThese = Private(FetchTheseProvider);
     request = mockRequest();
     requests = [ request ];
   }));

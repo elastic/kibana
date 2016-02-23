@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
-import CourierFetchStrategyDocProvider from '../strategy/doc';
-import CourierFetchRequestRequestProvider from './request';
+import DocStrategyProvider from '../strategy/doc';
+import AbstractRequestProvider from './request';
 
 export default function DocRequestProvider(Private) {
 
-  var docStrategy = Private(CourierFetchStrategyDocProvider);
-  var AbstractRequest = Private(CourierFetchRequestRequestProvider);
+  var docStrategy = Private(DocStrategyProvider);
+  var AbstractRequest = Private(AbstractRequestProvider);
 
   _.class(DocRequest).inherits(AbstractRequest);
   function DocRequest(source, defer) {

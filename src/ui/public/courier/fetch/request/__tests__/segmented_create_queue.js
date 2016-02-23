@@ -4,7 +4,7 @@ import ngMock from 'ngMock';
 
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
-import CourierFetchRequestSegmentedProvider from '../segmented';
+import SegmentedRequestProvider from '../segmented';
 
 describe('ui/courier/fetch/request/segmented/_createQueue', () => {
 
@@ -19,7 +19,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(CourierFetchRequestSegmentedProvider);
+    SegmentedReq = Private(SegmentedRequestProvider);
 
     MockSource = class {
       constructor() {
