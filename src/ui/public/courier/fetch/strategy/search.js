@@ -1,6 +1,8 @@
-import { toJson } from 'ui/utils/aggressive_parse';
 import _ from 'lodash';
 import angular from 'angular';
+
+import { toJson } from 'ui/utils/aggressive_parse';
+
 export default function FetchStrategyForSearch(Private, Promise, timefilter) {
 
   return {

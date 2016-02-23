@@ -2,7 +2,9 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-import CourierFetchFetchTheseProvider from 'ui/courier/fetch/_fetch_these';
+
+import CourierFetchFetchTheseProvider from '../fetch/fetch_these';
+
 describe('ui/courier/fetch/_fetch_these', () => {
 
   let Promise;

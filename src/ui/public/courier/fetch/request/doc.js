@@ -1,6 +1,8 @@
 import _ from 'lodash';
-import CourierFetchStrategyDocProvider from 'ui/courier/fetch/strategy/doc';
-import CourierFetchRequestRequestProvider from 'ui/courier/fetch/request/request';
+
+import CourierFetchStrategyDocProvider from '../strategy/doc';
+import CourierFetchRequestRequestProvider from './request';
+
 export default function DocRequestProvider(Private) {
 
   var docStrategy = Private(CourierFetchStrategyDocProvider);

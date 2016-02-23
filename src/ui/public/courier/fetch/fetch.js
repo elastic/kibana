@@ -1,8 +1,10 @@
 import _ from 'lodash';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierFetchFetchTheseProvider from 'ui/courier/fetch/_fetch_these';
-import CourierFetchCallResponseHandlersProvider from 'ui/courier/fetch/_call_response_handlers';
-import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+
+import CourierRequestQueueProvider from '../_request_queue';
+import CourierFetchFetchTheseProvider from './fetch_these';
+import CourierFetchCallResponseHandlersProvider from './call_response_handlers';
+import CourierFetchReqStatusProvider from './req_status';
+
 export default function fetchService(Private, Promise) {
 
   var requestQueue = Private(CourierRequestQueueProvider);

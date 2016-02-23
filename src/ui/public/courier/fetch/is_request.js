@@ -1,4 +1,4 @@
-import CourierFetchRequestRequestProvider from 'ui/courier/fetch/request/request';
+import CourierFetchRequestRequestProvider from './request';
 
 export default function CourierFetchIsRequestProvider(Private) {
   var AbstractRequest = Private(CourierFetchRequestRequestProvider);

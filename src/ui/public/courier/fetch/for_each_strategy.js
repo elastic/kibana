@@ -1,6 +1,6 @@
 import _ from 'lodash';
-export default function FetchForEachRequestStrategy(Private, Promise) {
 
+export default function FetchForEachRequestStrategy(Private, Promise) {
   function forEachStrategy(requests, block) {
     block = Promise.method(block);
     var sets = [];

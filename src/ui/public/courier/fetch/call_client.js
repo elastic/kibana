@@ -1,7 +1,9 @@
 import _ from 'lodash';
-import CourierFetchIsRequestProvider from 'ui/courier/fetch/_is_request';
-import CourierFetchMergeDuplicateRequestsProvider from 'ui/courier/fetch/_merge_duplicate_requests';
-import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+
+import CourierFetchIsRequestProvider from './is_request';
+import CourierFetchMergeDuplicateRequestsProvider from './merge_duplicate_requests';
+import CourierFetchReqStatusProvider from './req_status';
+
 export default function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
 
   var isRequest = Private(CourierFetchIsRequestProvider);

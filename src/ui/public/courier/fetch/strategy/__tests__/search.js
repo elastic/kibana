@@ -2,7 +2,9 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
+
+import CourierFetchStrategySearchProvider from '../search';
+
 describe('ui/courier/fetch/strategy/search', () => {
 
   let Promise;

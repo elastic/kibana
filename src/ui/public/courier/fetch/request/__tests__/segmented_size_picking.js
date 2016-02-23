@@ -6,7 +6,8 @@ import sinon from 'auto-release-sinon';
 import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';
 import NoDigestPromises from 'testUtils/noDigestPromises';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
+
+import CourierFetchRequestSegmentedProvider from '../segmented';
 
 describe('Segmented Request Size Picking', function () {
   let Promise;

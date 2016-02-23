@@ -1,9 +1,9 @@
-import CourierFetchNotifierProvider from 'ui/courier/fetch/_notifier';
-import CourierFetchForEachStrategyProvider from 'ui/courier/fetch/_for_each_strategy';
-import CourierFetchCallClientProvider from 'ui/courier/fetch/_call_client';
-import CourierFetchCallResponseHandlersProvider from 'ui/courier/fetch/_call_response_handlers';
-import CourierFetchContinueIncompleteProvider from 'ui/courier/fetch/_continue_incomplete';
-import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+import CourierFetchNotifierProvider from './notifier';
+import CourierFetchForEachStrategyProvider from './for_each_strategy';
+import CourierFetchCallClientProvider from './call_client';
+import CourierFetchCallResponseHandlersProvider from './call_response_handlers';
+import CourierFetchContinueIncompleteProvider from './continue_incomplete';
+import CourierFetchReqStatusProvider from './req_status';
 
 export default function FetchTheseProvider(Private, Promise) {
   var notify = Private(CourierFetchNotifierProvider);

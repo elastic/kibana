@@ -1,5 +1,5 @@
-import CourierFetchIsRequestProvider from 'ui/courier/fetch/_is_request';
-import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+import CourierFetchIsRequestProvider from './is_request';
+import CourierFetchReqStatusProvider from './req_status';
 
 export default function FetchMergeDuplicateRequests(Private) {
   var isRequest = Private(CourierFetchIsRequestProvider);

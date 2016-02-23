@@ -1,8 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
+
 import errors from 'ui/errors';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierFetchRequestErrorHandlerProvider from 'ui/courier/fetch/request/_error_handler';
+
+import CourierRequestQueueProvider from '../../_request_queue';
+import CourierFetchRequestErrorHandlerProvider from './error_handler';
+
 export default function AbstractReqProvider(Private, Promise) {
   var requestQueue = Private(CourierRequestQueueProvider);
   var requestErrorHandler = Private(CourierFetchRequestErrorHandlerProvider);

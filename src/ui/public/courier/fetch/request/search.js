@@ -1,6 +1,8 @@
 import _ from 'lodash';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
-import CourierFetchRequestRequestProvider from 'ui/courier/fetch/request/request';
+
+import CourierFetchStrategySearchProvider from '../strategy/search';
+import CourierFetchRequestRequestProvider from './request';
+
 export default function SearchReqProvider(Private) {
 
   var searchStrategy = Private(CourierFetchStrategySearchProvider);
