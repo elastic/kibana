@@ -1,6 +1,6 @@
 var Promise = require('bluebird');
 var Boom = require('boom');
-
+var chainRunnerFn = require('../handlers/chain_runner.js');
 
 function replyWithError(e, reply) {
   reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
@@ -17,7 +17,7 @@ module.exports = function (server) {
         server: server,
         request: request
       });
-      var chainRunner = require('../handlers/chain_runner.js')(tlConfig);
+      var chainRunner = chainRunnerFn(tlConfig);
 
       var sheet;
       try {
