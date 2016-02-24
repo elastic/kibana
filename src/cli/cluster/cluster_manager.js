@@ -83,8 +83,7 @@ module.exports = class ClusterManager {
 
   setupWatching(extraPaths) {
     const chokidar = require('chokidar');
-    const utils = require('requirefrom')('src/utils');
-    const fromRoot = utils('fromRoot');
+    const fromRoot = require('../../utils/fromRoot');
 
     this.watcher = chokidar.watch([
       'src/plugins',

@@ -4,8 +4,7 @@ import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
+import fromRoot from '../../utils/fromRoot';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
