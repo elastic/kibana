@@ -5,13 +5,13 @@ define(function (require) {
   var es; // share the client amoungst all apps
   require('ui/modules')
     .get('kibana', ['elasticsearch', 'kibana/config'])
-    .service('es', function (esFactory, esUrl, $q, esApiVersion) {
+    .service('es', function (esFactory, esUrl, $q, esApiVersion, esRequestTimeout) {
       if (es) return es;
 
       es = esFactory({
         host: esUrl,
         log: 'info',
-        requestTimeout: 0,
+        requestTimeout: esRequestTimeout,
         apiVersion: esApiVersion,
         plugins: [function (Client, config) {
 

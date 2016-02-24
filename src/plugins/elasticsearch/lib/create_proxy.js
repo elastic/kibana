@@ -12,7 +12,8 @@ function createProxy(server, method, route, config) {
         mapUri: mapUri(server),
         passThrough: true,
         agent: createAgent(server),
-        xforward: true
+        xforward: true,
+        timeout: server.config().get('elasticsearch.requestTimeout') + 100
       }
     },
   };
