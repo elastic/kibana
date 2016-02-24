@@ -119,7 +119,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
   });
 
   describe('response sorting', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
 
     context('when no sorting direction given', function () {
       it('returns the indices in the order that elasticsearch sends them', function () {

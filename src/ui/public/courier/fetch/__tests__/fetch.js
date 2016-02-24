@@ -9,7 +9,7 @@ import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_sourc
 import CourierDataSourceSearchSourceProvider from 'ui/courier/data_source/search_source';
 
 describe('Fetch service', function () {
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   let es;
   let fetch;

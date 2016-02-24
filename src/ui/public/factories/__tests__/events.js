@@ -8,7 +8,7 @@ import 'ui/private';
 import EventsProvider from 'ui/events';
 
 describe('Events', function () {
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   var $rootScope;
   var Events;

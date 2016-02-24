@@ -69,7 +69,7 @@ module.exports = (kibana) => {
       modules: {
         ngMock$: fromRoot('src/plugins/devMode/public/ngMock'),
         fixtures: fromRoot('src/fixtures'),
-        testUtils: fromRoot('src/testUtils'),
+        test_utils: fromRoot('src/test_utils'),
         'angular-mocks': {
           path: require.resolve('angular-mocks'),
           imports: 'angular'

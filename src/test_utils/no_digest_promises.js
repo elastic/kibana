@@ -8,7 +8,7 @@ Bluebird.longStackTraces();
  * replace the Promise service with Bluebird so that tests
  * can use promises without having to call $rootScope.apply()
  *
- * var noDigestPromises = require('testUtils/noDigestPromises');
+ * var noDigestPromises = require('test_utils/no_digest_promises');
  *
  * describe('some module that does complex shit with promises', function () {
  *   beforeEach(noDigestPromises.activate);

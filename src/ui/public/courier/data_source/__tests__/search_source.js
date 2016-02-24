@@ -6,7 +6,7 @@ import RequestQueueProv from '../../_request_queue';
 import SearchSourceProv from '../search_source';
 
 describe('SearchSource', function () {
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   let requestQueue;
   let SearchSource;

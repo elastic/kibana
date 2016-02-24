@@ -10,7 +10,7 @@ import ReflowWatcherProvider from 'ui/reflow_watcher';
 
 describe('Vislib Resize Checker', function () {
 
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   var ResizeChecker;
   var EventEmitter;

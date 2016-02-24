@@ -12,7 +12,7 @@ import 'ui/private';
 var routes;
 
 describe('wrapRouteWithPrep fn', function () {
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(function () {
     routes = new RouteManager();
