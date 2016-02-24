@@ -2,8 +2,8 @@ define(function (require) {
   var _ = require('lodash');
   var jison = require('jison');
   var esQueryStringPattern = /^[^"=]*:/;
-
   var bnf = require('raw!./queryLang.jison');
+  var ngModel;
   var parser = new jison.Parser(bnf, {
     type : 'slr',
     noDefaultResolve : true,
@@ -21,7 +21,7 @@ define(function (require) {
      *          user's query input
      * @returns {object}
      */
-    function fromUser(text) {
+    function fromUser(text, model) {
 
       function getQueryStringQuery(text) {
         return decorateQuery({
@@ -32,7 +32,11 @@ define(function (require) {
       }
 
       var matchAll = getQueryStringQuery('*');
+      if (model !== undefined) {
+        ngModel = model;
+      }
 
+      ngModel.parseError = undefined;
       // If we get an empty object, treat it as a *
       if (_.isObject(text)) {
         if (Object.keys(text).length) {
@@ -56,7 +60,12 @@ define(function (require) {
         }
       } else {
         if (!esQueryStringPattern.test(text)) {
-          return JSON.parse(parser.parse(text).toJson());
+          try {
+            return JSON.parse(parser.parse(text).toJson());
+          } catch (e) {
+            ngModel.parseError = e.message;
+            return undefined;
+          }
         }
         return getQueryStringQuery(text);
       }

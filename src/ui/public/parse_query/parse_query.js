@@ -14,7 +14,7 @@ define(function (require) {
         },
         link: function ($scope, elem, attr, ngModel) {
           var init = function () {
-            $scope.ngModel = fromUser($scope.ngModel);
+            $scope.ngModel = fromUser($scope.ngModel, ($scope ? $scope.$parent : undefined));
           };
 
           var fieldMap;
