@@ -4,8 +4,9 @@ import 'ui/number_list';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
 import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggTypeMetricPercentileRanksProvider(Private) {
+import getPercentileValue from './percentiles_get_value';
 
+export default function AggTypeMetricPercentileRanksProvider(Private) {
   var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
   var fieldFormats = Private(RegistryFieldFormatsProvider);
@@ -49,9 +50,7 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
       return fieldFormats.getInstance('percent') || fieldFormats.getDefaultInstance('number');
     },
     getValue: function (agg, bucket) {
-      const values = bucket[agg.parentId] && bucket[agg.parentId].values;
-      const percentile = _.find(values, value => agg.key === value.key);
-      return percentile ? percentile.value / 100 : null;
+      return getPercentileValue(agg, bucket) / 100;
     }
   });
 };
