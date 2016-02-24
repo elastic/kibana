@@ -1,8 +1,8 @@
 import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
-import fromRoot from '../utils/fromRoot';
-import pkg from '../utils/packageJson';
+import fromRoot from '../utils/from_root';
+import pkg from '../utils/package_json';
 
 let rootDir = fromRoot('.');
 

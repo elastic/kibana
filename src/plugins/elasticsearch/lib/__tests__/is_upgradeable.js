@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 import isUpgradeable from '../is_upgradeable';
-import pkg from '../../../../utils/packageJson';
+import pkg from '../../../../utils/package_json';
 let version = pkg.version;
 
 describe('plugins/elasticsearch', function () {

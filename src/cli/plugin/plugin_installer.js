@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 import pluginDownloader from './plugin_downloader';
 import pluginCleaner from './plugin_cleaner';
 import pluginExtractor from './plugin_extractor';

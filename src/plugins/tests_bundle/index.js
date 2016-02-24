@@ -1,7 +1,7 @@
 import { union } from 'lodash';
 
 import findSourceFiles from './find_source_files';
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 
 export default (kibana) => {
   return new kibana.Plugin({
