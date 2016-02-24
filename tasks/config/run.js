@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   let {resolve} = require('path');
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
-  let uiConfig = require(root('test/serverConfig'));
+  let uiConfig = require(root('test/server_config'));
 
   const stdDevArgs = [
     '--env.name=development',

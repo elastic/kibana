@@ -12,7 +12,7 @@ var chainableMethods = [
 ];
 
 var $rp;
-describe('routes/RouteManager', function () {
+describe('routes/route_manager', function () {
   beforeEach(ngMock.module('kibana', function ($routeProvider) {
     $rp = $routeProvider;
     sinon.stub($rp, 'otherwise');

@@ -3,7 +3,7 @@ module.exports = function (kibana) {
     uiExports: {
       app: {
         title: 'Server Status',
-        main: 'plugins/statusPage/statusPage',
+        main: 'plugins/status_page/status_page',
         hidden: true,
         url: '/status'
       }

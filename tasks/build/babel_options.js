@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
 
-  var srcFile = 'build/kibana/src/optimize/babelOptions.js';
-  var buildFile = 'build/kibana/src/optimize/babelOptions.build.js';
+  var srcFile = 'build/kibana/src/optimize/babel_options.js';
+  var buildFile = 'build/kibana/src/optimize/babel_options.build.js';
   var rename = require('fs').renameSync;
   var unlink = require('fs').unlinkSync;
 

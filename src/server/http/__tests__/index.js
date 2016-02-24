@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import kbnTestServer from '../../../../test/utils/kbn_server';
+import * as kbnTestServer from '../../../../test/utils/kbn_server';
 
 describe('cookie validation', function () {
   let kbnServer;

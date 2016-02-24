@@ -3,7 +3,7 @@ module.exports = (kibana) => {
   return new kibana.Plugin({
     uiExports: {
       spyModes: [
-        'plugins/devMode/visDebugSpyPanel'
+        'plugins/dev_mode/vis_debug_spy_panel'
       ]
     }
   });
