@@ -2,8 +2,8 @@ import _ from 'lodash';
 import ordinalSuffix from 'ui/utils/ordinal_suffix';
 import percentsEditor from 'ui/agg_types/controls/percentiles.html';
 import 'ui/number_list';
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
-import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function AggTypeMetricPercentilesProvider(Private) {
 

@@ -5,7 +5,7 @@ import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 describe('AggTableGroup Directive', function () {
 
   var $rootScope;

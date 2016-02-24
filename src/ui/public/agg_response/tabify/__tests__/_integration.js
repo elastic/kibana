@@ -3,7 +3,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('tabifyAggResponse Integration', function () {
 

@@ -4,7 +4,7 @@ import expect from 'expect.js';
 import ngMock from 'ngMock';
 import sinon from 'auto-release-sinon';
 import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Integration', function () {
 

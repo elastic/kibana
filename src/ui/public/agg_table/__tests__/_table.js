@@ -6,7 +6,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'auto-release-sinon';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 describe('AggTable Directive', function () {
 
   var $rootScope;

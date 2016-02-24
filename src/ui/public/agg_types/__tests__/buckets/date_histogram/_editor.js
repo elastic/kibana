@@ -3,7 +3,7 @@ import $ from 'jquery';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('editor', function () {
 

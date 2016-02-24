@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import Binder from 'ui/Binder';
+import Binder from 'ui/binder';
 import errors from 'ui/errors';
 import 'ui/vislib/styles/main.less';
 import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
 let pkg = require('requirefrom')('src/utils')('packageJson');
-import clone from './deepCloneWithBuffers';
+import clone from './deep_clone_with_buffers';
 import { zipObject } from 'lodash';
 
 const schema = Symbol('Joi Schema');

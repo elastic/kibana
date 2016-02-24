@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import 'ui/validateDateInterval';
+import 'ui/validate_date_interval';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';

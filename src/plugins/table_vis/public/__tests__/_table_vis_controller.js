@@ -5,7 +5,7 @@ import ngMock from 'ngMock';
 import sinon from 'auto-release-sinon';
 import tabifyPm from 'ui/agg_response/tabify/tabify';
 import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Controller', function () {
 

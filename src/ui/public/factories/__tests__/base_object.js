@@ -12,7 +12,7 @@ describe('Base Object', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    BaseObject = require('ui/utils/BaseObject');
+    BaseObject = require('ui/utils/base_object');
   }));
 
   it('should take an inital set of values', function () {

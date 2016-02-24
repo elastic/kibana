@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import TabCollection from '../TabCollection';
+import TabCollection from '../tab_collection';
 
 module.exports = function (chrome, internals) {
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 export default function TruncateFormatProvider(Private) {
   var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
   var omission = '...';

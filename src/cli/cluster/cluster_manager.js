@@ -4,7 +4,7 @@ const { format: formatUrl } = require('url');
 import Hapi from 'hapi';
 const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
-import Log from '../Log';
+import Log from '../log';
 import Worker from './worker';
 import BasePathProxy from './base_path_proxy';
 

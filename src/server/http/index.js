@@ -4,7 +4,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import getDefaultRoute from './getDefaultRoute';
+import getDefaultRoute from './get_default_route';
 module.exports = async function (kbnServer, server, config) {
 
 

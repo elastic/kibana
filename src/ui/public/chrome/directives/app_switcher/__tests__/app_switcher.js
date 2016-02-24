@@ -2,7 +2,7 @@ import sinon from 'auto-release-sinon';
 import ngMock from 'ngMock';
 import expect from 'expect.js';
 
-import DomLocationProvider from 'ui/domLocation';
+import DomLocationProvider from 'ui/dom_location';
 import { constant } from 'lodash';
 import { set } from 'lodash';
 import { cloneDeep } from 'lodash';

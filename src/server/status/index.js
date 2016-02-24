@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import ServerStatus from './ServerStatus';
+import ServerStatus from './server_status';
 import { join } from 'path';
 module.exports = function (kbnServer, server, config) {
 

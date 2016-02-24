@@ -31,7 +31,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       vis = Private(FixturesVislibVisFixtureProvider)();
       persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.render(data, persistedState);
-      SimpleEmitter = require('ui/utils/SimpleEmitter');
+      SimpleEmitter = require('ui/utils/simple_emitter');
     }));
 
     afterEach(function () {
