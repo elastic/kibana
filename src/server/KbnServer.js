@@ -39,6 +39,7 @@ module.exports = class KbnServer {
       () => {
         if (this.config.get('server.autoListen')) {
           this.ready = constant(resolve());
+          this.server.listener.timeout = this.config.get('elasticsearch.requestTimeout') + 100;
           return this.listen();
         }
       }
