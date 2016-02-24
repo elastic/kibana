@@ -2,7 +2,7 @@
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
-let Collection = require('requirefrom')('src')('utils/Collection');
+import Collection from '../../utils/Collection';
 
 let byIdCache = Symbol('byIdCache');
 let pluginApis = Symbol('pluginApis');

@@ -1,7 +1,6 @@
 import expect from 'expect.js';
 import util from 'util';
-const requireFromTest = require('requirefrom')('test');
-const kbnTestServer = requireFromTest('utils/kbn_server');
+import kbnTestServer from '../../../../../test/utils/kbn_server';
 
 const format = util.format;
 

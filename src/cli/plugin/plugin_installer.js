@@ -1,6 +1,5 @@
 import _ from 'lodash';
-const utils = require('requirefrom')('src/utils');
-const fromRoot = utils('fromRoot');
+import fromRoot from '../../utils/fromRoot';
 import pluginDownloader from './plugin_downloader';
 import pluginCleaner from './plugin_cleaner';
 import pluginExtractor from './plugin_extractor';

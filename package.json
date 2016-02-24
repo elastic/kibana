@@ -127,7 +127,6 @@
     "moment-timezone": "0.4.1",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
-    "requirefrom": "0.2.0",
     "rimraf": "2.4.3",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",

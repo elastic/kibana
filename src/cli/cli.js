@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
+import pkg from '../utils/packageJson';
 import Command from './command';
 
 let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
