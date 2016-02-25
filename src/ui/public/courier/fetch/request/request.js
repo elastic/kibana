@@ -10,14 +10,11 @@ export default function AbstractReqProvider(Private, Promise) {
   const requestQueue = Private(RequestQueueProvider);
   const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
-  const onStop = Symbol('onStopMethod');
-  const whenAbortedHandlers = Symbol('whenAbortedHandlers');
-
   return class AbstractReq {
     constructor(source, defer) {
       this.source = source;
       this.defer = defer || Promise.defer();
-      this[whenAbortedHandlers] = [];
+      this._whenAbortedHandlers = [];
 
       requestQueue.push(this);
     }
@@ -82,27 +79,26 @@ export default function AbstractReqProvider(Private, Promise) {
       return clone;
     }
 
-    [onStop]() {
+    _markStopped() {
       if (this.stopped) return;
-
       this.stopped = true;
       this.source.activeFetchCount -= 1;
       _.pull(requestQueue, this);
     }
 
     abort() {
-      this[onStop]();
+      this._markStopped();
       this.defer = null;
       this.aborted = true;
-      _.callEach(this[whenAbortedHandlers]);
+      _.callEach(this._whenAbortedHandlers);
     }
 
     whenAborted(cb) {
-      this[whenAbortedHandlers].push(cb);
+      this._whenAbortedHandlers.push(cb);
     }
 
     complete() {
-      this[onStop]();
+      this._markStopped();
       this.ms = this.moment.diff() * -1;
       this.defer.resolve(this.resp);
     }
