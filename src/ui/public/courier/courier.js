@@ -131,9 +131,9 @@ uiModules.get('kibana/courier')
     };
 
     // Listen for refreshInterval changes
-    $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-      var refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-      var refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+    $rootScope.$watchCollection('$$timefilter.refreshInterval', function () {
+      var refreshValue = _.get($rootScope, '$$timefilter.refreshInterval.value');
+      var refreshPause = _.get($rootScope, '$$timefilter.refreshInterval.pause');
       if (_.isNumber(refreshValue) && !refreshPause) {
         self.fetchInterval(refreshValue);
       } else {
