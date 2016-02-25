@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { processResponse } from '../../../lib/ingest_simulate';
+import processESIngestSimulateResponse from '../../../lib/process_es_ingest_simulate_response';
 import simulateRequestSchema from '../../../lib/schemas/simulate_request_schema';
-import ingestSimulateApiToEsConverter from '../../../lib/converters/ingest_simulate_api_to_es_converter';
+import ingestSimulateApiKibanaToEsConverter from '../../../lib/converters/ingest_simulate_api_kibana_to_es_converter';
 
 module.exports = function registerSimulate(server) {
   server.route({
@@ -15,7 +15,7 @@ module.exports = function registerSimulate(server) {
     handler: function (request, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, request);
       const simulateApiDocument = request.payload;
-      const body = ingestSimulateApiToEsConverter(simulateApiDocument);
+      const body = ingestSimulateApiKibanaToEsConverter(simulateApiDocument);
 
       return boundCallWithRequest('transport.request', {
         path: '_ingest/pipeline/_simulate',
@@ -23,7 +23,7 @@ module.exports = function registerSimulate(server) {
         method: 'POST',
         body: body
       })
-      .then(_.partial(processResponse, simulateApiDocument))
+      .then(_.partial(processESIngestSimulateResponse, simulateApiDocument))
       .then(reply);
     }
   });

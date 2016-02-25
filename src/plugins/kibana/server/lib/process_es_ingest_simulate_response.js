@@ -6,7 +6,7 @@ function translateError(esError) {
   return _.get(rootCause, 'reason') || _.get(rootCause, 'type');
 }
 
-export function processResponse(simulateApiDocument, resp) {
+export default function processESIngestSimulateResponse(simulateApiDocument, resp) {
   const results = simulateApiDocument.processors.map((processor) => {
     return {
       processorId: processor.processor_id,

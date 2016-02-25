@@ -1,8 +1,8 @@
 const expect = require('expect.js');
 const _ = require('lodash');
-import { processResponse } from '../ingest_simulate';
+import processESIngestSimulateResponse from '../process_es_ingest_simulate_response';
 
-describe('processResponse', function () {
+describe('processESIngestSimulateResponse', function () {
 
   it('returns a result for each processor in the pipeline', function () {
     const pipeline = {
@@ -12,7 +12,7 @@ describe('processResponse', function () {
       docs: [ { processor_results: [] } ]
     };
 
-    const results = processResponse(pipeline, null, response);
+    const results = processESIngestSimulateResponse(pipeline, response);
     expect(results.length).to.be(2);
   });
 
@@ -33,7 +33,7 @@ describe('processResponse', function () {
       { processorId: 'processor2', output: 'bar', error: undefined },
       { processorId: 'processor3', output: 'baz', error: undefined }
     ];
-    const actual = processResponse(pipeline, null, response);
+    const actual = processESIngestSimulateResponse(pipeline, response);
 
     expect(actual).to.eql(expected);
   });
@@ -58,7 +58,7 @@ describe('processResponse', function () {
       { processorId: 'processor2', output: 'new_bar', error: undefined },
       { processorId: 'processor3', output: 'new_baz', error: undefined }
     ];
-    const actual = processResponse(pipeline, null, response);
+    const actual = processESIngestSimulateResponse(pipeline, response);
 
     expect(actual).to.eql(expected);
   });
@@ -89,7 +89,7 @@ describe('processResponse', function () {
         { processorId: 'processor2', output: 'new_bar', error: undefined },
         { processorId: 'processor3', output: undefined, error: { isNested: false, message: 'something bad happened'} }
       ];
-      const actual = processResponse(pipeline, null, response);
+      const actual = processESIngestSimulateResponse(pipeline, response);
 
       expect(actual).to.eql(expected);
     });
@@ -118,7 +118,7 @@ describe('processResponse', function () {
         { processorId: 'processor2', output: 'new_bar', error: undefined },
         { processorId: 'processor3', output: undefined, error: { isNested: false, message: 'something bad happened'} }
       ];
-      const actual = processResponse(pipeline, null, response);
+      const actual = processESIngestSimulateResponse(pipeline, response);
 
       expect(actual).to.eql(expected);
     });
@@ -153,7 +153,7 @@ describe('processResponse', function () {
         { processorId: 'processor2', output: undefined, error: { isNested: true, message: 'Invalid Parent Processor' } },
         { processorId: 'processor3', output: undefined, error: { isNested: true, message: 'Invalid Parent Processor' } }
       ];
-      const actual = processResponse(pipeline, null, response);
+      const actual = processESIngestSimulateResponse(pipeline, response);
 
       expect(actual).to.eql(expected);
     });

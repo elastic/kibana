@@ -1,8 +1,8 @@
 import expect from 'expect.js';
 import _ from 'lodash';
-import ingestSimulateApiToEsConverter from '../../converters/ingest_simulate_api_to_es_converter';
+import ingestSimulateApiKibanaToEsConverter from '../../converters/ingest_simulate_api_kibana_to_es_converter';
 
-describe('ingestSimulateApiToEsConverter', function () {
+describe('ingestSimulateApiKibanaToEsConverter', function () {
 
   it('populates the docs._source section and converts known processors', function () {
 
@@ -34,15 +34,15 @@ describe('ingestSimulateApiToEsConverter', function () {
     let actual;
 
     expected = buildExpected(undefined);
-    actual = ingestSimulateApiToEsConverter(buildSamplePipeline(undefined));
+    actual = ingestSimulateApiKibanaToEsConverter(buildSamplePipeline(undefined));
     expect(actual).to.eql(expected);
 
     expected = buildExpected('foo');
-    actual = ingestSimulateApiToEsConverter(buildSamplePipeline('foo'));
+    actual = ingestSimulateApiKibanaToEsConverter(buildSamplePipeline('foo'));
     expect(actual).to.eql(expected);
 
     expected = buildExpected({ foo: 'bar' });
-    actual = ingestSimulateApiToEsConverter(buildSamplePipeline({ foo: 'bar' }));
+    actual = ingestSimulateApiKibanaToEsConverter(buildSamplePipeline({ foo: 'bar' }));
     expect(actual).to.eql(expected);
   });
 
@@ -78,7 +78,7 @@ describe('ingestSimulateApiToEsConverter', function () {
       ]
     };
 
-    const actual = ingestSimulateApiToEsConverter(pipeline);
+    const actual = ingestSimulateApiKibanaToEsConverter(pipeline);
 
     expect(actual).to.eql(expected);
   });
