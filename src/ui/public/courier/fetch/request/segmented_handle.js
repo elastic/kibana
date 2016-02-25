@@ -24,19 +24,19 @@ export default function CourierSegmentedReqHandle(Private) {
     }
 
     setDirection(...args) {
-      this[segmentedRequest](...args);
+      this[segmentedRequest].setDirection(...args);
     }
 
     setSize(...args) {
-      this[segmentedRequest](...args);
+      this[segmentedRequest].setSize(...args);
     }
 
     setMaxSegments(...args) {
-      this[segmentedRequest](...args);
+      this[segmentedRequest].setMaxSegments(...args);
     }
 
     setSortFn(...args) {
-      this[segmentedRequest](...args);
+      this[segmentedRequest].setSortFn(...args);
     }
   };
 };

@@ -101,7 +101,7 @@ export default function AbstractReqProvider(Private, Promise) {
       this[whenAbortedHandlers].push(cb);
     }
 
-    completefunction() {
+    complete() {
       this[onStop]();
       this.ms = this.moment.diff() * -1;
       this.defer.resolve(this.resp);
