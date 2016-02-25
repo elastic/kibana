@@ -10,6 +10,7 @@ define(function (require) {
       template: require('plugins/kibana/visualize/editor/vis_options.html'),
       scope: {
         vis: '=',
+        savedVis: '=',
       },
       link: function ($scope, $el) {
         const $optionContainer = $el.find('.visualization-options');
