@@ -64,7 +64,7 @@ class UiExports {
       case 'navbarExtensions':
       case 'settingsSections':
       case 'docViews':
-      case 'sledgehammers':
+      case 'hacks':
       case 'chromeConfigControls':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);

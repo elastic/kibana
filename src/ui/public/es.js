@@ -1,4 +1,4 @@
-import 'elasticsearch-browser/elasticsearch.angular.js';
+import 'elasticsearch-browser';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 

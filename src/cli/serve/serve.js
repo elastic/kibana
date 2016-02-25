@@ -61,7 +61,11 @@ function initServerSettings(opts, extraCliOptions) {
     opts.pluginDir
   )));
 
-  set('plugins.paths', [].concat(opts.pluginPath || []));
+  set('plugins.paths', _.compact([].concat(
+    get('plugins.paths'),
+    opts.pluginPath
+  )));
+
   merge(extraCliOptions);
 
   return settings;
