@@ -16,6 +16,38 @@
 .navbar {
   border-width: 0;
 
+  &-static-top {
+    background-color: @kibanaGray5;
+    color: @kibanaGray2;
+    .navbar-brand:hover,
+    .navbar-brand {
+      float: none;
+      color: @kibanaGray2;
+      font-size: 1em;
+      background-color: transparent;
+      padding-top: 8px;
+      height: 35px;
+    }
+    .navbar-nav {
+
+      > li > a {
+        color: @kibanaGray2;
+        font-size: 1.5em;
+        padding: 5px 0 6px 0;
+        margin: 0 10px;
+      }
+      // Active, hover state for the getTabs
+      > .active > a,
+      > .active > a:hover,
+      > .active > a:active,
+      > li > a:active,
+      > li > a:hover {
+        color: @kibanaGray1;
+        background-color: transparent;
+        border-bottom: 2px solid @kibanaGray1;
+      }
+    }
+  }
   &-btn-link {
     margin: 0;
     border-radius: 0;
@@ -60,7 +92,6 @@
   &-brand {
     cursor: default;
     font-size: 1.8em;
-    background-color: @navbar-inverse-brand-bg;
     user-select: none;
   }
 
