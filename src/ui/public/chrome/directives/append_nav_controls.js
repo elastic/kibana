@@ -1,13 +1,9 @@
-import $ from 'jquery';
+import _ from 'lodash';
 
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
+import chromeConfigControlsRegistry from 'ui/registry/chrome_config_controls';
 import UiModules from 'ui/modules';
 import spinnerHtml from './active_http_spinner.html';
-
-const spinner = {
-  name: 'active http requests',
-  template: spinnerHtml
-};
 
 export default function (chrome, internals) {
 
@@ -17,16 +13,42 @@ export default function (chrome, internals) {
     return {
       template: function ($element) {
         const parts = [$element.html()];
-        const controls = Private(chromeNavControlsRegistry);
+        const navs = Private(chromeNavControlsRegistry);
+        const configs = Private(chromeConfigControlsRegistry);
 
-        for (const control of [spinner, ...controls.inOrder]) {
-          parts.unshift(
-            `<!-- nav control ${control.name} -->`,
-            control.template
-          );
-        }
+        const controls = [
+          {
+            name: 'active http requests',
+            order: -100,
+            template: spinnerHtml
+          },
+
+          ...navs.map(function (nav) {
+            return {
+              template: `<!-- nav control ${nav.name} -->${nav.template}`,
+              order: nav.order
+            };
+          }),
+
+          ...configs.map(function (config) {
+            const configHtml = `<render-directive definition="configs['${config.name}'].navbar">
+              ${config.navbar.template}
+            </render-directive>`;
+            return {
+              template: `<!-- nav control ${config.name} -->${configHtml}`,
+              order: config.order
+            };
+          }),
+        ];
+
+        _.sortBy(controls, 'order').forEach(function (control) {
+          parts.unshift(control.template);
+        });
 
         return parts.join('\n');
+      },
+      controller: function ($scope) {
+        $scope.configs = Private(chromeConfigControlsRegistry).byName;
       }
     };
   });
