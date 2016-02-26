@@ -130,7 +130,7 @@
     "rimraf": "2.4.3",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",
-    "semver": "4.3.6",
+    "semver": "5.1.0",
     "style-loader": "0.12.3",
     "tar": "2.2.0",
     "url-loader": "0.5.6",
