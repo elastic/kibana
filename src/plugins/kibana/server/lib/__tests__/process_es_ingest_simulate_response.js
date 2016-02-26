@@ -5,25 +5,21 @@ import processESIngestSimulateResponse from '../process_es_ingest_simulate_respo
 describe('processESIngestSimulateResponse', function () {
 
   it('returns a result for each processor in the pipeline', function () {
-    const pipeline = {
-      processors: [ { processorId: 'processor1' }, { processorId: 'processor2' } ]
-    };
+    const processors = [ { processorId: 'processor1' }, { processorId: 'processor2' } ];
     const response = {
       docs: [ { processor_results: [] } ]
     };
 
-    const results = processESIngestSimulateResponse(pipeline, response);
+    const results = processESIngestSimulateResponse(processors, response);
     expect(results.length).to.be(2);
   });
 
   it('each processor that does not receive a result will contain default info', function () {
-    const pipeline = {
-      processors: [
-        { processorId: 'processor1', outputObject: 'foo' },
-        { processorId: 'processor2', outputObject: 'bar' },
-        { processorId: 'processor3', outputObject: 'baz' }
-      ]
-    };
+    const processors = [
+      { processorId: 'processor1', outputObject: 'foo' },
+      { processorId: 'processor2', outputObject: 'bar' },
+      { processorId: 'processor3', outputObject: 'baz' }
+    ];
     const response = {
       docs: [ { processor_results: [] } ]
     };
@@ -33,19 +29,17 @@ describe('processESIngestSimulateResponse', function () {
       { processorId: 'processor2', output: 'bar', error: undefined },
       { processorId: 'processor3', output: 'baz', error: undefined }
     ];
-    const actual = processESIngestSimulateResponse(pipeline, response);
+    const actual = processESIngestSimulateResponse(processors, response);
 
     expect(actual).to.eql(expected);
   });
 
   it('each processor that receives a result will contain response info', function () {
-    const pipeline = {
-      processors: [
-        { processorId: 'processor1', outputObject: 'foo' },
-        { processorId: 'processor2', outputObject: 'bar' },
-        { processorId: 'processor3', outputObject: 'baz' }
-      ]
-    };
+    const processors = [
+      { processorId: 'processor1', outputObject: 'foo' },
+      { processorId: 'processor2', outputObject: 'bar' },
+      { processorId: 'processor3', outputObject: 'baz' }
+    ];
     const response = {
       docs: [ { processor_results: [
         { tag: 'processor2', doc: { _source: 'new_bar' }, error: undefined },
@@ -58,7 +52,7 @@ describe('processESIngestSimulateResponse', function () {
       { processorId: 'processor2', output: 'new_bar', error: undefined },
       { processorId: 'processor3', output: 'new_baz', error: undefined }
     ];
-    const actual = processESIngestSimulateResponse(pipeline, response);
+    const actual = processESIngestSimulateResponse(processors, response);
 
     expect(actual).to.eql(expected);
   });
@@ -66,13 +60,11 @@ describe('processESIngestSimulateResponse', function () {
   describe('processors that return an error object', function () {
 
     it('will be the root_cause reason if one exists', function () {
-      const pipeline = {
-        processors: [
-          { processorId: 'processor1', outputObject: 'foo' },
-          { processorId: 'processor2', outputObject: 'bar' },
-          { processorId: 'processor3', outputObject: 'baz' }
-        ]
-      };
+      const processors = [
+        { processorId: 'processor1', outputObject: 'foo' },
+        { processorId: 'processor2', outputObject: 'bar' },
+        { processorId: 'processor3', outputObject: 'baz' }
+      ];
       const response = {
         docs: [ { processor_results: [
           { tag: 'processor2', doc: { _source: 'new_bar' }, error: undefined },
@@ -89,19 +81,17 @@ describe('processESIngestSimulateResponse', function () {
         { processorId: 'processor2', output: 'new_bar', error: undefined },
         { processorId: 'processor3', output: undefined, error: { isNested: false, message: 'something bad happened'} }
       ];
-      const actual = processESIngestSimulateResponse(pipeline, response);
+      const actual = processESIngestSimulateResponse(processors, response);
 
       expect(actual).to.eql(expected);
     });
 
     it('will be the root_cause type if reason does not exists', function () {
-      const pipeline = {
-        processors: [
-          { processorId: 'processor1', outputObject: 'foo' },
-          { processorId: 'processor2', outputObject: 'bar' },
-          { processorId: 'processor3', outputObject: 'baz' }
-        ]
-      };
+      const processors = [
+        { processorId: 'processor1', outputObject: 'foo' },
+        { processorId: 'processor2', outputObject: 'bar' },
+        { processorId: 'processor3', outputObject: 'baz' }
+      ];
       const response = {
         docs: [ { processor_results: [
           { tag: 'processor2', doc: { _source: 'new_bar' }, error: undefined },
@@ -118,20 +108,18 @@ describe('processESIngestSimulateResponse', function () {
         { processorId: 'processor2', output: 'new_bar', error: undefined },
         { processorId: 'processor3', output: undefined, error: { isNested: false, message: 'something bad happened'} }
       ];
-      const actual = processESIngestSimulateResponse(pipeline, response);
+      const actual = processESIngestSimulateResponse(processors, response);
 
       expect(actual).to.eql(expected);
     });
 
     it('any processor after errored processor will be set to a nested error state', function () {
-      const pipeline = {
-        processors: [
-          { processorId: 'processor0', outputObject: 'oof' },
-          { processorId: 'processor1', outputObject: 'foo' },
-          { processorId: 'processor2', outputObject: 'bar' },
-          { processorId: 'processor3', outputObject: 'baz' }
-        ]
-      };
+      const processors = [
+        { processorId: 'processor0', outputObject: 'oof' },
+        { processorId: 'processor1', outputObject: 'foo' },
+        { processorId: 'processor2', outputObject: 'bar' },
+        { processorId: 'processor3', outputObject: 'baz' }
+      ];
       const response = {
         docs: [
           {
@@ -153,7 +141,7 @@ describe('processESIngestSimulateResponse', function () {
         { processorId: 'processor2', output: undefined, error: { isNested: true, message: 'Invalid Parent Processor' } },
         { processorId: 'processor3', output: undefined, error: { isNested: true, message: 'Invalid Parent Processor' } }
       ];
-      const actual = processESIngestSimulateResponse(pipeline, response);
+      const actual = processESIngestSimulateResponse(processors, response);
 
       expect(actual).to.eql(expected);
     });

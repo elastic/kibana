@@ -6,11 +6,11 @@ function translateError(esError) {
   return _.get(rootCause, 'reason') || _.get(rootCause, 'type');
 }
 
-export default function processESIngestSimulateResponse(simulateApiDocument, resp) {
-  const results = simulateApiDocument.processors.map((processor) => {
+export default function processESIngestSimulateResponse(processors, resp) {
+  const results = processors.map((processor) => {
     return {
-      processorId: processor.processor_id,
-      output: processor.output_object,
+      processorId: processor.processorId,
+      output: processor.outputObject,
       error: undefined
     };
   });
