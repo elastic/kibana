@@ -9,7 +9,7 @@ define(function (require) {
   require('ui/registry/vis_types').register(TimelionVisProvider);
 
   function TimelionVisProvider(Private) {
-    var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    var TemplateVisType = Private(require('ui/template_vis_type'));
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.

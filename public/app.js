@@ -28,7 +28,7 @@ require('ui/saved_objects/saved_object_registry').register(require('plugins/time
 
 // TODO: Expose an api for dismissing notifications
 var unsafeNotifications = require('ui/notify')._notifs;
-var ConfigTemplate = require('ui/ConfigTemplate');
+var ConfigTemplate = require('ui/config_template');
 
 require('ui/routes').enable();
 
