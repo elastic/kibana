@@ -38,6 +38,15 @@ define(function (require) {
           .expect(200);
       });
 
+      bdd.it('should return a simulated output with the correct result for the given processor', function () {
+        return request.post('/kibana/ingest/simulate')
+          .send(testPipeline)
+          .expect(200)
+          .then(function (response) {
+            expect(response.body[0].output.foo).to.be.equal('bar');
+          });
+      });
+
       bdd.it('should enforce snake case', function setSimulateSnakeCase() {
         return request.post('/kibana/ingest/simulate')
         .send({
