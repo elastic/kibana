@@ -86,7 +86,7 @@ module.exports = function (grunt) {
       args: [
         ...buildTestsArgs,
         '--server.port=5610',
-        '--testsBundle.instrument=true',
+        '--tests_bundle.instrument=true',
         ...kbnServerFlags,
       ]
     },

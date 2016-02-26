@@ -19,7 +19,7 @@ export default (kibana) => {
         let config = kibana.config;
 
         const testGlobs = ['src/ui/public/**/*.js'];
-        const testingPluginId = config.get('testsBundle.pluginId');
+        const testingPluginId = config.get('tests_bundle.pluginId');
 
         if (testingPluginId) {
           const plugin = plugins.byId[testingPluginId];
@@ -49,7 +49,7 @@ export default (kibana) => {
         const testFiles = await findSourceFiles(testGlobs);
         for (let f of testFiles) modules.push(f);
 
-        if (config.get('testsBundle.instrument')) {
+        if (config.get('tests_bundle.instrument')) {
           env.addPostLoader({
             test: /\.jsx?$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
