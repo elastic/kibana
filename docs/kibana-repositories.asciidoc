@@ -37,7 +37,7 @@ When the `deb-src` entry, is present, the commands in this procedure generate an
 
     Unable to find expected entry 'main/source/Sources' in Release file (Wrong sources.list entry or malformed file)
 
-Delete the `deb-src` entry from the `/etc/apt/sources.list.d/kibana` file to clear the error.
+Delete the `deb-src` entry from the `/etc/apt/sources.list.d/kiban.list` file to clear the error.
 ==================================================
 +
 . Run `apt-get update` and the repository is ready for use. Install Kibana with the following command:
