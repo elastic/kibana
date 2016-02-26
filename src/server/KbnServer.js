@@ -39,7 +39,6 @@ module.exports = class KbnServer {
       () => {
         if (this.config.get('server.autoListen')) {
           this.ready = constant(resolve());
-          this.server.listener.timeout = this.config.get('elasticsearch.requestTimeout') + 100;
           return this.listen();
         }
       }
@@ -74,6 +73,7 @@ module.exports = class KbnServer {
     let { server, config } = this;
 
     await this.ready();
+    server.listener.timeout = config.get('elasticsearch.requestTimeout') + 100;
     await fromNode(cb => server.start(cb));
     await require('./pid')(this, server, config);
 
