@@ -1,5 +1,5 @@
-var dedupFilters = require('ui/filter_bar/lib/dedupFilters');
-var expect = require('expect.js');
+import dedupFilters from 'ui/filter_bar/lib/dedupFilters';
+import expect from 'expect.js';
 describe('Filter Bar Directive', function () {
   describe('dedupFilters(existing, filters)', function () {
 

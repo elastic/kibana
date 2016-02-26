@@ -1,9 +1,7 @@
-define(function (require) {
-  return function CourierFetchRequestStatus() {
-    return {
-      ABORTED: { CourierFetchRequestStatus: 'aborted' },
-      DUPLICATE: { CourierFetchRequestStatus: 'duplicate' },
-      INCOMPLETE: { CourierFetchRequestStatus: 'incomplete' }
-    };
+export default function CourierFetchRequestStatus() {
+  return {
+    ABORTED: { CourierFetchRequestStatus: 'aborted' },
+    DUPLICATE: { CourierFetchRequestStatus: 'duplicate' },
+    INCOMPLETE: { CourierFetchRequestStatus: 'incomplete' }
   };
-});
+};

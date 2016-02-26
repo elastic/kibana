@@ -6,6 +6,25 @@ module.exports = function (grunt) {
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   let uiConfig = require(root('test/serverConfig'));
 
+  const stdDevArgs = [
+    '--env.name=development',
+    '--logging.json=false',
+  ];
+
+  const buildTestsArgs = [
+    ...stdDevArgs,
+    '--plugins.initialize=false',
+    '--optimize.bundleFilter=tests',
+  ];
+
+  const kbnServerFlags = grunt.option.flags().reduce(function (flags, flag) {
+    if (flag.startsWith('--kbnServer.')) {
+      flags.push(`--${flag.slice(12)}`);
+    }
+
+    return flags;
+  }, []);
+
   return {
     testServer: {
       options: {
@@ -16,11 +35,9 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--server.port=5610',
-        '--env.name=development',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false'
+        ...kbnServerFlags,
       ]
     },
 
@@ -33,11 +50,12 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
-        '--server.port=' + uiConfig.servers.kibana.port,
-        '--server.xsrf.disableProtection=true',
+        ...stdDevArgs,
         '--optimize.enabled=false',
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
-        '--logging.json=false'
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--server.xsrf.disableProtection=true',
+        ...kbnServerFlags,
       ]
     },
 
@@ -50,10 +68,10 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
-        '--env.name=development',
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
-        '--logging.json=false'
+        ...kbnServerFlags,
       ]
     },
 
@@ -66,12 +84,10 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--server.port=5610',
-        '--env.name=development',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false',
-        '--testsBundle.instrument=true'
+        '--testsBundle.instrument=true',
+        ...kbnServerFlags,
       ]
     },
 
@@ -84,6 +100,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--dev',
         '--no-watch',
         '--no-ssl',
@@ -91,9 +108,7 @@ module.exports = function (grunt) {
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false'
+        ...kbnServerFlags,
       ]
     },
 
@@ -109,7 +124,7 @@ module.exports = function (grunt) {
         '-jar',
         'selenium/selenium-server-standalone-2.48.2.jar',
         '-port',
-        uiConfig.servers.webdriver.port
+        uiConfig.servers.webdriver.port,
       ]
     },
 
@@ -125,7 +140,7 @@ module.exports = function (grunt) {
         '-jar',
         'selenium/selenium-server-standalone-2.48.2.jar',
         '-port',
-        uiConfig.servers.webdriver.port
+        uiConfig.servers.webdriver.port,
       ]
     },
 
@@ -140,7 +155,8 @@ module.exports = function (grunt) {
         '--env.name=production',
         '--logging.json=false',
         '--plugins.initialize=false',
-        '--server.autoListen=false'
+        '--server.autoListen=false',
+        ...kbnServerFlags,
       ]
     }
   };

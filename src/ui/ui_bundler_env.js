@@ -1,7 +1,7 @@
-let { includes, flow, escapeRegExp } = require('lodash');
-let { isString, isArray, isPlainObject, get } = require('lodash');
-let { keys } = require('lodash');
-let fromRoot = require('../utils/fromRoot');
+import fromRoot from '../utils/fromRoot';
+import { includes, flow, escapeRegExp } from 'lodash';
+import { isString, isArray, isPlainObject, get } from 'lodash';
+import { keys } from 'lodash';
 
 let asRegExp = flow(
   escapeRegExp,

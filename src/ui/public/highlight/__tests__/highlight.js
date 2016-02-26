@@ -1,9 +1,9 @@
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/highlight';
 
 describe('Highlight', function () {
-  var angular = require('angular');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  require('ui/highlight');
 
   var filter;
 

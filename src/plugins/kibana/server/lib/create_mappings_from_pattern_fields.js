@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 // Creates an ES field mapping from a single field object in a kibana index pattern
 module.exports = function createMappingsFromPatternFields(fields) {

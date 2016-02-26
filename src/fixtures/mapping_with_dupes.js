@@ -1,40 +1,38 @@
-define(function (require) {
-  return {
-    test: {
-      mappings: {
-        testType: {
-          'baz': {
-            full_name: 'baz',
-            mapping: {
-              bar: {
-                type: 'long'
-              }
-            }
-          },
-          'foo.bar': {
-            full_name: 'foo.bar',
-            mapping: {
-              bar: {
-                type: 'string'
-              }
+export default {
+  test: {
+    mappings: {
+      testType: {
+        'baz': {
+          full_name: 'baz',
+          mapping: {
+            bar: {
+              type: 'long'
             }
           }
-        }
-      }
-    },
-    duplicates: {
-      mappings: {
-        testType: {
-          'baz': {
-            full_name: 'baz',
-            mapping: {
-              bar: {
-                type: 'date'
-              }
+        },
+        'foo.bar': {
+          full_name: 'foo.bar',
+          mapping: {
+            bar: {
+              type: 'string'
             }
           }
         }
       }
     }
-  };
-});
+  },
+  duplicates: {
+    mappings: {
+      testType: {
+        'baz': {
+          full_name: 'baz',
+          mapping: {
+            bar: {
+              type: 'date'
+            }
+          }
+        }
+      }
+    }
+  }
+};

@@ -147,6 +147,7 @@ Distributable packages can be found in `target/` after the build completes.
 Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
 ```sh
 gem install pleaserun
+apt-get install ruby-dev
 gem install fpm
 npm run build:ospackages
 ```
@@ -184,7 +185,7 @@ To run the functional UI tests use the following commands
 
 #### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
 
-Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respecitively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
+Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
 
 Once you've got the services running, execute the following:
 
@@ -195,7 +196,7 @@ npm run test:ui:runner
 #### General notes:
 
 - Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
-- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This gaurantees the same results each run.
+- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 

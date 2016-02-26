@@ -1,7 +1,9 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesFieldProvider from 'ui/agg_types/param_types/field';
 describe('Field', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var BaseAggParam;
   var FieldAggParam;
@@ -9,8 +11,8 @@ describe('Field', function () {
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    FieldAggParam = Private(require('ui/agg_types/param_types/field'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    FieldAggParam = Private(AggTypesParamTypesFieldProvider);
   }));
 
   describe('constructor', function () {

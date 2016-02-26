@@ -1,13 +1,14 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import VisRenderbotProvider from 'ui/Vis/Renderbot';
 describe('renderbot', function () {
   var Renderbot;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   function init() {
     ngMock.module('kibana');
 
     ngMock.inject(function (Private) {
-      Renderbot = Private(require('ui/Vis/Renderbot'));
+      Renderbot = Private(VisRenderbotProvider);
     });
   }
 

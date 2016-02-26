@@ -1,10 +1,8 @@
-module.exports = async (kbnServer, kibanaHapiServer, config) => {
+import LazyServer from './LazyServer';
+import LazyOptimizer from './LazyOptimizer';
+import fromRoot from '../../utils/fromRoot';
 
-  let src = require('requirefrom')('src');
-  let fromRoot = src('utils/fromRoot');
-  let LazyServer = require('./LazyServer');
-  let LazyOptimizer = require('./LazyOptimizer');
-
+export default async (kbnServer, kibanaHapiServer, config) => {
   let server = new LazyServer(
     config.get('optimize.lazyHost'),
     config.get('optimize.lazyPort'),
@@ -19,7 +17,6 @@ module.exports = async (kbnServer, kibanaHapiServer, config) => {
       unsafeCache: config.get('optimize.unsafeCache'),
     })
   );
-
 
   let ready = false;
 

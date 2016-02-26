@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 // Turns thisIsASentence to
 // This Is A Sentence

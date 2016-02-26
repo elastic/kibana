@@ -1,5 +1,5 @@
-const {templateToPattern, patternToTemplate} = require('../convert_pattern_and_template_name');
-const expect = require('expect.js');
+import expect from 'expect.js';
+import {templateToPattern, patternToTemplate} from '../convert_pattern_and_template_name';
 
 describe('convertPatternAndTemplateName', function () {
 
