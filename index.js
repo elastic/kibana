@@ -37,6 +37,9 @@ module.exports = function (kibana) {
         enabled: Joi.boolean().default(true),
         defaultServerUrl: Joi.string().default('http://localhost:9200'),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
+        ssl: Joi.object({
+          verify: Joi.boolean().default(true),
+        }).default(),
       }).default();
     },
 
@@ -67,6 +70,7 @@ module.exports = function (kibana) {
 
                 cb(null, uri);
               },
+              rejectUnauthorized: options.ssl.verify,
               passThrough: true,
               xforward: true,
               onResponse: function (err, res, request, reply, settings, ttl) {
