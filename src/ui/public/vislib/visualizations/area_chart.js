@@ -32,7 +32,26 @@ define(function (require) {
       if (this.isOverlapping) {
 
         // Default opacity should return to 0.6 on mouseout
-        handler._attr.defaultOpacity = 0.6;
+        var defaultOpacity = 0.6;
+        handler._attr.defaultOpacity = defaultOpacity;
+        handler.highlight = function (element) {
+          var label = this.getAttribute('data-label');
+          if (!label) return;
+
+          var highlightOpacity = 0.8;
+          var highlightElements = $('[data-label]', element.parentNode).filter(
+            function (els, el) {
+              return `${$(el).data('label')}` === label;
+            });
+          $('[data-label]', element.parentNode).not(highlightElements).css('opacity', defaultOpacity / 2); // half of the default opacity
+          highlightElements.css('opacity', highlightOpacity);
+        };
+        handler.unHighlight = function (element) {
+          $('[data-label]', element).css('opacity', defaultOpacity);
+
+          //The legend should keep max opacity
+          $('[data-label]', $(element).siblings()).css('opacity', 1);
+        };
       }
 
       this.checkIfEnoughData();
