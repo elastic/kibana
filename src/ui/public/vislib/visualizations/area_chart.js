@@ -33,7 +33,20 @@ export default function AreaChartFactory(Private) {
     if (this.isOverlapping) {
 
       // Default opacity should return to 0.6 on mouseout
-      handler._attr.defaultOpacity = 0.6;
+      var defaultOpacity = 0.6;
+      handler._attr.defaultOpacity = defaultOpacity;
+      handler.highlight = function (element) {
+        var label = this.getAttribute('data-label');
+        if (!label) return;
+
+        var highlightOpacity = 0.8;
+        var highlightElements = $('[data-label="' + label + '"]', element.parentNode);
+        $('[data-label]', element.parentNode).not(highlightElements).css('opacity', defaultOpacity / 2); // half of the default opacity
+        highlightElements.css('opacity', highlightOpacity);
+      };
+      handler.unHighlight = function (element) {
+        $('[data-label]', element.parentNode).css('opacity', defaultOpacity);
+      };
     }
 
     this.checkIfEnoughData();

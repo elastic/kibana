@@ -29,12 +29,26 @@ uiModules.get('kibana')
         refresh();
       });
 
-      $scope.highlightSeries = function (label) {
-        $('[data-label]', $elem.siblings()).not('[data-label="' + label + '"]').css('opacity', 0.5);
+      $scope.highlightSeries = function (event) {
+        var el = event.currentTarget;
+        var handler = $scope.renderbot.vislibVis.handler;
+        if(handler.highlight) {
+          handler.highlight.call(el, handler.el);
+        }else{
+          var label = el.getAttribute('data-label');
+          if (!label) return;
+          $('[data-label]', el.siblings()).not('[data-label="' + label + '"]').css('opacity', 0.5);
+        }
       };
 
-      $scope.unhighlightSeries = function () {
-        $('[data-label]', $elem.siblings()).css('opacity', 1);
+      $scope.unhighlightSeries = function (event) {
+        var el = event.currentTarget;
+        var handler = $scope.renderbot.vislibVis.handler;
+        if(handler.unHighlight) {
+          handler.unHighlight.call(el, handler.el);
+        }else{
+          $('[data-label]', el.siblings()).css('opacity', 1);
+        }
       };
 
       $scope.setColor = function (label, color) {
