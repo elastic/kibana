@@ -106,6 +106,7 @@ export default function DispatchClass(Private) {
     var isClickable = this.listenerCount('click') > 0;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
+    var defaultOpacity = this.handler._attr.defaultOpacity || 1;
 
     function hover(d, i) {
       // Add pointer if item is clickable
@@ -113,7 +114,7 @@ export default function DispatchClass(Private) {
         self.addMousePointer.call(this, arguments);
       }
 
-      self.highlightLegend.call(this, $el);
+      self.highlightLegend.call(this, $el, defaultOpacity);
       self.emit('hover', self.eventResponse(d, i));
     }
 
@@ -129,9 +130,10 @@ export default function DispatchClass(Private) {
     var self = this;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
+    var defaultOpacity = this.handler._attr.defaultOpacity || 1;
 
     function mouseout() {
-      self.unHighlightLegend.call(this, $el);
+      self.unHighlightLegend.call(this, $el, defaultOpacity);
     }
 
     return addEvent('mouseout', mouseout);
@@ -227,10 +229,14 @@ export default function DispatchClass(Private) {
    * @param element {D3.Selection}
    * @method highlightLegend
    */
-  Dispatch.prototype.highlightLegend = function (element) {
+  Dispatch.prototype.highlightLegend = function (element, defaultOpacity) {
     var label = this.getAttribute('data-label');
+    var highlightOpacity = (defaultOpacity < 1) ? 0.8 : 1;
     if (!label) return;
-    $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
+
+    var highlightElements = $('[data-label="' + label + '"]', element.parentNode);
+    $('[data-label]', element.parentNode).not(highlightElements).css('opacity', defaultOpacity / 2);
+    highlightElements.css('opacity', highlightOpacity);
   };
 
   /**
@@ -239,8 +245,8 @@ export default function DispatchClass(Private) {
    * @param element {D3.Selection}
    * @method unHighlightLegend
    */
-  Dispatch.prototype.unHighlightLegend = function (element) {
-    $('[data-label]', element.parentNode).css('opacity', 1);
+  Dispatch.prototype.unHighlightLegend = function (element, defaultOpacity) {
+    $('[data-label]', element.parentNode).css('opacity', defaultOpacity);
   };
 
   /**
