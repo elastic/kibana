@@ -106,7 +106,9 @@ export default function DispatchClass(Private) {
     var isClickable = this.listenerCount('click') > 0;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
-    var highlight = this.handler.highlight || self.highlight;
+    if(!this.handler.highlight) {
+      this.handler.highlight = self.highlight;
+    }
 
     function hover(d, i) {
       // Add pointer if item is clickable
@@ -114,7 +116,7 @@ export default function DispatchClass(Private) {
         self.addMousePointer.call(this, arguments);
       }
 
-      highlight.call(this, $el);
+      self.handler.highlight.call(this, $el);
       self.emit('hover', self.eventResponse(d, i));
     }
 
@@ -130,10 +132,12 @@ export default function DispatchClass(Private) {
     var self = this;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
-    var unHighlight = this.handler.unHighlight || self.unHighlight;
+    if(!this.handler.unHighlight) {
+      this.handler.unHighlight = self.unHighlight;
+    }
 
     function mouseout() {
-      unHighlight.call(this, $el);
+      self.handler.unHighlight.call(this, $el);
     }
 
     return addEvent('mouseout', mouseout);

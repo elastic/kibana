@@ -32,25 +32,15 @@ uiModules.get('kibana')
       $scope.highlight = function (event) {
         var el = event.currentTarget;
         var handler = $scope.renderbot.vislibVis.handler;
-        if(handler.highlight) {
-          handler.highlight.call(el, handler.el);
-        }else{
-          var label = el.getAttribute('data-label');
-          if (!label) return;
-          var highlightElements = $('[data-label="' + label + '"]', handler.el.parentNode);
-          $('[data-label]', handler.el.parentNode).not(highlightElements).css('opacity', 0.5);
-          $(highlightElements).css('opacity', 1);
-        }
+        if(!handler) return;
+        handler.highlight.call(el, handler.el);
       };
 
       $scope.unhighlight = function (event) {
         var el = event.currentTarget;
         var handler = $scope.renderbot.vislibVis.handler;
-        if(handler.unHighlight) {
-          handler.unHighlight.call(el, handler.el);
-        }else{
-          $('[data-label]', handler.el.parentNode).css('opacity', 1);
-        }
+        if(!handler) return;
+        handler.unHighlight.call(el, handler.el);
       };
 
       $scope.setColor = function (label, color) {
