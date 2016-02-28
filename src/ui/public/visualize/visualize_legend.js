@@ -29,7 +29,7 @@ uiModules.get('kibana')
         refresh();
       });
 
-      $scope.highlightSeries = function (event) {
+      $scope.highlight = function (event) {
         var el = event.currentTarget;
         var handler = $scope.renderbot.vislibVis.handler;
         if(handler.highlight) {
@@ -37,17 +37,19 @@ uiModules.get('kibana')
         }else{
           var label = el.getAttribute('data-label');
           if (!label) return;
-          $('[data-label]', el.siblings()).not('[data-label="' + label + '"]').css('opacity', 0.5);
+          var highlightElements = $('[data-label="' + label + '"]', handler.el.parentNode);
+          $('[data-label]', handler.el.parentNode).not(highlightElements).css('opacity', 0.5);
+          $(highlightElements).css('opacity', 1);
         }
       };
 
-      $scope.unhighlightSeries = function (event) {
+      $scope.unhighlight = function (event) {
         var el = event.currentTarget;
         var handler = $scope.renderbot.vislibVis.handler;
         if(handler.unHighlight) {
           handler.unHighlight.call(el, handler.el);
         }else{
-          $('[data-label]', el.siblings()).css('opacity', 1);
+          $('[data-label]', handler.el.parentNode).css('opacity', 1);
         }
       };
 

@@ -45,7 +45,10 @@ export default function AreaChartFactory(Private) {
         highlightElements.css('opacity', highlightOpacity);
       };
       handler.unHighlight = function (element) {
-        $('[data-label]', element.parentNode).css('opacity', defaultOpacity);
+        $('[data-label]', element).css('opacity', defaultOpacity);
+
+        //The legend should keep max opacity
+        $('[data-label]', $(element).siblings()).css('opacity', 1);
       };
     }
 
