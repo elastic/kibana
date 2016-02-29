@@ -12,6 +12,8 @@ describe('plugins/elasticsearch', function () {
     let kbnServer;
 
     before(function () {
+      this.timeout(15000); // sometimes waiting for server takes longer than 10
+
       kbnServer = kbnTestServer.createServer();
       return kbnServer.ready()
       .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
