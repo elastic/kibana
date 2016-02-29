@@ -1,9 +1,9 @@
-import _ from 'lodash';
+// import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ngMock';
 
-import FetchTheseProvider from '../fetch/fetch_these';
+import FetchTheseProvider from '../fetch_these';
 
 describe('ui/courier/fetch/_fetch_these', () => {
 
@@ -24,9 +24,9 @@ describe('ui/courier/fetch/_fetch_these', () => {
       return fakeResponses;
     }
 
-    PrivateProvider.swap(require('ui/courier/fetch/_call_client'), FakeResponsesProvider);
-    PrivateProvider.swap(require('ui/courier/fetch/_call_response_handlers'), FakeResponsesProvider);
-    PrivateProvider.swap(require('ui/courier/fetch/_continue_incomplete'), FakeResponsesProvider);
+    PrivateProvider.swap(require('ui/courier/fetch/call_client'), FakeResponsesProvider);
+    PrivateProvider.swap(require('ui/courier/fetch/call_response_handlers'), FakeResponsesProvider);
+    PrivateProvider.swap(require('ui/courier/fetch/continue_incomplete'), FakeResponsesProvider);
   }));
 
   beforeEach(ngMock.inject((Private, $injector) => {
