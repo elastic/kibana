@@ -7,7 +7,7 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div ng-hide="showNoResultsMessage()">
+<div ng-hide="showNoResultsMessage()" class="vis-container">
   <div ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
     class="visualize-chart">
