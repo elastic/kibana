@@ -164,7 +164,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       const url = await shortUrlLookup.getUrl(request.params.urlId);
-      reply().redirect(url);
+      reply().redirect(config.get('server.basePath') + url);
     }
   });
 
