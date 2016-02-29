@@ -1,25 +1,22 @@
 define(function (require) {
   var bdd = require('intern!bdd');
-  var expect = require('intern/dojo/node!expect.js');
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
-  var _ = require('intern/dojo/node!lodash');
-  var Common = require('../../../support/pages/Common');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
+  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
   var discoverTest = require('./_discover');
+  var fieldData = require('./_field_data');
+  var sharedLinks = require('./_shared_links');
+  var collapseExpand = require('./_collapse_expand');
 
   bdd.describe('discover app', function () {
-    var common;
     var scenarioManager;
     var remote;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = 120000;
+    this.timeout = config.timeouts.default;
 
-    // on setup, we create an settingsPage instance
-    // that we will use for all the tests
     bdd.before(function () {
-      common = new Common(this.remote);
       remote = this.remote;
+      return remote.setWindowSize(1200,800);
     });
 
     bdd.after(function unloadMakelogs() {
@@ -27,6 +24,12 @@ define(function (require) {
     });
 
     discoverTest(bdd, scenarioManager);
+
+    fieldData(bdd, scenarioManager);
+
+    sharedLinks(bdd, scenarioManager);
+
+    collapseExpand(bdd, scenarioManager);
 
   });
 });

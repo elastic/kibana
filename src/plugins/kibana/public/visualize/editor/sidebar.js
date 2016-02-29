@@ -2,7 +2,7 @@ define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .directive('visEditorSidebar', function () {
-    var _ = require('lodash');
+    const _ = require('lodash');
 
     require('plugins/kibana/visualize/editor/agg_group');
     require('plugins/kibana/visualize/editor/vis_options');

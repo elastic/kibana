@@ -176,6 +176,11 @@ define(function (require) {
         value: '($0,0.[00])',
         description: 'Default numeral format for the "currency" format'
       },
+      'savedObjects:perPage': {
+        type: 'number',
+        value: 5,
+        description: 'Number of objects to show per page in the load dialog'
+      },
       'timepicker:timeDefaults': {
         type: 'json',
         value: [

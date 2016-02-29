@@ -22,7 +22,12 @@ module.exports = function (grunt) {
         '--package', targetDir,
         '-s', 'dir', // input type
         '--name', 'kibana',
+        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
         '--version', version,
+        '--url', 'https://www.elastic.co',
+        '--vendor', 'Elasticsearch,\ Inc.',
+        '--maintainer', 'Kibana Team\ \<info@elastic.co\>',
+        '--license', 'Apache\ 2.0',
         '--after-install', resolve(userScriptsDir, 'installer.sh'),
         '--after-remove', resolve(userScriptsDir, 'remover.sh'),
         '--config-files', '/opt/kibana/config/kibana.yml'
@@ -41,7 +46,7 @@ module.exports = function (grunt) {
 
       grunt.file.mkdir(targetDir);
       if (buildDeb || noneSpecified) {
-        fpm(args.concat('-t', 'deb', '-a', arch, files, sysv, systemd));
+        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files, sysv, systemd));
       }
       if (buildRpm || noneSpecified) {
         fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv, systemd));

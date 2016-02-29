@@ -2,7 +2,7 @@ define(function (require) {
   var bdd = require('intern!bdd');
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
+  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
 
   var initialStateTest = require('./_initial_state');
   var creationChangesTest = require('./_creation_form_changes');
@@ -13,7 +13,7 @@ define(function (require) {
 
   bdd.describe('settings app', function () {
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = 120000;
+    this.timeout = config.timeouts.default;
 
     // on setup, we create an settingsPage instance
     // that we will use for all the tests

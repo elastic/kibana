@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var angular = require('angular');
-  var ConfigTemplate = require('ui/ConfigTemplate');
-  var chrome = require('ui/chrome');
+  const _ = require('lodash');
+  const $ = require('jquery');
+  const angular = require('angular');
+  const ConfigTemplate = require('ui/ConfigTemplate');
+  const chrome = require('ui/chrome');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -20,7 +20,7 @@ define(function (require) {
   require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
 
 
-  var app = require('ui/modules').get('app/dashboard', [
+  const app = require('ui/modules').get('app/dashboard', [
     'elasticsearch',
     'ngRoute',
     'kibana/courier',
@@ -54,13 +54,13 @@ define(function (require) {
     return {
       controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
-        var queryFilter = Private(require('ui/filter_bar/query_filter'));
+        const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
-        var notify = new Notifier({
+        const notify = new Notifier({
           location: 'Dashboard'
         });
 
-        var dash = $scope.dash = $route.current.locals.dash;
+        const dash = $scope.dash = $route.current.locals.dash;
 
         if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
           timefilter.time.to = dash.timeTo;
@@ -69,16 +69,16 @@ define(function (require) {
 
         $scope.$on('$destroy', dash.destroy);
 
-        var matchQueryFilter = function (filter) {
+        const matchQueryFilter = function (filter) {
           return filter.query && filter.query.query_string && !filter.meta;
         };
 
-        var extractQueryFromFilters = function (filters) {
-          var filter = _.find(filters, matchQueryFilter);
+        const extractQueryFromFilters = function (filters) {
+          const filter = _.find(filters, matchQueryFilter);
           if (filter) return filter.query;
         };
 
-        var stateDefaults = {
+        const stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
@@ -87,8 +87,8 @@ define(function (require) {
           filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
         };
 
-        var $state = $scope.state = new AppState(stateDefaults);
-        var $uiState = $scope.uiState = $state.makeStateful('uiState');
+        const $state = $scope.state = new AppState(stateDefaults);
+        const $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
           if (!angular.equals(newVal, oldVal)) $state.save();
@@ -114,7 +114,7 @@ define(function (require) {
         function init() {
           updateQueryOnRootSource();
 
-          var docTitle = Private(require('ui/doc_title'));
+          const docTitle = Private(require('ui/doc_title'));
           if (dash.id) {
             docTitle.change(dash.title);
           }
@@ -125,7 +125,7 @@ define(function (require) {
 
         function initPanelIndices() {
           // find the largest panelIndex in all the panels
-          var maxIndex = getMaxPanelIndex();
+          let maxIndex = getMaxPanelIndex();
 
           // ensure that all panels have a panelIndex
           $scope.state.panels.forEach(function (panel) {
@@ -136,7 +136,7 @@ define(function (require) {
         }
 
         function getMaxPanelIndex() {
-          var index = $scope.state.panels.reduce(function (idx, panel) {
+          let index = $scope.state.panels.reduce(function (idx, panel) {
             // if panel is missing an index, add one and increment the index
             return Math.max(idx, panel.panelIndex || idx);
           }, 0);
@@ -144,7 +144,7 @@ define(function (require) {
         }
 
         function updateQueryOnRootSource() {
-          var filters = queryFilter.getFilters();
+          const filters = queryFilter.getFilters();
           if ($state.query) {
             dash.searchSource.set('filter', _.union(filters, [{
               query: $state.query
@@ -155,7 +155,7 @@ define(function (require) {
         }
 
         function setDarkTheme(enabled) {
-          var theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
+          const theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
           chrome.removeApplicationClass(['theme-dark', 'theme-light']);
           chrome.addApplicationClass(theme);
         }
@@ -202,7 +202,7 @@ define(function (require) {
           .catch(notify.fatal);
         };
 
-        var pendingVis = _.size($state.panels);
+        let pendingVis = _.size($state.panels);
         $scope.$on('ready:vis', function () {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {

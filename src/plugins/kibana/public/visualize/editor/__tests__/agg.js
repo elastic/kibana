@@ -1,19 +1,19 @@
 
-var angular = require('angular');
-var $ = require('jquery');
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+const angular = require('angular');
+const $ = require('jquery');
+const _ = require('lodash');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
 
 require('plugins/kibana/visualize/editor/agg');
 
 describe('Vis-Editor-Agg plugin directive', function () {
-  var $parentScope = {};
-  var $scope;
-  var $elem;
+  const $parentScope = {};
+  let $scope;
+  let $elem;
 
   function makeConfig(which) {
-    var schemaMap = {
+    const schemaMap = {
       radius: {
         title: 'Dot Size',
         min: 0,
@@ -25,10 +25,10 @@ describe('Vis-Editor-Agg plugin directive', function () {
         max: Infinity
       }
     };
-    var typeOptions = ['count', 'avg', 'sum', 'min', 'max', 'cardinality'];
+    const typeOptions = ['count', 'avg', 'sum', 'min', 'max', 'cardinality'];
     which = which || 'metric';
 
-    var schema = schemaMap[which];
+    const schema = schemaMap[which];
 
     return {
       min: schema.min,

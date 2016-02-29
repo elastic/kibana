@@ -5,13 +5,13 @@ require('plugins/kibana/settings/index');
 require('plugins/kibana/doc/index');
 require('ui/timepicker');
 
-var moment = require('moment-timezone');
+const moment = require('moment-timezone');
 
-var chrome = require('ui/chrome');
-var routes = require('ui/routes');
-var modules = require('ui/modules');
+const chrome = require('ui/chrome');
+const routes = require('ui/routes');
+const modules = require('ui/modules');
 
-var kibanaLogoUrl = require('ui/images/kibana.svg');
+const kibanaLogoUrl = require('ui/images/kibana.svg');
 
 routes.enable();
 

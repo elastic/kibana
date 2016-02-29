@@ -2,12 +2,12 @@ define(function (require) {
   var _ = require('lodash');
   // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
-  var module = require('ui/modules').get('kibana/metric_vis', ['kibana']);
+  const module = require('ui/modules').get('kibana/metric_vis', ['kibana']);
 
   module.controller('KbnMetricVisController', function ($scope, Private) {
-    var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+    const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
 
-    var metrics = $scope.metrics = [];
+    const metrics = $scope.metrics = [];
 
     function isInvalid(val) {
       return _.isUndefined(val) || _.isNull(val) || _.isNaN(val);
@@ -16,8 +16,8 @@ define(function (require) {
     $scope.processTableGroups = function (tableGroups) {
       tableGroups.tables.forEach(function (table) {
         table.columns.forEach(function (column, i) {
-          var fieldFormatter = table.aggConfig(column).fieldFormatter();
-          var value = table.rows[0][i];
+          const fieldFormatter = table.aggConfig(column).fieldFormatter();
+          let value = table.rows[0][i];
 
           value = isInvalid(value) ? '?' : fieldFormatter(value);
 

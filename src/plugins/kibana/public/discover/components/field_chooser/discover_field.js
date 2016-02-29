@@ -1,8 +1,8 @@
 define(function (require) {
-  var $ = require('jquery');
-  var app = require('ui/modules').get('apps/discover');
-  var html = require('plugins/kibana/discover/components/field_chooser/discover_field.html');
-  var _ = require('lodash');
+  const $ = require('jquery');
+  const app = require('ui/modules').get('apps/discover');
+  const html = require('plugins/kibana/discover/components/field_chooser/discover_field.html');
+  const _ = require('lodash');
 
   require('ui/directives/css_truncate');
   require('ui/directives/field_name');
@@ -14,19 +14,19 @@ define(function (require) {
       template: html,
       replace: true,
       link: function ($scope, $elem) {
-        var detailsElem;
-        var detailScope = $scope.$new();
+        let detailsElem;
+        let detailScope = $scope.$new();
 
-        var detailsHtml = require('plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html');
+        const detailsHtml = require('plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html');
 
-        var init = function () {
+        const init = function () {
           if ($scope.field.details) {
             $scope.toggleDetails($scope.field, true);
           }
         };
 
-        var getWarnings = function (field) {
-          var warnings = [];
+        const getWarnings = function (field) {
+          let warnings = [];
 
           if (!field.scripted) {
             if (!field.doc_values && field.type !== 'boolean' && !(field.analyzed && field.type === 'string')) {
@@ -60,11 +60,11 @@ define(function (require) {
         };
 
         $scope.toggleDisplay = function (field) {
-          // inheritted param to fieldChooser
+          // This is inherited from fieldChooser
           $scope.toggle(field.name);
           if (field.display) $scope.increaseFieldCounter(field);
 
-          // we are now displaying the field, kill it's details
+          // we are now displaying the field, kill its details
           if (field.details) {
             $scope.toggleDetails(field);
           }

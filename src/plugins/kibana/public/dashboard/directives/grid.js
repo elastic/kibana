@@ -1,38 +1,38 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var Binder = require('ui/Binder');
+  const _ = require('lodash');
+  const $ = require('jquery');
+  const Binder = require('ui/Binder');
   require('gridster');
 
-  var app = require('ui/modules').get('app/dashboard');
+  const app = require('ui/modules').get('app/dashboard');
 
   app.directive('dashboardGrid', function ($compile, Notifier) {
     return {
       restrict: 'E',
       require: '^dashboardApp', // must inherit from the dashboardApp
       link: function ($scope, $el) {
-        var notify = new Notifier();
-        var $container = $el;
+        const notify = new Notifier();
+        const $container = $el;
         $el = $('<ul>').appendTo($container);
 
-        var $window = $(window);
-        var $body = $(document.body);
-        var binder = new Binder($scope);
+        const $window = $(window);
+        const $body = $(document.body);
+        const binder = new Binder($scope);
 
         // appState from controller
-        var $state = $scope.state;
+        const $state = $scope.state;
 
-        var gridster; // defined in init()
+        let gridster; // defined in init()
 
         // number of columns to render
-        var COLS = 12;
+        const COLS = 12;
         // number of pixed between each column/row
-        var SPACER = 10;
+        const SPACER = 10;
         // pixels used by all of the spacers (gridster puts have a spacer on the ends)
-        var spacerSize = SPACER * COLS;
+        const spacerSize = SPACER * COLS;
 
         // debounced layout function is safe to call as much as possible
-        var safeLayout = _.debounce(layout, 200);
+        const safeLayout = _.debounce(layout, 200);
 
         function init() {
           $el.addClass('gridster');
@@ -61,15 +61,15 @@ define(function (require) {
           });
 
           $scope.$watchCollection('state.panels', function (panels) {
-            var currentPanels = gridster.$widgets.toArray().map(function (el) {
+            const currentPanels = gridster.$widgets.toArray().map(function (el) {
               return getPanelFor(el);
             });
 
             // panels that are now missing from the panels array
-            var removed = _.difference(currentPanels, panels);
+            const removed = _.difference(currentPanels, panels);
 
             // panels that have been added
-            var added = _.difference(panels, currentPanels);
+            const added = _.difference(panels, currentPanels);
 
             if (removed.length) removed.forEach(removePanel);
             if (added.length) added.forEach(addPanel);
@@ -87,7 +87,7 @@ define(function (require) {
 
             if (!gridster) return;
             gridster.$widgets.each(function (i, el) {
-              var panel = getPanelFor(el);
+              const panel = getPanelFor(el);
               removePanel(panel);
               // stop any animations
               panel.$el.stop();
@@ -107,8 +107,8 @@ define(function (require) {
         // ALWAYS CALL makePanelSerializeable AFTER YOU ARE DONE WITH IT
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         function getPanelFor(el) {
-          var $panel = el.jquery ? el : $(el);
-          var panel = $panel.data('panel');
+          const $panel = el.jquery ? el : $(el);
+          const panel = $panel.data('panel');
 
           panel.$el = $panel;
           panel.$scope = $panel.data('$scope');
@@ -174,7 +174,7 @@ define(function (require) {
 
         // ensure that the panel object has the latest size/pos info
         function refreshPanelStats(panel) {
-          var data = panel.$el.coords().grid;
+          const data = panel.$el.coords().grid;
           panel.size_x = data.size_x;
           panel.size_y = data.size_y;
           panel.col = data.col;
@@ -185,7 +185,7 @@ define(function (require) {
         function readGridsterChangeHandler(e, ui, $widget) {
           // ensure that our panel objects keep their size in sync
           gridster.$widgets.each(function (i, el) {
-            var panel = getPanelFor(el);
+            const panel = getPanelFor(el);
             refreshPanelStats(panel);
             panel.$scope.$broadcast('resize');
             makePanelSerializeable(panel);
@@ -198,14 +198,14 @@ define(function (require) {
         // we may need to consider using a different library
         function reflowGridster() {
           // https://github.com/gcphost/gridster-responsive/blob/97fe43d4b312b409696b1d702e1afb6fbd3bba71/jquery.gridster.js#L1208-L1235
-          var g = gridster;
+          const g = gridster;
 
           g.options.widget_margins = [SPACER / 2, SPACER / 2];
           g.options.widget_base_dimensions = [($container.width() - spacerSize) / COLS, 100];
           g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
           g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 
-          // var serializedGrid = g.serialize();
+          // const serializedGrid = g.serialize();
           g.$widgets.each(function (i, widget) {
             g.resize_widget($(widget));
           });
@@ -222,7 +222,7 @@ define(function (require) {
         }
 
         function layout() {
-          var complete = notify.event('reflow dashboard');
+          const complete = notify.event('reflow dashboard');
           reflowGridster();
           readGridsterChangeHandler();
           complete();

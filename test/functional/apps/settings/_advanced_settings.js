@@ -1,8 +1,7 @@
 define(function (require) {
-  var Common = require('../../../support/pages/Common');
+  var Common = require('../../../support/pages/common');
   var SettingsPage = require('../../../support/pages/settings_page');
   var expect = require('intern/dojo/node!expect.js');
-  var Promise = require('bluebird');
 
   return function (bdd, scenarioManager) {
     bdd.describe('creating and deleting default index', function describeIndexTests() {

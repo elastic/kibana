@@ -1,4 +1,4 @@
-// in test/support/pages/Common.js
+// in test/support/pages/common.js
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
@@ -50,6 +50,10 @@ define(function (require) {
 
   Common.prototype = {
     constructor: Common,
+
+    getHostPort: function getHostPort() {
+      return getUrl.baseUrl(config.servers.kibana);
+    },
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
@@ -107,11 +111,12 @@ define(function (require) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
           // give the app time to update the URL
-          return self.sleep(500)
+          return self.sleep(501)
           .then(function () {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
+            self.debug('in doNavigation url = ' + currentUrl);
             if (lastUrl !== currentUrl) {
               lastUrl = currentUrl;
               throw new Error('URL changed, waiting for it to settle');
@@ -179,7 +184,7 @@ define(function (require) {
     tryForTime: function (timeout, block) {
       var self = this;
       var start = Date.now();
-      var retryDelay = 500;
+      var retryDelay = 502;
       var lastTry = 0;
       var tempMessage;
 
@@ -202,17 +207,20 @@ define(function (require) {
       return Promise.try(attempt);
     },
 
-    log: function (logString) {
+    log: function log(logString) {
       console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
     },
 
-    debug: function (logString) {
+    debug: function debug(logString) {
       if (config.debug) this.log(logString);
     },
 
-    sleep: function (sleepMilliseconds) {
-      this.debug('sleeping for ' + sleepMilliseconds + 'ms');
-      return Promise.resolve().delay(sleepMilliseconds);
+    sleep: function sleep(sleepMilliseconds) {
+      var self = this;
+      self.debug('... sleep(' + sleepMilliseconds + ') start');
+
+      return Promise.resolve().delay(sleepMilliseconds)
+      .then(function () { self.debug('... sleep(' + sleepMilliseconds + ') end'); });
     },
 
     handleError: function (testObj) {
@@ -230,7 +238,7 @@ define(function (require) {
       };
     },
 
-    saveScreenshot: function (filename) {
+    saveScreenshot: function saveScreenshot(filename) {
       var self = this;
       var outDir = path.resolve('test', 'output');
 

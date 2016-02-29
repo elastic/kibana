@@ -71,7 +71,7 @@ define(function (require) {
     });
     Promise.try = function (fn, args, ctx) {
       if (typeof fn !== 'function') {
-        return Promise.reject('fn must be a function');
+        return Promise.reject(new TypeError('fn must be a function'));
       }
 
       var value;

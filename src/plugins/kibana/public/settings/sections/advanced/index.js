@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
+  const _ = require('lodash');
+  const toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
 
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
@@ -15,8 +15,8 @@ define(function (require) {
     return {
       restrict: 'E',
       link: function ($scope) {
-        var configDefaults = Private(require('ui/config/defaults'));
-        var keyCodes = {
+        const configDefaults = Private(require('ui/config/defaults'));
+        const keyCodes = {
           ESC: 27
         };
 
@@ -29,9 +29,9 @@ define(function (require) {
         }
 
         function readConfigVals() {
-          var configVals = config._vals();
+          const configVals = config._vals();
 
-          var customConfig = Object.keys(configVals)
+          const customConfig = Object.keys(configVals)
           .filter(notDefaultConfig)
           .map(name => toEditableConfig(false, name, configVals[name]));
 
@@ -43,7 +43,7 @@ define(function (require) {
         }
 
         // react to changes of the config values
-        var unhook = $rootScope.$on('change:config', readConfigVals);
+        const unhook = $rootScope.$on('change:config', readConfigVals);
         $scope.$on('$destroy', unhook);
 
         // initial config setup

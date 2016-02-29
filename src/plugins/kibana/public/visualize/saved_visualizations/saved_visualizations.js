@@ -1,7 +1,7 @@
 define(function (require) {
-  var app = require('ui/modules').get('app/visualize');
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const app = require('ui/modules').get('app/visualize');
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/visualize/saved_visualizations/_saved_vis');
 
@@ -13,14 +13,14 @@ define(function (require) {
   });
 
   app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, Notifier, kbnUrl) {
-    var visTypes = Private(require('ui/registry/vis_types'));
+    const visTypes = Private(require('ui/registry/vis_types'));
 
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'visualization'
     });
 
-    var notify = new Notifier({
+    const notify = new Notifier({
       location: 'Saved Visualization Service'
     });
 
@@ -56,11 +56,11 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
 
-      var typeName = source.typeName;
+      let typeName = source.typeName;
       if (source.visState) {
         try { typeName = JSON.parse(source.visState).type; }
         catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
@@ -78,7 +78,7 @@ define(function (require) {
     };
 
     this.find = function (searchString, size = 100) {
-      var body;
+      let body;
       if (searchString) {
         body = {
           query: {
