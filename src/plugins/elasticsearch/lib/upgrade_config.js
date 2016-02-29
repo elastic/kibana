@@ -3,8 +3,6 @@ import isUpgradeable from './is_upgradeable';
 import _ from 'lodash';
 import { format } from 'util';
 
-const utils = require('requirefrom')('src/utils');
-
 module.exports = function (server) {
   const MAX_INTEGER = Math.pow(2, 53) - 1;
 
@@ -54,4 +52,3 @@ module.exports = function (server) {
     });
   };
 };
-
