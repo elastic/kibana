@@ -1,31 +1,3 @@
-<<<<<<< HEAD
-define(function (require) {
-  return function HeatmapMarkerFactory(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var L = require('leaflet');
-
-    var BaseMarker = Private(require('ui/vislib/visualizations/marker_types/base_marker'));
-
-    /**
-     * Map overlay: canvas layer with leaflet.heat plugin
-     *
-     * @param map {Leaflet Object}
-     * @param geoJson {geoJson Object}
-     * @param params {Object}
-     */
-    _.class(HeatmapMarker).inherits(BaseMarker);
-    function HeatmapMarker(map, geoJson, params) {
-      var self = this;
-      this._disableTooltips = false;
-      HeatmapMarker.Super.apply(this, arguments);
-
-      this._createMarkerGroup({
-        radius: +this._attr.heatRadius,
-        blur: +this._attr.heatBlur,
-        maxZoom: +this._attr.heatMaxZoom,
-        minOpacity: +this._attr.heatMinOpacity,
-=======
 import d3 from 'd3';
 import _ from 'lodash';
 import L from 'leaflet';
@@ -90,7 +62,6 @@ export default function HeatmapMarkerFactory(Private) {
       });
       this.map.on('mouseup', function () {
         self._disableTooltips = false;
->>>>>>> master
       });
     }
 
@@ -163,72 +134,65 @@ export default function HeatmapMarkerFactory(Private) {
     return nearest;
   };
 
-<<<<<<< HEAD
-      var testScale = d3.scale.pow().exponent(0.2)
-      .domain([1, 18])
-      .range([1500000, 50]);
-      return showTip;
-    };
+  /**
+   * Returns the domain for the heatmap scale
+   *
+   * @method _getDomain
+   * @param features {geoJson Object}
+   * @param scaleType {String}
+   * @param callback {Function}
+   * @return {Array}
+   */
+  HeatmapMarker.prototype._getDomain = function (features, scaleType, callback) {
+    var isLog = Boolean(scaleType === 'log');
+    var extent = d3.extent(features, callback);
 
-    /**
-     * Returns the domain for the heatmap scale
-     *
-     * @method _getDomain
-     * @param features {geoJson Object}
-     * @param scaleType {String}
-     * @param callback {Function}
-     * @return {Array}
-     */
-    HeatmapMarker.prototype._getDomain = function (features, scaleType, callback) {
-      var isLog = Boolean(scaleType === 'log');
-      var extent = d3.extent(features, callback);
+    // Log scales cannot have numbers <= 0. Default min value is 1e-9 and max value is 1.
+    if (isLog) return [ Math.max(1e-9, extent[0]), Math.max(1, extent[1]) ];
+    return extent;
+  };
 
-      // Log scales cannot have numbers <= 0. Default min value is 1e-9 and max value is 1.
-      if (isLog) return [ Math.max(1e-9, extent[0]), Math.max(1, extent[1]) ];
-      return extent;
-    };
+  /**
+   * Returns a scale function which determines the heatmap intensity at a given
+   * point. Linear scale by default.
+   *
+   * @method _heatmapScale
+   * @param features {Array}
+   * @param scaleType {String}
+   * @param callback {Function}
+   * @return {Function}
+   */
+  HeatmapMarker.prototype._heatmapScale = function (features, scaleType, callback) {
+    return d3.scale[scaleType]()
+    .domain(this._getDomain(features, scaleType, callback))
+    .range([0, 1]) // Heatmap plugin expects output between 0 and 1
+    .clamp(true); // Clamps the output to keep it between 0 and 1
+  };
 
-    /**
-     * Returns a scale function which determines the heatmap intensity at a given
-     * point. Linear scale by default.
-     *
-     * @method _heatmapScale
-     * @param features {Array}
-     * @param scaleType {String}
-     * @param callback {Function}
-     * @return {Function}
-     */
-    HeatmapMarker.prototype._heatmapScale = function (features, scaleType, callback) {
-      return d3.scale[scaleType]()
-      .domain(this._getDomain(features, scaleType, callback))
-      .range([0, 1]) // Heatmap plugin expects output between 0 and 1
-      .clamp(true); // Clamps the output to keep it between 0 and 1
-    };
+  /**
+   * returns data for data for heat map intensity
+   *
+   * @method _dataToHeatArray
+   * @param max {Number}
+   * @return {Array}
+   */
+  HeatmapMarker.prototype._dataToHeatArray = function (max) {
+    var self = this;
+    var scaleType = this._attr.intensityScale || 'linear';
+    var features = this.geoJson.features;
+    var intensityScale = this._heatmapScale(features, scaleType, function (d) {
+      return scaleType === 'log' ? Math.abs(d.properties.value) : d.properties.value;
+    });
 
-    /**
-     * returns data for data for heat map intensity
-     *
-     * @method _dataToHeatArray
-     * @param max {Number}
-     * @return {Array}
-     */
-    HeatmapMarker.prototype._dataToHeatArray = function (max) {
-      var self = this;
-      var scaleType = this._attr.intensityScale || 'linear';
-      var features = this.geoJson.features;
-      var intensityScale = this._heatmapScale(features, scaleType, function (d) {
-        return scaleType === 'log' ? Math.abs(d.properties.value) : d.properties.value;
-      });
+    return features.map(function (feature) {
+      var lat = feature.properties.center[0];
+      var lng = feature.properties.center[1];
+      var heatIntensity = intensityScale(feature.properties.value);
 
-      return features.map(function (feature) {
-        var lat = feature.properties.center[0];
-        var lng = feature.properties.center[1];
-        var heatIntensity = intensityScale(feature.properties.value);
+      return [lat, lng, heatIntensity];
+    });
+  };
 
-        return [lat, lng, heatIntensity];
-      });
-    };
-=======
   /**
    * display tooltip if feature is close enough to event latlng
    *
@@ -263,43 +227,12 @@ export default function HeatmapMarkerFactory(Private) {
     if (distance < proximity && lngDif < maxLngDif) {
       showTip = true;
     }
->>>>>>> master
 
     var testScale = d3.scale.pow().exponent(0.2)
     .domain([1, 18])
     .range([1500000, 50]);
+
     return showTip;
-  };
-
-
-  /**
-   * returns data for data for heat map intensity
-   * if heatNormalizeData attribute is checked/true
-   • normalizes data for heat map intensity
-   *
-   * @method _dataToHeatArray
-   * @param max {Number}
-   * @return {Array}
-   */
-  HeatmapMarker.prototype._dataToHeatArray = function (max) {
-    var self = this;
-    var mapData = this.geoJson;
-
-    return this.geoJson.features.map(function (feature) {
-      var lat = feature.properties.center[0];
-      var lng = feature.properties.center[1];
-      var heatIntensity;
-
-      if (!self._attr.heatNormalizeData) {
-        // show bucket value on heatmap
-        heatIntensity = feature.properties.value;
-      } else {
-        // show bucket value normalized to max value
-        heatIntensity = parseInt(feature.properties.value / max * 100);
-      }
-
-      return [lat, lng, heatIntensity];
-    });
   };
 
   return HeatmapMarker;
