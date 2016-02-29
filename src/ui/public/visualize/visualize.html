@@ -1,5 +1,4 @@
-<div
-  ng-if="vis.type.requiresSearch && esResp.hits.total === 0"
+<div ng-if="showNoResultsMessage()"
   class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
@@ -8,11 +7,11 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
-  class="vis-container" >
+<div ng-hide="showNoResultsMessage()" class="vis-container">
   <div ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
-    class="visualize-chart"></div>
+    class="visualize-chart">
+  </div>
   <visualize-legend></visualize-legend>
 </div>
 <!-- <pre>{{chartData | json}}</pre> -->

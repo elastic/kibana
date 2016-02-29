@@ -23,6 +23,7 @@ define(function (require) {
       template: require('plugins/metric_vis/metric_vis.html'),
       params: {
         defaults: {
+          handleNoResults: true,
           fontSize: 60
         },
         editor: require('plugins/metric_vis/metric_vis_params.html')
