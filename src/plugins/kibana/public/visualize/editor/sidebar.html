@@ -13,7 +13,7 @@
 
         <!-- tabs -->
         <ul class="nav navbar-nav">
-          <li ng-class="{active: sidebar.section == 'data'}" ng-show="vis.type.schemas.metrics">
+          <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
             <a class="navbar-link active" ng-click="sidebar.section='data'">Data</a>
           </li>
           <li ng-class="{active: sidebar.section == 'options'}">
@@ -66,4 +66,3 @@
 
   </form>
 </div>
-
