@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var SourceMapConsumer = require('source-map/lib/source-map/source-map-consumer').SourceMapConsumer;
-var parse = require('url').parse;
+import _ from 'lodash';
+import { SourceMapConsumer } from 'source-map/lib/source-map/source-map-consumer';
+import { parse } from 'url';
 
 function SourceMapReader(url, map) {
   this.smc = new SourceMapConsumer(map);

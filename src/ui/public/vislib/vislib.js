@@ -1,12 +1,14 @@
+import 'ui/vislib/lib/handler/types/pie';
+import 'ui/vislib/lib/handler/types/point_series';
+import 'ui/vislib/lib/handler/types/tile_map';
+import 'ui/vislib/lib/handler/handler_types';
+import 'ui/vislib/lib/layout/layout_types';
+import 'ui/vislib/lib/data';
+import 'ui/vislib/visualizations/_map.js';
+import 'ui/vislib/visualizations/vis_types';
+import 'ui/vislib/styles/main.less';
+import VislibVisProvider from 'ui/vislib/vis';
 // prefetched for faster optimization runs
-require('ui/vislib/lib/handler/types/pie');
-require('ui/vislib/lib/handler/types/point_series');
-require('ui/vislib/lib/handler/types/tile_map');
-require('ui/vislib/lib/handler/handler_types');
-require('ui/vislib/lib/layout/layout_types');
-require('ui/vislib/lib/data');
-require('ui/vislib/visualizations/_map.js');
-require('ui/vislib/visualizations/vis_types');
 // end prefetching
 
 /**
@@ -17,10 +19,9 @@ require('ui/vislib/visualizations/vis_types');
  * @return {Object} Contains the version number and the Vis Class for creating visualizations
  */
 module.exports = function VislibProvider(Private) {
-  require('ui/vislib/styles/main.less');
 
   return {
     version: '0.0.0',
-    Vis: Private(require('ui/vislib/vis'))
+    Vis: Private(VislibVisProvider)
   };
 };

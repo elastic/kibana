@@ -1,8 +1,8 @@
-var angular = require('angular');
-var $ = require('jquery');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-require('ui/directives/input_focus');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import $ from 'jquery';
+import 'ui/directives/input_focus';
 
 describe('Input focus directive', function () {
   var $compile;

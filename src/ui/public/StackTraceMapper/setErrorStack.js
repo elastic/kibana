@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 var err = new Error();
 try { setByAssignment(err, 'john'); } catch (e) {} // eslint-disable-line

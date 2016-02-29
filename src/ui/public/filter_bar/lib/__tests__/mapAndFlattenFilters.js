@@ -1,9 +1,10 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/mapAndFlattenFilters';
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
-    var sinon = require('auto-release-sinon');
     var mapAndFlattenFilters;
     var $rootScope;
 
@@ -16,7 +17,7 @@ describe('Filter Bar Directive', function () {
     ));
 
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+      mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
       $rootScope = _$rootScope_;
     }));
 

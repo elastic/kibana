@@ -1,6 +1,10 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import VisProvider from 'ui/Vis';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterIpRangeProvider from 'ui/agg_types/buckets/create_filter/ip_range';
 describe('AggConfig Filters', function () {
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   describe('IP range', function () {
     var AggConfig;
@@ -10,10 +14,10 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfig = Private(require('ui/Vis/AggConfig'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      createFilter = Private(require('ui/agg_types/buckets/create_filter/ip_range'));
+      Vis = Private(VisProvider);
+      AggConfig = Private(VisAggConfigProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      createFilter = Private(AggTypesBucketsCreateFilterIpRangeProvider);
     }));
 
     it('should return a range filter for ip_range agg', function () {

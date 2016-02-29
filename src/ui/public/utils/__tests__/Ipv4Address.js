@@ -1,5 +1,5 @@
-var Ipv4Address = require('ui/utils/Ipv4Address');
-var expect = require('expect.js');
+import Ipv4Address from 'ui/utils/Ipv4Address';
+import expect from 'expect.js';
 
 describe('Ipv4Address', function () {
   it('should throw errors with invalid IP addresses', function () {

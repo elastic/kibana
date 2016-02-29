@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 export function list(settings, logger) {
   fs.readdirSync(settings.pluginDir)

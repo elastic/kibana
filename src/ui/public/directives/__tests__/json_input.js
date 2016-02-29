@@ -1,8 +1,8 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/directives/json_input';
 
-require('ui/directives/json_input');
 
 describe('JSON input validation', function () {
   var $compile;

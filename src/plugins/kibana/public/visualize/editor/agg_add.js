@@ -1,28 +1,30 @@
-define(function (require) {
-  require('ui/modules')
-  .get('kibana')
-  .directive('visEditorAggAdd', function (Private) {
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import uiModules from 'ui/modules';
+import aggAddTemplate from 'plugins/kibana/visualize/editor/agg_add.html';
 
-    return {
-      restrict: 'E',
-      template: require('plugins/kibana/visualize/editor/agg_add.html'),
-      controllerAs: 'add',
-      controller: function ($scope) {
-        var self = this;
+uiModules
+.get('kibana')
+.directive('visEditorAggAdd', function (Private) {
+  const AggConfig = Private(VisAggConfigProvider);
 
+  return {
+    restrict: 'E',
+    template: aggAddTemplate,
+    controllerAs: 'add',
+    controller: function ($scope) {
+      const self = this;
+
+      self.form = false;
+      self.submit = function (schema) {
         self.form = false;
-        self.submit = function (schema) {
-          self.form = false;
 
-          var aggConfig = new AggConfig($scope.vis, {
-            schema: schema
-          });
-          aggConfig.brandNew = true;
+        const aggConfig = new AggConfig($scope.vis, {
+          schema: schema
+        });
+        aggConfig.brandNew = true;
 
-          $scope.vis.aggs.push(aggConfig);
-        };
-      }
-    };
-  });
+        $scope.vis.aggs.push(aggConfig);
+      };
+    }
+  };
 });

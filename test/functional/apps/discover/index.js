@@ -2,10 +2,11 @@ define(function (require) {
   var bdd = require('intern!bdd');
   var config = require('intern').config;
   var url = require('intern/dojo/node!url');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenarioManager');
+  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
   var discoverTest = require('./_discover');
   var fieldData = require('./_field_data');
   var sharedLinks = require('./_shared_links');
+  var collapseExpand = require('./_collapse_expand');
 
   bdd.describe('discover app', function () {
     var scenarioManager;
@@ -27,6 +28,8 @@ define(function (require) {
     fieldData(bdd, scenarioManager);
 
     sharedLinks(bdd, scenarioManager);
+
+    collapseExpand(bdd, scenarioManager);
 
   });
 });

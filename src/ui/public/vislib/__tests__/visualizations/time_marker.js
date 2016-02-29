@@ -1,12 +1,13 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var fixtures = require('fixtures/fake_hierarchical_data');
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var terms = require('fixtures/vislib/mock_data/terms/_columns');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import _ from 'lodash';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import terms from 'fixtures/vislib/mock_data/terms/_columns';
+import $ from 'jquery';
+import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 
 describe('Vislib Time Marker Test Suite', function () {
   var height = 50;
@@ -43,7 +44,7 @@ describe('Vislib Time Marker Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
     minDomain = getExtent(series.series, d3.min);
     maxDomain = getExtent(series.series, d3.max);
     domain = [minDomain, maxDomain];

@@ -1,8 +1,11 @@
+import _ from 'lodash';
+import VislibProvider from 'ui/vislib';
+import VisRenderbotProvider from 'ui/Vis/Renderbot';
+import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/buildChartData';
 module.exports = function VislibRenderbotFactory(Private) {
-  var _ = require('lodash');
-  var vislib = Private(require('ui/vislib'));
-  var Renderbot = Private(require('ui/Vis/Renderbot'));
-  var buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));
+  var vislib = Private(VislibProvider);
+  var Renderbot = Private(VisRenderbotProvider);
+  var buildChartData = Private(VislibVisTypeBuildChartDataProvider);
 
   _.class(VislibRenderbot).inherits(Renderbot);
   function VislibRenderbot(vis, $el, uiState) {

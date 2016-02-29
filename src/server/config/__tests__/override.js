@@ -1,5 +1,5 @@
-var override = require('../override');
-var expect = require('expect.js');
+import override from '../override';
+import expect from 'expect.js';
 
 describe('override(target, source)', function () {
 

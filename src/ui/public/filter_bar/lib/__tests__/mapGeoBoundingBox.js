@@ -1,9 +1,10 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FilterBarLibMapGeoBoundingBoxProvider from 'ui/filter_bar/lib/mapGeoBoundingBox';
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoBoundingBox()', function () {
-    var sinon = require('auto-release-sinon');
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
     var mapGeoBoundingBox;
     var $rootScope;
 
@@ -16,7 +17,7 @@ describe('Filter Bar Directive', function () {
     ));
 
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      mapGeoBoundingBox = Private(require('ui/filter_bar/lib/mapGeoBoundingBox'));
+      mapGeoBoundingBox = Private(FilterBarLibMapGeoBoundingBoxProvider);
       $rootScope = _$rootScope_;
     }));
 

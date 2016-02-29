@@ -1,9 +1,8 @@
-let _ = require('lodash');
-let fs = require('fs');
-let yaml = require('js-yaml');
+import _ from 'lodash';
+import fs from 'fs';
+import yaml from 'js-yaml';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
+import fromRoot from '../../utils/fromRoot';
 
 let legacySettingMap = {
   // server
@@ -67,4 +66,3 @@ module.exports = function (path) {
     apply(config, val, key);
   }, {});
 };
-

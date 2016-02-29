@@ -1,12 +1,12 @@
-const cluster = require('cluster');
+import cluster from 'cluster';
 const { join } = require('path');
 const { format: formatUrl } = require('url');
-const Hapi = require('hapi');
+import Hapi from 'hapi';
 const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
 
-const Log = require('../Log');
-const Worker = require('./worker');
-const BasePathProxy = require('./base_path_proxy');
+import Log from '../Log';
+import Worker from './worker';
+import BasePathProxy from './base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -63,7 +63,13 @@ module.exports = class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
-    if (opts.watch) this.setupWatching();
+    if (opts.watch) {
+      this.setupWatching([
+        ...settings.plugins.paths,
+        ...settings.plugins.scanDirs
+      ]);
+    }
+
     else this.startCluster();
   }
 
@@ -75,10 +81,9 @@ module.exports = class ClusterManager {
     }
   }
 
-  setupWatching() {
+  setupWatching(extraPaths) {
     const chokidar = require('chokidar');
-    const utils = require('requirefrom')('src/utils');
-    const fromRoot = utils('fromRoot');
+    const fromRoot = require('../../utils/fromRoot');
 
     this.watcher = chokidar.watch([
       'src/plugins',
@@ -86,7 +91,7 @@ module.exports = class ClusterManager {
       'src/ui',
       'src/utils',
       'config',
-      'installedPlugins'
+      ...extraPaths
     ], {
       cwd: fromRoot('.'),
       ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__)[\\\/]/

@@ -1,10 +1,11 @@
+import { pluck } from 'lodash';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import moment from 'moment';
+import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 describe('ui/index_patterns/_calculate_indices', () => {
-  const _ = require('lodash');
-  const pluck = require('lodash').pluck;
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
-  const moment = require('moment');
 
   let Promise;
   let $rootScope;
@@ -36,7 +37,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
     $rootScope = $injector.get('$rootScope');
     es = $injector.get('es');
     Promise = $injector.get('Promise');
-    calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   }));
 
   function run({ start = undefined, stop = undefined } = {}) {

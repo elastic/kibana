@@ -1,6 +1,6 @@
-var diff = require('ui/utils/diff_object');
-var expect = require('expect.js');
-var _ = require('lodash');
+import diff from 'ui/utils/diff_object';
+import expect from 'expect.js';
+import _ from 'lodash';
 
 describe('ui/utils/diff_object', function () {
 
