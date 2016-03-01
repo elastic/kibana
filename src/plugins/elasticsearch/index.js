@@ -19,7 +19,7 @@ module.exports = function ({ Plugin }) {
         username: string(),
         password: string(),
         shardTimeout: number().default(0),
-        requestTimeout: number().default(300000),
+        requestTimeout: number().default(30000),
         pingTimeout: number().default(30000),
         startupTimeout: number().default(5000),
         ssl: object({
