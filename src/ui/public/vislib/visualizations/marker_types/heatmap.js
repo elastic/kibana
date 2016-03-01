@@ -199,7 +199,7 @@ define(function (require) {
           heatIntensity = feature.properties.value;
         } else {
           // show bucket value normalized to max value
-          heatIntensity = parseInt(feature.properties.value / max * 100);
+          heatIntensity = feature.properties.value / max;
         }
 
         return [lat, lng, heatIntensity];

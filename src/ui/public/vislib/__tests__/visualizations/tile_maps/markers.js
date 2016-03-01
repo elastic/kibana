@@ -301,7 +301,7 @@ describe('Marker Tests', function () {
           var arr = markerLayer._dataToHeatArray(max);
           var index = _.random(mapData.features.length - 1);
           var feature = mapData.features[index];
-          var featureValue = parseInt(feature.properties.value / max * 100);
+          var featureValue = feature.properties.value / max;
           var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });
