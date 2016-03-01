@@ -173,10 +173,9 @@ export default function HeatmapMarkerFactory(Private) {
    * returns data for data for heat map intensity
    *
    * @method _dataToHeatArray
-   * @param max {Number}
    * @return {Array}
    */
-  HeatmapMarker.prototype._dataToHeatArray = function (max) {
+  HeatmapMarker.prototype._dataToHeatArray = function () {
     var self = this;
     var scaleType = this._attr.intensityScale || 'linear';
     var features = this.geoJson.features;
