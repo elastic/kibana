@@ -138,6 +138,11 @@ The standard `npm run test` task runs several sub tasks and can take several min
     Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
     for development and fixing individual tests.
   </dd>
+  
+  <dt><code>npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin</code></dt>
+  <dd>
+    Run the tests for just your particular plugin
+  </dd>
 </dl>
 
 Distributable packages can be found in `target/` after the build completes.
