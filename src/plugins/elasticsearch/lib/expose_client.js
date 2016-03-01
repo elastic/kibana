@@ -18,6 +18,8 @@ module.exports = function (server) {
       clientKey: config.get('elasticsearch.ssl.key'),
       ca: config.get('elasticsearch.ssl.ca'),
       apiVersion: config.get('elasticsearch.apiVersion'),
+      pingTimeout: config.get('elasticsearch.pingTimeout'),
+      requestTimeout: config.get('elasticsearch.requestTimeout'),
       keepAlive: true,
       auth: true
     });
@@ -43,6 +45,8 @@ module.exports = function (server) {
       ssl: ssl,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
+      pingTimeout: options.pingTimeout,
+      requestTimeout: options.requestTimeout,
       log: function () {
         this.error = function (err) {
           server.log(['error', 'elasticsearch'], err);
