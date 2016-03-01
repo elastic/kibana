@@ -5,7 +5,6 @@ import 'ui/collapsible_sidebar';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import 'plugins/kibana/discover/controllers/discover';
 import 'plugins/kibana/discover/styles/main.less';
-import 'ui/doc_table/components/table_row';
 import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
 
 // preload
