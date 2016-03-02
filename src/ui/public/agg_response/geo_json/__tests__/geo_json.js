@@ -38,7 +38,7 @@ describe('GeoJson Agg Response Converter', function () {
 
     aggs = {
       metric: vis.aggs[0],
-      geo: vis.aggs[2]
+      geo: vis.aggs[1]
     };
   }));
 

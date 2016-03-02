@@ -47,16 +47,18 @@ export default function GeoHashGridAggResponseFixture() {
       };
     });
 
-    return {
-      key: 'tag ' + (i + 1),
-      doc_count: docCount,
-      3: {
-        buckets: buckets
-      },
-      1: {
-        value: 1000 + i
-      }
-    };
+    return tags;
+
+    //return {
+      // key: 'tag ' + (i + 1),
+      //doc_count: docCount,
+      // 3: {
+      //   buckets: buckets
+      // },
+      // 1: {
+      //   value: 1000 + i
+      // }
+    //};
   });
 
   return {
