@@ -45,7 +45,7 @@ describe('GeoJson Agg Response Converter', function () {
   [ { asAggConfigResults: true }, { asAggConfigResults: false } ].forEach(function (tableOpts) {
 
     function makeTable() {
-      return _.sample(_.sample(tabify(vis, esResponse, tableOpts).tables).tables);
+      return _.sample(tabify(vis, esResponse, tableOpts).tables);
     }
 
     function makeSingleChart(table) {
