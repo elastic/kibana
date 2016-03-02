@@ -328,9 +328,12 @@ describe('Marker Tests', function () {
 
     describe('dataToHeatArray', function () {
       it('should return an array or values for each feature', function () {
-        var arr = markerLayer._dataToHeatArray();
-        expect(arr).to.be.an('array');
-        expect(arr).to.have.length(mapData.features.length);
+        var arrs = markerLayer._dataToHeatArray();
+        expect(arrs).to.be.an('array');
+        expect(arrs).to.have.length(mapData.features.length);
+        arrs.forEach(function (arr) {
+          expect(arr).to.have.length(3); // [lat, lon, heatIntensity]
+        });
       });
     });
 
