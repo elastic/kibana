@@ -70,15 +70,23 @@
   cursor: pointer;
 }
 
-.chart-container {
-  display: inline-block;
-  cursor: pointer;
-  position: relative;
-  box-sizing: border-box;
-  border: 2px dashed transparent;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-  margin-bottom: 10px;
+.chart {
+  &-container {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    box-sizing: border-box;
+    border: 2px dashed transparent;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    margin-bottom: 10px;
+  }
+
+  &-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+  }
 }
 
 .chart-container.active {

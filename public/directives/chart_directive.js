@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
+var appendTitle = require('./lib/append_title');
 
 require('flot');
 require('flotTime');
@@ -10,6 +11,7 @@ require('flotSelection');
 require('flotSymbol');
 
 var app = require('ui/modules').get('apps/timelion', []);
+var template = '<div class="chart-title"></div><div class="chart-canvas"></div>';
 
 app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Private) {
   return {
@@ -90,7 +92,6 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         $rootScope.$broadcast('timelionPlotHover', event, pos, item);
       });
 
-
       $elem.on('plotselected', function (event, ranges) {
         timefilter.time.from = moment(ranges.xaxis.from);
         timefilter.time.to = moment(ranges.xaxis.to);
@@ -140,9 +141,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
 
           // Nearest point
           for (j = 0; j < series.data.length; ++j) {
-            if (series.data[j][0] > pos.x) {
-              break;
-            }
+            if (series.data[j][0] > pos.x) break;
           }
 
           var y;
@@ -174,8 +173,15 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
           return;
         }
 
+        if (!$('.chart-canvas', $elem).length) $elem.html(template);
+        var canvasElem = $('.chart-canvas', $elem);
+        canvasElem.height($elem.height());
+
+        var title = _(plotConfig).map('_title').compact().last();
+        appendTitle($elem, title);
+
         var options = _.cloneDeep(defaultOptions);
-        var series = _.map($scope.chart, function (series, index) {
+        var series = _.map(plotConfig, function (series, index) {
           series = _.cloneDeep(_.defaults(series, {
             shadowSize: 0,
             lines: {
@@ -183,11 +189,13 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
             }
           }));
           series._id = index;
+
           if (series._hide) {
             series.data = [];
             //series.color = "#ddd";
             series.label = '(hidden) ' + series.label;
           }
+
           if (series._global) {
             _.merge(options, series._global);
           }
@@ -195,13 +203,13 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
           return series;
         });
 
-        $scope.plot = $.plot($elem, _.compact(series), options);
+        $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
         legendScope.$destroy();
         legendScope = $scope.$new();
         // Used to toggle the series, and for displaying values on hover
-        legendValueNumbers = $elem.find('.ngLegendValueNumber');
-        _.each($elem.find('.ngLegendValue'), function (elem) {
+        legendValueNumbers = canvasElem.find('.ngLegendValueNumber');
+        _.each(canvasElem.find('.ngLegendValue'), function (elem) {
           $compile(elem)(legendScope);
         });
       }
