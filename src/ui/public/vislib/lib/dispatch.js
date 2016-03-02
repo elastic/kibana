@@ -230,7 +230,7 @@ export default function DispatchClass(Private) {
   Dispatch.prototype.highlightLegend = function (element) {
     var label = this.getAttribute('data-label');
     if (!label) return;
-    $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
+    $('[data-label]', element.parentNode).not(function (els, el) { return $(el).data('label') !== label;}).css('opacity', 0.5);
   };
 
   /**
