@@ -1,5 +1,5 @@
 <div class="timelion" ng-controller="timelion">
-  <navbar class="timelion-navbar" scroll-class="timelion-scroll-class-header" scroll-limit=45>
+  <navbar class="timelion-navbar" scroll-class="timelion-scroll-class-header" scroll-limit=45 ng-show="chrome.getVisible()">
     <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
       <div class="typeahead">
         <div class="input-group"
