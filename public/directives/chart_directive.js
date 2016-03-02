@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
-var appendTitle = require('./lib/append_title');
 
 require('flot');
 require('flotTime');
@@ -179,7 +178,9 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         var canvasElem = $('.chart-canvas', $elem);
 
         var title = _(plotConfig).map('_title').compact().last();
-        appendTitle($elem, title);
+        $('.chart-title', $elem)
+          .height(title ? 9 : 0)
+          .text(title == null ? '' : title);
 
         var options = _.cloneDeep(defaultOptions);
         var series = _.map(plotConfig, function (series, index) {

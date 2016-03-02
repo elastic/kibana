@@ -249,6 +249,13 @@ alpha | *number* | *no help available*
 beta | *number* | *no help available*  
 gamma | *number* | *no help available*  
 
+#### .title()
+Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.
+
+Argument | Accepts | Description
+--- | --- | ---
+title | *string* | Title for the plot.  
+
 #### .yaxis()
 This is an internal function that simply returns the input series. Don't use this
 
