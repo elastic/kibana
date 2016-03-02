@@ -164,7 +164,7 @@ app.directive('timelionExpression', function ($compile, $http, $timeout, $rootSc
             if ($scope.suggestions.list.length) {
               $scope.completeExpression($scope.suggestions.selected);
             } else {
-              $scope.search();
+              $elem.submit();
             }
             break;
           case keys.ESC:

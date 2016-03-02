@@ -1,11 +1,19 @@
 @import "~ui/styles/variables.less";
 @import (reference) "~ui/styles/mixins";
+@import './chart.less';
+@import './suggestions.less';
+
 
 [chart] {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.suggestions {
+  position: absolute;
+  top: 30px;
 }
 
 .timelion {
@@ -70,20 +78,6 @@
 
 [ng-click] {
   cursor: pointer;
-}
-
-.chart {
-  &-title {
-    flex: 0;
-    text-align: center;
-    font-weight: bold;
-    font-size: 11px;
-  }
-
-  &-canvas {
-    min-width: 100%;
-    flex: 1;
-  }
 }
 
 .chart-container {
@@ -152,44 +146,6 @@ input.timelion-interval {
   border-right: 0px;
   border-left: 0px;
   text-align: center;
-}
-
-.suggestions {
-  position: absolute;
-  top: 30px;
-  left: 0;
-  width: 100% !important;
-  background-color: @body-bg;
-  color: @text-color;
-  border: 1px solid @input-border;
-  border-top: 2px solid @input-border;
-  border-radius: 0px 0px @border-radius-base @border-radius-base !important;
-  z-index: 10000;
-  max-height: 378px; // 5 suggestions
-  overflow-y: auto;
-
-  .suggestion {
-    border-bottom: 1px solid @gray-lighter;
-    padding: 5px 20px;
-
-    &-details {
-      background-color: @body-bg;
-      padding: 10px;
-      border-radius: @border-radius-base;
-
-      > table {
-        margin-bottom: 0px;
-      }
-    }
-
-    &:hover {
-      background-color: @gray-lighter;
-    }
-
-    &.active {
-      background-color: @gray-lighter;
-    }
-  }
 }
 
 div.doc-container {

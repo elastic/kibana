@@ -3,12 +3,12 @@ var logoUrl = require('./logo.png');
 
 require('angularSortableView');
 
-require('./directives/chart_directive');
-require('./directives/expression_directive');
-require('./directives/scroll_class');
-require('./directives/timelion_grid');
-require('./directives/docs');
-require('./main.less');
+require('plugins/timelion/directives/chart_directive');
+require('plugins/timelion/directives/expression_directive');
+require('plugins/timelion/directives/scroll_class');
+require('plugins/timelion/directives/timelion_grid');
+require('plugins/timelion/directives/docs');
+require('plugins/timelion/app.less');
 
 var timelionLogo = require('plugins/timelion/header.png');
 document.title = 'Timelion - Kibana';

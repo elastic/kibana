@@ -1,6 +1,11 @@
-<div class="markdown-vis-options form-group">
-  <div>
-    <label>Timelion Expression</label>
+<div class="form-group" ng-controller="TimelionVisParamsController">
+  <div class="timelion-vis-editor-expression">
+    <div>
+      <label>Timelion Expression</label>
+    </div>
+    <textarea
+      ng-model="vis.params.expression" class="form-control" timelion-expression="{{vis.params.expression}}"
+      rows="5"></textarea>
   </div>
-  <textarea ng-model="vis.params.expression" class="form-control" rows="20"></textarea>
+
 </div>

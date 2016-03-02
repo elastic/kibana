@@ -1,4 +1,7 @@
 @import (reference) "~ui/styles/mixins.less";
+@import '../chart.less';
+@import '../suggestions.less';
+
 
 .timelion-vis {
   min-width: 100%;
@@ -11,18 +14,12 @@
     display: flex;
     flex-direction: column;
   }
-}
 
-.chart {
-  &-title {
-    flex: 0;
-    text-align: center;
-    font-weight: bold;
-    font-size: 11px;
-  }
+  &-editor-expression {
+    position: relative;
 
-  &-canvas {
-    min-width: 100%;
-    flex: 1;
+    .suggestions {
+      position: absolute;
+    }
   }
 }

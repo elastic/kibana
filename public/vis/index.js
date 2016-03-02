@@ -1,6 +1,7 @@
 define(function (require) {
   // we also need to load the controller and used by the template
   require('plugins/timelion/vis/timelion_vis_controller');
+  require('plugins/timelion/vis/timelion_vis_params_controller');
 
   // Stylin
   require('plugins/timelion/vis/timelion_vis.less');
