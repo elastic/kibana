@@ -10,7 +10,7 @@ Timelion pronounced time-lion, not time-leon, brings together totally independen
 
 Timelion makes all that possible, and more. Timelion is an Elastic {Re}search project into time series, but its more than just an experiment: Its completely usable. By you. Right now.
 
-Installation:
+### Installation
 - Run this, bounce the Kibana server. and refresh your browser: `./bin/kibana plugin -i kibana/timelion`
 - **Timelion requires the latest version of Kibana.** Always. What does that mean? I means if a beta version of kibana 9.2.1492 comes out, you'll need to install the latest version of Kibana to install Timelion.
 - **You can not install from the archives that github provides**. They are not built versions, they won't work, use the command above.
