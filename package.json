@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "5.0.0-snapshot",
+  "version": "5.0.0-reskin-snapshot",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -139,13 +139,14 @@
     "wreck": "6.2.0"
   },
   "devDependencies": {
+    "@elastic/eslint-config-kibana": "0.0.2",
     "Nonsense": "0.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
-    "babel-eslint": "4.1.7",
+    "babel-eslint": "4.1.8",
     "chokidar": "1.0.5",
-    "eslint": "1.5.1",
-    "eslint-plugin-mocha": "1.0.0",
+    "eslint": "1.10.3",
+    "eslint-plugin-mocha": "1.1.0",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
     "glob": "4.5.3",
@@ -186,7 +187,7 @@
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "4.2.4",
+    "node": "4.3.0",
     "npm": "2.14.15"
   }
 }

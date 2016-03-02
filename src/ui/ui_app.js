@@ -7,7 +7,6 @@ class UiApp {
 
     this.id = this.spec.id;
     if (!this.id) {
-      console.log('-----------Spec Without ID:', this.spec);
       throw new Error('Every app must specify it\'s id');
     }
 
@@ -51,7 +50,7 @@ class UiApp {
   getModules() {
     return chain([
       this.uiExports.find(get(this, 'spec.uses', [])),
-      this.uiExports.find(['chromeNavControls', 'sledgehammers']),
+      this.uiExports.find(['chromeNavControls', 'hacks']),
     ])
     .flatten()
     .uniq()

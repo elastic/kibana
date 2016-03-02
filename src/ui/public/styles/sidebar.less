@@ -11,8 +11,26 @@
   .sidebar-well {
     background-color: @sidebar-well-bg;
   }
+  .vis-editor-agg-header-controls {
+    .btn-primary {
+        &.disabled,
+        &[disabled] {
+          background-color: @kibanaGray4;
+        }
+    }
+  }
 
   .sidebar-list {
+    .navbar-nav.navbar-right {
+      border-radius: 4px;
+      overflow:hidden;
+      margin-right: -13px;
+      margin-top: 2px;
+      .navbar-btn-link {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
     ul {
       list-style: none;
       margin-bottom: 0px;
@@ -58,12 +76,6 @@
         &.full-title {
           white-space: normal;
         }
-
-        &:hover,
-        &:hover .text-muted {
-          color: @sidebar-hover-color;
-          background-color: @sidebar-hover-bg;
-        }
       }
 
       &-text {
@@ -81,7 +93,7 @@
 
         &.primary {
           background-color: @btn-primary-bg;
-          color: @btn-primary-color
+          color: @btn-primary-color;
         }
 
         &.info {
@@ -127,6 +139,8 @@
     padding: 5px 10px;
     display: flex;
     justify-content: space-between;
+    background-color: @kibanaGray4;
+    line-height: 28px;
 
     > * {
       flex: 0 1 auto;

@@ -7,7 +7,7 @@ html,
 body {
   .flex-parent();
   height: 100%;
-  margin: 0px;
+  margin: 0;
 }
 
 label > small {
@@ -140,6 +140,8 @@ a {
     z-index: 0;
   }
 
+  > navbar:first-child { padding-bottom: 0; }
+
   > config {
     z-index: 1;
   }
@@ -162,6 +164,7 @@ a {
     &:not(.pull-right):first-child {
       // This is how .navbar-brand accomplishes it's solid placement
       margin-left: -15px;
+      margin-top: 4px;
     }
   }
 }
@@ -197,6 +200,11 @@ a {
   .fa {
     font-size: 16px;
     vertical-align: middle;
+  }
+
+  button {
+    background-color: transparent;
+    border-radius: 0;
   }
 }
 

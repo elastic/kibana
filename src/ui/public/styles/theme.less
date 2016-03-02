@@ -16,8 +16,39 @@
 .navbar {
   border-width: 0;
 
+  &-static-top {
+    background-color: @kibanaGray5;
+    color: @kibanaGray2;
+    .navbar-brand:hover,
+    .navbar-brand {
+      float: none;
+      color: @kibanaGray2;
+      font-size: 1em;
+      background-color: transparent;
+      padding-top: 8px;
+      height: 35px;
+    }
+    .navbar-nav {
+
+      > li > a {
+        color: @kibanaGray2;
+        font-size: 1.5em;
+        padding: 5px 0 6px 0;
+        margin: 0 10px;
+      }
+      // Active, hover state for the getTabs
+      > .active > a,
+      > .active > a:hover,
+      > .active > a:active,
+      > li > a:active,
+      > li > a:hover {
+        color: @kibanaGray1;
+        background-color: transparent;
+        border-bottom: 2px solid @kibanaGray1;
+      }
+    }
+  }
   &-btn-link {
-    height: @navbar-height;
     margin: 0;
     border-radius: 0;
 
@@ -54,34 +85,13 @@
   }
 
   .navbar-nav > .active > a {
-    border-bottom-color: @navbar-nav-active-link-border;
-
-    // navbar active arrow base styles
-    &:before {
-      content: "";
-      display: inline-block;
-      position: absolute;
-      border: @navbar-arrow-size solid transparent;
-      border-bottom-color: inherit;
-      top: (@navbar-height - @navbar-arrow-size*2);
-      left: 0;
-      right: 0;
-      margin: 0 auto;
-      width: 0;
-      height: 0;
-    }
-
-    @media (max-width: @screen-sm-min) {
-      &:before {
-        display: none !important;
-      }
-    }
+    border-bottom-color: @kibanaGray2;
+    background-color: transparent;
   }
 
   &-brand {
     cursor: default;
     font-size: 1.8em;
-    background-color: @navbar-inverse-brand-bg;
     user-select: none;
   }
 

@@ -11,7 +11,7 @@
     ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
     class="visualize-chart"></div>
-  <visualize-legend></visualize-legend>
+  <visualize-legend ng-show="vis.params.addLegend"></visualize-legend>
 </div>
 <!-- <pre>{{chartData | json}}</pre> -->
 <visualize-spy ng-if="vis.type.requiresSearch && showSpyPanel"></visualize-spy>

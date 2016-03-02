@@ -6,13 +6,6 @@
   <div class="vis-editor-agg-group" ng-class="groupName">
     <!-- wrapper needed for nesting-indicator -->
     <div ng-repeat="agg in group" class="vis-editor-agg-wrapper">
-      <nesting-indicator
-        ng-if="groupName === 'buckets'"
-        item="agg"
-        index="$index"
-        list="group">
-      </nesting-indicator>
-
       <!-- agg.html - controls for aggregation -->
       <ng-form vis-editor-agg name="aggForm" class="vis-editor-agg"></ng-form>
     </div>

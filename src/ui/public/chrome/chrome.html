@@ -47,7 +47,7 @@
       <kbn-notifications list="notifList"></kbn-notifications>
       <nav
         ng-style="::{ background: chrome.getNavBackground() }"
-        ng-class="{ show: chrome.getVisible() }"
+        ng-class="{ show: chrome.getTabs().length > 0 }"
         class="hide navbar navbar-inverse navbar-static-top">
 
         <!-- Mobile navbar -->
@@ -61,16 +61,15 @@
           <span class="visible-xs">
             <span ng-if="chrome.getBrand('title')" class="navbar-brand">{{ chrome.getBrand('title') }}</span>
             <span ng-if="chrome.getActiveTabTitle()" class="navbar-brand">{{ chrome.getActiveTabTitle() }}</span>
-            <span ng-show="chrome.httpActive.length" class="spinner"></span>
           </span>
         </div>
         <!-- /Mobile navbar -->
 
         <!-- Full navbar -->
         <div collapse="!showCollapsed" class="navbar-collapse" kbn-chrome-append-nav-controls>
+          <div ng-if="chrome.getBrand('title')" class="navbar-brand">{{ chrome.getBrand('title') }}</div>
           <ul class="nav navbar-nav" role="navigation">
 
-            <li ng-if="chrome.getBrand('title')" class="navbar-brand">{{ chrome.getBrand('title') }}</li>
 
             <li ng-repeat="tab in chrome.getTabs()" ng-class="{ active: tab.active }">
               <a ng-href="{{ tab.href() }}" ng-style="{ 'border-bottom-color': tab.activeIndicatorColor }">
@@ -81,14 +80,6 @@
         </div>
         <!-- /Full navbar -->
       </nav>
-
-      <config
-        ng-show="timefilter.enabled"
-        config-template="pickerTemplate"
-        config-object="timefilter"
-        config-close="pickerTemplate.close">
-      </config>
-
       <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-') + ' ' + chrome.getApplicationClasses()" ng-view></div>
     </div>
   </div>
