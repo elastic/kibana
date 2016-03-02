@@ -19,6 +19,8 @@ module.exports = function (server) {
       clientKey: config.get('elasticsearch.ssl.key'),
       ca: config.get('elasticsearch.ssl.ca'),
       apiVersion: config.get('elasticsearch.apiVersion'),
+      pingTimeout: config.get('elasticsearch.pingTimeout'),
+      requestTimeout: config.get('elasticsearch.requestTimeout'),
       keepAlive: true,
       auth: true
     });
@@ -45,6 +47,8 @@ module.exports = function (server) {
       plugins: options.plugins,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
+      pingTimeout: options.pingTimeout,
+      requestTimeout: options.requestTimeout,
       defer: function () {
         return Bluebird.defer();
       },
