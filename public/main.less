@@ -4,6 +4,8 @@
 [chart] {
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .timelion {
@@ -71,26 +73,32 @@
 }
 
 .chart {
-  &-container {
-    display: inline-block;
-    cursor: pointer;
-    position: relative;
-    box-sizing: border-box;
-    border: 2px dashed transparent;
-    padding-left: 0px !important;
-    padding-right: 0px !important;
-    margin-bottom: 10px;
-  }
-
   &-title {
+    flex: 0;
     text-align: center;
     font-weight: bold;
     font-size: 11px;
   }
+
+  &-canvas {
+    min-width: 100%;
+    flex: 1;
+  }
 }
 
-.chart-container.active {
-  border-color: #ccc;
+.chart-container {
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  border: 2px dashed transparent;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  margin-bottom: 10px;
+
+  &.active {
+    border-color: #ccc;
+  }
 }
 
 navbar.timelion-navbar .form-control:focus {

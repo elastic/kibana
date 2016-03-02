@@ -177,7 +177,6 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
 
         if (!$('.chart-canvas', $elem).length) $elem.html(template);
         var canvasElem = $('.chart-canvas', $elem);
-        canvasElem.height($elem.height());
 
         var title = _(plotConfig).map('_title').compact().last();
         appendTitle($elem, title);

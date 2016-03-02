@@ -7,11 +7,9 @@ module.exports = function appendTitle($elem, title) {
 
   if (title) {
     titleElem.height(titleSize);
-    canvasElem.height($elem.height() - titleSize);
     titleElem.text(title);
   } else {
     titleElem.height(0);
-    canvasElem.height($elem.height());
     titleElem.text(null);
   }
 };
