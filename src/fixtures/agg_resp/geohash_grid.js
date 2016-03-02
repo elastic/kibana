@@ -47,7 +47,7 @@ export default function GeoHashGridAggResponseFixture() {
       };
     });
 
-    return tags;
+    return buckets;
 
     //return {
       // key: 'tag ' + (i + 1),
