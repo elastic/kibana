@@ -178,9 +178,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         var canvasElem = $('.chart-canvas', $elem);
 
         var title = _(plotConfig).map('_title').compact().last();
-        $('.chart-title', $elem)
-          .height(title ? 9 : 0)
-          .text(title == null ? '' : title);
+        $('.chart-title', $elem).text(title == null ? '' : title);
 
         var options = _.cloneDeep(defaultOptions);
         var series = _.map(plotConfig, function (series, index) {
