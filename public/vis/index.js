@@ -18,7 +18,8 @@ define(function (require) {
       name: 'timelion',
       title: 'Timeseries',
       icon: 'fa-clock-o',
-      description: 'Create timeseries charts using the timelion expression language',
+      description: 'Create timeseries charts using the timelion expression language. ' +
+        'Perfect for computing and combining timeseries set with functions suchs as derivatives and moving averages',
       template: require('plugins/timelion/vis/timelion_vis.html'),
       params: {
         editor: require('plugins/timelion/vis/timelion_vis_params.html')
