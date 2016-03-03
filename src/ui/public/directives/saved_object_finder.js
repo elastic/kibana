@@ -56,9 +56,9 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       self.isAscending = true;
 
       /**
-       * [sortHits description]
-       * @param  {[type]} hits [description]
-       * @return {[type]}      [description]
+       * Sorts saved object finder hits either ascending or descending
+       * @param  {Array} hits Array of saved finder object hits
+       * @return {Array} Array sorted either ascending or descending
        */
       self.sortHits = function (hits) {
         self.isAscending = !self.isAscending;
