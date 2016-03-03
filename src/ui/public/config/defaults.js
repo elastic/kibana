@@ -33,7 +33,7 @@ define(function (require) {
         type: 'json',
         value:
           '[\n' +
-          '  ["", "hh:mm:ss.SSS"],\n' +
+          '  ["", "HH:mm:ss.SSS"],\n' +
           '  ["PT1S", "HH:mm:ss"],\n' +
           '  ["PT1M", "HH:mm"],\n' +
           '  ["PT1H",\n' +
