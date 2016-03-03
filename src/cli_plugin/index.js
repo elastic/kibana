@@ -2,4 +2,4 @@
 // before calling babel/register
 const babelOptions = require('../optimize/babelOptions').node;
 require('babel/register')(babelOptions);
-require('./plugin');
+require('./cli');

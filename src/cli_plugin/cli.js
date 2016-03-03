@@ -1,10 +1,9 @@
 import _ from 'lodash';
-
-import pkg from '../utils/package_json';
-import Command from './command';
+import pkg from '../utils/packageJson';
+import Command from '../cli/Command';
 
 let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-let program = new Command('bin/kibana');
+let program = new Command('bin/kibana-plugin');
 
 program
 .version(pkg.version)
@@ -13,8 +12,9 @@ program
   'based analytics and search dashboard for Elasticsearch.'
 );
 
-// attach commands
-require('./serve/serve')(program);
+require('./list')(program);
+require('./install')(program);
+require('./remove')(program);
 
 program
 .command('help <command>')
@@ -33,13 +33,8 @@ program
 
 // check for no command name
 var subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
-
 if (!subCommand) {
-  if (_.intersection(argv.slice(2), ['-h', '--help']).length) {
-    program.defaultHelp();
-  } else {
-    argv.splice(2, 0, ['serve']);
-  }
+  program.defaultHelp();
 }
 
 program.parse(argv);
