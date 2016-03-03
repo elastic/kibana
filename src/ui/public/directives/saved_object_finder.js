@@ -48,20 +48,30 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       filterResults();
 
-      self.isSorted = true;
+      /**
+       * Boolean that keeps track of whether hits are sorted ascending (true)
+       * or descending (false) by title
+       * @type {Boolean}
+       */
+      self.isAscending = true;
 
-      self.sortHits = function () {
-        self.isSorted = !self.isSorted;
+      /**
+       * [sortHits description]
+       * @param  {[type]} hits [description]
+       * @return {[type]}      [description]
+       */
+      self.sortHits = function (hits) {
+        self.isAscending = !self.isAscending;
 
-        if (self.hits.length) {
-          if (self.isSorted) {
-            self.hits = self.hits.sort(function (a, b) {
+        if (hits.length) {
+          if (self.isAscending) {
+            return hits.sort(function (a, b) {
               if (a.title > b.title) return 1;
               if (a.title < b.title) return -1;
               return 0;
             });
           } else {
-            self.hits = self.hits.sort(function (a, b) {
+            return hits.sort(function (a, b) {
               if (a.title < b.title) return 1;
               if (a.title > b.title) return -1;
               return 0;

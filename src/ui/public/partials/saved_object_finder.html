@@ -34,10 +34,10 @@
           Name
           <i
             class="fa"
-            ng-click="finder.sortHits()"
+            ng-click="finder.sortHits(finder.hits)"
             ng-class="{
-              'fa-caret-up': finder.isSorted === true,
-              'fa-caret-down': finder.isSorted === false,
+              'fa-caret-up': finder.isAscending === true,
+              'fa-caret-down': finder.isAscending === false,
             }">
           </i>
         </li>
