@@ -56,24 +56,14 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         if (self.hits.length) {
           if (self.isSorted) {
             self.hits = self.hits.sort(function (a, b) {
-              if (a.title > b.title) {
-                return 1;
-              }
-              if (a.title < b.title) {
-                return -1;
-              }
-              // a must be equal to b
+              if (a.title > b.title) return 1;
+              if (a.title < b.title) return -1;
               return 0;
             });
           } else {
             self.hits = self.hits.sort(function (a, b) {
-              if (a.title < b.title) {
-                return 1;
-              }
-              if (a.title > b.title) {
-                return -1;
-              }
-              // a must be equal to b
+              if (a.title < b.title) return 1;
+              if (a.title > b.title) return -1;
               return 0;
             });
           }
