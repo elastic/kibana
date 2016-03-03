@@ -1,23 +1,19 @@
 import fs from 'fs';
 import rimraf from 'rimraf';
 
-module.exports = {
-  remove: remove
-};
-
-function remove(settings, logger) {
+export default function remove(settings, logger) {
   try {
     try {
       fs.statSync(settings.pluginPath);
     } catch (e) {
-      logger.log(`Plugin ${settings.package} does not exist`);
+      logger.log(`Plugin ${settings.plugin} is not installed`);
       return;
     }
 
-    logger.log(`Removing ${settings.package}...`);
+    logger.log(`Removing ${settings.plugin}...`);
     rimraf.sync(settings.pluginPath);
   } catch (err) {
-    logger.error(`Unable to remove plugin "${settings.package}" because of error: "${err.message}"`);
+    logger.error(`Unable to remove plugin "${settings.plugin}" because of error: "${err.message}"`);
     process.exit(74); // eslint-disable-line no-process-exit
   }
 }
