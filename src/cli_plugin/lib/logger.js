@@ -1,44 +1,45 @@
-export default function createPluginLogger(settings) {
-  let previousLineEnded = true;
-  const silent = !!settings.silent;
-  const quiet = !!settings.quiet;
+export default function Logger(settings) {
+  const self = this;
 
-  function log(data, sameLine) {
-    if (silent || quiet) return;
+  self.previousLineEnded = true;
+  self.silent = !!settings.silent;
+  self.quiet = !!settings.quiet;
+}
 
-    if (!sameLine && !previousLineEnded) {
-      process.stdout.write('\n');
-    }
+Logger.prototype.log = function (data, sameLine) {
+  const self = this;
 
-    //if data is a stream, pipe it.
-    if (data.readable) {
-      data.pipe(process.stdout);
-      return;
-    }
+  if (self.silent || self.quiet) return;
 
-    process.stdout.write(data);
-    if (!sameLine) process.stdout.write('\n');
-    previousLineEnded = !sameLine;
+  if (!sameLine && !self.previousLineEnded) {
+    process.stdout.write('\n');
   }
 
-  function error(data) {
-    if (silent) return;
-
-    if (!previousLineEnded) {
-      process.stderr.write('\n');
-    }
-
-    //if data is a stream, pipe it.
-    if (data.readable) {
-      data.pipe(process.stderr);
-      return;
-    }
-    process.stderr.write(`${data}\n`);
-    previousLineEnded = true;
+  //if data is a stream, pipe it.
+  if (data.readable) {
+    data.pipe(process.stdout);
+    return;
   }
 
-  return {
-    log: log,
-    error: error
-  };
+  process.stdout.write(data);
+  if (!sameLine) process.stdout.write('\n');
+  self.previousLineEnded = !sameLine;
+};
+
+Logger.prototype.error = function (data) {
+  const self = this;
+
+  if (self.silent) return;
+
+  if (!self.previousLineEnded) {
+    process.stderr.write('\n');
+  }
+
+  //if data is a stream, pipe it.
+  if (data.readable) {
+    data.pipe(process.stderr);
+    return;
+  }
+  process.stderr.write(`${data}\n`);
+  self.previousLineEnded = true;
 };
