@@ -13,7 +13,7 @@
 
         <!-- tabs -->
         <ul class="nav navbar-nav">
-          <li ng-class="{active: sidebar.section == 'data'}" ng-show="vis.type.schemas.metrics">
+          <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
             <a class="navbar-link active" ng-click="sidebar.section='data'">Data</a>
           </li>
           <li ng-class="{active: sidebar.section == 'options'}">
@@ -60,10 +60,9 @@
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'options'">
       <!-- vis options -->
-      <vis-editor-vis-options vis="vis"></vis-editor-vis-options>
+      <vis-editor-vis-options vis="vis" saved-vis="savedVis"></vis-editor-vis-options>
     </div>
 
 
   </form>
 </div>
-

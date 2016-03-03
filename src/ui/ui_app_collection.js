@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import UiApp from './ui_app';
-let Collection = require('requirefrom')('src')('utils/Collection');
+import Collection from '../utils/Collection';
 
 let byIdCache = Symbol('byId');
 
