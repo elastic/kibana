@@ -32,8 +32,14 @@
         <li class="list-type table-type-label" ng-show="finder.properties.noun === 'Visualization'">Type</li>
         <li class="list-name table-label">
           Name
-          <!-- <span class="fa fa-caret-up"></span> -->
-          <span class="fa fa-caret-down"></span>
+          <i
+            class="fa"
+            ng-click="finder.sort()"
+            ng-class="{
+              'fa-caret-down': finder.isSorted === true,
+              'fa-caret-up': finder.isSorted === false,
+            }">
+          </i>
         </li>
       </ul>
     </li>
@@ -41,7 +47,7 @@
     <li
       class="list-body list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
-      ng-repeat="hit in page"
+      ng-repeat="hit in page | orderBy : '' : !self.isSorted"
       ng-keydown="finder.hitKeyDown($event, page, paginate)"
       ng-click="finder.onChoose(hit, $event)">
 

@@ -48,6 +48,11 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       filterResults();
 
+      self.isSorted = true;
+      self.sort = function () {
+        self.isSorted = !self.isSorted;
+      };
+
       /**
        * Passed the hit objects and will determine if the
        * hit should have a url in the UI, returns it if so
