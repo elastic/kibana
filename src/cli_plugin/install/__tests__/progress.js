@@ -1,23 +1,22 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import progressReporter from '../progress_reporter';
-import pluginLogger from '../plugin_logger';
+import Progress from '../progress';
+import Logger from '../../lib/logger';
 
 describe('kibana cli', function () {
 
   describe('plugin installer', function () {
 
     describe('progressReporter', function () {
-
       let logger;
       let progress;
       let request;
 
       beforeEach(function () {
-        logger = pluginLogger({ silent: false, quiet: false });
+        logger = new Logger({ silent: false, quiet: false });
         sinon.stub(logger, 'log');
         sinon.stub(logger, 'error');
-        progress = progressReporter(logger);
+        progress = new Progress(logger);
       });
 
       afterEach(function () {

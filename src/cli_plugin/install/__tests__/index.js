@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import plugin from '../plugin';
+import index from '../index';
 
 describe('kibana cli', function () {
 
@@ -18,8 +18,8 @@ describe('kibana cli', function () {
       it('should define the command', function () {
         sinon.spy(program, 'command');
 
-        plugin(program);
-        expect(program.command.calledWith('plugin')).to.be(true);
+        index(program);
+        expect(program.command.calledWith('install <plugin/url>')).to.be(true);
 
         program.command.restore();
       });
@@ -27,8 +27,8 @@ describe('kibana cli', function () {
       it('should define the description', function () {
         sinon.spy(program, 'description');
 
-        plugin(program);
-        expect(program.description.calledWith('Maintain Plugins')).to.be(true);
+        index(program);
+        expect(program.description.calledWith('Install a plugin')).to.be(true);
 
         program.description.restore();
       });
@@ -37,14 +37,14 @@ describe('kibana cli', function () {
         const spy = sinon.spy(program, 'option');
 
         const options = [
-          /-i/,
-          /-r/,
+          /-q/,
           /-s/,
-          /-u/,
-          /-t/
+          /-c/,
+          /-t/,
+          /-d/
         ];
 
-        plugin(program);
+        index(program);
 
         for (let i = 0; i < spy.callCount; i++) {
           const call = spy.getCall(i);
@@ -63,7 +63,7 @@ describe('kibana cli', function () {
       it('should call the action function', function () {
         sinon.spy(program, 'action');
 
-        plugin(program);
+        index(program);
         expect(program.action.calledOnce).to.be(true);
 
         program.action.restore();

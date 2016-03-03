@@ -1,114 +1,48 @@
 import expiry from 'expiry-js';
 import { intersection } from 'lodash';
 import { resolve } from 'path';
+import { arch, platform } from 'os';
 
-export default function createSettingParser(options) {
-  function parseMilliseconds(val) {
-    let result;
+function generateUrls(settings) {
+  const { version, plugin } = settings;
+  return [
+    plugin,
+    `https://download.elastic.co/packs/${plugin}/${plugin}-${version}.zip`
+  ];
+}
 
-    try {
-      let timeVal = expiry(val);
-      result = timeVal.asMilliseconds();
-    } catch (ex) {
-      result = 0;
-    }
+export function parseMilliseconds(val) {
+  let result;
 
-    return result;
+  try {
+    let timeVal = expiry(val);
+    result = timeVal.asMilliseconds();
+  } catch (ex) {
+    result = 0;
   }
 
-  function generateDownloadUrl(settings) {
-    const version = (settings.version) || 'latest';
-    const filename = settings.package + '-' + version + '.tar.gz';
+  return result;
+};
 
-    return 'https://download.elastic.co/' + settings.organization + '/' + settings.package + '/' + filename;
-  }
-
-  function areMultipleOptionsChosen(options, choices) {
-    return intersection(Object.keys(options), choices).length > 1;
-  }
-
-  function parse() {
-    let parts;
-    let settings = {
-      timeout: 0,
-      silent: false,
-      quiet: false,
-      urls: []
-    };
-
-    if (options.timeout) {
-      settings.timeout = options.timeout;
-    }
-
-    if (options.parent && options.parent.quiet) {
-      settings.quiet = options.parent.quiet;
-    }
-
-    if (options.silent) {
-      settings.silent = options.silent;
-    }
-
-    if (options.url) {
-      settings.urls.push(options.url);
-    }
-
-    if (options.config) {
-      settings.config = options.config;
-    }
-
-    if (options.install) {
-      settings.action = 'install';
-      parts = options.install.split('/');
-
-      if (options.url) {
-        if (parts.length !== 1) {
-          throw new Error('Invalid install option. When providing a url, please use the format <plugin>.');
-        }
-
-        settings.package = parts.shift();
-      } else {
-        if (parts.length < 2 || parts.length > 3) {
-          throw new Error('Invalid install option. Please use the format <org>/<plugin>/<version>.');
-        }
-
-        settings.organization = parts.shift();
-        settings.package = parts.shift();
-        settings.version = parts.shift();
-
-        settings.urls.push(generateDownloadUrl(settings));
-      }
-    }
-
-    if (options.remove) {
-      settings.action = 'remove';
-      parts = options.remove.split('/');
-
-      if (parts.length !== 1) {
-        throw new Error('Invalid remove option. Please use the format <plugin>.');
-      }
-      settings.package = parts.shift();
-    }
-
-    if (options.list) {
-      settings.action = 'list';
-    }
-
-    if (!settings.action || areMultipleOptionsChosen(options, [ 'install', 'remove', 'list' ])) {
-      throw new Error('Please specify either --install, --remove, or --list.');
-    }
-
-    settings.pluginDir = options.pluginDir;
-    if (settings.package) {
-      settings.pluginPath = resolve(settings.pluginDir, settings.package);
-      settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
-      settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
-    }
-
-    return settings;
-  }
-
-  return {
-    parse: parse,
-    parseMilliseconds: parseMilliseconds
+export function parse(command, options, kbnPackage) {
+  const settings = {
+    timeout: options.timeout ? options.timeout : 0,
+    quiet: options.quiet ? options.quiet : false,
+    silent: options.silent ? options.silent : false,
+    config: options.config ? options.config : '',
+    plugin: command,
+    version: kbnPackage.version,
+    pluginDir: options.pluginDir ? options.pluginDir : ''
   };
+
+  settings.urls = generateUrls(settings);
+  settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
+  settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
+  settings.tempPackageFile = resolve(settings.workingPath, 'package.json');
+  settings.setPlugin = function (plugin) {
+    settings.plugin = plugin;
+    settings.pluginPath = resolve(settings.pluginDir, settings.plugin.name);
+  };
+
+  return settings;
 };

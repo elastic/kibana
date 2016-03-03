@@ -1,6 +1,5 @@
-import getProgressReporter from '../progress_reporter';
+import Progress from '../progress';
 import { createWriteStream, createReadStream, unlinkSync, statSync } from 'fs';
-import fileType from '../file_type';
 
 function openSourceFile({ sourcePath }) {
   try {
@@ -18,7 +17,7 @@ function openSourceFile({ sourcePath }) {
   }
 }
 
-async function copyFile({ readStream, writeStream, progressReporter }) {
+async function copyFile({ readStream, writeStream, progress }) {
   await new Promise((resolve, reject) => {
     // if either stream errors, fail quickly
     readStream.on('error', reject);
@@ -26,7 +25,7 @@ async function copyFile({ readStream, writeStream, progressReporter }) {
 
     // report progress as we transfer
     readStream.on('data', (chunk) => {
-      progressReporter.progress(chunk.length);
+      progress.progress(chunk.length);
     });
 
     // write the download to the file system
@@ -46,21 +45,17 @@ export default async function copyLocalFile(logger, sourcePath, targetPath) {
     const writeStream = createWriteStream(targetPath);
 
     try {
-      const progressReporter = getProgressReporter(logger);
-      progressReporter.init(fileInfo.size);
+      const progress = new Progress(logger);
+      progress.init(fileInfo.size);
 
-      await copyFile({ readStream, writeStream, progressReporter });
+      await copyFile({ readStream, writeStream, progress });
 
-      progressReporter.complete();
+      progress.complete();
     } catch (err) {
       readStream.close();
       writeStream.close();
       throw err;
     }
-
-    // all is well, return our archive type
-    const archiveType = fileType(sourcePath);
-    return { archiveType };
   } catch (err) {
     logger.error(err);
     throw err;

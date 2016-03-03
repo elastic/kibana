@@ -1,8 +1,8 @@
 import path from 'path';
 import expect from 'expect.js';
-
 import fromRoot from '../../../utils/from_root';
-import settingParser from '../setting_parser';
+import { resolve } from 'path';
+import { parseMilliseconds, parse, getPlatform } from '../settings';
 
 describe('kibana cli', function () {
 
@@ -12,56 +12,53 @@ describe('kibana cli', function () {
 
       describe('parseMilliseconds function', function () {
 
-        var parser = settingParser();
-
         it('should return 0 for an empty string', function () {
-          var value = '';
-
-          var result = parser.parseMilliseconds(value);
+          const value = '';
+          const result = parseMilliseconds(value);
 
           expect(result).to.be(0);
         });
 
         it('should return 0 for a number with an invalid unit of measure', function () {
-          var result = parser.parseMilliseconds('1gigablasts');
+          const result = parseMilliseconds('1gigablasts');
           expect(result).to.be(0);
         });
 
         it('should assume a number with no unit of measure is specified as milliseconds', function () {
-          var result = parser.parseMilliseconds(1);
+          const result = parseMilliseconds(1);
           expect(result).to.be(1);
 
-          result = parser.parseMilliseconds('1');
-          expect(result).to.be(1);
+          const result2 = parseMilliseconds('1');
+          expect(result2).to.be(1);
         });
 
         it('should interpret a number with "s" as the unit of measure as seconds', function () {
-          var result = parser.parseMilliseconds('5s');
+          const result = parseMilliseconds('5s');
           expect(result).to.be(5 * 1000);
         });
 
         it('should interpret a number with "second" as the unit of measure as seconds', function () {
-          var result = parser.parseMilliseconds('5second');
+          const result = parseMilliseconds('5second');
           expect(result).to.be(5 * 1000);
         });
 
         it('should interpret a number with "seconds" as the unit of measure as seconds', function () {
-          var result = parser.parseMilliseconds('5seconds');
+          const result = parseMilliseconds('5seconds');
           expect(result).to.be(5 * 1000);
         });
 
         it('should interpret a number with "m" as the unit of measure as minutes', function () {
-          var result = parser.parseMilliseconds('9m');
+          const result = parseMilliseconds('9m');
           expect(result).to.be(9 * 1000 * 60);
         });
 
         it('should interpret a number with "minute" as the unit of measure as minutes', function () {
-          var result = parser.parseMilliseconds('9minute');
+          const result = parseMilliseconds('9minute');
           expect(result).to.be(9 * 1000 * 60);
         });
 
         it('should interpret a number with "minutes" as the unit of measure as minutes', function () {
-          var result = parser.parseMilliseconds('9minutes');
+          const result = parseMilliseconds('9minutes');
           expect(result).to.be(9 * 1000 * 60);
         });
 
@@ -69,65 +66,41 @@ describe('kibana cli', function () {
 
       describe('parse function', function () {
 
-        var options;
-        var parser;
+        const command = 'plugin name';
+        let options = {};
+        const kbnPackage = { version: 1234 };
         beforeEach(function () {
-          options = { install: 'dummy/dummy', pluginDir: fromRoot('installedPlugins') };
+          options = { pluginDir: fromRoot('installedPlugins') };
         });
 
-        it('should require the user to specify either install, remove, or list', function () {
-          options.install = null;
-          parser = settingParser(options);
+        describe('timeout option', function () {
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
-        });
+          it('should default to 0 (milliseconds)', function () {
+            const settings = parse(command, options, kbnPackage);
 
-        it('should not allow the user to specify both install and remove', function () {
-          options.remove = 'package';
-          options.install = 'org/package/version';
-          parser = settingParser(options);
+            expect(settings.timeout).to.be(0);
+          });
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
-        });
+          it('should set settings.timeout property', function () {
+            options.timeout = 1234;
+            const settings = parse(command, options, kbnPackage);
 
-        it('should not allow the user to specify both install and list', function () {
-          options.list = true;
-          options.install = 'org/package/version';
-          parser = settingParser(options);
+            expect(settings.timeout).to.be(1234);
+          });
 
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
-        });
-
-        it('should not allow the user to specify both remove and list', function () {
-          options.list = true;
-          options.remove = 'package';
-          parser = settingParser(options);
-
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
-        });
-
-        it('should not allow the user to specify install, remove, and list', function () {
-          options.list = true;
-          options.install = 'org/package/version';
-          options.remove = 'package';
-          parser = settingParser(options);
-
-          expect(parser.parse).withArgs().to.throwError(/Please specify either --install, --remove, or --list./);
         });
 
         describe('quiet option', function () {
 
           it('should default to false', function () {
-            parser = settingParser(options);
-            var settings = parser.parse(options);
+            const settings = parse(command, options, kbnPackage);
 
             expect(settings.quiet).to.be(false);
           });
 
           it('should set settings.quiet property to true', function () {
-            options.parent = { quiet: true };
-            parser = settingParser(options);
-            var settings = parser.parse(options);
+            options.quiet = true;
+            const settings = parse(command, options, kbnPackage);
 
             expect(settings.quiet).to.be(true);
           });
@@ -137,238 +110,111 @@ describe('kibana cli', function () {
         describe('silent option', function () {
 
           it('should default to false', function () {
-            parser = settingParser(options);
-            var settings = parser.parse(options);
+            const settings = parse(command, options, kbnPackage);
 
-            expect(settings).to.have.property('silent', false);
+            expect(settings.silent).to.be(false);
           });
 
           it('should set settings.silent property to true', function () {
             options.silent = true;
-            parser = settingParser(options);
-            var settings = parser.parse(options);
+            const settings = parse(command, options, kbnPackage);
 
-            expect(settings).to.have.property('silent', true);
+            expect(settings.silent).to.be(true);
           });
 
         });
 
+        describe('config option', function () {
 
-        describe('timeout option', function () {
+          it('should default to ZLS', function () {
+            const settings = parse(command, options, kbnPackage);
 
-          it('should default to 0 (milliseconds)', function () {
-            parser = settingParser(options);
-            var settings = parser.parse(options);
-
-            expect(settings).to.have.property('timeout', 0);
+            expect(settings.config).to.be('');
           });
 
-          it('should set settings.timeout property to specified value', function () {
-            options.timeout = 1234;
-            parser = settingParser(options);
-            var settings = parser.parse(options);
+          it('should set settings.config property', function () {
+            options.config = 'foo bar baz';
+            const settings = parse(command, options, kbnPackage);
 
-            expect(settings).to.have.property('timeout', 1234);
+            expect(settings.config).to.be('foo bar baz');
           });
 
         });
 
-        describe('install option', function () {
+        describe('pluginDir option', function () {
 
-          it('should set settings.action property to "install"', function () {
-            options.install = 'org/package/version';
-            parser = settingParser(options);
-            var settings = parser.parse(options);
+          it('should default to installedPlugins', function () {
+            const settings = parse(command, options, kbnPackage);
 
-            expect(settings).to.have.property('action', 'install');
+            expect(settings.pluginDir).to.be(fromRoot('installedPlugins'));
           });
 
-          it('should allow two parts to the install parameter', function () {
-            options.install = 'kibana/test-plugin';
-            parser = settingParser(options);
+          it('should set settings.config property', function () {
+            options.pluginDir = 'foo bar baz';
+            const settings = parse(command, options, kbnPackage);
 
-            expect(parser.parse).withArgs().to.not.throwError();
-
-            var settings = parser.parse(options);
-
-            expect(settings).to.have.property('organization', 'kibana');
-            expect(settings).to.have.property('package', 'test-plugin');
-            expect(settings).to.have.property('version', undefined);
-          });
-
-          it('should allow three parts to the install parameter', function () {
-            options.install = 'kibana/test-plugin/v1.0.1';
-            parser = settingParser(options);
-
-            expect(parser.parse).withArgs().to.not.throwError();
-
-            var settings = parser.parse(options);
-
-            expect(settings).to.have.property('organization', 'kibana');
-            expect(settings).to.have.property('package', 'test-plugin');
-            expect(settings).to.have.property('version', 'v1.0.1');
-          });
-
-          it('should not allow one part to the install parameter', function () {
-            options.install = 'test-plugin';
-            parser = settingParser(options);
-
-            expect(parser.parse).withArgs().to.throwError(/Invalid install option. Please use the format <org>\/<plugin>\/<version>./);
-          });
-
-          it('should not allow more than three parts to the install parameter', function () {
-            options.install = 'kibana/test-plugin/v1.0.1/dummy';
-            parser = settingParser(options);
-
-            expect(parser.parse).withArgs().to.throwError(/Invalid install option. Please use the format <org>\/<plugin>\/<version>./);
-          });
-
-          it('should populate the urls collection properly when no version specified', function () {
-            options.install = 'kibana/test-plugin';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-
-            expect(settings.urls).to.have.property('length', 1);
-            expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-latest.tar.gz');
-          });
-
-          it('should populate the urls collection properly version specified', function () {
-            options.install = 'kibana/test-plugin/v1.1.1';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-
-            expect(settings.urls).to.have.property('length', 1);
-            expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-v1.1.1.tar.gz');
-          });
-
-          it('should populate the pluginPath', function () {
-            options.install = 'kibana/test-plugin';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-            var expected = fromRoot('installedPlugins/test-plugin');
-
-            expect(settings).to.have.property('pluginPath', expected);
-          });
-
-          it('should populate the workingPath', function () {
-            options.install = 'kibana/test-plugin';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-            var expected = fromRoot('installedPlugins/.plugin.installing');
-
-            expect(settings).to.have.property('workingPath', expected);
-          });
-
-          it('should populate the tempArchiveFile', function () {
-            options.install = 'kibana/test-plugin';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-            var expected = fromRoot('installedPlugins/.plugin.installing/archive.part');
-
-            expect(settings).to.have.property('tempArchiveFile', expected);
-          });
-
-          describe('with url option', function () {
-
-            it('should allow one part to the install parameter', function () {
-              options.install = 'test-plugin';
-              options.url = 'http://www.google.com/plugin.tar.gz';
-              parser = settingParser(options);
-
-              expect(parser.parse).withArgs().to.not.throwError();
-
-              var settings = parser.parse();
-
-              expect(settings).to.have.property('package', 'test-plugin');
-            });
-
-            it('should not allow more than one part to the install parameter', function () {
-              options.url = 'http://www.google.com/plugin.tar.gz';
-              options.install = 'kibana/test-plugin';
-              parser = settingParser(options);
-
-              expect(parser.parse).withArgs()
-                .to.throwError(/Invalid install option. When providing a url, please use the format <plugin>./);
-            });
-
-            it('should result in only the specified url in urls collection', function () {
-              var url = 'http://www.google.com/plugin.tar.gz';
-              options.install = 'test-plugin';
-              options.url = url;
-              parser = settingParser(options);
-
-              var settings = parser.parse();
-
-              expect(settings).to.have.property('urls');
-              expect(settings.urls).to.be.an('array');
-              expect(settings.urls).to.have.property('length', 1);
-              expect(settings.urls).to.contain(url);
-            });
-
+            expect(settings.pluginDir).to.be('foo bar baz');
           });
 
         });
 
-        describe('remove option', function () {
+        describe('command value', function () {
 
-          it('should set settings.action property to "remove"', function () {
-            delete options.install;
-            options.remove = 'package';
-            parser = settingParser(options);
+          it('should set settings.plugin property', function () {
+            const settings = parse(command, options, kbnPackage);
 
-            var settings = parser.parse();
-
-            expect(settings).to.have.property('action', 'remove');
-          });
-
-          it('should allow one part to the remove parameter', function () {
-            delete options.install;
-            options.remove = 'test-plugin';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-
-            expect(settings).to.have.property('package', 'test-plugin');
-          });
-
-          it('should not allow more than one part to the remove parameter', function () {
-            delete options.install;
-            options.remove = 'kibana/test-plugin';
-            parser = settingParser(options);
-
-            expect(parser.parse).withArgs()
-              .to.throwError(/Invalid remove option. Please use the format <plugin>./);
-          });
-
-          it('should populate the pluginPath', function () {
-            delete options.install;
-            options.remove = 'test-plugin';
-            parser = settingParser(options);
-
-            var settings = parser.parse();
-            var expected = fromRoot('installedPlugins/test-plugin');
-
-            expect(settings).to.have.property('pluginPath', expected);
+            expect(settings.plugin).to.be(command);
           });
 
         });
 
-        describe('list option', function () {
+        describe('urls collection', function () {
 
-          it('should set settings.action property to "list"', function () {
-            delete options.install;
-            delete options.remove;
-            options.list = true;
-            parser = settingParser(options);
+          it('should populate the settings.urls property', function () {
+            const settings = parse(command, options, kbnPackage);
 
-            var settings = parser.parse();
+            const expected = [
+              command,
+              `https://download.elastic.co/packs/${command}/${command}-1234.zip`
+            ];
 
-            expect(settings).to.have.property('action', 'list');
+            expect(settings.urls).to.eql(expected);
+          });
+
+        });
+
+        describe('workingPath value', function () {
+
+          it('should set settings.workingPath property', function () {
+            options.pluginDir = 'foo/bar/baz';
+            const settings = parse(command, options, kbnPackage);
+            const expected = resolve('foo/bar/baz', '.plugin.installing');
+
+            expect(settings.workingPath).to.be(expected);
+          });
+
+        });
+
+        describe('tempArchiveFile value', function () {
+
+          it('should set settings.tempArchiveFile property', function () {
+            options.pluginDir = 'foo/bar/baz';
+            const settings = parse(command, options, kbnPackage);
+            const expected = resolve('foo/bar/baz', '.plugin.installing', 'archive.part');
+
+            expect(settings.tempArchiveFile).to.be(expected);
+          });
+
+        });
+
+        describe('tempPackageFile value', function () {
+
+          it('should set settings.tempPackageFile property', function () {
+            options.pluginDir = 'foo/bar/baz';
+            const settings = parse(command, options, kbnPackage);
+            const expected = resolve('foo/bar/baz', '.plugin.installing', 'package.json');
+
+            expect(settings.tempPackageFile).to.be(expected);
           });
 
         });

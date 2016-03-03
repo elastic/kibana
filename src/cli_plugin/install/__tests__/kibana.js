@@ -1,51 +1,104 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import rimraf from 'rimraf';
-import pluginLogger from '../plugin_logger';
-import pluginInstaller from '../plugin_installer';
-import { mkdirSync } from 'fs';
+import Logger from '../../lib/logger';
 import { join } from 'path';
+import rimraf from 'rimraf';
+import mkdirp from 'mkdirp';
+import { existingInstall, checkVersion } from '../kibana';
 
 describe('kibana cli', function () {
 
   describe('plugin installer', function () {
 
-    describe('pluginInstaller', function () {
-      let logger;
-      let testWorkingPath;
-      let processExitStub;
+    describe('kibana', function () {
+      const testWorkingPath = join(__dirname, '.test.data');
+      const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
 
-      beforeEach(function () {
-        processExitStub = undefined;
-        logger = pluginLogger(false);
-        testWorkingPath = join(__dirname, '.test.data');
-        rimraf.sync(testWorkingPath);
-        sinon.stub(logger, 'log');
-        sinon.stub(logger, 'error');
+      const settings = {
+        workingPath: testWorkingPath,
+        tempArchiveFile: tempArchiveFilePath,
+        plugin: 'test-plugin',
+        version: '1.0.0',
+        plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo') } ]
+      };
+
+      const logger = new Logger(settings);
+
+      describe('checkVersion', function () {
+
+        beforeEach(function () {
+          rimraf.sync(testWorkingPath);
+          mkdirp.sync(testWorkingPath);
+          sinon.stub(logger, 'log');
+          sinon.stub(logger, 'error');
+        });
+
+        afterEach(function () {
+          logger.log.restore();
+          logger.error.restore();
+          rimraf.sync(testWorkingPath);
+        });
+
+        it('should throw an error if plugin does contain a version.', function () {
+          const errorStub = sinon.stub();
+
+          try {
+            checkVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.firstCall.args[0]).to.match(/plugin version not found/i);
+        });
+
+        it('should throw an error if plugin version does does not match kibana version', function () {
+          const errorStub = sinon.stub();
+          settings.plugins[0].version = '1.2.3.4';
+
+          try {
+            checkVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.firstCall.args[0]).to.match(/incorrect version/i);
+        });
       });
 
-      afterEach(function () {
-        if (processExitStub) processExitStub.restore();
-        logger.log.restore();
-        logger.error.restore();
-        rimraf.sync(testWorkingPath);
-      });
+      describe('existingInstall', function () {
+        let testWorkingPath;
+        let processExitStub;
 
-      it('should throw an error if the workingPath already exists.', function () {
-        processExitStub = sinon.stub(process, 'exit');
-        mkdirSync(testWorkingPath);
+        beforeEach(function () {
+          processExitStub = sinon.stub(process, 'exit');
+          testWorkingPath = join(__dirname, '.test.data');
+          rimraf.sync(testWorkingPath);
+          sinon.stub(logger, 'log');
+          sinon.stub(logger, 'error');
+        });
 
-        let settings = {
-          pluginPath: testWorkingPath
-        };
+        afterEach(function () {
+          processExitStub.restore();
+          logger.log.restore();
+          logger.error.restore();
+          rimraf.sync(testWorkingPath);
+        });
 
-        var errorStub = sinon.stub();
-        return pluginInstaller.install(settings, logger)
-        .catch(errorStub)
-        .then(function (data) {
+        it('should throw an error if the workingPath already exists.', function () {
+          mkdirp.sync(settings.plugins[0].path);
+          existingInstall(settings, logger);
+
           expect(logger.error.firstCall.args[0]).to.match(/already exists/);
           expect(process.exit.called).to.be(true);
         });
+
+        it('should not throw an error if the workingPath does not exist.', function () {
+          existingInstall(settings, logger);
+          expect(logger.error.called).to.be(false);
+        });
+
       });
 
     });
