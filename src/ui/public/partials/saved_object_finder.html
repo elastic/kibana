@@ -34,10 +34,10 @@
           Name
           <i
             class="fa"
-            ng-click="finder.sort()"
+            ng-click="finder.sortHits()"
             ng-class="{
-              'fa-caret-down': finder.isSorted === true,
-              'fa-caret-up': finder.isSorted === false,
+              'fa-caret-up': finder.isSorted === true,
+              'fa-caret-down': finder.isSorted === false,
             }">
           </i>
         </li>
@@ -47,7 +47,7 @@
     <li
       class="list-body list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
-      ng-repeat="hit in page | orderBy : '' : !self.isSorted"
+      ng-repeat="hit in page"
       ng-keydown="finder.hitKeyDown($event, page, paginate)"
       ng-click="finder.onChoose(hit, $event)">
 

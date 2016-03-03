@@ -49,8 +49,35 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       filterResults();
 
       self.isSorted = true;
-      self.sort = function () {
+
+      self.sortHits = function () {
         self.isSorted = !self.isSorted;
+
+        if (self.hits.length) {
+          if (self.isSorted) {
+            self.hits = self.hits.sort(function (a, b) {
+              if (a.title > b.title) {
+                return 1;
+              }
+              if (a.title < b.title) {
+                return -1;
+              }
+              // a must be equal to b
+              return 0;
+            });
+          } else {
+            self.hits = self.hits.sort(function (a, b) {
+              if (a.title < b.title) {
+                return 1;
+              }
+              if (a.title > b.title) {
+                return -1;
+              }
+              // a must be equal to b
+              return 0;
+            });
+          }
+        }
       };
 
       /**
