@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import SearchStrategyProvider from '../strategy/search';
 import AbstractRequestProvider from './request';
 

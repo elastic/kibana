@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import DocStrategyProvider from '../strategy/doc';
 import AbstractRequestProvider from './request';
 
