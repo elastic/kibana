@@ -44,6 +44,7 @@ define(function () {
 
         if (val.type === 'json') {
           val.type = 'keyword';
+          val.index = false;
           val._serialize = json._serialize;
           val._deserialize = json._deserialize;
         }
