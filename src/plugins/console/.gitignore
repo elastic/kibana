@@ -1,8 +1,0 @@
-.idea
-.DS_Store
-*.iml
-node_modules
-build
-.aws-config.json
-html_docs
-target
