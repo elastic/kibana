@@ -27,7 +27,7 @@ define(function (require) {
         });
 
         $scope.highlightSeries = function (label) {
-          $('[data-label]', $elem.siblings()).not('[data-label="' + label + '"]').css('opacity', 0.5);
+          $('[data-label]', $elem.siblings()).not(function (els, el) { return $(el).data('label') !== label;}).css('opacity', 0.5);
         };
 
         $scope.unhighlightSeries = function () {
