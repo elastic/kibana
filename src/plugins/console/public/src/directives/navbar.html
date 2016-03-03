@@ -1,0 +1,61 @@
+<span class="name">Server</span>
+
+<form
+  name="serverInput"
+  class="inline-form server-url-form"
+  role="form"
+  ng-submit="sense.sendSelected()">
+
+  <input
+    type="text"
+    placeholder="http://servername:port"
+    aria-label="Server Name"
+    class="form-control"
+    ng-focus="navbar.updateServerUrlHistory()"
+    ng-blur="navbar.commitServerUrlFormModel()"
+
+    sense-uib-typeahead="url for url in navbar.serverUrlHistory"
+    ng-model="navbar.serverUrlFormModel"
+    typeahead-append-to-body="true"
+    typeahead-focus-first="false"
+
+    required>
+</form>
+
+<div class="button-group" role="toolbar">
+  <kbn-tooltip text="History" placement="bottom" append-to-body="1">
+    <button
+      id="history_btn"
+      aria-label="History"
+      aria-haspopup="true"
+      aria-expanded="{{ sense.dropdown.is('history') }}"
+      ng-class="{ active: sense.dropdown.is('history') }"
+      ng-click="sense.dropdown.toggle('history');">
+      <i aria-hidden="true" class="fa fa-clock-o"></i>
+    </button>
+  </kbn-tooltip>
+
+  <kbn-tooltip text="Settings" placement="bottom" append-to-body="1">
+    <button
+      id="settings_btn"
+      aria-label="Settings"
+      aria-haspopup="true"
+      aria-expanded="{{ sense.dropdown.is('settings') }}"
+      ng-class="{ active: sense.dropdown.is('settings') }"
+      ng-click="sense.dropdown.toggle('settings');">
+      <i aria-hidden="true" class="fa fa-cog"></i>
+    </button>
+  </kbn-tooltip>
+
+  <kbn-tooltip text="Help" placement="bottom" append-to-body="1">
+    <button
+      id="help_btn"
+      aria-label="Help"
+      aria-haspopup="true"
+      aria-expanded="{{ sense.dropdown.is('help') }}"
+      ng-class="{ active: sense.dropdown.is('help') }"
+      ng-click="sense.dropdown.toggle('help');">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </button>
+  </kbn-tooltip>
+</div>

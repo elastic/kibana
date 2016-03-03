@@ -1,0 +1,51 @@
+
+body {
+  background-color: #f7f7f7;
+}
+
+#editor, #output {
+  outline: 1px solid #ccc;
+  border-top: 1px solid #ffffff;
+}
+
+.ace_url {
+  color: #0088cc;
+}
+
+.ace_url.ace_param {
+  color: rgb(49, 132, 149);
+}
+
+.ace_url.ace_value {
+  color: rgb(3, 106, 7);
+}
+
+.ace-tm .ace_gutter {
+  background: transparent;
+}
+
+.ace_scroller {
+  border-left: 1px solid #ccc;
+}
+
+.ace_method {
+  color: rgb(197, 6, 11);
+}
+
+.ace_snippet-marker {
+  background: rgba(194, 193, 208, 0.20);
+  border-top: dotted 1px rgba(194, 193, 208, 0.80);
+  border-bottom: dotted 1px rgba(194, 193, 208, 0.80);
+  margin-top: -1px; /* compensate for background */
+}
+
+
+.ui-menu {
+  background-color: white;
+  border: 1px solid #CCC
+}
+
+.ui-state-focus {
+  color: white;
+  background-color: #08C;
+}
