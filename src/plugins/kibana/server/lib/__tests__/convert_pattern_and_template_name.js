@@ -1,5 +1,5 @@
-const {ingestToPattern, patternToIngest} = require('../convert_pattern_and_ingest_name');
-const expect = require('expect.js');
+import expect from 'expect.js';
+import {patternToIngest, ingestToPattern} from '../convert_pattern_and_ingest_name';
 
 describe('convertPatternAndTemplateName', function () {
 

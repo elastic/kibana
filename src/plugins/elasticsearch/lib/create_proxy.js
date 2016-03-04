@@ -1,23 +1,30 @@
-var createAgent = require('./create_agent');
-var mapUri = require('./map_uri');
-var { resolve } = require('url');
+import createAgent from './create_agent';
+import mapUri from './map_uri';
+import { resolve } from 'url';
+import { assign } from 'lodash';
 
 function createProxy(server, method, route, config) {
 
-  var options = {
+  const options = {
     method: method,
     path: createProxy.createPath(route),
+    config: {
+      timeout: {
+        socket: server.config().get('elasticsearch.requestTimeout')
+      }
+    },
     handler: {
       proxy: {
         mapUri: mapUri(server),
         passThrough: true,
         agent: createAgent(server),
-        xforward: true
+        xforward: true,
+        timeout: server.config().get('elasticsearch.requestTimeout')
       }
     },
   };
 
-  if (config) options.config = config;
+  assign(options.config, config);
 
   server.route(options);
 };

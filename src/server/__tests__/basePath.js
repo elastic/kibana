@@ -1,10 +1,8 @@
 import { resolve } from 'path';
 import { fromNode as fn } from 'bluebird';
 import expect from 'expect.js';
-import requirefrom from 'requirefrom';
 
-const requireFromTest = requirefrom('test');
-const kbnTestServer = requireFromTest('utils/kbn_server');
+import * as kbnTestServer from '../../../test/utils/kbn_server';
 const basePath = '/kibana';
 
 describe('Server basePath config', function () {

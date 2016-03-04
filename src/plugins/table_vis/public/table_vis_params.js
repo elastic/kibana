@@ -1,26 +1,26 @@
-define(function (require) {
-  var _ = require('lodash');
+import _ from 'lodash';
+import uiModules from 'ui/modules';
+import tableVisParamsTemplate from 'plugins/table_vis/table_vis_params.html';
 
-  require('ui/modules').get('kibana/table_vis')
-  .directive('tableVisParams', function () {
-    return {
-      restrict: 'E',
-      template: require('plugins/table_vis/table_vis_params.html'),
-      link: function ($scope) {
-        $scope.$watchMulti([
-          'vis.params.showPartialRows',
-          'vis.params.showMeticsAtAllLevels'
-        ], function () {
-          if (!$scope.vis) return;
+uiModules.get('kibana/table_vis')
+.directive('tableVisParams', function () {
+  return {
+    restrict: 'E',
+    template: tableVisParamsTemplate,
+    link: function ($scope) {
+      $scope.$watchMulti([
+        'vis.params.showPartialRows',
+        'vis.params.showMeticsAtAllLevels'
+      ], function () {
+        if (!$scope.vis) return;
 
-          var params = $scope.vis.params;
-          if (params.showPartialRows || params.showMeticsAtAllLevels) {
-            $scope.metricsAtAllLevels = true;
-          } else {
-            $scope.metricsAtAllLevels = false;
-          }
-        });
-      }
-    };
-  });
+        const params = $scope.vis.params;
+        if (params.showPartialRows || params.showMeticsAtAllLevels) {
+          $scope.metricsAtAllLevels = true;
+        } else {
+          $scope.metricsAtAllLevels = false;
+        }
+      });
+    }
+  };
 });

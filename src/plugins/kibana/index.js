@@ -1,4 +1,4 @@
-const ingest = require('./server/routes/api/ingest');
+import ingest from './server/routes/api/ingest';
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
@@ -21,7 +21,9 @@ module.exports = function (kibana) {
           'visTypes',
           'spyModes',
           'fieldFormats',
-          'navbarExtensions'
+          'navbarExtensions',
+          'settingsSections',
+          'docViews'
         ],
 
         injectVars: function (server, options) {

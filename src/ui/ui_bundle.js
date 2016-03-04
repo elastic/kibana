@@ -1,6 +1,6 @@
+import { join } from 'path';
+import { promisify } from 'bluebird';
 
-let { join } = require('path');
-let { promisify } = require('bluebird');
 let read = promisify(require('fs').readFile);
 let write = promisify(require('fs').writeFile);
 let unlink = promisify(require('fs').unlink);

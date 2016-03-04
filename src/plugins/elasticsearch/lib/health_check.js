@@ -1,28 +1,28 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
-var elasticsearch = require('elasticsearch');
-var exposeClient = require('./expose_client');
-var migrateConfig = require('./migrate_config');
-var createKibanaIndex = require('./create_kibana_index');
-var checkEsVersion = require('./check_es_version');
-var NoConnections = elasticsearch.errors.NoConnections;
-var util = require('util');
-var format = util.format;
+import _ from 'lodash';
+import Promise from 'bluebird';
+import elasticsearch from 'elasticsearch';
+import exposeClient from './expose_client';
+import migrateConfig from './migrate_config';
+import createKibanaIndex from './create_kibana_index';
+import checkEsVersion from './check_es_version';
+const NoConnections = elasticsearch.errors.NoConnections;
+import util from 'util';
+const format = util.format;
 
-var NO_INDEX = 'no_index';
-var INITIALIZING = 'initializing';
-var READY = 'ready';
+const NO_INDEX = 'no_index';
+const INITIALIZING = 'initializing';
+const READY = 'ready';
 
-var REQUEST_DELAY = 2500;
+const REQUEST_DELAY = 2500;
 
 module.exports = function (plugin, server) {
-  var config = server.config();
-  var client = server.plugins.elasticsearch.client;
+  const config = server.config();
+  const client = server.plugins.elasticsearch.client;
 
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitForPong() {
-    return client.ping({ requestTimeout: 1500 }).catch(function (err) {
+    return client.ping().catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
@@ -90,12 +90,12 @@ module.exports = function (plugin, server) {
     .catch(err => plugin.status.red(err));
   }
 
-  var timeoutId = null;
+  let timeoutId = null;
 
   function scheduleCheck(ms) {
     if (timeoutId) return;
 
-    var myId = setTimeout(function () {
+    const myId = setTimeout(function () {
       check().finally(function () {
         if (timeoutId === myId) startorRestartChecking();
       });

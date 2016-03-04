@@ -1,11 +1,10 @@
-let get = require('lodash').get;
-let Joi = require('joi');
-let fs = require('fs');
-let path = require('path');
+import Joi from 'joi';
+import fs from 'fs';
+import path from 'path';
+import { get } from 'lodash';
+import { randomBytes } from 'crypto';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
-const randomBytes = require('crypto').randomBytes;
+import fromRoot from '../../utils/fromRoot';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({

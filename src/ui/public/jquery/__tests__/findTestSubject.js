@@ -1,5 +1,5 @@
-var $ = require('jquery');
-var expect = require('expect.js');
+import expect from 'expect.js';
+import $ from 'jquery';
 
 function $make(subject) {
   return $('<div>').attr('data-test-subj', subject);

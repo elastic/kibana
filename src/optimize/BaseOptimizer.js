@@ -1,17 +1,17 @@
-let { inherits } = require('util');
-let { defaults } = require('lodash');
-let { resolve } = require('path');
-let { writeFile } = require('fs');
-let webpack = require('webpack');
-var Boom = require('boom');
-let DirectoryNameAsMain = require('webpack-directory-name-as-main');
-let ExtractTextPlugin = require('extract-text-webpack-plugin');
-var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+import webpack from 'webpack';
+import Boom from 'boom';
+import DirectoryNameAsMain from 'webpack-directory-name-as-main';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
-let babelOptions = require('./babelOptions');
+import fromRoot from '../utils/fromRoot';
+import babelOptions from './babelOptions';
+import { inherits } from 'util';
+import { defaults, transform } from 'lodash';
+import { resolve } from 'path';
+import { writeFile } from 'fs';
 let babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
+import pkg from '../../package.json';
 
 class BaseOptimizer {
   constructor(opts) {
@@ -133,12 +133,20 @@ class BaseOptimizer {
       resolve: {
         extensions: ['.js', '.json', '.jsx', '.less', ''],
         postfixes: [''],
-        modulesDirectories: ['webpackShims', 'node_modules'],
+        modulesDirectories: ['webpackShims', 'node_modules', fromRoot('webpackShims'), fromRoot('node_modules')],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,
         unsafeCache: this.unsafeCache,
       },
+
+      resolveLoader: {
+        alias: transform(pkg.dependencies, function (aliases, version, name) {
+          if (name.endsWith('-loader')) {
+            aliases[name.replace(/-loader$/, '')] = require.resolve(name);
+          }
+        }, {})
+      }
     };
   }
 

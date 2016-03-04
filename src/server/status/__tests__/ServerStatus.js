@@ -1,10 +1,10 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var sinon = require('sinon');
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
-var states = require('../states');
-var Status = require('../Status');
-var ServerStatus = require('../ServerStatus');
+import states from '../states';
+import Status from '../Status';
+import ServerStatus from '../ServerStatus';
 
 describe('ServerStatus class', function () {
   var server;

@@ -1,6 +1,6 @@
-const Promise = require('bluebird');
-const handleESError = require('../../../lib/handle_es_error');
-const {ingestToPattern, patternToIngest} = require('../../../lib/convert_pattern_and_ingest_name');
+import Promise from 'bluebird';
+import handleESError from '../../../lib/handle_es_error';
+import {ingestToPattern, patternToIngest} from '../../../lib/convert_pattern_and_ingest_name';
 
 module.exports = function registerDelete(server) {
   server.route({

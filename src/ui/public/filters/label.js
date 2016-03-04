@@ -1,16 +1,10 @@
-define(function (require) {
-  require('ui/modules')
-    .get('kibana')
-    .filter('label', function () {
-      return function (str) {
-        var words = str.split(' ');
-        return words.map(capFirst).join(' ');
-      };
-    });
+import uiModules from 'ui/modules';
+import { words, capitalize } from 'lodash';
 
-  function capFirst(str) {
-    var i = str[0];
-    var r = new RegExp(i, 'i');
-    return str.replace(r, i.toUpperCase());
-  }
-});
+uiModules
+  .get('kibana')
+  .filter('label', function () {
+    return function (str) {
+      return words(str).map(capitalize).join(' ');
+    };
+  });

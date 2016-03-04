@@ -1,13 +1,14 @@
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FilterBarLibMapQueryStringProvider from 'ui/filter_bar/lib/mapQueryString';
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
     var mapQueryString;
     var $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;
-      mapQueryString = Private(require('ui/filter_bar/lib/mapQueryString'));
+      mapQueryString = Private(FilterBarLibMapQueryStringProvider);
     }));
 
     it('should return the key and value for matching filters', function (done) {

@@ -1,10 +1,9 @@
-const _ = require('lodash');
+import _ from 'lodash';
 const { isWorker } = require('cluster');
 const { resolve } = require('path');
 
 const cwd = process.cwd();
-const src = require('requirefrom')('src');
-const fromRoot = src('utils/fromRoot');
+import fromRoot from '../../utils/fromRoot';
 
 let canCluster;
 try {
@@ -61,7 +60,11 @@ function initServerSettings(opts, extraCliOptions) {
     opts.pluginDir
   )));
 
-  set('plugins.paths', [].concat(opts.pluginPath || []));
+  set('plugins.paths', _.compact([].concat(
+    get('plugins.paths'),
+    opts.pluginPath
+  )));
+
   merge(extraCliOptions);
 
   return settings;
@@ -123,7 +126,7 @@ module.exports = function (program) {
     }
 
     let kbnServer = {};
-    const KbnServer = src('server/KbnServer');
+    const KbnServer = require('../../server/KbnServer');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();

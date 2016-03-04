@@ -1,30 +1,30 @@
-var expect = require('expect.js');
-var Boom = require('boom');
-var esErrors = require('elasticsearch').errors;
-var handleESError = require('../handle_es_error');
+import expect from 'expect.js';
+import Boom from 'boom';
+import handleESError from '../handle_es_error';
+import { errors as esErrors } from 'elasticsearch';
 
 describe('handleESError', function () {
 
   it('should transform elasticsearch errors into boom errors with the same status code', function () {
-    var conflict = handleESError(new esErrors.Conflict());
+    const conflict = handleESError(new esErrors.Conflict());
     expect(conflict.isBoom).to.be(true);
     expect(conflict.output.statusCode).to.be(409);
 
-    var forbidden = handleESError(new esErrors[403]);
+    const forbidden = handleESError(new esErrors[403]);
     expect(forbidden.isBoom).to.be(true);
     expect(forbidden.output.statusCode).to.be(403);
 
-    var notFound = handleESError(new esErrors.NotFound());
+    const notFound = handleESError(new esErrors.NotFound());
     expect(notFound.isBoom).to.be(true);
     expect(notFound.output.statusCode).to.be(404);
 
-    var badRequest = handleESError(new esErrors.BadRequest());
+    const badRequest = handleESError(new esErrors.BadRequest());
     expect(badRequest.isBoom).to.be(true);
     expect(badRequest.output.statusCode).to.be(400);
   });
 
   it('should return an unknown error without transforming it', function () {
-    var unknown = new Error('mystery error');
+    const unknown = new Error('mystery error');
     expect(handleESError(unknown)).to.be(unknown);
   });
 

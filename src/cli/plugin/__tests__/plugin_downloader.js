@@ -1,12 +1,12 @@
-const expect = require('expect.js');
-const sinon = require('sinon');
-const nock = require('nock');
-const glob = require('glob');
-const rimraf = require('rimraf');
-const { join } = require('path');
-const mkdirp = require('mkdirp');
-const pluginLogger = require('../plugin_logger');
-const pluginDownloader = require('../plugin_downloader');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import nock from 'nock';
+import glob from 'glob-all';
+import rimraf from 'rimraf';
+import mkdirp from 'mkdirp';
+import pluginLogger from '../plugin_logger';
+import pluginDownloader from '../plugin_downloader';
+import { join } from 'path';
 
 describe('kibana cli', function () {
 
@@ -116,6 +116,25 @@ describe('kibana cli', function () {
             .replyWithFile(200, filePath);
 
           const sourceUrl = 'http://www.files.com/plugin.tar.gz';
+
+          return downloader._downloadSingle(sourceUrl)
+          .then(function (data) {
+            expect(data.archiveType).to.be('.tar.gz');
+            expectWorkingPathNotEmpty();
+          });
+        });
+
+        it('should consider .tgz files as archive type .tar.gz', function () {
+          const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');
+
+          const couchdb = nock('http://www.files.com')
+            .defaultReplyHeaders({
+              'content-length': '10'
+            })
+            .get('/plugin.tgz')
+            .replyWithFile(200, filePath);
+
+          const sourceUrl = 'http://www.files.com/plugin.tgz';
 
           return downloader._downloadSingle(sourceUrl)
           .then(function (data) {
