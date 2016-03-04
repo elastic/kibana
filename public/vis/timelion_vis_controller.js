@@ -1,5 +1,7 @@
 define(function (require) {
   require('plugins/timelion/directives/chart_directive');
+  require('plugins/timelion/directives/interval/interval');
+
   require('plugins/timelion/directives/refresh_hack');
 
 
@@ -20,7 +22,7 @@ define(function (require) {
       $http.post('../api/timelion/run', {
         sheet: [expression],
         time: _.extend(timefilter.time, {
-          interval: '1d', // Make this automatic
+          interval: $scope.vis.params.interval,
           timezone: timezone
         }),
       })
@@ -39,7 +41,7 @@ define(function (require) {
     // This is bad, there should be a single event that triggers a refresh of data.
 
     // When the expression updates
-    $scope.$watch('vis.params.expression', $scope.search);
+    $scope.$watchMulti(['vis.params.expression', 'vis.params.interval'], $scope.search);
 
     // When the time filter changes
     $scope.$listen(timefilter, 'fetch', $scope.search);
