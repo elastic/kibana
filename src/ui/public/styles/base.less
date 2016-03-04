@@ -94,7 +94,7 @@ ul.navbar-inline li {
   .flex-parent(@shrink: 0);
   position: relative;
   z-index: 0;
-  background-color: #fff;
+  background-color: @white;
 }
 
 .top-fixed {
@@ -140,11 +140,25 @@ a {
     z-index: 0;
   }
 
-  > navbar:first-child { padding-bottom: 0; }
+  .kibana-nav-options {
+    padding-bottom: 0;
+    .kibana-nav-actions {
+      margin-left: auto;
+    }
+    .kibana-nav-info {
+      line-height: 30px;
+      padding: 0 10px;
+      &-title {
+        font-weight: bold;
+        margin-right: 10px;
+      }
+    }
+  }
 
   > config {
     z-index: 1;
   }
+  > navbar { padding-bottom: 4px; }
 
   > nav,
   > navbar {
