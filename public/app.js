@@ -4,6 +4,8 @@ var logoUrl = require('./logo.png');
 require('angularSortableView');
 
 require('plugins/timelion/directives/chart_directive');
+require('plugins/timelion/directives/interval/interval');
+
 require('plugins/timelion/directives/expression_directive');
 require('plugins/timelion/directives/scroll_class');
 require('plugins/timelion/directives/timelion_grid');
@@ -79,8 +81,7 @@ app.controller('timelion', function (
       selected: 0,
       columns: savedSheet.timelion_columns,
       rows: savedSheet.timelion_rows,
-      interval: savedSheet.timelion_interval,
-      otherInterval: savedSheet.timelion_other_interval
+      interval: savedSheet.timelion_interval
     };
   }
 
@@ -115,11 +116,6 @@ app.controller('timelion', function (
       };
       startRefresh();
     }
-  });
-
-  $scope.$watch('state.interval', function (newInterval, oldInterval) {
-    if (oldInterval === 'other') return;
-    $scope.state.otherInterval = oldInterval;
   });
 
   $scope.$watch(function () { return savedSheet.title; }, function (newTitle) {
@@ -161,7 +157,7 @@ app.controller('timelion', function (
     $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
-        interval: getInterval($scope.state),
+        interval: $scope.state.interval,
         timezone: timezone
       }),
     })
@@ -188,20 +184,12 @@ app.controller('timelion', function (
     });
   };
 
-  function getInterval(state) {
-    if (state.interval === 'other') {
-      return state.otherInterval;
-    }
-    return state.interval;
-  }
-
   $scope.safeSearch = _.debounce($scope.search, 500);
 
   function save() {
     savedSheet.id = savedSheet.title;
     savedSheet.timelion_sheet = $scope.state.sheet;
     savedSheet.timelion_interval = $scope.state.interval;
-    savedSheet.timelion_other_interval = $scope.state.otherInterval;
     savedSheet.timelion_columns = $scope.state.columns;
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {

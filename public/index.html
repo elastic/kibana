@@ -12,6 +12,7 @@
             type="text"
             class="form-control timelion-expression">
 
+          <!--
           <input input-focus ng-if="state.interval === 'other'"
             class="form-control timelion-interval"
             ng-model="state.otherInterval">
@@ -20,6 +21,9 @@
             ng-options="i for i in ['1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other']"
             ng-class="{'timelion-interval-other': state.interval == 'other'}"
             ng-model="state.interval"></select>
+          -->
+
+          <timelion-interval model="state.interval"></timelion-interval>
 
           <button type="submit"
             ng-disabled="discoverSearch.$invalid"
