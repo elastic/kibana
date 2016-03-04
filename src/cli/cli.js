@@ -21,7 +21,7 @@ program
 .description('Get the help for a specific command')
 .action(function (cmdName) {
   var cmd = _.find(program.commands, { _name: cmdName });
-  if (!cmd) return this.error(`unknown command ${cmdName}`);
+  if (!cmd) return program.error(`unknown command ${cmdName}`);
   cmd.help();
 });
 

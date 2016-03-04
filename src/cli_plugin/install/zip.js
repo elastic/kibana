@@ -63,6 +63,7 @@ export async function listFiles(zipPath) {
     unzipper.on('error', reject);
 
     unzipper.on('list', (files) => {
+      files = files.map((file) => file.replace(/\\/g, '/'));
       resolve(files);
     });
 

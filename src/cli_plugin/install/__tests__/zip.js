@@ -10,7 +10,7 @@ import { listFiles, extractFiles } from '../zip';
 
 describe('kibana cli', function () {
 
-  describe('plugin extractor', function () {
+  describe('zip', function () {
 
     const testWorkingPath = join(__dirname, '.test.data');
     const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
@@ -59,17 +59,17 @@ describe('kibana cli', function () {
         })
         .then((actual) => {
           const expected = [
-            'elasticsearch\\',
-            'kibana\\',
-            'kibana\\test-plugin\\',
-            'kibana\\test-plugin\\.gitignore',
-            'kibana\\test-plugin\\extra file only in zip.txt',
-            'kibana\\test-plugin\\index.js',
-            'kibana\\test-plugin\\package.json',
-            'kibana\\test-plugin\\public\\',
-            'kibana\\test-plugin\\public\\app.js',
-            'kibana\\test-plugin\\README.md',
-            'logstash\\'
+            'elasticsearch/',
+            'kibana/',
+            'kibana/test-plugin/',
+            'kibana/test-plugin/.gitignore',
+            'kibana/test-plugin/extra file only in zip.txt',
+            'kibana/test-plugin/index.js',
+            'kibana/test-plugin/package.json',
+            'kibana/test-plugin/public/',
+            'kibana/test-plugin/public/app.js',
+            'kibana/test-plugin/README.md',
+            'logstash/'
           ];
 
           expect(actual).to.eql(expected);

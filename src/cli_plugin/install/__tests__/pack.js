@@ -10,7 +10,7 @@ import { join } from 'path';
 
 describe('kibana cli', function () {
 
-  describe('plugin extractor', function () {
+  describe('pack', function () {
 
     const testWorkingPath = join(__dirname, '.test.data');
     const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
