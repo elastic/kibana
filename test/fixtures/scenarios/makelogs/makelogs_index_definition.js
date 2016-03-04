@@ -26,7 +26,7 @@ module.exports = {
               }
             }
           },
-          'match_mapping_type': 'text',
+          'match_mapping_type': 'string',
           'match': '*'
         }
       }],
