@@ -1,7 +1,7 @@
 import _ from 'lodash';
-
 import pkg from '../utils/package_json';
 import Command from './command';
+import serveCommand from './serve/serve';
 
 let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 let program = new Command('bin/kibana');
@@ -14,7 +14,7 @@ program
 );
 
 // attach commands
-require('./serve/serve')(program);
+serveCommand(program);
 
 program
 .command('help <command>')

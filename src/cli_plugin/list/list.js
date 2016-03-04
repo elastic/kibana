@@ -1,9 +1,12 @@
-import fs from 'fs';
+import { statSync, readdirSync } from 'fs';
+import { join } from 'path';
 
 export default function list(settings, logger) {
-  fs.readdirSync(settings.pluginDir)
+  readdirSync(settings.pluginDir)
   .forEach((filename) => {
-    if (filename[0] !== '.') {
+    const stat = statSync(join(settings.pluginDir, filename));
+
+    if (stat.isDirectory() && filename[0] !== '.') {
       logger.log(filename);
     }
   });

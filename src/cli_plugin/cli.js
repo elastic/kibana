@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import pkg from '../utils/packageJson';
 import Command from '../cli/Command';
+import listCommand from './list';
+import installCommand from './install';
+import removeCommand from './remove';
 
 let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 let program = new Command('bin/kibana-plugin');
@@ -12,9 +15,9 @@ program
   'based analytics and search dashboard for Elasticsearch.'
 );
 
-require('./list')(program);
-require('./install')(program);
-require('./remove')(program);
+listCommand(program);
+installCommand(program);
+removeCommand(program);
 
 program
 .command('help <command>')

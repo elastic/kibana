@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import glob from 'glob';
+import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 import Logger from '../../lib/logger';
@@ -154,6 +154,16 @@ describe('kibana cli', function () {
         })
         .then(shouldReject, (err) => {
           expect(err.message).to.match(/error retrieving/i);
+        });
+      });
+
+      it('throw an error if there an invalid plugin name', function () {
+        return copyReplyFile('invalid_name.zip')
+        .then((data) => {
+          return getPackData(settings, logger);
+        })
+        .then(shouldReject, (err) => {
+          expect(err.message).to.match(/invalid plugin name/i);
         });
       });
 

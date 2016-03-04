@@ -1,8 +1,6 @@
 import path from 'path';
 import expect from 'expect.js';
-
-const utils = require('requirefrom')('src/utils');
-const fromRoot = utils('fromRoot');
+import fromRoot from '../../../utils/fromRoot';
 import { resolve } from 'path';
 import { parseMilliseconds, parse } from '../settings';
 

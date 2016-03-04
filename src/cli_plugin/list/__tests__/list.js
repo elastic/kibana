@@ -5,6 +5,7 @@ import mkdirp from 'mkdirp';
 import Logger from '../../lib/logger';
 import list from '../list';
 import { join } from 'path';
+import { writeFileSync } from 'fs';
 
 describe('kibana cli', function () {
 
@@ -31,7 +32,7 @@ describe('kibana cli', function () {
       rimraf.sync(pluginDir);
     });
 
-    it('list all of the directories in the plugin folder', function () {
+    it('list all of the folders in the plugin folder', function () {
       mkdirp.sync(join(pluginDir, 'plugin1'));
       mkdirp.sync(join(pluginDir, 'plugin2'));
       mkdirp.sync(join(pluginDir, 'plugin3'));
@@ -54,6 +55,19 @@ describe('kibana cli', function () {
 
       expect(logger.log.calledWith('.foo')).to.be(false);
       expect(logger.log.calledWith('.bar')).to.be(false);
+    });
+
+    it('list should only list folders', function () {
+      mkdirp.sync(join(pluginDir, 'plugin1'));
+      mkdirp.sync(join(pluginDir, 'plugin2'));
+      mkdirp.sync(join(pluginDir, 'plugin3'));
+      writeFileSync(join(pluginDir, 'plugin4'), 'This is a file, and not a folder.');
+
+      list(settings, logger);
+
+      expect(logger.log.calledWith('plugin1')).to.be(true);
+      expect(logger.log.calledWith('plugin2')).to.be(true);
+      expect(logger.log.calledWith('plugin3')).to.be(true);
     });
 
   });

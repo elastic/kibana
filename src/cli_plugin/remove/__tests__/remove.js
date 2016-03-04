@@ -1,17 +1,19 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import glob from 'glob';
+import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 import Logger from '../../lib/logger';
 import remove from '../remove';
 import { join } from 'path';
+import { writeFileSync } from 'fs';
 
 describe('kibana cli', function () {
 
   describe('plugin lister', function () {
 
     const pluginDir = join(__dirname, '.test.data');
+    let processExitStub;
     let logger;
 
     const settings = {
@@ -19,6 +21,7 @@ describe('kibana cli', function () {
     };
 
     beforeEach(function () {
+      processExitStub = sinon.stub(process, 'exit');
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
@@ -27,16 +30,27 @@ describe('kibana cli', function () {
     });
 
     afterEach(function () {
+      processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
       rimraf.sync(pluginDir);
     });
 
-    it('log a message if the plugin is not installed.', function () {
+    it('throw an error if the plugin is not installed.', function () {
       settings.pluginPath = join(pluginDir, 'foo');
-      remove(settings, logger);
+      settings.plugin = 'foo';
 
-      expect(logger.log.firstCall.args[0]).to.match(/not installed/i);
+      remove(settings, logger);
+      expect(logger.error.firstCall.args[0]).to.match(/not installed/);
+      expect(process.exit.called).to.be(true);
+    });
+
+    it('throw an error if the specified plugin is not a folder.', function () {
+      writeFileSync(join(pluginDir, 'foo'), 'This is a file, and not a folder.');
+
+      remove(settings, logger);
+      expect(logger.error.firstCall.args[0]).to.match(/not a plugin/);
+      expect(process.exit.called).to.be(true);
     });
 
     it('delete the specified folder.', function () {

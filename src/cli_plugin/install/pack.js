@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { listFiles, extractFiles } from './zip';
 import { resolve } from 'path';
 import { sync as rimrafSync } from 'rimraf';
+import validate from 'validate-npm-package-name';
 
 //*****************************************
 //Return a list of package.json files in the archive
@@ -44,6 +45,16 @@ function deletePackageFiles(settings, packages) {
     const fullPath = resolve(settings.workingPath, 'kibana');
     rimrafSync(fullPath);
   });
+}
+
+//*****************************************
+//Check the plugin name
+//*****************************************
+function validatePackageName(plugin) {
+  const validation = validate(plugin.name);
+  if (!validation.validForNewPackages) {
+    throw new Error(`Invalid plugin name [${plugin.name}] in package.json`);
+  }
 }
 
 //*****************************************
@@ -101,6 +112,7 @@ export async function getPackData(settings, logger) {
   if (packages.length === 0) {
     throw new Error('No kibana plugins found in archive');
   }
+  packages.forEach(validatePackageName);
 
   settings.plugins = packages;
 }
