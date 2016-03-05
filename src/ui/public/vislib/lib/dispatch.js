@@ -236,7 +236,10 @@ export default function DispatchClass(Private) {
   Dispatch.prototype.highlight = function (element) {
     var label = this.getAttribute('data-label');
     if (!label) return;
-    $('[data-label]', element.parentNode).not(function (els, el) { return $(el).data('label') === label; }).css('opacity', 0.5);
+    //Opacity 1 is needed to avoid the css application
+    $('[data-label]', element.parentNode).css('opacity', 1).not(
+      function (els, el) { return `${$(el).data('label')}` === label;}
+    ).css('opacity', 0.5);
   };
 
   /**
