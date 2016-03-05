@@ -22,7 +22,7 @@ module.exports = function (plugin, server) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitForPong() {
-    return client.ping({ requestTimeout: 1500 }).catch(function (err) {
+    return client.ping().catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
