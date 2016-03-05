@@ -1,6 +1,6 @@
 import modules from 'ui/modules';
 import template from 'plugins/kibana/settings/sections/indices/filebeat/directives/filebeat_wizard.html';
-import { keysToSnakeCaseShallow } from '../../../../../../common/lib/case_conversion';
+import IngestProvider from 'ui/ingest';
 
 require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step');
 require('plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step');
@@ -16,8 +16,9 @@ modules.get('apps/settings')
     scope: {},
     bindToController: true,
     controllerAs: 'wizard',
-    controller: function ($scope, AppState, safeConfirm, kbnUrl, $http, Notifier, $window) {
-      var $state = this.state = new AppState();
+    controller: function ($scope, AppState, safeConfirm, kbnUrl, $http, Notifier, $window, config, Private) {
+      const ingest = Private(IngestProvider);
+      const $state = this.state = new AppState();
 
       var notify = new Notifier({
         location: 'Add Data'
@@ -50,10 +51,7 @@ modules.get('apps/settings')
       };
 
       this.save = () => {
-        $http.post('../api/kibana/ingest', {
-          index_pattern: keysToSnakeCaseShallow(this.stepResults.indexPattern),
-          pipeline: this.stepResults.pipeline
-        })
+        return ingest.save(this.stepResults.indexPattern, this.stepResults.pipeline)
         .then(
           () => {
             this.nextStep();
