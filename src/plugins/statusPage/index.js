@@ -1,9 +1,9 @@
 module.exports = function (kibana) {
   return new kibana.Plugin({
-    uiExports: {
+    ui: {
       app: {
         title: 'Server Status',
-        main: 'plugins/statusPage/statusPage',
+        main: './statusPage.js',
         hidden: true,
         url: '/status'
       }

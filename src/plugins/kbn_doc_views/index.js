@@ -2,9 +2,10 @@ module.exports = function (kibana) {
 
   return new kibana.Plugin({
 
-    uiExports: {
+    ui: {
       docViews: [
-        'plugins/kbn_doc_views/kbn_doc_views'
+        './views/table.js',
+        './views/json.js'
       ]
     }
 

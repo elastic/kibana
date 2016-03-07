@@ -51,7 +51,7 @@ module.exports = class Plugin {
     this.path = path;
 
     this.id = opts.id || pkg.name;
-    this.uiExportsSpecs = opts.uiExports || {};
+    this.uiExportsSpecs = opts.ui || opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
     this.externalInit = opts.init || _.noop;

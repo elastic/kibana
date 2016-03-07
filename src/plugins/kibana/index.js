@@ -11,12 +11,11 @@ module.exports = function (kibana) {
       }).default();
     },
 
-    uiExports: {
+    ui: {
       app: {
         title: 'Kibana',
         description: 'the kibana you know and love',
-        //icon: 'plugins/kibana/settings/sections/about/barcode.svg',
-        main: 'plugins/kibana/kibana',
+        main: './kibana.js',
         uses: [
           'visTypes',
           'spyModes',
