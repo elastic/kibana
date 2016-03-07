@@ -1,9 +1,13 @@
 import { parse, format } from 'url';
-import { startsWith, isString, find } from 'lodash';
+import { find, startsWith, isString, find } from 'lodash';
 
 export default function (chrome, internals) {
   chrome.getNavLinks = function () {
     return internals.nav;
+  };
+  
+  chrome.getActiveNavLink = function () {
+    return find(internals.nav, { active: true });
   };
 
   chrome.getBasePath = function () {
