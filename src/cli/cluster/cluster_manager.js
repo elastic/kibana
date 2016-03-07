@@ -85,14 +85,17 @@ module.exports = class ClusterManager {
     const chokidar = require('chokidar');
     const fromRoot = require('../../utils/fromRoot');
 
-    const watchPaths = uniq([
-      'src/plugins',
-      'src/server',
-      'src/ui',
-      'src/utils',
-      'config',
-      ...extraPaths
-    ].map(path => resolve(path)));
+    const watchPaths = uniq(
+      [
+        fromRoot('src/plugins'),
+        fromRoot('src/server'),
+        fromRoot('src/ui'),
+        fromRoot('src/utils'),
+        fromRoot('config'),
+        ...extraPaths
+      ]
+      .map(path => resolve(path))
+    );
 
     this.watcher = chokidar.watch(watchPaths, {
       cwd: fromRoot('.'),
