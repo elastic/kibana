@@ -1,3 +1,4 @@
+var camelCase = require('lodash').camelCase;
 require('babel/register')(require('./src/optimize/babel_options').node);
 
 module.exports = function (grunt) {
@@ -81,6 +82,16 @@ module.exports = function (grunt) {
     config: config,
     loadGruntTasks: {
       pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
+    },
+    preMerge(config, data) {
+      Object.keys(config).forEach(key => {
+        const camelKey = camelCase(key);
+        if (key !== camelKey) {
+          grunt.log.debug(`renaming config for ${key} to ${camelKey}`);
+          config[camelKey] = config[key];
+          delete config[key];
+        }
+      });
     }
   });
 
