@@ -1,8 +1,8 @@
 import cluster from 'cluster';
-const { join } = require('path');
+const { join, resolve } = require('path');
 const { format: formatUrl } = require('url');
 import Hapi from 'hapi';
-const { debounce, compact, get, invoke, bindAll, once, sample } = require('lodash');
+const { debounce, compact, get, invoke, bindAll, once, sample, uniq } = require('lodash');
 
 import Log from '../Log';
 import Worker from './worker';
@@ -85,14 +85,19 @@ module.exports = class ClusterManager {
     const chokidar = require('chokidar');
     const fromRoot = require('../../utils/fromRoot');
 
-    this.watcher = chokidar.watch([
-      'src/plugins',
-      'src/server',
-      'src/ui',
-      'src/utils',
-      'config',
-      ...extraPaths
-    ], {
+    const watchPaths = uniq(
+      [
+        fromRoot('src/plugins'),
+        fromRoot('src/server'),
+        fromRoot('src/ui'),
+        fromRoot('src/utils'),
+        fromRoot('config'),
+        ...extraPaths
+      ]
+      .map(path => resolve(path))
+    );
+
+    this.watcher = chokidar.watch(watchPaths, {
       cwd: fromRoot('.'),
       ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__)[\\\/]/
     });
