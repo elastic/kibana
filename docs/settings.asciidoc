@@ -340,6 +340,10 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 + 
 *default*: `.kibana`
 
+`kibana.indexPatternPlaceholder` added[5.0]:: The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.
++
+*default*: `logstash-*`
+
 `kibana.defaultAppId` added[4.2]:: The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`.
 +
 *alias*: `default_app_id` deprecated[4.2]
