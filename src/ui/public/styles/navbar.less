@@ -1,5 +1,7 @@
 @import "./control_group";
 
+@navbar-margin: @padding-small-vertical;
+
 navbar {
   .control-group();
 
@@ -21,8 +23,8 @@ navbar {
   }
 
   .navbar-text {
-    margin-top: 6px;
-    margin-bottom: 6px;
+    margin-top: @navbar-margin;
+    margin-bottom: @navbar-margin;
   }
 
   // the "brand" that is displayed, usually on the left of the navbar
