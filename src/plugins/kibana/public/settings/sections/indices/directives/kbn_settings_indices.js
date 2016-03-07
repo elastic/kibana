@@ -13,10 +13,7 @@ require('ui/modules').get('apps/settings')
       config.$bind($scope, 'defaultIndex');
 
       function refreshIndexPatternList() {
-        indexPatterns.getIds.clearCache();
-
-        refreshKibanaIndex()
-        .then(() => {return indexPatterns.getIds();})
+        indexPatterns.getIds()
         .then((ids) => {
           $scope.indexPatternIds = ids;
           $scope.indexPatternList = ids.map(function (id) {
@@ -31,7 +28,11 @@ require('ui/modules').get('apps/settings')
       }
 
       $scope.$watch('defaultIndex', refreshIndexPatternList);
-      $scope.$on('ingest:updated', refreshIndexPatternList);
+
+      $scope.$on('ingest:updated', () => {
+        indexPatterns.getIds.clearCache();
+        refreshKibanaIndex().then(refreshIndexPatternList);
+      });
 
       $scope.$emit('application.load');
     }
