@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FilterBarLibMapExistsProvider from 'ui/filter_bar/lib/map_exists';
 describe('Filter Bar Directive', function () {
   describe('mapExists()', function () {

@@ -66,7 +66,7 @@ export default (kibana) => {
       },
 
       modules: {
-        ngMock$: fromRoot('src/plugins/dev_mode/public/ngMock'),
+        ng_mock$: fromRoot('src/plugins/dev_mode/public/ng_mock'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils'),
         'angular-mocks': {

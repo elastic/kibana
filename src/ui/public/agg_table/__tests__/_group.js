@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';

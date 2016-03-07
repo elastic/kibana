@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 describe('Filter Bar pushFilter()', function () {
 

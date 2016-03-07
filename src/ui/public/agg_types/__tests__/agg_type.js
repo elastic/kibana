@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import 'ui/private';
 import AggParamsPM from 'ui/agg_types/agg_params';

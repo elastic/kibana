@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
 import aggResp from 'fixtures/agg_resp/date_histogram';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';

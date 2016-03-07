@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FilterBarLibMapQueryStringProvider from 'ui/filter_bar/lib/map_query_string';
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {

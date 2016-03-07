@@ -2,7 +2,7 @@ import { pluck } from 'lodash';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import moment from 'moment';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 describe('ui/index_patterns/_calculate_indices', () => {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 import AggTypesParamTypesStringProvider from 'ui/agg_types/param_types/string';
 

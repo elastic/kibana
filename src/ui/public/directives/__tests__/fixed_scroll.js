@@ -1,6 +1,6 @@
 
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/fixed_scroll';
 import $ from 'jquery';
 import sinon from 'auto-release-sinon';

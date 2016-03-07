@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FilterBarLibMapDefaultProvider from 'ui/filter_bar/lib/map_default';
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {

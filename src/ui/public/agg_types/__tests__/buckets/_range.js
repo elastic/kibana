@@ -1,6 +1,6 @@
 import { values } from 'lodash';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import resp from 'fixtures/agg_resp/range';
 import AggTypesIndexProvider from 'ui/agg_types/index';

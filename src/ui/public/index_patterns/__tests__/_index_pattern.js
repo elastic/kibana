@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import errors from 'ui/errors';

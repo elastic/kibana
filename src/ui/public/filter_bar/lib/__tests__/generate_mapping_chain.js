@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FilterBarLibGenerateMappingChainProvider from 'ui/filter_bar/lib/generate_mapping_chain';
 
 describe('Filter Bar Directive', function () {

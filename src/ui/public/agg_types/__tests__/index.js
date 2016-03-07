@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import './agg_type';
 import './agg_params';
 import './bucket_count_between';

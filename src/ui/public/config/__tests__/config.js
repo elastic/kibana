@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import ConfigDefaultsProvider from 'ui/config/defaults';
 describe('config component', function () {
   var $scope;

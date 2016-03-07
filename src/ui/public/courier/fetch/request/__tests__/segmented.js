@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
 import CourierFetchRequestSearchProvider from 'ui/courier/fetch/request/search';
 describe('ui/courier/fetch/request/segmented', () => {

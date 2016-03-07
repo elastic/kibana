@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 describe('styleCompile directive', function () {
 
   var config;

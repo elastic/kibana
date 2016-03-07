@@ -11,7 +11,7 @@ import StackTraceMapper from 'ui/stack_trace_mapper';
 import { parse } from 'url';
 import $ from 'jquery';
 import './test_harness.less';
-import 'ngMock';
+import 'ng_mock';
 
 /*** the vislib tests have certain style requirements, so lets make sure they are met ***/
 $('body').attr('id', 'test-harness-body'); // so we can make high priority selectors

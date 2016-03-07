@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import WorkQueue from 'ui/routes/work_queue';
 import sinon from 'auto-release-sinon';
 import 'ui/promises';

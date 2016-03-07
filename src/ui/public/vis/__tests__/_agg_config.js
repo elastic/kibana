@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
 import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
 import VisAggConfigProvider from 'ui/vis/agg_config';

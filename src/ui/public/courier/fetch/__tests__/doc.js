@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
 import CourierFetchRequestDocProvider from 'ui/courier/fetch/request/doc';
 

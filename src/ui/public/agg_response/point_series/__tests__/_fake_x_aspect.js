@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import VisProvider from 'ui/vis';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
