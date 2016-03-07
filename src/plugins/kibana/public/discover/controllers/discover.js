@@ -126,7 +126,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     return {
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
-      columns: savedSearch.columns || ['_source'],
+      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns'),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))

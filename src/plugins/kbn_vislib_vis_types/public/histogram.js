@@ -11,7 +11,7 @@ export default function HistogramVisType(Private) {
     title: 'Vertical bar chart',
     icon: 'fa-bar-chart',
     description: 'The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, ' +
-    'exact numbers or percentages. If you are not sure which chart your need, you could do worse than to start here.',
+    'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.',
     params: {
       defaults: {
         shareYAxis: true,
