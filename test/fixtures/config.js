@@ -16,7 +16,7 @@ module.exports = {
       }]
     },
     emptyKibana: {
-      baseDir: path.join(rootDir, 'emptyKibana'),
+      baseDir: path.join(rootDir, 'empty_kibana'),
       bulk: [{
         indexName: '.kibana',
         indexDefinition: 'kibana_definition.js',
@@ -25,7 +25,7 @@ module.exports = {
       }]
     },
     logstashFunctional: {
-      baseDir: path.join(rootDir, 'logstashFunctional'),
+      baseDir: path.join(rootDir, 'logstash_functional'),
       bulk: [{
         indexDefinition: 'makelogs_index_definition.js',
         indexName: 'logstash-2015.09.20',
