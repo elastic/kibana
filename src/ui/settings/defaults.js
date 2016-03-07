@@ -301,6 +301,10 @@ export default function defaultSettingsProvider() {
       description: 'The URL can sometimes grow to be too large for some browsers to ' +
         'handle. To counter-act this we are testing if storing parts of the URL in ' +
         'sessions storage could help. Please let us know how it goes!'
+    },
+    'indexPatternPlaceholder': {
+      value: 'logstash-*',
+      description: 'The placeholder for the field "Index name or pattern" in the "Settings > Indices" tab.',
     }
   };
 }
