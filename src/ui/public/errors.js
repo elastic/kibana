@@ -149,6 +149,28 @@ define(function (require) {
   _.class(errors.FieldNotFoundInCache).inherits(KbnError);
 
   /**
+   * when a field mapping is requested for an unknown field
+   * @param {String} name - the field name
+   */
+  errors.FieldNotFoundInSelectedIndex = function FieldNotFoundInSelectedIndex(name) {
+    KbnError.call(this,
+      'The ' + name + ' field was not found in the currently selected index',
+      errors.FieldNotFoundInSelectedIndex);
+  };
+  _.class(errors.FieldNotFoundInSelectedIndex).inherits(KbnError);
+
+  /**
+   * when a field mapping is requested for an unknown field
+   * @param {String} name - the field name
+   */
+  errors.InvalidValueForField = function InvalidValueForField(name, type, value) {
+    KbnError.call(this,
+      'The ' + name + ' field expects a ' + type + ' but got ' + value,
+      errors.InvalidValueForField);
+  };
+  _.class(errors.InvalidValueForField).inherits(KbnError);
+
+  /**
    * when a mapping already exists for a field the user is attempting to add
    * @param {String} name - the field name
    */

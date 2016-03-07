@@ -207,11 +207,58 @@ define(function (require) {
       if (output.subAggs) {
         var subDslLvl = configDsl.aggs || (configDsl.aggs = {});
         output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
-          subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
+          subAggConfig.toDslNested(subDslLvl);
         });
       }
 
       return configDsl;
+    };
+
+    /**
+     * Convert this aggConfig to its dsl syntax, handling the case that the
+     * config is nested. If it is not nested, this is equivalent to:
+     * `destination[this.id] = this.toDsl()`. If it is nested, the value of
+     * `destination['nested_' + this.id]` reflects the nested structure, and
+     * the original dsl exists at `destination['nested_' + this.id][this.id]`.
+     *
+     * @param destination The destination object in which to emplace the DSL
+     * under the appropriate key.
+     * @returns {void|Object} The original result of `this.toDsl()`, regardless
+     * of whether this aggregation is nested.
+     */
+    AggConfig.prototype.toDslNested = function (destination, nestedPath, reverseNested) {
+      var id = this.id;
+      var dsl = this.toDsl();
+      var result = dsl; // save the original dsl to return later
+
+      if (nestedPath || reverseNested) {
+        // save the current dsl as a sub-agg of the nested agg
+        var aggs = {};
+        aggs[id] = dsl;
+        if (reverseNested) {
+          var reverseNestedDsl = {};
+          // when reverse nesting, the path is optional
+          if (nestedPath) {
+            reverseNestedDsl.path = nestedPath;
+          }
+          id = 'nested_' + this.id;
+          dsl = {
+            reverse_nested: reverseNestedDsl,
+            aggs: aggs
+          };
+        } else if (nestedPath) {
+          id = 'nested_' + this.id;
+          dsl = {
+            nested: {
+              path: nestedPath
+            },
+            aggs: aggs
+          };
+        }
+      }
+      // apply the change to the destination
+      destination[id] = dsl;
+      return result;
     };
 
     AggConfig.prototype.toJSON = function () {

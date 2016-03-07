@@ -1,0 +1,50 @@
+{
+  "simple" : {
+    "name" : "simple",
+    "type" : "boolean"
+  },
+  "s_imple" : {
+    "name" : "s_imple",
+    "type" : "boolean"
+  },
+  "s_imple3" : {
+    "name" : "s_imple3",
+    "type" : "boolean"
+  },
+  "s_imple3.field" : {
+    "name" : "s_imple3.field",
+    "type" : "boolean"
+  },
+  "strField" : {
+    "name" : "strField",
+    "type" : "string"
+  },
+  "boolField" : {
+    "name" : "boolField",
+    "type" : "boolean"
+  },
+  "geoPointField" : {
+    "name" : "geoPointField",
+    "type" : "geo_point"
+  },
+  "ipField" : {
+    "name" : "ipField",
+    "type" : "ip"
+  },
+  "intField" : {
+    "name" : "intField",
+    "type" : "integer"
+  },
+  "decimalField" : {
+    "name" : "decimalField",
+    "type" : "double"
+  },
+  "dateField" : {
+    "name" : "dateField",
+    "type" : "date"
+  },
+  "dateTimeField" : {
+    "name" : "dateTimeField",
+    "type" : "date"
+  }
+}

@@ -22,7 +22,7 @@ define(function (require) {
      * @return {[type]}        [description]
      */
     MetricAggType.prototype.getValue = function (agg, bucket) {
-      return bucket[agg.id].value;
+      return (bucket[agg.id] || bucket['nested_' + agg.id][agg.id]).value;
     };
 
     /**

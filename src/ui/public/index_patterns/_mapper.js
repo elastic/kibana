@@ -56,9 +56,9 @@ define(function (require) {
         }
 
         return promise.then(function (indexList) {
-          return es.indices.getFieldMapping({
+          return es.indices.getMapping({
             index: indexList,
-            field: '*',
+            type: '*',
             ignoreUnavailable: _.isArray(indexList),
             allowNoIndices: false,
             includeDefaults: true

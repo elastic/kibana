@@ -18,6 +18,7 @@
             aria-label="Search">
             <span aria-hidden="true" class="fa fa-search"></span></button>
         </div>
+        <div ng-show="parseError !== undefined"><pre>{{parseError}}</pre></div>
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>
     </form>

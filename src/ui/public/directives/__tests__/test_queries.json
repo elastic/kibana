@@ -1,0 +1,126 @@
+{
+  "fieldName1" : {
+    "query" : "simple",
+    "result" : "{\"query\":{\"term\":{\"simple\":true}}}"
+  },
+  "fieldName3" : {
+    "query" : "s_imple",
+    "result" : "{\"query\":{\"term\":{\"s_imple\":true}}}"
+  },
+  "fieldName5" : {
+    "query" : "s_imple3",
+    "result" : "{\"query\":{\"term\":{\"s_imple3\":true}}}"
+  },
+  "fieldName6" : {
+    "query" : "s_imple3.field",
+    "result" : "{\"query\":{\"term\":{\"s_imple3.field\":true}}}"
+  },
+  "stringTerm" : {
+    "query" : "strField=\"test string\"",
+    "result" : "{\"query\":{\"term\":{\"strField\":\"test string\"}}}"
+  },
+  "booleanTermTrue" : {
+    "query" : "boolField=true",
+    "result" : "{\"query\":{\"term\":{\"boolField\":true}}}"
+  },
+  "booleanTermFalse" : {
+    "query" : "boolField=false",
+    "result" : "{\"query\":{\"term\":{\"boolField\":false}}}"
+  },
+  "booleanTerm" : {
+    "query" : "boolField",
+    "result" : "{\"query\":{\"term\":{\"boolField\":true}}}"
+  },
+  "intTerm" : {
+    "query" : "intField=1234",
+    "result" : "{\"query\":{\"term\":{\"intField\":1234}}}"
+  },
+  "decimalTerm" : {
+    "query" : "decimalField=1234.56789",
+    "result" : "{\"query\":{\"term\":{\"decimalField\":1234.56789}}}"
+  },
+  "ipTerm" : {
+    "query" : "ipField=127.0.0.1",
+    "result" : "{\"query\":{\"term\":{\"ipField\":\"127.0.0.1\"}}}"
+  },
+  "geoTerm" : {
+    "query" : "geoPointField=\"30.34202800,-97.72782900\"",
+    "result" : "{\"query\":{\"term\":{\"geoPointField\":\"30.34202800,-97.72782900\"}}}"
+  },
+  "dateTerm" : {
+    "query" : "dateField=2015-01-01",
+    "result" : "{\"query\":{\"term\":{\"dateField\":1420070400000}}}"
+  },
+  "dateTimeTerm" : {
+    "query" : "dateTimeField=2015-01-01T12:00:00.000Z",
+    "result" : "{\"query\":{\"term\":{\"dateTimeField\":1420113600000}}}"
+  },
+  "notTerm" : {
+    "query" : "NOT intField=1234",
+    "result" : "{\"query\":{\"bool\":{\"must_not\":{\"term\":{\"intField\":1234}}}}}"
+  },
+  "ltTerm" : {
+    "query" : "intField<1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":null,\"to\":1234,\"include_lower\":true,\"include_upper\":false}}}}"
+  },
+  "gtTerm" : {
+    "query" : "intField>1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1234,\"to\":null,\"include_lower\":false,\"include_upper\":true}}}}"
+  },
+  "lteTerm" : {
+    "query" : "intField<=1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":null,\"to\":1234,\"include_lower\":true,\"include_upper\":true}}}}"
+  },
+  "gteTerm" : {
+    "query" : "intField>=1234",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1234,\"to\":null,\"include_lower\":true,\"include_upper\":true}}}}"
+  },
+  "likeTerm" : {
+    "query" : "strField~=\"abc*123?foo\"",
+    "result" : "{\"query\":{\"wildcard\":{\"strField\":\"abc*123?foo\"}}}"
+  },
+  "isTerm" : {
+    "query" : "intField IS NULL",
+    "result" : "{\"query\":{\"filtered\":{\"filter\":{\"missing\":{\"field\":\"intField\"}}}}}"
+  },
+  "rangeExclusive" : {
+    "query" : "intField IN [1,10]",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1,\"to\":10,\"include_lower\":false,\"include_upper\":false}}}}"
+  },
+  "rangeLowerInclusive" : {
+    "query" : "intField IN (1,10]",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1,\"to\":10,\"include_lower\":true,\"include_upper\":false}}}}"
+  },
+  "rangeUpperInclusive" : {
+    "query" : "intField IN [1,10)",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1,\"to\":10,\"include_lower\":false,\"include_upper\":true}}}}"
+  },
+  "rangeInclusive" : {
+    "query" : "intField IN (1,10)",
+    "result" : "{\"query\":{\"range\":{\"intField\":{\"from\":1,\"to\":10,\"include_lower\":true,\"include_upper\":true}}}}"
+  },
+  "setSingleValue" : {
+    "query" : "intField IN {1}",
+    "result" : "{\"query\":{\"bool\":{\"should\":[{\"term\":{\"intField\":1}}]}}}"
+  },
+  "setMultipleValues" : {
+    "query" : "intField IN {1,2,3}",
+    "result" : "{\"query\":{\"bool\":{\"should\":[{\"term\":{\"intField\":1}},{\"term\":{\"intField\":2}},{\"term\":{\"intField\":3}}]}}}"
+  },
+  "termAndTerm" : {
+    "query" : "dateTimeField=2015-01-01T12:00:00.000Z AND boolField",
+    "result" : "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"dateTimeField\":1420113600000}},{\"term\":{\"boolField\":true}}]}}}"
+  },
+  "termOrTerm" : {
+    "query" : "dateTimeField=2015-01-01T12:00:00.000Z OR boolField",
+    "result" : "{\"query\":{\"bool\":{\"should\":[{\"term\":{\"dateTimeField\":1420113600000}},{\"term\":{\"boolField\":true}}]}}}"
+  },
+  "simpleScope" : {
+    "query" : "(dateTimeField=2015-01-01T12:00:00.000Z OR boolField) AND intField=1",
+    "result" : "{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"term\":{\"dateTimeField\":1420113600000}},{\"term\":{\"boolField\":true}}]}},{\"term\":{\"intField\":1}}]}}}"
+  },
+  "multiScope" : {
+    "query" : "(dateTimeField=2015-01-01T12:00:00.000Z OR boolField) AND (intField=1 OR boolField)",
+    "result" : "{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"should\":[{\"term\":{\"dateTimeField\":1420113600000}},{\"term\":{\"boolField\":true}}]}},{\"bool\":{\"should\":[{\"term\":{\"intField\":1}},{\"term\":{\"boolField\":true}}]}}]}}}"
+  }
+}

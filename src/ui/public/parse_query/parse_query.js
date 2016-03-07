@@ -4,6 +4,7 @@ define(function (require) {
     .directive('parseQuery', function (Private) {
       var fromUser = Private(require('ui/parse_query/lib/from_user'));
       var toUser = require('ui/parse_query/lib/to_user');
+      var _ = require('lodash');
 
       return {
         restrict: 'A',
@@ -13,9 +14,17 @@ define(function (require) {
         },
         link: function ($scope, elem, attr, ngModel) {
           var init = function () {
-            $scope.ngModel = fromUser($scope.ngModel);
+            $scope.ngModel = fromUser($scope.ngModel, ($scope ? $scope.$parent : undefined));
           };
 
+          var fieldMap;
+
+          if ($scope.$parent.indexPattern) {
+            fieldMap = _.chain($scope.$parent.indexPattern.fields).indexBy('name').value();
+          }
+
+          toUser.setIndexPattern(fieldMap);
+          fromUser.setIndexPattern(fieldMap);
           ngModel.$parsers.push(fromUser);
           ngModel.$formatters.push(toUser);
 
