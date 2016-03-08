@@ -21,7 +21,6 @@ module.exports = {
           'mapping': {
             'type': 'string',
             'index': 'analyzed',
-            'omit_norms': true,
             'fields': {
               'raw': {
                 'index': 'not_analyzed',
