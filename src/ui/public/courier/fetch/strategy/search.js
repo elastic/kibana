@@ -21,6 +21,9 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
           }
 
           var timeBounds = timefilter.getBounds();
+          if (fetchParams.bounds) {
+            timeBounds = fetchParams.bounds;
+          }
           return indexList.toIndexList(timeBounds.min, timeBounds.max);
         })
         .then(function (indexList) {

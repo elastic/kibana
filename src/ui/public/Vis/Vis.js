@@ -2,10 +2,12 @@ import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/Vis/AggConfigs';
+import VisTimefilterHandlerProvider from 'plugins/vis_timefilter/vis_timefilter_handler';
 export default function VisFactory(Notifier, Private) {
   var aggTypes = Private(AggTypesIndexProvider);
   var visTypes = Private(RegistryVisTypesProvider);
   var AggConfigs = Private(VisAggConfigsProvider);
+  var VisTimefilterHandler = Private(VisTimefilterHandlerProvider);
 
   var notify = new Notifier({
     location: 'Vis'
@@ -24,6 +26,9 @@ export default function VisFactory(Notifier, Private) {
 
     // http://aphyr.com/data/posts/317/state.gif
     this.setState(state);
+
+    this.vistime = new VisTimefilterHandler(this.indexPattern);
+    this.vistime.initWithParams(this.params);
   }
 
   Vis.convertOldState = function (type, oldState) {
@@ -77,6 +82,10 @@ export default function VisFactory(Notifier, Private) {
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.params.defaults || {})
     );
+
+    if (this.params.timeSets) {
+      this.params.timeSets = _.clone(this.params.timeSets, true);
+    }
 
     this.aggs = new AggConfigs(this, state.aggs);
   };

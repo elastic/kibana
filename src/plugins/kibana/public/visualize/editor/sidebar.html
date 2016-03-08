@@ -19,6 +19,9 @@
           <li ng-class="{active: sidebar.section == 'options'}">
             <a class="navbar-link" ng-click="sidebar.section='options'">Options</a>
           </li>
+          <li ng-class="{active: sidebar.section == 'timefilter'}">
+            <a class="navbar-link" ng-click="sidebar.section='timefilter'">Timefilter</a>
+          </li>
         </ul>
 
         <!-- controls -->
@@ -63,6 +66,9 @@
       <vis-editor-vis-options vis="vis" saved-vis="savedVis"></vis-editor-vis-options>
     </div>
 
+    <div class="vis-editor-config" ng-show="sidebar.section == 'timefilter'">
+      <vis-timefilter-params vis="vis"></vis-timefilter-params>
+    </div>
 
   </form>
 </div>

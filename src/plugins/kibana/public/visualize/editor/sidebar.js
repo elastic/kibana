@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import 'plugins/kibana/visualize/editor/agg_group';
 import 'plugins/kibana/visualize/editor/vis_options';
+import 'plugins/vis_timefilter/vis_timefilter_params';
 import uiModules from 'ui/modules';
 import sidebarTemplate from 'plugins/kibana/visualize/editor/sidebar.html';
 uiModules
