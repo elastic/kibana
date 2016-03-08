@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import glob from 'glob';
+import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 
