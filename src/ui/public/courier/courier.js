@@ -19,7 +19,7 @@ import uiModules from 'ui/modules';
 
 
 uiModules.get('kibana/courier')
-.service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier) {
+.service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier, timefilter) {
   function Courier() {
     var self = this;
 
@@ -131,9 +131,11 @@ uiModules.get('kibana/courier')
     };
 
     // Listen for refreshInterval changes
-    $rootScope.$watchCollection('$$timefilter.refreshInterval', function () {
-      var refreshValue = _.get($rootScope, '$$timefilter.refreshInterval.value');
-      var refreshPause = _.get($rootScope, '$$timefilter.refreshInterval.pause');
+    $rootScope.$watchCollection(function () {
+      return timefilter.refreshInterval;
+    }, function (interval) {
+      var refreshValue = _.get(interval, 'value');
+      var refreshPause = _.get(interval, 'pause');
       if (_.isNumber(refreshValue) && !refreshPause) {
         self.fetchInterval(refreshValue);
       } else {
