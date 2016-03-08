@@ -41,8 +41,9 @@ export default function AreaChartFactory(Private) {
 
         var highlightOpacity = 0.8;
         var highlightElements = $('[data-label]', element.parentNode).filter(
-          function (els, el) { return `${$(el).data('label')}` === label;
-        });
+          function (els, el) {
+            return `${$(el).data('label')}` === label;
+          });
         $('[data-label]', element.parentNode).not(highlightElements).css('opacity', defaultOpacity / 2); // half of the default opacity
         highlightElements.css('opacity', highlightOpacity);
       };
