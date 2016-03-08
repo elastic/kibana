@@ -54,7 +54,7 @@ module.exports = function ({ Plugin }) {
         return reply.continue();
       }
 
-      function noCreateIndex({ path }, reply) {
+      function noDirectIndex({ path }, reply) {
         const requestPath = trimRight(trim(path), '/');
         const matchPath = createPath(kibanaIndex);
 
@@ -75,7 +75,7 @@ module.exports = function ({ Plugin }) {
         ['PUT', 'POST', 'DELETE'],
         `/${kibanaIndex}/{paths*}`,
         {
-          pre: [ noCreateIndex, noBulkCheck ]
+          pre: [ noDirectIndex, noBulkCheck ]
         }
       );
 
