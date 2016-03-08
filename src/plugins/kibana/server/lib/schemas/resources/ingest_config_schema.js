@@ -4,5 +4,5 @@ const pipelineSchema = require('./pipeline_schema');
 
 module.exports = Joi.object({
   index_pattern: indexPatternSchema.required(),
-  pipeline: pipelineSchema.required()
+  pipeline: pipelineSchema
 });

@@ -113,6 +113,30 @@ define(function (require) {
           });
       });
 
+      bdd.it('should create a pipeline if one is included in the request', function () {
+        return request.post('/kibana/ingest')
+          .send(createTestData())
+          .expect(204)
+          .then(function () {
+            return scenarioManager.client.transport.request({
+              path: '_ingest/pipeline/kibana-logstash-*',
+              method: 'GET'
+            })
+            .then(function (body) {
+              expect(body.pipelines[0].id).to.be('kibana-logstash-*');
+            });
+          });
+      });
+
+      bdd.it('pipeline should be optional', function optionalPipeline() {
+        const payload = createTestData();
+        delete payload.pipeline;
+
+        return request.post('/kibana/ingest')
+          .send(payload)
+          .expect(204);
+      });
+
       bdd.it('should return 409 conflict when a pattern with the given ID already exists', function patternConflict() {
         return request.post('/kibana/ingest')
           .send(createTestData())

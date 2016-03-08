@@ -67,6 +67,7 @@ module.exports = function registerPost(server) {
       const indexPattern = keysToCamelCaseShallow(requestDocument.index_pattern);
       const indexPatternId = indexPattern.id;
       const ingestConfigName = patternToIngest(indexPatternId);
+      const shouldCreatePipeline = !_.isEmpty(requestDocument.pipeline);
       delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
@@ -132,7 +133,11 @@ module.exports = function registerPost(server) {
           return boundCallWithRequest('indices.putTemplate', templateParams)
           .catch((templateError) => {return patternRollback(templateError, indexPatternId, boundCallWithRequest);});
         })
-        .then(() => {
+        .then((templateResponse) => {
+          if (!shouldCreatePipeline) {
+            return templateResponse;
+          }
+
           return boundCallWithRequest('transport.request', pipelineParams)
           .catch((pipelineError) => {return templateRollback(pipelineError, ingestConfigName, boundCallWithRequest);})
           .catch((templateRollbackError) => {return patternRollback(templateRollbackError, indexPatternId, boundCallWithRequest);});
