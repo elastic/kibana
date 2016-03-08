@@ -3,9 +3,6 @@
 
 .tab-dashboard {
   background-color: @dashboard-bg;
-  navbar[name="dashboard-options"] {
-    padding-bottom: 0;
-  }
 }
 
 dashboard-grid {
@@ -156,14 +153,24 @@ dashboard-grid {
   }
 }
 
-.dashboard-actions {
-  margin-left: auto;
-}
-
 .dashboard-panel-picker > .list-group-item {
   border-top: 0;
 }
 
 .dashboard-load {
   margin: 10px;
+}
+
+.dashboard {
+  &-info {
+    line-height: 30px;
+    padding: 0px 10px;
+    border-bottom-left-radius: @border-radius-base;
+
+
+    &-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  }
 }

@@ -7,13 +7,6 @@ import 'plugins/statusPage/statusPage.less';
 
 
 const chrome = require('ui/chrome')
-.setTabs([
-  {
-    id: '',
-    title: 'Server Status',
-    activeIndicatorColor: '#EFF0F2'
-  }
-])
 .setRootTemplate(require('plugins/statusPage/statusPage.html'))
 .setRootController('ui', function ($http, $scope) {
   const ui = this;
