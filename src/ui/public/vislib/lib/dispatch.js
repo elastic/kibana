@@ -106,6 +106,9 @@ export default function DispatchClass(Private) {
     var isClickable = this.listenerCount('click') > 0;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
+    if (!this.handler.highlight) {
+      this.handler.highlight = self.highlight;
+    }
 
     function hover(d, i) {
       // Add pointer if item is clickable
@@ -113,7 +116,7 @@ export default function DispatchClass(Private) {
         self.addMousePointer.call(this, arguments);
       }
 
-      self.highlightLegend.call(this, $el);
+      self.handler.highlight.call(this, $el);
       self.emit('hover', self.eventResponse(d, i));
     }
 
@@ -129,9 +132,12 @@ export default function DispatchClass(Private) {
     var self = this;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
+    if (!this.handler.unHighlight) {
+      this.handler.unHighlight = self.unHighlight;
+    }
 
     function mouseout() {
-      self.unHighlightLegend.call(this, $el);
+      self.handler.unHighlight.call(this, $el);
     }
 
     return addEvent('mouseout', mouseout);
@@ -225,21 +231,24 @@ export default function DispatchClass(Private) {
    * Mouseover Behavior
    *
    * @param element {D3.Selection}
-   * @method highlightLegend
+   * @method highlight
    */
-  Dispatch.prototype.highlightLegend = function (element) {
+  Dispatch.prototype.highlight = function (element) {
     var label = this.getAttribute('data-label');
     if (!label) return;
-    $('[data-label]', element.parentNode).not('[data-label="' + label + '"]').css('opacity', 0.5);
+    //Opacity 1 is needed to avoid the css application
+    $('[data-label]', element.parentNode).css('opacity', 1).not(
+      function (els, el) { return `${$(el).data('label')}` === label;}
+    ).css('opacity', 0.5);
   };
 
   /**
    * Mouseout Behavior
    *
    * @param element {D3.Selection}
-   * @method unHighlightLegend
+   * @method unHighlight
    */
-  Dispatch.prototype.unHighlightLegend = function (element) {
+  Dispatch.prototype.unHighlight = function (element) {
     $('[data-label]', element.parentNode).css('opacity', 1);
   };
 

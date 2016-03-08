@@ -59,8 +59,6 @@ module.exports = function registerPost(server) {
                       mapping: {
                         type: 'string',
                         index: 'analyzed',
-                        omit_norms: true,
-                        fielddata: {format: 'disabled'},
                         fields: {
                           raw: {type: 'string', index: 'not_analyzed', doc_values: true, ignore_above: 256}
                         }

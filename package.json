@@ -56,8 +56,10 @@
     "elasticsearchWithPlugins": "grunt esvm:withPlugins:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
+    "makelogs": "makelogs",
     "mocha": "mocha",
-    "mocha:debug": "mocha --debug-brk"
+    "mocha:debug": "mocha --debug-brk",
+    "sterilize": "grunt sterilize"
   },
   "repository": {
     "type": "git",
@@ -100,6 +102,7 @@
     "extract-text-webpack-plugin": "0.8.2",
     "file-loader": "0.8.4",
     "font-awesome": "4.4.0",
+    "glob-all": "3.0.1",
     "good": "6.3.0",
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",
@@ -125,11 +128,10 @@
     "moment-timezone": "0.4.1",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
-    "requirefrom": "0.2.0",
     "rimraf": "2.4.3",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",
-    "semver": "4.3.6",
+    "semver": "5.1.0",
     "style-loader": "0.12.3",
     "tar": "2.2.0",
     "url-loader": "0.5.6",
@@ -144,12 +146,11 @@
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "4.1.8",
-    "chokidar": "1.0.5",
+    "chokidar": "1.4.3",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
-    "glob": "4.5.3",
     "grunt": "0.4.5",
     "grunt-babel": "5.0.1",
     "grunt-cli": "0.1.13",
@@ -176,6 +177,7 @@
     "libesvm": "3.3.0",
     "license-checker": "3.1.0",
     "load-grunt-config": "0.7.2",
+    "makelogs": "3.0.0-beta3",
     "marked-text-renderer": "0.1.0",
     "mocha": "2.3.0",
     "nock": "2.10.0",
@@ -187,7 +189,7 @@
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "4.3.0",
-    "npm": "2.14.15"
+    "node": "4.3.2",
+    "npm": "2.14.22"
   }
 }
