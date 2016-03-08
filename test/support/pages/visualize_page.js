@@ -396,7 +396,7 @@ define(function (require) {
       var yAxisLabel = 0;
       var yAxisHeight = 0;
 
-      // 1). get the maximim chart Y-Axis marker value
+      common.debug('1) get the maximim chart Y-Axis marker value');
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
@@ -408,29 +408,36 @@ define(function (require) {
         common.debug('yAxisLabel = ' + yAxisLabel);
         return yLabel;
       })
-      // 2). find and save the y-axis pixel size (the chart height)
       .then(function () {
+        common.debug('2) find and save the y-axis pixel size (the chart height)');
+
         return self
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('rect.background'); // different here
       })
       .then(function (chartAreaObj) {
+        common.debug('3) get chart height');
+
         return chartAreaObj.getAttribute('height');
       })
       .then(function (chartH) {
         yAxisHeight = chartH;
-        common.debug('height --------- ' + yAxisHeight);
+        common.debug('height = ' + yAxisHeight);
       })
       .then(function () {
+        common.debug('4) find all paths');
+
         return self.setFindTimeout(defaultTimeout * 2)
         .findAllByCssSelector('path')
         .then(function (chartTypes) {
+          common.debug('4) find all paths');
 
           function getChartType(chart) {
             return chart
             .getAttribute('data-label')
             .then(function (chartString) {
-              //common.debug('data-label  = ' + chartString);
+              common.debug('data-label = ' + chartString);
+
               if (chartString === 'Count') {
                 return chart.getAttribute('d')
                 .then(function (data) {
