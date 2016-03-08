@@ -27,6 +27,7 @@ window.__KBN__ = {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,
     esApiVersion: '2.0',
+    esRequestTimeout: '300000'
   }
 };
 

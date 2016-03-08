@@ -16,7 +16,12 @@ uiModules
     controller: function ($scope) {
       $scope.$bind('vis', 'editableVis');
       $scope.$bind('outputVis', 'vis');
-      this.section = _.get($scope, 'vis.type.requiresSearch') ? 'data' : 'options';
+      $scope.$watch('vis.type', (visType) => {
+        if (visType) {
+          this.showData = visType.schemas.buckets || visType.schemas.metrics;
+          this.section = this.section || (this.showData ? 'data' : 'options');
+        }
+      });
     }
   };
 });

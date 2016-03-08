@@ -2,10 +2,10 @@ import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
+import fromRoot from '../utils/fromRoot';
+import pkg from '../utils/packageJson';
 
-let utils = require('requirefrom')('src/utils');
-let rootDir = utils('fromRoot')('.');
-let pkg = utils('packageJson');
+let rootDir = fromRoot('.');
 
 module.exports = class KbnServer {
   constructor(settings) {

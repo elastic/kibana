@@ -1,9 +1,7 @@
 import expect from 'expect.js';
 import { fromNode as fn } from 'bluebird';
 import { resolve } from 'path';
-
-const requireFromTest = require('requirefrom')('test');
-const kbnTestServer = requireFromTest('utils/kbn_server');
+import * as kbnTestServer from '../../../../test/utils/kbn_server';
 
 const nonDestructiveMethods = ['GET'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
