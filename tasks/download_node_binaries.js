@@ -26,7 +26,7 @@ module.exports = function (grunt) {
         var dest = join(rootPath, '.node_binaries', 'windows');
         fs.stat(dest, function (err) {
           if (!err) return resolve(); // skip downloading if we already have them
-          var url = urlPattern({ version: version, file: 'node.exe'});
+          var url = urlPattern({ version: version, file: 'win-x86/node.exe'});
           mkdirp(dest, function (err) {
             if (err) return reject(err);
             var out = fs.createWriteStream(join(dest, 'node.exe'));
