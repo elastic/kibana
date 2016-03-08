@@ -45,7 +45,7 @@ module.exports = class Worker extends EventEmitter {
       kbnWorkerArgv: JSON.stringify(argv)
     };
 
-    _.bindAll(this, ['onExit', 'onMessage', 'onOnline', 'onDisconnect', 'shutdown', 'start']);
+    bindProtoMethods(this);
   }
 
   onExit(fork, code) {
