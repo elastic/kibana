@@ -9,6 +9,19 @@ import callWithRequest from './call_with_request';
 module.exports = function (server) {
   const config = server.config();
 
+  class ElasticsearchClientLogging {
+    error(err) {
+      server.log(['error', 'elasticsearch'], err);
+    }
+    warning(message) {
+      server.log(['warning', 'elasticsearch'], message);
+    }
+    info() {}
+    debug() {}
+    trace() {}
+    close() {}
+  }
+
   function createClient(options) {
     options = _.defaults(options || {}, {
       url: config.get('elasticsearch.url'),
@@ -52,18 +65,7 @@ module.exports = function (server) {
       defer: function () {
         return Bluebird.defer();
       },
-      log: function () {
-        this.error = function (err) {
-          server.log(['error', 'elasticsearch'], err);
-        };
-        this.warning = function (message) {
-          server.log(['warning', 'elasticsearch'], message);
-        };
-        this.info = _.noop;
-        this.debug = _.noop;
-        this.trace = _.noop;
-        this.close = _.noop;
-      }
+      log: ElasticsearchClientLogging
     });
   }
 
@@ -73,6 +75,7 @@ module.exports = function (server) {
   const noAuthClient = createClient({ auth: false });
   server.on('close', _.bindKey(noAuthClient, 'close'));
 
+  server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
   server.expose('createClient', createClient);
   server.expose('callWithRequestFactory', callWithRequest);

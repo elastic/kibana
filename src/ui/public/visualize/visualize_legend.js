@@ -32,14 +32,14 @@ uiModules.get('kibana')
       $scope.highlight = function (event) {
         var el = event.currentTarget;
         var handler = $scope.renderbot.vislibVis.handler;
-        if(!handler) return;
+        if (!handler) return;
         handler.highlight.call(el, handler.el);
       };
 
       $scope.unhighlight = function (event) {
         var el = event.currentTarget;
         var handler = $scope.renderbot.vislibVis.handler;
-        if(!handler) return;
+        if (!handler) return;
         handler.unHighlight.call(el, handler.el);
       };
 
