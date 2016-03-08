@@ -9,10 +9,9 @@ module.exports = function (kibana) {
 
   const apps = [
     {
-      title: 'Sense',
+      title: 'Console',
       description: 'JSON aware developer\'s interface to ElasticSearch',
-      icon: 'plugins/sense/bonsai.png',
-      main: 'plugins/sense/sense',
+      main: 'plugins/console/console',
       injectVars: function (server, options) {
         return options;
       }
@@ -21,16 +20,16 @@ module.exports = function (kibana) {
 
   if (existsSync(resolve(__dirname, 'public/tests'))) {
     apps.push({
-      title: 'Sense Tests',
+      title: 'Console Tests',
       id: 'sense-tests',
-      main: 'plugins/sense/tests',
+      main: 'plugins/console/tests',
       hidden: true
       //listed: false // uncomment after https://github.com/elastic/kibana/pull/4755
     });
   }
 
   return new kibana.Plugin({
-    id: 'sense',
+    id: 'console',
 
     config: function (Joi) {
       return Joi.object({
@@ -48,7 +47,7 @@ module.exports = function (kibana) {
 
       // http://hapijs.com/api/8.8.1#route-configuration
       server.route({
-        path: '/api/sense/proxy',
+        path: '/api/console/proxy',
         method: ['*', 'GET'],
         config: {
           handler: {
@@ -86,7 +85,7 @@ module.exports = function (kibana) {
       });
 
       server.route({
-        path: '/api/sense/api_server',
+        path: '/api/console/api_server',
         method: ['GET', 'POST'],
         handler: function (req, reply) {
           let server = require('./api_server/server');
