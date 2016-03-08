@@ -43,8 +43,8 @@ describe('Notifier', function () {
       expect(notify('error').title).to.equal('Error');
     });
 
-    it('sets lifetime to Infinity', function () {
-      expect(notify('error').lifetime).to.equal(Infinity);
+    it('sets lifetime to 5 minutes', function () {
+      expect(notify('error').lifetime).to.equal(300000);
     });
 
     it('allows reporting', function () {
