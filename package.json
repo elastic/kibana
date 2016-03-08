@@ -57,7 +57,8 @@
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
     "mocha": "mocha",
-    "mocha:debug": "mocha --debug-brk"
+    "mocha:debug": "mocha --debug-brk",
+    "sterilize": "grunt sterilize"
   },
   "repository": {
     "type": "git",
@@ -100,6 +101,7 @@
     "extract-text-webpack-plugin": "0.8.2",
     "file-loader": "0.8.4",
     "font-awesome": "4.4.0",
+    "glob-all": "3.0.1",
     "good": "6.3.0",
     "good-squeeze": "2.1.0",
     "gridster": "0.5.6",
@@ -149,7 +151,6 @@
     "eslint-plugin-mocha": "1.1.0",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
-    "glob": "4.5.3",
     "grunt": "0.4.5",
     "grunt-babel": "5.0.1",
     "grunt-cli": "0.1.13",

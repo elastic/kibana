@@ -1,7 +1,7 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover-options">
-    <div class="discover-info">
-      <span ng-show="opts.savedSearch.id" class="discover-info-title">
+  <navbar name="discover-options" class="kibana-nav-options">
+    <div class="kibana-nav-info">
+      <span ng-show="opts.savedSearch.id" class="kibana-nav-info-title">
         <span ng-bind="::opts.savedSearch.title"></span>
         <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
       </span>
@@ -9,7 +9,7 @@
       <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
       <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
     </div>
-    <div class="discover-actions button-group" role="toolbar">
+    <div class="kibana-nav-actions button-group" role="toolbar">
       <button
         ng-click="newQuery()"
         aria-label="New Search">

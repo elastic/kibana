@@ -27,7 +27,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // number of columns to render
       const COLS = 12;
       // number of pixed between each column/row
-      const SPACER = 10;
+      const SPACER = 0;
       // pixels used by all of the spacers (gridster puts have a spacer on the ends)
       const spacerSize = SPACER * COLS;
 
@@ -46,7 +46,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             stop: readGridsterChangeHandler
           },
           draggable: {
-            handle: '.panel-heading, .panel-title',
+            handle: '.panel-move, .fa-arrows',
             stop: readGridsterChangeHandler
           }
         }).data('gridster');
@@ -232,4 +232,3 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
     }
   };
 });
-

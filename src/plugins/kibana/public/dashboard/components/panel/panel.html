@@ -7,6 +7,9 @@
       <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>
+      <a aria-label="Move" ng-show="chrome.getVisible()" class="panel-move">
+        <i aria-hidden="true" class="fa fa-arrows"></i>
+      </a>
       <a aria-label="Remove" ng-show="chrome.getVisible()" ng-click="remove()">
         <i aria-hidden="true" class="fa fa-times"></i>
       </a>

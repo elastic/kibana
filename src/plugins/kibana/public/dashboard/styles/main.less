@@ -3,9 +3,6 @@
 
 .tab-dashboard {
   background-color: @dashboard-bg;
-  navbar[name="dashboard-options"] {
-    padding-bottom: 0;
-  }
 }
 
 dashboard-grid {
@@ -46,14 +43,8 @@ dashboard-grid {
         .visualize-show-spy {
           visibility: visible;
         }
-        .panel .panel-heading {
-          background-color: @kibanaGray6;
-          &:hover {
-            cursor: pointer;
-          }
-          .btn-group {
-            display: block !important;
-          }
+        .panel .panel-heading .btn-group {
+          display: block !important;
         }
       }
 
@@ -120,6 +111,10 @@ dashboard-grid {
           }
         }
 
+        .panel-move:hover {
+          cursor: move;
+        }
+
         a {
           color: @dashboard-panel-heading-link-color;
           border: none;
@@ -156,10 +151,6 @@ dashboard-grid {
       }
     }
   }
-}
-
-.dashboard-actions {
-  margin-left: auto;
 }
 
 .dashboard-panel-picker > .list-group-item {

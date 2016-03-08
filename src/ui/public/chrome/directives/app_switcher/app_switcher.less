@@ -5,9 +5,11 @@
 @as-open-width: 160px;
 @as-closed-width: 53px;
 @app-icon-height: 38px;
+@app-line-height: 24px;
 @transition-time: .35s;
 @transition-delay: .25s;
 @app-links-wrapper-background: #3caed2;
+@app-links-active-background: lighten(@app-links-wrapper-background, 7.5%);
 
 @firstLinkColor: #E4BB51;
 @secondLinkColor: #8AC336;
@@ -81,17 +83,17 @@ body { overflow-x: hidden; }
   .app-link {
     width: @as-open-width;
     height: @app-icon-height;
-    line-height:  24px;
+    line-height:  @app-line-height;
 
 
     > a {
       display: block;
       height: 100%;
-      color: #fff;
+      color: @white;
     }
 
     &:hover {
-      background-color: lighten(@app-links-wrapper-background, 7.5%);
+      background-color: @app-links-active-background;
     }
 
     .app-icon {
@@ -103,8 +105,6 @@ body { overflow-x: hidden; }
       display: inline-block;
       height: @app-icon-height;
       width: @as-closed-width;
-      > i {
-      }
 
       > img {
         height: 18px;
@@ -118,6 +118,7 @@ body { overflow-x: hidden; }
       font-size: 1.7em;
       display: inline-block;
       height: @app-icon-height;
+      line-height: @app-icon-height;
       width: @as-closed-width;
       background-position: center;
       background-size: contain;
@@ -135,7 +136,7 @@ body { overflow-x: hidden; }
     }
 
     &.active {
-      background-color: lighten(@app-links-wrapper-background, 10%);
+      background-color: @app-links-active-background;
       > a {
         color: #333;
         text-decoration: none;
