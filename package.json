@@ -3,7 +3,7 @@
   "contributors": [
     "Spencer Alger <spencer.alger@elastic.co>"
   ],
-  "name": "Sense",
+  "name": "sense",
   "version": "2.0.0-snapshot",
   "repository": {
     "type": "git",
@@ -27,9 +27,14 @@
     "grunt-contrib-copy": "^0.8.2",
     "grunt-gitinfo": "^0.1.7",
     "grunt-replace": "^0.11.0",
+    "grunt-run": "^0.5.2",
     "gruntify-eslint": "^1.2.0",
     "jit-grunt": "^0.9.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "boom": "^3.1.2",
+    "joi": "^8.0.4",
+    "lodash": "^4.6.1"
+  },
   "license": "Apache-2.0"
 }

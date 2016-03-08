@@ -108,6 +108,19 @@ module.exports = function (grunt) {
         },
         files: replaceSrcFiles
       }
+    },
+
+    run: {
+      npmInstallInBuild: {
+        cmd: 'npm',
+        args: [
+          'install',
+          '--production'
+        ],
+        options: {
+          cwd: 'build/sense-<%= pkg.version %>'
+        }
+      }
     }
   });
 

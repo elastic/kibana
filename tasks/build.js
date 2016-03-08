@@ -5,6 +5,7 @@ module.exports = function (grunt) {
     'clean:target',
     'eslint:source',
     'copy:build',
+    'run:npmInstallInBuild',
     'gitinfo',
     'replace:build',
     'compress:build'
