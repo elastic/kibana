@@ -19,50 +19,98 @@ describe('Ingest Service', function () {
     sinon.spy($rootScope, '$broadcast');
   }));
 
-  it('Throws an error if an index pattern is not provided', function () {
-    expect(ingest.save).to.throwException(/index pattern is required/);
+  describe('save', function () {
+    it('Throws an error if an index pattern is not provided', function () {
+      expect(ingest.save).to.throwException(/index pattern is required/);
+    });
+
+    it('Sets the default index if there isn\'t one already', function () {
+      $httpBackend
+      .when('POST', '../api/kibana/ingest')
+      .respond('ok');
+
+      expect(config.get('defaultIndex')).to.be(null);
+      ingest.save({id: 'foo'});
+      ingest.save({id: 'bar'});
+      $httpBackend.flush();
+      expect(config.get('defaultIndex')).to.be('foo');
+    });
+
+    it('Returns error from ingest API if there is one', function (done) {
+      $httpBackend
+      .expectPOST('../api/kibana/ingest')
+      .respond(400);
+
+      ingest.save({id: 'foo'})
+      .then(
+        () => {
+          throw new Error('expected an error response');
+        },
+        (error) => {
+          expect(error.status).to.be(400);
+          done();
+        }
+      );
+
+      $httpBackend.flush();
+    });
+
+    it('Broadcasts an ingest:updated event on the rootScope upon succesful save', function () {
+      $httpBackend
+      .when('POST', '../api/kibana/ingest')
+      .respond('ok');
+
+      ingest.save({id: 'foo'});
+      $httpBackend.flush();
+
+      expect($rootScope.$broadcast.calledOnce);
+      expect($rootScope.$broadcast.calledWith('ingest:updated')).to.be.ok();
+    });
   });
 
-  it('Sets the default index if there isn\'t one already', function () {
-    $httpBackend
-    .when('POST', '../api/kibana/ingest')
-    .respond('ok');
+  describe('delete', function () {
+    it('throws an error if no ingest id is provided', function () {
+      expect(ingest.delete).to.throwException(/ingest id is required/);
+    });
 
-    expect(config.get('defaultIndex')).to.be(null);
-    ingest.save({id: 'foo'});
-    ingest.save({id: 'bar'});
-    $httpBackend.flush();
-    expect(config.get('defaultIndex')).to.be('foo');
-  });
+    it('Calls the DELETE endpoint of the ingest API with the given id', function () {
+      $httpBackend
+      .expectDELETE('../api/kibana/ingest/foo')
+      .respond('ok');
 
-  it('Returns error from ingest API if there is one', function (done) {
-    $httpBackend
-    .expectPOST('../api/kibana/ingest')
-    .respond(400);
+      ingest.delete('foo');
+      $httpBackend.flush();
+    });
 
-    ingest.save({id: 'foo'})
-    .then(
-      () => {
-        throw new Error('expected an error response');
-      },
-      (error) => {
-        expect(error.status).to.be(400);
-        done();
-      }
-    );
+    it('Returns error from ingest API if there is one', function (done) {
+      $httpBackend
+      .expectDELETE('../api/kibana/ingest/foo')
+      .respond(404);
 
-    $httpBackend.flush();
-  });
+      ingest.delete('foo')
+      .then(
+        () => {
+          throw new Error('expected an error response');
+        },
+        (error) => {
+          expect(error.status).to.be(404);
+          done();
+        }
+      );
 
-  it('Broadcasts an ingest:updated event on the rootScope upon succesful save', function () {
-    $httpBackend
-    .when('POST', '../api/kibana/ingest')
-    .respond('ok');
+      $httpBackend.flush();
+    });
 
-    ingest.save({id: 'foo'});
-    $httpBackend.flush();
+    it('Broadcasts an ingest:updated event on the rootScope upon succesful save', function () {
+      $httpBackend
+      .when('DELETE', '../api/kibana/ingest/foo')
+      .respond('ok');
 
-    expect($rootScope.$broadcast.calledOnce);
-    expect($rootScope.$broadcast.calledWith('ingest:updated')).to.be.ok();
+      ingest.delete('foo');
+      $httpBackend.flush();
+
+      expect($rootScope.$broadcast.calledOnce);
+      expect($rootScope.$broadcast.calledWith('ingest:updated')).to.be.ok();
+    });
   });
 });
