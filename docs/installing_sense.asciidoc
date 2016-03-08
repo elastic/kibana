@@ -101,7 +101,7 @@ Once downloaded you can install Sense using the following command:
 
 [source,bash]
 -------------
-$ bin/kibana plugin -i sense -u file://PATH_TO_SENSE_TAR_FILE
+$ bin/kibana plugin -i sense -u file:///PATH_TO_SENSE_TAR_FILE
 -------------
 
 
