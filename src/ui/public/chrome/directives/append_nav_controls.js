@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import $ from 'jquery';
 
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
 import chromeConfigControlsRegistry from 'ui/registry/chrome_config_controls';
@@ -31,11 +32,12 @@ export default function (chrome, internals) {
           }),
 
           ...configs.map(function (config) {
-            const configHtml = `<render-directive definition="configs['${config.name}'].navbar">
-              ${config.navbar.template}
-            </render-directive>`;
+            let $wrapper = $('<div></div>');
+            let $directive = $(`<render-directive definition="configs['${config.name}'].navbar"></render-directive>`);
+            $directive.html(config.navbar.template);
+            $wrapper.append($directive);
             return {
-              template: `<!-- nav control ${config.name} -->${configHtml}`,
+              template: `<!-- nav control ${config.name} -->${$wrapper.html()}`,
               order: config.order
             };
           }),
