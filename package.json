@@ -32,9 +32,9 @@
     "jit-grunt": "^0.9.1"
   },
   "dependencies": {
-    "boom": "^3.1.2",
-    "joi": "^8.0.4",
-    "lodash": "^4.6.1"
+    "boom": "2.8.0",
+    "joi": "6.6.1",
+    "lodash": "3.10.1"
   },
   "license": "Apache-2.0"
 }
