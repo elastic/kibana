@@ -3,7 +3,7 @@ import cluster from 'cluster';
 let { resolve } = require('path');
 let { EventEmitter } = require('events');
 
-import fromRoot from '../../utils/fromRoot';
+import { bindProtoMethods, fromRoot } from '../../utils';
 
 let cliPath = fromRoot('src/cli');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
