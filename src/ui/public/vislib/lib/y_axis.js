@@ -192,13 +192,14 @@ export default function YAxisFactory(Private) {
     var margin = this._attr.margin;
     var mode = this._attr.mode;
     var isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
+    var padding = 10;
 
     return function (selection) {
       selection.each(function () {
         var el = this;
 
         var div = d3.select(el);
-        var width = $(el).parent().width();
+        var width = $(el).parent().width() + padding;
         var height = $(el).height();
         var adjustedHeight = height - margin.top - margin.bottom;
 
@@ -221,7 +222,7 @@ export default function YAxisFactory(Private) {
 
           var container = svg.select('g.y.axis').node();
           if (container) {
-            var cWidth = Math.max(width, container.getBBox().width);
+            var cWidth = Math.max(width, container.getBBox().width + padding);
             svg.attr('width', cWidth);
             svg.select('g')
             .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
