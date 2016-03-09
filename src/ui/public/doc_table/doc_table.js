@@ -1,20 +1,25 @@
+import React, { Component, PropType } from 'react';
 import _ from 'lodash';
-import html from 'ui/doc_table/doc_table.html';
-import getSort from 'ui/doc_table/lib/get_sort';
-import 'ui/doc_table/doc_table.less';
+
+import uiModules from 'ui/modules';
 import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
-import 'ui/doc_table/components/table_header';
-import 'ui/doc_table/components/table_row';
-import uiModules from 'ui/modules';
 
-
+import './doc_table.less';
+import getSort from './lib/get_sort';
+import './components/doc_table_react_bridge';
 
 uiModules.get('kibana')
-.directive('docTable', function (config, Notifier, getAppState) {
+.directive('docTable', function (config, Notifier, getAppState, shortDotsFilter) {
   return {
     restrict: 'E',
-    template: html,
+    template: `
+      <react-component
+        ng-if="props"
+        watch-depth="reference"
+        name="DocTableReactBridge"
+        props="props">
+    `,
     scope: {
       sorting: '=',
       columns: '=',
@@ -24,9 +29,11 @@ uiModules.get('kibana')
       infiniteScroll: '=?',
       filter: '=?',
     },
-    link: function ($scope) {
+    link($scope) {
       var notify = new Notifier();
+
       $scope.limit = 50;
+      $scope.shortDotsFilter = shortDotsFilter;
       $scope.persist = {
         sorting: $scope.sorting,
         columns: $scope.columns
@@ -51,8 +58,80 @@ uiModules.get('kibana')
         };
       }());
 
+      $scope.$watchMulti([
+        'limit',
+        '[]columns',
+        'indexPattern',
+        'searchSource',
+        'hits',
+        'infiniteScroll',
+      ], function () {
+        $scope.props = {
+          limit: $scope.limit,
+          columns: $scope.columns,
+          indexPattern: $scope.indexPattern,
+          searchSource: $scope.searchSource,
+          hits: $scope.hits,
+          infiniteScroll: $scope.infiniteScroll,
+
+          // actions, these are wrapped by react-component to trigger $scope.$apply
+          moveColLeft: $scope.moveColLeft,
+          moveColRight: $scope.moveColRight,
+          toggleCol: $scope.toggleCol,
+          sortByCol: $scope.sortByCol,
+
+          // helpers, to prevent wrapping in $scope.$apply wrap in an object
+          helpers: {
+            isColSortable: $scope.isColSortable,
+            isColRemovable: $scope.isColRemovable,
+            shortDotsFilter: $scope.shortDotsFilter,
+          }
+        };
+      });
+
       $scope.addRows = function () {
         $scope.limit += 50;
+      };
+
+      $scope.moveColLeft = function (column) {
+        var index = _.indexOf($scope.columns, column);
+        if (index === 0) return;
+        _.move($scope.columns, index, --index);
+      };
+
+      $scope.moveColRight = function (column) {
+        var index = _.indexOf($scope.columns, column);
+        if (index === $scope.columns.length - 1) return;
+
+        _.move($scope.columns, index, ++index);
+      };
+
+      $scope.toggleCol = function (fieldName) {
+        _.toggleInOut($scope.columns, fieldName);
+      };
+
+      $scope.isColSortable = function (column) {
+        return !!_.get($scope, ['indexPattern', 'fields', 'byName', column, 'sortable']);
+      };
+
+      $scope.isColRemovable = function (name) {
+        return (name !== '_source' || $scope.columns.length !== 1);
+      };
+
+      $scope.sortByCol = function (column) {
+        if (!column || !$scope.isColSortable(column)) return;
+
+        var sorting = $scope.sorting = $scope.sorting || [];
+
+        var direction = sorting[1] || 'asc';
+        if (sorting[0] !== column) {
+          direction = 'asc';
+        } else {
+          direction = sorting[1] === 'asc' ? 'desc' : 'asc';
+        }
+
+        $scope.sorting[0] = column;
+        $scope.sorting[1] = direction;
       };
 
       // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
@@ -64,14 +143,13 @@ uiModules.get('kibana')
         if ($state) $state.replace();
       });
 
-      $scope.$watchCollection('columns', function (columns, oldColumns) {
-        if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
+      $scope.$watchCollection('columns', function (columns, oldCols) {
+        if (oldCols.length === 1 && oldCols[0] === '_source' && $scope.columns.length > 1) {
           _.pull($scope.columns, '_source');
         }
 
         if ($scope.columns.length === 0) $scope.columns.push('_source');
       });
-
 
       $scope.$watch('searchSource', prereq(function (searchSource) {
         if (!$scope.searchSource) return;
@@ -108,7 +186,6 @@ uiModules.get('kibana')
 
         $scope.searchSource.onError(notify.error).catch(notify.fatal);
       }));
-
     }
   };
 });
