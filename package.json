@@ -82,7 +82,7 @@
     "boom": "2.8.0",
     "bootstrap": "3.3.5",
     "brace": "0.5.1",
-    "bunyan": "1.4.0",
+    "bunyan": "1.7.1",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
