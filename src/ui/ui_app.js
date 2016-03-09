@@ -1,4 +1,5 @@
 import { chain, get, noop, once, pick } from 'lodash';
+import _ from 'lodash';
 
 class UiApp {
   constructor(uiExports, spec) {

@@ -1,15 +1,16 @@
-import CourierErrorHandlersProvider from 'ui/courier/_error_handlers';
 import Notifier from 'ui/notify/notifier';
 
-export default function RequestErrorHandlerFactory(Private) {
-  var errHandlers = Private(CourierErrorHandlersProvider);
+import ErrorHandlersProvider from '../../_error_handlers';
 
-  var notify = new Notifier({
+export default function RequestErrorHandlerFactory(Private) {
+  const errHandlers = Private(ErrorHandlersProvider);
+
+  const notify = new Notifier({
     location: 'Courier Fetch Error'
   });
 
   function handleError(req, error) {
-    var myHandlers = [];
+    const myHandlers = [];
 
     errHandlers.splice(0).forEach(function (handler) {
       (handler.source === req.source ? myHandlers : errHandlers).push(handler);

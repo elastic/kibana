@@ -106,7 +106,7 @@ export default function DispatchClass(Private) {
     var isClickable = this.listenerCount('click') > 0;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
-    if(!this.handler.highlight) {
+    if (!this.handler.highlight) {
       this.handler.highlight = self.highlight;
     }
 
@@ -132,7 +132,7 @@ export default function DispatchClass(Private) {
     var self = this;
     var addEvent = this.addEvent;
     var $el = this.handler.el;
-    if(!this.handler.unHighlight) {
+    if (!this.handler.unHighlight) {
       this.handler.unHighlight = self.unHighlight;
     }
 
