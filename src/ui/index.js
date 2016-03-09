@@ -64,6 +64,7 @@ module.exports = async (kbnServer, server, config) => {
     defaultInjectedVars.kbnIndex = config.get('kibana.index');
   }
   if (config.has('elasticsearch')) {
+    defaultInjectedVars.esRequestTimeout = config.get('elasticsearch.requestTimeout');
     defaultInjectedVars.esShardTimeout = config.get('elasticsearch.shardTimeout');
     defaultInjectedVars.esApiVersion = config.get('elasticsearch.apiVersion');
   }

@@ -1,22 +1,22 @@
-import CourierFetchNotifierProvider from 'ui/courier/fetch/_notifier';
-import CourierFetchForEachStrategyProvider from 'ui/courier/fetch/_for_each_strategy';
-import CourierFetchCallClientProvider from 'ui/courier/fetch/_call_client';
-import CourierFetchCallResponseHandlersProvider from 'ui/courier/fetch/_call_response_handlers';
-import CourierFetchContinueIncompleteProvider from 'ui/courier/fetch/_continue_incomplete';
-import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+import NotifierProvider from './notifier';
+import ForEachStrategyProvider from './for_each_strategy';
+import CallClientProvider from './call_client';
+import CallResponseHandlersProvider from './call_response_handlers';
+import ContinueIncompleteProvider from './continue_incomplete';
+import ReqStatusProvider from './req_status';
 
 export default function FetchTheseProvider(Private, Promise) {
-  var notify = Private(CourierFetchNotifierProvider);
-  var forEachStrategy = Private(CourierFetchForEachStrategyProvider);
+  const notify = Private(NotifierProvider);
+  const forEachStrategy = Private(ForEachStrategyProvider);
 
   // core tasks
-  var callClient = Private(CourierFetchCallClientProvider);
-  var callResponseHandlers = Private(CourierFetchCallResponseHandlersProvider);
-  var continueIncomplete = Private(CourierFetchContinueIncompleteProvider);
+  const callClient = Private(CallClientProvider);
+  const callResponseHandlers = Private(CallResponseHandlersProvider);
+  const continueIncomplete = Private(ContinueIncompleteProvider);
 
-  var ABORTED = Private(CourierFetchReqStatusProvider).ABORTED;
-  var DUPLICATE = Private(CourierFetchReqStatusProvider).DUPLICATE;
-  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
+  const ABORTED = Private(ReqStatusProvider).ABORTED;
+  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchThese(requests) {
     return forEachStrategy(requests, function (strategy, reqsForStrategy) {
@@ -66,7 +66,7 @@ export default function FetchTheseProvider(Private, Promise) {
       }
 
       return new Promise(function (resolve) {
-        var action = req.started ? req.continue : req.start;
+        const action = req.started ? req.continue : req.start;
         resolve(action.call(req));
       })
       .catch(err => req.handleFailure(err));

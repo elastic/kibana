@@ -29,12 +29,18 @@ uiModules.get('kibana')
         refresh();
       });
 
-      $scope.highlightSeries = function (label) {
-        $('[data-label]', $elem.siblings()).not('[data-label="' + label + '"]').css('opacity', 0.5);
+      $scope.highlight = function (event) {
+        var el = event.currentTarget;
+        var handler = $scope.renderbot.vislibVis.handler;
+        if (!handler) return;
+        handler.highlight.call(el, handler.el);
       };
 
-      $scope.unhighlightSeries = function () {
-        $('[data-label]', $elem.siblings()).css('opacity', 1);
+      $scope.unhighlight = function (event) {
+        var el = event.currentTarget;
+        var handler = $scope.renderbot.vislibVis.handler;
+        if (!handler) return;
+        handler.unHighlight.call(el, handler.el);
       };
 
       $scope.setColor = function (label, color) {
