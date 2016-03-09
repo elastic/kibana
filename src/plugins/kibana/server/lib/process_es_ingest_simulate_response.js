@@ -6,46 +6,8 @@ function translateError(esError) {
   return _.get(rootCause, 'reason') || _.get(rootCause, 'type');
 }
 
-export function buildRequest(processorTypes, pipeline) {
-  if (processorTypes === undefined ||
-      !_.isArray(processorTypes) ||
-      processorTypes.length === 0) {
-    throw new Error('requires a processorTypes object array argument');
-  }
-
-  if (pipeline === undefined || !_.isPlainObject(pipeline)) {
-    throw new Error('requires a pipeline object argument');
-  }
-
-  if (pipeline.processors === undefined ||
-      !_.isArray(pipeline.processors) ||
-      pipeline.processors.length === 0) {
-    throw new Error('pipeline contains no processors');
-  }
-
-  const processors = pipeline.processors;
-  const body = {
-    'pipeline': {
-      'processors': []
-    },
-    'docs': [
-      {
-        _source: pipeline.input
-      }
-    ]
-  };
-
-  processors.forEach((processor) => {
-    const processorType = _.find(processorTypes, { 'typeId': processor.typeId });
-    const definition = processorType.getDefinition(processor);
-    body.pipeline.processors.push(definition);
-  });
-
-  return body;
-};
-
-export function processResponse(pipeline, err, resp) {
-  const results = pipeline.processors.map((processor) => {
+export default function processESIngestSimulateResponse(processors, resp) {
+  const results = processors.map((processor) => {
     return {
       processorId: processor.processorId,
       output: processor.outputObject,
