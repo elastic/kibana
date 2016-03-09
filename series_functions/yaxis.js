@@ -28,7 +28,7 @@ module.exports = new Chainable('yaxis', {
       help: 'left or right'
     },
   ],
-  help: 'This is an internal function that simply returns the input series. Don\'t use this',
+  help: 'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   fn: function yaxisFn(args) {
     return alter(args, function (eachSeries, yaxis, min, max, position) {
       yaxis = yaxis || 1;

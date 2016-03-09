@@ -257,7 +257,7 @@ Argument | Accepts | Description
 title | *string* | Title for the plot.  
 
 #### .yaxis()
-This is an internal function that simply returns the input series. Don't use this
+Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis
 
 Argument | Accepts | Description
 --- | --- | ---
