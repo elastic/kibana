@@ -80,19 +80,6 @@ module.exports = function (chrome, internals) {
    * @param {any} def - the default value if there isn't any active tab
    * @return {any}
    */
-  chrome.getActiveTabId = function () {
-    const activeAppObj = _.find(internals.nav, { active: true });
-    const lastUrl = activeAppObj.lastSubUrl.toLowerCase();
-    const numeralPos = lastUrl.indexOf('#/') + 2;
-    const quesPos = lastUrl.indexOf('?');
-    const dirtyUrl = lastUrl.substring(numeralPos, quesPos);
-    return dirtyUrl.replace('/', '-');
-  };
-
-  /**
-   * @param {any} def - the default value if there isn't any active tab
-   * @return {any}
-   */
   chrome.getActiveTabTitle = activeGetter('title');
 
   // create a getter for properties of the active tab
