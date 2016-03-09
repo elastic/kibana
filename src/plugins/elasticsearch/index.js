@@ -54,6 +54,7 @@ module.exports = function ({ Plugin }) {
       createProxy(server, 'POST', '/{index}/_field_stats');
       createProxy(server, 'POST', '/_msearch');
       createProxy(server, 'POST', '/_search/scroll');
+      createProxy(server, 'POST', '/{index}/_count');
 
       function noBulkCheck({ path }, reply) {
         if (/\/_bulk/.test(path)) {
