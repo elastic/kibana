@@ -1,8 +1,9 @@
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import MockState from 'fixtures/mock_state';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('get filters', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var MockState = require('fixtures/mock_state');
   var storeNames = {
     app: 'appState',
     global: 'globalState'
@@ -30,7 +31,7 @@ describe('get filters', function () {
 
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    queryFilter = Private(require('ui/filter_bar/query_filter'));
+    queryFilter = Private(FilterBarQueryFilterProvider);
   }));
 
   describe('getFilters method', function () {

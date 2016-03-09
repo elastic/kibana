@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var slugifyId = require('ui/utils/slugify_id');
-var expect = require('expect.js');
+import _ from 'lodash';
+import slugifyId from 'ui/utils/slugify_id';
+import expect from 'expect.js';
 
 describe('slugifyId()', function () {
 

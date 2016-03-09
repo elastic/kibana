@@ -1,5 +1,5 @@
-const expect = require('expect.js');
-const createProxy = require('../create_proxy');
+import expect from 'expect.js';
+import createProxy from '../create_proxy';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_proxy', function () {

@@ -41,6 +41,15 @@ define(function (require) {
               .catch(function (error) {
                 expect(error.status).to.be(404);
               });
+          })
+          .then(function () {
+            return scenarioManager.client.transport.request({
+              path: '_ingest/pipeline/kibana-logstash-*',
+              method: 'GET'
+            })
+            .catch(function (error) {
+              expect(error.status).to.be(404);
+            });
           });
       });
 

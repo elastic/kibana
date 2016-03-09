@@ -1,12 +1,26 @@
-var elasticsearch = require('elasticsearch');
-var _ = require('lodash');
-var readFile = (file) => require('fs').readFileSync(file, 'utf8');
-var util = require('util');
-var url = require('url');
-var callWithRequest = require('./call_with_request');
+import elasticsearch from 'elasticsearch';
+import _ from 'lodash';
+import Bluebird from 'bluebird';
+const readFile = (file) => require('fs').readFileSync(file, 'utf8');
+import util from 'util';
+import url from 'url';
+import callWithRequest from './call_with_request';
 
 module.exports = function (server) {
-  var config = server.config();
+  const config = server.config();
+
+  class ElasticsearchClientLogging {
+    error(err) {
+      server.log(['error', 'elasticsearch'], err);
+    }
+    warning(message) {
+      server.log(['warning', 'elasticsearch'], message);
+    }
+    info() {}
+    debug() {}
+    trace() {}
+    close() {}
+  }
 
   function createClient(options) {
     options = _.defaults(options || {}, {
@@ -18,18 +32,20 @@ module.exports = function (server) {
       clientKey: config.get('elasticsearch.ssl.key'),
       ca: config.get('elasticsearch.ssl.ca'),
       apiVersion: config.get('elasticsearch.apiVersion'),
+      pingTimeout: config.get('elasticsearch.pingTimeout'),
+      requestTimeout: config.get('elasticsearch.requestTimeout'),
       keepAlive: true,
       auth: true
     });
 
-    var uri = url.parse(options.url);
+    const uri = url.parse(options.url);
 
-    var authorization;
+    let authorization;
     if (options.auth && options.username && options.password) {
       uri.auth = util.format('%s:%s', options.username, options.password);
     }
 
-    var ssl = { rejectUnauthorized: options.verifySsl };
+    const ssl = { rejectUnauthorized: options.verifySsl };
     if (options.clientCrt && options.clientKey) {
       ssl.cert = readFile(options.clientCrt);
       ssl.key = readFile(options.clientKey);
@@ -44,27 +60,22 @@ module.exports = function (server) {
       plugins: options.plugins,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
-      log: function () {
-        this.error = function (err) {
-          server.log(['error', 'elasticsearch'], err);
-        };
-        this.warning = function (message) {
-          server.log(['warning', 'elasticsearch'], message);
-        };
-        this.info = _.noop;
-        this.debug = _.noop;
-        this.trace = _.noop;
-        this.close = _.noop;
-      }
+      pingTimeout: options.pingTimeout,
+      requestTimeout: options.requestTimeout,
+      defer: function () {
+        return Bluebird.defer();
+      },
+      log: ElasticsearchClientLogging
     });
   }
 
-  var client = createClient();
+  const client = createClient();
   server.on('close', _.bindKey(client, 'close'));
 
-  var noAuthClient = createClient({ auth: false });
+  const noAuthClient = createClient({ auth: false });
   server.on('close', _.bindKey(noAuthClient, 'close'));
 
+  server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
   server.expose('createClient', createClient);
   server.expose('callWithRequestFactory', callWithRequest);

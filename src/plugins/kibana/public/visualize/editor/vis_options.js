@@ -1,25 +1,26 @@
-define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
+import _ from 'lodash';
+import $ from 'jquery';
+import uiModules from 'ui/modules';
+import visOptionsTemplate from 'plugins/kibana/visualize/editor/vis_options.html';
 
-  require('ui/modules')
-  .get('app/visualize')
-  .directive('visEditorVisOptions', function (Private, $timeout, $compile) {
-    return {
-      restrict: 'E',
-      template: require('plugins/kibana/visualize/editor/vis_options.html'),
-      scope: {
-        vis: '=',
-      },
-      link: function ($scope, $el) {
-        var $optionContainer = $el.find('.visualization-options');
-        var $editor = $compile($scope.vis.type.params.editor)($scope);
-        $optionContainer.append($editor);
+uiModules
+.get('app/visualize')
+.directive('visEditorVisOptions', function (Private, $timeout, $compile) {
+  return {
+    restrict: 'E',
+    template: visOptionsTemplate,
+    scope: {
+      vis: '=',
+      savedVis: '=',
+    },
+    link: function ($scope, $el) {
+      const $optionContainer = $el.find('.visualization-options');
+      const $editor = $compile($scope.vis.type.params.editor)($scope);
+      $optionContainer.append($editor);
 
-        $scope.$watch('vis.type.schemas.all.length', function (len) {
-          $scope.alwaysShowOptions = len === 0;
-        });
-      }
-    };
-  });
+      $scope.$watch('vis.type.schemas.all.length', function (len) {
+        $scope.alwaysShowOptions = len === 0;
+      });
+    }
+  };
 });

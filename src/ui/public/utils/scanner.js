@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 let Scanner = function (client, {index, type} = {}) {
   if (!index) throw new Error('Expected index');

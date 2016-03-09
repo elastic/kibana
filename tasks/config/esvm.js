@@ -2,11 +2,11 @@ module.exports = function (grunt) {
   var resolve = require('path').resolve;
   var directory = resolve(__dirname, '../../esvm');
   var dataDir = resolve(directory, 'data_dir');
-  var uiConfig = require('requirefrom')('test')('serverConfig');
+  var uiConfig = require('../../test/serverConfig');
 
   return {
     options: {
-      branch: '2.1',
+      branch: 'master',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         network: {

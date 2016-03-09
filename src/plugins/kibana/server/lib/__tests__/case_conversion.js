@@ -1,6 +1,6 @@
-const expect = require('expect.js');
-const { keysToSnakeCaseShallow, keysToCamelCaseShallow } = require('../case_conversion');
-const _ = require('lodash');
+import expect from 'expect.js';
+import _ from 'lodash';
+import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../case_conversion';
 
 describe('keysToSnakeCaseShallow', function () {
 

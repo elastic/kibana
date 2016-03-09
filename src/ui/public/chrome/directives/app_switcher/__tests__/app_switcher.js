@@ -1,15 +1,15 @@
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
-var $ = require('jquery');
-var expect = require('expect.js');
-var constant = require('lodash').constant;
-var set = require('lodash').set;
-var cloneDeep = require('lodash').cloneDeep;
-var indexBy = require('lodash').indexBy;
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
 
-require('ui/chrome');
-require('../app_switcher');
-var DomLocationProvider = require('ui/domLocation');
+import DomLocationProvider from 'ui/domLocation';
+import { constant } from 'lodash';
+import { set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { indexBy } from 'lodash';
+import $ from 'jquery';
+import 'ui/chrome';
+import '../app_switcher';
 
 describe('appSwitcher directive', function () {
   var env;

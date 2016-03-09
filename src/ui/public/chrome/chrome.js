@@ -1,14 +1,14 @@
-require('babel/polyfill');
 
-var _ = require('lodash');
-var $ = require('jquery');
-var angular = require('angular');
+import _ from 'lodash';
+import angular from 'angular';
 
-require('ui/timefilter');
-require('ui/private');
-require('ui/promises');
 
-var metadata = require('ui/metadata');
+import metadata from 'ui/metadata';
+import 'babel/polyfill';
+import $ from 'jquery';
+import 'ui/timefilter';
+import 'ui/private';
+import 'ui/promises';
 
 var chrome = {};
 var internals = _.defaults(

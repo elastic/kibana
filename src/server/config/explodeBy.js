@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 module.exports = function (dot, flatObject) {
   var fullObject = {};
   _.each(flatObject, function (value, key) {

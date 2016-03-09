@@ -1,7 +1,13 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisProvider from 'ui/Vis';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
 describe('bucketCountBetween util', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var indexPattern;
   var Vis;
   var visTypes;
@@ -17,12 +23,12 @@ describe('bucketCountBetween util', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Vis = Private(require('ui/Vis'));
-    visTypes = Private(require('ui/registry/vis_types'));
-    aggTypes = Private(require('ui/agg_types/index'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    bucketCountBetween = Private(require('ui/agg_types/buckets/_bucket_count_between'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    Vis = Private(VisProvider);
+    visTypes = Private(RegistryVisTypesProvider);
+    aggTypes = Private(AggTypesIndexProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
   }));
 
   it('returns a positive number when a is before b', function () {

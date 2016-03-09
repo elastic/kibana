@@ -1,19 +1,18 @@
-var semver = require('semver');
-var utils = require('requirefrom')('src/utils');
-var rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
+import semver from 'semver';
+const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
 module.exports = function (server, doc) {
-  var config = server.config();
+  const config = server.config();
   if (/beta|snapshot/i.test(doc._id)) return false;
   if (!doc._id) return false;
   if (doc._id === config.get('pkg.version')) return false;
 
-  var packageRcRelease = Infinity;
-  var rcRelease = Infinity;
-  var packageVersion = config.get('pkg.version');
-  var version = doc._id;
-  var matches = doc._id.match(rcVersionRegex);
-  var packageMatches = config.get('pkg.version').match(rcVersionRegex);
+  let packageRcRelease = Infinity;
+  let rcRelease = Infinity;
+  let packageVersion = config.get('pkg.version');
+  let version = doc._id;
+  const matches = doc._id.match(rcVersionRegex);
+  const packageMatches = config.get('pkg.version').match(rcVersionRegex);
 
   if (matches) {
     version = matches[1];

@@ -1,14 +1,15 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import AggResponsePointSeriesGetSeriesProvider from 'ui/agg_response/point_series/_get_series';
 describe('getSeries', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
   var getSeries;
 
   var agg = { fieldFormatter: _.constant(_.identity) };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    getSeries = Private(require('ui/agg_response/point_series/_get_series'));
+    getSeries = Private(AggResponsePointSeriesGetSeriesProvider);
   }));
 
   function wrapRows(row) {

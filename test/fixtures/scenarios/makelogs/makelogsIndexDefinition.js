@@ -19,14 +19,9 @@ module.exports = {
       'dynamic_templates': [{
         'string_fields': {
           'mapping': {
-            'type': 'multi_field',
-            'doc_values': true,
+            'type': 'string',
+            'index': 'analyzed',
             'fields': {
-              '{name}': {
-                'index': 'analyzed',
-                'omit_norms': true,
-                'type': 'string'
-              },
               'raw': {
                 'index': 'not_analyzed',
                 'type': 'string',
@@ -47,7 +42,7 @@ module.exports = {
         },
         'id': {
           'type': 'integer',
-          'index': 'not_analyzed',
+          'index': true,
           'include_in_all': false
         },
         'clientip': {
@@ -98,7 +93,7 @@ module.exports = {
                 },
                 'lastname': {
                   'type': 'integer',
-                  'index': 'not_analyzed'
+                  'index': true
                 }
               }
             }

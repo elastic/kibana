@@ -1,20 +1,18 @@
-define(function (require) {
-  var _ = require('lodash');
-  return function (id) {
-    if (id == null) return;
+import _ from 'lodash';
+export default function (id) {
+  if (id == null) return;
 
-    var trans = {
-      '/' : '-slash-',
-      '\\?' : '-questionmark-',
-      '\\&' : '-ampersand-',
-      '=' : '-equal-'
-    };
-    _.each(trans, function (val, key) {
-      var regex = new RegExp(key, 'g');
-      id = id.replace(regex, val);
-    });
-    id = id.replace(/[\s]+/g, '-');
-    id = id.replace(/[\-]+/g, '-');
-    return id;
+  var trans = {
+    '/' : '-slash-',
+    '\\?' : '-questionmark-',
+    '\\&' : '-ampersand-',
+    '=' : '-equal-'
   };
-});
+  _.each(trans, function (val, key) {
+    var regex = new RegExp(key, 'g');
+    id = id.replace(regex, val);
+  });
+  id = id.replace(/[\s]+/g, '-');
+  id = id.replace(/[\-]+/g, '-');
+  return id;
+};

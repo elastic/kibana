@@ -1,18 +1,19 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import 'ui/listen';
+import EventsProvider from 'ui/events';
 
 describe('listen component', function () {
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
   var $rootScope;
   var Events;
 
-  require('ui/listen');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
     $rootScope = $injector.get('$rootScope');
-    Events = Private(require('ui/events'));
+    Events = Private(EventsProvider);
   }));
 
   it('exposes the $listen method on all scopes', function () {

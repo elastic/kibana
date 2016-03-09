@@ -1,5 +1,3 @@
-define(function (require) {
-  return function savedDashboardFn(savedDashboards) {
-    return savedDashboards;
-  };
-});
+export default function savedDashboardFn(savedDashboards) {
+  return savedDashboards;
+};
