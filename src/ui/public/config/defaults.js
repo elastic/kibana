@@ -32,7 +32,7 @@ export default function configDefaultsProvider() {
       type: 'json',
       value:
         '[\n' +
-        '  ["", "hh:mm:ss.SSS"],\n' +
+        '  ["", "HH:mm:ss.SSS"],\n' +
         '  ["PT1S", "HH:mm:ss"],\n' +
         '  ["PT1M", "HH:mm"],\n' +
         '  ["PT1H",\n' +
@@ -49,6 +49,10 @@ export default function configDefaultsProvider() {
     'defaultIndex': {
       value: null,
       description: 'The index to access if no index is set',
+    },
+    'defaultColumns': {
+      value: ['_source'],
+      description: 'Columns displayed by default in the Discovery tab',
     },
     'metaFields': {
       value: ['_source', '_id', '_type', '_index', '_score'],

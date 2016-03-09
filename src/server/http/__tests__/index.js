@@ -1,8 +1,5 @@
 import expect from 'expect.js';
-import requirefrom from 'requirefrom';
-
-const requireFromTest = requirefrom('test');
-const kbnTestServer = requireFromTest('utils/kbn_server');
+import * as kbnTestServer from '../../../../test/utils/kbn_server';
 
 describe('cookie validation', function () {
   let kbnServer;

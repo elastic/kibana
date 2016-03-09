@@ -1,13 +1,13 @@
 import _ from 'lodash';
-export default function FetchForEachRequestStrategy(Private, Promise) {
 
+export default function FetchForEachRequestStrategy(Private, Promise) {
   function forEachStrategy(requests, block) {
     block = Promise.method(block);
-    var sets = [];
+    const sets = [];
 
     requests.forEach(function (req) {
-      var strategy = req.strategy;
-      var set = _.find(sets, { 0: strategy });
+      const strategy = req.strategy;
+      const set = _.find(sets, { 0: strategy });
       if (set) set[1].push(req);
       else sets.push([strategy, [req]]);
     });
