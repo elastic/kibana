@@ -1,3 +1,5 @@
+import { HostBasedProxyConfigCollection } from './server/host_based_proxy_config';
+
 module.exports = function (kibana) {
   let { resolve, join, sep } = require('path');
   let Joi = require('joi');
@@ -38,50 +40,87 @@ module.exports = function (kibana) {
         defaultServerUrl: Joi.string().default('http://localhost:9200'),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
         ssl: Joi.object({
-          verify: Joi.boolean().default(true),
+          verify: Joi.boolean(),
         }).default(),
+        hosts: Joi.array().items(
+          Joi.object().keys({
+            host: Joi.array().items(Joi.string()).single().default(['.*']),
+            timeout: Joi.number(),
+            ssl: Joi.object().keys({
+              verify: Joi.boolean(),
+              ca: Joi.array().single().items(Joi.string()),
+              cert: Joi.string(),
+              key: Joi.string()
+            }).default()
+          })
+        ).default([
+          {
+            host: '.*',
+            timeout: 180000,
+            ssl: {
+              verify: true
+            }
+          }
+        ])
       }).default();
     },
 
     init: function (server, options) {
       const filters = options.proxyFilter.map(str => new RegExp(str));
 
+      if (options.ssl && options.ssl.verify) {
+        throw new Error('sense.ssl.version is no longer supported.');
+      }
+
+      const hostBasedProxyConfig = new HostBasedProxyConfigCollection(options.hosts);
+
       // http://hapijs.com/api/8.8.1#route-configuration
       server.route({
         path: '/api/sense/proxy',
         method: ['*', 'GET'],
         config: {
-          handler: {
-            proxy: {
-              mapUri: function (req, cb) {
-                let { uri } = req.query;
-                if (!uri) {
-                  cb(Boom.badRequest('URI is a required param.'));
-                  return;
-                }
+          validate: {
+            query: Joi.object().keys({
+              uri: Joi.string().uri({
+                allowRelative: false,
+                shema: ['http:', 'https:'],
+              }),
+            }).unknown(true),
+          },
 
-                if (!filters.some(re => re.test(uri))) {
-                  const err = Boom.forbidden();
-                  err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
-                  err.output.headers['content-type'] = 'text/plain';
-                  cb(err);
-                  return;
-                }
+          pre: [
+            function filterUri(req, reply) {
+              const { uri } = req.query;
 
-                cb(null, uri);
-              },
-              rejectUnauthorized: options.ssl.verify,
-              passThrough: true,
-              xforward: true,
-              onResponse: function (err, res, request, reply, settings, ttl) {
-                if (err != null) {
-                  reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
-                } else {
-                  reply(null, res);
-                }
+              if (!filters.some(re => re.test(uri))) {
+                const err = Boom.forbidden();
+                err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
+                err.output.headers['content-type'] = 'text/plain';
+                reply(err);
+              } else {
+                reply();
               }
             }
-          }
+          ]
+        },
+
+        handler(req, reply) {
+          const { uri } = req.query;
+
+          reply.proxy({
+            uri,
+            xforward: true,
+            passThrough: true,
+            onResponse(err, res, request, reply, settings, ttl) {
+              if (err != null) {
+                reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+              } else {
+                reply(null, res);
+              }
+            },
+
+            ...hostBasedProxyConfig.forUri(uri)
+          })
         }
       });
 
