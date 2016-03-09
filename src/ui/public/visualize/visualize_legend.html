@@ -6,8 +6,8 @@
 
     <li
       ng-repeat="legendData in labels track by legendData.label"
-      ng-mouseenter="highlightSeries(legendData.label)"
-      ng-mouseleave="unhighlightSeries()"
+      ng-mouseenter="highlight($event)"
+      ng-mouseleave="unhighlight($event)"
       data-label="{{legendData.label}}"
       class="legend-value color">
 
