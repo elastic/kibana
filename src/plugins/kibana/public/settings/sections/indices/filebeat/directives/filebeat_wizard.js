@@ -1,5 +1,6 @@
-var modules = require('ui/modules');
-var template = require('plugins/kibana/settings/sections/indices/filebeat/directives/filebeat_wizard.html');
+import modules from 'ui/modules';
+import template from 'plugins/kibana/settings/sections/indices/filebeat/directives/filebeat_wizard.html';
+import IngestProvider from 'ui/ingest';
 
 require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step');
 require('plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step');
@@ -15,8 +16,14 @@ modules.get('apps/settings')
     scope: {},
     bindToController: true,
     controllerAs: 'wizard',
-    controller: function ($scope, AppState, safeConfirm, kbnUrl) {
-      var $state = this.state = new AppState();
+    controller: function ($scope, AppState, safeConfirm, kbnUrl, $http, Notifier, $window, config, Private) {
+      const ingest = Private(IngestProvider);
+      const $state = this.state = new AppState();
+
+      var notify = new Notifier({
+        location: 'Add Data'
+      });
+
       var totalSteps = 4;
       this.stepResults = {};
 
@@ -36,10 +43,24 @@ modules.get('apps/settings')
           kbnUrl.change('/discover');
         }
       };
+
       this.prevStep = () => {
         if ($state.currentStep > 0) {
           this.setCurrentStep($state.currentStep - 1);
         }
+      };
+
+      this.save = () => {
+        return ingest.save(this.stepResults.indexPattern, this.stepResults.pipeline)
+        .then(
+          () => {
+            this.nextStep();
+          },
+          (err) => {
+            notify.error(err);
+            $window.scrollTo(0,0);
+          }
+        );
       };
 
       $scope.$watch('wizard.state.currentStep', (newValue, oldValue) => {

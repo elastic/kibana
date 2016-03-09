@@ -23,8 +23,8 @@ const testData = {
 const testPipeline = [
   {
     grok: {
-      match_field: 'message',
-      match_pattern: 'foo'
+      field: 'message',
+      pattern: 'foo'
     }
   },
   {
