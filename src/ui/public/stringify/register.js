@@ -2,7 +2,7 @@ import fieldFormats from 'ui/registry/field_formats';
 import stringifyUrl from 'ui/stringify/types/Url';
 import stringifyBytes from 'ui/stringify/types/Bytes';
 import stringifyDate from 'ui/stringify/types/Date';
-import stringifyDuration from 'ui/stringify/types/Duration';
+import stringifyDuration from 'ui/stringify/types/duration';
 import stringifyIp from 'ui/stringify/types/Ip';
 import stringifyNumber from 'ui/stringify/types/Number';
 import stringifyPercent from 'ui/stringify/types/Percent';
