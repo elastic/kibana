@@ -51,7 +51,8 @@
         ng-click="configTemplate.toggle('options');">
         <span>Options</span>
       </button>
-      <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
+      <kbn-loading-indicator></kbn-loading-indicator>
+      <kbn-global-timepicker></kbn-global-timepicker>
     </div>
   </navbar>
   <config config-template="configTemplate" config-object="opts"></config>
