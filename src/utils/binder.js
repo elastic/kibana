@@ -14,7 +14,7 @@ export default class Binder {
   }
 
   destroy() {
-    var destroyers = this.disposal;
+    const destroyers = this.disposal;
     this.disposal = [];
     destroyers.forEach(fn => fn());
   }

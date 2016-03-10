@@ -14,7 +14,7 @@ export default class UiBinder extends Binder {
   }
 
   jqOn(el, ...args) {
-    var $el = $(el);
+    const $el = $(el);
     $el.on(...args);
     this.disposal.push(() => $el.off(...args));
   }
@@ -22,7 +22,7 @@ export default class UiBinder extends Binder {
   fakeD3Bind(el, event, handler) {
     this.jqOn(el, event, (e) => {
       // mimick https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
-      var o = d3.event; // Events can be reentrant (e.g., focus).
+      const o = d3.event; // Events can be reentrant (e.g., focus).
       d3.event = e;
       try {
         handler.apply(this, [this.__data__]);
