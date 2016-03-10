@@ -6,6 +6,6 @@ const base = Joi.object({
 
 export const set = base.keys({
   type_id: Joi.string().only('set').required(),
-  target_field: Joi.string().required(),
-  value: Joi.any().required()
+  target_field: Joi.string().allow(''),
+  value: Joi.string().allow('')
 });

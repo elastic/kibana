@@ -3,7 +3,7 @@ const _ = require('lodash');
 const Pipeline = require('../lib/pipeline');
 const Processor = require('../lib/processor');
 const angular = require('angular');
-const processorTypes = require('../../../../../../../common/ingest_processor_types');
+const processorTypes = require('../lib/processor_types');
 const savedPipeline = require('../sample_pipeline.json'); //temp for debugging purposes
 
 require('../services/ingest');

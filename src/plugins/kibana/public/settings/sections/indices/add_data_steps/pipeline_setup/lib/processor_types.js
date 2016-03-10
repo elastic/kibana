@@ -1,0 +1,15 @@
+const keysDeep = require('./keys_deep');
+const _ = require('lodash');
+
+export default [
+  { // set
+    typeId: 'set',
+    title: 'Set',
+    targetField: '',
+    value: '',
+    getDescription: function (processor) {
+      const target = (processor.targetField) ? processor.targetField : '?';
+      return `[${target}]`;
+    }
+  }
+];

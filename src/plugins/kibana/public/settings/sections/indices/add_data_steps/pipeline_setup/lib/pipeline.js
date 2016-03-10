@@ -119,7 +119,8 @@ Pipeline.prototype.updateOutput = function () {
 
 Pipeline.prototype.getProcessorById = function (processorId) {
   const self = this;
-  return _.find(self.processors, (processor) => { return processor.processorId === processorId; });
+  const result = _.find(self.processors, (processor) => { return processor.processorId === processorId; });
+  return result;
 };
 
 // Updates the state of the pipeline and processors with the results
