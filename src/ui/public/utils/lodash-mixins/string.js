@@ -10,7 +10,7 @@ export default function (_) {
      * @return {string}
      */
     asPrettyString: function (val) {
-      if (val === null || val === undefined) return '(empty)';
+      if (val === null || val === undefined) return ' - ';
       switch (typeof val) {
         case 'string': return val;
         case 'object': return JSON.stringify(val, null, '  ');
