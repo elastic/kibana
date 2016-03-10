@@ -2,52 +2,64 @@
 @import (reference) "~bootstrap/less/list-group";
 @import (reference) "~ui/styles/list-group-menu";
 
-
-.step-2-table {
-  margin-bottom: 0;
-  border-bottom: 1px solid @kibanaGray6;
-}
-
-.step-2-table-header {
-  padding: 16px !important;
-}
-
-.index-link {
-  text-decoration: @link-hover-decoration !important;
-  color: @kibanaBlue2;
-}
-
 .vis-wizard {
-  margin-right: 0px;
-  margin-left: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
+  margin-right: 0;
+  margin-left: 0;
+  padding-left: 0;
+  padding-right: 0;
 
   @media (min-width: 1280px) {
     .wizard {
-      padding: 0px;
+      padding: 0;
       display: flex;
-
-      :first-child {
-        padding-right: 5px;
-      }
 
       .wizard-column {
         flex: 1;
         display: flex;
         flex-direction: column;
+        padding: 0px 2.5px;
+
+        .wizard-row {
+          flex: 1;
+          background-color: @kibanaGray6;
+        }
       }
     }
-  }
-
-  .wizard-row {
-    flex: 1;
-    background-color: @kibanaGray6;
   }
 
   h3 {
     margin-top: 45px;
     padding: 0px 15px;
+  }
+
+  .wizard-row {
+    .panel {
+      margin-bottom: 0;
+      border: none;
+    }
+
+    .panel-default > .panel-heading {
+      background-color: @kibanaGray6;
+    }
+
+    .list-group {
+      margin-bottom: 0;
+
+      .list-group-item {
+        border-radius: 0;
+        border: none;
+      }
+    }
+
+    .striped {
+      li:nth-child(odd) {
+        background-color: @white;
+      }
+
+      li:nth-child(even) {
+        background-color: @kibanaGray6;
+      }
+    }
   }
 
   .wizard-type {
@@ -84,6 +96,5 @@
     }
   }
 }
-
 
 @import "../editor/styles/_editor.less";

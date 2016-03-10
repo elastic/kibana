@@ -3,22 +3,14 @@
     <h3>From a New Search</h3>
     <!-- Index patterns -->
     <div class="wizard-row">
-
-      <table class="step-2-table table table-striped">
-        <thead>
-          <tr>
-            <th class="step-2-table-header">Index Patterns</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="pattern in indexPattern.list">
-            <td>
-              <a class="index-link"  href ng-click="goToUrl(pattern)">{{pattern}}</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
+      <div class="panel panel-default">
+        <div class="panel-heading">Index Patterns</div>
+      </div>
+      <ul class="striped list-group">
+        <li class="list-group-item" ng-repeat="pattern in indexPattern.list">
+          <a class="index-link" href ng-click="goToUrl(pattern)">{{pattern}}</a>
+        </li>
+      </ul>
     </div>
   </div>
   <div class="wizard-column">
