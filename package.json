@@ -56,6 +56,7 @@
     "elasticsearchWithPlugins": "grunt esvm:withPlugins:keepalive",
     "lint": "grunt eslint:source",
     "lintroller": "grunt eslint:fixSource",
+    "makelogs": "makelogs",
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
     "sterilize": "grunt sterilize"
@@ -88,7 +89,7 @@
     "boom": "2.8.0",
     "bootstrap": "3.3.5",
     "brace": "0.5.1",
-    "bunyan": "1.4.0",
+    "bunyan": "1.7.1",
     "clipboard": "1.5.5",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
@@ -145,7 +146,7 @@
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "4.1.8",
-    "chokidar": "1.0.5",
+    "chokidar": "1.4.3",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
     "expect.js": "0.3.1",
@@ -176,6 +177,7 @@
     "libesvm": "3.3.0",
     "license-checker": "3.1.0",
     "load-grunt-config": "0.7.2",
+    "makelogs": "3.0.0-beta3",
     "marked-text-renderer": "0.1.0",
     "mocha": "2.3.0",
     "nock": "2.10.0",
@@ -187,7 +189,7 @@
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "4.3.0",
-    "npm": "2.14.15"
+    "node": "4.3.2",
+    "npm": "2.14.22"
   }
 }
