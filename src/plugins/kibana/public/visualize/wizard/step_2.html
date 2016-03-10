@@ -1,8 +1,9 @@
-<div class="wizard-vis-container">
-  <div class="wizard-vis-column first">
+<div class="wizard">
+  <div class="wizard-column">
     <h3>From a New Search</h3>
     <!-- Index patterns -->
-    <div class="step-1-wizard">
+    <div class="wizard-row">
+
       <table class="step-2-table table table-striped">
         <thead>
           <tr>
@@ -17,15 +18,16 @@
           </tr>
         </tbody>
       </table>
+
     </div>
   </div>
-  <div class="wizard-vis-column">
+  <div class="wizard-column">
     <h3>Or, From a Saved Search</h3>
     <!-- Saved searches -->
     <saved-object-finder
-        class="step-1-wizard"
         title="Saved Searches"
         type="searches"
+        class="wizard-row"
         make-url="step2WithSearchUrl">
     </saved-object-finder>
   </div>
