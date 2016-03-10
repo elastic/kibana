@@ -1,0 +1,21 @@
+import { bindKey, rest } from 'lodash';
+
+export default class Binder {
+  constructor() {
+    this.disposal = [];
+  }
+
+  on(emitter, event, handler) {
+    const on = emitter.on || emitter.addListener;
+    const off = emitter.off || emitter.removeListener;
+
+    on.call(emitter, event, handler);
+    this.disposal.push(() => off.call(emitter, event, handler));
+  }
+
+  destroy() {
+    var destroyers = this.disposal;
+    this.disposal = [];
+    destroyers.forEach(fn => fn());
+  }
+}
