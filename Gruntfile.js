@@ -1,11 +1,11 @@
-var camelCase = require('lodash').camelCase;
+const camelCase = require('lodash').camelCase;
 require('babel/register')(require('./src/optimize/babel_options').node);
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
   // and once during so that we have access to it via
   // grunt.config.get() within the config files
-  var config = {
+  const config = {
     pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
     src: __dirname + '/src',
