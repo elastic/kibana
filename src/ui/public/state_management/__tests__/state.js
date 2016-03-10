@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/private';
 import StateManagementStateProvider from 'ui/state_management/state';
 import EventsProvider from 'ui/events';

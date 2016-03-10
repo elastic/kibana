@@ -2,7 +2,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import yaml from 'js-yaml';
 
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 
 let legacySettingMap = {
   // server

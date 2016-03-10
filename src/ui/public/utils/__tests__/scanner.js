@@ -2,7 +2,7 @@ import Scanner from 'ui/utils/scanner';
 import expect from 'expect.js';
 import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
 describe('Scanner', function () {

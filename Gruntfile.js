@@ -1,10 +1,11 @@
-require('babel/register')(require('./src/optimize/babelOptions').node);
+const camelCase = require('lodash').camelCase;
+require('babel/register')(require('./src/optimize/babel_options').node);
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
   // and once during so that we have access to it via
   // grunt.config.get() within the config files
-  var config = {
+  const config = {
     pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
     src: __dirname + '/src',
@@ -12,7 +13,7 @@ module.exports = function (grunt) {
     plugins: __dirname + '/src/plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
-    testUtilsDir: __dirname + '/src/testUtils',
+    testUtilsDir: __dirname + '/src/test_utils',
     configFile: __dirname + '/src/config/kibana.yml',
 
     karmaBrowser: (function () {
@@ -81,6 +82,17 @@ module.exports = function (grunt) {
     config: config,
     loadGruntTasks: {
       pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
+    },
+    preMerge(config, data) {
+      Object.keys(config).forEach(key => {
+        const taskConfig = config[key];
+        if (taskConfig.__taskName__) {
+          config[taskConfig.__taskName__] = taskConfig;
+
+          delete config[key];
+          delete taskConfig.__taskName__;
+        }
+      });
     }
   });
 
