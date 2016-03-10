@@ -289,14 +289,99 @@ table {
 
 //== SavedObjectFinder
 saved-object-finder {
+  .row {
+    background-color: @kibanaGray6;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+
   .form-group {
     margin-bottom: 0;
+    float: left;
+    flex: 8;
+
     input {
-      .border-bottom-radius(0);
+      border: none;
+      padding: 5px 0px;
+      border-radius: @border-radius-base;
+    }
+
+    span {
+      padding: 5px 0px;
+      background-color: @white;
+      border: none;
+
+      i {
+        color: @kibanaGray3;
+        width: 15px;
+      }
+    }
+  }
+
+  #finder-hit-count {
+    text-align: center;
+    padding: 5px;
+    flex: 1;
+    min-width: 80px;
+
+    span {
+      color: @kibanaGray3;
+    }
+  }
+
+  #finder-manage-object {
+    flex: 3;
+    padding: 5px;
+    text-align: left;
+    min-width: 80px;
+  }
+
+  ul.li-striped {
+    li {
+      border: none;
+    }
+
+    li:nth-child(odd) {
+      background-color: @kibanaGray6;
+    }
+
+    li:nth-child(even) {
+      background-color: @white;
     }
   }
 
   .list-group-item {
+    padding: 8px 15px;
+
+    ul {
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+
+      .paginate-heading {
+        font-weight: normal;
+        color: @kibanaGray1;
+      }
+
+      .finder-type {
+        width: 50px;
+        text-align: center;
+      }
+
+      .finder-name {
+        flex: 1;
+      }
+
+      li:nth-child(odd) {
+        background-color: transparent;
+      }
+
+      li:nth-child(even) {
+        background-color: transparent;
+      }
+    }
+
     a {
       i {
         color: @saved-object-finder-icon-color !important;
