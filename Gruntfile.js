@@ -85,11 +85,12 @@ module.exports = function (grunt) {
     },
     preMerge(config, data) {
       Object.keys(config).forEach(key => {
-        const camelKey = camelCase(key);
-        if (key !== camelKey) {
-          grunt.log.debug(`renaming config for ${key} to ${camelKey}`);
-          config[camelKey] = config[key];
+        const taskConfig = config[key];
+        if (taskConfig.__taskName__) {
+          config[taskConfig.__taskName__] = taskConfig;
+
           delete config[key];
+          delete taskConfig.__taskName__;
         }
       });
     }
