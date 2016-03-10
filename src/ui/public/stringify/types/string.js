@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import 'ui/field_format_editor/samples/samples';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
-export default function _StringProvider(Private) {
-  var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+export default function StringFormatProvider(Private) {
+  var FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
 
   _.class(_String).inherits(FieldFormat);

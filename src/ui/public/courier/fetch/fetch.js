@@ -1,18 +1,20 @@
 import _ from 'lodash';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierFetchFetchTheseProvider from 'ui/courier/fetch/_fetch_these';
-import CourierFetchCallResponseHandlersProvider from 'ui/courier/fetch/_call_response_handlers';
-import CourierFetchReqStatusProvider from 'ui/courier/fetch/_req_status';
+
+import RequestQueueProvider from '../_request_queue';
+import FetchTheseProvider from './fetch_these';
+import CallResponseHandlersProvider from './call_response_handlers';
+import ReqStatusProvider from './req_status';
+
 export default function fetchService(Private, Promise) {
 
-  var requestQueue = Private(CourierRequestQueueProvider);
-  var fetchThese = Private(CourierFetchFetchTheseProvider);
+  const requestQueue = Private(RequestQueueProvider);
+  const fetchThese = Private(FetchTheseProvider);
 
-  var callResponseHandlers = Private(CourierFetchCallResponseHandlersProvider);
-  var INCOMPLETE = Private(CourierFetchReqStatusProvider).INCOMPLETE;
+  const callResponseHandlers = Private(CallResponseHandlersProvider);
+  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchQueued(strategy) {
-    var requests = requestQueue.getStartable(strategy);
+    const requests = requestQueue.getStartable(strategy);
     if (!requests.length) return Promise.resolve();
     else return fetchThese(requests);
   }
@@ -20,7 +22,7 @@ export default function fetchService(Private, Promise) {
   this.fetchQueued = fetchQueued;
 
   function fetchASource(source, strategy) {
-    var defer = Promise.defer();
+    const defer = Promise.defer();
 
     fetchThese([
       source._createRequest(defer)

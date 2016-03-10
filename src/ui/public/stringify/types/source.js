@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import noWhiteSpace from 'ui/utils/no_white_space';
 import angular from 'angular';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
-export default function _SourceProvider(Private, shortDotsFilter) {
-  var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+export default function _SourceFormatProvider(Private, shortDotsFilter) {
+  var FieldFormat = Private(IndexPatternsFieldFormatProvider);
   var template = _.template(noWhiteSpace(require('ui/stringify/types/_source.html')));
 
   _.class(Source).inherits(FieldFormat);

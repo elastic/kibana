@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import 'ui/field_format_editor/pattern/pattern';
 import 'ui/stringify/icons';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import urlTemplate from 'ui/stringify/editors/url.html';
 export default function UrlFormatProvider(Private, highlightFilter) {
 
-  var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+  var FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
 
   _.class(Url).inherits(FieldFormat);
