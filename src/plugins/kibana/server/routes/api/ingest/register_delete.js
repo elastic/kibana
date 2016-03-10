@@ -19,7 +19,8 @@ module.exports = function registerDelete(server) {
         callWithRequest(req, 'indices.deleteTemplate', {name: patternToIngest(req.params.id), ignore: [404]}),
         callWithRequest(req, 'transport.request', {
           path: `_ingest/pipeline/${patternToIngest(req.params.id)}`,
-          method: 'DELETE'
+          method: 'DELETE',
+          ignore: [404]
         })
       ])
       .then(

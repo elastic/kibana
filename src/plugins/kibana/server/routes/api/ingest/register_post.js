@@ -5,7 +5,7 @@ import handleESError from '../../../lib/handle_es_error';
 import createMappingsFromPatternFields from '../../../lib/create_mappings_from_pattern_fields';
 import initDefaultFieldProps from '../../../lib/init_default_field_props';
 import {ingestToPattern, patternToIngest} from '../../../lib/convert_pattern_and_ingest_name';
-import { keysToCamelCaseShallow } from '../../../lib/case_conversion';
+import { keysToCamelCaseShallow } from '../../../../common/lib/case_conversion';
 
 function patternRollback(rootError, indexPatternId, boundCallWithRequest) {
   const deleteParams = {

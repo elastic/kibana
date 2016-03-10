@@ -8,6 +8,7 @@ import PluginsKibanaSettingsSectionsIndicesFieldTypesProvider from 'plugins/kiba
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/settings/sections/indices/_edit.html';
+import IngestProvider from 'ui/ingest';
 
 uiRoutes
 .when('/settings/indices/edit/:indexPatternId', {
@@ -26,6 +27,7 @@ uiModules.get('apps/settings')
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
   const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
+  const ingest = Private(IngestProvider);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
@@ -62,8 +64,8 @@ uiModules.get('apps/settings')
       }
     }
 
-    courier.indexPatterns.delete($scope.indexPattern)
-    .then(refreshKibanaIndex)
+    ingest.delete($scope.indexPattern.id)
+    .then($scope.indexPattern.destroy)
     .then(function () {
       $location.url('/settings/indices');
     })
