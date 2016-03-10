@@ -305,6 +305,7 @@ saved-object-finder {
       border: none;
       padding: 5px 0px;
       border-radius: @border-radius-base;
+      text-transform: capitalize;
     }
 
     span {
@@ -319,11 +320,14 @@ saved-object-finder {
     }
   }
 
-  #finder-hit-count {
-    text-align: center;
-    padding: 5px;
-    flex: 1;
+  #finder-hit-count, #finder-manage-object {
     min-width: 80px;
+    padding: 5px;
+  }
+
+  #finder-hit-count {
+    flex: 1;
+    text-align: center;
 
     span {
       color: @kibanaGray3;
@@ -332,9 +336,8 @@ saved-object-finder {
 
   #finder-manage-object {
     flex: 3;
-    padding: 5px;
     text-align: left;
-    min-width: 80px;
+    text-transform: capitalize;
   }
 
   ul.li-striped {

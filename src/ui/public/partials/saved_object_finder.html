@@ -8,9 +8,10 @@
         <input
           input-focus
           ng-model="filter"
-          ng-attr-placeholder="{{finder.properties.nouns | capitalize}} Filter..."
+          ng-attr-placeholder="{{finder.properties.nouns}} Filter..."
           ng-keydown="finder.filterKeyDown($event)"
           class="form-control"
+          style="text-transform: capitalize"
           name="filter"
           type="text" />
       </div>
@@ -18,7 +19,7 @@
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
       <div id="finder-manage-object" class="col-md-2">
-        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage {{finder.properties.nouns | capitalize}}</a>
+        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage {{finder.properties.nouns}}</a>
       </div>
     </div>
   </div>
