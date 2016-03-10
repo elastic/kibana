@@ -1,5 +1,3 @@
-import { bindKey, rest } from 'lodash';
-
 export default class Binder {
   constructor() {
     this.disposal = [];
