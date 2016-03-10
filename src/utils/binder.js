@@ -3,12 +3,12 @@ export default class Binder {
     this.disposal = [];
   }
 
-  on(emitter, event, handler) {
+  on(emitter, ...args) {
     const on = emitter.on || emitter.addListener;
     const off = emitter.off || emitter.removeListener;
 
-    on.call(emitter, event, handler);
-    this.disposal.push(() => off.call(emitter, event, handler));
+    on.apply(emitter, args);
+    this.disposal.push(() => off.apply(emitter, args));
   }
 
   destroy() {
