@@ -1,7 +1,7 @@
 import uiModules from 'ui/modules';
 import _  from 'lodash';
 import angular from 'angular';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../lib/case_conversion';
+import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../../../../../common/lib/case_conversion';
 
 const module = uiModules.get('kibana');
 
