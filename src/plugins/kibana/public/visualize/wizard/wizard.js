@@ -7,7 +7,7 @@ import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 
 
-var templateStep = function (num, txt) {
+const templateStep = function (num, txt) {
   return '<div ng-controller="VisualizeWizardStep' + num + '" class="container-fluid vis-wizard">' + txt + '</div>';
 };
 

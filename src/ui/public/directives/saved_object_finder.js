@@ -61,23 +61,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
        * @return {Array} Array sorted either ascending or descending
        */
       self.sortHits = function (hits) {
-        self.isAscending = !self.isAscending;
-
-        if (hits.length) {
-          if (self.isAscending) {
-            return hits.sort(function (a, b) {
-              if (a.title > b.title) return 1;
-              if (a.title < b.title) return -1;
-              return 0;
-            });
-          } else {
-            return hits.sort(function (a, b) {
-              if (a.title < b.title) return 1;
-              if (a.title > b.title) return -1;
-              return 0;
-            });
-          }
-        }
+        return self.isAscending ? _.sortBy(hits, 'title') : _.sortBy(hits, 'title').reverse();
       };
 
       /**
