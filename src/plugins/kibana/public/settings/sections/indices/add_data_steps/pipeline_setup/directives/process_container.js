@@ -1,9 +1,12 @@
-const app = require('ui/modules').get('kibana');
-const _ = require('lodash');
+import uiModules from 'ui/modules';
+import _ from 'lodash';
+
 require('../styles/_process_container.less');
 require('./process_container_header');
 
-app.directive('processContainer', function ($compile) {
+const module = uiModules.get('kibana');
+
+module.directive('processContainer', function ($compile) {
   return {
     restrict: 'E',
     scope: {

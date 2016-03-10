@@ -1,9 +1,9 @@
-const app = require('ui/modules').get('kibana');
-const _ = require('lodash');
-const keysDeep = require('../lib/keys_deep');
+import uiModules from 'ui/modules';
+
+const module = uiModules.get('kibana');
 
 //scope.processor, scope.pipeline are attached by the process_container.
-app.directive('processorUiSet', function () {
+module.directive('processorUiSet', function () {
   return {
     restrict: 'E',
     template: require('../views/processor_ui_set.html'),

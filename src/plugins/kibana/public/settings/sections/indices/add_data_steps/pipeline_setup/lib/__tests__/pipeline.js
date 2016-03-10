@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const expect = require('expect.js');
+import _ from 'lodash';
+import expect from 'expect.js';
 import Pipeline from '../../lib/pipeline';
 
 function Processor(processorType) {

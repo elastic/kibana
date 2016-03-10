@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 export default function Processor(processorType) {
   const self = this;

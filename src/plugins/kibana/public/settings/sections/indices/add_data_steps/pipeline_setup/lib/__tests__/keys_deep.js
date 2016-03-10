@@ -1,7 +1,6 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-
-var keysDeep = require('../keys_deep');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import keysDeep from '../keys_deep';
 
 describe('keys deep', function () {
 

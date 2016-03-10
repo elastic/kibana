@@ -1,6 +1,3 @@
-const keysDeep = require('./keys_deep');
-const _ = require('lodash');
-
 export default [
   { // set
     typeId: 'set',

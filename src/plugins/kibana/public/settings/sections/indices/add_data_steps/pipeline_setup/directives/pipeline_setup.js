@@ -1,10 +1,10 @@
-const app = require('ui/modules').get('kibana');
-const _ = require('lodash');
-const Pipeline = require('../lib/pipeline');
-const Processor = require('../lib/processor');
-const angular = require('angular');
-const processorTypes = require('../lib/processor_types');
-const savedPipeline = require('../sample_pipeline.json'); //temp for debugging purposes
+import uiModules from 'ui/modules';
+import _ from 'lodash';
+import Pipeline from '../lib/pipeline';
+import Processor from '../lib/processor';
+import angular from 'angular';
+import processorTypes from '../lib/processor_types';
+import savedPipeline from '../sample_pipeline.json'; //temp for debugging purposes
 
 require('../services/ingest');
 require('../styles/_pipeline_setup.less');
@@ -12,7 +12,9 @@ require('./pipeline_output');
 require('./source_data');
 require('./processors');
 
-app.directive('pipelineSetup', function () {
+const module = uiModules.get('kibana');
+
+module.directive('pipelineSetup', function () {
   return {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),

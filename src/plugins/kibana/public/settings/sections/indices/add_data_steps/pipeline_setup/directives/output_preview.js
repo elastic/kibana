@@ -1,9 +1,12 @@
-const app = require('ui/modules').get('kibana');
-const jsondiffpatch = require('@bigfunger/jsondiffpatch');
-const htmlFormat = jsondiffpatch.formatters.html.format;
+import uiModules from 'ui/modules';
+import jsondiffpatch from '@bigfunger/jsondiffpatch';
+
 require('../styles/_output_preview.less');
 
-app.directive('outputPreview', function () {
+const htmlFormat = jsondiffpatch.formatters.html.format;
+const module = uiModules.get('kibana');
+
+module.directive('outputPreview', function () {
   return {
     restrict: 'E',
     template: require('../views/output_preview.html'),

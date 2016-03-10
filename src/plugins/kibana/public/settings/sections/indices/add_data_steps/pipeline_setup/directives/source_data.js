@@ -1,9 +1,11 @@
-const app = require('ui/modules').get('kibana');
-const _ = require('lodash');
-const angular = require('angular');
+import uiModules from 'ui/modules';
+import angular from 'angular';
+
 require('../styles/_source_data.less');
 
-app.directive('sourceData', function () {
+const module = uiModules.get('kibana');
+
+module.directive('sourceData', function () {
   return {
     restrict: 'E',
     scope: {
