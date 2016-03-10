@@ -3,9 +3,9 @@ import angular from 'angular';
 
 require('../styles/_source_data.less');
 
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.directive('sourceData', function () {
+app.directive('sourceData', function () {
   return {
     restrict: 'E',
     scope: {

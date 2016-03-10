@@ -4,9 +4,9 @@ import _ from 'lodash';
 require('../styles/_process_container.less');
 require('./process_container_header');
 
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.directive('processContainer', function ($compile) {
+app.directive('processContainer', function ($compile) {
   return {
     restrict: 'E',
     scope: {

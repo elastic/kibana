@@ -4,9 +4,9 @@ import jsondiffpatch from '@bigfunger/jsondiffpatch';
 require('../styles/_output_preview.less');
 
 const htmlFormat = jsondiffpatch.formatters.html.format;
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.directive('outputPreview', function () {
+app.directive('outputPreview', function () {
   return {
     restrict: 'E',
     template: require('../views/output_preview.html'),

@@ -2,9 +2,9 @@ import uiModules from 'ui/modules';
 
 require('../styles/_process_container_header.less');
 
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.directive('processContainerHeader', function () {
+app.directive('processContainerHeader', function () {
   return {
     restrict: 'E',
     scope: {

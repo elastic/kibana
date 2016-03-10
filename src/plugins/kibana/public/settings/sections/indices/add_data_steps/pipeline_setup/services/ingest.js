@@ -3,9 +3,9 @@ import _  from 'lodash';
 import angular from 'angular';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../../../../../common/lib/case_conversion';
 
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.service('ingest', function ($http) {
+app.service('ingest', function ($http) {
   return {
     simulatePipeline: simulatePipeline
   };

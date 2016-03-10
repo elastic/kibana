@@ -12,9 +12,9 @@ require('./pipeline_output');
 require('./source_data');
 require('./processors');
 
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.directive('pipelineSetup', function () {
+app.directive('pipelineSetup', function () {
   return {
     restrict: 'E',
     template: require('../views/pipeline_setup.html'),

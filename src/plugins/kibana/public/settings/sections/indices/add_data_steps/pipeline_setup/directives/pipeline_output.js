@@ -2,9 +2,9 @@ import uiModules from 'ui/modules';
 
 require('../styles/_pipeline_output.less');
 
-const module = uiModules.get('kibana');
+const app = uiModules.get('kibana');
 
-module.directive('pipelineOutput', function () {
+app.directive('pipelineOutput', function () {
   return {
     restrict: 'E',
     template: require('../views/pipeline_output.html'),

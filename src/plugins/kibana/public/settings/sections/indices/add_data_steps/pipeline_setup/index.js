@@ -1,1 +1,1 @@
-require('./directives/pipeline_setup');
+import './directives/pipeline_setup';
