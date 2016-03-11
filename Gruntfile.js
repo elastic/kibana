@@ -9,6 +9,7 @@ module.exports = function (grunt) {
       expand: true,
       src: [
         'public/**',
+        'server/**',
         '!public/tests/**',
         'api_server/**',
         'index.js',
