@@ -99,7 +99,7 @@ sense.proxyConfig:
       host: "*.internal.org" # allow any host that ends in .internal.org
       port: "{9200..9299}" # allow any port from 9200-9299
 
-    ssl
+    ssl:
       ca: "/opt/certs/internal.ca"
       # "key" and "cert" are also valid options here
 
