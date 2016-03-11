@@ -148,9 +148,9 @@ describe('FieldFormat class', function () {
         expect(f.convert('val', 'html')).to.be('html');
       });
 
-      it('formats a value as "(empty)"" when no value is specified', function () {
+      it('formats a value as " - " when no value is specified', function () {
         var f = new TestFormat();
-        expect(f.convert()).to.be('(empty)');
+        expect(f.convert()).to.be(' - ');
       });
     });
 
