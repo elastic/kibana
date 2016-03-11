@@ -85,8 +85,8 @@ describe('FieldFormat class', function () {
         var text = f.getConverterFor('text');
         var html = f.getConverterFor('html');
         expect(text).to.not.be(html);
-        expect(text()).to.be('formatted');
-        expect(html()).to.be('formatted');
+        expect(text('formatted')).to.be('formatted');
+        expect(html('formatted')).to.be('formatted');
       });
 
       it('can be an object, with seperate text and html converter', function () {
@@ -99,8 +99,8 @@ describe('FieldFormat class', function () {
         var text = f.getConverterFor('text');
         var html = f.getConverterFor('html');
         expect(text).to.not.be(html);
-        expect(text()).to.be('formatted text');
-        expect(html()).to.be('formatted html');
+        expect(text('formatted text')).to.be('formatted text');
+        expect(html('formatted html')).to.be('formatted html');
       });
 
       it('does not escape the output of the text converter', function () {
