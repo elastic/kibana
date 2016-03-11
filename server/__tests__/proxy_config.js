@@ -3,7 +3,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import fs from 'fs';
-import { Agent as HttpsAgent } from 'https';
+import https, { Agent as HttpsAgent } from 'https';
 import { parse as parseUrl } from 'url';
 
 import { ProxyConfig } from '../proxy_config'
@@ -25,6 +25,70 @@ describe('ProxyConfig', function () {
 
   afterEach(function () {
     fs.readFileSync.restore();
+  });
+
+  describe('constructor', function () {
+    beforeEach(function () {
+      sinon.stub(https, 'Agent');
+    });
+
+    afterEach(function () {
+      https.Agent.restore();
+    });
+
+    it('uses ca to create sslAgent', function () {
+      const config = new ProxyConfig({
+        ssl: {
+          ca: 'path/to/ca'
+        }
+      });
+
+      expect(config.sslAgent).to.be.a(https.Agent);
+      sinon.assert.calledOnce(https.Agent);
+      const sslAgentOpts = https.Agent.firstCall.args[0];
+      expect(sslAgentOpts).to.eql({
+        ca: { path: 'path/to/ca' },
+        cert: undefined,
+        key: undefined,
+      });
+    });
+
+    it('uses cert, and key to create sslAgent', function () {
+      const config = new ProxyConfig({
+        ssl: {
+          cert: 'path/to/cert',
+          key: 'path/to/key'
+        }
+      });
+
+      expect(config.sslAgent).to.be.a(https.Agent);
+      sinon.assert.calledOnce(https.Agent);
+      const sslAgentOpts = https.Agent.firstCall.args[0];
+      expect(sslAgentOpts).to.eql({
+        ca: undefined,
+        cert: { path: 'path/to/cert' },
+        key: { path: 'path/to/key' },
+      });
+    });
+
+    it('uses ca, cert, and key to create sslAgent', function () {
+      const config = new ProxyConfig({
+        ssl: {
+          ca: 'path/to/ca',
+          cert: 'path/to/cert',
+          key: 'path/to/key'
+        }
+      });
+
+      expect(config.sslAgent).to.be.a(https.Agent);
+      sinon.assert.calledOnce(https.Agent);
+      const sslAgentOpts = https.Agent.firstCall.args[0];
+      expect(sslAgentOpts).to.eql({
+        ca: { path: 'path/to/ca' },
+        cert: { path: 'path/to/cert' },
+        key: { path: 'path/to/key' },
+      });
+    });
   });
 
   describe('#getForParsedUri', function () {
