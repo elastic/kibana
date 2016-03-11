@@ -8,7 +8,7 @@
       </div>
       <ul class="striped list-group">
         <li class="list-group-item" ng-repeat="pattern in indexPattern.list | orderBy: 'toString()'">
-          <a class="index-link" href ng-click="goToUrl(pattern)">{{pattern}}</a>
+          <a class="index-link" kbn-href="">{{pattern}}</a>
         </li>
       </ul>
     </div>

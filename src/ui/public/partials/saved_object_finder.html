@@ -12,36 +12,30 @@
           ng-keydown="finder.filterKeyDown($event)"
           class="form-control"
           name="filter"
-          type="text" />
+          type="text"
+          autocomplete="off" />
       </div>
-      <div id="finder-hit-count" class="col-md-2">
+      <div class="finder-hit-count col-md-2">
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
-      <div id="finder-manage-object" class="col-md-2">
+      <div class="finder-manage-object col-md-2">
         <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage {{finder.properties.nouns}}</a>
       </div>
     </div>
   </div>
 </form>
 <paginate list="finder.hits" per-page="20">
-  <ul class="li-striped list-group list-group-menu"
-    ng-class="{'select-mode': finder.selector.enabled}">
+  <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
 
     <li class="list-group-item list-group-menu-item">
-      <ul>
-        <li class="finder-type paginate-heading" ng-show="finder.properties.noun === 'Visualization'">Type</li>
-        <li class="finder-name paginate-heading">
-          Name
-          <i
-            class="fa"
-            ng-click="finder.sortHits(finder.hits)"
-            ng-class="{
-              'fa-caret-up': finder.isAscending === true,
-              'fa-caret-down': finder.isAscending === false,
-            }">
-          </i>
-        </li>
-      </ul>
+      <span class="paginate-heading">
+        Name
+        <i
+          class="fa"
+          ng-click="finder.sortHits(finder.hits)"
+          ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+        </i>
+      </span>
     </li>
 
     <li
@@ -54,15 +48,9 @@
       <a ng-href="{{finder.makeUrl(hit)}}"
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
-        <ul>
-          <li ng-show="finder.properties.noun === 'Visualization'" class="finder-type">
-            <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i>
-          </li>
-          <li class="finder-name">
-            {{hit.title}}
-            <p ng-if="hit.description" ng-bind="hit.description"></p>
-          </li>
-        </ul>
+          <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+          <span>{{hit.title}}</span>
+          <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
     </li>
 

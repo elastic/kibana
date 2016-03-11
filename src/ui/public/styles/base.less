@@ -320,12 +320,12 @@ saved-object-finder {
     }
   }
 
-  #finder-hit-count, #finder-manage-object {
+  .finder-hit-count, .finder-manage-object {
     min-width: 80px;
     padding: 5px;
   }
 
-  #finder-hit-count {
+  .finder-hit-count {
     flex: 1;
     text-align: center;
 
@@ -334,7 +334,7 @@ saved-object-finder {
     }
   }
 
-  #finder-manage-object {
+  .finder-manage-object {
     flex: 3;
     text-align: left;
     text-transform: capitalize;
@@ -345,6 +345,10 @@ saved-object-finder {
       border: none;
     }
 
+    li.list-group-item-menu:hover {
+      background-color: transparent;
+    }
+
     li:nth-child(odd) {
       background-color: @kibanaGray6;
     }
@@ -352,53 +356,41 @@ saved-object-finder {
     li:nth-child(even) {
       background-color: @white;
     }
-  }
 
-  .list-group-item {
-    padding: 8px 15px;
-
-    ul {
-      padding: 0;
-      display: flex;
-      flex-direction: row;
-
-      .paginate-heading {
-        font-weight: normal;
-        color: @kibanaGray1;
-      }
-
-      .finder-type {
-        width: 50px;
-        text-align: center;
-      }
-
-      .finder-name {
-        flex: 1;
-      }
-
-      li:nth-child(odd) {
-        background-color: transparent;
-      }
-
-      li:nth-child(even) {
-        background-color: transparent;
-      }
+    .paginate-heading {
+      font-weight: normal;
+      color: @kibanaGray1;
     }
 
-    a {
-      i {
-        color: @saved-object-finder-icon-color !important;
+    .list-group-item {
+      padding: 8px 15px;
+
+      ul {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+
+        .finder-type {
+          margin-right: 10px;
+        }
       }
 
-      color: @saved-object-finder-link-color !important;
-    }
+      a {
+        i {
+          color: @saved-object-finder-icon-color !important;
+          margin-right: 10px;
+        }
 
-    &:first-child {
-      .border-top-radius(0) !important;
-    }
+        color: @saved-object-finder-link-color !important;
+      }
 
-    &.list-group-no-results p {
-      margin-bottom: 0 !important;
+      &:first-child {
+        .border-top-radius(0) !important;
+      }
+
+      &.list-group-no-results p {
+        margin-bottom: 0 !important;
+      }
     }
   }
 
@@ -410,13 +402,6 @@ saved-object-finder {
       flex-direction: row;
       justify-content: flex-end;
     }
-  }
-
-  span.finder-hit-count {
-    position: absolute;
-    right: 10px;
-    top: 25px;
-    font-size: 0.85em;
   }
 
   .finder-options {
