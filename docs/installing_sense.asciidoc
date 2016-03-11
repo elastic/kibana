@@ -86,6 +86,28 @@ You can add the following options in the `config/kibana.yml` file:
 `sense.proxyFilter`:: A list of regular expressions that are used to validate any outgoing request from Sense. If none
  of these match, the request will be rejected. Defaults to `.*` . See <<securing_sense>> for more details.
 
+`sense.proxyConfig`:: A list of configuration options that are based on the proxy target. Use this to set custom timeouts or SSL settings for specific hosts. This is done by defining a set of `match` criteria using wildcards/globs which will be checked against each request. The configuration from all matching rules will then be merged together to configure the proxy used for that request.
++
+The valid match keys are `match.protocol`, `match.host`, `match.port`, and `match.path`. All of these keys default to `*`, which means they will match any value.
++
+Example:
++
+[source,yaml]
+--------
+sense.proxyConfig:
+  - match.host: "*.internal.org" # allow any host that ends in .internal.org
+    match.port: "{9200..9299}" # allow any port from 9200-9299
+
+    ssl.ca: "/opt/certs/internal.ca"
+    # ssl.key and ssl.cert are also valid options here
+
+  - match.protocol: "https"
+    ssl.verify: false # allows any certificate to be used, even self-signed certs
+
+  # since this rule has no match keys it matches everything
+  - timeout: 180000 # 3 minutes
+--------
+
 [NOTE]
 
 Kibana needs to be restarted after each change to the configuration for them to be applied.
@@ -103,5 +125,3 @@ Once downloaded you can install Sense using the following command:
 -------------
 $ bin/kibana plugin -i sense -u file:///PATH_TO_SENSE_TAR_FILE
 -------------
-
-
