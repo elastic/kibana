@@ -220,7 +220,7 @@ define(function (require) {
             + ' "Arts", "og:site_name": "LA Weekly", "twitter:title": "Shopping Daze", "twitter:description": "LA'
             + ' Weekly is the definitive source of information for news, music, movies, restaurants, reviews, and'
             + ' events in Los Angeles.", "twitter:card": "summary", "twitter:site": "@laweekly" } machine.os:osx'
-            + ' machine.ram:15,032,385,536 _id:AU_x3_g3GFA8no6QjkFm _type:apache _index:logstash-2015.09.20 _score: -  '
+            + ' machine.ram:15,032,385,536 _id:AU_x3_g3GFA8no6QjkFm _type:apache _index:logstash-2015.09.20 _score: - '
             + ' relatedContent.article:modified_time:October 28th 2014, 22:00:08.000, November 26th 2014,'
             + ' 01:05:47.000, November 26th 2014, 03:52:35.000, November 26th 2014, 04:15:21.000, November 27th 2014,'
             + ' 16:01:03.000 relatedContent.article:published_time:October 21st 2005, 01:10:25.000, March 5th 2006,'
