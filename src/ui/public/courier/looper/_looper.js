@@ -1,5 +1,9 @@
 import _ from 'lodash';
-export default function LooperFactory($timeout, Notifier, Promise) {
+
+import 'ui/promises';
+import Notifier from 'ui/notify/notifier';
+
+export default function LooperFactory($timeout, Promise) {
   var notify = new Notifier();
 
   function Looper(ms, fn) {
