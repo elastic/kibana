@@ -126,4 +126,5 @@ module.exports = function (grunt) {
 
   require('./tasks/build')(grunt);
   require('./tasks/release')(grunt);
+  require('./tasks/setup_kibana')(grunt);
 };
