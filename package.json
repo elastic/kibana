@@ -13,6 +13,8 @@
     "build": "grunt build",
     "release": "grunt release",
     "lint": "grunt eslint:source",
+    "setup_kibana": "grunt setup_kibana",
+    "test": "npm run test:server",
     "test:server": "plugin-helpers test:server"
   },
   "devDependencies": {
