@@ -12,9 +12,11 @@
   "scripts": {
     "build": "grunt build",
     "release": "grunt release",
-    "lint": "grunt eslint:source"
+    "lint": "grunt eslint:source",
+    "test:server": "plugin-helpers test:server"
   },
   "devDependencies": {
+    "@elastic/plugin-helpers": "^5.0.0-beta1",
     "babel-eslint": "^4.1.6",
     "eslint": "^1.7.3",
     "eslint-config-airbnb": "^0.1.0",
