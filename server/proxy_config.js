@@ -44,7 +44,7 @@ export class ProxyConfig {
     this.verifySsl = ssl.verify;
 
     const sslAgentOpts = {
-      ca: ssl.ca && readFileSync(ssl.ca),
+      ca: ssl.ca && ssl.ca.map(ca => readFileSync(ca)),
       cert: ssl.cert && readFileSync(ssl.cert),
       key: ssl.key && readFileSync(ssl.key),
     };

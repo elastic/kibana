@@ -39,7 +39,7 @@ describe('ProxyConfig', function () {
     it('uses ca to create sslAgent', function () {
       const config = new ProxyConfig({
         ssl: {
-          ca: 'path/to/ca'
+          ca: ['path/to/ca']
         }
       });
 
@@ -47,7 +47,7 @@ describe('ProxyConfig', function () {
       sinon.assert.calledOnce(https.Agent);
       const sslAgentOpts = https.Agent.firstCall.args[0];
       expect(sslAgentOpts).to.eql({
-        ca: { path: 'path/to/ca' },
+        ca: [{ path: 'path/to/ca' }],
         cert: undefined,
         key: undefined,
       });
@@ -74,7 +74,7 @@ describe('ProxyConfig', function () {
     it('uses ca, cert, and key to create sslAgent', function () {
       const config = new ProxyConfig({
         ssl: {
-          ca: 'path/to/ca',
+          ca: ['path/to/ca'],
           cert: 'path/to/cert',
           key: 'path/to/key'
         }
@@ -84,7 +84,7 @@ describe('ProxyConfig', function () {
       sinon.assert.calledOnce(https.Agent);
       const sslAgentOpts = https.Agent.firstCall.args[0];
       expect(sslAgentOpts).to.eql({
-        ca: { path: 'path/to/ca' },
+        ca: [{ path: 'path/to/ca' }],
         cert: { path: 'path/to/cert' },
         key: { path: 'path/to/key' },
       });
@@ -131,7 +131,7 @@ describe('ProxyConfig', function () {
           it('creates but does not output the agent', function () {
             const config = new ProxyConfig({
               ssl: {
-                ca: 'path/to/ca'
+                ca: ['path/to/ca']
               }
             });
 
@@ -183,7 +183,7 @@ describe('ProxyConfig', function () {
           it('creates and outputs the agent', function () {
             const config = new ProxyConfig({
               ssl: {
-                ca: 'path/to/ca'
+                ca: ['path/to/ca']
               }
             });
 

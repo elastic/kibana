@@ -132,7 +132,7 @@ describe('ProxyConfigCollection', function () {
       return new ProxyConfigCollection([
         {
           match: { host: '*.internal.org' },
-          ssl: { ca: 'path/to/ca' }
+          ssl: { ca: ['path/to/ca'] }
         },
         {
           match: { host: '*' },
