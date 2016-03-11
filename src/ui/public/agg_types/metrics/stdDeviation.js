@@ -7,26 +7,29 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
 
   var responseAggConfigProps = {
     valProp: function () {
-      var details = this.keyedDetails[this.key];
+      var details = this.keyedDetails(this.params.customLabel)[this.key];
       return details.valProp;
     },
     makeLabel: function () {
-      var details = this.keyedDetails[this.key];
+      var details = this.keyedDetails(this.params.customLabel)[this.key];
       return details.title + ' of ' + this.fieldDisplayName();
     },
-    keyedDetails: {
-      std_lower: {
-        valProp: ['std_deviation_bounds', 'lower'],
-        title: 'Lower Standard Deviation'
-      },
-      avg: {
-        valProp: 'avg',
-        title: 'Average'
-      },
-      std_upper: {
-        valProp: ['std_deviation_bounds', 'upper'],
-        title: 'Upper Standard Deviation'
-      }
+    keyedDetails: function (customLabel) {
+      const label = customLabel ? customLabel : 'Standard Deviation';
+      return {
+        std_lower: {
+          valProp: ['std_deviation_bounds', 'lower'],
+          title: 'Lower ' + label
+        },
+        avg: {
+          valProp: 'avg',
+          title: 'Average'
+        },
+        std_upper: {
+          valProp: ['std_deviation_bounds', 'upper'],
+          title: 'Upper ' + label
+        }
+      };
     }
   };
 
