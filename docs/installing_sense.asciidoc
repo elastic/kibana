@@ -95,16 +95,21 @@ Example:
 [source,yaml]
 --------
 sense.proxyConfig:
-  - match.host: "*.internal.org" # allow any host that ends in .internal.org
-    match.port: "{9200..9299}" # allow any port from 9200-9299
+  - match:
+      host: "*.internal.org" # allow any host that ends in .internal.org
+      port: "{9200..9299}" # allow any port from 9200-9299
 
-    ssl.ca: "/opt/certs/internal.ca"
-    # ssl.key and ssl.cert are also valid options here
+    ssl
+      ca: "/opt/certs/internal.ca"
+      # "key" and "cert" are also valid options here
 
-  - match.protocol: "https"
-    ssl.verify: false # allows any certificate to be used, even self-signed certs
+  - match:
+      protocol: "https"
 
-  # since this rule has no match keys it matches everything
+    ssl:
+      verify: false # allows any certificate to be used, even self-signed certs
+
+  # since this rule has no "match" section it matches everything
   - timeout: 180000 # 3 minutes
 --------
 
