@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import fs from 'fs';
 import rimraf from 'rimraf';
 
-import { cleanPrevious, cleanError } from '../cleanup';
+import { cleanPrevious, cleanArtifacts } from '../cleanup';
 import Logger from '../../lib/logger';
 
 describe('kibana cli', function () {
@@ -108,7 +108,7 @@ describe('kibana cli', function () {
 
       });
 
-      describe('cleanError', function () {
+      describe('cleanArtifacts', function () {
         let logger;
 
         beforeEach(function () {
@@ -122,7 +122,7 @@ describe('kibana cli', function () {
         it('should attempt to delete the working directory', function () {
           sinon.stub(rimraf, 'sync');
 
-          cleanError(settings);
+          cleanArtifacts(settings);
           expect(rimraf.sync.calledWith(settings.workingPath)).to.be(true);
         });
 
@@ -131,7 +131,7 @@ describe('kibana cli', function () {
             throw new Error('Something bad happened.');
           });
 
-          expect(cleanError).withArgs(settings).to.not.throwError();
+          expect(cleanArtifacts).withArgs(settings).to.not.throwError();
         });
 
       });

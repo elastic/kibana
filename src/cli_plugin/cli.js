@@ -11,8 +11,8 @@ let program = new Command('bin/kibana-plugin');
 program
 .version(pkg.version)
 .description(
-  'Kibana is an open source (Apache Licensed), browser ' +
-  'based analytics and search dashboard for Elasticsearch.'
+  'The Kibana plugin manager enables you to install and remove plugins that ' +
+  'provide additional functionality to Kibana'
 );
 
 listCommand(program);

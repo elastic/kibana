@@ -10,15 +10,13 @@ import { writeFileSync } from 'fs';
 
 describe('kibana cli', function () {
 
-  describe('plugin lister', function () {
+  describe('plugin remover', function () {
 
     const pluginDir = join(__dirname, '.test.data');
     let processExitStub;
     let logger;
 
-    const settings = {
-      pluginDir: pluginDir
-    };
+    const settings = { pluginDir };
 
     beforeEach(function () {
       processExitStub = sinon.stub(process, 'exit');

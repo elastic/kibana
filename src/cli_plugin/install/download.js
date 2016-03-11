@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import downloadHttpFile from './downloaders/http';
 import downloadLocalFile from './downloaders/file';
 import { parse } from 'url';

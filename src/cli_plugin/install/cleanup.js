@@ -21,7 +21,7 @@ export function cleanPrevious(settings, logger) {
   });
 };
 
-export function cleanError(settings) {
+export function cleanArtifacts(settings) {
   // delete the working directory.
   // At this point we're bailing, so swallow any errors on delete.
   try {

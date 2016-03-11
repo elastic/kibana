@@ -4,21 +4,21 @@ import Logger from '../lib/logger';
 import pkg from '../../utils/packageJson';
 import { parse, parseMilliseconds } from './settings';
 
-export default function pluginInstall(program) {
-  function processCommand(command, options) {
-    let settings;
-    try {
-      settings = parse(command, options, pkg);
-    } catch (ex) {
-      //The logger has not yet been initialized.
-      console.error(ex.message);
-      process.exit(64); // eslint-disable-line no-process-exit
-    }
-
-    const logger = new Logger(settings);
-    install(settings, logger);
+function processCommand(command, options) {
+  let settings;
+  try {
+    settings = parse(command, options, pkg);
+  } catch (ex) {
+    //The logger has not yet been initialized.
+    console.error(ex.message);
+    process.exit(64); // eslint-disable-line no-process-exit
   }
 
+  const logger = new Logger(settings);
+  install(settings, logger);
+}
+
+export default function pluginInstall(program) {
   program
   .command('install <plugin/url>')
   .option('-q, --quiet', 'Disable all process messaging except errors')

@@ -10,5 +10,5 @@ export default function list(settings, logger) {
       logger.log(filename);
     }
   });
-  logger.log('');
+  logger.log(''); //intentional blank line for aesthetics
 }

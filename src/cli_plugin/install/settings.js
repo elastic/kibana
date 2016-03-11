@@ -3,8 +3,7 @@ import { intersection } from 'lodash';
 import { resolve } from 'path';
 import { arch, platform } from 'os';
 
-function generateUrls(settings) {
-  const { version, plugin } = settings;
+function generateUrls({ version, plugin }) {
   return [
     plugin,
     `https://download.elastic.co/packs/${plugin}/${plugin}-${version}.zip`
@@ -15,7 +14,7 @@ export function parseMilliseconds(val) {
   let result;
 
   try {
-    let timeVal = expiry(val);
+    const timeVal = expiry(val);
     result = timeVal.asMilliseconds();
   } catch (ex) {
     result = 0;
@@ -26,13 +25,13 @@ export function parseMilliseconds(val) {
 
 export function parse(command, options, kbnPackage) {
   const settings = {
-    timeout: options.timeout ? options.timeout : 0,
-    quiet: options.quiet ? options.quiet : false,
-    silent: options.silent ? options.silent : false,
-    config: options.config ? options.config : '',
+    timeout: options.timeout || 0,
+    quiet: options.quiet || false,
+    silent: options.silent || false,
+    config: options.config || '',
     plugin: command,
     version: kbnPackage.version,
-    pluginDir: options.pluginDir ? options.pluginDir : ''
+    pluginDir: options.pluginDir || ''
   };
 
   settings.urls = generateUrls(settings);

@@ -1,25 +1,25 @@
-import _ from 'lodash';
 import { download } from './download';
 import Promise from 'bluebird';
-import { cleanPrevious, cleanError } from './cleanup';
+import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { sync as rimrafSync } from 'rimraf';
-import { statSync, renameSync } from 'fs';
+import { renameSync } from 'fs';
 import { existingInstall, rebuildCache, checkVersion } from './kibana';
+import mkdirp from 'mkdirp';
 
-const mkdirp = Promise.promisify(require('mkdirp'));
+const mkdir = Promise.promisify(mkdirp);
 
 export default async function install(settings, logger) {
   try {
     await cleanPrevious(settings, logger);
 
-    await mkdirp(settings.workingPath);
+    await mkdir(settings.workingPath);
 
     await download(settings, logger);
 
     await getPackData(settings, logger);
 
-    await extract (settings, logger);
+    await extract(settings, logger);
 
     rimrafSync(settings.tempArchiveFile);
 
@@ -34,7 +34,7 @@ export default async function install(settings, logger) {
     logger.log('Plugin installation complete');
   } catch (err) {
     logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
-    cleanError(settings);
+    cleanArtifacts(settings);
     process.exit(70); // eslint-disable-line no-process-exit
   }
 }

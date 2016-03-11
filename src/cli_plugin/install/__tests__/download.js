@@ -61,11 +61,11 @@ describe('kibana cli', function () {
       describe('http downloader', function () {
 
         it('should throw an ENOTFOUND error for a http ulr that returns 404', function () {
-          const couchdb = nock('http://www.files.com')
+          const couchdb = nock('http://example.com')
             .get('/plugin.tar.gz')
             .reply(404);
 
-          const sourceUrl = 'http://www.files.com/plugin.tar.gz';
+          const sourceUrl = 'http://example.com/plugin.tar.gz';
 
           return _downloadSingle(settings, logger, sourceUrl)
           .then(shouldReject, function (err) {
@@ -87,7 +87,7 @@ describe('kibana cli', function () {
         it('should download a file from a valid http url', function () {
           const filePath = join(__dirname, 'replies/banana.jpg');
 
-          const couchdb = nock('http://www.files.com')
+          const couchdb = nock('http://example.com')
             .defaultReplyHeaders({
               'content-length': '341965',
               'content-type': 'application/zip'
@@ -95,7 +95,7 @@ describe('kibana cli', function () {
             .get('/plugin.zip')
             .replyWithFile(200, filePath);
 
-          const sourceUrl = 'http://www.files.com/plugin.zip';
+          const sourceUrl = 'http://example.com/plugin.zip';
 
           return _downloadSingle(settings, logger, sourceUrl)
           .then(function () {
@@ -136,13 +136,13 @@ describe('kibana cli', function () {
       it('should loop through bad urls until it finds a good one.', function () {
         const filePath = join(__dirname, 'replies/test_plugin.zip');
         settings.urls = [
-          'http://www.files.com/badfile1.tar.gz',
-          'http://www.files.com/badfile2.tar.gz',
+          'http://example.com/badfile1.tar.gz',
+          'http://example.com/badfile2.tar.gz',
           'I am a bad uri',
-          'http://www.files.com/goodfile.tar.gz'
+          'http://example.com/goodfile.tar.gz'
         ];
 
-        const couchdb = nock('http://www.files.com')
+        const couchdb = nock('http://example.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -166,13 +166,13 @@ describe('kibana cli', function () {
       it('should stop looping through urls when it finds a good one.', function () {
         const filePath = join(__dirname, 'replies/test_plugin.zip');
         settings.urls = [
-          'http://www.files.com/badfile1.tar.gz',
-          'http://www.files.com/badfile2.tar.gz',
-          'http://www.files.com/goodfile.tar.gz',
-          'http://www.files.com/badfile3.tar.gz'
+          'http://example.com/badfile1.tar.gz',
+          'http://example.com/badfile2.tar.gz',
+          'http://example.com/goodfile.tar.gz',
+          'http://example.com/badfile3.tar.gz'
         ];
 
-        const couchdb = nock('http://www.files.com')
+        const couchdb = nock('http://example.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -196,12 +196,12 @@ describe('kibana cli', function () {
 
       it('should throw an error when it doesn\'t find a good url.', function () {
         settings.urls = [
-          'http://www.files.com/badfile1.tar.gz',
-          'http://www.files.com/badfile2.tar.gz',
-          'http://www.files.com/badfile3.tar.gz'
+          'http://example.com/badfile1.tar.gz',
+          'http://example.com/badfile2.tar.gz',
+          'http://example.com/badfile3.tar.gz'
         ];
 
-        const couchdb = nock('http://www.files.com')
+        const couchdb = nock('http://example.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
