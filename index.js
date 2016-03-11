@@ -42,9 +42,15 @@ module.exports = function (kibana) {
         ssl: Joi.object({
           verify: Joi.boolean(),
         }).default(),
-        hosts: Joi.array().items(
+        proxyConfig: Joi.array().items(
           Joi.object().keys({
-            host: Joi.array().items(Joi.string()).single().default(['.*']),
+            match: Joi.object().keys({
+              protocol: Joi.string().default('*'),
+              host: Joi.string().default('*'),
+              port: Joi.string().default('*'),
+              path: Joi.string().default('*')
+            }),
+
             timeout: Joi.number(),
             ssl: Joi.object().keys({
               verify: Joi.boolean(),
@@ -55,7 +61,13 @@ module.exports = function (kibana) {
           })
         ).default([
           {
-            host: '.*',
+            match: {
+              protocol: '*',
+              hostname: '*',
+              port: '*',
+              path: '*'
+            },
+
             timeout: 180000,
             ssl: {
               verify: true
@@ -72,7 +84,7 @@ module.exports = function (kibana) {
         throw new Error('sense.ssl.version is no longer supported.');
       }
 
-      const hostBasedProxyConfig = new HostBasedProxyConfigCollection(options.hosts);
+      const hostBasedProxyConfig = new HostBasedProxyConfigCollection(options.proxyConfig);
 
       // http://hapijs.com/api/8.8.1#route-configuration
       server.route({
@@ -119,7 +131,7 @@ module.exports = function (kibana) {
               }
             },
 
-            ...hostBasedProxyConfig.forUri(uri)
+            ...hostBasedProxyConfig.configForUri(uri)
           })
         }
       });
