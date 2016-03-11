@@ -34,6 +34,9 @@ to 0 to disable.
 retrying.
 `pid.file:`:: Specifies the path where Kibana creates the process ID file.
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana stores log output.
+`logging.filter.<key>:`:: *Default:* `authorization` Replace <key> with the string to filter. Set the value of this 
+setting to `remove` to remove matching keys from all logged objects. Set the value of this setting to `censor` to replace 
+each character in the key's value with an `X` character.
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output.
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output other than 
 error messages.
