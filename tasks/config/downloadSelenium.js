@@ -3,8 +3,6 @@ var path = require('path');
 
 module.exports = function (grunt) {
   return {
-    __taskName__: 'downloadSelenium',
-
     options: {
       selenium: {
         filename: 'selenium-server-standalone-2.48.2.jar',
