@@ -1,6 +1,5 @@
 import uiModules from 'ui/modules';
-
-require('../styles/_pipeline_output.less');
+import '../styles/_pipeline_output.less';
 
 const app = uiModules.get('kibana');
 

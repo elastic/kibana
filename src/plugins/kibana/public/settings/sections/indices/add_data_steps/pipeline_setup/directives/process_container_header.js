@@ -1,6 +1,5 @@
 import uiModules from 'ui/modules';
-
-require('../styles/_process_container_header.less');
+import '../styles/_process_container_header.less';
 
 const app = uiModules.get('kibana');
 

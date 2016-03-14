@@ -1,8 +1,7 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
-
-require('../styles/_process_container.less');
-require('./process_container_header');
+import '../styles/_process_container.less';
+import './process_container_header';
 
 const app = uiModules.get('kibana');
 

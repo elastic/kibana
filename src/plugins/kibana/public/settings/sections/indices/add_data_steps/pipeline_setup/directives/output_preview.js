@@ -1,7 +1,6 @@
 import uiModules from 'ui/modules';
 import jsondiffpatch from '@bigfunger/jsondiffpatch';
-
-require('../styles/_output_preview.less');
+import '../styles/_output_preview.less';
 
 const htmlFormat = jsondiffpatch.formatters.html.format;
 const app = uiModules.get('kibana');

@@ -1,7 +1,6 @@
 import uiModules from 'ui/modules';
 import angular from 'angular';
-
-require('../styles/_source_data.less');
+import '../styles/_source_data.less';
 
 const app = uiModules.get('kibana');
 
