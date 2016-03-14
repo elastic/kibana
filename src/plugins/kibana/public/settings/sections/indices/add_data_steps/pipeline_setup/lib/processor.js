@@ -1,25 +1,23 @@
 import _ from 'lodash';
 
-export default function Processor(processorType) {
-  const self = this;
+export default class Processor {
 
-  self.collapsed = false;
-  self.error = undefined;
+  constructor(processorType) {
+    this.collapsed = false;
+    this.error = undefined;
 
-  _.merge(self, processorType);
-};
+    _.merge(this, processorType);
+  }
 
-Processor.prototype.setParent = function (newParent) {
-  const self = this;
+  setParent(newParent) {
+    const oldParent = this.parent;
+    this.parent = newParent;
 
-  const oldParent = self.parent;
-  self.parent = newParent;
+    return (oldParent !== this.parent);
+  }
 
-  return (oldParent !== self.parent);
-};
+  updateDescription() {
+    this.description = this.getDescription(this);
+  }
 
-Processor.prototype.updateDescription = function () {
-  const self = this;
-
-  self.description = self.getDescription(self);
-};
+}

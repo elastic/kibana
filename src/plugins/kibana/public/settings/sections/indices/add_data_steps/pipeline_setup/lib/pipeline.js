@@ -1,158 +1,142 @@
 import _ from 'lodash';
 
-export default function Pipeline(processorTypes, Processor) {
-  const self = this;
+export default class Pipeline {
 
-  self.processors = [];
-  self.counter = 0;
-  self.input = {};
-  self.output = undefined;
-  self.dirty = false;
-  self.Processor = Processor;
-  self.processorTypes = processorTypes;
-};
-
-Pipeline.prototype.load = function (pipeline) {
-  const self = this;
-
-  while (self.processors.length > 0) {
-    self.processors.pop();
+  constructor(processorTypes, Processor) {
+    this.processors = [];
+    this.counter = 0;
+    this.input = {};
+    this.output = undefined;
+    this.dirty = false;
+    this.Processor = Processor;
+    this.processorTypes = processorTypes;
   }
 
-  pipeline.processors.forEach((processor) => {
-    self.addExisting(processor);
-  });
-};
-
-Pipeline.prototype.remove = function (processor) {
-  const self = this;
-  const processors = self.processors;
-  const index = processors.indexOf(processor);
-
-  processors.splice(index, 1);
-};
-
-Pipeline.prototype.moveUp = function (processor) {
-  const self = this;
-  const processors = self.processors;
-  const index = processors.indexOf(processor);
-
-  if (index === 0) return;
-
-  const temp = processors[index - 1];
-  processors[index - 1] = processors[index];
-  processors[index] = temp;
-};
-
-Pipeline.prototype.moveDown = function (processor) {
-  const self = this;
-  const processors = self.processors;
-  const index = processors.indexOf(processor);
-
-  if (index === processors.length - 1) return;
-
-  const temp = processors[index + 1];
-  processors[index + 1] = processors[index];
-  processors[index] = temp;
-};
-
-function remove(array, arrayToRemove) {
-  arrayToRemove.forEach((itemToRemove) => {
-    _.remove(array, (o) => { return o === itemToRemove; });
-  });
-};
-
-Pipeline.prototype.addExisting = function (existingProcessor) {
-  const self = this;
-  const processors = self.processors;
-
-  const processorType = _.find(self.processorTypes, (o) => { return o.typeId === existingProcessor.typeId; });
-  const newProcessor = self.add(processorType);
-
-  const keys = _.keys(existingProcessor);
-  remove(keys, ['title', 'template', 'typeId', 'processorId', 'outputObject', 'inputObject', 'description']);
-  keys.forEach((key) => {
-    _.set(newProcessor, key, _.get(existingProcessor, key));
-  });
-
-  return newProcessor;
-};
-
-Pipeline.prototype.add = function (processorType) {
-  const self = this;
-  const processors = self.processors;
-
-  const newProcessor = new self.Processor(processorType);
-
-  self.counter += 1;
-  newProcessor.processorId = `processor_${self.counter}`;
-  processors.push(newProcessor);
-
-  return newProcessor;
-};
-
-Pipeline.prototype.updateParents = function () {
-  const self = this;
-  const processors = self.processors;
-
-  processors.forEach((processor, index) => {
-    let newParent;
-    if (index === 0) {
-      newParent = self.input;
-    } else {
-      newParent = processors[index - 1];
+  load(pipeline) {
+    while (this.processors.length > 0) {
+      this.processors.pop();
     }
 
-    processor.setParent(newParent);
-  });
-};
-
-Pipeline.prototype.updateOutput = function () {
-  const self = this;
-  const processors = self.processors;
-
-  self.output = undefined;
-  if (processors.length > 0) {
-    self.output = processors[processors.length - 1].outputObject;
+    pipeline.processors.forEach((processor) => {
+      this.addExisting(processor);
+    });
   }
-};
 
-Pipeline.prototype.getProcessorById = function (processorId) {
-  const self = this;
-  const result = _.find(self.processors, (processor) => { return processor.processorId === processorId; });
-  return result;
-};
+  remove(processor) {
+    const processors = this.processors;
+    const index = processors.indexOf(processor);
 
-// Updates the state of the pipeline and processors with the results
-// from an ingest simulate call.
-Pipeline.prototype.applySimulateResults = function (results) {
-  const self = this;
+    processors.splice(index, 1);
+  }
 
-  //update the outputObject of each processor
-  results.forEach((result) => {
-    const processor = self.getProcessorById(result.processorId);
+  moveUp(processor) {
+    const processors = this.processors;
+    const index = processors.indexOf(processor);
 
-    processor.outputObject = _.get(result, 'output');
-    processor.error = _.get(result, 'error');
-  });
+    if (index === 0) return;
 
-  //update the inputObject of each processor
-  results.forEach((result) => {
-    const processor = self.getProcessorById(result.processorId);
+    const temp = processors[index - 1];
+    processors[index - 1] = processors[index];
+    processors[index] = temp;
+  }
 
-    //we don't want to change the inputObject if the parent processor
-    //is in error because that can cause us to lose state.
-    if (!_.get(processor, 'error.isNested')) {
-      if (processor.parent.processorId) {
-        processor.inputObject = _.cloneDeep(processor.parent.outputObject);
+  moveDown(processor) {
+    const processors = this.processors;
+    const index = processors.indexOf(processor);
+
+    if (index === processors.length - 1) return;
+
+    const temp = processors[index + 1];
+    processors[index + 1] = processors[index];
+    processors[index] = temp;
+  }
+
+  addExisting(existingProcessor) {
+    const processors = this.processors;
+    const processorType = _.find(this.processorTypes, (o) => { return o.typeId === existingProcessor.typeId; });
+    const newProcessor = this.add(processorType);
+
+    const keys = _(existingProcessor)
+                  .keys()
+                  .omit(['title', 'template', 'typeId', 'processorId', 'outputObject', 'inputObject', 'description'])
+                  .value();
+    keys.forEach((key) => {
+      _.set(newProcessor, key, _.get(existingProcessor, key));
+    });
+
+    return newProcessor;
+  }
+
+  add(processorType) {
+    const processors = this.processors;
+    const newProcessor = new this.Processor(processorType);
+
+    this.counter += 1;
+    newProcessor.processorId = `processor_${this.counter}`;
+    processors.push(newProcessor);
+
+    return newProcessor;
+  }
+
+  updateParents() {
+    const processors = this.processors;
+
+    processors.forEach((processor, index) => {
+      let newParent;
+      if (index === 0) {
+        newParent = this.input;
       } else {
-        processor.inputObject = _.cloneDeep(processor.parent);
+        newParent = processors[index - 1];
       }
+
+      processor.setParent(newParent);
+    });
+  }
+
+  updateOutput() {
+    const processors = this.processors;
+
+    this.output = undefined;
+    if (processors.length > 0) {
+      this.output = processors[processors.length - 1].outputObject;
     }
+  }
 
-    processor.updateDescription();
-  });
+  getProcessorById(processorId) {
+    const result = _.find(this.processors, (processor) => { return processor.processorId === processorId; });
+    return result;
+  }
 
-  self.updateOutput();
-  self.dirty = false;
-};
+  // Updates the state of the pipeline and processors with the results
+  // from an ingest simulate call.
+  applySimulateResults(results) {
+    //update the outputObject of each processor
+    results.forEach((result) => {
+      const processor = this.getProcessorById(result.processorId);
+
+      processor.outputObject = _.get(result, 'output');
+      processor.error = _.get(result, 'error');
+    });
+
+    //update the inputObject of each processor
+    results.forEach((result) => {
+      const processor = this.getProcessorById(result.processorId);
+
+      //we don't want to change the inputObject if the parent processor
+      //is in error because that can cause us to lose state.
+      if (!_.get(processor, 'error.isNested')) {
+        if (processor.parent.processorId) {
+          processor.inputObject = _.cloneDeep(processor.parent.outputObject);
+        } else {
+          processor.inputObject = _.cloneDeep(processor.parent);
+        }
+      }
+
+      processor.updateDescription();
+    });
+
+    this.updateOutput();
+    this.dirty = false;
+  }
+
+}
