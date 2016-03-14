@@ -14,11 +14,6 @@ module.exports = function (grunt) {
         },
         http: {
           port: 9200
-        },
-        marvel: {
-          agent: {
-            enabled: false
-          }
         }
       }
     },
