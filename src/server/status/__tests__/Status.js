@@ -4,7 +4,6 @@ var Status = require('../Status');
 var ServerStatus = require('../ServerStatus');
 
 describe('Status class', function () {
-
   var server;
   var serverStatus;
 
@@ -64,8 +63,10 @@ describe('Status class', function () {
     var msg = 'Test Ready';
     status.green(msg);
 
-    status.on('green', function () {
-      expect(arguments.length).to.equal(0);
+    status.on('green', function (prev, prevMsg) {
+      expect(arguments.length).to.equal(2);
+      expect(prev).to.be('green');
+      expect(prevMsg).to.be(msg);
       expect(status.message).to.equal(msg);
       done();
     });
@@ -76,8 +77,10 @@ describe('Status class', function () {
     var msg = 'Test Ready';
     status.green(msg);
 
-    status.once('green', function () {
-      expect(arguments.length).to.equal(0);
+    status.once('green', function (prev, prevMsg) {
+      expect(arguments.length).to.equal(2);
+      expect(prev).to.be('green');
+      expect(prevMsg).to.be(msg);
       expect(status.message).to.equal(msg);
       done();
     });
