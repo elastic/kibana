@@ -26,7 +26,6 @@ module.exports = function (chrome, internals) {
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
     .run(($location) => {
-      debugger;
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];
       };
