@@ -20,6 +20,8 @@ app.directive('sourceData', function () {
       }
 
       $scope.$watch('selectedSample', (newValue) => {
+        //the added complexity of this directive is to strip out the properties
+        //that angular adds to array objects that are bound via ng-options
         $scope.sample = angular.copy(newValue);
       });
 
