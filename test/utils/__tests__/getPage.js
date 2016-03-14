@@ -13,7 +13,7 @@ describe('getUrl', function () {
     expect(url).to.be('http://localhost/foo');
   });
 
-  it('should convert to a secure url with port', function () {
+  it('should convert to a url with port', function () {
     var url = getUrl({
       protocol: 'http',
       hostname: 'localhost',

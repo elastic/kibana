@@ -2,7 +2,7 @@ module.exports = function (grunt) {
   var resolve = require('path').resolve;
   var directory = resolve(__dirname, '../../esvm');
   var dataDir = resolve(directory, 'data_dir');
-  var uiConfig = require('../../test/serverConfig');
+  var serverConfig = require('../../test/serverConfig');
 
   return {
     options: {
@@ -36,7 +36,7 @@ module.exports = function (grunt) {
         purge: true,
         config: {
           http: {
-            port: 9210
+            port: serverConfig.servers.elasticsearch.port
           },
           cluster: {
             name: 'esvm-test'
@@ -50,7 +50,7 @@ module.exports = function (grunt) {
         purge: true,
         config: {
           http: {
-            port: uiConfig.servers.elasticsearch.port
+            port: serverConfig.servers.elasticsearch.port
           },
           cluster: {
             name: 'esvm-ui'
