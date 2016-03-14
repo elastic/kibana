@@ -327,19 +327,68 @@ define(function (require) {
       });
     },
 
-    // saved visualizations are paginated 5 to a page!
-    loadSavedVisualization: function loadSavedVisualization(vizName) {
-      var self = this;
+
+    clickLoadSavedVisButton: function clickLoadSavedVisButton() {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('button.ng-scope[aria-label="Load Saved Visualization"]')
-      .click()
-      .then(function findVizByLinkedText() {
-        common.debug('Load Saved Vis button clicked');
+      .click();
+    },
+
+    filterVisByName: function filterVisByName(vizName) {
+      var self = this;
+      return this.remote
+      .findByCssSelector('input[name="filter"]')
+      .then(function (filter) {
+        return self.remote.moveMouseTo(filter);
+      })
+      .then (function () {
         return self.remote
-        .setFindTimeout(defaultTimeout)
+        .findByCssSelector('input[name="filter"]')
+        .click()
+        .type(vizName.replace('-',' '));
+      })
+      .then (function () {
+        common.sleep(3000);
+      });
+    },
+
+    clickVisualizationByLinkText: function clickVisualizationByLinkText(vizName) {
+      var self = this;
+      common.debug('clickVisualizationByLinkText(' + vizName + ')');
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByLinkText(vizName)
+      .then(function (link) {
+        return self.remote.moveMouseTo(link);
+      })
+      .then (function () {
+        return self.remote
         .findByLinkText(vizName)
         .click();
+      });
+    },
+
+    // this starts by clicking the Load Saved Viz button, not from the
+    // bottom half of the "Create a new visualization      Step 1" page
+    loadSavedVisualization: function loadSavedVisualization(vizName) {
+      var self = this;
+      return this.clickLoadSavedVisButton()
+      .then(function filterVisualization() {
+        return self.filterVisByName(vizName);
+      })
+      .then(function clickDashboardByLinkedText() {
+        return self.clickVisualizationByLinkText(vizName);
+      });
+    },
+
+    // this starts on the
+    // bottom half of the "Create a new visualization      Step 1" page
+    openSavedVisualization: function openSavedVisualization(vizName) {
+      var self = this;
+      return self.filterVisByName(vizName)
+      .then(function clickDashboardByLinkedText() {
+        return self.clickVisualizationByLinkText(vizName);
       });
     },
 
@@ -385,7 +434,7 @@ define(function (require) {
      ** This method gets the chart data and scales it based on chart height and label.
      ** Returns an array of height values
      */
-    getAreaChartData: function getAreaChartData() {
+    getAreaChartData: function getAreaChartData(aggregateName) {
 
       var self = this.remote;
       var chartData = [];
@@ -404,7 +453,7 @@ define(function (require) {
         return y.getVisibleText();
       })
       .then(function (yLabel) {
-        yAxisLabel = yLabel.replace(',', '');
+        yAxisLabel = yLabel.replace(',', '').replace('%','');
         common.debug('yAxisLabel = ' + yAxisLabel);
         return yLabel;
       })
@@ -423,43 +472,27 @@ define(function (require) {
       })
       .then(function () {
         return self.setFindTimeout(defaultTimeout * 2)
-        .findAllByCssSelector('path')
-        .then(function (chartTypes) {
-
-          function getChartType(chart) {
-            return chart
-            .getAttribute('data-label')
-            .then(function (chartString) {
-              //common.debug('data-label  = ' + chartString);
-              if (chartString === 'Count') {
-                return chart.getAttribute('d')
-                .then(function (data) {
-                  common.debug(data);
-                  tempArray = data.split('L');
-                  chartSections = tempArray.length / 2;
-                  common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
-                  chartData[0] = Math.round((yAxisHeight - tempArray[0].split(',')[1]) / yAxisHeight * yAxisLabel);
-                  common.debug('chartData[0] =' + chartData[0]);
-                  for (var i = 1; i < chartSections; i++) {
-                    chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
-                    common.debug('chartData[i] =' + chartData[i]);
-                  }
-                  return chartData;
-                });
-              }
-            });
-          }
-          var getChartTypesPromises = chartTypes.map(getChartType);
-          return Promise.all(getChartTypesPromises);
-        });
+        .findByCssSelector('path[data-label="' + aggregateName + '"]');
       })
-      .then(function (chartData) {
-        return chartData[1]; // MAGIC NUMBER - we find multiple 'path's and only one of them is the right one.
+      .then(function (chart) {
+        return chart.getAttribute('d');
+      })
+      .then(function (data) {
+        common.debug(data);
+        tempArray = data.replace('M','').split('L');
+        chartSections = tempArray.length / 2;
+        common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
+        for (var i = 0; i < chartSections; i++) {
+          chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
+          common.debug('chartData[i] =' + chartData[i]);
+        }
+        return chartData;
       });
     },
 
+
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-    getLineChartData: function getLineChartData() {
+    getLineChartData: function getLineChartData(cssPart) {
       var self = this.remote;
       var yAxisLabel = 0;
       var yAxisHeight;
@@ -502,7 +535,7 @@ define(function (require) {
             // 5). for each chart element, find the green circle, then the cy position
             function getChartType(chart) {
               return chart
-              .findByCssSelector('circle[fill="#57c17b"]')
+              .findByCssSelector('circle[' + cssPart + ']')
               .then(function (circleObject) {
                 // common.debug('circleObject = ' + circleObject + ' yAxisHeight= ' + yAxisHeight + ' yAxisLabel= ' + yAxisLabel);
                 return circleObject
@@ -633,6 +666,13 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout * 2)
       .findByCssSelector('table.table.table-condensed tbody')
+      .getVisibleText();
+    },
+
+    getMarkdownData: function getMarkdownData() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('visualize.ng-isolate-scope')
       .getVisibleText();
     },
 

@@ -150,7 +150,7 @@ define(function (require) {
             expect(labels).to.eql(yAxisLabels);
           })
           .then(function getAreaChartData() {
-            return visualizePage.getAreaChartData();
+            return visualizePage.getAreaChartData('count');
           })
           .then(function (paths) {
             common.debug('expectedAreaChartData = ' + expectedAreaChartData);
