@@ -16,23 +16,10 @@ module.directive('patternChecker', function () {
     },
     controller: function (es, Notifier, $scope, $timeout) {
       let validationTimeout;
-      this.isValidating = false;
 
       var notify = new Notifier({
         location: 'Add Data'
       });
-
-      this.toggleValidation = () => {
-        if (!this.isValidating) {
-          this.isValidating = true;
-          this.validateInstall();
-        }
-        else {
-          $timeout.cancel(validationTimeout);
-          this.isValidating = false;
-          this.validationResults = '';
-        }
-      };
 
       this.validateInstall = () => {
         es.count({
@@ -41,6 +28,7 @@ module.directive('patternChecker', function () {
         .then(
           (response) => {
             this.validationResults = `Querying ${this.pattern}... ${response.count} results`;
+            this.isValidated = !!response.count;
           },
           (error) => {
             notify.fatal(error);
@@ -54,6 +42,8 @@ module.directive('patternChecker', function () {
       $scope.$on('$destroy', () => {
         $timeout.cancel(validationTimeout);
       });
+
+      this.validateInstall();
     }
   };
 });
