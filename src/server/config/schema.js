@@ -81,6 +81,10 @@ module.exports = () => Joi.object({
   })
   .default(),
 
+  ops: Joi.object({
+    interval: Joi.number().default(10000),
+  }),
+
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
