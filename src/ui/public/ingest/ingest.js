@@ -1,5 +1,6 @@
-import { keysToSnakeCaseShallow } from '../../../plugins/kibana/common/lib/case_conversion';
+import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../plugins/kibana/common/lib/case_conversion';
 import _ from 'lodash';
+import angular from 'angular';
 
 export default function IngestProvider($rootScope, $http, config) {
 
@@ -35,6 +36,52 @@ export default function IngestProvider($rootScope, $http, config) {
     return $http.delete(`${ingestAPIPrefix}/${ingestId}`)
     .then(() => {
       $rootScope.$broadcast('ingest:updated');
+    });
+  };
+
+  function packageSimulatePipeline(pipeline) {
+    const requiredFields = ['input', 'processors'];
+    const cleanedPipeline = _.pick(pipeline, requiredFields);
+    return keysToSnakeCaseShallow(cleanedPipeline);
+  }
+
+  function packageSimulateProcessor(processor) {
+    const uiFields = [
+      '$$hashKey',
+      'collapsed',
+      'description',
+      'error',
+      'getDescription',
+      'inputObject',
+      'outputObject',
+      'parent',
+      'setParent',
+      'title',
+      'updateDescription'
+    ];
+
+    const cleanedProcessor = _.omit(processor, uiFields);
+    return keysToSnakeCaseShallow(cleanedProcessor);
+  }
+
+  function packageSimulateRequest(pipeline) {
+    const apiPipeline = packageSimulatePipeline(pipeline);
+    apiPipeline.processors = apiPipeline.processors.map(packageSimulateProcessor);
+    return angular.toJson(apiPipeline);
+  }
+
+  function unpackageSimulateResult(result) {
+    const data = result.data.map((processorResult) => keysToCamelCaseShallow(processorResult));
+    return data;
+  }
+
+  this.simulate = function (pipeline) {
+    const data = packageSimulateRequest(pipeline);
+
+    return $http.post(`../api/kibana/ingest/simulate`, data)
+    .then(unpackageSimulateResult)
+    .catch((err) => {
+      throw ('Error communicating with Kibana server');
     });
   };
 

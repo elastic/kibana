@@ -5,8 +5,8 @@ import Processor from '../lib/processor';
 import angular from 'angular';
 import processorTypes from '../lib/processor_types';
 import savedPipeline from '../sample_pipeline.json'; //temp for debugging purposes
+import IngestProvider from 'ui/ingest';
 
-require('../services/ingest');
 require('../styles/_pipeline_setup.less');
 require('./pipeline_output');
 require('./source_data');
@@ -22,7 +22,8 @@ app.directive('pipelineSetup', function () {
       samples: '=',
       pipeline: '='
     },
-    controller: function ($scope, ingest, debounce, Notifier) {
+    controller: function ($scope, debounce, Private, Notifier) {
+      const ingest = Private(IngestProvider);
       const notify = new Notifier({ location: `Ingest Pipeline Setup` });
       $scope.processorTypes = _.sortBy(processorTypes, 'title');
       $scope.sample = {};
@@ -43,7 +44,7 @@ app.directive('pipelineSetup', function () {
           return;
         }
 
-        ingest.simulatePipeline(pipeline)
+        ingest.simulate(pipeline)
         .then((results) => { pipeline.applySimulateResults(results); })
         .catch(notify.error);
       }
