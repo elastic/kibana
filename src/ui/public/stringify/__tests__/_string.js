@@ -23,6 +23,8 @@ describe('String Format', function () {
       transform: 'title'
     });
     expect(string.convert('PLEASE DO NOT SHOUT')).to.be('Please Do Not Shout');
+    expect(string.convert('Mean, variance and standard_deviation.')).to.be('Mean, Variance And Standard_deviation.');
+    expect(string.convert('Stay CALM!')).to.be('Stay Calm!');
   });
 
 });
