@@ -4,13 +4,11 @@ import Pipeline from '../lib/pipeline';
 import Processor from '../lib/processor';
 import angular from 'angular';
 import processorTypes from '../lib/processor_types';
-import savedPipeline from '../sample_pipeline.json'; //temp for debugging purposes
 import IngestProvider from 'ui/ingest';
-
-require('../styles/_pipeline_setup.less');
-require('./pipeline_output');
-require('./source_data');
-require('./processors');
+import '../styles/_pipeline_setup.less';
+import './pipeline_output';
+import './source_data';
+import './processors';
 
 const app = uiModules.get('kibana');
 
@@ -29,6 +27,8 @@ app.directive('pipelineSetup', function () {
       $scope.sample = {};
 
       const pipeline = new Pipeline(processorTypes, Processor);
+      // Loads pre-existing pipeline which will exist if the user returns from
+      // a later step in the wizard
       if ($scope.pipeline) {
         pipeline.load($scope.pipeline);
         $scope.sample = $scope.pipeline.input;
@@ -51,37 +51,14 @@ app.directive('pipelineSetup', function () {
 
       $scope.$watchCollection('pipeline.processors', (newVal, oldVal) => {
         pipeline.updateParents();
-        pipeline.dirty = true;
-        simulatePipeline();
       });
 
       $scope.$watch('sample', (newVal) => {
         pipeline.input = $scope.sample;
         pipeline.updateParents();
-        pipeline.dirty = true;
-        simulatePipeline();
       });
 
       $scope.$watch('pipeline.dirty', simulatePipeline);
-
-      //temp for debugging purposes
-      $scope.loadPipeline = function () {
-        pipeline.load(savedPipeline);
-      };
-
-      //temp for debugging purposes
-      $scope.savePipeline = function () {
-        const tempPipeline = _.cloneDeep(pipeline);
-        tempPipeline.processors.forEach((processor) => {
-          delete processor.inputObject;
-          delete processor.outputObject;
-          delete processor.parent;
-        });
-        delete tempPipeline.input;
-        delete tempPipeline.output;
-
-        //console.log(angular.toJson(tempPipeline, true));
-      };
     }
   };
 });

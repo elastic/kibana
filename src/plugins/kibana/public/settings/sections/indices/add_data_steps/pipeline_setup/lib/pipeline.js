@@ -91,6 +91,7 @@ export default class Pipeline {
 
       processor.setParent(newParent);
     });
+    this.dirty = true;
   }
 
   updateOutput() {
@@ -100,6 +101,7 @@ export default class Pipeline {
     if (processors.length > 0) {
       this.output = processors[processors.length - 1].outputObject;
     }
+    this.dirty = false;
   }
 
   getProcessorById(processorId) {
@@ -136,7 +138,6 @@ export default class Pipeline {
     });
 
     this.updateOutput();
-    this.dirty = false;
   }
 
 }
