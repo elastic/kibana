@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Pipeline from '../lib/pipeline';
 import Processor from '../lib/processor';
 import angular from 'angular';
-import processorTypes from '../lib/processor_types';
+import * as processorTypes from '../lib/processor_types';
 import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';
 import './pipeline_output';

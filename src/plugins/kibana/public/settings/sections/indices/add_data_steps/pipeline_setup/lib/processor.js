@@ -2,9 +2,10 @@ import _ from 'lodash';
 
 export default class Processor {
 
-  constructor(processorType) {
+  constructor(processorType, processorId) {
     this.collapsed = false;
     this.error = undefined;
+    this.processorId = processorId;
 
     _.merge(this, processorType);
   }

@@ -58,7 +58,15 @@ export default class Pipeline {
 
     const keys = _(existingProcessor)
                   .keys()
-                  .omit(['title', 'template', 'typeId', 'processorId', 'outputObject', 'inputObject', 'description'])
+                  .omit([
+                    'title',
+                    'template',
+                    'typeId',
+                    'processorId',
+                    'outputObject',
+                    'inputObject',
+                    'description'
+                  ])
                   .value();
     keys.forEach((key) => {
       _.set(newProcessor, key, _.get(existingProcessor, key));
@@ -69,10 +77,10 @@ export default class Pipeline {
 
   add(processorType) {
     const processors = this.processors;
-    const newProcessor = new this.Processor(processorType);
 
     this.counter += 1;
-    newProcessor.processorId = `processor_${this.counter}`;
+    const processorId = `processor_${this.counter}`;
+    const newProcessor = new this.Processor(processorType, processorId);
     processors.push(newProcessor);
 
     return newProcessor;
