@@ -41,13 +41,13 @@ class Status extends EventEmitter {
     super.on(eventName, handler);
 
     if (eventName === this.state) {
-      setImmediate(handler);
+      setImmediate(() => handler(this.state, this.message));
     }
   }
 
   once(eventName, handler) {
     if (eventName === this.state) {
-      setImmediate(handler);
+      setImmediate(() => handler(this.state, this.message));
     } else {
       super.once(eventName, handler);
     }
