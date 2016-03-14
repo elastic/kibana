@@ -37,10 +37,9 @@ app.directive('outputPreview', function () {
     controller: function ($scope, debounce) {
       $scope.collapsed = true;
 
-      function updateOutput() {
+      const updateOutput = debounce(function () {
         $scope.updateUi();
-      }
-      updateOutput = debounce(updateOutput, 200);
+      }, 200);
 
       $scope.$watch('oldObject', updateOutput);
       $scope.$watch('newObject', updateOutput);
