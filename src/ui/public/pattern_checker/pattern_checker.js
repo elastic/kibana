@@ -50,6 +50,10 @@ module.directive('patternChecker', function () {
           validationTimeout = $timeout(this.validateInstall, 5000);
         });
       };
+
+      $scope.$on('$destroy', () => {
+        $timeout.cancel(validationTimeout);
+      });
     }
   };
 });
