@@ -4,6 +4,7 @@ import modules from 'ui/modules';
 module.exports = function (chrome, internals) {
 
   chrome.getFirstPathSegment = _.noop;
+  chrome.getBreadcrumbs = _.noop;
 
   chrome.setupAngular = function () {
     var kibana = modules.get('kibana');
@@ -25,9 +26,14 @@ module.exports = function (chrome, internals) {
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
     .run(($location) => {
+      debugger;
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];
-      }
+      };
+
+      chrome.getBreadcrumbs = () => {
+        return $location.path().split('/').slice(1);
+      };
     });
 
     require('../directives')(chrome, internals);
