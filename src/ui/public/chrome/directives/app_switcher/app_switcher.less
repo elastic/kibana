@@ -84,7 +84,6 @@ body { overflow-x: hidden; }
 
     .app-icon {
       float: left;
-      filter: invert(100%);
       font-weight: bold;
       text-align: center;
       font-size: 1.7em;
@@ -95,6 +94,11 @@ body { overflow-x: hidden; }
       > img {
         height: 18px;
         margin-top: 8px;
+        filter: invert(100%);
+      }
+      > i {
+        color: #fff;
+        line-height: @app-icon-height
       }
     }
 
@@ -128,7 +132,7 @@ body { overflow-x: hidden; }
         text-decoration: none;
       }
       img {
-        filter: invert(100%);
+        filter: none;
       }
     }
 
