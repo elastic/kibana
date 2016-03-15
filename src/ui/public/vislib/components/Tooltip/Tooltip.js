@@ -1,8 +1,8 @@
-var d3 = require('d3');
-var _ = require('lodash');
-var $ = require('jquery');
-var Binder = require('ui/Binder');
-var positionTooltip = require('./positionTooltip');
+import d3 from 'd3';
+import _ from 'lodash';
+import Binder from 'ui/Binder';
+import positionTooltip from './positionTooltip';
+import $ from 'jquery';
 
 var allContents = [];
 

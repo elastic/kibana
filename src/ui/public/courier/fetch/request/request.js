@@ -1,27 +1,29 @@
-define(function (require) {
-  return function AbstractReqProvider(Private, Promise) {
-    var _ = require('lodash');
-    var moment = require('moment');
-    var errors = require('ui/errors');
-    var requestQueue = Private(require('ui/courier/_request_queue'));
-    var requestErrorHandler = Private(require('ui/courier/fetch/request/_error_handler'));
+import _ from 'lodash';
+import moment from 'moment';
 
-    function AbstractReq(source, defer) {
-      if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {
-        throw new Error('The AbstractReq class should not be called directly');
-      }
+import errors from 'ui/errors';
 
+import RequestQueueProvider from '../../_request_queue';
+import ErrorHandlerRequestProvider from './error_handler';
+
+export default function AbstractReqProvider(Private, Promise) {
+  const requestQueue = Private(RequestQueueProvider);
+  const requestErrorHandler = Private(ErrorHandlerRequestProvider);
+
+  return class AbstractReq {
+    constructor(source, defer) {
       this.source = source;
       this.defer = defer || Promise.defer();
+      this._whenAbortedHandlers = [];
 
       requestQueue.push(this);
     }
 
-    AbstractReq.prototype.canStart = function () {
+    canStart() {
       return Boolean(!this.stopped && !this.source._fetchDisabled);
-    };
+    }
 
-    AbstractReq.prototype.start = function () {
+    start() {
       if (this.started) {
         throw new TypeError('Unable to start request because it has already started');
       }
@@ -29,7 +31,7 @@ define(function (require) {
       this.started = true;
       this.moment = moment();
 
-      var source = this.source;
+      const source = this.source;
       if (source.activeFetchCount) {
         source.activeFetchCount += 1;
       } else {
@@ -37,79 +39,72 @@ define(function (require) {
       }
 
       source.history = [this];
-    };
+    }
 
-    AbstractReq.prototype.getFetchParams = function () {
+    getFetchParams() {
       return this.source._flatten();
-    };
+    }
 
-    AbstractReq.prototype.transformResponse = function (resp) {
+    transformResponse(resp) {
       return resp;
-    };
+    }
 
-    AbstractReq.prototype.filterError = function (resp) {
+    filterError(resp) {
       return false;
-    };
+    }
 
-    AbstractReq.prototype.handleResponse = function (resp) {
+    handleResponse(resp) {
       this.success = true;
       this.resp = resp;
-    };
+    }
 
-    AbstractReq.prototype.handleFailure = function (error) {
+    handleFailure(error) {
       this.success = false;
       this.resp = error && error.resp;
       this.retry();
       return requestErrorHandler(this, error);
-    };
-
-    AbstractReq.prototype.isIncomplete = function () {
-      return false;
-    };
-
-    AbstractReq.prototype.continue = function () {
-      throw new Error('Unable to continue ' + this.type + ' request');
-    };
-
-    AbstractReq.prototype.retry = function () {
-      var clone = this.clone();
-      this.abort();
-      return clone;
-    };
-
-    // don't want people overriding this, so it becomes a natural
-    // part of .abort() and .complete()
-    function stop(then) {
-      return function () {
-        if (this.stopped) return;
-
-        this.stopped = true;
-        this.source.activeFetchCount -= 1;
-        _.pull(requestQueue, this);
-        then.call(this);
-      };
     }
 
-    AbstractReq.prototype.abort = stop(function () {
+    isIncomplete() {
+      return false;
+    }
+
+    continue() {
+      throw new Error('Unable to continue ' + this.type + ' request');
+    }
+
+    retry() {
+      const clone = this.clone();
+      this.abort();
+      return clone;
+    }
+
+    _markStopped() {
+      if (this.stopped) return;
+      this.stopped = true;
+      this.source.activeFetchCount -= 1;
+      _.pull(requestQueue, this);
+    }
+
+    abort() {
+      this._markStopped();
       this.defer = null;
       this.aborted = true;
-      if (this._whenAborted) _.callEach(this._whenAborted);
-    });
+      _.callEach(this._whenAbortedHandlers);
+    }
 
-    AbstractReq.prototype.whenAborted = function (cb) {
-      this._whenAborted = (this._whenAborted || []);
-      this._whenAborted.push(cb);
-    };
+    whenAborted(cb) {
+      this._whenAbortedHandlers.push(cb);
+    }
 
-    AbstractReq.prototype.complete = stop(function () {
+    complete() {
+      this._markStopped();
       this.ms = this.moment.diff() * -1;
       this.defer.resolve(this.resp);
-    });
+    }
 
-    AbstractReq.prototype.clone = function () {
+    clone() {
       return new this.constructor(this.source, this.defer);
-    };
-
-    return AbstractReq;
+    }
   };
-});
+};

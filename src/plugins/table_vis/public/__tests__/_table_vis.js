@@ -1,9 +1,12 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
+import VisProvider from 'ui/Vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Integration', function () {
-  const $ = require('jquery');
-  const _ = require('lodash');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
-  const sinon = require('auto-release-sinon');
 
   let $rootScope;
   let TableGroup;
@@ -19,9 +22,9 @@ describe('Integration', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    TableGroup = Private(AggResponseTabifyTableGroupProvider);
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   // basically a parameterized beforeEach

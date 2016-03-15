@@ -1,4 +1,4 @@
-let _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = class RouteSetupManager {
   constructor() {

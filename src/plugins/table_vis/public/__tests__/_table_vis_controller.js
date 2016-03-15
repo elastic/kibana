@@ -1,9 +1,13 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import sinon from 'auto-release-sinon';
+import tabifyPm from 'ui/agg_response/tabify/tabify';
+import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
+import VisProvider from 'ui/Vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Controller', function () {
-  const $ = require('jquery');
-  const _ = require('lodash');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
-  const sinon = require('auto-release-sinon');
 
   let $rootScope;
   let TableGroup;
@@ -20,13 +24,13 @@ describe('Controller', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-    Vis = Private(require('ui/Vis'));
+    TableGroup = Private(AggResponseTabifyTableGroupProvider);
+    Vis = Private(VisProvider);
   }));
 
   function OneRangeVis(params) {
     return new Vis(
-      Private(require('fixtures/stubbed_logstash_index_pattern')),
+      Private(FixturesStubbedLogstashIndexPatternProvider),
       {
         type: 'table',
         params: params || {},
@@ -114,7 +118,6 @@ describe('Controller', function () {
 
   it('passes partialRows:true to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const tabifyPm = require('ui/agg_response/tabify/tabify');
     const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
@@ -128,7 +131,6 @@ describe('Controller', function () {
 
   it('passes partialRows:false to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const tabifyPm = require('ui/agg_response/tabify/tabify');
     const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
@@ -142,7 +144,6 @@ describe('Controller', function () {
 
   it('passes partialRows:true to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const tabifyPm = require('ui/agg_response/tabify/tabify');
     const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
@@ -156,7 +157,6 @@ describe('Controller', function () {
 
   it('passes partialRows:false to tabify based on the vis params', function () {
     // spy on the tabify private module
-    const tabifyPm = require('ui/agg_response/tabify/tabify');
     const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 

@@ -1,5 +1,5 @@
-var inflector = require('ui/IndexedArray/inflector');
-var expect = require('expect.js');
+import inflector from 'ui/IndexedArray/inflector';
+import expect from 'expect.js';
 
 describe('IndexedArray Inflector', function () {
   it('returns a function', function () {

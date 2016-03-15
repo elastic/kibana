@@ -1,6 +1,6 @@
 
-const toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
-const expect = require('expect.js');
+import toEditableConfig from 'plugins/kibana/settings/sections/advanced/lib/to_editable_config';
+import expect from 'expect.js';
 
 describe('Settings', function () {
   describe('Advanced', function () {

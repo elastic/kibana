@@ -1,10 +1,9 @@
-let _ = require('lodash');
-let expect = require('expect.js');
-let sinon = require('sinon');
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
-let isUpgradeable = require('../is_upgradeable');
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
+import isUpgradeable from '../is_upgradeable';
+import pkg from '../../../../utils/packageJson';
 let version = pkg.version;
 
 describe('plugins/elasticsearch', function () {

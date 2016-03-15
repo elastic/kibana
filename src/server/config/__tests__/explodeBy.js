@@ -1,5 +1,5 @@
-var explodeBy = require('../explodeBy');
-var expect = require('expect.js');
+import explodeBy from '../explodeBy';
+import expect from 'expect.js';
 
 describe('explode_by(dot, flatObject)', function () {
 

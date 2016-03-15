@@ -17,7 +17,7 @@
     <span class="finder-hit-count"><strong>{{finder.hitCount}}</strong> {{finder.hitCountNoun()}}</span>
   </div>
 </form>
-<paginate list="finder.hits" per-page="5">
+<paginate list="finder.hits" per-page="{{perPage}}">
   <ul
     class="list-group list-group-menu"
     ng-class="{'select-mode': finder.selector.enabled}">

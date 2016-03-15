@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const util = require('util');
+import _ from 'lodash';
+import util from 'util';
 
 function SetupError(server, template, err) {
   const config = server.config().get();

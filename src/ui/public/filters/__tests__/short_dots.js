@@ -1,10 +1,10 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var _ = require('lodash');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import 'plugins/kibana/discover/index';
+import 'ui/filters/short_dots';
 
-require('plugins/kibana/discover/index');
-require('ui/filters/short_dots');
 
 var filter;
 

@@ -1,9 +1,7 @@
-const Promise = require('bluebird');
-const isUpgradeable = require('./is_upgradeable');
-const _ = require('lodash');
-const format = require('util').format;
-
-const utils = require('requirefrom')('src/utils');
+import Promise from 'bluebird';
+import isUpgradeable from './is_upgradeable';
+import _ from 'lodash';
+import { format } from 'util';
 
 module.exports = function (server) {
   const MAX_INTEGER = Math.pow(2, 53) - 1;
@@ -54,4 +52,3 @@ module.exports = function (server) {
     });
   };
 };
-

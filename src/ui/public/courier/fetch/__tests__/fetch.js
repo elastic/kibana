@@ -2,9 +2,12 @@ import ngMock from 'ngMock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
-import FetchProvider from 'ui/courier/fetch';
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import searchResp from 'fixtures/search_response';
+
+import FetchProvider from '../fetch';
+import DocSourceProvider from '../../data_source/doc_source';
+import SearchSourceProvider from '../../data_source/search_source';
 
 describe('Fetch service', function () {
   require('testUtils/noDigestPromises').activateForSuite();
@@ -22,8 +25,8 @@ describe('Fetch service', function () {
     Promise = $injector.get('Promise');
     fetch = Private(FetchProvider);
     indexPattern = Private(IndexPatternProvider);
-    DocSource = Private(require('ui/courier/data_source/doc_source'));
-    SearchSource = Private(require('ui/courier/data_source/search_source'));
+    DocSource = Private(DocSourceProvider);
+    SearchSource = Private(SearchSourceProvider);
   }));
 
   describe('#doc(docSource)', function () {

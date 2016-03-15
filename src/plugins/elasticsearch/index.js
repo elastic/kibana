@@ -28,8 +28,8 @@ module.exports = function ({ Plugin }) {
           cert: string(),
           key: string()
         }).default(),
-        apiVersion: string().default('2.0'),
-        engineVersion: string().valid('^2.1.0').default('^2.1.0')
+        apiVersion: Joi.string().default('master'),
+        engineVersion: Joi.string().valid('^5.0.0').default('^5.0.0')
       }).default();
     },
 
@@ -54,7 +54,7 @@ module.exports = function ({ Plugin }) {
         return reply.continue();
       }
 
-      function noCreateIndex({ path }, reply) {
+      function noDirectIndex({ path }, reply) {
         const requestPath = trimRight(trim(path), '/');
         const matchPath = createPath(kibanaIndex);
 
@@ -75,7 +75,7 @@ module.exports = function ({ Plugin }) {
         ['PUT', 'POST', 'DELETE'],
         `/${kibanaIndex}/{paths*}`,
         {
-          pre: [ noCreateIndex, noBulkCheck ]
+          pre: [ noDirectIndex, noBulkCheck ]
         }
       );
 

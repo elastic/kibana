@@ -1,9 +1,11 @@
-require('ui/modules')
+import _ from 'lodash';
+import $ from 'jquery';
+import VislibProvider from 'ui/vislib';
+import uiModules from 'ui/modules';
+uiModules
 .get('apps/discover')
 .directive('discoverTimechart', function (Private, $compile) {
-  const _ = require('lodash');
-  const $ = require('jquery');
-  const vislib = Private(require('ui/vislib'));
+  const vislib = Private(VislibProvider);
 
   return {
     restrict: 'E',

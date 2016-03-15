@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var Boom = require('boom');
-var Promise = require('bluebird');
+import _ from 'lodash';
+import Boom from 'boom';
+import Promise from 'bluebird';
+import { unlinkSync as unlink } from 'fs';
 var writeFile = Promise.promisify(require('fs').writeFile);
-var unlink = require('fs').unlinkSync;
 
 module.exports = Promise.method(function (kbnServer, server, config) {
   var path = config.get('pid.file');

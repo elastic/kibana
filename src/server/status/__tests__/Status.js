@@ -1,7 +1,7 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-var Status = require('../Status');
-var ServerStatus = require('../ServerStatus');
+import expect from 'expect.js';
+import sinon from 'sinon';
+import Status from '../Status';
+import ServerStatus from '../ServerStatus';
 
 describe('Status class', function () {
   var server;

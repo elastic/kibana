@@ -1,131 +1,133 @@
-define(function (require) {
-  return function MapperService(Private, Promise, es, config, kbnIndex) {
-    var _ = require('lodash');
-    var moment = require('moment');
+import { IndexPatternMissingIndices } from 'ui/errors';
+import _ from 'lodash';
+import moment from 'moment';
+import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
+import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
+export default function MapperService(Private, Promise, es, config, kbnIndex) {
 
-    var IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
-    var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
-    var intervals = Private(require('ui/index_patterns/_intervals'));
-    var patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
+  var transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
+  var intervals = Private(IndexPatternsIntervalsProvider);
+  var patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
-    var LocalCache = Private(require('ui/index_patterns/_local_cache'));
+  var LocalCache = Private(IndexPatternsLocalCacheProvider);
 
-    function Mapper() {
+  function Mapper() {
 
-      // Save a reference to mapper
-      var self = this;
+    // Save a reference to mapper
+    var self = this;
 
-      // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-      var fieldCache = self.cache = new LocalCache();
+    // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
+    var fieldCache = self.cache = new LocalCache();
 
-      /**
-       * Gets an object containing all fields with their mappings
-       * @param {dataSource} dataSource
-       * @param {boolean} skipIndexPatternCache - should we ping the index-pattern objects
-       * @returns {Promise}
-       * @async
-       */
-      self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-        var id = indexPattern.id;
+    /**
+     * Gets an object containing all fields with their mappings
+     * @param {dataSource} dataSource
+     * @param {boolean} skipIndexPatternCache - should we ping the index-pattern objects
+     * @returns {Promise}
+     * @async
+     */
+    self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
+      var id = indexPattern.id;
 
-        var cache = fieldCache.get(id);
-        if (cache) return Promise.resolve(cache);
+      var cache = fieldCache.get(id);
+      if (cache) return Promise.resolve(cache);
 
-        if (!skipIndexPatternCache) {
-          return es.get({
-            index: kbnIndex,
-            type: 'index-pattern',
-            id: id,
-            _sourceInclude: ['fields']
-          })
-          .then(function (resp) {
-            if (resp.found && resp._source.fields) {
-              fieldCache.set(id, JSON.parse(resp._source.fields));
-            }
-            return self.getFieldsForIndexPattern(indexPattern, true);
-          });
-        }
-
-        var promise = Promise.resolve(id);
-        if (indexPattern.intervalName) {
-          promise = self.getIndicesForIndexPattern(indexPattern)
-          .then(function (existing) {
-            if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-            return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
-          });
-        }
-
-        return promise.then(function (indexList) {
-          return es.indices.getFieldMapping({
-            index: indexList,
-            field: '*',
-            ignoreUnavailable: _.isArray(indexList),
-            allowNoIndices: false,
-            includeDefaults: true
-          });
-        })
-        .catch(handleMissingIndexPattern)
-        .then(transformMappingIntoFields)
-        .then(function (fields) {
-          fieldCache.set(id, fields);
-          return fieldCache.get(id);
-        });
-      };
-
-      self.getIndicesForIndexPattern = function (indexPattern) {
-        return es.indices.getAliases({
-          index: patternToWildcard(indexPattern.id)
+      if (!skipIndexPatternCache) {
+        return es.get({
+          index: kbnIndex,
+          type: 'index-pattern',
+          id: id,
+          _sourceInclude: ['fields']
         })
         .then(function (resp) {
-          // var all = Object.keys(resp).sort();
-          var all = _(resp)
-          .map(function (index, key) {
-            if (index.aliases) {
-              return [Object.keys(index.aliases), key];
-            } else {
-              return key;
-            }
-          })
-          .flattenDeep()
-          .sort()
-          .uniq(true)
-          .value();
-
-          var matches = all.filter(function (existingIndex) {
-            var parsed = moment(existingIndex, indexPattern.id);
-            return existingIndex === parsed.format(indexPattern.id);
-          });
-
-          return {
-            all: all,
-            matches: matches
-          };
-        })
-        .catch(handleMissingIndexPattern);
-      };
-
-      /**
-       * Clears mapping caches from elasticsearch and from local object
-       * @param {dataSource} dataSource
-       * @returns {Promise}
-       * @async
-       */
-      self.clearCache = function (indexPattern) {
-        fieldCache.clear(indexPattern);
-        return Promise.resolve();
-      };
-    }
-
-    function handleMissingIndexPattern(err) {
-      if (err.status >= 400) {
-        // transform specific error type
-        return Promise.reject(new IndexPatternMissingIndices());
-      } else {
-        // rethrow all others
-        throw err;
+          if (resp.found && resp._source.fields) {
+            fieldCache.set(id, JSON.parse(resp._source.fields));
+          }
+          return self.getFieldsForIndexPattern(indexPattern, true);
+        });
       }
-    }
 
-    return new Mapper();
-  };
-});
+      var promise = Promise.resolve(id);
+      if (indexPattern.intervalName) {
+        promise = self.getIndicesForIndexPattern(indexPattern)
+        .then(function (existing) {
+          if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
+          return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+        });
+      }
+
+      return promise.then(function (indexList) {
+        return es.indices.getFieldMapping({
+          index: indexList,
+          fields: '*',
+          ignoreUnavailable: _.isArray(indexList),
+          allowNoIndices: false,
+          includeDefaults: true
+        });
+      })
+      .catch(handleMissingIndexPattern)
+      .then(transformMappingIntoFields)
+      .then(function (fields) {
+        fieldCache.set(id, fields);
+        return fieldCache.get(id);
+      });
+    };
+
+    self.getIndicesForIndexPattern = function (indexPattern) {
+      return es.indices.getAlias({
+        index: patternToWildcard(indexPattern.id)
+      })
+      .then(function (resp) {
+        // var all = Object.keys(resp).sort();
+        var all = _(resp)
+        .map(function (index, key) {
+          if (index.aliases) {
+            return [Object.keys(index.aliases), key];
+          } else {
+            return key;
+          }
+        })
+        .flattenDeep()
+        .sort()
+        .uniq(true)
+        .value();
+
+        var matches = all.filter(function (existingIndex) {
+          var parsed = moment(existingIndex, indexPattern.id);
+          return existingIndex === parsed.format(indexPattern.id);
+        });
+
+        return {
+          all: all,
+          matches: matches
+        };
+      })
+      .catch(handleMissingIndexPattern);
+    };
+
+    /**
+     * Clears mapping caches from elasticsearch and from local object
+     * @param {dataSource} dataSource
+     * @returns {Promise}
+     * @async
+     */
+    self.clearCache = function (indexPattern) {
+      fieldCache.clear(indexPattern);
+      return Promise.resolve();
+    };
+  }
+
+  function handleMissingIndexPattern(err) {
+    if (err.status >= 400) {
+      // transform specific error type
+      return Promise.reject(new IndexPatternMissingIndices());
+    } else {
+      // rethrow all others
+      throw err;
+    }
+  }
+
+  return new Mapper();
+};

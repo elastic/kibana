@@ -1,14 +1,15 @@
 
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import _ from 'lodash';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 
 describe('hit sort function', function () {
   let createHitSortFn;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    createHitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
+    createHitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   }));
 
 

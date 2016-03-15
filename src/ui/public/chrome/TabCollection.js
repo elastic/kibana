@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var { startsWith, get, set, omit, wrap, pick } = require('lodash');
-var Tab = require('ui/chrome/Tab');
-var { parse } = require('url');
+import _ from 'lodash';
+import Tab from 'ui/chrome/Tab';
+import { startsWith, get, set, omit, wrap, pick } from 'lodash';
+import { parse } from 'url';
 
 function TabCollection(opts = {}) {
   var tabs = [];

@@ -1,12 +1,12 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const elasticsearch = require('elasticsearch');
-const exposeClient = require('./expose_client');
-const migrateConfig = require('./migrate_config');
-const createKibanaIndex = require('./create_kibana_index');
-const checkEsVersion = require('./check_es_version');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import elasticsearch from 'elasticsearch';
+import exposeClient from './expose_client';
+import migrateConfig from './migrate_config';
+import createKibanaIndex from './create_kibana_index';
+import checkEsVersion from './check_es_version';
 const NoConnections = elasticsearch.errors.NoConnections;
-const util = require('util');
+import util from 'util';
 const format = util.format;
 
 const NO_INDEX = 'no_index';
@@ -22,7 +22,7 @@ module.exports = function (plugin, server) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitForPong() {
-    return client.ping({ requestTimeout: 1500 }).catch(function (err) {
+    return client.ping().catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));

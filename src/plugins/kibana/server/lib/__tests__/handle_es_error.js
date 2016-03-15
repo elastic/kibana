@@ -1,7 +1,7 @@
-const expect = require('expect.js');
-const Boom = require('boom');
-const esErrors = require('elasticsearch').errors;
-const handleESError = require('../handle_es_error');
+import expect from 'expect.js';
+import Boom from 'boom';
+import handleESError from '../handle_es_error';
+import { errors as esErrors } from 'elasticsearch';
 
 describe('handleESError', function () {
 

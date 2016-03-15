@@ -1,14 +1,16 @@
 
-const angular = require('angular');
-const ngMock = require('ngMock');
-const $ = require('jquery');
-const _ = require('lodash');
-const sinon = require('auto-release-sinon');
-const expect = require('expect.js');
+import angular from 'angular';
+import ngMock from 'ngMock';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import $ from 'jquery';
+import 'ui/private';
+import 'plugins/kibana/discover/components/field_chooser/field_chooser';
+import FixturesHitsProvider from 'fixtures/hits';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
-require('ui/private');
-require('plugins/kibana/discover/components/field_chooser/field_chooser');
 
 let $parentScope;
 let $scope;
@@ -55,8 +57,8 @@ describe('discover field chooser directives', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    hits = Private(require('fixtures/hits'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    hits = Private(FixturesHitsProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     indexPatternList = [ 'b', 'a', 'c' ];
 
     const fieldCounts = _.transform(hits, function (counts, hit) {

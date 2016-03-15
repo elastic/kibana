@@ -1,8 +1,10 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const sinon = require('sinon');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import url from 'url';
 
-const checkEsVersion = require('../check_es_version');
+import serverConfig from '../../../../../test/serverConfig';
+import checkEsVersion from '../check_es_version';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/check_es_version', function () {
@@ -23,7 +25,7 @@ describe('plugins/elasticsearch', function () {
             status: {
               red: sinon.stub()
             },
-            url: 'http://localhost:9210'
+            url: url.format(serverConfig.servers.elasticsearch)
           }
         }
       };

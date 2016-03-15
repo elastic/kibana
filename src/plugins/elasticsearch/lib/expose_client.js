@@ -1,12 +1,26 @@
-const elasticsearch = require('elasticsearch');
-const _ = require('lodash');
+import elasticsearch from 'elasticsearch';
+import _ from 'lodash';
+import Bluebird from 'bluebird';
 const readFile = (file) => require('fs').readFileSync(file, 'utf8');
-const util = require('util');
-const url = require('url');
-const callWithRequest = require('./call_with_request');
+import util from 'util';
+import url from 'url';
+import callWithRequest from './call_with_request';
 
 module.exports = function (server) {
   const config = server.config();
+
+  class ElasticsearchClientLogging {
+    error(err) {
+      server.log(['error', 'elasticsearch'], err);
+    }
+    warning(message) {
+      server.log(['warning', 'elasticsearch'], message);
+    }
+    info() {}
+    debug() {}
+    trace() {}
+    close() {}
+  }
 
   function createClient(options) {
     options = _.defaults(options || {}, {
@@ -18,6 +32,8 @@ module.exports = function (server) {
       clientKey: config.get('elasticsearch.ssl.key'),
       ca: config.get('elasticsearch.ssl.ca'),
       apiVersion: config.get('elasticsearch.apiVersion'),
+      pingTimeout: config.get('elasticsearch.pingTimeout'),
+      requestTimeout: config.get('elasticsearch.requestTimeout'),
       keepAlive: true,
       auth: true
     });
@@ -44,18 +60,12 @@ module.exports = function (server) {
       plugins: options.plugins,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
-      log: function () {
-        this.error = function (err) {
-          server.log(['error', 'elasticsearch'], err);
-        };
-        this.warning = function (message) {
-          server.log(['warning', 'elasticsearch'], message);
-        };
-        this.info = _.noop;
-        this.debug = _.noop;
-        this.trace = _.noop;
-        this.close = _.noop;
-      }
+      pingTimeout: options.pingTimeout,
+      requestTimeout: options.requestTimeout,
+      defer: function () {
+        return Bluebird.defer();
+      },
+      log: ElasticsearchClientLogging
     });
   }
 
@@ -65,6 +75,7 @@ module.exports = function (server) {
   const noAuthClient = createClient({ auth: false });
   server.on('close', _.bindKey(noAuthClient, 'close'));
 
+  server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
   server.expose('createClient', createClient);
   server.expose('callWithRequestFactory', callWithRequest);

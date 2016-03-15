@@ -1,5 +1,5 @@
-let _ = require('lodash');
-let fromNode = require('bluebird').fromNode;
+import _ from 'lodash';
+import { fromNode } from 'bluebird';
 
 module.exports = function (kbnServer, server, config) {
   // prevent relying on kbnServer so this can be used with other hapi servers
@@ -39,7 +39,7 @@ module.exports = function (kbnServer, server, config) {
     server.register({
       register: require('good'),
       options: {
-        opsInterval: 5000,
+        opsInterval: config.get('ops.interval'),
         requestHeaders: true,
         requestPayload: true,
         reporters: [

@@ -1,8 +1,8 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const Boom = require('boom');
-const getBasicAuthRealm = require('./get_basic_auth_realm');
-const toPath = require('lodash/internal/toPath');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import Boom from 'boom';
+import getBasicAuthRealm from './get_basic_auth_realm';
+import toPath from 'lodash/internal/toPath';
 
 module.exports = (client) => {
   return (req, endpoint, params = {}) => {

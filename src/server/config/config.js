@@ -1,11 +1,11 @@
-let Promise = require('bluebird');
-let Joi = require('joi');
-let _ = require('lodash');
-let { zipObject } = require('lodash');
-let override = require('./override');
-let createDefaultSchema = require('./schema');
-let pkg = require('requirefrom')('src/utils')('packageJson');
-const clone = require('./deepCloneWithBuffers');
+import Promise from 'bluebird';
+import Joi from 'joi';
+import _ from 'lodash';
+import override from './override';
+import createDefaultSchema from './schema';
+import pkg from '../../utils/packageJson';
+import clone from './deepCloneWithBuffers';
+import { zipObject } from 'lodash';
 
 const schema = Symbol('Joi Schema');
 const schemaKeys = Symbol('Schema Extensions');
