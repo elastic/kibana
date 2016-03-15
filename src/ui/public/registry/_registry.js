@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import IndexedArray from 'ui/IndexedArray';
+import IndexedArray from 'ui/indexed_array';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 

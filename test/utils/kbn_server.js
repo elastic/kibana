@@ -2,9 +2,9 @@ import url from 'url';
 import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
 import { kibanaUser, kibanaServer } from '../shield';
-import KbnServer from '../../src/server/KbnServer';
-import fromRoot from '../../src/utils/fromRoot';
-import serverConfig from '../serverConfig';
+import KbnServer from '../../src/server/kbn_server';
+import fromRoot from '../../src/utils/from_root';
+import serverConfig from '../server_config';
 
 const SERVER_DEFAULTS = {
   server: {

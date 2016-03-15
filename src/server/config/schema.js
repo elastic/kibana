@@ -4,7 +4,7 @@ import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
 
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({

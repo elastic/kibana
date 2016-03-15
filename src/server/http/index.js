@@ -4,7 +4,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import getDefaultRoute from './getDefaultRoute';
+import getDefaultRoute from './get_default_route';
 module.exports = async function (kbnServer, server, config) {
 
 
@@ -82,7 +82,7 @@ module.exports = async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler: function (req, reply) {
-      return reply.view('rootRedirect', {
+      return reply.view('root_redirect', {
         hashRoute: `${config.get('server.basePath')}/app/kibana`,
         defaultRoute: getDefaultRoute(kbnServer),
       });

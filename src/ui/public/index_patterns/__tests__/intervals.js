@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { pluck } from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 
 describe('Index Patterns', function () {

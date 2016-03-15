@@ -2,7 +2,7 @@
 import fn from 'ui/filter_manager/lib/query';
 import expect from 'expect.js';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 var indexPattern;
 var expected;

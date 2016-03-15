@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
 describe('Buckets wrapper', function () {
   var Buckets;
