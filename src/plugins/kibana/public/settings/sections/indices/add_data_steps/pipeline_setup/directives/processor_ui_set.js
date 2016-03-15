@@ -15,8 +15,8 @@ app.directive('processorUiSet', function () {
         pipeline.dirty = true;
       }
 
-      $scope.$watch('processor.targetField', processorUiChanged);
-      $scope.$watch('processor.value', processorUiChanged);
+      $scope.$watch('processor.data.targetField', processorUiChanged);
+      $scope.$watch('processor.data.value', processorUiChanged);
     }
   };
 });

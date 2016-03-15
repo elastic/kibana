@@ -17,12 +17,13 @@ app.directive('processContainer', function ($compile) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
       const $container = $el.find('.process-worker-container');
+      const typeId = processor.data.typeId;
 
       const newScope = $scope.$new();
       newScope.pipeline = pipeline;
       newScope.processor = processor;
 
-      const template = `<processor-ui-${processor.typeId}></processor-ui-${processor.typeId}>`;
+      const template = `<processor-ui-${typeId}></processor-ui-${typeId}>`;
       const $innerEl = $compile(template)(newScope);
 
       $innerEl.appendTo($container);

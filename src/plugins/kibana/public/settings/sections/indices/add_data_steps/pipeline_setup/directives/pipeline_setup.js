@@ -1,9 +1,8 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import Pipeline from '../lib/pipeline';
-import Processor from '../lib/processor';
 import angular from 'angular';
-import * as processorTypes from '../lib/processor_types';
+import * as ProcessorTypes from '../lib/processor_types';
 import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';
 import './pipeline_output';
@@ -11,6 +10,22 @@ import './source_data';
 import './processors';
 
 const app = uiModules.get('kibana');
+
+function buildProcessorTypeList() {
+  var result = [];
+  _.forIn(ProcessorTypes, function (Type, key) {
+    var instance = new Type('');
+    if (instance.data.typeId !== 'base') {
+      result.push({
+        typeId: instance.data.typeId,
+        title: instance.title,
+        Type: Type
+      });
+    }
+  });
+
+  return result;
+}
 
 app.directive('pipelineSetup', function () {
   return {
@@ -23,10 +38,10 @@ app.directive('pipelineSetup', function () {
     controller: function ($scope, debounce, Private, Notifier) {
       const ingest = Private(IngestProvider);
       const notify = new Notifier({ location: `Ingest Pipeline Setup` });
-      $scope.processorTypes = _.sortBy(processorTypes, 'title');
+      $scope.processorTypes = _.sortBy(buildProcessorTypeList(), 'title');
       $scope.sample = {};
 
-      const pipeline = new Pipeline(processorTypes, Processor);
+      const pipeline = new Pipeline(ProcessorTypes);
       // Loads pre-existing pipeline which will exist if the user returns from
       // a later step in the wizard
       if ($scope.pipeline) {

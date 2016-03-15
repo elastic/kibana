@@ -46,22 +46,7 @@ export default function IngestProvider($rootScope, $http, config) {
   }
 
   function packageSimulateProcessor(processor) {
-    const uiFields = [
-      '$$hashKey',
-      'collapsed',
-      'description',
-      'error',
-      'getDescription',
-      'inputObject',
-      'outputObject',
-      'parent',
-      'setParent',
-      'title',
-      'updateDescription'
-    ];
-
-    const cleanedProcessor = _.omit(processor, uiFields);
-    return keysToSnakeCaseShallow(cleanedProcessor);
+    return keysToSnakeCaseShallow(processor.data);
   }
 
   function packageSimulateRequest(pipeline) {
