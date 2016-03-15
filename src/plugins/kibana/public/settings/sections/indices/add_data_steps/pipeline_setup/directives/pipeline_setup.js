@@ -12,19 +12,18 @@ import './processor_ui';
 const app = uiModules.get('kibana');
 
 function buildProcessorTypeList() {
-  const result = [];
-  _.forIn(ProcessorTypes, function (Type, key) {
-    const instance = new Type('');
-    if (instance.data.typeId !== 'base') {
-      result.push({
+  return _(ProcessorTypes)
+    .map(Type => {
+      const instance = new Type('');
+      if (instance.data.typeId === 'base') return;
+      return {
         typeId: instance.data.typeId,
         title: instance.title,
-        Type: Type
-      });
-    }
-  });
-
-  return result;
+        Type
+      };
+    })
+    .compact()
+    .value();
 }
 
 app.directive('pipelineSetup', function () {
