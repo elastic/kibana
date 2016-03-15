@@ -1,27 +1,27 @@
 <form role="form" class="form-inline">
   <div class="container-fluid">
     <div class="row">
-      <div class="input-group form-group finder-form col-md-7">
+      <div class="input-group form-group finder-form col-md-9">
         <span class="input-group-addon">
           <i class="fa fa-search"></i>
         </span>
         <input
           input-focus
           ng-model="filter"
-          ng-attr-placeholder="{{finder.properties.nouns}} Filter..."
+          ng-attr-placeholder="Filter..."
           ng-keydown="finder.filterKeyDown($event)"
           class="form-control"
           name="filter"
           type="text"
           autocomplete="off" />
       </div>
-      <div class="finder-hit-count col-md-2">
+      <div class="finder-hit-count col-md-3">
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="20">
+<paginate list="finder.hits" per-page="finder.perPage">
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
     <li
       class="list-group-item list-group-menu-item"

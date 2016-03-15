@@ -1,18 +1,9 @@
 <div class="wizard">
-  <div class="wizard-column">
-    <h3>From a New Search</h3>
-    <!-- Index patterns -->
-    <div class="wizard-row">
-      <div class="panel panel-default">
-        <div class="panel-heading">Index Patterns</div>
-      </div>
-      <ul class="striped list-group">
-        <li class="list-group-item" ng-repeat="pattern in indexPattern.list | orderBy: 'toString()'">
-          <a class="index-link" kbn-href="{{ makeUrl(pattern) }}">{{pattern}}</a>
-        </li>
-      </ul>
-    </div>
-  </div>
+  <selectable-list
+    perPage="20"
+    list="indexPattern.list | orderBy: 'toString()'"
+    userOnSelect="makeUrl">
+  </selectable-list>
   <div class="wizard-column">
     <h3>Or, From a Saved Search</h3>
     <!-- Saved searches -->
