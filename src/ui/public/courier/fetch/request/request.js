@@ -1,115 +1,110 @@
 import _ from 'lodash';
 import moment from 'moment';
+
 import errors from 'ui/errors';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierFetchRequestErrorHandlerProvider from 'ui/courier/fetch/request/_error_handler';
+
+import RequestQueueProvider from '../../_request_queue';
+import ErrorHandlerRequestProvider from './error_handler';
+
 export default function AbstractReqProvider(Private, Promise) {
-  var requestQueue = Private(CourierRequestQueueProvider);
-  var requestErrorHandler = Private(CourierFetchRequestErrorHandlerProvider);
+  const requestQueue = Private(RequestQueueProvider);
+  const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
-  function AbstractReq(source, defer) {
-    if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {
-      throw new Error('The AbstractReq class should not be called directly');
+  return class AbstractReq {
+    constructor(source, defer) {
+      this.source = source;
+      this.defer = defer || Promise.defer();
+      this._whenAbortedHandlers = [];
+
+      requestQueue.push(this);
     }
 
-    this.source = source;
-    this.defer = defer || Promise.defer();
-
-    requestQueue.push(this);
-  }
-
-  AbstractReq.prototype.canStart = function () {
-    return Boolean(!this.stopped && !this.source._fetchDisabled);
-  };
-
-  AbstractReq.prototype.start = function () {
-    if (this.started) {
-      throw new TypeError('Unable to start request because it has already started');
+    canStart() {
+      return Boolean(!this.stopped && !this.source._fetchDisabled);
     }
 
-    this.started = true;
-    this.moment = moment();
+    start() {
+      if (this.started) {
+        throw new TypeError('Unable to start request because it has already started');
+      }
 
-    var source = this.source;
-    if (source.activeFetchCount) {
-      source.activeFetchCount += 1;
-    } else {
-      source.activeFetchCount = 1;
+      this.started = true;
+      this.moment = moment();
+
+      const source = this.source;
+      if (source.activeFetchCount) {
+        source.activeFetchCount += 1;
+      } else {
+        source.activeFetchCount = 1;
+      }
+
+      source.history = [this];
     }
 
-    source.history = [this];
-  };
+    getFetchParams() {
+      return this.source._flatten();
+    }
 
-  AbstractReq.prototype.getFetchParams = function () {
-    return this.source._flatten();
-  };
+    transformResponse(resp) {
+      return resp;
+    }
 
-  AbstractReq.prototype.transformResponse = function (resp) {
-    return resp;
-  };
+    filterError(resp) {
+      return false;
+    }
 
-  AbstractReq.prototype.filterError = function (resp) {
-    return false;
-  };
+    handleResponse(resp) {
+      this.success = true;
+      this.resp = resp;
+    }
 
-  AbstractReq.prototype.handleResponse = function (resp) {
-    this.success = true;
-    this.resp = resp;
-  };
+    handleFailure(error) {
+      this.success = false;
+      this.resp = error && error.resp;
+      this.retry();
+      return requestErrorHandler(this, error);
+    }
 
-  AbstractReq.prototype.handleFailure = function (error) {
-    this.success = false;
-    this.resp = error && error.resp;
-    this.retry();
-    return requestErrorHandler(this, error);
-  };
+    isIncomplete() {
+      return false;
+    }
 
-  AbstractReq.prototype.isIncomplete = function () {
-    return false;
-  };
+    continue() {
+      throw new Error('Unable to continue ' + this.type + ' request');
+    }
 
-  AbstractReq.prototype.continue = function () {
-    throw new Error('Unable to continue ' + this.type + ' request');
-  };
+    retry() {
+      const clone = this.clone();
+      this.abort();
+      return clone;
+    }
 
-  AbstractReq.prototype.retry = function () {
-    var clone = this.clone();
-    this.abort();
-    return clone;
-  };
-
-  // don't want people overriding this, so it becomes a natural
-  // part of .abort() and .complete()
-  function stop(then) {
-    return function () {
+    _markStopped() {
       if (this.stopped) return;
-
       this.stopped = true;
       this.source.activeFetchCount -= 1;
       _.pull(requestQueue, this);
-      then.call(this);
-    };
-  }
+    }
 
-  AbstractReq.prototype.abort = stop(function () {
-    this.defer = null;
-    this.aborted = true;
-    if (this._whenAborted) _.callEach(this._whenAborted);
-  });
+    abort() {
+      this._markStopped();
+      this.defer = null;
+      this.aborted = true;
+      _.callEach(this._whenAbortedHandlers);
+    }
 
-  AbstractReq.prototype.whenAborted = function (cb) {
-    this._whenAborted = (this._whenAborted || []);
-    this._whenAborted.push(cb);
+    whenAborted(cb) {
+      this._whenAbortedHandlers.push(cb);
+    }
+
+    complete() {
+      this._markStopped();
+      this.ms = this.moment.diff() * -1;
+      this.defer.resolve(this.resp);
+    }
+
+    clone() {
+      return new this.constructor(this.source, this.defer);
+    }
   };
-
-  AbstractReq.prototype.complete = stop(function () {
-    this.ms = this.moment.diff() * -1;
-    this.defer.resolve(this.resp);
-  });
-
-  AbstractReq.prototype.clone = function () {
-    return new this.constructor(this.source, this.defer);
-  };
-
-  return AbstractReq;
 };

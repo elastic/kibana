@@ -1,12 +1,12 @@
-import IndexedArray from 'ui/IndexedArray';
-import 'ui/agg_types/AggParams';
+import IndexedArray from 'ui/indexed_array';
+import 'ui/agg_types/agg_params';
 import AggTypesMetricsCountProvider from 'ui/agg_types/metrics/count';
 import AggTypesMetricsAvgProvider from 'ui/agg_types/metrics/avg';
 import AggTypesMetricsSumProvider from 'ui/agg_types/metrics/sum';
 import AggTypesMetricsMedianProvider from 'ui/agg_types/metrics/median';
 import AggTypesMetricsMinProvider from 'ui/agg_types/metrics/min';
 import AggTypesMetricsMaxProvider from 'ui/agg_types/metrics/max';
-import AggTypesMetricsStdDeviationProvider from 'ui/agg_types/metrics/stdDeviation';
+import AggTypesMetricsStdDeviationProvider from 'ui/agg_types/metrics/std_deviation';
 import AggTypesMetricsCardinalityProvider from 'ui/agg_types/metrics/cardinality';
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 import AggTypesMetricsPercentileRanksProvider from 'ui/agg_types/metrics/percentile_ranks';

@@ -1,7 +1,7 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import d3 from 'd3';
 
 import angular from 'angular';

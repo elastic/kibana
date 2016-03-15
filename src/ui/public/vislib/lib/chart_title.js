@@ -2,7 +2,7 @@ import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
-import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
 export default function ChartTitleFactory(Private) {
 
   var ErrorHandler = Private(VislibLibErrorHandlerProvider);
