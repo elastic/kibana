@@ -12,9 +12,9 @@ import './processors';
 const app = uiModules.get('kibana');
 
 function buildProcessorTypeList() {
-  var result = [];
+  const result = [];
   _.forIn(ProcessorTypes, function (Type, key) {
-    var instance = new Type('');
+    const instance = new Type('');
     if (instance.data.typeId !== 'base') {
       result.push({
         typeId: instance.data.typeId,
@@ -41,7 +41,7 @@ app.directive('pipelineSetup', function () {
       $scope.processorTypes = _.sortBy(buildProcessorTypeList(), 'title');
       $scope.sample = {};
 
-      const pipeline = new Pipeline(ProcessorTypes);
+      const pipeline = new Pipeline();
       // Loads pre-existing pipeline which will exist if the user returns from
       // a later step in the wizard
       if ($scope.pipeline) {

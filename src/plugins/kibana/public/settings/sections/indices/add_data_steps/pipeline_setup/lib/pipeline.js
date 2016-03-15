@@ -2,13 +2,12 @@ import _ from 'lodash';
 
 export default class Pipeline {
 
-  constructor(processorTypes) {
+  constructor() {
     this.processors = [];
     this.counter = 0;
     this.input = {};
     this.output = undefined;
     this.dirty = false;
-    this.processorTypes = processorTypes;
   }
 
   load(pipeline) {
@@ -51,28 +50,11 @@ export default class Pipeline {
   }
 
   addExisting(existingProcessor) {
-    // console.log('DO SOMETHING TO CREATE A NEW PROCESSOR');
-    // const processors = this.processors;
-    // const processorType = _.find(this.processorTypes, (o) => { return o.typeId === existingProcessor.typeId; });
-    // const newProcessor = this.add(processorType);
+    const newProcessor = this.add(existingProcessor.constructor);
+    _.assign(newProcessor, _.omit(existingProcessor, 'data'));
+    _.assign(newProcessor.data, _.omit(existingProcessor.data, 'processorId'));
 
-    // const keys = _(existingProcessor)
-    //               .keys()
-    //               .omit([
-    //                 'title',
-    //                 'template',
-    //                 'typeId',
-    //                 'processorId',
-    //                 'outputObject',
-    //                 'inputObject',
-    //                 'description'
-    //               ])
-    //               .value();
-    // keys.forEach((key) => {
-    //   _.set(newProcessor, key, _.get(existingProcessor, key));
-    // });
-
-    // return newProcessor;
+    return newProcessor;
   }
 
   add(ProcessorType) {
@@ -124,10 +106,8 @@ export default class Pipeline {
     results.forEach((result) => {
       const processor = this.getProcessorById(result.processorId);
 
-      //console.log(`applySimulateResults before ${result.processorId}`, _.cloneDeep(processor));
       processor.outputObject = _.get(result, 'output');
       processor.error = _.get(result, 'error');
-      //console.log(`applySimulateResults after ${result.processorId}`, _.cloneDeep(processor));
     });
 
     //update the inputObject of each processor
