@@ -18,6 +18,13 @@
             >More Info</button>
           <button
             type="button"
+            ng-if="notif.stack && notif.showStack"
+            class="btn"
+            ng-class="'btn-' + notif.type"
+            ng-click="notif.showStack = false"
+            >Less Info</button>
+          <button
+            type="button"
             ng-if="notif.accept"
             class="btn"
             ng-class="'btn-' + notif.type"
