@@ -36,6 +36,8 @@ I won't give it all away, there’s more to it than just this post. Timelion wil
 
 Installing it is easy, run this, bounce the Kibana server. and refresh your browser: `./bin/kibana plugin -i kibana/timelion`. Or you can try it on Found, the best hosted Elasticsearch in the history of the universe, for free: Found by Elastic 
 
+You can also install offline by grabbing [the latest build](https://download.elasticsearch.org/kibana/timelion/timelion-latest.tar.gz) and using the `--url` parameter to point the plugin installer at say, `file:///Users/ItsAYou/timelion-latest.tar.gz` 
+
 Now use it. Abuse it.
 Once you've installed it, you'll have a new icon in Kibana, which opens the app switcher and allows you to enter other apps
 
