@@ -36,5 +36,10 @@ describe('chrome nav apis', function () {
       const chrome = getChrome();
       expect(chrome.addBasePath('http://github.com/elastic/kibana')).to.be('http://github.com/elastic/kibana');
     });
+
+    it('includes the query string', function () {
+      const chrome = getChrome();
+      expect(chrome.addBasePath('/app/kibana?a=b')).to.be(`${basePath}/app/kibana?a=b`);
+    });
   });
 });
