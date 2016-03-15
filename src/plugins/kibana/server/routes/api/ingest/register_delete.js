@@ -7,9 +7,10 @@ module.exports = function registerDelete(server) {
     path: '/api/kibana/ingest/{id}',
     method: 'DELETE',
     handler: function (req, reply) {
+      const kibanaIndex = server.config().get('kibana.index');
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const deletePatternParams = {
-        index: '.kibana',
+        index: kibanaIndex,
         type: 'index-pattern',
         id: req.params.id
       };

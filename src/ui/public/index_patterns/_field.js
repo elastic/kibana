@@ -1,5 +1,5 @@
-import ObjDefine from 'ui/utils/ObjDefine';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+import ObjDefine from 'ui/utils/obj_define';
+import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
@@ -70,9 +70,9 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     return obj.create();
   }
 
-    Field.prototype.routes = {
-      edit: '/settings/indices/edit/{{indexPattern.id}}/field/{{name}}'
-    };
+  Field.prototype.routes = {
+    edit: '/settings/indices/edit/{{indexPattern.id}}/field/{{name}}'
+  };
 
   return Field;
 };

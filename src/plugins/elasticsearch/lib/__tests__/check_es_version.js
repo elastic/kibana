@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import url from 'url';
 
-import serverConfig from '../../../../../test/serverConfig';
+import serverConfig from '../../../../../test/server_config';
 import checkEsVersion from '../check_es_version';
 
 describe('plugins/elasticsearch', function () {

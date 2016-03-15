@@ -322,12 +322,12 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     self.formatField = self.formatHit.formatField;
   }
 
-    IndexPattern.prototype.routes = {
-      edit: '/settings/indices/edit/{{id}}',
-      addField: '/settings/indices/edit/{{id}}/create-field',
-      indexedFields: '/settings/indices/edit/{{id}}?_a=(tab:indexedFields)',
-      scriptedFields: '/settings/indices/edit/{{id}}?_a=(tab:scriptedFields)'
-    };
+  IndexPattern.prototype.routes = {
+    edit: '/settings/indices/edit/{{id}}',
+    addField: '/settings/indices/edit/{{id}}/create-field',
+    indexedFields: '/settings/indices/edit/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/settings/indices/edit/{{id}}?_a=(tab:scriptedFields)'
+  };
 
   return IndexPattern;
 };

@@ -1,5 +1,5 @@
 import 'ui/private';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import NormalizeSortRequestProvider from 'ui/courier/data_source/_normalize_sort_request';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';

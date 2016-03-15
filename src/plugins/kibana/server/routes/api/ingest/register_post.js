@@ -7,52 +7,53 @@ import initDefaultFieldProps from '../../../lib/init_default_field_props';
 import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 import { keysToCamelCaseShallow } from '../../../../common/lib/case_conversion';
 
-function patternRollback(rootError, indexPatternId, boundCallWithRequest) {
-  const deleteParams = {
-    index: '.kibana',
-    type: 'index-pattern',
-    id: indexPatternId
-  };
+module.exports = function registerPost(server) {
+  const kibanaIndex = server.config().get('kibana.index');
 
-  return boundCallWithRequest('delete', deleteParams)
-  .then(
-    () => {
-      throw rootError;
-    },
-    (patternDeletionError) => {
-      throw new Error(
-        `index-pattern ${indexPatternId} created successfully but index template or pipeline
+  function patternRollback(rootError, indexPatternId, boundCallWithRequest) {
+    const deleteParams = {
+      index: kibanaIndex,
+      type: 'index-pattern',
+      id: indexPatternId
+    };
+
+    return boundCallWithRequest('delete', deleteParams)
+      .then(
+        () => {
+          throw rootError;
+        },
+        (patternDeletionError) => {
+          throw new Error(
+            `index-pattern ${indexPatternId} created successfully but index template or pipeline
                 creation failed. Failed to rollback index-pattern creation, must delete manually.
                 ${patternDeletionError.toString()}
                 ${rootError.toString()}`
+          );
+        }
       );
-    }
-  );
-}
+  }
 
-function templateRollback(rootError, templateName, boundCallWithRequest) {
-  const deleteParams = {
-    name: templateName
-  };
+  function templateRollback(rootError, templateName, boundCallWithRequest) {
+    const deleteParams = {
+      name: templateName
+    };
 
-  return boundCallWithRequest('indices.deleteTemplate', deleteParams)
-    .then(
-      () => {
-        throw rootError;
-      },
-      (templateDeletionError) => {
-        throw new Error(
-          `index template ${templateName} created successfully but pipeline
+    return boundCallWithRequest('indices.deleteTemplate', deleteParams)
+      .then(
+        () => {
+          throw rootError;
+        },
+        (templateDeletionError) => {
+          throw new Error(
+            `index template ${templateName} created successfully but pipeline
                 creation failed. Failed to rollback template creation, must delete manually.
                 ${templateDeletionError.toString()}
                 ${rootError.toString()}`
-        );
-      }
-    );
-}
+          );
+        }
+      );
+  }
 
-
-module.exports = function registerPost(server) {
   server.route({
     path: '/api/kibana/ingest',
     method: 'POST',
@@ -82,7 +83,7 @@ module.exports = function registerPost(server) {
 
       // Set up call with request params
       const patternCreateParams = {
-        index: '.kibana',
+        index: kibanaIndex,
         type: 'index-pattern',
         id: indexPatternId,
         body: indexPattern
