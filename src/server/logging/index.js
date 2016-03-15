@@ -44,7 +44,7 @@ module.exports = function (kbnServer, server, config) {
         requestPayload: true,
         reporters: [
           {
-            reporter: require('./LogReporter'),
+            reporter: require('./log_reporter'),
             config: {
               json: config.get('logging.json'),
               dest: config.get('logging.dest'),

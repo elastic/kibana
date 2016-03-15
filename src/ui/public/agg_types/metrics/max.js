@@ -1,4 +1,4 @@
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 
 export default function AggTypeMetricMaxProvider(Private) {
   var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);

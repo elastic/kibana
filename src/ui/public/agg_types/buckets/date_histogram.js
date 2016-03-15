@@ -2,7 +2,7 @@ import { jstz as tzDetect } from 'jstimezonedetect';
 import _ from 'lodash';
 import moment from 'moment';
 import 'ui/filters/field_type';
-import 'ui/validateDateInterval';
+import 'ui/validate_date_interval';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import TimeBucketsProvider from 'ui/time_buckets';
 import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import uiModules from 'ui/modules';
 uiModules
 .get('app/visualize')

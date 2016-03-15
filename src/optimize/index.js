@@ -1,4 +1,4 @@
-import FsOptimizer from './FsOptimizer';
+import FsOptimizer from './fs_optimizer';
 module.exports = async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 

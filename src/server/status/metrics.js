@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Samples from './Samples';
+import Samples from './samples';
 module.exports = function (kbnServer, server, config) {
   let lastReport = Date.now();
 
