@@ -51,7 +51,7 @@ export default function HistogramAggDefinition(Private) {
         write: function (aggConfig, output) {
           var val = aggConfig.params.extended_bounds;
 
-          if (val.min != null || val.max != null) {
+          if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
             output.params.extended_bounds = {
               min: val.min,
               max: val.max

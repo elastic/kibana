@@ -2,7 +2,7 @@ import _ from 'lodash';
 import processESIngestSimulateResponse from '../../../lib/process_es_ingest_simulate_response';
 import simulateRequestSchema from '../../../lib/schemas/simulate_request_schema';
 import ingestSimulateApiKibanaToEsConverter from '../../../lib/converters/ingest_simulate_api_kibana_to_es_converter';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow }  from '../../../../common/lib/case_conversion';
+import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../../common/lib/case_conversion';
 
 module.exports = function registerSimulate(server) {
   server.route({

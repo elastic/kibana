@@ -11,6 +11,7 @@ var config;
 var formatIds = [
   'bytes',
   'date',
+  'duration',
   'ip',
   'number',
   'percent',

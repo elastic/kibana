@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import handleESError from '../../../lib/handle_es_error';
-import {ingestToPattern, patternToIngest} from '../../../lib/convert_pattern_and_ingest_name';
+import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 
 module.exports = function registerDelete(server) {
   server.route({
