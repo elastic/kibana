@@ -15,9 +15,9 @@ function buildProcessorTypeList() {
   return _(ProcessorTypes)
     .map(Type => {
       const instance = new Type('');
-      if (instance.data.typeId === 'base') return;
+      if (instance.typeId === 'base') return;
       return {
-        typeId: instance.data.typeId,
+        typeId: instance.typeId,
         title: instance.title,
         Type
       };
@@ -58,7 +58,7 @@ app.directive('pipelineSetup', function () {
           return;
         }
 
-        ingest.simulate(pipeline)
+        ingest.simulate(pipeline.model)
         .then((results) => { pipeline.applySimulateResults(results); })
         .catch(notify.error);
       }, 200);

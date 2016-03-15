@@ -1,15 +1,12 @@
 export class Processor {
   constructor(processorId) {
+    this.processorId = processorId;
+    this.typeId = 'base';
     this.collapsed = false;
     this.parent = undefined;
     this.inputObject = undefined;
     this.outputObject = undefined;
     this.error = undefined;
-
-    this.data = {
-      processorId,
-      typeId: 'base'
-    };
   }
 
   setParent(newParent) {
@@ -24,13 +21,22 @@ export class SetProcessor extends Processor {
   constructor(processorId) {
     super(processorId);
     this.title = 'Set';
-    this.data.typeId = 'set';
-    this.data.targetField = '';
-    this.data.value = '';
+    this.typeId = 'set';
+    this.targetField = '';
+    this.value = '';
   }
 
   get description() {
-    const target = this.data.targetField || '?';
+    const target = this.targetField || '?';
     return `[${target}]`;
+  }
+
+  get model() {
+    return {
+      processorId: this.processorId,
+      typeId: this.typeId,
+      targetField: this.targetField,
+      value: this.value
+    };
   }
 };

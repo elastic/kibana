@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import * as ProcessorTypes from './processor_types';
 
 export default class Pipeline {
 
@@ -8,6 +9,19 @@ export default class Pipeline {
     this.input = {};
     this.output = undefined;
     this.dirty = false;
+
+    this._processorTypes = _.reduce(ProcessorTypes, (result, Type, key) => {
+      const instance = new Type();
+      result[instance.typeId] = Type;
+      return result;
+    }, {});
+  }
+
+  get model() {
+    return {
+      input: this.input,
+      processors: _.map(this.processors, processor => processor.model)
+    };
   }
 
   load(pipeline) {
@@ -50,9 +64,9 @@ export default class Pipeline {
   }
 
   addExisting(existingProcessor) {
-    const newProcessor = this.add(existingProcessor.constructor);
-    _.assign(newProcessor, _.omit(existingProcessor, 'data'));
-    _.assign(newProcessor.data, _.omit(existingProcessor.data, 'processorId'));
+    const Type = this._processorTypes[existingProcessor.typeId];
+    const newProcessor = this.add(Type);
+    _.assign(newProcessor, _.omit(existingProcessor, 'processorId'));
 
     return newProcessor;
   }
@@ -95,7 +109,7 @@ export default class Pipeline {
   }
 
   getProcessorById(processorId) {
-    const result = _.find(this.processors, (processor) => { return processor.data.processorId === processorId; });
+    const result = _.find(this.processors, { processorId });
     return result;
   }
 
@@ -117,7 +131,7 @@ export default class Pipeline {
       //we don't want to change the inputObject if the parent processor
       //is in error because that can cause us to lose state.
       if (!_.get(processor, 'error.isNested')) {
-        if (processor.parent.data) {
+        if (processor.parent instanceof ProcessorTypes.Processor) {
           processor.inputObject = _.cloneDeep(processor.parent.outputObject);
         } else {
           processor.inputObject = _.cloneDeep(processor.parent);

@@ -18,7 +18,7 @@ app.directive('processorUiContainer', function ($compile) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
       const $container = $el.find('.processor-ui-content');
-      const typeId = processor.data.typeId;
+      const typeId = processor.typeId;
 
       const newScope = $scope.$new();
       newScope.pipeline = pipeline;
