@@ -1,15 +1,15 @@
-<div class="process-container-header">
+<div class="processor-ui-container-header">
   <button
     aria-label="{{ processor.collapsed ? 'Open Editor' : 'Close Editor' }}"
     tooltip="{{ processor.collapsed ? 'Open Editor' : 'Close Editor' }}"
     tooltip-append-to-body="true"
     ng-click="processor.collapsed = !processor.collapsed"
     type="button"
-    class="btn btn-default btn-xs process-container-header-toggle">
+    class="btn btn-default btn-xs processor-ui-container-header-toggle">
     <i aria-hidden="true" ng-class="{ 'fa-caret-down': !processor.collapsed, 'fa-caret-right': processor.collapsed }" class="fa"></i>
   </button>
 
-  <div class="process-container-header-title">
+  <div class="processor-ui-container-header-title">
     <span class="processor-title">
       {{processor.title}}
     </span>
@@ -24,7 +24,7 @@
     </span>
   </div>
 
-  <div class="process-container-header-controls btn-group">
+  <div class="processor-ui-container-header-controls btn-group">
     <button
       aria-label="Increase Priority"
       tooltip="Increase Priority"

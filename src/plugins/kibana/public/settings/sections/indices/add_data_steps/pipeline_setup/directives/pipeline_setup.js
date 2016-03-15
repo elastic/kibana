@@ -7,7 +7,7 @@ import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';
 import './pipeline_output';
 import './source_data';
-import './processors';
+import './processor_ui';
 
 const app = uiModules.get('kibana');
 

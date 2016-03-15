@@ -1,9 +1,9 @@
 import uiModules from 'ui/modules';
-import '../styles/_process_container_header.less';
+import '../styles/_processor_ui_container_header.less';
 
 const app = uiModules.get('kibana');
 
-app.directive('processContainerHeader', function () {
+app.directive('processorUiContainerHeader', function () {
   return {
     restrict: 'E',
     scope: {
@@ -11,6 +11,6 @@ app.directive('processContainerHeader', function () {
       field: '=',
       pipeline: '='
     },
-    template: require('../views/process_container_header.html')
+    template: require('../views/processor_ui_container_header.html')
   };
 });
