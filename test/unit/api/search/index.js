@@ -1,6 +1,6 @@
 define(function (require) {
   var bdd = require('intern!bdd');
-  var serverConfig = require('intern/dojo/node!../../../serverConfig');
+  var serverConfig = require('intern/dojo/node!../../../server_config');
   var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
   var request = require('intern/dojo/node!supertest-as-promised');
   var url = require('intern/dojo/node!url');

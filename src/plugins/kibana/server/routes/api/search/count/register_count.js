@@ -2,16 +2,14 @@ import _ from 'lodash';
 import handleESError from '../../../../lib/handle_es_error';
 
 export default function registerCount(server) {
-  server.route({
-    path: '/api/kibana/{id}/_count',
-    method: 'POST',
-    handler: function (req, reply) {
-      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
+  const path = '/api/kibana/{id}/_count';
+  const handler = function (req, reply) {
+    const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
 
-      boundCallWithRequest('count', {
-        allowNoIndices: false,
-        index: req.params.id
-      })
+    boundCallWithRequest('count', {
+      allowNoIndices: false,
+      index: req.params.id
+    })
       .then(
         function (res) {
           reply({count: res.count});
@@ -20,6 +18,17 @@ export default function registerCount(server) {
           reply(handleESError(error));
         }
       );
-    }
+  };
+
+  server.route({
+    path,
+    method: 'POST',
+    handler
+  });
+
+  server.route({
+    path,
+    method: 'GET',
+    handler
   });
 }

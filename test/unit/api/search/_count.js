@@ -49,6 +49,14 @@ define(function (require) {
         });
       });
 
+      bdd.it('should support GET requests as well', function () {
+        return request.get('/kibana/foo-*/_count')
+          .expect(200)
+          .then(function (response) {
+            expect(response.body.count).to.be(2);
+          });
+      });
+
       bdd.it('should return 404 if a pattern matches no indices', function () {
         return request.post('/kibana/doesnotexist-*/_count')
         .expect(404);
