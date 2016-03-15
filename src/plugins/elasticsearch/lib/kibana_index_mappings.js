@@ -6,5 +6,13 @@ export const mappings = {
         index: 'not_analyzed'
       }
     }
+  },
+  uuids: {
+    properties: {
+      uuid: {
+        type: 'string',
+        index: 'not_analyzed'
+      }
+    }
   }
 };
