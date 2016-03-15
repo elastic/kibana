@@ -58,6 +58,6 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, $location, t
 
   $scope.makeUrl = function (pattern) {
     if (!pattern) return;
-    return `/visualize/create?type=${type}&indexPattern=${pattern}`;
+    return `#/visualize/create?type=${type}&indexPattern=${pattern}`;
   };
 });
