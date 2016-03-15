@@ -11,6 +11,7 @@ class UiExports {
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
     this.bundleProviders = [];
+    this.defaultVariableInjectors = [];
   }
 
   consumePlugin(plugin) {
@@ -53,6 +54,12 @@ class UiExports {
               id: plugin.id,
               urlBasePath: this.urlBasePath
             }));
+
+            plugin.extendRegister((server, options) => { // eslint-disable-line no-loop-func
+              const wrapped = app.getInjectedVars;
+              app.getInjectedVars = () => wrapped.call(plugin, server, options);
+            });
+
             plugin.apps.add(app);
           }
         };
@@ -78,6 +85,13 @@ class UiExports {
         return (plugin, specs) => {
           _.forOwn(specs, (spec, adhocType) => {
             this.aliases[adhocType] = _.union(this.aliases[adhocType] || [], spec);
+          });
+        };
+
+      case 'injectVars':
+        return (plugin, injector) => {
+          plugin.extendRegister((server, options) => {
+            this.defaultVariableInjectors.push(() => injector.call(plugin, server, options));
           });
         };
     }

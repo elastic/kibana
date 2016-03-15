@@ -1,6 +1,6 @@
 import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
-import { defaults } from 'lodash';
+import { defaults, once } from 'lodash';
 import Boom from 'boom';
 import { resolve } from 'path';
 import fromRoot from '../utils/from_root';
@@ -59,15 +59,10 @@ module.exports = async (kbnServer, server, config) => {
     }
   });
 
-  const defaultInjectedVars = {};
-  if (config.has('kibana')) {
-    defaultInjectedVars.kbnIndex = config.get('kibana.index');
-  }
-  if (config.has('elasticsearch')) {
-    defaultInjectedVars.esRequestTimeout = config.get('elasticsearch.requestTimeout');
-    defaultInjectedVars.esShardTimeout = config.get('elasticsearch.shardTimeout');
-    defaultInjectedVars.esApiVersion = config.get('elasticsearch.apiVersion');
-  }
+  const getDefaultInjectedVars = once(function createDefaultInjectedVars() {
+    const injectors = uiExports.defaultVariableInjectors;
+    return defaults({}, ...injectors.map(injector => (injector() || {})));
+  });
 
   server.decorate('reply', 'renderApp', function (app) {
     const payload = {
@@ -77,7 +72,7 @@ module.exports = async (kbnServer, server, config) => {
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
-      vars: defaults(app.getInjectedVars() || {}, defaultInjectedVars),
+      vars: defaults(app.getInjectedVars() || {}, getDefaultInjectedVars()),
     };
 
     return this.view(app.templateName, {

@@ -33,7 +33,13 @@ module.exports = function (kibana) {
             kbnDefaultAppId: config.get('kibana.defaultAppId')
           };
         }
-      }
+      },
+
+      injectVars(server, options) {
+        return {
+          kbnIndex: options.index
+        };
+      },
     },
 
     init: function (server, options) {
