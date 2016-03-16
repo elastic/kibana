@@ -91,6 +91,7 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
+            var currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
@@ -254,8 +255,10 @@ define(function (require) {
     },
 
     findTestSubject: function findTestSubject(selector) {
-      this.debug('in findTestSubject: ' + selector);
-      return this.remote.findByCssSelector(testSubjSelector(selector));
+      this.debug('in findTestSubject: ' + testSubjSelector(selector));
+      return this.remote
+        .setFindTimeout(defaultTimeout)
+        .findDisplayedByCssSelector(testSubjSelector(selector));
     }
   };
 
