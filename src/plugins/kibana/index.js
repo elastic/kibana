@@ -36,7 +36,7 @@ module.exports = function (kibana) {
         }
       },
 
-      injectVars(server, options) {
+      injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index
         };

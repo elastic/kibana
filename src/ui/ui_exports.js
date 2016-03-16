@@ -11,7 +11,7 @@ class UiExports {
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
     this.bundleProviders = [];
-    this.defaultVariableInjectors = [];
+    this.defaultInjectedVars = {};
   }
 
   consumePlugin(plugin) {
@@ -88,10 +88,10 @@ class UiExports {
           });
         };
 
-      case 'injectVars':
+      case 'injectDefaultVars':
         return (plugin, injector) => {
-          plugin.extendRegister((server, options) => {
-            this.defaultVariableInjectors.push(() => injector.call(plugin, server, options));
+          plugin.extendRegister(async (server, options) => {
+            _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
         };
     }

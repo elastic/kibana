@@ -34,7 +34,7 @@ module.exports = function ({ Plugin }) {
     },
 
     uiExports: {
-      injectVars(server, options) {
+      injectDefaultVars(server, options) {
         return {
           esRequestTimeout: options.requestTimeout,
           esShardTimeout: options.shardTimeout,
