@@ -101,12 +101,12 @@ module.exports = class Plugin {
     let { config } = kbnServer;
 
     // setup the hapi register function and get on with it
-    let register = (server, options, next) => {
+    const asyncRegister = async (server, options) => {
       this.server = server;
 
-      for (const fn of this[extendRegisterFns]) {
-        fn.call(this, server, options);
-      }
+      await Promise.all(this[extendRegisterFns].map(async fn => {
+        await fn.call(this, server, options);
+      }));
 
       server.log(['plugins', 'debug'], {
         tmpl: 'Initializing plugin <%= plugin.id %>',
@@ -120,7 +120,11 @@ module.exports = class Plugin {
       this.status = kbnServer.status.create(`plugin:${this.id}`);
       server.expose('status', this.status);
 
-      attempt(this.externalInit, [server, options], this).nodeify(next);
+      return await attempt(this.externalInit, [server, options], this);
+    };
+
+    const register = (server, options, next) => {
+      asyncRegister(server, options).nodeify(next);
     };
 
     register.attributes = { name: id, version: version };
