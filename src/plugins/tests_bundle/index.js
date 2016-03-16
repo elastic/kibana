@@ -5,8 +5,6 @@ import fromRoot from '../../utils/from_root';
 
 export default (kibana) => {
   return new kibana.Plugin({
-    configPrefix: 'testsBundle',
-
     config: (Joi) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
