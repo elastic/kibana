@@ -198,6 +198,14 @@ describe('lib/config/config', function () {
         expect(config.get('myTest.test')).to.be(true);
       });
 
+      it('should allow you to extend the schema with a prefix', function () {
+        var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        config.extendSchema('prefix.myTest', newSchema);
+        expect(config.get('prefix')).to.eql({ myTest: { test: true }});
+        expect(config.get('prefix.myTest')).to.eql({ test: true });
+        expect(config.get('prefix.myTest.test')).to.be(true);
+      });
+
       it('should NOT allow you to extend the schema if somethign else is there', function () {
         var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
         var run = function () {
