@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import * as ProcessorTypes from './processor_types';
 
 export default class Pipeline {
 
@@ -9,12 +8,6 @@ export default class Pipeline {
     this.input = {};
     this.output = undefined;
     this.dirty = false;
-
-    this._processorTypes = _.reduce(ProcessorTypes, (result, Type, key) => {
-      const instance = new Type();
-      result[instance.typeId] = Type;
-      return result;
-    }, {});
   }
 
   get model() {
@@ -25,10 +18,7 @@ export default class Pipeline {
   }
 
   load(pipeline) {
-    while (this.processors.length > 0) {
-      this.processors.pop();
-    }
-
+    this.processors = [];
     pipeline.processors.forEach((processor) => {
       this.addExisting(processor);
     });
@@ -64,7 +54,7 @@ export default class Pipeline {
   }
 
   addExisting(existingProcessor) {
-    const Type = this._processorTypes[existingProcessor.typeId];
+    const Type = existingProcessor.constructor;
     const newProcessor = this.add(Type);
     _.assign(newProcessor, _.omit(existingProcessor, 'processorId'));
 
@@ -131,10 +121,12 @@ export default class Pipeline {
       //we don't want to change the inputObject if the parent processor
       //is in error because that can cause us to lose state.
       if (!_.get(processor, 'error.isNested')) {
-        if (processor.parent instanceof ProcessorTypes.Processor) {
-          processor.inputObject = _.cloneDeep(processor.parent.outputObject);
-        } else {
+        //the parent property of the first processor is set to the pipeline.input.
+        //In all other cases it is set to processor[index-1]
+        if (!processor.parent.processorId) {
           processor.inputObject = _.cloneDeep(processor.parent);
+        } else {
+          processor.inputObject = _.cloneDeep(processor.parent.outputObject);
         }
       }
     });

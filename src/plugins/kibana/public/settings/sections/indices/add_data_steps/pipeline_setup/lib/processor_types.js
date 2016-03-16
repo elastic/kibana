@@ -1,7 +1,12 @@
-export class Processor {
-  constructor(processorId) {
+class Processor {
+  constructor(processorId, typeId, title) {
+    if (!typeId || !title) {
+      throw new Error('Cannot instantiate the base Processor class.');
+    }
+
     this.processorId = processorId;
-    this.typeId = 'base';
+    this.title = title;
+    this.typeId = typeId;
     this.collapsed = false;
     this.parent = undefined;
     this.inputObject = undefined;
@@ -17,11 +22,9 @@ export class Processor {
   }
 }
 
-export class SetProcessor extends Processor {
+export class Set extends Processor {
   constructor(processorId) {
-    super(processorId);
-    this.title = 'Set';
-    this.typeId = 'set';
+    super(processorId, 'set', 'Set');
     this.targetField = '';
     this.value = '';
   }

@@ -10,12 +10,10 @@ import './source_data';
 import './processor_ui';
 
 const app = uiModules.get('kibana');
-
 function buildProcessorTypeList() {
   return _(ProcessorTypes)
     .map(Type => {
-      const instance = new Type('');
-      if (instance.typeId === 'base') return;
+      const instance = new Type();
       return {
         typeId: instance.typeId,
         title: instance.title,
@@ -50,7 +48,7 @@ app.directive('pipelineSetup', function () {
       $scope.pipeline = pipeline;
 
       //initiates the simulate call if the pipeline is dirty
-      const simulatePipeline = debounce(function (event, message) {
+      const simulatePipeline = debounce((event, message) => {
         if (!pipeline.dirty) return;
 
         if (pipeline.processors.length === 0) {
@@ -58,7 +56,7 @@ app.directive('pipelineSetup', function () {
           return;
         }
 
-        ingest.simulate(pipeline.model)
+        return ingest.simulate(pipeline.model)
         .then((results) => { pipeline.applySimulateResults(results); })
         .catch(notify.error);
       }, 200);

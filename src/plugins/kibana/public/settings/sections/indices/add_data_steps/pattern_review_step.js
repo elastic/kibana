@@ -17,20 +17,19 @@ modules.get('apps/settings')
       template: template,
       scope: {
         indexPattern: '=',
-        pipeline: '='
+        pipeline: '=',
+        sampleDoc: '='
       },
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
-        this.sampleDoc = this.pipeline.output;
-
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
 
         const knownFieldTypes = {};
         this.dateFields = [];
-        this.pipeline.processors.forEach((processor) => {
+        this.pipeline.model.processors.forEach((processor) => {
           if (processor.typeId === 'geoip') {
             const field = processor.targetField || 'geoip';
             knownFieldTypes[field] = 'geo_point';
