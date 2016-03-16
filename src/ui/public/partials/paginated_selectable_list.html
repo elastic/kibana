@@ -7,43 +7,31 @@
         </span>
         <input
           input-focus
-          ng-model="filter"
-          ng-attr-placeholder="Filter..."
-          ng-keydown="finder.filterKeyDown($event)"
+          ng-model="query"
+          placeholder="Filter..."
           class="form-control"
-          name="filter"
+          name="query"
           type="text"
           autocomplete="off" />
       </div>
       <div class="finder-hit-count col-md-3">
-        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
+        <span>{{hitCount}} of {{hitCount}}</span>
       </div>
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="finder.perPage">
-  <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
+<paginate list="hits" per-page="{{perPage}}">
+  <ul class="li-striped list-group list-group-menu">
     <li
       class="list-group-item list-group-menu-item"
-      ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
-      ng-repeat="hit in page"
-      ng-keydown="finder.hitKeyDown($event, page, paginate)"
-      ng-click="finder.onChoose(hit, $event)">
-
-      <a ng-href="{{finder.makeUrl(hit)}}"
-          ng-blur="finder.hitBlur($event)"
-          ng-click="finder.preventClick($event)">
-          <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
-          <span>{{hit.title}}</span>
-          <p ng-if="hit.description" ng-bind="hit.description"></p>
+      ng-repeat="hit in page | filter: query | orderBy: hit.toString()"
+      ng-click="onSelect(hit, $event)">
+      <a ng-href="{{makeUrl(hit)}}" ng-click="preventClick($event)">
+        <span>{{hit}}</span>
       </a>
     </li>
-
-    <li
-      class="list-group-item list-group-no-results"
-      ng-if="finder.hits.length === 0">
-      <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
+    <li class="list-group-item list-group-no-results" ng-if="hits.length === 0">
+      <p ng-bind="'No matches found.'"></p>
     </li>
-
   </ul>
 </paginate>

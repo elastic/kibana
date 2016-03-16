@@ -26,18 +26,6 @@
 </form>
 <paginate list="finder.hits" per-page="20">
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
-
-    <li class="list-group-item list-group-menu-item">
-      <span class="paginate-heading">
-        Name
-        <i
-          class="fa"
-          ng-click="finder.sortHits(finder.hits)"
-          ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-        </i>
-      </span>
-    </li>
-
     <li
       class="list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"

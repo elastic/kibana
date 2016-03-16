@@ -49,23 +49,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       filterResults();
 
       /**
-       * Boolean that keeps track of whether hits are sorted ascending (true)
-       * or descending (false) by title
-       * @type {Boolean}
-       */
-      self.isAscending = true;
-
-      /**
-       * Sorts saved object finder hits either ascending or descending
-       * @param  {Array} hits Array of saved finder object hits
-       * @return {Array} Array sorted either ascending or descending
-       */
-      self.sortHits = function (hits) {
-        self.isAscending = !self.isAscending;
-        self.hits = self.isAscending ? _.sortBy(hits, 'title') : _.sortBy(hits, 'title').reverse();
-      };
-
-      /**
        * Passed the hit objects and will determine if the
        * hit should have a url in the UI, returns it if so
        * @return {string|null} - the url or nothing

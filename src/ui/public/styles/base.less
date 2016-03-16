@@ -288,12 +288,34 @@ table {
 }
 
 //== SavedObjectFinder
-saved-object-finder {
+saved-object-finder,
+paginated-selectable-list {
   .row {
     background-color: @kibanaGray6;
     padding: 10px;
     display: flex;
     flex-direction: row;
+  }
+
+  .finder-hit-count,
+  .finder-manage-object {
+    min-width: 80px;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .finder-hit-count {
+    flex: 1;
+
+    span {
+      color: @kibanaGray3;
+    }
+  }
+
+  .finder-manage-object {
+    flex: 3;
+    text-align: left;
+    text-transform: capitalize;
   }
 
   .form-group {
@@ -318,30 +340,6 @@ saved-object-finder {
         width: 15px;
       }
     }
-    
-    .finder-hit-count, .finder-manage-object {
-      min-width: 80px;
-      padding: 5px;
-    }
-
-    .finder-hit-count {
-      flex: 1;
-      text-align: center;
-
-      span {
-        color: @kibanaGray3;
-      }
-    }
-
-    .finder-manage-object {
-      flex: 3;
-      text-align: left;
-      text-transform: capitalize;
-    }
-  }
-
-  .list-group-item-menu:hover {
-    background-color: transparent;
   }
 
   ul.li-striped {
@@ -350,11 +348,11 @@ saved-object-finder {
     }
 
     li:nth-child(odd) {
-      background-color: @kibanaGray6;
+      background-color: @white;
     }
 
     li:nth-child(even) {
-      background-color: @white;
+      background-color: @kibanaGray6;
     }
 
     .paginate-heading {
@@ -430,6 +428,12 @@ saved-object-finder {
           color: @component-active-color;
         }
       }
+    }
+  }
+
+  paginate {
+    paginate-controls {
+      margin: 20px;
     }
   }
 }

@@ -13,6 +13,30 @@
       padding: 0;
       display: flex;
 
+      .wizard-column-1 {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        padding: 0px 2.5px;
+
+        .wizard-row {
+          flex: 1;
+          background-color: @kibanaGray6;
+        }
+      }
+
+      .wizard-column-2 {
+        flex: 3;
+        display: flex;
+        flex-direction: column;
+        padding: 0px 2.5px;
+
+        .wizard-row {
+          flex: 1;
+          background-color: @kibanaGray6;
+        }
+      }
+
       .wizard-column {
         flex: 1;
         display: flex;
@@ -45,7 +69,15 @@
     .list-group {
       margin-bottom: 0;
 
-      .list-group-item {
+      .list-group-item .list-group-item-menu:hover {
+          background-color: transparent;
+      }
+
+      .list-group-item .list-group-item-menu.active {
+          background-color: transparent;
+      }
+
+      .list-group-item .list-group-item-menu {
         border-radius: 0;
         border: none;
       }

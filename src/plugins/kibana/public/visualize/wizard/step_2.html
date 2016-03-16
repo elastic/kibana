@@ -1,10 +1,14 @@
 <div class="wizard">
-  <selectable-list
-    perPage="20"
-    list="indexPattern.list | orderBy: 'toString()'"
-    userOnSelect="makeUrl">
-  </selectable-list>
-  <div class="wizard-column">
+  <div class="wizard-column-1">
+    <h3>From a New Search, Select Index</h3>
+    <paginated-selectable-list
+      per-page="20"
+      list="indexPattern.list"
+      user-make-url="makeUrl"
+      class="wizard-row">
+    </paginataed-selectable-list>
+  </div>
+  <div class="wizard-column-2">
     <h3>Or, From a Saved Search</h3>
     <!-- Saved searches -->
     <saved-object-finder
