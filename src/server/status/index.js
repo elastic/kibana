@@ -20,9 +20,9 @@ module.exports = function (kbnServer, server, config) {
     }
   });
 
-  server.decorate('reply', 'renderStatusPage', function () {
+  server.decorate('reply', 'renderStatusPage', async function () {
     var app = kbnServer.uiExports.getHiddenApp('status_page');
-    var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
+    var resp = app ? await this.renderApp(app) : this(kbnServer.status.toString());
     resp.code(kbnServer.status.isGreen() ? 200 : 503);
     return resp;
   });
@@ -30,8 +30,8 @@ module.exports = function (kbnServer, server, config) {
   server.route({
     method: 'GET',
     path: '/status',
-    handler: function (request, reply) {
-      return reply.renderStatusPage();
+    handler: async function (request, reply) {
+      return await reply.renderStatusPage();
     }
   });
 };

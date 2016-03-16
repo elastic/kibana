@@ -46,25 +46,29 @@ module.exports = async (kbnServer, server, config) => {
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    handler: function (req, reply) {
+    handler: async function (req, reply) {
       let id = req.params.id;
       let app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
-        return reply.renderApp(app);
+        return await reply.renderApp(app);
       } else {
-        return reply.renderStatusPage();
+        return await reply.renderStatusPage();
       }
     }
   });
 
-  const getDefaultInjectedVars = once(function createDefaultInjectedVars() {
-    const injectors = uiExports.defaultVariableInjectors;
-    return defaults({}, ...injectors.map(injector => (injector() || {})));
-  });
+  async function getDefaultInjectedVars() {
+    const vars = Promise.map(uiExports.defaultVariableInjectors, async injector => {
+      const toInject = await injector();
+      return toInject || {};
+    });
 
-  server.decorate('reply', 'renderApp', function (app) {
+    return defaults({}, ...vars);
+  };
+
+  server.decorate('reply', 'renderApp', async function (app) {
     const payload = {
       app: app,
       nav: uiExports.apps,
@@ -72,7 +76,7 @@ module.exports = async (kbnServer, server, config) => {
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
-      vars: defaults(app.getInjectedVars() || {}, getDefaultInjectedVars()),
+      vars: defaults(app.getInjectedVars() || {}, await getDefaultInjectedVars()),
     };
 
     return this.view(app.templateName, {
