@@ -51,7 +51,8 @@ modules.get('apps/settings')
       };
 
       this.save = () => {
-        return ingest.save(this.stepResults.indexPattern, this.stepResults.pipeline)
+        const processors = this.stepResults.pipeline.processors.map(processor => processor.model);
+        return ingest.save(this.stepResults.indexPattern, processors)
         .then(
           () => {
             this.nextStep();

@@ -15,7 +15,7 @@ export default function IngestProvider($rootScope, $http, config) {
       index_pattern: keysToSnakeCaseShallow(indexPattern)
     };
     if (!_.isEmpty(pipeline)) {
-      payload.pipeline = pipeline;
+      payload.pipeline = _.map(pipeline, processor => keysToSnakeCaseShallow(processor));
     }
 
     return $http.post(`${ingestAPIPrefix}`, payload)
@@ -52,7 +52,7 @@ export default function IngestProvider($rootScope, $http, config) {
       return data;
     }
 
-    return $http.post(`../api/kibana/ingest/simulate`, pack(pipeline))
+    return $http.post(`${ingestAPIPrefix}/simulate`, pack(pipeline))
     .then(unpack)
     .catch(err => {
       throw ('Error communicating with Kibana server');

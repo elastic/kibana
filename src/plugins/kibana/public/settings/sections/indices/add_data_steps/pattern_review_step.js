@@ -16,13 +16,14 @@ modules.get('apps/settings')
     return {
       template: template,
       scope: {
-        sampleDocs: '=',
         indexPattern: '=',
         pipeline: '='
       },
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
+        this.sampleDoc = this.pipeline.output;
+
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
@@ -30,12 +31,12 @@ modules.get('apps/settings')
         const knownFieldTypes = {};
         this.dateFields = [];
         this.pipeline.processors.forEach((processor) => {
-          if (processor.geoip) {
-            const field = processor.geoip.target_field || 'geoip';
+          if (processor.typeId === 'geoip') {
+            const field = processor.targetField || 'geoip';
             knownFieldTypes[field] = 'geo_point';
           }
-          else if (processor.date) {
-            const field = processor.date.target_field || '@timestamp';
+          else if (processor.typeId === 'date') {
+            const field = processor.targetField || '@timestamp';
             knownFieldTypes[field] = 'date';
             this.dateFields.push(field);
           }
@@ -45,7 +46,7 @@ modules.get('apps/settings')
           id: 'filebeat-*',
           title: 'filebeat-*',
           timeFieldName: pickDefaultTimeFieldName(this.dateFields),
-          fields: _.map(this.sampleDocs, (value, key) => {
+          fields: _.map(this.sampleDoc, (value, key) => {
             let type = knownFieldTypes[key] || typeof value;
             if (type === 'object' && _.isArray(value) && !_.isEmpty(value)) {
               type = typeof value[0];
@@ -73,7 +74,7 @@ modules.get('apps/settings')
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const sampleValue = this.sampleDocs[field.name];
+            const sampleValue = this.sampleDoc[field.name];
             return [
               _.escape(field.name),
               {
