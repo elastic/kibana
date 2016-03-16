@@ -336,21 +336,13 @@ define(function (require) {
     },
 
     filterVisByName: function filterVisByName(vizName) {
-      var self = this;
       return this.remote
       .findByCssSelector('input[name="filter"]')
-      .then(function (filter) {
-        return self.remote.moveMouseTo(filter);
-      })
-      .then (function () {
-        return self.remote
-        .findByCssSelector('input[name="filter"]')
-        .click()
-        .type(vizName.replace('-',' '));
-      })
-      .then (function () {
-        common.sleep(3000);
-      });
+      .click()
+      // can't uses dashes in saved visualizations when filtering
+      // or extended character sets
+      // https://github.com/elastic/kibana/issues/6300
+      .type(vizName.replace('-',' '));
     },
 
     clickVisualizationByLinkText: function clickVisualizationByLinkText(vizName) {
@@ -359,14 +351,7 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByLinkText(vizName)
-      .then(function (link) {
-        return self.remote.moveMouseTo(link);
-      })
-      .then (function () {
-        return self.remote
-        .findByLinkText(vizName)
-        .click();
-      });
+      .click();
     },
 
     // this starts by clicking the Load Saved Viz button, not from the
@@ -375,18 +360,18 @@ define(function (require) {
       var self = this;
       return this.clickLoadSavedVisButton()
       .then(function filterVisualization() {
-        return self.filterVisByName(vizName);
-      })
-      .then(function clickDashboardByLinkedText() {
-        return self.clickVisualizationByLinkText(vizName);
+        return self.openSavedVisualization(vizName);
       });
     },
 
-    // this starts on the
+    // this is for starting on the
     // bottom half of the "Create a new visualization      Step 1" page
     openSavedVisualization: function openSavedVisualization(vizName) {
       var self = this;
       return self.filterVisByName(vizName)
+      .then(function () {
+        return common.sleep(1000);
+      })
       .then(function clickDashboardByLinkedText() {
         return self.clickVisualizationByLinkText(vizName);
       });
