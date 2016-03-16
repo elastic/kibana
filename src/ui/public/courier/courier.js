@@ -1,45 +1,48 @@
-import errors from 'ui/errors';
 import _ from 'lodash';
+
+import errors from 'ui/errors';
 import 'ui/es';
 import 'ui/promises';
 import 'ui/safe_confirm';
 import 'ui/index_patterns';
-import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
-import CourierDataSourceSearchSourceProvider from 'ui/courier/data_source/search_source';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierErrorHandlersProvider from 'ui/courier/_error_handlers';
-import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
-import CourierLooperDocProvider from 'ui/courier/looper/doc';
-import CourierLooperSearchProvider from 'ui/courier/looper/search';
-import CourierDataSourceRootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
-import CourierSavedObjectSavedObjectProvider from 'ui/courier/saved_object/saved_object';
-import CourierRedirectWhenMissingProvider from 'ui/courier/_redirect_when_missing';
 import uiModules from 'ui/modules';
+import Notifier from 'ui/notify/notifier';
+
+import DocSourceProvider from './data_source/doc_source';
+import SearchSourceProvider from './data_source/search_source';
+import SearchStrategyProvider from './fetch/strategy/search';
+import RequestQueueProvider from './_request_queue';
+import ErrorHandlersProvider from './_error_handlers';
+import FetchProvider from './fetch';
+import DocLooperProvider from './looper/doc';
+import SearchLooperProvider from './looper/search';
+import RootSearchSourceProvider from './data_source/_root_search_source';
+import SavedObjectProvider from './saved_object';
+import RedirectWhenMissingProvider from './_redirect_when_missing';
 
 
 uiModules.get('kibana/courier')
-.service('courier', function ($rootScope, Private, Promise, indexPatterns, Notifier, timefilter) {
+.service('courier', function ($rootScope, Private, Promise, indexPatterns, timefilter) {
   function Courier() {
     var self = this;
 
-    var DocSource = Private(CourierDataSourceDocSourceProvider);
-    var SearchSource = Private(CourierDataSourceSearchSourceProvider);
-    var searchStrategy = Private(CourierFetchStrategySearchProvider);
+    var DocSource = Private(DocSourceProvider);
+    var SearchSource = Private(SearchSourceProvider);
+    var searchStrategy = Private(SearchStrategyProvider);
 
-    var requestQueue = Private(CourierRequestQueueProvider);
-    var errorHandlers = Private(CourierErrorHandlersProvider);
+    var requestQueue = Private(RequestQueueProvider);
+    var errorHandlers = Private(ErrorHandlersProvider);
 
-    var fetch = Private(CourierFetchFetchProvider);
-    var docLooper = self.docLooper = Private(CourierLooperDocProvider);
-    var searchLooper = self.searchLooper = Private(CourierLooperSearchProvider);
+    var fetch = Private(FetchProvider);
+    var docLooper = self.docLooper = Private(DocLooperProvider);
+    var searchLooper = self.searchLooper = Private(SearchLooperProvider);
 
     // expose some internal modules
-    self.setRootSearchSource = Private(CourierDataSourceRootSearchSourceProvider).set;
+    self.setRootSearchSource = Private(RootSearchSourceProvider).set;
 
-    self.SavedObject = Private(CourierSavedObjectSavedObjectProvider);
+    self.SavedObject = Private(SavedObjectProvider);
     self.indexPatterns = indexPatterns;
-    self.redirectWhenMissing = Private(CourierRedirectWhenMissingProvider);
+    self.redirectWhenMissing = Private(RedirectWhenMissingProvider);
 
     self.DocSource = DocSource;
     self.SearchSource = SearchSource;

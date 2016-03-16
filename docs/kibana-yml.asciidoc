@@ -39,3 +39,4 @@ retrying.
 error messages.
 `logging.verbose`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage 
 information and all requests.
+`ops.interval`:: *Default: 10000* Set the interval in milliseconds to sample system and process performance metrics. Minimum is 100ms. Defaults to 10 seconds.

@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import AggConfigResult from 'ui/Vis/AggConfigResult';
+import AggConfigResult from 'ui/vis/agg_config_result';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import uiModules from 'ui/modules';
 var module = uiModules.get('kibana');

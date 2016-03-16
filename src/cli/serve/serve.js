@@ -3,8 +3,7 @@ const { isWorker } = require('cluster');
 const { resolve } = require('path');
 
 const cwd = process.cwd();
-const src = require('requirefrom')('src');
-const fromRoot = src('utils/fromRoot');
+import fromRoot from '../../utils/from_root';
 
 let canCluster;
 try {
@@ -127,7 +126,7 @@ module.exports = function (program) {
     }
 
     let kbnServer = {};
-    const KbnServer = src('server/KbnServer');
+    const KbnServer = require('../../server/kbn_server');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();

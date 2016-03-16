@@ -1,8 +1,7 @@
 import _ from 'lodash';
 
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
-import Command from './Command';
+import pkg from '../utils/package_json';
+import Command from './command';
 
 let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 let program = new Command('bin/kibana');

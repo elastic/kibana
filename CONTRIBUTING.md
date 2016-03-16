@@ -13,7 +13,7 @@ At any given time the Kibana team at Elastic is working on dozens of features an
 Let's just get this out there: **Feel free to +1 an issue**. That said, a +1 isn't a vote. We keep up on highly commented issues, but comments are but one of many reasons we might, or might not, work on an issue. A solid write up of your use case is more likely to make your case than a comment that says *+10000*.
 
 #### My issue isn't getting enough attention
-First of all, sorry about that, we want you to have a great time with Kibana! You should join us on IRC (#kibana on freenode) and chat about it. Github is terrible for conversations. With that out of the way, there are a number of variables that go into deciding what to work on. These include priority, impact, difficulty, applicability to use cases, and last, and importantly: What we feel like working on.
+First of all, sorry about that, we want you to have a great time with Kibana! You should join us on IRC ([#kibana](https://kiwiirc.com/client/irc.freenode.net/?#kibana) on freenode) and chat about it. Github is terrible for conversations. With that out of the way, there are a number of variables that go into deciding what to work on. These include priority, impact, difficulty, applicability to use cases, and last, and importantly: What we feel like working on.
 
 ### I want to help!
 **Now we're talking**. If you have a bugfix or new feature that you would like to contribute to Kibana, please **find or open an issue about it before you start working on it.** Talk about what you would like to do. It may be that somebody is already working on it, or that there are particular issues that you should know about before implementing the change.
@@ -111,36 +111,73 @@ Before running the tests you will need to install the projects dependencies as d
 
 Once that is complete just run:
 
-```sh
+```
+sh
 npm run test && npm run build
 ```
 
-#### Testing and debugging tests
+#### Debugging unit tests
 
 The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
-<dl>
-  <dt><code>npm run test:quick</code></dt>
-  <dd>Runs both server and browser tests, but skips linting</dd>
 
-  <dt><code>npm run test:server</code> or <code>npm run test:browser</code></dt>
-  <dd>Runs the tests for just the server or browser</dd>
+`npm run test:quick`  
+Runs both server and browser tests, but skips linting
 
-  <dt><code>npm run test:dev</code></dt>
-  <dd>
-    Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
-    <br>
-    <img src="http://i.imgur.com/DwHxgfq.png">
-  </dd>
+`npm run test:server`  
+Run only the server tests
 
-  <dt><code>npm run mocha [test file or dir]</code> or <code>npm run mocha:debug [test file or dir]</code></dt>
-  <dd>
-    Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
-    for development and fixing individual tests.
-  </dd>
-</dl>
+`npm run test:browser`  
+Run only the browser tests
 
-Distributable packages can be found in `target/` after the build completes.
+`npm run test:dev`  
+Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.  
+![Browser test debugging](http://i.imgur.com/DwHxgfq.png)
+
+`npm run mocha [test file or dir]` or `npm run mocha:debug [test file or dir]`  
+Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
+for development and fixing individual tests.
+
+#### Unit testing plugins
+This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
+
+`npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin`  
+Run the tests for just your particular plugin. Assuming you plugin lives outside of the `installedPlugins directory`, which it should.
+
+#### Running browser automation tests:
+
+*The Selenium server that is started currently only runs the tests in Firefox*
+
+The following will start Kibana, Elasticsearch and Selenium for you. To run the functional UI tests use the following commands
+
+`npm run test:ui`  
+Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.
+
+`npm run test:ui:server`  
+Start the server required for the `test:ui:runner` tasks. Once the server is started `test:ui:runner` can be run multiple times without waiting for the server to start.
+
+`npm run test:ui:runner`  
+Execute the front-end selenium tests. This requires the server started by the `test:ui:server` task.
+
+##### If you already have ElasticSearch, Kibana, and Selenium Server running:
+
+Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
+
+Once you've got the services running, execute the following:
+
+```
+sh
+npm run test:ui:runner
+```
+
+#### Browser automation notes:
+
+- Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
+- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
+- These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
+- These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
+- https://theintern.github.io/
+- https://theintern.github.io/leadfoot/Element.html
 
 #### Building OS packages
 
@@ -157,48 +194,7 @@ To specify a package to build you can add `rpm` or `deb` as an argument.
 npm run build:ospackages -- --rpm
 ```
 
-### Functional UI Testing
-
-#### Handy references
-
-- https://theintern.github.io/
-- https://theintern.github.io/leadfoot/Element.html
-
-#### Running tests using npm task:
-
-*The Selenium server that is started currently only runs the tests in Firefox*
-
-To run the functional UI tests use the following commands
-
-<dl>
-
-  <dt><code>npm run test:ui</code></dt>
-  <dd>Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.</dd>
-
-  <dt><code>npm run test:ui:server</code></dt>
-  <dd>Start the server required for the <code>test:ui:runner</code> tasks. Once the server is started <code>test:ui:runner</code> can be run multiple times without waiting for the server to start.</dd>
-
-  <dt><code>npm run test:ui:runner</code></dt>
-  <dd>Execute the front-end selenium tests. This requires the server started by the <code>test:ui:server</code> task.</dd>
-
-</dl>
-
-#### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
-
-Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
-
-Once you've got the services running, execute the following:
-
-```sh
-npm run test:ui:runner
-```
-
-#### General notes:
-
-- Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
-- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
-- These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
-- These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
+Distributable packages can be found in `target/` after the build completes.
 
 ## Submitting a pull request
 
@@ -222,9 +218,10 @@ So, you've been assigned a pull to review. What's that look like?
 
 Remember, someone is blocked by a pull awaiting review, make it count. Be thorough, the more action items you catch in the first review, the less back and forth will be required, and the better chance the pull has of being successful. Don't you like success?
 
-1. **Understand the issue** that is being fixed, or the feature being added. Check the description on the pull, and check out the related issue. If you don't understand something, ask the person the submitter for clarification.
+1. **Understand the issue** that is being fixed, or the feature being added. Check the description on the pull, and check out the related issue. If you don't understand something, ask the submitter for clarification.
 1. **Reproduce the bug** (or the lack of feature I guess?) in the destination branch, usually `master`. The referenced issue will help you here. If you're unable to reproduce the issue, contact the issue submitter for clarification
 1. **Check out the pull** and test it. Is the issue fixed? Does it have nasty side effects? Try to create suspect inputs. If it operates on the value of a field try things like: strings (including an empty string), null, numbers, dates. Try to think of edge cases that might break the code.
+1. **Merge the target branch**. It is possible that tests or the linter have been updated in the target branch since the pull was submitted. Merging the pull could cause core to start failing.
 1. **Read the code**. Understanding the changes will help you find additional things to test. Contact the submitter if you don't understand something.
 1. **Go line-by-line**. Are there [style guide](https://github.com/elastic/kibana/blob/master/STYLEGUIDE.md) violations? Strangely named variables? Magic numbers? Do the abstractions make sense to you? Are things arranged in a testable way?
 1. **Speaking of tests** Are they there? If a new function was added does it have tests? Do the tests, well, TEST anything? Do they just run the function or do they properly check the output?

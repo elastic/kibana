@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import angular from 'angular';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
