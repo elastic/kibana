@@ -434,9 +434,7 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
-      .then(function setYAxisLabel(y) {
-        return y.getVisibleText();
-      })
+      .getVisibleText()
       .then(function (yLabel) {
         yAxisLabel = yLabel.replace(',', '').replace('%','');
         common.debug('yAxisLabel = ' + yAxisLabel);
@@ -446,10 +444,8 @@ define(function (require) {
       .then(function () {
         return self
         .setFindTimeout(defaultTimeout)
-        .findByCssSelector('rect.background'); // different here
-      })
-      .then(function (chartAreaObj) {
-        return chartAreaObj.getAttribute('height');
+        .findByCssSelector('rect.background') // different here
+        .getAttribute('height');
       })
       .then(function (chartH) {
         yAxisHeight = chartH;
@@ -457,10 +453,8 @@ define(function (require) {
       })
       .then(function () {
         return self.setFindTimeout(defaultTimeout * 2)
-        .findByCssSelector('path[data-label="' + aggregateName + '"]');
-      })
-      .then(function (chart) {
-        return chart.getAttribute('d');
+        .findByCssSelector('path[data-label="' + aggregateName + '"]')
+        .getAttribute('d');
       })
       .then(function (data) {
         common.debug(data);
@@ -486,10 +480,7 @@ define(function (require) {
       return this.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
-        .then(function setYAxisLabel(y) {
-          return y
-          .getVisibleText();
-        })
+        .getVisibleText()
         .then(function (yLabel) {
           yAxisLabel = yLabel.replace(',', '');
           common.debug('yAxisLabel = ' + yAxisLabel);
@@ -500,10 +491,7 @@ define(function (require) {
           return self
           .setFindTimeout(defaultTimeout)
           .findByCssSelector('clipPath rect')
-          .then(function getRectHeight(chartAreaObj) {
-            return chartAreaObj
-            .getAttribute('height');
-          })
+          .getAttribute('height')
           .then(function (theHeight) {
             yAxisHeight = theHeight - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
             common.debug('theHeight = ' + theHeight);
