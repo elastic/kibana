@@ -23,7 +23,7 @@ module.exports = {
     }
   },
   apps: {
-    statusPage: {
+    status_page: {
       pathname: 'status'
     },
     discover: {

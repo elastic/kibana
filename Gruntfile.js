@@ -82,17 +82,6 @@ module.exports = function (grunt) {
     config: config,
     loadGruntTasks: {
       pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*', 'intern']
-    },
-    preMerge(config, data) {
-      Object.keys(config).forEach(key => {
-        const taskConfig = config[key];
-        if (taskConfig.__taskName__) {
-          config[taskConfig.__taskName__] = taskConfig;
-
-          delete config[key];
-          delete taskConfig.__taskName__;
-        }
-      });
     }
   });
 

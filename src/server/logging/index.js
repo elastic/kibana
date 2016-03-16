@@ -39,7 +39,7 @@ module.exports = function (kbnServer, server, config) {
     server.register({
       register: require('good'),
       options: {
-        opsInterval: 5000,
+        opsInterval: config.get('ops.interval'),
         requestHeaders: true,
         requestPayload: true,
         reporters: [

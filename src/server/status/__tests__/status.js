@@ -4,7 +4,6 @@ import Status from '../status';
 import ServerStatus from '../server_status';
 
 describe('Status class', function () {
-
   var server;
   var serverStatus;
 
@@ -57,6 +56,34 @@ describe('Status class', function () {
     var json = status.toJSON();
     expect(json.state).to.eql('green');
     expect(json.message).to.eql('Ready');
+  });
+
+  it('should call on handler if status is already matched', function (done) {
+    var status = serverStatus.create('test');
+    var msg = 'Test Ready';
+    status.green(msg);
+
+    status.on('green', function (prev, prevMsg) {
+      expect(arguments.length).to.equal(2);
+      expect(prev).to.be('green');
+      expect(prevMsg).to.be(msg);
+      expect(status.message).to.equal(msg);
+      done();
+    });
+  });
+
+  it('should call once handler if status is already matched', function (done) {
+    var status = serverStatus.create('test');
+    var msg = 'Test Ready';
+    status.green(msg);
+
+    status.once('green', function (prev, prevMsg) {
+      expect(arguments.length).to.equal(2);
+      expect(prev).to.be('green');
+      expect(prevMsg).to.be(msg);
+      expect(status.message).to.equal(msg);
+      done();
+    });
   });
 
   function testState(color) {
