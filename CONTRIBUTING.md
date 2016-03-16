@@ -146,7 +146,8 @@ Run the tests for just your particular plugin. Assuming you plugin lives outside
 
 #### Running browser automation tests:
 
-*The Selenium server that is started currently only runs the tests in Firefox*
+*The Selenium server that is started currently only runs the tests in a recent version of Firefox.*
+*You can use the `PATH` environment variable to specify which version of Firefox to use.*
 
 The following will start Kibana, Elasticsearch and Selenium for you. To run the functional UI tests use the following commands
 
@@ -177,7 +178,7 @@ npm run test:ui:runner
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 - https://theintern.github.io/
-- https://theintern.github.io/leadfoot/Element.html
+- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
 
 #### Building OS packages
 
