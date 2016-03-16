@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Joi from 'joi';
-import { attempt, fromNode } from 'bluebird';
+import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
 import { inherits } from 'util';
 
@@ -124,7 +124,7 @@ module.exports = class Plugin {
     };
 
     const register = (server, options, next) => {
-      asyncRegister(server, options).nodeify(next);
+      Bluebird.resolve(asyncRegister(server, options)).nodeify(next);
     };
 
     register.attributes = { name: id, version: version };
