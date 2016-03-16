@@ -1,4 +1,4 @@
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 import settingParser from './setting_parser';
 import installer from './plugin_installer';
 import remover from './plugin_remover';

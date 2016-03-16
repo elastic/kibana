@@ -4,7 +4,7 @@ import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
 
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -80,6 +80,10 @@ module.exports = () => Joi.object({
     })
   })
   .default(),
+
+  ops: Joi.object({
+    interval: Joi.number().default(10000),
+  }),
 
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),

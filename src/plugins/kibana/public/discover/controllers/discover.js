@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import getSort from 'ui/doc_table/lib/get_sort';
 import rison from 'ui/utils/rison';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/notify';
-import 'ui/fixedScroll';
+import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
 import 'ui/courier';
@@ -17,7 +17,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/highlight/highlight_tags';
 import 'ui/share';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import DocTitleProvider from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
@@ -126,7 +126,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     return {
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
-      columns: savedSearch.columns || ['_source'],
+      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns'),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))

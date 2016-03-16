@@ -17,6 +17,7 @@ module.exports = function registerPost(server) {
       }
     },
     handler: function (req, reply) {
+      const kibanaIndex = server.config().get('kibana.index');
       const callWithRequest = server.plugins.elasticsearch.callWithRequest;
       const requestDocument = _.cloneDeep(req.payload);
       const indexPatternId = requestDocument.id;
@@ -36,7 +37,7 @@ module.exports = function registerPost(server) {
         }
 
         const patternCreateParams = {
-          index: '.kibana',
+          index: kibanaIndex,
           type: 'index-pattern',
           id: indexPatternId,
           body: indexPattern
@@ -59,8 +60,6 @@ module.exports = function registerPost(server) {
                       mapping: {
                         type: 'string',
                         index: 'analyzed',
-                        omit_norms: true,
-                        fielddata: {format: 'disabled'},
                         fields: {
                           raw: {type: 'string', index: 'not_analyzed', doc_values: true, ignore_above: 256}
                         }
@@ -76,7 +75,7 @@ module.exports = function registerPost(server) {
           return callWithRequest(req, 'indices.putTemplate', templateParams)
           .catch((templateError) => {
             const deleteParams = {
-              index: '.kibana',
+              index: kibanaIndex,
               type: 'index-pattern',
               id: indexPatternId
             };

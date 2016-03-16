@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
-import VisProvider from 'ui/Vis';
-import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesBucketsCreateFilterRangeProvider from 'ui/agg_types/buckets/create_filter/range';
 describe('AggConfig Filters', function () {

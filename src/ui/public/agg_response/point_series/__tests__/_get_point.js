@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggResponsePointSeriesGetPointProvider from 'ui/agg_response/point_series/_get_point';
 
 describe('getPoint', function () {
