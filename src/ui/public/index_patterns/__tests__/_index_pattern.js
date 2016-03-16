@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import errors from 'ui/errors';
-import IndexedArray from 'ui/IndexedArray';
+import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
 import DocSourceProvider from 'ui/courier/data_source/doc_source';
@@ -146,7 +146,7 @@ describe('index pattern', function () {
 
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
     var indexPatternId = 'test-pattern';
     var indexPattern;
     var fieldLength;
@@ -301,7 +301,7 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
     context('when index pattern is an interval', function () {
       var interval;
       beforeEach(function () {
@@ -380,7 +380,7 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
 
       var interval;
       beforeEach(function () {
@@ -411,7 +411,7 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -433,7 +433,7 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
@@ -10,7 +10,7 @@ import ReflowWatcherProvider from 'ui/reflow_watcher';
 
 describe('Vislib Resize Checker', function () {
 
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   var ResizeChecker;
   var EventEmitter;

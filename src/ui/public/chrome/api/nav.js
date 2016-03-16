@@ -18,7 +18,7 @@ export default function (chrome, internals) {
     var isUrl = url && isString(url);
     if (!isUrl) return url;
 
-    var parsed = parse(url);
+    var parsed = parse(url, true);
     if (!parsed.host && parsed.pathname) {
       if (parsed.pathname[0] === '/') {
         parsed.pathname = chrome.getBasePath() + parsed.pathname;
