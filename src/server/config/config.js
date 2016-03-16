@@ -188,7 +188,8 @@ module.exports = class Config {
   getSchema() {
     if (!this[schema]) {
       this[schema] = (function convertToSchema(children) {
-        let schema = Joi.object().keys().default();
+        let objKeys = zipObject([...children]);
+        let schema = Joi.object().keys(objKeys).default();
 
         for (const key of Object.keys(children)) {
           const child = children[key];
