@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import Joi from 'joi';
 import _ from 'lodash';
+import toPath from 'lodash/internal/toPath';
 import override from './override';
 import createDefaultSchema from './schema';
 import pkg from '../../utils/package_json';
@@ -8,9 +9,32 @@ import clone from './deep_clone_with_buffers';
 import { zipObject } from 'lodash';
 
 const schema = Symbol('Joi Schema');
-const schemaKeys = Symbol('Schema Extensions');
+const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
+
+function unset(object, rawPath) {
+  const path = toPath(rawPath);
+
+  switch (path.length) {
+    case 0:
+      return;
+
+    case 1:
+      delete object[rawPath];
+      break;
+
+    default:
+      const leaf = path.pop();
+      const parentPath = path.slice();
+      const parent = _.get(object, parentPath);
+      delete parent[leaf];
+      if (!_.size(parent)) {
+        unset(object, parentPath);
+      }
+      break;
+  }
+}
 
 module.exports = class Config {
   static withDefaultSchema(settings = {}) {
@@ -18,16 +42,15 @@ module.exports = class Config {
   }
 
   constructor(initialSchema, initialSettings) {
-    this[schemaKeys] = new Map();
-
+    this[schemaExts] = Object.create(null);
     this[vals] = Object.create(null);
-    this[pendingSets] = new Map(_.pairs(clone(initialSettings || {})));
+    this[pendingSets] = _.merge(Object.create(null), initialSettings || {});
 
     if (initialSchema) this.extendSchema(initialSchema);
   }
 
   getPendingSets() {
-    return this[pendingSets];
+    return new Map(_.pairs(this[pendingSets]));
   }
 
   extendSchema(key, extension) {
@@ -41,26 +64,27 @@ module.exports = class Config {
       throw new Error(`Config schema already has key: ${key}`);
     }
 
-    this[schemaKeys].set(key, extension);
+    _.set(this[schemaExts], key, extension);
     this[schema] = null;
 
-    let initialVals = this[pendingSets].get(key);
+    let initialVals = _.get(this[pendingSets], key);
     if (initialVals) {
       this.set(key, initialVals);
-      this[pendingSets].delete(key);
+      const path = toPath(key);
+      unset(this[pendingSets], key);
     } else {
       this._commit(this[vals]);
     }
   }
 
   removeSchema(key) {
-    if (!this[schemaKeys].has(key)) {
+    if (!_.has(this[schemaExts], key)) {
       throw new TypeError(`Unknown schema key: ${key}`);
     }
 
     this[schema] = null;
-    this[schemaKeys].delete(key);
-    this[pendingSets].delete(key);
+    unset(this[schemaExts], key);
+    unset(this[pendingSets], key);
     delete this[vals][key];
   }
 
@@ -138,7 +162,7 @@ module.exports = class Config {
       // Catch the partial paths
       if (path.join('.') === key) return true;
       // Only go deep on inner objects with children
-      if (schema._inner.children.length) {
+      if (_.size(schema._inner.children)) {
         for (let i = 0; i < schema._inner.children.length; i++) {
           let child = schema._inner.children[i];
           // If the child is an object recurse through it's children and return
@@ -163,8 +187,22 @@ module.exports = class Config {
 
   getSchema() {
     if (!this[schema]) {
-      let objKeys = zipObject([...this[schemaKeys]]);
-      this[schema] = Joi.object().keys(objKeys).default();
+      this[schema] = (function convertToSchema(children) {
+        let schema = Joi.object().keys().default();
+
+        for (const key of Object.keys(children)) {
+          const child = children[key];
+          const childSchema = _.isPlainObject(child) ? convertToSchema(child) : child;
+
+          if (!childSchema || !childSchema.isJoi) {
+            throw new TypeError('Unable to convert configuration definition value to Joi schema: ' + childSchema);
+          }
+
+          schema = schema.keys({ [key]: childSchema });
+        }
+
+        return schema;
+      }(this[schemaExts]));
     }
 
     return this[schema];
