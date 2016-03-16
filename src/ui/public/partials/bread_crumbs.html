@@ -1,0 +1,6 @@
+<ul>
+  <li ng-repeat="crumb in crumbs">
+    <a ng-href="{{ makeUrl(crumb) }}">{{crumb}}</a>
+    <span ng-hide="$index === (crumbs.length - 1)"> / </span>
+  </li>
+</ul>

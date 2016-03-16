@@ -287,6 +287,32 @@ table {
   }
 }
 
+//== breadCrumbsTemplate
+bread-crumbs {
+  ul {
+    margin: 0;
+    padding: 8px 10px;
+    list-style-type: none;
+    text-transform: capitalize;
+
+    &>li {
+      display: inline;
+      &>a {
+        color: @kibanaGray2;
+      }
+      &>a:hover {
+        color: @kibanaGray1;
+      }
+    }
+
+    &>li:last-child {
+      &>a {
+        color: @kibanaGray1;
+      }
+    }
+  }
+}
+
 //== SavedObjectFinder
 saved-object-finder {
   .row {
@@ -318,7 +344,7 @@ saved-object-finder {
         width: 15px;
       }
     }
-    
+
     .finder-hit-count, .finder-manage-object {
       min-width: 80px;
       padding: 5px;
