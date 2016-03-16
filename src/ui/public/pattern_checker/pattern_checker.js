@@ -1,6 +1,7 @@
 import uiModules from 'ui/modules';
 import template from './pattern_checker.html';
 import './pattern_checker.less';
+import chrome from 'ui/chrome';
 
 const module = uiModules.get('kibana');
 
@@ -11,10 +12,9 @@ module.directive('patternChecker', function () {
     controllerAs: 'checker',
     bindToController: true,
     scope: {
-      pattern: '=',
-      buttonLabel: '='
+      pattern: '='
     },
-    controller: function (es, Notifier, $scope, $timeout) {
+    controller: function (Notifier, $scope, $timeout, $http) {
       let validationTimeout;
 
       var notify = new Notifier({
@@ -22,16 +22,19 @@ module.directive('patternChecker', function () {
       });
 
       this.validateInstall = () => {
-        es.count({
-          index: this.pattern
-        })
+        $http.post(chrome.addBasePath(`/api/kibana/${this.pattern}/_count`))
         .then(
           (response) => {
-            this.validationResults = `Querying ${this.pattern}... ${response.count} results`;
+            this.resultCount = response.count;
             this.isValidated = !!response.count;
           },
           (error) => {
-            notify.fatal(error);
+            if (error.status === 404) {
+              this.resultCount = 0;
+            }
+            else {
+              notify.fatal(error);
+            }
           }
         )
         .then(() => {
