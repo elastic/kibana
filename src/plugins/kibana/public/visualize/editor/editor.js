@@ -7,7 +7,7 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
 import angular from 'angular';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import DocTitleProvider from 'ui/doc_title';

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
-import SimpleEmitter from 'ui/utils/SimpleEmitter';
+import SimpleEmitter from 'ui/utils/simple_emitter';
 
 export default function EventsProvider(Private, Promise) {
   var notify = new Notifier({ location: 'EventEmitter' });

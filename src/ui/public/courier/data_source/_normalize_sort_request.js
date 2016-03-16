@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 export default function normalizeSortRequest(config) {
   var defaultSortOptions = config.get('sort:options');
 
@@ -48,4 +49,3 @@ export default function normalizeSortRequest(config) {
     return normalized;
   }
 };
-
