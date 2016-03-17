@@ -1,32 +1,80 @@
+import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
 let module = uiModules.get('kibana');
 
-module.directive('fileUpload', function ($parse) {
+let html = '<span class="dropzone" ng-transclude></span>';
+
+module.directive('fileUpload', function () {
   return {
-    restrict: 'A',
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      onRead: '&',
+      onLocate: '&',
+      label: '='
+    },
+    template: html,
     link: function ($scope, $elem, attrs) {
-      let onUpload = $parse(attrs.fileUpload);
+      let $button = $elem.find('.upload');
+      let $dropzone = $elem.find('.dropzone');
 
-      let $fileInput = $('<input type="file" style="opacity: 0" id="testfile" />');
-      $elem.after($fileInput);
+      const handleFile = (file) => {
+        if (_.isUndefined(file)) return;
 
-      $fileInput.on('change', function (e) {
-        let reader = new FileReader();
-        reader.onload = function (e) {
-          $scope.$apply(function () {
-            onUpload($scope, {fileContents: e.target.result});
-          });
-        };
+        if ($scope.onRead) {
+          let reader = new FileReader();
+          reader.onload = function (e) {
+            $scope.$apply(function () {
+              $scope.onRead({fileContents: e.target.result});
+            });
+          };
+          reader.readAsText(file);
+        }
 
-        let target = e.srcElement || e.target;
-        if (target && target.files && target.files.length) reader.readAsText(target.files[0]);
+        if ($scope.onLocate) {
+          $scope.onLocate({ file });
+        }
+      };
+
+      $dropzone.on('dragover', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      );
+
+      $dropzone.on('dragenter', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      );
+
+      $dropzone.on('drop', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        const file = _.get(e, 'originalEvent.dataTransfer.files[0]');
+
+        if (file) {
+          handleFile(file);
+        }
       });
 
-      $elem.on('click', function (e) {
-        $fileInput.val(null);
-        $fileInput.trigger('click');
-      });
+      if ($button) {
+        const $fileInput = $('<input type="file" style="opacity: 0; position:absolute; right: -999999999px" id="testfile" />');
+        $elem.append($fileInput);
+
+        $fileInput.on('change', function (e) {
+          let target = e.srcElement || e.target;
+          if (_.get(target, 'files.length')) {
+            handleFile(target.files[0]);
+          }
+        });
+
+        $button.on('click', function (e) {
+          $fileInput.val(null);
+          $fileInput.trigger('click');
+        });
+      }
     }
   };
 });
