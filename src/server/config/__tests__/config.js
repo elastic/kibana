@@ -51,6 +51,30 @@ describe('lib/config/config', function () {
         expect(run).to.throwException();
       });
 
+      it('should allow keys in the schema', function () {
+        var config = new Config(schema);
+        var run = function () {
+          config.set('test.client.host', 'http://0.0.0.0');
+        };
+        expect(run).to.not.throwException();
+      });
+
+      it('should not allow keys not in the schema', function () {
+        var config = new Config(schema);
+        var run = function () {
+          config.set('paramNotDefinedInTheSchema', true);
+        };
+        expect(run).to.throwException();
+      });
+
+      it('should not allow child keys not in the schema', function () {
+        var config = new Config(schema);
+        var run = function () {
+          config.set('test.client.paramNotDefinedInTheSchema', true);
+        };
+        expect(run).to.throwException();
+      });
+
       it('should set defaults', function () {
         var config = new Config(schema);
         expect(config.get('test.enable')).to.be(true);
