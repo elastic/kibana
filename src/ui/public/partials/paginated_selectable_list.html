@@ -36,7 +36,7 @@
       class="list-group-item list-group-menu-item"
       ng-repeat="hit in page | filter: query">
       <a ng-if="userMakeUrl" kbn-href="{{makeUrl(hit)}}">
-        <span>{{hit}}</span>
+        <div><span>{{hit}}</span></div>
       </a>
       <div ng-if="userOnSelect" ng-click="onSelect(hit, $event)">
         <span>{{hit}}</span>
