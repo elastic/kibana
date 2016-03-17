@@ -100,6 +100,11 @@ export default class Pipeline {
 
   getProcessorById(processorId) {
     const result = _.find(this.processors, { processorId });
+
+    if (!result) {
+      throw new Error(`Could not find processor by id [${processorId}]`);
+    }
+
     return result;
   }
 
