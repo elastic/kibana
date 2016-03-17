@@ -7,9 +7,7 @@ var module = uiModules.get('kibana');
 module.directive('breadCrumbs', function () {
   return {
     restrict: 'E',
-    scope: {
-      userMakeUrl: '=?makeUrl'
-    },
+    scope: true,
     template: breadCrumbsTemplate,
     controller: function ($scope) {
       $scope.crumbs = chrome.getBreadcrumbs();
