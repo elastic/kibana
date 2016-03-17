@@ -22,29 +22,29 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
 
       $scope.hitCount = $scope.hits.length;
 
+      /**
+       * Boolean that keeps track of whether hits are sorted ascending (true)
+       * or descending (false) by title
+       * @type {Boolean}
+       */
+      $scope.isAscending = true;
+
+      /**
+       * Sorts saved object finder hits either ascending or descending
+       * @param  {Array} hits Array of saved finder object hits
+       * @return {Array} Array sorted either ascending or descending
+       */
+      $scope.sortHits = function (hits) {
+        $scope.isAscending = !$scope.isAscending;
+        $scope.list = $scope.isAscending ? hits.sort() : hits.reverse();
+      };
+
       $scope.makeUrl = function (hit) {
-        if ($scope.userMakeUrl) {
-          return $scope.userMakeUrl(hit);
-        }
-        return '#';
+        return $scope.userMakeUrl(hit);
       };
 
       $scope.onSelect = function (hit, $event) {
-        if ($scope.userOnSelect) {
-          return $scope.userOnSelect(hit, $event);
-        }
-
-        var url = $scope.makeUrl(hit);
-        if (!url || url === '#' || url.charAt(0) !== '#') return;
-
-        $event.preventDefault();
-
-        // we want the '/path', not '#/path'
-        kbnUrl.change(url.substr(1));
-      };
-
-      $scope.preventClick = function ($event) {
-        $event.preventDefault();
+        return $scope.userOnSelect(hit, $event);
       };
 
       $scope.$watch('query', function (val) {

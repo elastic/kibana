@@ -22,13 +22,25 @@
 </form>
 <paginate list="hits" per-page="{{perPage}}">
   <ul class="li-striped list-group list-group-menu">
+    <li class="list-group-item list-group-menu-item">
+      <span class="paginate-heading">
+        Name
+        <i
+          class="fa"
+          ng-click="sortHits(hits)"
+          ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+        </i>
+      </span>
+    </li>
     <li
       class="list-group-item list-group-menu-item"
-      ng-repeat="hit in page | filter: query | orderBy: hit.toString()"
-      ng-click="onSelect(hit, $event)">
-      <a ng-href="{{makeUrl(hit)}}" ng-click="preventClick($event)">
+      ng-repeat="hit in page | filter: query | orderBy: hit.toString()">
+      <a ng-if="userMakeUrl" kbn-href="{{makeUrl(hit)}}">
         <span>{{hit}}</span>
       </a>
+      <div ng-if="userOnSelect" ng-click="onSelect(hit, $event)">
+        <span>{{hit}}</span>
+      </div>
     </li>
     <li class="list-group-item list-group-no-results" ng-if="hits.length === 0">
       <p ng-bind="'No matches found.'"></p>
