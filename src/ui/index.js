@@ -3,7 +3,7 @@ import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import Boom from 'boom';
 import { resolve } from 'path';
-import fromRoot from '../utils/fromRoot';
+import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';

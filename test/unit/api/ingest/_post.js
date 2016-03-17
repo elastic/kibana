@@ -38,6 +38,11 @@ define(function (require) {
           // Fields must have a name and type
           request.post('/kibana/ingest')
             .send(_.set(createTestData(), 'index_pattern.fields', [{count: 0}]))
+            .expect(400),
+
+          // should validate pipeline processors
+          request.post('/kibana/ingest')
+            .send(_.set(createTestData(), 'pipeline[0]', {bad: 'processor'}))
             .expect(400)
         ]);
       });

@@ -24,13 +24,11 @@ module.exports = function createTestData() {
         }
       ]
     },
-    pipeline: [
-      {
-        date: {
-          match_field: 'initialDate',
-          match_formats: ['dd/MM/yyyy hh:mm:ss']
-        }
-      }
-    ]
+    pipeline: [{
+      processor_id: 'processor1',
+      type_id: 'set',
+      target_field: 'foo',
+      value: 'bar'
+    }]
   };
 };

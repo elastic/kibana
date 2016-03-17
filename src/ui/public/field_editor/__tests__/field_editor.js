@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';

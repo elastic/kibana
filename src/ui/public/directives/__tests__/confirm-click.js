@@ -1,7 +1,7 @@
 import angular from 'angular';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'ui/directives/confirm_click';
 import 'plugins/kibana/discover/index';

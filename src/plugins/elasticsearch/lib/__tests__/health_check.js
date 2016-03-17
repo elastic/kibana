@@ -6,7 +6,7 @@ import url from 'url';
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import healthCheck from '../health_check';
-import serverConfig from '../../../../../test/serverConfig';
+import serverConfig from '../../../../../test/server_config';
 
 const esPort = serverConfig.servers.elasticsearch.port;
 const esUrl = url.format(serverConfig.servers.elasticsearch);

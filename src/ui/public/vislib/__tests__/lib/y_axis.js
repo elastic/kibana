@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
