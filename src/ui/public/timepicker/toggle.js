@@ -6,7 +6,7 @@ import toggleHtml from './toggle.html';
 
 UiModules
 .get('kibana')
-.directive('kbnGlobalTimepicker', function(timefilter, globalState) {
+.directive('kbnGlobalTimepicker', (timefilter, globalState) => {
   const listenForUpdates = once($scope => {
     $scope.$listen(timefilter, 'update', (newVal, oldVal) => {
       globalState.time = clone(timefilter.time);
@@ -17,7 +17,7 @@ UiModules
 
   return {
     template: toggleHtml,
-    link: function($scope, $el, attrs) {
+    link: ($scope, $el, attrs) => {
       listenForUpdates($scope);
 
       $scope.timefilter = timefilter;
