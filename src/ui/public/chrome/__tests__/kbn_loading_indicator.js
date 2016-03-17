@@ -1,4 +1,4 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import uiModules from 'ui/modules';
 import $ from 'jquery';
