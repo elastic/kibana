@@ -34,7 +34,7 @@
     </li>
     <li
       class="list-group-item list-group-menu-item"
-      ng-repeat="hit in page | filter: query | orderBy: hit.toString()">
+      ng-repeat="hit in page | filter: query">
       <a ng-if="userMakeUrl" kbn-href="{{makeUrl(hit)}}">
         <span>{{hit}}</span>
       </a>

@@ -18,7 +18,7 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
     controller: function ($scope, $element, $filter) {
       $scope.perPage = $scope.perPage || 10;
 
-      $scope.hits = $scope.list || [];
+      $scope.hits = $scope.list.sort() || [];
 
       $scope.hitCount = $scope.hits.length;
 
@@ -36,7 +36,7 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
        */
       $scope.sortHits = function (hits) {
         $scope.isAscending = !$scope.isAscending;
-        $scope.list = $scope.isAscending ? hits.sort() : hits.reverse();
+        $scope.hits = $scope.isAscending ? hits.sort() : hits.reverse();
       };
 
       $scope.makeUrl = function (hit) {
