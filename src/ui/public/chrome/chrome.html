@@ -81,7 +81,7 @@
         </div>
         <!-- /Full navbar -->
       </nav>
-      <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-') + ' ' + chrome.getApplicationClasses()" ng-view kbn-loading-indicator></div>
+      <div class="application" ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()" ng-view kbn-loading-indicator></div>
     </div>
   </div>
 </div>
