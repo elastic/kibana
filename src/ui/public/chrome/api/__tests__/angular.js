@@ -12,7 +12,6 @@ describe('Chrome API :: Angular', () => {
         addBasePath: noop
       };
       kbnAngular(chrome, {});
-      debugger;
     });
     it('should return breadcrumbs based on the url', () => {
     });
