@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 import pluginDownloader from './plugin_downloader';
 import pluginCleaner from './plugin_cleaner';
 import pluginExtractor from './plugin_extractor';
-import KbnServer from '../../server/KbnServer';
+import KbnServer from '../../server/kbn_server';
 import readYamlConfig from '../serve/read_yaml_config';
 import Promise from 'bluebird';
 import { sync as rimrafSync } from 'rimraf';

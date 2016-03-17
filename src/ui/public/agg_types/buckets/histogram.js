@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import 'ui/validateDateInterval';
+import 'ui/validate_date_interval';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
@@ -51,7 +51,7 @@ export default function HistogramAggDefinition(Private) {
         write: function (aggConfig, output) {
           var val = aggConfig.params.extended_bounds;
 
-          if (val.min != null || val.max != null) {
+          if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
             output.params.extended_bounds = {
               min: val.min,
               max: val.max

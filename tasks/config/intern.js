@@ -12,7 +12,7 @@ module.exports = function (grunt) {
     api: {
       options: {
         runType: 'client',
-        config: 'test/apiIntern'
+        config: 'test/api_intern'
       }
     }
   };

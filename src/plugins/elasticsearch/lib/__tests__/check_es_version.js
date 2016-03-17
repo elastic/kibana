@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
+import url from 'url';
 
+import serverConfig from '../../../../../test/server_config';
 import checkEsVersion from '../check_es_version';
 
 describe('plugins/elasticsearch', function () {
@@ -23,7 +25,7 @@ describe('plugins/elasticsearch', function () {
             status: {
               red: sinon.stub()
             },
-            url: 'http://localhost:9210'
+            url: url.format(serverConfig.servers.elasticsearch)
           }
         }
       };

@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash';
 import UiNavLink from './ui_nav_link';
-import Collection from '../utils/Collection';
+import Collection from '../utils/collection';
 
 const inOrderCache = Symbol('inOrder');
 

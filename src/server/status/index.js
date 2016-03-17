@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import ServerStatus from './ServerStatus';
+import ServerStatus from './server_status';
 import { join } from 'path';
 module.exports = function (kbnServer, server, config) {
 
@@ -21,7 +21,7 @@ module.exports = function (kbnServer, server, config) {
   });
 
   server.decorate('reply', 'renderStatusPage', function () {
-    var app = kbnServer.uiExports.getHiddenApp('statusPage');
+    var app = kbnServer.uiExports.getHiddenApp('status_page');
     var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
     resp.code(kbnServer.status.isGreen() ? 200 : 503);
     return resp;
