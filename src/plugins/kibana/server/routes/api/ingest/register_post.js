@@ -6,6 +6,7 @@ import createMappingsFromPatternFields from '../../../lib/create_mappings_from_p
 import initDefaultFieldProps from '../../../lib/init_default_field_props';
 import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 import { keysToCamelCaseShallow } from '../../../../common/lib/case_conversion';
+import ingestPipelineApiKibanaToEsConverter from '../../../lib/converters/ingest_pipeline_api_kibana_to_es_converter';
 
 module.exports = function registerPost(server) {
   const kibanaIndex = server.config().get('kibana.index');
@@ -77,9 +78,7 @@ module.exports = function registerPost(server) {
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
-      const pipeline = {
-        processors: requestDocument.pipeline
-      };
+      const pipeline = ingestPipelineApiKibanaToEsConverter(requestDocument.pipeline);
 
       // Set up call with request params
       const patternCreateParams = {
