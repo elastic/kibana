@@ -43,13 +43,12 @@ describe('lib/config/config', function () {
 
     describe('constructor', function () {
 
-      it('should not allow any config if the schema is not passed', function (done) {
+      it('should not allow any config if the schema is not passed', function () {
         var config = new Config();
         var run = function () {
           config.set('something.enable', true);
         };
         expect(run).to.throwException();
-        done();
       });
 
       it('should set defaults', function () {
