@@ -1,6 +1,6 @@
 import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
-import { defaults, once } from 'lodash';
+import { defaults } from 'lodash';
 import Boom from 'boom';
 import { resolve } from 'path';
 import fromRoot from '../utils/from_root';
