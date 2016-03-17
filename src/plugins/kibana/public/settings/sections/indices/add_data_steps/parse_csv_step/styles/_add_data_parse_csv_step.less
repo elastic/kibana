@@ -1,0 +1,64 @@
+@import (reference) "../../../styles/_add_data_wizard";
+
+.upload-wizard-file-upload-container {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: @settings-add-data-wizard-form-control-bg;
+  border: @settings-add-data-wizard-parse-csv-container-border 1px dashed;
+  text-align: center;
+
+  .upload-instructions {
+    font-size: 2em;
+  }
+
+  .upload-instructions-separator {
+    margin: 15px 0;
+  }
+
+  button {
+    width: inherit;
+  }
+
+  button.upload {
+    align-self: center;
+    margin-bottom: 15px;
+  }
+}
+
+.upload-wizard-file-preview-container {
+  .preview {
+    overflow: auto;
+    max-height: 500px;
+    border: @settings-add-data-wizard-parse-csv-container-border 1px solid;
+
+    table {
+      margin-bottom: 0;
+
+      .table-striped()
+    }
+  }
+
+  .parse-error {
+    margin-top: 2em;
+  }
+
+  .advanced-options {
+    display: flex;
+    align-items: center;
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      padding-right: 15px;
+
+      label {
+        padding-right: 8px;
+        margin-bottom: 0;
+      }
+    }
+
+    padding-bottom: 10px;
+  }
+}

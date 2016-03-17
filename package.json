@@ -132,6 +132,7 @@
     "moment": "2.10.6",
     "moment-timezone": "0.4.1",
     "node-uuid": "1.4.7",
+    "papaparse": "4.1.2",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "rimraf": "2.4.3",
