@@ -80,7 +80,7 @@
         </div>
         <!-- /Full navbar -->
       </nav>
-      <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-') + ' ' + chrome.getApplicationClasses()" ng-view></div>
+      <div class="application" ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()" ng-view></div>
     </div>
   </div>
 </div>
