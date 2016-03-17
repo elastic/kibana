@@ -1,6 +1,6 @@
 import angular from 'angular';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import dataSeries from 'fixtures/vislib/mock_data/date_histogram/_series';

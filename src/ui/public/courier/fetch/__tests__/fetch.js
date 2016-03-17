@@ -1,4 +1,4 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
@@ -10,7 +10,7 @@ import DocSourceProvider from '../../data_source/doc_source';
 import SearchSourceProvider from '../../data_source/search_source';
 
 describe('Fetch service', function () {
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   let es;
   let fetch;

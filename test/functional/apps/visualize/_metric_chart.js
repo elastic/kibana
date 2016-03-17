@@ -199,8 +199,10 @@ define(function (require) {
         });
 
         bdd.it('should show Standard Deviation', function pageHeader() {
-          var standardDeviationBytes = [ '-1,435.138', 'Lower Standard Deviation of bytes',
-            '5,727.314', 'Average of bytes', '12,889.766', 'Upper Standard Deviation of bytes'
+          var standardDeviationBytes = [
+            '-1,435.138', 'Lower Standard Deviation of bytes',
+            '5,727.314', 'Average of bytes',
+            '12,889.766', 'Upper Standard Deviation of bytes'
           ];
           common.debug('Aggregation = Standard Deviation');
           return visualizePage.selectAggregation('Standard Deviation')
@@ -252,18 +254,16 @@ define(function (require) {
         });
 
         bdd.it('should show Percentiles', function pageHeader() {
-          // This SHOULD be the expected result but the top item is cut off.
-          //  See https://github.com/elastic/kibana/issues/5721
-          // var percentileMachineRam = ['2,147,483,648', '1st percentile of machine.ram', '3,221,225,472',
-          //   '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
-          //   '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
-          //   '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
-          // ];
-          var percentileMachineRam = ['3,221,225,472',
-            '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
-            '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
-            '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
+          var percentileMachineRam = [
+            '2,147,483,648', '1st percentile of machine.ram',
+            '3,221,225,472', '5th percentile of machine.ram',
+            '7,516,192,768', '25th percentile of machine.ram',
+            '12,884,901,888', '50th percentile of machine.ram',
+            '18,253,611,008', '75th percentile of machine.ram',
+            '32,212,254,720', '95th percentile of machine.ram',
+            '32,212,254,720', '99th percentile of machine.ram'
           ];
+
           common.debug('Aggregation = Percentiles');
           return visualizePage.selectAggregation('Percentiles')
           .then(function selectField() {

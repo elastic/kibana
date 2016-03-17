@@ -53,35 +53,37 @@ define(function (require) {
 
         bdd.it('should initially be expanded', function () {
           return discoverPage.getSidebarWidth()
-          .then(function (actualwidth) {
-            common.debug('expanded sidebar width = ' + actualwidth);
-            expect(actualwidth > 180).to.be(true);
-          })
-          .catch(common.handleError(this));
+            .then(function (width) {
+              common.debug('expanded sidebar width = ' + width);
+              expect(width > 180).to.be(true);
+            })
+            .catch(common.handleError(this));
         });
 
         bdd.it('should collapse when clicked', function () {
-          return discoverPage.clickSidebarCollapse()
-          .then(function () {
-            return discoverPage.getSidebarWidth();
-          })
-          .then(function (actualwidth) {
-            common.debug('collapsed sidebar width = ' + actualwidth);
-            expect(actualwidth < 20).to.be(true);
-          })
-          .catch(common.handleError(this));
+          return discoverPage.toggleSidebarCollapse()
+            .then(function () {
+              common.debug('discoverPage.getSidebarWidth()');
+              return discoverPage.getSidebarWidth();
+            })
+            .then(function (width) {
+              common.debug('collapsed sidebar width = ' + width);
+              expect(width < 20).to.be(true);
+            })
+            .catch(common.handleError(this));
         });
 
         bdd.it('should expand when clicked', function () {
-          return discoverPage.clickSidebarExpand()
-          .then(function () {
-            return discoverPage.getSidebarWidth();
-          })
-          .then(function (actualwidth) {
-            common.debug('expanded sidebar width = ' + actualwidth);
-            expect(actualwidth > 180).to.be(true);
-          })
-          .catch(common.handleError(this));
+          return discoverPage.toggleSidebarCollapse()
+            .then(function () {
+              common.debug('discoverPage.getSidebarWidth()');
+              return discoverPage.getSidebarWidth();
+            })
+            .then(function (width) {
+              common.debug('expanded sidebar width = ' + width);
+              expect(width > 180).to.be(true);
+            })
+            .catch(common.handleError(this));
         });
 
       });

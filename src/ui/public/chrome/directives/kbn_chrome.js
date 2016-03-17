@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
 import UiModules from 'ui/modules';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 
 export default function (chrome, internals) {
 

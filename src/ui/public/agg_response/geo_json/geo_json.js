@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import rowsToFeatures from 'ui/agg_response/geo_json/rowsToFeatures';
+import rowsToFeatures from 'ui/agg_response/geo_json/rows_to_features';
 import AggResponseGeoJsonTooltipFormatterProvider from 'ui/agg_response/geo_json/_tooltip_formatter';
 export default function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
 

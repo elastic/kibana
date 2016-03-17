@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 export default function DecorateQuery(config) {
   /**
    * Decorate queries with default parameters

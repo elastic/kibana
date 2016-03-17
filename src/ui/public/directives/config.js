@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import 'ui/watch_multi';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import angular from 'angular';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';

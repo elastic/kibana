@@ -7,35 +7,35 @@ module.exports = {
       baseDir: path.join(rootDir, 'makelogs'),
       bulk: [{
         indexName: 'logstash-2015.09.17',
-        indexDefinition: 'makelogsIndexDefinition.js',
+        indexDefinition: 'makelogs_index_definition.js',
         source: 'logstash-2015.09.17.js'
       }, {
         indexName: 'logstash-2015.09.18',
-        indexDefinition: 'makelogsIndexDefinition.js',
+        indexDefinition: 'makelogs_index_definition.js',
         source: 'logstash-2015.09.18.js'
       }]
     },
     emptyKibana: {
-      baseDir: path.join(rootDir, 'emptyKibana'),
+      baseDir: path.join(rootDir, 'empty_kibana'),
       bulk: [{
         indexName: '.kibana',
-        indexDefinition: 'kibanaDefinition.js',
+        indexDefinition: 'kibana_definition.js',
         source: 'kibana.js',
         haltOnFailure: false
       }]
     },
     logstashFunctional: {
-      baseDir: path.join(rootDir, 'logstashFunctional'),
+      baseDir: path.join(rootDir, 'logstash_functional'),
       bulk: [{
-        indexDefinition: 'makelogsIndexDefinition.js',
+        indexDefinition: 'makelogs_index_definition.js',
         indexName: 'logstash-2015.09.20',
         source: 'logstash-2015.09.20.js'
       }, {
-        indexDefinition: 'makelogsIndexDefinition.js',
+        indexDefinition: 'makelogs_index_definition.js',
         indexName: 'logstash-2015.09.21',
         source: 'logstash-2015.09.21.js'
       }, {
-        indexDefinition: 'makelogsIndexDefinition.js',
+        indexDefinition: 'makelogs_index_definition.js',
         indexName: 'logstash-2015.09.22',
         source: 'logstash-2015.09.22.js'
       }]

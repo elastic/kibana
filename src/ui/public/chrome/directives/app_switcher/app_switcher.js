@@ -1,4 +1,4 @@
-import DomLocationProvider from 'ui/domLocation';
+import DomLocationProvider from 'ui/dom_location';
 import { parse } from 'url';
 import { bindKey } from 'lodash';
 import '../app_switcher/app_switcher.less';
