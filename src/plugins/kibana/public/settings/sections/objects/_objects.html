@@ -3,7 +3,11 @@
     <div class="header">
       <h2 class="title">Edit Saved Objects</h2>
       <button class="btn btn-default controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export Everything</button>
-      <button file-upload="importAll(fileContents)" class="btn btn-default controls" ng-click><i aria-hidden="true" class="fa fa-upload"></i> Import</button>
+      <file-upload on-read="importAll(fileContents)">
+        <button class="btn btn-default controls upload" ng-click>
+          <i aria-hidden="true" class="fa fa-upload"></i> Import
+        </button>
+      </file-upload>
     </div>
     <p>
       From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
