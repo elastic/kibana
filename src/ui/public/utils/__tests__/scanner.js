@@ -2,8 +2,11 @@ import Scanner from 'ui/utils/scanner';
 import expect from 'expect.js';
 import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import url from 'url';
+
+import serverConfig from '../../../../../test/server_config';
 
 describe('Scanner', function () {
   let es;
@@ -11,7 +14,7 @@ describe('Scanner', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (esFactory) {
     es = esFactory({
-      host: 'http://localhost:9210',
+      host: url.format(serverConfig.servers.elasticsearch),
       defer: function () {
         return Bluebird.defer();
       }

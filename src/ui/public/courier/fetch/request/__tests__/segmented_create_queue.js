@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
@@ -13,7 +13,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   let SegmentedReq;
   let MockSource;
 
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {

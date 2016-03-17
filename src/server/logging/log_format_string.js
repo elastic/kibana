@@ -2,7 +2,7 @@ import _ from 'lodash';
 import ansicolors from 'ansicolors';
 import moment from 'moment';
 
-import LogFormat from './LogFormat';
+import LogFormat from './log_format';
 
 let statuses = [
   'err',
