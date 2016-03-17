@@ -187,10 +187,10 @@ module.exports = class Config {
   getSchema() {
     if (!this[schema]) {
       this[schema] = (function convertToSchema(children) {
-        let objKeys = zipObject([...children]);
+        let objKeys = Object.keys(children);
         let schema = Joi.object().keys(objKeys).default();
 
-        for (const key of Object.keys(children)) {
+        for (const key of objKeys) {
           const child = children[key];
           const childSchema = _.isPlainObject(child) ? convertToSchema(child) : child;
 
