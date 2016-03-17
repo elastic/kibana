@@ -16,12 +16,6 @@ module.directive('breadCrumbs', function () {
         // Remove the empty string from the end of the array
         $scope.crumbs.pop();
       }
-
-      $scope.makeUrl = function (val) {
-        if ($scope.userMakeUrl) {
-          return $scope.userMakeUrl(val);
-        }
-      };
     }
   };
 });
