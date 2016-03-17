@@ -82,7 +82,7 @@ define(function (require) {
       var types = [];
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findAllByCssSelector('a.wizard-vis-type.ng-scope h4')
+      .findAllByCssSelector('.wizard-type-heading h4')
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart.getVisibleText();
@@ -134,8 +134,7 @@ define(function (require) {
 
     getMetric: function getMetric() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
-      // .findByCssSelector('div[ng-repeat="metric in metrics"')
+      .setFindTimeout(2000)
       .findByCssSelector('div[ng-controller="KbnMetricVisController"]')
       .getVisibleText();
     },
@@ -150,7 +149,7 @@ define(function (require) {
     clickNewSearch: function clickNewSearch() {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('li[ng-click="stepTwoMode=\'new\'"]')
+      .findByCssSelector('.list-group-item a')
       .click();
     },
 
@@ -274,7 +273,7 @@ define(function (require) {
     setNumericInterval: function setNumericInterval(newValue) {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('input.form-control:nth-child(2)')
+      .findByCssSelector('input[name="interval"]')
       .type(newValue);
     },
 
@@ -314,7 +313,7 @@ define(function (require) {
       .then(function () {
         return self.remote
         .setFindTimeout(defaultTimeout)
-        .findByCssSelector('.btn-primary')
+        .findByCssSelector('.config button[type="submit"]')
         .click();
       })
       // verify that green message at the top of the page.

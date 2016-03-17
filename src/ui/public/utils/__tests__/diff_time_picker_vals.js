@@ -1,6 +1,6 @@
 
 import moment from 'moment';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
 

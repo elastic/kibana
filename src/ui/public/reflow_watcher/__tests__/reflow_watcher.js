@@ -3,7 +3,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import EventsProvider from 'ui/events';
 import ReflowWatcherProvider from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {

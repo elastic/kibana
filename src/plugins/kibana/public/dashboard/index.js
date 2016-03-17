@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import angular from 'angular';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import chrome from 'ui/chrome';
 import 'ui/directives/config';
 import 'ui/courier';

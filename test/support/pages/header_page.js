@@ -51,7 +51,7 @@ define(function (require) {
 
     clickTimepicker: function clickTimepicker() {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByClassName('navbar-timepicker-time-desc').click();
+      .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
@@ -100,41 +100,27 @@ define(function (require) {
         return self.clickGoButton();
       })
       .then(function () {
-        self.collapseTimepicker();
+        return self.collapseTimepicker();
       });
     },
 
     collapseTimepicker: function collapseTimepicker() {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.fa.fa-chevron-up')
+      .findByCssSelector('.fa.fa-chevron-circle-up')
       .click();
     },
 
     getToastMessage: function getToastMessage() {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      .findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
       .getVisibleText();
     },
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-      return common.tryForTime(defaultTimeout, function () {
-        return self.remote.setFindTimeout(500)
-        .findAllByCssSelector('kbn-truncated.toast-message')
-        .then(function toastMessage(messages) {
-          if (messages.length > 0) {
-            common.debug('toast message found, waiting...');
-            throw new Error('waiting for toast message to clear');
-          } else {
-            common.debug('toast message clear');
-            return messages;
-          }
-        })
-        .catch(function () {
-          common.debug('toast message not found');
-          return;
-        });
-      });
+
+      return self.remote.setFindTimeout(defaultTimeout)
+        .waitForDeletedByCssSelector('kbn-truncated.toast-message');
     },
 
     clickToastOK: function clickToastOK() {
@@ -148,7 +134,7 @@ define(function (require) {
       var self = this;
       return this.remote
       .setFindTimeout(defaultTimeout * 10)
-      .findByCssSelector('.navbar-text.ng-hide .spinner');
+      .findByCssSelector('.spinner.ng-hide');
     }
 
   };
