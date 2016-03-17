@@ -287,6 +287,32 @@ table {
   }
 }
 
+//== breadCrumbsTemplate
+bread-crumbs {
+  ul {
+    margin: 0;
+    padding: 8px 10px;
+    list-style-type: none;
+    text-transform: capitalize;
+
+    >li {
+      display: inline;
+      >span {
+        color: @kibanaGray2;
+      }
+      >span:hover {
+        color: @kibanaGray1;
+      }
+    }
+
+    >li:last-child {
+      >span {
+        color: @kibanaGray1;
+      }
+    }
+  }
+}
+
 //== SavedObjectFinder
 saved-object-finder,
 paginated-selectable-list {
