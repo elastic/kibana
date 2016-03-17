@@ -70,7 +70,6 @@ module.exports = class Config {
     let initialVals = _.get(this[pendingSets], key);
     if (initialVals) {
       this.set(key, initialVals);
-      const path = toPath(key);
       unset(this[pendingSets], key);
     } else {
       this._commit(this[vals]);
