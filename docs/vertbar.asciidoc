@@ -26,6 +26,8 @@ values field. Click *+Add* to add a values field.
 
 You can add an aggregation by clicking the *+ Add Aggregation* button.
 
+Enter a string in the *Custom Label* field to change the display label.
+
 The _buckets_ aggregations determine what information is being retrieved from your data set.
 
 Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
@@ -35,6 +37,8 @@ if the splits are displayed in a row or a column by clicking the *Rows | Columns
 include::x-axis-aggs.asciidoc[]
 
 include::color-picker.asciidoc[]
+
+Enter a string in the *Custom Label* field to change the display label.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
