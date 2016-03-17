@@ -55,7 +55,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   npm run elasticsearch
   ```
 
-- Start the development server.
+- Start the development server. _On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command._
 
   ```sh
   npm start
