@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 
 import kbnAngular from '../angular';
-import TabFakeStore from '../../__tests__/_TabFakeStore';
+import TabFakeStore from '../../__tests__/_tab_fake_store';
 import { noop } from 'lodash';
 
 describe('Chrome API :: Angular', () => {
