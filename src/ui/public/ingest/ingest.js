@@ -1,10 +1,11 @@
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../plugins/kibana/common/lib/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';
+import chrome from 'ui/chrome';
 
 export default function IngestProvider($rootScope, $http, config, $q) {
 
-  const ingestAPIPrefix = '../api/kibana/ingest';
+  const ingestAPIPrefix = chrome.addBasePath('/api/kibana/ingest');
 
   this.save = function (indexPattern, pipeline) {
     if (_.isEmpty(indexPattern)) {
@@ -68,6 +69,32 @@ export default function IngestProvider($rootScope, $http, config, $q) {
     .then(unpack)
     .catch(err => {
       return $q.reject(new Error('Error fetching enabled processors'));
+    });
+  };
+
+  this.uploadCSV = function (file, indexPattern, delimiter, pipeline) {
+    if (_.isUndefined(file)) {
+      throw new Error('file is required');
+    }
+    if (_.isUndefined(indexPattern)) {
+      throw new Error('index pattern is required');
+    }
+
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const params = {};
+    if (!_.isUndefined(delimiter)) {
+      params.csv_delimiter = delimiter;
+    }
+    if (!_.isUndefined(pipeline)) {
+      params.pipeline = pipeline;
+    }
+
+    return $http.post(chrome.addBasePath(`/api/kibana/${indexPattern}/_data`), formData, {
+      params: params,
+      transformRequest: angular.identity,
+      headers: {'Content-Type': undefined}
     });
   };
 
