@@ -11,21 +11,20 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
     scope: {
       perPage: '=',
       list: '=',
+      listProperty: '=',
       userMakeUrl: '=',
       userOnSelect: '='
     },
     template: paginatedSelectableListTemplate,
     controller: function ($scope, $element, $filter) {
       $scope.perPage = $scope.perPage || 10;
-
-      $scope.hits = $scope.list.sort() || [];
-
-      $scope.hitCount = $scope.hits.length;
+      $scope.hits = $scope.list = _.sortBy($scope.list, accessor) || [];
+      $scope.filterCount = $scope.hitCount = $scope.hits.length;
 
       /**
        * Boolean that keeps track of whether hits are sorted ascending (true)
-       * or descending (false) by title
-       * @type {Boolean}
+       * or descending (false)
+       * * @type {Boolean}
        */
       $scope.isAscending = true;
 
@@ -35,8 +34,10 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
        * @return {Array} Array sorted either ascending or descending
        */
       $scope.sortHits = function (hits) {
+        const sortedList = _.sortBy(hits, accessor);
+
         $scope.isAscending = !$scope.isAscending;
-        $scope.hits = $scope.isAscending ? hits.sort() : hits.reverse();
+        $scope.hits = $scope.isAscending ? sortedList : sortedList.reverse();
       };
 
       $scope.makeUrl = function (hit) {
@@ -49,8 +50,13 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
 
       $scope.$watch('query', function (val) {
         $scope.hits = $filter('filter')($scope.list, val);
-        $scope.hitCount = $scope.hits.length;
+        $scope.filterCount = $scope.hits.length;
       });
+
+      function accessor(val) {
+        const prop = $scope.listProperty;
+        return prop ? val[prop] : val;
+      }
     }
   };
 });
