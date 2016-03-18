@@ -25,7 +25,8 @@ define(function (require) {
             processors: [{
               processor_id: 'processor1',
               type_id: 'set',
-              value: 'bar'
+              value: 'bar',
+              target_field: 42
             }]
           })
           .expect(400)
