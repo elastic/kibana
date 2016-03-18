@@ -1,6 +1,6 @@
 <div class="content" chrome-context >
   <!-- TODO: These config dropdowns shouldn't be hard coded -->
-  <nav class="app-links-wrapper">
+  <nav class="app-links-wrapper" ng-show="chrome.getVisible()">
     <li
       ng-if="!chrome.getBrand('logo')  && !chrome.getBrand('smallLogo')"
       aria-label="{{ chrome.getAppTitle() }} Logo"
@@ -21,29 +21,12 @@
 
     <app-switcher>
     </app-switcher>
-    <div class="bottom-apps app-links">
+    <div class="bottom-apps">
       <div class="chrome-actions app-links" kbn-chrome-append-nav-controls></div>
-      <div class="hide app-link">
-        <a href="http://elastic.co">
-          <div class="app-icon">
-            <i class="fa fa-gear"></i>
-          </div>
-          <div class="app-title">settings</div>
-        </a>
-      </div>
-      <div class="hide app-link">
-        <a href="http://elastic.co">
-          <div class="app-icon">
-            <i class="fa fa-user"></i>
-          </div>
-          <div class="app-title">Jon Doe</div>
-          <div class="app-title">Logout</div>
-        </a>
-      </div>
     </div>
   </nav>
 
-  <div class="app-wrapper">
+  <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
     <div class="app-wrapper-panel">
       <kbn-notifications list="notifList"></kbn-notifications>
       <nav
