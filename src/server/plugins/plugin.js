@@ -4,7 +4,7 @@ import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
 import { inherits } from 'util';
 
-const extendRegisterFns = Symbol('extend register');
+const extendInitFns = Symbol('extend plugin initialization');
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)
@@ -59,7 +59,7 @@ module.exports = class Plugin {
     this.externalInit = opts.init || _.noop;
     this.getConfigSchema = opts.config || _.noop;
     this.init = _.once(this.init);
-    this[extendRegisterFns] = [];
+    this[extendInitFns] = [];
 
     if (opts.publicDir === false) {
       this.publicDir = null;
@@ -104,7 +104,7 @@ module.exports = class Plugin {
     const asyncRegister = async (server, options) => {
       this.server = server;
 
-      await Promise.all(this[extendRegisterFns].map(async fn => {
+      await Promise.all(this[extendInitFns].map(async fn => {
         await fn.call(this, server, options);
       }));
 
@@ -143,8 +143,8 @@ module.exports = class Plugin {
     }
   }
 
-  extendRegister(fn) {
-    this[extendRegisterFns].push(fn);
+  extendInit(fn) {
+    this[extendInitFns].push(fn);
   }
 
   toJSON() {

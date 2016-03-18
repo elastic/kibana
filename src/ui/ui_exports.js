@@ -55,7 +55,7 @@ class UiExports {
               urlBasePath: this.urlBasePath
             }));
 
-            plugin.extendRegister((server, options) => { // eslint-disable-line no-loop-func
+            plugin.extendInit((server, options) => { // eslint-disable-line no-loop-func
               const wrapped = app.getInjectedVars;
               app.getInjectedVars = () => wrapped.call(plugin, server, options);
             });
@@ -90,7 +90,7 @@ class UiExports {
 
       case 'injectDefaultVars':
         return (plugin, injector) => {
-          plugin.extendRegister(async (server, options) => {
+          plugin.extendInit(async (server, options) => {
             _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
         };
