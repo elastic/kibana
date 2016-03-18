@@ -1,9 +1,9 @@
-import {unlink} from 'fs';
 import {join, extname} from 'path';
 import {promisify} from 'bluebird';
 import {ncp} from 'ncp';
+import rimraf from 'rimraf';
 const pncp = promisify(ncp);
-const punlink = promisify(unlink);
+const primraf = promisify(rimraf);
 
 export default function (grunt) {
   grunt.registerTask('_build:osShellScripts', async function osShellScripts() {
@@ -13,7 +13,7 @@ export default function (grunt) {
     const allPlatforms = fn => invokeAllAsync(platforms, fn);
 
     try {
-      await allPlatforms(platform => punlink(join(platform.buildDir, 'bin')));
+      await allPlatforms(platform => primraf(join(platform.buildDir, 'bin')));
       await allPlatforms(platform => pncp(source, join(platform.buildDir, 'bin')));
       await allPlatforms(platform => removeExtraneousShellScripts(grunt, platform));
       done();
@@ -31,7 +31,7 @@ function removeExtraneousShellScripts(grunt, platform) {
   return Promise.all(grunt.file
     .expand(join(platform.buildDir, 'bin', '*'))
     .filter(file => isExtraneous(platform, file))
-    .map(file => punlink(file)));
+    .map(file => primraf(file)));
 }
 
 function isExtraneous(platform, file) {
