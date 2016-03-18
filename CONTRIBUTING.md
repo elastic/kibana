@@ -128,7 +128,7 @@ Runs both server and browser tests, but skips linting
 Run only the server tests
 
 `npm run test:browser`  
-Run only the browser tests
+Run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 `npm run test:dev`  
 Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.  
