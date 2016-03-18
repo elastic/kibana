@@ -11,6 +11,7 @@ uiModules
     template: visOptionsTemplate,
     scope: {
       vis: '=',
+      savedVis: '=',
     },
     link: function ($scope, $el) {
       const $optionContainer = $el.find('.visualization-options');

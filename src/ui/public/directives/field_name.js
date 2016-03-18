@@ -15,25 +15,25 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
       var typeIcon = function (fieldType) {
         switch (fieldType) {
           case 'source':
-            return '<i class="fa fa-file-text-o "></i>';
+            return '<i title="source" class="fa fa-file-text-o "></i>';
           case 'string':
-            return '<i><strong>t</strong></i>';
+            return '<i title="string"><strong>t</strong></i>';
           case 'murmur3':
-            return '<i><strong>h</strong></i>';
+            return '<i title="murmur3"><strong>h</strong></i>';
           case 'number':
-            return '<i><strong>#</strong></i>';
+            return '<i title="number"><strong>#</strong></i>';
           case 'date':
-            return '<i class="fa fa-clock-o"></i>';
+            return '<i title="date" class="fa fa-clock-o"></i>';
           case 'ip':
-            return '<i class="fa fa-laptop"></i>';
+            return '<i title="ip" class="fa fa-laptop"></i>';
           case 'geo_point':
-            return '<i class="fa fa-globe"></i>';
+            return '<i title="geo_point" class="fa fa-globe"></i>';
           case 'boolean':
-            return '<i class="fa fa-adjust"></i>';
+            return '<i title="boolean" class="fa fa-adjust"></i>';
           case 'conflict':
-            return '<i class="fa fa-warning"></i>';
+            return '<i title="conflict" class="fa fa-warning"></i>';
           default:
-            return '<i><strong>?</strong></i>';
+            return '<i title="unknown"><strong>?</strong></i>';
         }
       };
 

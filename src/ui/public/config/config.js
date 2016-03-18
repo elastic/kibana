@@ -3,19 +3,19 @@ import _ from 'lodash';
 import ConfigDefaultsProvider from 'ui/config/defaults';
 import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
 import ConfigValsProvider from 'ui/config/_vals';
-import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
+import DocSourceProvider from 'ui/courier/data_source/doc_source';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana/config', [
-  'kibana/notify'
-]);
+import Notifier from 'ui/notify/notifier';
+
+var module = uiModules.get('kibana/config');
 
 uiRoutes.addSetupWork(function (config) {
   return config.init();
 });
 
 // service for delivering config variables to everywhere else
-module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
+module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, buildNum) {
   var config = this;
 
   var defaults = Private(ConfigDefaultsProvider);
@@ -30,7 +30,7 @@ module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $roo
   // update once it is requested by calling #set() or #clear().
   var updater;
 
-  var DocSource = Private(CourierDataSourceDocSourceProvider);
+  var DocSource = Private(DocSourceProvider);
   var doc = (new DocSource())
     .index(kbnIndex)
     .type('config')

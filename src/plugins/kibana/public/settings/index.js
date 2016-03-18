@@ -20,7 +20,7 @@ uiRoutes
   redirectTo: '/settings/indices'
 });
 
-require('ui/index_patterns/routeSetup/loadDefault')({
+require('ui/index_patterns/route_setup/load_default')({
   notRequiredRe: /^\/settings\//,
   whenMissingRedirectTo: '/settings/indices'
 });

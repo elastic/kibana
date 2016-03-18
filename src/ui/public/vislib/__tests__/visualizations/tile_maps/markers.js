@@ -1,7 +1,7 @@
 
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import L from 'leaflet';
 import sinon from 'auto-release-sinon';
@@ -305,7 +305,7 @@ describe('Marker Tests', function () {
           var arr = markerLayer._dataToHeatArray(max);
           var index = _.random(mapData.features.length - 1);
           var feature = mapData.features[index];
-          var featureValue = parseInt(feature.properties.value / max * 100);
+          var featureValue = feature.properties.value / max;
           var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });

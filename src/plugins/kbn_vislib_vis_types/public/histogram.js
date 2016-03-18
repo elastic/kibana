@@ -1,5 +1,5 @@
-import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/VislibVisType';
-import VisSchemasProvider from 'ui/Vis/Schemas';
+import VislibVisTypeVislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
+import VisSchemasProvider from 'ui/vis/schemas';
 import histogramTemplate from 'plugins/kbn_vislib_vis_types/editors/histogram.html';
 
 export default function HistogramVisType(Private) {
@@ -11,7 +11,7 @@ export default function HistogramVisType(Private) {
     title: 'Vertical bar chart',
     icon: 'fa-bar-chart',
     description: 'The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, ' +
-    'exact numbers or percentages. If you are not sure which chart your need, you could do worse than to start here.',
+    'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.',
     params: {
       defaults: {
         shareYAxis: true,

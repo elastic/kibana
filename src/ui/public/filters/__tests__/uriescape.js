@@ -1,7 +1,7 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
 
 

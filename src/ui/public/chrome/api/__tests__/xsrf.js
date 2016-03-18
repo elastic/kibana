@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import expect from 'expect.js';
 import { stub } from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 
 import xsrfChromeApi from '../xsrf';
 import { version } from '../../../../../../package.json';
