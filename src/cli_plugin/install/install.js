@@ -4,7 +4,7 @@ import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { sync as rimrafSync } from 'rimraf';
 import { renameSync } from 'fs';
-import { existingInstall, rebuildCache, checkVersion } from './kibana';
+import { existingInstall, rebuildCache, assertVersion } from './kibana';
 import mkdirp from 'mkdirp';
 
 const mkdir = Promise.promisify(mkdirp);
@@ -25,7 +25,7 @@ export default async function install(settings, logger) {
 
     existingInstall(settings, logger);
 
-    checkVersion(settings);
+    assertVersion(settings);
 
     renameSync(settings.workingPath, settings.plugins[0].path);
 

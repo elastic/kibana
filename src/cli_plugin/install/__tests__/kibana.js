@@ -4,7 +4,7 @@ import Logger from '../../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import { existingInstall, checkVersion } from '../kibana';
+import { existingInstall, assertVersion } from '../kibana';
 
 describe('kibana cli', function () {
 
@@ -24,7 +24,7 @@ describe('kibana cli', function () {
 
       const logger = new Logger(settings);
 
-      describe('checkVersion', function () {
+      describe('assertVersion', function () {
 
         beforeEach(function () {
           rimraf.sync(testWorkingPath);
@@ -43,7 +43,7 @@ describe('kibana cli', function () {
           const errorStub = sinon.stub();
 
           try {
-            checkVersion(settings);
+            assertVersion(settings);
           }
           catch (err) {
             errorStub(err);
@@ -57,7 +57,49 @@ describe('kibana cli', function () {
           settings.plugins[0].version = '1.2.3.4';
 
           try {
-            checkVersion(settings);
+            assertVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.firstCall.args[0]).to.match(/incorrect version/i);
+        });
+
+        it('should not throw an error if plugin version matches kibana version', function () {
+          const errorStub = sinon.stub();
+          settings.plugins[0].version = '1.0.0';
+
+          try {
+            assertVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.called).to.be(false);
+        });
+
+        it('should ignore version info after the dash in checks on valid version', function () {
+          const errorStub = sinon.stub();
+          settings.plugins[0].version = '1.0.0-foo-bar-version-1.2.3';
+
+          try {
+            assertVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.called).to.be(false);
+        });
+
+        it('should ignore version info after the dash in checks on invalid version', function () {
+          const errorStub = sinon.stub();
+          settings.plugins[0].version = '2.0.0-foo-bar-version-1.2.3';
+
+          try {
+            assertVersion(settings);
           }
           catch (err) {
             errorStub(err);
