@@ -9,11 +9,11 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
   return {
     restrict: 'E',
     scope: {
-      perPage: '=',
+      perPage: '=?',
       list: '=',
       listProperty: '=',
-      userMakeUrl: '=',
-      userOnSelect: '='
+      userMakeUrl: '=?',
+      userOnSelect: '=?'
     },
     template: paginatedSelectableListTemplate,
     controller: function ($scope, $element, $filter) {
@@ -41,11 +41,15 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
       };
 
       $scope.makeUrl = function (hit) {
-        return $scope.userMakeUrl(hit);
+        if ($scope.userMakeUrl) {
+          return $scope.userMakeUrl(hit);
+        }
       };
 
       $scope.onSelect = function (hit, $event) {
-        return $scope.userOnSelect(hit, $event);
+        if ($scope.userOnSelect) {
+          return $scope.userOnSelect(hit, $event);
+        }
       };
 
       $scope.$watch('query', function (val) {
