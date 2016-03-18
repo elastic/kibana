@@ -15,19 +15,9 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
 
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
+        common.debug('navigateToApp visualize');
+        return common.navigateToApp('visualize')//;
+        // })
         .catch(common.handleError(this));
       });
 

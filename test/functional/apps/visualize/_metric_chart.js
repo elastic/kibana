@@ -31,29 +31,9 @@ define(function (require) {
         common.debug('Start of test' + testSubName + 'Visualization');
         var vizName1 = 'Visualization ' + testSubName;
 
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          return settingsPage.clickAdvancedTab();
-        })
-        .then(function GetAdvancedSetting() {
-          common.debug('check for required UTC timezone');
-          return settingsPage.getAdvancedSettings('dateFormat:tz');
-        })
-        .then(function (advancedSetting) {
-          expect(advancedSetting).to.be('UTC');
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
+        common.debug('navigateToApp visualize');
+        return common.navigateToApp('visualize')//;
+        // })
         .then(function () {
           common.debug('clickMetric');
           return visualizePage.clickMetric();
@@ -284,7 +264,8 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should show Percentile Ranks', function pageHeader() {
+        bdd.it('should show Percentile Ranks, take screenshot', function pageHeader() {
+          var testSubName = 'MetricChart';
           var percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
           common.debug('Aggregation = Percentile Ranks');
           return visualizePage.selectAggregation('Percentile Ranks')
@@ -306,6 +287,37 @@ define(function (require) {
                   expect(percentileRankBytes).to.eql(metricValue.split('\n'));
                 });
             });
+          })
+          .then(function takeScreenshot() {
+            common.debug('Take screenshot');
+            common.saveScreenshot('./screenshot-' + testSubName + '.png');
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should save and load', function pageHeader() {
+          var testSubName = 'MetricChart';
+          common.debug('Start of test' + testSubName + 'Visualization');
+          var vizName1 = 'Visualization ' + testSubName;
+          var remote = this.remote;
+
+          return visualizePage.saveVisualization(vizName1)
+          .then(function (message) {
+            common.debug('Saved viz message = ' + message);
+            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return visualizePage.waitForToastMessageGone();
+          })
+          .then(function () {
+            return visualizePage.loadSavedVisualization(vizName1);
+          })
+          .then(function waitForVisualization() {
+            return visualizePage.waitForVisualization();
+          })
+          // sleep a bit before trying to get the pie chart data below
+          .then(function sleep() {
+            return common.sleep(2000);
           })
           .catch(common.handleError(this));
         });
