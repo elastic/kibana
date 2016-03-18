@@ -16,11 +16,7 @@ const SERVER_DEFAULTS = {
   logging: {
     quiet: true
   },
-  plugins: {
-    scanDirs: [
-      fromRoot('src/plugins')
-    ]
-  },
+  plugins: {},
   optimize: {
     enabled: false
   },
