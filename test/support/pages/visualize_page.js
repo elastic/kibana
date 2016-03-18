@@ -436,7 +436,9 @@ define(function (require) {
       .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
       .getVisibleText()
       .then(function (yLabel) {
-        yAxisLabel = yLabel.replace(',', '').replace('%','');
+        // since we're going to use the y-axis 'last' (top) label as a number to
+        // scale the chart pixel data, we need to clean out commas and % marks.
+        yAxisLabel = yLabel.replace(/(%|,)/g, '');
         common.debug('yAxisLabel = ' + yAxisLabel);
         return yLabel;
       })
@@ -458,6 +460,10 @@ define(function (require) {
       })
       .then(function (data) {
         common.debug(data);
+        // This area chart data starts with a 'M'ove to a x,y location, followed
+        // by a bunch of 'L'ines from that point to the next.  Those points are
+        // the values we're going to use to calculate the data values we're testing.
+        // So git rid of the one 'M' and split the rest on the 'L's.
         tempArray = data.replace('M','').split('L');
         chartSections = tempArray.length / 2;
         common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
