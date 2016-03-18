@@ -101,10 +101,9 @@ module.exports = function registerPost(server) {
                   match: '*',
                   match_mapping_type: 'string',
                   mapping: {
-                    type: 'string',
-                    index: 'analyzed',
+                    type: 'text',
                     fields: {
-                      raw: {type: 'string', index: 'not_analyzed', doc_values: true, ignore_above: 256}
+                      raw: {type: 'keyword', ignore_above: 256}
                     }
                   }
                 }

@@ -36,6 +36,22 @@ class Status extends EventEmitter {
       since: this.since
     };
   }
+
+  on(eventName, handler) {
+    super.on(eventName, handler);
+
+    if (eventName === this.state) {
+      setImmediate(() => handler(this.state, this.message));
+    }
+  }
+
+  once(eventName, handler) {
+    if (eventName === this.state) {
+      setImmediate(() => handler(this.state, this.message));
+    } else {
+      super.once(eventName, handler);
+    }
+  }
 }
 
 states.all.forEach(function (state) {
