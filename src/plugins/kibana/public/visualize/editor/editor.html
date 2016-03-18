@@ -1,5 +1,5 @@
 <div ng-controller="VisEditor" class="app-container vis-editor vis-type-{{ vis.type.name }}">
-  <navbar name="visualize-options" class="kibana-nav-options" ng-if="chrome.getVisible()">
+  <navbar name="visualize" class="kibana-nav-options" ng-if="chrome.getVisible()">
     <div class="vis-editor-info">
       <span ng-show="savedVis.id" class="vis-editor-info-title">
         <span ng-bind="::savedVis.title"></span>
