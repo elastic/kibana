@@ -28,7 +28,7 @@ describe('kibana cli', function () {
         sinon.spy(program, 'description');
 
         index(program);
-        expect(program.description.calledWith('Install a plugin')).to.be(true);
+        expect(program.description.calledWith('install a plugin')).to.be(true);
 
         program.description.restore();
       });
