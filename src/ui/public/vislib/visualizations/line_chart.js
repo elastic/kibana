@@ -291,6 +291,9 @@ export default function LineChartFactory(Private) {
 
         var layers = data.series.map(function mapSeries(d) {
           var label = d.label;
+          if (self._attr.hideZeros) {
+            d.values = d.values.filter(function (e) { return e.y; });
+          }
           return d.values.map(function mapValues(e, i) {
             return {
               _input: e,

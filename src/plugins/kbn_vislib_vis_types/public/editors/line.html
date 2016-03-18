@@ -18,6 +18,12 @@
       Show Circles
     </label>
   </div>
+  <div>
+    <label>
+      <input type="checkbox" value="{{hideZeros}}" ng-model="vis.params.hideZeros" name="hideZeros"  ng-checked="vis.params.hideZeros">
+      Hide Zero Values
+    </label>
+  </div>
 </div>
 <point-series-options></point-series-options>
 <vislib-basic-options></vislib-basic-options>

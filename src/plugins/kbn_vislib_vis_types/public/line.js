@@ -22,6 +22,7 @@ export default function HistogramVisType(Private) {
         interpolate: 'linear',
         scale: 'linear',
         drawLinesBetweenPoints: true,
+        hideZeros: false,
         radiusRatio: 9,
         times: [],
         addTimeMarker: false,
