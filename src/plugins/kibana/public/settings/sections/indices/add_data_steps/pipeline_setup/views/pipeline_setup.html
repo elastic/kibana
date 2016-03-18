@@ -1,0 +1,33 @@
+<source-data sample="sample" samples="samples"></source-data>
+
+<pipeline-output pipeline="pipeline"></pipeline-output>
+
+<div class="form-group">
+  <label>Processor Pipeline:</label>
+  <ul
+    class="pipeline-container"
+    ng-show="pipeline.processors.length > 0">
+    <li ng-repeat="processor in pipeline.processors track by processor.processorId">
+      <processor-ui-container pipeline="pipeline" processor="processor"></processor-ui-container>
+    </li>
+  </ul>
+  <div
+    class="empty-pipeline"
+    ng-hide="pipeline.processors.length > 0">
+    <p>Your pipeline is currently empty. Add a processor to get started!</p>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>Processor Type:</label>
+  <select
+    class="form-control"
+    ng-options="processorType.title for processorType in processorTypes"
+    ng-model="processorType">
+  </select>
+</div>
+<button
+  ng-click="pipeline.add(processorType.Type)"
+  ng-disabled="!processorType">
+  Add Processor
+</button>

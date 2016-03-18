@@ -1,0 +1,436 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import Pipeline from '../../lib/pipeline';
+
+describe('processor pipeline', function () {
+
+  class TestProcessor {
+    constructor(processorId) {
+      this.processorId = processorId;
+    }
+
+    setParent(newParent) { }
+  }
+
+  function getProcessorIds(pipeline) {
+    return pipeline.processors.map(p => p.processorId);
+  }
+
+  describe('model', function () {
+
+    it('should only contain the clean data properties', function () {
+      const pipeline = new Pipeline();
+      const actual = pipeline.model;
+      const expectedKeys = [ 'input', 'processors' ];
+
+      expect(_.keys(actual)).to.eql(expectedKeys);
+    });
+
+    it('should access the model property of each processor', function () {
+      const pipeline = new Pipeline();
+      pipeline.input = { foo: 'bar' };
+      pipeline.add(TestProcessor);
+      pipeline.processors[0].model = { bar: 'baz' };
+
+      const actual = pipeline.model;
+      const expected = { input: pipeline.input, processors: [ pipeline.processors[0].model ]};
+
+      expect(actual).to.eql(expected);
+    });
+
+  });
+
+  describe('load', function () {
+
+    it('should remove existing processors from the pipeline', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const oldProcessors = [ pipeline.processors[0], pipeline.processors[1], pipeline.processors[2] ];
+
+      const newPipeline = new Pipeline();
+      newPipeline.add(TestProcessor);
+      newPipeline.add(TestProcessor);
+      newPipeline.add(TestProcessor);
+
+      pipeline.load(newPipeline);
+
+      expect(_.find(pipeline.processors, oldProcessors[0])).to.be(undefined);
+      expect(_.find(pipeline.processors, oldProcessors[1])).to.be(undefined);
+      expect(_.find(pipeline.processors, oldProcessors[2])).to.be(undefined);
+    });
+
+    it('should call addExisting for each of the imported processors', function () {
+      const pipeline = new Pipeline();
+      sinon.stub(pipeline, 'addExisting');
+
+      const newPipeline = new Pipeline();
+      newPipeline.add(TestProcessor);
+      newPipeline.add(TestProcessor);
+      newPipeline.add(TestProcessor);
+
+      pipeline.load(newPipeline);
+
+      expect(pipeline.addExisting.calledWith(newPipeline.processors[0])).to.be(true);
+      expect(pipeline.addExisting.calledWith(newPipeline.processors[1])).to.be(true);
+      expect(pipeline.addExisting.calledWith(newPipeline.processors[2])).to.be(true);
+    });
+
+  });
+
+  describe('remove', function () {
+
+    it('remove the specified processor from the processors collection', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+
+      const processorIds = getProcessorIds(pipeline);
+
+      pipeline.remove(pipeline.processors[1]);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[2]);
+    });
+
+  });
+
+  describe('add', function () {
+
+    it('should append new items to the processors collection', function () {
+      const pipeline = new Pipeline();
+
+      expect(pipeline.processors.length).to.be(0);
+
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+
+      expect(pipeline.processors.length).to.be(3);
+    });
+
+    it('should append assign each new processor a unique processorId', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+
+      const ids =  pipeline.processors.map((p) => { return p.processorId; });
+      expect(_.uniq(ids).length).to.be(3);
+    });
+
+    it('added processors should be an instance of the type supplied', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+
+      expect(pipeline.processors[0] instanceof TestProcessor).to.be(true);
+      expect(pipeline.processors[1] instanceof TestProcessor).to.be(true);
+      expect(pipeline.processors[2] instanceof TestProcessor).to.be(true);
+    });
+
+  });
+
+  describe('addExisting', function () {
+
+    it('should append new items to the processors collection', function () {
+      const pipeline = new Pipeline();
+
+      expect(pipeline.processors.length).to.be(0);
+
+      const testProcessor = new TestProcessor();
+      testProcessor.processorId = 'foo';
+      testProcessor.foo = 'bar';
+      testProcessor.bar = 'baz';
+
+      pipeline.addExisting(testProcessor);
+
+      expect(pipeline.processors.length).to.be(1);
+    });
+
+    it('should instanciate an object of the same class as the object passed in', function () {
+      const pipeline = new Pipeline();
+
+      const testProcessor = new TestProcessor();
+      testProcessor.processorId = 'foo';
+      testProcessor.foo = 'bar';
+      testProcessor.bar = 'baz';
+
+      pipeline.addExisting(testProcessor);
+
+      expect(pipeline.processors[0] instanceof TestProcessor).to.be(true);
+    });
+
+    it('the object added should be a different instance than the object passed in', function () {
+      const pipeline = new Pipeline();
+
+      const testProcessor = new TestProcessor();
+      testProcessor.processorId = 'foo';
+      testProcessor.foo = 'bar';
+      testProcessor.bar = 'baz';
+
+      pipeline.addExisting(testProcessor);
+
+      expect(pipeline.processors[0]).to.not.be(testProcessor);
+    });
+
+    it('the object added should have the same property values as the object passed in (except id)', function () {
+      const pipeline = new Pipeline();
+
+      const testProcessor = new TestProcessor();
+      testProcessor.processorId = 'foo';
+      testProcessor.foo = 'bar';
+      testProcessor.bar = 'baz';
+
+      pipeline.addExisting(testProcessor);
+
+      expect(pipeline.processors[0].foo).to.be('bar');
+      expect(pipeline.processors[0].bar).to.be('baz');
+      expect(pipeline.processors[0].processorId).to.not.be('foo');
+    });
+
+  });
+
+  describe('moveUp', function () {
+
+    it('should be able to move an item up in the array', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[1];
+      pipeline.moveUp(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[1]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[2]);
+    });
+
+    it('should be able to move the same item move than once', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[2];
+      pipeline.moveUp(target);
+      pipeline.moveUp(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[2]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[1]);
+    });
+
+    it('should not move the selected item past the top', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[2];
+      pipeline.moveUp(target);
+      pipeline.moveUp(target);
+      pipeline.moveUp(target);
+      pipeline.moveUp(target);
+      pipeline.moveUp(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[2]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[1]);
+    });
+
+    it('should not allow the top item to be moved up', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[0];
+      pipeline.moveUp(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[1]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[2]);
+    });
+
+  });
+
+  describe('moveDown', function () {
+
+    it('should be able to move an item down in the array', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[1];
+      pipeline.moveDown(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[2]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[1]);
+    });
+
+    it('should be able to move the same item move than once', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[0];
+      pipeline.moveDown(target);
+      pipeline.moveDown(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[1]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[2]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[0]);
+    });
+
+    it('should not move the selected item past the bottom', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[0];
+      pipeline.moveDown(target);
+      pipeline.moveDown(target);
+      pipeline.moveDown(target);
+      pipeline.moveDown(target);
+      pipeline.moveDown(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[1]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[2]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[0]);
+    });
+
+    it('should not allow the bottom item to be moved down', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const target = pipeline.processors[2];
+      pipeline.moveDown(target);
+
+      expect(pipeline.processors[0].processorId).to.be(processorIds[0]);
+      expect(pipeline.processors[1].processorId).to.be(processorIds[1]);
+      expect(pipeline.processors[2].processorId).to.be(processorIds[2]);
+    });
+
+  });
+
+  describe('updateParents', function () {
+
+    it('should set the first processors parent to pipeline.input', function () {
+      const pipeline = new Pipeline();
+      pipeline.input = { foo: 'bar' };
+
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+
+      pipeline.processors.forEach(p => sinon.stub(p, 'setParent'));
+
+      pipeline.updateParents();
+
+      expect(pipeline.processors[0].setParent.calledWith(pipeline.input)).to.be(true);
+    });
+
+    it('should set non-first processors parent to previous processor', function () {
+      const pipeline = new Pipeline();
+      pipeline.input = { foo: 'bar' };
+
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+
+      pipeline.processors.forEach(p => sinon.stub(p, 'setParent'));
+
+      pipeline.updateParents();
+
+      expect(pipeline.processors[1].setParent.calledWith(pipeline.processors[0])).to.be(true);
+      expect(pipeline.processors[2].setParent.calledWith(pipeline.processors[1])).to.be(true);
+      expect(pipeline.processors[3].setParent.calledWith(pipeline.processors[2])).to.be(true);
+    });
+
+    it('should set pipeline.dirty', function () {
+      const pipeline = new Pipeline();
+      pipeline.updateParents();
+
+      expect(pipeline.dirty).to.be(true);
+    });
+
+  });
+
+  describe('getProcessorById', function () {
+
+    it('should return a processor when suppied its id', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      pipeline.add(TestProcessor);
+      const processorIds = getProcessorIds(pipeline);
+
+      const actual = pipeline.getProcessorById(processorIds[2]);
+      const expected = pipeline.processors[2];
+
+      expect(actual).to.be(expected);
+    });
+
+    it('should throw an error if given an unknown id', function () {
+      const pipeline = new Pipeline();
+
+      expect(pipeline.getProcessorById).withArgs('foo').to.throwError();
+    });
+
+  });
+
+  describe('updateOutput', function () {
+
+    it('should set output to be last processors output if processors exist', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(TestProcessor);
+
+      const expected = { foo: 'bar' };
+      pipeline.processors[0].outputObject = expected;
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.be(expected);
+    });
+
+    it('should set output to be undefined if no processors exist', function () {
+      const pipeline = new Pipeline();
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.be(undefined);
+    });
+
+    it('should set pipeline.dirty', function () {
+      const pipeline = new Pipeline();
+      pipeline.updateParents();
+      expect(pipeline.dirty).to.be(true);
+
+      pipeline.updateOutput();
+      expect(pipeline.dirty).to.be(false);
+    });
+
+  });
+
+  // describe('applySimulateResults', function () { });
+
+
+});

@@ -38,23 +38,22 @@
     </div>
 
     <div ng-switch-when="1">
-      <pipeline-step
-        samples="wizard.stepResults.samples"
+      <pipeline-setup
         pipeline="wizard.stepResults.pipeline"
-        sample-docs="wizard.stepResults.sampleDocs">
-      </pipeline-step>
+        samples="wizard.stepResults.samples">
+      </pipeline-setup>
 
       <div class="nav-buttons">
         <button ng-click="wizard.prevStep()">Prev</button>
-        <button ng-disabled="!wizard.stepResults.pipeline || !wizard.stepResults.sampleDocs" ng-click="wizard.nextStep()">Next</button>
+        <button ng-disabled="!wizard.stepResults.pipeline" ng-click="wizard.nextStep()">Next</button>
       </div>
     </div>
 
     <div ng-switch-when="2">
       <pattern-review-step
         index-pattern="wizard.stepResults.indexPattern"
-        sample-docs="wizard.stepResults.sampleDocs"
-        pipeline="wizard.stepResults.pipeline">
+        pipeline="wizard.stepResults.pipeline"
+        sample-doc="wizard.stepResults.pipeline.output">
       </pattern-review-step>
 
       <div class="nav-buttons">
