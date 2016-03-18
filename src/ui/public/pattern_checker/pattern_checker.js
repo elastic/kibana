@@ -25,8 +25,8 @@ module.directive('patternChecker', function () {
         $http.post(chrome.addBasePath(`/api/kibana/${this.pattern}/_count`))
         .then(
           (response) => {
-            this.resultCount = response.count;
-            this.isValidated = !!response.count;
+            this.resultCount = response.data.count;
+            this.isValidated = !!response.data.count;
           },
           (error) => {
             if (error.status === 404) {
