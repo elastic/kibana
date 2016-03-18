@@ -3,7 +3,6 @@ import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
 import { kibanaUser, kibanaServer } from '../shield';
 import KbnServer from '../../src/server/kbn_server';
-import fromRoot from '../../src/utils/from_root';
 import serverConfig from '../server_config';
 
 const SERVER_DEFAULTS = {
