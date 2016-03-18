@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import pkg from '../utils/packageJson';
+import pkg from '../utils/package_json';
 import Command from '../cli/Command';
 import listCommand from './list';
 import installCommand from './install';
@@ -21,7 +21,7 @@ removeCommand(program);
 
 program
 .command('help <command>')
-.description('Get the help for a specific command')
+.description('get the help for a specific command')
 .action(function (cmdName) {
   var cmd = _.find(program.commands, { _name: cmdName });
   if (!cmd) return program.error(`unknown command ${cmdName}`);

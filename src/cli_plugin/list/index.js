@@ -1,4 +1,4 @@
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 import list from './list';
 import Logger from '../lib/logger';
 import { parse } from './settings';
@@ -22,9 +22,9 @@ export default function pluginList(program) {
     .command('list')
     .option(
       '-d, --plugin-dir <path>',
-      'The path to the directory where plugins are stored',
+      'path to the directory where plugins are stored',
       fromRoot('installedPlugins')
     )
-    .description('List installed plugins')
+    .description('list installed plugins')
     .action(processCommand);
 };

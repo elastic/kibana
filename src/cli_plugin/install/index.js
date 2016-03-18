@@ -1,7 +1,7 @@
-import fromRoot from '../../utils/fromRoot';
+import fromRoot from '../../utils/from_root';
 import install from './install';
 import Logger from '../lib/logger';
-import pkg from '../../utils/packageJson';
+import pkg from '../../utils/package_json';
 import { parse, parseMilliseconds } from './settings';
 
 function processCommand(command, options) {
@@ -21,24 +21,24 @@ function processCommand(command, options) {
 export default function pluginInstall(program) {
   program
   .command('install <plugin/url>')
-  .option('-q, --quiet', 'Disable all process messaging except errors')
-  .option('-s, --silent', 'Disable all process messaging')
+  .option('-q, --quiet', 'disable all process messaging except errors')
+  .option('-s, --silent', 'disable all process messaging')
   .option(
     '-c, --config <path>',
-    'Path to the config file',
+    'path to the config file',
     fromRoot('config/kibana.yml')
   )
   .option(
     '-t, --timeout <duration>',
-    'Length of time before failing; 0 for never fail',
+    'length of time before failing; 0 for never fail',
     parseMilliseconds
   )
   .option(
     '-d, --plugin-dir <path>',
-    'The path to the directory where plugins are stored',
+    'path to the directory where plugins are stored',
     fromRoot('installedPlugins')
   )
-  .description('Install a plugin',
+  .description('install a plugin',
 `Common examples:
   install xpack
   install file:///Path/to/my/xpack.zip

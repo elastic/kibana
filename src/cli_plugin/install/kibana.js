@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import fromRoot from '../../utils/fromRoot';
-import KbnServer from '../../server/KbnServer';
+import fromRoot from '../../utils/from_root';
+import KbnServer from '../../server/kbn_server';
 import readYamlConfig from '../../cli/serve/read_yaml_config';
 import { statSync } from 'fs';
 
