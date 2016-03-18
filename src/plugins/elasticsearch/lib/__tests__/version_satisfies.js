@@ -1,4 +1,4 @@
-import versionSatisfies from '../../../../utils/version_satisfies';
+import versionSatisfies from '../version_satisfies';
 import expect from 'expect.js';
 
 const versionChecks = [

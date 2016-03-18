@@ -39,6 +39,26 @@ describe('kibana cli', function () {
           rimraf.sync(testWorkingPath);
         });
 
+        it('should succeed with exact match', function () {
+          const settings = {
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            plugin: 'test-plugin',
+            version: '5.0.0-snapshot',
+            plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo'), version: '5.0.0-snapshot' } ]
+          };
+          const errorStub = sinon.stub();
+
+          try {
+            assertVersion(settings);
+          }
+          catch (err) {
+            errorStub(err);
+          }
+
+          expect(errorStub.called).to.be(false);
+        });
+
         it('should throw an error if plugin does contain a version.', function () {
           const errorStub = sinon.stub();
 

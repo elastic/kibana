@@ -2,7 +2,7 @@ import _ from 'lodash';
 import fromRoot from '../../utils/from_root';
 import KbnServer from '../../server/kbn_server';
 import readYamlConfig from '../../cli/serve/read_yaml_config';
-import versionSatisfies from '../../utils/version_satisfies';
+import { versionSatisfies, cleanVersion } from './version';
 import { statSync } from 'fs';
 
 export function existingInstall(settings, logger) {
@@ -50,8 +50,10 @@ export function assertVersion(settings) {
     throw new Error (`Plugin version not found. Check package.json in archive`);
   }
 
-  if (!versionSatisfies(settings.plugins[0].version, settings.version)) {
+  const actual = cleanVersion(settings.plugins[0].version);
+  const expected = cleanVersion(settings.version);
+  if (!versionSatisfies(actual, expected)) {
     throw new Error (`Incorrect version in plugin [${settings.plugins[0].name}]. ` +
-      `Expected [${settings.version}]; found [${settings.plugins[0].version}]`);
+      `Expected [${expected}]; found [${actual}]`);
   }
 }
