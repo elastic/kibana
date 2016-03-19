@@ -15,36 +15,30 @@
           autocomplete="off" />
       </div>
       <div class="finder-hit-count col-md-3">
-        <span>{{filterCount}} of {{hitCount}}</span>
+        <span>{{ (hits | filter: query).length }} of {{ hitCount }}</span>
       </div>
     </div>
   </div>
 </form>
-<paginate list="hits" per-page="{{perPage}}">
+<paginate list="hits | filter: query" per-page="{{ perPage }}">
   <ul class="li-striped list-group list-group-menu">
-    <li class="list-group-item list-group-menu-item">
+    <li class="list-group-item list-group-menu-item" ng-click="sortHits(hits)">
       <span class="paginate-heading">
         Name
-        <i
-          class="fa"
-          ng-click="sortHits(hits)"
-          ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-        </i>
+        <i class="fa" ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'"></i>
       </span>
     </li>
-    <li
-      class="list-group-item list-group-menu-item"
-      ng-repeat="hit in page | filter: query">
+    <li class="list-group-item list-group-menu-item" ng-repeat="hit in page">
       <div>
-        <a ng-show="userMakeUrl" kbn-href="{{makeUrl(hit)}}">
-          <span>{{hit}}</span>
+        <a ng-show="userMakeUrl" kbn-href="{{ makeUrl(hit) }}">
+          <span>{{ hit }}</span>
         </a>
       </div>
       <div ng-show="userOnSelect" ng-click="onSelect(hit, $event)">
-        <span>{{hit}}</span>
+        <span>{{ hit }}</span>
       </div>
     </li>
-    <li class="list-group-item list-group-no-results" ng-if="hits.length === 0">
+    <li class="list-group-item list-group-no-results" ng-if="(hits | filter: query).length === 0">
       <p>No matches found.</p>
     </li>
   </ul>

@@ -18,8 +18,8 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
     template: paginatedSelectableListTemplate,
     controller: function ($scope, $element, $filter) {
       $scope.perPage = $scope.perPage || 10;
-      $scope.hits = $scope.list = _.sortBy($scope.list, accessor) || [];
-      $scope.filterCount = $scope.hitCount = $scope.hits.length;
+      $scope.hits = $scope.list = _.sortBy($scope.list, accessor);
+      $scope.hitCount = $scope.hits.length;
 
       /**
        * Boolean that keeps track of whether hits are sorted ascending (true)
@@ -51,11 +51,6 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
           return $scope.userOnSelect(hit, $event);
         }
       };
-
-      $scope.$watch('query', function (val) {
-        $scope.hits = $filter('filter')($scope.list, val);
-        $scope.filterCount = $scope.hits.length;
-      });
 
       function accessor(val) {
         const prop = $scope.listProperty;
