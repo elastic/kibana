@@ -4,18 +4,26 @@ import expect from 'expect.js';
 
 import uiModules from 'ui/modules';
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
+import chromeConfigControlsRegistry from 'ui/registry/chrome_config_controls';
 import Registry from 'ui/registry/_registry';
 
 describe('chrome nav controls', function () {
   let compile;
-  let stubRegistry;
+  let stubNavRegistry;
+  let stubConfigRegistry;
 
   beforeEach(ngMock.module('kibana', function (PrivateProvider) {
-    stubRegistry = new Registry({
+    stubNavRegistry = new Registry({
       order: ['order']
     });
 
-    PrivateProvider.swap(chromeNavControlsRegistry, stubRegistry);
+    PrivateProvider.swap(chromeNavControlsRegistry, stubNavRegistry);
+
+    stubConfigRegistry = new Registry({
+      order: ['order']
+    });
+
+    PrivateProvider.swap(chromeConfigControlsRegistry, stubConfigRegistry);
   }));
 
   beforeEach(ngMock.inject(function ($compile, $rootScope) {
@@ -28,7 +36,7 @@ describe('chrome nav controls', function () {
   }));
 
   it('injects templates from the ui/registry/chrome_nav_controls registry', function () {
-    stubRegistry.register(function () {
+    stubNavRegistry.register(function () {
       return {
         name: 'control',
         order: 100,
@@ -40,22 +48,39 @@ describe('chrome nav controls', function () {
     expect($el.find('#testTemplateEl')).to.have.length(1);
   });
 
+  it('injects templates from the ui/registry/chrome_config_controls registry', function () {
+    stubConfigRegistry.register(function () {
+      return {
+        name: 'control',
+        order: 100,
+        navbar: {
+          template: `<span id="testTemplateEl"></span>`
+        }
+      };
+    });
+
+    var $el = compile();
+    expect($el.find('#testTemplateEl')).to.have.length(1);
+  });
+
   it('renders controls in reverse order, assuming that each control will float:right', function () {
-    stubRegistry.register(function () {
+    stubConfigRegistry.register(function () {
       return {
         name: 'control2',
         order: 2,
-        template: `<span id="2", class="testControl"></span>`
+        navbar: {
+          template: `<span id="2", class="testControl"></span>`
+        }
       };
     });
-    stubRegistry.register(function () {
+    stubNavRegistry.register(function () {
       return {
         name: 'control1',
         order: 1,
         template: `<span id="1", class="testControl"></span>`
       };
     });
-    stubRegistry.register(function () {
+    stubNavRegistry.register(function () {
       return {
         name: 'control3',
         order: 3,

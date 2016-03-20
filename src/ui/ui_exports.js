@@ -72,6 +72,7 @@ class UiExports {
       case 'settingsSections':
       case 'docViews':
       case 'hacks':
+      case 'chromeConfigControls':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };

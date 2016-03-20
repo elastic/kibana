@@ -28,23 +28,18 @@ var init = function () {
   clock = sinon.useFakeTimers(moment(anchor).valueOf());
 
   // Create the scope
-  ngMock.inject(function ($rootScope, $compile) {
+  ngMock.inject(function ($rootScope, $compile, timefilter) {
 
     // Give us a scope
     $parentScope = $rootScope;
 
     // Add some parameters to it
-    var timefilter = {
-      time : {
-        from: moment().subtract(15, 'minutes'),
-        to: moment(),
-        mode: undefined
-      },
-      refreshInterval : {
-        value : 0,
-        display : 'Off'
-      }
-    };
+    timefilter.time.from = moment().subtract(15, 'minutes');
+    timefilter.time.to = moment();
+    timefilter.time.mode = undefined;
+    timefilter.refreshInterval.value = 0;
+    timefilter.refreshInterval.display = 'Off';
+
     $parentScope.timefilter = timefilter;
 
     // Create the element
