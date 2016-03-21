@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import angular from 'angular';
-import ConfigTemplate from 'ui/config_template';
 import chrome from 'ui/chrome';
 import 'ui/directives/config';
 import 'ui/courier';
@@ -100,7 +99,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.configTemplate = new ConfigTemplate({
+      $scope.configTemplates = {
         save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
         load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
         share: require('plugins/kibana/dashboard/partials/share.html'),
@@ -108,7 +107,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         options: require('plugins/kibana/dashboard/partials/options.html'),
         filter: require('ui/chrome/config/filter.html'),
         interval: require('ui/chrome/config/interval.html')
-      });
+      };
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -198,7 +197,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         dash.save()
         .then(function (id) {
-          $scope.configTemplate.close('save');
+          $scope.kbnTopNavbar.close('save');
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {

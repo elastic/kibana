@@ -16,37 +16,33 @@
         <span>New</span>
       </button>
       <button
-        ng-click="configTemplate.toggle('save');"
-        ng-class="{active: configTemplate.is('save')}"
+        ng-click="kbnTopNavbar.toggle('save');"
+        ng-class="{active: kbnTopNavbar.is('save')}"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('save') }}"
+        aria-expanded="{{ kbnTopNavbar.is('save') }}"
         aria-label="Save Search">
         <span>Save</span>
       </button>
       <button
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('load') }}"
-        ng-click="configTemplate.toggle('load');"
-        ng-class="{active: configTemplate.is('load')}"
+        aria-expanded="{{ kbnTopNavbar.is('load') }}"
+        ng-click="kbnTopNavbar.toggle('load');"
+        ng-class="{active: kbnTopNavbar.is('load')}"
         aria-label="Load Saved Search">
         <span>Open</span>
       </button>
       <button
         aria-label="Share Search"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('share') }}"
-        ng-class="{active: configTemplate.is('share')}"
-        ng-click="configTemplate.toggle('share');">
+        aria-expanded="{{ kbnTopNavbar.is('share') }}"
+        ng-class="{active: kbnTopNavbar.is('share')}"
+        ng-click="kbnTopNavbar.toggle('share');">
         <span>Share</span>
       </button>
       <kbn-global-timepicker></kbn-global-timepicker>
     </div>
   </navbar>
-  <config
-    config-template="configTemplate"
-    config-object="opts"
-    config-close="configClose"
-  ></config>
+  <kbn-top-navbar templates="configTemplates"></kbn-top-navbar>
   <navbar name="discover-search">
     <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
       <div class="typeahead" kbn-typeahead="discover">
