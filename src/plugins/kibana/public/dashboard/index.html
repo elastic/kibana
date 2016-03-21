@@ -14,47 +14,47 @@
       <button
         aria-label="Save Dashboard"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('save') }}"
-        ng-class="{active: configTemplate.is('save')}"
-        ng-click="configTemplate.toggle('save');">
+        aria-expanded="{{ kbnTopNavbar.is('save') }}"
+        ng-class="{active: kbnTopNavbar.is('save')}"
+        ng-click="kbnTopNavbar.toggle('save');">
         <span>Save</span>
       </button>
       <button
         aria-label="Load Saved Dashboard"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('load') }}"
-        ng-class="{active: configTemplate.is('load')}"
-        ng-click="configTemplate.toggle('load');">
+        aria-expanded="{{ kbnTopNavbar.is('load') }}"
+        ng-class="{active: kbnTopNavbar.is('load')}"
+        ng-click="kbnTopNavbar.toggle('load');">
         <span>Open</span>
       </button>
       <button
         aria-label="Share Dashboard"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('share') }}"
-        ng-class="{active: configTemplate.is('share')}"
-        ng-click="configTemplate.toggle('share');">
+        aria-expanded="{{ kbnTopNavbar.is('share') }}"
+        ng-class="{active: kbnTopNavbar.is('share')}"
+        ng-click="kbnTopNavbar.toggle('share');">
         <span>Share</span>
       </button>
       <button
         aria-label="Add Visualization"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('pickVis') }}"
-        ng-class="{active: configTemplate.is('pickVis')}"
-        ng-click="configTemplate.toggle('pickVis');">
+        aria-expanded="{{ kbnTopNavbar.is('pickVis') }}"
+        ng-class="{active: kbnTopNavbar.is('pickVis')}"
+        ng-click="kbnTopNavbar.toggle('pickVis');">
         <span>Add visualization</span>
       </button>
       <button
         aria-label="Options"
         aria-haspopup="false"
-        aria-expanded="{{ configTemplate.is('options') }}"
-        ng-class="{active: configTemplate.is('options')}"
-        ng-click="configTemplate.toggle('options');">
+        aria-expanded="{{ kbnTopNavbar.is('options') }}"
+        ng-class="{active: kbnTopNavbar.is('options')}"
+        ng-click="kbnTopNavbar.toggle('options');">
         <span>Options</span>
       </button>
       <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
     </div>
   </navbar>
-  <config config-template="configTemplate" config-object="opts"></config>
+  <kbn-top-navbar templates="configTemplates"></kbn-top-navbar>
 
   <navbar ng-show="chrome.getVisible()" name="dashboard-search">
     <form name="queryInput"
@@ -91,7 +91,7 @@
 
   <div ng-show="!state.panels.length" class="text-center start-screen">
     <h2>Ready to get started?</h2>
-    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="configTemplate.open('pickVis'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization"><i aria-hidden="true" class="fa fa-plus-circle"></i></a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit the <a href="#/visualize" title="Visualize">"Visualize"</a> tab to create your first visualization.</p>
+    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="kbnTopNavbar.open('pickVis'); toggleAddVisualization = !toggleAddVisualization" aria-label="Add visualization"><i aria-hidden="true" class="fa fa-plus-circle"></i></a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit the <a href="#/visualize" title="Visualize">"Visualize"</a> tab to create your first visualization.</p>
   </div>
 
   <dashboard-grid></dashboard-grid>

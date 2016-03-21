@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import 'ui/watch_multi';
-import ConfigTemplate from 'ui/config_template';
 import angular from 'angular';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';
@@ -8,75 +7,55 @@ var module = uiModules.get('kibana');
 
 
 /**
- * config directive
+ * kbnTopNavbar directive
  *
- * Creates a full width horizonal config section, usually under a nav/subnav.
+ * The top section that shows the timepicker, load, share and save dialogues.
  * ```
- * <config config-template="configTemplate" config-object="configurable"></config>
+ * <kbn-top-navbar config-template="configTemplate"></kbn-top-navbar>
  * ```
  */
 
-module.directive('config', function ($compile) {
+module.directive('kbnTopNavbar', function ($compile) {
   return {
     restrict: 'E',
-    scope: {
-      configTemplate: '=',
-      configClose: '=',
-      configSubmit: '=',
-      configObject: '='
-    },
-    link: function ($scope, element, attr) {
-      var tmpScope = $scope.$new();
-
-      $scope.$watch('configObject', function (newVal) {
-        $scope[attr.configObject] = $scope.configObject;
-      });
-
-      var wrapTmpl = function (tmpl) {
-        if ($scope.configSubmit) {
-          return '<form role="form" class="container-fluid" ng-submit="configSubmit()">' + tmpl + '</form>';
+    transclude: true,
+    template: `
+      <div class="config" ng-show="kbnTopNavbar.currTemplate">
+        <div id="template_wrapper" class="container-fluid"></div>
+        <div class="config-close remove">
+          <i class="fa fa-chevron-circle-up" ng-click="kbnTopNavbar.close()"></i>
+        </div>
+      </div>`,
+    controller: ['$scope', '$compile', function ($scope, $compile) {
+      const ctrlObj = this;
+      // toggleCurrTemplate(false) to turn it off
+      ctrlObj.toggleCurrTemplate = function (which) {
+        if (ctrlObj.curr === which || !which) {
+          ctrlObj.curr = null;
         } else {
-          return '<div class="container-fluid">' + tmpl + '</div>';
+          ctrlObj.curr = which;
         }
+        const templateToCompile = ctrlObj.templates[ctrlObj.curr] || false;
+        $scope.kbnTopNavbar.currTemplate = templateToCompile ? $compile(templateToCompile)($scope) : false;
       };
 
-      $scope.$watchMulti([
-        'configSubmit',
-        'configTemplate.current || configTemplate'
-      ], function () {
-        var tmpl = $scope.configTemplate;
-        if (tmpl instanceof ConfigTemplate) {
-          tmpl = tmpl.toString();
-        }
-
-        tmpScope.$destroy();
-        tmpScope = $scope.$new();
-
-        var html = '';
-        if (tmpl) {
-          html = $compile('' +
-            '<div class="config" ng-show="configTemplate">' +
-              wrapTmpl(tmpl) +
-            '  <div class="config-close remove">' +
-            '    <i class="fa fa-chevron-circle-up" ng-click="close()"></i>' +
-            '  </div>' +
-            '</div>' +
-            ''
-          )(tmpScope);
-        }
-
-        element.html(html);
-      });
-
-
-      $scope.close = function () {
-        if (_.isFunction($scope.configClose)) $scope.configClose();
-        if ($scope.configTemplate instanceof ConfigTemplate) {
-          $scope.configTemplate.current = null;
-        } else {
-          $scope.configTemplate = null;
+      $scope.kbnTopNavbar = {
+        currTemplate: false,
+        is: which => { return ctrlObj.curr === which; },
+        close: () => { ctrlObj.toggleCurrTemplate(false); },
+        toggle: ctrlObj.toggleCurrTemplate,
+        open: which => {
+          if (ctrlObj.curr !== which) {
+            ctrlObj.toggleCurrTemplate(which);
+          }
         }
       };
+    }],
+    link: function ($scope, element, attr, configCtrl, transcludeFn) {
+      configCtrl.templates = $scope[attr.templates];
+      $scope.$watch('kbnTopNavbar.currTemplate', newVal => {
+        element.find('#template_wrapper').html(newVal);
+      });
     }
   };
 });

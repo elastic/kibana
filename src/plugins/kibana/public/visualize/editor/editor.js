@@ -7,7 +7,6 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
 import angular from 'angular';
-import ConfigTemplate from 'ui/config_template';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import DocTitleProvider from 'ui/doc_title';
@@ -81,13 +80,13 @@ uiModules
   const searchSource = savedVis.searchSource;
 
   // config panel templates
-  const configTemplate = new ConfigTemplate({
+  $scope.configTemplates = {
     save: require('plugins/kibana/visualize/editor/panels/save.html'),
     load: require('plugins/kibana/visualize/editor/panels/load.html'),
     share: require('plugins/kibana/visualize/editor/panels/share.html'),
     filter: require('ui/chrome/config/filter.html'),
     interval: require('ui/chrome/config/interval.html')
-  });
+  };
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);
@@ -129,7 +128,6 @@ uiModules
     $scope.uiState = $state.makeStateful('uiState');
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
-    $scope.configTemplate = configTemplate;
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
     editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -235,7 +233,7 @@ uiModules
 
     savedVis.save()
     .then(function (id) {
-      configTemplate.close('save');
+      $scope.kbnTopNavbar.close('save');
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');
