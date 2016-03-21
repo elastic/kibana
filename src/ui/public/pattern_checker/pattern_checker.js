@@ -26,7 +26,6 @@ module.directive('patternChecker', function () {
         .then(
           (response) => {
             this.resultCount = response.data.count;
-            this.isValidated = !!response.data.count;
           },
           (error) => {
             if (error.status === 404) {
