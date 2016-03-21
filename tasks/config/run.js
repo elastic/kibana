@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   let {resolve} = require('path');
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
-  let uiConfig = require(root('test/serverConfig'));
+  let uiConfig = require(root('test/server_config'));
 
   const stdDevArgs = [
     '--env.name=development',
@@ -86,7 +86,7 @@ module.exports = function (grunt) {
       args: [
         ...buildTestsArgs,
         '--server.port=5610',
-        '--testsBundle.instrument=true',
+        '--tests_bundle.instrument=true',
         ...kbnServerFlags,
       ]
     },
@@ -122,7 +122,7 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.48.2.jar',
+        '<%= downloadSelenium.options.selenium.path %>',
         '-port',
         uiConfig.servers.webdriver.port,
       ]
@@ -138,7 +138,7 @@ module.exports = function (grunt) {
       cmd: 'java',
       args: [
         '-jar',
-        'selenium/selenium-server-standalone-2.48.2.jar',
+        '<%= downloadSelenium.options.selenium.path %>',
         '-port',
         uiConfig.servers.webdriver.port,
       ]

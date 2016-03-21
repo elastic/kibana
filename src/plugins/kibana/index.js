@@ -1,4 +1,5 @@
 import ingest from './server/routes/api/ingest';
+import search from './server/routes/api/search';
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
@@ -33,11 +34,18 @@ module.exports = function (kibana) {
             kbnDefaultAppId: config.get('kibana.defaultAppId')
           };
         }
-      }
+      },
+
+      injectDefaultVars(server, options) {
+        return {
+          kbnIndex: options.index
+        };
+      },
     },
 
     init: function (server, options) {
       ingest(server);
+      search(server);
     }
   });
 

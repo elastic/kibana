@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 
 // Assume interval is in the form (value)(unit), such as "1h"
 var INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');

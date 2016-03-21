@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 
 import DocSourceProvider from '../../data_source/doc_source';
 import DocRequestProvider from '../request/doc';

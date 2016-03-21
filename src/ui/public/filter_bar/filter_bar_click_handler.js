@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import dedupFilters from './lib/dedupFilters';
-import uniqFilters from './lib/uniqFilters';
+import dedupFilters from './lib/dedup_filters';
+import uniqFilters from './lib/uniq_filters';
 import findByParam from 'ui/utils/find_by_param';
 
 export default function (Notifier) {

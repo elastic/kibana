@@ -1,4 +1,4 @@
-import RouteManager from './RouteManager';
+import RouteManager from './route_manager';
 import 'angular-route/angular-route';
 import uiModules from 'ui/modules';
 var defaultRouteManager = new RouteManager();
