@@ -16,7 +16,11 @@ export default function createUrlShortener(Notifier, $http, $location) {
     const formData = { url: relativeUrl };
 
     return $http.post(`${basePath}/shorten`, formData).then((result) => {
-      return `${parsedUrl.protocol}//${parsedUrl.host}${basePath}/goto/${result.data}`;
+      return url.format({
+        protocol: parsedUrl.protocol,
+        host: parsedUrl.host,
+        pathname: `${basePath}/goto/${result.data}`
+      });
     }).catch((response) => {
       notify.error(response);
     });
