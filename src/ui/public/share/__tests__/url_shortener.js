@@ -80,6 +80,43 @@ describe('Url shortener', function () {
       $httpBackend.flush();
     });
 
+    it('should shorten urls with a query string', function (done) {
+      $httpBackend.when('POST', `${basePath}/shorten`).respond(function (type, route, data) {
+        expect(JSON.parse(data).url).to.be('/app/kibana?foo#123');
+        return [200, shareId];
+      });
+      urlShortener.shortenUrl(`http://localhost${basePath}/app/kibana?foo#123`).then(function (url) {
+        expect(url).to.be(`http://localhost${basePath}/goto/id123`);
+        done();
+      });
+      $httpBackend.flush();
+    });
+
+    it('should shorten urls without a hash', function (done) {
+      $httpBackend.when('POST', `${basePath}/shorten`).respond(function (type, route, data) {
+        expect(JSON.parse(data).url).to.be('/app/kibana');
+        return [200, shareId];
+      });
+      urlShortener.shortenUrl(`http://localhost${basePath}/app/kibana`).then(function (url) {
+        expect(url).to.be(`http://localhost${basePath}/goto/id123`);
+        done();
+      });
+      $httpBackend.flush();
+    });
+
+    it('should shorten urls with a query string in the hash', function (done) {
+      const relativeUrl = "/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"; //eslint-disable-line max-len, quotes
+      $httpBackend.when('POST', `${basePath}/shorten`).respond(function (type, route, data) {
+        expect(JSON.parse(data).url).to.be(relativeUrl);
+        return [200, shareId];
+      });
+      urlShortener.shortenUrl(`http://localhost${basePath}${relativeUrl}`).then(function (url) {
+        expect(url).to.be(`http://localhost${basePath}/goto/id123`);
+        done();
+      });
+      $httpBackend.flush();
+    });
+
     afterEach(function () {
       getBasePath.restore();
     });
