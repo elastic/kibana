@@ -3,7 +3,7 @@
   Now that you've got a fresh pipeline and index pattern, let's throw some data at it!
 </div>
 
-<div>
+<div class="install-filebeat">
   <ol>
     <li>Install Filebeat on all servers on which you want to tail logs
       (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-installation.html">
@@ -43,5 +43,10 @@ output:
         instructions
       </a>)
     </li>
+    <li>Verify your filebeat installation below. We'll poll your new index pattern for documents and let you know when
+      they show up. If you'd like to skip this step, simply click Done now.
+    </li>
   </ol>
 </div>
+
+<pattern-checker pattern="installStep.results.indexPattern.id"/>
