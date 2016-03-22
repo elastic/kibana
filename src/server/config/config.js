@@ -60,7 +60,7 @@ module.exports = class Config {
     this[schema] = null;
     unset(this[schemaExts], key);
     unset(this[pendingSets], key);
-    delete this[vals][key];
+    unset(this[vals], key);
   }
 
   resetTo(obj) {
