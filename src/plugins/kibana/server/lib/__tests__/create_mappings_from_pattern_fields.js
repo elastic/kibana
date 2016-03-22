@@ -39,21 +39,21 @@ describe('createMappingsFromPatternFields', function () {
     let mappings = createMappingsFromPatternFields(testFields);
 
     _.forEach(mappings, function (mapping) {
-      if (mapping.type !== 'string') {
+      if (mapping.type !== 'text') {
         expect(_.isEqual(mapping, {
           type: mapping.type,
-          index: 'not_analyzed',
+          index: true,
           doc_values: true
         })).to.be.ok();
       }
     });
   });
 
-  it('should give strings a multi-field mapping', function () {
+  it('should give strings a multi-field mapping with a "text" base type', function () {
     let mappings = createMappingsFromPatternFields(testFields);
 
     _.forEach(mappings, function (mapping) {
-      if (mapping.type === 'string') {
+      if (mapping.type === 'text') {
         expect(mapping).to.have.property('fields');
       }
     });
@@ -68,7 +68,7 @@ describe('createMappingsFromPatternFields', function () {
     expect(mappings.geo.properties).to.have.property('coordinates');
     expect(_.isEqual(mappings.geo.properties.coordinates, {
       type: 'geo_point',
-      index: 'not_analyzed',
+      index: true,
       doc_values: true
     })).to.be.ok();
   });
