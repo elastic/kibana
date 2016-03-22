@@ -12,7 +12,7 @@ scope._ = require('lodash');
 
 function getMapping(fieldName) {
   if (scope.fieldDictionary) {
-    var mapping = scope.fieldDictionary[fieldName];
+    var mapping = scope.fieldDictionary.byName[fieldName];
     if (mapping === undefined) {
       throw new scope.errors.FieldNotFoundInSelectedIndex(fieldName);
     }

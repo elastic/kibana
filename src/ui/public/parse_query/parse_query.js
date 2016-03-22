@@ -20,7 +20,7 @@ define(function (require) {
           var fieldMap;
 
           if ($scope.$parent.indexPattern) {
-            fieldMap = _.chain($scope.$parent.indexPattern.fields).indexBy('name').value();
+            fieldMap = $scope.$parent.indexPattern.fields;
           }
 
           toUser.setIndexPattern(fieldMap);
