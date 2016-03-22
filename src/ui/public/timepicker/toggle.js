@@ -1,16 +1,29 @@
 import UiModules from 'ui/modules';
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
+import { once, clone } from 'lodash';
 
 import toggleHtml from './toggle.html';
 
-// TODO: the chrome-context directive is currently responsible for several variables
-// on scope used by this template. We need to get rid of that directive and move that
-// logic here
+UiModules
+.get('kibana')
+.directive('kbnGlobalTimepicker', (timefilter, globalState) => {
+  const listenForUpdates = once($scope => {
+    $scope.$listen(timefilter, 'update', (newVal, oldVal) => {
+      globalState.time = clone(timefilter.time);
+      globalState.refreshInterval = clone(timefilter.refreshInterval);
+      globalState.save();
+    });
+  });
 
-chromeNavControlsRegistry.register(function () {
   return {
-    name: 'timepicker toggle',
-    order: 100,
-    template: toggleHtml
+    template: toggleHtml,
+    link: ($scope, $el, attrs) => {
+      listenForUpdates($scope);
+
+      $scope.timefilter = timefilter;
+      $scope.toggleRefresh = () => {
+        timefilter.refreshInterval.pause = !timefilter.refreshInterval.pause;
+      };
+    },
   };
 });

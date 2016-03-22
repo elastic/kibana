@@ -12,10 +12,10 @@
       </button>
       <!-- normal save -->
       <button
-        ng-class="{active: configTemplate.is('save')}"
-        ng-click="configTemplate.toggle('save')"
+        ng-class="{active: kbnTopNavbar.is('save')}"
+        ng-click="kbnTopNavbar.toggle('save')"
         ng-if="!editableVis.dirty"
-        aria-expanded="{{ configTemplate.is('save') }}"
+        aria-expanded="{{ kbnTopNavbar.is('save') }}"
         aria-label="Save Visualization">
         <span>Save</span>
       </button>
@@ -25,18 +25,18 @@
         <span>Save</span>
       </button>
       <button
-        ng-class="{active: configTemplate.is('load')}"
-        ng-click="configTemplate.toggle('load')"
+        ng-class="{active: kbnTopNavbar.is('load')}"
+        ng-click="kbnTopNavbar.toggle('load')"
         aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('load') }}"
+        aria-expanded="{{ kbnTopNavbar.is('load') }}"
         aria-label="Load Saved Visualization">
         <span>Load</span>
       </button>
       <button
-        ng-class="{active: configTemplate.is('share')}"
-        ng-click="configTemplate.toggle('share')"
+        ng-class="{active: kbnTopNavbar.is('share')}"
+        ng-click="kbnTopNavbar.toggle('share')"
         aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('share') }}"
+        aria-expanded="{{ kbnTopNavbar.is('share') }}"
         aria-label="Share Visualization">
         <span>Share</span>
       </button>
@@ -45,14 +45,13 @@
         aria-label="Refresh">
         <span>Refresh</span>
       </button>
-      <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
+      <kbn-global-timepicker></kbn-global-timepicker>
     </div>
   </navbar>
-  <config
+  <kbn-top-navbar
     ng-if="chrome.getVisible()"
-    config-template="configTemplate"
-    config-object="opts">
-  </config>
+    templates="configTemplates">
+  </kbn-top-navbar>
 
   <navbar ng-if="chrome.getVisible()" name="visualize-search">
     <div class="fill bitty-modal-container">

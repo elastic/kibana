@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import ConfigTemplate from 'ui/config_template';
 import getSort from 'ui/doc_table/lib/get_sort';
 import rison from 'ui/utils/rison';
 import dateMath from 'ui/utils/date_math';
@@ -97,13 +96,13 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     $scope.showInterval = !$scope.showInterval;
   };
   // config panel templates
-  $scope.configTemplate = new ConfigTemplate({
+  $scope.configTemplates = {
     load: require('plugins/kibana/discover/partials/load_search.html'),
     save: require('plugins/kibana/discover/partials/save_search.html'),
     share: require('plugins/kibana/discover/partials/share_search.html'),
     filter: require('ui/chrome/config/filter.html'),
     interval: require('ui/chrome/config/interval.html')
-  });
+  };
   $scope.timefilter = timefilter;
 
 
@@ -287,7 +286,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
 
       return savedSearch.save()
       .then(function (id) {
-        $scope.configTemplate.close('save');
+        $scope.kbnTopNavbar.close('save');
 
         if (id) {
           notify.info('Saved Data Source "' + savedSearch.title + '"');
