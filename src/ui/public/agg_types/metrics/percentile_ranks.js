@@ -37,6 +37,11 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
         name: 'values',
         editor: valuesEditor,
         default: []
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        }
       }
     ],
     getResponseAggs: function (agg) {
