@@ -66,6 +66,11 @@ bin/kibana plugin --remove marvel
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
 
 [float]
+=== Listing Installed Plugins
+
+Use `--list` or `-l` option to list the currently installed plugins.
+
+[float]
 === Updating Plugins
 
 To update a plugin, remove the current version and reinstall the plugin.

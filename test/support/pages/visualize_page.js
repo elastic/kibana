@@ -326,6 +326,33 @@ define(function (require) {
       });
     },
 
+    clickLoadSavedVisButton: function clickLoadSavedVisButton() {
+      return this.remote
+        .setFindTimeout(defaultTimeout)
+        .findDisplayedByCssSelector('button[aria-label="Load Saved Visualization"]')
+        .click();
+    },
+
+    filterVisByName: function filterVisByName(vizName) {
+      return this.remote
+        .findByCssSelector('input[name="filter"]')
+        .click()
+        // can't uses dashes in saved visualizations when filtering
+        // or extended character sets
+        // https://github.com/elastic/kibana/issues/6300
+        .type(vizName.replace('-',' '));
+    },
+
+    clickVisualizationByLinkText: function clickVisualizationByLinkText(vizName) {
+      var self = this;
+      common.debug('clickVisualizationByLinkText(' + vizName + ')');
+
+      return this.remote
+        .setFindTimeout(defaultTimeout)
+        .findByLinkText(vizName)
+        .click();
+    },
+
     // this starts by clicking the Load Saved Viz button, not from the
     // bottom half of the "Create a new visualization      Step 1" page
     loadSavedVisualization: function loadSavedVisualization(vizName) {
