@@ -1,40 +1,16 @@
 import Promise from 'bluebird';
 import Joi from 'joi';
 import _ from 'lodash';
-import toPath from 'lodash/internal/toPath';
 import override from './override';
+import unset from './unset';
 import createDefaultSchema from './schema';
 import pkg from '../../utils/package_json';
 import clone from './deep_clone_with_buffers';
-import { zipObject } from 'lodash';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
-
-function unset(object, rawPath) {
-  const path = toPath(rawPath);
-
-  switch (path.length) {
-    case 0:
-      return;
-
-    case 1:
-      delete object[rawPath];
-      break;
-
-    default:
-      const leaf = path.pop();
-      const parentPath = path.slice();
-      const parent = _.get(object, parentPath);
-      delete parent[leaf];
-      if (!_.size(parent)) {
-        unset(object, parentPath);
-      }
-      break;
-  }
-}
 
 module.exports = class Config {
   static withDefaultSchema(settings = {}) {
