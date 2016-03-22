@@ -48,7 +48,14 @@ module.exports = function (path) {
       _.forOwn(val, function (subVal, subKey) {
         apply(config, subVal, key + '.' + subKey);
       });
-    } else {
+    }
+    else if (_.isArray(val)) {
+      config[key] = [];
+      val.forEach((subVal, i) => {
+        apply(config, subVal, key + '.' + i);
+      });
+    }
+    else {
       _.set(config, key, val);
     }
   }
