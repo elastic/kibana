@@ -22,7 +22,7 @@
 </form>
 <paginate list="hits | filter: query" per-page="{{ perPage }}">
   <ul class="li-striped list-group list-group-menu">
-    <li class="list-group-item list-group-menu-item" ng-click="sortHits(hits)">
+    <li class="list-group-item" ng-click="sortHits(hits)">
       <span class="paginate-heading">
         Name
         <i class="fa" ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'"></i>
