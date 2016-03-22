@@ -14,19 +14,20 @@ define(function () {
         var div = d3.select(this);
 
         if (!data.series) {
-          div.selectAll('.chart-title')
-          .append('div')
+          var splits = div.selectAll('.chart-title')
+          // .append('div')
           .data(function (d) {
             return d.rows ? d.rows : d.columns;
-          })
-          .enter()
-            .append('div')
+          });
+
+          splits.exit().remove();
+          splits.enter().append('div')
             .attr('class', 'chart-title');
 
           if (data.rows) {
-            d3.select('.x-axis-chart-title').remove();
+            div.select('.x-axis-chart-title').remove();
           } else {
-            d3.select('.y-axis-chart-title').remove();
+            div.select('.y-axis-chart-title').remove();
           }
 
           return div;
