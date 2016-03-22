@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import esBool from './es_bool';
-import versionSatisfies from '../../../utils/version_satisfies';
+import versionSatisfies from './version_satisfies';
 import SetupError from './setup_error';
 
 module.exports = function (server) {
