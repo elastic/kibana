@@ -1,5 +1,4 @@
 import UiModules from 'ui/modules';
-import chrome from 'ui/chrome';
 import { words, camelCase, kebabCase } from 'lodash';
 
 export function kbnUrlDirective(name) {
@@ -8,7 +7,7 @@ export function kbnUrlDirective(name) {
 
   UiModules
   .get('kibana')
-  .directive(name, function (Private) {
+  .directive(name, function (Private, chrome) {
     return {
       restrict: 'A',
       link: function ($scope, $el, $attr) {

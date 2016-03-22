@@ -82,7 +82,7 @@ define(function (require) {
       var types = [];
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findAllByCssSelector('a.wizard-vis-type.ng-scope h4')
+      .findAllByCssSelector('.wizard-type-heading h4')
       .then(function (chartTypes) {
         function getChartType(chart) {
           return chart.getVisibleText();
@@ -134,8 +134,7 @@ define(function (require) {
 
     getMetric: function getMetric() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
-      // .findByCssSelector('div[ng-repeat="metric in metrics"')
+      .setFindTimeout(2000)
       .findByCssSelector('div[ng-controller="KbnMetricVisController"]')
       .getVisibleText();
     },
@@ -150,7 +149,7 @@ define(function (require) {
     clickNewSearch: function clickNewSearch() {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('li[ng-click="stepTwoMode=\'new\'"]')
+      .findByCssSelector('.list-group-item a')
       .click();
     },
 
@@ -274,7 +273,7 @@ define(function (require) {
     setNumericInterval: function setNumericInterval(newValue) {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('input.form-control:nth-child(2)')
+      .findByCssSelector('input[name="interval"]')
       .type(newValue);
     },
 
@@ -289,7 +288,7 @@ define(function (require) {
     clickNewVisualization: function clickNewVisualization() {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="New Visualization"]')
+      .findByCssSelector('button[aria-label="New Visualization"]')
       .click();
     },
 
@@ -298,7 +297,7 @@ define(function (require) {
       var self = this;
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="Save Visualization"]')
+      .findByCssSelector('button[aria-label="Save Visualization"]')
       .click()
       .then(function () {
         return common.sleep(1000);
@@ -314,7 +313,7 @@ define(function (require) {
       .then(function () {
         return self.remote
         .setFindTimeout(defaultTimeout)
-        .findByCssSelector('.btn-primary')
+        .findByCssSelector('.config button[type="submit"]')
         .click();
       })
       // verify that green message at the top of the page.
@@ -327,31 +326,31 @@ define(function (require) {
       });
     },
 
-
     clickLoadSavedVisButton: function clickLoadSavedVisButton() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="Load Saved Visualization"]')
-      .click();
+        .setFindTimeout(defaultTimeout)
+        .findDisplayedByCssSelector('button[aria-label="Load Saved Visualization"]')
+        .click();
     },
 
     filterVisByName: function filterVisByName(vizName) {
       return this.remote
-      .findByCssSelector('input[name="filter"]')
-      .click()
-      // can't uses dashes in saved visualizations when filtering
-      // or extended character sets
-      // https://github.com/elastic/kibana/issues/6300
-      .type(vizName.replace('-',' '));
+        .findByCssSelector('input[name="filter"]')
+        .click()
+        // can't uses dashes in saved visualizations when filtering
+        // or extended character sets
+        // https://github.com/elastic/kibana/issues/6300
+        .type(vizName.replace('-',' '));
     },
 
     clickVisualizationByLinkText: function clickVisualizationByLinkText(vizName) {
       var self = this;
       common.debug('clickVisualizationByLinkText(' + vizName + ')');
+
       return this.remote
-      .setFindTimeout(defaultTimeout)
-      .findByLinkText(vizName)
-      .click();
+        .setFindTimeout(defaultTimeout)
+        .findByLinkText(vizName)
+        .click();
     },
 
     // this starts by clicking the Load Saved Viz button, not from the
@@ -514,7 +513,7 @@ define(function (require) {
             // 5). for each chart element, find the green circle, then the cy position
             function getChartType(chart) {
               return chart
-              .findByCssSelector('circle[' + cssPart + ']')
+              .findByCssSelector('circle[fill="#6eadc1"]')
               .then(function (circleObject) {
                 // common.debug('circleObject = ' + circleObject + ' yAxisHeight= ' + yAxisHeight + ' yAxisLabel= ' + yAxisLabel);
                 return circleObject
@@ -585,7 +584,7 @@ define(function (require) {
             .getAttribute('fill')
             .then(function (fillColor) {
               // we're only getting the Green Bars
-              if (fillColor === '#57c17b') {
+              if (fillColor === '#6eadc1') {
                 return chart
                 .getAttribute('height')
                 .then(function (barHeight) {

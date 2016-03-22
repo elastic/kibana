@@ -25,8 +25,9 @@ define(function (require) {
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
-        return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
-        .click();
+        return self.remote
+          .findDisplayedByCssSelector('option[label="' + propertyValue + '"]')
+          .click();
       })
       .then(function setAdvancedSettingsClickSaveButton() {
         return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
@@ -95,7 +96,7 @@ define(function (require) {
 
     getTimeFieldNameField: function () {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('select[ng-model="index.timeField"]');
+        .findDisplayedByCssSelector('select[ng-model="index.timeField"]');
     },
 
     selectTimeFieldOption: function (selection) {
@@ -122,12 +123,12 @@ define(function (require) {
 
     getTimeFieldOption: function (selection) {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('option[label="' + selection + '"]').click();
+        .findDisplayedByCssSelector('option[label="' + selection + '"]').click();
     },
 
     getCreateButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn');
+        .findDisplayedByCssSelector('.btn');
     },
 
     clickCreateButton: function () {

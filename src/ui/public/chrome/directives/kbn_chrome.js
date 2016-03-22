@@ -35,8 +35,8 @@ export default function (chrome, internals) {
         const onRouteChange = function () {
           let { href } = window.location;
           let persist = chrome.getVisible();
-          internals.trackPossibleSubUrl(href);
           internals.tabs.consumeRouteUpdate(href, persist);
+          internals.trackPossibleSubUrl(href);
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
