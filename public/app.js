@@ -12,13 +12,13 @@ require('plugins/timelion/directives/timelion_grid');
 require('plugins/timelion/directives/docs');
 require('plugins/timelion/app.less');
 
-var timelionLogo = require('plugins/timelion/header.png');
+var timelionLogo = require('plugins/timelion/header.svg');
 document.title = 'Timelion - Kibana';
 
 require('ui/chrome')
 .setBrand({
-  'logo': 'url(' + timelionLogo + ') left no-repeat',
-  'smallLogo': 'url(' + timelionLogo + ') left no-repeat'
+  'logo': 'url(' + timelionLogo + ') left no-repeat #e8488b',
+  'smallLogo': 'url(' + timelionLogo + ') left no-repeat #e8488b'
 }).setTabs([]);
 
 var app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);

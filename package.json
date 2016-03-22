@@ -1,6 +1,6 @@
 {
   "name": "timelion",
-  "version": "0.1.253",
+  "version": "0.1.257",
   "dependencies": {
     "body-parser": "^1.12.0",
     "boom": "^2.8.0",
