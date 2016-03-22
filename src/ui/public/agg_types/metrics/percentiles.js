@@ -35,6 +35,11 @@ export default function AggTypeMetricPercentilesProvider(Private) {
         name: 'percents',
         editor: percentsEditor,
         default: [1, 5, 25, 50, 75, 95, 99]
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        }
       }
     ],
     getResponseAggs: function (agg) {
