@@ -3,10 +3,6 @@
 
 The {version} release of Kibana requires Elasticsearch {esversion} or later.
 
-Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch  
-include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates 
-in the index pattern name.
-
 [float]
 [[enhancements]]
 == Enhancements
