@@ -1,9 +1,9 @@
-import RegisterPost from './register_post';
-import RegisterDelete from './register_delete';
-import RegisterSimulate from './register_simulate';
+import { registerPost } from './register_post';
+import { registerDelete } from './register_delete';
+import { registerSimulate } from './register_simulate';
 
 export default function (server) {
-  RegisterPost(server);
-  RegisterDelete(server);
-  RegisterSimulate(server);
+  registerPost(server);
+  registerDelete(server);
+  registerSimulate(server);
 }
