@@ -6,12 +6,12 @@ require('ui/tooltip');
 require('ui/autoload/styles');
 
 require('./css/sense.less');
-require('./src/controllers/SenseController');
-require('./src/directives/senseHistory');
-require('./src/directives/senseSettings');
-require('./src/directives/senseHelp');
-require('./src/directives/senseWelcome');
-require('./src/directives/senseNavbar');
+require('./src/controllers/sense_controller');
+require('./src/directives/sense_history');
+require('./src/directives/sense_settings');
+require('./src/directives/sense_help');
+require('./src/directives/sense_welcome');
+require('./src/directives/sense_navbar');
 
 require('ui/chrome')
 .setRootTemplate(require('./index.html'))

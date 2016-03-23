@@ -1,4 +1,4 @@
-require('./senseHelpExample');
+require('./sense_help_example');
 
 require('ui/modules')
 .get('app/sense')

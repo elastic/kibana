@@ -1,4 +1,4 @@
-require('./senseHelpExample');
+require('./sense_help_example');
 
 const storage = require('../storage');
 
