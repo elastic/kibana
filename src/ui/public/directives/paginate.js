@@ -194,5 +194,3 @@ uiModules.get('kibana')
     template: paginateControlsTemplate
   };
 });
-
-
