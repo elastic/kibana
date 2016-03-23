@@ -7,13 +7,6 @@ import 'plugins/status_page/status_page.less';
 
 
 const chrome = require('ui/chrome')
-.setTabs([
-  {
-    id: '',
-    title: 'Server Status',
-    activeIndicatorColor: '#EFF0F2'
-  }
-])
 .setRootTemplate(require('plugins/status_page/status_page.html'))
 .setRootController('ui', function ($http, $scope) {
   const ui = this;
@@ -53,4 +46,9 @@ const chrome = require('ui/chrome')
   };
 
   ui.refresh();
+});
+
+require('ui/modules').get('kibana')
+.config(function (appSwitcherEnsureNavigationProvider) {
+  appSwitcherEnsureNavigationProvider.forceNavigation(true);
 });

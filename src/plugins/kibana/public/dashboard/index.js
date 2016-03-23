@@ -105,7 +105,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
         share: require('plugins/kibana/dashboard/partials/share.html'),
         pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
-        options: require('plugins/kibana/dashboard/partials/options.html')
+        options: require('plugins/kibana/dashboard/partials/options.html'),
+        filter: require('ui/chrome/config/filter.html'),
+        interval: require('ui/chrome/config/interval.html')
       });
 
       $scope.refresh = _.bindKey(courier, 'fetch');
@@ -239,7 +241,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
-        addSearch: $scope.addSearch
+        addSearch: $scope.addSearch,
+        timefilter: $scope.timefilter
       };
 
       init();

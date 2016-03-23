@@ -23,37 +23,6 @@
     }
   }
 
-  button {
-    padding: @padding-base-vertical @padding-base-horizontal;
-    font-size: @font-size-base;
-    color: @control-group-link-color;
-    background-color: @control-group-bg;
-
-    &:hover {
-      color: @control-group-link-hover-color;
-      background-color: @control-group-link-hover-bg;
-    }
-
-    .active, &:active, &:focus {
-      color: @control-group-link-active-color;
-      background-color: @control-group-link-active-bg;
-    }
-
-    &[disabled] {
-      color: @control-group-link-disabled-color;
-      background-color: @control-group-link-disabled-bg;
-    }
-
-    &:focus {
-      // because some buttons are all side-to-side, the browser's outline
-      // is cut off by the next button. This causes the outline to be
-      // drawn inside the button. Appplied to all buttons so that it's
-      // uniform within this widget
-      outline-offset: -4px;
-    }
-  }
-
-
   // horizontal group of buttons/form elements
   .button-group,
   .inline-form .input-group {
