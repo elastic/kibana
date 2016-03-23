@@ -63,6 +63,7 @@ class BaseOptimizer {
 
   getConfig() {
     let mapQ = this.sourceMaps ? '?sourceMap' : '';
+    let mapQPre = mapQ ? mapQ + '&' : '?';
 
     return {
       context: fromRoot('.'),
@@ -101,7 +102,7 @@ class BaseOptimizer {
             test: /\.less$/,
             loader: ExtractTextPlugin.extract(
               'style',
-              `css${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+              `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQPre}dumpLineNumbers=comments`
             )
           },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },

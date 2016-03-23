@@ -11,12 +11,25 @@ kbn-settings-objects-view {
   display: block;
 }
 
+nav.navbar {
+  height: 70px;
+}
+
 .settings-nav {
   text-transform: capitalize;
 }
 
 li.kbn-settings-tab:first-letter {
   text-transform: capitalize;
+}
+
+kbn-settings-app {
+  div.app-container {
+    div.container-fluid {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
 }
 
 kbn-settings-objects {
@@ -93,6 +106,8 @@ kbn-settings-objects-view {
 }
 
 .advanced-settings {
+  overflow-x: scroll;
+
   table {
     width: 100%;
 

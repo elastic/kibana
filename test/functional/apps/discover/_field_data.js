@@ -51,7 +51,6 @@ define(function (require) {
         var fromTimeString = 'September 19th 2015, 06:31:44.000';
         var toTimeString = 'September 23rd 2015, 18:31:44.000';
 
-
         bdd.it('search php should show the correct hit count', function () {
           var expectedHitCount = '445';
           return discoverPage.query('php')
