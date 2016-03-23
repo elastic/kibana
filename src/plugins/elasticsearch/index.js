@@ -33,6 +33,16 @@ module.exports = function ({ Plugin }) {
       }).default();
     },
 
+    uiExports: {
+      injectDefaultVars(server, options) {
+        return {
+          esRequestTimeout: options.requestTimeout,
+          esShardTimeout: options.shardTimeout,
+          esApiVersion: options.apiVersion,
+        };
+      }
+    },
+
     init(server, options) {
       const kibanaIndex = server.config().get('kibana.index');
 
@@ -54,7 +64,7 @@ module.exports = function ({ Plugin }) {
         return reply.continue();
       }
 
-      function noCreateIndex({ path }, reply) {
+      function noDirectIndex({ path }, reply) {
         const requestPath = trimRight(trim(path), '/');
         const matchPath = createPath(kibanaIndex);
 
@@ -75,7 +85,7 @@ module.exports = function ({ Plugin }) {
         ['PUT', 'POST', 'DELETE'],
         `/${kibanaIndex}/{paths*}`,
         {
-          pre: [ noCreateIndex, noBulkCheck ]
+          pre: [ noDirectIndex, noBulkCheck ]
         }
       );
 

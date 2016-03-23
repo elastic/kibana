@@ -64,7 +64,6 @@ app.directive('discoverField', function ($compile) {
         $scope.toggle(field.name);
         if (field.display) $scope.increaseFieldCounter(field);
 
-        // we are now displaying the field, kill its details
         if (field.details) {
           $scope.toggleDetails(field);
         }
@@ -80,10 +79,11 @@ app.directive('discoverField', function ($compile) {
 
           detailsElem = $(detailsHtml);
           $compile(detailsElem)(detailScope);
-          $elem.append(detailsElem);
+          $elem.append(detailsElem).addClass('active');
         } else {
           delete field.details;
           detailsElem.remove();
+          $elem.removeClass('active');
         }
       };
 

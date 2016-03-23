@@ -2,7 +2,7 @@ import moment from 'moment-timezone';
 import _ from 'lodash';
 
 export default function configDefaultsProvider() {
-  // wraped in provider so that a new instance is given to each app/test
+  // wrapped in provider so that a new instance is given to each app/test
 
   return {
     'buildNum': {
@@ -32,7 +32,7 @@ export default function configDefaultsProvider() {
       type: 'json',
       value:
         '[\n' +
-        '  ["", "hh:mm:ss.SSS"],\n' +
+        '  ["", "HH:mm:ss.SSS"],\n' +
         '  ["PT1S", "HH:mm:ss"],\n' +
         '  ["PT1M", "HH:mm"],\n' +
         '  ["PT1H",\n' +
@@ -112,7 +112,7 @@ export default function configDefaultsProvider() {
     'visualization:colorMapping': {
       type: 'json',
       value: JSON.stringify({
-        'Count': '#57c17b'
+        'Count': '#6eadc1'
       }),
       description: 'Maps values to specified colors within visualizations'
     },

@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import getSort from 'ui/doc_table/lib/get_sort';
 import rison from 'ui/utils/rison';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/notify';
-import 'ui/fixedScroll';
+import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
 import 'ui/courier';
@@ -17,7 +17,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/highlight/highlight_tags';
 import 'ui/share';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import DocTitleProvider from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
@@ -96,15 +96,16 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.toggleInterval = function () {
     $scope.showInterval = !$scope.showInterval;
   };
-
   // config panel templates
   $scope.configTemplate = new ConfigTemplate({
     load: require('plugins/kibana/discover/partials/load_search.html'),
     save: require('plugins/kibana/discover/partials/save_search.html'),
-    share: require('plugins/kibana/discover/partials/share_search.html')
+    share: require('plugins/kibana/discover/partials/share_search.html'),
+    filter: require('ui/chrome/config/filter.html'),
+    interval: require('ui/chrome/config/interval.html')
   });
-
   $scope.timefilter = timefilter;
+
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -147,7 +148,8 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     index: $scope.indexPattern.id,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list
+    indexPatternList: $route.current.locals.ip.list,
+    timefilter: $scope.timefilter
   };
 
   const init = _.once(function () {

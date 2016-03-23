@@ -1,24 +1,23 @@
-<h1>
-  Create a new visualization <br class="visible-xs">
-  <span class="pull-right label label-default hidden-xs">Step 1</span>
-  <span class="label label-default visible-xs">Step 1</span>
-</h1>
-
-<div class="wizard-vis-types">
-  <a class="wizard-vis-type"
-     ng-repeat="type in visTypes.inTitleOrder"
-     ng-href="{{ visTypeUrl(type) }}">
-    <div class="wizard-vis-type-heading">
-      <i aria-hidden="true" class="fa fa-fw" ng-class="type.icon"></i>
-      <h4>{{type.title}}</h4>
+<bread-crumbs></bread-crumbs>
+<div class="wizard">
+  <div class="wizard-column">
+    <h3>Create New Visualization</h3>
+    <div class="wizard-row">
+      <a class="wizard-type" ng-repeat="type in visTypes.inTitleOrder" ng-href="{{ visTypeUrl(type) }}">
+        <div class="wizard-type-heading">
+          <i aria-hidden="true" class="fa fa-fw" ng-class="type.icon"></i>
+          <h4>{{type.title}}</h4>
+        </div>
+        <p class="wizard-type-description">{{type.description}}</p>
+      </a>
     </div>
-    <p class="wizard-vis-type-description">{{type.description}}</p>
-  </a>
+  </div>
+  <div class="wizard-column">
+    <h3>Or, Open a Saved Visualization</h3>
+    <saved-object-finder
+      title="Saved Visualizations"
+      type="visualizations"
+      class="wizard-row">
+    </saved-object-finder>
+  </div>
 </div>
-
-<h1>Or, open a saved visualization</h1>
-
-<saved-object-finder
-        title="Saved Visualizations"
-        type="visualizations">
-</saved-object-finder>

@@ -13,9 +13,10 @@ dashboards that display changes to Elasticsearch queries in real time.
 Setting up Kibana is a snap. You can install Kibana and start exploring your
 Elasticsearch indices in minutes -- no code, no additional infrastructure required. 
 
-NOTE: This guide describes how to use Kibana 4.3. For information about what's new
-in Kibana 4.3, see the <<releasenotes, release notes>>.
+NOTE: This guide describes how to use Kibana {version}. For information about what's new
+in Kibana {version}, see the <<releasenotes, release notes>>.
 
+////
 [float]
 [[data-discovery]]
 === Data Discovery and Visualization
@@ -50,6 +51,7 @@ to correlate related information. For example, we could create a dashboard
 that displays several visualizations of the TFL data:
 
 image:images/TFL-Dashboard.jpg[Dashboard]
+////
 
 For more information about creating and sharing visualizations and dashboards, see the <<visualize, Visualize>> 
 and <<dashboard, Dashboard>> topics. A complete <<getting-started,tutorial>> covering several aspects of Kibana's 
