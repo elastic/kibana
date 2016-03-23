@@ -170,7 +170,6 @@
     "karma-chrome-launcher": "0.2.0",
     "karma-coverage": "0.5.1",
     "karma-firefox-launcher": "0.1.6",
-    "karma-growl-reporter": "0.1.1",
     "karma-ie-launcher": "0.2.0",
     "karma-mocha": "0.2.0",
     "karma-safari-launcher": "0.1.1",
