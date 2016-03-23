@@ -3,7 +3,7 @@ import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import Boom from 'boom';
 import { resolve } from 'path';
-import fromRoot from '../utils/fromRoot';
+import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
@@ -59,25 +59,15 @@ module.exports = async (kbnServer, server, config) => {
     }
   });
 
-  const defaultInjectedVars = {};
-  if (config.has('kibana')) {
-    defaultInjectedVars.kbnIndex = config.get('kibana.index');
-  }
-  if (config.has('elasticsearch')) {
-    defaultInjectedVars.esRequestTimeout = config.get('elasticsearch.requestTimeout');
-    defaultInjectedVars.esShardTimeout = config.get('elasticsearch.shardTimeout');
-    defaultInjectedVars.esApiVersion = config.get('elasticsearch.apiVersion');
-  }
-
   server.decorate('reply', 'renderApp', function (app) {
     const payload = {
       app: app,
-      nav: uiExports.apps,
+      nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
-      vars: defaults(app.getInjectedVars() || {}, defaultInjectedVars),
+      vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
 
     return this.view(app.templateName, {

@@ -17,7 +17,7 @@ uiModules
       const init = function () {
         // This elem should already have a height/width
         const myChart = new vislib.Chart(elem[0], {
-
+          addLegend: false
         });
 
         $scope.$watch('data', function (data) {

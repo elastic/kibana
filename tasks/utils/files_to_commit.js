@@ -5,6 +5,7 @@ import { includes } from 'lodash';
 export default function filesToCommit(path) {
   const simpleGit = new SimpleGit(path);
   const gitDiff = promisify(simpleGit.diff, simpleGit);
+  const pathsToIgnore = ['webpackShims'];
 
   return gitDiff(['--name-status', '--cached'])
   .then(output => {
@@ -12,6 +13,9 @@ export default function filesToCommit(path) {
     .split('\n')
     .map(line => line.trim().split('\t'))
     .filter(parts => parts.length === 2)
+    .filter(parts => {
+      return pathsToIgnore.reduce((prev, curr) => {(prev === false) ? prev : parts[1].indexOf(curr) === -1;}, true);
+    })
     .map(parts => {
       const status = parts.shift();
       const name = parts.join('\t').trim();

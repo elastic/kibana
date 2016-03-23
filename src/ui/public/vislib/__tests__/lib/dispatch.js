@@ -1,7 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import d3 from 'd3';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
@@ -31,7 +31,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       vis = Private(FixturesVislibVisFixtureProvider)();
       persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.render(data, persistedState);
-      SimpleEmitter = require('ui/utils/SimpleEmitter');
+      SimpleEmitter = require('ui/utils/simple_emitter');
     }));
 
     afterEach(function () {

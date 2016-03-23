@@ -1,13 +1,13 @@
 <div class="legend-col-wrapper" ng-if="labels.length">
   <div ng-click="toggleLegend()" class="legend-toggle">
-    <i class="fa" ng-class="open ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+    <i class="legend-icon fa" ng-class="open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left'"></i>
   </div>
   <ul class="legend-ul" ng-show="open">
 
     <li
       ng-repeat="legendData in labels track by legendData.label"
-      ng-mouseenter="highlightSeries(legendData.label)"
-      ng-mouseleave="unhighlightSeries()"
+      ng-mouseenter="highlight($event)"
+      ng-mouseleave="unhighlight($event)"
       data-label="{{legendData.label}}"
       class="legend-value color">
 

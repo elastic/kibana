@@ -1,15 +1,18 @@
 import angular from 'angular';
-import errors from 'ui/errors';
 import _ from 'lodash';
+
+import errors from 'ui/errors';
 import slugifyId from 'ui/utils/slugify_id';
-import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
-import CourierDataSourceSearchSourceProvider from 'ui/courier/data_source/search_source';
-import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import MappingSetupProvider from 'ui/utils/mapping_setup';
+
+import DocSourceProvider from '../data_source/doc_source';
+import SearchSourceProvider from '../data_source/search_source';
+
 export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
 
-  var DocSource = Private(CourierDataSourceDocSourceProvider);
-  var SearchSource = Private(CourierDataSourceSearchSourceProvider);
-  var mappingSetup = Private(UtilsMappingSetupProvider);
+  var DocSource = Private(DocSourceProvider);
+  var SearchSource = Private(SearchSourceProvider);
+  var mappingSetup = Private(MappingSetupProvider);
 
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import 'ui/state_management/global_state';
 import 'ui/config';
 import EventsProvider from 'ui/events';
