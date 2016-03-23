@@ -1,7 +1,7 @@
-const modules = require('ui/modules');
-const template = require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html');
-const _ = require('lodash');
-const editFieldTypeHTML = require('plugins/kibana/settings/sections/indices/partials/_edit_field_type.html');
+import modules from 'ui/modules';
+import template from 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html';
+import _ from 'lodash';
+import editFieldTypeHTML from 'plugins/kibana/settings/sections/indices/partials/_edit_field_type.html';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {

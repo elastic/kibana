@@ -1,6 +1,6 @@
-const expect = require('expect.js');
-const _ = require('lodash');
 import processESIngestSimulateResponse from '../process_es_ingest_simulate_response';
+import expect from 'expect.js';
+import _ from 'lodash';
 
 describe('processESIngestSimulateResponse', function () {
 

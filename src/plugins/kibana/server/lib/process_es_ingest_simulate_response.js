@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 function translateError(esError) {
   const rootCause = _.get(esError, 'root_cause[0]');
