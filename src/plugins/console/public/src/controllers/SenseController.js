@@ -10,7 +10,7 @@ require('ui/modules')
   // require the root app code, which expects to execute once the dom is loaded up
   require('../app');
 
-  const ConfigTemplate = require('ui/ConfigTemplate');
+  const ConfigTemplate = require('ui/config_template');
   const input = require('../input');
   const es = require('../es');
   const storage = require('../storage');

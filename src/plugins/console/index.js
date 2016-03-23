@@ -1,3 +1,5 @@
+import { ProxyConfigCollection } from './server/proxy_config_collection';
+
 module.exports = function (kibana) {
   let { resolve, join, sep } = require('path');
   let Joi = require('joi');
@@ -37,52 +39,116 @@ module.exports = function (kibana) {
         defaultServerUrl: Joi.string().default('http://localhost:9200'),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
         ssl: Joi.object({
-          verify: Joi.boolean().default(true),
+          verify: Joi.boolean(),
         }).default(),
+        proxyConfig: Joi.array().items(
+          Joi.object().keys({
+            match: Joi.object().keys({
+              protocol: Joi.string().default('*'),
+              host: Joi.string().default('*'),
+              port: Joi.string().default('*'),
+              path: Joi.string().default('*')
+            }),
+
+            timeout: Joi.number(),
+            ssl: Joi.object().keys({
+              verify: Joi.boolean(),
+              ca: Joi.array().single().items(Joi.string()),
+              cert: Joi.string(),
+              key: Joi.string()
+            }).default()
+          })
+        ).default([
+          {
+            match: {
+              protocol: '*',
+              host: '*',
+              port: '*',
+              path: '*'
+            },
+
+            timeout: 180000,
+            ssl: {
+              verify: true
+            }
+          }
+        ])
       }).default();
     },
 
     init: function (server, options) {
       const filters = options.proxyFilter.map(str => new RegExp(str));
 
-      // http://hapijs.com/api/8.8.1#route-configuration
-      server.route({
-        path: '/api/console/proxy',
-        method: ['*', 'GET'],
-        config: {
-          handler: {
-            proxy: {
-              mapUri: function (req, cb) {
-                let { uri } = req.query;
-                if (!uri) {
-                  cb(Boom.badRequest('URI is a required param.'));
-                  return;
-                }
+      if (options.ssl && options.ssl.verify) {
+        throw new Error('sense.ssl.verify is no longer supported.');
+      }
 
-                if (!filters.some(re => re.test(uri))) {
-                  const err = Boom.forbidden();
-                  err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
-                  err.output.headers['content-type'] = 'text/plain';
-                  cb(err);
-                  return;
-                }
+      const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
+      const proxyRouteConfig = {
+        validate: {
+          query: Joi.object().keys({
+            uri: Joi.string().uri({
+              allowRelative: false,
+              shema: ['http:', 'https:'],
+            }),
+          }).unknown(true),
+        },
 
-                cb(null, uri);
-              },
-              rejectUnauthorized: options.ssl.verify,
-              passThrough: true,
-              xforward: true,
-              onResponse: function (err, res, request, reply, settings, ttl) {
-                if (err != null) {
-                  reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
-                } else {
-                  reply(null, res);
-                }
-              }
+        pre: [
+          function filterUri(req, reply) {
+            const { uri } = req.query;
+
+            if (!filters.some(re => re.test(uri))) {
+              const err = Boom.forbidden();
+              err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
+              err.output.headers['content-type'] = 'text/plain';
+              reply(err);
+            } else {
+              reply();
             }
           }
+        ],
+
+        handler(req, reply) {
+          const { uri } = req.query;
+
+          reply.proxy({
+            uri,
+            xforward: true,
+            passThrough: true,
+            onResponse(err, res, request, reply, settings, ttl) {
+              if (err != null) {
+                reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+              } else {
+                reply(null, res);
+              }
+            },
+
+            ...proxyConfigCollection.configForUri(uri)
+          })
+        }
+      };
+
+      server.route({
+        path: '/api/console/proxy',
+        method: '*',
+        config: {
+          ...proxyRouteConfig,
+
+          payload: {
+            output: 'stream',
+            parse: false
+          },
         }
       });
+
+      server.route({
+        path: '/api/console/proxy',
+        method: 'GET',
+        config: {
+          ...proxyRouteConfig
+        }
+      })
 
       server.route({
         path: '/api/console/api_server',
