@@ -1,5 +1,9 @@
+import RegisterPost from './register_post';
+import RegisterDelete from './register_delete';
+import RegisterSimulate from './register_simulate';
+
 export default function (server) {
-  require('./register_post')(server);
-  require('./register_delete')(server);
-  require('./register_simulate')(server);
+  RegisterPost(server);
+  RegisterDelete(server);
+  RegisterSimulate(server);
 }
