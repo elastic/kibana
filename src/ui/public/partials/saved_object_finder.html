@@ -8,7 +8,7 @@
         <input
           input-focus
           ng-model="filter"
-          ng-attr-placeholder="{{finder.properties.nouns}} Filter..."
+          ng-attr-placeholder="{{finder.properties.nouns | label }} Filter..."
           ng-keydown="finder.filterKeyDown($event)"
           class="form-control"
           name="filter"
