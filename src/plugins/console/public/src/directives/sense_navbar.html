@@ -1,0 +1,62 @@
+<navbar name="sense-options" class="kibana-nav-options">
+  <div class="kibana-nav-info">
+    <span ng-show="dash.id" class="kibana-nav-info-title">
+      Elasticsearch Console
+    </span>
+  </div>
+
+  <div class="button-group kibana-nav-actions" role="toolbar">
+    <button
+      ng-click="sense.dropdown.toggle('history')"
+      aria-label="History"
+      aria-haspopup="true"
+      aria-expanded="{{ sense.dropdown.is('history') }}"
+      ng-class="{active: sense.dropdown.is('save')}">
+      <span>History</span>
+    </button>
+
+    <button
+      aria-label="Settings"
+      aria-haspopup="true"
+      aria-expanded="{{ sense.dropdown.is('settings') }}"
+      ng-class="{active: sense.dropdown.is('settings')}"
+      ng-click="sense.dropdown.toggle('settings');">
+      <span>Settings</span>
+    </button>
+
+    <button
+      aria-label="Help"
+      aria-haspopup="true"
+      aria-expanded="{{ sense.dropdown.is('help') }}"
+      ng-class="{active: sense.dropdown.is('help')}"
+      ng-click="sense.dropdown.toggle('help');">
+      <span>Share</span>
+    </button>
+    <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
+  </div>
+</navbar>
+<config config-template="sense.dropdown" config-object="sense"></config>
+
+<navbar ng-show="chrome.getVisible()" name="sense-serverInput">
+  <form
+    name="serverInput"
+    class="fill inline-form"
+    ng-submit="sense.sendSelected()"
+    role="form">
+
+    <input
+      type="text"
+      placeholder="http://servername:port"
+      aria-label="Server Name"
+      class="form-control"
+      ng-focus="navbar.updateServerUrlHistory()"
+      ng-blur="navbar.commitServerUrlFormModel()"
+
+      sense-uib-typeahead="url for url in navbar.serverUrlHistory"
+      ng-model="navbar.serverUrlFormModel"
+      typeahead-append-to-body="true"
+      typeahead-focus-first="false"
+
+      required>
+  </form>
+</navbar>

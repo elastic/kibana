@@ -5,24 +5,34 @@ require('ui/modules')
 .get('app/sense')
 .directive('senseNavbar', function () {
   return {
-    restrict: 'A',
-    template: require('./navbar.html'),
+    restrict: 'E',
+    template: require('./sense_navbar.html'),
+    require: '^ngController',
+    scope: {},
+    link($scope, $el, attrs, sense) {
+      $scope.sense = sense
+      $scope.navbar.link($scope)
+    },
     controllerAs: 'navbar',
-    controller: function SenseNavbarController($scope, $element) {
-      this.serverUrlHistory = [];
-      this.updateServerUrlHistory = function () {
+    controller: class SenseNavbarController {
+      constructor($scope) {
+        $scope.chrome = require('ui/chrome');
+        this.updateServerUrlHistory();
+      }
+
+      link($scope) {
+        $scope.$watch('sense.serverUrl', (url) => {
+          this.serverUrlFormModel = url
+        })
+      }
+
+      updateServerUrlHistory() {
         this.serverUrlHistory = history.getHistoricalServers();
-      };
+      }
 
-      this.updateServerUrlHistory();
-
-      this.commitServerUrlFormModel = () => {
+      commitServerUrlFormModel() {
         es.setBaseUrl(this.serverUrlFormModel);
-      };
-
-      $scope.$watch('sense.serverUrl', (serverUrl) => {
-        this.serverUrlFormModel = serverUrl;
-      });
+      }
     }
   };
 });
