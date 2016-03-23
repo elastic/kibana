@@ -1,16 +1,24 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import Notifier from 'ui/notify/notifier';
-describe('Notifier', function () {
 
+describe('Notifier', function () {
+  var $interval;
   var message = 'Oh, the humanity!';
   var notifier;
   var params;
   var version = window.__KBN__.version;
   var buildNum = window.__KBN__.buildNum;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(function () {
+    ngMock.module('kibana');
+
+    ngMock.inject(function (_$interval_) {
+      $interval = _$interval_;
+    });
+  });
 
   beforeEach(function () {
     params = { location: 'foo' };
@@ -45,6 +53,45 @@ describe('Notifier', function () {
 
     it('sets lifetime to 5 minutes', function () {
       expect(notify('error').lifetime).to.equal(300000);
+    });
+
+    it('sets timeRemaining and decrements', function () {
+      var notif = notify('error');
+
+      expect(notif.timeRemaining).to.equal(300);
+      $interval.flush(1000);
+      expect(notif.timeRemaining).to.equal(299);
+    });
+
+    it('closes notification on lifetime expiry', function () {
+      var expectation = sinon.mock();
+      var notif = notifier.error(message, expectation);
+
+      expectation.once();
+      expectation.withExactArgs('ignore');
+
+      $interval.flush(300000);
+
+      expect(notif.timerId).to.be(undefined);
+    });
+
+    it('allows canceling of timer', function () {
+      var notif = notify('error');
+
+      expect(notif.timerId).to.not.be(undefined);
+      notif.cancelTimer();
+
+      expect(notif.timerId).to.be(undefined);
+    });
+
+    it('resets timer on addition to stack', function () {
+      var notif = notify('error');
+
+      $interval.flush(100000);
+      expect(notif.timeRemaining).to.equal(200);
+
+      notify('error');
+      expect(notif.timeRemaining).to.equal(300);
     });
 
     it('allows reporting', function () {
