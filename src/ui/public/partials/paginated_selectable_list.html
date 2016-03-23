@@ -29,11 +29,9 @@
       </span>
     </li>
     <li class="list-group-item list-group-menu-item" ng-repeat="hit in page">
-      <div>
-        <a ng-show="userMakeUrl" kbn-href="{{ makeUrl(hit) }}">
-          <span>{{ hit }}</span>
-        </a>
-      </div>
+      <a ng-show="userMakeUrl" kbn-href="{{ makeUrl(hit) }}">
+        <span>{{ hit }}</span>
+      </a>
       <div ng-show="userOnSelect" ng-click="onSelect(hit, $event)">
         <span>{{ hit }}</span>
       </div>
