@@ -309,20 +309,22 @@ describe('Marker Tests', function () {
     });
 
     describe('heatmapScale', function () {
-      var scaleType = 'linear';
+      var scaleTypes = ['linear', 'sqrt', 'log'];
       var callback = function (d) { return d; };
       var features = [10, 20, 30, 40, 50];
       var index = features.length - 1;
       var intensityScale;
 
-      it('should return a function', function () {
-        intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
-        expect(intensityScale).to.be.a('function');
-      });
+      scaleTypes.forEach(function (scaleType) {
+        it('should return a function', function () {
+          intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
+          expect(intensityScale).to.be.a('function');
+        });
 
-      it('should return a value between 0 and 1', function () {
-        intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
-        expect(intensityScale(features[index])).to.be.within(0, 1);
+        it('should return a value between 0 and 1', function () {
+          intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
+          expect(intensityScale(features[index])).to.be.within(0, 1);
+        });
       });
     });
 

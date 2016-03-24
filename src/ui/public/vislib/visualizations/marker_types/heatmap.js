@@ -176,7 +176,6 @@ export default function HeatmapMarkerFactory(Private) {
    * @return {Array}
    */
   HeatmapMarker.prototype._dataToHeatArray = function () {
-    var self = this;
     var scaleType = this._attr.intensityScale || 'linear';
     var features = this.geoJson.features;
     var intensityScale = this._heatmapScale(features, scaleType, function (d) {
