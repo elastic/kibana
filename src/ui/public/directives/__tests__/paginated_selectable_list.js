@@ -30,7 +30,7 @@ lists.forEach(function (list) {
     return _.isPlainObject(item);
   });
 
-  var init = function (arr) {
+  var init = function (arr, willFail) {
     // Load the application
     ngMock.module('kibana');
 
@@ -43,8 +43,13 @@ lists.forEach(function (list) {
       $scope.test = function (val) { return val; };
 
       // Create the element
-      $element = angular.element('<paginated-selectable-list perPage="perPage" list="list"' +
-         'list-property="listProperty" user-make-url="test"></paginated-selectable-list>');
+      if (willFail) {
+        $element = angular.element('<paginated-selectable-list per-page="perPage" list="list"' +
+           'list-property="listProperty" user-make-url="test" user-on-select="test"></paginated-selectable-list>');
+      } else {
+        $element = angular.element('<paginated-selectable-list per-page="perPage" list="list"' +
+           'list-property="listProperty" user-make-url="test"></paginated-selectable-list>');
+      }
 
       // And compile it
       $compile($element)($scope);
@@ -58,8 +63,6 @@ lists.forEach(function (list) {
   };
 
   describe('paginatedSelectableList', function () {
-    var scope;
-
     it('should throw an error when there is no makeUrl and onSelect attribute', ngMock.inject(function ($compile, $rootScope) {
       function errorWrapper() {
         $compile(angular.element('<paginated-selectable-list></paginated-selectable-list>'))($rootScope.new());
@@ -69,32 +72,8 @@ lists.forEach(function (list) {
 
     it('should throw an error with both makeUrl and onSelect attributes', function () {
       function errorWrapper() {
-        // Load the application
-        ngMock.module('kibana');
-
-        // Create the scope
-        ngMock.inject(function ($rootScope, $compile) {
-          $scope = $rootScope.$new();
-          $scope.perPage = 5;
-          $scope.list = list;
-          $scope.listProperty = isArrayOfObjects ? 'title' : undefined;
-          $scope.test = function (val) { return val; };
-
-          // Create the element
-          $element = angular.element('<paginated-selectable-list perPage="perPage" list="list"' +
-             'list-property="listProperty" user-make-url="test" user-on-select="test"></paginated-selectable-list>');
-
-          // And compile it
-          $compile($element)($scope);
-
-          // Fire a digest cycle
-          $element.scope().$digest();
-
-          // Grab the isolate scope so we can test it
-          $isolatedScope = $element.isolateScope();
-        });
+        init(list, true);
       }
-
       expect(errorWrapper).to.throwError();
     });
 
