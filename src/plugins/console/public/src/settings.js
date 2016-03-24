@@ -3,7 +3,7 @@ let es = require('./es');
 const storage = require('./storage');
 
 function getFontSize() {
-  return storage.get('font_size', 12);
+  return storage.get('font_size', 14);
 }
 
 function setFontSize(size) {
