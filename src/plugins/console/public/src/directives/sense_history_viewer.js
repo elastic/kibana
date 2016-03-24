@@ -1,9 +1,12 @@
 const history = require('../history');
 let SenseEditor = require('../sense_editor/editor');
+import { useResizeCheckerProvider } from '../sense_editor_resize';
 
 require('ui/modules')
 .get('app/sense')
-.directive('senseHistoryViewer', function () {
+.directive('senseHistoryViewer', function (Private) {
+  const useResizeChecker = Private(useResizeCheckerProvider);
+
   return {
     restrict: 'E',
     scope: {
@@ -13,6 +16,7 @@ require('ui/modules')
       const viewer = new SenseEditor($el);
       viewer.setReadOnly(true);
       viewer.renderer.setShowPrintMargin(false);
+      useResizeChecker($scope, $el, viewer);
       require('../settings').applyCurrentSettings(viewer);
 
       $scope.$watch('req', function (req) {

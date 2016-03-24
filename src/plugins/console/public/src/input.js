@@ -11,8 +11,14 @@ let storage = require('./storage');
 let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
+import { useResizeCheckerProvider } from './sense_editor_resize';
+import uiModules from 'ui/modules';
 
-var input = new SenseEditor($('#editor'));
+var $el = $('#editor');
+var input = new SenseEditor($el);
+uiModules.get('kibana').run(function (Private, $rootScope) {
+  Private(useResizeCheckerProvider)($rootScope, $el, input, output);
+})
 
 input.autocomplete = new Autocomplete(input);
 

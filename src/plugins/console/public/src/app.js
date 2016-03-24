@@ -122,15 +122,5 @@ history.restoreFromHistory = function applyHistoryElem(req) {
   input.focus();
 };
 
-function resize() {
-  input.resize();
-  output.resize();
-}
-
-resize();
-$(window).resize((event) => {
-  if (event.target === window) resize();
-});
-
 loadSavedState();
 setupAutosave();
