@@ -61,6 +61,13 @@ lists.forEach(function (list) {
 
   describe('paginatedSelectableList', function () {
 
+    it('should throw an error when there is no makeUrl and onSelect attribute', ngMock.inject(function ($compile, $rootScope) {
+      function errorWrapper() {
+        $compile(angular.element('<paginated-selectable-list></paginated-selectable-list>'))($rootScope.new());
+      }
+      expect(errorWrapper).to.throwError();
+    }));
+
     describe('$scope.hits', function () {
       beforeEach(function () {
         init(list);

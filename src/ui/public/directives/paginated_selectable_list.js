@@ -17,6 +17,10 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
     },
     template: paginatedSelectableListTemplate,
     controller: function ($scope, $element, $filter) {
+      if (!$scope.userMakeUrl && !$scope.userOnSelect) {
+        throw new Error('paginatedSelectableList directive expects a makeUrl or onSelect function');
+      }
+
       $scope.perPage = $scope.perPage || 10;
       $scope.hits = $scope.list = _.sortBy($scope.list, accessor);
       $scope.hitCount = $scope.hits.length;
@@ -41,15 +45,11 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
       };
 
       $scope.makeUrl = function (hit) {
-        if ($scope.userMakeUrl) {
-          return $scope.userMakeUrl(hit);
-        }
+        return $scope.userMakeUrl(hit);
       };
 
       $scope.onSelect = function (hit, $event) {
-        if ($scope.userOnSelect) {
-          return $scope.userOnSelect(hit, $event);
-        }
+        return $scope.userOnSelect(hit, $event);
       };
 
       function accessor(val) {
