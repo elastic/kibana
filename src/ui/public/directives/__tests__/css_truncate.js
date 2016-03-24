@@ -4,11 +4,11 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'plugins/kibana/discover/index';
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
+let $elem;
 
 var init = function (expandable) {
   // Load the application

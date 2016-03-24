@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import AggResponsePointSeriesTooltipFormatterProvider from 'ui/agg_response/point_series/_tooltip_formatter';
 describe('tooltipFormatter', function () {
 
-  var tooltipFormatter;
+  let tooltipFormatter;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -5,9 +5,9 @@ import NormalizeSortRequestProvider from 'ui/courier/data_source/_normalize_sort
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('SearchSource#normalizeSortRequest', function () {
-  var normalizeSortRequest;
-  var indexPattern;
-  var normalizedSort;
+  let normalizeSortRequest;
+  let indexPattern;
+  let normalizedSort;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

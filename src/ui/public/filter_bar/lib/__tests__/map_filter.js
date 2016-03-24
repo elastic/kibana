@@ -4,8 +4,8 @@ import ngMock from 'ng_mock';
 import FilterBarLibMapFilterProvider from 'ui/filter_bar/lib/map_filter';
 
 describe('Filter Bar Directive', function () {
-  var mapFilter;
-  var $rootScope;
+  let mapFilter;
+  let $rootScope;
 
 
   beforeEach(ngMock.module(

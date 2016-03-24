@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
 
 
-var filter;
+let filter;
 
 var init = function (expandable) {
   // Load the application

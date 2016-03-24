@@ -106,7 +106,7 @@ uiModules.get('kibana')
         var count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
         _.times(count, function (i) {
-          var page;
+          let page;
 
           if (perPage) {
             var start = perPage * i;

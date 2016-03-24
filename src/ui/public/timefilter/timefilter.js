@@ -84,7 +84,7 @@ uiModules
   }
 
   Timefilter.prototype.get = function (indexPattern) {
-    var filter;
+    let filter;
     var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
 
     if (timefield) {

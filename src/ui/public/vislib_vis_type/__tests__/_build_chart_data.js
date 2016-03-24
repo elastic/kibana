@@ -8,10 +8,10 @@ import AggResponseIndexProvider from 'ui/agg_response/index';
 import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
 describe('renderbot#buildChartData', function () {
 
-  var buildChartData;
-  var aggResponse;
-  var TableGroup;
-  var Table;
+  let buildChartData;
+  let aggResponse;
+  let TableGroup;
+  let Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
