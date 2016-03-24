@@ -64,7 +64,8 @@
         </div>
         <!-- /Full navbar -->
       </nav>
-      <div class="application" ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()" ng-view kbn-loading-indicator></div>
+      <kbn-loading-indicator></kbn-loading-indicator>
+      <div class="application" ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()" ng-view></div>
     </div>
   </div>
 </div>
