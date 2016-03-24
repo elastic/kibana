@@ -7,11 +7,7 @@ UiModules
 .get('ui/kibana')
 .directive('kbnLoadingIndicator', function ($compile) {
   return {
-    restrict: 'AC',
-    link: function (scope, $el) {
-      const $loadingEl = angular.element(spinnerTemplate);
-      $el.append($loadingEl);
-      $compile($loadingEl)(scope);
-    }
+    restrict: 'E',
+    template: spinnerTemplate,
   };
 });
