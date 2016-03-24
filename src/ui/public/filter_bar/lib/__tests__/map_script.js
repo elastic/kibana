@@ -5,8 +5,8 @@ import FilterBarLibMapScriptProvider from 'ui/filter_bar/lib/map_script';
 
 describe('Filter Bar Directive', function () {
   describe('mapScript()', function () {
-    var mapScript;
-    var $rootScope;
+    let mapScript;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

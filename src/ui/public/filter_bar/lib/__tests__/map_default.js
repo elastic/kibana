@@ -4,8 +4,8 @@ import FilterBarLibMapDefaultProvider from 'ui/filter_bar/lib/map_default';
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {
 
-    var mapDefault;
-    var $rootScope;
+    let mapDefault;
+    let $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;

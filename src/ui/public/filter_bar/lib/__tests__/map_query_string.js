@@ -3,8 +3,8 @@ import ngMock from 'ng_mock';
 import FilterBarLibMapQueryStringProvider from 'ui/filter_bar/lib/map_query_string';
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {
-    var mapQueryString;
-    var $rootScope;
+    let mapQueryString;
+    let $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;

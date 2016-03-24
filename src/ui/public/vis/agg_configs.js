@@ -49,8 +49,8 @@ export default function AggConfigsFactory(Private) {
 
   AggConfigs.prototype.toDsl = function () {
     var dslTopLvl = {};
-    var dslLvlCursor;
-    var nestedMetrics;
+    let dslLvlCursor;
+    let nestedMetrics;
 
     if (this.vis.isHierarchical()) {
       // collect all metrics, and filter out the ones that we won't be copying
@@ -86,7 +86,7 @@ export default function AggConfigsFactory(Private) {
       }
 
       var dsl = dslLvlCursor[config.id] = config.toDsl();
-      var subAggs;
+      let subAggs;
 
       if (config.schema.group === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs

@@ -5,9 +5,9 @@ import 'ui/directives/validate_json';
 
 // Load the kibana app dependencies.
 
-var $parentScope;
-var $elemScope;
-var $elem;
+let $parentScope;
+let $elemScope;
+let $elem;
 var mockScope = '';
 
 var input = {

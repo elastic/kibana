@@ -7,8 +7,8 @@ import Status from '../status';
 import ServerStatus from '../server_status';
 
 describe('ServerStatus class', function () {
-  var server;
-  var serverStatus;
+  let server;
+  let serverStatus;
 
   beforeEach(function () {
     server = { expose: sinon.stub(), log: sinon.stub() };

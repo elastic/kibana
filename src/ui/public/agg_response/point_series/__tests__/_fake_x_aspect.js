@@ -6,11 +6,11 @@ import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
 import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
 describe('makeFakeXAspect', function () {
 
-  var makeFakeXAspect;
-  var Vis;
-  var AggType;
-  var AggConfig;
-  var indexPattern;
+  let makeFakeXAspect;
+  let Vis;
+  let AggType;
+  let AggConfig;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
