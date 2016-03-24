@@ -16,7 +16,7 @@ describe('kbnLoadingIndicator', function () {
         $rootScope.chrome = {
           httpActive: (hasActiveConnections ? [1] : [])
         };
-        const $el = $('<div kbn-loading-indicator><div id="other-content"></div></div>');
+        const $el = $('<kbn-loading-indicator></kbn-loading-indicator>');
         $rootScope.$apply();
         $compile($el)($rootScope);
         return $el;
@@ -38,10 +38,4 @@ describe('kbnLoadingIndicator', function () {
     const $el  = compile(true);
     expect($el.find('.spinner.ng-hide')).to.have.length(0);
   });
-
-  it('doesn\'t modify the contents of what the elment already has', function () {
-    const $el = compile();
-    expect($el.find('#other-content')).to.have.length(1);
-  });
-
 });
