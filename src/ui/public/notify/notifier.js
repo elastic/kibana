@@ -5,15 +5,10 @@ import formatMsg from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 /* eslint no-console: 0 */
 
-
-
 var notifs = [];
-var setTO = setTimeout;
-var clearTO = clearTimeout;
 var version = metadata.version;
 var buildNum = metadata.buildNum;
 var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
-
 
 var log = _.bindKey(console, 'log');
 
@@ -34,34 +29,75 @@ function now() {
   return Date.now();
 }
 
-function closeNotif(cb, key) {
+function closeNotif(notif, cb = _.noop, key) {
   return function () {
     // this === notif
-    var i = notifs.indexOf(this);
+    var i = notifs.indexOf(notif);
     if (i !== -1) notifs.splice(i, 1);
-    if (this.timerId) this.timerId = clearTO(this.timerId);
-    if (typeof cb === 'function') cb(key);
+
+    cancelTimer(notif);
+    cb(key);
   };
+}
+
+function cancelTimer(notif) {
+  if (notif.timerId) {
+    Notifier.config.clearInterval(notif.timerId);
+    notif.timerId = undefined;
+  }
+}
+
+function timerCanceler(notif, cb = _.noop, key) {
+  return function cancelNotifTimer() {
+    cancelTimer(notif);
+    cb(key);
+  };
+}
+
+/**
+ * Initiates a timer to update _timeRemaining_ on the notif at second
+ * intervals and clears the notif once the notif _lifetime_ has been reached.
+ */
+function startNotifTimer(notif, cb) {
+  var interval = 1000;
+
+  if (notif.lifetime === Infinity) return;
+
+  notif.timeRemaining = Math.floor(notif.lifetime / interval);
+
+  notif.timerId = Notifier.config.setInterval(function () {
+    notif.timeRemaining -= 1;
+
+    if (notif.timeRemaining === 0) {
+      closeNotif(notif, cb, 'ignore')();
+    }
+  }, interval, notif.timeRemaining);
+
+  notif.cancelTimer = timerCanceler(notif, cb);
+}
+
+function restartNotifTimer(notif, cb) {
+  cancelTimer(notif);
+  startNotifTimer(notif, cb);
 }
 
 function add(notif, cb) {
   _.set(notif, 'info.version', version);
   _.set(notif, 'info.buildNum', buildNum);
 
-  if (notif.lifetime !== Infinity) {
-    notif.timerId = setTO(function () {
-      closeNotif(cb, 'ignore').call(notif);
-    }, notif.lifetime);
-  }
+  notif.clear = closeNotif(notif);
 
-  notif.clear = closeNotif();
   if (notif.actions) {
     notif.actions.forEach(function (action) {
-      notif[action] = closeNotif(cb, action);
+      notif[action] = closeNotif(notif, cb, action);
     });
   }
 
   notif.count = (notif.count || 0) + 1;
+
+  notif.isTimed = function isTimed() {
+    return notif.timerId ? true : false;
+  };
 
   var dup = _.find(notifs, function (item) {
     return item.content === notif.content && item.lifetime === notif.lifetime;
@@ -70,8 +106,13 @@ function add(notif, cb) {
   if (dup) {
     dup.count += 1;
     dup.stacks = _.union(dup.stacks, [notif.stack]);
+
+    restartNotifTimer(dup, cb);
+
     return dup;
   }
+
+  startNotifTimer(notif, cb);
 
   notif.stacks = [notif.stack];
   notifs.push(notif);
@@ -115,14 +156,20 @@ function Notifier(opts) {
   });
 }
 
+Notifier.config = {
+  errorLifetime: 300000,
+  warningLifetime: 10000,
+  infoLifetime: 5000,
+  setInterval: window.setInterval,
+  clearInterval: window.clearInterval
+};
+
+Notifier.applyConfig = function (config) {
+  _.merge(Notifier.config, config);
+};
+
 // to be notified when the first fatal error occurs, push a function into this array.
 Notifier.fatalCallbacks = [];
-
-// set the timer functions that all notification managers will use
-Notifier.setTimerFns = function (set, clear) {
-  setTO = set;
-  clearTO = clear;
-};
 
 // simply a pointer to the global notif list
 Notifier.prototype._notifs = notifs;
@@ -229,7 +276,7 @@ Notifier.prototype.error = function (err, cb) {
     content: formatMsg(err, this.from),
     icon: 'warning',
     title: 'Error',
-    lifetime: 300000,
+    lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
   }, cb);
@@ -246,7 +293,7 @@ Notifier.prototype.warning = function (msg, cb) {
     content: formatMsg(msg, this.from),
     icon: 'warning',
     title: 'Warning',
-    lifetime: 10000,
+    lifetime: Notifier.config.warningLifetime,
     actions: ['accept']
   }, cb);
 };
@@ -262,7 +309,7 @@ Notifier.prototype.info = function (msg, cb) {
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
     title: 'Debug',
-    lifetime: 5000,
+    lifetime: Notifier.config.infoLifetime,
     actions: ['accept']
   }, cb);
 };

@@ -85,6 +85,8 @@ uiModules
     save: require('plugins/kibana/visualize/editor/panels/save.html'),
     load: require('plugins/kibana/visualize/editor/panels/load.html'),
     share: require('plugins/kibana/visualize/editor/panels/share.html'),
+    filter: require('ui/chrome/config/filter.html'),
+    interval: require('ui/chrome/config/interval.html')
   });
 
   if (savedVis.id) {
@@ -125,8 +127,8 @@ uiModules
     $scope.editableVis = editableVis;
     $scope.state = $state;
     $scope.uiState = $state.makeStateful('uiState');
-
-    $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
+    $scope.timefilter = timefilter;
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
     $scope.configTemplate = configTemplate;
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);

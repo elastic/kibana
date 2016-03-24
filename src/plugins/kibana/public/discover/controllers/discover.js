@@ -96,15 +96,16 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.toggleInterval = function () {
     $scope.showInterval = !$scope.showInterval;
   };
-
   // config panel templates
   $scope.configTemplate = new ConfigTemplate({
     load: require('plugins/kibana/discover/partials/load_search.html'),
     save: require('plugins/kibana/discover/partials/save_search.html'),
-    share: require('plugins/kibana/discover/partials/share_search.html')
+    share: require('plugins/kibana/discover/partials/share_search.html'),
+    filter: require('ui/chrome/config/filter.html'),
+    interval: require('ui/chrome/config/interval.html')
   });
-
   $scope.timefilter = timefilter;
+
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -147,7 +148,8 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     index: $scope.indexPattern.id,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list
+    indexPatternList: $route.current.locals.ip.list,
+    timefilter: $scope.timefilter
   };
 
   const init = _.once(function () {

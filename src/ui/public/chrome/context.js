@@ -21,11 +21,6 @@ uiModules
 
       // chrome is responsible for timepicker ui and state transfer...
       $scope.timefilter = timefilter;
-      $scope.pickerTemplate = new ConfigTemplate({
-        filter: require('ui/chrome/config/filter.html'),
-        interval: require('ui/chrome/config/interval.html')
-      });
-
       $scope.toggleRefresh = function () {
         timefilter.refreshInterval.pause = !timefilter.refreshInterval.pause;
       };
