@@ -12,10 +12,11 @@
           <button
             type="button"
             ng-if="notif.isTimed()"
-            class="btn btn-sm"
+            class="btn toaster-countdown"
             ng-class="'btn-' + notif.type"
             ng-click="notif.cancelTimer()"
-            >Auto-closing in {{notif.timeRemaining}}</button>
+
+            ><span class="badge" hover-text="stop">{{notif.timeRemaining}}s</span></button>
           <button
             type="button"
             ng-if="notif.stack && !notif.showStack"
