@@ -10,10 +10,11 @@ uiRoutes
 });
 
 uiModules.get('apps/settings')
-.controller('settingsAbout', function ($scope, kbnVersion, buildNum, buildSha) {
+.controller('settingsAbout', function ($scope, kbnVersion, buildNum, buildSha, serverName) {
   $scope.kbnVersion = kbnVersion;
   $scope.buildNum = buildNum;
   $scope.buildSha = buildSha;
+  $scope.serverName = serverName;
 });
 
 registry.register(_.constant({
