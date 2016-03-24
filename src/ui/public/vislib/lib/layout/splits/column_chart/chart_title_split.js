@@ -18,14 +18,12 @@ define(function () {
 
         if (!data.series) {
           var splits = div.selectAll('.chart-title')
-          // .append('div')
           .data(function (d) {
             return d.rows ? d.rows : d.columns;
-          });
-
-          splits.exit().remove();
-          splits.enter().append('div');
-          splits.attr('class', 'chart-title');
+          })
+          .enter()
+            .append('div')
+            .attr('class', 'chart-title');
 
           if (data.rows) {
             d3.select(parent).select('.x-axis-chart-title').remove();
