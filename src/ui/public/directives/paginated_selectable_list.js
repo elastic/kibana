@@ -4,6 +4,10 @@ import paginatedSelectableListTemplate from 'ui/partials/paginated_selectable_li
 
 const module = uiModules.get('kibana');
 
+function throwError(message) {
+  throw new Error(message);
+}
+
 module.directive('paginatedSelectableList', function (kbnUrl) {
 
   return {
@@ -17,8 +21,14 @@ module.directive('paginatedSelectableList', function (kbnUrl) {
     },
     template: paginatedSelectableListTemplate,
     controller: function ($scope, $element, $filter) {
+      // Should specify either user-make-url or user-on-select
       if (!$scope.userMakeUrl && !$scope.userOnSelect) {
-        throw new Error('paginatedSelectableList directive expects a makeUrl or onSelect function');
+        throwError('paginatedSelectableList directive expects a makeUrl or onSelect function');
+      }
+
+      // Should specify either user-make-url or user-on-select, but not both.
+      if ($scope.userMakeUrl && $scope.userOnSelect) {
+        throwError('paginatedSelectableList directive expects a makeUrl or onSelect attribute but not both');
       }
 
       $scope.perPage = $scope.perPage || 10;

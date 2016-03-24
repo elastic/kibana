@@ -40,13 +40,11 @@ lists.forEach(function (list) {
       $scope.perPage = 5;
       $scope.list = list;
       $scope.listProperty = isArrayOfObjects ? 'title' : undefined;
-      $scope.test = function (val) {
-        return val;
-      };
+      $scope.test = function (val) { return val; };
 
       // Create the element
       $element = angular.element('<paginated-selectable-list perPage="perPage" list="list"' +
-       'list-property="listProperty" user-make-url="test" user-on-select="test"></paginated-selectable-list>');
+         'list-property="listProperty" user-make-url="test"></paginated-selectable-list>');
 
       // And compile it
       $compile($element)($scope);
@@ -60,6 +58,7 @@ lists.forEach(function (list) {
   };
 
   describe('paginatedSelectableList', function () {
+    var scope;
 
     it('should throw an error when there is no makeUrl and onSelect attribute', ngMock.inject(function ($compile, $rootScope) {
       function errorWrapper() {
@@ -67,6 +66,37 @@ lists.forEach(function (list) {
       }
       expect(errorWrapper).to.throwError();
     }));
+
+    it('should throw an error with both makeUrl and onSelect attributes', function () {
+      function errorWrapper() {
+        // Load the application
+        ngMock.module('kibana');
+
+        // Create the scope
+        ngMock.inject(function ($rootScope, $compile) {
+          $scope = $rootScope.$new();
+          $scope.perPage = 5;
+          $scope.list = list;
+          $scope.listProperty = isArrayOfObjects ? 'title' : undefined;
+          $scope.test = function (val) { return val; };
+
+          // Create the element
+          $element = angular.element('<paginated-selectable-list perPage="perPage" list="list"' +
+             'list-property="listProperty" user-make-url="test" user-on-select="test"></paginated-selectable-list>');
+
+          // And compile it
+          $compile($element)($scope);
+
+          // Fire a digest cycle
+          $element.scope().$digest();
+
+          // Grab the isolate scope so we can test it
+          $isolatedScope = $element.isolateScope();
+        });
+      }
+
+      expect(errorWrapper).to.throwError();
+    });
 
     describe('$scope.hits', function () {
       beforeEach(function () {
@@ -158,6 +188,8 @@ lists.forEach(function (list) {
       it('should return the result of the function its passed', function () {
         var property = $isolatedScope.listProperty;
         var sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
+
+        $isolatedScope.userOnSelect = function (val) { return val; };
 
         $isolatedScope.hits.forEach(function (hit, index) {
           if (property) {
