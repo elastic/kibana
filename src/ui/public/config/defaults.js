@@ -213,6 +213,21 @@ export default function configDefaultsProvider() {
     'filters:pinnedByDefault': {
       value: false,
       description: 'Whether the filters should have a global state (be pinned) by default'
+    },
+    'notifications:lifetime:error': {
+      value: 300000,
+      description: 'The time in milliseconds which an error notification ' +
+      'will be displayed on-screen for. Setting to Infinity will disable.'
+    },
+    'notifications:lifetime:warning': {
+      value: 10000,
+      description: 'The time in milliseconds which a warning notification ' +
+        'will be displayed on-screen for. Setting to Infinity will disable.'
+    },
+    'notifications:lifetime:info': {
+      value: 5000,
+      description: 'The time in milliseconds which an information notification ' +
+        'will be displayed on-screen for. Setting to Infinity will disable.'
     }
   };
 };

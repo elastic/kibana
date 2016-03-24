@@ -14,6 +14,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/api/status',
     handler: function (request, reply) {
       return reply({
+        name: config.get('server.name'),
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       });

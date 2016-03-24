@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
+import os from 'os';
 
 import fromRoot from '../../utils/from_root';
 
@@ -29,6 +30,7 @@ module.exports = () => Joi.object({
   }).default(),
 
   server: Joi.object({
+    name: Joi.string().default(os.hostname()),
     host: Joi.string().hostname().default('0.0.0.0'),
     port: Joi.number().default(5601),
     maxPayloadBytes: Joi.number().default(1048576),
