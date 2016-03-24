@@ -1,14 +1,14 @@
-import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierLooperLooperProvider from 'ui/courier/looper/_looper';
+import FetchProvider from '../fetch';
+import SearchStrategyProvider from '../fetch/strategy/search';
+import RequestQueueProvider from '../_request_queue';
+import LooperProvider from './_looper';
 
 export default function SearchLooperService(Private, Promise, Notifier, $rootScope) {
-  var fetch = Private(CourierFetchFetchProvider);
-  var searchStrategy = Private(CourierFetchStrategySearchProvider);
-  var requestQueue = Private(CourierRequestQueueProvider);
+  var fetch = Private(FetchProvider);
+  var searchStrategy = Private(SearchStrategyProvider);
+  var requestQueue = Private(RequestQueueProvider);
 
-  var Looper = Private(CourierLooperLooperProvider);
+  var Looper = Private(LooperProvider);
   var notif = new Notifier({ location: 'Search Looper' });
 
   /**

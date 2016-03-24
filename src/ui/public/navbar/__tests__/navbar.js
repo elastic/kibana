@@ -1,4 +1,4 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import angular from 'angular';

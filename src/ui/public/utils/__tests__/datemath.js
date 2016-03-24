@@ -1,4 +1,4 @@
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import expect from 'expect.js';
 import moment from 'moment';
 import _ from 'lodash';

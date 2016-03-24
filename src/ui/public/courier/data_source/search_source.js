@@ -1,16 +1,18 @@
 import _ from 'lodash';
-import rootSearchSource from 'ui/courier/data_source/_root_search_source';
-import CourierDataSourceAbstractProvider from 'ui/courier/data_source/_abstract';
-import CourierFetchRequestSearchProvider from 'ui/courier/fetch/request/search';
-import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
-import CourierDataSourceNormalizeSortRequestProvider from 'ui/courier/data_source/_normalize_sort_request';
+
+import NormalizeSortRequestProvider from './_normalize_sort_request';
+import rootSearchSource from './_root_search_source';
+import AbstractDataSourceProvider from './_abstract';
+import SearchRequestProvider from '../fetch/request/search';
+import SegmentedRequestProvider from '../fetch/request/segmented';
+import SearchStrategyProvider from '../fetch/strategy/search';
+
 export default function SearchSourceFactory(Promise, Private) {
-  var SourceAbstract = Private(CourierDataSourceAbstractProvider);
-  var SearchRequest = Private(CourierFetchRequestSearchProvider);
-  var SegmentedRequest = Private(CourierFetchRequestSegmentedProvider);
-  var searchStrategy = Private(CourierFetchStrategySearchProvider);
-  var normalizeSortRequest = Private(CourierDataSourceNormalizeSortRequestProvider);
+  var SourceAbstract = Private(AbstractDataSourceProvider);
+  var SearchRequest = Private(SearchRequestProvider);
+  var SegmentedRequest = Private(SegmentedRequestProvider);
+  var searchStrategy = Private(SearchStrategyProvider);
+  var normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {

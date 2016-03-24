@@ -28,36 +28,14 @@ routes
 
 chrome
 .setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
+  'logo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b',
+  'smallLogo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b'
 })
-.setNavBackground('#222222')
 .setTabDefaults({
   resetWhenActive: true,
-  lastUrlStore: window.sessionStore,
+  lastUrlStore: window.sessionStorage,
   activeIndicatorColor: '#656a76'
 })
-.setTabs([
-  {
-    id: 'discover',
-    title: 'Discover'
-  },
-  {
-    id: 'visualize',
-    title: 'Visualize',
-    activeIndicatorColor: function () {
-      return (String(this.lastUrl).indexOf('/visualize/step/') === 0) ? 'white' : '#656a76';
-    }
-  },
-  {
-    id: 'dashboard',
-    title: 'Dashboard'
-  },
-  {
-    id: 'settings',
-    title: 'Settings'
-  }
-])
 .setRootController('kibana', function ($scope, $rootScope, courier, config) {
   function setDefaultTimezone() {
     moment.tz.setDefault(config.get('dateFormat:tz'));

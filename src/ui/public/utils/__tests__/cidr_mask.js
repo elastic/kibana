@@ -1,5 +1,5 @@
 
-import CidrMask from 'ui/utils/CidrMask';
+import CidrMask from 'ui/utils/cidr_mask';
 import expect from 'expect.js';
 
 describe('CidrMask', function () {

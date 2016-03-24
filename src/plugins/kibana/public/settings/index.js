@@ -9,6 +9,7 @@ import 'ui/filters/start_from';
 import 'ui/field_editor';
 import 'plugins/kibana/settings/sections/indices/_indexed_fields';
 import 'plugins/kibana/settings/sections/indices/_scripted_fields';
+import 'ui/directives/bread_crumbs';
 import registry from 'ui/registry/settings_sections';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
@@ -20,7 +21,7 @@ uiRoutes
   redirectTo: '/settings/indices'
 });
 
-require('ui/index_patterns/routeSetup/loadDefault')({
+require('ui/index_patterns/route_setup/load_default')({
   notRequiredRe: /^\/settings\//,
   whenMissingRedirectTo: '/settings/indices'
 });

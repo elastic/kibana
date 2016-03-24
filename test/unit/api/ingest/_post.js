@@ -12,7 +12,12 @@ define(function (require) {
       });
 
       bdd.afterEach(function () {
-        return request.del('/kibana/ingest/logstash-*');
+        return request.del('/kibana/ingest/logstash-*')
+        .then(function () {
+          return scenarioManager.client.indices.delete({
+            index: 'logstash-*'
+          });
+        });
       });
 
       bdd.it('should return 400 for an invalid payload', function invalidPayload() {
@@ -57,6 +62,29 @@ define(function (require) {
           });
       });
 
+      bdd.it('should successfully create new indices based on the template', function newIndices() {
+        return request.post('/kibana/ingest')
+          .send(createTestData())
+          .expect(204)
+          .then(function () {
+            return scenarioManager.client.create({
+              index: 'logstash-1',
+              type: 'foo',
+              id: '1',
+              body: {
+                ip: '192.168.1.1',
+                '@timestamp': '2015-09-20T10:28:22.684Z',
+                agent: 'Jack',
+                bytes: 9001,
+                geo: {coordinates: {lat: 43.07260861, lon: -92.61077833}}
+              }
+            })
+            .then(function (response) {
+              expect(response.created).to.be.ok();
+            });
+          });
+      });
+
       bdd.it('should provide defaults for field properties', function createTemplate() {
         return request.post('/kibana/ingest')
           .send(createTestData())
@@ -92,15 +120,15 @@ define(function (require) {
             .then(function (template) {
               var mappings = template['kibana-logstash-*'].mappings._default_.properties;
               expect(mappings).to.be.ok();
-              expect(_.isEqual(mappings.ip, {index: 'not_analyzed', type: 'ip', doc_values: true})).to.be.ok();
-              expect(_.isEqual(mappings['@timestamp'], {index: 'not_analyzed', type: 'date', doc_values: true})).to.be.ok();
-              expect(_.isEqual(mappings.bytes, {index: 'not_analyzed', type: 'double', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings.ip, {index: true, type: 'ip', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings['@timestamp'], {index: true, type: 'date', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings.bytes, {index: true, type: 'double', doc_values: true})).to.be.ok();
 
               // object fields are mapped as such, with individual mappings for each of their properties
               expect(_.isEqual(mappings.geo, {
                 properties: {
                   coordinates: {
-                    index: 'not_analyzed',
+                    index: true,
                     type: 'geo_point',
                     doc_values: true
                   }
