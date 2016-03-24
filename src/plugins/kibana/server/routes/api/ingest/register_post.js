@@ -8,7 +8,7 @@ import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_p
 import { keysToCamelCaseShallow } from '../../../../common/lib/case_conversion';
 import ingestPipelineApiKibanaToEsConverter from '../../../lib/converters/ingest_pipeline_api_kibana_to_es_converter';
 
-module.exports = function registerPost(server) {
+export function registerPost(server) {
   const kibanaIndex = server.config().get('kibana.index');
 
   function patternRollback(rootError, indexPatternId, boundCallWithRequest) {

@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import handleESError from '../../../lib/handle_es_error';
 import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 
-module.exports = function registerDelete(server) {
+export function registerDelete(server) {
   server.route({
     path: '/api/kibana/ingest/{id}',
     method: 'DELETE',

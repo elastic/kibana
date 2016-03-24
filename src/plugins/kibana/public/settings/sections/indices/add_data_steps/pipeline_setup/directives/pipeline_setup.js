@@ -8,6 +8,7 @@ import '../styles/_pipeline_setup.less';
 import './pipeline_output';
 import './source_data';
 import './processor_ui';
+import pipelineSetupTemplate from '../views/pipeline_setup.html';
 
 const app = uiModules.get('kibana');
 function buildProcessorTypeList() {
@@ -27,7 +28,7 @@ function buildProcessorTypeList() {
 app.directive('pipelineSetup', function () {
   return {
     restrict: 'E',
-    template: require('../views/pipeline_setup.html'),
+    template: pipelineSetupTemplate,
     scope: {
       samples: '=',
       pipeline: '='

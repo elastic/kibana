@@ -3,6 +3,7 @@ import _ from 'lodash';
 import '../styles/_processor_ui_container.less';
 import './output_preview';
 import './processor_ui_container_header';
+import processorUiContainerTemplate from '../views/processor_ui_container.html';
 
 const app = uiModules.get('kibana');
 
@@ -13,7 +14,7 @@ app.directive('processorUiContainer', function ($compile) {
       pipeline: '=',
       processor: '='
     },
-    template: require('../views/processor_ui_container.html'),
+    template: processorUiContainerTemplate,
     link: function ($scope, $el) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;

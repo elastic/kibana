@@ -1,6 +1,7 @@
 import uiModules from 'ui/modules';
 import jsondiffpatch from '@bigfunger/jsondiffpatch';
 import '../styles/_output_preview.less';
+import outputPreviewTemplate from '../views/output_preview.html';
 
 const htmlFormat = jsondiffpatch.formatters.html.format;
 const app = uiModules.get('kibana');
@@ -8,7 +9,7 @@ const app = uiModules.get('kibana');
 app.directive('outputPreview', function () {
   return {
     restrict: 'E',
-    template: require('../views/output_preview.html'),
+    template: outputPreviewTemplate,
     scope: {
       oldObject: '=',
       newObject: '='

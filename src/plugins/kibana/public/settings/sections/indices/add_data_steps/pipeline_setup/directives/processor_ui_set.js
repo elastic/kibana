@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+import processorUiSetTemplate from '../views/processor_ui_set.html';
 
 const app = uiModules.get('kibana');
 
@@ -6,7 +7,7 @@ const app = uiModules.get('kibana');
 app.directive('processorUiSet', function () {
   return {
     restrict: 'E',
-    template: require('../views/processor_ui_set.html'),
+    template: processorUiSetTemplate,
     controller : function ($scope) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;

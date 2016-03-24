@@ -1,6 +1,7 @@
 import uiModules from 'ui/modules';
 import angular from 'angular';
 import '../styles/_source_data.less';
+import sourceDataTemplate from '../views/source_data.html';
 
 const app = uiModules.get('kibana');
 
@@ -11,7 +12,7 @@ app.directive('sourceData', function () {
       samples: '=',
       sample: '='
     },
-    template: require('../views/source_data.html'),
+    template: sourceDataTemplate,
     controller: function ($scope) {
       const samples = $scope.samples;
 

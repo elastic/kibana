@@ -1,11 +1,11 @@
 import modules from 'ui/modules';
 import template from 'plugins/kibana/settings/sections/indices/filebeat/directives/filebeat_wizard.html';
 import IngestProvider from 'ui/ingest';
+import 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step';
+import 'plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step';
+import 'plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup';
+import 'plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step';
 
-require('plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step');
-require('plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step');
-require('plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup');
-require('plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step');
 
 // wrapper directive, which sets up the breadcrumb for all filebeat steps
 modules.get('apps/settings')

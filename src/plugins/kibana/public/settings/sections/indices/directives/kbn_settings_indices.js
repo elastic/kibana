@@ -1,12 +1,16 @@
+import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
+import uiModules from 'ui/modules';
+import kbnSettingsIndicesTemplate from 'plugins/kibana/settings/sections/indices/directives/kbn_settings_indices.html';
+
 // wrapper directive, which sets some global stuff up like the left nav
-require('ui/modules').get('apps/settings')
+uiModules.get('apps/settings')
 .directive('kbnSettingsIndices', function ($route, config, kbnUrl, indexPatterns, Private) {
   return {
     restrict: 'E',
     transclude: true,
-    template: require('plugins/kibana/settings/sections/indices/directives/kbn_settings_indices.html'),
+    template: kbnSettingsIndicesTemplate,
     link: function ($scope) {
-      const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
+      const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
 
       $scope.showAddNew = !/^\/settings\/indices$/.test($route.current.$$route.originalPath);
       $scope.editingId = $route.current.params.indexPatternId;
