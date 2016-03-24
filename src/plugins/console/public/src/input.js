@@ -197,7 +197,7 @@ function sendCurrentRequestToES() {
             mode = modeForContentType(xhr.getAllResponseHeaders("Content-Type") || "");
             if (value[0] == "{") {
               try {
-                value = JSON.stringify(JSON.parse(value), null, 3);
+                value = JSON.stringify(JSON.parse(value), null, 2);
               }
               catch (e) {
               }
