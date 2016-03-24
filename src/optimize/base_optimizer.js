@@ -3,6 +3,8 @@ import Boom from 'boom';
 import DirectoryNameAsMain from 'webpack-directory-name-as-main';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
+import DefinePlugin from 'webpack/lib/DefinePlugin';
+import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 
 import fromRoot from '../utils/from_root';
 import babelOptions from './babel_options';
@@ -94,6 +96,7 @@ class BaseOptimizer {
           name: 'commons',
           filename: 'commons.bundle.js'
         }),
+        ...this.pluginsForEnv(this.env.context.env)
       ],
 
       module: {
@@ -149,6 +152,27 @@ class BaseOptimizer {
         }, {})
       }
     };
+  }
+
+  pluginsForEnv(env) {
+    if (env !== 'production') {
+      return [];
+    }
+
+    return [
+      new DefinePlugin({
+        'process.env': {
+          'NODE_ENV': '"production"'
+        }
+      }),
+      new UglifyJsPlugin({
+        compress: {
+          warnings: false
+        },
+        sourceMap: false,
+        mangle: false
+      }),
+    ];
   }
 
   failedStatsToError(stats) {
