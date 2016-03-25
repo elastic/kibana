@@ -1,19 +1,22 @@
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('tabifyAggResponse Integration', function () {
 
-  var Vis;
-  var Buckets;
-  var indexPattern;
-  var tabifyAggResponse;
+  let Vis;
+  let Buckets;
+  let indexPattern;
+  let tabifyAggResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   function normalizeIds(vis) {
@@ -43,12 +46,12 @@ describe('tabifyAggResponse Integration', function () {
   describe('transforms a complex response', function () {
     this.slow(1000);
 
-    var vis;
-    var avg;
-    var ext;
-    var src;
-    var os;
-    var esResp;
+    let vis;
+    let avg;
+    let ext;
+    let src;
+    let os;
+    let esResp;
 
     beforeEach(function () {
       vis = new Vis(indexPattern, {

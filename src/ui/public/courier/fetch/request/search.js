@@ -1,19 +1,17 @@
-import _ from 'lodash';
-define(function (require) {
-  return function SearchReqProvider(Private) {
+import SearchStrategyProvider from '../strategy/search';
+import AbstractRequestProvider from './request';
 
-    var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
-    var AbstractRequest = Private(require('ui/courier/fetch/request/request'));
+export default function SearchReqProvider(Private) {
 
-    _.class(SearchReq).inherits(AbstractRequest);
-    var Super = SearchReq.Super;
-    function SearchReq(source, defer) {
-      Super.call(this, source, defer);
+  const searchStrategy = Private(SearchStrategyProvider);
+  const AbstractRequest = Private(AbstractRequestProvider);
+
+  return class SearchReq extends AbstractRequest {
+    constructor(...args) {
+      super(...args);
 
       this.type = 'search';
       this.strategy = searchStrategy;
     }
-
-    return SearchReq;
   };
-});
+};

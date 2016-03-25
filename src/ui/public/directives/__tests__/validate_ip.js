@@ -1,12 +1,12 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/directives/validate_ip';
 
 
 describe('Validate IP directive', function () {
-  var $compile;
-  var $rootScope;
+  let $compile;
+  let $rootScope;
   var html = '<input type="text" ng-model="value" validate-ip />';
 
   beforeEach(ngMock.module('kibana'));

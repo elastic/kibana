@@ -45,6 +45,8 @@ sub-aggregation from the list of types.
 
 You can use the up or down arrows to the right of the aggregation's type to change the aggregation's priority.
 
+Enter a string in the *Custom Label* field to change the display label.
+
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.

@@ -1,9 +1,12 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import tabifyPm from 'ui/agg_response/tabify/tabify';
+import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Controller', function () {
 
   let $rootScope;
@@ -22,14 +25,13 @@ describe('Controller', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-    Vis = Private(require('ui/Vis'));
-    AppState = Private(require('ui/state_management/app_state'));
+    TableGroup = Private(AggResponseTabifyTableGroupProvider);
+    Vis = Private(VisProvider);
   }));
 
   function OneRangeVis(params) {
     return new Vis(
-      Private(require('fixtures/stubbed_logstash_index_pattern')),
+      Private(FixturesStubbedLogstashIndexPatternProvider),
       {
         type: 'table',
         params: params || {},

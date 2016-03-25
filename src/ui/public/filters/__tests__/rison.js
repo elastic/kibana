@@ -1,12 +1,12 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
 
 // Load kibana and its applications
 
-var rison;
-var risonDecode;
+let rison;
+let risonDecode;
 
 var init = function (expandable) {
   // Load the application

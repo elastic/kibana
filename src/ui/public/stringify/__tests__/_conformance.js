@@ -1,14 +1,17 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 
-var fieldFormats;
-var FieldFormat;
-var config;
+let fieldFormats;
+let FieldFormat;
+let config;
 
 var formatIds = [
   'bytes',
   'date',
+  'duration',
   'ip',
   'number',
   'percent',
@@ -22,14 +25,14 @@ var formatIds = [
 module.exports = describe('conformance', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    fieldFormats = Private(require('ui/registry/field_formats'));
-    FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+    fieldFormats = Private(RegistryFieldFormatsProvider);
+    FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
     config = $injector.get('config');
   }));
 
   formatIds.forEach(function (id) {
-    var instance;
-    var Type;
+    let instance;
+    let Type;
 
     beforeEach(function () {
       Type = fieldFormats.getType(id);

@@ -1,83 +1,82 @@
 import _ from 'lodash';
 import 'ui/watch_multi';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import angular from 'angular';
 import 'ui/directives/input_focus';
-define(function (require) {
-  var module = require('ui/modules').get('kibana');
+import uiModules from 'ui/modules';
+var module = uiModules.get('kibana');
 
 
-  /**
-   * config directive
-   *
-   * Creates a full width horizonal config section, usually under a nav/subnav.
-   * ```
-   * <config config-template="configTemplate" config-object="configurable"></config>
-   * ```
-   */
+/**
+ * config directive
+ *
+ * Creates a full width horizonal config section, usually under a nav/subnav.
+ * ```
+ * <config config-template="configTemplate" config-object="configurable"></config>
+ * ```
+ */
 
-  module.directive('config', function ($compile) {
-    return {
-      restrict: 'E',
-      scope: {
-        configTemplate: '=',
-        configClose: '=',
-        configSubmit: '=',
-        configObject: '='
-      },
-      link: function ($scope, element, attr) {
-        var tmpScope = $scope.$new();
+module.directive('config', function ($compile) {
+  return {
+    restrict: 'E',
+    scope: {
+      configTemplate: '=',
+      configClose: '=',
+      configSubmit: '=',
+      configObject: '='
+    },
+    link: function ($scope, element, attr) {
+      var tmpScope = $scope.$new();
 
-        $scope.$watch('configObject', function (newVal) {
-          $scope[attr.configObject] = $scope.configObject;
-        });
+      $scope.$watch('configObject', function (newVal) {
+        $scope[attr.configObject] = $scope.configObject;
+      });
 
-        var wrapTmpl = function (tmpl) {
-          if ($scope.configSubmit) {
-            return '<form role="form" class="container-fluid" ng-submit="configSubmit()">' + tmpl + '</form>';
-          } else {
-            return '<div class="container-fluid">' + tmpl + '</div>';
-          }
-        };
+      var wrapTmpl = function (tmpl) {
+        if ($scope.configSubmit) {
+          return '<form role="form" class="container-fluid" ng-submit="configSubmit()">' + tmpl + '</form>';
+        } else {
+          return '<div class="container-fluid">' + tmpl + '</div>';
+        }
+      };
 
-        $scope.$watchMulti([
-          'configSubmit',
-          'configTemplate.current || configTemplate'
-        ], function () {
-          var tmpl = $scope.configTemplate;
-          if (tmpl instanceof ConfigTemplate) {
-            tmpl = tmpl.toString();
-          }
+      $scope.$watchMulti([
+        'configSubmit',
+        'configTemplate.current || configTemplate'
+      ], function () {
+        var tmpl = $scope.configTemplate;
+        if (tmpl instanceof ConfigTemplate) {
+          tmpl = tmpl.toString();
+        }
 
-          tmpScope.$destroy();
-          tmpScope = $scope.$new();
+        tmpScope.$destroy();
+        tmpScope = $scope.$new();
 
-          var html = '';
-          if (tmpl) {
-            html = $compile('' +
-              '<div class="config" ng-show="configTemplate">' +
-                wrapTmpl(tmpl) +
-              '  <div class="config-close remove" ng-click="close()">' +
-              '    <i class="fa fa-chevron-up"></i>' +
-              '  </div>' +
-              '</div>' +
-              ''
-            )(tmpScope);
-          }
+        var html = '';
+        if (tmpl) {
+          html = $compile('' +
+            '<div class="config" ng-show="configTemplate">' +
+              wrapTmpl(tmpl) +
+            '  <div class="config-close remove">' +
+            '    <i class="fa fa-chevron-circle-up" ng-click="close()"></i>' +
+            '  </div>' +
+            '</div>' +
+            ''
+          )(tmpScope);
+        }
 
-          element.html(html);
-        });
+        element.html(html);
+      });
 
 
-        $scope.close = function () {
-          if (_.isFunction($scope.configClose)) $scope.configClose();
-          if ($scope.configTemplate instanceof ConfigTemplate) {
-            $scope.configTemplate.current = null;
-          } else {
-            $scope.configTemplate = null;
-          }
-        };
-      }
-    };
-  });
+      $scope.close = function () {
+        if (_.isFunction($scope.configClose)) $scope.configClose();
+        if ($scope.configTemplate instanceof ConfigTemplate) {
+          $scope.configTemplate.current = null;
+        } else {
+          $scope.configTemplate = null;
+        }
+      };
+    }
+  };
 });

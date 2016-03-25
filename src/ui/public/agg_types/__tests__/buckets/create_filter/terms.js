@@ -1,19 +1,23 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 describe('AggConfig Filters', function () {
 
   describe('terms', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfig = Private(require('ui/Vis/AggConfig'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+      Vis = Private(VisProvider);
+      AggConfig = Private(VisAggConfigProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
     }));
 
     it('should return a match filter for terms', function () {

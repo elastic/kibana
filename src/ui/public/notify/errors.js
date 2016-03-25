@@ -1,29 +1,27 @@
 import _ from 'lodash';
-define(function (require) {
-  var errors = {};
+var errors = {};
 
-  var canStack = (function () {
-    var err = new Error();
-    return !!err.stack;
-  }());
+var canStack = (function () {
+  var err = new Error();
+  return !!err.stack;
+}());
 
-  // abstract error class
-  _.class(KibanaError).inherits(Error);
-  function KibanaError(msg, constructor) {
-    this.message = msg;
+// abstract error class
+_.class(KibanaError).inherits(Error);
+function KibanaError(msg, constructor) {
+  this.message = msg;
 
-    Error.call(this, this.message);
-    if (!this.stack) {
-      if (Error.captureStackTrace) {
-        Error.captureStackTrace(this, constructor || KibanaError);
-      } else if (canStack) {
-        this.stack = (new Error()).stack;
-      } else {
-        this.stack = '';
-      }
+  Error.call(this, this.message);
+  if (!this.stack) {
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, constructor || KibanaError);
+    } else if (canStack) {
+      this.stack = (new Error()).stack;
+    } else {
+      this.stack = '';
     }
   }
-  errors.KibanaError = KibanaError;
+}
+errors.KibanaError = KibanaError;
 
-  return errors;
-});
+export default errors;

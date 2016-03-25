@@ -1,7 +1,7 @@
 
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
 
@@ -13,6 +13,8 @@ import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
 //var histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 // tuple, with the format [description, mode, data]
 var dataTypesArray = [
@@ -30,8 +32,8 @@ dataTypesArray.forEach(function (dataType, i) {
   var data = dataType[2];
 
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
     var visLibParams = {
       type: 'histogram',
       hasTimeField: true,
@@ -42,8 +44,8 @@ dataTypesArray.forEach(function (dataType, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
     }));
@@ -54,8 +56,8 @@ dataTypesArray.forEach(function (dataType, i) {
     });
 
     describe('stackData method', function () {
-      var stackedData;
-      var isStacked;
+      let stackedData;
+      let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -76,9 +78,9 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('addBars method', function () {
       it('should append rects', function () {
-        var numOfSeries;
-        var numOfValues;
-        var product;
+        let numOfSeries;
+        let numOfValues;
+        let product;
 
         vis.handler.charts.forEach(function (chart) {
           numOfSeries = chart.chartData.series.length;

@@ -3,12 +3,11 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 import isUpgradeable from '../is_upgradeable';
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
+import pkg from '../../../../utils/package_json';
 let version = pkg.version;
 
 describe('plugins/elasticsearch', function () {
-  describe('lib/isUpgradeable', function () {
+  describe('lib/is_upgradeable', function () {
     let server = {
       config: _.constant({
         get: function (key) {

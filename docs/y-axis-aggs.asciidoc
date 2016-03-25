@@ -22,3 +22,5 @@ from the drop-down, then specify one or more percentile rank values in the *Valu
 values field. Click *+Add* to add a values field.
 
 You can add an aggregation by clicking the *+ Add Aggregation* button.
+
+Enter a string in the *Custom Label* field to change the display label.

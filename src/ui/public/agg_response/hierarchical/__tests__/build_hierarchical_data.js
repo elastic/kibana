@@ -3,13 +3,17 @@ import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
-var Vis;
-var Notifier;
-var AggConfigs;
-var indexPattern;
-var buildHierarchicalData;
+let Vis;
+let Notifier;
+let AggConfigs;
+let indexPattern;
+let buildHierarchicalData;
 
 describe('buildHierarchicalData', function () {
 
@@ -19,16 +23,16 @@ describe('buildHierarchicalData', function () {
     Notifier = $injector.get('Notifier');
     sinon.stub(Notifier.prototype, 'error');
 
-    Vis = Private(require('ui/Vis'));
-    AggConfigs = Private(require('ui/Vis/AggConfigs'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+    Vis = Private(VisProvider);
+    AggConfigs = Private(VisAggConfigsProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
   }));
 
 
   describe('metric only', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -99,8 +103,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('threeTermBuckets', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -141,8 +145,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneHistogramBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -173,8 +177,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneRangeBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -214,8 +218,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -250,8 +254,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket that is a split', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;

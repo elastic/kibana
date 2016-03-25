@@ -1,19 +1,22 @@
 import d3 from 'd3';
 import angular from 'angular';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
+import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
-  var AxisTitle;
-  var Data;
-  var PersistedState;
-  var axisTitle;
-  var el;
-  var dataObj;
-  var xTitle;
-  var yTitle;
+  let AxisTitle;
+  let Data;
+  let PersistedState;
+  let axisTitle;
+  let el;
+  let dataObj;
+  let xTitle;
+  let yTitle;
   var data = {
     hits: 621,
     label: '',
@@ -75,9 +78,9 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    AxisTitle = Private(require('ui/vislib/lib/axis_title'));
-    Data = Private(require('ui/vislib/lib/data'));
-    PersistedState = Private(require('ui/persisted_state/persisted_state'));
+    AxisTitle = Private(VislibLibAxisTitleProvider);
+    Data = Private(VislibLibDataProvider);
+    PersistedState = Private(PersistedStatePersistedStateProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper');

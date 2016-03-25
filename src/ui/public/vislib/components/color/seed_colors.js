@@ -8,8 +8,8 @@ define(function () {
 
   return function SeedColorUtilService() {
     return [
+      '#6eadc1',
       '#57c17b',
-      '#006e8a',
       '#6f87d8',
       '#663db8',
       '#bc52bc',

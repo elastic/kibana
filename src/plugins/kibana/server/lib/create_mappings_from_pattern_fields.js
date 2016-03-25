@@ -13,12 +13,9 @@ module.exports = function createMappingsFromPatternFields(fields) {
 
     if (field.type === 'string') {
       mapping = {
-        type: 'string',
-        index: 'analyzed',
-        omit_norms: true,
-        fielddata: {format: 'disabled'},
+        type: 'text',
         fields: {
-          raw: {type: 'string', index: 'not_analyzed', doc_values: true, ignore_above: 256}
+          raw: {type: 'keyword', ignore_above: 256}
         }
       };
     }
@@ -26,7 +23,7 @@ module.exports = function createMappingsFromPatternFields(fields) {
       const fieldType = field.type === 'number' ? 'double' : field.type;
       mapping = {
         type: fieldType,
-        index: 'not_analyzed',
+        index: true,
         doc_values: true
       };
     }

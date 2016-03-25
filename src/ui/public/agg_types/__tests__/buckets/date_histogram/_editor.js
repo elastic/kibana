@@ -1,20 +1,23 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisProvider from 'ui/vis';
+import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('editor', function () {
 
-  var indexPattern;
-  var vis;
-  var agg;
-  var render;
-  var $scope;
+  let indexPattern;
+  let vis;
+  let agg;
+  let render;
+  let $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    var Vis = Private(require('ui/Vis'));
+    var Vis = Private(VisProvider);
 
     /**
      * Render the AggParams editor for the date histogram aggregation
@@ -66,13 +69,13 @@ describe('editor', function () {
   }));
 
   describe('random field/interval', function () {
-    var params;
-    var field;
-    var interval;
+    let params;
+    let field;
+    let interval;
 
     beforeEach(ngMock.inject(function (Private) {
       field = _.sample(indexPattern.fields);
-      interval = _.sample(Private(require('ui/agg_types/buckets/_interval_options')));
+      interval = _.sample(Private(AggTypesBucketsIntervalOptionsProvider));
       params = render({ field: field, interval: interval });
     }));
 
@@ -94,7 +97,7 @@ describe('editor', function () {
   });
 
   describe('interval "auto" and indexPattern timeField', function () {
-    var params;
+    let params;
 
     beforeEach(function () {
       params = render({ field: indexPattern.timeFieldName, interval: 'auto' });

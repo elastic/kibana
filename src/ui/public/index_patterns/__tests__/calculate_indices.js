@@ -2,8 +2,9 @@ import { pluck } from 'lodash';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import moment from 'moment';
+import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 describe('ui/index_patterns/_calculate_indices', () => {
 
   let Promise;
@@ -36,7 +37,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
     $rootScope = $injector.get('$rootScope');
     es = $injector.get('es');
     Promise = $injector.get('Promise');
-    calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
   }));
 
   function run({ start = undefined, stop = undefined } = {}) {
@@ -118,7 +119,7 @@ describe('ui/index_patterns/_calculate_indices', () => {
   });
 
   describe('response sorting', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
 
     context('when no sorting direction given', function () {
       it('returns the indices in the order that elasticsearch sends them', function () {
