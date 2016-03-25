@@ -8,6 +8,7 @@ export default function GeoHashGridAggResponseFixture() {
   //   type: 'tile_map',
   //   aggs:[
   //     { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
+  //     { schema: 'split', type: 'terms', params: { field: '@tags', size: 10 } },
   //     { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3 } }
   //   ],
   //   params: {
@@ -24,20 +25,36 @@ export default function GeoHashGridAggResponseFixture() {
 
   var totalDocCount = 0;
 
-  var buckets = _.times(_.random(40, 200), function () {
-    return _.sample(geoHashCharts, 3).join('');
-  })
-  .sort()
-  .map(function (geoHash, i) {
-    var count = _.random(1, 5000);
+  var tags = _.times(_.random(4, 20), function (i) {
+    // random number of tags
+    var docCount = 0;
+    var buckets = _.times(_.random(40, 200), function () {
+      return _.sample(geoHashCharts, 3).join('');
+    })
+    .sort()
+    .map(function (geoHash) {
+      var count = _.random(1, 5000);
 
-    totalDocCount += count;
+      totalDocCount += count;
+      docCount += count;
+
+      return {
+        key: geoHash,
+        doc_count: count,
+        1: {
+          value: 2048 + i
+        }
+      };
+    });
 
     return {
-      key: geoHash,
-      doc_count: count,
+      key: 'tag ' + (i + 1),
+      doc_count: docCount,
+      3: {
+        buckets: buckets
+      },
       1: {
-        value: 2048 + i
+        value: 1000 + i
       }
     };
   });
@@ -57,7 +74,7 @@ export default function GeoHashGridAggResponseFixture() {
     },
     aggregations: {
       2: {
-        buckets: buckets
+        buckets: tags
       }
     }
   };

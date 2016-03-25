@@ -116,6 +116,14 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         aggFilter: 'geohash_grid',
         min: 1,
         max: 1
+      },
+      {
+        group: 'buckets',
+        name: 'split',
+        title: 'Split Chart',
+        deprecate: true,
+        min: 0,
+        max: 1
       }
     ])
   });
