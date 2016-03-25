@@ -14,7 +14,7 @@ define(function () {
     return function (selection) {
       selection.each(function (data) {
         var div = d3.select(this);
-        var parent = $(this).parents('.vis-wrapper')[0];
+        var parent = d3.select($(this).parents('.vis-wrapper')[0]);
 
         if (!data.series) {
           var splits = div.selectAll('.chart-title')
@@ -26,9 +26,9 @@ define(function () {
             .attr('class', 'chart-title');
 
           if (data.rows) {
-            d3.select(parent).select('.x-axis-chart-title').remove();
+            parent.select('.x-axis-chart-title').remove();
           } else {
-            d3.select(parent).select('.y-axis-chart-title').remove();
+            parent.select('.y-axis-chart-title').remove();
           }
 
           return div;
