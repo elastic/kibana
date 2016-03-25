@@ -21,7 +21,7 @@ describe('AggTableGroup Directive', function () {
     $compile = $injector.get('$compile');
   }));
 
-  var $scope;
+  let $scope;
   beforeEach(function () {
     $scope = $rootScope.$new();
   });

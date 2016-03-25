@@ -1,0 +1,22 @@
+diff a/src/ui/public/vislib/__tests__/lib/y_axis.js b/src/ui/public/vislib/__tests__/lib/y_axis.js	(rejected hunks)
+@@ -7,13 +7,13 @@ import VislibLibDataProvider from 'ui/vislib/lib/data';
+ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+ import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
+ 
+-var YAxis;
+-var Data;
+-var persistedState;
+-var el;
+-var buildYAxis;
+-var yAxis;
+-var yAxisDiv;
++let YAxis;
++let Data;
++let persistedState;
++let el;
++let buildYAxis;
++let yAxis;
++let yAxisDiv;
+ 
+ var timeSeries = [
+   1408734060000,

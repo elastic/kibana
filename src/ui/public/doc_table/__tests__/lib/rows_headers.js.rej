@@ -1,0 +1,20 @@
+diff a/src/ui/public/doc_table/__tests__/lib/rows_headers.js b/src/ui/public/doc_table/__tests__/lib/rows_headers.js	(rejected hunks)
+@@ -10,14 +10,14 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
+ 
+ describe('Doc Table', function () {
+ 
+-  var $parentScope;
++  let $parentScope;
+ 
+-  var $scope;
++  let $scope;
+ 
+-  var config;
++  let config;
+ 
+   // Stub out a minimal mapping of 4 fields
+-  var mapping;
++  let mapping;
+ 
+   beforeEach(ngMock.module('kibana', 'apps/discover'));
+   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {

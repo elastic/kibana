@@ -1,0 +1,12 @@
+diff a/src/ui/public/bind/__tests__/bind.js b/src/ui/public/bind/__tests__/bind.js	(rejected hunks)
+@@ -3,8 +3,8 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ describe('$scope.$bind', function () {
+ 
+-  var $rootScope;
+-  var $scope;
++  let $rootScope;
++  let $scope;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($injector) {

@@ -1,0 +1,10 @@
+diff a/src/ui/public/vislib/visualizations/pie_chart.js b/src/ui/public/vislib/visualizations/pie_chart.js	(rejected hunks)
+@@ -184,7 +184,7 @@ export default function PieChartFactory(Private) {
+         var div = d3.select(this);
+         var width = $(this).width();
+         var height = $(this).height();
+-        var path;
++        let path;
+ 
+         if (!slices.children.length) return;
+ 

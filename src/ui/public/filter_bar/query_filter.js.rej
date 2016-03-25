@@ -1,0 +1,21 @@
+diff a/src/ui/public/filter_bar/query_filter.js b/src/ui/public/filter_bar/query_filter.js	(rejected hunks)
+@@ -81,8 +81,8 @@ export default function (Private, $rootScope, getAppState, globalState, config)
+   queryFilter.removeFilter = function (matchFilter) {
+     var appState = getAppState();
+     var filter = _.omit(matchFilter, ['$$hashKey']);
+-    var state;
+-    var index;
++    let state;
++    let index;
+ 
+     // check for filter in appState
+     if (appState) {
+@@ -297,7 +297,7 @@ export default function (Private, $rootScope, getAppState, globalState, config)
+    * @returns {void}
+    */
+   function initWatchers() {
+-    var removeAppStateWatchers;
++    let removeAppStateWatchers;
+ 
+     $rootScope.$watch(getAppState, function () {
+       removeAppStateWatchers && removeAppStateWatchers();

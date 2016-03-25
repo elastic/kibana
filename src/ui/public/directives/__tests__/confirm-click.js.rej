@@ -1,0 +1,16 @@
+diff a/src/ui/public/directives/__tests__/confirm-click.js b/src/ui/public/directives/__tests__/confirm-click.js	(rejected hunks)
+@@ -7,11 +7,11 @@ import 'ui/directives/confirm_click';
+ import 'plugins/kibana/discover/index';
+ 
+ 
+-var $parentScope;
++let $parentScope;
+ 
+-var $scope;
++let $scope;
+ 
+-var $elem;
++let $elem;
+ 
+ var init = function (text) {
+   // Load the application

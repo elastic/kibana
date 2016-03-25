@@ -1,0 +1,10 @@
+diff a/src/ui/public/url/url.js b/src/ui/public/url/url.js	(rejected hunks)
+@@ -140,7 +140,7 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
+   /////
+   // private api
+   /////
+-  var reloading;
++  let reloading;
+ 
+   self._changeLocation = function (type, url, paramObj, replace) {
+     var prev = {

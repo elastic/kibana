@@ -1,0 +1,12 @@
+diff a/src/ui/public/watch_multi/__tests__/watch_multi.js b/src/ui/public/watch_multi/__tests__/watch_multi.js	(rejected hunks)
+@@ -6,8 +6,8 @@ import sinon from 'auto-release-sinon';
+ 
+ describe('$scope.$watchMulti', function () {
+ 
+-  var $rootScope;
+-  var $scope;
++  let $rootScope;
++  let $scope;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($injector) {

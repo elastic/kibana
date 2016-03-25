@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_response/point_series/__tests__/_get_series.js b/src/ui/public/agg_response/point_series/__tests__/_get_series.js	(rejected hunks)
+@@ -3,7 +3,7 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ import AggResponsePointSeriesGetSeriesProvider from 'ui/agg_response/point_series/_get_series';
+ describe('getSeries', function () {
+-  var getSeries;
++  let getSeries;
+ 
+   var agg = { fieldFormatter: _.constant(_.identity) };
+ 

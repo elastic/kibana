@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_response/point_series/__tests__/_get_point.js b/src/ui/public/agg_response/point_series/__tests__/_get_point.js	(rejected hunks)
+@@ -5,7 +5,7 @@ import AggResponsePointSeriesGetPointProvider from 'ui/agg_response/point_series
+ 
+ describe('getPoint', function () {
+ 
+-  var getPoint;
++  let getPoint;
+ 
+   var truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
+   var identFormatted = { fieldFormatter: _.constant(_.identity) };

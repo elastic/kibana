@@ -1,0 +1,10 @@
+diff a/src/ui/public/filter_bar/filter_bar_click_handler.js b/src/ui/public/filter_bar/filter_bar_click_handler.js	(rejected hunks)
+@@ -9,7 +9,7 @@ export default function (Notifier) {
+       var notify = new Notifier({
+         location: 'Filter bar'
+       });
+-      var aggConfigResult;
++      let aggConfigResult;
+ 
+       // Hierarchical and tabular data set their aggConfigResult parameter
+       // differently because of how the point is rewritten between the two. So

@@ -26,8 +26,8 @@ describe('AggTypesComponent', function () {
   });
 
   describe('metric aggs', function () {
-    var metricAggs;
-    var MetricAggType;
+    let metricAggs;
+    let MetricAggType;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

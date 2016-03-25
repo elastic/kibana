@@ -1,0 +1,10 @@
+diff a/src/ui/public/index_patterns/_get_ids.js b/src/ui/public/index_patterns/_get_ids.js	(rejected hunks)
+@@ -3,7 +3,7 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
+ 
+   // many places may require the id list, so we will cache it seperately
+   // didn't incorportate with the indexPattern cache to prevent id collisions.
+-  var cachedPromise;
++  let cachedPromise;
+ 
+   var getIds = function () {
+     if (cachedPromise) {
