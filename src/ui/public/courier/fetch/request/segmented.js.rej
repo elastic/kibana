@@ -1,0 +1,25 @@
+diff a/src/ui/public/courier/fetch/request/segmented.js b/src/ui/public/courier/fetch/request/segmented.js	(rejected hunks)
+@@ -42,6 +42,8 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
+     *********/
+ 
+     start() {
++      super.start();
++
+       this._complete = [];
+       this._active = null;
+       this._segments = [];
+@@ -61,12 +63,12 @@ export default function SegmentedReqProvider(es, Private, Promise, timefilter, c
+       // parameters via the handle
+       if (_.isFunction(this._initFn)) this._initFn(this._handle);
+       return this._createQueue().then((queue) => {
++        if (this.stopped) return;
++
+         this._all = queue.slice(0);
+ 
+         // Send the initial fetch status
+         this._reportStatus();
+-
+-        return super.start();
+       });
+     }
+ 

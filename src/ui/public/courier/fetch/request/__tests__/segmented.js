@@ -29,9 +29,7 @@ describe('ui/courier/fetch/request/segmented', () => {
       expect(returned.then).to.be.Function;
     });
 
-    it('does not call super.start() until promise is resolved', () => {
-      expect(searchReqStart.called).to.be(false);
-      $rootScope.$apply();
+    it('calls super.start() synchronously', () => {
       expect(searchReqStart.called).to.be(true);
     });
   });
