@@ -10,7 +10,7 @@ export default function (grunt) {
     const done = this.async();
     const source = 'build/kibana/bin';
     const platforms = grunt.config.get('platforms');
-    const allPlatforms = fn => invokeAllAsync(platforms, fn);
+    const allPlatforms = fn => Promise.map(platforms, fn);
 
     try {
       await allPlatforms(platform => primraf(join(platform.buildDir, 'bin')));
@@ -23,15 +23,13 @@ export default function (grunt) {
   });
 };
 
-function invokeAllAsync(all, fn) {
-  return Promise.all(all.map(fn));
-}
-
 function removeExtraneousShellScripts(grunt, platform) {
-  return Promise.all(grunt.file
+  return Promise.all(
+    grunt.file
     .expand(join(platform.buildDir, 'bin', '*'))
     .filter(file => isExtraneous(platform, file))
-    .map(file => primraf(file)));
+    .map(file => primraf(file))
+  );
 }
 
 function isExtraneous(platform, file) {

@@ -139,7 +139,7 @@ module.exports = class Plugin {
     };
 
     const register = (server, options, next) => {
-      Bluebird.resolve(asyncRegister(server, options)).nodeify(next);
+      Bluebird.resolve(asyncRegister(server, options)).asCallback(next);
     };
 
     register.attributes = { name: id, version: version };

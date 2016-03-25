@@ -20,7 +20,7 @@ module.exports = function (grunt) {
         cwd: targetDir
       });
     })
-    .nodeify(this.async());
+    .asCallback(this.async());
   });
 
 };

@@ -26,7 +26,7 @@ export default (grunt) => {
     all(
       config.get('platforms').map(async platform => await archives(platform))
     )
-    .nodeify(this.async());
+    .asCallback(this.async());
 
   });
 };

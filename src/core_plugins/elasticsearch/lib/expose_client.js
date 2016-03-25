@@ -6,6 +6,7 @@ import util from 'util';
 import url from 'url';
 import callWithRequest from './call_with_request';
 import filterHeaders from './filter_headers';
+import { makeDefer } from '../../../utils';
 
 module.exports = function (server) {
   const config = server.config();
@@ -73,9 +74,7 @@ module.exports = function (server) {
       keepAlive: options.keepAlive,
       pingTimeout: options.pingTimeout,
       requestTimeout: options.requestTimeout,
-      defer: function () {
-        return Bluebird.defer();
-      },
+      defer: makeDefer,
       log: ElasticsearchClientLogging
     });
   }

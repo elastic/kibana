@@ -71,7 +71,7 @@ module.exports = function (grunt) {
   };
 
   grunt.registerTask('_build:downloadNodeBuilds:start', function () {
-    map(platforms, start).nodeify(this.async());
+    map(platforms, start).asCallback(this.async());
   });
 
   grunt.registerTask('_build:downloadNodeBuilds:finish', function () {
@@ -79,6 +79,6 @@ module.exports = function (grunt) {
       await platform.downloadPromise;
       grunt.log.ok(`${platform.name} download complete`);
     })
-    .nodeify(this.async());
+    .asCallback(this.async());
   });
 };
