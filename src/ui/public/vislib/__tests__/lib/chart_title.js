@@ -9,12 +9,12 @@ import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
-  var ChartTitle;
-  var Data;
-  var persistedState;
-  var chartTitle;
-  var el;
-  var dataObj;
+  let ChartTitle;
+  let Data;
+  let persistedState;
+  let chartTitle;
+  let el;
+  let dataObj;
   var data = {
     hits: 621,
     label: '',

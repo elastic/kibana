@@ -7,7 +7,7 @@ import 'plugins/kibana/discover/index';
 
 // Load kibana and its applications
 
-var filter;
+let filter;
 
 var init = function (expandable) {
   // Load the application

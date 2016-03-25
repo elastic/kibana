@@ -5,8 +5,8 @@ import FilterBarLibMapRangeProvider from 'ui/filter_bar/lib/map_range';
 
 describe('Filter Bar Directive', function () {
   describe('mapRange()', function () {
-    var mapRange;
-    var $rootScope;
+    let mapRange;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

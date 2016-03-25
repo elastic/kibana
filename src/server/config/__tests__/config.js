@@ -85,7 +85,7 @@ describe('lib/config/config', function () {
 
     describe('#resetTo(object)', function () {
 
-      var config;
+      let config;
       beforeEach(function () {
         config = new Config(schema);
       });
@@ -102,7 +102,7 @@ describe('lib/config/config', function () {
 
     describe('#has(key)', function () {
 
-      var config;
+      let config;
       beforeEach(function () {
         config = new Config(schema);
       });
@@ -122,7 +122,7 @@ describe('lib/config/config', function () {
     });
 
     describe('#set(key, value)', function () {
-      var config;
+      let config;
 
       beforeEach(function () {
         config = new Config(schema);
@@ -171,7 +171,7 @@ describe('lib/config/config', function () {
 
     describe('#get(key)', function () {
 
-      var config;
+      let config;
 
       beforeEach(function () {
         config = new Config(schema);
@@ -210,7 +210,7 @@ describe('lib/config/config', function () {
     });
 
     describe('#extendSchema(key, schema)', function () {
-      var config;
+      let config;
       beforeEach(function () {
         config = new Config(schema);
       });

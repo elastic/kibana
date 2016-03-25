@@ -7,9 +7,9 @@ import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggConfigResult', function () {
 
-  var AggConfig;
-  var indexPattern;
-  var Vis;
+  let AggConfig;
+  let indexPattern;
+  let Vis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

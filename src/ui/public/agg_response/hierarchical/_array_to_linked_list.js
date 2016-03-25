@@ -1,6 +1,6 @@
 import _ from 'lodash';
 export default function (buckets) {
-  var previous;
+  let previous;
   _.each(buckets, function (bucket) {
     if (previous) {
       bucket._previous = previous;

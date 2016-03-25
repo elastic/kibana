@@ -173,8 +173,8 @@ export default function AreaChartFactory(Private) {
     var tooltip = this.tooltip;
     var isTooltip = this._attr.addTooltip;
     var isOverlapping = this.isOverlapping;
-    var layer;
-    var circles;
+    let layer;
+    let circles;
 
     layer = svg.selectAll('.points')
     .data(data)
@@ -297,14 +297,14 @@ export default function AreaChartFactory(Private) {
     var minHeight = 20;
     var addTimeMarker = this._attr.addTimeMarker;
     var times = this._attr.times || [];
-    var timeMarker;
-    var div;
-    var svg;
-    var width;
-    var height;
-    var layers;
-    var circles;
-    var path;
+    let timeMarker;
+    let div;
+    let svg;
+    let width;
+    let height;
+    let layers;
+    let circles;
+    let path;
 
     return function (selection) {
       selection.each(function (data) {
