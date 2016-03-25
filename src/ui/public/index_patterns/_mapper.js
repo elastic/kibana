@@ -76,7 +76,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
     };
 
     self.getIndicesForIndexPattern = function (indexPattern) {
-      return es.indices.getAliases({
+      return es.indices.getAlias({
         index: patternToWildcard(indexPattern.id)
       })
       .then(function (resp) {

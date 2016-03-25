@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 describe('AggTableGroup Directive', function () {
 
-  var $rootScope;
-  var $compile;
-  var tabifyAggResponse;
-  var Vis;
-  var indexPattern;
+  let $rootScope;
+  let $compile;
+  let tabifyAggResponse;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
@@ -24,7 +24,7 @@ describe('AggTableGroup Directive', function () {
     $compile = $injector.get('$compile');
   }));
 
-  var $scope;
+  let $scope;
   beforeEach(function () {
     $scope = $rootScope.$new();
   });

@@ -1,4 +1,4 @@
-module.exports = function (kbnServer, server, config) {
+export default function (kbnServer, server, config) {
 
   server.decorate('server', 'config', function () {
     return kbnServer.config;

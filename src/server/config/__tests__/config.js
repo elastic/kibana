@@ -43,13 +43,36 @@ describe('lib/config/config', function () {
 
     describe('constructor', function () {
 
-      it('should not allow any config if the schema is not passed', function (done) {
+      it('should not allow any config if the schema is not passed', function () {
         var config = new Config();
         var run = function () {
           config.set('something.enable', true);
         };
         expect(run).to.throwException();
-        done();
+      });
+
+      it('should allow keys in the schema', function () {
+        var config = new Config(schema);
+        var run = function () {
+          config.set('test.client.host', 'http://0.0.0.0');
+        };
+        expect(run).to.not.throwException();
+      });
+
+      it('should not allow keys not in the schema', function () {
+        var config = new Config(schema);
+        var run = function () {
+          config.set('paramNotDefinedInTheSchema', true);
+        };
+        expect(run).to.throwException();
+      });
+
+      it('should not allow child keys not in the schema', function () {
+        var config = new Config(schema);
+        var run = function () {
+          config.set('test.client.paramNotDefinedInTheSchema', true);
+        };
+        expect(run).to.throwException();
       });
 
       it('should set defaults', function () {
@@ -62,7 +85,7 @@ describe('lib/config/config', function () {
 
     describe('#resetTo(object)', function () {
 
-      var config;
+      let config;
       beforeEach(function () {
         config = new Config(schema);
       });
@@ -79,7 +102,7 @@ describe('lib/config/config', function () {
 
     describe('#has(key)', function () {
 
-      var config;
+      let config;
       beforeEach(function () {
         config = new Config(schema);
       });
@@ -99,7 +122,7 @@ describe('lib/config/config', function () {
     });
 
     describe('#set(key, value)', function () {
-      var config;
+      let config;
 
       beforeEach(function () {
         config = new Config(schema);
@@ -148,7 +171,7 @@ describe('lib/config/config', function () {
 
     describe('#get(key)', function () {
 
-      var config;
+      let config;
 
       beforeEach(function () {
         config = new Config(schema);
@@ -187,7 +210,7 @@ describe('lib/config/config', function () {
     });
 
     describe('#extendSchema(key, schema)', function () {
-      var config;
+      let config;
       beforeEach(function () {
         config = new Config(schema);
       });
@@ -196,6 +219,14 @@ describe('lib/config/config', function () {
         var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
         config.extendSchema('myTest', newSchema);
         expect(config.get('myTest.test')).to.be(true);
+      });
+
+      it('should allow you to extend the schema with a prefix', function () {
+        var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        config.extendSchema('prefix.myTest', newSchema);
+        expect(config.get('prefix')).to.eql({ myTest: { test: true }});
+        expect(config.get('prefix.myTest')).to.eql({ test: true });
+        expect(config.get('prefix.myTest.test')).to.be(true);
       });
 
       it('should NOT allow you to extend the schema if somethign else is there', function () {

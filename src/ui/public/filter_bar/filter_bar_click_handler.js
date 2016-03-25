@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import dedupFilters from './lib/dedupFilters';
-import uniqFilters from './lib/uniqFilters';
+import dedupFilters from './lib/dedup_filters';
+import uniqFilters from './lib/uniq_filters';
 import findByParam from 'ui/utils/find_by_param';
 
 export default function (Notifier) {
@@ -9,7 +9,7 @@ export default function (Notifier) {
       var notify = new Notifier({
         location: 'Filter bar'
       });
-      var aggConfigResult;
+      let aggConfigResult;
 
       // Hierarchical and tabular data set their aggConfigResult parameter
       // differently because of how the point is rewritten between the two. So

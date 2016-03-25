@@ -3,7 +3,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import EventsProvider from 'ui/events';
 import ReflowWatcherProvider from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {
@@ -17,10 +17,10 @@ describe('Reflow watcher', function () {
     })).to.be(true);
   };
 
-  var EventEmitter;
-  var reflowWatcher;
-  var $rootScope;
-  var $onStub;
+  let EventEmitter;
+  let reflowWatcher;
+  let $rootScope;
+  let $onStub;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -51,7 +51,7 @@ describe('Reflow watcher', function () {
   });
 
   describe('un-listens in #destroy()', function () {
-    var $offStub;
+    let $offStub;
 
     beforeEach(function () {
       $offStub = sinon.stub($.fn, 'off');

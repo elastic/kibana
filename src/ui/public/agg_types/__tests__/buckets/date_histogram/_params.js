@@ -1,20 +1,20 @@
 import _ from 'lodash';
 import moment from 'moment';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
-import AggParamWriterProvider from '../../AggParamWriter';
+import ngMock from 'ng_mock';
+import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesIndexProvider from 'ui/agg_types/index';
-import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import VisAggConfigProvider from 'ui/vis/agg_config';
 describe('params', function () {
 
-  var paramWriter;
-  var writeInterval;
+  let paramWriter;
+  let writeInterval;
 
-  var aggTypes;
-  var AggConfig;
-  var setTimeBounds;
-  var timeField;
+  let aggTypes;
+  let AggConfig;
+  let setTimeBounds;
+  let timeField;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

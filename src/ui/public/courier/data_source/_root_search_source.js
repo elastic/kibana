@@ -1,7 +1,7 @@
-import CourierDataSourceSearchSourceProvider from 'ui/courier/data_source/search_source';
+import SearchSourceProvider from 'ui/courier/data_source/search_source';
 
 export default function RootSearchSource(Private, $rootScope, timefilter, Notifier) {
-  var SearchSource = Private(CourierDataSourceSearchSourceProvider);
+  var SearchSource = Private(SearchSourceProvider);
 
   var notify = new Notifier({ location: 'Root Search Source' });
 
@@ -12,7 +12,7 @@ export default function RootSearchSource(Private, $rootScope, timefilter, Notifi
     return timefilter.get(globalSource.get('index'));
   });
 
-  var appSource; // set in setAppSource()
+  let appSource; // set in setAppSource()
   resetAppSource();
 
   // when the route changes, clear the appSource

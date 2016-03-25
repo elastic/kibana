@@ -1,23 +1,23 @@
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_response_writer';
 import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
 import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('ResponseWriter class', function () {
 
-  var Vis;
-  var Table;
-  var Buckets;
-  var Private;
-  var TableGroup;
-  var getColumns;
-  var indexPattern;
-  var ResponseWriter;
+  let Vis;
+  let Table;
+  let Buckets;
+  let Private;
+  let TableGroup;
+  let getColumns;
+  let indexPattern;
+  let ResponseWriter;
 
   function defineSetup(stubGetColumns) {
     beforeEach(ngMock.module('kibana'));

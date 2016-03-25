@@ -1,19 +1,19 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'auto-release-sinon';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 describe('AggTable Directive', function () {
 
-  var $rootScope;
-  var $compile;
-  var tabifyAggResponse;
-  var Vis;
-  var indexPattern;
+  let $rootScope;
+  let $compile;
+  let tabifyAggResponse;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
@@ -25,7 +25,7 @@ describe('AggTable Directive', function () {
     $compile = $injector.get('$compile');
   }));
 
-  var $scope;
+  let $scope;
   beforeEach(function () {
     $scope = $rootScope.$new();
   });
@@ -134,7 +134,7 @@ describe('AggTable Directive', function () {
   });
 
   describe('aggTable.exportAsCsv()', function () {
-    var origBlob;
+    let origBlob;
     function FakeBlob(slices, opts) {
       this.slices = slices;
       this.opts = opts;

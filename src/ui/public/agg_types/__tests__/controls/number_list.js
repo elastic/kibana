@@ -1,15 +1,15 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
-import simulateKeys from 'testUtils/simulateKeys';
-import ngMock from 'ngMock';
+import simulateKeys from 'test_utils/simulate_keys';
+import ngMock from 'ng_mock';
 import 'ui/number_list';
 describe('NumberList directive', function () {
 
 
-  var $el;
-  var $scope;
-  var compile;
+  let $el;
+  let $scope;
+  let compile;
 
   function onlyValidValues() {
     return $el.find('[ng-model]').toArray().map(function (el) {

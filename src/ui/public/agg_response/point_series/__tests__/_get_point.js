@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggResponsePointSeriesGetPointProvider from 'ui/agg_response/point_series/_get_point';
 
 describe('getPoint', function () {
 
-  var getPoint;
+  let getPoint;
 
   var truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
   var identFormatted = { fieldFormatter: _.constant(_.identity) };
@@ -16,10 +16,10 @@ describe('getPoint', function () {
   }));
 
   describe('Without series aspect', function () {
-    var seriesAspect;
-    var xAspect;
-    var yAspect;
-    var yScale;
+    let seriesAspect;
+    let xAspect;
+    let yAspect;
+    let yScale;
 
     beforeEach(function () {
       seriesAspect = null;
@@ -49,10 +49,10 @@ describe('getPoint', function () {
   });
 
   describe('With series aspect', function () {
-    var row;
-    var xAspect;
-    var yAspect;
-    var yScale;
+    let row;
+    let xAspect;
+    let yAspect;
+    let yScale;
 
     beforeEach(function () {
       row = [ { value: 1 }, { value: 2 }, { value: 3 }];

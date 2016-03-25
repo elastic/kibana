@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggTypesIndexProvider from 'ui/agg_types/index';
-import AggParamWriterProvider from '../AggParamWriter';
+import AggParamWriterProvider from '../agg_param_writer';
 describe('Histogram Agg', function () {
 
   describe('ordered', function () {
-    var histogram;
+    let histogram;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -24,7 +24,7 @@ describe('Histogram Agg', function () {
 
 
   describe('params', function () {
-    var paramWriter;
+    let paramWriter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -82,6 +82,7 @@ describe('Histogram Agg', function () {
     describe('extended_bounds', function () {
       it('writes when only eb.min is set', function () {
         var output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: { min: 0 }
         });
         expect(output.params.extended_bounds).to.have.property('min', 0);
@@ -90,6 +91,7 @@ describe('Histogram Agg', function () {
 
       it('writes when only eb.max is set', function () {
         var output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: { max: 0 }
         });
         expect(output.params.extended_bounds).to.have.property('min', undefined);
@@ -98,6 +100,7 @@ describe('Histogram Agg', function () {
 
       it('writes when both eb.min and eb.max are set', function () {
         var output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: { min: 99, max: 100 }
         });
         expect(output.params.extended_bounds).to.have.property('min', 99);
@@ -106,7 +109,16 @@ describe('Histogram Agg', function () {
 
       it('does not write when nothing is set', function () {
         var output = paramWriter.write({
+          min_doc_count: true,
           extended_bounds: {}
+        });
+        expect(output.params).to.not.have.property('extended_bounds');
+      });
+
+      it('does not write when min_doc_count is false', function () {
+        var output = paramWriter.write({
+          min_doc_count: false,
+          extended_bounds: { min: 99, max: 100 }
         });
         expect(output.params).to.not.have.property('extended_bounds');
       });

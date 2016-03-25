@@ -11,11 +11,26 @@
         <div class="btn-group pull-right toast-controls">
           <button
             type="button"
+            ng-if="notif.isTimed()"
+            class="btn toaster-countdown"
+            ng-class="'btn-' + notif.type"
+            ng-click="notif.cancelTimer()"
+
+            ><span class="badge" hover-text="stop">{{notif.timeRemaining}}s</span></button>
+          <button
+            type="button"
             ng-if="notif.stack && !notif.showStack"
             class="btn"
             ng-class="'btn-' + notif.type"
-            ng-click="notif.showStack = true"
+            ng-click="notif.cancelTimer(); notif.showStack = true"
             >More Info</button>
+          <button
+            type="button"
+            ng-if="notif.stack && notif.showStack"
+            class="btn"
+            ng-class="'btn-' + notif.type"
+            ng-click="notif.showStack = false"
+            >Less Info</button>
           <button
             type="button"
             ng-if="notif.accept"

@@ -27,7 +27,7 @@ export default function DateIntervalRoundingRulesProvider() {
   function find(rules, check, last) {
     function pick(buckets, duration) {
       var target = duration / buckets;
-      var lastResp;
+      let lastResp;
 
       for (var i = 0; i < rules.length; i++) {
         var rule = rules[i];

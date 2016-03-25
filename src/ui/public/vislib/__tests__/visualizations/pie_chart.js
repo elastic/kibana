@@ -1,12 +1,12 @@
 import d3 from 'd3';
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import VisProvider from 'ui/Vis';
+import VisProvider from 'ui/vis';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
@@ -65,14 +65,14 @@ describe('No global chart settings', function () {
     addLegend: true,
     addTooltip: true
   };
-  var chart1;
-  var chart2;
-  var Vis;
-  var persistedState;
-  var indexPattern;
-  var buildHierarchicalData;
-  var data1;
-  var data2;
+  let chart1;
+  let chart2;
+  let Vis;
+  let persistedState;
+  let indexPattern;
+  let buildHierarchicalData;
+  let data1;
+  let data2;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -162,12 +162,12 @@ aggArray.forEach(function (dataAgg, i) {
       addLegend: true,
       addTooltip: true
     };
-    var vis;
-    var Vis;
-    var persistedState;
-    var indexPattern;
-    var buildHierarchicalData;
-    var data;
+    let vis;
+    let Vis;
+    let persistedState;
+    let indexPattern;
+    let buildHierarchicalData;
+    let data;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -197,10 +197,10 @@ aggArray.forEach(function (dataAgg, i) {
     });
 
     describe('addPathEvents method', function () {
-      var path;
-      var d3selectedPath;
-      var onClick;
-      var onMouseOver;
+      let path;
+      let d3selectedPath;
+      let onClick;
+      let onMouseOver;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -227,10 +227,10 @@ aggArray.forEach(function (dataAgg, i) {
     });
 
     describe('addPath method', function () {
-      var width;
-      var height;
-      var svg;
-      var slices;
+      let width;
+      let height;
+      let svg;
+      let slices;
 
       beforeEach(ngMock.inject(function () {
         vis.handler.charts.forEach(function (chart) {

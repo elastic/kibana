@@ -1,7 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/private';
 
 import docViewsRegistry from 'ui/registry/doc_views';

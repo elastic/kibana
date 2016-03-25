@@ -7,7 +7,7 @@ export default function FlattenDataObjectUtilService() {
    */
 
   return function (obj) {
-    var charts;
+    let charts;
 
     if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
       throw new TypeError('FlattenDataObjUtilService expects an object with a series, rows, or columns key');
