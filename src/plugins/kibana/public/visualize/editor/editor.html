@@ -15,6 +15,7 @@
         ng-class="{active: kbnTopNavbar.is('save')}"
         ng-click="kbnTopNavbar.toggle('save')"
         ng-if="!editableVis.dirty"
+        aria-haspopup="true"
         aria-expanded="{{ kbnTopNavbar.is('save') }}"
         aria-label="Save Visualization">
         <span>Save</span>

@@ -8,7 +8,7 @@
         <input
           input-focus
           ng-model="filter"
-          ng-attr-placeholder="{{finder.properties.nouns}} Filter..."
+          ng-attr-placeholder="{{finder.properties.nouns | label }} Filter..."
           ng-keydown="finder.filterKeyDown($event)"
           class="form-control"
           name="filter"
@@ -19,25 +19,24 @@
         <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
       </div>
       <div class="finder-manage-object col-md-2">
-        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">Manage {{finder.properties.nouns}}</a>
+        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
+          Manage {{finder.properties.nouns}}
+        </a>
       </div>
     </div>
   </div>
 </form>
 <paginate list="finder.hits" per-page="20">
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
-
-    <li class="list-group-item list-group-menu-item">
+    <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">
         Name
         <i
           class="fa"
-          ng-click="finder.sortHits(finder.hits)"
           ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
         </i>
       </span>
     </li>
-
     <li
       class="list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
@@ -53,12 +52,10 @@
           <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
     </li>
-
     <li
       class="list-group-item list-group-no-results"
       ng-if="finder.hits.length === 0">
       <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
     </li>
-
   </ul>
 </paginate>

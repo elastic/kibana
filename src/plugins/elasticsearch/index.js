@@ -10,7 +10,7 @@ module.exports = function ({ Plugin }) {
     require: ['kibana'],
 
     config(Joi) {
-      const { array, boolean, number, object, string } = Joi;
+      const { array, boolean, number, object, string, ref } = Joi;
 
       return object({
         enabled: boolean().default(true),
@@ -20,7 +20,7 @@ module.exports = function ({ Plugin }) {
         password: string(),
         shardTimeout: number().default(0),
         requestTimeout: number().default(30000),
-        pingTimeout: number().default(30000),
+        pingTimeout: number().default(ref('requestTimeout')),
         startupTimeout: number().default(5000),
         ssl: object({
           verify: boolean().default(true),

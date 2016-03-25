@@ -16,7 +16,7 @@ var log = _.bindKey(console, 'log');
 var firstFatal = true;
 
 var fatalToastTemplate = (function lazyTemplate(tmpl) {
-  var compiled;
+  let compiled;
   return function (vars) {
     return (compiled || (compiled = _.template(tmpl)))(vars);
   };
@@ -332,9 +332,9 @@ function createGroupLogger(type, opts) {
   var groups = window[type + 'Groups'] = {};
 
   return function logger(name, success) {
-    var status; // status of the timer
-    var exec; // function to execute and wrap
-    var ret; // return value
+    let status; // status of the timer
+    let exec; // function to execute and wrap
+    let ret; // return value
 
     var complete = function (val) { logger(name, true); return val; };
     var failure = function (err) { logger(name, false); throw err; };

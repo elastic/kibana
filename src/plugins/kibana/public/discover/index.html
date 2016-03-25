@@ -18,13 +18,13 @@
       <button
         ng-click="kbnTopNavbar.toggle('save');"
         ng-class="{active: kbnTopNavbar.is('save')}"
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ kbnTopNavbar.is('save') }}"
         aria-label="Save Search">
         <span>Save</span>
       </button>
       <button
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ kbnTopNavbar.is('load') }}"
         ng-click="kbnTopNavbar.toggle('load');"
         ng-class="{active: kbnTopNavbar.is('load')}"
@@ -33,7 +33,7 @@
       </button>
       <button
         aria-label="Share Search"
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ kbnTopNavbar.is('share') }}"
         ng-class="{active: kbnTopNavbar.is('share')}"
         ng-click="kbnTopNavbar.toggle('share');">
