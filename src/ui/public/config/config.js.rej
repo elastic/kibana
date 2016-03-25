@@ -1,0 +1,19 @@
+diff a/src/ui/public/config/config.js b/src/ui/public/config/config.js	(rejected hunks)
+@@ -28,7 +28,7 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
+ 
+   // active or previous instance of DelayedUpdater. This will log and then process an
+   // update once it is requested by calling #set() or #clear().
+-  var updater;
++  let updater;
+ 
+   var DocSource = Private(DocSourceProvider);
+   var doc = (new DocSource())
+@@ -82,7 +82,7 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
+   });
+ 
+   config.get = function (key, defaultVal) {
+-    var keyVal;
++    let keyVal;
+ 
+     if (vals[key] == null) {
+       if (defaultVal == null) {

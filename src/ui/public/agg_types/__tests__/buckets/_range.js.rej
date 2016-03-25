@@ -1,0 +1,14 @@
+diff a/src/ui/public/agg_types/__tests__/buckets/_range.js b/src/ui/public/agg_types/__tests__/buckets/_range.js	(rejected hunks)
+@@ -11,9 +11,9 @@ describe('Range Agg', function () {
+ 
+   var buckets = values(resp.aggregations[1].buckets);
+ 
+-  var range;
+-  var Vis;
+-  var indexPattern;
++  let range;
++  let Vis;
++  let indexPattern;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

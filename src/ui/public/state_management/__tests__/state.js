@@ -136,7 +136,7 @@ describe('State Management', function () {
     });
 
     it('should clear state when missing form URL', function () {
-      var stateObj;
+      let stateObj;
       var state = new State();
 
       // set satte via URL

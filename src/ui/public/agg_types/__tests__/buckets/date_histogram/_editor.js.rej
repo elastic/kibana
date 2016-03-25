@@ -1,0 +1,18 @@
+diff a/src/ui/public/agg_types/__tests__/buckets/date_histogram/_editor.js b/src/ui/public/agg_types/__tests__/buckets/date_histogram/_editor.js	(rejected hunks)
+@@ -7,11 +7,11 @@ import VisProvider from 'ui/vis';
+ import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
+ describe('editor', function () {
+ 
+-  var indexPattern;
+-  var vis;
+-  var agg;
+-  var render;
+-  var $scope;
++  let indexPattern;
++  let vis;
++  let agg;
++  let render;
++  let $scope;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector, $compile) {

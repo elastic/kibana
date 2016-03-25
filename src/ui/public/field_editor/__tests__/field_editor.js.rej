@@ -1,0 +1,21 @@
+diff a/src/ui/public/field_editor/__tests__/field_editor.js b/src/ui/public/field_editor/__tests__/field_editor.js	(rejected hunks)
+@@ -6,13 +6,13 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+ describe('FieldEditor directive', function () {
+ 
+-  var Field;
+-  var StringFormat;
+-  var $rootScope;
++  let Field;
++  let StringFormat;
++  let $rootScope;
+ 
+-  var compile;
+-  var $scope;
+-  var $el;
++  let compile;
++  let $scope;
++  let $el;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($compile, $injector, Private) {

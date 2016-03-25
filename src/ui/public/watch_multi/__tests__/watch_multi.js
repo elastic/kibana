@@ -135,9 +135,9 @@ describe('$scope.$watchMulti', function () {
   });
 
   describe('complex watch expressions', function () {
-    var stateWatchers;
-    var firstValue;
-    var secondValue;
+    let stateWatchers;
+    let firstValue;
+    let secondValue;
 
     beforeEach(function () {
       var firstGetter = function () {

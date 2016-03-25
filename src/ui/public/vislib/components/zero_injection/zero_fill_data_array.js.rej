@@ -1,0 +1,14 @@
+diff a/src/ui/public/vislib/components/zero_injection/zero_fill_data_array.js b/src/ui/public/vislib/components/zero_injection/zero_fill_data_array.js	(rejected hunks)
+@@ -12,9 +12,9 @@ export default function ZeroFillDataArrayUtilService(Private) {
+       throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
+     }
+ 
+-    var i;
+-    var val;
+-    var index;
++    let i;
++    let val;
++    let index;
+     var max = arr2.length;
+ 
+     var getX = function (d) {

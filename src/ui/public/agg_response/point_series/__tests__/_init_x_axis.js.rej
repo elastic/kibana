@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_response/point_series/__tests__/_init_x_axis.js b/src/ui/public/agg_response/point_series/__tests__/_init_x_axis.js	(rejected hunks)
+@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
+ import AggResponsePointSeriesInitXAxisProvider from 'ui/agg_response/point_series/_init_x_axis';
+ describe('initXAxis', function () {
+ 
+-  var initXAxis;
++  let initXAxis;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

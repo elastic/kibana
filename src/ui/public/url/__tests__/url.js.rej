@@ -1,0 +1,20 @@
+diff a/src/ui/public/url/__tests__/url.js b/src/ui/public/url/__tests__/url.js	(rejected hunks)
+@@ -8,12 +8,12 @@ import MockState from 'fixtures/mock_state';
+ import 'ui/url';
+ 
+ // global vars, injected and mocked in init()
+-var kbnUrl;
+-var $route;
+-var $location;
+-var $rootScope;
+-var globalStateMock;
+-var appState;
++let kbnUrl;
++let $route;
++let $location;
++let $rootScope;
++let globalStateMock;
++let appState;
+ 
+ 
+ function init() {

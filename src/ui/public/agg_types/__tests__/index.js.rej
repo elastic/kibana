@@ -1,0 +1,12 @@
+diff a/src/ui/public/agg_types/__tests__/index.js b/src/ui/public/agg_types/__tests__/index.js	(rejected hunks)
+@@ -12,8 +12,8 @@ import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_ag
+ describe('AggTypesComponent', function () {
+ 
+   describe('bucket aggs', function () {
+-    var bucketAggs;
+-    var BucketAggType;
++    let bucketAggs;
++    let BucketAggType;
+ 
+     beforeEach(ngMock.module('kibana'));
+     beforeEach(ngMock.inject(function (Private) {

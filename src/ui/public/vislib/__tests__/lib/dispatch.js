@@ -20,9 +20,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
   }
 
   describe('', function () {
-    var vis;
-    var persistedState;
-    var SimpleEmitter;
+    let vis;
+    let persistedState;
+    let SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -46,8 +46,8 @@ describe('Vislib Dispatch Class Test Suite', function () {
   });
 
   describe('Stock event handlers', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

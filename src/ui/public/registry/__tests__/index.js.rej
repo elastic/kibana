@@ -1,0 +1,12 @@
+diff a/src/ui/public/registry/__tests__/index.js b/src/ui/public/registry/__tests__/index.js	(rejected hunks)
+@@ -4,8 +4,8 @@ import registry from 'ui/registry/_registry';
+ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ describe('Registry', function () {
+-  var Private;
+-  var IndexedArray;
++  let Private;
++  let IndexedArray;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($injector) {

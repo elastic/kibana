@@ -11,7 +11,7 @@ describe('Url Format', function () {
   }));
 
   describe('Url Format', function () {
-    var Url;
+    let Url;
 
     beforeEach(function () {
       Url = fieldFormats.getType('url');

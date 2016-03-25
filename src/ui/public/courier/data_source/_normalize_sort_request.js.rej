@@ -1,0 +1,10 @@
+diff a/src/ui/public/courier/data_source/_normalize_sort_request.js b/src/ui/public/courier/data_source/_normalize_sort_request.js	(rejected hunks)
+@@ -28,7 +28,7 @@ export default function normalizeSortRequest(config) {
+     var indexField = indexPattern.fields.byName[sortField];
+ 
+     if (indexField && indexField.scripted && indexField.sortable) {
+-      var direction;
++      let direction;
+       if (_.isString(sortValue)) direction = sortValue;
+       if (_.isObject(sortValue) && sortValue.order) direction = sortValue.order;
+ 

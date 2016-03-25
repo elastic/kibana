@@ -1,0 +1,51 @@
+diff a/src/ui/public/vislib/visualizations/column_chart.js b/src/ui/public/vislib/visualizations/column_chart.js	(rejected hunks)
+@@ -51,8 +51,8 @@ export default function ColumnChartFactory(Private) {
+     var color = this.handler.data.getColorFunc();
+     var tooltip = this.tooltip;
+     var isTooltip = this._attr.addTooltip;
+-    var layer;
+-    var bars;
++    let layer;
++    let bars;
+ 
+     layer = svg.selectAll('.layer')
+     .data(layers)
+@@ -120,7 +120,7 @@ export default function ColumnChartFactory(Private) {
+     var yMin = this.handler.yAxis.yScale.domain()[0];
+     var self = this;
+ 
+-    var barWidth;
++    let barWidth;
+     if (data.ordered && data.ordered.date) {
+       var start = data.ordered.min;
+       var end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+@@ -185,7 +185,7 @@ export default function ColumnChartFactory(Private) {
+     var groupSpacingPercentage = 0.15;
+     var isTimeScale = (data.ordered && data.ordered.date);
+     var minWidth = 1;
+-    var barWidth;
++    let barWidth;
+ 
+     // update
+     bars
+@@ -270,13 +270,13 @@ export default function ColumnChartFactory(Private) {
+     var minHeight = 20;
+     var addTimeMarker = this._attr.addTimeMarker;
+     var times = this._attr.times || [];
+-    var timeMarker;
+-    var div;
+-    var svg;
+-    var width;
+-    var height;
+-    var layers;
+-    var bars;
++    let timeMarker;
++    let div;
++    let svg;
++    let width;
++    let height;
++    let layers;
++    let bars;
+ 
+     return function (selection) {
+       selection.each(function (data) {
