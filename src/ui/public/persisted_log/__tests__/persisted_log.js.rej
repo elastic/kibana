@@ -1,0 +1,14 @@
+diff a/src/ui/public/persisted_log/__tests__/persisted_log.js b/src/ui/public/persisted_log/__tests__/persisted_log.js	(rejected hunks)
+@@ -4,9 +4,9 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ import 'ui/persisted_log';
+ 
+-var storage;
+-var config;
+-var PersistedLog;
++let storage;
++let config;
++let PersistedLog;
+ 
+ var historyName = 'testHistory';
+ var historyLimit = 10;

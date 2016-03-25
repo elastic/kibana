@@ -1,0 +1,10 @@
+diff a/src/ui/public/filters/__tests__/uriescape.js b/src/ui/public/filters/__tests__/uriescape.js	(rejected hunks)
+@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
+ import 'plugins/kibana/discover/index';
+ 
+ 
+-var filter;
++let filter;
+ 
+ var init = function (expandable) {
+   // Load the application

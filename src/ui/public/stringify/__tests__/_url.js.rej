@@ -1,0 +1,10 @@
+diff a/src/ui/public/stringify/__tests__/_url.js b/src/ui/public/stringify/__tests__/_url.js	(rejected hunks)
+@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
+ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+ describe('Url Format', function () {
+ 
+-  var fieldFormats;
++  let fieldFormats;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

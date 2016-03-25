@@ -1,0 +1,18 @@
+diff a/src/ui/public/agg_table/__tests__/_table.js b/src/ui/public/agg_table/__tests__/_table.js	(rejected hunks)
+@@ -9,11 +9,11 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
+ import VisProvider from 'ui/vis';
+ describe('AggTable Directive', function () {
+ 
+-  var $rootScope;
+-  var $compile;
+-  var tabifyAggResponse;
+-  var Vis;
+-  var indexPattern;
++  let $rootScope;
++  let $compile;
++  let tabifyAggResponse;
++  let Vis;
++  let indexPattern;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($injector, Private) {

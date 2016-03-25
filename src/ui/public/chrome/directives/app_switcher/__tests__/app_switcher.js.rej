@@ -1,0 +1,10 @@
+diff a/src/ui/public/chrome/directives/app_switcher/__tests__/app_switcher.js b/src/ui/public/chrome/directives/app_switcher/__tests__/app_switcher.js	(rejected hunks)
+@@ -12,7 +12,7 @@ import 'ui/chrome';
+ import '../app_switcher';
+ 
+ describe('appSwitcher directive', function () {
+-  var env;
++  let env;
+ 
+   beforeEach(ngMock.module('kibana'));
+ 

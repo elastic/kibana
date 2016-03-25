@@ -1,0 +1,20 @@
+diff a/src/ui/public/paginated_table/__tests__/index.js b/src/ui/public/paginated_table/__tests__/index.js	(rejected hunks)
+@@ -7,12 +7,12 @@ import 'ui/paginated_table';
+ import $ from 'jquery';
+ 
+ describe('paginated table', function () {
+-  var $el;
+-  var $rootScope;
+-  var $compile;
+-  var $scope;
+-  var $elScope;
+-  var $orderBy;
++  let $el;
++  let $rootScope;
++  let $compile;
++  let $scope;
++  let $elScope;
++  let $orderBy;
+   var defaultPerPage = 10;
+ 
+   var makeData = function (colCount, rowCount) {

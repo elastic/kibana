@@ -22,7 +22,7 @@ describe('Histogram Agg', function () {
 
 
   describe('params', function () {
-    var paramWriter;
+    let paramWriter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

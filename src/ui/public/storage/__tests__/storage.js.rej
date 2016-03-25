@@ -1,0 +1,12 @@
+diff a/src/ui/public/storage/__tests__/storage.js b/src/ui/public/storage/__tests__/storage.js	(rejected hunks)
+@@ -3,8 +3,8 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ import 'ui/storage';
+ 
+-var storage;
+-var $window;
++let storage;
++let $window;
+ var payload = { first: 'john', last: 'smith' };
+ 
+ 

@@ -1,0 +1,20 @@
+diff a/src/ui/public/safe_confirm/__tests__/safe_confirm.js b/src/ui/public/safe_confirm/__tests__/safe_confirm.js	(rejected hunks)
+@@ -3,12 +3,12 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ describe('ui/safe_confirm', function () {
+ 
+-  var $rootScope;
+-  var $window;
+-  var $timeout;
+-  var message;
+-  var safeConfirm;
+-  var promise;
++  let $rootScope;
++  let $window;
++  let $timeout;
++  let message;
++  let safeConfirm;
++  let promise;
+ 
+   beforeEach(function () {
+     ngMock.module('kibana', function ($provide) {

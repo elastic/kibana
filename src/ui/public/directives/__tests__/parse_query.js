@@ -101,7 +101,7 @@ describe('parse-query directive', function () {
 
   describe('model presentation formatter', function () {
     it('should present undefined as empty string', function () {
-      var notDefined;
+      let notDefined;
       expect(toUser(notDefined)).to.be('');
     });
 

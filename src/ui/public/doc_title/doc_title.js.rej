@@ -1,0 +1,10 @@
+diff a/src/ui/public/doc_title/doc_title.js b/src/ui/public/doc_title/doc_title.js	(rejected hunks)
+@@ -14,7 +14,7 @@ uiModules.get('kibana')
+   var baseTitle = document.title;
+   var self = this;
+ 
+-  var lastChange;
++  let lastChange;
+ 
+   function render() {
+     lastChange = lastChange || [];

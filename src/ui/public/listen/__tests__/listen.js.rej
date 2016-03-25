@@ -1,0 +1,12 @@
+diff a/src/ui/public/listen/__tests__/listen.js b/src/ui/public/listen/__tests__/listen.js	(rejected hunks)
+@@ -6,8 +6,8 @@ import EventsProvider from 'ui/events';
+ 
+ describe('listen component', function () {
+ 
+-  var $rootScope;
+-  var Events;
++  let $rootScope;
++  let Events;
+ 
+ 
+   beforeEach(ngMock.module('kibana'));

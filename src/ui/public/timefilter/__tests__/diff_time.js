@@ -4,10 +4,10 @@ var ngMock = require('ngMock');
 
 describe('Timefilter service', function () {
   describe('time diff watcher', function () {
-    var fn;
-    var update;
-    var fetch;
-    var timefilter;
+    let fn;
+    let update;
+    let fetch;
+    let timefilter;
 
     beforeEach(ngMock.module('kibana'));
 

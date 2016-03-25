@@ -85,7 +85,7 @@ describe('timepicker directive', function () {
   });
 
   describe('refresh interval', function () {
-    var $courier;
+    let $courier;
     beforeEach(function () {
       init();
       ngMock.inject(function (courier, $rootScope) {
@@ -232,7 +232,7 @@ describe('timepicker directive', function () {
     });
 
     it('disables the submit button if the form is invalid', function (done) {
-      var button;
+      let button;
       button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
@@ -359,7 +359,7 @@ describe('timepicker directive', function () {
 
   describe('absolute mode', function () {
 
-    var inputs;
+    let inputs;
 
     beforeEach(function () {
       init();

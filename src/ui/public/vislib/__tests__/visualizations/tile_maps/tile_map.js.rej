@@ -1,0 +1,12 @@
+diff a/src/ui/public/vislib/__tests__/visualizations/tile_maps/tile_map.js b/src/ui/public/vislib/__tests__/visualizations/tile_maps/tile_map.js	(rejected hunks)
+@@ -10,8 +10,8 @@ import $ from 'jquery';
+ import VislibVisualizationsTileMapProvider from 'ui/vislib/visualizations/tile_map';
+ var mockChartEl = $('<div>');
+ 
+-var TileMap;
+-var extentsStub;
++let TileMap;
++let extentsStub;
+ 
+ function createTileMap(handler, chartEl, chartData) {
+   handler = handler || {};

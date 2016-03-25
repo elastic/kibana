@@ -1,0 +1,12 @@
+diff a/src/ui/public/persisted_state/__tests__/persisted_state.js b/src/ui/public/persisted_state/__tests__/persisted_state.js	(rejected hunks)
+@@ -7,8 +7,8 @@ import errors from 'ui/errors';
+ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+ import EventsProvider from 'ui/events';
+ 
+-var PersistedState;
+-var Events;
++let PersistedState;
++let Events;
+ 
+ describe('Persisted State', function () {
+   noDigestPromises.activateForSuite();

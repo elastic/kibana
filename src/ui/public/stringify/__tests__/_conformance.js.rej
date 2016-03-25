@@ -1,0 +1,14 @@
+diff a/src/ui/public/stringify/__tests__/_conformance.js b/src/ui/public/stringify/__tests__/_conformance.js	(rejected hunks)
+@@ -4,9 +4,9 @@ import ngMock from 'ng_mock';
+ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+ import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+ 
+-var fieldFormats;
+-var FieldFormat;
+-var config;
++let fieldFormats;
++let FieldFormat;
++let config;
+ 
+ var formatIds = [
+   'bytes',

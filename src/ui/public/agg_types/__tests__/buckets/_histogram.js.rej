@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_types/__tests__/buckets/_histogram.js b/src/ui/public/agg_types/__tests__/buckets/_histogram.js	(rejected hunks)
+@@ -6,7 +6,7 @@ import AggParamWriterProvider from '../agg_param_writer';
+ describe('Histogram Agg', function () {
+ 
+   describe('ordered', function () {
+-    var histogram;
++    let histogram;
+ 
+     beforeEach(ngMock.module('kibana'));
+     beforeEach(ngMock.inject(function (Private) {

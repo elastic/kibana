@@ -1,0 +1,16 @@
+diff a/src/ui/public/doc_title/__tests__/doc_title.js b/src/ui/public/doc_title/__tests__/doc_title.js	(rejected hunks)
+@@ -5,11 +5,11 @@ import ngMock from 'ng_mock';
+ import DocTitleProvider from 'ui/doc_title';
+ 
+ describe('docTitle Service', function () {
+-  var initialDocTitle;
++  let initialDocTitle;
+   var MAIN_TITLE = 'Kibana 4';
+ 
+-  var docTitle;
+-  var $rootScope;
++  let docTitle;
++  let $rootScope;
+ 
+   beforeEach(function () {
+     initialDocTitle = document.title;

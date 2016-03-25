@@ -22,7 +22,7 @@ describe('AggTable Directive', function () {
     $compile = $injector.get('$compile');
   }));
 
-  var $scope;
+  let $scope;
   beforeEach(function () {
     $scope = $rootScope.$new();
   });
@@ -131,7 +131,7 @@ describe('AggTable Directive', function () {
   });
 
   describe('aggTable.exportAsCsv()', function () {
-    var origBlob;
+    let origBlob;
     function FakeBlob(slices, opts) {
       this.slices = slices;
       this.opts = opts;
