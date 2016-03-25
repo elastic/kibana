@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_response/point_series/_get_series.js b/src/ui/public/agg_response/point_series/_get_series.js	(rejected hunks)
+@@ -37,7 +37,7 @@ export default function PointSeriesGetSeries(Private) {
+     if (multiY) {
+       series = _.sortBy(series, function (siri) {
+         var firstVal = siri.values[0];
+-        var y;
++        let y;
+ 
+         if (firstVal) {
+           var agg = firstVal.aggConfigResult.aggConfig;

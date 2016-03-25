@@ -17,7 +17,7 @@ describe('greater_than model validator directive', function () {
 
   // no value is the same as 0
   describe('without value', function () {
-    var element;
+    let element;
     beforeEach(function () {
       html = '<input type="text" ng-model="value" greater-than />';
       element = $compile(html)($rootScope);
@@ -44,7 +44,7 @@ describe('greater_than model validator directive', function () {
 
   [0, 1, 10, 42, -12].forEach(function (num) {
     describe('with value ' + num, function () {
-      var element;
+      let element;
       beforeEach(function () {
         html = '<input type="text" ng-model="value" greater-than="' + num + '" />';
         element = $compile(html)($rootScope);

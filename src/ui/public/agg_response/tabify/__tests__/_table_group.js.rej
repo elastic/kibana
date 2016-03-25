@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_response/tabify/__tests__/_table_group.js b/src/ui/public/agg_response/tabify/__tests__/_table_group.js	(rejected hunks)
+@@ -2,7 +2,7 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
+ describe('Table Group class', function () {
+-  var TableGroup;
++  let TableGroup;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector) {

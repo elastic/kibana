@@ -1,0 +1,10 @@
+diff a/src/ui/public/filters/__tests__/label.js b/src/ui/public/filters/__tests__/label.js	(rejected hunks)
+@@ -7,7 +7,7 @@ import 'plugins/kibana/discover/index';
+ 
+ // Load kibana and its applications
+ 
+-var filter;
++let filter;
+ 
+ var init = function (expandable) {
+   // Load the application

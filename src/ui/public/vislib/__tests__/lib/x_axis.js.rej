@@ -1,0 +1,22 @@
+diff a/src/ui/public/vislib/__tests__/lib/x_axis.js b/src/ui/public/vislib/__tests__/lib/x_axis.js	(rejected hunks)
+@@ -9,13 +9,13 @@ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_s
+ import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
+ 
+ describe('Vislib xAxis Class Test Suite', function () {
+-  var XAxis;
+-  var Data;
+-  var persistedState;
+-  var xAxis;
+-  var el;
+-  var fixture;
+-  var dataObj;
++  let XAxis;
++  let Data;
++  let persistedState;
++  let xAxis;
++  let el;
++  let fixture;
++  let dataObj;
+   var data = {
+     hits: 621,
+     label: '',

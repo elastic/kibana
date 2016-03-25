@@ -20,8 +20,8 @@ describe('Vislib Color Module Test Suite', function () {
     var arrayOfNullValues = [null, null, null];
     var emptyObject = {};
     var nullValue = null;
-    var notAValue;
-    var color;
+    let notAValue;
+    let color;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
@@ -247,9 +247,9 @@ describe('Vislib Color Module Test Suite', function () {
     var nullValue = null;
     var emptyArr = [];
     var emptyObject = {};
-    var notAValue;
-    var createColorPalette;
-    var colorPalette;
+    let notAValue;
+    let createColorPalette;
+    let colorPalette;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

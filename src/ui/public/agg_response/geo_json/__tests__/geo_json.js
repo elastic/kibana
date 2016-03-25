@@ -103,10 +103,10 @@ describe('GeoJson Agg Response Converter', function () {
         describe('includes one feature per row in the table', function () {
           this.timeout(60000);
 
-          var table;
-          var chart;
-          var geoColI;
-          var metricColI;
+          let table;
+          let chart;
+          let geoColI;
+          let metricColI;
 
           before(function () {
             table = makeTable();

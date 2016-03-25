@@ -1,0 +1,10 @@
+diff a/src/ui/public/directives/infinite_scroll.js b/src/ui/public/directives/infinite_scroll.js	(rejected hunks)
+@@ -10,7 +10,7 @@ module.directive('kbnInfiniteScroll', function () {
+     },
+     link: function ($scope, $element, attrs) {
+       var $window = $(window);
+-      var checkTimer;
++      let checkTimer;
+ 
+       function onScroll() {
+         if (!$scope.more) return;

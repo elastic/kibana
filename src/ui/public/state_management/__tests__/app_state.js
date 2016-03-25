@@ -14,7 +14,7 @@ describe('State Management', function () {
   }));
 
   describe('App State', function () {
-    var appState;
+    let appState;
 
     beforeEach(function () {
       appState = new AppState();

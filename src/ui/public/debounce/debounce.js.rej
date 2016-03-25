@@ -1,0 +1,16 @@
+diff a/src/ui/public/debounce/debounce.js b/src/ui/public/debounce/debounce.js	(rejected hunks)
+@@ -7,10 +7,10 @@ var module = uiModules.get('kibana');
+ 
+ module.service('debounce', ['$timeout', function ($timeout) {
+   return function (func, wait, options) {
+-    var timeout;
+-    var args;
+-    var self;
+-    var result;
++    let timeout;
++    let args;
++    let self;
++    let result;
+     options = _.defaults(options || {}, {
+       leading: false,
+       trailing: true

@@ -1,0 +1,10 @@
+diff a/src/ui/public/index_patterns/__tests__/intervals.js b/src/ui/public/index_patterns/__tests__/intervals.js	(rejected hunks)
+@@ -7,7 +7,7 @@ import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+ describe('Index Patterns', function () {
+   describe('interval.toIndexList()', function () {
+ 
+-    var intervals;
++    let intervals;
+     beforeEach(ngMock.module('kibana'));
+     beforeEach(ngMock.inject(function (Private) {
+       intervals = Private(IndexPatternsIntervalsProvider);

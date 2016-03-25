@@ -1,0 +1,16 @@
+diff a/src/ui/public/agg_types/__tests__/buckets/create_filter/terms.js b/src/ui/public/agg_types/__tests__/buckets/create_filter/terms.js	(rejected hunks)
+@@ -7,10 +7,10 @@ import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/creat
+ describe('AggConfig Filters', function () {
+ 
+   describe('terms', function () {
+-    var AggConfig;
+-    var indexPattern;
+-    var Vis;
+-    var createFilter;
++    let AggConfig;
++    let indexPattern;
++    let Vis;
++    let createFilter;
+ 
+     beforeEach(ngMock.module('kibana'));
+     beforeEach(ngMock.inject(function (Private) {

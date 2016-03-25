@@ -1,0 +1,10 @@
+diff a/src/ui/public/courier/data_source/_root_search_source.js b/src/ui/public/courier/data_source/_root_search_source.js	(rejected hunks)
+@@ -12,7 +12,7 @@ export default function RootSearchSource(Private, $rootScope, timefilter, Notifi
+     return timefilter.get(globalSource.get('index'));
+   });
+ 
+-  var appSource; // set in setAppSource()
++  let appSource; // set in setAppSource()
+   resetAppSource();
+ 
+   // when the route changes, clear the appSource

@@ -1,0 +1,31 @@
+diff a/src/ui/public/vislib/visualizations/line_chart.js b/src/ui/public/vislib/visualizations/line_chart.js	(rejected hunks)
+@@ -204,7 +204,7 @@ export default function LineChartFactory(Private) {
+     .y(function y(d) {
+       return yScale(d.y);
+     });
+-    var lines;
++    let lines;
+ 
+     lines = svg
+     .selectAll('.lines')
+@@ -277,13 +277,13 @@ export default function LineChartFactory(Private) {
+     var lineStrokeWidth = 1;
+     var addTimeMarker = this._attr.addTimeMarker;
+     var times = this._attr.times || [];
+-    var timeMarker;
+-    var div;
+-    var svg;
+-    var width;
+-    var height;
+-    var lines;
+-    var circles;
++    let timeMarker;
++    let div;
++    let svg;
++    let width;
++    let height;
++    let lines;
++    let circles;
+ 
+     return function (selection) {
+       selection.each(function (data) {

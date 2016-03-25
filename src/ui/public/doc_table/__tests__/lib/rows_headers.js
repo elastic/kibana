@@ -52,7 +52,7 @@ describe('Doc Table', function () {
     });
 
     it('should be able to add and remove columns', function (done) {
-      var childElems;
+      let childElems;
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
@@ -244,7 +244,7 @@ describe('Doc Table', function () {
       });
 
       describe('expanded', function () {
-        var $details;
+        let $details;
         beforeEach(function () {
           // Open the row
           $scope.toggleRow();
@@ -277,7 +277,7 @@ describe('Doc Table', function () {
         'index-pattern="indexPattern"' +
         '></tr>'
     );
-    var $details;
+    let $details;
 
     beforeEach(function () {
       var row = getFakeRow(0, mapping);
@@ -311,10 +311,10 @@ describe('Doc Table', function () {
   });
 
   describe('row diffing', function () {
-    var $row;
-    var $scope;
-    var $root;
-    var $before;
+    let $row;
+    let $scope;
+    let $root;
+    let $before;
 
     beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
       $root = $rootScope;

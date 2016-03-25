@@ -1,0 +1,14 @@
+diff a/src/ui/public/directives/__tests__/inequality.js b/src/ui/public/directives/__tests__/inequality.js	(rejected hunks)
+@@ -4,9 +4,9 @@ import ngMock from 'ng_mock';
+ import 'ui/directives/inequality';
+ 
+ describe('greater_than model validator directive', function () {
+-  var $compile;
+-  var $rootScope;
+-  var html;
++  let $compile;
++  let $rootScope;
++  let html;
+ 
+   beforeEach(ngMock.module('kibana'));
+ 
