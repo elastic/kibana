@@ -9,11 +9,11 @@ import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
-var Vis;
-var Notifier;
-var AggConfigs;
-var indexPattern;
-var buildHierarchicalData;
+let Vis;
+let Notifier;
+let AggConfigs;
+let indexPattern;
+let buildHierarchicalData;
 
 describe('buildHierarchicalData', function () {
 
@@ -31,8 +31,8 @@ describe('buildHierarchicalData', function () {
 
 
   describe('metric only', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -103,8 +103,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('threeTermBuckets', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -145,8 +145,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneHistogramBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -177,8 +177,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneRangeBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -218,8 +218,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;
@@ -254,8 +254,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket that is a split', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
       var id = 1;

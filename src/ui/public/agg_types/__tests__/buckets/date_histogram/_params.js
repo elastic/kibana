@@ -8,13 +8,13 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 describe('params', function () {
 
-  var paramWriter;
-  var writeInterval;
+  let paramWriter;
+  let writeInterval;
 
-  var aggTypes;
-  var AggConfig;
-  var setTimeBounds;
-  var timeField;
+  let aggTypes;
+  let AggConfig;
+  let setTimeBounds;
+  let timeField;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

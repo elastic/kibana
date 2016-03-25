@@ -3,12 +3,12 @@ import expect from 'expect.js';
 import $ from 'jquery';
 
 describe('fancy forms', function () {
-  var $el;
-  var $scope;
-  var $compile;
-  var $rootScope;
-  var ngForm;
-  var ngModel;
+  let $el;
+  let $scope;
+  let $compile;
+  let $rootScope;
+  let ngForm;
+  let ngModel;
 
   function generateEl() {
     return $('<form>').html(

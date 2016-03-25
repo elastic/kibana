@@ -5,8 +5,8 @@ import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optioned';
 describe('Optioned', function () {
 
-  var BaseAggParam;
-  var OptionedAggParam;
+  let BaseAggParam;
+  let OptionedAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps

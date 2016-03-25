@@ -361,7 +361,7 @@ define(function () {
 
   rison.parser.parse_array = function (parser) {
       var ar = [];
-      var c;
+      let c;
       while ((c = parser.next()) != ')') {
           if (!c) return parser.error("unmatched '!('");
           if (ar.length) {
@@ -400,7 +400,7 @@ define(function () {
       },
       '(': function () {
           var o = {};
-          var c;
+          let c;
           var count = 0;
           while ((c = this.next()) != ')') {
               if (count) {
@@ -425,7 +425,7 @@ define(function () {
           var i = this.index;
           var start = i;
           var segments = [];
-          var c;
+          let c;
           while ((c = s.charAt(i++)) != "'") {
               //if (i == s.length) return this.error('unmatched "\'"');
               if (!c) return this.error('unmatched "\'"');

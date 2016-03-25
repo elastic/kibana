@@ -45,7 +45,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
     },
     createFilter: createFilter,
     decorateAggConfig: function () {
-      var buckets;
+      let buckets;
       return {
         buckets: {
           configurable: true,

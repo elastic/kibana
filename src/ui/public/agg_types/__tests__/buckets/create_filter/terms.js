@@ -7,10 +7,10 @@ import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/creat
 describe('AggConfig Filters', function () {
 
   describe('terms', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

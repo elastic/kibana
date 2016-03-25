@@ -7,8 +7,8 @@ var urlParam = '_a';
 function AppStateProvider(Private, $rootScope, getAppState) {
   var State = Private(StateManagementStateProvider);
   var PersistedState = Private(PersistedStatePersistedStateProvider);
-  var persistedStates;
-  var eventUnsubscribers;
+  let persistedStates;
+  let eventUnsubscribers;
 
   _.class(AppState).inherits(State);
   function AppState(defaults) {
@@ -72,7 +72,7 @@ modules.get('kibana/global_state')
   return Private(AppStateProvider);
 })
 .service('getAppState', function ($location) {
-  var currentAppState;
+  let currentAppState;
 
   function get() {
     return currentAppState;

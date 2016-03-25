@@ -9,14 +9,14 @@ import VisProvider from 'ui/vis';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-var AggConfigs;
-var Vis;
-var indexPattern;
+let AggConfigs;
+let Vis;
+let indexPattern;
 
 describe('buildHierarchicalData()', function () {
   describe('createRawData()', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(ngMock.module('kibana'));
 

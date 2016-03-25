@@ -5,8 +5,8 @@ import AggResponseHierarchicalTransformAggregationProvider from 'ui/agg_response
 
 describe('buildHierarchicalData()', function () {
   describe('transformAggregation()', function () {
-    var transform;
-    var fixture;
+    let transform;
+    let fixture;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

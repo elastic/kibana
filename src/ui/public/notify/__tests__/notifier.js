@@ -5,10 +5,10 @@ import sinon from 'sinon';
 import Notifier from 'ui/notify/notifier';
 
 describe('Notifier', function () {
-  var $interval;
+  let $interval;
   var message = 'Oh, the humanity!';
-  var notifier;
-  var params;
+  let notifier;
+  let params;
   var version = window.__KBN__.version;
   var buildNum = window.__KBN__.buildNum;
 
