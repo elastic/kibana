@@ -7,7 +7,7 @@ import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 describe('Index Patterns', function () {
   describe('interval.toIndexList()', function () {
 
-    var intervals;
+    let intervals;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       intervals = Private(IndexPatternsIntervalsProvider);

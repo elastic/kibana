@@ -38,8 +38,8 @@ function encodeUriQuery(val, pctEncodeSpaces) {
  */
 qs.decode = function (keyValue) {
   var obj = {};
-  var keyValueParts;
-  var key;
+  let keyValueParts;
+  let key;
 
   (keyValue || '').split('&').forEach(function (keyValue) {
     if (keyValue) {

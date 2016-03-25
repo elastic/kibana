@@ -1,4 +1,4 @@
-module.exports = function (kibana) {
+export default function (kibana) {
 
   return new kibana.Plugin({
     uiExports: {

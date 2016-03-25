@@ -19,7 +19,7 @@ export default function UniqueXValuesUtilService(Private) {
     var flattenedData = flattenDataArray(obj);
     var uniqueXValues = new Map();
 
-    var charts;
+    let charts;
     if (!obj.series) {
       charts = obj.rows ? obj.rows : obj.columns;
     } else {

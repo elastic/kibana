@@ -5,8 +5,8 @@ import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_tim
 
 describe('Filter Bar Directive', function () {
   describe('extractTimeFilter()', function () {
-    var extractTimeFilter;
-    var $rootScope;
+    let extractTimeFilter;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

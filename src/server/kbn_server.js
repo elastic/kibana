@@ -20,6 +20,9 @@ module.exports = class KbnServer {
       require('./logging'),
       require('./status'),
 
+      // writes pid file
+      require('./pid'),
+
       // find plugins and set this.plugins
       require('./plugins/scan'),
 
@@ -74,9 +77,8 @@ module.exports = class KbnServer {
 
     await this.ready();
     await fromNode(cb => server.start(cb));
-    await require('./pid')(this, server, config);
 
-    server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
+    server.log(['listening', 'info'], `Server running at ${server.info.uri}`);
     return server;
   }
 

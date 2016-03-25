@@ -6,7 +6,7 @@ import Binder from 'ui/binder';
 import $ from 'jquery';
 
 describe('Binder class', function () {
-  var $scope;
+  let $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($rootScope) {

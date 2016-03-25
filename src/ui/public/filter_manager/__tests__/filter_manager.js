@@ -5,10 +5,10 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FilterManagerProvider from 'ui/filter_manager';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-var $rootScope;
-var queryFilter;
-var filterManager;
-var appState;
+let $rootScope;
+let queryFilter;
+let filterManager;
+let appState;
 
 function checkAddFilters(length, comps, idx) {
   idx = idx || 0;

@@ -321,12 +321,34 @@ bread-crumbs {
 }
 
 //== SavedObjectFinder
-saved-object-finder {
+saved-object-finder,
+paginated-selectable-list {
   .row {
     background-color: @kibanaGray6;
     padding: 10px;
     display: flex;
     flex-direction: row;
+  }
+
+  .finder-hit-count,
+  .finder-manage-object {
+    min-width: 80px;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .finder-hit-count {
+    flex: 1;
+
+    span {
+      color: @kibanaGray3;
+    }
+  }
+
+  .finder-manage-object {
+    flex: 3;
+    text-align: left;
+    text-transform: capitalize;
   }
 
   .form-group {
@@ -338,7 +360,6 @@ saved-object-finder {
       border: none;
       padding: 5px 0px;
       border-radius: @border-radius-base;
-      text-transform: capitalize;
     }
 
     span {
@@ -351,30 +372,6 @@ saved-object-finder {
         width: 15px;
       }
     }
-
-    .finder-hit-count, .finder-manage-object {
-      min-width: 80px;
-      padding: 5px;
-    }
-
-    .finder-hit-count {
-      flex: 1;
-      text-align: center;
-
-      span {
-        color: @kibanaGray3;
-      }
-    }
-
-    .finder-manage-object {
-      flex: 3;
-      text-align: left;
-      text-transform: capitalize;
-    }
-  }
-
-  .list-group-item-menu:hover {
-    background-color: transparent;
   }
 
   ul.li-striped {
@@ -414,6 +411,7 @@ saved-object-finder {
           margin-right: 10px;
         }
 
+        display: block;
         color: @saved-object-finder-link-color !important;
       }
 
@@ -463,6 +461,12 @@ saved-object-finder {
           color: @component-active-color;
         }
       }
+    }
+  }
+
+  paginate {
+    paginate-controls {
+      margin: 20px;
     }
   }
 }

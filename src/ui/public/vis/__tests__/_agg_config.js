@@ -8,11 +8,11 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('AggConfig', function () {
 
-  var Vis;
-  var AggType;
-  var AggConfig;
-  var indexPattern;
-  var fieldFormat;
+  let Vis;
+  let AggType;
+  let AggConfig;
+  let indexPattern;
+  let fieldFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -10,12 +10,12 @@ import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggType Class', function () {
-  var AggType;
-  var AggParams;
-  var AggConfig;
-  var indexPattern;
-  var fieldFormat;
-  var Vis;
+  let AggType;
+  let AggParams;
+  let AggConfig;
+  let indexPattern;
+  let fieldFormat;
+  let Vis;
 
 
   beforeEach(ngMock.module('kibana'));

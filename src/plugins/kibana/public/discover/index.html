@@ -18,13 +18,13 @@
       <button
         ng-click="configTemplate.toggle('save');"
         ng-class="{active: configTemplate.is('save')}"
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ configTemplate.is('save') }}"
         aria-label="Save Search">
         <span>Save</span>
       </button>
       <button
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ configTemplate.is('load') }}"
         ng-click="configTemplate.toggle('load');"
         ng-class="{active: configTemplate.is('load')}"
@@ -33,7 +33,7 @@
       </button>
       <button
         aria-label="Share Search"
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ configTemplate.is('share') }}"
         ng-class="{active: configTemplate.is('share')}"
         ng-click="configTemplate.toggle('share');">
