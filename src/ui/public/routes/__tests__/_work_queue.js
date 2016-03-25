@@ -6,8 +6,8 @@ import sinon from 'auto-release-sinon';
 import 'ui/promises';
 
 describe('work queue', function () {
-  var queue;
-  var Promise;
+  let queue;
+  let Promise;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_Promise_) {

@@ -55,7 +55,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   npm run elasticsearch
   ```
 
-- Start the development server.
+- Start the development server. _On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command._
 
   ```sh
   npm start
@@ -128,7 +128,7 @@ Runs both server and browser tests, but skips linting
 Run only the server tests
 
 `npm run test:browser`  
-Run only the browser tests
+Run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 `npm run test:dev`  
 Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.  
@@ -146,7 +146,8 @@ Run the tests for just your particular plugin. Assuming you plugin lives outside
 
 #### Running browser automation tests:
 
-*The Selenium server that is started currently only runs the tests in Firefox*
+*The Selenium server that is started currently only runs the tests in a recent version of Firefox.*
+*You can use the `PATH` environment variable to specify which version of Firefox to use.*
 
 The following will start Kibana, Elasticsearch and Selenium for you. To run the functional UI tests use the following commands
 
@@ -177,7 +178,7 @@ npm run test:ui:runner
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 - https://theintern.github.io/
-- https://theintern.github.io/leadfoot/Element.html
+- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
 
 #### Building OS packages
 

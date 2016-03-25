@@ -4,8 +4,8 @@ import FilterBarLibMapExistsProvider from 'ui/filter_bar/lib/map_exists';
 describe('Filter Bar Directive', function () {
   describe('mapExists()', function () {
 
-    var mapExists;
-    var $rootScope;
+    let mapExists;
+    let $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;

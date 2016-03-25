@@ -1,20 +1,15 @@
 <bread-crumbs></bread-crumbs>
 <div class="wizard">
-  <div class="wizard-column">
-    <h3>From a New Search</h3>
-    <!-- Index patterns -->
-    <div class="wizard-row">
-      <div class="panel panel-default">
-        <div class="panel-heading">Index Patterns</div>
-      </div>
-      <ul class="striped list-group">
-        <li class="list-group-item" ng-repeat="pattern in indexPattern.list | orderBy: 'toString()'">
-          <a class="index-link" kbn-href="{{ makeUrl(pattern) }}">{{pattern}}</a>
-        </li>
-      </ul>
-    </div>
+  <div class="wizard-small wizard-column">
+    <h3>From a New Search, Select Index</h3>
+    <paginated-selectable-list
+      per-page="20"
+      list="indexPattern.list"
+      user-make-url="makeUrl"
+      class="wizard-row">
+    </paginated-selectable-list>
   </div>
-  <div class="wizard-column">
+  <div class="wizard-large wizard-column">
     <h3>Or, From a Saved Search</h3>
     <!-- Saved searches -->
     <saved-object-finder

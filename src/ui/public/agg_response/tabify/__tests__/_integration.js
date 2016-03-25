@@ -7,10 +7,10 @@ import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('tabifyAggResponse Integration', function () {
 
-  var Vis;
-  var Buckets;
-  var indexPattern;
-  var tabifyAggResponse;
+  let Vis;
+  let Buckets;
+  let indexPattern;
+  let tabifyAggResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -46,12 +46,12 @@ describe('tabifyAggResponse Integration', function () {
   describe('transforms a complex response', function () {
     this.slow(1000);
 
-    var vis;
-    var avg;
-    var ext;
-    var src;
-    var os;
-    var esResp;
+    let vis;
+    let avg;
+    let ext;
+    let src;
+    let os;
+    let esResp;
 
     beforeEach(function () {
       vis = new Vis(indexPattern, {

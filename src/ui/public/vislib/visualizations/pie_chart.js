@@ -184,7 +184,7 @@ export default function PieChartFactory(Private) {
         var div = d3.select(this);
         var width = $(this).width();
         var height = $(this).height();
-        var path;
+        let path;
 
         if (!slices.children.length) return;
 

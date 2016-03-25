@@ -9,11 +9,11 @@ import AggResponsePointSeriesGetAspectsProvider from 'ui/agg_response/point_seri
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('getAspects', function () {
 
-  var Vis;
-  var Table;
-  var AggConfig;
-  var indexPattern;
-  var getAspects;
+  let Vis;
+  let Table;
+  let AggConfig;
+  let indexPattern;
+  let getAspects;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -24,8 +24,8 @@ describe('getAspects', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
-  var vis;
-  var table;
+  let vis;
+  let table;
 
   var date = _.memoize(function (n) {
     return moment().startOf('day').add(n, 'hour').valueOf();

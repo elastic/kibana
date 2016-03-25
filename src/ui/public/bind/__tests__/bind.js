@@ -3,8 +3,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 describe('$scope.$bind', function () {
 
-  var $rootScope;
-  var $scope;
+  let $rootScope;
+  let $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {

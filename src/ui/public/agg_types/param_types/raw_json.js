@@ -25,7 +25,7 @@ export default function RawJSONAggParamFactory(Private) {
    * @return {undefined}
    */
   RawJSONAggParam.prototype.write = function (aggConfig, output) {
-    var paramJSON;
+    let paramJSON;
     var param = aggConfig.params[this.name];
 
     if (!param) {

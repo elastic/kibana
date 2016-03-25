@@ -5,8 +5,8 @@ import _ from 'lodash';
 import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
 
 describe('Vislib Vis Types Test Suite', function () {
-  var visTypes;
-  var visFunc;
+  let visTypes;
+  let visFunc;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

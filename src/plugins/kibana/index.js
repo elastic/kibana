@@ -67,7 +67,12 @@ module.exports = function (kibana) {
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
         }
-      ]
+      ],
+      injectDefaultVars(server, options) {
+        return {
+          kbnIndex: options.index
+        };
+      },
     },
 
     init: function (server, options) {

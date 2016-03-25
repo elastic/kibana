@@ -1,9 +1,9 @@
 import _ from 'lodash';
 export default function mapTermsProvider(Promise, courier) {
   return function (filter) {
-    var key;
-    var value;
-    var field;
+    let key;
+    let value;
+    let field;
     if (filter.query && filter.query.match) {
       return courier
       .indexPatterns

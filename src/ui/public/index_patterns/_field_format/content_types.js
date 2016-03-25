@@ -6,6 +6,10 @@ export default function contentTypesProvider(highlightFilter) {
   var types = {
     html: function (format, convert) {
       return function recurse(value, field, hit) {
+        if (value == null) {
+          return _.asPrettyString(value);
+        }
+
         if (!value || typeof value.map !== 'function') {
           return convert.call(format, value, field, hit);
         }

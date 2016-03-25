@@ -10,13 +10,13 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import VisSchemasProvider from 'ui/vis/schemas';
 describe('AggConfigs', function () {
 
-  var Vis;
-  var IndexedArray;
-  var AggConfig;
-  var AggConfigs;
-  var SpiedAggConfig;
-  var indexPattern;
-  var Schemas;
+  let Vis;
+  let IndexedArray;
+  let AggConfig;
+  let AggConfigs;
+  let SpiedAggConfig;
+  let indexPattern;
+  let Schemas;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -100,7 +100,7 @@ describe('AggConfigs', function () {
     });
 
     describe('defaults', function () {
-      var vis;
+      let vis;
       beforeEach(function () {
         vis = {
           indexPattern: indexPattern,

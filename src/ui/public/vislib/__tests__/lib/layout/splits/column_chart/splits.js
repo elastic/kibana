@@ -10,11 +10,11 @@ import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from 'ui/vislib/lib/la
 
 describe('Vislib Split Function Test Suite', function () {
   describe('Column Chart', function () {
-    var chartSplit;
-    var chartTitleSplit;
-    var xAxisSplit;
-    var yAxisSplit;
-    var el;
+    let chartSplit;
+    let chartTitleSplit;
+    let xAxisSplit;
+    let yAxisSplit;
+    let el;
     var data = {
       rows: [
         {
@@ -153,7 +153,7 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('chart split function', function () {
-      var fixture;
+      let fixture;
 
       beforeEach(ngMock.inject(function () {
         fixture = d3.select('.visualization').call(chartSplit);
@@ -173,8 +173,8 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('chart title split function', function () {
-      var newEl;
-      var fixture;
+      let newEl;
+      let fixture;
 
       beforeEach(ngMock.inject(function () {
         el.append('div').attr('class', 'x-axis-chart-title');
@@ -213,8 +213,8 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('x axis split function', function () {
-      var fixture;
-      var divs;
+      let fixture;
+      let divs;
 
       beforeEach(ngMock.inject(function () {
         fixture = d3.select('body').append('div')
@@ -235,8 +235,8 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('y axis split function', function () {
-      var fixture;
-      var divs;
+      let fixture;
+      let divs;
 
       beforeEach(ngMock.inject(function () {
         fixture = d3.select('body').append('div')

@@ -5,6 +5,8 @@ Add-on functionality for Kibana is implemented with plug-in modules. You can use
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
 `installedPlugins` directory and unpacking the plugin files into a new directory.
 
+A list of existing Kibana plugins is available on https://github.com/elastic/kibana/wiki/Known-Plugins[GitHub].
+
 [float]
 === Installing Plugins
 
@@ -64,6 +66,11 @@ example:
 bin/kibana plugin --remove marvel
 
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
+
+[float]
+=== Listing Installed Plugins
+
+Use `--list` or `-l` option to list the currently installed plugins.
 
 [float]
 === Updating Plugins

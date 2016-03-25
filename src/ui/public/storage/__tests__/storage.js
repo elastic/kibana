@@ -3,8 +3,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/storage';
 
-var storage;
-var $window;
+let storage;
+let $window;
 var payload = { first: 'john', last: 'smith' };
 
 

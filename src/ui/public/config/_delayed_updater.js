@@ -12,7 +12,7 @@ export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
     var updater = this;
     var queue = [];
     var log = {};
-    var timer;
+    let timer;
 
     updater.fire = function () {
       clearTimeout(timer);
@@ -21,8 +21,8 @@ export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
       if (updater.fired) return;
       updater.fired = true;
 
-      var method;
-      var body;
+      let method;
+      let body;
       var updated = [];
       var deleted = [];
 
