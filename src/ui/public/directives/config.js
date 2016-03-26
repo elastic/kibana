@@ -15,10 +15,40 @@ var module = uiModules.get('kibana');
  * ```
  */
 
-module.directive('kbnTopNavbar', function ($compile) {
+module.directive('kbnTopNav', function () {
+  const defaultTemplateMap = {
+    interval: {
+      description: 'Auto Refresh',
+    }
+  };
   return {
     restrict: 'E',
     transclude: true,
+    template: `
+      <navbar name="foobar">
+        <div ng-transclude></div>
+        <div class="button-group kibana-nav-actions" role="toolbar">
+          <button
+            ng-repeat="menuItem in topNavItems"
+            area-label="menuItem.description"
+            aria-haspopup="menuItem.hasFunction"
+            aria-expanded="kbnTopNavbar.is(menuItem.key)"
+            ng-class="{active: kbnTopNavbar.is(menuItem.key)}"
+            ng-click="menuItem.run()"
+            ng-bind="menuItem.label">
+          </button>
+        </div>
+      </navbar>
+      <kbn-top-navbar></kbn-top-navbar`,
+    link: function ($scope) {
+      function normalizeOptions(opt) {
+      }
+    }
+  };
+});
+module.directive('kbnTopNavbar', function ($compile) {
+  return {
+    restrict: 'E',
     template: `
       <div class="config" ng-show="kbnTopNavbar.currTemplate">
         <div id="template_wrapper" class="container-fluid"></div>
@@ -51,7 +81,7 @@ module.directive('kbnTopNavbar', function ($compile) {
         }
       };
     }],
-    link: function ($scope, element, attr, configCtrl, transcludeFn) {
+    link: function ($scope, element, attr, configCtrl) {
       configCtrl.templates = $scope[attr.templates];
       $scope.$watch('kbnTopNavbar.currTemplate', newVal => {
         element.find('#template_wrapper').html(newVal);

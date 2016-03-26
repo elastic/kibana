@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import ConfigTemplate from 'ui/config_template';
 import uiModules from 'ui/modules';
 
 uiModules

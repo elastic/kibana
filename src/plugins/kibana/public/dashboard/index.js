@@ -108,6 +108,23 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         filter: require('ui/chrome/config/filter.html'),
         interval: require('ui/chrome/config/interval.html')
       };
+      $scope.topNavItems = [{
+        key: 'new',
+        description: 'New Dashboard',
+        run: function () { kbnUrl.change('/dashboard', {}); },
+      }, {
+        key: 'save',
+        description: 'Save Dashboard',
+        template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
+      }, {
+        key: 'open',
+        description: 'Load Saved Dashboard',
+        template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
+      }, {
+        key: 'share',
+        description: 'Share Dashboard',
+        template: require('plugins/kibana/dashboard/partials/share.html')
+      }];
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
