@@ -25,7 +25,10 @@ uiModules
         const stats = $scope.stats = {
           min: 0,
           max: 0,
-          count: $scope.group ? $scope.group.length : 0
+          count: $scope.group ? $scope.group.length : 0,
+          numDeprecated: $scope.schemas.raw.filter(function (o) {
+            return o.deprecate;
+          }).length
         };
 
         if (!$scope.schemas) return;

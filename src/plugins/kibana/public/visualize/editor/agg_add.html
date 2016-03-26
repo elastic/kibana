@@ -2,6 +2,7 @@
   <label>Select {{ groupName }} type</label>
   <ul class="form-group list-group list-group-menu">
     <li
+      ng-hide="schema.deprecate"
       ng-repeat="schema in availableSchema"
       ng-click="add.submit(schema)"
       class="list-group-item list-group-menu-item">
@@ -21,7 +22,7 @@
     <div class="btn btn-sm btn-primary" ng-if="groupName !== 'buckets' || !stats.count">
       Add {{ groupName }}
     </div>
-    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count > 0">
+    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count - stats.numDeprecated > 0">
       Add sub-{{ groupName }}
     </div>
   </div>
