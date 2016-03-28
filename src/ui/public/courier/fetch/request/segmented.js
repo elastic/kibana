@@ -39,6 +39,8 @@ define(function (require) {
     SegmentedReq.prototype.start = function () {
       var self = this;
 
+      SearchReq.prototype.start.call(this);
+
       this._complete = [];
       this._active = null;
       this._segments = [];
@@ -58,12 +60,12 @@ define(function (require) {
       // parameters via the handle
       if (_.isFunction(this._initFn)) this._initFn(this._handle);
       return this._createQueue().then(function (queue) {
+        if (self.stopped) return;
+
         self._all = queue.slice(0);
 
         // Send the initial fetch status
         self._reportStatus();
-
-        return SearchReq.prototype.start.call(self);
       });
     };
 
