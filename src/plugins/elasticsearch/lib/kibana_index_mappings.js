@@ -7,7 +7,7 @@ export const mappings = {
       }
     }
   },
-  uuids: {
+  server: {
     properties: {
       uuid: {
         type: 'string',

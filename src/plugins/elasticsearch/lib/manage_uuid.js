@@ -15,6 +15,7 @@ const serverHostname = hostname();
  *   "data uuid" = uuid in .kibana index)
  */
 export default function manageUuid(server) {
+  const TYPE = 'server';
   const config = server.config();
   const serverPort = server.info.port;
   const client = server.plugins.elasticsearch.client;
@@ -30,7 +31,7 @@ export default function manageUuid(server) {
     return client.get({
       index: config.get('kibana.index'),
       ignore: [404],
-      type: 'uuids',
+      type: TYPE,
       id: fieldId
     }).then(result => {
       if (result.found) {
@@ -53,7 +54,7 @@ export default function manageUuid(server) {
           logToServer(`Updating Kibana instance UUID to: ${kibanaUuid} (was: ${result._source.uuid})`);
           return client.update({
             index: config.get('kibana.index'),
-            type: 'uuids',
+            type: TYPE,
             id: fieldId,
             body: { doc: { uuid: kibanaUuid } }
           });
@@ -70,7 +71,7 @@ export default function manageUuid(server) {
       logToServer(`Setting new Kibana instance UUID: ${kibanaUuid}`);
       return client.index({
         index: config.get('kibana.index'),
-        type: 'uuids',
+        type: TYPE,
         id: fieldId,
         body: { uuid: kibanaUuid }
       });
