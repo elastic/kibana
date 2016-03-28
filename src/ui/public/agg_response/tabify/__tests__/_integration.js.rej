@@ -1,0 +1,16 @@
+diff a/src/ui/public/agg_response/tabify/__tests__/_integration.js b/src/ui/public/agg_response/tabify/__tests__/_integration.js	(rejected hunks)
+@@ -7,10 +7,10 @@ import VisProvider from 'ui/vis';
+ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+ describe('tabifyAggResponse Integration', function () {
+ 
+-  var Vis;
+-  var Buckets;
+-  var indexPattern;
+-  var tabifyAggResponse;
++  let Vis;
++  let Buckets;
++  let indexPattern;
++  let tabifyAggResponse;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector) {

@@ -1,0 +1,10 @@
+diff a/src/ui/public/promises/promises.js b/src/ui/public/promises/promises.js	(rejected hunks)
+@@ -74,7 +74,7 @@ module.service('Promise', function ($q, $timeout) {
+       return Promise.reject(new TypeError('fn must be a function'));
+     }
+ 
+-    var value;
++    let value;
+ 
+     if (_.isArray(args)) {
+       try { value = fn.apply(ctx, args); }

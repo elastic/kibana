@@ -1,0 +1,16 @@
+diff a/src/ui/public/agg_response/point_series/__tests__/_main.js b/src/ui/public/agg_response/point_series/__tests__/_main.js	(rejected hunks)
+@@ -11,10 +11,10 @@ describe('pointSeriesChartDataFromTable', function () {
+   this.slow(1000);
+ 
+ 
+-  var pointSeriesChartDataFromTable;
+-  var indexPattern;
+-  var Table;
+-  var Vis;
++  let pointSeriesChartDataFromTable;
++  let indexPattern;
++  let Table;
++  let Vis;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

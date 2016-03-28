@@ -1,0 +1,18 @@
+diff a/src/ui/public/agg_response/hierarchical/__tests__/build_hierarchical_data.js b/src/ui/public/agg_response/hierarchical/__tests__/build_hierarchical_data.js	(rejected hunks)
+@@ -9,11 +9,11 @@ import VisAggConfigsProvider from 'ui/vis/agg_configs';
+ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+ import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
+ 
+-var Vis;
+-var Notifier;
+-var AggConfigs;
+-var indexPattern;
+-var buildHierarchicalData;
++let Vis;
++let Notifier;
++let AggConfigs;
++let indexPattern;
++let buildHierarchicalData;
+ 
+ describe('buildHierarchicalData', function () {
+ 

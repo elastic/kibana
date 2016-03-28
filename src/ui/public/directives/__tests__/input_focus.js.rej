@@ -1,0 +1,22 @@
+diff a/src/ui/public/directives/__tests__/input_focus.js b/src/ui/public/directives/__tests__/input_focus.js	(rejected hunks)
+@@ -5,13 +5,13 @@ import $ from 'jquery';
+ import 'ui/directives/input_focus';
+ 
+ describe('Input focus directive', function () {
+-  var $compile;
+-  var $rootScope;
+-  var $timeout;
+-  var element;
+-  var $el;
+-  var selectedEl;
+-  var selectedText;
++  let $compile;
++  let $rootScope;
++  let $timeout;
++  let element;
++  let $el;
++  let selectedEl;
++  let selectedText;
+   var inputValue = 'Input Text Value';
+ 
+   beforeEach(ngMock.module('kibana'));

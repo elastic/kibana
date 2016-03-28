@@ -1,0 +1,12 @@
+diff a/src/ui/public/vislib/__tests__/lib/layout/layout_types.js b/src/ui/public/vislib/__tests__/lib/layout/layout_types.js	(rejected hunks)
+@@ -5,8 +5,8 @@ import expect from 'expect.js';
+ import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
+ 
+ describe('Vislib Layout Types Test Suite', function () {
+-  var layoutType;
+-  var layoutFunc;
++  let layoutType;
++  let layoutFunc;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

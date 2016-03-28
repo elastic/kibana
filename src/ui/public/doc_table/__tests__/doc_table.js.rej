@@ -1,0 +1,22 @@
+diff a/src/ui/public/doc_table/__tests__/doc_table.js b/src/ui/public/doc_table/__tests__/doc_table.js	(rejected hunks)
+@@ -12,16 +12,16 @@ import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source'
+ // Load the kibana app dependencies.
+ 
+ 
+-var $parentScope;
++let $parentScope;
+ 
+ 
+-var $scope;
++let $scope;
+ 
+ 
+-var $timeout;
++let $timeout;
+ 
+ 
+-var searchSource;
++let searchSource;
+ 
+ var init = function ($elem, props) {
+   ngMock.inject(function ($rootScope, $compile, _$timeout_) {

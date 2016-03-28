@@ -1,0 +1,16 @@
+diff a/src/ui/public/factories/__tests__/events.js b/src/ui/public/factories/__tests__/events.js	(rejected hunks)
+@@ -10,10 +10,10 @@ import EventsProvider from 'ui/events';
+ describe('Events', function () {
+   require('test_utils/no_digest_promises').activateForSuite();
+ 
+-  var $rootScope;
+-  var Events;
+-  var Notifier;
+-  var Promise;
++  let $rootScope;
++  let Events;
++  let Notifier;
++  let Promise;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($injector, Private) {

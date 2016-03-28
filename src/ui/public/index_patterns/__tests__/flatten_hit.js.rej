@@ -1,0 +1,16 @@
+diff a/src/ui/public/index_patterns/__tests__/flatten_hit.js b/src/ui/public/index_patterns/__tests__/flatten_hit.js	(rejected hunks)
+@@ -6,10 +6,10 @@ import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
+ describe('IndexPattern#flattenHit()', function () {
+ 
+ 
+-  var flattenHit;
+-  var config;
+-  var hit;
+-  var flat;
++  let flattenHit;
++  let config;
++  let hit;
++  let flat;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector) {

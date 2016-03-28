@@ -1,0 +1,62 @@
+diff a/src/ui/public/index_patterns/__tests__/_index_pattern.js b/src/ui/public/index_patterns/__tests__/_index_pattern.js	(rejected hunks)
+@@ -13,18 +13,18 @@ import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+ import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+ import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
+ describe('index pattern', function () {
+-  var IndexPattern;
+-  var mapper;
+-  var mappingSetup;
+-  var mockLogstashFields;
+-  var DocSource;
+-  var config;
+-  var docSourceResponse;
++  let IndexPattern;
++  let mapper;
++  let mappingSetup;
++  let mockLogstashFields;
++  let DocSource;
++  let config;
++  let docSourceResponse;
+   var indexPatternId = 'test-pattern';
+-  var indexPattern;
+-  var calculateIndices;
+-  var $rootScope;
+-  var intervals;
++  let indexPattern;
++  let calculateIndices;
++  let $rootScope;
++  let intervals;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
+@@ -148,9 +148,9 @@ describe('index pattern', function () {
+     // override the default indexPattern, with a truncated field list
+     require('test_utils/no_digest_promises').activateForSuite();
+     var indexPatternId = 'test-pattern';
+-    var indexPattern;
+-    var fieldLength;
+-    var truncatedFields;
++    let indexPattern;
++    let fieldLength;
++    let truncatedFields;
+ 
+     beforeEach(function () {
+       fieldLength = mockLogstashFields.length;
+@@ -303,7 +303,7 @@ describe('index pattern', function () {
+   describe('#toDetailedIndexList', function () {
+     require('test_utils/no_digest_promises').activateForSuite();
+     context('when index pattern is an interval', function () {
+-      var interval;
++      let interval;
+       beforeEach(function () {
+         interval = 'result:getInterval';
+         sinon.stub(indexPattern, 'getInterval').returns(interval);
+@@ -382,7 +382,7 @@ describe('index pattern', function () {
+     context('when index pattern is an interval', function () {
+       require('test_utils/no_digest_promises').activateForSuite();
+ 
+-      var interval;
++      let interval;
+       beforeEach(function () {
+         interval = 'result:getInterval';
+         sinon.stub(indexPattern, 'getInterval').returns(interval);

@@ -1,0 +1,12 @@
+diff a/src/ui/public/agg_types/__tests__/param_types/_optioned.js b/src/ui/public/agg_types/__tests__/param_types/_optioned.js	(rejected hunks)
+@@ -5,8 +5,8 @@ import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+ import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optioned';
+ describe('Optioned', function () {
+ 
+-  var BaseAggParam;
+-  var OptionedAggParam;
++  let BaseAggParam;
++  let OptionedAggParam;
+ 
+   beforeEach(ngMock.module('kibana'));
+   // fetch out deps

@@ -1,0 +1,14 @@
+diff a/src/ui/public/debounce/__tests__/debounce.js b/src/ui/public/debounce/__tests__/debounce.js	(rejected hunks)
+@@ -3,9 +3,9 @@ import sinon from 'auto-release-sinon';
+ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ 
+-var debounce;
+-var $timeout;
+-var $timeoutSpy;
++let debounce;
++let $timeout;
++let $timeoutSpy;
+ 
+ function init() {
+   ngMock.module('kibana');

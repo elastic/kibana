@@ -1,0 +1,10 @@
+diff a/src/ui/public/vis/__tests__/_renderbot.js b/src/ui/public/vis/__tests__/_renderbot.js	(rejected hunks)
+@@ -2,7 +2,7 @@ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ import VisRenderbotProvider from 'ui/vis/renderbot';
+ describe('renderbot', function () {
+-  var Renderbot;
++  let Renderbot;
+ 
+   function init() {
+     ngMock.module('kibana');

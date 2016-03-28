@@ -1,0 +1,10 @@
+diff a/src/ui/public/filters/short_dots.js b/src/ui/public/filters/short_dots.js	(rejected hunks)
+@@ -11,7 +11,7 @@ uiModules
+   });
+ 
+ function shortDotsFilterProvider(config, $rootScope) {
+-  var filter;
++  let filter;
+ 
+   function updateFilter() {
+     filter = config.get('shortDots:enable') ? _.shortenDottedString : _.identity;
