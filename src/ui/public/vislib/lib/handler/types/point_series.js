@@ -26,7 +26,7 @@ export default function ColumnHandler(Private) {
 
     return function (vis) {
       var isUserDefinedYAxis = vis._attr.setYExtents;
-      var data;
+      let data;
 
       if (opts.zeroFill) {
         data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);

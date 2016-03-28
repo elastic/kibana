@@ -6,7 +6,7 @@ import AggParamWriterProvider from '../agg_param_writer';
 describe('Histogram Agg', function () {
 
   describe('ordered', function () {
-    var histogram;
+    let histogram;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -24,7 +24,7 @@ describe('Histogram Agg', function () {
 
 
   describe('params', function () {
-    var paramWriter;
+    let paramWriter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

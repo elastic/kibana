@@ -5,9 +5,9 @@ import ngMock from 'ng_mock';
 import 'ui/state_management/global_state';
 
 describe('State Management', function () {
-  var $rootScope;
-  var $location;
-  var state;
+  let $rootScope;
+  let $location;
+  let state;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$location_, globalState) {

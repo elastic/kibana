@@ -29,6 +29,7 @@ const chrome = require('ui/chrome')
       const data = resp.data;
       ui.metrics = data.metrics;
       ui.statuses = data.status.statuses;
+      ui.name = data.name;
 
       const overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {

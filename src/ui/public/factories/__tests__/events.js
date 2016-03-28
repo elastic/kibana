@@ -10,10 +10,10 @@ import EventsProvider from 'ui/events';
 describe('Events', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
-  var $rootScope;
-  var Events;
-  var Notifier;
-  var Promise;
+  let $rootScope;
+  let Events;
+  let Notifier;
+  let Promise;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
@@ -185,7 +185,7 @@ describe('Events', function () {
   it('should preserve the scope of the handler', function () {
     var obj = new Events();
     var expected = 'some value';
-    var testValue;
+    let testValue;
 
     function handler(arg1, arg2) {
       testValue = this.getVal();

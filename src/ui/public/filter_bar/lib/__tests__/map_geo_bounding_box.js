@@ -5,8 +5,8 @@ import FilterBarLibMapGeoBoundingBoxProvider from 'ui/filter_bar/lib/map_geo_bou
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoBoundingBox()', function () {
-    var mapGeoBoundingBox;
-    var $rootScope;
+    let mapGeoBoundingBox;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

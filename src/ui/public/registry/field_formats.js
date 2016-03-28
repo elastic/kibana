@@ -8,7 +8,7 @@ export default uiRegistry({
 
   constructor: function (config, $rootScope) {
     var self = this;
-    var defaultMap;
+    let defaultMap;
 
     function init() {
       parseDefaultTypeMap();

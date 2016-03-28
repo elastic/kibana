@@ -74,7 +74,7 @@ IndexedArray.prototype._setupIndices = function (props, inflect, op) {
 
     var from = pathGetter.partial(prop).value();
     var to = inflect(prop);
-    var cache;
+    let cache;
 
     Object.defineProperty(self, to, {
       enumerable: false,

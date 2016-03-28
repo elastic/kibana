@@ -5,8 +5,8 @@ import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {
-    var mapAndFlattenFilters;
-    var $rootScope;
+    let mapAndFlattenFilters;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

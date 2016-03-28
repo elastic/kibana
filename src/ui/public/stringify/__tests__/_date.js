@@ -3,11 +3,11 @@ import ngMock from 'ng_mock';
 import moment from 'moment-timezone';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Date Format', function () {
-  var fieldFormats;
-  var settings;
-  var convert;
-  var $scope;
-  var off;
+  let fieldFormats;
+  let settings;
+  let convert;
+  let $scope;
+  let off;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, config, $rootScope) {

@@ -4,7 +4,7 @@ import 'ui/filters/comma_list';
 
 describe('Comma-List filter', function () {
 
-  var commaList;
+  let commaList;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {

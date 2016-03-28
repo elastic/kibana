@@ -8,7 +8,7 @@ import Promise from 'bluebird';
 
 describe('FixedScroll directive', function () {
 
-  var compile;
+  let compile;
   var trash = [];
 
   beforeEach(ngMock.module('kibana'));
@@ -112,10 +112,10 @@ describe('FixedScroll directive', function () {
       { from: '$scroller', to: '$container' }
     ].forEach(function (names) {
       describe('scroll events ' + JSON.stringify(names), function () {
-        var spy;
-        var els;
-        var $from;
-        var $to;
+        let spy;
+        let els;
+        let $from;
+        let $to;
 
         beforeEach(function () {
           spy = sinon.spy($.fn, 'scrollLeft');
