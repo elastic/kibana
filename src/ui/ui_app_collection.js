@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import UiApp from './ui_app';
-import Collection from '../utils/Collection';
+import Collection from '../utils/collection';
 
 let byIdCache = Symbol('byId');
 

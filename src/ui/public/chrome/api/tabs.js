@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import TabCollection from '../TabCollection';
+import TabCollection from '../tab_collection';
 
 module.exports = function (chrome, internals) {
 
@@ -75,12 +75,6 @@ module.exports = function (chrome, internals) {
   chrome.getActiveTab = function () {
     return internals.tabs.getActive();
   };
-
-  /**
-   * @param {any} def - the default value if there isn't any active tab
-   * @return {any}
-   */
-  chrome.getActiveTabId = activeGetter('id');
 
   /**
    * @param {any} def - the default value if there isn't any active tab

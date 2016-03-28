@@ -38,7 +38,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       var currentFilter = $scope.filter;
 
       // the most recently entered search/filter
-      var prevSearch;
+      let prevSearch;
 
       // the list of hits, used to render display
       self.hits = [];
@@ -47,6 +47,23 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       self.properties = self.service.loaderProperties;
 
       filterResults();
+
+      /**
+       * Boolean that keeps track of whether hits are sorted ascending (true)
+       * or descending (false) by title
+       * @type {Boolean}
+       */
+      self.isAscending = true;
+
+      /**
+       * Sorts saved object finder hits either ascending or descending
+       * @param  {Array} hits Array of saved finder object hits
+       * @return {Array} Array sorted either ascending or descending
+       */
+      self.sortHits = function (hits) {
+        self.isAscending = !self.isAscending;
+        self.hits = self.isAscending ? _.sortBy(hits, 'title') : _.sortBy(hits, 'title').reverse();
+      };
 
       /**
        * Passed the hit objects and will determine if the

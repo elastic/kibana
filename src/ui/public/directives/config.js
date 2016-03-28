@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import 'ui/watch_multi';
-import ConfigTemplate from 'ui/ConfigTemplate';
+import ConfigTemplate from 'ui/config_template';
 import angular from 'angular';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';
@@ -57,8 +57,8 @@ module.directive('config', function ($compile) {
           html = $compile('' +
             '<div class="config" ng-show="configTemplate">' +
               wrapTmpl(tmpl) +
-            '  <div class="config-close remove" ng-click="close()">' +
-            '    <i class="fa fa-chevron-up"></i>' +
+            '  <div class="config-close remove">' +
+            '    <i class="fa fa-chevron-circle-up" ng-click="close()"></i>' +
             '  </div>' +
             '</div>' +
             ''

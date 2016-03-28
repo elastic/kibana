@@ -1,6 +1,6 @@
 
 import angular from 'angular';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
@@ -27,9 +27,9 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
-    var Handler;
-    var vis;
-    var persistedState;
+    let Handler;
+    let vis;
+    let persistedState;
     var events = [
       'click',
       'brush'
@@ -58,7 +58,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('enable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
@@ -80,7 +80,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('disable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;

@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggResponsePointSeriesGetSeriesProvider from 'ui/agg_response/point_series/_get_series';
 describe('getSeries', function () {
-  var getSeries;
+  let getSeries;
 
   var agg = { fieldFormatter: _.constant(_.identity) };
 

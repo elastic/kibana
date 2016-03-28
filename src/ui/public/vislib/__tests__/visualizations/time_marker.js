@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import series from 'fixtures/vislib/mock_data/date_histogram/_series';
@@ -33,14 +33,14 @@ describe('Vislib Time Marker Test Suite', function () {
     });
   };
   var times = [];
-  var TimeMarker;
-  var defaultMarker;
-  var customMarker;
-  var selection;
-  var xScale;
-  var minDomain;
-  var maxDomain;
-  var domain;
+  let TimeMarker;
+  let defaultMarker;
+  let customMarker;
+  let selection;
+  let xScale;
+  let minDomain;
+  let maxDomain;
+  let domain;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -63,8 +63,8 @@ describe('Vislib Time Marker Test Suite', function () {
   });
 
   describe('_isTimeBaseChart method', function () {
-    var boolean;
-    var newSelection;
+    let boolean;
+    let newSelection;
 
     it('should return true when data is time based', function () {
       boolean = defaultMarker._isTimeBasedChart(selection);
@@ -79,7 +79,7 @@ describe('Vislib Time Marker Test Suite', function () {
   });
 
   describe('render method', function () {
-    var lineArray;
+    let lineArray;
 
     beforeEach(function () {
       defaultMarker.render(selection);

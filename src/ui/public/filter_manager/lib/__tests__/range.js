@@ -2,10 +2,10 @@
 import fn from 'ui/filter_manager/lib/range';
 import expect from 'expect.js';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-var indexPattern;
-var expected;
+let indexPattern;
+let expected;
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana'));

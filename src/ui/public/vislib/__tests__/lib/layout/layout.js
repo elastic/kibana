@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import angular from 'angular';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
@@ -27,11 +27,11 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
-    var Layout;
-    var vis;
-    var persistedState;
-    var numberOfCharts;
-    var testLayout;
+    let Layout;
+    let vis;
+    let persistedState;
+    let numberOfCharts;
+    let testLayout;
 
     beforeEach(ngMock.module('kibana'));
 

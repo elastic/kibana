@@ -2,7 +2,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import getFakeRow from 'fixtures/fake_row';
 import $ from 'jquery';
 import 'plugins/kibana/discover/index';
@@ -10,14 +10,14 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 describe('Doc Table', function () {
 
-  var $parentScope;
+  let $parentScope;
 
-  var $scope;
+  let $scope;
 
-  var config;
+  let config;
 
   // Stub out a minimal mapping of 4 fields
-  var mapping;
+  let mapping;
 
   beforeEach(ngMock.module('kibana', 'apps/discover'));
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
@@ -53,7 +53,7 @@ describe('Doc Table', function () {
     });
 
     it('should be able to add and remove columns', function (done) {
-      var childElems;
+      let childElems;
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
@@ -245,7 +245,7 @@ describe('Doc Table', function () {
       });
 
       describe('expanded', function () {
-        var $details;
+        let $details;
         beforeEach(function () {
           // Open the row
           $scope.toggleRow();
@@ -278,7 +278,7 @@ describe('Doc Table', function () {
         'index-pattern="indexPattern"' +
         '></tr>'
     );
-    var $details;
+    let $details;
 
     beforeEach(function () {
       var row = getFakeRow(0, mapping);
@@ -312,10 +312,10 @@ describe('Doc Table', function () {
   });
 
   describe('row diffing', function () {
-    var $row;
-    var $scope;
-    var $root;
-    var $before;
+    let $row;
+    let $scope;
+    let $root;
+    let $before;
 
     beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
       $root = $rootScope;

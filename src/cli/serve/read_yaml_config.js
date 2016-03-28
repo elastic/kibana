@@ -2,7 +2,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import yaml from 'js-yaml';
 
-import fromRoot from '../../utils/fromRoot';
+import { fromRoot } from '../../utils';
 
 let legacySettingMap = {
   // server
@@ -48,7 +48,14 @@ module.exports = function (path) {
       _.forOwn(val, function (subVal, subKey) {
         apply(config, subVal, key + '.' + subKey);
       });
-    } else {
+    }
+    else if (_.isArray(val)) {
+      config[key] = [];
+      val.forEach((subVal, i) => {
+        apply(config, subVal, key + '.' + i);
+      });
+    }
+    else {
       _.set(config, key, val);
     }
   }
