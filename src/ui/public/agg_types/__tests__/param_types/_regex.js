@@ -30,8 +30,8 @@ describe('Regex', function () {
   });
 
   describe('write results', function () {
-    var aggParam;
-    var aggConfig;
+    let aggParam;
+    let aggConfig;
     var output = { params: {} };
     var paramName = 'exclude';
 

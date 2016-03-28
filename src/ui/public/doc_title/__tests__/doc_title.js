@@ -60,7 +60,7 @@ describe('docTitle Service', function () {
   });
 
   describe('#change', function () {
-    var getActiveTabStub;
+    let getActiveTabStub;
 
     beforeEach(function () {
       getActiveTabStub = sinon.stub(require('ui/chrome'), 'getActiveTab');

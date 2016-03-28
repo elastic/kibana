@@ -44,7 +44,7 @@ describe('Registry', function () {
   describe('spec', function () {
     it('executes with the module list as "this", and can override it', function () {
       var i = 0;
-      var self;
+      let self;
 
       var reg = registry({
         constructor: function () {
@@ -84,7 +84,7 @@ describe('Registry', function () {
 
     it('executes with the module list as "this", and can override it', function () {
       var i = 0;
-      var self;
+      let self;
 
       var reg = registry({
         constructor: function () {
