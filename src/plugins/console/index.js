@@ -14,6 +14,7 @@ module.exports = function (kibana) {
       title: 'Console',
       description: 'JSON aware developer\'s interface to ElasticSearch',
       main: 'plugins/console/console',
+      icon: 'plugins/console/logo.svg',
       injectVars: function (server, options) {
         return options;
       }
