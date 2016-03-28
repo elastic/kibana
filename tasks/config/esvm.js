@@ -9,9 +9,6 @@ module.exports = function (grunt) {
       branch: 'master',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
-        network: {
-          host: '127.0.0.1'
-        },
         http: {
           port: 9200
         }
