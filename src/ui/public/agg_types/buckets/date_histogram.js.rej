@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_types/buckets/date_histogram.js b/src/ui/public/agg_types/buckets/date_histogram.js	(rejected hunks)
+@@ -45,7 +45,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
+     },
+     createFilter: createFilter,
+     decorateAggConfig: function () {
+-      var buckets;
++      let buckets;
+       return {
+         buckets: {
+           configurable: true,

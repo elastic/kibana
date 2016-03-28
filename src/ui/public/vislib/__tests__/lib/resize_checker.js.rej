@@ -1,0 +1,16 @@
+diff a/src/ui/public/vislib/__tests__/lib/resize_checker.js b/src/ui/public/vislib/__tests__/lib/resize_checker.js	(rejected hunks)
+@@ -12,10 +12,10 @@ describe('Vislib Resize Checker', function () {
+ 
+   require('test_utils/no_digest_promises').activateForSuite();
+ 
+-  var ResizeChecker;
+-  var EventEmitter;
+-  var checker;
+-  var reflowWatcher;
++  let ResizeChecker;
++  let EventEmitter;
++  let checker;
++  let reflowWatcher;
+   var reflowSpies = {};
+ 
+   beforeEach(ngMock.module('kibana'));

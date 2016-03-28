@@ -28,8 +28,8 @@ module.exports = describe('conformance', function () {
   }));
 
   formatIds.forEach(function (id) {
-    var instance;
-    var Type;
+    let instance;
+    let Type;
 
     beforeEach(function () {
       Type = fieldFormats.getType(id);

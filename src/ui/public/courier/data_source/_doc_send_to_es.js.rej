@@ -1,0 +1,10 @@
+diff a/src/ui/public/courier/data_source/_doc_send_to_es.js b/src/ui/public/courier/data_source/_doc_send_to_es.js	(rejected hunks)
+@@ -33,7 +33,7 @@ export default function (Promise, Private, es) {
+       doc._storeVersion(resp._version);
+       doc.id(resp._id);
+ 
+-      var docFetchProm;
++      let docFetchProm;
+       if (method !== 'index') {
+         docFetchProm = doc.fetch();
+       } else {

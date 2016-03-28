@@ -1,0 +1,12 @@
+diff a/src/ui/public/filter_manager/lib/__tests__/query.js b/src/ui/public/filter_manager/lib/__tests__/query.js	(rejected hunks)
+@@ -4,8 +4,8 @@ import expect from 'expect.js';
+ import _ from 'lodash';
+ import ngMock from 'ng_mock';
+ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+-var indexPattern;
+-var expected;
++let indexPattern;
++let expected;
+ describe('Filter Manager', function () {
+   describe('Phrase filter builder', function () {
+     beforeEach(ngMock.module('kibana'));

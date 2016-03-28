@@ -1,0 +1,19 @@
+diff a/src/ui/public/directives/__tests__/timepicker.js b/src/ui/public/directives/__tests__/timepicker.js	(rejected hunks)
+@@ -12,13 +12,13 @@ import 'plugins/kibana/discover/index';
+ 
+ // TODO: This should not be needed, timefilter is only included here, it should move
+ 
+-var $parentScope;
++let $parentScope;
+ 
+-var $scope;
++let $scope;
+ 
+-var $elem;
++let $elem;
+ var anchor = '2014-01-01T06:06:06.666Z';
+-var clock;
++let clock;
+ 
+ var init = function () {
+   // Load the application

@@ -1,0 +1,12 @@
+diff a/src/ui/public/filters/__tests__/rison.js b/src/ui/public/filters/__tests__/rison.js	(rejected hunks)
+@@ -5,8 +5,8 @@ import 'plugins/kibana/discover/index';
+ 
+ // Load kibana and its applications
+ 
+-var rison;
+-var risonDecode;
++let rison;
++let risonDecode;
+ 
+ var init = function (expandable) {
+   // Load the application

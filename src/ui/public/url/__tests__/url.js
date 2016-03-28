@@ -374,8 +374,8 @@ describe('kbnUrl', function () {
   });
 
   describe('_shouldAutoReload', function () {
-    var next;
-    var prev;
+    let next;
+    let prev;
 
     beforeEach(function () {
       $route.current = {

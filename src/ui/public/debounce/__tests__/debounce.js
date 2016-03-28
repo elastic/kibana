@@ -19,7 +19,7 @@ function init() {
 }
 
 describe('debounce service', function () {
-  var spy;
+  let spy;
   beforeEach(function () {
     spy = sinon.spy(function () {});
     init();

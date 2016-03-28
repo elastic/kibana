@@ -1,0 +1,10 @@
+diff a/src/ui/public/filter_bar/__tests__/push_filter.js b/src/ui/public/filter_bar/__tests__/push_filter.js	(rejected hunks)
+@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
+ import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
+ describe('Filter Bar pushFilter()', function () {
+ 
+-  var pushFilterFn;
++  let pushFilterFn;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector) {

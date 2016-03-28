@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_types/param_types/raw_json.js b/src/ui/public/agg_types/param_types/raw_json.js	(rejected hunks)
+@@ -25,7 +25,7 @@ export default function RawJSONAggParamFactory(Private) {
+    * @return {undefined}
+    */
+   RawJSONAggParam.prototype.write = function (aggConfig, output) {
+-    var paramJSON;
++    let paramJSON;
+     var param = aggConfig.params[this.name];
+ 
+     if (!param) {

@@ -1,0 +1,13 @@
+diff a/src/ui/public/highlight/__tests__/highlight.js b/src/ui/public/highlight/__tests__/highlight.js	(rejected hunks)
+@@ -5,9 +5,9 @@ import 'ui/highlight';
+ 
+ describe('Highlight', function () {
+ 
+-  var filter;
++  let filter;
+ 
+-  var tags;
++  let tags;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (highlightFilter, highlightTags) {

@@ -1,0 +1,22 @@
+diff a/src/ui/public/vislib/__tests__/components/labels.js b/src/ui/public/vislib/__tests__/components/labels.js	(rejected hunks)
+@@ -7,13 +7,13 @@ import VislibComponentsLabelsDataArrayProvider from 'ui/vislib/components/labels
+ import VislibComponentsLabelsUniqLabelsProvider from 'ui/vislib/components/labels/uniq_labels';
+ import VislibComponentsLabelsFlattenSeriesProvider from 'ui/vislib/components/labels/flatten_series';
+ 
+-var getLabels;
+-var seriesLabels;
+-var rowsLabels;
+-var seriesArr;
+-var rowsArr;
+-var uniqLabels;
+-var error;
++let getLabels;
++let seriesLabels;
++let rowsLabels;
++let seriesArr;
++let rowsArr;
++let uniqLabels;
++let error;
+ 
+ var seriesData = {
+   'label': '',

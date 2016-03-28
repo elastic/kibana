@@ -1,0 +1,18 @@
+diff a/src/ui/public/vislib/__tests__/components/color.js b/src/ui/public/vislib/__tests__/components/color.js	(rejected hunks)
+@@ -9,13 +9,13 @@ import VislibComponentsColorMappedColorsProvider from 'ui/vislib/components/colo
+ import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
+ 
+ describe('Vislib Color Module Test Suite', function () {
+-  var seedColors;
+-  var mappedColors;
++  let seedColors;
++  let mappedColors;
+   let config;
+ 
+   describe('Color (main)', function () {
+     let previousConfig;
+-    var getColors;
++    let getColors;
+     var arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
+     var arrayOfNumbers = [1, 2, 3, 4, 5];
+     var arrayOfUndefinedValues = [undefined, undefined, undefined];

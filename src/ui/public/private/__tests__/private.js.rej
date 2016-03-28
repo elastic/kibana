@@ -1,0 +1,10 @@
+diff a/src/ui/public/private/__tests__/private.js b/src/ui/public/private/__tests__/private.js	(rejected hunks)
+@@ -3,7 +3,7 @@ import ngMock from 'ng_mock';
+ 
+ describe('Private module loader', function () {
+ 
+-  var Private;
++  let Private;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function ($injector) {

@@ -79,7 +79,7 @@ describe('AggConfig Filters', function () {
 
     it('extends the filter edge to 1ms before the next bucket for all interval options', function () {
       intervalOptions.forEach(function (option) {
-        var duration;
+        let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {
           duration = moment.duration(10, option.val);
 

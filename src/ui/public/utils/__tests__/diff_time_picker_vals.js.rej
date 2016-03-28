@@ -1,0 +1,10 @@
+diff a/src/ui/public/utils/__tests__/diff_time_picker_vals.js b/src/ui/public/utils/__tests__/diff_time_picker_vals.js	(rejected hunks)
+@@ -5,7 +5,7 @@ import expect from 'expect.js';
+ import UtilsDiffTimePickerValsProvider from 'ui/utils/diff_time_picker_vals';
+ 
+ describe('Diff Time Picker Values', function () {
+-  var diffTimePickerValues;
++  let diffTimePickerValues;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

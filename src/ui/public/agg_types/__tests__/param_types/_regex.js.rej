@@ -1,0 +1,16 @@
+diff a/src/ui/public/agg_types/__tests__/param_types/_regex.js b/src/ui/public/agg_types/__tests__/param_types/_regex.js	(rejected hunks)
+@@ -7,10 +7,10 @@ import VisProvider from 'ui/vis';
+ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+ describe('Regex', function () {
+ 
+-  var BaseAggParam;
+-  var RegexAggParam;
+-  var Vis;
+-  var indexPattern;
++  let BaseAggParam;
++  let RegexAggParam;
++  let Vis;
++  let indexPattern;
+ 
+   beforeEach(ngMock.module('kibana'));
+   // fetch out deps
