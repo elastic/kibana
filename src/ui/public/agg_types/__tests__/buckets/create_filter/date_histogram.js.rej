@@ -1,0 +1,27 @@
+diff a/src/ui/public/agg_types/__tests__/buckets/create_filter/date_histogram.js b/src/ui/public/agg_types/__tests__/buckets/create_filter/date_histogram.js	(rejected hunks)
+@@ -12,16 +12,16 @@ import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interv
+ describe('AggConfig Filters', function () {
+   describe('date_histogram', function () {
+ 
+-    var vis;
+-    var agg;
+-    var field;
+-    var filter;
+-    var bucketKey;
+-    var bucketStart;
+-    var getIntervalStub;
+-    var intervalOptions;
++    let vis;
++    let agg;
++    let field;
++    let filter;
++    let bucketKey;
++    let bucketStart;
++    let getIntervalStub;
++    let intervalOptions;
+ 
+-    var init;
++    let init;
+ 
+     beforeEach(ngMock.module('kibana'));
+     beforeEach(ngMock.inject(function (Private, $injector) {

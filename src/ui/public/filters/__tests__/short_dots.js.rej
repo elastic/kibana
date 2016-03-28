@@ -1,0 +1,13 @@
+diff a/src/ui/public/filters/__tests__/short_dots.js b/src/ui/public/filters/__tests__/short_dots.js	(rejected hunks)
+@@ -6,9 +6,9 @@ import 'plugins/kibana/discover/index';
+ import 'ui/filters/short_dots';
+ 
+ 
+-var filter;
++let filter;
+ 
+-var config;
++let config;
+ 
+ var init = function (expandable) {
+   // Load the application

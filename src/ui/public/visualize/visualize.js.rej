@@ -1,0 +1,10 @@
+diff a/src/ui/public/visualize/visualize.js b/src/ui/public/visualize/visualize.js	(rejected hunks)
+@@ -29,7 +29,7 @@ uiModules
+     },
+     template: visualizeTemplate,
+     link: function ($scope, $el, attr) {
+-      var chart; // set in "vis" watcher
++      let chart; // set in "vis" watcher
+       var minVisChartHeight = 180;
+ 
+       if (_.isUndefined($scope.showSpyPanel)) {

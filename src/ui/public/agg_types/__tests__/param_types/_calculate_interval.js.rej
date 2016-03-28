@@ -1,0 +1,18 @@
+diff a/src/ui/public/agg_types/__tests__/param_types/_calculate_interval.js b/src/ui/public/agg_types/__tests__/param_types/_calculate_interval.js	(rejected hunks)
+@@ -7,11 +7,11 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
+ import AggTypesParamTypesCalculateIntervalProvider from 'ui/agg_types/param_types/_calculate_interval';
+ 
+ describe('calculateInterval()', function () {
+-  var AggConfig;
+-  var indexPattern;
+-  var Vis;
+-  var createFilter;
+-  var calculateInterval;
++  let AggConfig;
++  let indexPattern;
++  let Vis;
++  let createFilter;
++  let calculateInterval;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

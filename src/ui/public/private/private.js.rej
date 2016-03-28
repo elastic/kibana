@@ -1,0 +1,21 @@
+diff a/src/ui/public/private/private.js b/src/ui/public/private/private.js	(rejected hunks)
+@@ -152,7 +152,7 @@ uiModules.get('kibana')
+     function get(id, prov, $delegateId, $delegateProv) {
+       if (cache[id]) return cache[id];
+ 
+-      var instance;
++      let instance;
+ 
+       if ($delegateId != null && $delegateProv != null) {
+         instance = instantiate(prov, {
+@@ -168,8 +168,8 @@ uiModules.get('kibana')
+     // main api, get the appropriate instance for a provider
+     function Private(prov) {
+       var id = identify(prov);
+-      var $delegateId;
+-      var $delegateProv;
++      let $delegateId;
++      let $delegateProv;
+ 
+       if (swaps[id]) {
+         $delegateId = id;

@@ -1,0 +1,10 @@
+diff a/src/ui/public/agg_response/tabify/__tests__/_table.js b/src/ui/public/agg_response/tabify/__tests__/_table.js	(rejected hunks)
+@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
+ import AggResponseTabifyTableProvider from 'ui/agg_response/tabify/_table';
+ describe('Table class', function () {
+ 
+-  var Table;
++  let Table;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private, $injector) {

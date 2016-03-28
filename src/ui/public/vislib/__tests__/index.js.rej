@@ -1,0 +1,10 @@
+diff a/src/ui/public/vislib/__tests__/index.js b/src/ui/public/vislib/__tests__/index.js	(rejected hunks)
+@@ -9,7 +9,7 @@ import 'ui/vislib/styles/main.less';
+ import VislibProvider from 'ui/vislib';
+ 
+ describe('Vislib Index Test Suite', function () {
+-  var vislib;
++  let vislib;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {
