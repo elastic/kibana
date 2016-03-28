@@ -51,7 +51,7 @@ export default function (chrome, internals) {
   }
 
   function decodeKibanaUrl(url) {
-    const parsedUrl = parse(url);
+    const parsedUrl = parse(url, true);
     const appId = getAppId(parsedUrl);
     const hash = parsedUrl.hash || '';
     const parsedHash = parse(hash.slice(1), true);
