@@ -2,7 +2,6 @@
 .ackrc
 .DS_Store
 .node_binaries
-node_modules
 trash
 bundles
 target
