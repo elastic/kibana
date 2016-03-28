@@ -12,10 +12,10 @@ describe('renderbot', function () {
   }
 
   describe('API', function () {
-    var vis;
-    var $el;
-    var renderbot;
-    var uiState;
+    let vis;
+    let $el;
+    let renderbot;
+    let uiState;
 
     beforeEach(init);
     beforeEach(function () {

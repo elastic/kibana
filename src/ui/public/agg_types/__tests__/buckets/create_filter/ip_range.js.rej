@@ -1,0 +1,16 @@
+diff a/src/ui/public/agg_types/__tests__/buckets/create_filter/ip_range.js b/src/ui/public/agg_types/__tests__/buckets/create_filter/ip_range.js	(rejected hunks)
+@@ -7,10 +7,10 @@ import AggTypesBucketsCreateFilterIpRangeProvider from 'ui/agg_types/buckets/cre
+ describe('AggConfig Filters', function () {
+ 
+   describe('IP range', function () {
+-    var AggConfig;
+-    var indexPattern;
+-    var Vis;
+-    var createFilter;
++    let AggConfig;
++    let indexPattern;
++    let Vis;
++    let createFilter;
+ 
+     beforeEach(ngMock.module('kibana'));
+     beforeEach(ngMock.inject(function (Private) {

@@ -1,0 +1,12 @@
+diff a/src/server/status/__tests__/status.js b/src/server/status/__tests__/status.js	(rejected hunks)
+@@ -4,8 +4,8 @@ import Status from '../status';
+ import ServerStatus from '../server_status';
+ 
+ describe('Status class', function () {
+-  var server;
+-  var serverStatus;
++  let server;
++  let serverStatus;
+ 
+   beforeEach(function () {
+     server = { expose: sinon.stub(), log: sinon.stub() };

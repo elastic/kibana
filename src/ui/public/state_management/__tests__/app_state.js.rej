@@ -1,0 +1,12 @@
+diff a/src/ui/public/state_management/__tests__/app_state.js b/src/ui/public/state_management/__tests__/app_state.js	(rejected hunks)
+@@ -5,8 +5,8 @@ import 'ui/state_management/app_state';
+ import StateManagementAppStateProvider from 'ui/state_management/app_state';
+ 
+ describe('State Management', function () {
+-  var $rootScope;
+-  var AppState;
++  let $rootScope;
++  let AppState;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {

@@ -54,7 +54,7 @@ describe('ui/safe_confirm', function () {
       it('promise is fulfilled with true', function () {
         $timeout.flush();
 
-        var value;
+        let value;
         promise.then(function (v) {
           value = v;
         });
@@ -69,7 +69,7 @@ describe('ui/safe_confirm', function () {
         $window.confirm.returns(false); // must be set before $timeout.flush()
         $timeout.flush();
 
-        var value;
+        let value;
         promise.then(null, function (v) {
           value = v;
         });

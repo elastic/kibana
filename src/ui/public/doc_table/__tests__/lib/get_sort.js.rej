@@ -1,0 +1,10 @@
+diff a/src/ui/public/doc_table/__tests__/lib/get_sort.js b/src/ui/public/doc_table/__tests__/lib/get_sort.js	(rejected hunks)
+@@ -3,7 +3,7 @@ var defaultSort = {time: 'desc'};
+ import expect from 'expect.js';
+ import ngMock from 'ng_mock';
+ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+-var indexPattern;
++let indexPattern;
+ 
+ describe('docTable', function () {
+   beforeEach(ngMock.module('kibana'));

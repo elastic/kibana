@@ -30,8 +30,8 @@ dataTypesArray.forEach(function (dataType, i) {
   var data = dataType[2];
 
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
     var visLibParams = {
       type: 'histogram',
       hasTimeField: true,
@@ -54,8 +54,8 @@ dataTypesArray.forEach(function (dataType, i) {
     });
 
     describe('stackData method', function () {
-      var stackedData;
-      var isStacked;
+      let stackedData;
+      let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -76,9 +76,9 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('addBars method', function () {
       it('should append rects', function () {
-        var numOfSeries;
-        var numOfValues;
-        var product;
+        let numOfSeries;
+        let numOfValues;
+        let product;
 
         vis.handler.charts.forEach(function (chart) {
           numOfSeries = chart.chartData.series.length;

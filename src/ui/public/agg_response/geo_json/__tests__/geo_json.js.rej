@@ -1,0 +1,18 @@
+diff a/src/ui/public/agg_response/geo_json/__tests__/geo_json.js b/src/ui/public/agg_response/geo_json/__tests__/geo_json.js	(rejected hunks)
+@@ -9,11 +9,11 @@ import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+ import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
+ 
+ describe('GeoJson Agg Response Converter', function () {
+-  var vis;
+-  var tabify;
+-  var convert;
+-  var esResponse;
+-  var aggs;
++  let vis;
++  let tabify;
++  let convert;
++  let esResponse;
++  let aggs;
+ 
+   beforeEach(ngMock.module('kibana'));
+   beforeEach(ngMock.inject(function (Private) {

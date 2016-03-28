@@ -1,0 +1,10 @@
+diff a/src/ui/public/paginated_table/paginated_table.js b/src/ui/public/paginated_table/paginated_table.js	(rejected hunks)
+@@ -31,7 +31,7 @@ uiModules
+         if (!col) return;
+         if (col.sortable === false) return;
+ 
+-        var sortDirection;
++        let sortDirection;
+ 
+         if (self.sort.columnIndex !== colIndex) {
+           sortDirection = 'asc';

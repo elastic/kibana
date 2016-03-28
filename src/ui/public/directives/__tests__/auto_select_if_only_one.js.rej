@@ -1,0 +1,12 @@
+diff a/src/ui/public/directives/__tests__/auto_select_if_only_one.js b/src/ui/public/directives/__tests__/auto_select_if_only_one.js	(rejected hunks)
+@@ -5,8 +5,8 @@ import ngMock from 'ng_mock';
+ import 'ui/directives/auto_select_if_only_one';
+ 
+ describe('Auto-select if only one directive', function () {
+-  var $compile;
+-  var $rootScope;
++  let $compile;
++  let $rootScope;
+   var zeroOptions = [];
+   var oneOption = [{label: 'foo'}];
+   var multiOptions = [{label: 'foo'}, {label: 'bar'}];

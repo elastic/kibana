@@ -447,7 +447,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', function () {
-        var indexList;
+        let indexList;
         indexPattern.toIndexList().then(function (val) {
           indexList = val;
         });

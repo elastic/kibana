@@ -22,7 +22,7 @@ function createTileMap(handler, chartEl, chartData) {
 }
 
 describe('TileMap Tests', function () {
-  var tilemap;
+  let tilemap;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -58,7 +58,7 @@ describe('TileMap Tests', function () {
   });
 
   describe('appendMap', function () {
-    var $selection;
+    let $selection;
 
     beforeEach(function () {
       $selection = $('<div>');
