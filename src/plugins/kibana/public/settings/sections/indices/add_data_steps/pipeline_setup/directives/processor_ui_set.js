@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-import processorUiSetTemplate from '../views/processor_ui_set.html';
+import template from '../views/processor_ui_set.html';
 
 const app = uiModules.get('kibana');
 
@@ -7,13 +7,13 @@ const app = uiModules.get('kibana');
 app.directive('processorUiSet', function () {
   return {
     restrict: 'E',
-    template: processorUiSetTemplate,
+    template: template,
     controller : function ($scope) {
       const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
       function processorUiChanged() {
-        pipeline.dirty = true;
+        pipeline.setDirty(processor);
       }
 
       $scope.$watch('processor.targetField', processorUiChanged);

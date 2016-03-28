@@ -10,7 +10,8 @@ app.directive('sourceData', function () {
     restrict: 'E',
     scope: {
       samples: '=',
-      sample: '='
+      sample: '=',
+      disabled: '='
     },
     template: sourceDataTemplate,
     controller: function ($scope) {

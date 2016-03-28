@@ -22,7 +22,7 @@ describe('processor pipeline', function () {
     it('should only contain the clean data properties', function () {
       const pipeline = new Pipeline();
       const actual = pipeline.model;
-      const expectedKeys = [ 'input', 'processors' ];
+      const expectedKeys = [ 'input', 'processors', 'dirtyProcessorId' ];
 
       expect(_.keys(actual)).to.eql(expectedKeys);
     });
@@ -34,7 +34,28 @@ describe('processor pipeline', function () {
       pipeline.processors[0].model = { bar: 'baz' };
 
       const actual = pipeline.model;
-      const expected = { input: pipeline.input, processors: [ pipeline.processors[0].model ]};
+      const expected = {
+        input: pipeline.input,
+        processors: [ pipeline.processors[0].model ],
+        dirtyProcessorId: undefined
+      };
+
+      expect(actual).to.eql(expected);
+    });
+
+    it('should have the dirtyProcessorId set to whichever processor was modified last', function () {
+      const pipeline = new Pipeline();
+      pipeline.input = { foo: 'bar' };
+      pipeline.add(TestProcessor);
+      pipeline.setDirty(pipeline.processors[0]);
+      pipeline.processors[0].model = { bar: 'baz' };
+
+      const actual = pipeline.model;
+      const expected = {
+        input: pipeline.input,
+        processors: [ pipeline.processors[0].model ],
+        dirtyProcessorId: pipeline.processors[0].processorId
+      };
 
       expect(actual).to.eql(expected);
     });

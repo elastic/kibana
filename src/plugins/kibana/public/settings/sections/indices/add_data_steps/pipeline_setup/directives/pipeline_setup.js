@@ -50,8 +50,6 @@ app.directive('pipelineSetup', function () {
 
       //initiates the simulate call if the pipeline is dirty
       const simulatePipeline = debounce((event, message) => {
-        if (!pipeline.dirty) return;
-
         if (pipeline.processors.length === 0) {
           pipeline.updateOutput();
           return;

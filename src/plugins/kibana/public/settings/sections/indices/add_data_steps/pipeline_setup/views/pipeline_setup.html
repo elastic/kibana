@@ -1,4 +1,4 @@
-<source-data sample="sample" samples="samples"></source-data>
+<source-data sample="sample" samples="samples" disabled="pipeline.hasCompileError"></source-data>
 
 <pipeline-output pipeline="pipeline"></pipeline-output>
 
@@ -28,6 +28,6 @@
 </div>
 <button
   ng-click="pipeline.add(processorType.Type)"
-  ng-disabled="!processorType">
+  ng-disabled="!processorType || pipeline.hasCompileError">
   Add Processor
 </button>

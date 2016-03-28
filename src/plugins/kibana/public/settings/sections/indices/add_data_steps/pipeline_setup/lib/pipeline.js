@@ -4,17 +4,26 @@ export default class Pipeline {
 
   constructor() {
     this.processors = [];
-    this.counter = 0;
+    this.processorCounter = 0;
     this.input = {};
     this.output = undefined;
     this.dirty = false;
+    this.hasCompileError = false;
+    this.dirtyProcessor = undefined;
   }
 
   get model() {
-    return {
+    const pipeline = {
       input: this.input,
-      processors: _.map(this.processors, processor => processor.model)
+      processors: _.map(this.processors, processor => processor.model),
+      dirtyProcessorId: _.get(this.dirtyProcessor, 'processorId')
     };
+    return pipeline;
+  }
+
+  setDirty(processor) {
+    this.dirty = true;
+    this.dirtyProcessor = processor;
   }
 
   load(pipeline) {
@@ -64,8 +73,8 @@ export default class Pipeline {
   add(ProcessorType) {
     const processors = this.processors;
 
-    this.counter += 1;
-    const processorId = `processor_${this.counter}`;
+    this.processorCounter += 1;
+    const processorId = `processor_${this.processorCounter}`;
     const newProcessor = new ProcessorType(processorId);
     processors.push(newProcessor);
 
@@ -88,16 +97,6 @@ export default class Pipeline {
     this.dirty = true;
   }
 
-  updateOutput() {
-    const processors = this.processors;
-
-    this.output = undefined;
-    if (processors.length > 0) {
-      this.output = processors[processors.length - 1].outputObject;
-    }
-    this.dirty = false;
-  }
-
   getProcessorById(processorId) {
     const result = _.find(this.processors, { processorId });
 
@@ -108,24 +107,44 @@ export default class Pipeline {
     return result;
   }
 
-  // Updates the state of the pipeline and processors with the results
-  // from an ingest simulate call.
-  applySimulateResults(results) {
-    //update the outputObject of each processor
-    results.forEach((result) => {
+  _updateProcessorOutputs(simulateResults) {
+    simulateResults.forEach((result) => {
       const processor = this.getProcessorById(result.processorId);
 
       processor.outputObject = _.get(result, 'output');
       processor.error = _.get(result, 'error');
     });
+  }
 
-    //update the inputObject of each processor
-    results.forEach((result) => {
-      const processor = this.getProcessorById(result.processorId);
+  //Updates the error state of the pipeline and its processors
+  //If a pipeline compile error is returned, lock all processors but the error
+  //If a pipeline data error is returned, lock all processors after the error
+  _updateErrorState() {
+    this.hasCompileError = _.some(this.processors, (processor) => {
+      return _.get(processor, 'error.compile');
+    });
+    _.forEach(this.processors, processor => {
+      processor.locked = false;
+    });
 
+    const errorIndex = _.findIndex(this.processors, 'error');
+    if (errorIndex === -1) return;
+
+    _.forEach(this.processors, (processor, index) => {
+      if (this.hasCompileError && index !== errorIndex) {
+        processor.locked = true;
+      }
+      if (!this.hasCompileError && index > errorIndex) {
+        processor.locked = true;
+      }
+    });
+  }
+
+  _updateProcessorInputs() {
+    this.processors.forEach((processor) => {
       //we don't want to change the inputObject if the parent processor
       //is in error because that can cause us to lose state.
-      if (!_.get(processor, 'error.isNested')) {
+      if (!_.get(processor, 'parent.error')) {
         //the parent property of the first processor is set to the pipeline.input.
         //In all other cases it is set to processor[index-1]
         if (!processor.parent.processorId) {
@@ -135,7 +154,24 @@ export default class Pipeline {
         }
       }
     });
+  }
 
+  updateOutput() {
+    const processors = this.processors;
+
+    this.output = undefined;
+    if (processors.length > 0) {
+      this.output = processors[processors.length - 1].outputObject;
+    }
+    this.dirty = false;
+  }
+
+  // Updates the state of the pipeline and processors with the results
+  // from an ingest simulate call.
+  applySimulateResults(simulateResults) {
+    this._updateProcessorOutputs(simulateResults);
+    this._updateErrorState();
+    this._updateProcessorInputs();
     this.updateOutput();
   }
 

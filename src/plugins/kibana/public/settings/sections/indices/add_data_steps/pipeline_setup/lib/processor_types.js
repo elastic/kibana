@@ -22,6 +22,30 @@ class Processor {
   }
 }
 
+export class Gsub extends Processor {
+  constructor(processorId) {
+    super(processorId, 'gsub', 'Gsub');
+    this.sourceField = '';
+    this.pattern = '';
+    this.replacement = '';
+  }
+
+  get description() {
+    const source = this.sourceField || '?';
+    return `[${source}] - /${this.pattern}/ -> '${this.replacement}'`;
+  }
+
+  get model() {
+    return {
+      processorId: this.processorId,
+      typeId: this.typeId,
+      sourceField: this.sourceField || '',
+      pattern: this.pattern || '',
+      replacement: this.replacement || ''
+    };
+  }
+};
+
 export class Set extends Processor {
   constructor(processorId) {
     super(processorId, 'set', 'Set');
@@ -38,8 +62,8 @@ export class Set extends Processor {
     return {
       processorId: this.processorId,
       typeId: this.typeId,
-      targetField: this.targetField,
-      value: this.value
+      targetField: this.targetField || '',
+      value: this.value || ''
     };
   }
 };
