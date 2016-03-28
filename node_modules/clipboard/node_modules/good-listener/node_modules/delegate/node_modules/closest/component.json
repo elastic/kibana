@@ -1,0 +1,12 @@
+{
+  "name": "closest",
+  "description": "Find the closest parent that matches a selector",
+  "version": "0.0.1",
+  "dependencies": {
+    "component/matches-selector": "*"
+  },
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}

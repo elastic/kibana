@@ -1,0 +1,25 @@
+{
+  "name": "expiry.js",
+  "version": "0.1.2",
+  "authors": [
+    "Adriano Di Giovanni <me@adrianodigiovanni.com>"
+  ],
+  "description": "A lightweight Javascript Universal Module for parsing durations",
+  "main": "dist/expiry.min.js",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "node",
+    "amd",
+    "browser",
+    "globals",
+    "duration",
+    "redis",
+    "expire"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/adriano-di-giovanni/expiry-js"
+}

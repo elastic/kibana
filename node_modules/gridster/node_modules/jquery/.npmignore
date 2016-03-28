@@ -1,0 +1,14 @@
+src/selector-sizzle.js
+src/selector.js
+dist
+.project
+.settings
+*~
+*.diff
+*.patch
+/*.html
+.DS_Store
+dist/.destination.json
+dist/.sizecache.json
+build/.sizecache.json
+node_modules

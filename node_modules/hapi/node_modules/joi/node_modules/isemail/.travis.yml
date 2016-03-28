@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - "0.8"
+  - "0.10"
+notifications:
+  hipchat:
+    rooms:
+      secure: lzNdJmq9QLPpKWKiFE+w1DNUhw+jp1OF1SIMlxSnT++H8M7NLVWchXzPIyoaE4enmy8n2JxMA9FGTaQvOER+G9UswuyOO2nUDjlt/I949SeN9DyVAf4XAwXnKbhXcmGuCho2odO7VeKPmrJXgoxbJYy3Ne0lS7zLU6rEkNJotIg=

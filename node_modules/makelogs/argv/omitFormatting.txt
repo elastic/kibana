@@ -1,0 +1,23 @@
+formatting an omit path
+=======================
+
+To remove a single top level property, you can simply specify the name of the property you want to remove:
+
+  $ makelogs --omit request
+
+To remove multiple properties, simply use omit multiple times
+
+  $ makelogs --omit request --omit referrer
+
+You can use dot notation to access properties of object values
+
+  $ makelogs --omit machine.os
+
+Or, you can omit the entire object value
+
+  $ makelogs --omit machine
+
+Finally, to traverse into arrays/nested fields you must use the [] operator
+
+  $ makelogs --omit relatedContent[].title
+

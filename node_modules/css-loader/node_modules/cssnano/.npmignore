@@ -1,0 +1,8 @@
+.editorconfig
+.gitignore
+.jshintrc
+.travis.yml
+appveyor.yml
+benchmark
+media
+tests

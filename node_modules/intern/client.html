@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Browser test runner</title>
+		<script src="node_modules/dojo/loader.js"></script>
+		<script>
+			// At least FirefoxDriver 2.46.0 will time out the page load detection and cause the page to reload in the
+			// middle of test module initialisation if a large number of tests are loaded before the onload event for
+			// the page has fired. See theintern/intern#466.
+			window.onload = function () {
+				var internPath = location.pathname.replace(/\/+[^\/]*$/, '/');
+				var initialBaseUrl = (function () {
+					var result = /[?&]initialBaseUrl=([^&]*)/.exec(location.search);
+					if (result) {
+						var baseUrl = decodeURIComponent(result[1]);
+
+						if (/^(?:\w+:)?\/\//.test(baseUrl)) {
+							throw new Error('Cross-origin loading of test modules is not allowed for security reasons');
+						}
+						return baseUrl;
+					}
+					else {
+						// For users running client.html directly, assume that the initial base URL is two levels up
+						// (the parent directory of node_modules/intern); this is most common.
+						// Users that need something special can provide a different `initialBaseUrl`.
+						return internPath.replace(/(?:\/+[^\/]*){2}\/?$/, '/');
+					}
+				})();
+
+				var internConfig = this.__internConfig = {
+					baseUrl: initialBaseUrl,
+					packages: [
+						{ name: 'intern', location: internPath }
+					],
+					map: {
+						intern: {
+							dojo: 'intern/node_modules/dojo',
+							chai: 'intern/node_modules/chai/chai',
+							diff: 'intern/node_modules/diff/diff'
+						},
+						'*': {
+							'intern/dojo': 'intern/node_modules/dojo'
+						}
+					}
+				};
+
+				require(internConfig, [ 'intern/client' ]);
+			};
+		</script>
+	</head>
+	<body></body>
+</html>

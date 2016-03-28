@@ -1,0 +1,11 @@
+var Code = require('code'),
+    Lab = require('lab'),
+    lab = lab.script;
+
+exports.lab = lab;
+
+lab.test('tests run and work', function (done) {
+  Code.expect(1+1).to.equal(2);
+
+  done();
+});

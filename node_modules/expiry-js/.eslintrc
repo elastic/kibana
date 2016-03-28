@@ -1,0 +1,16 @@
+{
+    "env": {
+        "browser": true,
+        "amd": true,
+        "node": true
+    },
+    "globals": {
+    },
+    "rules": {
+        "quotes": [ 2, "single" ],
+        "strict": 0,
+        "no-underscore-dangle": 0,
+        "space-infix-ops": 0,
+        "space-unary-ops": 0
+    }
+}

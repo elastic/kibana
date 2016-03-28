@@ -1,0 +1,4 @@
+coverage/
+test/
+.travis.yml
+appveyor.yml

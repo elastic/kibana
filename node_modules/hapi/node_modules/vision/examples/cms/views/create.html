@@ -1,0 +1,25 @@
+<form action="/create" method="POST">
+    <fieldset>
+        <div class="control-group">
+            <label for="name" class="control-label">Name</label>
+            <input name="name" id="name" style="width: 700px" type="text" />
+        </div>
+        <div class="control-group">
+            <label for="contents" class="control-label">Contents</label>
+            <textarea name="contents" id="contents" style="width: 700px" rows="30"></textarea>
+        </div>
+        <div class="form-actions">
+            <input type="submit" value="Save" class="btn btn-large btn-primary" />
+            <a href="/" class="btn btn-large btn-secondary">Cancel</a>
+        </div>
+    </fieldset>
+</form>
+
+<script type="text/javascript" src="http://js.nicedit.com/nicEdit-latest.js"></script>
+<script>
+    //<![CDATA[
+    bkLib.onDomLoaded(function() {
+        new nicEditor({buttonList : ['fontSize','bold','italic','underline','strikeThrough','subscript','superscript','html']}).panelInstance('contents');
+    });
+    //]]>
+</script>

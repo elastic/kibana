@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo Starting self tests...
+./node_modules/.bin/intern-client config=tests/intern

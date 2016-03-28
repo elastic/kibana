@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "iojs"
+  - "0.12"
+  - "0.10"
+
+# Make sure we have new NPM.
+before_install:
+  - npm install -g npm
+  - npm config set loglevel warn
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - npm install -g grunt-cli
+
+script:
+  - grunt

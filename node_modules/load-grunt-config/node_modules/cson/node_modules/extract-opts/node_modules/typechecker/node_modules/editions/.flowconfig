@@ -1,0 +1,14 @@
+[ignore]
+.*/node_modules/y18n/test/locales/bad-locale.json
+es2015/
+esnext/
+docs/
+
+[include]
+source/
+
+[libs]
+
+[options]
+module.ignore_non_literal_requires=true
+unsafe.enable_getters_and_setters=true
