@@ -46,7 +46,7 @@ export default function (chrome, internals) {
   function getAppId(url) {
     const pathname = parse(url).pathname;
     const pathnameWithoutBasepath = pathname.slice(chrome.getBasePath().length);
-    const match = String(pathnameWithoutBasepath).match(/^\/app\/([^\/]+)(?:\/|\?|#|$)/);
+    const match = pathnameWithoutBasepath.match(/^\/app\/([^\/]+)(?:\/|\?|#|$)/);
     if (match) return match[1];
   }
 
