@@ -10,4 +10,10 @@
     style="display: none;">
 </div>
 
+<div ng-if="agg.schema.deprecate" class="form-group">
+  <p class="vis-editor-agg-error">
+    "{{ agg.schema.title }}" has been deprecated.
+  </p>
+</div>
+
 <!-- schema editors get added down here: aggSelect.html, agg_types/controls/*.html -->

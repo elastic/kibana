@@ -19,10 +19,10 @@
   class="vis-editor-agg-wide-btn">
 
   <div ng-if="!add.form">
-    <div class="btn btn-sm btn-primary" ng-if="groupName !== 'buckets' || !stats.count">
+    <div class="btn btn-sm btn-primary" ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate">
       Add {{ groupName }}
     </div>
-    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count - stats.numDeprecated > 0">
+    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate">
       Add sub-{{ groupName }}
     </div>
   </div>

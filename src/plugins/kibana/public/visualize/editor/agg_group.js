@@ -25,10 +25,7 @@ uiModules
         const stats = $scope.stats = {
           min: 0,
           max: 0,
-          count: $scope.group ? $scope.group.length : 0,
-          numDeprecated: $scope.schemas.raw.filter(function (o) {
-            return o.deprecate;
-          }).length
+          count: $scope.group ? $scope.group.length : 0
         };
 
         if (!$scope.schemas) return;
@@ -36,6 +33,7 @@ uiModules
         $scope.schemas.forEach(function (schema) {
           stats.min += schema.min;
           stats.max += schema.max;
+          stats.deprecate = schema.deprecate;
         });
 
         $scope.availableSchema = $scope.schemas.filter(function (schema) {
