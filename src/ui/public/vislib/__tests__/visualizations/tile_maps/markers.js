@@ -18,8 +18,6 @@ var bounds = {};
 var MarkerType;
 var map;
 
-// angular.module('MarkerFactory', ['kibana']);
-
 function setBounds(southWest, northEast) {
   bounds.southWest = L.latLng(southWest || defaultSWCoords);
   bounds.northEast = L.latLng(northEast || defaultNECoords);
