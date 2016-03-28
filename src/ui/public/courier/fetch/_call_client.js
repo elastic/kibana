@@ -16,6 +16,8 @@ define(function (require) {
       var executable = statuses.filter(isRequest);
       var execCount = executable.length;
 
+      if (!execCount) return Promise.resolve([]);
+
       // resolved by respond()
       var esPromise;
       var defer = Promise.defer();
