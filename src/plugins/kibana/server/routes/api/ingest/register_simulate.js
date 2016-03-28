@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import processESIngestSimulateResponse from '../../../lib/process_es_ingest_simulate_response';
+import handleResponse from '../../../lib/process_es_ingest_simulate_response';
 import processESIngestSimulateError from '../../../lib/process_es_ingest_simulate_error';
 import simulateRequestSchema from '../../../lib/schemas/simulate_request_schema';
 import ingestSimulateApiKibanaToEsConverter from '../../../lib/converters/ingest_simulate_api_kibana_to_es_converter';
@@ -19,7 +19,6 @@ export function registerSimulate(server) {
       const simulateApiDocument = request.payload;
       const body = ingestSimulateApiKibanaToEsConverter(simulateApiDocument);
 
-      const handleResponse = processESIngestSimulateResponse;
       const handleError = _.partial(processESIngestSimulateError, simulateApiDocument.dirty_processor_id);
 
       return boundCallWithRequest('transport.request', {
