@@ -184,7 +184,7 @@ describe('Events', function () {
   it('should preserve the scope of the handler', function () {
     var obj = new Events();
     var expected = 'some value';
-    var testValue;
+    let testValue;
 
     function handler(arg1, arg2) {
       testValue = this.getVal();

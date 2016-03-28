@@ -46,7 +46,7 @@ var destroy = function () {
 };
 
 describe('docTable', function () {
-  var $elem;
+  let $elem;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(function () {

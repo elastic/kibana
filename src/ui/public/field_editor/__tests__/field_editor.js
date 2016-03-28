@@ -44,7 +44,7 @@ describe('FieldEditor directive', function () {
   });
 
   describe('$scope.editor', function () {
-    var editor;
+    let editor;
 
     beforeEach(function () {
       compile();
@@ -60,8 +60,8 @@ describe('FieldEditor directive', function () {
     });
 
     describe('editor.field', function () {
-      var field;
-      var actual;
+      let field;
+      let actual;
 
       beforeEach(function () {
         field = editor.field;
