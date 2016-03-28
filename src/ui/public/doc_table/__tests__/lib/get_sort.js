@@ -3,7 +3,7 @@ var defaultSort = {time: 'desc'};
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-var indexPattern;
+let indexPattern;
 
 describe('docTable', function () {
   beforeEach(ngMock.module('kibana'));

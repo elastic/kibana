@@ -15,8 +15,8 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizat
 var defaultSWCoords = [13.496, -143.789];
 var defaultNECoords = [55.526, -57.919];
 var bounds = {};
-var MarkerType;
-var map;
+let MarkerType;
+let map;
 
 function setBounds(southWest, northEast) {
   bounds.southWest = L.latLng(southWest || defaultSWCoords);
@@ -37,8 +37,8 @@ var mockMap = {
 };
 
 describe('Marker Tests', function () {
-  var mapData;
-  var markerLayer;
+  let mapData;
+  let markerLayer;
 
   function createMarker(MarkerClass, geoJson) {
     mapData = _.assign({}, geoJsonData.geoJson, geoJson || {});
@@ -62,7 +62,7 @@ describe('Marker Tests', function () {
   });
 
   describe('Base Methods', function () {
-    var MarkerClass;
+    let MarkerClass;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -141,7 +141,7 @@ describe('Marker Tests', function () {
 
     describe('showTooltip', function () {
       it('should use the tooltip formatter', function () {
-        var content;
+        let content;
         var sample = _.sample(mapData.features);
 
         var stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
@@ -156,8 +156,8 @@ describe('Marker Tests', function () {
     });
 
     describe('addLegend', function () {
-      var addToSpy;
-      var leafletControlStub;
+      let addToSpy;
+      let leafletControlStub;
 
       beforeEach(function () {
         addToSpy = sinon.spy();
@@ -218,8 +218,8 @@ describe('Marker Tests', function () {
   });
 
   describe('Scaled Circles', function () {
-    var zoom;
-    var MarkerClass;
+    let zoom;
+    let MarkerClass;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

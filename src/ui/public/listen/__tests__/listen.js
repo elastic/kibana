@@ -6,8 +6,8 @@ import EventsProvider from 'ui/events';
 
 describe('listen component', function () {
 
-  var $rootScope;
-  var Events;
+  let $rootScope;
+  let Events;
 
 
   beforeEach(ngMock.module('kibana'));

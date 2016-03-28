@@ -2,8 +2,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Color Format', function () {
-  var fieldFormats;
-  var ColorFormat;
+  let fieldFormats;
+  let ColorFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

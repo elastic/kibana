@@ -113,7 +113,7 @@ export default function HeatmapMarkerFactory(Private) {
    */
   HeatmapMarker.prototype._nearestFeature = function (latLng) {
     var self = this;
-    var nearest;
+    let nearest;
 
     if (latLng.lng < -180 || latLng.lng > 180) {
       return;

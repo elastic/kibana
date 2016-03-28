@@ -140,7 +140,7 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
   /////
   // private api
   /////
-  var reloading;
+  let reloading;
 
   self._changeLocation = function (type, url, paramObj, replace) {
     var prev = {

@@ -6,8 +6,8 @@ import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filt
 describe('Filter Bar Directive', function () {
   describe('filterOutTimeBasedFilter()', function () {
 
-    var filterOutTimeBasedFilter;
-    var $rootScope;
+    let filterOutTimeBasedFilter;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

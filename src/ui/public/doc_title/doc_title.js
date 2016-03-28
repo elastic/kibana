@@ -14,7 +14,7 @@ uiModules.get('kibana')
   var baseTitle = document.title;
   var self = this;
 
-  var lastChange;
+  let lastChange;
 
   function render() {
     lastChange = lastChange || [];

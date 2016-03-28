@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 describe('renderbot', function () {
-  var Renderbot;
+  let Renderbot;
 
   function init() {
     ngMock.module('kibana');
@@ -13,10 +13,10 @@ describe('renderbot', function () {
   }
 
   describe('API', function () {
-    var vis;
-    var $el;
-    var renderbot;
-    var uiState;
+    let vis;
+    let $el;
+    let renderbot;
+    let uiState;
 
     beforeEach(init);
     beforeEach(function () {

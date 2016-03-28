@@ -45,7 +45,7 @@ export default function VislibVisBuildChartData(Private) {
 
     if (!tables.length) return;
     var out = {};
-    var outList;
+    let outList;
 
     tables.forEach(function (table) {
       if (!outList) {
@@ -54,7 +54,7 @@ export default function VislibVisBuildChartData(Private) {
         outList = out[direction] = [];
       }
 
-      var output;
+      let output;
       if (output = convertTableGroup(vis, table)) {
         outList.push(output);
       }
