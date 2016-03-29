@@ -1,0 +1,20 @@
+Backport PR #6653
+---------
+
+**Commit 1:**
+[internal] Replace empty var declaration with let
+
+Any time there is a variable defined in a JS file without also storing a
+value in it, we know that definition cannot be converted to a const, so
+we convert it to a let.
+
+For example:
+
+`var blah;` becomes `let blah;`
+
+Some of these things variables might be unused, and many others can
+likely be switched to const with only minor refactoring, but the commit
+is very large, so there are no changes in it other than the 1:1 switch.
+
+* Original sha: bfc59e9666d1cb593e6fe94b09322af5c6e3db07
+* Authored by Court Ewing <court@epixa.com> on 2016-03-24T22:27:29Z
