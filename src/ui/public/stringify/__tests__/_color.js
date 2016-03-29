@@ -1,6 +1,6 @@
 describe('Color Format', function () {
-  var fieldFormats;
-  var ColorFormat;
+  let fieldFormats;
+  let ColorFormat;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

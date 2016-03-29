@@ -8,10 +8,10 @@ describe('Tooltip Positioning', function () {
   var posTT = require('../positionTooltip');
   var positions = ['north', 'south', 'east', 'west'];
   var bounds = ['top', 'left', 'bottom', 'right'];
-  var $window;
-  var $chart;
-  var $tooltip;
-  var $sizer;
+  let $window;
+  let $chart;
+  let $tooltip;
+  let $sizer;
 
   function testEl(width, height, $children) {
     var $el = $('<div>');

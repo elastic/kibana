@@ -5,13 +5,13 @@ const _ = require('lodash');
 const d3 = require('d3');
 
 describe('Vislib Color Module Test Suite', function () {
-  var seedColors;
-  var mappedColors;
+  let seedColors;
+  let mappedColors;
   let config;
 
   describe('Color (main)', function () {
     let previousConfig;
-    var getColors;
+    let getColors;
     var arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
     var arrayOfNumbers = [1, 2, 3, 4, 5];
     var arrayOfUndefinedValues = [undefined, undefined, undefined];
@@ -20,8 +20,8 @@ describe('Vislib Color Module Test Suite', function () {
     var arrayOfNullValues = [null, null, null];
     var emptyObject = {};
     var nullValue = null;
-    var notAValue;
-    var color;
+    let notAValue;
+    let color;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
@@ -247,9 +247,9 @@ describe('Vislib Color Module Test Suite', function () {
     var nullValue = null;
     var emptyArr = [];
     var emptyObject = {};
-    var notAValue;
-    var createColorPalette;
-    var colorPalette;
+    let notAValue;
+    let createColorPalette;
+    let colorPalette;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

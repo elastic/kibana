@@ -8,7 +8,7 @@ define(function (require) {
 
     constructor: function (config, $rootScope) {
       var self = this;
-      var defaultMap;
+      let defaultMap;
 
       function init() {
         parseDefaultTypeMap();

@@ -2,7 +2,7 @@ describe('SimpleEmitter class', function () {
   var SimpleEmitter = require('ui/utils/SimpleEmitter');
   var expect = require('expect.js');
   var sinon = require('auto-release-sinon');
-  var emitter;
+  let emitter;
 
   beforeEach(function () {
     emitter = new SimpleEmitter();

@@ -12,7 +12,7 @@ require('../app_switcher');
 var DomLocationProvider = require('ui/domLocation');
 
 describe('appSwitcher directive', function () {
-  var env;
+  let env;
 
   beforeEach(ngMock.module('kibana'));
 

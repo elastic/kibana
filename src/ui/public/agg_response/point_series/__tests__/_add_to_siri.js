@@ -1,7 +1,7 @@
 describe('addToSiri', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var addToSiri;
+  let addToSiri;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

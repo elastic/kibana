@@ -8,7 +8,7 @@ require('ui/vislib/styles/main.less');
 var angular = require('angular');
 
 describe('Vislib Index Test Suite', function () {
-  var vislib;
+  let vislib;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -25,7 +25,7 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 
 describe('TileMap Map Tests', function () {
   var $mockMapEl = $('<div>');
-  var TileMapMap;
+  let TileMapMap;
   var leafletStubs = {};
   var leafletMocks = {};
 
@@ -43,8 +43,8 @@ describe('TileMap Map Tests', function () {
   }));
 
   describe('instantiation', function () {
-    var map;
-    var createStub;
+    let map;
+    let createStub;
 
     beforeEach(function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
@@ -65,8 +65,8 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('createMap', function () {
-    var map;
-    var mapStubs;
+    let map;
+    let mapStubs;
 
     beforeEach(function () {
       mapStubs = {
@@ -109,7 +109,7 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('attachEvents', function () {
-    var map;
+    let map;
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
@@ -144,8 +144,8 @@ describe('TileMap Map Tests', function () {
 
 
   describe('addMarkers', function () {
-    var map;
-    var createStub;
+    let map;
+    let createStub;
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');
@@ -172,7 +172,7 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('getDataRectangles', function () {
-    var map;
+    let map;
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');

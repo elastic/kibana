@@ -1,8 +1,8 @@
 define(function (require) {
   return function mapExistsProvider(Promise) {
     return function (filter) {
-      var key;
-      var value;
+      let key;
+      let value;
       if (filter.exists) {
         key = 'exists';
         value = filter.exists.field;

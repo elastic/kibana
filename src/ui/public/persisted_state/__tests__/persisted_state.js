@@ -5,8 +5,8 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 var errors = require('ui/errors');
 
-var PersistedState;
-var Events;
+let PersistedState;
+let Events;
 
 describe('Persisted State', function () {
   noDigestPromises.activateForSuite();
@@ -21,7 +21,7 @@ describe('Persisted State', function () {
   });
 
   describe('state creation', function () {
-    var persistedState;
+    let persistedState;
 
     it('should create an empty state instance', function () {
       persistedState = new PersistedState();
@@ -99,7 +99,7 @@ describe('Persisted State', function () {
     it('should throw if given a parent without a path', function () {
       var run = function () {
         var val = { red: 'blue' };
-        var path;
+        let path;
         var parent = new PersistedState();
 
         new PersistedState(val, path, parent);
@@ -112,7 +112,7 @@ describe('Persisted State', function () {
   });
 
   describe('child state creation', function () {
-    var childState;
+    let childState;
 
     it('should not append the child state to the parent, without parent value', function () {
       var childIndex = 'i can haz child';
@@ -369,7 +369,7 @@ describe('Persisted State', function () {
   });
 
   describe('JSON importing and exporting', function () {
-    var persistedStateValue;
+    let persistedStateValue;
 
     beforeEach(function () {
       persistedStateValue = { one: 1, two: 2, 'meaning of life': 42 };
@@ -494,7 +494,7 @@ describe('Persisted State', function () {
     });
 
     describe('simple replace operations', function () {
-      var persistedState;
+      let persistedState;
 
       it('should replace value with string', function () {
         persistedState = new PersistedState({ hello: 'world' });
@@ -530,7 +530,7 @@ describe('Persisted State', function () {
     });
 
     describe('deep replace operations', function () {
-      var persistedState;
+      let persistedState;
 
       it('should append to the object', function () {
         persistedState = new PersistedState({ hello: { message: 'world' } });
@@ -574,8 +574,8 @@ describe('Persisted State', function () {
   });
 
   describe('events', function () {
-    var persistedState;
-    var emitter;
+    let persistedState;
+    let emitter;
 
     var getByType = function (type, spy) {
       spy = spy || emitter;

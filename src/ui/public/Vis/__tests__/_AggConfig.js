@@ -3,11 +3,11 @@ describe('AggConfig', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var Vis;
-  var AggType;
-  var AggConfig;
-  var indexPattern;
-  var fieldFormat;
+  let Vis;
+  let AggType;
+  let AggConfig;
+  let indexPattern;
+  let fieldFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

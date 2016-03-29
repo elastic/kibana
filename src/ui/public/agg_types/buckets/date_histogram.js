@@ -40,7 +40,7 @@ define(function (require) {
       },
       createFilter: createFilter,
       decorateAggConfig: function () {
-        var buckets;
+        let buckets;
         return {
           buckets: {
             configurable: true,

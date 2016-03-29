@@ -1,7 +1,7 @@
 describe('get columns', function () {
-  var getColumns;
-  var Vis;
-  var indexPattern;
+  let getColumns;
+  let Vis;
+  let indexPattern;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

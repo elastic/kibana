@@ -4,8 +4,8 @@ describe('listen component', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var $rootScope;
-  var Events;
+  let $rootScope;
+  let Events;
 
   require('ui/listen');
 

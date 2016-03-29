@@ -9,7 +9,7 @@ var stub = require('auto-release-sinon').stub;
 
 require('ui/private');
 
-var routes;
+let routes;
 
 describe('wrapRouteWithPrep fn', function () {
   require('testUtils/noDigestPromises').activateForSuite();
@@ -28,10 +28,10 @@ describe('wrapRouteWithPrep fn', function () {
       ngMock.module('kibana', 'kibana/notify');
       var setupComplete = false;
       var userWorkComplete = false;
-      var route;
-      var Private;
-      var Promise;
-      var $injector;
+      let route;
+      let Private;
+      let Promise;
+      let $injector;
 
       ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
         Private = _Private_;

@@ -42,7 +42,7 @@ define(function (require) {
     TimeBuckets.prototype.setBounds = function (input) {
       if (!input) return this.clearBounds();
 
-      var bounds;
+      let bounds;
       if (_.isPlainObject(input)) {
         // accept the response from timefilter.getActiveBounds()
         bounds = [input.min, input.max];
@@ -213,7 +213,7 @@ define(function (require) {
 
         var maxLength = config.get('histogram:maxBars');
         var approxLen = duration / interval;
-        var scaled;
+        let scaled;
 
         if (approxLen > maxLength) {
           scaled = calcAuto.lessThan(maxLength, duration);

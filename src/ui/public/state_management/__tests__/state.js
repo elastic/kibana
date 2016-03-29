@@ -6,10 +6,10 @@ var ngMock = require('ngMock');
 require('ui/private');
 
 describe('State Management', function () {
-  var $rootScope;
-  var $location;
-  var State;
-  var Events;
+  let $rootScope;
+  let $location;
+  let State;
+  let Events;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {
@@ -136,7 +136,7 @@ describe('State Management', function () {
     });
 
     it('should clear state when missing form URL', function () {
-      var stateObj;
+      let stateObj;
       var state = new State();
 
       // set satte via URL

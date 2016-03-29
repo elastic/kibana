@@ -36,7 +36,7 @@ define(function (require) {
             throw new Error('fixedScroll listeners were not cleaned up properly before re-listening!');
           }
 
-          var blockTo;
+          let blockTo;
           function bind($from, $to) {
             function handler() {
               if (blockTo === $to) return (blockTo = null);

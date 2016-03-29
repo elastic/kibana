@@ -7,11 +7,11 @@ var ngMock = require('ngMock');
 require('ui/directives/confirm_click');
 require('plugins/kibana/discover/index');
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
+let $elem;
 
 var init = function (text) {
   // Load the application
@@ -47,7 +47,7 @@ describe('confirmClick directive', function () {
 
 
   describe('event handlers', function () {
-    var events;
+    let events;
 
     beforeEach(function () {
       init();
@@ -71,7 +71,7 @@ describe('confirmClick directive', function () {
 
 
   describe('confirmed', function () {
-    var confirmed;
+    let confirmed;
 
     beforeEach(function () {
       init();
@@ -98,7 +98,7 @@ describe('confirmClick directive', function () {
   });
 
   describe('not confirmed', function () {
-    var confirmed;
+    let confirmed;
 
     beforeEach(function () {
       init();

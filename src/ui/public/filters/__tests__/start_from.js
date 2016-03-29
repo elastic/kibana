@@ -4,7 +4,7 @@ var ngMock = require('ngMock');
 
 require('ui/filters/start_from');
 
-var filter;
+let filter;
 
 var init = function (expandable) {
   // Load the application

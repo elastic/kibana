@@ -1,7 +1,7 @@
 
 describe('Private module loader', function () {
 
-  var Private;
+  let Private;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
