@@ -4,11 +4,11 @@ describe('editor', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  var indexPattern;
-  var vis;
-  var agg;
-  var render;
-  var $scope;
+  let indexPattern;
+  let vis;
+  let agg;
+  let render;
+  let $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
@@ -66,9 +66,9 @@ describe('editor', function () {
   }));
 
   describe('random field/interval', function () {
-    var params;
-    var field;
-    var interval;
+    let params;
+    let field;
+    let interval;
 
     beforeEach(ngMock.inject(function (Private) {
       field = _.sample(indexPattern.fields);
@@ -94,7 +94,7 @@ describe('editor', function () {
   });
 
   describe('interval "auto" and indexPattern timeField', function () {
-    var params;
+    let params;
 
     beforeEach(function () {
       params = render({ field: indexPattern.timeFieldName, interval: 'auto' });

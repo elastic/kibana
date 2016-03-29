@@ -1,9 +1,9 @@
 var _ = require('lodash');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
-var queryFilter;
-var EventEmitter;
-var $rootScope;
+let queryFilter;
+let EventEmitter;
+let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {

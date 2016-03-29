@@ -3,9 +3,9 @@ var expect = require('expect.js');
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
 
-    var mapMissing;
+    let mapMissing;
 
-    var $rootScope;
+    let $rootScope;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       $rootScope = _$rootScope_;

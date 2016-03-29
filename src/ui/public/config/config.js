@@ -23,7 +23,7 @@ define(function (require) {
 
     // active or previous instance of DelayedUpdater. This will log and then process an
     // update once it is requested by calling #set() or #clear().
-    var updater;
+    let updater;
 
     var DocSource = Private(require('ui/courier/data_source/doc_source'));
     var doc = (new DocSource())
@@ -77,7 +77,7 @@ define(function (require) {
     });
 
     config.get = function (key, defaultVal) {
-      var keyVal;
+      let keyVal;
 
       if (vals[key] == null) {
         if (defaultVal == null) {

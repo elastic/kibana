@@ -3,10 +3,10 @@ describe('AggConfig Filters', function () {
   var ngMock = require('ngMock');
 
   describe('range', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

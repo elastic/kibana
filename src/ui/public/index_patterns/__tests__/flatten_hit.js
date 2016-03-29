@@ -5,10 +5,10 @@ describe('IndexPattern#flattenHit()', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var flattenHit;
-  var config;
-  var hit;
-  var flat;
+  let flattenHit;
+  let config;
+  let hit;
+  let flat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

@@ -4,9 +4,9 @@ describe('AggConfigResult', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var AggConfig;
-  var indexPattern;
-  var Vis;
+  let AggConfig;
+  let indexPattern;
+  let Vis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

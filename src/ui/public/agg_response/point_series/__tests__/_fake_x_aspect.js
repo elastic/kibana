@@ -1,10 +1,10 @@
 describe('makeFakeXAspect', function () {
 
-  var makeFakeXAspect;
-  var Vis;
-  var AggType;
-  var AggConfig;
-  var indexPattern;
+  let makeFakeXAspect;
+  let Vis;
+  let AggType;
+  let AggConfig;
+  let indexPattern;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

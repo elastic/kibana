@@ -8,7 +8,7 @@ function RouteManager() {
   var setup = new RouteSetupManager();
   var when = [];
   var defaults = [];
-  var otherwise;
+  let otherwise;
 
   self.config = function ($routeProvider) {
     when.forEach(function (args) {

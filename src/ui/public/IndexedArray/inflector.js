@@ -17,7 +17,7 @@ define(function (require) {
 
   function inflector(prefix, postfix) {
     return function inflect(key) {
-      var inflected;
+      let inflected;
 
       if (key.indexOf('.') !== -1) {
         inflected = key

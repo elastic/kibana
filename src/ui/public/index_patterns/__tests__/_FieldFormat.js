@@ -3,8 +3,8 @@ describe('FieldFormat class', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var FieldFormat;
-  var TestFormat;
+  let FieldFormat;
+  let TestFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

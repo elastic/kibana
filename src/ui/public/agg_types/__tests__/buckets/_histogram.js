@@ -4,7 +4,7 @@ describe('Histogram Agg', function () {
   var ngMock = require('ngMock');
 
   describe('ordered', function () {
-    var histogram;
+    let histogram;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -22,7 +22,7 @@ describe('Histogram Agg', function () {
 
 
   describe('params', function () {
-    var paramWriter;
+    let paramWriter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

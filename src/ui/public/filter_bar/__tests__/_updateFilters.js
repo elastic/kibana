@@ -8,10 +8,10 @@ describe('update filters', function () {
     app: 'appState',
     global: 'globalState'
   };
-  var queryFilter;
-  var appState;
-  var globalState;
-  var $rootScope;
+  let queryFilter;
+  let appState;
+  let globalState;
+  let $rootScope;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -38,8 +38,8 @@ describe('update filters', function () {
   }));
 
   describe('updating', function () {
-    var currentFilter;
-    var newFilter;
+    let currentFilter;
+    let newFilter;
 
     beforeEach(function () {
       newFilter = _.cloneDeep({

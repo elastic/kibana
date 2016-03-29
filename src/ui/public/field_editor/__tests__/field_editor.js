@@ -3,13 +3,13 @@ describe('FieldEditor directive', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  var Field;
-  var StringFormat;
-  var $rootScope;
+  let Field;
+  let StringFormat;
+  let $rootScope;
 
-  var compile;
-  var $scope;
-  var $el;
+  let compile;
+  let $scope;
+  let $el;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
@@ -44,7 +44,7 @@ describe('FieldEditor directive', function () {
   });
 
   describe('$scope.editor', function () {
-    var editor;
+    let editor;
 
     beforeEach(function () {
       compile();
@@ -60,8 +60,8 @@ describe('FieldEditor directive', function () {
     });
 
     describe('editor.field', function () {
-      var field;
-      var actual;
+      let field;
+      let actual;
 
       beforeEach(function () {
         field = editor.field;
