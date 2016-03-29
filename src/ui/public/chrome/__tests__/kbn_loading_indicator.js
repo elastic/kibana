@@ -29,11 +29,6 @@ describe('kbnLoadingIndicator', function () {
     const $el = compile();
     expect($el.find('.spinner')).to.have.length(1);
   });
-  // Doesn't work...
-  xit('applies the ng-hide class when there are no connections', function () {
-    const $el  = compile(false);
-    expect($el.find('.spinner.ng-hide')).to.have.length(1);
-  });
   it('applies removes ng-hide class when there are connections', function () {
     const $el  = compile(true);
     expect($el.find('.spinner.ng-hide')).to.have.length(0);
