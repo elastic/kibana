@@ -27,30 +27,16 @@
 
   <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
   <div class="vis-editor-agg-header-controls btn-group">
-    <!-- up button -->
+    <!-- drag handle -->
     <button
-      aria-label="Increase Priority"
+      draggable-handle
+      aria-label="Modify Priority by Dragging"
       ng-if="stats.count > 1"
-      ng-class="{ disabled: $first }"
-      ng-click="moveUp(agg)"
-      tooltip="Increase Priority"
+      tooltip="Modify Priority by Dragging"
       tooltip-append-to-body="true"
       type="button"
       class="btn btn-xs btn-primary">
-      <i aria-hidden="true" class="fa fa-caret-up"></i>
-    </button>
-
-    <!-- down button -->
-    <button
-      aria-label="Decrease Priority"
-      ng-if="stats.count > 1"
-      ng-class="{ disabled: $last }"
-      ng-click="moveDown(agg)"
-      tooltip="Decrease Priority"
-      tooltip-append-to-body="true"
-      type="button"
-      class="btn btn-xs btn-primary">
-      <i aria-hidden="true" class="fa fa-caret-down"></i>
+      <i aria-hidden="true" class="fa fa-arrows-v"></i>
     </button>
 
     <!-- remove button -->
