@@ -1,5 +1,5 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover-options" class="kibana-nav-options">
+  <kbn-top-nav name="discover" config="topNavMenu">
     <div class="kibana-nav-info">
       <span ng-show="opts.savedSearch.id" class="kibana-nav-info-title">
         <span ng-bind="::opts.savedSearch.title"></span>
@@ -9,40 +9,7 @@
       <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
       <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
     </div>
-    <div class="kibana-nav-actions button-group" role="toolbar">
-      <button
-        ng-click="newQuery()"
-        aria-label="New Search">
-        <span>New</span>
-      </button>
-      <button
-        ng-click="kbnTopNavbar.toggle('save');"
-        ng-class="{active: kbnTopNavbar.is('save')}"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('save') }}"
-        aria-label="Save Search">
-        <span>Save</span>
-      </button>
-      <button
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('load') }}"
-        ng-click="kbnTopNavbar.toggle('load');"
-        ng-class="{active: kbnTopNavbar.is('load')}"
-        aria-label="Load Saved Search">
-        <span>Open</span>
-      </button>
-      <button
-        aria-label="Share Search"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('share') }}"
-        ng-class="{active: kbnTopNavbar.is('share')}"
-        ng-click="kbnTopNavbar.toggle('share');">
-        <span>Share</span>
-      </button>
-    <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
-    </div>
-  </navbar>
-  <kbn-top-navbar templates="configTemplates"></kbn-top-navbar>
+  </kbn-top-nav>
   <navbar name="discover-search">
     <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
       <div class="typeahead" kbn-typeahead="discover">

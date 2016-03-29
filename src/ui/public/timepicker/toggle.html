@@ -8,10 +8,10 @@
   </li>
 
   <li
-    ng-show="timefilter.refreshInterval.value > 0 || kbnTopNavbar.is('interval') || kbnTopNavbar.is('filter')">
+    ng-show="timefilter.refreshInterval.value > 0 || kbnTopNav.is('interval') || kbnTopNav.is('filter')">
 
-    <button ng-click="kbnTopNavbar.toggle('interval')"
-    ng-class="{active: kbnTopNavbar.is('interval') }"
+    <button ng-click="kbnTopNav.toggle('interval')"
+    ng-class="{active: kbnTopNav.is('interval') }"
     class="navbar-timepicker-auto-refresh-desc">
       <span ng-show="timefilter.refreshInterval.value === 0"><i class="fa fa-repeat"></i> Auto-refresh</span>
       <span ng-show="timefilter.refreshInterval.value > 0">{{timefilter.refreshInterval.display}}</span>
@@ -20,8 +20,8 @@
   </li>
 
   <li>
-    <button ng-class="{active: kbnTopNavbar.is('filter')}"
-      ng-click="kbnTopNavbar.toggle('filter')"
+    <button ng-class="{active: kbnTopNav.is('filter')}"
+      ng-click="kbnTopNav.toggle('filter')"
       aria-haspopup="true"
       aria-expanded="false"
       class="navbar-timepicker-time-desc">

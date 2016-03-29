@@ -1,67 +1,11 @@
 <div dashboard-app class="app-container dashboard-container">
-  <kbn-top-nav>
+  <kbn-top-nav name="dashboard" config="topNavMenu">
     <div class="kibana-nav-info">
       <span ng-show="dash.id" class="kibana-nav-info-title">
         <span ng-bind="::dash.title"></span>
       </span>
     </div>
   </kbn-top-nav>
-  <navbar name="dashboard-options" class="kibana-nav-options">
-    <div class="kibana-nav-info">
-      <span ng-show="dash.id" class="kibana-nav-info-title">
-        <span ng-bind="::dash.title"></span>
-      </span>
-    </div>
-
-    <div class="button-group kibana-nav-actions" role="toolbar">
-      <button ng-click="newDashboard()"
-        aria-label="New Dashboard">
-        <span>New</span>
-      </button>
-      <button
-        aria-label="Save Dashboard"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('save') }}"
-        ng-class="{active: kbnTopNavbar.is('save')}"
-        ng-click="kbnTopNavbar.toggle('save');">
-        <span>Save</span>
-      </button>
-      <button
-        aria-label="Load Saved Dashboard"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('load') }}"
-        ng-class="{active: kbnTopNavbar.is('load')}"
-        ng-click="kbnTopNavbar.toggle('load');">
-        <span>Open</span>
-      </button>
-      <button
-        aria-label="Share Dashboard"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('share') }}"
-        ng-class="{active: kbnTopNavbar.is('share')}"
-        ng-click="kbnTopNavbar.toggle('share');">
-        <span>Share</span>
-      </button>
-      <button
-        aria-label="Add Visualization"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('pickVis') }}"
-        ng-class="{active: kbnTopNavbar.is('pickVis')}"
-        ng-click="kbnTopNavbar.toggle('pickVis');">
-        <span>Add visualization</span>
-      </button>
-      <button
-        aria-label="Options"
-        aria-haspopup="true"
-        aria-expanded="{{ kbnTopNavbar.is('options') }}"
-        ng-class="{active: kbnTopNavbar.is('options')}"
-        ng-click="kbnTopNavbar.toggle('options');">
-        <span>Options</span>
-      </button>
-      <div class="chrome-actions"kbn-chrome-append-nav-controls></div>
-    </div>
-  </navbar>
-  <kbn-top-navbar templates="configTemplates"></kbn-top-navbar>
 
   <navbar ng-show="chrome.getVisible()" name="dashboard-search">
     <form name="queryInput"

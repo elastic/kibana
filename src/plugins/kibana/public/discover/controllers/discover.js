@@ -95,14 +95,23 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.toggleInterval = function () {
     $scope.showInterval = !$scope.showInterval;
   };
-  // config panel templates
-  $scope.configTemplates = {
-    load: require('plugins/kibana/discover/partials/load_search.html'),
-    save: require('plugins/kibana/discover/partials/save_search.html'),
-    share: require('plugins/kibana/discover/partials/share_search.html'),
-    filter: require('ui/chrome/config/filter.html'),
-    interval: require('ui/chrome/config/interval.html')
-  };
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'New Search',
+    run: function () { kbnUrl.change('/discover') }
+  }, {
+    key: 'save',
+    description: 'Save Search',
+    template: require('plugins/kibana/discover/partials/save_search.html')
+  }, {
+    key: 'open',
+    description: 'Open Saved Search',
+    template: require('plugins/kibana/discover/partials/load_search.html')
+  }, {
+    key: 'share',
+    description: 'Share Saved Search',
+    template: require('plugins/kibana/discover/partials/share_search.html')
+  }];
   $scope.timefilter = timefilter;
 
 

@@ -79,14 +79,23 @@ uiModules
 
   const searchSource = savedVis.searchSource;
 
-  // config panel templates
-  $scope.configTemplates = {
-    save: require('plugins/kibana/visualize/editor/panels/save.html'),
-    load: require('plugins/kibana/visualize/editor/panels/load.html'),
-    share: require('plugins/kibana/visualize/editor/panels/share.html'),
-    filter: require('ui/chrome/config/filter.html'),
-    interval: require('ui/chrome/config/interval.html')
-  };
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'New Visualization',
+    run: function () { kbnUrl.change('/visualize', {}); }
+  }, {
+    key: 'save',
+    template: require('plugins/kibana/visualize/editor/panels/save.html'),
+    description: 'Save Visualization'
+  }, {
+    key: 'load',
+    template: require('plugins/kibana/visualize/editor/panels/load.html'),
+    description: 'Load Visualization',
+  }, {
+    key: 'share',
+    template: require('plugins/kibana/visualize/editor/panels/share.html'),
+    description: 'Share Visualization'
+  }];
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);

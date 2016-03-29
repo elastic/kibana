@@ -99,16 +99,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.configTemplates = {
-        save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
-        load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
-        share: require('plugins/kibana/dashboard/partials/share.html'),
-        pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
-        options: require('plugins/kibana/dashboard/partials/options.html'),
-        filter: require('ui/chrome/config/filter.html'),
-        interval: require('ui/chrome/config/interval.html')
-      };
-      $scope.topNavItems = [{
+      $scope.topNavMenu = [{
         key: 'new',
         description: 'New Dashboard',
         run: function () { kbnUrl.change('/dashboard', {}); },
@@ -124,7 +115,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         key: 'share',
         description: 'Share Dashboard',
         template: require('plugins/kibana/dashboard/partials/share.html')
-      }];
+      }, 'timepicker'];
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
