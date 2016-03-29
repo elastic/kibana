@@ -13,6 +13,10 @@
   },
   "author": "Elastic",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/datemath.git"
+  },
   "devDependencies": {
     "babel-cli": "~6.6.5",
     "babel-core": "~6.7.4",
