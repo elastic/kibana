@@ -40,17 +40,17 @@ export default (grunt) => {
     ]);
   }
 
-  grunt.registerTask('publish:staging', [
-    '_publish:confirm',
-    '_publish:packages:staging',
+  grunt.registerTask('publishPackages:staging', [
+    '_publishPackages:confirm',
+    '_publishPackages:upload:staging',
   ]);
 
-  grunt.registerTask('publish:production', [
-    '_publish:confirm',
-    '_publish:packages:production',
+  grunt.registerTask('publishPackages:production', [
+    '_publishPackages:confirm',
+    '_publishPackages:upload:production',
   ]);
 
-  grunt.registerTask('_publish:confirm', function () {
+  grunt.registerTask('_publishPackages:confirm', function () {
     function abort() {
       grunt.fail.fatal('Aborting publish');
     }
@@ -68,7 +68,7 @@ export default (grunt) => {
     });
   });
 
-  grunt.registerTask('_publish:packages', function (environment) {
+  grunt.registerTask('_publishPackages:upload', function (environment) {
     const done = this.async();
     const aws = grunt.file.readJSON('.aws-config.json');
     const simpleGit = new SimpleGit();
