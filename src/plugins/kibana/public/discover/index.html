@@ -1,5 +1,5 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover-options" class="kibana-nav-options">
+  <navbar name="discover" class="kibana-nav-options">
     <div class="kibana-nav-info">
       <span ng-show="opts.savedSearch.id" class="kibana-nav-info-title">
         <span ng-bind="::opts.savedSearch.title"></span>
@@ -39,8 +39,9 @@
         ng-click="configTemplate.toggle('share');">
         <span>Share</span>
       </button>
-      <kbn-global-timepicker></kbn-global-timepicker>
     </div>
+    <kbn-global-timepicker></kbn-global-timepicker>
+    <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
   </navbar>
   <config
     config-template="configTemplate"

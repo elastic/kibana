@@ -1,5 +1,5 @@
 <div dashboard-app class="app-container dashboard-container">
-  <navbar name="dashboard-options" class="kibana-nav-options">
+  <navbar name="dashboard" class="kibana-nav-options">
     <div class="kibana-nav-info">
       <span ng-show="dash.id" class="kibana-nav-info-title">
         <span ng-bind="::dash.title"></span>
@@ -51,8 +51,9 @@
         ng-click="configTemplate.toggle('options');">
         <span>Options</span>
       </button>
-      <kbn-global-timepicker></kbn-global-timepicker>
     </div>
+    <kbn-global-timepicker></kbn-global-timepicker>
+    <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
   </navbar>
   <config config-template="configTemplate" config-object="opts"></config>
 
