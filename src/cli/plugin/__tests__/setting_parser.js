@@ -70,8 +70,8 @@ describe('kibana cli', function () {
 
       describe('parse function', function () {
 
-        var options;
-        var parser;
+        let options;
+        let parser;
         beforeEach(function () {
           options = { install: 'dummy/dummy', pluginDir: fromRoot('installedPlugins') };
         });

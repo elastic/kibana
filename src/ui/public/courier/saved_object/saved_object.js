@@ -146,7 +146,7 @@ define(function (require) {
         if (!self.searchSource) return;
 
         // if we have a searchSource, set its state based on the searchSourceJSON field
-        var state;
+        let state;
         try {
           state = JSON.parse(searchSourceJson);
         } catch (e) {

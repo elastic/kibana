@@ -4,12 +4,12 @@ describe('Courier DocFetchRequest class', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var storage;
-  var source;
-  var defer;
-  var req;
+  let storage;
+  let source;
+  let defer;
+  let req;
 
-  var setVersion;
+  let setVersion;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, Promise, $injector) {

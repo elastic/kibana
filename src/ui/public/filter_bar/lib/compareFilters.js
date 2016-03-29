@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
-  var excludedAttributes;
-  var comparators;
+  let excludedAttributes;
+  let comparators;
 
   /**
    * Compare two filters to see if they match

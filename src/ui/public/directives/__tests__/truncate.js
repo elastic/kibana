@@ -5,11 +5,11 @@ var ngMock = require('ngMock');
 
 require('plugins/kibana/discover/index');
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
+let $elem;
 
 var init = function (text) {
   // Load the application

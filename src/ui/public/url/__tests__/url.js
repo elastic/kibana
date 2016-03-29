@@ -7,12 +7,12 @@ var _ = require('lodash');
 var MockState = require('fixtures/mock_state');
 
 // global vars, injected and mocked in init()
-var kbnUrl;
-var $route;
-var $location;
-var $rootScope;
-var globalStateMock;
-var appState;
+let kbnUrl;
+let $route;
+let $location;
+let $rootScope;
+let globalStateMock;
+let appState;
 
 require('ui/url');
 
@@ -374,8 +374,8 @@ describe('kbnUrl', function () {
   });
 
   describe('_shouldAutoReload', function () {
-    var next;
-    var prev;
+    let next;
+    let prev;
 
     beforeEach(function () {
       $route.current = {

@@ -5,9 +5,9 @@ var expect = require('expect.js');
 describe('Filter Bar Directive', function () {
   describe('changeTimeFilter()', function () {
 
-    var changeTimeFilter;
+    let changeTimeFilter;
 
-    var timefilter;
+    let timefilter;
 
     beforeEach(ngMock.module('kibana'));
 

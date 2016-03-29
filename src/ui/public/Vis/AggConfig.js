@@ -141,7 +141,7 @@ define(function (require) {
      */
     AggConfig.prototype.resetParams = function () {
       var fieldParam = this.type && this.type.params.byName.field;
-      var field;
+      let field;
 
       if (fieldParam) {
         var prevField = this.params.field;

@@ -24,16 +24,16 @@ require('ui/private');
 require('ui/doc_viewer');
 
 
-var $parentScope;
+let $parentScope;
 
 
-var $scope;
+let $scope;
 
 
-var indexPattern;
+let indexPattern;
 
 
-var flattened;
+let flattened;
 
 var init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile) {
@@ -51,7 +51,7 @@ var destroy = function () {
 };
 
 describe('docViewer', function () {
-  var $elem;
+  let $elem;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(function () {

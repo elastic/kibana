@@ -152,7 +152,7 @@ define(function (require) {
       function get(id, prov, $delegateProv, $delegateId) {
         if (cache[id]) return cache[id];
 
-        var instance;
+        let instance;
 
         if ($delegateId != null && $delegateProv != null) {
           instance = instantiate(prov, {
@@ -168,8 +168,8 @@ define(function (require) {
       // main api, get the appropriate instance for a provider
       function Private(prov) {
         var id = identify(prov);
-        var $delegateId;
-        var $delegateProv;
+        let $delegateId;
+        let $delegateProv;
 
         if (swaps[id]) {
           $delegateId = id;

@@ -1,5 +1,5 @@
 describe('String Truncate Format', function () {
-  var fieldFormats;
+  let fieldFormats;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
