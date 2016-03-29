@@ -18,6 +18,7 @@ describe('plugins/elasticsearch', function () {
     let plugin;
     let server;
     let get;
+    let set;
     let client;
 
     beforeEach(function () {
@@ -30,8 +31,9 @@ describe('plugins/elasticsearch', function () {
           yellow: sinon.stub()
         }
       };
-      // setup the config().get() stub
+      // setup the config().get()/.set() stubs
       get = sinon.stub();
+      set = sinon.stub();
       // set up the elasticsearch client stub
       client = {
         cluster: { health: sinon.stub() },
@@ -39,6 +41,8 @@ describe('plugins/elasticsearch', function () {
         nodes: { info: sinon.stub() },
         ping: sinon.stub(),
         create: sinon.stub(),
+        index: sinon.stub().returns(Promise.resolve()),
+        get: sinon.stub().returns(Promise.resolve({ found: false })),
         search: sinon.stub().returns(Promise.resolve({ hits: { hits: [] } })),
       };
       client.nodes.info.returns(Promise.resolve({
@@ -53,7 +57,8 @@ describe('plugins/elasticsearch', function () {
       // Setup the server mock
       server = {
         log: sinon.stub(),
-        config: function () { return { get: get }; },
+        info: { port: 5601 },
+        config: function () { return { get: get, set: set }; },
         plugins: { elasticsearch: { client: client  } }
       };
 
