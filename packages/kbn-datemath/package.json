@@ -15,7 +15,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elastic/datemath.git"
+    "url": "https://github.com/elastic/datemath-js.git"
   },
   "devDependencies": {
     "babel-cli": "~6.6.5",
