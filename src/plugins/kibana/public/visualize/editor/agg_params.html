@@ -11,7 +11,10 @@
 </div>
 
 <div ng-if="agg.schema.deprecate" class="form-group">
-  <p class="vis-editor-agg-error">
+  <p ng-show="agg.schema.deprecateMessage" class="vis-editor-agg-error">
+    {{ agg.schema.deprecateMessage }}
+  </p>
+  <p ng-show="!agg.schema.deprecateMessage" class="vis-editor-agg-error">
     "{{ agg.schema.title }}" has been deprecated.
   </p>
 </div>

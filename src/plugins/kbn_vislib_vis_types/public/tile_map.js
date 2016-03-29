@@ -122,6 +122,7 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         name: 'split',
         title: 'Split Chart',
         deprecate: true,
+        deprecateMessage: 'The Split Chart feature for Tile Maps has been deprecated.',
         min: 0,
         max: 1
       }
