@@ -16,6 +16,7 @@ module.exports = function (grunt) {
     grunt.option('os-packages', true);
 
     grunt.task.run(compact([
+      'rejectRejFiles',
       'test',
       process.env.JOB_NAME === 'kibana_core' ? 'build' : null
     ]));
