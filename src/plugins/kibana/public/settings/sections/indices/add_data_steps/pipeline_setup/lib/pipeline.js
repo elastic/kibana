@@ -170,9 +170,9 @@ export default class Pipeline {
   // Updates the state of the pipeline and processors with the results
   // from an ingest simulate call.
   applySimulateResults(simulateResults) {
-    updateProcessorOutputs(simulateResults);
-    updateErrorState();
-    updateProcessorInputs();
+    updateProcessorOutputs(this, simulateResults);
+    updateErrorState(this);
+    updateProcessorInputs(this);
     this.updateOutput();
   }
 
