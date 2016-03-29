@@ -44,7 +44,7 @@ export default function VisFactory(Notifier, Private) {
       oldConfigs.forEach(function (oldConfig) {
         var agg = {
           schema: schema.name,
-          type: oldConfig.agg,
+          type: oldConfig.agg
         };
 
         var aggType = aggTypes.byName[agg.type];
@@ -81,16 +81,21 @@ export default function VisFactory(Notifier, Private) {
     this.aggs = new AggConfigs(this, state.aggs);
   };
 
-  Vis.prototype.getState = function () {
+  Vis.prototype.getState = function (full) {
     return {
       title: this.title,
       type: this.type.name,
       params: this.params,
-      aggs: this.aggs.map(function (agg) {
-        return agg.toJSON();
-      }).filter(Boolean),
+      aggs: this.aggs
+        .filter(agg => full || agg.enabled)
+        .map(agg => agg.toJSON())
+        .filter(Boolean),
       listeners: this.listeners
     };
+  };
+
+  Vis.prototype.getFullState = function () {
+    return this.getState(true);
   };
 
   Vis.prototype.createEditableVis = function () {
@@ -102,7 +107,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.clone = function () {
-    return new Vis(this.indexPattern, this.getState());
+    return new Vis(this.indexPattern, this.getFullState());
   };
 
   Vis.prototype.requesting = function () {

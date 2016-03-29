@@ -29,7 +29,6 @@ uiModules
     },
     template: visualizeTemplate,
     link: function ($scope, $el, attr) {
-      let chart; // set in "vis" watcher
       var minVisChartHeight = 180;
 
       if (_.isUndefined($scope.showSpyPanel)) {

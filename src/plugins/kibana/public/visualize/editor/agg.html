@@ -27,6 +27,30 @@
 
   <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
   <div class="vis-editor-agg-header-controls btn-group">
+    <!-- disable aggregation -->
+    <button
+      ng-if="agg.enabled && canRemove(agg)"
+      ng-click="agg.enabled = false"
+      aria-label="Disable aggregation"
+      tooltip="Disable aggregation"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-toggle-on"></i>
+    </button>
+
+    <!-- enable aggregation -->
+    <button
+      ng-if="!agg.enabled"
+      ng-click="agg.enabled = true"
+      aria-label="Enable aggregation"
+      tooltip="Enable aggregation"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-toggle-off"></i>
+    </button>
+
     <!-- drag handle -->
     <button
       draggable-handle
@@ -35,7 +59,7 @@
       tooltip="Modify Priority by Dragging"
       tooltip-append-to-body="true"
       type="button"
-      class="btn btn-xs btn-primary">
+      class="btn btn-xs">
       <i aria-hidden="true" class="fa fa-arrows-v"></i>
     </button>
 
