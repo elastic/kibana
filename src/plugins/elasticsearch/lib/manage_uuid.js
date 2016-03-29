@@ -22,6 +22,7 @@ export default function manageUuid(server) {
 
   return function uuidManagement() {
     const fieldId = `${serverHostname}-${serverPort}`;
+    const kibanaIndex = config.get('kibana.index');
     let kibanaUuid = config.get('uuid');
 
     function logToServer(msg) {
@@ -29,7 +30,7 @@ export default function manageUuid(server) {
     }
 
     return client.get({
-      index: config.get('kibana.index'),
+      index: kibanaIndex,
       ignore: [404],
       type: TYPE,
       id: fieldId
@@ -53,7 +54,7 @@ export default function manageUuid(server) {
           // config uuid exists, data uuid exists but mismatches
           logToServer(`Updating Kibana instance UUID to: ${kibanaUuid} (was: ${result._source.uuid})`);
           return client.update({
-            index: config.get('kibana.index'),
+            index: kibanaIndex,
             type: TYPE,
             id: fieldId,
             body: { doc: { uuid: kibanaUuid } }
@@ -70,7 +71,7 @@ export default function manageUuid(server) {
 
       logToServer(`Setting new Kibana instance UUID: ${kibanaUuid}`);
       return client.index({
-        index: config.get('kibana.index'),
+        index: kibanaIndex,
         type: TYPE,
         id: fieldId,
         body: { uuid: kibanaUuid }
