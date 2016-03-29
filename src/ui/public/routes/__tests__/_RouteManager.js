@@ -4,14 +4,14 @@ var sinon = require('auto-release-sinon');
 var RouteManager = require('ui/routes/RouteManager');
 var expect = require('expect.js');
 
-var routes; // will contain an new instance of RouteManager for each test
+let routes; // will contain an new instance of RouteManager for each test
 var chainableMethods = [
   { name: 'when', args: ['', {}] },
   { name: 'otherwise', args: [{}] },
   { name: 'defaults', args: [/regexp/, {}] }
 ];
 
-var $rp;
+let $rp;
 describe('routes/RouteManager', function () {
   beforeEach(ngMock.module('kibana', function ($routeProvider) {
     $rp = $routeProvider;

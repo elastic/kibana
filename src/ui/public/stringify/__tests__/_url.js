@@ -3,7 +3,7 @@ describe('Url Format', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var fieldFormats;
+  let fieldFormats;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -11,7 +11,7 @@ describe('Url Format', function () {
   }));
 
   describe('Url Format', function () {
-    var Url;
+    let Url;
 
     beforeEach(function () {
       Url = fieldFormats.getType('url');

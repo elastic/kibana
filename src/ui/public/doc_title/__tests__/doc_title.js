@@ -4,11 +4,11 @@ describe('docTitle Service', function () {
   var sinon = require('auto-release-sinon');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var initialDocTitle;
+  let initialDocTitle;
   var MAIN_TITLE = 'Kibana 4';
 
-  var docTitle;
-  var $rootScope;
+  let docTitle;
+  let $rootScope;
 
   beforeEach(function () {
     initialDocTitle = document.title;
@@ -60,7 +60,7 @@ describe('docTitle Service', function () {
   });
 
   describe('#change', function () {
-    var getActiveTabStub;
+    let getActiveTabStub;
 
     beforeEach(function () {
       getActiveTabStub = sinon.stub(require('ui/chrome'), 'getActiveTab');

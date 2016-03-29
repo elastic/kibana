@@ -3,8 +3,8 @@ describe('Filter Bar Directive', function () {
   var sinon = require('auto-release-sinon');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var mapFilter;
-  var $rootScope;
+  let mapFilter;
+  let $rootScope;
 
 
   beforeEach(ngMock.module(

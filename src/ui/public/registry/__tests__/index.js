@@ -4,8 +4,8 @@ describe('Registry', function () {
   var registry = require('ui/registry/_registry');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var Private;
-  var IndexedArray;
+  let Private;
+  let IndexedArray;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -44,7 +44,7 @@ describe('Registry', function () {
   describe('spec', function () {
     it('executes with the module list as "this", and can override it', function () {
       var i = 0;
-      var self;
+      let self;
 
       var reg = registry({
         constructor: function () {
@@ -84,7 +84,7 @@ describe('Registry', function () {
 
     it('executes with the module list as "this", and can override it', function () {
       var i = 0;
-      var self;
+      let self;
 
       var reg = registry({
         constructor: function () {

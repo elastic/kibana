@@ -1,5 +1,5 @@
 describe('IP Address Format', function () {
-  var fieldFormats;
+  let fieldFormats;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

@@ -2,7 +2,7 @@ describe('getSeries', function () {
   var _ = require('lodash');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var getSeries;
+  let getSeries;
 
   var agg = { fieldFormatter: _.constant(_.identity) };
 

@@ -6,13 +6,13 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 describe('Vislib xAxis Class Test Suite', function () {
-  var XAxis;
-  var Data;
-  var persistedState;
-  var xAxis;
-  var el;
-  var fixture;
-  var dataObj;
+  let XAxis;
+  let Data;
+  let persistedState;
+  let xAxis;
+  let el;
+  let fixture;
+  let dataObj;
   var data = {
     hits: 621,
     label: '',
@@ -124,13 +124,13 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
-    var ordered;
-    var timeScale;
-    var timeDomain;
-    var ordinalScale;
-    var ordinalDomain;
-    var width;
-    var range;
+    let ordered;
+    let timeScale;
+    let timeDomain;
+    let ordinalScale;
+    let ordinalDomain;
+    let width;
+    let range;
 
     beforeEach(function () {
       timeScale = xAxis.getScale();
@@ -173,8 +173,8 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getXScale Method', function () {
-    var width;
-    var xScale;
+    let width;
+    let xScale;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
@@ -197,8 +197,8 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getXAxis Method', function () {
-    var width;
-    var axis;
+    let width;
+    let axis;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();

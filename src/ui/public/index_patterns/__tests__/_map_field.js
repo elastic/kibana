@@ -3,8 +3,8 @@ describe('field mapping normalizer (mapField)', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var fn;
-  var fields;
+  let fn;
+  let fields;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, config) {
     config.set('metaFields', ['_id', '_timestamp']);

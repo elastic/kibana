@@ -19,7 +19,7 @@ define(function (require) {
       if (!execCount) return Promise.resolve([]);
 
       // resolved by respond()
-      var esPromise;
+      let esPromise;
       var defer = Promise.defer();
 
       // for each respond with either the response or ABORTED

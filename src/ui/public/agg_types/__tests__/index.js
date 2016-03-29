@@ -9,8 +9,8 @@ describe('AggTypesComponent', function () {
   require('./buckets/_range');
 
   describe('bucket aggs', function () {
-    var bucketAggs;
-    var BucketAggType;
+    let bucketAggs;
+    let BucketAggType;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -26,8 +26,8 @@ describe('AggTypesComponent', function () {
   });
 
   describe('metric aggs', function () {
-    var metricAggs;
-    var MetricAggType;
+    let metricAggs;
+    let MetricAggType;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

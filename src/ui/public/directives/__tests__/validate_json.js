@@ -5,9 +5,9 @@ var ngMock = require('ngMock');
 // Load the kibana app dependencies.
 require('ui/directives/validate_json');
 
-var $parentScope;
-var $elemScope;
-var $elem;
+let $parentScope;
+let $elemScope;
+let $elem;
 var mockScope = '';
 
 var input = {

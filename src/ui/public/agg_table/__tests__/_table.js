@@ -6,11 +6,11 @@ describe('AggTable Directive', function () {
   var fixtures = require('fixtures/fake_hierarchical_data');
   var sinon = require('auto-release-sinon');
 
-  var $rootScope;
-  var $compile;
-  var tabifyAggResponse;
-  var Vis;
-  var indexPattern;
+  let $rootScope;
+  let $compile;
+  let tabifyAggResponse;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
@@ -22,7 +22,7 @@ describe('AggTable Directive', function () {
     $compile = $injector.get('$compile');
   }));
 
-  var $scope;
+  let $scope;
   beforeEach(function () {
     $scope = $rootScope.$new();
   });
@@ -131,7 +131,7 @@ describe('AggTable Directive', function () {
   });
 
   describe('aggTable.exportAsCsv()', function () {
-    var origBlob;
+    let origBlob;
     function FakeBlob(slices, opts) {
       this.slices = slices;
       this.opts = opts;

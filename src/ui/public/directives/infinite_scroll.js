@@ -10,7 +10,7 @@ define(function (require) {
       },
       link: function ($scope, $element, attrs) {
         var $window = $(window);
-        var checkTimer;
+        let checkTimer;
 
         function onScroll() {
           if (!$scope.more) return;

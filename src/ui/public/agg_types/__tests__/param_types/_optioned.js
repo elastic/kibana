@@ -3,8 +3,8 @@ describe('Optioned', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  var BaseAggParam;
-  var OptionedAggParam;
+  let BaseAggParam;
+  let OptionedAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps

@@ -4,11 +4,11 @@ describe('Vis Class', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  var indexPattern;
-  var Vis;
-  var visTypes;
+  let indexPattern;
+  let Vis;
+  let visTypes;
 
-  var vis;
+  let vis;
   var stateFixture = {
     type: 'pie',
     aggs: [

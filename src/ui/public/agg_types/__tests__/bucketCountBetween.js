@@ -2,12 +2,12 @@ describe('bucketCountBetween util', function () {
   var _ = require('lodash');
   var expect = require('expect.js');
   var ngMock = require('ngMock');
-  var indexPattern;
-  var Vis;
-  var visTypes;
-  var aggTypes;
-  var AggConfig;
-  var bucketCountBetween;
+  let indexPattern;
+  let Vis;
+  let visTypes;
+  let aggTypes;
+  let AggConfig;
+  let bucketCountBetween;
 
   // http://cwestblog.com/2014/02/25/javascript-testing-for-negative-zero/
   // works for -0 and +0
