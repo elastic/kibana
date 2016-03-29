@@ -15,7 +15,7 @@ export default function (Private) {
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
     _.each(values, function (value) {
-      var filter;
+      let filter;
       var existing = _.find(filters, function (filter) {
         if (!filter) return;
 

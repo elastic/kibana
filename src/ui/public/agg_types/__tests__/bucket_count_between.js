@@ -8,12 +8,12 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import AggTypesBucketsBucketCountBetweenProvider from 'ui/agg_types/buckets/_bucket_count_between';
 describe('bucketCountBetween util', function () {
-  var indexPattern;
-  var Vis;
-  var visTypes;
-  var aggTypes;
-  var AggConfig;
-  var bucketCountBetween;
+  let indexPattern;
+  let Vis;
+  let visTypes;
+  let aggTypes;
+  let AggConfig;
+  let bucketCountBetween;
 
   // http://cwestblog.com/2014/02/25/javascript-testing-for-negative-zero/
   // works for -0 and +0

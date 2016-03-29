@@ -5,8 +5,8 @@ import FilterBarLibMapTermsProvider from 'ui/filter_bar/lib/map_terms';
 
 describe('Filter Bar Directive', function () {
   describe('mapTerms()', function () {
-    var mapTerms;
-    var $rootScope;
+    let mapTerms;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

@@ -16,7 +16,7 @@ define(function (require) {
       // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
       // var expectedToastMessage = 'Share search: URL copied to clipboard.';
       // Pass either one.
-      var expectedToastMessage = /Share search: URL (selected. Press Ctrl+C to copy.|copied to clipboard.)/;
+      var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
       bdd.before(function () {
         common = new Common(this.remote);

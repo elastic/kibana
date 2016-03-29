@@ -29,22 +29,26 @@ export default function FetchTheseProvider(Private, Promise) {
   }
 
   function fetchWithStrategy(strategy, requests) {
+    function replaceAbortedRequests() {
+      requests = requests.map(r => r.aborted ? ABORTED : r);
+    }
 
-    requests = requests.map(function (req) {
-      return req.aborted ? ABORTED : req;
-    });
-
+    replaceAbortedRequests();
     return startRequests(requests)
     .then(function () {
+      replaceAbortedRequests();
       return callClient(strategy, requests);
     })
     .then(function (responses) {
+      replaceAbortedRequests();
       return callResponseHandlers(requests, responses);
     })
     .then(function (responses) {
+      replaceAbortedRequests();
       return continueIncomplete(strategy, requests, responses, fetchWithStrategy);
     })
     .then(function (responses) {
+      replaceAbortedRequests();
       return responses.map(function (resp) {
         switch (resp) {
           case ABORTED:

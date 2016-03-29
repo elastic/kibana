@@ -6,10 +6,10 @@ import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
 describe('Timefilter service', function () {
   describe('Refresh interval diff watcher', function () {
 
-    var fn;
-    var update;
-    var fetch;
-    var timefilter;
+    let fn;
+    let update;
+    let fetch;
+    let timefilter;
 
     beforeEach(ngMock.module('kibana'));
 

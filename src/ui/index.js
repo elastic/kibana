@@ -67,6 +67,7 @@ module.exports = async (kbnServer, server, config) => {
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
+      serverName: config.get('server.name'),
       vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
 

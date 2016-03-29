@@ -7,10 +7,10 @@ import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Regex', function () {
 
-  var BaseAggParam;
-  var RegexAggParam;
-  var Vis;
-  var indexPattern;
+  let BaseAggParam;
+  let RegexAggParam;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
@@ -34,8 +34,8 @@ describe('Regex', function () {
   });
 
   describe('write results', function () {
-    var aggParam;
-    var aggConfig;
+    let aggParam;
+    let aggConfig;
     var output = { params: {} };
     var paramName = 'exclude';
 

@@ -6,9 +6,9 @@ import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_
 describe('Filter Bar Directive', function () {
   describe('changeTimeFilter()', function () {
 
-    var changeTimeFilter;
+    let changeTimeFilter;
 
-    var timefilter;
+    let timefilter;
 
     beforeEach(ngMock.module('kibana'));
 

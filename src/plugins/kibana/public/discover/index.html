@@ -1,5 +1,5 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover-options" class="kibana-nav-options">
+  <navbar name="discover" class="kibana-nav-options">
     <div class="kibana-nav-info">
       <span ng-show="opts.savedSearch.id" class="kibana-nav-info-title">
         <span ng-bind="::opts.savedSearch.title"></span>
@@ -18,13 +18,13 @@
       <button
         ng-click="configTemplate.toggle('save');"
         ng-class="{active: configTemplate.is('save')}"
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ configTemplate.is('save') }}"
         aria-label="Save Search">
         <span>Save</span>
       </button>
       <button
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ configTemplate.is('load') }}"
         ng-click="configTemplate.toggle('load');"
         ng-class="{active: configTemplate.is('load')}"
@@ -33,14 +33,14 @@
       </button>
       <button
         aria-label="Share Search"
-        aria-haspopup="false"
+        aria-haspopup="true"
         aria-expanded="{{ configTemplate.is('share') }}"
         ng-class="{active: configTemplate.is('share')}"
         ng-click="configTemplate.toggle('share');">
         <span>Share</span>
       </button>
-    <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
     </div>
+    <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
   </navbar>
   <config
     config-template="configTemplate"

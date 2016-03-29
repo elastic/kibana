@@ -17,6 +17,7 @@ module.exports = function (chrome, internals) {
     .value('kbnVersion', internals.version)
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
+    .value('serverName', internals.serverName)
     .value('sessionId', Date.now())
     .value('chrome', chrome)
     .value('esUrl', (function () {

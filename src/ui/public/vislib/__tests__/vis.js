@@ -30,10 +30,10 @@ dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
     var beforeEvent = 'click';
     var afterEvent = 'brush';
-    var vis;
-    var persistedState;
-    var secondVis;
-    var numberOfCharts;
+    let vis;
+    let persistedState;
+    let secondVis;
+    let numberOfCharts;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -133,9 +133,9 @@ dataArray.forEach(function (data, i) {
         beforeEvent,
         afterEvent
       ];
-      var listeners;
-      var listener1;
-      var listener2;
+      let listeners;
+      let listener1;
+      let listener2;
 
       beforeEach(function () {
         listeners = [
@@ -183,9 +183,9 @@ dataArray.forEach(function (data, i) {
     });
 
     describe('off Method', function () {
-      var listeners;
-      var listener1;
-      var listener2;
+      let listeners;
+      let listener1;
+      let listener2;
 
       beforeEach(function () {
         listeners = [];

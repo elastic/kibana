@@ -9,10 +9,10 @@ import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/c
 
 describe('AggConfig Filters', function () {
   describe('histogram', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
