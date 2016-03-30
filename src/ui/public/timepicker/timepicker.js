@@ -8,7 +8,7 @@ import 'ui/directives/inequality';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
-import 'ui/timepicker/toggle';
+import 'ui/timepicker/kbn_global_timepicker';
 import uiModules from 'ui/modules';
 var module = uiModules.get('ui/timepicker');
 var notify = new Notifier({
