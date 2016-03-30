@@ -94,7 +94,7 @@
 
       <div class="discover-wrapper col-md-10">
         <div class="discover-content">
-          <discover-no-results></discover-no-results>
+          <discover-no-results ng-show="resultState === 'none'"></discover-no-results>
 
           <!-- loading -->
           <div ng-show="resultState === 'loading'">

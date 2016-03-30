@@ -222,17 +222,21 @@ define(function (require) {
 
     hasNoResults: function hasNoResults() {
       return thisTime
-      .findByCssSelector('[data-test-subj="discoverNoResults"]')
-      .getVisibleText()
-      .then(text => text.length > 0);
+        .findTestSubject('discoverNoResult')
+        .then(() => true)
+        .catch(() => false);
     },
 
-    hasNoResultsTimepicker: function hasNoResults() {
-      return thisTime
-      .findByCssSelector('[data-test-subj="discoverNoResultsTimefilter"]')
-      .getVisibleText()
-      .then(text => text.length > 0);
+    getNoResultsTimepicker: function getNoResultsTimepicker() {
+      return thisTime.findTestSubject('discoverNoResultsTimefilter');
     },
+
+    hasNoResultsTimepicker: function hasNoResultsTimepicker() {
+      return this
+        .getNoResultsTimepicker()
+        .then(() => true)
+        .catch(() => false);
+    }
 
   };
 

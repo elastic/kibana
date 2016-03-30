@@ -54,6 +54,13 @@ define(function (require) {
       .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
 
+    isTimepickerOpen: function isTimepickerOpen() {
+      return this.remote.setFindTimeout(defaultTimeout)
+      .findDisplayedByClassName('config')
+      .then(() => true)
+      .catch(() => false);
+    },
+
     clickAbsoluteButton: function clickAbsoluteButton() {
       return this.remote.setFindTimeout(defaultTimeout)
       .findByLinkText('Absolute').click();

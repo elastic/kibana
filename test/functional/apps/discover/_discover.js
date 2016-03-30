@@ -246,8 +246,8 @@ define(function (require) {
         });
 
         bdd.it('should not show "no results"', () => {
-          discoverPage.hasNoResults().then(noResults => {
-            expect(noResults).to.be(false);
+          discoverPage.hasNoResults().then(visible => {
+            expect(visible).to.be(false);
           });
         });
 
@@ -287,19 +287,39 @@ define(function (require) {
 
         bdd.before(() => {
           common.debug('setAbsoluteRangeForAnotherQuery');
-          return headerPage.setAbsoluteRange(fromTime, toTime);
+          return headerPage
+            .setAbsoluteRange(fromTime, toTime)
+            .catch(common.handleError(this));
         });
 
         bdd.it('should show "no results"', () => {
-          discoverPage.hasNoResults().then(noResults => {
-            expect(noResults).to.not.be(true);
-          });
+          discoverPage.hasNoResults().then(visible => {
+            expect(visible).to.be(true);
+          })
+          .catch(common.handleError(this));
         });
 
         bdd.it('should suggest a new time range is picked', () => {
-          discoverPage.hasNoResultsTimepicker().then(hasTimepicker => {
-            expect(hasTimepicker).to.be(true);
-          });
+          discoverPage.hasNoResultsTimepicker().then(visible => {
+            expect(visible).to.be(true);
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should open and close the time picker', () => {
+          isTimepickerOpen(false)
+            .click()
+            .then(() => isTimepickerOpen(true))
+            .click()
+            .then(() => isTimepickerOpen(false))
+            .catch(common.handleError(this));
+
+          function isTimepickerOpen(expected) {
+            return headerPage.isTimepickerOpen().then(shown => {
+              expect(shown).to.be(expected);
+              return discoverPage.getNoResultsTimepicker();
+            });
+          }
         });
       });
 
