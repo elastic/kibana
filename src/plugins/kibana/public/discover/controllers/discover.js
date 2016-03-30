@@ -489,8 +489,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
         schema: 'segment',
         params: {
           field: $scope.opts.timefield,
-          interval: $state.interval,
-          min_doc_count: 0
+          interval: $state.interval
         }
       }
     ];

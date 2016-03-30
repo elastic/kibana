@@ -7,11 +7,11 @@ var module = uiModules.get('kibana');
 
 
 /**
- * kbnTopNavbar directive
+ * kbnTopNav directive
  *
  * The top section that shows the timepicker, load, share and save dialogues.
  * ```
- * <kbn-top-navbar config-template="configTemplate"></kbn-top-navbar>
+ * <kbn-top-nav name="current-app-for-extensions" config="path.to.menuItems"></kbn-top-nav>
  * ```
  */
 
