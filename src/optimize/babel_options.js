@@ -1,3 +1,6 @@
+// this file is not transpiled
+'use strict'; // eslint-disable-line strict
+
 let cloneDeep = require('lodash').cloneDeep;
 let fromRoot = require('path').resolve.bind(null, __dirname, '../../');
 
