@@ -46,6 +46,7 @@ module.exports = function (grunt) {
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
+          { type: 'cobertura', dir: 'coverage/', file: 'coverage.xml'},
           { type: 'text-summary' },
         ]
       }
