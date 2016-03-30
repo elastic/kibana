@@ -242,7 +242,7 @@ uiModules
 
     savedVis.save()
     .then(function (id) {
-      $scope.kbnTopNavbar.close('save');
+      $scope.kbnTopNav.close('save');
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');

@@ -205,7 +205,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         dash.save()
         .then(function (id) {
-          $scope.kbnTopNavbar.close('save');
+          $scope.kbnTopNav.close('save');
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
