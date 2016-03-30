@@ -32,11 +32,11 @@
     "Joe Fleming <joe.fleming@elastic.co>",
     "Khalah Jones-Golden <khalah.jones@elastic.co>",
     "Lukas Olson <lukas.olson@elastic.co>",
+    "Nicolás Bevacqua <nico@elastic.co>",
     "Juan Thomassie <juan.thomassie@elastic.co>",
     "Shelby Sturgis <shelby@elastic.co>",
     "Tim Sullivan <tim@elastic.co>",
-    "Jim Unger <jim.unger@elastic.co>",
-    "Nicolás Bevacqua <nico@elastic.co>"
+    "Jim Unger <jim.unger@elastic.co>"
   ],
   "scripts": {
     "test": "grunt test",
