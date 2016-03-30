@@ -98,18 +98,18 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Search',
-    run: function () { kbnUrl.change('/discover') }
+    run: function () { kbnUrl.change('/discover'); }
   }, {
     key: 'save',
     description: 'Save Search',
     template: require('plugins/kibana/discover/partials/save_search.html')
   }, {
     key: 'open',
-    description: 'Open Saved Search',
+    description: 'Load Saved Search',
     template: require('plugins/kibana/discover/partials/load_search.html')
   }, {
     key: 'share',
-    description: 'Share Saved Search',
+    description: 'Share Search',
     template: require('plugins/kibana/discover/partials/share_search.html')
   }];
   $scope.timefilter = timefilter;
@@ -295,7 +295,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
 
       return savedSearch.save()
       .then(function (id) {
-        $scope.kbnTopNavbar.close('save');
+        $scope.kbnTopNav.close('save');
 
         if (id) {
           notify.info('Saved Data Source "' + savedSearch.title + '"');

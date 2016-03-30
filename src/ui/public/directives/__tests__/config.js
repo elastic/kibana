@@ -22,7 +22,7 @@ describe('Config Directive', function () {
   beforeEach(ngMock.inject(function ($compile, $rootScope) {
 
     build = function (scopeVars) {
-      var $el = $('<config>');
+      var $el = $('<kbn-top-nav>');
       $testScope = $rootScope.$new();
       assign($testScope, scopeVars || {});
       $compile($el)($testScope);
@@ -32,11 +32,11 @@ describe('Config Directive', function () {
 
   }));
 
-  it('sets the proper functions on the kbnTopNavbar prop on scope', function () {
+  it('sets the proper functions on the kbnTopNav prop on scope', function () {
     var $config = build();
-    expect($testScope.kbnTopNavbar.open).to.be.a(Function);
-    expect($testScope.kbnTopNavbar.close).to.be.a(Function);
-    expect($testScope.kbnTopNavbar.is).to.be.a(Function);
-    expect($testScope.kbnTopNavbar.toggle).to.be.a(Function);
+    expect($testScope.kbnTopNav.open).to.be.a(Function);
+    expect($testScope.kbnTopNav.close).to.be.a(Function);
+    expect($testScope.kbnTopNav.is).to.be.a(Function);
+    expect($testScope.kbnTopNav.toggle).to.be.a(Function);
   });
 });

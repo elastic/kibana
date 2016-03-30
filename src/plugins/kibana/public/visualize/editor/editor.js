@@ -90,11 +90,15 @@ uiModules
   }, {
     key: 'load',
     template: require('plugins/kibana/visualize/editor/panels/load.html'),
-    description: 'Load Visualization',
+    description: 'Load Saved Visualization',
   }, {
     key: 'share',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     description: 'Share Visualization'
+  }, {
+    key: 'refresh',
+    description: 'Refresh',
+    run: function () { $scope.fetch(); }
   }];
 
   if (savedVis.id) {
@@ -242,7 +246,7 @@ uiModules
 
     savedVis.save()
     .then(function (id) {
-      $scope.kbnTopNavbar.close('save');
+      $scope.kbnTopNav.close('save');
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');

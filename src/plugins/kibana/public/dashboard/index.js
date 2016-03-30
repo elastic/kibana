@@ -115,7 +115,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         key: 'share',
         description: 'Share Dashboard',
         template: require('plugins/kibana/dashboard/partials/share.html')
-      }, 'timepicker'];
+      }, {
+        key: 'pickVis',
+        description: 'Add Visualization',
+        template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+      }];
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -205,7 +209,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         dash.save()
         .then(function (id) {
-          $scope.kbnTopNavbar.close('save');
+          $scope.kbnTopNav.close('save');
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
