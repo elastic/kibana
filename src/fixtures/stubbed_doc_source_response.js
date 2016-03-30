@@ -1,7 +1,7 @@
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 
 function stubbedDocSourceResponse(Private) {
-  var mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+  let mockLogstashFields = Private(FixturesLogstashFieldsProvider);
 
   return function (id, index) {
     index = index || '.kibana';
