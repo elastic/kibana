@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import angular from 'angular';
-import ConfigTemplate from 'ui/config_template';
 import chrome from 'ui/chrome';
 import 'ui/directives/config';
 import 'ui/courier';
@@ -100,15 +99,28 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       });
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
-      $scope.configTemplate = new ConfigTemplate({
-        save: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
-        load: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
-        share: require('plugins/kibana/dashboard/partials/share.html'),
-        pickVis: require('plugins/kibana/dashboard/partials/pick_visualization.html'),
-        options: require('plugins/kibana/dashboard/partials/options.html'),
-        filter: require('ui/chrome/config/filter.html'),
-        interval: require('ui/chrome/config/interval.html')
-      });
+      $scope.topNavMenu = [{
+        key: 'new',
+        description: 'New Dashboard',
+        run: function () { kbnUrl.change('/dashboard', {}); },
+      }, {
+        key: 'add',
+        description: 'Add a panel to the dashboard',
+        template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+      },
+      {
+        key: 'save',
+        description: 'Save Dashboard',
+        template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
+      }, {
+        key: 'open',
+        description: 'Load Saved Dashboard',
+        template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
+      }, {
+        key: 'share',
+        description: 'Share Dashboard',
+        template: require('plugins/kibana/dashboard/partials/share.html')
+      }, 'timepicker'];
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 
@@ -198,7 +210,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         dash.save()
         .then(function (id) {
-          $scope.configTemplate.close('save');
+          $scope.kbnTopNav.close('save');
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
