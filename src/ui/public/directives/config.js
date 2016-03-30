@@ -17,7 +17,7 @@ var module = uiModules.get('kibana');
 
 module.directive('kbnTopNav', function (Private) {
   const filterTemplate = require('ui/chrome/config/filter.html');
-  const intervalTemplate = require('ui/chrome/config/interval.html')
+  const intervalTemplate = require('ui/chrome/config/interval.html');
   function optionsNormalizer(defaultFunction, opt) {
     if (!opt.key) {
       return false;
@@ -52,9 +52,9 @@ module.directive('kbnTopNav', function (Private) {
         <div class="button-group kibana-nav-actions" role="toolbar">
           <button
             ng-repeat="menuItem in kbnTopNav.menuItems"
-            area-label="menuItem.description"
-            aria-haspopup="menuItem.hasFunction"
-            aria-expanded="kbnTopNav.is(menuItem.key)"
+            aria-label="{{::menuItem.description}}"
+            aria-haspopup="{{!menuItem.hasFunction}}"
+            aria-expanded="{{kbnTopNav.is(menuItem.key)}}"
             ng-class="{active: kbnTopNav.is(menuItem.key)}"
             ng-click="menuItem.run(menuItem)"
             ng-bind="menuItem.label">
