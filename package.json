@@ -24,19 +24,19 @@
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "contributors": [
-    "Spencer Alger <spencer.alger@elastic.co>",
-    "Matt Bargar <matt.bargar@elastic.co>",
-    "Jon Budzenski <jonathan.budzenski@elastic.co>",
     "Chris Cowan <chris.cowan@elastic.co>",
     "Court Ewing <court@elastic.co>",
+    "Jim Unger <jim.unger@elastic.co>",
     "Joe Fleming <joe.fleming@elastic.co>",
+    "Jon Budzenski <jonathan.budzenski@elastic.co>",
+    "Juan Thomassie <juan.thomassie@elastic.co>",
     "Khalah Jones-Golden <khalah.jones@elastic.co>",
     "Lukas Olson <lukas.olson@elastic.co>",
+    "Matt Bargar <matt.bargar@elastic.co>",
     "Nicolás Bevacqua <nico@elastic.co>",
-    "Juan Thomassie <juan.thomassie@elastic.co>",
     "Shelby Sturgis <shelby@elastic.co>",
-    "Tim Sullivan <tim@elastic.co>",
-    "Jim Unger <jim.unger@elastic.co>"
+    "Spencer Alger <spencer.alger@elastic.co>",
+    "Tim Sullivan <tim@elastic.co>"
   ],
   "scripts": {
     "test": "grunt test",
