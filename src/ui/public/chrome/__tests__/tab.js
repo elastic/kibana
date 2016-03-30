@@ -1,7 +1,8 @@
 import sinon from 'auto-release-sinon';
+
 import Tab from '../tab';
 import expect from 'expect.js';
-import TabFakeStore from './_tab_fake_store';
+import StubBrowserStorage from './fixtures/stub_browser_storage';
 
 describe('Chrome Tab', function () {
   describe('construction', function () {
@@ -88,7 +89,7 @@ describe('Chrome Tab', function () {
     });
 
     it('discovers the lastUrl', function () {
-      const lastUrlStore = new TabFakeStore();
+      const lastUrlStore = new StubBrowserStorage();
       const tab = new Tab({ id: 'foo', lastUrlStore });
       expect(tab.lastUrl).to.not.equal('/foo/bar');
 
@@ -100,7 +101,7 @@ describe('Chrome Tab', function () {
     });
 
     it('logs a warning about last urls that do not match the rootUrl', function () {
-      const lastUrlStore = new TabFakeStore();
+      const lastUrlStore = new StubBrowserStorage();
       const tab = new Tab({ id: 'foo', baseUrl: '/bar', lastUrlStore });
       tab.setLastUrl('/bar/foo/1');
 
@@ -114,7 +115,7 @@ describe('Chrome Tab', function () {
 
   describe('#setLastUrl()', function () {
     it('updates the lastUrl and storage value if passed a lastUrlStore', function () {
-      const lastUrlStore = new TabFakeStore();
+      const lastUrlStore = new StubBrowserStorage();
       const tab = new Tab({ id: 'foo', lastUrlStore });
 
       expect(tab.lastUrl).to.not.equal('foo');
