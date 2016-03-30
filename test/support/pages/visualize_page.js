@@ -311,6 +311,7 @@ define(function (require) {
       })
       //   // click save button
       .then(function () {
+        common.debug('click submit button');
         return self.remote
         .setFindTimeout(defaultTimeout)
         .findByCssSelector('.config button[type="submit"]')
