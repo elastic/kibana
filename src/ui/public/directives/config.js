@@ -41,7 +41,6 @@ module.directive('kbnTopNav', function (Private) {
   return {
     restrict: 'E',
     transclude: true,
-    scope: true,
     template: function ($el, $attrs) {
       // This is ugly
       // This is necessary because of navbar-extensions
@@ -62,7 +61,7 @@ module.directive('kbnTopNav', function (Private) {
           </button>
           <navbar-extensions name="${$attrs.name}"></navbar-extensions>
         </div>
-      <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
+        <kbn-global-timepicker></kbn-global-timepicker>
       </navbar>
       <div class="config" ng-show="kbnTopNav.currTemplate">
         <div id="template_wrapper" class="container-fluid"></div>
