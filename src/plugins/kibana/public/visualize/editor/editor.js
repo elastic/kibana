@@ -98,7 +98,7 @@ uiModules
   }, {
     key: 'refresh',
     description: 'Refresh',
-    run: function () { $scope.fetch() }
+    run: function () { $scope.fetch(); }
   }];
 
   if (savedVis.id) {

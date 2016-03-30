@@ -104,6 +104,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         description: 'New Dashboard',
         run: function () { kbnUrl.change('/dashboard', {}); },
       }, {
+        key: 'add',
+        description: 'Add a panel to the dashboard',
+        template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
+      },
+      {
         key: 'save',
         description: 'Save Dashboard',
         template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
