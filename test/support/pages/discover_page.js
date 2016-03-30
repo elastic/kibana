@@ -218,7 +218,21 @@ define(function (require) {
       return thisTime
         .findByClassName('sidebar-list')
         .getProperty('clientWidth');
-    }
+    },
+
+    hasNoResults: function hasNoResults() {
+      return thisTime
+      .findByCssSelector('[data-test-subj="discoverNoResults"]')
+      .getVisibleText()
+      .then(text => text.length > 0);
+    },
+
+    hasNoResultsTimepicker: function hasNoResults() {
+      return thisTime
+      .findByCssSelector('[data-test-subj="discoverNoResultsTimefilter"]')
+      .getVisibleText()
+      .then(text => text.length > 0);
+    },
 
   };
 

@@ -1,4 +1,5 @@
 import 'plugins/kibana/discover/saved_searches/saved_searches';
+import 'plugins/kibana/discover/directives/no_results';
 import 'plugins/kibana/discover/directives/timechart';
 import 'ui/navbar';
 import 'ui/collapsible_sidebar';

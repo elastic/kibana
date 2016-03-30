@@ -245,6 +245,11 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
+        bdd.it('should not show "no results"', () => {
+          discoverPage.hasNoResults().then(noResults => {
+            expect(noResults).to.be(false);
+          });
+        });
 
         function verifyChartData(expectedBarChartData) {
           return common.tryForTime(20 * 1000, function tryingForTime() {
@@ -274,6 +279,30 @@ define(function (require) {
         }
 
       });
+
+
+      bdd.describe('query #2, which has an empty time range', function () {
+        var fromTime = '1999-06-11 09:22:11.000';
+        var toTime = '1999-06-12 11:21:04.000';
+
+        bdd.before(() => {
+          common.debug('setAbsoluteRangeForAnotherQuery');
+          return headerPage.setAbsoluteRange(fromTime, toTime);
+        });
+
+        bdd.it('should show "no results"', () => {
+          discoverPage.hasNoResults().then(noResults => {
+            expect(noResults).to.not.be(true);
+          });
+        });
+
+        bdd.it('should suggest a new time range is picked', () => {
+          discoverPage.hasNoResultsTimepicker().then(hasTimepicker => {
+            expect(hasTimepicker).to.be(true);
+          });
+        });
+      });
+
     });
   };
 });
