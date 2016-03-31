@@ -1,6 +1,5 @@
 import 'angular';
 import 'ui/chrome';
-import 'ui/chrome/context';
 import 'ui/bind';
 import 'ui/bound_to_config_obj';
 import 'ui/config';

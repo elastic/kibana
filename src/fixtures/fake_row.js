@@ -1,5 +1,5 @@
 import _ from 'lodash';
-var longString = Array(200).join('_');
+let longString = Array(200).join('_');
 
 export default function (id, mapping) {
   function fakeVals(type) {

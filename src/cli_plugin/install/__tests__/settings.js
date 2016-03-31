@@ -1,6 +1,6 @@
 import path from 'path';
 import expect from 'expect.js';
-import fromRoot from '../../../utils/from_root';
+import { fromRoot } from '../../../utils';
 import { resolve } from 'path';
 import { parseMilliseconds, parse, getPlatform } from '../settings';
 
