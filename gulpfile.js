@@ -10,14 +10,15 @@ var Rsync = require('rsync');
 var Promise = require('bluebird');
 var eslint = require('gulp-eslint');
 var rimraf = require('rimraf');
-var tar = require('gulp-tar');
-var gzip = require('gulp-gzip');
+var zip = require('gulp-zip');
 var fs = require('fs');
 
 var pkg = require('./package.json');
 var packageName = pkg.name  + '-' + pkg.version;
 
-var buildDir = path.resolve(__dirname, 'build');
+var buildDir = path.resolve(__dirname, 'build/kibana');
+var packageRoot = path.resolve(__dirname, 'build');
+
 var targetDir = path.resolve(__dirname, 'target');
 var buildTarget = path.resolve(buildDir, pkg.name);
 var kibanaPluginDir = path.resolve(__dirname, '../kibana/installedPlugins/' + pkg.name);
@@ -126,21 +127,20 @@ gulp.task('build', ['clean'], function (done) {
 });
 
 gulp.task('package', ['build'], function (done) {
-  return gulp.src(path.join(buildDir, '**', '*'))
-    .pipe(tar(packageName + '.tar'))
-    .pipe(gzip())
+  return gulp.src(path.join(packageRoot, '**', '*'))
+    .pipe(zip(packageName + '.zip'))
     .pipe(gulp.dest(targetDir));
 });
 
 gulp.task('release', ['package'], function (done) {
-  var filename = packageName + '.tar.gz';
+  var filename = packageName + '.zip';
 
   // Upload to both places.
   var keys = ['kibana/timelion/', 'elastic/timelion/'];
 
   _.each(keys, function (key) {
     if (yargs.latest) {
-      key += 'timelion-latest.tar.gz';
+      key += 'timelion-latest.zip';
     } else {
       key += filename;
     }
