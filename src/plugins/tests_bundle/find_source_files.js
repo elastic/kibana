@@ -1,5 +1,5 @@
 
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils';
 import { chain, memoize } from 'lodash';
 import { resolve } from 'path';
 import { map, fromNode } from 'bluebird';

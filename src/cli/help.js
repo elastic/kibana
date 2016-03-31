@@ -69,6 +69,6 @@ ${indent(cmd.optionHelp(), 2)}
 }
 
 function humanReadableArgName(arg) {
-  var nameOutput = arg.name + (arg.variadic === true ? '...' : '');
+  let nameOutput = arg.name + (arg.variadic === true ? '...' : '');
   return arg.required ? '<' + nameOutput + '>' : '[' + nameOutput + ']';
 }

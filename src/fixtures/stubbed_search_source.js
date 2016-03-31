@@ -3,8 +3,8 @@ import searchResponse from 'fixtures/search_response';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 export default function stubSearchSource(Private, $q, Promise) {
-  var deferedResult = $q.defer();
-  var indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  let deferedResult = $q.defer();
+  let indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
   return {
     sort: sinon.spy(),

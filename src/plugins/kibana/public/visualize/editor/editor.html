@@ -1,60 +1,12 @@
 <div ng-controller="VisEditor" class="app-container vis-editor vis-type-{{ vis.type.name }}">
-  <navbar name="visualize" class="kibana-nav-options" ng-if="chrome.getVisible()">
+
+  <kbn-top-nav name="visualize" config="topNavMenu">
     <div class="vis-editor-info">
       <span ng-show="savedVis.id" class="vis-editor-info-title">
         <span ng-bind="::savedVis.title"></span>
       </span>
     </div>
-
-    <div class="button-group kibana-nav-actions">
-      <button ng-click="startOver()" aria-label="New Visualization">
-        <span>New</span>
-      </button>
-      <!-- normal save -->
-      <button
-        ng-class="{active: configTemplate.is('save')}"
-        ng-click="configTemplate.toggle('save')"
-        ng-if="!editableVis.dirty"
-        aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('save') }}"
-        aria-label="Save Visualization">
-        <span>Save</span>
-      </button>
-
-      <!-- save stub with tooltip -->
-      <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving" aria-label="Apply or Discard your changes before saving">
-        <span>Save</span>
-      </button>
-      <button
-        ng-class="{active: configTemplate.is('load')}"
-        ng-click="configTemplate.toggle('load')"
-        aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('load') }}"
-        aria-label="Load Saved Visualization">
-        <span>Load</span>
-      </button>
-      <button
-        ng-class="{active: configTemplate.is('share')}"
-        ng-click="configTemplate.toggle('share')"
-        aria-haspopup="true"
-        aria-expanded="{{ configTemplate.is('share') }}"
-        aria-label="Share Visualization">
-        <span>Share</span>
-      </button>
-      <button
-        ng-click="fetch()"
-        aria-label="Refresh">
-        <span>Refresh</span>
-      </button>
-    </div>
-    <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
-  </navbar>
-  <config
-    ng-if="chrome.getVisible()"
-    config-template="configTemplate"
-    config-object="opts">
-  </config>
-
+  </kbn-top-nav>
   <navbar ng-if="chrome.getVisible()" name="visualize-search">
     <div class="fill bitty-modal-container">
       <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
