@@ -9,22 +9,10 @@ import Registry from 'ui/registry/_registry';
 import 'ui/navbar';
 
 const defaultMarkup = `
-  <navbar name="testing">
-    <div class="button-group" role="toolbar">
-      <button>
-        <i aria-hidden="true" class="fa fa-file-new-o"></i>
-      </button>
-      <button>
-        <i aria-hidden="true" class="fa fa-save"></i>
-      </button>
-      <button>
-        <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-      </button>
-    </div>
-  </navbar>`;
+  <navbar-extensions name="testing"></navbar-extensions>`;
 
 
-describe('navbar directive', function () {
+describe('navbar-extensions directive', function () {
   let $rootScope;
   let $compile;
   let stubRegistry;
@@ -59,37 +47,8 @@ describe('navbar directive', function () {
 
   describe('incorrect use', function () {
     it('should throw if missing a name property', function () {
-      const markup = `<navbar><div class="button-group" role="toolbar"></div></navbar>`;
+      const markup = `<navbar-extensions><div class="button-group" role="toolbar"></div></navbar-extensions>`;
       expect(() => init(markup)).to.throwException(/requires a name attribute/);
-    });
-
-    it('should throw if missing a button group', function () {
-      const markup = `<navbar name="testing"></navbar>`;
-      expect(() => init(markup)).to.throwException(/must have exactly 1 button group/);
-    });
-
-    it('should throw if multiple button groups', function () {
-      const markup = `  <navbar name="testing">
-          <div class="button-group" role="toolbar">
-            <button>
-              <i aria-hidden="true" class="fa fa-file-new-o"></i>
-            </button>
-            <button>
-              <i aria-hidden="true" class="fa fa-save"></i>
-            </button>
-          </div>
-          <div class="button-group" role="toolbar">
-            <button>
-              <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-            </button>
-          </div>
-        </navbar>`;
-      expect(() => init(markup)).to.throwException(/must have exactly 1 button group/);
-    });
-
-    it('should throw if button group not direct child', function () {
-      const markup = `<navbar><div><div class="button-group" role="toolbar"></div></div></navbar>`;
-      expect(() => init(markup)).to.throwException(/must have exactly 1 button group/);
     });
   });
 
@@ -108,33 +67,40 @@ describe('navbar directive', function () {
       });
     }
 
-    it('should use the default markup', function () {
-      var $el = init();
-      expect($el.find('.button-group button').length).to.equal(3);
-    });
-
     it('should append to end then order == 0', function () {
       registerExtension({ order: 0 });
       var $el = init();
 
-      expect($el.find('.button-group button').length).to.equal(4);
-      expect($el.find('.button-group button').last().hasClass('test-button')).to.be.ok();
+      expect($el.find('button').last().hasClass('test-button')).to.be.ok();
     });
 
-    it('should append to end then order > 0', function () {
-      registerExtension({ order: 1 });
+    it('should enforce the order prop', function () {
+      registerExtension({
+        order: 1,
+        template: `
+          <button class="test-button-1">
+            <i aria-hidden="true" class="fa fa-rocket"></i>
+          </button>`
+      });
+      registerExtension({
+        order: 2,
+        template: `
+          <button class="test-button-2">
+            <i aria-hidden="true" class="fa fa-rocket"></i>
+          </button>`
+      });
+      registerExtension({
+        order: 0,
+        template: `
+          <button class="test-button-0">
+            <i aria-hidden="true" class="fa fa-rocket"></i>
+          </button>`
+      });
       var $el = init();
 
-      expect($el.find('.button-group button').length).to.equal(4);
-      expect($el.find('.button-group button').last().hasClass('test-button')).to.be.ok();
-    });
-
-    it('should append to end then order < 0', function () {
-      registerExtension({ order: -1 });
-      var $el = init();
-
-      expect($el.find('.button-group button').length).to.equal(4);
-      expect($el.find('.button-group button').first().hasClass('test-button')).to.be.ok();
+      expect($el.find('button').length).to.equal(3);
+      expect($el.find('button').last().hasClass('test-button-2')).to.be.ok();
+      expect($el.find('button').first().hasClass('test-button-0')).to.be.ok();
     });
   });
 });

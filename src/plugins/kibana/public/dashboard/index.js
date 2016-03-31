@@ -107,8 +107,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         key: 'add',
         description: 'Add a panel to the dashboard',
         template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
-      },
-      {
+      }, {
         key: 'save',
         description: 'Save Dashboard',
         template: require('plugins/kibana/dashboard/partials/save_dashboard.html')
@@ -120,10 +119,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         key: 'share',
         description: 'Share Dashboard',
         template: require('plugins/kibana/dashboard/partials/share.html')
-      }, {
-        key: 'pickVis',
-        description: 'Add Visualization',
-        template: require('plugins/kibana/dashboard/partials/pick_visualization.html')
       }];
 
       $scope.refresh = _.bindKey(courier, 'fetch');
