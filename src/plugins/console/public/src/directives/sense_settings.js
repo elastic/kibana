@@ -13,7 +13,7 @@ require('ui/modules')
       this.vals = settings.getCurrentSettings();
       this.apply = () => {
         this.vals = settings.updateSettings(this.vals);
-        $scope.close();
+        $scope.kbnTopNav.close();
       };
 
     },

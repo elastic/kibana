@@ -33,12 +33,12 @@ require('ui/modules')
       // main actions
       this.clear = () => {
         history.clearHistory($element);
-        $scope.close();
+        $scope.kbnTopNav.close();
       };
 
       this.restore = (req = this.selectedReq) => {
         history.restoreFromHistory(req);
-        $scope.close();
+        $scope.kbnTopNav.close();
       };
     }
   };

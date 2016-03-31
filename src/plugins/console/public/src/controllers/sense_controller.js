@@ -1,5 +1,5 @@
-require('ui/doc_title');
-
+import 'ui/doc_title';
+import 'ui/directives/kbn_top_nav';
 
 require('ui/modules')
 .get('app/sense')
@@ -10,24 +10,8 @@ require('ui/modules')
   // require the root app code, which expects to execute once the dom is loaded up
   require('../app');
 
-  const ConfigTemplate = require('ui/config_template');
   const input = require('../input');
   const es = require('../es');
-  const storage = require('../storage');
-
-  this.dropdown = new ConfigTemplate({
-    welcome: '<sense-welcome></sense-welcome>',
-    history: '<sense-history></sense-history>',
-    settings: '<sense-settings></sense-settings>',
-    help: '<sense-help></sense-help>',
-  });
-
-  /**
-   * Display the welcome dropdown if it has not been shown yet
-   */
-    if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    this.dropdown.open('welcome');
-  }
 
   this.sendSelected = () => {
     input.focus();

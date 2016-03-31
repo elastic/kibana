@@ -1,5 +1,6 @@
 const history = require('../history');
 const es = require('../es');
+const storage = require('../storage');
 
 require('ui/modules')
 .get('app/sense')
@@ -17,6 +18,31 @@ require('ui/modules')
     controller: class SenseNavbarController {
       constructor($scope) {
         $scope.chrome = require('ui/chrome');
+
+        this.menu = [
+          {
+            key: 'welcome',
+            noButton: true,
+            openByDefault: storage.get('version_welcome_shown') !== '@@SENSE_REVISION',
+            template: `<sense-welcome></sense-welcome>`
+          },
+          {
+            key: 'history',
+            description: 'History',
+            template: `<sense-history></sense-history>`
+          },
+          {
+            key: 'settings',
+            description: 'Settings',
+            template: `<sense-settings></sense-settings>`
+          },
+          {
+            key: 'help',
+            description: 'Help',
+            template: `<sense-help></sense-help>`
+          },
+        ];
+
         this.updateServerUrlHistory();
       }
 
