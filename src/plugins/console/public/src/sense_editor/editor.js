@@ -596,7 +596,7 @@ function SenseEditor($el) {
         var session = editor.session;
         var firstLine = session.getLine(startRow);
 
-        if (firstLine.length > session.getScreenWidth() - 5) {
+        if (firstLine.length > session.getWrapLimit() - 5) {
           // overlap first row
           if (startRow > 0) {
             startRow--;
