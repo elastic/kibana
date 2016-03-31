@@ -1,4 +1,4 @@
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils';
 import list from './list';
 import Logger from '../lib/logger';
 import { parse } from './settings';

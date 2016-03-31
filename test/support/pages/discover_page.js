@@ -28,7 +28,7 @@ define(function (require) {
 
     getTimespanText: function getTimespanText() {
       return thisTime
-      .findByCssSelector('.kibana-nav-actions .navbar-timepicker-time-desc pretty-duration')
+      .findByCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
       .getVisibleText();
     },
 
