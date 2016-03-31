@@ -88,7 +88,7 @@ module.directive('kbnTopNav', function (Private) {
         ctrlObj.toggleCurrTemplate(item.key);
       });
 
-      const niceMenuItems = _.compact(($scope[$attrs.config] || []).map(normalizeOpts));
+      const niceMenuItems = _.compact(_.get($scope, $attrs.config, []).map(normalizeOpts));
       ctrlObj.templates = _.assign({
         interval: intervalTemplate,
         filter: filterTemplate,
