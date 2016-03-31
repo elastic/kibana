@@ -30,7 +30,7 @@ require('ui/saved_objects/saved_object_registry').register(require('plugins/time
 
 // TODO: Expose an api for dismissing notifications
 var unsafeNotifications = require('ui/notify')._notifs;
-var ConfigTemplate = require('ui/config_template');
+//var ConfigTemplate = require('ui/config_template');
 
 require('ui/routes').enable();
 
@@ -62,17 +62,39 @@ app.controller('timelion', function (
   var savedSheet = $route.current.locals.savedSheet;
   var blankSheet = [defaultExpression];
 
-    // config panel templates
-  $scope.configTemplate = new ConfigTemplate({
-    load: require('plugins/timelion/partials/load_sheet.html'),
-    save: require('plugins/timelion/partials/save_sheet.html'),
-    options: require('plugins/timelion/partials/sheet_options.html'),
-    docs: '<timelion-docs></timelion-docs>'
-  });
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'New Sheet',
+    run: function () { kbnUrl.change('/'); }
+  }, {
+    key: 'add',
+    description: 'Add a chart',
+    run: function () { $scope.newCell(); }
+  }, {
+    key: 'save',
+    description: 'Save Sheet',
+    template: require('plugins/timelion/partials/save_sheet.html')
+  }, {
+    key: 'open',
+    description: 'Load Sheet',
+    template: require('plugins/timelion/partials/load_sheet.html')
+  }, {
+    key: 'options',
+    description: 'Options',
+    template: require('plugins/timelion/partials/sheet_options.html')
+  }, {
+    key: 'docs',
+    description: 'Documentation',
+    template: '<timelion-docs></timelion-docs>'
+  }];
 
-  if (config.get('timelion:showTutorial', true)) {
-    $scope.configTemplate.toggle('docs');
-  }
+
+  $timeout(function () {
+    if (config.get('timelion:showTutorial', true)) {
+      $scope.kbnTopNav.open('docs');
+    }
+  }, 0);
+
 
   $scope.state = new AppState(getStateDefaults());
   function getStateDefaults() {
@@ -99,7 +121,7 @@ app.controller('timelion', function (
       search: $scope.search,
       dontShowHelp: function () {
         config.set('timelion:showTutorial', false);
-        $scope.configTemplate.toggle('docs');
+        $scope.kbnTopNav.close('docs');
       }
     };
   };
@@ -193,7 +215,7 @@ app.controller('timelion', function (
     savedSheet.timelion_columns = $scope.state.columns;
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
-      $scope.configTemplate.close('save');
+      //$scope.configTemplate.close('save');
       if (id) {
         notify.info('Saved sheet as "' + savedSheet.title + '"');
         if (savedSheet.id !== $routeParams.id) {

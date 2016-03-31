@@ -3,11 +3,6 @@
 @import './chart.less';
 @import './suggestions.less';
 
-navbar.timelion-navbar {
-  padding-top: 16px;
-  padding-bottom: 16px;
-}
-
 [chart] {
   height: 100%;
   width: 100%;
@@ -47,10 +42,7 @@ navbar.timelion-navbar {
   }
 
   &-stats {
-    color: @text-color;
-    font-size: 0.9em;
-    padding: 5px 20px;
-    display: inline-block;
+    font-weight: normal;
   }
 
   &-buttons {
@@ -99,8 +91,16 @@ navbar.timelion-navbar {
   }
 }
 
-navbar.timelion-navbar .form-control:focus {
-  border-color: @gray-lighter;
+
+navbar.timelion-navbar {
+
+  input, select {
+    height: 34px;
+  }
+
+  .form-control:focus {
+    border-color: @gray-lighter;
+  }
 }
 
 .timelion-nav-wrapper {
@@ -128,7 +128,7 @@ navbar.timelion-navbar .form-control:focus {
 }
 
 select.timelion-interval {
-  width: 60px !important;
+  width: 70px !important;
   -webkit-appearance: none;
   -moz-appearance: none;
   background-position: right 50%;
@@ -145,6 +145,9 @@ select.timelion-interval {
   }
 }
 
+timelion-interval {
+  display: flex;
+}
 
 input.timelion-interval {
   border-radius: 0;

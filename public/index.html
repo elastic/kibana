@@ -1,105 +1,41 @@
-<div class="timelion" ng-controller="timelion">
+<div class="timelion app-container" ng-controller="timelion">
+
+  <kbn-top-nav name="timelion" config="topNavMenu">
+    <div class="kibana-nav-info ng-scope">
+      <span class="kibana-nav-info-title">
+        <span ng-show="opts.savedSheet.id">
+          {{opts.savedSheet.title}}
+          <i class="fa fa-bolt" ng-click="showStats = !showStats"></i>
+        </span>
+        <small class="timelion-stats" ng-show="showStats">
+          Query Time {{stats.queryTime - stats.invokeTime}}ms /
+          Processing Time {{stats.sheetTime - stats.queryTime}}ms
+        </small>
+      </span>
+    </div>
+  </kbn-top-nav>
+
   <navbar class="timelion-navbar" scroll-class="timelion-scroll-class-header" scroll-limit=45 ng-show="chrome.getVisible()">
     <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
-      <div class="typeahead">
-        <div class="input-group"
-          ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-          <input input-focus
-            ng-model="state.sheet[state.selected]"
-            timelion-expression="{{state.sheet[state.selected]}}"
-            placeholder="Expression ..."
-            aria-label="Expression input"
-            type="text"
-            class="form-control timelion-expression">
+      <div class="input-group"
+        ng-class="discoverSearch.$invalid ? 'has-error' : ''">
+        <input input-focus
+          ng-model="state.sheet[state.selected]"
+          timelion-expression="{{state.sheet[state.selected]}}"
+          placeholder="Expression ..."
+          aria-label="Expression input"
+          type="text"
+          class="form-control timelion-expression">
 
-          <timelion-interval model="state.interval"></timelion-interval>
+        <timelion-interval model="state.interval"></timelion-interval>
 
-          <button type="submit"
-            ng-disabled="discoverSearch.$invalid"
-            aria-label="Search">
-            <span aria-hidden="true" class="fa fa-play"></span></button>
-        </div>
+        <button type="submit"
+          ng-disabled="discoverSearch.$invalid"
+          aria-label="Search">
+          <span aria-hidden="true" class="fa fa-play"></span></button>
       </div>
     </form>
-
-
-    <div class="button-group" role="toolbar" scroll-class="timelion-scroll-class-options" scroll-limit=45>
-      <kbn-tooltip text="Toggle Menu" placement="bottom" append-to-body="1">
-        <button
-          ng-click="toggle('showButtons')"
-          aria-label="Toggle Menu">
-          <i aria-hidden="true" class="fa fa-bars"></i>
-        </button>
-      </kbn-tooltip>
-    </div>
   </navbar>
-
-  <div scroll-class="timelion-scroll-class-options" scroll-limit=45>
-    <div ng-if="showButtons" class="timelion-subnav">
-      <div class="timelion-stats">
-        <strong>Deduplication</strong> {{((1 - (stats.cacheCount/stats.queryCount))*100) | number:0}}% /
-        <strong>Query Time</strong> {{stats.queryTime - stats.invokeTime}}ms /
-        <strong>Processing Time</strong> {{stats.sheetTime - stats.queryTime}}ms
-      </div>
-      <div ng-if="showButtons" class="timelion-buttons">
-        <kbn-tooltip text="New Sheet" placement="bottom" append-to-body="1">
-          <a
-            ng-click="newSheet()"
-            aria-label="New Sheet">
-            <i aria-hidden="true" class="fa fa-file-new-o"></i>
-          </a>
-        </kbn-tooltip>
-
-        <kbn-tooltip text="Sheet Options" placement="bottom" append-to-body="1">
-          <a
-            ng-click="configTemplate.toggle('options');"
-            ng-class="{active: configTemplate.is('options')}"
-            aria-haspopup="true"
-            aria-expanded="{{ configTemplate.is('options') }}"
-            aria-label="Sheet Options">
-            <i aria-hidden="true" class="fa fa-cog"></i>
-          </a>
-        </kbn-tooltip>
-
-        <kbn-tooltip text="Save Sheet" placement="bottom" append-to-body="1">
-          <a
-            ng-click="configTemplate.toggle('save');"
-            ng-class="{active: configTemplate.is('save')}"
-            aria-haspopup="true"
-            aria-expanded="{{ configTemplate.is('save') }}"
-            aria-label="Save Search">
-            <i aria-hidden="true" class="fa fa-save"></i>
-          </a>
-        </kbn-tooltip>
-        <kbn-tooltip text="Load Sheet" placement="bottom" append-to-body="1">
-          <a
-            aria-haspopup="true"
-            aria-expanded="{{ configTemplate.is('load') }}"
-            ng-click="configTemplate.toggle('load');"
-            ng-class="{active: configTemplate.is('load')}"
-            aria-label="Load Saved Search">
-            <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-          </a>
-        </kbn-tooltip>
-        <kbn-tooltip text="Add Chart" placement="bottom" append-to-body="1">
-          <a
-            aria-label="Add Chart"
-            ng-click="newCell()">
-            <i aria-hidden="true" class="fa fa-area-chart"></i>
-          </a>
-        </kbn-tooltip>
-        <kbn-tooltip text="Show Help" placement="bottom" append-to-body="1">
-          <a
-            aria-label="Show Help"
-            ng-click="configTemplate.toggle('docs');">
-            <i aria-hidden="true" class="fa fa-question-circle"></i>
-          </a>
-        </kbn-tooltip>
-      </div>
-    </div>
-
-    <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
-  </div>
 
   <div class="timelion-container" scroll-class="timelion-scroll-class-body" scroll-limit=45>
     <div class="timelion-container-sheet">
