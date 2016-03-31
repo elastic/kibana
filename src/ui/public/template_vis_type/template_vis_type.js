@@ -1,7 +1,7 @@
 import _ from 'lodash';
 define(function (require) {
   return function TemplateVisTypeFactory(Private) {
-    var VisType = Private(require('ui/Vis/VisType'));
+    var VisType = Private(require('ui/vis/vis_type'));
     var TemplateRenderbot = Private(require('ui/template_vis_type/template_renderbot'));
 
     _.class(TemplateVisType).inherits(VisType);

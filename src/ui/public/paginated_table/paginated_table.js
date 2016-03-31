@@ -73,6 +73,19 @@ uiModules
       if ($scope.sort && $scope.sort.columnIndex !== null) {
         self.sortColumn($scope.sort.columnIndex, $scope.sort.direction);
       }
+      function resortRows() {
+        if (!$scope.rows || !$scope.columns) {
+          $scope.sortedRows = false;
+          return;
+        }
+
+        var sort = self.sort;
+        if (sort.direction == null) {
+          $scope.sortedRows = $scope.rows.slice(0);
+        } else {
+          $scope.sortedRows = orderBy($scope.rows, sort.getter, sort.direction === 'desc');
+        }
+      }
 
       $scope.$watchCollection('sort', function (newSort) {
         if (newSort && !_.isEqual(newSort, self.sort)) {
@@ -86,19 +99,7 @@ uiModules
         'rows',
         'columns',
         '[]paginatedTable.sort'
-      ], function resortRows() {
-        if (!$scope.rows || !$scope.columns) {
-          $scope.sortedRows = false;
-          return;
-        }
-
-        var sort = self.sort;
-        if (sort.direction == null) {
-          $scope.sortedRows = $scope.rows.slice(0);
-        } else {
-          $scope.sortedRows = orderBy($scope.rows, sort.getter, sort.direction === 'desc');
-        }
-      });
+      ], resortRows);
     }
   };
 });
