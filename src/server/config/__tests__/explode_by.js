@@ -4,7 +4,7 @@ import expect from 'expect.js';
 describe('explode_by(dot, flatObject)', function () {
 
   it('should explode a flatten object with dots', function () {
-    var flatObject = {
+    let flatObject = {
       'test.enable': true,
       'test.hosts': ['host-01', 'host-02']
     };
@@ -17,7 +17,7 @@ describe('explode_by(dot, flatObject)', function () {
   });
 
   it('should explode a flatten object with slashes', function () {
-    var flatObject = {
+    let flatObject = {
       'test/enable': true,
       'test/hosts': ['host-01', 'host-02']
     };

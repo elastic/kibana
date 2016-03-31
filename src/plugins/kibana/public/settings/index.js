@@ -40,12 +40,11 @@ uiModules
     },
     link: function ($scope, $el) {
       timefilter.enabled = false;
-      $scope.sections = sections;
       $scope.sections = sections.inOrder;
       $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 
-      $scope.sections.forEach(function (section) {
-        section.class = (section === $scope.section) ? 'active' : void 0;
+      $scope.sections.forEach(section => {
+        section.class = section === $scope.section ? 'active' : undefined;
       });
     }
   };
