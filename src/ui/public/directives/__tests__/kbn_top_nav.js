@@ -5,9 +5,9 @@ import $ from 'jquery';
 
 import navbarExtensionsRegistry from 'ui/registry/navbar_extensions';
 import Registry from 'ui/registry/_registry';
-import 'ui/navbar';
+import 'ui/navbar_extensions';
 
-describe('Config Directive', function () {
+describe('kbnTopNav Directive', function () {
 
   var build = function () {};
   let $testScope = null;
