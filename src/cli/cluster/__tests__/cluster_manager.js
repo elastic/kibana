@@ -3,9 +3,10 @@ import sinon from 'auto-release-sinon';
 import cluster from 'cluster';
 import { ChildProcess } from 'child_process';
 import { sample, difference } from 'lodash';
+import requireHelper from '../../../test_utils/requireHelper';
 
-import ClusterManager from '../cluster_manager';
-import Worker from '../worker';
+const ClusterManager = requireHelper('cli/cluster/cluster_manager');
+const Worker = requireHelper('cli/cluster/worker');
 
 describe('CLI cluster manager', function () {
 

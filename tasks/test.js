@@ -13,7 +13,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:quick', function () {
     grunt.task.run([
-      'test:server',
+      grunt.option('coverage') ? 'test:coverage:server' : 'test:server',
       'test:ui',
       grunt.option('coverage') ? 'test:coverage' : 'test:browser',
       'test:api'
