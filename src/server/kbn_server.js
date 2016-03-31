@@ -1,8 +1,8 @@
 import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
-import fromRoot from '../utils/from_root';
-import pkg from '../utils/package_json';
+import { isWorker } from 'cluster';
+import { fromRoot, pkg } from '../utils';
 
 let rootDir = fromRoot('.');
 
@@ -77,6 +77,11 @@ module.exports = class KbnServer {
 
     await this.ready();
     await fromNode(cb => server.start(cb));
+
+    if (isWorker) {
+      // help parent process know when we are ready
+      process.send(['WORKER_LISTENING']);
+    }
 
     server.log(['listening', 'info'], `Server running at ${server.info.uri}`);
     return server;

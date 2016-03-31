@@ -1,4 +1,4 @@
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils';
 import install from './install';
 import Logger from '../lib/logger';
 import pkg from '../../utils/package_json';
