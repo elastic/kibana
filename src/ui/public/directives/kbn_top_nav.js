@@ -81,8 +81,21 @@ module.directive('kbnTopNav', function (Private) {
         } else {
           ctrlObj.curr = which;
         }
+
         const templateToCompile = ctrlObj.templates[ctrlObj.curr] || false;
-        $scope.kbnTopNav.currTemplate = templateToCompile ? $compile(templateToCompile)($scope) : false;
+
+        if ($scope.kbnTopNav.currTemplate) {
+          $scope.kbnTopNav.currTemplateScope.$destroy();
+          $scope.kbnTopNav.currTemplate.remove();
+        }
+
+        if (templateToCompile) {
+          $scope.kbnTopNav.currTemplateScope = $scope.$new();
+          $scope.kbnTopNav.currTemplate = $compile(templateToCompile)($scope.kbnTopNav.currTemplateScope);
+        } else {
+          $scope.kbnTopNav.currTemplateScope = null;
+          $scope.kbnTopNav.currTemplate = false;
+        }
       };
       const normalizeOpts = _.partial(optionsNormalizer, (item) => {
         ctrlObj.toggleCurrTemplate(item.key);
