@@ -26,6 +26,8 @@ module.directive('kbnTopNav', function (Private) {
       label: _.capitalize(opt.key),
       hasFunction: !!opt.run,
       description: ('Toggle ' + opt.key),
+      noButton: !!opt.noButton,
+      openByDefault: !!opt.openByDefault ,
       run: defaultFunction
     }, opt);
   }
@@ -92,9 +94,8 @@ module.directive('kbnTopNav', function (Private) {
         filter: filterTemplate,
       }, getTemplatesMap(niceMenuItems));
 
-
       $scope.kbnTopNav = {
-        menuItems: niceMenuItems,
+        menuItems: niceMenuItems.filter(item => !item.noButton),
         currTemplate: false,
         is: which => { return ctrlObj.curr === which; },
         close: () => { ctrlObj.toggleCurrTemplate(false); },
@@ -106,6 +107,11 @@ module.directive('kbnTopNav', function (Private) {
         }
       };
 
+      niceMenuItems.forEach(item => {
+        if (item.openByDefault) {
+          $scope.kbnTopNav.open(item.key);
+        }
+      });
     }],
     link: function ($scope, element, attr, configCtrl) {
       $scope.$watch('kbnTopNav.currTemplate', newVal => {
