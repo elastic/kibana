@@ -81,11 +81,13 @@ uiModules
         }
       }
 
+
       // update the sortedRows result
       $scope.$watchMulti([
         'rows',
         'columns',
-        '[]sort'
+        '[]sort',
+        '[]paginatedTable.sort'
       ], resortRows);
     }
   };
