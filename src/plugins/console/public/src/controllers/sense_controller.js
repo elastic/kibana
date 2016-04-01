@@ -1,9 +1,18 @@
 import 'ui/doc_title';
 import 'ui/directives/kbn_top_nav';
+import { useResizeCheckerProvider } from '../sense_editor_resize';
 
-require('ui/modules')
-.get('app/sense')
-.controller('SenseController', function SenseController($scope, docTitle) {
+const module = require('ui/modules').get('app/sense');
+
+module.run(function (Private, $rootScope) {
+  const useResizeChecker = Private(useResizeCheckerProvider);
+
+  module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
+    return useResizeChecker($rootScope, $el, ...editors);
+  };
+});
+
+module.controller('SenseController', function SenseController($scope, docTitle) {
 
   docTitle.change('Sense');
 
