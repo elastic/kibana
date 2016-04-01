@@ -21,7 +21,7 @@ export function registerSimulate(server) {
       const body = ingestSimulateApiKibanaToEsConverter(simulateApiDocument);
 
       return boundCallWithRequest('transport.request', {
-        path: '_ingest/pipeline/_simulate',
+        path: '/_ingest/pipeline/_simulate',
         query: { verbose: true },
         method: 'POST',
         body: body
