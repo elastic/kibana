@@ -1,7 +1,9 @@
 import expect from 'expect.js';
 import Boom from 'boom';
-import handleESError from '../handle_es_error';
+import requireCovered from '../../../../../test_utils/requireCovered';
 import { errors as esErrors } from 'elasticsearch';
+
+const handleESError = requireCovered('plugins/kibana/server/lib/handle_es_error');
 
 describe('handleESError', function () {
 

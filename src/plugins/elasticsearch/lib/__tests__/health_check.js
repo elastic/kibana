@@ -2,11 +2,12 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import url from 'url';
+import requireCovered from '../../../../test_utils/requireCovered';
+import serverConfig from '../../../../../test/server_config';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
-import healthCheck from '../health_check';
-import serverConfig from '../../../../../test/server_config';
+const healthCheck = requireCovered('plugins/elasticsearch/lib/health_check');
 
 const esPort = serverConfig.servers.elasticsearch.port;
 const esUrl = url.format(serverConfig.servers.elasticsearch);

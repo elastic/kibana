@@ -1,5 +1,7 @@
-import applyFiltersToKeys from '../apply_filters_to_keys';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const applyFiltersToKeys = requireCovered('server/logging/apply_filters_to_keys');
 
 describe('applyFiltersToKeys(obj, actionsByKey)', function () {
   it('applies for each key+prop in actionsByKey', function () {

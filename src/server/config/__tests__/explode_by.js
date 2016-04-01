@@ -1,5 +1,7 @@
-import explodeBy from '../explode_by';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const explodeBy = requireCovered('server/config/explode_by');
 
 describe('explode_by(dot, flatObject)', function () {
 

@@ -2,8 +2,9 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
+import requireCovered from '../../../../test_utils/requireCovered';
 
-import upgradeConfig from '../upgrade_config';
+const upgradeConfig = requireCovered('plugins/elasticsearch/lib/upgrade_config');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/upgrade_config', function () {

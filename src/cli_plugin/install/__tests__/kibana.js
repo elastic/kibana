@@ -1,10 +1,12 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Logger from '../../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import { existingInstall, assertVersion } from '../kibana';
+import requireCovered from '../../../test_utils/requireCovered';
+
+const Logger = requireCovered('cli_plugin/lib/logger');
+const { existingInstall, assertVersion } = requireCovered('cli_plugin/install/kibana');
 
 describe('kibana cli', function () {
 

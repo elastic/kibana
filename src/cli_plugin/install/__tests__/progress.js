@@ -1,7 +1,9 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Progress from '../progress';
-import Logger from '../../lib/logger';
+import requireCovered from '../../../test_utils/requireCovered';
+
+const Logger = requireCovered('cli_plugin/lib/logger');
+const Progress = requireCovered('cli_plugin/install/progress');
 
 describe('kibana cli', function () {
 

@@ -1,5 +1,7 @@
-import unset from '../unset';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const unset = requireCovered('server/config/unset');
 
 describe('unset(obj, key)', function () {
   describe('invalid input', function () {

@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';
+import requireCovered from '../../../../test_utils/requireCovered';
 
-import isUpgradeable from '../is_upgradeable';
+const isUpgradeable = requireCovered('plugins/elasticsearch/lib/is_upgradeable');
+
 import pkg from '../../../../utils/package_json';
 let version = pkg.version;
 

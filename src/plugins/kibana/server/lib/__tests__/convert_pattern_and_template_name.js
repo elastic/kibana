@@ -1,5 +1,6 @@
 import expect from 'expect.js';
-import {templateToPattern, patternToTemplate} from '../convert_pattern_and_template_name';
+import requireCovered from '../../../../../test_utils/requireCovered';
+const { templateToPattern, patternToTemplate } = requireCovered('plugins/kibana/server/lib/convert_pattern_and_template_name');
 
 describe('convertPatternAndTemplateName', function () {
 

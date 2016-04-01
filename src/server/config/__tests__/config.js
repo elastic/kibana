@@ -1,7 +1,9 @@
-import Config from '../config';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
 import _ from 'lodash';
 import Joi from 'joi';
+
+const Config = requireCovered('server/config/config');
 
 /**
  * Plugins should defined a config method that takes a joi object. By default

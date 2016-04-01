@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import _ from 'lodash';
-import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../case_conversion';
+import requireCovered from '../../../../../test_utils/requireCovered';
+const { keysToSnakeCaseShallow, keysToCamelCaseShallow } = requireCovered('plugins/kibana/server/lib/case_conversion');
 
 describe('keysToSnakeCaseShallow', function () {
 

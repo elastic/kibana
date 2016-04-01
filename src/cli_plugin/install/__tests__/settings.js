@@ -2,7 +2,10 @@ import path from 'path';
 import expect from 'expect.js';
 import { fromRoot } from '../../../utils';
 import { resolve } from 'path';
-import { parseMilliseconds, parse, getPlatform } from '../settings';
+import requireCovered from '../../../test_utils/requireCovered';
+
+const { parseMilliseconds, parse, getPlatform } = requireCovered('cli_plugin/install/settings');
+
 
 describe('kibana cli', function () {
 

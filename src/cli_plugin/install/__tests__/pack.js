@@ -3,10 +3,13 @@ import sinon from 'sinon';
 import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import Logger from '../../lib/logger';
-import { extract, getPackData } from '../pack';
-import { _downloadSingle }  from '../download';
+import requireCovered from '../../../test_utils/requireCovered';
 import { join } from 'path';
+
+
+const Logger = requireCovered('cli_plugin/lib/logger');
+const { extract, getPackData } = requireCovered('cli_plugin/install/pack');
+const { _downloadSingle } = requireCovered('cli_plugin/install/download');
 
 describe('kibana cli', function () {
 

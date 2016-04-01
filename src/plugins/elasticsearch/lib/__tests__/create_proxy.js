@@ -1,5 +1,7 @@
 import expect from 'expect.js';
-import createProxy from '../create_proxy';
+import requireCovered from '../../../../test_utils/requireCovered';
+
+const createProxy = requireCovered('plugins/elasticsearch/lib/create_proxy');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_proxy', function () {

@@ -1,6 +1,8 @@
-import createMappingsFromPatternFields from '../create_mappings_from_pattern_fields';
 import expect from 'expect.js';
 import _ from 'lodash';
+import requireCovered from '../../../../../test_utils/requireCovered';
+
+const createMappingsFromPatternFields = requireCovered('plugins/kibana/server/lib/create_mappings_from_pattern_fields');
 
 let testFields;
 

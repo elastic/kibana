@@ -2,9 +2,10 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import Promise from 'bluebird';
+import requireCovered from '../../../../test_utils/requireCovered';
 
-import createKibanaIndex from '../create_kibana_index';
-import SetupError from '../setup_error';
+const createKibanaIndex = requireCovered('plugins/elasticsearch/lib/create_kibana_index');
+const SetupError = requireCovered('plugins/elasticsearch/lib/setup_error');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_kibana_index', function () {

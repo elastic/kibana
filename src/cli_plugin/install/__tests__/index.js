@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import index from '../index';
+import requireCovered from '../../../test_utils/requireCovered';
+const index = requireCovered('cli_plugin/install/index');
 
 describe('kibana cli', function () {
 

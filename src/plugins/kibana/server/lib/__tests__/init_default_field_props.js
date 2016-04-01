@@ -1,6 +1,9 @@
-import initDefaultFieldProps from '../init_default_field_props';
 import expect from 'expect.js';
 import _ from 'lodash';
+import requireCovered from '../../../../../test_utils/requireCovered';
+
+const initDefaultFieldProps = requireCovered('plugins/kibana/server/lib/init_default_field_props');
+
 let fields;
 
 const testData = [
