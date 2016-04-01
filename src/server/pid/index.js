@@ -1,20 +1,20 @@
-var _ = require('lodash');
-var Boom = require('boom');
-var Promise = require('bluebird');
-var writeFile = Promise.promisify(require('fs').writeFile);
-var unlink = require('fs').unlinkSync;
+let _ = require('lodash');
+let Boom = require('boom');
+let Promise = require('bluebird');
+let writeFile = Promise.promisify(require('fs').writeFile);
+let unlink = require('fs').unlinkSync;
 
 module.exports = Promise.method(function (kbnServer, server, config) {
-  var path = config.get('pid.file');
+  let path = config.get('pid.file');
   if (!path) return;
 
-  var pid = String(process.pid);
+  let pid = String(process.pid);
 
   return writeFile(path, pid, { flag: 'wx' })
   .catch(function (err) {
     if (err.code !== 'EEXIST') throw err;
 
-    var log = {
+    let log = {
       tmpl: 'pid file already exists at <%= path %>',
       path: path,
       pid: pid
@@ -36,7 +36,7 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       pid: pid
     });
 
-    var clean = _.once(function (code) {
+    let clean = _.once(function (code) {
       unlink(path);
     });
 

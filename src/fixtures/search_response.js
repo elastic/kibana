@@ -1,5 +1,5 @@
 define(function (require) {
-  var hits = require('fixtures/real_hits');
+  let hits = require('fixtures/real_hits');
 
   return {
     took: 73,

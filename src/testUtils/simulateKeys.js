@@ -1,10 +1,10 @@
 define(function (require) {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var Promise = require('bluebird');
-  var keyMap = require('ui/utils/key_map');
-  var reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
-  var KeyboardEvent = window.KeyboardEvent;
+  let $ = require('jquery');
+  let _ = require('lodash');
+  let Promise = require('bluebird');
+  let keyMap = require('ui/utils/key_map');
+  let reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
+  let KeyboardEvent = window.KeyboardEvent;
 
   /**
    * Simulate keyboard events in an element. This allows testing the way that
@@ -36,7 +36,7 @@ define(function (require) {
    * @async
    */
   return function ($el, sequence) {
-    var modifierState = {
+    let modifierState = {
       ctrlKey: false,
       shiftKey: false,
       altKey: false,
@@ -46,7 +46,7 @@ define(function (require) {
     return doList(_.clone(sequence));
 
     function setModifier(key, state) {
-      var name = key + 'Key';
+      let name = key + 'Key';
       if (modifierState.hasOwnProperty(name)) {
         modifierState[name] = !!state;
       }
@@ -56,7 +56,7 @@ define(function (require) {
       return Promise.try(function () {
         if (!list || !list.length) return;
 
-        var event = list[0];
+        let event = list[0];
         if (_.isString(event)) {
           event = { type: 'press', key: event };
         }
@@ -92,14 +92,14 @@ define(function (require) {
     }
 
     function fire(type, key, repeat) {
-      var keyCode = reverseKeyMap[key];
+      let keyCode = reverseKeyMap[key];
       if (!keyCode) throw new TypeError('invalid key "' + key + '"');
 
       if (type === 'keydown') setModifier(key, true);
       if (type === 'keyup') setModifier(key, false);
 
-      var $target = _.isFunction($el) ? $el() : $el;
-      var $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
+      let $target = _.isFunction($el) ? $el() : $el;
+      let $event = new $.Event(type, _.defaults({ keyCode: keyCode }, modifierState));
       $target.trigger($event);
     }
   };

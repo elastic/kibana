@@ -1,10 +1,10 @@
-var override = require('../override');
-var expect = require('expect.js');
+let override = require('../override');
+let expect = require('expect.js');
 
 describe('override(target, source)', function () {
 
   it('should override the values form source to target', function () {
-    var target = {
+    let target = {
       test: {
         enable: true,
         host: ['host-01', 'host-02'],
@@ -13,7 +13,7 @@ describe('override(target, source)', function () {
         }
       }
     };
-    var source = { test: { client: { type: 'nosql' } } };
+    let source = { test: { client: { type: 'nosql' } } };
     expect(override(target, source)).to.eql({
       test: {
         enable: true,
