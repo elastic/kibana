@@ -1,14 +1,14 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+let d3 = require('d3');
+let angular = require('angular');
+let _ = require('lodash');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
 
 describe('Vislib Column Layout Test Suite', function () {
   let layoutType;
   let columnLayout;
   let el;
-  var data = {
+  let data = {
     hits: 621,
     label: '',
     ordered: {

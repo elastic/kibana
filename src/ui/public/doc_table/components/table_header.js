@@ -1,11 +1,11 @@
 define(function (require) {
-  var _ = require('lodash');
-  var module = require('ui/modules').get('app/discover');
+  let _ = require('lodash');
+  let module = require('ui/modules').get('app/discover');
 
   require('ui/filters/short_dots');
 
   module.directive('kbnTableHeader', function (shortDotsFilter) {
-    var headerHtml = require('ui/doc_table/components/table_header.html');
+    let headerHtml = require('ui/doc_table/components/table_header.html');
     return {
       restrict: 'A',
       scope: {
@@ -16,9 +16,9 @@ define(function (require) {
       template: headerHtml,
       controller: function ($scope) {
 
-        var sortableField = function (field) {
+        let sortableField = function (field) {
           if (!$scope.indexPattern) return;
-          var sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
+          let sortable = _.get($scope.indexPattern.fields.byName[field], 'sortable');
           return sortable;
         };
 
@@ -34,22 +34,22 @@ define(function (require) {
         $scope.headerClass = function (column) {
           if (!sortableField(column)) return;
 
-          var sorting = $scope.sorting;
-          var defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
+          let sorting = $scope.sorting;
+          let defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
 
           if (!sorting || column !== sorting[0]) return defaultClass;
           return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
         };
 
         $scope.moveLeft = function (column) {
-          var index = _.indexOf($scope.columns, column);
+          let index = _.indexOf($scope.columns, column);
           if (index === 0) return;
 
           _.move($scope.columns, index, --index);
         };
 
         $scope.moveRight = function (column) {
-          var index = _.indexOf($scope.columns, column);
+          let index = _.indexOf($scope.columns, column);
           if (index === $scope.columns.length - 1) return;
 
           _.move($scope.columns, index, ++index);
@@ -62,9 +62,9 @@ define(function (require) {
         $scope.sort = function (column) {
           if (!column || !sortableField(column)) return;
 
-          var sorting = $scope.sorting = $scope.sorting || [];
+          let sorting = $scope.sorting = $scope.sorting || [];
 
-          var direction = sorting[1] || 'asc';
+          let direction = sorting[1] || 'asc';
           if (sorting[0] !== column) {
             direction = 'asc';
           } else {

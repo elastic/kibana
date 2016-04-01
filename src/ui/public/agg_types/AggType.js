@@ -1,8 +1,8 @@
 define(function (require) {
   return function AggTypeFactory(Private) {
-    var _ = require('lodash');
-    var AggParams = Private(require('ui/agg_types/AggParams'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    let _ = require('lodash');
+    let AggParams = Private(require('ui/agg_types/AggParams'));
+    let fieldFormats = Private(require('ui/registry/field_formats'));
 
     /**
      * Generic AggType Constructor
@@ -141,7 +141,7 @@ define(function (require) {
      * @return {FieldFromat}
      */
     AggType.prototype.getFormat = function (agg) {
-      var field = agg.field();
+      let field = agg.field();
       return field ? field.format : fieldFormats.getDefaultInstance('string');
     };
 

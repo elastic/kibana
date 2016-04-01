@@ -1,13 +1,13 @@
 define(function (require) {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
+  let _ = require('lodash');
+  let sinon = require('auto-release-sinon');
 
   return function (Private, Promise) {
-    var indexPatterns = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    var getIndexPatternStub = sinon.stub();
+    let indexPatterns = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    let getIndexPatternStub = sinon.stub();
     getIndexPatternStub.returns(Promise.resolve(indexPatterns));
 
-    var courier = {
+    let courier = {
       indexPatterns: { get: getIndexPatternStub },
       getStub: getIndexPatternStub
     };

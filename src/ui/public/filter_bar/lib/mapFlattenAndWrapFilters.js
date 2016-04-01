@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function mapFlattenAndWrapFilters(Private) {
-    var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+    let mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     return function (filters) {
       return mapAndFlattenFilters(filters).then(function (filters) {
         return _.map(filters, function (filter) {

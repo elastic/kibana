@@ -1,6 +1,6 @@
 define(function (require) {
   return function ResponseAggConfigProvider() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     /**
      * Get the ResponseAggConfig class for an aggConfig,
@@ -31,7 +31,7 @@ define(function (require) {
         this.key = key;
         this.parentId = this.id;
 
-        var subId = String(key);
+        let subId = String(key);
         if (subId.indexOf('.') > -1) {
           this.id = this.parentId + '[\'' + subId.replace(/'/g, '\\\'') + '\']';
         } else {

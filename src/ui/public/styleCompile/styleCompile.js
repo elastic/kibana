@@ -1,16 +1,16 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var $style = $('<style>').appendTo('head').attr('id', 'style-compile');
+  let _ = require('lodash');
+  let $ = require('jquery');
+  let $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
   require('ui/config');
 
   require('ui/modules')
   .get('kibana')
   .run(function ($rootScope, $compile, config) {
-    var truncateGradientHeight = 15;
-    var template = _.template(require('./styleCompile.css.tmpl'));
-    var locals = {};
+    let truncateGradientHeight = 15;
+    let template = _.template(require('./styleCompile.css.tmpl'));
+    let locals = {};
 
     // watch the value of the truncate:maxHeight config param
     $rootScope.$watch(function () {

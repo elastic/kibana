@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var NL_RE = /\n/g;
-  var events = 'keydown keypress keyup change';
+  let _ = require('lodash');
+  let NL_RE = /\n/g;
+  let events = 'keydown keypress keyup change';
 
   require('ui/modules').get('kibana')
   .directive('elasticTextarea', function () {

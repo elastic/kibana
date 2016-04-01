@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var TabCollection = require('../TabCollection');
+let _ = require('lodash');
+let TabCollection = require('../TabCollection');
 
 module.exports = function (chrome, internals) {
 
@@ -91,7 +91,7 @@ module.exports = function (chrome, internals) {
   // create a getter for properties of the active tab
   function activeGetter(prop) {
     return function (def) {
-      var active = chrome.getActiveTab();
+      let active = chrome.getActiveTab();
       return !active ? def : active[prop];
     };
   }

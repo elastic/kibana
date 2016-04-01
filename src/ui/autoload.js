@@ -1,30 +1,30 @@
-var _ = require('lodash');
-var resolve = require('path').resolve;
-var basename = require('path').basename;
-var readdir = require('fs').readdirSync;
+let _ = require('lodash');
+let resolve = require('path').resolve;
+let basename = require('path').basename;
+let readdir = require('fs').readdirSync;
 
-var utils = require('requirefrom')('src/utils');
-var fromRoot = utils('fromRoot');
+let utils = require('requirefrom')('src/utils');
+let fromRoot = utils('fromRoot');
 
 function scan(type) {
-  var dir = fromRoot('src/ui/public', type);
+  let dir = fromRoot('src/ui/public', type);
 
   return _.chain(readdir(dir))
   .reject(function (name) {
     return name[0] === '.' || name[0] === '_';
   })
   .map(function (filename) {
-    var path = resolve(dir, filename);
-    var name = basename(filename, '.js');
+    let path = resolve(dir, filename);
+    let name = basename(filename, '.js');
     return `ui/${type}/${name}`;
   })
   .value();
 }
 
 function findStyles() {
-  var base = ['ui/styles/theme.less', 'ui/styles/base.less'];
-  var exclude = ['ui/styles/mixins.less', 'ui/styles/variables.less'];
-  var found = scan('styles', true);
+  let base = ['ui/styles/theme.less', 'ui/styles/base.less'];
+  let exclude = ['ui/styles/mixins.less', 'ui/styles/variables.less'];
+  let found = scan('styles', true);
 
   return _.difference(_.union(base, found), exclude);
 }

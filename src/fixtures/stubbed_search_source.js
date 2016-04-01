@@ -1,10 +1,10 @@
 define(function (require) {
-  var sinon = require('auto-release-sinon');
-  var searchResponse = require('fixtures/search_response');
+  let sinon = require('auto-release-sinon');
+  let searchResponse = require('fixtures/search_response');
 
   return function stubSearchSource(Private, $q, Promise) {
-    var deferedResult = $q.defer();
-    var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    let deferedResult = $q.defer();
+    let indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
     return {
       sort: sinon.spy(),

@@ -1,7 +1,7 @@
 define(function (require) {
   return function MapFieldFn(Private, config) {
-    var _ = require('lodash');
-    var castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
+    let _ = require('lodash');
+    let castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
 
     /**
      * Accepts a field object and its name, and tries to give it a mapping
@@ -10,14 +10,14 @@ define(function (require) {
      * @return {Object} - the resulting field after overrides and tweaking
      */
     return function mapField(field, name) {
-      var keys = Object.keys(field.mapping);
+      let keys = Object.keys(field.mapping);
       if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-      var mapping = _.cloneDeep(field.mapping[keys.shift()]);
+      let mapping = _.cloneDeep(field.mapping[keys.shift()]);
       mapping.type = castMappingType(mapping.type);
 
       // Override the mapping, even if elasticsearch says otherwise
-      var mappingOverrides = {
+      let mappingOverrides = {
         _source: { type: '_source' },
         _index: { type: 'string' },
         _type: { type: 'string' },

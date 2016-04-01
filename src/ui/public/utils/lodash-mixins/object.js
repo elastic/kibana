@@ -19,8 +19,8 @@ define(function (require) {
        * @return {object}
        */
       flattenWith: function (dot, nestedObj, flattenArrays) {
-        var stack = []; // track key stack
-        var flatObj = {};
+        let stack = []; // track key stack
+        let flatObj = {};
 
         (function flattenObj(obj) {
           _.keys(obj).forEach(function (key) {

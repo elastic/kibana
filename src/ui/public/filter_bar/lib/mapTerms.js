@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function mapTermsProvider(Promise, courier) {
     return function (filter) {
       let key;

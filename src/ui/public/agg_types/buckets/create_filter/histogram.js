@@ -1,9 +1,9 @@
 define(function (require) {
-  var buildRangeFilter = require('ui/filter_manager/lib/range');
+  let buildRangeFilter = require('ui/filter_manager/lib/range');
 
   return function createHistogramFitlerProvider(Private) {
     return function (aggConfig, key) {
-      var value = parseInt(key, 10);
+      let value = parseInt(key, 10);
 
       return buildRangeFilter(
         aggConfig.params.field,

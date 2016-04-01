@@ -48,9 +48,9 @@ class UiBundleCollection {
       case 1:
         return `bundle for ${this.each[0].id}`;
       default:
-        var ids = this.getIds();
-        var last = ids.pop();
-        var commas = ids.join(', ');
+        let ids = this.getIds();
+        let last = ids.pop();
+        let commas = ids.join(', ');
         return `bundles for ${commas} and ${last}`;
     }
   }

@@ -1,7 +1,7 @@
 describe('Table Group class', function () {
   let TableGroup;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -9,7 +9,7 @@ describe('Table Group class', function () {
   }));
 
   it('exposes tables array and empty aggConfig, key and title', function () {
-    var tableGroup = new TableGroup();
+    let tableGroup = new TableGroup();
     expect(tableGroup.tables).to.be.an('array');
     expect(tableGroup.aggConfig).to.be(null);
     expect(tableGroup.key).to.be(null);

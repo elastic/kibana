@@ -1,6 +1,6 @@
-var _ = require('lodash');
+let _ = require('lodash');
 var { join } = require('path');
-var autoload = require('./autoload');
+let autoload = require('./autoload');
 
 class UiApp {
   constructor(uiExports, spec) {
