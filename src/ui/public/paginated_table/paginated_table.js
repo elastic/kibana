@@ -27,16 +27,14 @@ uiModules
         direction: null
       };
 
-      self.sortColumn = function (colIndex) {
+      self.sortColumn = function (colIndex, sortDirection) {
         var col = $scope.columns[colIndex];
 
         if (!col) return;
         if (col.sortable === false) return;
 
-        let sortDirection;
-
         if (self.sort.columnIndex !== colIndex) {
-          sortDirection = 'asc';
+          sortDirection = sortDirection || 'asc';
         } else {
           var directions = {
             null: 'asc',
@@ -51,29 +49,25 @@ uiModules
         if ($scope.sort) {
           _.assign($scope.sort, self.sort);
         }
-        self._setSortGetter(colIndex);
       };
 
-      self._setSortGetter = function (index) {
-        if (_.isFunction($scope.sortHandler)) {
-          // use custom sort handler
-          self.sort.getter = $scope.sortHandler(index);
-        } else {
-          // use generic sort handler
-          self.sort.getter = function (row) {
-            var value = row[index];
-            if (value && value.value != null) value = value.value;
-            if (typeof value === 'boolean') value = value ? 0 : 1;
-            return value;
-          };
-        }
-      };
+      function valueGetter(row) {
+        var value = row[self.sort.columnIndex];
+        if (value && value.value != null) value = value.value;
+        if (typeof value === 'boolean') value = value ? 0 : 1;
+        return value;
+      }
 
       // Set the sort state if it is set
       if ($scope.sort && $scope.sort.columnIndex !== null) {
         self.sortColumn($scope.sort.columnIndex, $scope.sort.direction);
       }
       function resortRows() {
+        const newSort = $scope.sort;
+        if (newSort && !_.isEqual(newSort, self.sort)) {
+          self.sortColumn(newSort.columnIndex, newSort.direction);
+        }
+
         if (!$scope.rows || !$scope.columns) {
           $scope.sortedRows = false;
           return;
@@ -83,22 +77,15 @@ uiModules
         if (sort.direction == null) {
           $scope.sortedRows = $scope.rows.slice(0);
         } else {
-          $scope.sortedRows = orderBy($scope.rows, sort.getter, sort.direction === 'desc');
+          $scope.sortedRows = orderBy($scope.rows, valueGetter, sort.direction === 'desc');
         }
       }
 
-      $scope.$watchCollection('sort', function (newSort) {
-        if (newSort && !_.isEqual(newSort, self.sort)) {
-          self.sortColumn(newSort.columnIndex, newSort.direction);
-          resortRows();
-        }
-      });
-
-      // update the sordedRows result
+      // update the sortedRows result
       $scope.$watchMulti([
         'rows',
         'columns',
-        '[]paginatedTable.sort'
+        '[]sort'
       ], resortRows);
     }
   };
