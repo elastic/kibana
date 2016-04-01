@@ -31,6 +31,7 @@ module.exports = {
     'no-bitwise': 0,
     'no-caller': 2,
     'no-cond-assign': 0,
+    'no-const-assign': 2,
     'no-debugger': 2,
     'no-empty': 2,
     'no-eval': 2,
