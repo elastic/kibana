@@ -26,7 +26,7 @@ define(function (require) {
 
         var id = RangeKey.idBucket(bucket);
 
-        var key = keys.get(id);
+        key = keys.get(id);
         if (!key) {
           key = new RangeKey(bucket);
           keys.set(id, key);
