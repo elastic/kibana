@@ -1,9 +1,9 @@
-var applyFiltersToKeys = require('../applyFiltersToKeys');
-var expect = require('expect.js');
+let applyFiltersToKeys = require('../applyFiltersToKeys');
+let expect = require('expect.js');
 
 describe('applyFiltersToKeys(obj, actionsByKey)', function () {
   it('applies for each key+prop in actionsByKey', function () {
-    var data = applyFiltersToKeys({
+    let data = applyFiltersToKeys({
       a: {
         b: {
           c: 1

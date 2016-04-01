@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var keys = {};
+  let _ = require('lodash');
+  let keys = {};
   return {
     get: function (path, def) {
       return keys[path] == null ? def : keys[path];

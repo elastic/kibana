@@ -1,9 +1,9 @@
-var $ = require('jquery');
-var _ = require('lodash');
+let $ = require('jquery');
+let _ = require('lodash');
 
-var $visCanvas = $('<div>').attr('id', 'vislib-vis-fixtures').appendTo('body');
-var count = 0;
-var visHeight = $visCanvas.height();
+let $visCanvas = $('<div>').attr('id', 'vislib-vis-fixtures').appendTo('body');
+let count = 0;
+let visHeight = $visCanvas.height();
 
 $visCanvas.new = function () {
   count += 1;
@@ -19,7 +19,7 @@ afterEach(function () {
 
 module.exports = function VislibFixtures(Private) {
   return function (visLibParams) {
-    var Vis = Private(require('ui/vislib/vis'));
+    let Vis = Private(require('ui/vislib/vis'));
     return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
       shareYAxis: true,
       addTooltip: true,
