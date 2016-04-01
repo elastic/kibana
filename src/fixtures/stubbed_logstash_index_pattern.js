@@ -1,21 +1,21 @@
 define(function (require) {
   return function stubbedLogstashIndexPatternService(Private) {
-    var StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
-    var fieldTypes = Private(require('ui/index_patterns/_field_types'));
-    var mockLogstashFields = Private(require('fixtures/logstash_fields'));
+    let StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
+    let fieldTypes = Private(require('ui/index_patterns/_field_types'));
+    let mockLogstashFields = Private(require('fixtures/logstash_fields'));
 
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var fields = mockLogstashFields.map(function (field) {
+    let fields = mockLogstashFields.map(function (field) {
       field.displayName = field.name;
-      var type = fieldTypes.byName[field.type];
+      let type = fieldTypes.byName[field.type];
       if (!type) throw new TypeError('unknown type ' + field.type);
       if (!_.has(field, 'sortable')) field.sortable = type.sortable;
       if (!_.has(field, 'filterable')) field.filterable = type.filterable;
       return field;
     });
 
-    var indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
+    let indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
     indexPattern.id = 'logstash-*';
 
     return indexPattern;
