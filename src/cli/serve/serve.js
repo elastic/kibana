@@ -1,9 +1,9 @@
 import _ from 'lodash';
-const { isWorker } = require('cluster');
-const { resolve } = require('path');
+import { isWorker } from 'cluster';
+import { resolve } from 'path';
+import { fromRoot } from '../../utils';
 
 const cwd = process.cwd();
-import { fromRoot } from '../../utils';
 
 let canCluster;
 try {
@@ -24,7 +24,7 @@ const pathCollector = function () {
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function initServerSettings(opts, extraCliOptions) {
+function readServerSettings(opts, extraCliOptions) {
   const readYamlConfig = require('./read_yaml_config');
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
@@ -116,7 +116,8 @@ module.exports = function (program) {
 
   command
   .action(async function (opts) {
-    const settings = initServerSettings(opts, this.getUnknownOptions());
+    const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
+    const settings = getCurrentSettings();
 
     if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
@@ -140,6 +141,12 @@ module.exports = function (program) {
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
     }
+
+    process.on('SIGHUP', function reloadConfig() {
+      const settings = getCurrentSettings();
+      kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
+      kbnServer.applyLoggingConfiguration(settings);
+    });
 
     return kbnServer;
   });
