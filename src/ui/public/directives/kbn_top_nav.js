@@ -26,6 +26,7 @@ module.directive('kbnTopNav', function (Private) {
       label: _.capitalize(opt.key),
       hasFunction: !!opt.run,
       description: ('Toggle ' + opt.key),
+      noButton: !!opt.noButton,
       run: defaultFunction
     }, opt);
   }
@@ -79,22 +80,34 @@ module.directive('kbnTopNav', function (Private) {
         } else {
           ctrlObj.curr = which;
         }
+
         const templateToCompile = ctrlObj.templates[ctrlObj.curr] || false;
-        $scope.kbnTopNav.currTemplate = templateToCompile ? $compile(templateToCompile)($scope) : false;
+
+        if ($scope.kbnTopNav.currTemplate) {
+          $scope.kbnTopNav.currTemplateScope.$destroy();
+          $scope.kbnTopNav.currTemplate.remove();
+        }
+
+        if (templateToCompile) {
+          $scope.kbnTopNav.currTemplateScope = $scope.$new();
+          $scope.kbnTopNav.currTemplate = $compile(templateToCompile)($scope.kbnTopNav.currTemplateScope);
+        } else {
+          $scope.kbnTopNav.currTemplateScope = null;
+          $scope.kbnTopNav.currTemplate = false;
+        }
       };
       const normalizeOpts = _.partial(optionsNormalizer, (item) => {
         ctrlObj.toggleCurrTemplate(item.key);
       });
 
-      const niceMenuItems = _.compact(($scope[$attrs.config] || []).map(normalizeOpts));
+      const niceMenuItems = _.compact(_.get($scope, $attrs.config, []).map(normalizeOpts));
       ctrlObj.templates = _.assign({
         interval: intervalTemplate,
         filter: filterTemplate,
       }, getTemplatesMap(niceMenuItems));
 
-
       $scope.kbnTopNav = {
-        menuItems: niceMenuItems,
+        menuItems: niceMenuItems.filter(item => !item.noButton),
         currTemplate: false,
         is: which => { return ctrlObj.curr === which; },
         close: () => { ctrlObj.toggleCurrTemplate(false); },
@@ -105,7 +118,6 @@ module.directive('kbnTopNav', function (Private) {
           }
         }
       };
-
     }],
     link: function ($scope, element, attr, configCtrl) {
       $scope.$watch('kbnTopNav.currTemplate', newVal => {

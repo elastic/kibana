@@ -9,7 +9,6 @@ define(function (require) {
   var collapseExpand = require('./_collapse_expand');
 
   bdd.describe('discover app', function () {
-    var scenarioManager;
     var remote;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
     this.timeout = config.timeouts.default;

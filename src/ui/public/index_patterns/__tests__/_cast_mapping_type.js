@@ -52,6 +52,17 @@ describe('type normalizer (castMappingType)', function () {
     });
   });
 
+  it('should cast text and keyword types to "string"', function () {
+    var types = [
+      'keyword',
+      'text'
+    ];
+
+    _.each(types, function (type) {
+      expect(fn(type)).to.be('string');
+    });
+  });
+
   it('should treat everything else as a string', function () {
     expect(fn('fooTypeIsNotReal')).to.be('string');
   });
