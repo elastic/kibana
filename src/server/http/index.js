@@ -13,7 +13,7 @@ module.exports = function (kbnServer, server, config) {
   const shortUrlLookup = require('./short_url_lookup')(server);
 
   // Create a new connection
-  var connectionOptions = {
+  let connectionOptions = {
     host: config.get('server.host'),
     port: config.get('server.port'),
     state: {

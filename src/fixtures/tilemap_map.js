@@ -1,5 +1,5 @@
 define(function (require) {
-  var sinon = require('auto-release-sinon');
+  let sinon = require('auto-release-sinon');
 
   function MockMap(container, chartData, params) {
     this.container = container;
