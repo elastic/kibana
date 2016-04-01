@@ -46,6 +46,7 @@ module.exports = {
     'no-new': 0,
     'no-path-concat': 0,
     'no-proto': 2,
+    'no-redeclare': 2,
     'no-return-assign': 0,
     'no-script-url': 2,
     'no-sequences': 2,
