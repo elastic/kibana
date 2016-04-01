@@ -1,7 +1,7 @@
 define(function (require) {
   return function CourierSegmentedReqHandle(Private) {
-    var _ = require('lodash');
-    var Events = Private(require('ui/events'));
+    let _ = require('lodash');
+    let Events = Private(require('ui/events'));
 
 
     /**

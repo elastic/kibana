@@ -21,7 +21,7 @@ function apply(obj, key, action) {
           obj[k] = ('' + val).replace(/./g, 'X');
         }
         else if (/\/.+\//.test(action)) {
-          var matches = action.match(/\/(.+)\//);
+          let matches = action.match(/\/(.+)\//);
           if (matches) {
             let regex = new RegExp(matches[1]);
             obj[k] = ('' + val).replace(regex, replacer);

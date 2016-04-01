@@ -1,22 +1,22 @@
 // Adds a filter to a passed state
 define(function (require) {
   return function (Private) {
-    var _ = require('lodash');
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var filterManager = {};
+    let _ = require('lodash');
+    let queryFilter = Private(require('ui/filter_bar/query_filter'));
+    let filterManager = {};
 
     filterManager.add = function (field, values, operation, index) {
       values = _.isArray(values) ? values : [values];
-      var fieldName = _.isObject(field) ? field.name : field;
-      var filters = _.flatten([queryFilter.getAppFilters()]);
-      var newFilters = [];
+      let fieldName = _.isObject(field) ? field.name : field;
+      let filters = _.flatten([queryFilter.getAppFilters()]);
+      let newFilters = [];
 
-      var negate = (operation === '-');
+      let negate = (operation === '-');
 
       // TODO: On array fields, negating does not negate the combination, rather all terms
       _.each(values, function (value) {
         let filter;
-        var existing = _.find(filters, function (filter) {
+        let existing = _.find(filters, function (filter) {
           if (!filter) return;
 
           if (fieldName === '_exists_' && filter.exists) {

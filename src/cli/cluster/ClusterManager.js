@@ -51,7 +51,7 @@ module.exports = class ClusterManager {
   }
 
   setupWatching() {
-    var chokidar = require('chokidar');
+    let chokidar = require('chokidar');
     let utils = require('requirefrom')('src/utils');
     let fromRoot = utils('fromRoot');
 

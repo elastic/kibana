@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
+  let _ = require('lodash');
+  let angular = require('angular');
   require('ace');
 
-  var html = require('ui/doc_viewer/doc_viewer.html');
+  let html = require('ui/doc_viewer/doc_viewer.html');
   require('ui/doc_viewer/doc_viewer.less');
 
   require('ui/modules').get('kibana')
@@ -38,7 +38,7 @@ define(function (require) {
           };
 
           $scope.showArrayInObjectsWarning = function (row, field) {
-            var value = $scope.flattened[field];
+            let value = $scope.flattened[field];
             return _.isArray(value) && typeof value[0] === 'object';
           };
         }

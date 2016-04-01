@@ -1,17 +1,17 @@
 require('babel/polyfill');
 
-var _ = require('lodash');
-var $ = require('jquery');
-var angular = require('angular');
+let _ = require('lodash');
+let $ = require('jquery');
+let angular = require('angular');
 
 require('ui/timefilter');
 require('ui/private');
 require('ui/promises');
 
-var metadata = require('ui/metadata');
+let metadata = require('ui/metadata');
 
-var chrome = {};
-var internals = _.defaults(
+let chrome = {};
+let internals = _.defaults(
   _.cloneDeep(metadata),
   {
     basePath: '',

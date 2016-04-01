@@ -1,6 +1,6 @@
 define(function (require) {
   return function HandlerTypeFactory(Private) {
-    var pointSeries = Private(require('ui/vislib/lib/handler/types/point_series'));
+    let pointSeries = Private(require('ui/vislib/lib/handler/types/point_series'));
 
     /**
      * Handles the building of each visualization

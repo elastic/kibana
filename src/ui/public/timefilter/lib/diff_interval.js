@@ -1,10 +1,10 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function diffTimeProvider(Private) {
-    var diff = Private(require('ui/utils/diff_time_picker_vals'));
+    let diff = Private(require('ui/utils/diff_time_picker_vals'));
 
     return function (self) {
-      var oldRefreshInterval = _.clone(self.refreshInterval);
+      let oldRefreshInterval = _.clone(self.refreshInterval);
 
       return function () {
         if (diff(self.refreshInterval, oldRefreshInterval)) {

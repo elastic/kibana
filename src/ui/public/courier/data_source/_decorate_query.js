@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function DecorateQuery(config) {
     /**
      * Decorate queries with default parameters
@@ -7,7 +7,7 @@ define(function (require) {
      * @returns {object}
      */
     return function (query) {
-      var queryOptions = config.get('query:queryString:options');
+      let queryOptions = config.get('query:queryString:options');
 
       if (_.has(query, 'query_string.query')) {
         _.extend(query.query_string, queryOptions);

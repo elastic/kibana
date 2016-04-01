@@ -1,20 +1,20 @@
 define(function (require) {
   return function contentTypesProvider(highlightFilter) {
-    var _ = require('lodash');
-    var angular = require('angular');
+    let _ = require('lodash');
+    let angular = require('angular');
     require('ui/highlight');
 
-    var types = {
+    let types = {
       html: function (format, convert) {
         return function recurse(value, field, hit) {
           if (!value || typeof value.map !== 'function') {
             return convert.call(format, value, field, hit);
           }
 
-          var subVals = value.map(function (v) {
+          let subVals = value.map(function (v) {
             return recurse(v, field, hit);
           });
-          var useMultiLine = subVals.some(function (sub) {
+          let useMultiLine = subVals.some(function (sub) {
             return sub.indexOf('\n') > -1;
           });
 
@@ -39,7 +39,7 @@ define(function (require) {
     }
 
     function fallbackHtml(value, field, hit) {
-      var formatted = _.escape(this.convert(value, 'text'));
+      let formatted = _.escape(this.convert(value, 'text'));
 
       if (!hit || !hit.highlight || !hit.highlight[field.name]) {
         return formatted;
@@ -49,8 +49,8 @@ define(function (require) {
     }
 
     function setup(format) {
-      var src = format._convert || {};
-      var converters = format._convert = {};
+      let src = format._convert || {};
+      let converters = format._convert = {};
 
       converters.text = types.text(format, src.text || fallbackText);
       converters.html = types.html(format, src.html || fallbackHtml);

@@ -1,7 +1,7 @@
 define(function (require) {
   return function EnsureSomeIndexPatternsFn(Private, Notifier, $location, kbnUrl) {
-    var errors = require('ui/errors');
-    var notify = new Notifier();
+    let errors = require('ui/errors');
+    let notify = new Notifier();
 
     return function ensureSomeIndexPatterns() {
       return function promiseHandler(patterns) {

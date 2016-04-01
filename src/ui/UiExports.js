@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var minimatch = require('minimatch');
+let _ = require('lodash');
+let minimatch = require('minimatch');
 
-var UiAppCollection = require('./UiAppCollection');
+let UiAppCollection = require('./UiAppCollection');
 
 class UiExports {
   constructor({ urlBasePath }) {
@@ -16,10 +16,10 @@ class UiExports {
   consumePlugin(plugin) {
     plugin.apps = new UiAppCollection(this);
 
-    var types = _.keys(plugin.uiExportsSpecs);
+    let types = _.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
-    var unkown = _.reject(types, this.exportConsumer, this);
+    let unkown = _.reject(types, this.exportConsumer, this);
     if (unkown.length) {
       throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
     }
@@ -80,9 +80,9 @@ class UiExports {
   }
 
   find(patterns) {
-    var aliases = this.aliases;
-    var names = _.keys(aliases);
-    var matcher = _.partialRight(minimatch.filter, { matchBase: true });
+    let aliases = this.aliases;
+    let names = _.keys(aliases);
+    let matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)
     .map(function (pattern) {

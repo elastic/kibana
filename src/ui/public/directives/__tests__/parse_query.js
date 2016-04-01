@@ -1,7 +1,7 @@
-var angular = require('angular');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let angular = require('angular');
+let sinon = require('auto-release-sinon');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 // Load the kibana app dependencies.
 require('ui/parse_query');
@@ -15,12 +15,12 @@ let config;
 let $elemScope;
 let $elem;
 
-var cycleIndex = 0;
-var markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
+let cycleIndex = 0;
+let markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 let fromUser;
-var toUser = require('ui/parse_query/lib/to_user');
+let toUser = require('ui/parse_query/lib/to_user');
 
-var init = function () {
+let init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -40,7 +40,7 @@ var init = function () {
   });
 };
 
-var compile = function () {
+let compile = function () {
   $rootScope.mockModel = 'cycle' + cycleIndex++;
   $rootScope.mockQueryInput = undefined;
 

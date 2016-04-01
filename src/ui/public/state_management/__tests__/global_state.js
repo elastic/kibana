@@ -1,7 +1,7 @@
 
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let sinon = require('sinon');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 require('ui/state_management/global_state');
 
 describe('State Management', function () {

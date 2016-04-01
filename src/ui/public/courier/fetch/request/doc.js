@@ -1,9 +1,9 @@
 define(function (require) {
   return function DocRequestProvider(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var docStrategy = Private(require('ui/courier/fetch/strategy/doc'));
-    var AbstractRequest = Private(require('ui/courier/fetch/request/request'));
+    let docStrategy = Private(require('ui/courier/fetch/strategy/doc'));
+    let AbstractRequest = Private(require('ui/courier/fetch/request/request'));
 
     _.class(DocRequest).inherits(AbstractRequest);
     function DocRequest(source, defer) {
@@ -14,15 +14,15 @@ define(function (require) {
     }
 
     DocRequest.prototype.canStart = function () {
-      var parent = DocRequest.Super.prototype.canStart.call(this);
+      let parent = DocRequest.Super.prototype.canStart.call(this);
       if (!parent) return false;
 
-      var version = this.source._version;
-      var storedVersion = this.source._getStoredVersion();
+      let version = this.source._version;
+      let storedVersion = this.source._getStoredVersion();
 
       // conditions that equal "fetch This DOC!"
-      var unknown = !version && !storedVersion;
-      var mismatch = version !== storedVersion;
+      let unknown = !version && !storedVersion;
+      let mismatch = version !== storedVersion;
 
       return Boolean(mismatch || (unknown && !this.started));
     };

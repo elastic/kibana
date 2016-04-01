@@ -1,4 +1,4 @@
-var moment = require('moment');
+let moment = require('moment');
 
 module.exports = {
   'label': '',

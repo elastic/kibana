@@ -1,14 +1,14 @@
 define(function (require) {
   return function AggConfigsFactory(Private) {
-    var _ = require('lodash');
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
-    var IndexedArray = require('ui/IndexedArray');
+    let _ = require('lodash');
+    let AggConfig = Private(require('ui/Vis/AggConfig'));
+    let IndexedArray = require('ui/IndexedArray');
 
     AggConfig.aggTypes = Private(require('ui/agg_types/index'));
 
     _.class(AggConfigs).inherits(IndexedArray);
     function AggConfigs(vis, configStates) {
-      var self = this;
+      let self = this;
       self.vis = vis;
 
       configStates = AggConfig.ensureIds(configStates || []);
@@ -35,9 +35,9 @@ define(function (require) {
         })
         .each(function (schema) {
           if (!self.bySchemaName[schema.name]) {
-            var defaults = schema.defaults.slice(0, schema.max);
+            let defaults = schema.defaults.slice(0, schema.max);
             _.each(defaults, function (defaultState) {
-              var state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
+              let state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
               self.push(new AggConfig(vis, state));
             });
           }
@@ -47,7 +47,7 @@ define(function (require) {
     }
 
     AggConfigs.prototype.toDsl = function () {
-      var dslTopLvl = {};
+      let dslTopLvl = {};
       let dslLvlCursor;
       let nestedMetrics;
 
@@ -75,8 +75,8 @@ define(function (require) {
           // start at the top level
           dslLvlCursor = dslTopLvl;
         } else {
-          var prevConfig = list[i - 1];
-          var prevDsl = dslLvlCursor[prevConfig.id];
+          let prevConfig = list[i - 1];
+          let prevDsl = dslLvlCursor[prevConfig.id];
 
           // advance the cursor and nest under the previous agg, or
           // put it on the same level if the previous agg doesn't accept
@@ -84,7 +84,7 @@ define(function (require) {
           dslLvlCursor = prevDsl.aggs || dslLvlCursor;
         }
 
-        var dsl = dslLvlCursor[config.id] = config.toDsl();
+        let dsl = dslLvlCursor[config.id] = config.toDsl();
         let subAggs;
 
         if (config.schema.group === 'buckets' && i < list.length - 1) {
@@ -121,7 +121,7 @@ define(function (require) {
      */
     AggConfigs.prototype.getResponseAggs = function () {
       return this.getRequestAggs().reduce(function (responseValuesAggs, agg) {
-        var aggs = agg.getResponseAggs();
+        let aggs = agg.getResponseAggs();
         return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
       }, []);
     };
@@ -136,7 +136,7 @@ define(function (require) {
      */
     AggConfigs.prototype.getResponseAggById = function (id) {
       id = String(id);
-      var reqAgg = _.find(this.getRequestAggs(), function (agg) {
+      let reqAgg = _.find(this.getRequestAggs(), function (agg) {
         return id.substr(0, String(agg.id).length) === agg.id;
       });
       if (!reqAgg) return;

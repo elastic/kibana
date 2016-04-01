@@ -1,15 +1,15 @@
 define(function (require) {
   return function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
-    var notify = new Notifier();
-    var _ = require('lodash');
-    var angular = require('angular');
+    let notify = new Notifier();
+    let _ = require('lodash');
+    let angular = require('angular');
 
-    var vals = Private(require('ui/config/_vals'));
+    let vals = Private(require('ui/config/_vals'));
 
     return function DelayedUpdater(doc) {
-      var updater = this;
-      var queue = [];
-      var log = {};
+      let updater = this;
+      let queue = [];
+      let log = {};
       let timer;
 
       updater.fire = function () {
@@ -21,8 +21,8 @@ define(function (require) {
 
         let method;
         let body;
-        var updated = [];
-        var deleted = [];
+        let updated = [];
+        let deleted = [];
 
         // seperate the log into lists
         Object.keys(log).forEach(function (key) {
@@ -53,8 +53,8 @@ define(function (require) {
       };
 
       updater.update = function (key, val, silentAndLocal) {
-        var newVal = val;
-        var oldVal = vals[key];
+        let newVal = val;
+        let oldVal = vals[key];
 
         if (angular.equals(newVal, oldVal)) {
           return Promise.resolve();
@@ -70,7 +70,7 @@ define(function (require) {
 
         if (silentAndLocal) return Promise.resolve();
 
-        var defer = Promise.defer();
+        let defer = Promise.defer();
         queue.push(defer);
         notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
         $rootScope.$broadcast('change:config.' + key, newVal, oldVal);

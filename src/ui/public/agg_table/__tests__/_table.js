@@ -1,10 +1,10 @@
 describe('AggTable Directive', function () {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var fixtures = require('fixtures/fake_hierarchical_data');
-  var sinon = require('auto-release-sinon');
+  let _ = require('lodash');
+  let $ = require('jquery');
+  let ngMock = require('ngMock');
+  let expect = require('expect.js');
+  let fixtures = require('fixtures/fake_hierarchical_data');
+  let sinon = require('auto-release-sinon');
 
   let $rootScope;
   let $compile;
@@ -32,10 +32,10 @@ describe('AggTable Directive', function () {
 
 
   it('renders a simple response properly', function () {
-    var vis = new Vis(indexPattern, 'table');
+    let vis = new Vis(indexPattern, 'table');
     $scope.table = tabifyAggResponse(vis, fixtures.metricOnly, { canSplit: false });
 
-    var $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
+    let $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
 
     expect($el.find('tbody').size()).to.be(1);
@@ -45,14 +45,14 @@ describe('AggTable Directive', function () {
 
   it('renders nothing if the table is empty', function () {
     $scope.table = null;
-    var $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
+    let $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
 
     expect($el.find('tbody').size()).to.be(0);
   });
 
   it('renders a complex response properly', function () {
-    var vis = new Vis(indexPattern, {
+    let vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -66,27 +66,27 @@ describe('AggTable Directive', function () {
     });
 
     $scope.table = tabifyAggResponse(vis, fixtures.threeTermBuckets, { canSplit: false });
-    var $el = $('<kbn-agg-table table="table"></kbn-agg-table>');
+    let $el = $('<kbn-agg-table table="table"></kbn-agg-table>');
     $compile($el)($scope);
     $scope.$digest();
 
     expect($el.find('tbody').size()).to.be(1);
 
-    var $rows = $el.find('tbody tr');
+    let $rows = $el.find('tbody tr');
     expect($rows.size()).to.be.greaterThan(0);
 
     function validBytes(str) {
       expect(str).to.match(/^\d+$/);
-      var bytesAsNum = _.parseInt(str);
+      let bytesAsNum = _.parseInt(str);
       expect(bytesAsNum === 0 || bytesAsNum > 1000).to.be.ok();
     }
 
     $rows.each(function (i) {
       // 6 cells in every row
-      var $cells = $(this).find('td');
+      let $cells = $(this).find('td');
       expect($cells.size()).to.be(6);
 
-      var txts = $cells.map(function () {
+      let txts = $cells.map(function () {
         return $(this).text().trim();
       });
 
@@ -106,11 +106,11 @@ describe('AggTable Directive', function () {
 
   describe('aggTable.toCsv()', function () {
     it('escapes and formats the rows and columns properly', function () {
-      var $el = $compile('<kbn-agg-table table="table">')($scope);
+      let $el = $compile('<kbn-agg-table table="table">')($scope);
       $scope.$digest();
 
-      var $tableScope = $el.isolateScope();
-      var aggTable = $tableScope.aggTable;
+      let $tableScope = $el.isolateScope();
+      let aggTable = $tableScope.aggTable;
 
       $tableScope.table = {
         columns: [
@@ -147,13 +147,13 @@ describe('AggTable Directive', function () {
     });
 
     it('calls _saveAs properly', function () {
-      var $el = $compile('<kbn-agg-table table="table">')($scope);
+      let $el = $compile('<kbn-agg-table table="table">')($scope);
       $scope.$digest();
 
-      var $tableScope = $el.isolateScope();
-      var aggTable = $tableScope.aggTable;
+      let $tableScope = $el.isolateScope();
+      let aggTable = $tableScope.aggTable;
 
-      var saveAs = sinon.stub(aggTable, '_saveAs');
+      let saveAs = sinon.stub(aggTable, '_saveAs');
       $tableScope.table = {
         columns: [
           { title: 'one' },
@@ -169,7 +169,7 @@ describe('AggTable Directive', function () {
       aggTable.exportAsCsv();
 
       expect(saveAs.callCount).to.be(1);
-      var call = saveAs.getCall(0);
+      let call = saveAs.getCall(0);
       expect(call.args[0]).to.be.a(FakeBlob);
       expect(call.args[0].slices).to.eql([
         'one,two,"with double-quotes("")"' + '\r\n' +
@@ -182,12 +182,12 @@ describe('AggTable Directive', function () {
     });
 
     it('should use the export-title attribute', function () {
-      var expected = 'export file name';
-      var $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
+      let expected = 'export file name';
+      let $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
       $scope.$digest();
 
-      var $tableScope = $el.isolateScope();
-      var aggTable = $tableScope.aggTable;
+      let $tableScope = $el.isolateScope();
+      let aggTable = $tableScope.aggTable;
       $tableScope.table = {
         columns: [],
         rows: []

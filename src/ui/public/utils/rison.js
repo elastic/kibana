@@ -1,6 +1,6 @@
 /* eslint-disable */
 define(function () {
-  var rison = {};
+  let rison = {};
   //////////////////////////////////////////////////
   //
   //  the stringifier is based on
@@ -39,11 +39,11 @@ define(function () {
   //rison.idchar_punctuation = "_-./~";
 
   (function () {
-      var l = [];
-      for (var hi = 0; hi < 16; hi++) {
-          for (var lo = 0; lo < 16; lo++) {
+      let l = [];
+      for (let hi = 0; hi < 16; hi++) {
+          for (let lo = 0; lo < 16; lo++) {
               if (hi+lo == 0) continue;
-              var c = String.fromCharCode(hi*16 + lo);
+              let c = String.fromCharCode(hi*16 + lo);
               if (! /\w|[-_.\/~]/.test(c))
                   l.push('\\u00' + hi.toString(16) + lo.toString(16));
           }
@@ -69,7 +69,7 @@ define(function () {
 
 
   (function () {
-      var idrx = '[^' + rison.not_idstart + rison.not_idchar +
+      let idrx = '[^' + rison.not_idstart + rison.not_idchar +
                  '][^' + rison.not_idchar + ']*';
 
       rison.id_ok = new RegExp('^' + idrx + '$');
@@ -110,17 +110,17 @@ define(function () {
   //
 
   (function () {
-      var sq = { // url-ok but quoted in strings
+      let sq = { // url-ok but quoted in strings
                  "'": true,  '!': true
       },
       enc = function (v) {
           if (v && typeof v.toJSON === 'function') v = v.toJSON();
-          var fn = s[typeof v];
+          let fn = s[typeof v];
           if (fn) return fn(v);
       },
       s = {
               array: function (x) {
-                  var a = ['!('], b, f, i, l = x.length, v;
+                  let a = ['!('], b, f, i, l = x.length, v;
                   for (i = 0; i < l; i += 1) {
                       v = enc(x[i]);
                       if (typeof v == 'string') {
@@ -154,7 +154,7 @@ define(function () {
                           return s.array(x);
                       }
 
-                      var a = ['('], b, f, i, v, ki, ks=[];
+                      let a = ['('], b, f, i, v, ki, ks=[];
                       for (i in x)
                           ks[ks.length] = i;
                       ks.sort();
@@ -212,7 +212,7 @@ define(function () {
       rison.encode_object = function (v) {
           if (typeof v != 'object' || v === null || v instanceof Array)
               throw new Error("rison.encode_object expects an object argument");
-          var r = s[typeof v](v);
+          let r = s[typeof v](v);
           return r.substring(1, r.length-1);
       };
 
@@ -223,7 +223,7 @@ define(function () {
       rison.encode_array = function (v) {
           if (!(v instanceof Array))
               throw new Error("rison.encode_array expects an array argument");
-          var r = s[typeof v](v);
+          let r = s[typeof v](v);
           return r.substring(2, r.length-1);
       };
 
@@ -259,8 +259,8 @@ define(function () {
    *     http://osteele.com/sources/openlaszlo/json
    */
   rison.decode = function(r) {
-      var errcb = function(e) { throw Error('rison decoder error: ' + e); };
-      var p = new rison.parser(errcb);
+      let errcb = function(e) { throw Error('rison decoder error: ' + e); };
+      let p = new rison.parser(errcb);
       return p.parse(r);
   };
 
@@ -315,7 +315,7 @@ define(function () {
       this.string = str;
       this.index = 0;
       this.message = null;
-      var value = this.readValue();
+      let value = this.readValue();
       if (!this.message && this.next())
           value = this.error("unable to parse string as rison: '" + rison.encode(str) + "'");
       if (this.message && this.errorHandler)
@@ -331,26 +331,26 @@ define(function () {
   }
 
   rison.parser.prototype.readValue = function () {
-      var c = this.next();
-      var fn = c && this.table[c];
+      let c = this.next();
+      let fn = c && this.table[c];
 
       if (fn)
           return fn.apply(this);
 
       // fell through table, parse as an id
 
-      var s = this.string;
-      var i = this.index-1;
+      let s = this.string;
+      let i = this.index-1;
 
       // Regexp.lastIndex may not work right in IE before 5.5?
       // g flag on the regexp is also necessary
       rison.next_id.lastIndex = i;
-      var m = rison.next_id.exec(s);
+      let m = rison.next_id.exec(s);
 
       // console.log('matched id', i, r.lastIndex);
 
       if (m.length > 0) {
-          var id = m[0];
+          let id = m[0];
           this.index = i+id.length;
           return id;  // a string
       }
@@ -360,7 +360,7 @@ define(function () {
   }
 
   rison.parser.parse_array = function (parser) {
-      var ar = [];
+      let ar = [];
       let c;
       while ((c = parser.next()) != ')') {
           if (!c) return parser.error("unmatched '!('");
@@ -371,7 +371,7 @@ define(function () {
               return parser.error("extra ','");
           } else
               --parser.index;
-          var n = parser.readValue();
+          let n = parser.readValue();
           if (typeof n == "undefined") return undefined;
           ar.push(n);
       }
@@ -387,10 +387,10 @@ define(function () {
 
   rison.parser.prototype.table = {
       '!': function () {
-          var s = this.string;
-          var c = s.charAt(this.index++);
+          let s = this.string;
+          let c = s.charAt(this.index++);
           if (!c) return this.error('"!" at end of input');
-          var x = rison.parser.bangs[c];
+          let x = rison.parser.bangs[c];
           if (typeof(x) == 'function') {
               return x.call(null, this);
           } else if (typeof(x) == 'undefined') {
@@ -399,9 +399,9 @@ define(function () {
           return x;
       },
       '(': function () {
-          var o = {};
+          let o = {};
           let c;
-          var count = 0;
+          let count = 0;
           while ((c = this.next()) != ')') {
               if (count) {
                   if (c != ',')
@@ -410,10 +410,10 @@ define(function () {
                   return this.error("extra ','");
               } else
                   --this.index;
-              var k = this.readValue();
+              let k = this.readValue();
               if (typeof k == "undefined") return undefined;
               if (this.next() != ':') return this.error("missing ':'");
-              var v = this.readValue();
+              let v = this.readValue();
               if (typeof v == "undefined") return undefined;
               o[k] = v;
               count++;
@@ -421,10 +421,10 @@ define(function () {
           return o;
       },
       "'": function () {
-          var s = this.string;
-          var i = this.index;
-          var start = i;
-          var segments = [];
+          let s = this.string;
+          let i = this.index;
+          let start = i;
+          let segments = [];
           let c;
           while ((c = s.charAt(i++)) != "'") {
               //if (i == s.length) return this.error('unmatched "\'"');
@@ -449,18 +449,18 @@ define(function () {
       // Also any digit.  The statement that follows this table
       // definition fills in the digits.
       '-': function () {
-          var s = this.string;
-          var i = this.index;
-          var start = i-1;
-          var state = 'int';
-          var permittedSigns = '-';
-          var transitions = {
+          let s = this.string;
+          let i = this.index;
+          let start = i-1;
+          let state = 'int';
+          let permittedSigns = '-';
+          let transitions = {
               'int+.': 'frac',
               'int+e': 'exp',
               'frac+e': 'exp'
           };
           do {
-              var c = s.charAt(i++);
+              let c = s.charAt(i++);
               if (!c) break;
               if ('0' <= c && c <= '9') continue;
               if (permittedSigns.indexOf(c) >= 0) {
@@ -478,17 +478,17 @@ define(function () {
   };
   // copy table['-'] to each of table[i] | i <- '0'..'9':
   (function (table) {
-      for (var i = 0; i <= 9; i++)
+      for (let i = 0; i <= 9; i++)
           table[String(i)] = table['-'];
   })(rison.parser.prototype.table);
 
   // return the next non-whitespace character, or undefined
   rison.parser.prototype.next = function () {
-      var s = this.string;
-      var i = this.index;
+      let s = this.string;
+      let i = this.index;
       do {
           if (i == s.length) return undefined;
-          var c = s.charAt(i++);
+          let c = s.charAt(i++);
       } while (rison.parser.WHITESPACE.indexOf(c) >= 0);
       this.index = i;
       return c;
