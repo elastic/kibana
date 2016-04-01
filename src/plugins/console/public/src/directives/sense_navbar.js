@@ -16,14 +16,13 @@ require('ui/modules')
     },
     controllerAs: 'navbar',
     controller: class SenseNavbarController {
-      constructor($scope) {
+      constructor($scope, $timeout, $element) {
         $scope.chrome = require('ui/chrome');
 
         this.menu = [
           {
             key: 'welcome',
             noButton: true,
-            openByDefault: storage.get('version_welcome_shown') !== '@@SENSE_REVISION',
             template: `<sense-welcome></sense-welcome>`
           },
           {
@@ -42,6 +41,19 @@ require('ui/modules')
             template: `<sense-help></sense-help>`
           },
         ];
+
+        $timeout(function tryToOpenWelcomeTemplate() {
+          if (storage.get('version_welcome_shown') === '@@SENSE_REVISION') {
+            return;
+          }
+
+          const $topNavScope = $element.find('kbn-top-nav').scope();
+          if ($topNavScope && $topNavScope.kbnTopNav) {
+            $topNavScope.kbnTopNav.open('welcome')
+          } else {
+            $timeout(tryToOpenWelcomeTemplate, 10);
+          }
+        }, 0)
 
         this.updateServerUrlHistory();
       }
