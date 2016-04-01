@@ -1,0 +1,62 @@
+Backport PR #6654
+---------
+
+**Commit 1:**
+Troubleshooting
+
+* Original sha: 81a9f29b364c99aef39c407e580c540169948815
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-22T21:44:17Z
+
+**Commit 2:**
+Merge branch 'master' into issue/6556
+
+* Original sha: f628114f3e17c79a633dc547b94693e0974336da
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-24T16:48:41Z
+
+**Commit 3:**
+troubleshooting
+
+* Original sha: 152f2b6f380d57e1f06b5ba4ed94a15e356cdc9a
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-24T17:13:01Z
+
+**Commit 4:**
+Closes #6556. Fixes issue with global x and y axis selection.
+
+* Original sha: 2ffbb76d7a49a8b3b35f9a6ef6a95f40f03e620f
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-24T22:44:54Z
+
+**Commit 5:**
+Merge branch 'master' into issue/6556
+
+* Original sha: da025aaca92783cb10fda1dc48c13ea532136aba
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-24T22:45:12Z
+
+**Commit 6:**
+Merge branch 'master' into issue/6556
+
+* Original sha: cf4a152a976584b61833198775ab1bc7301de762
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-24T22:45:50Z
+
+**Commit 7:**
+fixing tests
+
+* Original sha: b2f26e7924e23c471044d240404ef18637839ab5
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-25T16:55:30Z
+
+**Commit 8:**
+Merge branch 'master' into issue/6556
+
+* Original sha: a56c5d5f3535fa52cf4b83a4fefd51985664883e
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-25T17:51:21Z
+
+**Commit 9:**
+refactoring
+
+* Original sha: b42f5bfa2f2bd87dc7315e2219302cffbaacdb11
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-25T21:43:59Z
+
+**Commit 10:**
+Merge branch 'master' into issue/6556
+
+* Original sha: 7f96a111b75557f24b45df0343352362c3c5ec08
+* Authored by Shelby Sturgis <shelbyjsturgis@gmail.com> on 2016-03-28T22:59:03Z
