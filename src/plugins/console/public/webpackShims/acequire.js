@@ -1,1 +1,1 @@
-module.exports = require('ace').require;
+module.exports = require('./ace').require;

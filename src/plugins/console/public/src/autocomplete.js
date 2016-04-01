@@ -202,12 +202,12 @@ module.exports = function (editor) {
       editor: editor
     };
 
-//      context.updatedForToken = session.getTokenAt(pos.row, pos.column);
-//
-//      if (!context.updatedForToken)
-//        context.updatedForToken = { value: "", start: pos.column }; // empty line
-//
-//      context.updatedForToken.row = pos.row; // extend
+    //  context.updatedForToken = session.getTokenAt(pos.row, pos.column);
+    //
+    //  if (!context.updatedForToken)
+    //    context.updatedForToken = { value: "", start: pos.column }; // empty line
+    //
+    //  context.updatedForToken.row = pos.row; // extend
 
     context.autoCompleteType = getAutoCompleteType(pos);
     switch (context.autoCompleteType) {
@@ -963,9 +963,9 @@ module.exports = function (editor) {
     }
   });
 
-  var langTools = ace.require('ace/ext/language_tools'),
-    aceUtils = ace.require('ace/autocomplete/util'),
-    aceAutoComplete = ace.require('ace/autocomplete');
+  var langTools = ace.require('ace/ext/language_tools');
+  var aceUtils = ace.require('ace/autocomplete/util');
+  var aceAutoComplete = ace.require('ace/autocomplete');
 
   langTools.addCompleter({
     getCompletions: getCompletions
@@ -1017,7 +1017,6 @@ module.exports = function (editor) {
   };
 
   editor.__ace.completer = aceAutoCompleteInstance;
-
 
   return {
     _test: {
