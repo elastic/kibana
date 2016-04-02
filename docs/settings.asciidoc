@@ -183,11 +183,13 @@ include::string-formatter.asciidoc[]
 
 ==== Numeric Field Formatters
 
-Numeric fields support the `Url`, `String`, `Bytes`, `Number`, `Percentage`, and `Color` formatters.
+Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
+
+include::url-formatter.asciidoc[]
 
 include::string-formatter.asciidoc[]
 
-include::url-formatter.asciidoc[]
+include::duration-formatter.asciidoc[]
 
 include::color-formatter.asciidoc[]
 
