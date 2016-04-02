@@ -4,20 +4,50 @@
 The {version} release of Kibana requires Elasticsearch {esversion} or later.
 
 [float]
+[[breaking]]
+== Breaking Change
+
+* {k4issue}5591[Issue 5591]: The command-line plugin tool no longer supports Github.
+
+[float]
 [[enhancements]]
 == Enhancements
 
-// * {k4issue}5109[Issue 5109]: Adds custom JSON and filter alias naming for filters.
-// * {k4issue}1726[Issue 1726]: Adds a color field formatter for value ranges in numeric fields.
-// * {k4issue}4342[Issue 4342]: Increased performance for wildcard indices.
-// * {k4issue}1600[Issue 1600]: Support for global time zones.
-// * {k4pull}5275[Pull Request 5275]: Highlighting values in Discover can now be disabled.
-// * {k4issue}5212[Issue 5212]: Adds support for multiple certificate authorities.
-// * {k4issue}2716[Issue 2716]: The open/closed position of the spy panel now persists across UI state changes.
+* {k4issue}6387[Issue 6387]: A new look for Kibana: new logo and UI, improved layout and navigation.
+* {k4pull}6402[Pull Request 6402]: Refactored the command-line plugin management tool to support cross-stack plugin 
+management.
+* {k4issue}5130[Issue 5130]: Adds a duration formatter for numeric fields.
+* {k4issue}2964[Issue 2964]: Adds a setting to configure the default columns visible in the Discover tab.
+* {k4issue}6379[Issue 6379]: Adds a title case formatter for string fields.
+* {k4pull}6610[Pull Request 6610]: Adds a configuration variable for the Kibana server name.
 
 [float]
 [[bugfixes]]
 == Bug Fixes
 
-// * {k4issue}5165[Issue 5165]: Resolves a display error in embedded views.
-// * {k4issue}5021[Issue 5021]: Improves visualization dimming for dashboards with auto-refresh.
+* {k4issue}5914[Issue 5914]: Adds ability to aggregate on unindexed fields.
+* {k4issue}6142[Issue 6142]: Allows the `exists` filter on unindexed fields.
+* {k4pull}6158[Pull Request 6158]: Corrects a sorting issue with Boolean values.
+* {k4issue}5898[Issue 5898]: Corrects a stale state issue with the *Show Empty Buckets* option in histogram 
+visualizations.
+* {k4pull}6627[Issue 6627]: Corrects the default value of `pingTimeout` to match the value in the documentation.
+
+[float]
+[[plugins-apis]]
+== Plugins, APIs, and Development Infrastructure
+
+NOTE: The items in this section are not a complete list of the internal changes relating to development in Kibana. Plugin 
+framework and APIs are not formally documented and not guaranteed to be backward compatible from release to release.
+
+* {k4issue}5198[Issue 5198]: Injects buttons from the plugin to the navigation bar.
+* {k4issue}6016[Issue 6016]: Enables plugins to export settings pages.
+* {k4issue}5214[Issue 5214]: Make the document table pluggable.
+* {k4pull}6122[Pull Requests 6122 and 6222]: Assorted plugins.
+* {k4pull}6054[Pull Request 6054]: Enables nested plugins.
+* {k4issue}6304[Issue 6304]: Enables plugins to add prefixes to the configuration.
+* {k4pull}6177[Pull Request 6177]: Enables plugins to exist outside the Kibana source tree.
+* {k4pull}5871[Pull Request 5871]: Changes to the autoloading of plugin dependencies.
+* {k4issue}5199[Issue 5199]: API for creating index patterns.
+* {k4pull}6534[Pull Request 6534]: Adds a `_count` API to retrieve the index pattern document count.
+* {k4pull}5870[Pull Request 5870]: Updates the wording of the error message when the Kibana server can’t start due to a 
+code-level issue.
