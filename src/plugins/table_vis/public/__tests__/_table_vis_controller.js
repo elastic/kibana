@@ -7,6 +7,7 @@ import tabifyPm from 'ui/agg_response/tabify/tabify';
 import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import StateManagementAppStateProvider from 'ui/state_management/app_state';
 describe('Controller', function () {
 
   let $rootScope;
@@ -25,6 +26,7 @@ describe('Controller', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
+    AppState = Private(StateManagementAppStateProvider);
     TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
   }));
