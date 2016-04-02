@@ -1,5 +1,4 @@
 import 'ui/doc_title';
-import 'ui/directives/kbn_top_nav';
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 
 const module = require('ui/modules').get('app/sense');

@@ -1,6 +1,8 @@
 const history = require('../history');
 const es = require('../es');
 const storage = require('../storage');
+require('ui/kbn_top_nav');
+const KbnTopNavControllerProvider = require('ui/kbn_top_nav/kbn_top_nav_controller');
 
 require('ui/modules')
 .get('app/sense')
@@ -16,13 +18,14 @@ require('ui/modules')
     },
     controllerAs: 'navbar',
     controller: class SenseNavbarController {
-      constructor($scope, $timeout, $element) {
+      constructor($scope, $timeout, $element, Private) {
+        const KbnTopNavController = Private(KbnTopNavControllerProvider);
         $scope.chrome = require('ui/chrome');
 
-        this.menu = [
+        this.menu = new KbnTopNavController([
           {
             key: 'welcome',
-            noButton: true,
+            hideButton: true,
             template: `<sense-welcome></sense-welcome>`
           },
           {
@@ -40,20 +43,11 @@ require('ui/modules')
             description: 'Help',
             template: `<sense-help></sense-help>`
           },
-        ];
+        ]);
 
-        $timeout(function tryToOpenWelcomeTemplate() {
-          if (storage.get('version_welcome_shown') === '@@SENSE_REVISION') {
-            return;
-          }
-
-          const $topNavScope = $element.find('kbn-top-nav').scope();
-          if ($topNavScope && $topNavScope.kbnTopNav) {
-            $topNavScope.kbnTopNav.open('welcome')
-          } else {
-            $timeout(tryToOpenWelcomeTemplate, 10);
-          }
-        }, 0)
+        if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
+          this.menu.open('welcome')
+        }
 
         this.updateServerUrlHistory();
       }
