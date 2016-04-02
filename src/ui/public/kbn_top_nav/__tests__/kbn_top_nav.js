@@ -3,12 +3,12 @@ import expect from 'expect.js';
 import { assign } from 'lodash';
 import $ from 'jquery';
 
+import '../';
 import navbarExtensionsRegistry from 'ui/registry/navbar_extensions';
 import Registry from 'ui/registry/_registry';
 import 'ui/navbar_extensions';
 
-describe('kbnTopNav Directive', function () {
-
+describe('kbnTopNav directive', function () {
   var build = function () {};
   let $testScope = null;
   let stubRegistry;
