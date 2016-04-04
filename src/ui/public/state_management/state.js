@@ -6,7 +6,8 @@ import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
 
 
-export default function StateProvider(Private, $rootScope, $location) {
+export default function StateProvider(Private, $rootScope, $location, config) {
+  var notify = new Notifier();
   var Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
@@ -44,7 +45,6 @@ export default function StateProvider(Private, $rootScope, $location) {
     try {
       return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
     } catch (e) {
-      var notify = new Notifier();
       notify.error('Unable to parse URL');
       search[this._urlParam] = rison.encode(this._defaults);
       $location.search(search).replace();
@@ -106,6 +106,14 @@ export default function StateProvider(Private, $rootScope, $location) {
       $location.search(search).replace();
     } else {
       $location.search(search);
+    }
+
+    const warnLength = config.get('warn:urlLength');
+    if (warnLength && $location.absUrl().length > warnLength) {
+      notify.warning(`
+        The URL has gotten big and may cause Kibana
+        to stop working. Please simplify the data on screen.
+      `);
     }
   };
 
