@@ -14,8 +14,7 @@ The {version} release of Kibana requires Elasticsearch {esversion} or later.
 == Enhancements
 
 * {k4issue}6387[Issue 6387]: A new look for Kibana: new logo and UI, improved layout and navigation.
-* {k4pull}6402[Pull Request 6402]: Refactored the command-line plugin management tool to support cross-stack plugin 
-management.
+* {k4pull}6402[Pull Request 6402]: New command-line plugin management tool supports cross-stack plugin management.
 * {k4issue}5130[Issue 5130]: Adds a duration formatter for numeric fields.
 * {k4issue}2964[Issue 2964]: Adds a setting to configure the default columns visible in the Discover tab.
 * {k4issue}6379[Issue 6379]: Adds a title case formatter for string fields.

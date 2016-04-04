@@ -280,6 +280,7 @@ you'll need to update your `kibana.yml` file. You can also enable SSL and set a 
 
 include::kibana-yml.asciidoc[]
 
+////
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
 [horizontal]
@@ -409,6 +410,7 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 `logging.dest` added[4.2]:: The location where you want to store the Kibana's log output. If not specified, log output is written to standard output and not stored. Specifying a log file suppresses log writes to standard output.
 +
 *alias*: `log_file` deprecated[4.2]
+////
 
 [[managing-saved-objects]]
 === Managing Saved Searches, Visualizations, and Dashboards 
