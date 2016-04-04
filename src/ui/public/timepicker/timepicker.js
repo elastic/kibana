@@ -16,7 +16,7 @@ var notify = new Notifier({
 });
 
 
-module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
+module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals, config) {
   return {
     restrict: 'E',
     scope: {
@@ -155,6 +155,14 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       init();
+    },
+    link: function ($scope) {
+      config.$bind($scope, 'dateFormat:dow', 'dateFormat_dow');
+
+      $scope.$watch('dateFormat_dow', function (day) {
+        const dow = moment.weekdays().indexOf(day);
+        moment.locale(moment.locale(), { week: { dow } });
+      });
     }
   };
 });
