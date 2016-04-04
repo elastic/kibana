@@ -90,7 +90,7 @@ uiModules.get('kibana')
       // Most of these functions were moved directly from the old Legend class. Not a fan of this.
       function getLabels(data, type) {
         if (!data) return [];
-        var data = data.columns || data.rows || [data];
+        data = data.columns || data.rows || [data];
         if (type === 'pie') return Data.prototype.pieNames(data);
         return getSeriesLabels(data);
       };
