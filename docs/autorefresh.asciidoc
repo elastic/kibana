@@ -15,7 +15,5 @@ is open and select an autorefresh interval:
 
 image::images/autorefresh-intervals.png[]
 
-// Autorefresh only displays when the time picker is open, is that on purpose?
-
 When auto-refresh is enabled, Kibana's top bar displays a pause button and the auto-refresh interval: 
 image:images/autorefresh-pause.png[]. Click the *Pause* button to pause auto-refresh.
