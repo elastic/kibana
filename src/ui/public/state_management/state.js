@@ -108,8 +108,18 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       $location.search(search);
     }
 
-    const warnLength = config.get('warn:urlLength');
-    if (warnLength && $location.absUrl().length > warnLength) {
+    const urlLength = $location.absUrl().length;
+    const warnLength = config.get('url:warnLength');
+    const failLength = config.get('url:limit');
+
+    if (failLength && urlLength >= failLength) {
+      throw new TypeError(`
+        The URL has gotten too big and kibana can no longer
+        continue. Please refresh to return to your previous state.
+      `);
+    }
+
+    if (warnLength && urlLength >= warnLength) {
       notify.warning(`
         The URL has gotten big and may cause Kibana
         to stop working. Please simplify the data on screen.
