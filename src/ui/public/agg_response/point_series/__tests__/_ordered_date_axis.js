@@ -28,7 +28,7 @@ describe('orderedDateAxis', function () {
     }
   };
 
-  var orderedDateAxis;
+  let orderedDateAxis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

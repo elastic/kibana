@@ -46,10 +46,10 @@ module.directive('kbnTableRow', function ($compile) {
       };
 
       // when we compile the details, we use this $scope
-      var $detailsScope;
+      let $detailsScope;
 
       // when we compile the toggle button in the summary, we use this $scope
-      var $toggleScope;
+      let $toggleScope;
 
       // toggle display of the rows details, a full list of the fields from each row
       $scope.toggleRow = function () {

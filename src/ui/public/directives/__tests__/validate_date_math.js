@@ -5,8 +5,8 @@ import 'ui/directives/validate_date_math';
 
 
 describe('Validate date math directive', function () {
-  var $compile;
-  var $rootScope;
+  let $compile;
+  let $rootScope;
   var html = '<input type="text" ng-model="value" validate-date-math />';
 
   beforeEach(ngMock.module('kibana'));

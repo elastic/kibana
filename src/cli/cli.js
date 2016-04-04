@@ -1,10 +1,10 @@
 import _ from 'lodash';
-
 import pkg from '../utils/package_json';
 import Command from './command';
+import serveCommand from './serve/serve';
 
-let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-let program = new Command('bin/kibana');
+const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
+const program = new Command('bin/kibana');
 
 program
 .version(pkg.version)
@@ -14,15 +14,14 @@ program
 );
 
 // attach commands
-require('./serve/serve')(program);
-require('./plugin/plugin')(program);
+serveCommand(program);
 
 program
 .command('help <command>')
 .description('Get the help for a specific command')
 .action(function (cmdName) {
-  var cmd = _.find(program.commands, { _name: cmdName });
-  if (!cmd) return this.error(`unknown command ${cmdName}`);
+  const cmd = _.find(program.commands, { _name: cmdName });
+  if (!cmd) return program.error(`unknown command ${cmdName}`);
   cmd.help();
 });
 
@@ -33,7 +32,7 @@ program
 });
 
 // check for no command name
-var subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
 
 if (!subCommand) {
   if (_.intersection(argv.slice(2), ['-h', '--help']).length) {

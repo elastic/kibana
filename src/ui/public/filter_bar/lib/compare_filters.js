@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
-var excludedAttributes;
-var comparators;
+let excludedAttributes;
+let comparators;
 
 /**
  * Compare two filters to see if they match

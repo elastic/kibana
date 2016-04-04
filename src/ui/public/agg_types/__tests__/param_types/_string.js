@@ -6,11 +6,11 @@ import AggTypesParamTypesStringProvider from 'ui/agg_types/param_types/string';
 
 module.exports = describe('String', function () {
   var paramName = 'json_test';
-  var BaseAggParam;
-  var StringAggParam;
-  var aggParam;
-  var aggConfig;
-  var output;
+  let BaseAggParam;
+  let StringAggParam;
+  let aggParam;
+  let aggConfig;
+  let output;
 
   function initAggParam(config) {
     config = config || {};

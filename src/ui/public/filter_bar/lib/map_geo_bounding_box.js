@@ -1,11 +1,11 @@
 import _ from 'lodash';
 export default function mapGeoBoundBoxProvider(Promise, courier) {
   return function (filter) {
-    var key;
-    var value;
-    var topLeft;
-    var bottomRight;
-    var field;
+    let key;
+    let value;
+    let topLeft;
+    let bottomRight;
+    let field;
     if (filter.geo_bounding_box) {
       return courier
       .indexPatterns

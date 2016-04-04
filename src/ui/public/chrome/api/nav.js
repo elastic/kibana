@@ -40,25 +40,72 @@ export default function (chrome, internals) {
   }
 
   function refreshLastUrl(link) {
-    link.lastSubUrl = internals.appUrlStore.getItem(lastSubUrlKey(link));
+    link.lastSubUrl = internals.appUrlStore.getItem(lastSubUrlKey(link)) || link.lastSubUrl || link.url;
+  }
+
+  function getAppId(url) {
+    const pathname = parse(url).pathname;
+    const pathnameWithoutBasepath = pathname.slice(chrome.getBasePath().length);
+    const match = pathnameWithoutBasepath.match(/^\/app\/([^\/]+)(?:\/|\?|#|$)/);
+    if (match) return match[1];
+  }
+
+  function decodeKibanaUrl(url) {
+    const parsedUrl = parse(url, true);
+    const appId = getAppId(parsedUrl);
+    const hash = parsedUrl.hash || '';
+    const parsedHash = parse(hash.slice(1), true);
+    const globalState = parsedHash.query && parsedHash.query._g;
+    return { appId, globalState, parsedUrl, parsedHash };
+  }
+
+  function injectNewGlobalState(link, fromAppId, newGlobalState) {
+    // parse the lastSubUrl of this link so we can manipulate its parts
+    const { appId: toAppId, parsedHash: toHash, parsedUrl: toParsed } = decodeKibanaUrl(link.lastSubUrl);
+
+    // don't copy global state if links are for different apps
+    if (fromAppId !== toAppId) return;
+
+    // add the new globalState to the hashUrl in the linkurl
+    const toHashQuery = toHash.query || {};
+    toHashQuery._g = newGlobalState;
+
+    // format the new subUrl and include the newHash
+    link.lastSubUrl = format({
+      protocol: toParsed.protocol,
+      port: toParsed.port,
+      hostname: toParsed.hostname,
+      pathname: toParsed.pathname,
+      query: toParsed.query,
+      hash: format({
+        pathname: toHash.pathname,
+        query: toHashQuery,
+        hash: toHash.hash,
+      }),
+    });
   }
 
   internals.trackPossibleSubUrl = function (url) {
-    for (const link of internals.nav) {
-      link.active = startsWith(url, link.url);
+    const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
 
+    for (const link of internals.nav) {
+      const matchingTab = find(internals.tabs, { rootUrl: link.url });
+
+      link.active = startsWith(url, link.url);
       if (link.active) {
         setLastUrl(link, url);
         continue;
       }
 
-      const matchingTab = find(internals.tabs, { rootUrl: link.url });
       if (matchingTab) {
         setLastUrl(link, matchingTab.getLastUrl());
-        continue;
+      } else {
+        refreshLastUrl(link);
       }
 
-      refreshLastUrl(link);
+      if (newGlobalState) {
+        injectNewGlobalState(link, appId, newGlobalState);
+      }
     }
   };
 
