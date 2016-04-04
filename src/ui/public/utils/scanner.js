@@ -38,6 +38,11 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
 
   return new Promise((resolve, reject) => {
     const getMoreUntilDone = (error, response) => {
+      if (error) {
+        console.error(error);
+        resolve(allResults);
+        return;
+      }
       const scanAllResults = opts.docCount === Infinity;
       allResults.total = scanAllResults ? response.hits.total : Math.min(response.hits.total, opts.docCount);
       scrollId = response._scroll_id || scrollId;
