@@ -276,16 +276,6 @@
     .visualize-show-spy {
       border-top-color: @visualize-show-spy-border;
 
-      &-tab {
-        border-color: @visualize-show-spy-border;
-        background: @visualize-show-spy-bg;
-        color: @visualize-show-spy-color;
-
-        &:hover {
-          background-color: @visualize-show-spy-hover-bg;
-          color: @visualize-show-spy-hover-color;
-        }
-      }
     }
     .visualize-spy-container {
       pre {
@@ -321,15 +311,6 @@
 
 // /src/ui/public/vislib/styles/_legend.less
   .legend-col-wrapper {
-
-    .legend-toggle {
-      &:hover {
-        color: @sidebar-hover-color;
-        background-color: @sidebar-hover-bg;
-      }
-
-      background-color: @sidebar-bg;
-    }
 
     .legend-ul {
       border-left-color: @sidebar-bg;
@@ -437,15 +418,13 @@
   }
 
   .leaflet-left {
-    .leaflet-control {
+    .leaflet-control,
+    .leaflet-draw-actions {
       a,
       a:hover {
-        color: @tilemap-leaflet-control-color;
+        color: @dark-button-font;
+        background-color: @dark-button-bg;
       }
-    }
-
-    .leaflet-draw-actions a {
-      background-color: @tilemap-leaflet-control-draw-action-bg;
     }
   }
 
@@ -486,7 +465,7 @@
 
 // /src/ui/public/styles/config.less
   .config {
-    border-bottom-color: @config-border;
+    border-bottom: 0 none transparent;
 
     .config-close {
       background-color: @config-close-bg;
@@ -533,6 +512,10 @@
       .pagination-other-pages {
         &-list {
           > li {
+            a {
+              background-color: @dark-button-bg;
+              color: @white;
+            }
             &.active a {
               color: @paginate-page-link-active-color;
             }
@@ -579,5 +562,11 @@
         }
       }
     }
+  }
+
+  saved-object-finder .form-group span,
+  .kibana-nav-actions .active {
+    background-color: @dark-button-bg;
+    color: @dark-button-font;
   }
 }
