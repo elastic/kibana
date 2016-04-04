@@ -21,7 +21,7 @@ module.exports = async function (kbnServer, server, config) {
       handler: {
         directory: {
           path: dirPath,
-          listing: true,
+          listing: config.get('server.staticDirectoryListings'),
           lookupCompressed: true
         }
       },
