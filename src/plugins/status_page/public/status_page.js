@@ -4,6 +4,7 @@ import $ from 'jquery';
 import 'ui/autoload/styles';
 import 'plugins/status_page/status_page_metric';
 import 'plugins/status_page/status_page.less';
+import uiModules from 'ui/modules';
 
 
 const chrome = require('ui/chrome')
@@ -28,6 +29,7 @@ const chrome = require('ui/chrome')
       const data = resp.data;
       ui.metrics = data.metrics;
       ui.statuses = data.status.statuses;
+      ui.name = data.name;
 
       const overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {
@@ -48,7 +50,7 @@ const chrome = require('ui/chrome')
   ui.refresh();
 });
 
-require('ui/modules').get('kibana')
+uiModules.get('kibana')
 .config(function (appSwitcherEnsureNavigationProvider) {
   appSwitcherEnsureNavigationProvider.forceNavigation(true);
 });

@@ -38,7 +38,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       var currentFilter = $scope.filter;
 
       // the most recently entered search/filter
-      var prevSearch;
+      let prevSearch;
 
       // the list of hits, used to render display
       self.hits = [];

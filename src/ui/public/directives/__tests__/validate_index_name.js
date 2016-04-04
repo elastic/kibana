@@ -6,8 +6,8 @@ import 'ui/directives/validate_index_name';
 // Load the kibana app dependencies.
 
 describe('Validate index name directive', function () {
-  var $compile;
-  var $rootScope;
+  let $compile;
+  let $rootScope;
   var html = '<input type="text" ng-model="indexName" validate-index-name />';
 
   beforeEach(ngMock.module('kibana'));

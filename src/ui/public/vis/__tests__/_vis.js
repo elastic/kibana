@@ -7,11 +7,11 @@ import RegistryVisTypesProvider from 'ui/registry/vis_types';
 describe('Vis Class', function () {
 
 
-  var indexPattern;
-  var Vis;
-  var visTypes;
+  let indexPattern;
+  let Vis;
+  let visTypes;
 
-  var vis;
+  let vis;
   var stateFixture = {
     type: 'pie',
     aggs: [

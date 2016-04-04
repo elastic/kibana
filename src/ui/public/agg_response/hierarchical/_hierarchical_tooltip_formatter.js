@@ -21,7 +21,7 @@ export default function HierarchicalTooltipFormaterProvider($rootScope, $compile
       _.forEachRight($tooltipScope.rows, function (row, i, rows) {
         row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
 
-        var percent;
+        let percent;
         if (row.item.percentOfGroup != null) {
           percent = row.item.percentOfGroup;
         }

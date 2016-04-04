@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   "took": 35,
   "timed_out": false,
   "_shards": {
