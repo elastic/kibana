@@ -1,38 +1,44 @@
 import $ from 'jquery';
+import truncText from 'trunc-text';
+import truncHTML from 'trunc-html';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.directive('kbnTruncated', function ($compile) {
   return {
     restrict: 'E',
     scope: {
-      orig: '@',
-      length: '@'
+      source: '@',
+      length: '@',
+      isHtml: '@'
     },
     template: function ($element, attrs) {
-      var template = '<span>{{text}}</span>';
-      template += '<span ng-if="orig.length > length"> <a ng-click="toggle()">{{action}}</a></span>';
-      return template;
+      return `
+        <span ng-if="!isHtml">{{content}}</span>
+        <span ng-if="isHtml" ng-bind-html="content | trustAsHtml"></span>
+        <span ng-if="truncated">
+          <a ng-click="toggle()">{{action}}</a>
+        </span>
+      `;
     },
     link: function ($scope, $element, attrs) {
+      const source = $scope.source;
+      const max = $scope.length;
+      const truncated = $scope.isHtml
+        ? truncHTML(source, max).html
+        : truncText(source, max);
 
-      var fullText = $scope.orig;
-      var truncated = fullText.substring(0, $scope.length);
+      $scope.content = truncated;
 
-      if (fullText === truncated) {
-        $scope.text = fullText;
+      if (source === truncated) {
         return;
       }
-
-      truncated += '...';
-
+      $scope.truncated = true;
       $scope.expanded = false;
-      $scope.text = truncated;
       $scope.action = 'more';
-
-      $scope.toggle = function () {
+      $scope.toggle = () => {
         $scope.expanded = !$scope.expanded;
-        $scope.text = $scope.expanded ? fullText : truncated;
+        $scope.content = $scope.expanded ? source : truncated;
         $scope.action = $scope.expanded ? 'less' : 'more';
       };
     }

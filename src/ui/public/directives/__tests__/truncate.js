@@ -23,7 +23,7 @@ var init = function (text) {
 
     // Create the element
     $elem = angular.element(
-      '<kbn-truncated orig="' + text + '" length="10"></kbn-truncated>'
+      '<kbn-truncated source="' + text + '" length="10"></kbn-truncated>'
     );
 
     // And compile it
