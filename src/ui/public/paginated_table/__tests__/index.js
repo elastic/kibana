@@ -161,6 +161,16 @@ describe('paginated table', function () {
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
     });
 
+    it('should set the sort direction to asc when it\'s not explicity set', function () {
+      paginatedTable.sortColumn(1);
+      $scope.$digest();
+
+      var tableRows = $el.find('tbody tr');
+      expect(tableRows.eq(2).find('td').eq(1).text()).to.be('cccc');
+      expect(tableRows.eq(1).find('td').eq(1).text()).to.be('bbbb');
+      expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+    });
+
     it('should allow you to explicitly set the sort direction', function () {
       paginatedTable.sortColumn(1, 'desc');
       $scope.$digest();
