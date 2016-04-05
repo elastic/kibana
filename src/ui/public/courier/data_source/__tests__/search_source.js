@@ -4,7 +4,7 @@ import sinon from 'auto-release-sinon';
 
 import RequestQueueProv from '../../_request_queue';
 import SearchSourceProv from '../search_source';
-import StubIndexPatternProv from 'testUtils/stub_index_pattern';
+import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
 describe('SearchSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
