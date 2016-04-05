@@ -10,6 +10,10 @@ describe('fieldWildcard', function () {
       expect('1234a').to.match(makeRegEx('1234*'));
       expect('12a34').to.match(makeRegEx('12a34'));
     });
+
+    it('properly escapes regexp control characters', function () {
+      expect('account[user_id]').to.match(makeRegEx('account[*]'));
+    });
   });
 
   describe('filter', function () {
