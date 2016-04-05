@@ -5,66 +5,93 @@
 </p>
 
 <div ng-class="{ saving: fieldFilters.saving }" class="field-filters-container">
-  <form
-    ng-repeat="filter in fieldFilters.all()"
-    ng-submit="fieldFilters.save(filter)"
-    class="field-filter"
-    name="form">
 
-    <div class="value">
-      <span ng-if="fieldFilters.editting !== filter">{{ filter.value }}</span>
+  <table class="table table-hover">
+    <tbody>
+      <tr ng-repeat="filter in fieldFilters.all()">
+        <td>
+          <form
+            ng-submit="fieldFilters.save(filter)"
+            class="field-filter"
+            name="form">
 
-      <input
-        ng-model="filter.value"
-        ng-if="fieldFilters.editting === filter"
-        placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
-        type="text"
-        required
-        class="form-control">
-    </div>
+            <div class="value">
+              <span ng-if="fieldFilters.editting !== filter">{{ filter.value }}</span>
 
-    <div class="controls">
-      <button
-        aria-label="Edit field filter"
-        ng-if="fieldFilters.editting !== filter"
-        ng-click="fieldFilters.editting = filter"
-        type="button"
-        class="btn btn-default">
-        <i aria-hidden="true" class="fa fa-pencil"></i>
-      </button>
-      <button
-        aria-label="Save field filter"
-        ng-if="fieldFilters.editting === filter"
-        type="submit"
-        class="btn btn-primary">
-        <i aria-hidden="true" class="fa fa-save"></i>
-      </button>
-      <button
-        aria-label="Delete field filter"
-        ng-click="fieldFilters.delete(filter)"
-        type="button"
-        class="btn btn-danger">
-        <i aria-hidden="true" class="fa fa-trash"></i>
-      </button>
-    </div>
-  </form>
+              <input
+                ng-model="filter.value"
+                input-focus
+                ng-if="fieldFilters.editting === filter"
+                placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
+                type="text"
+                required
+                class="form-control">
+            </div>
 
-  <form name="form" ng-submit="fieldFilters.create()">
-    <div class="input-group">
-      <input
-        ng-model="fieldFilters.newValue"
-        placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
-        type="text"
-        class="form-control">
+            <div class="controls">
+              <button
+                aria-label="Edit field filter"
+                ng-if="fieldFilters.editting !== filter"
+                ng-click="fieldFilters.editting = filter"
+                type="button"
+                class="btn btn-default">
+                <i aria-hidden="true" class="fa fa-pencil"></i>
+              </button>
+              <button
+                aria-label="Save field filter"
+                ng-if="fieldFilters.editting === filter"
+                type="submit"
+                class="btn btn-primary">
+                <i aria-hidden="true" class="fa fa-save"></i>
+              </button>
+              <button
+                aria-label="Delete field filter"
+                ng-click="fieldFilters.delete(filter)"
+                type="button"
+                class="btn btn-danger">
+                <i aria-hidden="true" class="fa fa-trash"></i>
+              </button>
+            </div>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>
+          <form name="form" ng-submit="fieldFilters.create()">
+            <div class="input-group">
+              <input
+                ng-model="fieldFilters.newValue"
+                placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
+                type="text"
+                class="form-control">
 
-      <div class="input-group-btn" role="group" aria-label="Field Filter Editor Controls">
-        <button
-          type="submit"
-          class="btn btn-primary"
-          ng-disabled="!fieldFilters.newValue">
-          Add
-        </button>
-      </div>
-    </div>
-  </form>
+              <div class="input-group-btn" role="group" aria-label="Field Filter Editor Controls">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  ng-disabled="!fieldFilters.newValue">
+                  Add
+                </button>
+              </div>
+            </div>
+          </form>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div ng-if="fieldFilters.all().length" class="known-matches">
+    <h4>Known Matches</h4>
+    <p ng-if="!fieldFilters.sampleMatches">
+      <em>The selected field filters don't match any known fields.</em>
+    </p>
+    <p ng-if="fieldFilters.sampleMatches">
+      Based on the choosen field filters, these are the known fields that would be excluded from document sources.
+    </p>
+    <ul>
+      <li ng-repeat="match in fieldFilters.sampleMatches">{{match}}</li>
+    </ul>
+  </div>
 </div>

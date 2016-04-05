@@ -7,6 +7,7 @@ import RequestQueueProvider from '../_request_queue';
 import ErrorHandlersProvider from '../_error_handlers';
 import FetchProvider from '../fetch';
 import DecorateQueryProvider from './_decorate_query';
+import { fieldWildcardFilter } from '../../field_wildcard';
 
 export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
   let requestQueue = Private(RequestQueueProvider);
@@ -381,6 +382,11 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
             recurse(agg.aggs || agg.aggregations);
           });
         }(flatState.body.aggs || flatState.body.aggregations));
+
+        if (flatState.body._source && flatState.body.fielddata_fields) {
+          const filter = fieldWildcardFilter(flatState.body._source.exclude);
+          flatState.body.fielddata_fields = flatState.body.fielddata_fields.filter(filter);
+        }
       }
 
       return flatState;
