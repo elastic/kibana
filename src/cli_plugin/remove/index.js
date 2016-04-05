@@ -34,6 +34,6 @@ export default function pluginRemove(program) {
   )
   .description('remove a plugin',
 `common examples:
-  remove xpack`)
+  remove x-pack`)
   .action(processCommand);
 };
