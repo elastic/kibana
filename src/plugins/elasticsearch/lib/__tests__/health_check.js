@@ -58,8 +58,8 @@ describe('plugins/elasticsearch', function () {
       server = {
         log: sinon.stub(),
         info: { port: 5601 },
-        config: function () { return { get: get, set: set }; },
-        plugins: { elasticsearch: { client: client  } }
+        config: function () { return { get, set }; },
+        plugins: { elasticsearch: { client  } }
       };
 
       health = healthCheck(plugin, server);
