@@ -1,0 +1,61 @@
+<div
+  ng-if="filter.bool"
+  ng-repeat="(clause, expressions) in filter.bool"
+  class="fe-expression fe-expression-{{::clause}}">
+
+  <span ng-repeat="expression in expressions">
+    <span ng-repeat="(filterType, fields) in expression">
+      <div ng-repeat="(fieldName, value) in fields" class="row">
+        <div class="col-xs-11">
+          <div class="fe-inputs">
+            <select
+              ng-model="fieldName"
+              ng-change="changeField(fieldName, expression)"
+              ng-options="name for name in indexFieldNames"
+              class="fe-field form-control">
+            </select>
+
+            <select
+              ng-model="clause"
+              ng-change="changeClause('{{::clause}}', clause, expression)"
+              ng-options="name for (name, label) in clauses"
+              class="fe-clause form-control">
+            </select>
+
+            <select
+              ng-model="filterType"
+              ng-change="changeFilterType(filterType, expression)"
+              ng-options="name as label for (name, label) in types"
+              class="fe-type form-control">
+            </select>
+
+            <div class="fe-query-container">
+              <input
+                ng-if="value | isObject"
+                ng-model="value.query"
+                class="fe-query form-control" />
+
+              <input
+                ng-if="!(value | isObject)"
+                ng-model="expression[filterType][fieldName]"
+                class="fe-query form-control" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-1 fe-actions">
+          <i ng-click="add(clause, expression)" class="fa fa-fw fa-plus"></i>
+          <i ng-click="remove(clause, $parent.$parent.$index)" class="fa fa-fw fa-trash"></i>
+        </div>
+      </div>
+    </span>
+  </span>
+</div>
+
+<div class="row">
+  <div class="col-xs-1 col-xs-offset-11">
+    <button class="btn btn-success" type='button'>
+      <i ng-click="add()" class="fa fa-fw fa-plus"></i>
+    </botton>
+  </div>
+</div>

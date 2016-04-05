@@ -1,0 +1,51 @@
+filter-editor {
+  select {
+    float: left;
+    width: auto;
+  }
+
+  .fe-inputs {
+    display: inline-block;
+    width: 100%;
+  }
+
+  .form-control {
+    width: auto;
+  }
+
+  .fe-query-container {
+    overflow: hidden;
+
+    input.fe-query {
+      width: 100%
+    }
+  }
+
+  .fe-expression {
+    border-left: solid 2px @kibanaBlue2;
+    padding: 5px;
+
+    &.fe-expression-must {
+      border-left-color: @kibanaGreen2;
+    }
+
+    &.fe-expression-must_not {
+      border-left-color: @kibanaRed2;
+    }
+  }
+
+  .fe-clause,
+  .fe-type {
+    width: 100px;
+  }
+
+  .fe-field {
+    max-width: 250px;
+  }
+
+  .fe-actions {
+    align-items: center;
+    display: flex;
+    height: 32px;
+  }
+}

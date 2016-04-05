@@ -50,14 +50,33 @@
           type="text"
           class="form-control">
       </div>
+
+      <ul class="nav nav-tabs">
+        <li role="editor" ng-class="{ active: editor === 'json' }">
+          <a ng-click="editor = 'json'">JSON</a>
+        </li>
+
+        <li role="editor" ng-class="{ active: editor === 'visual' }">
+          <a ng-click="editor = 'visual'">Visual</a>
+        </li>
+      </ul>
+
+      <filter-editor
+        ng-if="editor === 'visual'"
+        index-pattern="editingFilter.source.meta.index"
+        filter="editingFilter.model">
+      </filter-editor>
+
       <div
         json-input
         require-keys="true"
+        ng-if="editor === 'json'"
         ui-ace="{
           mode: 'json',
           onLoad: aceLoaded
         }"
         ng-model="editingFilter.model"></div>
+
       <div class="form-group">
         <button class="btn btn-primary" ng-click="stopEditingFilter()">Cancel</button>
         <button type="submit" class="btn btn-success"
