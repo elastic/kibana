@@ -15,7 +15,8 @@ settings-indices-field-filters {
       align-items: center;
       margin: 10px 0;
 
-      > .value {
+      .value {
+        text-align: left;
         flex: 1 1 auto;
         padding-right: 5px;
         font-family: @font-family-monospace;
@@ -24,6 +25,14 @@ settings-indices-field-filters {
           padding-left: 15px;
         }
       }
+    }
+  }
+
+  .known-matches {
+    ul li {
+      font-family: @font-family-monospace;
+      font-size: @font-size-base;
+      padding: @table-cell-padding;
     }
   }
 }

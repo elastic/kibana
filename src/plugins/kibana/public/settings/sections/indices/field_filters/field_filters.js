@@ -1,7 +1,8 @@
-import { without } from 'lodash';
+import { size, without } from 'lodash';
 
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
+import { fieldWildcardMatcher } from 'ui/field_wildcard';
 
 import template from './field_filters.html';
 import './field_filters.less';
@@ -27,10 +28,17 @@ uiModules.get('kibana')
         this.saving = false;
         this.editting = null;
         this.newValue = null;
+
+        $scope.$watch('indexPattern.fieldFilters', (filters) => {
+          const values = filters.map(f => f.value);
+          const filter = fieldWildcardMatcher(values);
+          const matches = $scope.indexPattern.fields.map(f => f.name).filter(filter).sort();
+          this.sampleMatches = size(matches) ? matches : null;
+        });
       }
 
       all() {
-        return this.$scope.indexPattern.fieldFilters || [];
+        return this.$scope.indexPattern.fieldFilters;
       }
 
       delete(filter) {
