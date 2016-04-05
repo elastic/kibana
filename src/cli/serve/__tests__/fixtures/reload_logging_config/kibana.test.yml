@@ -1,0 +1,4 @@
+server:
+  port: 8274
+logging:
+  dest: src/cli/serve/__tests__/logs/first.log

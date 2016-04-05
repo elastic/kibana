@@ -146,6 +146,7 @@ module.exports = function (program) {
       const settings = getCurrentSettings();
       kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
       kbnServer.applyLoggingConfiguration(settings);
+      kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
     });
 
     return kbnServer;
