@@ -6,7 +6,10 @@
         <span ng-show="notif.count > 1" class="badge">{{ notif.count }}</span>
 
         <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i>
-        <kbn-truncated orig="{{notif.content}}" length="250" class="toast-message" /></kbn-truncated>
+
+        <kbn-truncated ng-if="notif.content" source="{{notif.content}}" length="250" class="toast-message" /></kbn-truncated>
+
+        <kbn-truncated ng-if="notif.markdown" source="{{notif.markdown | markdown}}" is-html="true" length="250" class="toast-message" /></kbn-truncated>
 
         <div class="btn-group pull-right toast-controls">
           <button
