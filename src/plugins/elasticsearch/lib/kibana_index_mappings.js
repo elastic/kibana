@@ -10,8 +10,7 @@ export const mappings = {
   server: {
     properties: {
       uuid: {
-        type: 'string',
-        index: 'not_analyzed'
+        type: 'keyword'
       }
     }
   }
