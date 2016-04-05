@@ -14,6 +14,15 @@ describe('fieldWildcard', function () {
     it('properly escapes regexp control characters', function () {
       expect('account[user_id]').to.match(makeRegEx('account[*]'));
     });
+
+    it('properly limits matches without wildcards', function () {
+      expect('username').to.match(makeRegEx('*name'));
+      expect('username').to.match(makeRegEx('user*'));
+      expect('username').to.match(makeRegEx('username'));
+      expect('username').to.not.match(makeRegEx('user'));
+      expect('username').to.not.match(makeRegEx('name'));
+      expect('username').to.not.match(makeRegEx('erna'));
+    });
   });
 
   describe('filter', function () {
