@@ -1,6 +1,7 @@
 define(function () {
   return function ChartTitleSplitFactory() {
     var d3 = require('d3');
+    var $ = require('jquery');
 
     /*
      * Adds div DOM elements to either the `.y-axis-chart-title` element or the
@@ -12,10 +13,10 @@ define(function () {
     return function (selection) {
       selection.each(function (data) {
         var div = d3.select(this);
+        var parent = $(this).parents('.vis-wrapper');
 
         if (!data.series) {
           div.selectAll('.chart-title')
-          .append('div')
           .data(function (d) {
             return d.rows ? d.rows : d.columns;
           })
@@ -24,9 +25,9 @@ define(function () {
             .attr('class', 'chart-title');
 
           if (data.rows) {
-            d3.select('.x-axis-chart-title').remove();
+            parent.find('.x-axis-chart-title').remove();
           } else {
-            d3.select('.y-axis-chart-title').remove();
+            parent.find('.y-axis-chart-title').remove();
           }
 
           return div;
