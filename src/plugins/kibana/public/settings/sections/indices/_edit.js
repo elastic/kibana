@@ -1,14 +1,16 @@
 import _ from 'lodash';
-import 'plugins/kibana/settings/sections/indices/_indexed_fields';
-import 'plugins/kibana/settings/sections/indices/_scripted_fields';
-import 'plugins/kibana/settings/sections/indices/_source_filtering';
-import 'plugins/kibana/settings/sections/indices/_index_header';
-import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
+
 import UrlProvider from 'ui/url';
-import PluginsKibanaSettingsSectionsIndicesFieldTypesProvider from 'plugins/kibana/settings/sections/indices/_field_types';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-import editTemplate from 'plugins/kibana/settings/sections/indices/_edit.html';
+import Notifier from 'ui/notify/notifier';
+
+import RefreshKibanaIndexProvider from './_refresh_kibana_index';
+import FieldTypesProvider from './_field_types';
+import editTemplate from './_edit.html';
+import './_indexed_fields';
+import './_scripted_fields';
+import './_index_header';
 
 uiRoutes
 .when('/settings/indices/:indexPatternId', {
@@ -22,18 +24,18 @@ uiRoutes
 });
 
 uiModules.get('apps/settings')
-.controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
+.controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Private, AppState, docTitle) {
 
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
-  const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
+  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-  const fieldTypes = Private(PluginsKibanaSettingsSectionsIndicesFieldTypesProvider);
+  const fieldTypes = Private(FieldTypesProvider);
   $scope.$watch('indexPattern.fields', function () {
     $scope.fieldTypes = fieldTypes($scope.indexPattern);
   });
