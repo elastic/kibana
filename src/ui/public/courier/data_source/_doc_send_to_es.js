@@ -1,11 +1,12 @@
 import _ from 'lodash';
+
 import errors from 'ui/errors';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
+import RequestQueueProvider from 'ui/courier/_request_queue';
+import FetchProvider from 'ui/courier/fetch/fetch';
 
 export default function (Promise, Private, es) {
-  var requestQueue = Private(CourierRequestQueueProvider);
-  var courierFetch = Private(CourierFetchFetchProvider);
+  var requestQueue = Private(RequestQueueProvider);
+  var courierFetch = Private(FetchProvider);
 
   /**
    * Backend for doUpdate and doIndex
@@ -32,7 +33,7 @@ export default function (Promise, Private, es) {
       doc._storeVersion(resp._version);
       doc.id(resp._id);
 
-      var docFetchProm;
+      let docFetchProm;
       if (method !== 'index') {
         docFetchProm = doc.fetch();
       } else {

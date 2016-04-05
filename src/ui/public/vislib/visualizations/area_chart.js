@@ -33,7 +33,26 @@ export default function AreaChartFactory(Private) {
     if (this.isOverlapping) {
 
       // Default opacity should return to 0.6 on mouseout
-      handler._attr.defaultOpacity = 0.6;
+      var defaultOpacity = 0.6;
+      handler._attr.defaultOpacity = defaultOpacity;
+      handler.highlight = function (element) {
+        var label = this.getAttribute('data-label');
+        if (!label) return;
+
+        var highlightOpacity = 0.8;
+        var highlightElements = $('[data-label]', element.parentNode).filter(
+          function (els, el) {
+            return `${$(el).data('label')}` === label;
+          });
+        $('[data-label]', element.parentNode).not(highlightElements).css('opacity', defaultOpacity / 2); // half of the default opacity
+        highlightElements.css('opacity', highlightOpacity);
+      };
+      handler.unHighlight = function (element) {
+        $('[data-label]', element).css('opacity', defaultOpacity);
+
+        //The legend should keep max opacity
+        $('[data-label]', $(element).siblings()).css('opacity', 1);
+      };
     }
 
     this.checkIfEnoughData();
@@ -154,8 +173,8 @@ export default function AreaChartFactory(Private) {
     var tooltip = this.tooltip;
     var isTooltip = this._attr.addTooltip;
     var isOverlapping = this.isOverlapping;
-    var layer;
-    var circles;
+    let layer;
+    let circles;
 
     layer = svg.selectAll('.points')
     .data(data)
@@ -278,14 +297,14 @@ export default function AreaChartFactory(Private) {
     var minHeight = 20;
     var addTimeMarker = this._attr.addTimeMarker;
     var times = this._attr.times || [];
-    var timeMarker;
-    var div;
-    var svg;
-    var width;
-    var height;
-    var layers;
-    var circles;
-    var path;
+    let timeMarker;
+    let div;
+    let svg;
+    let width;
+    let height;
+    let layers;
+    let circles;
+    let path;
 
     return function (selection) {
       selection.each(function (data) {

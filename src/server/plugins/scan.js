@@ -3,10 +3,10 @@ import { fromNode } from 'bluebird';
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { each } from 'bluebird';
-import PluginCollection from './PluginCollection';
+import PluginCollection from './plugin_collection';
 module.exports = async (kbnServer, server, config) => {
 
-  var plugins = kbnServer.plugins = new PluginCollection(kbnServer);
+  let plugins = kbnServer.plugins = new PluginCollection(kbnServer);
 
   let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
   let pluginPaths = [].concat(config.get('plugins.paths') || []);

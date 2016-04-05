@@ -1,18 +1,18 @@
 import $ from 'jquery';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('FieldEditor directive', function () {
 
-  var Field;
-  var StringFormat;
-  var $rootScope;
+  let Field;
+  let StringFormat;
+  let $rootScope;
 
-  var compile;
-  var $scope;
-  var $el;
+  let compile;
+  let $scope;
+  let $el;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
@@ -47,7 +47,7 @@ describe('FieldEditor directive', function () {
   });
 
   describe('$scope.editor', function () {
-    var editor;
+    let editor;
 
     beforeEach(function () {
       compile();
@@ -63,8 +63,8 @@ describe('FieldEditor directive', function () {
     });
 
     describe('editor.field', function () {
-      var field;
-      var actual;
+      let field;
+      let actual;
 
       beforeEach(function () {
         field = editor.field;

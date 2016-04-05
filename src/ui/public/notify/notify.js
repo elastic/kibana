@@ -7,7 +7,6 @@ import 'ui/notify/directives';
 var module = modules.get('kibana/notify');
 var rootNotifier = new Notifier();
 
-
 module.factory('createNotifier', function () {
   return function (opts) {
     return new Notifier(opts);
@@ -18,9 +17,26 @@ module.factory('Notifier', function () {
   return Notifier;
 });
 
-module.run(function ($timeout) {
-  // provide alternate methods for setting timeouts, which will properly trigger digest cycles
-  Notifier.setTimerFns($timeout, $timeout.cancel);
+module.run(function ($interval, $rootScope, config) {
+  var configInitListener = $rootScope.$on('init:config', function () {
+    applyConfig();
+    configInitListener();
+  });
+
+  $rootScope.$on('change:config', applyConfig);
+
+  Notifier.applyConfig({
+    setInterval: $interval,
+    clearInterval: $interval.cancel
+  });
+
+  function applyConfig() {
+    Notifier.applyConfig({
+      errorLifetime: config.get('notifications:lifetime:error'),
+      warningLifetime: config.get('notifications:lifetime:warning'),
+      infoLifetime: config.get('notifications:lifetime:info')
+    });
+  }
 });
 
 /**
@@ -40,4 +56,3 @@ window.onerror = function (err, url, line) {
 };
 
 export default rootNotifier;
-

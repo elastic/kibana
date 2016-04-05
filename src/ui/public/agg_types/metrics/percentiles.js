@@ -2,11 +2,12 @@ import _ from 'lodash';
 import ordinalSuffix from 'ui/utils/ordinal_suffix';
 import percentsEditor from 'ui/agg_types/controls/percentiles.html';
 import 'ui/number_list';
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
-import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function AggTypeMetricPercentilesProvider(Private) {
+import getPercentileValue from './percentiles_get_value';
 
+export default function AggTypeMetricPercentilesProvider(Private) {
   var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
   var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
   var fieldFormats = Private(RegistryFieldFormatsProvider);
@@ -34,6 +35,11 @@ export default function AggTypeMetricPercentilesProvider(Private) {
         name: 'percents',
         editor: percentsEditor,
         default: [1, 5, 25, 50, 75, 95, 99]
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        }
       }
     ],
     getResponseAggs: function (agg) {
@@ -43,12 +49,6 @@ export default function AggTypeMetricPercentilesProvider(Private) {
         return new ValueAggConfig(percent);
       });
     },
-    getValue: function (agg, bucket) {
-      // percentiles for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
-      // parse the keys and respond with the value that matches
-      return _.find(bucket[agg.parentId] && bucket[agg.parentId].values, function (value, key) {
-        return agg.key === parseFloat(key);
-      });
-    }
+    getValue: getPercentileValue
   });
 };

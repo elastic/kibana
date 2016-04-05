@@ -1,6 +1,6 @@
 import html from 'ui/timepicker/timepicker.html';
 import _ from 'lodash';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import moment from 'moment';
 import Notifier from 'ui/notify/notifier';
 import 'ui/directives/input_datetime';
@@ -8,7 +8,7 @@ import 'ui/directives/inequality';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
-import 'ui/timepicker/toggle';
+import 'ui/timepicker/kbn_global_timepicker';
 import uiModules from 'ui/modules';
 var module = uiModules.get('ui/timepicker');
 var notify = new Notifier({

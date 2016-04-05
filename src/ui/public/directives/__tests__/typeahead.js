@@ -1,7 +1,7 @@
 import angular from 'angular';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/typeahead';
 import 'plugins/kibana/discover/index';
 
@@ -9,12 +9,12 @@ import 'plugins/kibana/discover/index';
 
 var typeaheadHistoryCount = 10;
 var typeaheadName = 'unittest';
-var $parentScope;
-var $typeaheadScope;
-var $elem;
-var $typeaheadInputScope;
-var typeaheadCtrl;
-var PersistedLog;
+let $parentScope;
+let $typeaheadScope;
+let $elem;
+let $typeaheadInputScope;
+let typeaheadCtrl;
+let PersistedLog;
 
 var markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
   '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +

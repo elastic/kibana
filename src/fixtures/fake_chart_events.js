@@ -1,4 +1,4 @@
-var results = {};
+let results = {};
 
 results.timeSeries = {
   data: {

@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
-import VislibComponentsTooltipProvider from 'ui/vislib/components/Tooltip';
+import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
 export default function PointSeriesChartProvider(Private) {
 
   var Chart = Private(VislibVisualizationsChartProvider);

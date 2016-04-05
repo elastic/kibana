@@ -29,6 +29,10 @@
       height: 200px;
       max-height: 600px;
 
+      .loading {
+        opacity: 1 !important;
+      }
+
       &.only-spy {
         height: auto;
 
@@ -71,12 +75,10 @@
   }
 
   &-info {
-    background-color: @discover-info-bg;
-    float: right;
-    padding: 5px 10px;
+    line-height: 30px;
+    padding: 0px 10px;
     border-bottom-left-radius: @border-radius-base;
 
-    text-align: right;
 
     &-title {
       font-weight: bold;
@@ -245,6 +247,10 @@ disc-field-chooser {
     }
   }
 
+  .sidebar-item.active .sidebar-item-title {
+    background-color: @sidebar-active-bg;
+    color: @sidebar-active-color;
+  }
   .sidebar-item-title {
     position: relative;
   }

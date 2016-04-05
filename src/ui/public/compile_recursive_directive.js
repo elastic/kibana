@@ -26,7 +26,7 @@ uiModules
 
       // Break the recursion loop by removing the contents
       var contents = element.contents().remove();
-      var compiledContents;
+      let compiledContents;
       return {
         pre: (link && link.pre) ? link.pre : null,
         /**

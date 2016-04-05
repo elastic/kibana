@@ -2,15 +2,18 @@ import _ from 'lodash';
 import minimatch from 'minimatch';
 
 import UiAppCollection from './ui_app_collection';
+import UiNavLinkCollection from './ui_nav_link_collection';
 
 class UiExports {
   constructor({ urlBasePath }) {
+    this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {};
     this.urlBasePath = urlBasePath;
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
     this.bundleProviders = [];
+    this.defaultInjectedVars = {};
   }
 
   consumePlugin(plugin) {
@@ -48,12 +51,28 @@ class UiExports {
       case 'app':
       case 'apps':
         return (plugin, specs) => {
+          const id = plugin.id;
           for (let spec of [].concat(specs || [])) {
+
             let app = this.apps.new(_.defaults({}, spec, {
               id: plugin.id,
               urlBasePath: this.urlBasePath
             }));
+
+            plugin.extendInit((server, options) => { // eslint-disable-line no-loop-func
+              const wrapped = app.getInjectedVars;
+              app.getInjectedVars = () => wrapped.call(plugin, server, options);
+            });
+
             plugin.apps.add(app);
+          }
+        };
+
+      case 'link':
+      case 'links':
+        return (plugin, spec) => {
+          for (const spec of [].concat(spec || [])) {
+            this.navLinks.new(spec);
           }
         };
 
@@ -64,7 +83,7 @@ class UiExports {
       case 'navbarExtensions':
       case 'settingsSections':
       case 'docViews':
-      case 'sledgehammers':
+      case 'hacks':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);
         };
@@ -78,6 +97,13 @@ class UiExports {
         return (plugin, specs) => {
           _.forOwn(specs, (spec, adhocType) => {
             this.aliases[adhocType] = _.union(this.aliases[adhocType] || [], spec);
+          });
+        };
+
+      case 'injectDefaultVars':
+        return (plugin, injector) => {
+          plugin.extendInit(async (server, options) => {
+            _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
           });
         };
     }

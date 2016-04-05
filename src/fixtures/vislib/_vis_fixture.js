@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import VislibVisProvider from 'ui/vislib/vis';
 
-var $visCanvas = $('<div>')
+let $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
   .css({
     height: '500px',
@@ -15,8 +15,8 @@ var $visCanvas = $('<div>')
   })
   .appendTo('body');
 
-var count = 0;
-var visHeight = $visCanvas.height();
+let count = 0;
+let visHeight = $visCanvas.height();
 
 $visCanvas.new = function () {
   count += 1;
@@ -32,7 +32,7 @@ afterEach(function () {
 
 module.exports = function VislibFixtures(Private) {
   return function (visLibParams) {
-    var Vis = Private(VislibVisProvider);
+    let Vis = Private(VislibVisProvider);
     return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
       shareYAxis: true,
       addTooltip: true,

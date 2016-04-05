@@ -1,6 +1,6 @@
 
 import angular from 'angular';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';

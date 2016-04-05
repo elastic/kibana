@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import onlyDisabled from 'ui/filter_bar/lib/onlyDisabled';
-import onlyStateChanged from 'ui/filter_bar/lib/onlyStateChanged';
-import uniqFilters from 'ui/filter_bar/lib/uniqFilters';
-import compareFilters from 'ui/filter_bar/lib/compareFilters';
+import onlyDisabled from 'ui/filter_bar/lib/only_disabled';
+import onlyStateChanged from 'ui/filter_bar/lib/only_state_changed';
+import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
+import compareFilters from 'ui/filter_bar/lib/compare_filters';
 import angular from 'angular';
 import EventsProvider from 'ui/events';
-import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/mapAndFlattenFilters';
+import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
 
 export default function (Private, $rootScope, getAppState, globalState, config) {
   var EventEmitter = Private(EventsProvider);
@@ -81,8 +81,8 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
   queryFilter.removeFilter = function (matchFilter) {
     var appState = getAppState();
     var filter = _.omit(matchFilter, ['$$hashKey']);
-    var state;
-    var index;
+    let state;
+    let index;
 
     // check for filter in appState
     if (appState) {
@@ -297,7 +297,7 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
    * @returns {void}
    */
   function initWatchers() {
-    var removeAppStateWatchers;
+    let removeAppStateWatchers;
 
     $rootScope.$watch(getAppState, function () {
       removeAppStateWatchers && removeAppStateWatchers();

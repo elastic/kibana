@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
@@ -10,12 +10,12 @@ import ReflowWatcherProvider from 'ui/reflow_watcher';
 
 describe('Vislib Resize Checker', function () {
 
-  require('testUtils/noDigestPromises').activateForSuite();
+  require('test_utils/no_digest_promises').activateForSuite();
 
-  var ResizeChecker;
-  var EventEmitter;
-  var checker;
-  var reflowWatcher;
+  let ResizeChecker;
+  let EventEmitter;
+  let checker;
+  let reflowWatcher;
   var reflowSpies = {};
 
   beforeEach(ngMock.module('kibana'));
@@ -96,7 +96,7 @@ describe('Vislib Resize Checker', function () {
   });
 
   describe('#check()', function () {
-    var emit;
+    let emit;
 
     beforeEach(function () {
       emit = sinon.stub(checker, 'emit');
@@ -161,8 +161,8 @@ describe('Vislib Resize Checker', function () {
   });
 
   describe('scheduling', function () {
-    var clock;
-    var schedule;
+    let clock;
+    let schedule;
 
     beforeEach(function () {
       // prevent the checker from running automatically

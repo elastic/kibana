@@ -1,5 +1,5 @@
-import ObjDefine from 'ui/utils/ObjDefine';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+import ObjDefine from 'ui/utils/obj_define';
+import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 

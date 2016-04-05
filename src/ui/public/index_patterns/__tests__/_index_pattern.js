@@ -1,30 +1,30 @@
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import errors from 'ui/errors';
-import IndexedArray from 'ui/IndexedArray';
+import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
-import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
+import DocSourceProvider from 'ui/courier/data_source/doc_source';
 import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
 describe('index pattern', function () {
-  var IndexPattern;
-  var mapper;
-  var mappingSetup;
-  var mockLogstashFields;
-  var DocSource;
-  var config;
-  var docSourceResponse;
+  let IndexPattern;
+  let mapper;
+  let mappingSetup;
+  let mockLogstashFields;
+  let DocSource;
+  let config;
+  let docSourceResponse;
   var indexPatternId = 'test-pattern';
-  var indexPattern;
-  var calculateIndices;
-  var $rootScope;
-  var intervals;
+  let indexPattern;
+  let calculateIndices;
+  let $rootScope;
+  let intervals;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
@@ -33,7 +33,7 @@ describe('index pattern', function () {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
-    DocSource = Private(CourierDataSourceDocSourceProvider);
+    DocSource = Private(DocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
 
@@ -146,11 +146,11 @@ describe('index pattern', function () {
 
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
     var indexPatternId = 'test-pattern';
-    var indexPattern;
-    var fieldLength;
-    var truncatedFields;
+    let indexPattern;
+    let fieldLength;
+    let truncatedFields;
 
     beforeEach(function () {
       fieldLength = mockLogstashFields.length;
@@ -301,9 +301,9 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
     context('when index pattern is an interval', function () {
-      var interval;
+      let interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
@@ -380,9 +380,9 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
 
-      var interval;
+      let interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
@@ -411,7 +411,7 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -433,7 +433,7 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -453,7 +453,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', function () {
-        var indexList;
+        let indexList;
         indexPattern.toIndexList().then(function (val) {
           indexList = val;
         });

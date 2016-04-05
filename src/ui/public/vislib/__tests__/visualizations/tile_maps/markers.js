@@ -1,7 +1,7 @@
 
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import L from 'leaflet';
 import sinon from 'auto-release-sinon';
@@ -15,8 +15,8 @@ import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizat
 var defaultSWCoords = [13.496, -143.789];
 var defaultNECoords = [55.526, -57.919];
 var bounds = {};
-var MarkerType;
-var map;
+let MarkerType;
+let map;
 
 angular.module('MarkerFactory', ['kibana']);
 
@@ -39,8 +39,8 @@ var mockMap = {
 };
 
 describe('Marker Tests', function () {
-  var mapData;
-  var markerLayer;
+  let mapData;
+  let markerLayer;
 
   function createMarker(MarkerClass, geoJson) {
     mapData = _.assign({}, geoJsonData.geoJson, geoJson || {});
@@ -64,7 +64,7 @@ describe('Marker Tests', function () {
   });
 
   describe('Base Methods', function () {
-    var MarkerClass;
+    let MarkerClass;
 
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
@@ -143,7 +143,7 @@ describe('Marker Tests', function () {
 
     describe('showTooltip', function () {
       it('should use the tooltip formatter', function () {
-        var content;
+        let content;
         var sample = _.sample(mapData.features);
 
         var stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
@@ -158,8 +158,8 @@ describe('Marker Tests', function () {
     });
 
     describe('addLegend', function () {
-      var addToSpy;
-      var leafletControlStub;
+      let addToSpy;
+      let leafletControlStub;
 
       beforeEach(function () {
         addToSpy = sinon.spy();
@@ -218,7 +218,7 @@ describe('Marker Tests', function () {
   });
 
   describe('Scaled Circles', function () {
-    var zoom;
+    let zoom;
 
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
@@ -274,7 +274,7 @@ describe('Marker Tests', function () {
     }));
 
     describe('dataToHeatArray', function () {
-      var max;
+      let max;
 
       beforeEach(function () {
         max = mapData.properties.allmax;
@@ -305,7 +305,7 @@ describe('Marker Tests', function () {
           var arr = markerLayer._dataToHeatArray(max);
           var index = _.random(mapData.features.length - 1);
           var feature = mapData.features[index];
-          var featureValue = parseInt(feature.properties.value / max * 100);
+          var featureValue = feature.properties.value / max;
           var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });

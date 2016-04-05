@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import parseInterval from 'ui/utils/parse_interval';
 import TimeBucketsCalcAutoIntervalProvider from 'ui/time_buckets/calc_auto_interval';
 import TimeBucketsCalcEsIntervalProvider from 'ui/time_buckets/calc_es_interval';
@@ -43,7 +43,7 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
   TimeBuckets.prototype.setBounds = function (input) {
     if (!input) return this.clearBounds();
 
-    var bounds;
+    let bounds;
     if (_.isPlainObject(input)) {
       // accept the response from timefilter.getActiveBounds()
       bounds = [input.min, input.max];
@@ -214,7 +214,7 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
 
       var maxLength = config.get('histogram:maxBars');
       var approxLen = duration / interval;
-      var scaled;
+      let scaled;
 
       if (approxLen > maxLength) {
         scaled = calcAuto.lessThan(maxLength, duration);
