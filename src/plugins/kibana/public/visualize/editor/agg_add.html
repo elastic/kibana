@@ -2,6 +2,7 @@
   <label>Select {{ groupName }} type</label>
   <ul class="form-group list-group list-group-menu">
     <li
+      ng-hide="schema.deprecate"
       ng-repeat="schema in availableSchema"
       ng-click="add.submit(schema)"
       class="list-group-item list-group-menu-item">
@@ -18,14 +19,14 @@
   class="vis-editor-agg-wide-btn">
 
   <div ng-if="!add.form">
-    <div class="vis-editor-agg-wide-btn-add" ng-if="groupName !== 'buckets' || !stats.count">
-      <i aria-hidden="true" class="fa fa-plus"></i> Add {{ groupName }}
+    <div class="btn btn-sm btn-primary" ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate">
+      Add {{ groupName }}
     </div>
-    <div class="vis-editor-agg-wide-btn-add" ng-if="groupName === 'buckets' && stats.count > 0">
-      <i aria-hidden="true" class="fa fa-code-fork"></i> Add sub-{{ groupName }}
+    <div class="btn btn-sm btn-primary" ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate">
+      Add sub-{{ groupName }}
     </div>
   </div>
-  <div class="vis-editor-agg-wide-btn-add" ng-if="add.form">
+  <div class="btn btn-sm btn-primary" ng-if="add.form">
     Cancel
   </div>
 </div>

@@ -3,7 +3,7 @@ const { isWorker } = require('cluster');
 const { resolve } = require('path');
 
 const cwd = process.cwd();
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils';
 
 let canCluster;
 try {

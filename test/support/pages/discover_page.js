@@ -28,7 +28,7 @@ define(function (require) {
 
     getTimespanText: function getTimespanText() {
       return thisTime
-      .findByCssSelector('a.navbar-timepicker-time-desc pretty-duration.ng-isolate-scope')
+      .findByCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
       .getVisibleText();
     },
 
@@ -42,19 +42,15 @@ define(function (require) {
       var self = this;
       return self.clickSaveSearchButton()
       .then(function () {
-        common.sleep(1000);
-      })
-      .then(function () {
         common.debug('--saveSearch button clicked');
-        return thisTime.findById('SaveSearch')
-        .type(searchName);
+        return thisTime.findDisplayedById('SaveSearch')
+        .pressKeys(searchName);
       })
       .then(function clickSave() {
         common.debug('--find save button');
-        return thisTime
-        .findByCssSelector('button[ng-disabled="!opts.savedSearch.title"]')
-        .click();
-      });
+        return common.findTestSubject('discover-save-search-btn').click();
+      })
+      .catch(common.handleError(this));
     },
 
     loadSavedSearch: function loadSavedSearch(searchName) {
@@ -76,18 +72,16 @@ define(function (require) {
       .click();
     },
 
-    clickLoadSavedSearchButton: function clickSaveSearchButton() {
+    clickLoadSavedSearchButton: function clickLoadSavedSearchButton() {
       return thisTime
-      .findByCssSelector('button[aria-label="Load Saved Search"]')
+      .findDisplayedByCssSelector('button[aria-label="Load Saved Search"]')
       .click();
     },
 
     getCurrentQueryName: function getCurrentQueryName() {
-      return common.tryForTime(defaultTimeout, function () {
-        return thisTime
-        .findByCssSelector('span.discover-info-title')
+      return thisTime
+        .findByCssSelector('span.kibana-nav-info-title span')
         .getVisibleText();
-      });
     },
 
     getBarChartData: function getBarChartData() {
@@ -110,13 +104,13 @@ define(function (require) {
 
     getChartInterval: function getChartInterval() {
       return thisTime
-      .findByCssSelector('span.results-interval:nth-child(2) > a:nth-child(1)')
+      .findByCssSelector('a[ng-click="toggleInterval()"]')
       .getVisibleText();
     },
 
     setChartInterval: function setChartInterval(interval) {
-      return thisTime
-      .findByCssSelector('span.results-interval:nth-child(2) > a:nth-child(1)')
+      return this.remote.setFindTimeout(5000)
+      .findByCssSelector('a[ng-click="toggleInterval()"]')
       .click()
       .catch(function () {
         // in some cases we have the link above, but after we've made a
@@ -191,20 +185,20 @@ define(function (require) {
 
     clickCopyToClipboard: function clickCopyToClipboard() {
       return thisTime
-      .findByCssSelector('button.clipboard-button')
+      .findDisplayedByCssSelector('button.clipboard-button')
       .click();
     },
 
     getShareCaption: function getShareCaption() {
       return thisTime
-      .findByCssSelector('div.form-group > label')
+      .findByCssSelector('.vis-share label')
       .getVisibleText();
     },
 
     getSharedUrl: function getSharedUrl() {
       return thisTime
       .findByCssSelector('.url')
-      .getProperty('baseURI');
+      .getProperty('value');
     },
 
     getShortenedUrl: function getShortenedUrl() {
@@ -213,40 +207,15 @@ define(function (require) {
       .getProperty('value');
     },
 
-    clickLegendExpand: function clickLegendExpand() {
-      return thisTime
-      .findByCssSelector('.fa-chevron-left')
-      .click();
-    },
-
-    clickLegendCollapse: function clickLegendCollapse() {
-      return thisTime
-      .findByCssSelector('div.legend-toggle > i.fa-chevron-right')
-      .click();
-    },
-
-    getLegendWidth: function getLegendWidth() {
-      return thisTime
-      .findByCssSelector('.legend-col-wrapper')
-      .getProperty('clientWidth');
-    },
-
-    clickSidebarExpand: function clickSidebarExpand() {
-      return thisTime
-      .findByCssSelector('.chevron-cont')
-      .click();
-    },
-
-    clickSidebarCollapse: function clickSidebarCollapse() {
-      return thisTime
-      .findByCssSelector('.chevron-cont')
-      .click();
+    toggleSidebarCollapse: function toggleSidebarCollapse() {
+      return thisTime.findDisplayedByCssSelector('.sidebar-collapser .chevron-cont')
+        .click();
     },
 
     getSidebarWidth: function getSidebarWidth() {
       return thisTime
-      .findByCssSelector('.sidebar-list')
-      .getProperty('clientWidth');
+        .findByClassName('sidebar-list')
+        .getProperty('clientWidth');
     }
 
   };

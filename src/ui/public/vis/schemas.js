@@ -30,7 +30,8 @@ export default function VisTypeSchemasFactory(Private) {
         title: schema.name,
         aggFilter: '*',
         editor: false,
-        params: []
+        params: [],
+        deprecate: false
       });
 
       // convert the params into a params registry

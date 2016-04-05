@@ -91,6 +91,7 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
+            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
@@ -154,11 +155,11 @@ define(function (require) {
       var self = this;
 
       return self.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.content > .application')
+      .findByCssSelector('.app-wrapper .application')
       .then(function () {
         return self.runScript(function () {
           var $ = window.$;
-          var $scope = $('.content > .application').scope();
+          var $scope = $('.app-wrapper .application').scope();
           return $scope ? $scope.chrome.getApp() : {};
         });
       });
@@ -254,8 +255,10 @@ define(function (require) {
     },
 
     findTestSubject: function findTestSubject(selector) {
-      this.debug('in findTestSubject: ' + selector);
-      return this.remote.findByCssSelector(testSubjSelector(selector));
+      this.debug('in findTestSubject: ' + testSubjSelector(selector));
+      return this.remote
+        .setFindTimeout(defaultTimeout)
+        .findDisplayedByCssSelector(testSubjSelector(selector));
     }
   };
 

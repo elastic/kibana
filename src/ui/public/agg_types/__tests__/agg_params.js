@@ -8,11 +8,11 @@ import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optione
 import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
 describe('AggParams class', function () {
 
-  var AggParams;
-  var BaseAggParam;
-  var FieldAggParam;
-  var OptionedAggParam;
-  var RegexAggParam;
+  let AggParams;
+  let BaseAggParam;
+  let FieldAggParam;
+  let OptionedAggParam;
+  let RegexAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // stub out the param classes before we get the AggParams

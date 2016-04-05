@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import ConfigTemplate from 'ui/config_template';
 import getSort from 'ui/doc_table/lib/get_sort';
 import rison from 'ui/utils/rison';
 import dateMath from 'ui/utils/date_math';
@@ -96,15 +95,25 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.toggleInterval = function () {
     $scope.showInterval = !$scope.showInterval;
   };
-
-  // config panel templates
-  $scope.configTemplate = new ConfigTemplate({
-    load: require('plugins/kibana/discover/partials/load_search.html'),
-    save: require('plugins/kibana/discover/partials/save_search.html'),
-    share: require('plugins/kibana/discover/partials/share_search.html')
-  });
-
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'New Search',
+    run: function () { kbnUrl.change('/discover'); }
+  }, {
+    key: 'save',
+    description: 'Save Search',
+    template: require('plugins/kibana/discover/partials/save_search.html')
+  }, {
+    key: 'open',
+    description: 'Load Saved Search',
+    template: require('plugins/kibana/discover/partials/load_search.html')
+  }, {
+    key: 'share',
+    description: 'Share Search',
+    template: require('plugins/kibana/discover/partials/share_search.html')
+  }];
   $scope.timefilter = timefilter;
+
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -147,7 +156,8 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     index: $scope.indexPattern.id,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list
+    indexPatternList: $route.current.locals.ip.list,
+    timefilter: $scope.timefilter
   };
 
   const init = _.once(function () {
@@ -285,7 +295,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
 
       return savedSearch.save()
       .then(function (id) {
-        $scope.configTemplate.close('save');
+        $scope.kbnTopNav.close('save');
 
         if (id) {
           notify.info('Saved Data Source "' + savedSearch.title + '"');
@@ -479,8 +489,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
         schema: 'segment',
         params: {
           field: $scope.opts.timefield,
-          interval: $state.interval,
-          min_doc_count: 0
+          interval: $state.interval
         }
       }
     ];

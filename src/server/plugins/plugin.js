@@ -1,8 +1,11 @@
 import _ from 'lodash';
+import toPath from 'lodash/internal/toPath';
 import Joi from 'joi';
-import { attempt, fromNode } from 'bluebird';
+import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
 import { inherits } from 'util';
+
+const extendInitFns = Symbol('extend plugin initialization');
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)
@@ -35,6 +38,8 @@ const defaultConfigSchema = Joi.object({
  * @param {String} [opts.version=pkg.version] - the version of this plugin
  * @param {Function} [opts.init] - A function that will be called to initialize
  *                               this plugin at the appropriate time.
+ * @param {Function} [opts.configPrefix=this.id] - The prefix to use for configuration
+ *                               values in the main configuration service
  * @param {Function} [opts.config] - A function that produces a configuration
  *                                 schema using Joi, which is passed as its
  *                                 first argument.
@@ -55,8 +60,10 @@ module.exports = class Plugin {
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
     this.externalInit = opts.init || _.noop;
+    this.configPrefix = opts.configPrefix || this.id;
     this.getConfigSchema = opts.config || _.noop;
     this.init = _.once(this.init);
+    this[extendInitFns] = [];
 
     if (opts.publicDir === false) {
       this.publicDir = null;
@@ -83,29 +90,27 @@ module.exports = class Plugin {
   async readConfig() {
     let schema = await this.getConfigSchema(Joi);
     let { config } = this.kbnServer;
-    config.extendSchema(this.id, schema || defaultConfigSchema);
+    config.extendSchema(this.configPrefix, schema || defaultConfigSchema);
 
-    if (config.get([this.id, 'enabled'])) {
+    if (config.get([...toPath(this.configPrefix), 'enabled'])) {
       return true;
     } else {
-      config.removeSchema(this.id);
+      config.removeSchema(this.configPrefix);
       return false;
     }
   }
 
   async init() {
-    let { id, version, kbnServer } = this;
+    let { id, version, kbnServer, configPrefix } = this;
     let { config } = kbnServer;
 
     // setup the hapi register function and get on with it
-    let register = (server, options, next) => {
+    const asyncRegister = async (server, options) => {
       this.server = server;
 
-      // bind the server and options to all
-      // apps created by this plugin
-      for (let app of this.apps) {
-        app.getInjectedVars = _.partial(app.getInjectedVars, server, options);
-      }
+      await Promise.all(this[extendInitFns].map(async fn => {
+        await fn.call(this, server, options);
+      }));
 
       server.log(['plugins', 'debug'], {
         tmpl: 'Initializing plugin <%= plugin.id %>',
@@ -119,7 +124,11 @@ module.exports = class Plugin {
       this.status = kbnServer.status.create(`plugin:${this.id}`);
       server.expose('status', this.status);
 
-      attempt(this.externalInit, [server, options], this).nodeify(next);
+      return await attempt(this.externalInit, [server, options], this);
+    };
+
+    const register = (server, options, next) => {
+      Bluebird.resolve(asyncRegister(server, options)).nodeify(next);
     };
 
     register.attributes = { name: id, version: version };
@@ -127,7 +136,7 @@ module.exports = class Plugin {
     await fromNode(cb => {
       kbnServer.server.register({
         register: register,
-        options: config.has(id) ? config.get(id) : null
+        options: config.has(configPrefix) ? config.get(configPrefix) : null
       }, cb);
     });
 
@@ -136,6 +145,10 @@ module.exports = class Plugin {
     if (this.status.state === 'uninitialized') {
       this.status.green('Ready');
     }
+  }
+
+  extendInit(fn) {
+    this[extendInitFns].push(fn);
   }
 
   toJSON() {

@@ -12,10 +12,10 @@ describe('Vislib Resize Checker', function () {
 
   require('test_utils/no_digest_promises').activateForSuite();
 
-  var ResizeChecker;
-  var EventEmitter;
-  var checker;
-  var reflowWatcher;
+  let ResizeChecker;
+  let EventEmitter;
+  let checker;
+  let reflowWatcher;
   var reflowSpies = {};
 
   beforeEach(ngMock.module('kibana'));
@@ -96,7 +96,7 @@ describe('Vislib Resize Checker', function () {
   });
 
   describe('#check()', function () {
-    var emit;
+    let emit;
 
     beforeEach(function () {
       emit = sinon.stub(checker, 'emit');
@@ -161,8 +161,8 @@ describe('Vislib Resize Checker', function () {
   });
 
   describe('scheduling', function () {
-    var clock;
-    var schedule;
+    let clock;
+    let schedule;
 
     beforeEach(function () {
       // prevent the checker from running automatically

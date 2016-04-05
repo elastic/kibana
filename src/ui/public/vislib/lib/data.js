@@ -29,7 +29,7 @@ export default function DataFactory(Private) {
     this.uiState = uiState;
 
     var self = this;
-    var offset;
+    let offset;
 
     if (attr.mode === 'stacked') {
       offset = 'zero';
@@ -215,7 +215,7 @@ export default function DataFactory(Private) {
 
   Data.prototype.getDataType = function () {
     var data = this.getVisData();
-    var type;
+    let type;
 
     data.forEach(function (obj) {
       if (obj.series) {
@@ -252,7 +252,7 @@ export default function DataFactory(Private) {
    * @returns {*} Array of chart data objects
    */
   Data.prototype.getVisData = function () {
-    var visData;
+    let visData;
 
     if (this.data.rows) {
       visData = this.data.rows;
@@ -701,7 +701,7 @@ export default function DataFactory(Private) {
    * @returns {Array} min and max values
    */
   Data.prototype.mapDataExtents = function (series) {
-    var values;
+    let values;
     values = _.map(series.rows, function (row) {
       return row[row.length - 1];
     });

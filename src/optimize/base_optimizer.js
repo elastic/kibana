@@ -3,6 +3,8 @@ import Boom from 'boom';
 import DirectoryNameAsMain from 'webpack-directory-name-as-main';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
+import DefinePlugin from 'webpack/lib/DefinePlugin';
+import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 
 import fromRoot from '../utils/from_root';
 import babelOptions from './babel_options';
@@ -63,6 +65,7 @@ class BaseOptimizer {
 
   getConfig() {
     let mapQ = this.sourceMaps ? '?sourceMap' : '';
+    let mapQPre = mapQ ? mapQ + '&' : '?';
 
     return {
       context: fromRoot('.'),
@@ -93,6 +96,7 @@ class BaseOptimizer {
           name: 'commons',
           filename: 'commons.bundle.js'
         }),
+        ...this.pluginsForEnv(this.env.context.env)
       ],
 
       module: {
@@ -101,7 +105,7 @@ class BaseOptimizer {
             test: /\.less$/,
             loader: ExtractTextPlugin.extract(
               'style',
-              `css${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+              `css${mapQ}!autoprefixer${mapQPre}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQPre}dumpLineNumbers=comments`
             )
           },
           { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
@@ -133,7 +137,8 @@ class BaseOptimizer {
       resolve: {
         extensions: ['.js', '.json', '.jsx', '.less', ''],
         postfixes: [''],
-        modulesDirectories: ['webpackShims', 'node_modules', fromRoot('webpackShims'), fromRoot('node_modules')],
+        modulesDirectories: ['webpackShims', 'node_modules'],
+        fallback: [fromRoot('webpackShims'), fromRoot('node_modules')],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,
@@ -148,6 +153,27 @@ class BaseOptimizer {
         }, {})
       }
     };
+  }
+
+  pluginsForEnv(env) {
+    if (env !== 'production') {
+      return [];
+    }
+
+    return [
+      new DefinePlugin({
+        'process.env': {
+          'NODE_ENV': '"production"'
+        }
+      }),
+      new UglifyJsPlugin({
+        compress: {
+          warnings: false
+        },
+        sourceMap: false,
+        mangle: false
+      }),
+    ];
   }
 
   failedStatsToError(stats) {

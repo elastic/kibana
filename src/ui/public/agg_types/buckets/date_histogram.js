@@ -45,7 +45,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
     },
     createFilter: createFilter,
     decorateAggConfig: function () {
-      var buckets;
+      let buckets;
       return {
         buckets: {
           configurable: true,
@@ -149,14 +149,6 @@ export default function DateHistogramAggType(timefilter, config, Private) {
             };
 
             return;
-          }
-
-          var bounds = timefilter.getActiveBounds();
-          if (bounds) {
-            output.params.extended_bounds = {
-              min: moment(bounds.min).valueOf(),
-              max: moment(bounds.max).valueOf()
-            };
           }
         }
       }

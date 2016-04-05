@@ -5,6 +5,7 @@ import VisSchemasProvider from 'ui/vis/schemas';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 import tileMapTemplate from 'plugins/kbn_vislib_vis_types/editors/tile_map.html';
+
 export default function TileMapVisType(Private, getAppState, courier, config) {
   const VislibVisType = Private(VislibVisTypeVislibVisTypeProvider);
   const Schemas = Private(VisSchemasProvider);
@@ -120,6 +121,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         group: 'buckets',
         name: 'split',
         title: 'Split Chart',
+        deprecate: true,
+        deprecateMessage: 'The Split Chart feature for Tile Maps has been deprecated.',
         min: 0,
         max: 1
       }
