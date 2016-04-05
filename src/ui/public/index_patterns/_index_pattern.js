@@ -38,6 +38,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     notExpandable: 'boolean',
     intervalName: 'string',
     fields: 'json',
+    fieldFilters: 'json',
     fieldFormatMap: {
       type: 'string',
       _serialize: function (map) {
@@ -66,6 +67,9 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     var self = this;
 
     setId(id);
+    if (!self.fieldFilters) {
+      self.fieldFilters = [];
+    }
 
     var docSource = new DocSource();
 
@@ -139,6 +143,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
         exclude: _(self.getNonScriptedFields())
           .filter((field) => field.exclude && !_.contains(columns, field.name))
           .map((field) => field.name)
+          .concat(self.fieldFilters.map(filter => filter.value))
           .value()
       };
     };

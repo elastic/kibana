@@ -6,10 +6,11 @@ import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 
 import RefreshKibanaIndexProvider from './_refresh_kibana_index';
-import FieldTypesProvider from './_field_types';
+import FieldTabsProvider from './_field_tabs';
 import editTemplate from './_edit.html';
 import './_indexed_fields';
 import './_scripted_fields';
+import './field_filters/field_filters';
 import './_index_header';
 
 uiRoutes
@@ -35,22 +36,18 @@ uiModules.get('apps/settings')
   docTitle.change($scope.indexPattern.id);
   const otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
-  const fieldTypes = Private(FieldTypesProvider);
-  $scope.$watch('indexPattern.fields', function () {
-    $scope.fieldTypes = fieldTypes($scope.indexPattern);
-  });
-
+  $scope.tabs = Private(FieldTabsProvider);
   $scope.changeTab = function (obj) {
     $state.tab = obj.index;
     $state.save();
   };
 
   $scope.$watch('state.tab', function (tab) {
-    if (!tab) $scope.changeTab($scope.fieldTypes[0]);
+    if (!tab) $scope.changeTab($scope.tabs[0]);
   });
 
-  $scope.$watchCollection('indexPattern.fields', function () {
-    $scope.conflictFields = _.filter($scope.indexPattern.fields, {type: 'conflict'});
+  $scope.$watchCollection('indexPattern.fields', function (fields) {
+    $scope.conflictFields = _.filter(fields, { type: 'conflict' });
   });
 
   $scope.refreshFields = function () {

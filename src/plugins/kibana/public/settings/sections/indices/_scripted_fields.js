@@ -37,8 +37,6 @@ uiModules.get('apps/settings')
         rowScopes.length = 0;
 
         const fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
-        _.find($scope.fieldTypes, {index: 'scriptedFields'}).count = fields.length; // Update the tab count
-
         $scope.rows = fields.map(function (field) {
           const rowScope = $scope.$new();
           rowScope.field = field;
