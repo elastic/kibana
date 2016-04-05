@@ -17,7 +17,7 @@ describe('Status class', function () {
   });
 
   it('emits change when the status is set', function (done) {
-    var status = serverStatus.create('test');
+    let status = serverStatus.create('test');
 
     status.once('change', function (prev, prevMsg) {
       expect(status.state).to.be('green');
@@ -40,8 +40,8 @@ describe('Status class', function () {
   });
 
   it('should only trigger the change listener when something changes', function () {
-    var status = serverStatus.create('test');
-    var stub = sinon.stub();
+    let status = serverStatus.create('test');
+    let stub = sinon.stub();
     status.on('change', stub);
     status.green('Ready');
     status.green('Ready');
@@ -50,17 +50,17 @@ describe('Status class', function () {
   });
 
   it('should create a JSON representation of the status', function () {
-    var status = serverStatus.create('test');
+    let status = serverStatus.create('test');
     status.green('Ready');
 
-    var json = status.toJSON();
+    let json = status.toJSON();
     expect(json.state).to.eql('green');
     expect(json.message).to.eql('Ready');
   });
 
   it('should call on handler if status is already matched', function (done) {
-    var status = serverStatus.create('test');
-    var msg = 'Test Ready';
+    let status = serverStatus.create('test');
+    let msg = 'Test Ready';
     status.green(msg);
 
     status.on('green', function (prev, prevMsg) {
@@ -73,8 +73,8 @@ describe('Status class', function () {
   });
 
   it('should call once handler if status is already matched', function (done) {
-    var status = serverStatus.create('test');
-    var msg = 'Test Ready';
+    let status = serverStatus.create('test');
+    let msg = 'Test Ready';
     status.green(msg);
 
     status.once('green', function (prev, prevMsg) {
@@ -88,16 +88,16 @@ describe('Status class', function () {
 
   function testState(color) {
     it(`should change the state to ${color} when #${color}() is called`, function () {
-      var status = serverStatus.create('test');
-      var message = 'testing ' + color;
+      let status = serverStatus.create('test');
+      let message = 'testing ' + color;
       status[color](message);
       expect(status).to.have.property('state', color);
       expect(status).to.have.property('message', message);
     });
 
     it(`should trigger the "change" listner when #${color}() is called`, function (done) {
-      var status = serverStatus.create('test');
-      var message = 'testing ' + color;
+      let status = serverStatus.create('test');
+      let message = 'testing ' + color;
       status.on('change', function (prev, prevMsg) {
         expect(status.state).to.be(color);
         expect(status.message).to.be(message);
@@ -110,8 +110,8 @@ describe('Status class', function () {
     });
 
     it(`should trigger the "${color}" listner when #${color}() is called`, function (done) {
-      var status = serverStatus.create('test');
-      var message = 'testing ' + color;
+      let status = serverStatus.create('test');
+      let message = 'testing ' + color;
       status.on(color, function (prev, prevMsg) {
         expect(status.state).to.be(color);
         expect(status.message).to.be(message);

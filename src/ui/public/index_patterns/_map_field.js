@@ -13,9 +13,6 @@ export default function MapFieldFn(Private, config) {
     var keys = Object.keys(field.mapping);
     if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-    var mapping = _.cloneDeep(field.mapping[keys.shift()]);
-    mapping.type = castMappingType(mapping.type);
-
     // Override the mapping, even if elasticsearch says otherwise
     var mappingOverrides = {
       _source: { type: '_source' },
@@ -32,6 +29,8 @@ export default function MapFieldFn(Private, config) {
       }
     };
 
+    var mapping = _.cloneDeep(field.mapping[keys.shift()]);
+
     if (!mapping.index || mapping.index === 'no') {
       // elasticsearch responds with false sometimes and 'no' others
       mapping.indexed = false;
@@ -39,7 +38,9 @@ export default function MapFieldFn(Private, config) {
       mapping.indexed = true;
     }
 
-    mapping.analyzed = mapping.index === 'analyzed' ? true : false;
+    mapping.analyzed = mapping.index === 'analyzed' || mapping.type === 'text';
+
+    mapping.type = castMappingType(mapping.type);
 
     if (mappingOverrides[name]) {
       _.merge(mapping, mappingOverrides[name]);

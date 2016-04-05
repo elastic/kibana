@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import TabFakeStore from './_tab_fake_store';
+import StubBrowserStorage from './fixtures/stub_browser_storage';
 import TabCollection from '../tab_collection';
 import Tab from '../tab';
 import { indexBy, random } from 'lodash';
@@ -54,7 +54,7 @@ describe('Chrome TabCollection', function () {
 
   describe('#consumeRouteUpdate()', function () {
     it('updates the active tab', function () {
-      const store = new TabFakeStore();
+      const store = new StubBrowserStorage();
       const baseUrl = `http://localhost:${random(1000, 9999)}`;
       const tabs = new TabCollection({ store, defaults: { baseUrl } });
       tabs.set([

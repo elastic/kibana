@@ -24,7 +24,7 @@ aggregation returns the percentile rankings for the values in the numeric field 
 from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a
 values field. Click *+Add* to add a values field.
 
-You can add an aggregation by clicking the *+ Add Aggregation* button.
+You can add an aggregation by clicking the *+ Add Metrics* button.
 
 include::x-axis-aggs.asciidoc[]
 For example, a chart of dates with incident counts can display dates in chronological order, or you can raise the 
