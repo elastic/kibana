@@ -91,7 +91,7 @@ module.exports = class Worker extends EventEmitter {
       this.processBinder.destroy();
 
       // wait until the cluster reports this fork has exitted, then resolve
-      await new Promise(cb => this.once('fork:exit', cb));
+      await new Promise(resolve => this.once('fork:exit', resolve));
     }
   }
 
@@ -150,7 +150,7 @@ module.exports = class Worker extends EventEmitter {
     this.forkBinder = new BinderFor(this.fork);
 
     // when the fork sends a message, comes online, or looses it's connection, then react
-    this.forkBinder.on('message', (msg) => this.parseIncomingMessage(msg));
+    this.forkBinder.on('message', msg => this.parseIncomingMessage(msg));
     this.forkBinder.on('online', () => this.onOnline());
     this.forkBinder.on('disconnect', () => this.onDisconnect());
 

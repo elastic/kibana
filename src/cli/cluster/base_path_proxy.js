@@ -56,7 +56,7 @@ export default class BasePathProxy {
       config: {
         pre: [
           (req, reply) => {
-            map(clusterManager.workers, (worker) => {
+            map(clusterManager.workers, worker => {
               if (worker.type === 'server' && !worker.listening && !worker.crashed) {
                 return fromNode(cb => {
                   const done = () => {
