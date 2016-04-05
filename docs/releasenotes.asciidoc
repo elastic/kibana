@@ -2,7 +2,7 @@
 == Kibana {version} Release Notes
 
 The {version} release of Kibana requires Elasticsearch {esversion} or later.
-
+////
 [float]
 [[breaking]]
 == Breaking Change

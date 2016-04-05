@@ -6,8 +6,8 @@
 :scyld: X-Pack Security
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
-:version: 5.0-alpha
-:esversion: 5.0-alpha
+:version: master
+:esversion: master
 
 include::introduction.asciidoc[]
 
