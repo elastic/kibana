@@ -151,12 +151,13 @@ function Notifier(opts) {
   // label type thing to say where notifications came from
   self.from = opts.location;
 
-  'event lifecycle timed fatal error warning info'.split(' ').forEach(function (m) {
+  'event lifecycle timed fatal error warning info banner'.split(' ').forEach(function (m) {
     self[m] = _.bind(self[m], self);
   });
 }
 
 Notifier.config = {
+  bannerLifetime: Infinity,
   errorLifetime: 300000,
   warningLifetime: 10000,
   infoLifetime: 5000,
@@ -312,6 +313,27 @@ Notifier.prototype.info = function (msg, cb) {
     lifetime: Notifier.config.infoLifetime,
     actions: ['accept']
   }, cb);
+};
+
+/**
+ * Display a banner message
+ * @param  {String} msg [description]
+ * @return {[type]}     [description]
+ */
+Notifier.prototype.banner = function (msg, cb) {
+  if (this._lastBanner) {
+    this._lastBanner.clear();
+  }
+  if (!msg) {
+    return null;
+  }
+  this._lastBanner = add({
+    type: 'banner',
+    markdown: msg,
+    lifetime: Notifier.config.bannerLifetime,
+    actions: ['accept']
+  }, cb);
+  return this._lastBanner;
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
