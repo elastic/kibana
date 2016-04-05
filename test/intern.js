@@ -5,7 +5,7 @@ define(function (require) {
   return _.assign({
     debug: true,
     capabilities: {
-      'selenium-version': '2.48.2',
+      'selenium-version': '2.53.0',
       'idle-timeout': 99
     },
     environments: [{
