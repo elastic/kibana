@@ -13,7 +13,8 @@ module.exports = {
       protocol: process.env.TEST_UI_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_KIBANA_HOSTNAME || 'localhost',
       port: parseInt(process.env.TEST_UI_KIBANA_PORT, 10) || 5620,
-      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password
+      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password,
+      shield: shield.kibanaUser
     },
     elasticsearch: {
       protocol: process.env.TEST_UI_ES_PROTOCOL || 'http',

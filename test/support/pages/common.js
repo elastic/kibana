@@ -10,6 +10,10 @@ define(function (require) {
   var parse = require('intern/dojo/node!url').parse;
   var format = require('intern/dojo/node!url').format;
   var path = require('intern/dojo/node!path');
+  var ShieldPage = require('../../support/pages/shield_page');
+
+  var shieldPage;
+
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -92,6 +96,17 @@ define(function (require) {
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
+            var loginPage = new RegExp('login').test(currentUrl);
+            self.debug('Found loginPage = ' + loginPage + ', username = '
+              + config.servers.kibana.shield.username);
+            if (loginPage) {
+              shieldPage = new ShieldPage(self.remote);
+              return shieldPage.login(config.servers.kibana.shield.username,
+                config.servers.kibana.shield.password)
+              .then(function () {
+                return self.remote.getCurrentUrl();
+              });
+            }
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
@@ -107,7 +122,7 @@ define(function (require) {
         });
       };
 
-      return doNavigation(navUrl)
+      return doNavigation(appUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
