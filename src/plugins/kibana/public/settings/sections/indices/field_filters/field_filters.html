@@ -1,0 +1,70 @@
+<h3>Field Filters</h3>
+
+<p>
+  Field filters can be used to exclude one or more fields when fetching the document source. This happens in apps like Discover for the doc table. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lowere level.
+</p>
+
+<div ng-class="{ saving: fieldFilters.saving }" class="field-filters-container">
+  <form
+    ng-repeat="filter in fieldFilters.all()"
+    ng-submit="fieldFilters.save(filter)"
+    class="field-filter"
+    name="form">
+
+    <div class="value">
+      <span ng-if="fieldFilters.editting !== filter">{{ filter.value }}</span>
+
+      <input
+        ng-model="filter.value"
+        ng-if="fieldFilters.editting === filter"
+        placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
+        type="text"
+        required
+        class="form-control">
+    </div>
+
+    <div class="controls">
+      <button
+        aria-label="Edit field filter"
+        ng-if="fieldFilters.editting !== filter"
+        ng-click="fieldFilters.editting = filter"
+        type="button"
+        class="btn btn-default">
+        <i aria-hidden="true" class="fa fa-pencil"></i>
+      </button>
+      <button
+        aria-label="Save field filter"
+        ng-if="fieldFilters.editting === filter"
+        type="submit"
+        class="btn btn-primary">
+        <i aria-hidden="true" class="fa fa-save"></i>
+      </button>
+      <button
+        aria-label="Delete field filter"
+        ng-click="fieldFilters.delete(filter)"
+        type="button"
+        class="btn btn-danger">
+        <i aria-hidden="true" class="fa fa-trash"></i>
+      </button>
+    </div>
+  </form>
+
+  <form name="form" ng-submit="fieldFilters.create()">
+    <div class="input-group">
+      <input
+        ng-model="fieldFilters.newValue"
+        placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
+        type="text"
+        class="form-control">
+
+      <div class="input-group-btn" role="group" aria-label="Field Filter Editor Controls">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          ng-disabled="!fieldFilters.newValue">
+          Add
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

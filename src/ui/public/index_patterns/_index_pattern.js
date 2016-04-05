@@ -36,6 +36,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     notExpandable: 'boolean',
     intervalName: 'string',
     fields: 'json',
+    fieldFilters: 'json',
     fieldFormatMap: {
       type: 'string',
       _serialize: function (map) {
@@ -64,6 +65,9 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     let self = this;
 
     setId(id);
+    if (!self.fieldFilters) {
+      self.fieldFilters = [];
+    }
 
     let docSource = new DocSource();
 
@@ -148,6 +152,18 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
           initFields();
         }
       }
+    };
+
+    // Get the source filtering configuration for that index.
+    // Fields which name appears in the given columns array will not be excluded.
+    self.getSourceFiltering = function (columns) {
+      return {
+        exclude: _(self.getNonScriptedFields())
+          .filter((field) => field.exclude && !_.contains(columns, field.name))
+          .map((field) => field.name)
+          .concat(self.fieldFilters.map(filter => filter.value))
+          .value()
+      };
     };
 
     self.addScriptedField = function (name, script, type, lang) {

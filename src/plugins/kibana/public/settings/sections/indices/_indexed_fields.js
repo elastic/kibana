@@ -34,12 +34,7 @@ uiModules.get('apps/settings')
       function refreshRows() {
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
-
-        const metaFields = config.get('metaFields');
-        const sourceFiltering = $scope.indexPattern.getSourceFiltering();
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
-        _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
-
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });
           rowScopes.push(childScope);
