@@ -1,7 +1,7 @@
 import { escapeRegExp, memoize } from 'lodash';
 
 export const makeRegEx = memoize(function makeRegEx(glob) {
-  return new RegExp(glob.split('*').map(escapeRegExp).join('.*'));
+  return new RegExp('^' + glob.split('*').map(escapeRegExp).join('.*') + '$');
 });
 
 export function fieldWildcardMatcher(globs) {
