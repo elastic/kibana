@@ -6,7 +6,7 @@ You can also see the number of documents that match the search query and get fie
 configured for the selected index pattern, the distribution of documents over time is displayed in a histogram at the 
 top of the page. 
 
-image:images/Discover-Start-Annotated.jpg[Discover Page]
+image::images/Discover-Start-Annotated.jpg[Discover Page]
 
 [float]
 [[set-time-filter]]
@@ -43,15 +43,16 @@ sets an interval based on the time range.
 [[search]]
 === Searching Your Data
 You can search the indices that match the current index pattern by submitting a search from the Discover page.
-You can enter simple query strings, use the Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query 
-syntax], or use the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]. 
+You can enter simple query strings, use the 
+Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based 
+{ref}/query-dsl.html[Elasticsearch Query DSL]. 
 
 When you submit a search, the histogram, Documents table, and Fields list are updated to reflect 
 the search results. The total number of hits (matching documents) is shown in the upper right corner of the
 histogram. The Documents table shows the first five hundred hits. By default, the hits are listed in reverse 
 chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time 
-column header. You can also sort the table using the values in any indexed field. For more information, see <<sorting, 
-Sorting the Documents Table>>.
+column header. You can also sort the table using the values in any indexed field. For more information, see 
+<<sorting,Sorting the Documents Table>>.
 
 To search your data:
 
@@ -79,9 +80,7 @@ Reference.
 [float]
 [[new-search]]
 ==== Starting a New Search
-To clear the current search and start a new search, click the *New Search* button in the Discover toolbar.
-
-image:images/Discover-New-Search.jpg[New Search]
+To clear the current search and start a new search, click the *New* button in the Discover toolbar.
 
 [float]
 [[save-search]]
@@ -91,19 +90,18 @@ Saving a search saves both the search query string and the currently selected in
 
 To save the current search:
 
-. Click the *Save Search* button image:images/SaveButton.jpg[Save Search button] in the Discover toolbar. 
+. Click the *Save* button in the Discover toolbar. 
 . Enter a name for the search and click *Save*.
 
 [float]
 [[load-search]]
-==== Loading a Saved Search
+==== Opening a Saved Search
 To load a saved search:
 
-. Click the *Load Search* button image:images/LoadButton.jpg[Load Search 
-button] in the Discover toolbar.
-. Select the search you want to load.
+. Click the *Open* button in the Discover toolbar.
+. Select the search you want to open.
 
-If the saved search is associated with a different index pattern than is currently selected, loading the saved search 
+If the saved search is associated with a different index pattern than is currently selected, opening the saved search 
 also changes the selected index pattern.
 
 [float]
@@ -184,13 +182,11 @@ image:images/add-column-button.png[Add Column] *Toggle column in table* button.
 [float]
 [[sorting]]
 ==== Sorting the Document List
-You can sort the documents in the Documents table by the values in any indexed field. If a time field is configured for 
-the selected index pattern, by default the documents are sorted in reverse chronological order.
+You can sort the documents in the Documents table by the values in any indexed field. Documents in index patterns that 
+are configured with time fields are sorted in reverse chronological order by default.
 
-To change the sort order:
-
-* Click the name of the field you want to sort by. The fields you can use for sorting have a sort button to the right 
-of the field name. Clicking the field name a second time reverses the sort order.
+To change the sort order, click the name of the field you want to sort by. The fields you can use for sorting have a 
+sort button to the right of the field name. Clicking the field name a second time reverses the sort order.
 
 [float]
 [[adding-columns]]
@@ -228,10 +224,8 @@ button image:images/RemoveFieldButton.jpg[Remove Field Button].
 From the field list, you can see how many documents in the Documents table contain a particular field, what the top 5 
 values are, and what percentage of documents contain each value. 
 
-To view field data statistics:
-
-* Click the name of a field in the Fields list. The field can be anywhere in the Fields list--Selected Fields,  Popular 
-Fields, or the list of other fields. 
+To view field data statistics, click the name of a field in the Fields list. The field can be anywhere in the Fields 
+list. 
 
 image:images/Discover-FieldStats.jpg[Field Statistics]
 
