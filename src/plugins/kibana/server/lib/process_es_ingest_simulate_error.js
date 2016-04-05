@@ -1,7 +1,8 @@
 const _ = require('lodash');
 
 function buildError(error) {
-  const errorMessage = _.get(error, 'body.error.reason');
+  const errorMessage = _.get(error, 'body.error.root_cause[0].reason');
+  if (!errorMessage) throw error;
 
   return {
     compile: true,

@@ -1,13 +1,7 @@
 const _ = require('lodash');
 
-function translateError(esError) {
-  const rootCause = _.get(esError, 'root_cause[0]');
-
-  return _.get(rootCause, 'reason') || _.get(rootCause, 'type');
-}
-
 function buildError(error) {
-  const errorMessage = translateError(error);
+  const errorMessage =  _.get(error, 'root_cause[0].reason') || _.get(error, 'root_cause[0].type');
   if (!errorMessage) return;
 
   return {

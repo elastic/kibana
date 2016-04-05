@@ -7,57 +7,81 @@ define(function (require) {
     processors: [{
       processor_id: 'processor1',
       type_id: 'gsub',
-      target_field: 'foo',
-      value: 'bar'
+      source_field: 'foo',
+      pattern: 'bar',
+      replacement: 'baz'
     }],
-    input: {}
+    input: { foo: 'bar' }
   };
 
   return function (bdd, scenarioManager, request) {
-    bdd.describe('simulate - set processor', function simulatePipeline() {
+    bdd.describe('simulate - gsub processor', () => {
 
-      bdd.it('should return 400 for an invalid payload', function invalidPayload() {
+      bdd.it('should return 400 for an invalid payload', () => {
         return Promise.all([
-          // Set processor requires targetField property
+          // GSub processor requires targetField property
           request.post('/kibana/ingest/simulate')
           .send({
-            input: {},
+            input: { foo: 'bar' },
             processors: [{
               processor_id: 'processor1',
-              type_id: 'set',
-              value: 'bar',
-              target_field: 42
+              type_id: 'gsub',
+              source_field: 42,
+              pattern: 'bar',
+              replacement: 'baz'
             }]
           })
           .expect(400)
         ]);
       });
 
-      bdd.it('should return 200 for a valid simulate request', function validSetSimulate() {
+      bdd.it('should return a compile error object for a processor with an invalid regex', () => {
+        return Promise.all([
+          // non-escaped square bracket is an invalid regex
+          request.post('/kibana/ingest/simulate')
+          .send({
+            input: { foo: 'bar' },
+            processors: [{
+              processor_id: 'processor1',
+              type_id: 'gsub',
+              source_field: 'foo',
+              pattern: '[',
+              replacement: 'baz'
+            }]
+          })
+          .expect(200)
+          .then((response) => {
+            expect(response.body[0].error.compile).to.be(true);
+          })
+        ]);
+      });
+
+      bdd.it('should return 200 for a valid simulate request', () => {
         return request.post('/kibana/ingest/simulate')
           .send(testPipeline)
           .expect(200);
       });
 
-      bdd.it('should return a simulated output with the correct result for the given processor', function () {
+      bdd.it('should return a simulated output with the correct result for the given processor', () => {
         return request.post('/kibana/ingest/simulate')
           .send(testPipeline)
           .expect(200)
-          .then(function (response) {
-            expect(response.body[0].output.foo).to.be.equal('bar');
+          .then((response) => {
+            expect(response.body[0].output.foo).to.be.equal('baz');
           });
       });
 
-      bdd.it('should enforce snake case', function setSimulateSnakeCase() {
+      bdd.it('should enforce snake case', () => {
         return request.post('/kibana/ingest/simulate')
         .send({
           processors: [{
             processorId: 'processor1',
-            typeId: 'set',
-            targetField: 'foo',
-            value: 'bar'
+            typeId: 'gsub',
+            sourceField: 'foo',
+            pattern: 'bar',
+            replacement: 'baz'
           }],
-          input: {}
+          input: { foo: 'bar' }
         })
         .expect(400);
       });

@@ -34,6 +34,14 @@ define(function (require) {
           // All processors must have a processorId property and a typeId property
           request.post('/kibana/ingest/simulate')
           .send({input: {}, processors: [{}]})
+          .expect(400),
+
+          request.post('/kibana/ingest/simulate')
+          .send({input: {}, processors: ['foo']})
+          .expect(400),
+
+          request.post('/kibana/ingest/simulate')
+          .send({input: {}, processors: 'foo'})
           .expect(400)
         ]);
       });

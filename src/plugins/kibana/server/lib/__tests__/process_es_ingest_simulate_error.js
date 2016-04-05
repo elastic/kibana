@@ -13,7 +13,7 @@ describe('processESIngestSimulateError', function () {
     ];
     const actual = processESIngestSimulateError(dirtyProcessorId, error);
 
-    expect(actual).to.eql(expected);
+    expect(_.isEqual(actual, expected)).to.be.ok();
   });
 
 });

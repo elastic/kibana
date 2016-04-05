@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import handleESError from '../../../lib/handle_es_error';
 import handleResponse from '../../../lib/process_es_ingest_simulate_response';
 import processESIngestSimulateError from '../../../lib/process_es_ingest_simulate_error';
 import simulateRequestSchema from '../../../lib/schemas/simulate_request_schema';
@@ -29,7 +30,10 @@ export function registerSimulate(server) {
       })
       .then(handleResponse, handleError)
       .then((processors) => _.map(processors, keysToSnakeCaseShallow))
-      .then(reply);
+      .then(reply)
+      .catch((error) => {
+        reply(handleESError(error));
+      });
     }
   });
 };
