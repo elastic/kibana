@@ -2,17 +2,17 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/paginated_table';
 import $ from 'jquery';
 
 describe('paginated table', function () {
-  var $el;
-  var $rootScope;
-  var $compile;
-  var $scope;
-  var $elScope;
-  var $orderBy;
+  let $el;
+  let $rootScope;
+  let $compile;
+  let $scope;
+  let $elScope;
+  let $orderBy;
   var defaultPerPage = 10;
 
   var makeData = function (colCount, rowCount) {
@@ -109,9 +109,9 @@ describe('paginated table', function () {
   });
 
   describe('sorting', function () {
-    var data;
-    var lastRowIndex;
-    var paginatedTable;
+    let data;
+    let lastRowIndex;
+    let paginatedTable;
 
     beforeEach(function () {
       data = makeData(3, [
@@ -210,8 +210,8 @@ describe('paginated table', function () {
   });
 
   describe('sorting duplicate columns', function () {
-    var data;
-    var paginatedTable;
+    let data;
+    let paginatedTable;
     var colText = 'test row';
 
     beforeEach(function () {
@@ -290,9 +290,9 @@ describe('paginated table', function () {
   });
 
   describe('custom sorting', function () {
-    var data;
-    var paginatedTable;
-    var sortHandler;
+    let data;
+    let paginatedTable;
+    let sortHandler;
 
     beforeEach(function () {
       sortHandler = sinon.spy();
@@ -320,9 +320,9 @@ describe('paginated table', function () {
   });
 
   describe('object rows', function () {
-    var cols;
-    var rows;
-    var paginatedTable;
+    let cols;
+    let rows;
+    let paginatedTable;
 
     beforeEach(function () {
       cols = [{

@@ -1,4 +1,4 @@
-module.exports = function getBasicAuthRealm(message) {
+export default function getBasicAuthRealm(message) {
   if (!message || typeof message !== 'string') return null;
 
   const parts = message.match(/Basic\ realm=\\"(.*)\\"/);

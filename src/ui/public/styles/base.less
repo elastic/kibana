@@ -7,7 +7,7 @@ html,
 body {
   .flex-parent();
   height: 100%;
-  margin: 0px;
+  margin: 0;
 }
 
 label > small {
@@ -76,16 +76,16 @@ ul.navbar-inline li {
 }
 
 .content {
-  .flex-parent();
-  position: relative;
-  z-index: 0;
+  .real-flex-parent(@flow: row nowrap);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 
   > nav {
-    position: relative;
     z-index: 1;
 
     .navbar-right {
-      margin-right: 0;
+      margin-right: 0 !important;
     }
   }
 }
@@ -94,6 +94,7 @@ ul.navbar-inline li {
   .flex-parent(@shrink: 0);
   position: relative;
   z-index: 0;
+  background-color: @white;
 }
 
 .top-fixed {
@@ -133,15 +134,45 @@ a {
   cursor: pointer;
 }
 
+.application,
 .app-container {
   > * {
     position: relative;
     z-index: 0;
   }
 
+  .kibana-nav-options {
+    padding-bottom: 0;
+    padding-right: 0px;
+
+    kbn-global-timepicker {
+      line-height: 20px;
+    }
+
+    .kibana-nav-actions {
+      margin-left: auto;
+      padding-right: 0;
+      line-height: 20px;
+
+      .button-group > :last-child {
+        border-radius: 0;
+      }
+    }
+    .kibana-nav-info {
+      line-height: 30px;
+      padding: 0 10px;
+      &-title {
+        font-weight: bold;
+        margin-right: 10px;
+      }
+    }
+  }
+
   > config {
     z-index: 1;
   }
+  > navbar { padding-bottom: 4px; }
+  > kbn-top-nav { z-index: 3; }
 
   > nav,
   > navbar {
@@ -161,6 +192,7 @@ a {
     &:not(.pull-right):first-child {
       // This is how .navbar-brand accomplishes it's solid placement
       margin-left: -15px;
+      margin-top: 4px;
     }
   }
 }
@@ -196,6 +228,11 @@ a {
   .fa {
     font-size: 16px;
     vertical-align: middle;
+  }
+
+  button {
+    background-color: transparent;
+    border-radius: 0;
   }
 }
 
@@ -264,30 +301,134 @@ table {
   }
 }
 
+//== breadCrumbsTemplate
+bread-crumbs {
+  ul {
+    margin: 0;
+    padding: 8px 10px;
+    list-style-type: none;
+    text-transform: capitalize;
+
+    >li {
+      display: inline;
+      >span {
+        color: @kibanaGray2;
+      }
+      >span:hover {
+        color: @kibanaGray1;
+      }
+    }
+
+    >li:last-child {
+      >span {
+        color: @kibanaGray1;
+      }
+    }
+  }
+}
+
 //== SavedObjectFinder
-saved-object-finder {
-  .form-group {
-    margin-bottom: 0;
-    input {
-      .border-bottom-radius(0);
+saved-object-finder,
+paginated-selectable-list {
+  .row {
+    background-color: @kibanaGray6;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .finder-hit-count,
+  .finder-manage-object {
+    min-width: 80px;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .finder-hit-count {
+    flex: 1;
+
+    span {
+      color: @kibanaGray3;
     }
   }
 
-  .list-group-item {
-    a {
+  .finder-manage-object {
+    flex: 3;
+    text-align: left;
+    text-transform: capitalize;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+    float: left;
+    flex: 8;
+
+    input {
+      border: none;
+      padding: 5px 0px;
+      border-radius: @border-radius-base;
+    }
+
+    span {
+      padding: 5px 0px;
+      background-color: @white;
+      border: none;
+
       i {
-        color: @saved-object-finder-icon-color !important;
+        color: @kibanaGray3;
+        width: 15px;
+      }
+    }
+  }
+
+  ul.li-striped {
+    li {
+      border: none;
+    }
+
+    li:nth-child(odd) {
+      background-color: @kibanaGray6;
+    }
+
+    li:nth-child(even) {
+      background-color: @white;
+    }
+
+    .paginate-heading {
+      font-weight: normal;
+      color: @kibanaGray1;
+    }
+
+    .list-group-item {
+      padding: 8px 15px;
+
+      ul {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+
+        .finder-type {
+          margin-right: 10px;
+        }
       }
 
-      color: @saved-object-finder-link-color !important;
-    }
+      a {
+        i {
+          color: @saved-object-finder-icon-color !important;
+          margin-right: 10px;
+        }
 
-    &:first-child {
-      .border-top-radius(0) !important;
-    }
+        display: block;
+        color: @saved-object-finder-link-color !important;
+      }
 
-    &.list-group-no-results p {
-      margin-bottom: 0 !important;
+      &:first-child {
+        .border-top-radius(0) !important;
+      }
+
+      &.list-group-no-results p {
+        margin-bottom: 0 !important;
+      }
     }
   }
 
@@ -299,13 +440,6 @@ saved-object-finder {
       flex-direction: row;
       justify-content: flex-end;
     }
-  }
-
-  span.finder-hit-count {
-    position: absolute;
-    right: 10px;
-    top: 25px;
-    font-size: 0.85em;
   }
 
   .finder-options {
@@ -334,6 +468,12 @@ saved-object-finder {
           color: @component-active-color;
         }
       }
+    }
+  }
+
+  paginate {
+    paginate-controls {
+      margin: 20px;
     }
   }
 }

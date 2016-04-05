@@ -1,26 +1,26 @@
 import angular from 'angular';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
 import MockState from 'fixtures/mock_state';
 import $ from 'jquery';
 import 'ui/filter_bar';
-import FilterBarLibMapFilterProvider from 'ui/filter_bar/lib/mapFilter';
+import FilterBarLibMapFilterProvider from 'ui/filter_bar/lib/map_filter';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 
 describe('Filter Bar Directive', function () {
-  var $rootScope;
-  var $compile;
-  var $timeout;
-  var Promise;
-  var appState;
-  var queryFilter;
-  var mapFilter;
-  var $el;
-  var $scope;
-  // require('testUtils/noDigestPromises').activateForSuite();
+  let $rootScope;
+  let $compile;
+  let $timeout;
+  let Promise;
+  let appState;
+  let queryFilter;
+  let mapFilter;
+  let $el;
+  let $scope;
+  // require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(

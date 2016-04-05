@@ -11,7 +11,7 @@ uiModules
   });
 
 function shortDotsFilterProvider(config, $rootScope) {
-  var filter;
+  let filter;
 
   function updateFilter() {
     filter = config.get('shortDots:enable') ? _.shortenDottedString : _.identity;

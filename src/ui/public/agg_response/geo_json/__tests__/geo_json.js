@@ -1,19 +1,19 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
-import VisProvider from 'ui/Vis';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
-  var vis;
-  var tabify;
-  var convert;
-  var esResponse;
-  var aggs;
+  let vis;
+  let tabify;
+  let convert;
+  let esResponse;
+  let aggs;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -108,10 +108,10 @@ describe('GeoJson Agg Response Converter', function () {
         describe('includes one feature per row in the table', function () {
           this.timeout(60000);
 
-          var table;
-          var chart;
-          var geoColI;
-          var metricColI;
+          let table;
+          let chart;
+          let geoColI;
+          let metricColI;
 
           before(function () {
             table = makeTable();

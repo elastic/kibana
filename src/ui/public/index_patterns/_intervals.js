@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import IndexedArray from 'ui/IndexedArray';
+import IndexedArray from 'ui/indexed_array';
 export default function IndexNameIntervalsService(timefilter) {
 
   var intervals = new IndexedArray({
@@ -35,7 +35,7 @@ export default function IndexNameIntervalsService(timefilter) {
   });
 
   intervals.toIndexList = function (format, interval, a, b, sortDirection) {
-    var bounds;
+    let bounds;
 
     // setup the range that the list will span, return two moment objects that
     // are in proper order. a and b can be numbers to specify to go before or after now (respectively)

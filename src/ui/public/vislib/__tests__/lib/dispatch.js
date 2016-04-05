@@ -1,7 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import d3 from 'd3';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
@@ -22,16 +22,16 @@ describe('Vislib Dispatch Class Test Suite', function () {
   }
 
   describe('', function () {
-    var vis;
-    var persistedState;
-    var SimpleEmitter;
+    let vis;
+    let persistedState;
+    let SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(FixturesVislibVisFixtureProvider)();
       persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.render(data, persistedState);
-      SimpleEmitter = require('ui/utils/SimpleEmitter');
+      SimpleEmitter = require('ui/utils/simple_emitter');
     }));
 
     afterEach(function () {
@@ -48,8 +48,8 @@ describe('Vislib Dispatch Class Test Suite', function () {
   });
 
   describe('Stock event handlers', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -119,9 +119,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
   describe('Custom event handlers', function () {
     it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
-      var vis;
-      var persistedState;
-      var chart;
+      let vis;
+      let persistedState;
+      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();
@@ -139,9 +139,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('can be added after rendering', function () {
-      var vis;
-      var persistedState;
-      var chart;
+      let vis;
+      let persistedState;
+      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();

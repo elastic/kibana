@@ -4,14 +4,14 @@ const { format: formatUrl } = require('url');
 import Hapi from 'hapi';
 const { debounce, compact, get, invoke, bindAll, once, sample, uniq } = require('lodash');
 
-import Log from '../Log';
+import Log from '../log';
 import Worker from './worker';
 import BasePathProxy from './base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
 module.exports = class ClusterManager {
-  constructor(opts, settings) {
+  constructor(opts = {}, settings = {}) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
@@ -83,7 +83,7 @@ module.exports = class ClusterManager {
 
   setupWatching(extraPaths) {
     const chokidar = require('chokidar');
-    const fromRoot = require('../../utils/fromRoot');
+    const fromRoot = require('../../utils/from_root');
 
     const watchPaths = uniq(
       [

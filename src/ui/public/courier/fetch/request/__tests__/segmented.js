@@ -1,6 +1,6 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 
 import SegmentedRequestProvider from '../segmented';
 import SearchRequestProvider from '../search';
@@ -32,9 +32,7 @@ describe('ui/courier/fetch/request/segmented', () => {
       expect(returned.then).to.be.Function;
     });
 
-    it('does not call super.start() until promise is resolved', () => {
-      expect(searchReqStart.called).to.be(false);
-      $rootScope.$apply();
+    it('calls super.start() synchronously', () => {
       expect(searchReqStart.called).to.be(true);
     });
   });

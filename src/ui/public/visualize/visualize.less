@@ -13,11 +13,10 @@ visualize {
   }
 
   .vis-container {
-    height: 1px;
     display: flex;
     flex-direction: row;
 
-    flex: 1 1 auto;
+    flex: 1 0;
     overflow: auto;
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
@@ -59,6 +58,7 @@ ul.visualizations .media-body {
 visualize-spy {
   // this element should flex
   flex: 0 1 auto;
+  padding: 0px 0px 0px 15px;
 
   // it's children should also flex vertically
   flex-direction: column;
@@ -77,34 +77,12 @@ visualize-spy {
 
   .visualize-show-spy {
     flex: 0 0 auto;
-
-    border-top: 1px solid;
-    border-top-color: @visualize-show-spy-border;
-    margin-bottom: 3px;
-
     &-tab {
-      margin: 0px auto;
-      margin-top: -1px;
-      border: 1px solid;
-      border-color: @visualize-show-spy-border;
-      border-top: 0px;
-      border-width: 0px 1px 1px 1px;
-      border-bottom-left-radius: @border-radius-base;
-      border-bottom-right-radius: @border-radius-base;
-      width: 50px;
-      background: @visualize-show-spy-bg;
-      text-align: center;
-      color: @visualize-show-spy-color;
-
-      &:hover {
-        background-color: @visualize-show-spy-hover-bg;
-        color: @visualize-show-spy-hover-color;
-      }
-    }
-
-
-    i {
-      padding: 0 10px;
+      color: @kibanaGray4;
+      position: absolute;
+      z-index: 100;
+      left: 5px;
+      bottom: 0px;
     }
   }
 
@@ -181,4 +159,3 @@ visualize-spy {
     white-space: pre-wrap;
   }
 }
-
