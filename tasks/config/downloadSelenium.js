@@ -1,7 +1,8 @@
 var path = require('path');
 import { resolve as resolveUrl } from 'url';
 
-const URL = 'https://selenium-release.storage.googleapis.com/2.48/selenium-server-standalone-2.48.2.jar';
+const URL = 'https://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar';
+// must match selenium-version in test/intern.js
 const DIR = resolveUrl(URL, './');
 const FILE = URL.replace(DIR, '');
 
