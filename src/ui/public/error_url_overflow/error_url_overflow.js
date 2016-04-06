@@ -4,12 +4,28 @@ import uiModules from 'ui/modules';
 import './error_url_overflow.less';
 import template from './error_url_overflow.html';
 
+const key = 'error/url-overflow/url';
+const store = window.sessionStorage || {
+  getItem() {},
+  setItem() {},
+  removeItem() {},
+};
+
 export function OverflowedUrlStoreProvider() {
-  let value;
+  let value = store.getItem(key);
+
   return {
-    set(v) { value = v; },
-    get() { return value; },
-    clear() { value = null; }
+    set(v) {
+      value = v;
+      store.setItem(key, value);
+    },
+    get() {
+      return value;
+    },
+    clear() {
+      value = null;
+      store.removeItem(key);
+    }
   };
 }
 
@@ -21,7 +37,6 @@ uiRoutes
     constructor(Private, config, $scope) {
       const overflowedUrlStore = Private(OverflowedUrlStoreProvider);
       this.url = overflowedUrlStore.get();
-      overflowedUrlStore.clear();
 
       if (!this.url) {
         window.location.hash = '#/';
@@ -29,6 +44,8 @@ uiRoutes
       }
 
       this.limit = config.get('url:limit');
+
+      $scope.$on('$destroy', () => overflowedUrlStore.clear());
     }
   }
 });
