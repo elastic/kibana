@@ -9,6 +9,7 @@ export default function TemplateRenderbotFactory(Private, $compile, $rootScope) 
 
     this.$scope = $rootScope.$new();
     this.$scope.vis = vis;
+    this.$scope.uiState = uiState;
 
     $el.html($compile(this.vis.type.template)(this.$scope));
   }
