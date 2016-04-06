@@ -115,7 +115,7 @@ describe('Controller', function () {
     initController(new OneRangeVis({sort: sortObj}));
 
     // modify the data to not have any buckets
-    var resp = _.cloneDeep(fixtures.oneRangeBucket);
+    const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
     attachEsResponseToScope(resp);
