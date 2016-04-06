@@ -2,6 +2,7 @@ import $ from 'jquery';
 import truncText from 'trunc-text';
 import truncHTML from 'trunc-html';
 import uiModules from 'ui/modules';
+import truncatedTemplate from 'ui/directives/partials/truncated.html';
 const module = uiModules.get('kibana');
 
 module.directive('kbnTruncated', function ($compile) {
@@ -12,15 +13,7 @@ module.directive('kbnTruncated', function ($compile) {
       length: '@',
       isHtml: '@'
     },
-    template: function ($element, attrs) {
-      return `
-        <span ng-if="!isHtml">{{content}}</span>
-        <span ng-if="isHtml" ng-bind-html="content | trustAsHtml"></span>
-        <span ng-if="truncated">
-          <a ng-click="toggle()">{{action}}</a>
-        </span>
-      `;
-    },
+    template: truncatedTemplate,
     link: function ($scope, $element, attrs) {
       const source = $scope.source;
       const max = $scope.length;

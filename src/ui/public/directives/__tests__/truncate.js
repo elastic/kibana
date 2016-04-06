@@ -37,6 +37,9 @@ var init = function (text) {
   });
 };
 
+function trimmed(text) {
+  return text.trim().replace(/\s+/g, ' ');
+}
 
 describe('kbnTruncate directive', function () {
 
@@ -47,7 +50,7 @@ describe('kbnTruncate directive', function () {
     });
 
     it('should trim long strings', function (done) {
-      expect($elem.text()).to.be('some strin... more');
+      expect(trimmed($elem.text())).to.be('some … more');
       done();
     });
 
@@ -64,7 +67,7 @@ describe('kbnTruncate directive', function () {
 
       $scope.toggle();
       $scope.$digest();
-      expect($elem.text()).to.be('some strin... more');
+      expect(trimmed($elem.text())).to.be('some … more');
       expect($elem.find('[ng-click="toggle()"]').text()).to.be('more');
 
       done();
