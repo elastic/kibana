@@ -59,21 +59,18 @@ export default class Pipeline {
     this.output = undefined;
     this.dirty = false;
     this.hasCompileError = false;
-    this.dirtyProcessor = undefined;
   }
 
   get model() {
     const pipeline = {
       input: this.input,
-      processors: _.map(this.processors, processor => processor.model),
-      dirtyProcessorId: _.get(this.dirtyProcessor, 'processorId')
+      processors: _.map(this.processors, processor => processor.model)
     };
     return pipeline;
   }
 
-  setDirty(processor) {
+  setDirty() {
     this.dirty = true;
-    this.dirtyProcessor = processor;
   }
 
   load(pipeline) {

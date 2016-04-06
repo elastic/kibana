@@ -75,8 +75,7 @@ define(function (require) {
               target_field: 'bar',
               value: 'baz'
             }
-          ],
-          dirty_processor_id: 'processor2'
+          ]
         };
 
         bdd.it('should return a 200 for a compile error caused by a processor', function () {

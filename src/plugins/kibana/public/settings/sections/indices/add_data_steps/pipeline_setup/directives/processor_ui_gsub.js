@@ -24,7 +24,7 @@ app.directive('processorUiGsub', function () {
       }
 
       function processorUiChanged() {
-        pipeline.setDirty(processor);
+        pipeline.setDirty();
       }
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);

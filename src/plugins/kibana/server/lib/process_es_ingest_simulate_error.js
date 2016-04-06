@@ -1,9 +1,6 @@
 const _ = require('lodash');
 
 function buildError(error) {
-  const processorId = _.get(error, 'body.error.root_cause[0].header.processor_tag');
-  if (!processorId) throw error;
-
   const errorMessage = _.get(error, 'body.error.root_cause[0].reason');
   return {
     compile: true,
@@ -11,10 +8,13 @@ function buildError(error) {
   };
 }
 
-export default function processESIngestSimulateError(dirtyProcessorId, error) {
+export default function processESIngestSimulateError(error) {
+  const processorId = _.get(error, 'body.error.root_cause[0].header.processor_tag');
+  if (!processorId) throw error;
+
   const results = [
     {
-      processorId: dirtyProcessorId,
+      processorId: processorId,
       error: buildError(error)
     }
   ];
