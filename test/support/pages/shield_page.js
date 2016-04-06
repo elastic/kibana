@@ -10,8 +10,6 @@ define(function (require) {
     this.remote = remote;
   }
 
-  var defaultTimeout = config.timeouts.default;
-
   ShieldPage.prototype = {
     constructor: ShieldPage,
 
