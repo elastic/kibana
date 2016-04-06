@@ -122,6 +122,13 @@ This is an internal function that simply returns the input seriesList. Don't use
 
 *This function does not accept any arguments.*
 
+#### .fit()
+Fills null values using a defined fit function
+
+Argument | Accepts | Description
+--- | --- | ---
+mode | *string* | *no help available*  
+
 #### .hide()
 Hide the series by default
 
