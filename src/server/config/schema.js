@@ -52,7 +52,6 @@ module.exports = () => Joi.object({
       disableProtection: Joi.boolean().default(false),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
-    staticDirectoryListings: Joi.boolean().default(Joi.ref('$dev')),
   }).default(),
 
   logging: Joi.object().keys({
