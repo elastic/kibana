@@ -27,9 +27,9 @@ define(function (require) {
     },
 
 
-    clickAdvancedTab: function () {
-      common.debug('in clickAdvancedTab');
-      return common.findTestSubject('settingsNav advanced').click();
+    clickIndicesTab: function () {
+      common.debug('in clickIndicesTab');
+      return common.findTestSubject('settingsNav indices').click();
     },
 
     setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
