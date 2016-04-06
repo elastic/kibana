@@ -45,6 +45,9 @@ describe('parseInterval', function () {
   });
 
   it('should correctly parse a unit in an interval only', function () {
+    duration = parseInterval('ms');
+    expect(duration.as('ms')).to.be(1);
+
     var duration = parseInterval('d');
     expect(duration.as('d')).to.be(1);
 
