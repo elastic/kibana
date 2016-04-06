@@ -78,9 +78,9 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 +
 . Create a file named `kibana.repo` in the `/etc/yum.repos.d/` directory with the following contents:
 +
-[source,sh]
+["source", "sh", subs="attributes"]
 --------------------------------------------------
-[kibana-{branch}]
+[kibana-{version}]
 name=Kibana repository for 4.5.x packages
 baseurl=http://packages.elastic.co/kibana/4.5/centos
 gpgcheck=1
