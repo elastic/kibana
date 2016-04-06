@@ -52,6 +52,107 @@ define(function (require) {
         .expect(200);
       });
 
+      bdd.describe('compilation errors', function simulatePipeline() {
+        const pipeline = {
+          input: { foo: '[message]' },
+          processors: [
+            {
+              processor_id: 'processor1',
+              type_id: 'set',
+              target_field: 'foo',
+              value: 'bar'
+            },
+            {
+              processor_id: 'processor2',
+              type_id: 'gsub',
+              source_field: 'foo',
+              pattern: '[',
+              replacement: '<'
+            },
+            {
+              processor_id: 'processor3',
+              type_id: 'set',
+              target_field: 'bar',
+              value: 'baz'
+            }
+          ],
+          dirty_processor_id: 'processor2'
+        };
+
+        bdd.it('should return a 200 for a compile error caused by a processor', function () {
+          request.post('/kibana/ingest/simulate')
+          .send(pipeline)
+          .expect(200)
+          .then((response) => {
+            expect(response.body[0].processor_id).to.be('processor2');
+            expect(response.body[0].error.compile).to.be(true);
+          });
+        });
+
+        bdd.it('should only return a result for the processor that threw the error', function () {
+          request.post('/kibana/ingest/simulate')
+          .send(pipeline)
+          .expect(200)
+          .then((response) => {
+            expect(response.body[0].processor_id).to.be('processor2');
+            expect(response.body[0].error.compile).to.be(true);
+            expect(response.body.length).to.be(1);
+          });
+        });
+      });
+
+      bdd.describe('data errors', function simulatePipeline() {
+        const pipeline = {
+          input: { foo: '[message]' },
+          processors: [
+            {
+              processor_id: 'processor1',
+              type_id: 'set',
+              target_field: 'foo',
+              value: 'bar'
+            },
+            {
+              processor_id: 'processor2',
+              type_id: 'gsub',
+              source_field: '', //invalid source field
+              pattern: '\\[',
+              replacement: '<'
+            },
+            {
+              processor_id: 'processor3',
+              type_id: 'set',
+              target_field: 'bar',
+              value: 'baz'
+            }
+          ]
+        };
+
+        bdd.it('should return 200 with non-compile error object for a processor with an invalid source_field', () => {
+          return Promise.all([
+            request.post('/kibana/ingest/simulate')
+            .send(pipeline)
+            .expect(200)
+            .then((response) => {
+              expect(response.body[0].error).to.be(undefined);
+              expect(response.body[1].error.compile).to.be(false);
+              expect(response.body[1].processor_id).to.be('processor2');
+            })
+          ]);
+        });
+
+        bdd.it('should return results up to and including the erroring processor', () => {
+          return Promise.all([
+            request.post('/kibana/ingest/simulate')
+            .send(pipeline)
+            .expect(200)
+            .then((response) => {
+              expect(response.body.length).to.be(2);
+            })
+          ]);
+        });
+
+      });
+
     });
   };
 });

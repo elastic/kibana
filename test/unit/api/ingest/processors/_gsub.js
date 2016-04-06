@@ -35,27 +35,6 @@ define(function (require) {
         ]);
       });
 
-      bdd.it('should return a compile error object for a processor with an invalid regex', () => {
-        return Promise.all([
-          // non-escaped square bracket is an invalid regex
-          request.post('/kibana/ingest/simulate')
-          .send({
-            input: { foo: 'bar' },
-            processors: [{
-              processor_id: 'processor1',
-              type_id: 'gsub',
-              source_field: 'foo',
-              pattern: '[',
-              replacement: 'baz'
-            }]
-          })
-          .expect(200)
-          .then((response) => {
-            expect(response.body[0].error.compile).to.be(true);
-          })
-        ]);
-      });
-
       bdd.it('should return 200 for a valid simulate request', () => {
         return request.post('/kibana/ingest/simulate')
           .send(testPipeline)

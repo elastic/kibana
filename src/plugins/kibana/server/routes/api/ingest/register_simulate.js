@@ -19,7 +19,6 @@ export function registerSimulate(server) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, request);
       const simulateApiDocument = request.payload;
       const body = ingestSimulateApiKibanaToEsConverter(simulateApiDocument);
-
       const handleError = _.partial(processESIngestSimulateError, simulateApiDocument.dirty_processor_id);
 
       return boundCallWithRequest('transport.request', {
