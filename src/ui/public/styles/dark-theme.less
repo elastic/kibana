@@ -84,6 +84,9 @@
 
 // /node_modules/bootstrap/less/buttons.less
   .btn {
+    background-color: @dark-button-bg;
+    color: @dark-button-font;
+
     &:hover,
     &:focus,
     &.focus {
@@ -106,7 +109,10 @@
 // /node_modules/bootstrap/less/list-group.less
   .list-group-item {
     background-color: @list-group-bg;
-    border-color: @list-group-border;
+    border: 0 none transparent;
+    &:nth-child(even) {
+      background-color: @gray4;
+    }
   }
 
   a.list-group-item,
@@ -188,8 +194,9 @@
 
 // /node_modules/bootstrap/less/navs.less
   .nav-tabs {
-    border-bottom: 1px solid @nav-tabs-border-color;
+    border-bottom: 1px solid @gray4;
     > li {
+      margin-bottom: -2px;
       > a {
         &:hover {
           border-color: @nav-tabs-link-hover-border-color @nav-tabs-link-hover-border-color @nav-tabs-border-color;
@@ -200,9 +207,9 @@
         &,
         &:hover,
         &:focus {
-          color: @nav-tabs-active-link-hover-color;
-          background-color: @nav-tabs-active-link-hover-bg;
-          border-color: @nav-tabs-active-link-hover-border-color;
+          color: @white;
+          background-color: @gray4;
+          border: 0 none transparent;
         }
       }
     }
@@ -214,6 +221,9 @@
     color: @navbar-default-color;
     background-color: @navbar-default-bg;
     border-color: @navbar-default-border;
+    button {
+      color: @white;
+    }
   }
 
 
@@ -329,7 +339,7 @@
     }
 
     &-full {
-      background-color: @sidebar-hover-bg;
+      background-color: @gray3;
     }
 
     &-details {
@@ -490,7 +500,7 @@
         background-color: @list-group-menu-item-active-bg;
       }
       &:hover {
-        background-color: @list-group-menu-item-hover-bg;
+        background-color: @gray2;
       }
       li {
         color: @list-group-menu-item-color;
@@ -564,9 +574,15 @@
     }
   }
 
-  saved-object-finder .form-group span,
+  saved-object-finder .form-group span {
+    background-color: @input-bg;
+    color: @dark-button-font;
+  }
+  saved-object-finder .paginate-heading {
+    color: @text-color;
+  }
   .kibana-nav-actions .active {
-    background-color: @dark-button-bg;
+    background-color: @config-bg;
     color: @dark-button-font;
   }
 }
