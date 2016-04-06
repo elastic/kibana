@@ -24,21 +24,6 @@ define(function (require) {
       return common.findTestSubject('addData existingIndices').click();
     },
 
-    setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
-      var self = this;
-      return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
-      .click()
-      .then(function setAdvancedSettingsClickPropertyValue(selectList) {
-        return self.remote
-          .findDisplayedByCssSelector('option[label="' + propertyValue + '"]')
-          .click();
-      })
-      .then(function setAdvancedSettingsClickSaveButton() {
-        return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
-        .click();
-      });
-    },
-
     getAdvancedSettings: function getAdvancedSettings(propertyName) {
       common.debug('in setAdvancedSettings');
       return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')

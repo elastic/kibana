@@ -23,7 +23,7 @@ program
 .command('help <command>')
 .description('get the help for a specific command')
 .action(function (cmdName) {
-  var cmd = _.find(program.commands, { _name: cmdName });
+  let cmd = _.find(program.commands, { _name: cmdName });
   if (!cmd) return program.error(`unknown command ${cmdName}`);
   cmd.help();
 });
@@ -35,7 +35,7 @@ program
 });
 
 // check for no command name
-var subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+let subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
 if (!subCommand) {
   program.defaultHelp();
 }

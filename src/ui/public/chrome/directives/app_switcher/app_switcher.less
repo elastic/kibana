@@ -54,6 +54,7 @@ body { overflow-x: hidden; }
   margin: 0 auto;
   background-color: #fff;
 
+  &.hidden-chrome { left: 0; }
   &-panel {
     .flex-parent(@shrink: 0);
     box-shadow: -4px 0px 3px rgba(0,0,0,0.2);
@@ -84,7 +85,6 @@ body { overflow-x: hidden; }
 
     .app-icon {
       float: left;
-      filter: invert(100%);
       font-weight: bold;
       text-align: center;
       font-size: 1.7em;
@@ -95,6 +95,11 @@ body { overflow-x: hidden; }
       > img {
         height: 18px;
         margin-top: 8px;
+        filter: invert(100%);
+      }
+      > i {
+        color: #fff;
+        line-height: @app-icon-height
       }
     }
 
@@ -128,7 +133,7 @@ body { overflow-x: hidden; }
         text-decoration: none;
       }
       img {
-        filter: invert(100%);
+        filter: none;
       }
     }
 

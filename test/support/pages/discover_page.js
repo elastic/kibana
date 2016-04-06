@@ -28,7 +28,7 @@ define(function (require) {
 
     getTimespanText: function getTimespanText() {
       return thisTime
-      .findByCssSelector('.kibana-nav-actions .navbar-timepicker-time-desc pretty-duration')
+      .findByCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
       .getVisibleText();
     },
 
@@ -48,9 +48,7 @@ define(function (require) {
       })
       .then(function clickSave() {
         common.debug('--find save button');
-        return thisTime
-        .findDisplayedByCssSelector('button[ng-disabled="!opts.savedSearch.title"]')
-        .click();
+        return common.findTestSubject('discover-save-search-btn').click();
       })
       .catch(common.handleError(this));
     },
@@ -76,13 +74,13 @@ define(function (require) {
 
     clickLoadSavedSearchButton: function clickLoadSavedSearchButton() {
       return thisTime
-      .findByCssSelector('button[aria-label="Load Saved Search"]')
+      .findDisplayedByCssSelector('button[aria-label="Load Saved Search"]')
       .click();
     },
 
     getCurrentQueryName: function getCurrentQueryName() {
       return thisTime
-        .findByCssSelector('span.kibana-nav-info-title')
+        .findByCssSelector('span.kibana-nav-info-title span')
         .getVisibleText();
     },
 
