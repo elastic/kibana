@@ -14,10 +14,10 @@ The material in this section assumes you have a working Kibana install connected
 
 Video tutorials are also available:
 
-* https://www.elastic.co/blog/kibana-4-video-tutorials-part-1[High-level Kibana 4 introduction, pie charts]
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-1[High-level Kibana introduction, pie charts]
 * https://www.elastic.co/blog/kibana-4-video-tutorials-part-2[Data discovery, bar charts, and line charts]
 * https://www.elastic.co/blog/kibana-4-video-tutorials-part-3[Tile maps]
-* https://www.elastic.co/blog/kibana-4-video-tutorials-part-4[Embedding Kibana 4 visualizations] 
+* https://www.elastic.co/blog/kibana-4-video-tutorials-part-4[Embedding Kibana visualizations] 
 
 [float]
 [[tutorial-load-dataset]]
@@ -76,9 +76,9 @@ The schema for the logs data set has dozens of different fields, but the notable
     "@timestamp": "date"
 }
 
-Before we load the Shakespeare data set, we need to set up a {ref}/mapping.html[_mapping_] for the fields. Mapping 
-divides the documents in the index into logical groups and specifies a field's characteristics, such as the field's
-searchability or whether or not it's _tokenized_, or broken up into separate words.
+Before we load the Shakespeare and logs data sets, we need to set up {ref}mapping.html[_mappings_] for the fields. 
+Mapping divides the documents in the index into logical groups and specifies a field's characteristics, such as the 
+field's searchability or whether or not it's _tokenized_, or broken up into separate words.
 
 Use the following command to set up a mapping for the Shakespeare data set:
 
@@ -196,10 +196,10 @@ yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb    
 === Defining Your Index Patterns
 
 Each set of data loaded to Elasticsearch has an <<settings-create-pattern,index pattern>>. In the previous section, the 
-Shakespeare data set has an index named `shakespeare`, and the accounts 
-data set has an index named `bank`. An _index pattern_ is a string with optional wildcards that can match multiple 
-indices. For example, in the common logging use case, a typical index name contains the date in MM-DD-YYYY 
-format, and an index pattern for May would look something like `logstash-2015.05*`.
+Shakespeare data set has an index named `shakespeare`, and the accounts  data set has an index named `bank`. An _index 
+pattern_ is a string with optional wildcards that can match multiple indices. For example, in the common logging use 
+case, a typical index name contains the date in MM-DD-YYYY format, and an index pattern for May would look something 
+like `logstash-2015.05*`.
 
 For this tutorial, any pattern that matches the name of an index we've loaded will work. Open a browser and 
 navigate to `localhost:5601`. Click the *Settings* tab, then the *Indices* tab. Click *Add New* to define a new index 
@@ -219,7 +219,7 @@ contain data.
 [[tutorial-discovering]]
 === Discovering Your Data
 
-Click the *Discover* tab to display Kibana's data discovery functions:
+Click the *Discover* image:images/discover-compass.png[Compass icon] tab to display Kibana's data discovery functions:
 
 image::images/tutorial-discover.png[]
 
@@ -257,7 +257,7 @@ image::images/tutorial-discover-3.png[]
 The visualization tools available on the *Visualize* tab enable you to display aspects of your data sets in several 
 different ways. 
 
-Click on the *Visualize* tab to start:
+Click on the *Visualize* image:images/visualize-icon.png[Bar chart icon] tab to start:
 
 image::images/tutorial-visualize.png[]
 
@@ -284,7 +284,7 @@ total number of ranges to six. Enter the following ranges:
 15000       30999
 31000       50000
 
-Click the green *Apply changes* button image:images/apply-changes-button.png[] to display the chart:
+Click the *Apply changes* button image:images/apply-changes-button.png[] to display the chart:
 
 image::images/tutorial-visualize-pie-2.png[]
 
@@ -294,7 +294,7 @@ holder's age.
 
 Click *Add sub-buckets* at the bottom, then select *Split Slices*. Choose the *Terms* aggregation and the *age* field from 
 the drop-downs. 
-Click the green *Apply changes* button image:images/apply-changes-button.png[] to add an external ring with the new 
+Click the  *Apply changes* button image:images/apply-changes-button.png[] to add an external ring with the new 
 results.
 
 image::images/tutorial-visualize-pie-3.png[]
@@ -310,10 +310,10 @@ image::images/tutorial-visualize-bar-1.png[]
 For the Y-axis metrics aggregation, select *Unique Count*, with *speaker* as the field. For Shakespeare plays, it might 
 be useful to know which plays have the lowest number of distinct speaking parts, if your theater company is short on 
 actors. For the X-Axis buckets, select the *Terms* aggregation with the *play_name* field. For the *Order*, select
-*Ascending*, leaving the *Size* at 5.
+*Ascending*, leaving the *Size* at 5. Write a description for the axes in the *Custom Label* fields.
 
-Leave the other elements at their default values and click the green *Apply changes* button image:images/apply-changes-button.png[]. Your chart should now look 
-like this:
+Leave the other elements at their default values and click the *Apply changes* button 
+image:images/apply-changes-button.png[]. Your chart should now look like this:
 
 image::images/tutorial-visualize-bar-2.png[]
 
@@ -327,14 +327,17 @@ as well as change many other options for your visualizations, by clicking the *O
 Now that you have a list of the smallest casts for Shakespeare plays, you might also be curious to see which of these 
 plays makes the greatest demands on an individual actor by showing the maximum number of speeches for a given part. Add 
 a Y-axis aggregation with the *Add metrics* button, then choose the *Max* aggregation for the *speech_number* field. In 
-the *Options* tab, change the *Bar Mode* drop-down to *grouped*, then click the green *Apply changes* button 
-image:images/apply-changes-button.png[]. Your 
-chart should now look like this:
+the *Options* tab, change the *Bar Mode* drop-down to *grouped*, then click the  *Apply changes* button 
+image:images/apply-changes-button.png[]. Your chart should now look like this:
 
 image::images/tutorial-visualize-bar-3.png[]
 
 As you can see, _Love's Labours Lost_ has an unusually high maximum speech number, compared to the other plays, and 
 might therefore make more demands on an actor's memory.
+
+Note how the *Number of speaking parts* Y-axis starts at zero, but the bars don't begin to differentiate until 18. To 
+make the differences stand out, starting the Y-axis at a value closer to the minimum, check the 
+*Scale Y-Axis to data bounds* box in the *Options* tab.
 
 Save this chart with the name _Bar Example_.
 
@@ -350,8 +353,8 @@ at the bottom. You'll see a map of the world, since we haven't defined any bucke
 
 image::images/tutorial-visualize-map-1.png[]
 
-Select *Geo Coordinates* as the bucket, then click the green *Apply changes* button image:images/apply-changes-button.png[]. Your chart should now look like 
-this:
+Select *Geo Coordinates* as the bucket, then click the *Apply changes* button image:images/apply-changes-button.png[]. 
+Your chart should now look like this:
 
 image::images/tutorial-visualize-map-2.png[]
 
@@ -378,7 +381,7 @@ Write the following text in the field:
 The Markdown widget uses **markdown** syntax.
 > Blockquotes in Markdown use the > character.
 
-Click the green *Apply changes* button image:images/apply-changes-button.png[] to display the rendered Markdown in the 
+Click the  *Apply changes* button image:images/apply-changes-button.png[] to display the rendered Markdown in the 
 preview pane:
 
 image::images/tutorial-visualize-md-2.png[]
