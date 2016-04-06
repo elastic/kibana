@@ -137,7 +137,8 @@ class BaseOptimizer {
       resolve: {
         extensions: ['.js', '.json', '.jsx', '.less', ''],
         postfixes: [''],
-        modulesDirectories: ['webpackShims', 'node_modules', fromRoot('webpackShims'), fromRoot('node_modules')],
+        modulesDirectories: ['webpackShims', 'node_modules'],
+        fallback: [fromRoot('webpackShims'), fromRoot('node_modules')],
         loaderPostfixes: ['-loader', ''],
         root: fromRoot('.'),
         alias: this.env.aliases,

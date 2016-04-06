@@ -2,7 +2,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import angular from 'angular';
 import chrome from 'ui/chrome';
-import 'ui/directives/kbn_top_nav';
 import 'ui/courier';
 import 'ui/config';
 import 'ui/notify';
