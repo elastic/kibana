@@ -1,0 +1,13 @@
+Backport PR #6745
+---------
+
+**Commit 1:**
+[internal] Bump eslint-config-kibana to 0.0.3
+
+Two new rules here:
+
+no-const-assign
+no-redeclare
+
+* Original sha: e79b785eb5fb9fb2ab29a0f69bdd5ade3ea70dcc
+* Authored by Court Ewing <court@epixa.com> on 2016-04-01T20:27:22Z
