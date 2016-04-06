@@ -63,8 +63,8 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       type: this.type,
       size: opts.pageSize,
       body,
-      searchType: 'scan',
-      scroll: '1m'
+      scroll: '1m',
+      sort: '_doc',
     }, getMoreUntilDone);
   });
 };
