@@ -1,14 +1,14 @@
 import { spawn } from 'child_process';
 import { promisify } from 'bluebird';
-import { writeFile, readFile } from 'fs';
+import { writeFileSync, readFile } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
+import es from 'event-stream';
 import readYamlConfig from '../read_yaml_config';
 import expect from 'expect.js';
 const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
-const pwriteFile = promisify(writeFile);
 const preadFile = promisify(readFile);
 const mkdir = promisify(mkdirp);
 const primraf = promisify(rimraf);
@@ -17,12 +17,12 @@ function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));
 }
 
-async function setLoggingDest(to) {
+function setLoggingJson(enabled) {
   const conf = readYamlConfig(testConfigFile);
   conf.logging = conf.logging || {};
-  conf.logging.dest = follow(to);
+  conf.logging.json = enabled;
   const yaml = safeDump(conf);
-  await pwriteFile(testConfigFile, yaml);
+  writeFileSync(testConfigFile, yaml);
   return conf;
 }
 
@@ -36,29 +36,48 @@ describe(`Server logging configuration`, function () {
     await primraf(testLogsDirectory);
     await mkdir(testLogsDirectory);
 
-    const conf = await setLoggingDest(`logs/first.log`);
+    let json = Infinity;
+    const conf = setLoggingJson(true);
     const child = spawn(`./bin/kibana`, [`--config`, testConfigFile]);
 
-    // wait for just a bit
-    await wait(5000);
+    child.stdout
+      .pipe(es.split())
+      .pipe(es.mapSync(function (line) {
+        if (!line) {
+          return line; // ignore empty lines
+        }
+        if (json--) {
+          parseJsonLogLine(line);
+        } else {
+          expectPlainTextLogLine(line);
+        }
+      }));
 
-    // reload configuration files
-    await setLoggingDest(`logs/second.log`);
-    child.kill(`SIGHUP`);
+    function parseJsonLogLine(line) {
+      const data = JSON.parse(line);
+      const listening = data.tags.indexOf('listening') !== -1;
+      if (listening) {
+        switchToPlainTextLog();
+      }
+    }
 
-    // wait for some logs to be written
-    await wait(3000);
+    function switchToPlainTextLog() {
+      json = 2; // ignore both "reloading" messages
+      setLoggingJson(false);
+      child.kill(`SIGHUP`); // reload logging config
+    }
 
-    // reset fixture
-    await setLoggingDest(`logs/first.log`);
+    function expectPlainTextLogLine(line) {
+      // cleanup
+      setLoggingJson(true);
+      child.kill();
 
-    child.kill();
-
-    const second = await preadFile(follow(`logs/second.log`), 'utf8');
-    const lines = second.split('\n');
-    const [firstLine] = lines;
-    const index = firstLine.indexOf(`"message":"Reloaded logging configuration due to SIGHUP."`);
-    expect(second.length > 0).to.be.ok();
-    expect(index !== -1).to.be.ok();
+      // assert
+      const tags = `[\u001b[32minfo\u001b[39m][\u001b[36mconfig\u001b[39m]`;
+      const status = `Reloaded logging configuration due to SIGHUP.`;
+      const index = line.indexOf(`${tags} ${status}`);
+      expect(line.length > 0).to.be.ok();
+      expect(index !== -1).to.be.ok();
+    }
   });
 });
