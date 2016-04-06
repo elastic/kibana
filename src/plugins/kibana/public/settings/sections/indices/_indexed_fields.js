@@ -8,7 +8,7 @@ import indexedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_ind
 import { fieldWildcardMatcher } from 'ui/field_wildcard';
 
 uiModules.get('apps/settings')
-.directive('indexedFields', function ($filter, config) {
+.directive('settingsIndicesIndexedFields', function ($filter) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const filter = $filter('filter');

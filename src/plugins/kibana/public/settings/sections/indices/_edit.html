@@ -37,6 +37,7 @@
 
       <br />
 
+      <!-- tab list -->
       <ul class="nav nav-tabs">
         <li class="kbn-settings-tab" ng-repeat="tab in tabs" ng-class="{ active: state.tab === tab.index }">
           <a ng-click="changeTab(tab)">
@@ -46,8 +47,15 @@
         </li>
       </ul>
 
-      <indexed-fields ng-show="state.tab == 'indexedFields'" class="fields indexed-fields"></indexed-fields>
-      <scripted-fields ng-show="state.tab == 'scriptedFields'" class="fields scripted-fields"></scripted-fields>
+      <!-- tabs -->
+      <settings-indices-indexed-fields
+        ng-show="state.tab == 'indexedFields'"
+        class="fields indexed-fields">
+      </settings-indices-indexed-fields>
+      <settings-indices-scripted-fields
+        ng-show="state.tab == 'scriptedFields'"
+        class="fields scripted-fields">
+      </settings-indices-scripted-fields>
       <settings-indices-field-filters
         ng-show="state.tab == 'fieldFilters'"
         index-pattern="indexPattern"
