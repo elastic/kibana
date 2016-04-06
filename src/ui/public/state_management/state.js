@@ -4,11 +4,13 @@ import applyDiff from 'ui/utils/diff_object';
 import qs from 'ui/utils/query_string';
 import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
-
+import KbnUrlProvider from 'ui/url';
+import { OverflowedUrlStoreProvider } from 'ui/error_url_overflow';
 
 export default function StateProvider(Private, $rootScope, $location, config) {
   var notify = new Notifier();
   var Events = Private(EventsProvider);
+  var overflowedUrlStore = Private(OverflowedUrlStoreProvider);
 
   _.class(State).inherits(Events);
   function State(urlParam, defaults) {
@@ -108,11 +110,16 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       $location.search(search);
     }
 
-    const urlLength = $location.absUrl().length;
+    if (overflowedUrlStore.get()) return;
+
+    const absUrl = $location.absUrl();
+    const urlLength = absUrl.length;
     const warnLength = config.get('url:warnLength');
     const failLength = config.get('url:limit');
 
     if (failLength && urlLength >= failLength) {
+      overflowedUrlStore.set(absUrl);
+      window.location.hash = '#/error/url-overflow';
       throw new TypeError(`
         The URL has gotten too big and kibana can no longer
         continue. Please refresh to return to your previous state.
