@@ -59,10 +59,10 @@ describe('kbnTruncate directive', function () {
       done();
     });
 
-    it('should should more text if the link is clicked and less text if clicked again', function (done) {
+    it('should show more text if the link is clicked and less text if clicked again', function (done) {
       $scope.toggle();
       $scope.$digest();
-      expect($elem.text()).to.be('some string of text over 10 characters less');
+      expect(trimmed($elem.text())).to.be('some string of text over 10 characters less');
       expect($elem.find('[ng-click="toggle()"]').text()).to.be('less');
 
       $scope.toggle();
@@ -82,7 +82,7 @@ describe('kbnTruncate directive', function () {
     });
 
     it('should not trim short strings', function (done) {
-      expect($elem.text()).to.be('short');
+      expect(trimmed($elem.text())).to.be('short');
       done();
     });
 
