@@ -1,6 +1,6 @@
 [[production]]
 == Using Kibana in a Production Environment
-* <<configuring-kibana-shield, Configuring Kibana to Work with Shield>>
+* <<configuring-kibana-shield, Configuring Kibana to Work with {scyld}>>
 * <<enabling-ssl, Enabling SSL>>
 * <<controlling-access, Controlling Access>>
 * <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
@@ -19,31 +19,29 @@ and an Elasticsearch client node on the same machine. For more information, see
 
 [float]
 [[configuring-kibana-shield]]
-=== Configuring Kibana to Work with Shield
-If you are using Shield to authenticate Elasticsearch users, you need to provide
+=== Configuring Kibana to Work with {scyld}
+If you are using {scyld} to authenticate Elasticsearch users, you need to provide
 the Kibana server with credentials so it can access the `.kibana` index and monitor
 the cluster.
 
 To configure credentials for the Kibana server:
 
-. Assign the `kibana4_server` role to a user in Shield. For more information, see
-{shield}/kibana.html#kibana4-server-role[Configuring a Role for the Kibana 4 Server]
-in the Shield documentation.
+. Assign the `kibana4_server` role to a user in {scyld}. For more information, see
+{shield}/kibana.html#kibana4-server-role[Configuring a Role for the Kibana Server]
+in the {scyld} documentation.
 
  . Set the `kibana_elasticsearch_username` and
 `kibana_elasticsearch_password` properties in `kibana.yml` to specify the credentials
-of the user you assigned the `kibana4_server`
-role:
+of the user you assigned the `kibana4_server` role:
 +
 [source,text]
 ----
-kibana_elasticsearch_username: kibana4-user
-kibana_elasticsearch_password: kibana4-password
+kibana_elasticsearch_username: kibana-user
+kibana_elasticsearch_password: kibana-password
 ----
 
-Kibana 4 users also need access to the `.kibana` index so they can save and load searches, visualizations, and dashboards.
-For more information, see {shield}/kibana.html[Using Kibana with Shield] in
-the Shield documentation.
+Users on release 4.0 and later of Kibana also need access to the `.kibana` index so they can save and load searches, visualizations, and
+dashboards. For more information, see {shield}/kibana.html[Using Kibana with {scyld}].
 
 TIP: See <<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>> for important information on Kibana and
 the dynamic mapping feature in Elasticsearch.
@@ -64,7 +62,7 @@ server.ssl.key: /path/to/your/server.key
 server.ssl.cert: /path/to/your/server.crt
 ----
 
-If you are using Shield or a proxy that provides an HTTPS endpoint for Elasticsearch,
+If you are using {scyld} or a proxy that provides an HTTPS endpoint for Elasticsearch,
 you can configure Kibana to access Elasticsearch via HTTPS so communications between
 the Kibana server and Elasticsearch are encrypted.
 
@@ -89,15 +87,14 @@ ca: /path/to/your/ca/cacert.pem
 [float]
 [[controlling-access]]
 === Controlling access
-You can use http://www.elastic.co/overview/shield/[Elasticsearch Shield]
-(Shield) to control what Elasticsearch data users can access through Kibana.
-Shield provides index-level access control. If a user isn't authorized to run
+You can use http://www.elastic.co/overview/shield/[{scyld}] to control what Elasticsearch data users can access through Kibana.
+{scyld} provides index-level access control. If a user isn't authorized to run
 the query that populates a Kibana visualization, the user just sees an empty
 visualization.
 
-To configure access to Kibana using Shield, you create Shield roles
+To configure access to Kibana using {scyld}, you create roles
 for Kibana using the `kibana4` default role as a starting point. For more
-information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana 4 with Shield].
+information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana with {scyld}].
 
 [float]
 [[load-balancing]]
