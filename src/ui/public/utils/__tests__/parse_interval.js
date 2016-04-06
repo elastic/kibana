@@ -67,8 +67,5 @@ describe('parseInterval', function () {
 
     duration = parseInterval('234asdf');
     expect(duration).to.not.be.ok();
-
-    duration = parseInterval('ms');
-    expect(duration).to.not.be.ok();
   });
 });
