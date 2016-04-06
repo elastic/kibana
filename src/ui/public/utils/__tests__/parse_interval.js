@@ -15,6 +15,9 @@ describe('parseInterval', function () {
     duration = parseInterval('5m');
     expect(duration.as('m')).to.be(5);
 
+    duration = parseInterval('250ms');
+    expect(duration.as('ms')).to.be(250);
+
     duration = parseInterval('100s');
     expect(duration.as('s')).to.be(100);
 
