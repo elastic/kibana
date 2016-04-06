@@ -158,11 +158,11 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     // Fields which name appears in the given columns array will not be excluded.
     self.getSourceFiltering = function (columns) {
       return {
-        exclude: _(self.getNonScriptedFields())
-          .filter((field) => field.exclude && !_.contains(columns, field.name))
-          .map((field) => field.name)
+        exclude: self
+          .getNonScriptedFields()
+          .filter(field => field.exclude && !_.contains(columns, field.name))
+          .map(field => field.name)
           .concat(self.fieldFilters.map(filter => filter.value))
-          .value()
       };
     };
 
