@@ -5,7 +5,7 @@ A Kibana _dashboard_ displays a set of saved visualizations in groups that you c
 dashboard to share or reload at a later time.
 
 .Sample dashboard
-image:images/NYCTA-Dashboard.jpg[Example dashboard]
+image:images/tutorial-dashboard.png[Example dashboard]
 
 [float]
 [[dashboard-getting-started]]
@@ -22,9 +22,7 @@ The first time you click the *Dashboard* tab, Kibana displays an empty dashboard
 image:images/NewDashboard.png[New Dashboard screen]
 
 Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color 
-theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button and check the *Use dark theme* box.
-
-image:images/darktheme.png[Dark Theme Example]
+theme instead, click the *Options* button and check the *Use dark theme* box.
 
 NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
@@ -36,9 +34,9 @@ include::autorefresh.asciidoc[]
 [[adding-visualizations-to-a-dashboard]]
 ==== Adding Visualizations to a Dashboard
 
-To add a visualization to the dashboard, click the *Add Visualization* image:images/AddVis.png[Plus] button in the 
-toolbar panel. Select a saved visualization from the list. You can filter the list of visualizations by typing a filter 
-string into the *Visualization Filter* field.
+To add a visualization to the dashboard, click the *Add* button in the toolbar panel. Select a saved visualization 
+from the list. You can filter the list of visualizations by typing a filter string into the *Visualization Filter* 
+field.
 
 The visualization you select appears in a _container_ on your dashboard.
 
@@ -60,7 +58,7 @@ when you save a dashboard. To disable this behavior, clear the *Store time with 
 
 Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes 
 a text field to filter by dashboard name and a link to the Object Editor for managing your saved dashboards. You can 
-also access the Object Editor by clicking *Settings > Edit Saved Objects*.
+also access the Object Editor by clicking *Settings > Objects*.
 
 [float]
 [[sharing-dashboards]]
@@ -72,8 +70,6 @@ in your Web page.
 NOTE: A user must have Kibana access in order to view embedded dashboards.
 
 To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
-
-image:images/sharing-panel.png[]
 
 Click the *Copy to Clipboard* button image:images/share-link.png[] to copy the native URL or embed HTML to the clipboard.
 Click the *Generate short URL* button image:images/share-short-link.png[] to create a shortened URL for sharing or 

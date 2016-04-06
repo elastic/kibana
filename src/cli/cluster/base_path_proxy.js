@@ -2,7 +2,7 @@ import { Server } from 'hapi';
 import { notFound } from 'boom';
 import { merge, sample } from 'lodash';
 import { format as formatUrl } from 'url';
-import { fromNode } from 'bluebird';
+import { map, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
@@ -40,7 +40,7 @@ export default class BasePathProxy {
   }
 
   setupRoutes() {
-    const { server, basePath, targetPort } = this;
+    const { clusterManager, server, basePath, targetPort } = this;
 
     server.route({
       method: 'GET',
@@ -53,6 +53,28 @@ export default class BasePathProxy {
     server.route({
       method: '*',
       path: `${basePath}/{kbnPath*}`,
+      config: {
+        pre: [
+          (req, reply) => {
+            map(clusterManager.workers, worker => {
+              if (worker.type === 'server' && !worker.listening && !worker.crashed) {
+                return fromNode(cb => {
+                  const done = () => {
+                    worker.removeListener('listening', done);
+                    worker.removeListener('crashed', done);
+                    cb();
+                  };
+
+                  worker.on('listening', done);
+                  worker.on('crashed', done);
+                });
+              }
+            })
+            .return(undefined)
+            .nodeify(reply);
+          }
+        ],
+      },
       handler: {
         proxy: {
           passThrough: true,

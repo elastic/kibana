@@ -27,10 +27,6 @@ routes
 });
 
 chrome
-.setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b'
-})
 .setTabDefaults({
   resetWhenActive: true,
   lastUrlStore: window.sessionStorage,
