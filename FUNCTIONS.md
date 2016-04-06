@@ -127,7 +127,7 @@ Fills null values using a defined fit function
 
 Argument | Accepts | Description
 --- | --- | ---
-mode | *string* | *no help available*  
+mode | *string* | The algorithm to use for fitting the series to the target. One of: average, nearest, none, scale  
 
 #### .hide()
 Hide the series by default

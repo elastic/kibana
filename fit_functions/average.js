@@ -6,8 +6,6 @@ var _ = require('lodash');
 
 module.exports = function (dataTuples, targetTuples) {
 
-  console.log(dataTuples);
-
   // Phase 1: Downsample
   // We nessecarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
@@ -48,10 +46,7 @@ module.exports = function (dataTuples, targetTuples) {
       if (isNaN(resultValues[i])) {
         if (i === 0) {
           // If our first number is NaN, intialize from dataTuples;
-          console.log('here');
-          console.log(dataTuples);
           previousRealNumber = dataTuples[0][1];
-          console.log('there');
         }
         naNCount++;
       } else {
