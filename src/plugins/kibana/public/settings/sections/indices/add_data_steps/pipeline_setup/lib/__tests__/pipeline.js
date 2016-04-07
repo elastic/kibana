@@ -1,17 +1,10 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Pipeline from '../../lib/pipeline';
+import Pipeline from '../pipeline';
+import * as processorTypes from '../processor_types';
 
 describe('processor pipeline', function () {
-
-  class TestProcessor {
-    constructor(processorId) {
-      this.processorId = processorId;
-    }
-
-    setParent(newParent) { }
-  }
 
   function getProcessorIds(pipeline) {
     return pipeline.processors.map(p => p.processorId);
@@ -30,8 +23,7 @@ describe('processor pipeline', function () {
     it('should access the model property of each processor', function () {
       const pipeline = new Pipeline();
       pipeline.input = { foo: 'bar' };
-      pipeline.add(TestProcessor);
-      pipeline.processors[0].model = { bar: 'baz' };
+      pipeline.add(processorTypes.Set);
 
       const actual = pipeline.model;
       const expected = {
@@ -48,15 +40,15 @@ describe('processor pipeline', function () {
 
     it('should remove existing processors from the pipeline', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const oldProcessors = [ pipeline.processors[0], pipeline.processors[1], pipeline.processors[2] ];
 
       const newPipeline = new Pipeline();
-      newPipeline.add(TestProcessor);
-      newPipeline.add(TestProcessor);
-      newPipeline.add(TestProcessor);
+      newPipeline.add(processorTypes.Set);
+      newPipeline.add(processorTypes.Set);
+      newPipeline.add(processorTypes.Set);
 
       pipeline.load(newPipeline);
 
@@ -70,9 +62,9 @@ describe('processor pipeline', function () {
       sinon.stub(pipeline, 'addExisting');
 
       const newPipeline = new Pipeline();
-      newPipeline.add(TestProcessor);
-      newPipeline.add(TestProcessor);
-      newPipeline.add(TestProcessor);
+      newPipeline.add(processorTypes.Set);
+      newPipeline.add(processorTypes.Set);
+      newPipeline.add(processorTypes.Set);
 
       pipeline.load(newPipeline);
 
@@ -87,9 +79,9 @@ describe('processor pipeline', function () {
 
     it('remove the specified processor from the processors collection', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
 
       const processorIds = getProcessorIds(pipeline);
 
@@ -108,18 +100,18 @@ describe('processor pipeline', function () {
 
       expect(pipeline.processors.length).to.be(0);
 
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
 
       expect(pipeline.processors.length).to.be(3);
     });
 
     it('should append assign each new processor a unique processorId', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
 
       const ids =  pipeline.processors.map((p) => { return p.processorId; });
       expect(_.uniq(ids).length).to.be(3);
@@ -127,13 +119,13 @@ describe('processor pipeline', function () {
 
     it('added processors should be an instance of the type supplied', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
 
-      expect(pipeline.processors[0] instanceof TestProcessor).to.be(true);
-      expect(pipeline.processors[1] instanceof TestProcessor).to.be(true);
-      expect(pipeline.processors[2] instanceof TestProcessor).to.be(true);
+      expect(pipeline.processors[0] instanceof processorTypes.Set).to.be(true);
+      expect(pipeline.processors[1] instanceof processorTypes.Set).to.be(true);
+      expect(pipeline.processors[2] instanceof processorTypes.Set).to.be(true);
     });
 
   });
@@ -145,36 +137,27 @@ describe('processor pipeline', function () {
 
       expect(pipeline.processors.length).to.be(0);
 
-      const testProcessor = new TestProcessor();
-      testProcessor.processorId = 'foo';
-      testProcessor.foo = 'bar';
-      testProcessor.bar = 'baz';
+      const testProcessor = new processorTypes.Set('foo');
 
       pipeline.addExisting(testProcessor);
 
       expect(pipeline.processors.length).to.be(1);
     });
 
-    it('should instanciate an object of the same class as the object passed in', function () {
+    it('should instantiate an object of the same class as the object passed in', function () {
       const pipeline = new Pipeline();
 
-      const testProcessor = new TestProcessor();
-      testProcessor.processorId = 'foo';
-      testProcessor.foo = 'bar';
-      testProcessor.bar = 'baz';
+      const testProcessor = new processorTypes.Set('foo');
 
       pipeline.addExisting(testProcessor);
 
-      expect(pipeline.processors[0] instanceof TestProcessor).to.be(true);
+      expect(pipeline.processors[0] instanceof processorTypes.Set).to.be(true);
     });
 
     it('the object added should be a different instance than the object passed in', function () {
       const pipeline = new Pipeline();
 
-      const testProcessor = new TestProcessor();
-      testProcessor.processorId = 'foo';
-      testProcessor.foo = 'bar';
-      testProcessor.bar = 'baz';
+      const testProcessor = new processorTypes.Set('foo');
 
       pipeline.addExisting(testProcessor);
 
@@ -184,8 +167,7 @@ describe('processor pipeline', function () {
     it('the object added should have the same property values as the object passed in (except id)', function () {
       const pipeline = new Pipeline();
 
-      const testProcessor = new TestProcessor();
-      testProcessor.processorId = 'foo';
+      const testProcessor = new processorTypes.Set('foo');
       testProcessor.foo = 'bar';
       testProcessor.bar = 'baz';
 
@@ -202,9 +184,9 @@ describe('processor pipeline', function () {
 
     it('should be able to move an item up in the array', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[1];
@@ -217,9 +199,9 @@ describe('processor pipeline', function () {
 
     it('should be able to move the same item move than once', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[2];
@@ -233,9 +215,9 @@ describe('processor pipeline', function () {
 
     it('should not move the selected item past the top', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[2];
@@ -252,9 +234,9 @@ describe('processor pipeline', function () {
 
     it('should not allow the top item to be moved up', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[0];
@@ -271,9 +253,9 @@ describe('processor pipeline', function () {
 
     it('should be able to move an item down in the array', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[1];
@@ -286,9 +268,9 @@ describe('processor pipeline', function () {
 
     it('should be able to move the same item move than once', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[0];
@@ -302,9 +284,9 @@ describe('processor pipeline', function () {
 
     it('should not move the selected item past the bottom', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[0];
@@ -321,9 +303,9 @@ describe('processor pipeline', function () {
 
     it('should not allow the bottom item to be moved down', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const target = pipeline.processors[2];
@@ -342,8 +324,8 @@ describe('processor pipeline', function () {
       const pipeline = new Pipeline();
       pipeline.input = { foo: 'bar' };
 
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
 
       pipeline.processors.forEach(p => sinon.stub(p, 'setParent'));
 
@@ -356,10 +338,10 @@ describe('processor pipeline', function () {
       const pipeline = new Pipeline();
       pipeline.input = { foo: 'bar' };
 
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
 
       pipeline.processors.forEach(p => sinon.stub(p, 'setParent'));
 
@@ -383,9 +365,9 @@ describe('processor pipeline', function () {
 
     it('should return a processor when suppied its id', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
       const processorIds = getProcessorIds(pipeline);
 
       const actual = pipeline.getProcessorById(processorIds[2]);
@@ -404,9 +386,33 @@ describe('processor pipeline', function () {
 
   describe('updateOutput', function () {
 
+    it('should set the output to the last processor with valid output if a processor has an error', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+
+      pipeline.processors[0].outputObject = { field1: 'value1' };
+      pipeline.processors[1].outputObject = { field1: 'value2' };
+      pipeline.processors[2].outputObject = { field1: 'value3' };
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.eql({ field1: 'value3' });
+
+      pipeline.processors[2].error = {}; //define an error
+      pipeline.updateOutput();
+      expect(pipeline.output).to.eql({ field1: 'value2' });
+
+      pipeline.processors[1].error = {}; //define an error
+      pipeline.processors[2].error = undefined; //if processor[1] has an error,
+      pipeline.processors[2].locked = true;     //subsequent processors will be locked.
+      pipeline.updateOutput();
+      expect(pipeline.output).to.eql({ field1: 'value1' });
+    });
+
     it('should set output to be last processors output if processors exist', function () {
       const pipeline = new Pipeline();
-      pipeline.add(TestProcessor);
+      pipeline.add(processorTypes.Set);
 
       const expected = { foo: 'bar' };
       pipeline.processors[0].outputObject = expected;
@@ -415,11 +421,11 @@ describe('processor pipeline', function () {
       expect(pipeline.output).to.be(expected);
     });
 
-    it('should set output to be undefined if no processors exist', function () {
+    it('should set output to be equal to input if no processors exist', function () {
       const pipeline = new Pipeline();
 
       pipeline.updateOutput();
-      expect(pipeline.output).to.be(undefined);
+      expect(pipeline.output).to.be(pipeline.input);
     });
 
     it('should set pipeline.dirty', function () {
