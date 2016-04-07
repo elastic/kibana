@@ -1,17 +1,11 @@
 import { spawn } from 'child_process';
-import { promisify } from 'bluebird';
 import { writeFileSync, readFile } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
-import mkdirp from 'mkdirp';
-import rimraf from 'rimraf';
 import es from 'event-stream';
 import readYamlConfig from '../read_yaml_config';
 import expect from 'expect.js';
 const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
-const preadFile = promisify(readFile);
-const mkdir = promisify(mkdirp);
-const primraf = promisify(rimraf);
 
 function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));
@@ -26,19 +20,22 @@ function setLoggingJson(enabled) {
   return conf;
 }
 
-function wait(time) {
-  return new Promise(resolve => setTimeout(() => resolve(), time));
-}
-
 describe(`Server logging configuration`, function () {
-  it(`should wait`, async function () {
-    const testLogsDirectory = follow(`logs`);
-    await primraf(testLogsDirectory);
-    await mkdir(testLogsDirectory);
-
+  it(`should be reloadable via SIGHUP process signaling`, function (done) {
+    let asserted = false;
     let json = Infinity;
     const conf = setLoggingJson(true);
     const child = spawn(`./bin/kibana`, [`--config`, testConfigFile]);
+
+    child.on('error', () => {
+      done(new Error('error in child process while attempting to reload config.'));
+    });
+
+    child.on('exit', (code) => {
+      expect(asserted).to.eql(true);
+      expect(code === null || code === 0).to.eql(true);
+      done();
+    });
 
     child.stdout
       .pipe(es.split())
@@ -47,7 +44,7 @@ describe(`Server logging configuration`, function () {
           return line; // ignore empty lines
         }
         if (json--) {
-          parseJsonLogLine(line);
+          expect(parseJsonLogLine).withArgs(line).to.not.throwError();
         } else {
           expectPlainTextLogLine(line);
         }
@@ -55,7 +52,7 @@ describe(`Server logging configuration`, function () {
 
     function parseJsonLogLine(line) {
       const data = JSON.parse(line);
-      const listening = data.tags.indexOf('listening') !== -1;
+      const listening = data.tags.indexOf(`listening`) !== -1;
       if (listening) {
         switchToPlainTextLog();
       }
@@ -68,16 +65,17 @@ describe(`Server logging configuration`, function () {
     }
 
     function expectPlainTextLogLine(line) {
-      // cleanup
-      setLoggingJson(true);
-      child.kill();
-
       // assert
       const tags = `[\u001b[32minfo\u001b[39m][\u001b[36mconfig\u001b[39m]`;
       const status = `Reloaded logging configuration due to SIGHUP.`;
-      const index = line.indexOf(`${tags} ${status}`);
-      expect(line.length > 0).to.be.ok();
-      expect(index !== -1).to.be.ok();
+      const expected = `${tags} ${status}`;
+      const actual = line.slice(-expected.length);
+      expect(actual).to.eql(expected);
+
+      // cleanup
+      asserted = true;
+      setLoggingJson(true);
+      child.kill();
     }
   });
 });
