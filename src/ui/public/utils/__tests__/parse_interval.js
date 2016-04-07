@@ -15,6 +15,9 @@ describe('parseInterval', function () {
     duration = parseInterval('5m');
     expect(duration.as('m')).to.be(5);
 
+    duration = parseInterval('250ms');
+    expect(duration.as('ms')).to.be(250);
+
     duration = parseInterval('100s');
     expect(duration.as('s')).to.be(100);
 
@@ -42,7 +45,10 @@ describe('parseInterval', function () {
   });
 
   it('should correctly parse a unit in an interval only', function () {
-    var duration = parseInterval('d');
+    var duration = parseInterval('ms');
+    expect(duration.as('ms')).to.be(1);
+
+    duration = parseInterval('d');
     expect(duration.as('d')).to.be(1);
 
     duration = parseInterval('m');
@@ -63,9 +69,6 @@ describe('parseInterval', function () {
     expect(duration).to.not.be.ok();
 
     duration = parseInterval('234asdf');
-    expect(duration).to.not.be.ok();
-
-    duration = parseInterval('ms');
     expect(duration).to.not.be.ok();
   });
 });
