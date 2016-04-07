@@ -22,6 +22,29 @@ class Processor {
   }
 }
 
+export class Convert extends Processor {
+  constructor(processorId) {
+    super(processorId, 'convert', 'Convert');
+    this.sourceField = '';
+    this.type = 'string';
+  }
+
+  get description() {
+    const source = this.sourceField || '?';
+    const type = this.type || '?';
+    return `[${source}] to ${type}`;
+  }
+
+  get model() {
+    return {
+      processorId: this.processorId,
+      typeId: this.typeId,
+      sourceField: this.sourceField || '',
+      type: this.type || 'string'
+    };
+  }
+};
+
 export class Gsub extends Processor {
   constructor(processorId) {
     super(processorId, 'gsub', 'Gsub');

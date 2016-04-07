@@ -4,6 +4,12 @@ const base = Joi.object({
   processor_id: Joi.string().required()
 });
 
+export const convert = base.keys({
+  type_id: Joi.string().only('convert').required(),
+  source_field: Joi.string().allow(''),
+  type: Joi.string()
+});
+
 export const gsub = base.keys({
   type_id: Joi.string().only('gsub').required(),
   source_field: Joi.string().allow(''),
