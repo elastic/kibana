@@ -39,7 +39,7 @@ export class Append extends Processor {
       processorId: this.processorId,
       typeId: this.typeId,
       targetField: this.targetField || '',
-      value: this.values || []
+      values: this.values || []
     };
   }
 };
