@@ -412,6 +412,7 @@ describe('processor pipeline', function () {
 
     it('should set output to be last processors output if processors exist', function () {
       const pipeline = new Pipeline();
+      pipeline.input = { bar: 'baz' };
       pipeline.add(processorTypes.Set);
 
       const expected = { foo: 'bar' };
@@ -423,6 +424,7 @@ describe('processor pipeline', function () {
 
     it('should set output to be equal to input if no processors exist', function () {
       const pipeline = new Pipeline();
+      pipeline.input = { bar: 'baz' };
 
       pipeline.updateOutput();
       expect(pipeline.output).to.be(pipeline.input);
