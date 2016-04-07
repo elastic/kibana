@@ -27,6 +27,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatRadius: 25,
         heatBlur: 15,
         heatNormalizeData: true,
+        mapZoom: 2,
+        mapCenter: [15, 5],
         wms: config.get('visualization:tileMap:WMSdefaults')
       },
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
@@ -50,17 +52,11 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         const agg = _.get(event, 'chart.geohashGridAgg');
         if (!agg) return;
 
-        agg.params.mapZoom = event.zoom;
-        agg.params.mapCenter = [event.center.lat, event.center.lng];
-
         const editableVis = agg.vis.getEditableVis();
         if (!editableVis) return;
 
-        const editableAgg = editableVis.aggs.byId[agg.id];
-        if (editableAgg) {
-          editableAgg.params.mapZoom = event.zoom;
-          editableAgg.params.mapCenter = [event.center.lat, event.center.lng];
-        }
+        editableVis.params.mapCenter = event.center;
+        editableVis.params.mapZoom = event.zoom;
       },
       mapZoomEnd: function (event) {
         const agg = _.get(event, 'chart.geohashGridAgg');

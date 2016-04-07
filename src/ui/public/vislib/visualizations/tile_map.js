@@ -99,10 +99,12 @@ export default function TileMapFactory(Private) {
    */
   TileMap.prototype._appendMap = function (selection) {
     var container = $(selection).addClass('tilemap');
+    // Lol couldn't think of another way to access this object...
+    const params = this._chartData.geohashGridAgg.vis.params;
 
     var map = new TileMapMap(container, this._chartData, {
-      // center: this._attr.mapCenter,
-      // zoom: this._attr.mapZoom,
+      center: params.mapCenter,
+      zoom: params.mapZoom,
       events: this.events,
       markerType: this._attr.mapType,
       tooltipFormatter: this.tooltipFormatter,
