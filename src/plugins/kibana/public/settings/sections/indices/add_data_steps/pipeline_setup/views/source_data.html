@@ -4,7 +4,8 @@
     <select
       class="form-control"
       ng-options="sample.message for sample in samples"
-      ng-model="selectedSample">
+      ng-model="selectedSample"
+      ng-disabled="disabled">
     </select>
     <button
       aria-label="Previous Line"
@@ -12,7 +13,8 @@
       tooltip-append-to-body="true"
       ng-click="previousLine()"
       type="button"
-      class="btn btn-xs btn-default">
+      class="btn btn-xs btn-default"
+      ng-disabled="disabled">
       <i aria-hidden="true" class="fa fa-chevron-left"></i>
     </button>
     <button
@@ -21,7 +23,8 @@
       tooltip-append-to-body="true"
       ng-click="nextLine()"
       type="button"
-      class="btn btn-xs btn-default">
+      class="btn btn-xs btn-default"
+      ng-disabled="disabled">
       <i aria-hidden="true" class="fa fa-chevron-right"></i>
     </button>
   </div>

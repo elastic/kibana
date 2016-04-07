@@ -34,7 +34,10 @@ describe('processor pipeline', function () {
       pipeline.processors[0].model = { bar: 'baz' };
 
       const actual = pipeline.model;
-      const expected = { input: pipeline.input, processors: [ pipeline.processors[0].model ]};
+      const expected = {
+        input: pipeline.input,
+        processors: [ pipeline.processors[0].model ]
+      };
 
       expect(actual).to.eql(expected);
     });

@@ -12,7 +12,8 @@ app.directive('outputPreview', function () {
     template: outputPreviewTemplate,
     scope: {
       oldObject: '=',
-      newObject: '='
+      newObject: '=',
+      error: '='
     },
     link: function ($scope, $el) {
       const div = $el.find('.visual')[0];
@@ -27,10 +28,10 @@ app.directive('outputPreview', function () {
       });
 
       $scope.updateUi = function () {
-        const left = $scope.oldObject;
-        const right = $scope.newObject;
+        let left = $scope.oldObject;
+        let right = $scope.newObject;
         let delta = $scope.diffpatch.diff(left, right);
-        if (!delta) delta = {};
+        if (!delta || $scope.error) delta = {};
 
         div.innerHTML = htmlFormat(delta, left);
       };

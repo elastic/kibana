@@ -5,7 +5,7 @@
 </processor-ui-container-header>
 <div
   class="processor-ui-container-body"
-  ng-class="{dirty: processor.error.isNested}">
+  ng-class="{locked: processor.locked}">
   <div
     class="processor-ui-container-body-content"
     ng-hide="processor.collapsed">
@@ -15,7 +15,11 @@
       {{processor.error.message}}
     </div>
     <div class="processor-ui-content"></div>
-    <output-preview new-object="processor.outputObject" old-object="processor.inputObject"></output-preview>
+    <output-preview
+      new-object="processor.outputObject"
+      old-object="processor.inputObject"
+      error="processor.error">
+    </output-preview>
   </div>
   <div class="overlay"></div>
 </div>

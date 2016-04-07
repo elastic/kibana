@@ -31,7 +31,8 @@
       tooltip-append-to-body="true"
       ng-click="pipeline.moveUp(processor)"
       type="button"
-      class="btn btn-xs btn-default">
+      class="btn btn-xs btn-default"
+      ng-disabled="pipeline.hasCompileError">
       <i aria-hidden="true" class="fa fa-caret-up"></i>
     </button>
 
@@ -41,7 +42,8 @@
       tooltip-append-to-body="true"
       ng-click="pipeline.moveDown(processor)"
       type="button"
-      class="btn btn-xs btn-default">
+      class="btn btn-xs btn-default"
+      ng-disabled="pipeline.hasCompileError">
       <i aria-hidden="true" class="fa fa-caret-down"></i>
     </button>
 
@@ -51,7 +53,8 @@
       tooltip-append-to-body="true"
       ng-click="pipeline.remove(processor)"
       type="button"
-      class="btn btn-xs btn-danger">
+      class="btn btn-xs btn-danger"
+      ng-disabled="pipeline.hasCompileError && !processor.error">
       <i aria-hidden="true" class="fa fa-times"></i>
     </button>
   </div>
