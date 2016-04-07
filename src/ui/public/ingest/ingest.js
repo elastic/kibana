@@ -11,6 +11,12 @@ export default function IngestProvider($rootScope, $http, config) {
       throw new Error('index pattern is required');
     }
 
+    if (_.isArray(indexPattern.fields)) {
+      _.forEach(config.get('metaFields'), (metaField) => {
+        indexPattern.fields.push({name: metaField});
+      });
+    }
+
     const payload = {
       index_pattern: keysToSnakeCaseShallow(indexPattern)
     };
