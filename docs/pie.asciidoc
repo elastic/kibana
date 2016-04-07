@@ -50,8 +50,8 @@ in a name to display on the visualization.
 {ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the 
 *Size* parameter defines the number of entries this aggregation returns.
 
-After defining an initial bucket aggregation, you can define sub-aggregations to refine the visualization. Click *+ Add 
-Sub Aggregation* to define a sub-aggregation, then choose *Split Slices* to select a sub-aggregation from the list of 
+After defining an initial bucket aggregation, you can define sub-buckets to refine the visualization. Click *+ Add 
+sub-buckets* to define a sub-aggregation, then choose *Split Slices* to select a sub-bucket from the list of 
 types.
 
 When multiple aggregations are defined on a chart's axis, you can use the up or down arrows to the right of the 
@@ -84,7 +84,7 @@ Select the *Options* tab to change the following aspects of the table:
 *Show Tooltip*:: Check this box to enable the display of tooltips.
 *Show Legend*:: Check this box to enable the display of a legend next to the chart.
 
-After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 
 [float]

@@ -3,6 +3,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import NormalizeSortRequestProvider from 'ui/courier/data_source/_normalize_sort_request';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import _ from 'lodash';
 
 describe('SearchSource#normalizeSortRequest', function () {
   let normalizeSortRequest;
@@ -86,5 +87,18 @@ describe('SearchSource#normalizeSortRequest', function () {
     var result = normalizeSortRequest([sortState], indexPattern);
 
     expect(result).to.eql([normalizedSort]);
+  });
+
+  it('should remove unmapped_type parameter from _score sorting', function () {
+    var sortable = { _score: 'desc'};
+    var expected = [{
+      _score: {
+        order: 'desc'
+      }
+    }];
+
+    var result = normalizeSortRequest(sortable, indexPattern);
+    expect(_.isEqual(result, expected)).to.be.ok();
+
   });
 });
