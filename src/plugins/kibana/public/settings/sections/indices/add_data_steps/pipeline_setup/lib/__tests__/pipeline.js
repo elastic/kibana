@@ -386,6 +386,39 @@ describe('processor pipeline', function () {
 
   describe('updateOutput', function () {
 
+    it('should set the output to input if first processor has error', function () {
+      const pipeline = new Pipeline();
+      pipeline.input = { bar: 'baz' };
+      pipeline.add(processorTypes.Set);
+
+      pipeline.processors[0].outputObject = { field1: 'value1' };
+      pipeline.processors[0].error = {}; //define an error
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.be(pipeline.input);
+    });
+
+    it('should set the output to the processor before the error on a compile error', function () {
+      const pipeline = new Pipeline();
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+      pipeline.add(processorTypes.Set);
+
+      pipeline.processors[0].outputObject = { field1: 'value1' };
+      pipeline.processors[1].outputObject = { field1: 'value2' };
+      pipeline.processors[2].outputObject = { field1: 'value3' };
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.eql({ field1: 'value3' });
+
+      pipeline.processors[1].error = { compile: true }; //define a compile error
+      pipeline.processors[0].locked = true;             //all other processors get locked.
+      pipeline.processors[2].locked = true;             //all other processors get locked.
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.eql({ field1: 'value1' });
+    });
+
     it('should set the output to the last processor with valid output if a processor has an error', function () {
       const pipeline = new Pipeline();
       pipeline.add(processorTypes.Set);
@@ -410,7 +443,7 @@ describe('processor pipeline', function () {
       expect(pipeline.output).to.eql({ field1: 'value1' });
     });
 
-    it('should set output to be last processors output if processors exist', function () {
+    it('should set output to be last processor output if processors exist', function () {
       const pipeline = new Pipeline();
       pipeline.input = { bar: 'baz' };
       pipeline.add(processorTypes.Set);

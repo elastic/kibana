@@ -14,10 +14,6 @@ class Processor {
     this.error = undefined;
   }
 
-  get hasValidOutput() {
-    return !this.locked && !this.error;
-  }
-
   setParent(newParent) {
     const oldParent = this.parent;
     this.parent = newParent;
