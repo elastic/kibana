@@ -57,8 +57,6 @@ uiModules
 
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
-      var uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
-      _.assign($scope.vis.params.sort, uiStateSort);
 
       var applyClassNames = function () {
         var $visEl = getVisContainer();
