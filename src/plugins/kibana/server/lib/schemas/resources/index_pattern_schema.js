@@ -9,7 +9,7 @@ module.exports = Joi.object({
   fields: Joi.array().items(
     Joi.object({
       name: Joi.string().required(),
-      type: Joi.string().required(),
+      type: Joi.string(),
       count: Joi.number().integer(),
       scripted: Joi.boolean(),
       doc_values: Joi.boolean(),

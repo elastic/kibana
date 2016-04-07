@@ -9,6 +9,9 @@ module.exports = function createMappingsFromPatternFields(fields) {
   const mappings = {};
 
   _.forEach(fields, function (field) {
+    // We don't want to add meta fields to our template
+    if (field.name && field.name[0] === '_') return;
+
     let mapping;
 
     if (field.type === 'string') {
