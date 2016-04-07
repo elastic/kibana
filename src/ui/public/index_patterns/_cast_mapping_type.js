@@ -7,6 +7,8 @@ export default function CastMappingTypeFn() {
     immutable: true,
     initialSet: [
       { name: 'string',       type: 'string',     group: 'base'   },
+      { name: 'text',         type: 'string',     group: 'base'   },
+      { name: 'keyword',      type: 'string',     group: 'base'   },
       { name: 'date',         type: 'date',       group: 'base'   },
       { name: 'boolean',      type: 'boolean',    group: 'base'   },
       { name: 'float',        type: 'number',     group: 'number' },

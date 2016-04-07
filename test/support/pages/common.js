@@ -91,7 +91,7 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
-            var currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
+            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +

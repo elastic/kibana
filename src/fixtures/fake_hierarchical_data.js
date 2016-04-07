@@ -1,4 +1,4 @@
-var data = {  };
+let data = {  };
 
 data.metricOnly = {
   hits: { total: 1000, hits: [], max_score: 0 },

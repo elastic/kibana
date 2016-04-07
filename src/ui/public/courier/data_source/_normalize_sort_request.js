@@ -43,6 +43,10 @@ export default function normalizeSortRequest(config) {
         sortValue = { order: sortValue };
       }
       sortValue = _.defaults({}, sortValue, defaultSortOptions);
+
+      if (sortField === '_score') {
+        delete sortValue.unmapped_type;
+      }
     }
 
     normalized[sortField] = sortValue;

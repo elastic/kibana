@@ -6,12 +6,12 @@ When a refresh interval is set, it is displayed to the left of the Time Filter i
 
 To set the refresh interval:
 
-. Click the *Time Filter* image:images/TimeFilter.jpg[Time Filter] in the upper right corner of the menu bar.
+. Click the *Time Filter* image:images/TimeFilter.jpg[Time Filter].
 . Click the *Refresh Interval* tab.
 . Choose a refresh interval from the list.
 
-To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button and select an 
-autorefresh interval:
+To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button when the time picker 
+is open and select an autorefresh interval:
 
 image::images/autorefresh-intervals.png[]
 
