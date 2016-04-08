@@ -1,8 +1,13 @@
 import _ from 'lodash';
-import fs from 'fs';
-import yaml from 'js-yaml';
+import ansicolors from 'ansicolors';
+import { readFileSync as read } from 'fs';
+import { safeLoad } from 'js-yaml';
 
 import { fromRoot } from '../../utils';
+
+const warnAboutDeprecation = _.memoize(function (key, message) {
+  console.log(ansicolors.red('WARNING:'), message);
+});
 
 let legacySettingMap = {
   // server
@@ -38,38 +43,40 @@ const deprecatedSettings = {
   'server.xsrf.token': 'server.xsrf.token is deprecated. It is no longer used when providing xsrf protection.'
 };
 
-module.exports = function (path) {
-  if (!path) return {};
+export default function (paths) {
+  if (!paths) return {};
 
-  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
-
-  function apply(config, val, key) {
-    if (_.isPlainObject(val)) {
-      _.forOwn(val, function (subVal, subKey) {
-        apply(config, subVal, key + '.' + subKey);
-      });
-    }
-    else if (_.isArray(val)) {
-      config[key] = [];
-      val.forEach((subVal, i) => {
-        apply(config, subVal, key + '.' + i);
-      });
-    }
-    else {
-      _.set(config, key, val);
-    }
-  }
-
-  _.each(deprecatedSettings, function (message, setting) {
-    if (_.has(file, setting)) console.error(message);
+  const files = [].concat(paths).map(path => {
+    return safeLoad(read(path, 'utf8'));
   });
 
-  // transform legeacy options into new namespaced versions
-  return _.transform(file, function (config, val, key) {
-    if (legacySettingMap.hasOwnProperty(key)) {
-      key = legacySettingMap[key];
-    }
+  return _.transform(files, function applyConfigFile(config, file) {
+    _.forOwn(file, function apply(val, key) {
+      // transform legeacy options into new namespaced versions
+      if (legacySettingMap.hasOwnProperty(key)) {
+        const replacement = legacySettingMap[key];
+        warnAboutDeprecation(key, `Config key "${key}" is deprecated. It has been replaced with "${replacement}"`);
+        key = replacement;
+      }
 
-    apply(config, val, key);
+      if (_.isPlainObject(val)) {
+        _.forOwn(val, function (subVal, subKey) {
+          apply(subVal, key + '.' + subKey);
+        });
+      }
+      else if (_.isArray(val)) {
+        _.set(config, key, []);
+        val.forEach((subVal, i) => {
+          apply(subVal, key + '.' + i);
+        });
+      }
+      else {
+        if (deprecatedSettings[key]) {
+          warnAboutDeprecation(key, deprecatedSettings[key]);
+        }
+
+        _.set(config, key, val);
+      }
+    });
   }, {});
-};
+}
