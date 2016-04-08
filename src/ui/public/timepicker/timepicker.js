@@ -16,7 +16,7 @@ var notify = new Notifier({
 });
 
 
-module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals, config) {
+module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
   return {
     restrict: 'E',
     scope: {
@@ -28,10 +28,6 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
     },
     template: html,
     controller: function ($scope) {
-      var init = function () {
-        $scope.setMode($scope.mode);
-      };
-
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
       $scope.modes = ['quick', 'relative', 'absolute'];
       $scope.activeTab = $scope.activeTab || 'filter';
@@ -115,7 +111,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.mode = thisMode;
       };
 
-      $scope.setQuick = function (from, to, description) {
+      $scope.setQuick = function (from, to) {
         $scope.from = from;
         $scope.to = to;
       };
@@ -154,15 +150,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.interval = interval;
       };
 
-      init();
-    },
-    link: function ($scope) {
-      config.$bind($scope, 'dateFormat:dow', 'dateFormat_dow');
-
-      $scope.$watch('dateFormat_dow', function (day) {
-        const dow = moment.weekdays().indexOf(day);
-        moment.locale(moment.locale(), { week: { dow } });
-      });
+      $scope.setMode($scope.mode);
     }
   };
 });
