@@ -21,8 +21,10 @@ If Not Exist "%NODE%" (
   )
 )
 
+echo.%* | findstr /V /C:"--dev" && set NODE_OPTIONS=--max-old-space-size=256 %NODE_OPTIONS%
+
 TITLE Kibana Server
-"%NODE%" %NODE_OPTIONS% "%DIR%\src\cli" %*
+call "%NODE%" %NODE_OPTIONS% "%DIR%\src\cli" %*
 
 :finally
 

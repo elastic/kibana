@@ -21,4 +21,9 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
+# sets V8 defaults while still allowing them to be overridden
+if echo "${@}" | grep -qv "\-\-dev"; then
+  NODE_OPTIONS="--max-old-space-size=256 $NODE_OPTIONS"
+fi
+
 exec "${NODE}" $NODE_OPTIONS "${DIR}/src/cli" ${@}
