@@ -1,9 +1,11 @@
 import _ from 'lodash';
-const { isWorker } = require('cluster');
-const { resolve } = require('path');
+import { isWorker } from 'cluster';
+import { resolve } from 'path';
+
+import readYamlConfig from './read_yaml_config';
+import { fromRoot } from '../../utils';
 
 const cwd = process.cwd();
-import { fromRoot } from '../../utils';
 
 let canCluster;
 try {
@@ -21,21 +23,16 @@ const pathCollector = function () {
   };
 };
 
+const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function initServerSettings(opts, extraCliOptions) {
-  const readYamlConfig = require('./read_yaml_config');
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
   const has = _.partial(_.has, settings);
   const merge = _.partial(_.merge, settings);
-
-  if (opts.dev) {
-    try { merge(readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
-    catch (e) { null; }
-  }
 
   if (opts.dev) {
     set('env', 'development');
@@ -80,7 +77,9 @@ module.exports = function (program) {
   .option(
     '-c, --config <path>',
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-    process.env.CONFIG_PATH || fromRoot('config/kibana.yml'))
+    configPathCollector,
+    [ process.env.CONFIG_PATH || fromRoot('config/kibana.yml') ]
+  )
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
   .option('-Q, --silent', 'Prevent all logging')
@@ -116,6 +115,10 @@ module.exports = function (program) {
 
   command
   .action(async function (opts) {
+    if (opts.dev) {
+      opts.config.push(fromRoot('config/kibana.dev.yml'));
+    }
+
     const settings = initServerSettings(opts, this.getUnknownOptions());
 
     if (canCluster && opts.dev && !isWorker) {
