@@ -28,7 +28,7 @@ define(function (require) {
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           common.debug('navigateTo');
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
         .then(function () {
           common.debug('createIndexPattern');
@@ -69,7 +69,7 @@ define(function (require) {
         })
         .then(function selectField() {
           common.debug('Field = extension');
-          return visualizePage.selectField('extension');
+          return visualizePage.selectField('extension.raw');
         })
         .then(function setInterval() {
           common.debug('switch from Rows to Columns');

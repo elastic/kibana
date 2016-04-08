@@ -6,8 +6,8 @@ import ngMock from 'ng_mock';
 import 'ui/private';
 
 describe('Base Object', function () {
-  var $rootScope;
-  var BaseObject;
+  let $rootScope;
+  let BaseObject;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {

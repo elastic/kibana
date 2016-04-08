@@ -1,0 +1,20 @@
+<div class="form-group">
+  <label>Field:</label>
+  <select
+    class="form-control"
+    ng-options="field as field for field in fields"
+    ng-model="processor.sourceField">
+  </select>
+</div>
+<div class="form-group">
+  <label>Field Data:</label>
+  <pre>{{ fieldData }}</pre>
+</div>
+<div class="form-group">
+  <label>Pattern:</label>
+  <input type="text" class="form-control" ng-model="processor.pattern">
+</div>
+<div class="form-group">
+  <label>Replacement:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.replacement">
+</div>

@@ -1,0 +1,40 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+processor-ui-container {
+  display: block;
+  margin-bottom: 1px;
+
+  .processor-ui-container-body {
+    display: block;
+    overflow: hidden;
+    position: relative;
+
+    &-content {
+      padding: 5px;
+    }
+
+    .overlay {
+      display: none;
+      position: absolute;
+
+      top: -5000px;
+      left: -5000px;
+      width: 10000px;
+      height: 10000px;
+      background-color: @settings-pipeline-setup-processor-container-overlay-bg;
+    }
+
+    &.locked {
+      .overlay {
+        display: block;
+      }
+    }
+  }
+
+  .form-group {
+    margin-bottom: 5px;
+  }
+
+}

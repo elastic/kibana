@@ -57,9 +57,9 @@ export default function ChartTitleFactory(Private) {
         var n = text[0].length;
         var maxWidth = size / n * 0.9;
         var length = this.getComputedTextLength();
-        var str;
-        var avg;
-        var end;
+        let str;
+        let avg;
+        let end;
 
         if (length > maxWidth) {
           str = text.text();

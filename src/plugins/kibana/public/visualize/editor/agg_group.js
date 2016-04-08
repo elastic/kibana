@@ -33,6 +33,7 @@ uiModules
         $scope.schemas.forEach(function (schema) {
           stats.min += schema.min;
           stats.max += schema.max;
+          stats.deprecate = schema.deprecate;
         });
 
         $scope.availableSchema = $scope.schemas.filter(function (schema) {

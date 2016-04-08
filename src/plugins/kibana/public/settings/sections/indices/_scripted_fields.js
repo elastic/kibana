@@ -19,7 +19,7 @@ uiModules.get('apps/settings')
     scope: true,
     link: function ($scope) {
 
-      const fieldCreatorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
+      const fieldCreatorPath = '/settings/indices/edit/{{ indexPattern }}/scriptedField';
       const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
       $scope.perPage = 25;

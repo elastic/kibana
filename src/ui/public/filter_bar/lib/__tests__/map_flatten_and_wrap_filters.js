@@ -6,8 +6,8 @@ import ngMock from 'ng_mock';
 import FilterBarLibMapFlattenAndWrapFiltersProvider from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
 describe('Filter Bar Directive', function () {
   describe('mapFlattenAndWrapFilters()', function () {
-    var mapFlattenAndWrapFilters;
-    var $rootScope;
+    let mapFlattenAndWrapFilters;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

@@ -195,9 +195,70 @@ kbn-settings-indices {
   p.text-center {
     padding-top: 1em;
   }
+
+  .nav-buttons {
+    float:right;
+  }
 }
 
 
 .kbn-settings-indices-create {
   .time-and-pattern > div {}
+}
+
+filebeat-wizard {
+  .nav-buttons {
+    float: right;
+  }
+}
+
+.wizard-step-headings{
+  margin-top: 1em;
+
+  .wizard-step-heading {
+    font-size: 1.5em;
+    padding-right: 1.5em;
+
+    &.active {
+      cursor: default;
+      font-weight: bold;
+    }
+    &.aheadActive {
+      cursor: default;
+      font-weight: 300;
+    }
+  }
+
+  &.complete {
+    .wizard-step-heading:not(.active) {
+      color: #dddddd;
+      cursor: default;
+    }
+  }
+}
+
+.wizard-step-title {
+  padding-bottom: 1em;
+}
+
+.pattern-review {
+  .time-field-input {
+    padding-left: 1em;
+    margin-bottom: 0;
+  }
+
+  .pattern-input {
+    width: 300px;
+  }
+}
+
+.paste-samples {
+  textarea {
+    width: 100%;
+    height: 250px;
+  }
+}
+
+.install-filebeat {
+  padding-bottom: 1em;
 }

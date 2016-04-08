@@ -16,7 +16,7 @@ define(function (require) {
       // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
       // var expectedToastMessage = 'Share search: URL copied to clipboard.';
       // Pass either one.
-      var expectedToastMessage = /Share search: URL (selected. Press Ctrl+C to copy.|copied to clipboard.)/;
+      var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -37,7 +37,7 @@ define(function (require) {
         })
         .then(function (navigateTo) {
           common.debug('navigateTo');
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
         .then(function () {
           common.debug('createIndexPattern');

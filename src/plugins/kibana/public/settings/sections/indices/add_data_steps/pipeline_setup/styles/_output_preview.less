@@ -1,0 +1,28 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+output-preview {
+  .visual {
+    background-color: @settings-pipeline-setup-output-preview-bg;
+    border: 1px solid;
+    border-color: @settings-pipeline-setup-output-preview-border;
+    overflow-x: auto;
+  }
+
+  .visual.collapsed {
+    max-height: 125px;
+    overflow-y: scroll;
+  }
+
+  pre {
+    background-color: transparent;
+    border: none;
+  }
+
+  .hide-unchanged {
+    .jsondiffpatch-unchanged {
+      display: none;
+    }
+  }
+}

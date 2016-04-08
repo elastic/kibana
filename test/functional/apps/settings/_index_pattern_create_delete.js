@@ -16,7 +16,7 @@ define(function (require) {
 
         return scenarioManager.reload('emptyKibana')
         .then(function () {
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         });
       });
 
@@ -81,9 +81,9 @@ define(function (require) {
           });
         });
 
-        bdd.it('should return to index pattern creation page', function returnToPage() {
+        bdd.it('should return to the add data landing page', function returnToPage() {
           return common.tryForTime(5000, function () {
-            return settingsPage.getCreateButton();
+            return common.findTestSubject('addData');
           })
           .catch(common.handleError(this));
         });

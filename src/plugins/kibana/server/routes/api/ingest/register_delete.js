@@ -1,8 +1,8 @@
 import Promise from 'bluebird';
 import handleESError from '../../../lib/handle_es_error';
-import {templateToPattern, patternToTemplate} from '../../../lib/convert_pattern_and_template_name';
+import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 
-module.exports = function registerDelete(server) {
+export function registerDelete(server) {
   server.route({
     path: '/api/kibana/ingest/{id}',
     method: 'DELETE',
@@ -17,7 +17,12 @@ module.exports = function registerDelete(server) {
 
       Promise.all([
         callWithRequest(req, 'delete', deletePatternParams),
-        callWithRequest(req, 'indices.deleteTemplate', {name: patternToTemplate(req.params.id), ignore: [404]})
+        callWithRequest(req, 'indices.deleteTemplate', {name: patternToIngest(req.params.id), ignore: [404]}),
+        callWithRequest(req, 'transport.request', {
+          path: `_ingest/pipeline/${patternToIngest(req.params.id)}`,
+          method: 'DELETE',
+          ignore: [404]
+        })
       ])
       .then(
         function (pattern) {

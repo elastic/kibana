@@ -1,5 +1,5 @@
 function stubbedLogstashFields() {
-  var sourceData = [
+  let sourceData = [
     { name: 'bytes',              type: 'number',     indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 10 },
     { name: 'ssl',                type: 'boolean',    indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 20 },
     { name: '@timestamp',         type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 30 },
@@ -16,7 +16,7 @@ function stubbedLogstashFields() {
     { name: 'extension',          type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
     { name: 'machine.os',         type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
     { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
-    { name: '_type',              type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
+    { name: '_type',              type: 'string',     indexed: false,  analyzed: true, sortable:  true,  filterable: true },
     { name: '_id',                type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: true},
     { name: '_source',            type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: false},
     { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false, sortable: false, filterable: true },

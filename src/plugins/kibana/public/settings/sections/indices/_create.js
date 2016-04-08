@@ -10,7 +10,7 @@ import createTemplate from 'plugins/kibana/settings/sections/indices/_create.htm
 
 
 uiRoutes
-.when('/settings/indices/', {
+.when('/settings/indices/create/existing', {
   template: createTemplate
 });
 
@@ -73,7 +73,7 @@ uiModules.get('apps/settings')
               config.set('defaultIndex', indexPattern.id);
             }
             indexPatterns.cache.clear(indexPattern.id);
-            kbnUrl.change('/settings/indices/' + indexPattern.id);
+            kbnUrl.change('/settings/indices/edit/' + indexPattern.id);
           });
         }
       });

@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import registry from 'ui/registry/settings_sections';
+import 'plugins/kibana/settings/sections/indices/directives/kbn_settings_indices';
 import 'plugins/kibana/settings/sections/indices/_create';
 import 'plugins/kibana/settings/sections/indices/_edit';
 import 'plugins/kibana/settings/sections/indices/_field_editor';
+import 'plugins/kibana/settings/sections/indices/filebeat/index';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/settings/sections/indices/index.html';
@@ -18,32 +20,8 @@ uiRoutes
   }
 });
 
-// wrapper directive, which sets some global stuff up like the left nav
-uiModules.get('apps/settings')
-.directive('kbnSettingsIndices', function ($route, config, kbnUrl) {
-  return {
-    restrict: 'E',
-    transclude: true,
-    template: indexTemplate,
-    link: function ($scope) {
-      $scope.editingId = $route.current.params.indexPatternId;
-      config.$bind($scope, 'defaultIndex');
-
-      $scope.$watch('defaultIndex', function () {
-        const ids = $route.current.locals.indexPatternIds;
-        $scope.indexPatternList = ids.map(function (id) {
-          return {
-            id: id,
-            url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
-            class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
-            default: $scope.defaultIndex === id
-          };
-        });
-      });
-
-      $scope.$emit('application.load');
-    }
-  };
+uiRoutes.when('/settings/indices', {
+  template: indexTemplate
 });
 
 registry.register(_.constant({

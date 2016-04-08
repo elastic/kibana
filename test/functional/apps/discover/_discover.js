@@ -28,7 +28,7 @@ define(function (require) {
         })
         .then(function (navigateTo) {
           common.debug('navigateTo');
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
         .then(function () {
           common.debug('createIndexPattern');
@@ -108,12 +108,11 @@ define(function (require) {
         });
 
         bdd.it('should show the correct bar chart', function () {
-          var expectedBarChartData = [ '0', '0', '0', '0', '0', '0', '3.237',
+          var expectedBarChartData = [ '3.237',
             '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
             '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
             '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
-            '118.562', '63.524', '17.587', '2.537', '0', '0', '0', '0', '0',
-            '0', '0'
+            '118.562', '63.524', '17.587', '2.537'
           ];
           return common.sleep(4000)
           .then(function () {
@@ -142,8 +141,7 @@ define(function (require) {
 
         bdd.it('should show correct data for chart interval Hourly', function () {
           var chartInterval = 'Hourly';
-          var expectedBarChartData = [ '0', '0', '0', '0', '0', '0', '0', '0',
-            '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1.527', '2.290',
+          var expectedBarChartData = [ '1.527', '2.290',
             '5.599', '7.890', '13.236', '30.290', '46.072', '55.490', '86.8',
             '112', '122.181', '131.6', '132.872', '113.527', '102.581',
             '81.709', '65.672', '43.781', '24.181', '14', '9.672', '6.109',
@@ -154,8 +152,7 @@ define(function (require) {
             '2.036', '1.781', '4.327', '8.654', '9.418', '26.472', '38.945',
             '61.345', '79.672', '102.836', '125.236', '130.327', '128.036',
             '120.4', '96.472', '74.581', '70.509', '39.709', '25.199', '13.490',
-            '12.472', '4.072', '2.290', '1.018', '0', '0', '0', '0', '0', '0',
-            '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'
+            '12.472', '4.072', '2.290', '1.018'
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
@@ -170,7 +167,7 @@ define(function (require) {
         bdd.it('should show correct data for chart interval Daily', function () {
           var chartInterval = 'Daily';
           var expectedBarChartData = [
-            '0', '133.196', '129.192', '129.724', '0'
+            '133.196', '129.192', '129.724'
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
@@ -223,12 +220,11 @@ define(function (require) {
 
         bdd.it('should show correct data for chart interval Auto', function () {
           var chartInterval = 'Auto';
-          var expectedBarChartData = [ '0', '0', '0', '0', '0', '0', '3.237',
+          var expectedBarChartData = [ '3.237',
             '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
             '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
             '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
-            '118.562', '63.524', '17.587', '2.537', '0', '0', '0', '0', '0',
-            '0', '0'
+            '118.562', '63.524', '17.587', '2.537'
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
