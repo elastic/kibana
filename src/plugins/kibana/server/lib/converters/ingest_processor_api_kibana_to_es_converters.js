@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export function append(processorApiDocument) {
   return {
     append: {
@@ -17,14 +19,18 @@ export function convert(processorApiDocument) {
     boolean: 'boolean'
   };
 
-  return {
+  const processor = {
     convert: {
       tag: processorApiDocument.processor_id,
       field: processorApiDocument.source_field,
-      target_field: processorApiDocument.target_field,
       type: types[processorApiDocument.type]
     }
   };
+  if (!_.isEmpty(processorApiDocument.target_field)) {
+    processor.convert.target_field = processorApiDocument.target_field;
+  }
+
+  return processor;
 }
 
 export function gsub(processorApiDocument) {
