@@ -4,6 +4,7 @@
 * <<enabling-ssl, Enabling SSL>>
 * <<controlling-access, Controlling Access>>
 * <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
+* <<memory-management, Memory management>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -132,3 +133,10 @@ cluster.name: "my_cluster"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch_url: "http://localhost:9200"
 --------
+
+[float]
+[[memory-management]]
+
+=== Memory management
+
+Kibana is built on Node.js which doesn't tune its heap size based on the amount of memory available. To combat this, we set defaults based on the requirements of Kibana needs, while allowing overhead for additional plugins. These defaults can be overridden at runtime, for example `NODE_OPTIONS="--max-old-space-size=512" bin/kibana`.
