@@ -246,16 +246,6 @@ Argument | Accepts | Description
 --- | --- | ---
 term | *seriesList/number* | Number or series to sum with the input series. If passing a seriesList it must contain exactly 1 series.  
 
-#### .testcast()
-Use holt-winters to forecast values. Basically useless. I have no idea how this works.
-
-Argument | Accepts | Description
---- | --- | ---
-count | *number* | *no help available*  
-alpha | *number* | *no help available*  
-beta | *number* | *no help available*  
-gamma | *number* | *no help available*  
-
 #### .title()
 Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.
 
