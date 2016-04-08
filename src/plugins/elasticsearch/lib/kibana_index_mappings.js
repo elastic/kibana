@@ -6,5 +6,12 @@ export const mappings = {
         index: 'not_analyzed'
       }
     }
+  },
+  server: {
+    properties: {
+      uuid: {
+        type: 'keyword'
+      }
+    }
   }
 };

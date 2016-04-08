@@ -40,8 +40,8 @@ export default function pluginInstall(program) {
   )
   .description('install a plugin',
 `Common examples:
-  install xpack
-  install file:///Path/to/my/xpack.zip
-  install https://path.to/my/xpack.zip`)
+  install x-pack
+  install file:///Path/to/my/x-pack.zip
+  install https://path.to/my/x-pack.zip`)
   .action(processCommand);
 };
