@@ -27,16 +27,20 @@ app.directive('processorUiConvert', function () {
         pipeline.setDirty();
       }
 
-      $scope.types = ['integer', 'float', 'string', 'boolean'];
+      $scope.types = ['auto', 'number', 'string', 'boolean'];
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 
       $scope.$watch('processor.sourceField', () => {
+        if (_.isEmpty($scope.processor.targetField)) {
+          $scope.processor.targetField = $scope.processor.sourceField;
+        }
         refreshFieldData();
         processorUiChanged();
       });
 
       $scope.$watch('processor.type', processorUiChanged);
+      $scope.$watch('processor.targetField', processorUiChanged);
     }
   };
 });

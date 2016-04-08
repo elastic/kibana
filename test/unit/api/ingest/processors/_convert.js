@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'convert',
       source_field: 'foo',
-      type: 'integer'
+      target_field: 'foo',
+      type: 'auto'
     }],
     input: { foo: '1234' }
   };
@@ -25,8 +26,9 @@ define(function (require) {
             processors: [{
               processor_id: 'processor1',
               type_id: 'convert',
-              value: 'integer',
-              source_field: 42
+              value: 'auto',
+              source_field: 42,
+              target_field: 'foo'
             }]
           })
           .expect(400)
@@ -55,6 +57,7 @@ define(function (require) {
             processorId: 'processor1',
             typeId: 'convert',
             sourceField: 'foo',
+            targetField: 'foo',
             type: 'string'
           }],
           input: {}

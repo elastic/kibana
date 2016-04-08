@@ -48,13 +48,15 @@ export class Convert extends Processor {
   constructor(processorId) {
     super(processorId, 'convert', 'Convert');
     this.sourceField = '';
-    this.type = 'string';
+    this.targetField = '';
+    this.type = 'auto';
   }
 
   get description() {
     const source = this.sourceField || '?';
+    const target = this.targetField || '?';
     const type = this.type || '?';
-    return `[${source}] to ${type}`;
+    return `[${source}] to ${type} -> [${target}]`;
   }
 
   get model() {
@@ -62,7 +64,8 @@ export class Convert extends Processor {
       processorId: this.processorId,
       typeId: this.typeId,
       sourceField: this.sourceField || '',
-      type: this.type || 'string'
+      targetField: this.targetField || '',
+      type: this.type || 'auto'
     };
   }
 };

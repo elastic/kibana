@@ -9,11 +9,20 @@ export function append(processorApiDocument) {
 }
 
 export function convert(processorApiDocument) {
+  const types = {
+    //<kibana type>: <ingest type>,
+    auto: 'auto',
+    number: 'float',
+    string: 'string',
+    boolean: 'boolean'
+  };
+
   return {
     convert: {
       tag: processorApiDocument.processor_id,
       field: processorApiDocument.source_field,
-      type: processorApiDocument.type
+      target_field: processorApiDocument.target_field,
+      type: types[processorApiDocument.type]
     }
   };
 }
