@@ -39,8 +39,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
   return new Promise((resolve, reject) => {
     const getMoreUntilDone = (error, response) => {
       if (error) {
-        console.error(error);
-        resolve(allResults);
+        reject(error);
         return;
       }
       const scanAllResults = opts.docCount === Infinity;

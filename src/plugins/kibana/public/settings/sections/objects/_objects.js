@@ -95,9 +95,9 @@ uiModules.get('apps/settings')
 
       $scope.exportAll = () => {
         Promise.map($scope.services, (service) =>
-          service.service.scanAll('').then((results) =>
-            results.hits.map((hit) => _.extend(hit, {type: service.type}))
-          )
+          service.service.scanAll('')
+            .then(results => results.hits.map(hit => _.extend(hit, { type: service.type })))
+            .catch(error => notify.error)
         ).then((results) => retrieveAndExportDocs(_.flattenDeep(results)));
       };
 

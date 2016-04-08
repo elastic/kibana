@@ -55,7 +55,7 @@ describe('Scanner', function () {
 
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function (error, response) {
+      .then(function (response) {
         expect(search.called).to.be(true);
         expect(scroll.called).to.be(true);
       });
