@@ -157,10 +157,10 @@ export default class Pipeline {
   updateOutput() {
     const processors = this.processors;
 
-    this.output = undefined;
-    if (processors.length > 0) {
-      this.output = processors[processors.length - 1].outputObject;
-    }
+    const errorIndex = _.findIndex(processors, 'error');
+    const goodProcessor = errorIndex === -1 ? _.last(processors) : processors[errorIndex - 1];
+    this.output = goodProcessor ? goodProcessor.outputObject : this.input;
+
     this.dirty = false;
   }
 

@@ -22,6 +22,28 @@ class Processor {
   }
 }
 
+export class Append extends Processor {
+  constructor(processorId) {
+    super(processorId, 'append', 'Append');
+    this.targetField = '';
+    this.values = [];
+  }
+
+  get description() {
+    const target = this.targetField || '?';
+    return `[${target}]`;
+  }
+
+  get model() {
+    return {
+      processorId: this.processorId,
+      typeId: this.typeId,
+      targetField: this.targetField || '',
+      values: this.values || []
+    };
+  }
+};
+
 export class Convert extends Processor {
   constructor(processorId) {
     super(processorId, 'convert', 'Convert');
