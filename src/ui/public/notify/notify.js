@@ -19,23 +19,25 @@ module.factory('Notifier', function () {
   return Notifier;
 });
 
+// teach Notifier how to use angular interval services
+module.run(function ($interval) {
+  Notifier.applyConfig({
+    setInterval: $interval,
+    clearInterval: $interval.cancel
+  });
+});
+
 // if kibana is not included then the notify service can't
 // expect access to config (since it's dependent on kibana)
-const shouldSetupConfig = !!kbnIndex;
-if (shouldSetupConfig) {
+if (!!kbnIndex) {
   require('ui/config');
-  module.run(function ($interval, $rootScope, $injector, config) {
+  module.run(function ($rootScope, config) {
     var configInitListener = $rootScope.$on('init:config', function () {
       applyConfig();
       configInitListener();
     });
 
     $rootScope.$on('change:config', applyConfig);
-
-    Notifier.applyConfig({
-      setInterval: $interval,
-      clearInterval: $interval.cancel
-    });
 
     function applyConfig() {
       Notifier.applyConfig({
