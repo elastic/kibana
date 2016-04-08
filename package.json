@@ -128,6 +128,7 @@
     "mkdirp": "0.5.1",
     "moment": "2.10.6",
     "moment-timezone": "0.4.1",
+    "node-uuid": "1.4.7",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "rimraf": "2.4.3",
@@ -144,7 +145,7 @@
     "wreck": "6.2.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.0.2",
+    "@elastic/eslint-config-kibana": "0.0.3",
     "Nonsense": "0.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",

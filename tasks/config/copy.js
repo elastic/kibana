@@ -12,6 +12,7 @@ module.exports = function (grunt) {
         '!src/fixtures/**',
         '!src/plugins/dev_mode/**',
         '!src/plugins/tests_bundle/**',
+        '!src/plugins/console/public/tests/**',
         '!src/cli/cluster/**',
       ],
       dest: 'build/kibana',

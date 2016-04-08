@@ -22,19 +22,20 @@ describe('Reflow watcher', function () {
   let $rootScope;
   let $onStub;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function () {
+    // stub jQuery's $.on method while creating the reflowWatcher
+    $onStub = sinon.stub($.fn, 'on');
+  }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     EventEmitter = Private(EventsProvider);
-
-    // stub jQuery's $.on method while creating the reflowWatcher
-    $onStub = sinon.stub($.fn, 'on');
     reflowWatcher = Private(ReflowWatcherProvider);
-    $onStub.restore();
-
     // setup the reflowWatchers $http watcher
     $rootScope.$apply();
   }));
+  afterEach(function () {
+    $onStub.restore();
+  });
 
   it('is an event emitter', function () {
     expect(reflowWatcher).to.be.an(EventEmitter);
