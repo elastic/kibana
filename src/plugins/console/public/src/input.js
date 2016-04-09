@@ -59,7 +59,7 @@ var zc = (function setupZeroClipboard() {
 
   zc.on('wrongflash noflash', function () {
     if (!storage.get('flash_warning_shown')) {
-      alert('Sense needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
+      alert('Console needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
       storage.set('flash_warning_shown', 'true');
     }
     $copyAsCURL.hide();
