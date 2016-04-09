@@ -73,14 +73,16 @@ describe('plugins/elasticsearch', function () {
       }, _.noop);
     });
 
-    it('passes if that single node is a client node', function () {
+    it('fails if that single node is a client node', function () {
       setNodes(
         '1.4.4',
         { version: '1.4.2', attributes: { client: 'true' } },
         '1.4.5'
       );
-
-      return checkEsVersion(server);
+      return checkEsVersion(server)
+      .then(function() {
+        throw new Error('expected validation to fail')
+      }, _.noop);
     });
 
   });
