@@ -3,24 +3,25 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import searchResponse from 'fixtures/search_response';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'ui/private';
 import 'ui/doc_table';
+import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 // Load the kibana app dependencies.
 
 
-var $parentScope;
+let $parentScope;
 
 
-var $scope;
+let $scope;
 
 
-var $timeout;
+let $timeout;
 
 
-var searchSource;
+let searchSource;
 
 var init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
@@ -46,13 +47,13 @@ var destroy = function () {
 };
 
 describe('docTable', function () {
-  var $elem;
+  let $elem;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(function () {
     $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
     ngMock.inject(function (Private) {
-      searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource = Private(FixturesStubbedSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,

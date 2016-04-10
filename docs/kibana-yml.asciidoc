@@ -2,9 +2,10 @@
 [horizontal]
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This setting specifies the port to use.
 `server.host:`:: *Default: "0.0.0.0"* This setting specifies the IP address of the back end server.
-`server.basePath:`:: Enables you to specify a path to mount Kibana at if you are running behind a proxy. This setting cannot 
-end in a slash (`/`).
+`server.basePath:`:: Enables you to specify a path to mount Kibana at if you are running behind a proxy. This setting 
+cannot end in a slash (`/`).
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes for incoming server requests.
+`server.name:`:: *Default: "your-hostname"* A human-readable display name that identifies this Kibana instance. 
 `elasticsearch.url:`:: *Default: "http://localhost:9200"* The URL of the Elasticsearch instance to use for all your 
 queries.
 `elasticsearch.preserveHost:`:: *Default: true* When this setting’s value is true Kibana uses the hostname specified in 
@@ -39,3 +40,5 @@ retrying.
 error messages.
 `logging.verbose`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage 
 information and all requests.
+`ops.interval`:: *Default: 10000* Set the interval in milliseconds to sample system and process performance metrics. 
+The minimum value is 100.

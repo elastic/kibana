@@ -586,7 +586,7 @@ Use slashes for both single line and multi line comments. Try to write
 comments that explain higher level mechanisms or clarify difficult
 segments of your code. **Don't use comments to restate trivial things**.
 
-***Exception:*** Comment blocks describing a function and it's arguments (docblock) should start with `/**`, contain a single `*` at the begining of each line, and end with `*/`.
+***Exception:*** Comment blocks describing a function and its arguments (docblock) should start with `/**`, contain a single `*` at the beginning of each line, and end with `*/`.
 
 *Right:*
 
@@ -656,7 +656,7 @@ function ClassName() {
 var ClassName = function () {};
 ```
 
-### Inhertiance should be done with a utility
+### Inheritance should be done with a utility
 
 While you can do it with pure JS, a utility will remove a lot of boilerplate, and be more readable and functional.
 
@@ -685,7 +685,7 @@ Square.prototype = Object.create(Shape);
 
 ### Keep Constructors Small
 
-It is often the case that there are properties that can't be defined on the prototype, or work that needs to be done to completely create an object (like call it's Super class). This is all that should be done within constructors.
+It is often the case that there are properties that can't be defined on the prototype, or work that needs to be done to completely create an object (like call its Super class). This is all that should be done within constructors.
 
 Try to follow the [Write small functions](#write-small-functions) rule here too.
 
@@ -775,7 +775,7 @@ Several already exist, and can be found in `src/kibana/utils/_mixins.js`
 
 ## Filenames
 
-All filenames should use `snake_case` and *can* start with an underscore if the module is not intended to be used outside of it's containing module.
+All filenames should use `snake_case` and *can* start with an underscore if the module is not intended to be used outside of its containing module.
 
 *Right:*
   - `src/kibana/index_patterns/index_pattern.js`
@@ -858,7 +858,7 @@ app.service('CustomService', function(Promise, otherDeps) {
 
 ### Routes
 
-Angular routes are defined using a custom require modules named `routes` that remove much of the required boilerplate.
+Angular routes are defined using a custom require module named `routes` that remove much of the required boilerplate.
 
 ```js
 require('ui/routes')
@@ -871,7 +871,7 @@ require('ui/routes')
 
 ## Multiple attribute values
 
-When a node has multiple attributes that would cause it to exceed the line character limit, each attribute including the first should be on its own line with a single indent. Also, when a node that is styled in this way has child nodes, there should be a blank line between the openening parent tag and the first child tag.
+When a node has multiple attributes that would cause it to exceed the line character limit, each attribute including the first should be on its own line with a single indent. Also, when a node that is styled in this way has child nodes, there should be a blank line between the opening parent tag and the first child tag.
 
 ```
 <ul

@@ -1,15 +1,16 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import AggResponseHierarchicalTransformAggregationProvider from 'ui/agg_response/hierarchical/_transform_aggregation';
 
 describe('buildHierarchicalData()', function () {
   describe('transformAggregation()', function () {
-    var transform;
-    var fixture;
+    let transform;
+    let fixture;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      transform = Private(require('ui/agg_response/hierarchical/_transform_aggregation'));
+      transform = Private(AggResponseHierarchicalTransformAggregationProvider);
     }));
 
     beforeEach(function () {

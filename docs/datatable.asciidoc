@@ -39,11 +39,13 @@ in a name to display on the visualization.
 *Geohash*:: The {ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points 
 based on the geohash coordinates.
 
-Once you've specified a bucket type aggregation, you can define sub-aggregations to refine the visualization. Click 
-*+ Add Sub Aggregation* to define a sub-aggregation, then choose *Split Rows* or *Split Table*, then select a 
-sub-aggregation from the list of types.
+Once you've specified a bucket type aggregation, you can define sub-buckets to refine the visualization. Click 
+*+ Add sub-buckets* to define a sub-bucket, then choose *Split Rows* or *Split Table*, then select an 
+aggregation from the list of types.
 
 You can use the up or down arrows to the right of the aggregation's type to change the aggregation's priority.
+
+Enter a string in the *Custom Label* field to change the display label.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 

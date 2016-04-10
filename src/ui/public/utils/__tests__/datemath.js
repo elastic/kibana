@@ -1,4 +1,4 @@
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import expect from 'expect.js';
 import moment from 'moment';
 import _ from 'lodash';
@@ -10,7 +10,7 @@ describe('dateMath', function () {
   var anchor =  '2014-01-01T06:06:06.666Z';
   var unix = moment(anchor).valueOf();
   var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
-  var clock;
+  let clock;
 
   describe('errors', function () {
     it('should return undefined if passed something falsy', function () {
@@ -39,10 +39,10 @@ describe('dateMath', function () {
   });
 
   describe('objects and strings', function () {
-    var mmnt;
-    var date;
-    var string;
-    var now;
+    let mmnt;
+    let date;
+    let string;
+    let now;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -70,8 +70,8 @@ describe('dateMath', function () {
   });
 
   describe('subtraction', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -94,8 +94,8 @@ describe('dateMath', function () {
   });
 
   describe('addition', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -119,8 +119,8 @@ describe('dateMath', function () {
   });
 
   describe('rounding', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);

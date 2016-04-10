@@ -1,20 +1,24 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesParamTypesCalculateIntervalProvider from 'ui/agg_types/param_types/_calculate_interval';
 
 describe('calculateInterval()', function () {
-  var AggConfig;
-  var indexPattern;
-  var Vis;
-  var createFilter;
-  var calculateInterval;
+  let AggConfig;
+  let indexPattern;
+  let Vis;
+  let createFilter;
+  let calculateInterval;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    calculateInterval = Private(require('ui/agg_types/param_types/_calculate_interval'));
+    Vis = Private(VisProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    calculateInterval = Private(AggTypesParamTypesCalculateIntervalProvider);
   }));
 
   var testInterval = function (option, expected) {

@@ -1,12 +1,13 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import L from 'leaflet';
 
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
 import $ from 'jquery';
+import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 
 // // Data
 // var dataArray = [
@@ -25,7 +26,7 @@ import $ from 'jquery';
 
 describe('TileMap Map Tests', function () {
   var $mockMapEl = $('<div>');
-  var TileMapMap;
+  let TileMapMap;
   var leafletStubs = {};
   var leafletMocks = {};
 
@@ -39,12 +40,12 @@ describe('TileMap Map Tests', function () {
 
     leafletStubs.map = sinon.stub(L, 'map', _.constant(leafletMocks.map));
 
-    TileMapMap = Private(require('ui/vislib/visualizations/_map'));
+    TileMapMap = Private(VislibVisualizationsMapProvider);
   }));
 
   describe('instantiation', function () {
-    var map;
-    var createStub;
+    let map;
+    let createStub;
 
     beforeEach(function () {
       createStub = sinon.stub(TileMapMap.prototype, '_createMap', _.noop);
@@ -65,8 +66,8 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('createMap', function () {
-    var map;
-    var mapStubs;
+    let map;
+    let mapStubs;
 
     beforeEach(function () {
       mapStubs = {
@@ -109,7 +110,7 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('attachEvents', function () {
-    var map;
+    let map;
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
@@ -144,8 +145,8 @@ describe('TileMap Map Tests', function () {
 
 
   describe('addMarkers', function () {
-    var map;
-    var createStub;
+    let map;
+    let createStub;
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');
@@ -172,7 +173,7 @@ describe('TileMap Map Tests', function () {
   });
 
   describe('getDataRectangles', function () {
-    var map;
+    let map;
 
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap');

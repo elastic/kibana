@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import $ from 'jquery';
-require('ui/modules')
+import VislibProvider from 'ui/vislib';
+import uiModules from 'ui/modules';
+uiModules
 .get('apps/discover')
 .directive('discoverTimechart', function (Private, $compile) {
-  const vislib = Private(require('ui/vislib'));
+  const vislib = Private(VislibProvider);
 
   return {
     restrict: 'E',
@@ -15,7 +17,7 @@ require('ui/modules')
       const init = function () {
         // This elem should already have a height/width
         const myChart = new vislib.Chart(elem[0], {
-
+          addLegend: false
         });
 
         $scope.$watch('data', function (data) {

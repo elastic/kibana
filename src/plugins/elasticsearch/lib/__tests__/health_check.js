@@ -1,9 +1,15 @@
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
+import url from 'url';
+
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import healthCheck from '../health_check';
+import serverConfig from '../../../../../test/server_config';
+
+const esPort = serverConfig.servers.elasticsearch.port;
+const esUrl = url.format(serverConfig.servers.elasticsearch);
 
 describe('plugins/elasticsearch', function () {
   describe('lib/health_check', function () {
@@ -12,6 +18,7 @@ describe('plugins/elasticsearch', function () {
     let plugin;
     let server;
     let get;
+    let set;
     let client;
 
     beforeEach(function () {
@@ -24,8 +31,9 @@ describe('plugins/elasticsearch', function () {
           yellow: sinon.stub()
         }
       };
-      // setup the config().get() stub
+      // setup the config().get()/.set() stubs
       get = sinon.stub();
+      set = sinon.stub();
       // set up the elasticsearch client stub
       client = {
         cluster: { health: sinon.stub() },
@@ -33,13 +41,15 @@ describe('plugins/elasticsearch', function () {
         nodes: { info: sinon.stub() },
         ping: sinon.stub(),
         create: sinon.stub(),
+        index: sinon.stub().returns(Promise.resolve()),
+        get: sinon.stub().returns(Promise.resolve({ found: false })),
         search: sinon.stub().returns(Promise.resolve({ hits: { hits: [] } })),
       };
       client.nodes.info.returns(Promise.resolve({
         nodes: {
           'node-01': {
             version: '1.5.0',
-            http_address: 'inet[/127.0.0.1:9210]',
+            http_address: `inet[/127.0.0.1:${esPort}]`,
             ip: '127.0.0.1'
           }
         }
@@ -47,8 +57,9 @@ describe('plugins/elasticsearch', function () {
       // Setup the server mock
       server = {
         log: sinon.stub(),
-        config: function () { return { get: get }; },
-        plugins: { elasticsearch: { client: client  } }
+        info: { port: 5601 },
+        config: function () { return { get, set }; },
+        plugins: { elasticsearch: { client  } }
       };
 
       health = healthCheck(plugin, server);
@@ -73,7 +84,7 @@ describe('plugins/elasticsearch', function () {
 
     it('should set the cluster red if the ping fails, then to green', function () {
 
-      get.withArgs('elasticsearch.url').returns('http://localhost:9210');
+      get.withArgs('elasticsearch.url').returns(esUrl);
       get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.onCall(0).returns(Promise.reject(new NoConnections()));
@@ -85,7 +96,7 @@ describe('plugins/elasticsearch', function () {
           expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
           sinon.assert.calledOnce(plugin.status.red);
           expect(plugin.status.red.args[0][0]).to.be(
-            'Unable to connect to Elasticsearch at http://localhost:9210.'
+            `Unable to connect to Elasticsearch at ${esUrl}.`
           );
           sinon.assert.calledTwice(client.ping);
           sinon.assert.calledOnce(client.nodes.info);
@@ -97,7 +108,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster red if the health check status is red, then to green', function () {
-      get.withArgs('elasticsearch.url').returns('http://localhost:9210');
+      get.withArgs('elasticsearch.url').returns(esUrl);
       get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.returns(Promise.resolve());
@@ -120,7 +131,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should set the cluster yellow if the health check timed_out and create index', function () {
-      get.withArgs('elasticsearch.url').returns('http://localhost:9210');
+      get.withArgs('elasticsearch.url').returns(esUrl);
       get.withArgs('elasticsearch.engineVersion').returns('^1.4.4');
       get.withArgs('kibana.index').returns('.my-kibana');
       client.ping.returns(Promise.resolve());

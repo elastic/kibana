@@ -1,21 +1,30 @@
+import chrome from 'ui/chrome';
+import url from 'url';
+
 export default function createUrlShortener(Notifier, $http, $location) {
   const notify = new Notifier({
     location: 'Url Shortener'
   });
-  const baseUrl = `${$location.protocol()}://${$location.host()}:${$location.port()}`;
 
-  async function shortenUrl(url) {
-    const relativeUrl = url.replace(baseUrl, '');
+  function shortenUrl(absoluteUrl) {
+    const basePath = chrome.getBasePath();
+
+    const parsedUrl = url.parse(absoluteUrl);
+    const path = parsedUrl.path.replace(basePath, '');
+    const hash = parsedUrl.hash ? parsedUrl.hash : '';
+    const relativeUrl = path + hash;
+
     const formData = { url: relativeUrl };
 
-    try {
-      const result = await $http.post('/shorten', formData);
-
-      return `${baseUrl}/goto/${result.data}`;
-    } catch (err) {
-      notify.error(err);
-      throw err;
-    }
+    return $http.post(`${basePath}/shorten`, formData).then((result) => {
+      return url.format({
+        protocol: parsedUrl.protocol,
+        host: parsedUrl.host,
+        pathname: `${basePath}/goto/${result.data}`
+      });
+    }).catch((response) => {
+      notify.error(response);
+    });
   }
 
   return {

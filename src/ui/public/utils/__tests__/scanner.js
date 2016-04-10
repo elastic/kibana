@@ -1,14 +1,31 @@
 import Scanner from 'ui/utils/scanner';
 import expect from 'expect.js';
-import elasticsearch from 'elasticsearch-browser';
+import Bluebird from 'bluebird';
+import 'elasticsearch-browser';
+import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import url from 'url';
 
-var es = new elasticsearch.Client({
-  host: 'http://localhost:9210',
-});
-
+import serverConfig from '../../../../../test/server_config';
 
 describe('Scanner', function () {
+  let es;
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (esFactory) {
+    es = esFactory({
+      host: url.format(serverConfig.servers.elasticsearch),
+      defer: function () {
+        return Bluebird.defer();
+      }
+    });
+  }));
+
+  afterEach(function () {
+    es.close();
+    es = null;
+  });
+
   describe('initialization', function () {
     it('should throw errors if missing arguments on initialization', function () {
       expect(() => new Scanner()).to.throwError();

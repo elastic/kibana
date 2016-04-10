@@ -3,7 +3,7 @@ import moment from 'moment';
 import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'plugins/kibana/visualize/index';
 import 'plugins/kibana/dashboard/index';
@@ -12,13 +12,13 @@ import 'plugins/kibana/discover/index';
 
 // TODO: This should not be needed, timefilter is only included here, it should move
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
+let $elem;
 var anchor = '2014-01-01T06:06:06.666Z';
-var clock;
+let clock;
 
 var init = function () {
   // Load the application
@@ -85,7 +85,7 @@ describe('timepicker directive', function () {
   });
 
   describe('refresh interval', function () {
-    var $courier;
+    let $courier;
     beforeEach(function () {
       init();
       ngMock.inject(function (courier, $rootScope) {
@@ -100,8 +100,8 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setRefreshInterval() that sets interval variable', function (done) {
-      $scope.setRefreshInterval('interval');
-      expect($scope.interval).to.be('interval');
+      $scope.setRefreshInterval({ value : 10000  });
+      expect($scope.interval).to.have.property('value', 10000);
       done();
     });
 
@@ -152,7 +152,7 @@ describe('timepicker directive', function () {
 
     it('should default the interval on the courier with incorrect values', function (done) {
       // Change refresh interval and digest
-      $scope.setRefreshInterval('undefined');
+      $scope.setRefreshInterval();
       $elem.scope().$digest();
       expect($courier.searchLooper.loopInterval()).to.be(0);
       done();
@@ -232,7 +232,7 @@ describe('timepicker directive', function () {
     });
 
     it('disables the submit button if the form is invalid', function (done) {
-      var button;
+      let button;
       button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
@@ -359,7 +359,7 @@ describe('timepicker directive', function () {
 
   describe('absolute mode', function () {
 
-    var inputs;
+    let inputs;
 
     beforeEach(function () {
       init();

@@ -1,20 +1,24 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
+import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
 describe('makeFakeXAspect', function () {
 
-  var makeFakeXAspect;
-  var Vis;
-  var AggType;
-  var AggConfig;
-  var indexPattern;
+  let makeFakeXAspect;
+  let Vis;
+  let AggType;
+  let AggConfig;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    AggType = Private(require('ui/agg_types/AggType'));
-    indexPattern = Private(require('ui/Vis'));
-    makeFakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
+    Vis = Private(VisProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    AggType = Private(AggTypesAggTypeProvider);
+    indexPattern = Private(VisProvider);
+    makeFakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
   }));
 
   it('creates an object that looks like an aspect', function () {

@@ -1,19 +1,24 @@
 import d3 from 'd3';
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import VislibVisProvider from 'ui/vislib/vis';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibVisualizationsColumnChartProvider from 'ui/vislib/visualizations/column_chart';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  var ColumnChart;
-  var Chart;
-  var Data;
-  var persistedState;
-  var Vis;
+  let ColumnChart;
+  let Chart;
+  let Data;
+  let persistedState;
+  let Vis;
   var chartData = {};
-  var vis;
-  var el;
-  var myChart;
-  var config;
+  let vis;
+  let el;
+  let myChart;
+  let config;
   var data = {
     hits      : 621,
     label     : '',
@@ -81,11 +86,11 @@ describe('Vislib _chart Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vislib/vis'));
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    ColumnChart = Private(require('ui/vislib/visualizations/column_chart'));
-    Chart = Private(require('ui/vislib/visualizations/_chart'));
+    Vis = Private(VislibVisProvider);
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    ColumnChart = Private(VislibVisualizationsColumnChartProvider);
+    Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
 

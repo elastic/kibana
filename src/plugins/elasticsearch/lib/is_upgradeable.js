@@ -1,5 +1,4 @@
 import semver from 'semver';
-const utils = require('requirefrom')('src/utils');
 const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
 module.exports = function (server, doc) {

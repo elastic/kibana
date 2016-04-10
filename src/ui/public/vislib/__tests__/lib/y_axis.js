@@ -1,16 +1,19 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
 
-var YAxis;
-var Data;
-var persistedState;
-var el;
-var buildYAxis;
-var yAxis;
-var yAxisDiv;
+let YAxis;
+let Data;
+let persistedState;
+let el;
+let buildYAxis;
+let yAxis;
+let yAxisDiv;
 
 var timeSeries = [
   1408734060000,
@@ -94,9 +97,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    YAxis = Private(require('ui/vislib/lib/y_axis'));
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    YAxis = Private(VislibLibYAxisProvider);
 
     expect($('.y-axis-wrapper')).to.have.length(0);
   }));
@@ -127,9 +130,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getYScale Method', function () {
-    var yScale;
-    var graphData;
-    var domain;
+    let yScale;
+    let graphData;
+    let domain;
     var height = 50;
 
     function checkDomain(min, max) {
@@ -156,8 +159,8 @@ describe('Vislib yAxis Class Test Suite', function () {
     });
 
     describe('should return log values', function () {
-      var domain;
-      var extents;
+      let domain;
+      let extents;
 
       it('should return 1', function () {
         yAxis._attr.scale = 'log';
@@ -322,9 +325,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getYAxis method', function () {
-    var mode;
-    var yMax;
-    var yScale;
+    let mode;
+    let yMax;
+    let yScale;
     beforeEach(function () {
       createData(defaultGraphData);
       mode = yAxis._attr.mode;

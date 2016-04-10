@@ -1,13 +1,14 @@
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
 
 describe('Timefilter service', function () {
   describe('time diff watcher', function () {
-    var fn;
-    var update;
-    var fetch;
-    var timefilter;
+    let fn;
+    let update;
+    let fetch;
+    let timefilter;
 
     beforeEach(ngMock.module('kibana'));
 
@@ -25,7 +26,7 @@ describe('Timefilter service', function () {
         }
       };
 
-      fn = Private(require('ui/timefilter/lib/diff_time'))(timefilter);
+      fn = Private(TimefilterLibDiffTimeProvider)(timefilter);
     }));
 
     it('not emit anything if the time has not changed', function () {

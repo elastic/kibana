@@ -1,13 +1,13 @@
 
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
 describe('$scope.$watchMulti', function () {
 
-  var $rootScope;
-  var $scope;
+  let $rootScope;
+  let $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -135,9 +135,9 @@ describe('$scope.$watchMulti', function () {
   });
 
   describe('complex watch expressions', function () {
-    var stateWatchers;
-    var firstValue;
-    var secondValue;
+    let stateWatchers;
+    let firstValue;
+    let secondValue;
 
     beforeEach(function () {
       var firstGetter = function () {

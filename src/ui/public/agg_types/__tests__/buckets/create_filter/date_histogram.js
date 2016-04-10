@@ -2,29 +2,34 @@ import _ from 'lodash';
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
 import aggResp from 'fixtures/agg_resp/date_histogram';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';
+import TimeBucketsProvider from 'ui/time_buckets';
+import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
 
-    var vis;
-    var agg;
-    var field;
-    var filter;
-    var bucketKey;
-    var bucketStart;
-    var getIntervalStub;
-    var intervalOptions;
+    let vis;
+    let agg;
+    let field;
+    let filter;
+    let bucketKey;
+    let bucketStart;
+    let getIntervalStub;
+    let intervalOptions;
 
-    var init;
+    let init;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      var Vis = Private(require('ui/Vis'));
-      var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-      var TimeBuckets = Private(require('ui/time_buckets'));
-      intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
+      var Vis = Private(VisProvider);
+      var indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      var createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
+      var TimeBuckets = Private(TimeBucketsProvider);
+      intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {
         interval = interval || 'auto';
@@ -79,7 +84,7 @@ describe('AggConfig Filters', function () {
 
     it('extends the filter edge to 1ms before the next bucket for all interval options', function () {
       intervalOptions.forEach(function (option) {
-        var duration;
+        let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {
           duration = moment.duration(10, option.val);
 

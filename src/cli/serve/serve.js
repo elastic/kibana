@@ -3,8 +3,7 @@ const { isWorker } = require('cluster');
 const { resolve } = require('path');
 
 const cwd = process.cwd();
-const src = require('requirefrom')('src');
-const fromRoot = src('utils/fromRoot');
+import { fromRoot } from '../../utils';
 
 let canCluster;
 try {
@@ -61,7 +60,11 @@ function initServerSettings(opts, extraCliOptions) {
     opts.pluginDir
   )));
 
-  set('plugins.paths', [].concat(opts.pluginPath || []));
+  set('plugins.paths', _.compact([].concat(
+    get('plugins.paths'),
+    opts.pluginPath
+  )));
+
   merge(extraCliOptions);
 
   return settings;
@@ -123,7 +126,7 @@ module.exports = function (program) {
     }
 
     let kbnServer = {};
-    const KbnServer = src('server/KbnServer');
+    const KbnServer = require('../../server/kbn_server');
     try {
       kbnServer = new KbnServer(settings);
       await kbnServer.ready();
@@ -131,8 +134,11 @@ module.exports = function (program) {
     catch (err) {
       const { server } = kbnServer;
 
-      if (server) server.log(['fatal'], err);
-      console.error('FATAL', err);
+      if (err.code === 'EADDRINUSE') {
+        logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
+      } else {
+        logFatal(err, server);
+      }
 
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
@@ -141,3 +147,10 @@ module.exports = function (program) {
     return kbnServer;
   });
 };
+
+function logFatal(message, server) {
+  if (server) {
+    server.log(['fatal'], message);
+  }
+  console.error('FATAL', message);
+}

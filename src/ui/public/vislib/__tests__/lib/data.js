@@ -1,11 +1,13 @@
 import angular from 'angular';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import dataSeries from 'fixtures/vislib/mock_data/date_histogram/_series';
 import dataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
 import dataStacked from 'fixtures/vislib/mock_data/stacked/_stacked';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 var seriesData = {
   'label': '',
@@ -100,13 +102,13 @@ var colsData = {
 };
 
 describe('Vislib Data Class Test Suite', function () {
-  var Data;
-  var persistedState;
+  let Data;
+  let persistedState;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
   }));
 
   describe('Data Class (main)', function () {
@@ -200,7 +202,7 @@ describe('Vislib Data Class Test Suite', function () {
 
 
   describe('_removeZeroSlices', function () {
-    var data;
+    let data;
     var pieData = {
       slices: {
         children: [
@@ -222,12 +224,12 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('Data.flatten', function () {
-    var serIn;
-    var rowIn;
-    var colIn;
-    var serOut;
-    var rowOut;
-    var colOut;
+    let serIn;
+    let rowIn;
+    let colIn;
+    let serOut;
+    let rowOut;
+    let colOut;
 
     beforeEach(function () {
       serIn = new Data(seriesData, {}, persistedState);
@@ -261,9 +263,9 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('getYMin method', function () {
-    var visData;
-    var visDataNeg;
-    var visDataStacked;
+    let visData;
+    let visDataNeg;
+    let visDataStacked;
     var minValue = 4;
     var minValueNeg = -41;
     var minValueStacked = 15;
@@ -298,9 +300,9 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('getYMax method', function () {
-    var visData;
-    var visDataNeg;
-    var visDataStacked;
+    let visData;
+    let visDataNeg;
+    let visDataStacked;
     var maxValue = 41;
     var maxValueNeg = -4;
     var maxValueStacked = 115;
@@ -335,7 +337,7 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('geohashGrid methods', function () {
-    var data;
+    let data;
     var geohashGridData = {
       hits: 3954,
       rows: [{

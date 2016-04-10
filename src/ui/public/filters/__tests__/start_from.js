@@ -1,10 +1,10 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/filters/start_from';
 
 
-var filter;
+let filter;
 
 var init = function (expandable) {
   // Load the application

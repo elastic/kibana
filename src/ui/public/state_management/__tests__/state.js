@@ -2,21 +2,23 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/private';
+import StateManagementStateProvider from 'ui/state_management/state';
+import EventsProvider from 'ui/events';
 
 describe('State Management', function () {
-  var $rootScope;
-  var $location;
-  var State;
-  var Events;
+  let $rootScope;
+  let $location;
+  let State;
+  let Events;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {
     $location = _$location_;
     $rootScope = _$rootScope_;
-    State = Private(require('ui/state_management/state'));
-    Events = Private(require('ui/events'));
+    State = Private(StateManagementStateProvider);
+    Events = Private(EventsProvider);
   }));
 
   describe('Provider', function () {
@@ -136,7 +138,7 @@ describe('State Management', function () {
     });
 
     it('should clear state when missing form URL', function () {
-      var stateObj;
+      let stateObj;
       var state = new State();
 
       // set satte via URL

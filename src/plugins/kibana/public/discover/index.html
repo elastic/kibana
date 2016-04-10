@@ -1,5 +1,16 @@
 <div ng-controller="discover" class="app-container">
-  <navbar name="discover">
+  <kbn-top-nav name="discover" config="topNavMenu">
+    <div class="kibana-nav-info">
+      <span ng-show="opts.savedSearch.id" class="kibana-nav-info-title">
+        <span ng-bind="::opts.savedSearch.title"></span>
+        <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
+      </span>
+
+      <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
+      <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
+    </div>
+  </kbn-top-nav>
+  <navbar name="discover-search">
     <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
@@ -21,49 +32,9 @@
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>
     </form>
-
-    <div class="button-group" role="toolbar">
-      <kbn-tooltip text="New Search" placement="bottom" append-to-body="1">
-        <button
-          ng-click="newQuery()"
-          aria-label="New Search">
-          <i aria-hidden="true" class="fa fa-file-new-o"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
-        <button
-          ng-click="configTemplate.toggle('save');"
-          ng-class="{active: configTemplate.is('save')}"
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('save') }}"
-          aria-label="Save Search">
-          <i aria-hidden="true" class="fa fa-save"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
-        <button
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('load') }}"
-          ng-click="configTemplate.toggle('load');"
-          ng-class="{active: configTemplate.is('load')}"
-          aria-label="Load Saved Search">
-          <i aria-hidden="true" class="fa fa-folder-open-o"></i>
-        </button>
-      </kbn-tooltip>
-      <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
-        <button
-          aria-label="Share Search"
-          aria-haspopup="true"
-          aria-expanded="{{ configTemplate.is('share') }}"
-          ng-class="{active: configTemplate.is('share')}"
-          ng-click="configTemplate.toggle('share');">
-          <i aria-hidden="true" class="fa fa-external-link"></i>
-        </button>
-      </kbn-tooltip>
-    </div>
+    <div class="button-group" role="toolbar"></div>
   </navbar>
 
-  <config config-template="configTemplate" config-object="opts" config-close="configClose"></config>
 
   <div class="container-fluid" role="main">
     <div class="row">
@@ -84,17 +55,6 @@
       </div>
 
       <div class="discover-wrapper col-md-10">
-
-        <div class="discover-info">
-          <span ng-show="opts.savedSearch.id" class="discover-info-title">
-            <span ng-bind="::opts.savedSearch.title"></span>
-            <i aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>
-          </span>
-
-          <strong class="discover-info-hits">{{(hits || 0) | number:0}}</strong>
-          <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
-        </div>
-
         <div class="discover-content">
           <!-- no results -->
           <div ng-show="resultState === 'none'">
@@ -119,7 +79,7 @@
                 <div ng-show="opts.timefield">
                   <p>
                     <h3>Expand your time range</h3>
-                    <p>I see you are looking at an index with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range. Click the button below to open the time picker. For future reference you can open the time picker by clicking the <a class="btn btn-xs navbtn" ng-click="toggleTimepicker(); toggledTimepicker = !toggledTimepicker" aria-expanded="{{toggledTimepicker}}" aria-label="time picker">time picker <i aria-hidden="true" class="fa fa-clock-o"></i></a> in the top right corner of your screen.
+                    <p>I see you are looking at an index with a date field. It is possible your query does not match anything in the current time range, or that there is no data at all in the currently selected time range. Try selecting a wider time range by opening the time picker <i aria-hidden="true" class="fa fa-clock-o"></i> in the top right corner of your screen.
                   </p>
                 </div>
 
@@ -153,7 +113,6 @@
           <div ng-show="resultState === 'loading'">
             <div class="discover-overlay">
               <h2>Searching</h2>
-              <div class="spinner large"></div>
               <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
             </div>
           </div>

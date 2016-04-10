@@ -1,4 +1,4 @@
-import fromRoot from '../utils/fromRoot';
+import fromRoot from '../utils/from_root';
 import { includes, flow, escapeRegExp } from 'lodash';
 import { isString, isArray, isPlainObject, get } from 'lodash';
 import { keys } from 'lodash';
@@ -46,7 +46,7 @@ module.exports = class UiBundlerEnv {
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
       ui: fromRoot('src/ui/public'),
-      testHarness: fromRoot('src/testHarness/public')
+      test_harness: fromRoot('src/test_harness/public')
     };
 
     // map of which plugins created which aliases

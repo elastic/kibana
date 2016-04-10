@@ -1,11 +1,13 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { times } from 'lodash';
 import sinon from 'auto-release-sinon';
 
 import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';
-import NoDigestPromises from 'testUtils/noDigestPromises';
+import NoDigestPromises from 'test_utils/no_digest_promises';
 import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+
+import SegmentedRequestProvider from '../segmented';
 
 describe('Segmented Request Size Picking', function () {
   let Promise;
@@ -21,7 +23,7 @@ describe('Segmented Request Size Picking', function () {
     Promise = $injector.get('Promise');
     HitSortFn = Private(HitSortFnProv);
     $rootScope = $injector.get('$rootScope');
-    SegmentedReq = Private(require('ui/courier/fetch/request/segmented'));
+    SegmentedReq = Private(SegmentedRequestProvider);
 
     MockSource = class {
       constructor() {

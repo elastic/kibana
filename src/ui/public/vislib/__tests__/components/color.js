@@ -1,17 +1,21 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
+import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
+import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
+import VislibComponentsColorMappedColorsProvider from 'ui/vislib/components/color/mapped_colors';
+import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
 
 describe('Vislib Color Module Test Suite', function () {
-  var seedColors;
-  var mappedColors;
+  let seedColors;
+  let mappedColors;
   let config;
 
   describe('Color (main)', function () {
     let previousConfig;
-    var getColors;
+    let getColors;
     var arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
     var arrayOfNumbers = [1, 2, 3, 4, 5];
     var arrayOfUndefinedValues = [undefined, undefined, undefined];
@@ -20,16 +24,16 @@ describe('Vislib Color Module Test Suite', function () {
     var arrayOfNullValues = [null, null, null];
     var emptyObject = {};
     var nullValue = null;
-    var notAValue;
-    var color;
+    let notAValue;
+    let color;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
       config.set('visualization:colorMapping', {});
-      seedColors = Private(require('ui/vislib/components/color/seed_colors'));
-      getColors = Private(require('ui/vislib/components/color/color'));
-      mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
+      seedColors = Private(VislibComponentsColorSeedColorsProvider);
+      getColors = Private(VislibComponentsColorColorProvider);
+      mappedColors = Private(VislibComponentsColorMappedColorsProvider);
       color = getColors(arr, {});
     }));
 
@@ -129,8 +133,8 @@ describe('Vislib Color Module Test Suite', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
       previousConfig = config.get('visualization:colorMapping');
-      mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
-      seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+      mappedColors = Private(VislibComponentsColorMappedColorsProvider);
+      seedColors = Private(VislibComponentsColorSeedColorsProvider);
       mappedColors.mapping = {};
     }));
 
@@ -247,14 +251,14 @@ describe('Vislib Color Module Test Suite', function () {
     var nullValue = null;
     var emptyArr = [];
     var emptyObject = {};
-    var notAValue;
-    var createColorPalette;
-    var colorPalette;
+    let notAValue;
+    let createColorPalette;
+    let colorPalette;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      seedColors = Private(require('ui/vislib/components/color/seed_colors'));
-      createColorPalette = Private(require('ui/vislib/components/color/color_palette'));
+      seedColors = Private(VislibComponentsColorSeedColorsProvider);
+      createColorPalette = Private(VislibComponentsColorColorPaletteProvider);
       colorPalette = createColorPalette(num1);
     }));
 

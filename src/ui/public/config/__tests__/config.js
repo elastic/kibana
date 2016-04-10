@@ -1,15 +1,16 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import ConfigDefaultsProvider from 'ui/config/defaults';
 describe('config component', function () {
-  var $scope;
-  var config;
-  var defaults;
+  let $scope;
+  let config;
+  let defaults;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
     config = $injector.get('config');
     $scope = $injector.get('$rootScope');
-    defaults = Private(require('ui/config/defaults'));
+    defaults = Private(ConfigDefaultsProvider);
   }));
 
   describe('#get', function () {

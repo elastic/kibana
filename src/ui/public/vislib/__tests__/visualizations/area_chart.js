@@ -1,12 +1,14 @@
 import d3 from 'd3';
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 
 import woahLotsOfVariables from 'fixtures/vislib/mock_data/date_histogram/_series';
 import notQuiteEnoughVariables from 'fixtures/vislib/mock_data/not_enough_data/_one_point';
 import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 var someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
@@ -25,13 +27,13 @@ var visLibParams = {
 
 _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
   describe('Vislib Area Chart Test Suite for ' + imaVariable + ' Data', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.on('brush', _.noop);
       vis.render(variablesAreCool, persistedState);
     }));
@@ -74,8 +76,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     });
 
     describe('stackData method', function () {
-      var stackedData;
-      var isStacked;
+      let stackedData;
+      let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -103,12 +105,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     });
 
     describe('addCircleEvents method', function () {
-      var circle;
-      var brush;
-      var d3selectedCircle;
-      var onBrush;
-      var onClick;
-      var onMouseOver;
+      let circle;
+      let brush;
+      let d3selectedCircle;
+      let onBrush;
+      let onClick;
+      let onMouseOver;
 
       beforeEach(ngMock.inject(function () {
         vis.handler.charts.forEach(function (chart) {
