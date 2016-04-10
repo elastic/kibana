@@ -1,13 +1,14 @@
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 
 let mappingSetup;
 
 describe('ui/utils/mapping_setup', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    mappingSetup = Private(require('ui/utils/mapping_setup'));
+    mappingSetup = Private(UtilsMappingSetupProvider);
   }));
 
   describe('#expandShorthand()', function () {

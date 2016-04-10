@@ -29,7 +29,7 @@
         </label>
         <a ng-disabled="selectedItems.length == 0"
           confirm-click="bulkDelete()"
-          confirmation="Are you sure want to delete the selected {{currentTab.title}}? This action is irreversible!"
+          confirmation="Are you sure you want to delete the selected {{currentTab.title}}? This action is irreversible!"
           class="btn btn-xs btn-danger" aria-label="Delete"><i aria-hidden="true" class="fa fa-trash"></i> Delete</a>
         <a ng-disabled="selectedItems.length == 0"
           ng-click="bulkExport()"

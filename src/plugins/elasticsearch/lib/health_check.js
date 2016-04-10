@@ -5,6 +5,7 @@ import exposeClient from './expose_client';
 import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import checkEsVersion from './check_es_version';
+import manageUuid from './manage_uuid';
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
 const format = util.format;
@@ -18,11 +19,12 @@ const REQUEST_DELAY = 2500;
 module.exports = function (plugin, server) {
   const config = server.config();
   const client = server.plugins.elasticsearch.client;
+  const uuidManagement = manageUuid(server);
 
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitForPong() {
-    return client.ping({ requestTimeout: 1500 }).catch(function (err) {
+    return client.ping().catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
 
       plugin.status.red(format('Unable to connect to Elasticsearch at %s.', config.get('elasticsearch.url')));
@@ -76,16 +78,19 @@ module.exports = function (plugin, server) {
         plugin.status.red('Elasticsearch is still initializing the kibana index.');
         return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
-
-      // otherwise we are g2g
-      plugin.status.green('Kibana index ready');
     });
+  }
+
+  function setGreenStatus() {
+    return plugin.status.green('Kibana index ready');
   }
 
   function check() {
     return waitForPong()
     .then(_.partial(checkEsVersion, server))
     .then(waitForShards)
+    .then(uuidManagement)
+    .then(setGreenStatus)
     .then(_.partial(migrateConfig, server))
     .catch(err => plugin.status.red(err));
   }

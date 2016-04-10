@@ -1,14 +1,16 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
+import IndexPatternProvider from '../_index_pattern';
+import IndexPatternsProvider from '../index_patterns';
 
 describe('IndexPatterns service', function () {
   let indexPatterns;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    const IndexPattern = Private(require('../_index_pattern'));
-    indexPatterns = Private(require('../index_patterns'));
+    const IndexPattern = Private(IndexPatternProvider);
+    indexPatterns = Private(IndexPatternsProvider);
 
     // prevent IndexPattern initialization from doing anything
     Private.stub(

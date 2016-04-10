@@ -3,14 +3,14 @@
 You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
-* Elasticsearch 2.1 or later
+* Elasticsearch {esversion}
 * A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
 ** Which Elasticsearch indices you want to search.
 
-NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[Shield] see
-{shield}/kibana.html#using-kibana4-with-shield[Shield with Kibana 4] for additional setup instructions.
+NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[{scyld}], see
+{shield}/kibana.html#using-kibana4-with-shield[{scyld} with Kibana] for additional setup instructions.
 
 [float]
 [[install]]
@@ -18,15 +18,16 @@ NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/o
 
 To get Kibana up and running:
 
-. Download the https://www.elastic.co/downloads/kibana[Kibana 4 binary package] for your platform.
+. Download the https://www.elastic.co/downloads/kibana[Kibana {version} binary package] for your platform.
 . Extract the `.zip` or `tar.gz` archive file.
+. After installing, run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
 
-// On Unix, you can instead run the package manager suited for your distribution.
-//
-// [float]
-// include::kibana-repositories.asciidoc[]
-//
-After installing, run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
+On Unix, you can instead run the package manager suited for your distribution.
+
+////
+[float]
+include::kibana-repositories.asciidoc[]
+////
 
 That's it! Kibana is now running on port 5601.
 
@@ -82,14 +83,14 @@ simply be the name of a single index.
 reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data,
 disable the *Index contains time-based events* option.
 +
-WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Support for this functionality 
-will be removed entirely in the next major Kibana release. Elasticsearch 2.1 includes sophisticated date parsing APIs that 
-Kibana uses to determine date information, removing the need to specify dates in the index pattern name.
+WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Starting in the 2.1 
+release, Elasticsearch includes sophisticated date parsing APIs that Kibana uses to determine date information, 
+removing the need to specify dates in the index pattern name.
 +
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
 When you have more than one index pattern, you can designate which one to use as the default from *Settings > Indices*.
 
-Voila! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for
+All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields configured for
 the matching index.
 
 [float]
@@ -101,5 +102,5 @@ You're ready to dive in to your data:
 * Chart and map your data from the <<visualize, Visualize>> page.
 * Create and view custom dashboards from the <<dashboard, Dashboard>> page.
 
-For a brief tutorial that explores these core Kibana concepts, take a look at the <<getting-started, Getting
+For a tutorial that explores these core Kibana concepts, take a look at the <<getting-started, Getting
 Started>> page.

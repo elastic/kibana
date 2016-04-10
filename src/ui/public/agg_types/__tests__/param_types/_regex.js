@@ -1,20 +1,24 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Regex', function () {
 
-  var BaseAggParam;
-  var RegexAggParam;
-  var Vis;
-  var indexPattern;
+  let BaseAggParam;
+  let RegexAggParam;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    RegexAggParam = Private(AggTypesParamTypesRegexProvider);
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {
@@ -30,8 +34,8 @@ describe('Regex', function () {
   });
 
   describe('write results', function () {
-    var aggParam;
-    var aggConfig;
+    let aggParam;
+    let aggConfig;
     var output = { params: {} };
     var paramName = 'exclude';
 

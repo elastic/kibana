@@ -1,7 +1,7 @@
 [[setup-repositories]]
 === Kibana Repositories
 
-Binary packages for Kibana are available for Unix distributions that support the `apt` and `yum` tools.We also have
+Binary packages for Kibana are available for Unix distributions that support the `apt` and `yum` tools. We also have
 repositories available for APT and YUM based distributions.
 
 NOTE: Since the packages are created as part of the Kibana build, source packages are not available.
@@ -22,25 +22,26 @@ has the following fingerprint:
 wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 --------------------------------------------------
 +
-. Add the repository definition to your `/etc/apt/sources.list` file:
+. Add the repository definition to your `/etc/apt/sources.list.d/kibana.list` file:
 +
-[source, sh]
+["source","sh",subs="attributes"]
 --------------------------------------------------
-echo "deb http://packages.elastic.co/kibana/{branch}/debian stable main" | sudo tee -a /etc/apt/sources.list
+echo "deb http://packages.elastic.co/kibana/{version}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
 --------------------------------------------------
 +
 [WARNING]
 ==================================================
-Use the `echo` method described above to add the Kibana repository.  Do not use `add-apt-repository`, as that command
+Use the `echo` method described above to add the Kibana repository. Do not use `add-apt-repository`, as that command
 adds a `deb-src` entry with no corresponding source package.
-When the `deb-src` entry, is present, the commands in this procedure generate an error similar to the following:
+
+When the `deb-src` entry is present, the commands in this procedure generate an error similar to the following:
 
     Unable to find expected entry 'main/source/Sources' in Release file (Wrong sources.list entry or malformed file)
 
-Delete the `deb-src` entry from the `/etc/apt/sources.list` file to clear the error.
+Delete the `deb-src` entry from the `/etc/apt/sources.list.d/kibana.list` file to clear the error.
 ==================================================
 +
-. Run `apt-get update` and the repository is ready for use. Install Kibana with the following command:
+. Run `apt-get update` to ready the repository. Install Kibana with the following command:
 +
 [source,sh]
 --------------------------------------------------
@@ -79,11 +80,11 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 +
 . Create a file named `kibana.repo` in the `/etc/yum.repos.d/` directory with the following contents:
 +
-[source,sh]
+["source","sh",subs="attributes"]
 --------------------------------------------------
-[kibana-{branch}]
-name=Kibana repository for {branch}.x packages
-baseurl=http://packages.elastic.co/kibana/{branch}/centos
+[kibana-{version}]
+name=Kibana repository for {version}.x packages
+baseurl=http://packages.elastic.co/kibana/{version}/centos
 gpgcheck=1
 gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch
 enabled=1

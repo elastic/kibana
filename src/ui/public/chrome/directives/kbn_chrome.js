@@ -1,7 +1,6 @@
 import $ from 'jquery';
 
 import UiModules from 'ui/modules';
-import ConfigTemplate from 'ui/ConfigTemplate';
 
 export default function (chrome, internals) {
 
@@ -35,8 +34,8 @@ export default function (chrome, internals) {
         const onRouteChange = function () {
           let { href } = window.location;
           let persist = chrome.getVisible();
-          internals.trackPossibleSubUrl(href);
           internals.tabs.consumeRouteUpdate(href, persist);
+          internals.trackPossibleSubUrl(href);
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
@@ -44,12 +43,8 @@ export default function (chrome, internals) {
         onRouteChange();
 
         // and some local values
-        $scope.httpActive = $http.pendingRequests;
+        chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
-        $scope.appSwitcherTemplate = new ConfigTemplate({
-          switcher: '<app-switcher></app-switcher>'
-        });
-
         return chrome;
       }
     };

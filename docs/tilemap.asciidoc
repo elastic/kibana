@@ -19,6 +19,8 @@ numeric field. Select a field from the drop-down.
 *Unique Count*:: The {ref}search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns 
 the number of unique values in a field. Select a field from the drop-down.
 
+Enter a string in the *Custom Label* field to change the display label.
+
 The _buckets_ aggregations determine what information is being retrieved from your data set.
 
 Before you choose a buckets aggregation, specify if you are splitting the chart or displaying the buckets as *Geo 
@@ -48,7 +50,7 @@ intervals in the histogram.
 *Range*:: With a {ref}search-aggregations-bucket-range-aggregation.html[_range_] aggregation, you can specify ranges 
 of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove 
 a range.
-After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 *Date Range*:: A {ref}search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values 
 that are within a range of dates that you specify. You can specify the ranges for the dates using 
@@ -70,6 +72,8 @@ in a name to display on the visualization.
 based on the geohash coordinates.
 
 NOTE: By default, the *Change precision on map zoom* box is checked. Uncheck the box to disable this behavior.
+
+Enter a string in the *Custom Label* field to change the display label.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
@@ -119,7 +123,7 @@ in the lower right corner.
 * *WMS styles*: A comma-separated list of the styles to use in this visualization. Each map server provides its own styling 
 options.
 
-After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 
 [float]

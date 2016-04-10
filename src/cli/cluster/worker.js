@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import cluster from 'cluster';
-let { resolve } = require('path');
-let { EventEmitter } = require('events');
+import { resolve } from 'path';
+import { EventEmitter } from 'events';
 
-import fromRoot from '../../utils/fromRoot';
+import { BinderFor, fromRoot } from '../../utils';
 
 let cliPath = fromRoot('src/cli');
 let baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
@@ -18,13 +18,6 @@ let dead = fork => {
   return fork.isDead() || fork.killed;
 };
 
-let kill = fork => {
-  // fork.kill() waits for process to disconnect, but causes occasional
-  // "ipc disconnected" errors and is too slow for the proc's "exit" event
-  fork.process.kill();
-  fork.killed = true;
-};
-
 module.exports = class Worker extends EventEmitter {
   constructor(opts) {
     opts = opts || {};
@@ -35,29 +28,42 @@ module.exports = class Worker extends EventEmitter {
     this.title = opts.title || opts.type;
     this.watch = (opts.watch !== false);
     this.startCount = 0;
-    this.online = false;
+
+    // status flags
+    this.online = false; // the fork can accept messages
+    this.listening = false; // the fork is listening for connections
+    this.crashed = false; // the fork crashed
+
     this.changes = [];
+
+    this.forkBinder = null; // defined when the fork is
+    this.clusterBinder = new BinderFor(cluster);
+    this.processBinder = new BinderFor(process);
 
     let argv = _.union(baseArgv, opts.argv || []);
     this.env = {
       kbnWorkerType: this.type,
       kbnWorkerArgv: JSON.stringify(argv)
     };
-
-    _.bindAll(this, ['onExit', 'onMessage', 'onOnline', 'onDisconnect', 'shutdown', 'start']);
-
-    this.start = _.debounce(this.start, 25);
-    cluster.on('exit', this.onExit);
-    process.on('exit', this.shutdown);
   }
 
   onExit(fork, code) {
     if (this.fork !== fork) return;
 
+    // we have our fork's exit, so stop listening for others
+    this.clusterBinder.destroy();
+
     // our fork is gone, clear our ref so we don't try to talk to it anymore
     this.fork = null;
+    this.forkBinder = null;
 
-    if (code) {
+    this.online = false;
+    this.listening = false;
+    this.emit('fork:exit');
+    this.crashed = code > 0;
+
+    if (this.crashed) {
+      this.emit('crashed');
       this.log.bad(`${this.title} crashed`, 'with status code', code);
       if (!this.watch) process.exit(code);
     } else {
@@ -72,26 +78,49 @@ module.exports = class Worker extends EventEmitter {
     this.start();
   }
 
-  shutdown() {
+  async shutdown() {
     if (this.fork && !dead(this.fork)) {
-      kill(this.fork);
-      this.fork.removeListener('message', this.onMessage);
-      this.fork.removeListener('online', this.onOnline);
-      this.fork.removeListener('disconnect', this.onDisconnect);
+      // kill the fork
+      this.fork.process.kill();
+      this.fork.killed = true;
+
+      // stop listening to the fork, it's just going to die
+      this.forkBinder.destroy();
+
+      // we don't need to react to process.exit anymore
+      this.processBinder.destroy();
+
+      // wait until the cluster reports this fork has exitted, then resolve
+      await new Promise(resolve => this.once('fork:exit', resolve));
     }
   }
 
-  onMessage(msg) {
-    if (!_.isArray(msg) || msg[0] !== 'WORKER_BROADCAST') return;
-    this.emit('broadcast', msg[1]);
+  parseIncomingMessage(msg) {
+    if (!_.isArray(msg)) return;
+    this.onMessage(...msg);
+  }
+
+  onMessage(type, data) {
+    switch (type) {
+      case 'WORKER_BROADCAST':
+        this.emit('broadcast', data);
+        break;
+      case 'WORKER_LISTENING':
+        this.listening = true;
+        this.emit('listening');
+        break;
+    }
   }
 
   onOnline() {
     this.online = true;
+    this.emit('fork:online');
+    this.crashed = false;
   }
 
   onDisconnect() {
     this.online = false;
+    this.listening = false;
   }
 
   flushChangeBuffer() {
@@ -102,9 +131,13 @@ module.exports = class Worker extends EventEmitter {
     }, '');
   }
 
-  start() {
-    // once "exit" event is received with 0 status, start() is called again
-    if (this.fork) return this.shutdown();
+  async start() {
+    if (this.fork) {
+      // once "exit" event is received with 0 status, start() is called again
+      this.shutdown();
+      await new Promise(cb => this.once('online', cb));
+      return;
+    }
 
     if (this.changes.length) {
       this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
@@ -114,8 +147,20 @@ module.exports = class Worker extends EventEmitter {
     }
 
     this.fork = cluster.fork(this.env);
-    this.fork.on('message', this.onMessage);
-    this.fork.on('online', this.onOnline);
-    this.fork.on('disconnect', this.onDisconnect);
+    this.forkBinder = new BinderFor(this.fork);
+
+    // when the fork sends a message, comes online, or looses it's connection, then react
+    this.forkBinder.on('message', msg => this.parseIncomingMessage(msg));
+    this.forkBinder.on('online', () => this.onOnline());
+    this.forkBinder.on('disconnect', () => this.onDisconnect());
+
+    // when the cluster says a fork has exitted, check if it is ours
+    this.clusterBinder.on('exit', (fork, code) => this.onExit(fork, code));
+
+    // when the process exits, make sure we kill our workers
+    this.processBinder.on('exit', () => this.shutdown());
+
+    // wait for the fork to report it is online before resolving
+    await new Promise(cb => this.once('fork:online', cb));
   }
 };

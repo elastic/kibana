@@ -11,6 +11,8 @@ field. Select a field from the drop-down.
 *Unique Count*:: The {ref}search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns 
 the number of unique values in a field. Select a field from the drop-down.
 
+Enter a string in the *Custom Label* field to change the display label.
+
 The _buckets_ aggregations determine what information is being retrieved from your data set.
 
 Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
@@ -48,14 +50,16 @@ in a name to display on the visualization.
 {ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the 
 *Size* parameter defines the number of entries this aggregation returns.
 
-After defining an initial bucket aggregation, you can define sub-aggregations to refine the visualization. Click *+ Add 
-Sub Aggregation* to define a sub-aggregation, then choose *Split Slices* to select a sub-aggregation from the list of 
+After defining an initial bucket aggregation, you can define sub-buckets to refine the visualization. Click *+ Add 
+sub-buckets* to define a sub-aggregation, then choose *Split Slices* to select a sub-bucket from the list of 
 types.
 
 When multiple aggregations are defined on a chart's axis, you can use the up or down arrows to the right of the 
 aggregation's type to change the aggregation's priority.
 
 include::color-picker.asciidoc[]
+
+Enter a string in the *Custom Label* field to change the display label.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
@@ -80,7 +84,7 @@ Select the *Options* tab to change the following aspects of the table:
 *Show Tooltip*:: Check this box to enable the display of tooltips.
 *Show Legend*:: Check this box to enable the display of a legend next to the chart.
 
-After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 
 [float]

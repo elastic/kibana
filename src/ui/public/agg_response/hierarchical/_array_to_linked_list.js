@@ -1,14 +1,12 @@
 import _ from 'lodash';
-define(function (require) {
-  return function (buckets) {
-    var previous;
-    _.each(buckets, function (bucket) {
-      if (previous) {
-        bucket._previous = previous;
-        previous._next = bucket;
-      }
-      previous = bucket;
-    });
-    return buckets;
-  };
-});
+export default function (buckets) {
+  let previous;
+  _.each(buckets, function (bucket) {
+    if (previous) {
+      bucket._previous = previous;
+      previous._next = bucket;
+    }
+    previous = bucket;
+  });
+  return buckets;
+};

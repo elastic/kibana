@@ -6,11 +6,40 @@
   @vis-editor-nesting-width: 8px;
   @vis-editor-agg-editor-spacing: 5px;
 
+  &-info {
+    line-height: 30px;
+    padding: 0px 10px;
+    border-bottom-left-radius: @border-radius-base;
+
+
+    &-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  }
+
   // For the vis-editor sidebar nav
   .navbar-default .navbar-nav {
-    &> .active > a:before {
-      border: 7px solid transparent;
-      border-bottom-color: @vis-editor-navbar-current-tab-color;
+    &> .active > a {
+      border-bottom: 2px solid @kibanaGray2;
+      color: @kibanaGray1;
+      &:before {
+        display: none;
+      }
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    > li {
+      > a {
+        padding: 4px 0;
+        margin: 0 10px;
+        color: @kibanaGray2;
+      }
+      > a:hover {
+        border-bottom: 2px solid @kibanaGray2;
+      }
     }
 
     .danger {
@@ -55,8 +84,10 @@
     }
   }
 
+
   &-content {
     .flex-parent();
+    z-index: 0;
 
     // overrides for tablet and desktop
     @media (min-width: @screen-md-min) {
@@ -78,7 +109,9 @@
       max-width: @vis-editor-sidebar-min-width;
     }
 
+    .index-pattern,
     nav {
+      min-height: @app-icon-height;
       border-radius: 0px;
     }
 
@@ -114,17 +147,11 @@
     }
 
     .sidebar-item-title {
-      font-size: 20px;
+      font-size: 14px;
       font-weight: bold;
       border: inherit !important;
-      background-color: @vis-editor-sidebar-title-bg;
       margin-bottom: @vis-editor-agg-editor-spacing;
       padding: 2px 5px !important;
-    }
-
-    .sidebar-item-title:hover {
-      color: @vis-editor-sidebar-title-hover-color !important;
-      background-color: @vis-editor-sidebar-title-hover-bg !important;
     }
 
     .hintbox {
@@ -177,7 +204,7 @@
 
     &-group {
       .flex-parent(0, 1, auto);
-      color: @vis-editor-agg-group-color;
+      color: @kibanaGray2;
     }
 
     &-header {
@@ -274,9 +301,7 @@
     }
 
     &-wide-btn {
-      border-radius: 0;
-      border-top: 2px solid;
-      border-top-color: @vis-editor-agg-wide-btn-border;
+      text-align: center;
 
       &-add {
         width: 140px;

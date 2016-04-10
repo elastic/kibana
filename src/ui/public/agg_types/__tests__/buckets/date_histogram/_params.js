@@ -1,26 +1,30 @@
 import _ from 'lodash';
 import moment from 'moment';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import AggParamWriterProvider from '../../agg_param_writer';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import VisAggConfigProvider from 'ui/vis/agg_config';
 describe('params', function () {
 
-  var paramWriter;
-  var writeInterval;
+  let paramWriter;
+  let writeInterval;
 
-  var aggTypes;
-  var AggConfig;
-  var setTimeBounds;
-  var timeField;
+  let aggTypes;
+  let AggConfig;
+  let setTimeBounds;
+  let timeField;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    var AggParamWriter = Private(require('../../AggParamWriter'));
-    var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    var AggParamWriter = Private(AggParamWriterProvider);
+    var indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     var timefilter = $injector.get('timefilter');
 
     timeField = indexPattern.timeFieldName;
-    aggTypes = Private(require('ui/agg_types/index'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
+    aggTypes = Private(AggTypesIndexProvider);
+    AggConfig = Private(VisAggConfigProvider);
 
     paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
     writeInterval = function (interval) {

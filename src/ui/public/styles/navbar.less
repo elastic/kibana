@@ -1,17 +1,17 @@
 @import "./control_group";
 
+@navbar-margin: @padding-small-vertical;
+
 navbar {
   .control-group();
 
   max-height: @navbar-collapse-max-height;
   margin-bottom: @navbar-margin-bottom;
   // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
-  padding: @padding-base-vertical @navbar-padding-horizontal;
+  padding: 0 @navbar-padding-horizontal 6px @navbar-padding-horizontal;
   color: @navbar-default-color;
   background-color: @navbar-default-bg;
-  border-style: solid;
-  border-color: @navbar-default-border;
-  border-width: 0 0 1px;
+  border: none;
   z-index: @zindex-navbar;
 
   /***
@@ -20,6 +20,11 @@ navbar {
 
   > * {
     padding-right: @navbar-padding-horizontal;
+  }
+
+  .navbar-text {
+    margin-top: @navbar-margin;
+    margin-bottom: @navbar-margin;
   }
 
   // the "brand" that is displayed, usually on the left of the navbar
@@ -47,6 +52,10 @@ navbar {
     &:active, &.active {
       color: @navbar-default-link-active-color;
       background-color: @navbar-default-link-active-bg;
+      box-shadow: none;
+      &:focus {
+        outline: none;
+      }
     }
 
     &[disabled] {
@@ -59,9 +68,7 @@ navbar {
     button {
       color: @navbar-button-color;
       background-color: @navbar-button-bg;
-      border: 2px solid;
-      border-left: 0;
-      border-color: @navbar-button-border;
+      border: none;
     }
   }
 

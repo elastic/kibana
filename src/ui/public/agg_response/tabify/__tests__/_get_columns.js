@@ -1,15 +1,18 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
+import AggResponseTabifyGetColumnsProvider from 'ui/agg_response/tabify/_get_columns';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function () {
-  var getColumns;
-  var Vis;
-  var indexPattern;
+  let getColumns;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    getColumns = Private(AggResponseTabifyGetColumnsProvider);
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   it('should inject a count metric if no aggs exist', function () {

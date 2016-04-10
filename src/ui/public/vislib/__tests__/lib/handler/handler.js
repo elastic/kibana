@@ -1,6 +1,6 @@
 
 import angular from 'angular';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
@@ -9,6 +9,9 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 var dateHistogramArray = [
   series,
   columns,
@@ -24,9 +27,9 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
-    var Handler;
-    var vis;
-    var persistedState;
+    let Handler;
+    let vis;
+    let persistedState;
     var events = [
       'click',
       'brush'
@@ -34,9 +37,9 @@ dateHistogramArray.forEach(function (data, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Handler = Private(require('ui/vislib/lib/handler/handler'));
-      vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      Handler = Private(VislibLibHandlerHandlerProvider);
+      vis = Private(FixturesVislibVisFixtureProvider)();
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.render(data, persistedState);
     }));
 
@@ -55,7 +58,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('enable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
@@ -77,7 +80,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('disable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
