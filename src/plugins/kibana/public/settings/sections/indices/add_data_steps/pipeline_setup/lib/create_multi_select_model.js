@@ -1,9 +1,12 @@
 import _ from 'lodash';
 
-export default function selectableArray(array, selectedValues) {
-  return array.map((item) => {
-    const selected = _.find(selectedValues, (selectedValue) => {
-      return selectedValue.toUpperCase() === item.toUpperCase();
+export default function selectableArray(items, selectedItems) {
+  if (!_.isArray(items)) throw new Error('First argument must be an array');
+  if (!_.isArray(selectedItems)) throw new Error('Second argument must be an array');
+
+  return items.map((item) => {
+    const selected = _.find(selectedItems, (selectedItem) => {
+      return cleanItem(selectedItem) === cleanItem(item);
     });
 
     return {
@@ -12,3 +15,7 @@ export default function selectableArray(array, selectedValues) {
     };
   });
 };
+
+function cleanItem(item) {
+  return _.trim(item).toUpperCase();
+}
