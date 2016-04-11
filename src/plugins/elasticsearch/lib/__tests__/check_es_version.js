@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
+import expect from 'expect.js';
 import url from 'url';
+import SetupError from '../setup_error';
 
 import serverConfig from '../../../../../test/server_config';
 import checkEsVersion from '../check_es_version';
@@ -79,10 +81,11 @@ describe('plugins/elasticsearch', function () {
         { version: '1.4.2', attributes: { client: 'true' } },
         '1.4.5'
       );
-      return checkEsVersion(server)
-      .then(function() {
-        throw new Error('expected validation to fail')
-      }, _.noop);
+
+      checkEsVersion(server)
+      .catch(function(e) {
+        expect(e).to.be.a(SetupError);
+      });
     });
 
   });
