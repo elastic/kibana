@@ -71,7 +71,7 @@ describe('plugins/elasticsearch', function () {
       setNodes('1.4.4', '1.4.2', '1.4.5');
 
       checkEsVersion(server)
-      .catch(function(e) {
+      .catch(function (e) {
         expect(e).to.be.a(SetupError);
       });
     });
@@ -84,7 +84,7 @@ describe('plugins/elasticsearch', function () {
       );
 
       checkEsVersion(server)
-      .catch(function(e) {
+      .catch(function (e) {
         expect(e).to.be.a(SetupError);
       });
     });
