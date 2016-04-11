@@ -1,8 +1,8 @@
 [[visualize]]
 == Visualize
 
-You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use
-them individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following 
+You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use them 
+individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following 
 data source types:
 
 * A new interactive search
@@ -15,9 +15,9 @@ Visualizations are based on the {ref}search-aggregations.html[aggregation] featu
 [[createvis]]
 === Creating a New Visualization
 
-To start the New Visualization wizard, click on the *Visualize* tab at the top left of the page. If you are already 
-creating a visualization, you can click the *New Visualization* button image:images/K4NewDocument.png[New Document 
-button] in the toolbar to the right of the search bar. The wizard guides you through the following steps:
+Click on the *Visualize* image:images/visualize-icon.png[chart icon] tab in the left-hand navigation bar. If you are
+already creating a visualization, you can click the *New* button in the toolbar. To set up your visualization, follow
+these steps:
 
 [float]
 [[newvis01]]
@@ -38,8 +38,8 @@ dashboard.
 <<vertical-bar-chart,Vertical bar chart>>:: Use vertical bar charts as a general-purpose chart.
 
 You can also load a saved visualization that you created earlier. The saved visualization selector includes a text 
-field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved 
-Objects*, to manage your saved visualizations.
+field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Objects*, to 
+manage your saved visualizations.
 
 If your new visualization is a Markdown widget, selecting that type takes you to a text entry field where you enter the 
 text to display in the widget. For all other types of visualization, selecting the type takes you to data source 
@@ -128,7 +128,7 @@ inside each bucket, which in this example is a one-hour interval.
 
 NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
 
-To render the visualization on the _preview canvas_, click the green *Apply Changes* button at the top right of the
+To render the visualization on the _preview canvas_, click the  *Apply Changes* button at the top right of the
 Aggregation Builder.
 
 You can learn more about aggregation and how altering the order of aggregations affects your visualizations 
@@ -143,7 +143,7 @@ include::filter-pinning.asciidoc[]
 ===== Preview Canvas
 
 The preview canvas displays a preview of the visualization you've defined in the aggregation builder. To refresh the 
-visualization preview, clicking the *Refresh* button image:images/K4Refresh.png[Refresh button] on the toolbar.
+visualization preview, clicking the *Apply Changes* image:images/apply-changes-button.png[] button on the toolbar.
 
 include::area.asciidoc[]
 

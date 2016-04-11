@@ -54,9 +54,9 @@ export class Convert extends Processor {
 
   get description() {
     const source = this.sourceField || '?';
-    const target = this.targetField || '?';
     const type = this.type || '?';
-    return `[${source}] to ${type} -> [${target}]`;
+    const target = this.targetField ? ` -> [${this.targetField}]` : '';
+    return `[${source}] to ${type}${target}`;
   }
 
   get model() {
