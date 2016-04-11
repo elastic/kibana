@@ -5,4 +5,5 @@ import './processor_ui_date';
 import './processor_ui_geoip';
 import './processor_ui_grok';
 import './processor_ui_gsub';
+import './processor_ui_join';
 import './processor_ui_set';

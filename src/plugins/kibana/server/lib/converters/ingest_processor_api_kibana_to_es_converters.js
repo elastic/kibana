@@ -88,6 +88,16 @@ export function gsub(processorApiDocument) {
   };
 }
 
+export function join(processorApiDocument) {
+  return {
+    join: {
+      tag: processorApiDocument.processor_id,
+      field: processorApiDocument.source_field,
+      separator: processorApiDocument.separator
+    }
+  };
+}
+
 export function set(processorApiDocument) {
   return {
     set: {
