@@ -76,7 +76,8 @@ module.exports = function (program) {
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
   .option(
     '-c, --config <path>',
-    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
+    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
+    'Use mulitple --config flags to include multiple config files.',
     configPathCollector,
     [ process.env.CONFIG_PATH || fromRoot('config/kibana.yml') ]
   )
