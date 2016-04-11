@@ -4,6 +4,8 @@ import modules from 'ui/modules';
 import errors from 'ui/notify/errors';
 import Notifier from 'ui/notify/notifier';
 import 'ui/notify/directives';
+import chrome from 'ui/chrome';
+import { kbnIndex } from 'ui/metadata';
 var module = modules.get('kibana/notify');
 var rootNotifier = new Notifier();
 
@@ -17,27 +19,35 @@ module.factory('Notifier', function () {
   return Notifier;
 });
 
-module.run(function ($interval, $rootScope, config) {
-  var configInitListener = $rootScope.$on('init:config', function () {
-    applyConfig();
-    configInitListener();
-  });
-
-  $rootScope.$on('change:config', applyConfig);
-
+// teach Notifier how to use angular interval services
+module.run(function ($interval) {
   Notifier.applyConfig({
     setInterval: $interval,
     clearInterval: $interval.cancel
   });
-
-  function applyConfig() {
-    Notifier.applyConfig({
-      errorLifetime: config.get('notifications:lifetime:error'),
-      warningLifetime: config.get('notifications:lifetime:warning'),
-      infoLifetime: config.get('notifications:lifetime:info')
-    });
-  }
 });
+
+// if kibana is not included then the notify service can't
+// expect access to config (since it's dependent on kibana)
+if (!!kbnIndex) {
+  require('ui/config');
+  module.run(function ($rootScope, config) {
+    var configInitListener = $rootScope.$on('init:config', function () {
+      applyConfig();
+      configInitListener();
+    });
+
+    $rootScope.$on('change:config', applyConfig);
+
+    function applyConfig() {
+      Notifier.applyConfig({
+        errorLifetime: config.get('notifications:lifetime:error'),
+        warningLifetime: config.get('notifications:lifetime:warning'),
+        infoLifetime: config.get('notifications:lifetime:info')
+      });
+    }
+  });
+}
 
 /**
  * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
