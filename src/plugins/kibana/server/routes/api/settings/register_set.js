@@ -1,6 +1,4 @@
 import Boom from 'boom';
-import { assign } from 'lodash';
-import defaultsProvider from './defaults';
 
 export default function registerSet(server) {
   server.route({
@@ -16,18 +14,19 @@ export default function registerSet(server) {
       const type = 'config';
       const clear = value === null || value === undefined;
 
-      client.update({
-        index,
-        type,
-        id,
-        body: {
-          doc: {
-            [key]: clear ? null : value
+      client
+        .update({
+          index,
+          type,
+          id,
+          body: {
+            doc: {
+              [key]: clear ? null : value
+            }
           }
-        }
-      });
-
-      reply({}).type('application/json');
+        })
+        .then(() => reply({}).type('application/json'))
+        .catch(reason => reply(Boom.wrap(reason)));
     }
   });
 }
