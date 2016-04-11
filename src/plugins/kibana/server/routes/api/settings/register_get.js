@@ -19,7 +19,7 @@ export default function registerGet(server) {
         .then(res => res._source)
         .then(user => assign(defaults, user, nonEmpty))
         .then(settings => reply(settings).type('application/json'))
-        .catch(reason => reply(Boom.create(500, `Elasticsearch failure.`)));
+        .catch(reason => reply(Boom.wrap(reason)));
     }
   });
 }
