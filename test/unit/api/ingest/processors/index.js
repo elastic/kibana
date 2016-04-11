@@ -3,6 +3,7 @@ define(function (require) {
   var convert = require('./_convert');
   var date = require('./_date');
   var geoip = require('./_geoip');
+  var grok = require('./_grok');
   var gsub = require('./_gsub');
   var set = require('./_set');
 
@@ -11,6 +12,7 @@ define(function (require) {
     convert(bdd, scenarioManager, request);
     date(bdd, scenarioManager, request);
     geoip(bdd, scenarioManager, request);
+    grok(bdd, scenarioManager, request);
     gsub(bdd, scenarioManager, request);
     set(bdd, scenarioManager, request);
   };
