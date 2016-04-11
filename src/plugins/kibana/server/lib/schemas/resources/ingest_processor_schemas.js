@@ -27,6 +27,12 @@ export const date = base.keys({
   custom_format: Joi.string().allow('')
 });
 
+export const geoip = base.keys({
+  type_id: Joi.string().only('geoip').required(),
+  source_field: Joi.string().allow(''),
+  target_field: Joi.string().allow('')
+});
+
 export const gsub = base.keys({
   type_id: Joi.string().only('gsub').required(),
   source_field: Joi.string().allow(''),
