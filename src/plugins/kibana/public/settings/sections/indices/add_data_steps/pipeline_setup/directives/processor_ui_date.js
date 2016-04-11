@@ -2,7 +2,7 @@ import uiModules from 'ui/modules';
 import template from '../views/processor_ui_date.html';
 import _ from 'lodash';
 import keysDeep from '../lib/keys_deep';
-import selectableArray from '../lib/selectable_array';
+const createMultiSelectModel = require('../lib/create_multi_select_model');
 import '../styles/_processor_ui_date.less';
 
 const app = uiModules.get('kibana');
@@ -29,22 +29,18 @@ app.directive('processorUiDate', function () {
         pipeline.setDirty();
       }
 
-      function updateFormats() {
-        const selectedFormats = $scope.formats.map((o) => {
-          if (!o.selected) return;
-          return o.title;
-        });
-        processor.formats = _.compact(selectedFormats);
+      const updateFormats = debounce(() => {
+        processor.formats = _($scope.formats)
+        .filter('selected')
+        .map('title')
+        .value();
 
-        $scope.customFormatSelected = !_.isUndefined(_.find(processor.formats, (o) => {
-          return o === 'Custom';
-        }));
+        $scope.customFormatSelected = _.includes(processor.formats, 'Custom');
         processorUiChanged();
-      }
-      updateFormats = debounce(updateFormats, 200);
+      }, 200);
 
-      $scope.formats = selectableArray(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom'], processor.formats);
       $scope.updateFormats = updateFormats;
+      $scope.formats = createMultiSelectModel(['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N', 'Custom'], processor.formats);
 
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 
