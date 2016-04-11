@@ -73,8 +73,10 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         pushFilter(filter, false, indexPatternName);
       },
       mapMoveEnd: function (event, uiState) {
+        const mapPrecision = zoomPrecision[event.zoom];
         uiState.set('vis.params.mapCenter', event.center);
         uiState.set('vis.params.mapZoom', event.zoom);
+        uiState.set('vis.params.mapPrecision', mapPrecision);
 
         const agg = _.get(event, 'chart.geohashGridAgg');
         if (!agg) return;
@@ -91,16 +93,16 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         if (editableAgg) {
           editableAgg.params.mapZoom = event.zoom;
           editableAgg.params.mapCenter = event.center;
-          editableAgg.params.precision = zoomPrecision[event.zoom];
+          editableAgg.params.mapPrecision = mapPrecision;
         }
       },
-      mapZoomEnd: function (event) {
+      mapZoomEnd: function (event, uiState) {
         const agg = _.get(event, 'chart.geohashGridAgg');
+        // this could be a problem, conditional on autoPrecision
         if (!agg || !agg.params.autoPrecision) return;
 
         const precision = config.get('visualization:tileMap:maxPrecision');
         agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
-        debugger;
 
         courier.fetch();
       }
