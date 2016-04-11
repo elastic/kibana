@@ -69,10 +69,11 @@ describe('plugins/elasticsearch', function () {
 
     it('fails with a single node that is out of date', function () {
       setNodes('1.4.4', '1.4.2', '1.4.5');
-      return checkEsVersion(server)
-      .then(function () {
-        throw new Error('expected validation to fail');
-      }, _.noop);
+
+      checkEsVersion(server)
+      .catch(function(e) {
+        expect(e).to.be.a(SetupError);
+      });
     });
 
     it('fails if that single node is a client node', function () {
