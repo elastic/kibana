@@ -21,7 +21,6 @@ uiModules
     template: aggTemplate,
     require: 'form',
     link: function ($scope, $el, attrs, kbnForm) {
-      $scope.$bind('outputAgg', 'outputVis.aggs.byId[agg.id]', $scope);
       $scope.editorOpen = !!$scope.agg.brandNew;
 
       $scope.$watch('editorOpen', function (open) {

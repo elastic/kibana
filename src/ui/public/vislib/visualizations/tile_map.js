@@ -106,6 +106,7 @@ export default function TileMapFactory(Private) {
     };
 
     const params = _.assign({}, this._chartData.geohashGridAgg.vis.params, uiStateParams);
+
     // this.handler.vis.uiState
 
     var map = new TileMapMap(container, this._chartData, {
