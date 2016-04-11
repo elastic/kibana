@@ -1,6 +1,6 @@
 import Boom from 'boom';
 
-export default function registerSet(server) {
+export default function registerDelete(server) {
   server.route({
     path: '/api/kibana/settings/{key}',
     method: 'DELETE',
