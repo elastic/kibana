@@ -1,4 +1,6 @@
 import d3 from 'd3';
+import $ from 'jquery';
+
 define(function () {
   return function ChartTitleSplitFactory() {
 
@@ -12,10 +14,10 @@ define(function () {
     return function (selection) {
       selection.each(function (data) {
         var div = d3.select(this);
+        var parent = $(this).parents('.vis-wrapper');
 
         if (!data.series) {
-          div.selectAll('.chart-title')
-          .append('div')
+          var splits = div.selectAll('.chart-title')
           .data(function (d) {
             return d.rows ? d.rows : d.columns;
           })
@@ -24,9 +26,9 @@ define(function () {
             .attr('class', 'chart-title');
 
           if (data.rows) {
-            d3.select('.x-axis-chart-title').remove();
+            parent.find('.x-axis-chart-title').remove();
           } else {
-            d3.select('.y-axis-chart-title').remove();
+            parent.find('.y-axis-chart-title').remove();
           }
 
           return div;

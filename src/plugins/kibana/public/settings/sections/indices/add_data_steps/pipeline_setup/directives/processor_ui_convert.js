@@ -32,9 +32,6 @@ app.directive('processorUiConvert', function () {
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 
       $scope.$watch('processor.sourceField', () => {
-        if (_.isEmpty($scope.processor.targetField)) {
-          $scope.processor.targetField = $scope.processor.sourceField;
-        }
         refreshFieldData();
         processorUiChanged();
       });

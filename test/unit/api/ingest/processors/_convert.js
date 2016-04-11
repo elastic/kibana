@@ -19,7 +19,7 @@ define(function (require) {
 
       bdd.it('should return 400 for an invalid payload', () => {
         return Promise.all([
-          // Convert processor requires targetField property
+          // Convert processor requires source_field property
           request.post('/kibana/ingest/simulate')
           .send({
             input: {},

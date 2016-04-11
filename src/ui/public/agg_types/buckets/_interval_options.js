@@ -16,6 +16,10 @@ export default function IntervalOptionsService(Private) {
       }
     },
     {
+      display: 'Millisecond',
+      val: 'ms'
+    },
+    {
       display: 'Second',
       val: 's'
     },
