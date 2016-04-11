@@ -17,9 +17,13 @@ export default function registerGet(server) {
       client
         .get({ index, type, id })
         .then(res => res._source)
-        .then(user => assign(defaults, user))
+        .then(user => assign(defaults, user, nonEmpty))
         .then(settings => reply(settings).type('application/json'))
         .catch(reason => reply(Boom.create(500, `Elasticsearch failure.`)));
     }
   });
+}
+
+function nonEmpty(current, following) {
+  return following === null ? current : following;
 }
