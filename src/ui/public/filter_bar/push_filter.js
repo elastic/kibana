@@ -10,7 +10,16 @@ export default function () {
       var filters = _.clone($state.filters || []);
       var pendingFilter = { meta: { negate: negate, index: index }};
       _.extend(pendingFilter, filter);
-      filters.push(pendingFilter);
+      if (!filters.length) {
+        filters.push(pendingFilter);
+      } else {
+        const filterKey = _.keys(filter)[0];
+        filters.forEach(function (filt) {
+          if (filt.hasOwnProperty(filterKey)) {
+            _.assign(filt, pendingFilter);
+          }
+        });
+      }
       $state.filters = filters;
     };
   };
