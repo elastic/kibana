@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-var canStack = (function () {
-  var err = new Error();
+let canStack = (function () {
+  let err = new Error();
   return !!err.stack;
 }());
 
-var errors = {};
+let errors = {};
 
 // abstract error class
 function KbnError(msg, constructor) {
@@ -119,7 +119,7 @@ _.class(errors.MappingConflict).inherits(KbnError);
  * @param {String} field - the fields which contains the conflict
  */
 errors.RestrictedMapping = function RestrictedMapping(field, index) {
-  var msg = field + ' is a restricted field name';
+  let msg = field + ' is a restricted field name';
   if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
 
   KbnError.call(this, msg, errors.RestrictedMapping);
@@ -165,7 +165,7 @@ _.class(errors.DuplicateField).inherits(KbnError);
 errors.SavedObjectNotFound = function SavedObjectNotFound(type, id) {
   this.savedObjectType = type;
   this.savedObjectId = id;
-  var idMsg = id ? ' (id: ' + id + ')' : '';
+  let idMsg = id ? ' (id: ' + id + ')' : '';
   KbnError.call(this,
     'Could not locate that ' + type + idMsg,
     errors.SavedObjectNotFound);

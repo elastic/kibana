@@ -3,7 +3,7 @@ import Notifier from 'ui/notify/notifier';
 import SimpleEmitter from 'ui/utils/simple_emitter';
 
 export default function EventsProvider(Private, Promise) {
-  var notify = new Notifier({ location: 'EventEmitter' });
+  let notify = new Notifier({ location: 'EventEmitter' });
 
   _.class(Events).inherits(SimpleEmitter);
   function Events() {
@@ -23,7 +23,7 @@ export default function EventsProvider(Private, Promise) {
       this._listeners[name] = [];
     }
 
-    var listener = {
+    let listener = {
       handler: handler
     };
     this._listeners[name].push(listener);
@@ -75,8 +75,8 @@ export default function EventsProvider(Private, Promise) {
    * @returns {Promise}
    */
   Events.prototype.emit = function (name) {
-    var self = this;
-    var args = _.rest(arguments);
+    let self = this;
+    let args = _.rest(arguments);
 
     if (!self._listeners[name]) {
       return self._emitChain;
