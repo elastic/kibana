@@ -6,6 +6,7 @@ define(function (require) {
   var grok = require('./_grok');
   var gsub = require('./_gsub');
   var join = require('./_join');
+  var lowercase = require('./_lowercase');
   var set = require('./_set');
 
   return function processors(bdd, scenarioManager, request) {
@@ -16,6 +17,7 @@ define(function (require) {
     grok(bdd, scenarioManager, request);
     gsub(bdd, scenarioManager, request);
     join(bdd, scenarioManager, request);
+    lowercase(bdd, scenarioManager, request);
     set(bdd, scenarioManager, request);
   };
 

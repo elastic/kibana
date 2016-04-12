@@ -98,6 +98,15 @@ export function join(processorApiDocument) {
   };
 }
 
+export function lowercase(processorApiDocument) {
+  return {
+    lowercase: {
+      tag: processorApiDocument.processor_id,
+      field: processorApiDocument.source_field
+    }
+  };
+}
+
 export function set(processorApiDocument) {
   return {
     set: {
