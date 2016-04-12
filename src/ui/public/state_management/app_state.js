@@ -33,7 +33,7 @@ function AppStateProvider(Private, $rootScope, getAppState) {
     var self = this;
 
     // set up the ui state
-    persistedStates[prop] = new PersistedState();
+    var state = persistedStates[prop] = new PersistedState();
 
     // update the app state when the stateful instance changes
     var updateOnChange = function () {
@@ -42,9 +42,13 @@ function AppStateProvider(Private, $rootScope, getAppState) {
       self[prop] = persistedStates[prop].getChanges();
       self.save(replaceState);
     };
-    var handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
-    handlerOnChange('on');
-    eventUnsubscribers.push(() => handlerOnChange('off'));
+
+    state.on('change', updateOnChange);
+    state.on('persist_requested', updateOnChange);
+    eventUnsubscribers.push(() => {
+      state.off('change', updateOnChange);
+      state.off('persist_requested', updateOnChange);
+    });
 
     // update the stateful object when the app state changes
     var persistOnChange = function (changes) {
@@ -54,9 +58,9 @@ function AppStateProvider(Private, $rootScope, getAppState) {
         persistedStates[prop].set(self[prop]);
       }
     };
-    var handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
-    handlePersist('on');
-    eventUnsubscribers.push(() => handlePersist('off'));
+
+    this.on('fetch_with_changes', persistOnChange);
+    eventUnsubscribers.push(() => this.off('fetch_with_changes', persistOnChange));
 
     // if the thing we're making stateful has an appState value, write to persisted state
     if (self[prop]) persistedStates[prop].setSilent(self[prop]);

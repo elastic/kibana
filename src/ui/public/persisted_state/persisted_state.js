@@ -133,6 +133,14 @@ export default function (Private) {
     return this.set(JSON.parse(input));
   };
 
+  PersistedState.prototype.requestPersist = function () {
+    if (this._parent) {
+      this._parent.requestPersist();
+    } else {
+      this.emit('persist_requested');
+    }
+  };
+
   PersistedState.prototype._getIndex = function (key) {
     if (_.isUndefined(key)) return this._path;
     return (this._path || []).concat(toPath(key));

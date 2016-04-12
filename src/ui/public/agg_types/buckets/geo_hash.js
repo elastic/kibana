@@ -4,22 +4,42 @@ import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_a
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
 export default function GeoHashAggDefinition(Private, config) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+
   var defaultPrecision = 2;
+  const zoomToPrecision = {
+    1: 2,
+    2: 2,
+    3: 2,
+    4: 3,
+    5: 3,
+    6: 4,
+    7: 4,
+    8: 5,
+    9: 5,
+    10: 6,
+    11: 6,
+    12: 7,
+    13: 7,
+    14: 8,
+    15: 9,
+    16: 10,
+    17: 11,
+    18: 12
+  };
 
-  function getPrecision(precision) {
-    var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
-
-    precision = parseInt(precision, 10);
-
-    if (isNaN(precision)) {
-      precision = defaultPrecision;
+  function getAutoPrecision(agg) {
+    const zoom = _.parseInt(agg.getUiStateValue('mapZoom'));
+    if (zoomToPrecision.hasOwnProperty(zoom)) {
+      return zoomToPrecision[zoom];
+    } else {
+      return defaultPrecision;
     }
+  }
 
-    if (precision > maxPrecision) {
-      return maxPrecision;
-    }
-
-    return precision;
+  function readPrecision(agg) {
+    const max = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
+    const param = _.parseInt(agg.params.precision);
+    return Math.min(isNaN(param) ? defaultPrecision : param, max);
   }
 
   return new BucketAggType({
@@ -36,18 +56,10 @@ export default function GeoHashAggDefinition(Private, config) {
         write: _.noop
       },
       {
-        name: 'mapZoom',
-        write: _.noop
-      },
-      {
-        name: 'mapCenter',
-        write: _.noop
-      },
-      {
         name: 'precision',
         default: defaultPrecision,
         editor: precisionTemplate,
-        controller: function ($scope) {
+        controller($scope) {
           $scope.$watchMulti([
             'agg.params.autoPrecision',
             'outputAgg.params.precision'
@@ -55,9 +67,10 @@ export default function GeoHashAggDefinition(Private, config) {
             if (cur[1]) $scope.agg.params.precision = cur[1];
           });
         },
-        deserialize: getPrecision,
-        write: function (aggConfig, output) {
-          output.params.precision = getPrecision(aggConfig.params.precision);
+        write(agg, output) {
+          const { autoPrecision } = agg.params;
+          const shouldAuto = autoPrecision && agg.hasUiState();
+          output.params.precision = shouldAuto ? getAutoPrecision(agg) : readPrecision(agg);
         }
       }
     ]

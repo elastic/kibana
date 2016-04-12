@@ -211,8 +211,8 @@ export default function MapFactory(Private) {
     this.map.on('moveend', function setZoomCenter(ev) {
       if (!self.map) return;
       // update internal center and zoom references
-      self._mapCenter = self.map.getCenter();
-      self._mapZoom = self.map.getZoom();
+      self._setMapProp('center', self.map.getCenter());
+      self._setMapProp('zoom', self.map.getZoom());
       self._addMarkers();
 
       if (!self._events) return;
@@ -220,8 +220,8 @@ export default function MapFactory(Private) {
       self._events.emit('mapMoveEnd', {
         chart: self._chartData,
         map: self.map,
-        center: self._mapCenter,
-        zoom: self._mapZoom,
+        center: self._getMapProp('center'),
+        zoom: self._getMapProp('zoom'),
       });
     });
 
@@ -264,10 +264,6 @@ export default function MapFactory(Private) {
   TileMapMap.prototype._createMap = function (mapOptions) {
     if (this.map) this.destroy();
 
-    // get center and zoom from mapdata, or use defaults
-    this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-    this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
-
     // add map tiles layer, using the mapTiles object settings
     if (this._attr.wms && this._attr.wms.enabled) {
       this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
@@ -277,8 +273,8 @@ export default function MapFactory(Private) {
 
     // append tile layers, center and zoom to the map options
     mapOptions.layers = this._tileLayer;
-    mapOptions.center = this._mapCenter;
-    mapOptions.zoom = this._mapZoom;
+    mapOptions.center = this._getMapProp('center');
+    mapOptions.zoom = this._getMapProp('zoom');
 
     this.map = L.map(this._container, mapOptions);
     this._attachEvents();
@@ -304,6 +300,14 @@ export default function MapFactory(Private) {
   TileMapMap.prototype._getDataRectangles = function () {
     if (!this._geoJson) return [];
     return _.pluck(this._geoJson.features, 'properties.rectangle');
+  };
+
+  TileMapMap.prototype._getMapProp = function (prop) {
+    return _.get(this._geoJson, ['properties', prop]) || defaultMapZoom;
+  };
+
+  TileMapMap.prototype._setMapProp = function (prop, val) {
+    return _.set(this._geoJson, ['properties', prop], val);
   };
 
   return TileMapMap;
