@@ -116,7 +116,6 @@ uiModules
     };
 
     $state = new AppState(stateDefaults);
-    $scope.uiState = $state.makeStateful('uiState');
 
     if (!angular.equals($state.vis, savedVisState)) {
       Promise.try(function () {
