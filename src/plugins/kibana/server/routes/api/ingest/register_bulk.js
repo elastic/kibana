@@ -5,6 +5,7 @@ import hi from 'highland';
 import { patternToIngest } from '../../../../common/lib/convert_pattern_and_ingest_name';
 import { PassThrough } from 'stream';
 import bulkRequestSchema from '../../../lib/schemas/bulk_request_schema';
+import JSONStream from 'JSONStream';
 
 export function registerBulk(server) {
   server.route({
@@ -34,7 +35,6 @@ export function registerBulk(server) {
 
       let currentLine = 2; // Starts at 2 since we parse the header separately
 
-      responseStream.write('[');
       csv.pipe(parser);
 
       hi(parser)
@@ -70,7 +70,7 @@ export function registerBulk(server) {
       })
       .parallel(2)
       .map((response) => {
-        return JSON.stringify(_.reduce(response.items, (memo, docResponse) => {
+        return _.reduce(response.items, (memo, docResponse) => {
           const indexResult = docResponse.index;
           if (indexResult.error) {
             if (_.isUndefined(_.get(memo, 'errors.index'))) {
@@ -83,13 +83,12 @@ export function registerBulk(server) {
           }
 
           return memo;
-        }, {created: 0}));
+        }, {created: 0});
       })
       .stopOnError((err, push) => {
-        push(null, JSON.stringify({created: 0, errors: {other: [err.message]}}));
+        push(null, {created: 0, errors: {other: [err.message]}});
       })
-      .intersperse(',')
-      .append(']')
+      .pipe(JSONStream.stringify())
       .pipe(responseStream);
 
       reply(responseStream).type('application/json');
