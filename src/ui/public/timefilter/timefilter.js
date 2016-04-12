@@ -40,8 +40,7 @@ uiModules
     self.enabled = false;
 
     self.init = _.once(function () {
-      return config.init()
-      .then(self.consumeDefaults);
+      return config.init().then(self.consumeDefaults);
     });
 
     self.consumeDefaults = _.once(function () {

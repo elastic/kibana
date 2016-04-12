@@ -1,124 +1,32 @@
 import angular from 'angular';
 import _ from 'lodash';
-import ConfigDefaultsProvider from 'ui/config/defaults';
-import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
-import ConfigValsProvider from 'ui/config/_vals';
-import DocSourceProvider from 'ui/courier/data_source/doc_source';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
+const module = uiModules.get('kibana/config');
 
-var module = uiModules.get('kibana/config');
-
-uiRoutes.addSetupWork(function (config) {
-  return config.init();
-});
+uiRoutes.addSetupWork(config => config.init());
 
 // service for delivering config variables to everywhere else
-module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, buildNum) {
-  var config = this;
+module.service(`config`, function ($rootScope, $http, chrome) {
+  const config = this;
+  const notify = new Notifier({ location: `Config` });
+  let vals = {};
 
-  var defaults = Private(ConfigDefaultsProvider);
-  var DelayedUpdater = Private(ConfigDelayedUpdaterProvider);
-  var vals = Private(ConfigValsProvider);
-
-  var notify = new Notifier({
-    location: 'Config'
-  });
-
-  // active or previous instance of DelayedUpdater. This will log and then process an
-  // update once it is requested by calling #set() or #clear().
-  let updater;
-
-  var DocSource = Private(DocSourceProvider);
-  var doc = (new DocSource())
-    .index(kbnIndex)
-    .type('config')
-    .id(kbnVersion);
-
-  /******
-   * PUBLIC API
-   ******/
-
-  /**
-   * Executes once and returns a promise that is resolved once the
-   * config has loaded for the first time.
-   *
-   * @return {Promise} - Resolved when the config loads initially
-   */
-  config.init = _.once(function () {
-    var complete = notify.lifecycle('config init');
-
-    return (function getDoc() {
-
-      // used to apply an entire es response to the vals, silentAndLocal will prevent
-      // event/notifications/writes from occuring.
-      var applyMassUpdate = function (resp, silentAndLocal) {
-        _.union(_.keys(resp._source), _.keys(vals)).forEach(function (key) {
-          change(key, resp._source[key], silentAndLocal);
-        });
-      };
-
-      return doc.fetch().then(function initDoc(resp) {
-        if (!resp.found) {
-          return doc.doIndex({
-            buildNum: buildNum
-          }).then(getDoc);
-        } else {
-          // apply update, and keep it quiet the first time
-          applyMassUpdate(resp, true);
-
-          // don't keep it quiet other times
-          doc.onUpdate(function (resp) {
-            applyMassUpdate(resp, false);
-          });
-        }
-      });
-    }())
-    .then(function () {
-      $rootScope.$broadcast('init:config');
-    })
-    .then(complete, complete.failure);
-  });
-
-  config.get = function (key, defaultVal) {
-    let keyVal;
-
-    if (vals[key] == null) {
-      if (defaultVal == null) {
-        keyVal = defaults[key].value;
-      } else {
-        keyVal = _.cloneDeep(defaultVal);
-      }
-    } else {
-      keyVal = vals[key];
+  config.init = _.once(init);
+  config.get = key => {
+    if (!(key in vals)) {
+      return null;
     }
-
-    if (defaults[key] && defaults[key].type === 'json') {
-      return JSON.parse(keyVal);
+    const { value, type } = vals[key];
+    if (type === 'json') {
+      return JSON.parse(value);
     }
-    return keyVal;
+    return value;
   };
-
-  // sets a value in the config
-  config.set = function (key, val) {
-    if (_.isPlainObject(val)) {
-      return change(key, angular.toJson(val));
-    } else {
-      return change(key, val);
-    }
-  };
-
-  // clears a value from the config
-  config.clear = function (key) {
-    return change(key);
-  };
-  // alias for clear
-  config.delete = config.clear;
-
-  config.close = function () {
-    if (updater) updater.fire();
-  };
+  config.set = (key, val) => change(key, _.isPlainObject(val) ? angular.toJson(val) : val);
+  config.clear = key => change(key, null);
+  config.getAll = () => _.cloneDeep(vals);
 
   /**
    * A little helper for binding config variables to $scopes
@@ -129,34 +37,53 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
    *                             be stored. Defaults to the config key
    * @return {function} - an unbind function
    */
-  config.$bind = function ($scope, key, property) {
-    if (!property) property = key;
-
-    var update = function () {
-      $scope[property] = config.get(key);
-    };
-
+  config.$bind = function ($scope, key, property = key) {
     update();
-    return _.partial(_.invoke, [
-      $scope.$on('change:config.' + key, update),
-      $scope.$on('init:config', update)
-    ], 'call');
+    return () => {
+      $scope.$on(`change:config.${key}`, update);
+      $scope.$on(`init:config`, update);
+    };
+    function update() {
+      $scope[property] = config.get(key);
+    }
   };
 
-  /*****
-   * PRIVATE API
-   *****/
-  function change(key, val, silentAndLocal) {
-    // if the previous updater has already fired, then start over with null
-    if (updater && updater.fired) updater = null;
-    // create a new updater
-    if (!updater) updater = new DelayedUpdater(doc);
-    // return a promise that will be resolved once the action is eventually done
-    return updater.update(key, val, silentAndLocal);
+  /**
+   * Executes once and returns a promise that is resolved once the
+   * config has loaded for the first time.
+   *
+   * @return {Promise} - Resolved when the config loads initially
+   */
+  function init() {
+    const complete = notify.lifecycle(`config init`);
+    return reset()
+      .then(() => $rootScope.$broadcast(`init:config`))
+      .then(
+        complete,
+        complete.failure
+      );
   }
-
-  config._vals = function () {
-    return _.cloneDeep(vals);
-  };
-
+  function reset(loud) {
+    return $http
+      .get(chrome.addBasePath(`/api/kibana/settings`))
+      .then(response => {
+        vals = response.data.settings;
+        if (loud) {
+          $rootScope.$broadcast(`change:config`, vals);
+        }
+      });
+  }
+  function change(key, value) {
+    const oldVal = config.get(key);
+    const update = value === null ? remove : edit;
+    return update(key, value)
+      .then(() => reset(true))
+      .then(() => $rootScope.$broadcast(`change:config.${key}`, vals[key], oldVal));
+  }
+  function remove(key) {
+    return $http.delete(chrome.addBasePath(`/api/kibana/settings/${key}`));
+  }
+  function edit(key, value) {
+    return $http.post(chrome.addBasePath(`/api/kibana/settings/${key}`), { value });
+  }
 });
