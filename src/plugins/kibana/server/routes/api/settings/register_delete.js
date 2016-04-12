@@ -19,7 +19,7 @@ export default function registerDelete(server) {
           id,
           body: {
             doc: {
-              [key]: { value: null }
+              [key]: null
             }
           }
         })

@@ -17,17 +17,20 @@ export default function registerGet(server) {
       client
         .get({ index, type, id })
         .then(res => res._source)
-        .then(user => assign(defaults, user, markCustom))
+        .then(user => assign(defaults, hydrateUserSettings(user)))
         .then(settings => reply({ settings }).type('application/json'))
         .catch(reason => reply(Boom.wrap(reason)));
     }
   });
 }
 
-function markCustom(current, following) {
-  if (following && following.value !== null) {
-    following.custom = true;
-    return following;
+function hydrateUserSettings(user) {
+  return Object.keys(user).reduce(expand, {});
+  function expand(expanded, key) {
+    expanded[key] = {
+      value: user[key],
+      custom: true
+    };
+    return expanded;
   }
-  return current;
 }
