@@ -156,7 +156,7 @@ module.exports = class UiBundlerEnv {
     let owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
 
     // TODO(spalger): we could do a lot more to detect colliding module defs
-    var existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
+    let existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
 
     if (existingOwner) {
       throw new TypeError(`${owner} attempted to override export "${id}" from ${existingOwner}`);
