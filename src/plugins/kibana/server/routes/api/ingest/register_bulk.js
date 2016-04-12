@@ -54,7 +54,7 @@ export function registerBulk(server) {
           next();
         }
       })
-      .batch(2000)
+      .batch(200)
       .map((bulkBody) => {
         const bulkParams = {
           index: indexPattern,
