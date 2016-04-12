@@ -27,6 +27,14 @@ uiModules
       esResp: '=?',
     },
     template: visualizeTemplate,
+    controller($scope) {
+      // TODO: remove this after clearing up references to $scope.uiState
+      Object.defineProperty($scope, 'uiState', {
+        get: () => $scope.vis.getUiState(),
+        configurable: true,
+        enumerable: true,
+      });
+    },
     link: function ($scope, $el, attr) {
       let chart; // set in "vis" watcher
       var minVisChartHeight = 180;
@@ -56,12 +64,6 @@ uiModules
 
       $scope.spy = {};
       $scope.spy.mode = $scope.vis.getUiStateValue('spy.mode', {});
-      // TODO: remove this after clearing up references to $scope.uiState
-      Object.defineProperty($scope, 'uiState', {
-        get() {
-          return $scope.vis.getUiState();
-        },
-      });
 
       var applyClassNames = function () {
         var $visEl = getVisContainer();
