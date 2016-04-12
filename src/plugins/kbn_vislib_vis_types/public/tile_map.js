@@ -51,21 +51,18 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         if (!agg || !agg.hasUiState()) return;
 
         const uiState = agg.getUiState();
-        uiState.set('mapZoom', event.zoom);
-        uiState.set('mapCenter', [event.center.lat, event.center.lng]);
+        uiState.setSilent('mapZoom', event.zoom);
+        uiState.setSilent('mapCenter', [event.center.lat, event.center.lng]);
+        uiState.requestPersist();
       },
       mapZoomEnd(event) {
         const agg = _.get(event, 'chart.geohashGridAgg');
         if (!agg || !agg.hasUiState()) return;
         const uiState = agg.getUiState();
 
-        if (agg.params.autoPrecision) {
-          uiState.setSilent('mapZoom', event.zoom);
-          uiState.requestPersist();
-          courier.fetch();
-        } else {
-          uiState.set('mapZoom', event.zoom);
-        }
+        uiState.setSilent('mapZoom', event.zoom);
+        uiState.requestPersist();
+        if (agg.params.autoPrecision) courier.fetch();
       }
     },
     responseConverter: geoJsonConverter,
