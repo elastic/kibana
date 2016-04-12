@@ -1,5 +1,7 @@
-import override from '../override';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const override = requireCovered('server/config/override');
 
 describe('override(target, source)', function () {
 

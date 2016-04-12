@@ -4,9 +4,11 @@ import nock from 'nock';
 import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import Logger from '../../lib/logger';
-import { download, _downloadSingle } from '../download';
 import { join } from 'path';
+import requireCovered from '../../../test_utils/requireCovered';
+
+const Logger = requireCovered('cli_plugin/lib/logger');
+const { download, _downloadSingle } = requireCovered('cli_plugin/install/download');
 
 describe('kibana cli', function () {
 

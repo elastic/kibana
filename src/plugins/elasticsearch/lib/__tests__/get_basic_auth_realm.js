@@ -1,4 +1,6 @@
-import getBasicAuthRealm from '../get_basic_auth_realm';
+import requireCovered from '../../../../test_utils/requireCovered';
+const getBasicAuthRealm = requireCovered('plugins/elasticsearch/lib/get_basic_auth_realm');
+
 import expect from 'expect.js';
 const exception = '[security_exception] missing authentication token for REST request [/logstash-*/_search],' +
                   ' with: {"header":{"WWW-Authenticate":"Basic realm=\\"shield\\""}}';

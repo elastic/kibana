@@ -2,10 +2,12 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import Logger from '../../lib/logger';
-import list from '../list';
 import { join } from 'path';
 import { writeFileSync } from 'fs';
+import requireCovered from '../../../test_utils/requireCovered';
+
+const Logger = requireCovered('cli_plugin/lib/logger');
+const list = requireCovered('cli_plugin/list/list');
 
 describe('kibana cli', function () {
 

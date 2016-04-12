@@ -1,5 +1,7 @@
-import deepCloneWithBuffers from '../deep_clone_with_buffers';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const deepCloneWithBuffers = requireCovered('server/config/deep_clone_with_buffers');
 
 describe('deepCloneWithBuffers()', function () {
   it('deep clones objects', function () {

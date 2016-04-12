@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Logger from '../logger';
+import requireCovered from '../../../test_utils/requireCovered';
+const Logger = requireCovered('cli_plugin/lib/logger');
 
 describe('kibana cli', function () {
 

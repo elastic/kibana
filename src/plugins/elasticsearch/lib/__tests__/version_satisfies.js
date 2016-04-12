@@ -1,5 +1,7 @@
-import versionSatisfies from '../version_satisfies';
+import requireCovered from '../../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const versionSatisfies = requireCovered('plugins/elasticsearch/lib/version_satisfies');
 
 const versionChecks = [
   // order is: ['actual version', 'match expression', satisfied (true/false)]

@@ -4,9 +4,10 @@ import cluster from 'cluster';
 import { ChildProcess } from 'child_process';
 import { difference, findIndex, sample } from 'lodash';
 import { fromNode as fn } from 'bluebird';
+import requireCovered from '../../../test_utils/requireCovered';
 
 import MockClusterFork from './_mock_cluster_fork';
-import Worker from '../worker';
+const Worker = requireCovered('cli/cluster/worker');
 
 const workersToShutdown = [];
 

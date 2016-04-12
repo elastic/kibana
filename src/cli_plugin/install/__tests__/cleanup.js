@@ -2,9 +2,10 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import requireCovered from '../../../test_utils/requireCovered';
 
-import { cleanPrevious, cleanArtifacts } from '../cleanup';
-import Logger from '../../lib/logger';
+const { cleanPrevious, cleanArtifacts } = requireCovered('cli_plugin/install/cleanup');
+const Logger = requireCovered('cli_plugin/lib/logger');
 
 describe('kibana cli', function () {
 

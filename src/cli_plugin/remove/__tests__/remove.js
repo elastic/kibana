@@ -3,10 +3,12 @@ import sinon from 'sinon';
 import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import Logger from '../../lib/logger';
-import remove from '../remove';
 import { join } from 'path';
 import { writeFileSync } from 'fs';
+import requireCovered from '../../../test_utils/requireCovered';
+
+const Logger = requireCovered('cli_plugin/lib/logger');
+const remove = requireCovered('cli_plugin/remove/remove');
 
 describe('kibana cli', function () {
 

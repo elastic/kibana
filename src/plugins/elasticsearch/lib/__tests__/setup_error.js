@@ -1,5 +1,7 @@
-import SetupError from '../setup_error';
+import requireCovered from '../../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const SetupError = requireCovered('plugins/elasticsearch/lib/setup_error');
 
 describe('plugins/elasticsearch', function () {
   describe('lib/setup_error', function () {

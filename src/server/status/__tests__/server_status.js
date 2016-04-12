@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';
+import requireCovered from '../../../test_utils/requireCovered';
 
-import states from '../states';
-import Status from '../status';
-import ServerStatus from '../server_status';
+const states = requireCovered('server/status/states');
+const Status = requireCovered('server/status/status');
+const ServerStatus = requireCovered('server/status/server_status');
 
 describe('ServerStatus class', function () {
   let server;

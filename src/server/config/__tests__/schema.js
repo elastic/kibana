@@ -1,6 +1,8 @@
-import schemaProvider from '../schema';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
 import Joi from 'joi';
+
+const schemaProvider = requireCovered('server/config/schema');
 
 describe('Config schema', function () {
   let schema;

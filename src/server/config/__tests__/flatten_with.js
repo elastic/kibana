@@ -1,5 +1,7 @@
-import flattenWith from '../flatten_with';
+import requireCovered from '../../../test_utils/requireCovered';
 import expect from 'expect.js';
+
+const flattenWith = requireCovered('server/config/flatten_with');
 
 describe('flatten_with(dot, nestedObj)', function () {
 
