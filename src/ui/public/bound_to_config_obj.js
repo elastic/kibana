@@ -16,7 +16,7 @@ export default function BoundToConfigObjProvider($rootScope, config) {
    * @return {Object}
    */
   function BoundToConfigObj(input) {
-    var self = this;
+    let self = this;
 
     _.forOwn(input, function (val, prop) {
       if (!_.isString(val) || val.charAt(0) !== '=') {
@@ -24,7 +24,7 @@ export default function BoundToConfigObjProvider($rootScope, config) {
         return;
       }
 
-      var configKey = val.substr(1);
+      let configKey = val.substr(1);
 
       update();
       $rootScope.$on('init:config', update);
