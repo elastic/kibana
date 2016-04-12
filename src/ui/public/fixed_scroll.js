@@ -2,7 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 
-var SCROLLER_HEIGHT = 20;
+let SCROLLER_HEIGHT = 20;
 
 uiModules
 .get('kibana')
@@ -10,15 +10,15 @@ uiModules
   return {
     restrict: 'A',
     link: function ($scope, $el) {
-      var $window = $(window);
-      var $scroller = $('<div class="fixed-scroll-scroller">').height(SCROLLER_HEIGHT);
+      let $window = $(window);
+      let $scroller = $('<div class="fixed-scroll-scroller">').height(SCROLLER_HEIGHT);
 
 
       /**
        * Remove the listeners bound in listen()
        * @type {function}
        */
-      var unlisten = _.noop;
+      let unlisten = _.noop;
 
       /**
        * Listen for scroll events on the $scroller and the $el, sets unlisten()
@@ -74,15 +74,15 @@ uiModules
       function setup() {
         cleanUp();
 
-        var containerWidth = $el.width();
-        var contentWidth = $el.prop('scrollWidth');
-        var containerHorizOverflow = contentWidth - containerWidth;
+        let containerWidth = $el.width();
+        let contentWidth = $el.prop('scrollWidth');
+        let containerHorizOverflow = contentWidth - containerWidth;
 
-        var elTop = $el.offset().top - $window.scrollTop();
-        var elBottom = elTop + $el.height();
-        var windowVertOverflow = elBottom - $window.height();
+        let elTop = $el.offset().top - $window.scrollTop();
+        let elBottom = elTop + $el.height();
+        let windowVertOverflow = elBottom - $window.height();
 
-        var requireScroller = containerHorizOverflow > 0 && windowVertOverflow > 0;
+        let requireScroller = containerHorizOverflow > 0 && windowVertOverflow > 0;
         if (!requireScroller) return;
 
         // push the content away from the scroller

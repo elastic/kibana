@@ -47,8 +47,8 @@ import _ from 'lodash';
  * "kibana" module's injector.
  *
  */
-var existingModules = {};
-var links = [];
+let existingModules = {};
+let links = [];
 
 /**
  * Take an angular module and extends the dependencies for that module to include all of the modules
@@ -79,7 +79,7 @@ function link(module) {
  * @return {AngularModule}
  */
 function get(moduleName, requires) {
-  var module = existingModules[moduleName];
+  let module = existingModules[moduleName];
 
   if (module === void 0) {
     // create the module
@@ -102,13 +102,13 @@ function get(moduleName, requires) {
 }
 
 function close(moduleName) {
-  var module = existingModules[moduleName];
+  let module = existingModules[moduleName];
 
   // already closed
   if (!module) return;
 
   // if the module is currently linked, unlink it
-  var i = links.indexOf(module);
+  let i = links.indexOf(module);
   if (i > -1) links.splice(i, 1);
 
   // remove from linked modules list of required modules
