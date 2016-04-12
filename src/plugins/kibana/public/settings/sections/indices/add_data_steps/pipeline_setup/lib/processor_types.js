@@ -106,14 +106,8 @@ export class GeoIp extends Processor {
     super(processorId, 'geoip', 'Geo IP');
     this.sourceField = '';
     this.targetField = 'geoip';
-    this.databaseFile = 'GeoLite2-City.mmdb';
-    this.databaseFields = [
-      'continent_name',
-      'country_iso_code',
-      'region_name',
-      'city_name',
-      'location'
-    ];
+    this.databaseFile = '';
+    this.databaseFields = [];
   }
 
   get description() {
@@ -128,14 +122,8 @@ export class GeoIp extends Processor {
       typeId: this.typeId,
       sourceField: this.sourceField || '',
       targetField: this.targetField || '',
-      databaseFile: this.databaseFile || 'GeoLite2-City.mmdb',
-      databaseFields: this.databaseFields || [
-        'continent_name',
-        'country_iso_code',
-        'region_name',
-        'city_name',
-        'location'
-      ]
+      databaseFile: this.databaseFile || '',
+      databaseFields: this.databaseFields || []
     };
   }
 };
