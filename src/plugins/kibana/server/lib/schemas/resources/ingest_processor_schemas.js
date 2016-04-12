@@ -62,6 +62,12 @@ export const remove = base.keys({
   source_field: Joi.string().allow('')
 });
 
+export const rename = base.keys({
+  type_id: Joi.string().only('rename').required(),
+  source_field: Joi.string().allow(''),
+  target_field: Joi.string().allow('')
+});
+
 export const set = base.keys({
   type_id: Joi.string().only('set').required(),
   target_field: Joi.string().allow(''),
