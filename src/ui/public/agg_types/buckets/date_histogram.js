@@ -7,14 +7,12 @@ import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_a
 import TimeBucketsProvider from 'ui/time_buckets';
 import AggTypesBucketsCreateFilterDateHistogramProvider from 'ui/agg_types/buckets/create_filter/date_histogram';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
-import ConfigDefaultsProvider from 'ui/config/defaults';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
 export default function DateHistogramAggType(timefilter, config, Private) {
   var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   var TimeBuckets = Private(TimeBucketsProvider);
   var createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
   var intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
-  var configDefaults = Private(ConfigDefaultsProvider);
 
   var detectedTimezone = tzDetect.determine().name();
   var tzOffset = moment().format('Z');
@@ -102,7 +100,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
           output.bucketInterval = interval;
           output.params.interval = interval.expression;
 
-          var isDefaultTimezone = config.get('dateFormat:tz') === configDefaults['dateFormat:tz'].value;
+          var isDefaultTimezone = config.get('dateFormat:tz') === 'Browser';
           output.params.time_zone = isDefaultTimezone ?
             (detectedTimezone || tzOffset) :
             config.get('dateFormat:tz');

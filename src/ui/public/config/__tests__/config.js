@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import ConfigDefaultsProvider from 'ui/config/defaults';
+
 describe('config component', function () {
   let $scope;
   let config;
@@ -10,7 +10,6 @@ describe('config component', function () {
   beforeEach(ngMock.inject(function ($injector, Private) {
     config = $injector.get('config');
     $scope = $injector.get('$rootScope');
-    defaults = Private(ConfigDefaultsProvider);
   }));
 
   describe('#get', function () {
@@ -18,14 +17,6 @@ describe('config component', function () {
     it('gives access to config values', function () {
       expect(config.get('dateFormat')).to.be.a('string');
     });
-
-    it('reads from the defaults', function () {
-      var initial = config.get('dateFormat');
-      var newDefault = initial + '- new';
-      defaults.dateFormat.value = newDefault;
-      expect(config.get('dateFormat')).to.be(newDefault);
-    });
-
   });
 
   describe('#set', function () {

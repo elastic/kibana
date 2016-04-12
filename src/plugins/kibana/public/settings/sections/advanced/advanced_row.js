@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import 'ui/elastic_textarea';
-import ConfigDefaultsProvider from 'ui/config/defaults';
 import uiModules from 'ui/modules';
 import advancedRowTemplate from 'plugins/kibana/settings/sections/advanced/advanced_row.html';
 
 uiModules.get('apps/settings')
-.directive('advancedRow', function (config, Notifier, Private) {
+.directive('advancedRow', function (config, Notifier) {
   return {
     restrict: 'A',
     replace: true,
@@ -15,7 +14,6 @@ uiModules.get('apps/settings')
       configs: '='
     },
     link: function ($scope) {
-      const configDefaults = Private(ConfigDefaultsProvider);
       const notify = new Notifier();
       const keyCodes = {
         ESC: 27

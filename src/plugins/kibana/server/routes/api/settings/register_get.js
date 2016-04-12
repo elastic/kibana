@@ -17,13 +17,17 @@ export default function registerGet(server) {
       client
         .get({ index, type, id })
         .then(res => res._source)
-        .then(user => assign(defaults, user, nonEmpty))
-        .then(settings => reply(settings).type('application/json'))
+        .then(user => assign(defaults, user, markCustom))
+        .then(settings => reply({ settings }).type('application/json'))
         .catch(reason => reply(Boom.wrap(reason)));
     }
   });
 }
 
-function nonEmpty(current, following) {
-  return following === null ? current : following;
+function markCustom(current, following) {
+  if (following && following.value !== null) {
+    following.custom = true;
+    return following;
+  }
+  return current;
 }
