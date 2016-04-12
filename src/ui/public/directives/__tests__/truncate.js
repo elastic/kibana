@@ -11,7 +11,7 @@ let $scope;
 
 let $elem;
 
-var init = function (text) {
+let init = function (text) {
   // Load the application
   ngMock.module('kibana');
 

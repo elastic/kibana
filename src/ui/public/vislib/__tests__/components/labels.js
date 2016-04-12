@@ -15,7 +15,7 @@ let rowsArr;
 let uniqLabels;
 let error;
 
-var seriesData = {
+let seriesData = {
   'label': '',
   'series': [
     {
@@ -25,7 +25,7 @@ var seriesData = {
   ]
 };
 
-var rowsData = {
+let rowsData = {
   'rows': [
     {
       'label': 'a',
@@ -66,7 +66,7 @@ var rowsData = {
   ]
 };
 
-var columnsData = {
+let columnsData = {
   'columns': [
     {
       'label': 'a',
@@ -152,23 +152,23 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Data array', function () {
-    var childrenObject = {
+    let childrenObject = {
       children: []
     };
-    var seriesObject = {
+    let seriesObject = {
       series: []
     };
-    var rowsObject = {
+    let rowsObject = {
       rows: []
     };
-    var columnsObject = {
+    let columnsObject = {
       columns: []
     };
-    var string = 'string';
-    var number = 23;
-    var boolean = false;
-    var emptyArray = [];
-    var nullValue = null;
+    let string = 'string';
+    let number = 23;
+    let boolean = false;
+    let emptyArray = [];
+    let nullValue = null;
     let notAValue;
     let dataArray;
     let testSeries;
@@ -267,7 +267,7 @@ describe('Vislib Labels Module Test Suite', function () {
 
   describe('Unique labels', function () {
     let uniqLabels;
-    var arrObj = [
+    let arrObj = [
       {'label': 'a'},
       {'label': 'b'},
       {'label': 'b'},
@@ -276,12 +276,12 @@ describe('Vislib Labels Module Test Suite', function () {
       {'label': 'd'},
       {'label': 'f'}
     ];
-    var string = 'string';
-    var number = 24;
-    var boolean = false;
-    var nullValue = null;
-    var emptyObject = {};
-    var emptyArray = [];
+    let string = 'string';
+    let number = 24;
+    let boolean = false;
+    let nullValue = null;
+    let emptyObject = {};
+    let emptyArray = [];
     let notAValue;
     let uniq;
     let testArr;
@@ -340,18 +340,18 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Get series', function () {
-    var string = 'string';
-    var number = 24;
-    var boolean = false;
-    var nullValue = null;
-    var rowsObject = {
+    let string = 'string';
+    let number = 24;
+    let boolean = false;
+    let nullValue = null;
+    let rowsObject = {
       rows: []
     };
-    var columnsObject = {
+    let columnsObject = {
       columns: []
     };
-    var emptyObject = {};
-    var emptyArray = [];
+    let emptyObject = {};
+    let emptyArray = [];
     let notAValue;
     let getSeries;
     let columnsLabels;
