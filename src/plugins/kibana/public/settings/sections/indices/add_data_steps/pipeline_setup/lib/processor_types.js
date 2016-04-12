@@ -101,6 +101,33 @@ export class Date extends Processor {
   }
 };
 
+export class GeoIp extends Processor {
+  constructor(processorId) {
+    super(processorId, 'geoip', 'Geo IP');
+    this.sourceField = '';
+    this.targetField = 'geoip';
+    this.databaseFile = '';
+    this.databaseFields = [];
+  }
+
+  get description() {
+    const source = this.sourceField || '?';
+    const target = this.targetField || '?';
+    return `[${source}] -> [${target}]`;
+  }
+
+  get model() {
+    return {
+      processorId: this.processorId,
+      typeId: this.typeId,
+      sourceField: this.sourceField || '',
+      targetField: this.targetField || '',
+      databaseFile: this.databaseFile || '',
+      databaseFields: this.databaseFields || []
+    };
+  }
+};
+
 export class Gsub extends Processor {
   constructor(processorId) {
     super(processorId, 'gsub', 'Gsub');
