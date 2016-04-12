@@ -7,7 +7,7 @@ import dedupFilters from 'ui/filter_bar/lib/dedup_filters';
  * @returns {object} The original filters array with duplicates removed
  */
 export default function (filters, comparatorOptions) {
-  var results = [];
+  let results = [];
   _.each(filters, function (filter) {
     results = _.union(results, dedupFilters(results, [filter], comparatorOptions));
   });

@@ -13,7 +13,7 @@ uiModules
     }
 
     return _.filter(items, function (item) {
-      for (var i = 0; i < rules.length; i++) {
+      for (let i = 0; i < rules.length; i++) {
         if (_.some([item], rules[i])) {
           return true;
         }
