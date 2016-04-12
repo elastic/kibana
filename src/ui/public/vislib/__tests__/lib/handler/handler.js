@@ -12,13 +12,13 @@ import $ from 'jquery';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-var dateHistogramArray = [
+let dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
@@ -30,7 +30,7 @@ dateHistogramArray.forEach(function (data, i) {
     let Handler;
     let vis;
     let persistedState;
-    var events = [
+    let events = [
       'click',
       'brush'
     ];

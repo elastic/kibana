@@ -22,8 +22,8 @@ describe('listen component', function () {
   });
 
   it('binds to an event emitter', function () {
-    var emitter = new Events();
-    var $scope = $rootScope.$new();
+    let emitter = new Events();
+    let $scope = $rootScope.$new();
 
     function handler() {}
     $scope.$listen(emitter, 'hello', handler);
@@ -33,8 +33,8 @@ describe('listen component', function () {
   });
 
   it('binds to $scope, waiting for the destroy event', function () {
-    var emitter = new Events();
-    var $scope = $rootScope.$new();
+    let emitter = new Events();
+    let $scope = $rootScope.$new();
 
     sinon.stub($scope, '$on');
     sinon.stub($rootScope, '$on');
@@ -45,14 +45,14 @@ describe('listen component', function () {
     expect($rootScope.$on).to.have.property('callCount', 0);
     expect($scope.$on).to.have.property('callCount', 1);
 
-    var call = $scope.$on.firstCall;
+    let call = $scope.$on.firstCall;
     expect(call.args[0]).to.be('$destroy');
     expect(call.args[1]).to.be.a('function');
   });
 
   it('unbinds the event handler when $destroy is triggered', function () {
-    var emitter = new Events();
-    var $scope = $rootScope.$new();
+    let emitter = new Events();
+    let $scope = $rootScope.$new();
 
     sinon.stub($scope, '$on');
     sinon.stub(emitter, 'off');
@@ -62,7 +62,7 @@ describe('listen component', function () {
     $scope.$listen(emitter, 'hello', handler);
 
     // get the unbinder that was registered to $scope
-    var unbinder = $scope.$on.firstCall.args[1];
+    let unbinder = $scope.$on.firstCall.args[1];
 
     // call the unbinder
     expect(emitter.off).to.have.property('callCount', 0);
@@ -70,7 +70,7 @@ describe('listen component', function () {
     expect(emitter.off).to.have.property('callCount', 1);
 
     // check that the off args were as expected
-    var call = emitter.off.firstCall;
+    let call = emitter.off.firstCall;
     expect(call.args[0]).to.be('hello');
     expect(call.args[1]).to.be(handler);
   });
