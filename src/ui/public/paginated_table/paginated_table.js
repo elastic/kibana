@@ -4,7 +4,7 @@ import paginatedTableTemplate from 'ui/paginated_table/paginated_table.html';
 uiModules
 .get('kibana')
 .directive('paginatedTable', function ($filter) {
-  var orderBy = $filter('orderBy');
+  let orderBy = $filter('orderBy');
 
   return {
     restrict: 'E',
@@ -19,14 +19,14 @@ uiModules
     },
     controllerAs: 'paginatedTable',
     controller: function ($scope) {
-      var self = this;
+      let self = this;
       self.sort = {
         columnIndex: null,
         direction: null
       };
 
       self.sortColumn = function (colIndex) {
-        var col = $scope.columns[colIndex];
+        let col = $scope.columns[colIndex];
 
         if (!col) return;
         if (col.sortable === false) return;
@@ -36,7 +36,7 @@ uiModules
         if (self.sort.columnIndex !== colIndex) {
           sortDirection = 'asc';
         } else {
-          var directions = {
+          let directions = {
             null: 'asc',
             'asc': 'desc',
             'desc': null
@@ -56,7 +56,7 @@ uiModules
         } else {
           // use generic sort handler
           self.sort.getter = function (row) {
-            var value = row[index];
+            let value = row[index];
             if (value && value.value != null) value = value.value;
             if (typeof value === 'boolean') value = value ? 0 : 1;
             return value;
@@ -75,7 +75,7 @@ uiModules
           return;
         }
 
-        var sort = self.sort;
+        let sort = self.sort;
         if (sort.direction == null) {
           $scope.sortedRows = $scope.rows.slice(0);
         } else {
