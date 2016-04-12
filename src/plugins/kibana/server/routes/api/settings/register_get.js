@@ -1,5 +1,5 @@
 import Boom from 'boom';
-import { assign } from 'lodash';
+import { defaultsDeep } from 'lodash';
 import defaultsProvider from './defaults';
 
 export default function registerGet(server) {
@@ -17,7 +17,7 @@ export default function registerGet(server) {
       client
         .get({ index, type, id })
         .then(res => res._source)
-        .then(user => assign(defaults, hydrateUserSettings(user)))
+        .then(user => defaultsDeep(hydrateUserSettings(user), defaults))
         .then(settings => reply({ settings }).type('application/json'))
         .catch(reason => reply(Boom.wrap(reason)));
     }
@@ -27,10 +27,9 @@ export default function registerGet(server) {
 function hydrateUserSettings(user) {
   return Object.keys(user).reduce(expand, {});
   function expand(expanded, key) {
-    expanded[key] = {
-      value: user[key],
-      custom: true
-    };
+    if (user[key] !== null) {
+      expanded[key] = { userValue: user[key] };
+    }
     return expanded;
   }
 }

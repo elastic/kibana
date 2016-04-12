@@ -4,7 +4,7 @@ import expect from 'expect.js';
 
 describe('Settings', function () {
   describe('Advanced', function () {
-    describe('toEditableConfig(def, name, value)', function () {
+    describe('toEditableConfig(def, name)', function () {
       it('sets name', function () {
         expect(invoke({ name: 'who' }).name).to.equal('who');
       });
