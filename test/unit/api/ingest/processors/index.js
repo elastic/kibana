@@ -10,6 +10,7 @@ define(function (require) {
   var remove = require('./_remove');
   var rename = require('./_rename');
   var set = require('./_set');
+  var split = require('./_split');
 
   return function processors(bdd, scenarioManager, request) {
     append(bdd, scenarioManager, request);
@@ -23,6 +24,7 @@ define(function (require) {
     remove(bdd, scenarioManager, request);
     rename(bdd, scenarioManager, request);
     set(bdd, scenarioManager, request);
+    split(bdd, scenarioManager, request);
   };
 
 });
