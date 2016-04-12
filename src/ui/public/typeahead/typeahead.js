@@ -3,11 +3,11 @@ import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';
 import uiModules from 'ui/modules';
-var typeahead = uiModules.get('kibana/typeahead');
+let typeahead = uiModules.get('kibana/typeahead');
 
 
 typeahead.directive('kbnTypeahead', function () {
-  var keyMap = {
+  let keyMap = {
     ESC: 27,
     UP: 38,
     DOWN: 40,
@@ -23,7 +23,7 @@ typeahead.directive('kbnTypeahead', function () {
     controllerAs: 'typeahead',
 
     controller: function ($scope, $element, $timeout, PersistedLog, config) {
-      var self = this;
+      let self = this;
       self.form = $element.closest('form');
       self.query = '';
       self.hidden = true;
@@ -76,7 +76,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       self.activateNext = function () {
-        var index = self.getActiveIndex();
+        let index = self.getActiveIndex();
         if (index == null) {
           index = 0;
         } else if (index < $scope.filteredItems.length - 1) {
@@ -87,7 +87,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       self.activatePrev = function () {
-        var index = self.getActiveIndex();
+        let index = self.getActiveIndex();
 
         if (index > 0 && index != null) {
           --index;
@@ -138,7 +138,7 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       self.keypressHandler = function (ev) {
-        var keyCode = ev.which || ev.keyCode;
+        let keyCode = ev.which || ev.keyCode;
 
         if (self.focused) {
           self.hidden = false;
@@ -194,11 +194,11 @@ typeahead.directive('kbnTypeahead', function () {
         }
 
         // update the filteredItems using the query
-        var beginningMatches = $scope.items.filter(function (item) {
+        let beginningMatches = $scope.items.filter(function (item) {
           return item.indexOf(query) === 0;
         });
 
-        var otherMatches = $scope.items.filter(function (item) {
+        let otherMatches = $scope.items.filter(function (item) {
           return item.indexOf(query) > 0;
         });
 
