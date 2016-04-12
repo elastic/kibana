@@ -3,10 +3,10 @@ import { includes, flow, escapeRegExp } from 'lodash';
 import { isString, isArray, isPlainObject, get } from 'lodash';
 import { keys } from 'lodash';
 
-let asRegExp = flow(
+const asRegExp = flow(
   escapeRegExp,
   function (path) {
-    let last = path.slice(-1);
+    const last = path.slice(-1);
     if (last === '/' || last === '\\') {
       // match a directory explicitly
       return path + '.*';
@@ -18,7 +18,7 @@ let asRegExp = flow(
   RegExp
 );
 
-let arr = v => [].concat(v || []);
+const arr = v => [].concat(v || []);
 
 module.exports = class UiBundlerEnv {
   constructor(workingDir) {
@@ -58,7 +58,7 @@ module.exports = class UiBundlerEnv {
   }
 
   consumePlugin(plugin) {
-    let tag = `${plugin.id}@${plugin.version}`;
+    const tag = `${plugin.id}@${plugin.version}`;
     if (includes(this.pluginInfo, tag)) return;
 
     if (plugin.publicDir) {
@@ -141,7 +141,7 @@ module.exports = class UiBundlerEnv {
 
     this.aliases[id] = path;
 
-    let loader = [];
+    const loader = [];
     if (imports) {
       loader.push(`imports?${imports}`);
     }
@@ -153,10 +153,10 @@ module.exports = class UiBundlerEnv {
   }
 
   claim(id, pluginId) {
-    let owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
+    const owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
 
     // TODO(spalger): we could do a lot more to detect colliding module defs
-    let existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
+    const existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
 
     if (existingOwner) {
       throw new TypeError(`${owner} attempted to override export "${id}" from ${existingOwner}`);
