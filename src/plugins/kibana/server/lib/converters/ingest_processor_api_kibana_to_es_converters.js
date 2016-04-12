@@ -77,6 +77,16 @@ export function geoip(processorApiDocument) {
   return processor;
 }
 
+export function grok(processorApiDocument) {
+  return {
+    grok: {
+      tag: processorApiDocument.processor_id,
+      field: processorApiDocument.source_field,
+      pattern: processorApiDocument.pattern
+    }
+  };
+}
+
 export function gsub(processorApiDocument) {
   return {
     gsub: {
