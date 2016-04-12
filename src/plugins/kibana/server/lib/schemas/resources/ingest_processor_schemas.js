@@ -35,6 +35,12 @@ export const geoip = base.keys({
   database_fields: Joi.array().items(Joi.string().allow('')),
 });
 
+export const grok = base.keys({
+  type_id: Joi.string().only('grok').required(),
+  source_field: Joi.string().allow(''),
+  pattern: Joi.string().allow('')
+});
+
 export const gsub = base.keys({
   type_id: Joi.string().only('gsub').required(),
   source_field: Joi.string().allow(''),
