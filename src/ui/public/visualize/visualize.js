@@ -22,7 +22,6 @@ uiModules
     scope : {
       showSpyPanel: '=?',
       vis: '=',
-      uiState: '=?',
       searchSource: '=?',
       editableVis: '=?',
       esResp: '=?',
@@ -56,7 +55,13 @@ uiModules
       };
 
       $scope.spy = {};
-      $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
+      $scope.spy.mode = $scope.vis.getUiStateValue('spy.mode', {});
+      // TODO: remove this after clearing up references to $scope.uiState
+      Object.defineProperty($scope, 'uiState', {
+        get() {
+          return $scope.vis.getUiState();
+        },
+      });
 
       var applyClassNames = function () {
         var $visEl = getVisContainer();
@@ -124,7 +129,7 @@ uiModules
         }
 
         if (oldVis) $scope.renderbot = null;
-        if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+        if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
       }));
 
       $scope.$watchCollection('vis.params', prereq(function () {
