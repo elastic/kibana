@@ -3,7 +3,7 @@ import editorHtml from 'ui/agg_types/controls/regular_expression.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 export default function RegexAggParamFactory(Private) {
 
-  var BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
 
   _.class(RegexAggParam).inherits(BaseAggParam);
   function RegexAggParam(config) {
@@ -33,15 +33,15 @@ export default function RegexAggParamFactory(Private) {
    * @return {undefined}
    */
   RegexAggParam.prototype.write = function (aggConfig, output) {
-    var param = aggConfig.params[this.name];
-    var paramType = aggConfig.type.params.byName[this.name];
+    let param = aggConfig.params[this.name];
+    let paramType = aggConfig.type.params.byName[this.name];
 
     // clear aggParam if pattern is not set or is disabled
     if (!param || !param.pattern || !param.pattern.length || paramType.disabled(aggConfig)) {
       return;
     }
 
-    var obj = {
+    let obj = {
       pattern: param.pattern
     };
 
