@@ -2,7 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 
-let SCROLLER_HEIGHT = 20;
+const SCROLLER_HEIGHT = 20;
 
 uiModules
 .get('kibana')
@@ -74,15 +74,15 @@ uiModules
       function setup() {
         cleanUp();
 
-        let containerWidth = $el.width();
-        let contentWidth = $el.prop('scrollWidth');
-        let containerHorizOverflow = contentWidth - containerWidth;
+        const containerWidth = $el.width();
+        const contentWidth = $el.prop('scrollWidth');
+        const containerHorizOverflow = contentWidth - containerWidth;
 
-        let elTop = $el.offset().top - $window.scrollTop();
-        let elBottom = elTop + $el.height();
-        let windowVertOverflow = elBottom - $window.height();
+        const elTop = $el.offset().top - $window.scrollTop();
+        const elBottom = elTop + $el.height();
+        const windowVertOverflow = elBottom - $window.height();
 
-        let requireScroller = containerHorizOverflow > 0 && windowVertOverflow > 0;
+        const requireScroller = containerHorizOverflow > 0 && windowVertOverflow > 0;
         if (!requireScroller) return;
 
         // push the content away from the scroller

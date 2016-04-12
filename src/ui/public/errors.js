@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-let canStack = (function () {
-  let err = new Error();
+const canStack = (function () {
+  const err = new Error();
   return !!err.stack;
 }());
 
-let errors = {};
+const errors = {};
 
 // abstract error class
 function KbnError(msg, constructor) {
@@ -165,7 +165,7 @@ _.class(errors.DuplicateField).inherits(KbnError);
 errors.SavedObjectNotFound = function SavedObjectNotFound(type, id) {
   this.savedObjectType = type;
   this.savedObjectId = id;
-  let idMsg = id ? ' (id: ' + id + ')' : '';
+  const idMsg = id ? ' (id: ' + id + ')' : '';
   KbnError.call(this,
     'Could not locate that ' + type + idMsg,
     errors.SavedObjectNotFound);
