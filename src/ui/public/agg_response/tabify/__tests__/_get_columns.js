@@ -4,9 +4,9 @@ import AggResponseTabifyGetColumnsProvider from 'ui/agg_response/tabify/_get_col
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function () {
-  var getColumns;
-  var Vis;
-  var indexPattern;
+  let getColumns;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

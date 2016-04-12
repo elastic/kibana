@@ -33,7 +33,7 @@ export default function (Promise, Private, es) {
       doc._storeVersion(resp._version);
       doc.id(resp._id);
 
-      var docFetchProm;
+      let docFetchProm;
       if (method !== 'index') {
         docFetchProm = doc.fetch();
       } else {

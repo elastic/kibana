@@ -14,6 +14,8 @@ module.exports = function (kbnServer, server, config) {
     path: '/api/status',
     handler: function (request, reply) {
       return reply({
+        name: config.get('server.name'),
+        uuid: config.get('uuid'),
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       });
@@ -21,8 +23,8 @@ module.exports = function (kbnServer, server, config) {
   });
 
   server.decorate('reply', 'renderStatusPage', function () {
-    var app = kbnServer.uiExports.getHiddenApp('status_page');
-    var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
+    let app = kbnServer.uiExports.getHiddenApp('status_page');
+    let resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
     resp.code(kbnServer.status.isGreen() ? 200 : 503);
     return resp;
   });

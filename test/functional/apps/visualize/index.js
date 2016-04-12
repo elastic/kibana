@@ -20,7 +20,6 @@ define(function (require) {
 
   bdd.describe('visualize app', function () {
     var common;
-    var scenarioManager;
     var remote;
     var headerPage;
     var settingsPage;

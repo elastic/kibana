@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
+import 'ui/directives/paginated_selectable_list';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
 import routes from 'ui/routes';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
@@ -8,7 +9,7 @@ import uiModules from 'ui/modules';
 
 
 const templateStep = function (num, txt) {
-  return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
+  return '<div ng-controller="VisualizeWizardStep' + num + '" class="container-fluid vis-wizard">' + txt + '</div>';
 };
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
@@ -56,16 +57,8 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, $location, t
     list: $route.current.locals.indexPatternIds
   };
 
-  $scope.$watch('stepTwoMode', function (mode) {
-    if (mode === 'new') {
-      if ($scope.indexPattern.list && $scope.indexPattern.list.length === 1) {
-        $scope.indexPattern.selection = $scope.indexPattern.list[0];
-      }
-    }
-  });
-
-  $scope.$watch('indexPattern.selection', function (pattern) {
+  $scope.makeUrl = function (pattern) {
     if (!pattern) return;
-    kbnUrl.change('/visualize/create?type={{type}}&indexPattern={{pattern}}', {type: type, pattern: pattern});
-  });
+    return `#/visualize/create?type=${type}&indexPattern=${pattern}`;
+  };
 });

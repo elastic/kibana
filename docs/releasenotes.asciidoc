@@ -1,27 +1,31 @@
 [[releasenotes]]
-== Kibana 4.4 Release Notes
+== Kibana {version} Release Notes
 
-The 4.4 release of Kibana requires Elasticsearch 2.2 or later.
+The {version} release of Kibana requires Elasticsearch {esversion} or later.
 
-Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch  
-include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates 
-in the index pattern name.
+[float]
+[[breaking]]
+== Breaking Changes
+
+// * {k4issue}5591[Issue 5591]: The command-line plugin tool no longer supports Github.
 
 [float]
 [[enhancements]]
 == Enhancements
 
-// * {k4issue}5109[Issue 5109]: Adds custom JSON and filter alias naming for filters.
-// * {k4issue}1726[Issue 1726]: Adds a color field formatter for value ranges in numeric fields.
-// * {k4issue}4342[Issue 4342]: Increased performance for wildcard indices.
-// * {k4issue}1600[Issue 1600]: Support for global time zones.
-// * {k4pull}5275[Pull Request 5275]: Highlighting values in Discover can now be disabled.
-// * {k4issue}5212[Issue 5212]: Adds support for multiple certificate authorities.
-// * {k4issue}2716[Issue 2716]: The open/closed position of the spy panel now persists across UI state changes.
+// * {k4issue}6387[Issue 6387]: A new look for Kibana: new logo and UI, improved layout and navigation.
 
 [float]
 [[bugfixes]]
 == Bug Fixes
 
-// * {k4issue}5165[Issue 5165]: Resolves a display error in embedded views.
-// * {k4issue}5021[Issue 5021]: Improves visualization dimming for dashboards with auto-refresh.
+// * {k4issue}5914[Issue 5914]: Adds ability to aggregate on unindexed fields.
+
+[float]
+[[plugins-apis]]
+== Plugins, APIs, and Development Infrastructure
+
+NOTE: The items in this section are not a complete list of the internal changes relating to development in Kibana. Plugin 
+framework and APIs are not formally documented and not guaranteed to be backward compatible from release to release.
+
+// * {k4issue}5198[Issue 5198]: Injects buttons from the plugin to the navigation bar.

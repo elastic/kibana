@@ -9,16 +9,16 @@ import VislibVisualizationsColumnChartProvider from 'ui/vislib/visualizations/co
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  var ColumnChart;
-  var Chart;
-  var Data;
-  var persistedState;
-  var Vis;
+  let ColumnChart;
+  let Chart;
+  let Data;
+  let persistedState;
+  let Vis;
   var chartData = {};
-  var vis;
-  var el;
-  var myChart;
-  var config;
+  let vis;
+  let el;
+  let myChart;
+  let config;
   var data = {
     hits      : 621,
     label     : '',

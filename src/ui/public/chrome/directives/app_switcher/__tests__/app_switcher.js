@@ -12,7 +12,7 @@ import 'ui/chrome';
 import '../app_switcher';
 
 describe('appSwitcher directive', function () {
-  var env;
+  let env;
 
   beforeEach(ngMock.module('kibana'));
 

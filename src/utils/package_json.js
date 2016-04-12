@@ -1,11 +1,11 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 
-var packageDir;
-var packagePath;
+let packageDir;
+let packagePath;
 
 while (!packagePath || !existsSync(packagePath)) {
-  var prev = packageDir;
+  let prev = packageDir;
   packageDir = prev ? join(prev, '..') : __dirname;
   packagePath = join(packageDir, 'package.json');
 

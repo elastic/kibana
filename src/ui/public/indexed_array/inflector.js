@@ -16,7 +16,7 @@ function endsWith(str, test) {
 
 function inflector(prefix, postfix) {
   return function inflect(key) {
-    var inflected;
+    let inflected;
 
     if (key.indexOf('.') !== -1) {
       inflected = key

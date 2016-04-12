@@ -4,9 +4,9 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/persisted_log';
 
-var storage;
-var config;
-var PersistedLog;
+let storage;
+let config;
+let PersistedLog;
 
 var historyName = 'testHistory';
 var historyLimit = 10;

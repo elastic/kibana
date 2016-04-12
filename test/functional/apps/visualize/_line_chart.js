@@ -49,7 +49,7 @@ define(function (require) {
         })
         .then(function selectField() {
           common.debug('Field = extension');
-          return visualizePage.selectField('extension');
+          return visualizePage.selectField('extension.raw');
         })
         .then(function setInterval() {
           common.debug('switch from Rows to Columns');

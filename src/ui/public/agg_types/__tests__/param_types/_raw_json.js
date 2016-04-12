@@ -7,11 +7,11 @@ import AggTypesParamTypesRawJsonProvider from 'ui/agg_types/param_types/raw_json
 
 module.exports = describe('JSON', function () {
   var paramName = 'json_test';
-  var BaseAggParam;
-  var JsonAggParam;
-  var aggParam;
-  var aggConfig;
-  var output;
+  let BaseAggParam;
+  let JsonAggParam;
+  let aggParam;
+  let aggConfig;
+  let output;
 
   function initAggParam(config) {
     config = config || {};

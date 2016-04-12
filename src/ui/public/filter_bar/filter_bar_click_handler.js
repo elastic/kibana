@@ -9,7 +9,7 @@ export default function (Notifier) {
       var notify = new Notifier({
         location: 'Filter bar'
       });
-      var aggConfigResult;
+      let aggConfigResult;
 
       // Hierarchical and tabular data set their aggConfigResult parameter
       // differently because of how the point is rewritten between the two. So
@@ -39,7 +39,9 @@ export default function (Notifier) {
           try {
             return result.createFilter();
           } catch (e) {
-            notify.warning(e.message);
+            if (!simulate) {
+              notify.warning(e.message);
+            }
           }
         })
         .filter(Boolean)

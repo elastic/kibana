@@ -2,7 +2,7 @@ import SimpleEmitter from 'ui/utils/simple_emitter';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 describe('SimpleEmitter class', function () {
-  var emitter;
+  let emitter;
 
   beforeEach(function () {
     emitter = new SimpleEmitter();

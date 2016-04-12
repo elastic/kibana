@@ -4,8 +4,8 @@ import ngMock from 'ng_mock';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 describe('FieldFormat class', function () {
 
-  var FieldFormat;
-  var TestFormat;
+  let FieldFormat;
+  let TestFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

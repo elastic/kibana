@@ -31,7 +31,7 @@ uiModules
         if (!col) return;
         if (col.sortable === false) return;
 
-        var sortDirection;
+        let sortDirection;
 
         if (self.sort.columnIndex !== colIndex) {
           sortDirection = 'asc';

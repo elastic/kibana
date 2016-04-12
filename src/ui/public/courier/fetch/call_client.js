@@ -20,6 +20,8 @@ export default function CourierFetchCallClient(Private, Promise, es, esShardTime
     const executable = statuses.filter(isRequest);
     let execCount = executable.length;
 
+    if (!execCount) return Promise.resolve([]);
+
     // resolved by respond()
     let esPromise;
     const defer = Promise.defer();

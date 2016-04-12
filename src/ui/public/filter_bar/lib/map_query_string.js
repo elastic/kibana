@@ -1,7 +1,7 @@
 export default function mapQueryStringProvider(Promise) {
   return function (filter) {
-    var key;
-    var value;
+    let key;
+    let value;
     if (filter.query && filter.query.query_string) {
       key = 'query';
       value = filter.query.query_string.query;

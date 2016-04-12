@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+var units = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 var unitsAsc = _.sortBy(units, function (unit) {
   return moment.duration(1, unit).valueOf();
 });
@@ -13,10 +13,10 @@ function parse(text, roundUp) {
   if (moment.isMoment(text)) return text;
   if (_.isDate(text)) return moment(text);
 
-  var time;
+  let time;
   var mathString = '';
-  var index;
-  var parseString;
+  let index;
+  let parseString;
 
   if (text.substring(0, 3) === 'now') {
     time = moment();
@@ -48,9 +48,9 @@ function parseDateMath(mathString, time, roundUp) {
 
   while (i < len) {
     var c = mathString.charAt(i++);
-    var type;
-    var num;
-    var unit;
+    let type;
+    let num;
+    let unit;
 
     if (c === '/') {
       type = 0;

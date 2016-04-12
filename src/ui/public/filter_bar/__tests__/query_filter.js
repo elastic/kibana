@@ -10,9 +10,9 @@ import './_invert_filters';
 import './_pin_filters';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import EventsProvider from 'ui/events';
-var queryFilter;
-var EventEmitter;
-var $rootScope;
+let queryFilter;
+let EventEmitter;
+let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {
