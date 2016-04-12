@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import uiModules from 'ui/modules';
-let NL_RE = /\n/g;
-let events = 'keydown keypress keyup change';
+const NL_RE = /\n/g;
+const events = 'keydown keypress keyup change';
 
 uiModules.get('kibana')
 .directive('elasticTextarea', function () {
