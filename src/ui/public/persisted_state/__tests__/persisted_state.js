@@ -679,5 +679,23 @@ describe('Persisted State', function () {
 
       child.set('events', 'changed via child set');
     });
+
+    it('should emit persist on normal change', function () {
+      expect(getByType('persist')).to.have.length(0);
+      persistedState.set('key', 'value');
+      expect(getByType('persist')).to.have.length(1);
+    });
+
+    it('should emit persist on silent change', function () {
+      expect(getByType('persist')).to.have.length(0);
+      persistedState.setSilent('key', 'value');
+      expect(getByType('persist')).to.have.length(1);
+    });
+
+    it('should not emit persist on silent unpersisted change', function () {
+      expect(getByType('persist')).to.have.length(0);
+      persistedState.setSilentUnpersisted('key', 'value');
+      expect(getByType('persist')).to.have.length(1);
+    });
   });
 });

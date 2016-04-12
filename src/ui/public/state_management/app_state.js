@@ -43,12 +43,8 @@ function AppStateProvider(Private, $rootScope, getAppState) {
       self.save(replaceState);
     };
 
-    state.on('change', updateOnChange);
-    state.on('persist_requested', updateOnChange);
-    eventUnsubscribers.push(() => {
-      state.off('change', updateOnChange);
-      state.off('persist_requested', updateOnChange);
-    });
+    state.on('persist', updateOnChange);
+    eventUnsubscribers.push(() => state.off('persist', updateOnChange));
 
     // update the stateful object when the app state changes
     var persistOnChange = function (changes) {
@@ -63,7 +59,7 @@ function AppStateProvider(Private, $rootScope, getAppState) {
     eventUnsubscribers.push(() => this.off('fetch_with_changes', persistOnChange));
 
     // if the thing we're making stateful has an appState value, write to persisted state
-    if (self[prop]) persistedStates[prop].setSilent(self[prop]);
+    if (self[prop]) persistedStates[prop].setSilentUnpersisted(self[prop]);
 
     return persistedStates[prop];
   };

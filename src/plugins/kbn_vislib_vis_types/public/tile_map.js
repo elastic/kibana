@@ -53,7 +53,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         const uiState = agg.getUiState();
         uiState.setSilent('mapZoom', event.zoom);
         uiState.setSilent('mapCenter', [event.center.lat, event.center.lng]);
-        uiState.requestPersist();
       },
       mapZoomEnd(event) {
         const agg = _.get(event, 'chart.geohashGridAgg');
@@ -61,7 +60,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         const uiState = agg.getUiState();
 
         uiState.setSilent('mapZoom', event.zoom);
-        uiState.requestPersist();
         if (agg.params.autoPrecision) courier.fetch();
       }
     },

@@ -84,6 +84,11 @@ export default function (Private) {
     return this._set(params.key, params.value, true);
   };
 
+  PersistedState.prototype.setSilentUnpersisted = function (key, value) {
+    var params = prepSetParams(key, value, this._path);
+    return this._set(params.key, params.value, true, true);
+  };
+
   PersistedState.prototype.reset = function (path) {
     var keyPath = this._getIndex(path);
     var origValue = _.get(this._defaultState, keyPath);
@@ -131,14 +136,6 @@ export default function (Private) {
 
   PersistedState.prototype.fromString = function (input) {
     return this.set(JSON.parse(input));
-  };
-
-  PersistedState.prototype.requestPersist = function () {
-    if (this._parent) {
-      this._parent.requestPersist();
-    } else {
-      this.emit('persist_requested');
-    }
   };
 
   PersistedState.prototype._getIndex = function (key) {
@@ -203,7 +200,7 @@ export default function (Private) {
     return _.get(this._mergedState, this._getIndex(key), def);
   };
 
-  PersistedState.prototype._set = function (key, value, silent, initialChildState) {
+  PersistedState.prototype._set = function (key, value, silent, unpersisted, initialChildState) {
     var self = this;
     var stateChanged = false;
     var initialState = !this._initialized;
@@ -219,7 +216,7 @@ export default function (Private) {
 
     // delegate to parent instance, passing child's default value
     if (this._parent) {
-      return this._parent._set(keyPath, value, silent, initialState);
+      return this._parent._set(keyPath, value, silent, unpersisted, initialState);
     }
 
     // everything in here affects only the parent state
@@ -271,7 +268,10 @@ export default function (Private) {
     // sanity check; verify that there are actually changes
     if (_.isEqual(this._mergedState, this._defaultState)) this._changedState = {};
 
-    if (!silent && stateChanged) this.emit('change');
+    if (stateChanged) {
+      if (!silent) this.emit('change');
+      if (!unpersisted) this.emit('persist');
+    }
 
     return this;
   };
