@@ -19,10 +19,10 @@ class UiExports {
   consumePlugin(plugin) {
     plugin.apps = new UiAppCollection(this);
 
-    let types = _.keys(plugin.uiExportsSpecs);
+    const types = _.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
-    let unkown = _.reject(types, this.exportConsumer, this);
+    const unkown = _.reject(types, this.exportConsumer, this);
     if (unkown.length) {
       throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
     }
@@ -43,7 +43,7 @@ class UiExports {
   exportConsumer(type) {
     for (let consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
-      let fn = consumer.exportConsumer(type);
+      const fn = consumer.exportConsumer(type);
       if (fn) return fn;
     }
 
@@ -54,7 +54,7 @@ class UiExports {
           const id = plugin.id;
           for (let spec of [].concat(specs || [])) {
 
-            let app = this.apps.new(_.defaults({}, spec, {
+            const app = this.apps.new(_.defaults({}, spec, {
               id: plugin.id,
               urlBasePath: this.urlBasePath
             }));
@@ -110,9 +110,9 @@ class UiExports {
   }
 
   find(patterns) {
-    let aliases = this.aliases;
-    let names = _.keys(aliases);
-    let matcher = _.partialRight(minimatch.filter, { matchBase: true });
+    const aliases = this.aliases;
+    const names = _.keys(aliases);
+    const matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)
     .map(function (pattern) {
