@@ -20,7 +20,7 @@ export default function registerSet(server) {
           id,
           body: {
             doc: {
-              [key]: { value }
+              [key]: value
             }
           }
         })
