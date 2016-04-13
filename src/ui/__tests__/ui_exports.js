@@ -5,7 +5,7 @@ import UiExports from '../UiExports';
 describe('UiExports', function () {
   describe('#find()', function () {
     it('finds exports based on the passed export names', function () {
-      var uiExports = new UiExports({});
+      let uiExports = new UiExports({});
       uiExports.aliases.foo = ['a', 'b', 'c'];
       uiExports.aliases.bar = ['d', 'e', 'f'];
 
@@ -15,7 +15,7 @@ describe('UiExports', function () {
     });
 
     it('allows query types that match nothing', function () {
-      var uiExports = new UiExports({});
+      let uiExports = new UiExports({});
       uiExports.aliases.foo = ['a', 'b', 'c'];
 
       expect(uiExports.find(['foo'])).to.eql(['a', 'b', 'c']);
