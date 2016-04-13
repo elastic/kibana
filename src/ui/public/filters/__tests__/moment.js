@@ -1,18 +1,18 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var sinon = require('auto-release-sinon');
-var moment = require('moment');
-var ngMock = require('ngMock');
+let angular = require('angular');
+let expect = require('expect.js');
+let sinon = require('auto-release-sinon');
+let moment = require('moment');
+let ngMock = require('ngMock');
 
 require('ui/filters/moment');
 
 let filter;
 
 let config;
-var anchor = '2014-01-01T06:06:06.666';
+let anchor = '2014-01-01T06:06:06.666';
 let clock;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

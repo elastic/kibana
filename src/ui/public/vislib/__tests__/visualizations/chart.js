@@ -1,7 +1,7 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let d3 = require('d3');
+let angular = require('angular');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 describe('Vislib _chart Test Suite', function () {
   let ColumnChart;
@@ -9,12 +9,12 @@ describe('Vislib _chart Test Suite', function () {
   let Data;
   let persistedState;
   let Vis;
-  var chartData = {};
+  let chartData = {};
   let vis;
   let el;
   let myChart;
   let config;
-  var data = {
+  let data = {
     hits      : 621,
     label     : '',
     ordered   : {

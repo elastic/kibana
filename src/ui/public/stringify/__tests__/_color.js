@@ -1,8 +1,8 @@
 describe('Color Format', function () {
   let fieldFormats;
   let ColorFormat;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -12,7 +12,7 @@ describe('Color Format', function () {
   }));
 
   it('should add colors if the value is in range', function () {
-    var colorer = new ColorFormat({
+    let colorer = new ColorFormat({
       colors: [{
         range: '100:150',
         text: 'blue',
@@ -26,7 +26,7 @@ describe('Color Format', function () {
   });
 
   it('should not convert invalid ranges', function () {
-    var colorer = new ColorFormat({
+    let colorer = new ColorFormat({
       colors: [{
         range: '100150',
         text: 'blue',

@@ -1,13 +1,13 @@
 
 describe('getPoint', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   let getPoint;
 
-  var truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
-  var identFormatted = { fieldFormatter: _.constant(_.identity) };
+  let truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
+  let identFormatted = { fieldFormatter: _.constant(_.identity) };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -28,9 +28,9 @@ describe('getPoint', function () {
     });
 
     it('properly unwraps and scales values', function () {
-      var row = [ { value: 1 }, { value: 2 }, { value: 3 } ];
-      var zAspect = { i: 2 };
-      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect, zAspect);
+      let row = [ { value: 1 }, { value: 2 }, { value: 3 } ];
+      let zAspect = { i: 2 };
+      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect, zAspect);
 
       expect(point)
         .to.have.property('x', 1)
@@ -41,8 +41,8 @@ describe('getPoint', function () {
     });
 
     it('ignores points with a y value of NaN', function () {
-      var row = [ { value: 1 }, { value: 'NaN' }];
-      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      let row = [ { value: 1 }, { value: 'NaN' }];
+      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
       expect(point).to.be(void 0);
     });
   });
@@ -61,8 +61,8 @@ describe('getPoint', function () {
     });
 
     it('properly unwraps and scales values', function () {
-      var seriesAspect = { i: 1, agg: identFormatted };
-      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      let seriesAspect = { i: 1, agg: identFormatted };
+      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point)
         .to.have.property('x', 1)
@@ -72,8 +72,8 @@ describe('getPoint', function () {
     });
 
     it('properly formats series values', function () {
-      var seriesAspect = { i: 1, agg: truthFormatted };
-      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      let seriesAspect = { i: 1, agg: truthFormatted };
+      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point)
         .to.have.property('x', 1)
@@ -83,8 +83,8 @@ describe('getPoint', function () {
     });
 
     it ('adds the aggConfig to the points', function () {
-      var seriesAspect = { i: 1, agg:  truthFormatted};
-      var point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
+      let seriesAspect = { i: 1, agg:  truthFormatted};
+      let point = getPoint(xAspect, seriesAspect, yScale, row, yAspect);
 
       expect(point).to.have.property('aggConfig', truthFormatted);
     });

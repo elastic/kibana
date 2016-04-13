@@ -1,9 +1,9 @@
 
 describe('IndexPattern#flattenHit()', function () {
 
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   let flattenHit;
   let config;
@@ -12,7 +12,7 @@ describe('IndexPattern#flattenHit()', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    var indexPattern = {
+    let indexPattern = {
       fields: {
         byName: {
           'message': { type: 'string' },
