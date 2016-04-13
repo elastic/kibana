@@ -31,7 +31,7 @@ module.exports = function (opts) {
       let required = !notRequiredRe || !path.match(notRequiredRe);
 
       if (defined && !exists) {
-        config.clear('defaultIndex');
+        config.remove('defaultIndex');
         defaultId = defined = false;
       }
 
