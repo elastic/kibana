@@ -2,14 +2,17 @@ import querystring from 'querystring';
 import { resolve } from 'url';
 import _ from 'lodash';
 
-const filterHeaders = function (originalHeaders) {
-  const headersToRemove = [
-    'origin'
-  ];
-  return _.omit(originalHeaders, headersToRemove);
-};
-
 module.exports = function mapUri(server, prefix) {
+
+  const filterHeaders = function (originalHeaders) {
+    const headersToKeep = server.config().get('elasticsearch.requestHeaders');
+    const headersToKeepNormalized = headersToKeep.map(function (header) {
+      return header.trim().toLowerCase();
+    });
+
+    return _.pick(originalHeaders, headersToKeepNormalized);
+  };
+
   const config = server.config();
   return function (request, done) {
     const path = request.path.replace('/elasticsearch', '');
