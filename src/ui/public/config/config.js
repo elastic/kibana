@@ -69,7 +69,10 @@ module.service(`config`, function ($rootScope, $http, chrome) {
     const update = value === null ? remove : edit;
     return update(key, value)
       .then(() => reset(true))
-      .then(() => $rootScope.$broadcast(`change:config.${key}`, vals[key], oldVal));
+      .then(() => {
+        notify.log(`config change: ${key}: ${oldVal} -> ${value}`);
+        $rootScope.$broadcast(`change:config.${key}`, vals[key], oldVal);
+      });
   }
   function remove(key) {
     return $http.delete(chrome.addBasePath(`/api/kibana/settings/${key}`));
