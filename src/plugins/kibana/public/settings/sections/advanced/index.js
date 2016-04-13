@@ -29,12 +29,22 @@ uiModules.get('apps/settings')
 
       function changed(values) {
         const all = config.getAll();
-        const editable = _.map(all, (def, name) => toEditableConfig({
-          def,
-          name,
-          value: def.userValue,
-          isCustom: config.isCustom(name)
-        }));
+        const editable = _(all)
+          .map((def, name) => toEditableConfig({
+            def,
+            name,
+            value: def.userValue,
+            isCustom: config.isCustom(name)
+          }))
+          .sortBy(def => {
+            if (def.isCustom) {
+              return 3;
+            }
+            const user = def.userValue;
+            const edited = user !== undefined && user !== null;
+            return edited ? 2 : 1;
+          })
+          .value();
         const writable = _.reject(editable, 'readonly');
         $scope.configs = writable;
       }
