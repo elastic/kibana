@@ -1,22 +1,22 @@
 module.exports = async (kbnServer, server, config) => {
   let { defaults } = require('lodash');
-  let Boom = require('boom');
-  let formatUrl = require('url').format;
+  const Boom = require('boom');
+  const formatUrl = require('url').format;
   let { resolve } = require('path');
-  let readFile = require('fs').readFileSync;
+  const readFile = require('fs').readFileSync;
 
-  let fromRoot = require('../utils/fromRoot');
-  let UiExports = require('./UiExports');
-  let UiBundle = require('./UiBundle');
-  let UiBundleCollection = require('./UiBundleCollection');
-  let UiBundlerEnv = require('./UiBundlerEnv');
-  let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
+  const fromRoot = require('../utils/fromRoot');
+  const UiExports = require('./UiExports');
+  const UiBundle = require('./UiBundle');
+  const UiBundleCollection = require('./UiBundleCollection');
+  const UiBundlerEnv = require('./UiBundlerEnv');
+  const loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
-  let uiExports = kbnServer.uiExports = new UiExports({
+  const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')
   });
 
-  let bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
+  const bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
   bundlerEnv.addContext('env', config.get('env.name'));
   bundlerEnv.addContext('urlBasePath', config.get('server.basePath'));
   bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
@@ -28,14 +28,14 @@ module.exports = async (kbnServer, server, config) => {
     uiExports.consumePlugin(plugin);
   }
 
-  let bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
+  const bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
 
   for (let app of uiExports.getAllApps()) {
     bundles.addApp(app);
   }
 
   for (let gen of uiExports.getBundleProviders()) {
-    let bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps());
+    const bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps());
     if (bundle) bundles.add(bundle);
   }
 
@@ -47,8 +47,8 @@ module.exports = async (kbnServer, server, config) => {
     path: '/app/{id}',
     method: 'GET',
     handler: function (req, reply) {
-      let id = req.params.id;
-      let app = uiExports.apps.byId[id];
+      const id = req.params.id;
+      const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
