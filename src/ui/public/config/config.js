@@ -18,12 +18,13 @@ module.service(`config`, function ($rootScope, $http, chrome) {
     if (!(key in vals)) {
       return null;
     }
-    const { userValue, value, type } = vals[key];
-    const val = userValue || value;
+    const { userValue, value: defaultValue, type } = vals[key];
+    const hasUserValue = userValue !== undefined && userValue !== null;
+    const currentValue = hasUserValue ? userValue : defaultValue;
     if (type === 'json') {
-      return JSON.parse(val);
+      return JSON.parse(currentValue);
     }
-    return val;
+    return currentValue;
   };
   config.set = (key, val) => change(key, _.isPlainObject(val) ? angular.toJson(val) : val);
   config.clear = key => change(key, null);
