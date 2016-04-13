@@ -10,14 +10,14 @@ import $ from 'jquery';
 import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 
 // // Data
-// var dataArray = [
+// let dataArray = [
 //   ['geojson', require('fixtures/vislib/mock_data/geohash/_geo_json')],
 //   ['columns', require('fixtures/vislib/mock_data/geohash/_columns')],
 //   ['rows', require('fixtures/vislib/mock_data/geohash/_rows')],
 // ];
 
 // // TODO: Test the specific behavior of each these
-// var mapTypes = [
+// let mapTypes = [
 //   'Scaled Circle Markers',
 //   'Shaded Circle Markers',
 //   'Shaded Geohash Grid',
@@ -25,10 +25,10 @@ import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 // ];
 
 describe('TileMap Map Tests', function () {
-  var $mockMapEl = $('<div>');
+  let $mockMapEl = $('<div>');
   let TileMapMap;
-  var leafletStubs = {};
-  var leafletMocks = {};
+  let leafletStubs = {};
+  let leafletMocks = {};
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -57,7 +57,7 @@ describe('TileMap Map Tests', function () {
     });
 
     it('should add zoom controls', function () {
-      var mapOptions = createStub.firstCall.args[0];
+      let mapOptions = createStub.firstCall.args[0];
 
       expect(mapOptions).to.be.an('object');
       if (mapOptions.zoomControl) expect(mapOptions.zoomControl).to.be.ok();
@@ -82,8 +82,8 @@ describe('TileMap Map Tests', function () {
       expect(leafletStubs.tileLayer.callCount).to.equal(1);
       expect(leafletStubs.map.callCount).to.equal(1);
 
-      var callArgs = leafletStubs.map.firstCall.args;
-      var mapOptions = callArgs[1];
+      let callArgs = leafletStubs.map.firstCall.args;
+      let mapOptions = callArgs[1];
       expect(callArgs[0]).to.be($mockMapEl.get(0));
       expect(mapOptions).to.have.property('zoom');
       expect(mapOptions).to.have.property('center');
@@ -122,21 +122,21 @@ describe('TileMap Map Tests', function () {
     });
 
     it('should attach interaction events', function () {
-      var expectedTileEvents = ['tileload'];
-      var expectedMapEvents = ['draw:created', 'moveend', 'zoomend', 'unload'];
-      var matchedEvents = {
+      let expectedTileEvents = ['tileload'];
+      let expectedMapEvents = ['draw:created', 'moveend', 'zoomend', 'unload'];
+      let matchedEvents = {
         tiles: 0,
         maps: 0,
       };
 
       _.times(leafletMocks.tileLayer.on.callCount, function (index) {
-        var ev = leafletMocks.tileLayer.on.getCall(index).args[0];
+        let ev = leafletMocks.tileLayer.on.getCall(index).args[0];
         if (_.includes(expectedTileEvents, ev)) matchedEvents.tiles++;
       });
       expect(matchedEvents.tiles).to.equal(expectedTileEvents.length);
 
       _.times(leafletMocks.map.on.callCount, function (index) {
-        var ev = leafletMocks.map.on.getCall(index).args[0];
+        let ev = leafletMocks.map.on.getCall(index).args[0];
         if (_.includes(expectedMapEvents, ev)) matchedEvents.maps++;
       });
       expect(matchedEvents.maps).to.equal(expectedMapEvents.length);
@@ -157,14 +157,14 @@ describe('TileMap Map Tests', function () {
     it('should pass the map options to the marker', function () {
       map._addMarkers();
 
-      var args = createStub.firstCall.args[0];
+      let args = createStub.firstCall.args[0];
       expect(args).to.have.property('tooltipFormatter');
       expect(args).to.have.property('valueFormatter');
       expect(args).to.have.property('attr');
     });
 
     it('should destroy existing markers', function () {
-      var destroyStub = sinon.stub();
+      let destroyStub = sinon.stub();
       map._markers = { destroy: destroyStub };
       map._addMarkers();
 
@@ -182,20 +182,20 @@ describe('TileMap Map Tests', function () {
 
     it('should return an empty array if no data', function () {
       map = new TileMapMap($mockMapEl, {}, {});
-      var rects = map._getDataRectangles();
+      let rects = map._getDataRectangles();
       expect(rects).to.have.length(0);
     });
 
     it('should return an array of arrays of rectangles', function () {
-      var rects = map._getDataRectangles();
+      let rects = map._getDataRectangles();
       _.times(5, function () {
-        var index = _.random(rects.length - 1);
-        var rect = rects[index];
-        var featureRect = geoJsonData.geoJson.features[index].properties.rectangle;
+        let index = _.random(rects.length - 1);
+        let rect = rects[index];
+        let featureRect = geoJsonData.geoJson.features[index].properties.rectangle;
         expect(rect.length).to.equal(featureRect.length);
 
         // should swap the array
-        var checkIndex = _.random(rect.length - 1);
+        let checkIndex = _.random(rect.length - 1);
         expect(rect[checkIndex]).to.eql(featureRect[checkIndex]);
       });
     });

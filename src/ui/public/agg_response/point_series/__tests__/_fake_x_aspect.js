@@ -22,8 +22,8 @@ describe('makeFakeXAspect', function () {
   }));
 
   it('creates an object that looks like an aspect', function () {
-    var vis = new Vis(indexPattern, { type: 'histogram' });
-    var aspect = makeFakeXAspect(vis);
+    let vis = new Vis(indexPattern, { type: 'histogram' });
+    let aspect = makeFakeXAspect(vis);
 
     expect(aspect)
       .to.have.property('i', -1)

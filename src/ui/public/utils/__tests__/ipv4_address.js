@@ -37,7 +37,7 @@ describe('Ipv4Address', function () {
   });
 
   it('should correctly calculate the decimal representation of an IP address', function () {
-    var ipAddress = new Ipv4Address('0.0.0.0');
+    let ipAddress = new Ipv4Address('0.0.0.0');
     expect(ipAddress.valueOf()).to.be(0);
 
     ipAddress = new Ipv4Address('0.0.0.1');
@@ -48,7 +48,7 @@ describe('Ipv4Address', function () {
   });
 
   it('toString()', function () {
-    var ipAddress = new Ipv4Address('0.000.00000.1');
+    let ipAddress = new Ipv4Address('0.000.00000.1');
     expect(ipAddress.toString()).to.be('0.0.0.1');
 
     ipAddress = new Ipv4Address('123.123.123.123');

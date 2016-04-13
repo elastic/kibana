@@ -16,7 +16,7 @@ describe('Vislib Resize Checker', function () {
   let EventEmitter;
   let checker;
   let reflowWatcher;
-  var reflowSpies = {};
+  let reflowSpies = {};
 
   beforeEach(ngMock.module('kibana'));
 
@@ -27,7 +27,7 @@ describe('Vislib Resize Checker', function () {
     reflowSpies.on = sinon.spy(reflowWatcher, 'on');
     reflowSpies.off = sinon.spy(reflowWatcher, 'off');
 
-    var $el = $(document.createElement('div'))
+    let $el = $(document.createElement('div'))
     .appendTo('body')
     .css('visibility', 'hidden')
     .get(0);
@@ -47,7 +47,7 @@ describe('Vislib Resize Checker', function () {
 
     it('listens for the "reflow" event of the reflowWatchers', function () {
       expect(reflowSpies.on).to.have.property('callCount', 1);
-      var call = reflowSpies.on.getCall(0);
+      let call = reflowSpies.on.getCall(0);
       expect(call.args[0]).to.be('reflow');
     });
 
@@ -63,8 +63,8 @@ describe('Vislib Resize Checker', function () {
 
   describe('#read', function () {
     it('gets the proper dimensions for the element', function () {
-      var dimensions = checker.read();
-      var windowWidth = document.documentElement.clientWidth;
+      let dimensions = checker.read();
+      let windowWidth = document.documentElement.clientWidth;
 
       expect(dimensions.w).to.equal(windowWidth);
       expect(dimensions.h).to.equal(0);
@@ -73,7 +73,7 @@ describe('Vislib Resize Checker', function () {
 
   describe('#saveSize', function () {
     it('calls #read() when no arg is passed', function () {
-      var stub = sinon.stub(checker, 'read').returns({});
+      let stub = sinon.stub(checker, 'read').returns({});
 
       checker.saveSize();
 
@@ -81,7 +81,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('saves the size of the element', function () {
-      var football = {};
+      let football = {};
       checker.saveSize(football);
       expect(checker).to.have.property('_savedSize', football);
     });
@@ -123,12 +123,12 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('emits "resize" based on MS_MAX_RESIZE_DELAY, even if el\'s constantly changing size', function () {
-      var steps = _.random(5, 10);
+      let steps = _.random(5, 10);
       this.slow(steps * 10);
 
       // we are going to fake the delay using the fake clock
-      var msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
-      var clock = sinon.useFakeTimers();
+      let msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
+      let clock = sinon.useFakeTimers();
 
       _.times(steps, function step(i) {
         checker.$el.css('height', 100 + i);
@@ -145,8 +145,8 @@ describe('Vislib Resize Checker', function () {
 
   describe('#destroy()', function () {
     it('removes the "reflow" event from the reflowWatcher', function () {
-      var onCall = reflowSpies.on.getCall(0);
-      var handler = onCall.args[1];
+      let onCall = reflowSpies.on.getCall(0);
+      let handler = onCall.args[1];
 
       checker.destroy();
       expect(reflowSpies.off).to.have.property('callCount', 1);
@@ -154,7 +154,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('clears the timeout', function () {
-      var spy = sinon.spy(window, 'clearTimeout');
+      let spy = sinon.spy(window, 'clearTimeout');
       checker.destroy();
       expect(spy).to.have.property('callCount', 1);
     });
@@ -176,26 +176,26 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('walks the schedule, using each value as it\'s next timeout', function () {
-      var timerId = checker.startSchedule(schedule);
+      let timerId = checker.startSchedule(schedule);
 
       // start at 0 even though "start" used the first slot, we will still check it
-      for (var i = 0; i < schedule.length; i++) {
+      for (let i = 0; i < schedule.length; i++) {
         expect(clock.timers[timerId]).to.have.property('callAt', schedule[i]);
         timerId = checker.continueSchedule();
       }
     });
 
     it('repeats the last value in the schedule', function () {
-      var timerId = checker.startSchedule(schedule);
+      let timerId = checker.startSchedule(schedule);
 
       // start at 1, and go until there is one left
-      for (var i = 1; i < schedule.length - 1; i++) {
+      for (let i = 1; i < schedule.length - 1; i++) {
         timerId = checker.continueSchedule();
       }
 
-      var last = _.last(schedule);
+      let last = _.last(schedule);
       _.times(5, function () {
-        var timer = clock.timers[checker.continueSchedule()];
+        let timer = clock.timers[checker.continueSchedule()];
         expect(timer).to.have.property('callAt', last);
       });
     });
