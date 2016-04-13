@@ -27,8 +27,9 @@ export default function registerGet(server) {
 function hydrateUserSettings(user) {
   return Object.keys(user).reduce(expand, {});
   function expand(expanded, key) {
-    if (user[key] !== null) {
-      expanded[key] = { userValue: user[key] };
+    const userValue = user[key];
+    if (userValue !== null) {
+      expanded[key] = { userValue };
     }
     return expanded;
   }
