@@ -1,10 +1,4 @@
-import { forOwn, has, transform } from 'lodash';
-import { red } from 'ansicolors';
-import { memoize } from 'lodash';
-
-const logWarning = memoize(function (key, message) {
-  console.log(red('WARNING:'), message);
-});
+import { forOwn, has, noop, transform } from 'lodash';
 
 const legacySettings = {
   // server
@@ -41,16 +35,16 @@ const deprecatedSettings = {
 };
 
 // transform legacy options into new namespaced versions
-export function rewriteDeprecatedConfig(object) {
+export function rewriteDeprecatedConfig(object, log = noop) {
   const rewritten = transform(object, (clone, val, key) => {
     if (legacySettings.hasOwnProperty(key)) {
       const replacement = legacySettings[key];
-      logWarning(key, `Config key "${key}" is deprecated. It has been replaced with "${replacement}"`);
+      log(`Config key "${key}" is deprecated. It has been replaced with "${replacement}"`);
       clone[replacement] = val;
     } else {
       clone[key] = val;
     }
-  });
+  }, {});
 
   forOwn(deprecatedSettings, (msg, key) => {
     if (has(rewritten, key)) {
