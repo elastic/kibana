@@ -29,7 +29,8 @@ export default function defaultSettingsProvider() {
     },
     'dateFormat:scaled': {
       type: 'json',
-      value: `[
+      value:
+`[
   ["", "HH:mm:ss.SSS"],
   ["PT1S", "HH:mm:ss"],
   ["PT1M", "HH:mm"],
@@ -37,11 +38,13 @@ export default function defaultSettingsProvider() {
   ["P1DT", "YYYY-MM-DD"],
   ["P1YT", "YYYY"]
 ]`,
-      description: 'Values that define the format used in situations where timebased' +
-      ' data is rendered in order, and formatted timestamps should adapt to the' +
-      ' interval between measurements. Keys are' +
-      ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
-      'ISO8601 intervals.</a>'
+      description: (
+        'Values that define the format used in situations where timebased' +
+        ' data is rendered in order, and formatted timestamps should adapt to the' +
+        ' interval between measurements. Keys are' +
+        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
+        'ISO8601 intervals.</a>'
+      )
     },
     'defaultIndex': {
       value: null,
@@ -102,7 +105,7 @@ export default function defaultSettingsProvider() {
           attribution: 'Maps provided by USGS',
           styles: '',
         }
-      }, null, '  '),
+      }, null, 2),
       type: 'json',
       description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
     },
@@ -144,7 +147,8 @@ export default function defaultSettingsProvider() {
     },
     'format:defaultTypeMap': {
       type: 'json',
-      value: `{
+      value:
+`{
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
   "number": { "id": "number", "params": {} },
@@ -181,24 +185,22 @@ export default function defaultSettingsProvider() {
     },
     'timepicker:timeDefaults': {
       type: 'json',
-      value: [
-        '{',
-        '  "from": "now-15m",',
-        '  "to": "now",',
-        '  "mode": "quick"',
-        '}'
-      ].join('\n'),
+      value:
+`{
+  "from": "now-15m",
+  "to": "now",
+  "mode": "quick"
+}`,
       description: 'The timefilter selection to use when Kibana is started without one'
     },
     'timepicker:refreshIntervalDefaults': {
       type: 'json',
-      value: [
-        '{',
-        '  "display": "Off",',
-        '  "pause": false,',
-        '  "value": 0',
-        '}'
-      ].join('\n'),
+      value:
+`{
+  "display": "Off",
+  "pause": false,
+  "value": 0
+}`,
       description: 'The timefilter\'s default refresh interval'
     },
     'dashboard:defaultDarkTheme': {
