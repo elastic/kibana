@@ -48,7 +48,7 @@ uiModules.get('apps/settings')
       $scope.save = function (conf) {
         loading(conf, function () {
           if (conf.unsavedValue === conf.defVal) {
-            return config.clear(conf.name);
+            return config.remove(conf.name);
           }
 
           return config.set(conf.name, conf.unsavedValue);
@@ -61,7 +61,7 @@ uiModules.get('apps/settings')
 
       $scope.clear = function (conf) {
         return loading(conf, function () {
-          return config.clear(conf.name);
+          return config.remove(conf.name);
         });
       };
 

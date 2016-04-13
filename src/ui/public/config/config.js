@@ -1,5 +1,5 @@
 import angular from 'angular';
-import _ from 'lodash';
+import { once, cloneDeep, isPlainObject } from 'lodash';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
@@ -13,13 +13,13 @@ module.service(`config`, function ($rootScope, $http, chrome) {
   const notify = new Notifier({ location: `Config` });
   let vals = {};
 
-  config.init = _.once(init);
-  config.getAll = () => _.cloneDeep(vals);
+  config.init = once(init);
+  config.getAll = () => cloneDeep(vals);
   config.get = key => getCurrentValue(key);
-  config.set = (key, val) => change(key, _.isPlainObject(val) ? angular.toJson(val) : val);
+  config.set = (key, val) => change(key, isPlainObject(val) ? angular.toJson(val) : val);
+  config.remove = key => change(key, null);
   config.isDefault = key => !(key in vals) || nullOrEmpty(vals[key].userValue);
   config.isCustom = key => key in vals && !('value' in vals[key]);
-  config.clear = key => change(key, null);
 
   /**
    * A little helper for binding config variables to $scopes
@@ -32,10 +32,8 @@ module.service(`config`, function ($rootScope, $http, chrome) {
    */
   config.$bind = function ($scope, key, property = key) {
     update();
-    return () => {
-      $scope.$on(`change:config.${key}`, update);
-      $scope.$on(`init:config`, update);
-    };
+    $scope.$on(`change:config.${key}`, update);
+    $scope.$on(`init:config`, update);
     function update() {
       $scope[property] = config.get(key);
     }
