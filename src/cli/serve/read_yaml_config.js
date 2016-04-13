@@ -4,7 +4,8 @@ import { safeLoad } from 'js-yaml';
 import { red } from 'ansicolors';
 
 import { fromRoot } from '../../utils';
-import { rewriteDeprecatedConfig } from './deprecated_config';
+import { rewriteLegacyConfig } from './legacy_config';
+import { checkForDeprecatedConfig } from './deprecated_config';
 
 const log = memoize(function (message) {
   console.log(red('WARNING:'), message);
@@ -32,9 +33,8 @@ export function merge(sources) {
 }
 
 export default function (paths) {
-  const files = [].concat(paths || [])
-    .map(path => safeLoad(read(path, 'utf8')))
-    .map(file => rewriteDeprecatedConfig(file, log));
-
-  return merge(files);
+  const files = [].concat(paths || []);
+  const yamls = files.map(path => safeLoad(read(path, 'utf8')));
+  const config = merge(yamls.map(file => rewriteLegacyConfig(file, log)));
+  return checkForDeprecatedConfig(config, log);
 }
