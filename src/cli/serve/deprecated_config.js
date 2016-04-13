@@ -40,7 +40,7 @@ const deprecatedSettings = {
   'server.xsrf.token': 'server.xsrf.token is deprecated. It is no longer used when providing xsrf protection.'
 };
 
-// transform legeacy options into new namespaced versions
+// transform legacy options into new namespaced versions
 export function rewriteDeprecatedConfig(object) {
   const rewritten = transform(object, (clone, val, key) => {
     if (legacySettings.hasOwnProperty(key)) {
