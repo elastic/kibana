@@ -40,7 +40,7 @@ uiModules.get('apps/settings')
             if (def.isCustom) {
               return 3;
             }
-            const user = def.userValue;
+            const user = def.value;
             const edited = user !== undefined && user !== null;
             return edited ? 2 : 1;
           })
