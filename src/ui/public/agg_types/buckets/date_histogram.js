@@ -100,10 +100,12 @@ export default function DateHistogramAggType(timefilter, config, Private) {
           output.bucketInterval = interval;
           output.params.interval = interval.expression;
 
-          var isDefaultTimezone = config.get('dateFormat:tz') === 'Browser';
-          output.params.time_zone = isDefaultTimezone ?
-            (detectedTimezone || tzOffset) :
-            config.get('dateFormat:tz');
+          var isDefaultTimezone = config.isDefault('dateFormat:tz');
+          if (isDefaultTimezone) {
+            output.params.time_zone = detectedTimezone || tzOffset;
+          } else {
+            output.params.time_zone = config.get('dateFormat:tz');
+          }
 
           var scaleMetrics = interval.scaled && interval.scale < 1;
           if (scaleMetrics) {

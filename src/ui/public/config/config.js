@@ -14,21 +14,11 @@ module.service(`config`, function ($rootScope, $http, chrome) {
   let vals = {};
 
   config.init = _.once(init);
-  config.get = key => {
-    if (!(key in vals)) {
-      return null;
-    }
-    const { userValue, value: defaultValue, type } = vals[key];
-    const hasUserValue = userValue !== undefined && userValue !== null;
-    const currentValue = hasUserValue ? userValue : defaultValue;
-    if (type === 'json') {
-      return JSON.parse(currentValue);
-    }
-    return currentValue;
-  };
-  config.set = (key, val) => change(key, _.isPlainObject(val) ? angular.toJson(val) : val);
-  config.clear = key => change(key, null);
   config.getAll = () => _.cloneDeep(vals);
+  config.get = key => getCurrentValue(key);
+  config.set = (key, val) => change(key, _.isPlainObject(val) ? angular.toJson(val) : val);
+  config.isDefault = key => !(key in vals) || nullOrEmpty(vals[key].userValue);
+  config.clear = key => change(key, null);
 
   /**
    * A little helper for binding config variables to $scopes
@@ -87,5 +77,19 @@ module.service(`config`, function ($rootScope, $http, chrome) {
   }
   function edit(key, value) {
     return $http.post(chrome.addBasePath(`/api/kibana/settings/${key}`), { value });
+  }
+  function nullOrEmpty(value) {
+    return value === undefined || value === null;
+  }
+  function getCurrentValue(key) {
+    if (!(key in vals)) {
+      return null;
+    }
+    const { userValue, value: defaultValue, type } = vals[key];
+    const currentValue = config.isDefault(key) ? defaultValue : userValue;
+    if (type === 'json') {
+      return JSON.parse(currentValue);
+    }
+    return currentValue;
   }
 });
