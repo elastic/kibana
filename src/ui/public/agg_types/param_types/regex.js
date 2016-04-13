@@ -7,20 +7,7 @@ export default function RegexAggParamFactory(Private) {
 
   _.class(RegexAggParam).inherits(BaseAggParam);
   function RegexAggParam(config) {
-    // Java RegExp flags
-    var flags = [
-      'CANON_EQ',
-      'CASE_INSENSITIVE',
-      'COMMENTS',
-      'DOTALL',
-      'LITERAL',
-      'MULTILINE',
-      'UNICODE_CASE',
-      'UNICODE_CHARACTER_CLASS',
-      'UNIX_LINES'
-    ];
-
-    _.defaults(config, { pattern: '', flags: flags });
+    _.defaults(config, { pattern: '' });
     RegexAggParam.Super.call(this, config);
   }
 
@@ -57,11 +44,6 @@ export default function RegexAggParamFactory(Private) {
     var obj = {
       pattern: param.pattern
     };
-
-    // include any selected flags
-    if (_.isArray(param.flags) && param.flags.length) {
-      obj.flags = param.flags.join('|');
-    }
 
     output.params[this.name] = obj;
   };
