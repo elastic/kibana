@@ -11,3 +11,4 @@ import './processor_ui_remove';
 import './processor_ui_rename';
 import './processor_ui_set';
 import './processor_ui_split';
+import './processor_ui_trim';
