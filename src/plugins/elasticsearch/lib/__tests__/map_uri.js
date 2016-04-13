@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import mapUri from '../map_uri';
+import sinon from 'sinon';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/map_uri', function () {
@@ -8,14 +9,12 @@ describe('plugins/elasticsearch', function () {
     let request;
 
     beforeEach(function () {
+      const get = sinon.stub()
+      .withArgs('elasticsearch.url').returns('http://foobar:9200')
+      .withArgs('elasticsearch.requestHeaders').returns(['x-my-custom-HEADER', 'Authorization']);
+      const config = function () { return { get: get }; };
       server = {
-        config() {
-          return {
-            get() {
-              return 'http://foobar:9200';
-            }
-          };
-        }
+        config: config
       };
 
       request = {
@@ -25,16 +24,19 @@ describe('plugins/elasticsearch', function () {
           'accept-encoding': 'gzip, deflate',
           origin: 'https://localhost:5601',
           'content-type': 'application/json',
-          accept: 'application/json, text/plain, */*'
+          'x-my-custom-header': '42',
+          accept: 'application/json, text/plain, */*',
+          authorization: '2343d322eda344390fdw42'
         }
       };
     });
 
-    it ('filters out the origin header from the client', function () {
+    it ('only keeps the whitelisted request headers', function () {
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
-        expect(upstreamHeaders).not.to.have.property('origin');
-        expect(Object.keys(upstreamHeaders).length).to.be(4);
+        expect(upstreamHeaders).to.have.property('authorization');
+        expect(upstreamHeaders).to.have.property('x-my-custom-header');
+        expect(Object.keys(upstreamHeaders).length).to.be(2);
       });
     });
   });
