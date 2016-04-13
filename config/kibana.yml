@@ -61,6 +61,9 @@
 # must be a positive integer.
 # elasticsearch.requestTimeout: 30000
 
+# List of Kibana client-side headers to send to Elasticsearch
+# elasticsearch.requestHeaders: [ ]
+
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 # elasticsearch.shardTimeout: 0
 
