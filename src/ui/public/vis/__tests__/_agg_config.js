@@ -25,7 +25,7 @@ describe('AggConfig', function () {
 
   describe('#toDsl', function () {
     it('calls #write()', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -35,15 +35,15 @@ describe('AggConfig', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.date_histogram[0];
-      var stub = sinon.stub(aggConfig, 'write').returns({ params: {} });
+      let aggConfig = vis.aggs.byTypeName.date_histogram[0];
+      let stub = sinon.stub(aggConfig, 'write').returns({ params: {} });
 
       aggConfig.toDsl();
       expect(stub.callCount).to.be(1);
     });
 
     it('uses the type name as the agg name', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -53,15 +53,15 @@ describe('AggConfig', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.date_histogram[0];
+      let aggConfig = vis.aggs.byTypeName.date_histogram[0];
       sinon.stub(aggConfig, 'write').returns({ params: {} });
 
-      var dsl = aggConfig.toDsl();
+      let dsl = aggConfig.toDsl();
       expect(dsl).to.have.property('date_histogram');
     });
 
     it('uses the params from #write() output as the agg params', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -71,17 +71,17 @@ describe('AggConfig', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.date_histogram[0];
-      var football = {};
+      let aggConfig = vis.aggs.byTypeName.date_histogram[0];
+      let football = {};
 
       sinon.stub(aggConfig, 'write').returns({ params: football });
 
-      var dsl = aggConfig.toDsl();
+      let dsl = aggConfig.toDsl();
       expect(dsl.date_histogram).to.be(football);
     });
 
     it('includes subAggs from #write() output', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -95,14 +95,14 @@ describe('AggConfig', function () {
         ]
       });
 
-      var histoConfig = vis.aggs.byTypeName.date_histogram[0];
-      var avgConfig = vis.aggs.byTypeName.avg[0];
-      var football = {};
+      let histoConfig = vis.aggs.byTypeName.date_histogram[0];
+      let avgConfig = vis.aggs.byTypeName.avg[0];
+      let football = {};
 
       sinon.stub(histoConfig, 'write').returns({ params: {}, subAggs: [avgConfig] });
       sinon.stub(avgConfig, 'write').returns({ params: football });
 
-      var dsl = histoConfig.toDsl();
+      let dsl = histoConfig.toDsl();
 
       // didn't use .eql() because of variable key names, and final check is strict
       expect(dsl).to.have.property('aggs');
@@ -114,7 +114,7 @@ describe('AggConfig', function () {
 
   describe('::ensureIds', function () {
     it('accepts an array of objects and assigns ids to them', function () {
-      var objs = [
+      let objs = [
         {},
         {},
         {},
@@ -128,7 +128,7 @@ describe('AggConfig', function () {
     });
 
     it('assigns ids relative to the other items in the list', function () {
-      var objs = [
+      let objs = [
         { id: '100' },
         {},
       ];
@@ -138,7 +138,7 @@ describe('AggConfig', function () {
     });
 
     it('assigns ids relative to the other items in the list', function () {
-      var objs = [
+      let objs = [
         { id: '100' },
         { id: '200' },
         { id: '500' },
@@ -155,14 +155,14 @@ describe('AggConfig', function () {
 
     it('uses ::nextId to get the starting value', function () {
       sinon.stub(AggConfig, 'nextId').returns(534);
-      var objs = AggConfig.ensureIds([{}]);
+      let objs = AggConfig.ensureIds([{}]);
       expect(objs[0]).to.have.property('id', '534');
     });
 
     it('only calls ::nextId once', function () {
-      var start = 420;
+      let start = 420;
       sinon.stub(AggConfig, 'nextId').returns(start);
-      var objs = AggConfig.ensureIds([{}, {}, {}, {}, {}, {}, {}]);
+      let objs = AggConfig.ensureIds([{}, {}, {}, {}, {}, {}, {}]);
 
       expect(AggConfig.nextId).to.have.property('callCount', 1);
       objs.forEach(function (obj, i) {
@@ -173,12 +173,12 @@ describe('AggConfig', function () {
 
   describe('::nextId', function () {
     it('accepts a list of objects and picks the next id', function () {
-      var next = AggConfig.nextId([ {id: 100}, {id: 500} ]);
+      let next = AggConfig.nextId([ {id: 100}, {id: 500} ]);
       expect(next).to.be(501);
     });
 
     it('handles an empty list', function () {
-      var next = AggConfig.nextId([]);
+      let next = AggConfig.nextId([]);
       expect(next).to.be(1);
     });
 
@@ -191,7 +191,7 @@ describe('AggConfig', function () {
 
   describe('#toJSON', function () {
     it('includes the aggs id, params, type and schema', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -201,13 +201,13 @@ describe('AggConfig', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.date_histogram[0];
+      let aggConfig = vis.aggs.byTypeName.date_histogram[0];
       expect(aggConfig.id).to.be('1');
       expect(aggConfig.params).to.be.an('object');
       expect(aggConfig.type).to.be.an(AggType).and.have.property('name', 'date_histogram');
       expect(aggConfig.schema).to.be.an('object').and.have.property('name', 'segment');
 
-      var state = aggConfig.toJSON();
+      let state = aggConfig.toJSON();
       expect(state).to.have.property('id', '1');
       expect(state.params).to.be.an('object');
       expect(state).to.have.property('type', 'date_histogram');
@@ -217,37 +217,37 @@ describe('AggConfig', function () {
 
   describe('#makeLabel', function () {
     it('uses the custom label if it is defined', function () {
-      var vis = new Vis(indexPattern, {});
-      var aggConfig = vis.aggs[0];
+      let vis = new Vis(indexPattern, {});
+      let aggConfig = vis.aggs[0];
       aggConfig.params.customLabel = 'Custom label';
-      var label = aggConfig.makeLabel();
+      let label = aggConfig.makeLabel();
       expect(label).to.be(aggConfig.params.customLabel);
     });
     it('default label should be "Count"', function () {
-      var vis = new Vis(indexPattern, {});
-      var aggConfig = vis.aggs[0];
-      var label = aggConfig.makeLabel();
+      let vis = new Vis(indexPattern, {});
+      let aggConfig = vis.aggs[0];
+      let label = aggConfig.makeLabel();
       expect(label).to.be('Count');
     });
     it('default label should be "Percentage of Count" when Vis is in percentage mode', function () {
-      var vis = new Vis(indexPattern, {});
-      var aggConfig = vis.aggs[0];
+      let vis = new Vis(indexPattern, {});
+      let aggConfig = vis.aggs[0];
       aggConfig.vis.params.mode = 'percentage';
-      var label = aggConfig.makeLabel();
+      let label = aggConfig.makeLabel();
       expect(label).to.be('Percentage of Count');
     });
     it('empty label if the Vis type is not defined', function () {
-      var vis = new Vis(indexPattern, {});
-      var aggConfig = vis.aggs[0];
+      let vis = new Vis(indexPattern, {});
+      let aggConfig = vis.aggs[0];
       aggConfig.type = undefined;
-      var label = aggConfig.makeLabel();
+      let label = aggConfig.makeLabel();
       expect(label).to.be('');
     });
   });
 
   describe('#fieldFormatter', function () {
     it('returns the fields format unless the agg type has a custom getFormat handler', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -273,7 +273,7 @@ describe('AggConfig', function () {
     });
 
     it('returns the string format if the field does not have a format', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -284,13 +284,13 @@ describe('AggConfig', function () {
         ]
       });
 
-      var agg = vis.aggs[0];
+      let agg = vis.aggs[0];
       agg.params.field = { type: 'date', format: null };
       expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -301,13 +301,13 @@ describe('AggConfig', function () {
         ]
       });
 
-      var agg = vis.aggs[0];
+      let agg = vis.aggs[0];
       delete agg.params.field;
       expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -318,7 +318,7 @@ describe('AggConfig', function () {
         ]
       });
 
-      var field = indexPattern.fields.byName.ssl;
+      let field = indexPattern.fields.byName.ssl;
       expect(vis.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
     });
   });
