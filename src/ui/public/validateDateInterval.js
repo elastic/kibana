@@ -1,5 +1,5 @@
 define(function (require) {
-  var parseInterval = require('ui/utils/parse_interval');
+  const parseInterval = require('ui/utils/parse_interval');
 
   require('ui/modules')
   .get('kibana')
