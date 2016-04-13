@@ -21,7 +21,8 @@ uiRoutes
 });
 
 uiModules.get('apps/settings')
-.controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
+.controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle,
+                                             $translate, $translatePartialLoader) {
 
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
@@ -36,6 +37,10 @@ uiModules.get('apps/settings')
   $scope.$watch('indexPattern.fields', function () {
     $scope.fieldTypes = fieldTypes($scope.indexPattern);
   });
+
+  // point angular-translate to base subdirectory where this modules i18n files are located
+  $translatePartialLoader.addPart('../plugins/kibana/settings/sections/indices');
+  $translate.refresh();
 
   $scope.changeTab = function (obj) {
     $state.tab = obj.index;
