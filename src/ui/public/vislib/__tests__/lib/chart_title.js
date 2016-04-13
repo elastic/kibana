@@ -1,9 +1,9 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+let d3 = require('d3');
+let angular = require('angular');
+let _ = require('lodash');
+let $ = require('jquery');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
@@ -12,7 +12,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   let chartTitle;
   let el;
   let dataObj;
-  var data = {
+  let data = {
     hits: 621,
     label: '',
     ordered: {

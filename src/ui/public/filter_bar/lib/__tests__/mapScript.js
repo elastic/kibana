@@ -1,9 +1,9 @@
 
 describe('Filter Bar Directive', function () {
   describe('mapScript()', function () {
-    var sinon = require('auto-release-sinon');
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
+    let sinon = require('auto-release-sinon');
+    let expect = require('expect.js');
+    let ngMock = require('ngMock');
     let mapScript;
     let $rootScope;
 
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      var filter = {
+      let filter = {
         meta: { index: 'logstash-*', field: 'script number' },
         script: { script: 'doc["script number"].value * 5', params: { value: 35}}
       };
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
+      let filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
       mapScript(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

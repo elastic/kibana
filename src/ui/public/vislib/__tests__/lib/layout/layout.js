@@ -1,21 +1,21 @@
-var d3 = require('d3');
-var angular = require('angular');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+let d3 = require('d3');
+let angular = require('angular');
+let $ = require('jquery');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
-var dateHistogramArray = [
+let series = require('fixtures/vislib/mock_data/date_histogram/_series');
+let columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
+let rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
+let stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+let dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
