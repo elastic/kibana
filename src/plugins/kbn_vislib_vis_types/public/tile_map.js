@@ -26,9 +26,14 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatMinOpacity: 0.1,
         heatRadius: 25,
         heatBlur: 15,
-        heatNormalizeData: true,
+        intensityScale: 'linear',
         wms: config.get('visualization:tileMap:WMSdefaults')
       },
+      intensityScales: [
+        {name: 'Linear', value: 'linear'},
+        {name: 'Logarithmic', value: 'log'},
+        {name: 'Square root', value: 'sqrt'}
+      ],
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
       canDesaturate: !!supports.cssFilters,
       editor: tileMapTemplate

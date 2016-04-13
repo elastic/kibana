@@ -18,8 +18,6 @@ var bounds = {};
 let MarkerType;
 let map;
 
-angular.module('MarkerFactory', ['kibana']);
-
 function setBounds(southWest, northEast) {
   bounds.southWest = L.latLng(southWest || defaultSWCoords);
   bounds.northEast = L.latLng(northEast || defaultNECoords);
@@ -66,7 +64,7 @@ describe('Marker Tests', function () {
   describe('Base Methods', function () {
     let MarkerClass;
 
-    beforeEach(ngMock.module('MarkerFactory'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       MarkerClass = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
       markerLayer = createMarker(MarkerClass);
@@ -200,9 +198,11 @@ describe('Marker Tests', function () {
   });
 
   describe('Shaded Circles', function () {
-    beforeEach(ngMock.module('MarkerFactory'));
+    var MarkerClass;
+
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      var MarkerClass = Private(VislibVisualizationsMarkerTypesShadedCirclesProvider);
+      MarkerClass = Private(VislibVisualizationsMarkerTypesShadedCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
@@ -219,12 +219,13 @@ describe('Marker Tests', function () {
 
   describe('Scaled Circles', function () {
     let zoom;
+    let MarkerClass;
 
-    beforeEach(ngMock.module('MarkerFactory'));
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       zoom = _.random(1, 18);
       sinon.stub(mockMap, 'getZoom', _.constant(zoom));
-      var MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
+      MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
@@ -267,47 +268,71 @@ describe('Marker Tests', function () {
   });
 
   describe('Heatmaps', function () {
-    beforeEach(ngMock.module('MarkerFactory'));
+    var MarkerClass;
+
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      var MarkerClass = Private(VislibVisualizationsMarkerTypesHeatmapProvider);
+      MarkerClass = Private(VislibVisualizationsMarkerTypesHeatmapProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
-    describe('dataToHeatArray', function () {
-      let max;
+    describe('getDomain', function () {
+      var scaleTypes = ['linear', 'log', 'sqrt'];
+      var callback = function (d) { return d; };
+      var features = [-50000, -40000, -3000, -200, -10, 0, 10, 200, 3000, 40000, 500000];
+      var intensityScale;
 
-      beforeEach(function () {
-        max = mapData.properties.allmax;
+      scaleTypes.forEach(function (scale) {
+        var min = Math.min.apply(null, features);
+        var max = Math.max.apply(null, features);
+
+        if (scale !== 'log') {
+          it('should return the min and max value of the dataset for each scale type', function () {
+            intensityScale = markerLayer._getDomain(features, scale, callback);
+            expect(_.first(intensityScale)).to.be.eql(min);
+            expect(_.last(intensityScale)).to.be.eql(max);
+          });
+        } else {
+          it('should default the min value to 1e-9 for log scales when the min value is less than 1e-9', function () {
+            intensityScale = markerLayer._getDomain(features, scale, callback);
+            expect(_.first(intensityScale)).to.be.within(1e-9, Infinity);
+          });
+
+          it('should default the max value to 1 for log scales when the max value is less than 1', function () {
+            intensityScale = markerLayer._getDomain(features, scale, callback);
+            expect(_.last(intensityScale)).to.be.within(1, Infinity);
+          });
+        }
       });
+    });
 
-      it('should return an array or values for each feature', function () {
-        var arr = markerLayer._dataToHeatArray(max);
-        expect(arr).to.be.an('array');
-        expect(arr).to.have.length(mapData.features.length);
+    describe('heatmapScale', function () {
+      var scaleTypes = ['linear', 'sqrt', 'log'];
+      var callback = function (d) { return d; };
+      var features = [10, 20, 30, 40, 50];
+      var index = features.length - 1;
+      var intensityScale;
 
-      });
+      scaleTypes.forEach(function (scaleType) {
+        it('should return a function', function () {
+          intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
+          expect(intensityScale).to.be.a('function');
+        });
 
-      it('should return an array item with lat, lng, metric for each feature', function () {
-        _.times(3, function () {
-          var arr = markerLayer._dataToHeatArray(max);
-          var index = _.random(mapData.features.length - 1);
-          var feature = mapData.features[index];
-          var featureValue = feature.properties.value;
-          var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
-          expect(arr[index]).to.eql(featureArr);
+        it('should return a value between 0 and 1', function () {
+          intensityScale = markerLayer._heatmapScale(features, scaleType, callback);
+          expect(intensityScale(features[index])).to.be.within(0, 1);
         });
       });
+    });
 
-      it('should return an array item with lat, lng, normalized metric for each feature', function () {
-        _.times(5, function () {
-          markerLayer._attr.heatNormalizeData = true;
-
-          var arr = markerLayer._dataToHeatArray(max);
-          var index = _.random(mapData.features.length - 1);
-          var feature = mapData.features[index];
-          var featureValue = feature.properties.value / max;
-          var featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
-          expect(arr[index]).to.eql(featureArr);
+    describe('dataToHeatArray', function () {
+      it('should return an array or values for each feature', function () {
+        var arrs = markerLayer._dataToHeatArray();
+        expect(arrs).to.be.an('array');
+        expect(arrs).to.have.length(mapData.features.length);
+        arrs.forEach(function (arr) {
+          expect(arr).to.have.length(3); // [lat, lon, heatIntensity]
         });
       });
     });
