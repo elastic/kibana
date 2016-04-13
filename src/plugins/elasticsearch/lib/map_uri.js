@@ -1,5 +1,14 @@
 import querystring from 'querystring';
 import { resolve } from 'url';
+import _ from 'lodash';
+
+const filterHeaders = function (originalHeaders) {
+  const headersToRemove = [
+    'origin'
+  ];
+  return _.omit(originalHeaders, headersToRemove);
+};
+
 module.exports = function mapUri(server, prefix) {
   const config = server.config();
   return function (request, done) {
@@ -11,6 +20,6 @@ module.exports = function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    done(null, url);
+    done(null, url, filterHeaders(request.headers));
   };
 };
