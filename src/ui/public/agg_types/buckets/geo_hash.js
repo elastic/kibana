@@ -69,28 +69,17 @@ export default function GeoHashAggDefinition(Private, config) {
       },
       {
         name: 'precision',
-        default: defaultPrecision,
         editor: precisionTemplate,
         controller: function ($scope) {
-          $scope.$watchGroup([
-          'agg.params.mapZoom',
-          'agg.params.autoPrecision'],
-          function (curr, prev) {
-            const zoom = curr[0];
-            const autoPrecision = curr[1];
-            if (autoPrecision) {
-              $scope.agg.params.precision = zoomPrecision[zoom];
-            }
-          });
-          $scope.$watch('agg.params.precision', function(precision) {
-            // $scope.uiState.set('mapPrecision', preci
-          });
-
-          $scope.agg.params.mapZoom = $scope.uiState.get('vis.params.mapZoom');
         },
         deserialize: getPrecision,
         write: function (aggConfig, output) {
-          output.params.precision = getPrecision(aggConfig.params.precision);
+          let currZoom = aggConfig.vis.params.mapZoom;
+          if (aggConfig.params.mapZoom || aggConfig.vis.uiState) { // First iteration
+            currZoom = aggConfig.vis.uiState ? aggConfig.vis.uiState.get('vis.params.mapZoom') : aggConfig.params.mapZoom;
+          }
+          const autoPrecisionVal = zoomPrecision[currZoom];
+          output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }
       }
     ]

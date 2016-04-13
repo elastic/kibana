@@ -98,7 +98,13 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       },
       mapZoomEnd: function (event, uiState) {
         const agg = _.get(event, 'chart.geohashGridAgg');
-        // this could be a problem, conditional on autoPrecision
+        const mapPrecision = zoomPrecision[event.zoom];
+        uiState.set('vis.params.mapZoom', event.zoom);
+        uiState.set('vis.params.mapPrecision', mapPrecision);
+
+        if (!agg) return;
+        agg.params.mapZoom = event.zoom;
+
         if (!agg || !agg.params.autoPrecision) return;
 
         const precision = config.get('visualization:tileMap:maxPrecision');
