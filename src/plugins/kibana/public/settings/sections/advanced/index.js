@@ -29,7 +29,12 @@ uiModules.get('apps/settings')
 
       function changed(values) {
         const all = config.getAll();
-        const editable = _.map(all, (x, k) => toEditableConfig(x, k, x.userValue));
+        const editable = _.map(all, (def, name) => toEditableConfig({
+          def,
+          name,
+          value: def.userValue,
+          isCustom: config.isCustom(name)
+        }));
         const writable = _.reject(editable, 'readonly');
         $scope.configs = writable;
       }

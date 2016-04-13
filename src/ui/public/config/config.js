@@ -18,6 +18,7 @@ module.service(`config`, function ($rootScope, $http, chrome) {
   config.get = key => getCurrentValue(key);
   config.set = (key, val) => change(key, _.isPlainObject(val) ? angular.toJson(val) : val);
   config.isDefault = key => !(key in vals) || nullOrEmpty(vals[key].userValue);
+  config.isCustom = key => key in vals && !('value' in vals[key]);
   config.clear = key => change(key, null);
 
   /**
