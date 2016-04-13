@@ -1,5 +1,5 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
 
@@ -13,7 +13,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      var filter = { missing: { field: '_type' } };
+      let filter = { missing: { field: '_type' } };
       mapMissing(filter).then(function (result) {
         expect(result).to.have.property('key', 'missing');
         expect(result).to.have.property('value', '_type');
@@ -23,7 +23,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      var filter = { query: { match: { query: 'foo' } } };
+      let filter = { query: { match: { query: 'foo' } } };
       mapMissing(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

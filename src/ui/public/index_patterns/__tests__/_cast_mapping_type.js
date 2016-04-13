@@ -1,7 +1,7 @@
 describe('type normalizer (castMappingType)', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
+  let _ = require('lodash');
+  let ngMock = require('ngMock');
+  let expect = require('expect.js');
 
   let fn;
   let fields;
@@ -19,7 +19,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should cast numeric types to "number"', function () {
-    var types = [
+    let types = [
       'float',
       'double',
       'integer',
@@ -35,7 +35,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should treat non-numeric known types as what they are', function () {
-    var types = [
+    let types = [
       'date',
       'boolean',
       'ip',

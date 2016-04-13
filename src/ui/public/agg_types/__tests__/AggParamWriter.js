@@ -1,9 +1,9 @@
 module.exports = function AggParamWriterHelper(Private) {
-  var _ = require('lodash');
-  var Vis = Private(require('ui/Vis'));
-  var aggTypes = Private(require('ui/agg_types/index'));
-  var visTypes = Private(require('ui/registry/vis_types'));
-  var stubbedLogstashIndexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+  let _ = require('lodash');
+  let Vis = Private(require('ui/Vis'));
+  let aggTypes = Private(require('ui/agg_types/index'));
+  let visTypes = Private(require('ui/registry/vis_types'));
+  let stubbedLogstashIndexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
   /**
    * Helper object for writing aggParams. Specify an aggType and it will find a vis & schema, and
@@ -13,8 +13,8 @@ module.exports = function AggParamWriterHelper(Private) {
    *  - Verify that the interval parameter of the histogram visualization casts its input to a number
    *    ```js
    *    it('casts to a number', function () {
-   *      var writer = new AggParamWriter({ aggType: 'histogram' });
-   *      var output = writer.write({ interval : '100/10' });
+   *      let writer = new AggParamWriter({ aggType: 'histogram' });
+   *      let output = writer.write({ interval : '100/10' });
    *      expect(output.params.interval).to.be.a('number');
    *      expect(output.params.interval).to.be(100);
    *    });
@@ -25,7 +25,7 @@ module.exports = function AggParamWriterHelper(Private) {
    * @param {string} opts.aggType - the name of the aggType we want to test. ('histogram', 'filter', etc.)
    */
   function AggParamWriter(opts) {
-    var self = this;
+    let self = this;
 
     self.aggType = opts.aggType;
     if (_.isString(self.aggType)) {
@@ -43,7 +43,7 @@ module.exports = function AggParamWriterHelper(Private) {
 
     // find a suitable vis type and schema
     _.find(visTypes, function (visType) {
-      var schema = _.find(visType.schemas.all, function (schema) {
+      let schema = _.find(visType.schemas.all, function (schema) {
         // type, type, type, type, type... :(
         return schema.group === self.aggType.type;
       });
@@ -65,7 +65,7 @@ module.exports = function AggParamWriterHelper(Private) {
   }
 
   AggParamWriter.prototype.write = function (paramValues) {
-    var self = this;
+    let self = this;
     paramValues = _.clone(paramValues);
 
     if (self.aggType.params.byName.field && !paramValues.field) {
@@ -86,7 +86,7 @@ module.exports = function AggParamWriterHelper(Private) {
       }]
     });
 
-    var aggConfig = _.find(self.vis.aggs, function (aggConfig) {
+    let aggConfig = _.find(self.vis.aggs, function (aggConfig) {
       return aggConfig.type === self.aggType;
     });
 

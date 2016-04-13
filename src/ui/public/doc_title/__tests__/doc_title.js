@@ -1,11 +1,11 @@
 
 describe('docTitle Service', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let sinon = require('auto-release-sinon');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
   let initialDocTitle;
-  var MAIN_TITLE = 'Kibana 4';
+  let MAIN_TITLE = 'Kibana 4';
 
   let docTitle;
   let $rootScope;
@@ -35,9 +35,9 @@ describe('docTitle Service', function () {
 
   describe('setup', function () {
     it('resets the title when a route change begins', function () {
-      var spy = $rootScope.$on;
+      let spy = $rootScope.$on;
 
-      var found = spy.args.some(function (args) {
+      let found = spy.args.some(function (args) {
         return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
       });
 

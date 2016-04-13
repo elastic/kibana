@@ -1,7 +1,7 @@
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
+    let expect = require('expect.js');
+    let ngMock = require('ngMock');
     let mapQueryString;
     let $rootScope;
     beforeEach(ngMock.module('kibana'));
@@ -11,7 +11,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      var filter = { query: { query_string: { query: 'foo:bar' } } };
+      let filter = { query: { query_string: { query: 'foo:bar' } } };
       mapQueryString(filter).then(function (result) {
         expect(result).to.have.property('key', 'query');
         expect(result).to.have.property('value', 'foo:bar');
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      var filter = { query: { match: { query: 'foo' } } };
+      let filter = { query: { match: { query: 'foo' } } };
       mapQueryString(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

@@ -1,7 +1,7 @@
 describe('get computed fields', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   let indexPattern;
 
