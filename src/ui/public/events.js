@@ -1,10 +1,10 @@
 define(function (require) {
-  var _ = require('lodash');
-  var Notifier = require('ui/notify/notifier');
+  const _ = require('lodash');
+  const Notifier = require('ui/notify/notifier');
 
   return function EventsProvider(Private, Promise) {
-    var SimpleEmitter = require('ui/utils/SimpleEmitter');
-    var notify = new Notifier({ location: 'EventEmitter' });
+    const SimpleEmitter = require('ui/utils/SimpleEmitter');
+    const notify = new Notifier({ location: 'EventEmitter' });
 
     _.class(Events).inherits(SimpleEmitter);
     function Events() {
@@ -24,7 +24,7 @@ define(function (require) {
         this._listeners[name] = [];
       }
 
-      var listener = {
+      const listener = {
         handler: handler
       };
       this._listeners[name].push(listener);
@@ -76,8 +76,8 @@ define(function (require) {
      * @returns {Promise}
      */
     Events.prototype.emit = function (name) {
-      var self = this;
-      var args = _.rest(arguments);
+      const self = this;
+      const args = _.rest(arguments);
 
       if (!self._listeners[name]) {
         return self._emitChain;

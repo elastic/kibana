@@ -1,16 +1,16 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   function ConfigTemplate(templates) {
-    var template = this;
+    const template = this;
     template.current = null;
     template.toggle = _.partial(update, null);
     template.open = _.partial(update, true);
     template.close = _.partial(update, false);
 
     function update(newState, name) {
-      var toUpdate = templates[name];
-      var curState = template.is(name);
+      const toUpdate = templates[name];
+      const curState = template.is(name);
       if (newState == null) newState = !curState;
 
       if (newState) {

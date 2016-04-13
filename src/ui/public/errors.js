@@ -1,13 +1,13 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
+  const _ = require('lodash');
+  const angular = require('angular');
 
-  var canStack = (function () {
-    var err = new Error();
+  const canStack = (function () {
+    const err = new Error();
     return !!err.stack;
   }());
 
-  var errors = {};
+  const errors = {};
 
   // abstract error class
   function KbnError(msg, constructor) {
@@ -120,7 +120,7 @@ define(function (require) {
    * @param {String} field - the fields which contains the conflict
    */
   errors.RestrictedMapping = function RestrictedMapping(field, index) {
-    var msg = field + ' is a restricted field name';
+    let msg = field + ' is a restricted field name';
     if (index) msg += ', found it while attempting to fetch mapping for index pattern: ' + index;
 
     KbnError.call(this, msg, errors.RestrictedMapping);
@@ -166,7 +166,7 @@ define(function (require) {
   errors.SavedObjectNotFound = function SavedObjectNotFound(type, id) {
     this.savedObjectType = type;
     this.savedObjectId = id;
-    var idMsg = id ? ' (id: ' + id + ')' : '';
+    const idMsg = id ? ' (id: ' + id + ')' : '';
     KbnError.call(this,
       'Could not locate that ' + type + idMsg,
       errors.SavedObjectNotFound);
