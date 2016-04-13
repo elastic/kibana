@@ -7,19 +7,23 @@ export default function () {
       // Hierarchical and tabular data set their aggConfigResult parameter
       // differently because of how the point is rewritten between the two. So
       // we need to check if the point.orig is set, if not use try the point.aggConfigResult
-      var filters = _.clone($state.filters || []);
-      var pendingFilter = { meta: { negate: negate, index: index }};
+      const filters = _.clone($state.filters || []);
+      const pendingFilter = { meta: { negate: negate, index: index }};
       _.extend(pendingFilter, filter);
-      if (!filters.length) {
+      const filterKey = _.keys(filter)[0];
+      let filterAdded = false;
+
+      filters.forEach(function (filt) {
+        if (filt.hasOwnProperty(filterKey)) {
+          _.assign(filt, pendingFilter);
+          filterAdded = true;
+        }
+      });
+
+      if (!filterAdded) {
         filters.push(pendingFilter);
-      } else {
-        const filterKey = _.keys(filter)[0];
-        filters.forEach(function (filt) {
-          if (filt.hasOwnProperty(filterKey)) {
-            _.assign(filt, pendingFilter);
-          }
-        });
       }
+
       $state.filters = filters;
     };
   };
