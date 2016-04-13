@@ -46,11 +46,20 @@ export function rewriteDeprecatedConfig(object, log = noop) {
     }
   }, {});
 
-  forOwn(deprecatedSettings, (msg, key) => {
-    if (has(rewritten, key)) {
-      logWarning(key, msg);
-    }
-  });
+  // walk through the object to find all nested keys,
+  // join them with simple string concatenation so that
+  // compound keys don't get considered a single path segment
+  (function recurse(obj, parent = []) {
+    forOwn(obj, (val, leaf) => {
+      const path = parent.concat(leaf);
+      const key = path.join('.');
+      if (deprecatedSettings.hasOwnProperty(key)) {
+        log(deprecatedSettings[key]);
+      } else if (typeof val === 'object') {
+        recurse(val, path);
+      }
+    });
+  }(rewritten));
 
   return rewritten;
 }
