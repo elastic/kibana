@@ -10,7 +10,7 @@ let $scope;
 
 let $elem;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

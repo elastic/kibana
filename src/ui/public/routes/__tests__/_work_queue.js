@@ -25,10 +25,10 @@ describe('work queue', function () {
 
   describe('#resolveWhenFull', function () {
     it('resolves requests waiting for the queue to fill when appropriate', function () {
-      var size = _.random(5, 50);
+      let size = _.random(5, 50);
       queue.limit = size;
 
-      var whenFull = Promise.defer();
+      let whenFull = Promise.defer();
       sinon.stub(whenFull, 'resolve');
       queue.resolveWhenFull(whenFull);
 
@@ -53,11 +53,11 @@ describe('work queue', function () {
    *                         can manipulate the filled queue
    */
   function fillWithStubs(then) {
-    var size = _.random(5, 50);
-    var stub = sinon.stub();
+    let size = _.random(5, 50);
+    let stub = sinon.stub();
 
     _.times(size, function () {
-      var d = Promise.defer();
+      let d = Promise.defer();
       // overwrite the defer methods with the stub
       d.resolve = stub;
       d.reject = stub;
