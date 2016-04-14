@@ -6,8 +6,8 @@ import Notifier from 'ui/notify/notifier';
 import 'ui/notify/directives';
 import chrome from 'ui/chrome';
 import { kbnIndex } from 'ui/metadata';
-var module = modules.get('kibana/notify');
-var rootNotifier = new Notifier();
+let module = modules.get('kibana/notify');
+let rootNotifier = new Notifier();
 
 module.factory('createNotifier', function () {
   return function (opts) {
@@ -32,7 +32,7 @@ module.run(function ($interval) {
 if (!!kbnIndex) {
   require('ui/config');
   module.run(function ($rootScope, config) {
-    var configInitListener = $rootScope.$on('init:config', function () {
+    let configInitListener = $rootScope.$on('init:config', function () {
       applyConfig();
       configInitListener();
     });

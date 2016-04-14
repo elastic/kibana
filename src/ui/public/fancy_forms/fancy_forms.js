@@ -12,16 +12,16 @@ uiModules
       // directive providers are arrays
       $delegate.forEach(function (directive) {
         // get metadata about all init fns
-        var chain = [directive.controller, DecorativeController].map(function (fn) {
-          var deps = $injector.annotate(fn);
+        let chain = [directive.controller, DecorativeController].map(function (fn) {
+          let deps = $injector.annotate(fn);
           return { deps: deps, fn: _.isArray(fn) ? _.last(fn) : fn };
         });
 
         // replace the controller with one that will setup the actual controller
         directive.controller = function stub() {
-          var allDeps = _.toArray(arguments);
+          let allDeps = _.toArray(arguments);
           return chain.reduce(function (controller, link, i) {
-            var deps = allDeps.splice(0, link.deps.length);
+            let deps = allDeps.splice(0, link.deps.length);
             return link.fn.apply(controller, deps) || controller;
           }, this);
         };

@@ -8,7 +8,7 @@ function startsWith(str, test) {
 }
 
 function endsWith(str, test) {
-  var tooShort = str.length < test.length;
+  let tooShort = str.length < test.length;
   if (tooShort) return;
 
   return str.substr(str.length - test.length).toLowerCase() === test.toLowerCase();
