@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function collectKeys(children) {
-    var nextChildren = _.pluck(children, 'children');
-    var keys = _.pluck(children, 'name');
+    let nextChildren = _.pluck(children, 'children');
+    let keys = _.pluck(children, 'name');
     return _(nextChildren)
     .map(collectKeys)
     .flattenDeep()

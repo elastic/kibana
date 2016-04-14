@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeMetricMaxProvider(Private) {
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
 
     return new MetricAggType({
       name: 'max',

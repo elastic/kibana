@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
 
-  var html = require('ui/doc_table/doc_table.html');
-  var getSort = require('ui/doc_table/lib/get_sort');
+  let html = require('ui/doc_table/doc_table.html');
+  let getSort = require('ui/doc_table/lib/get_sort');
 
   require('ui/doc_table/doc_table.less');
   require('ui/directives/truncated');
@@ -25,15 +25,15 @@ define(function (require) {
         filter: '=?',
       },
       link: function ($scope) {
-        var notify = new Notifier();
+        let notify = new Notifier();
         $scope.limit = 50;
         $scope.persist = {
           sorting: $scope.sorting,
           columns: $scope.columns
         };
 
-        var prereq = (function () {
-          var fns = [];
+        let prereq = (function () {
+          let fns = [];
 
           return function register(fn) {
             fns.push(fn);
@@ -59,7 +59,7 @@ define(function (require) {
         $scope.$watch('columns', function (columns) {
           if (columns.length !== 0) return;
 
-          var $state = getAppState();
+          let $state = getAppState();
           $scope.columns.push('_source');
           if ($state) $state.replace();
         });

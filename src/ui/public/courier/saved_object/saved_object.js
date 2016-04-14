@@ -1,42 +1,42 @@
 define(function (require) {
   return function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
-    var angular = require('angular');
-    var errors = require('ui/errors');
-    var _ = require('lodash');
-    var slugifyId = require('ui/utils/slugify_id');
+    let angular = require('angular');
+    let errors = require('ui/errors');
+    let _ = require('lodash');
+    let slugifyId = require('ui/utils/slugify_id');
 
-    var DocSource = Private(require('ui/courier/data_source/doc_source'));
-    var SearchSource = Private(require('ui/courier/data_source/search_source'));
-    var mappingSetup = Private(require('ui/utils/mapping_setup'));
+    let DocSource = Private(require('ui/courier/data_source/doc_source'));
+    let SearchSource = Private(require('ui/courier/data_source/search_source'));
+    let mappingSetup = Private(require('ui/utils/mapping_setup'));
 
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};
 
       // save an easy reference to this
-      var self = this;
+      let self = this;
 
       /************
        * Initialize config vars
        ************/
       // the doc which is used to store this object
-      var docSource = new DocSource();
+      let docSource = new DocSource();
 
       // type name for this object, used as the ES-type
-      var type = config.type;
+      let type = config.type;
 
       // Create a notifier for sending alerts
-      var notify = new Notifier({
+      let notify = new Notifier({
         location: 'Saved ' + type
       });
 
       // mapping definition for the fields that this object will expose
-      var mapping = mappingSetup.expandShorthand(config.mapping);
+      let mapping = mappingSetup.expandShorthand(config.mapping);
 
       // default field values, assigned when the source is loaded
-      var defaults = config.defaults || {};
+      let defaults = config.defaults || {};
 
-      var afterESResp = config.afterESResp || _.noop;
-      var customInit = config.init || _.noop;
+      let afterESResp = config.afterESResp || _.noop;
+      let customInit = config.init || _.noop;
 
       // optional search source which this object configures
       self.searchSource = config.searchSource && new SearchSource();
@@ -108,7 +108,7 @@ define(function (require) {
 
         if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, self.id);
 
-        var meta = resp._source.kibanaSavedObjectMeta || {};
+        let meta = resp._source.kibanaSavedObjectMeta || {};
         delete resp._source.kibanaSavedObjectMeta;
 
         if (!config.indexPattern && self._source.indexPattern) {
@@ -153,8 +153,8 @@ define(function (require) {
           state = {};
         }
 
-        var oldState = self.searchSource.toJSON();
-        var fnProps = _.transform(oldState, function (dynamic, val, name) {
+        let oldState = self.searchSource.toJSON();
+        let fnProps = _.transform(oldState, function (dynamic, val, name) {
           if (_.isFunction(val)) dynamic[name] = val;
         }, {});
 
@@ -171,7 +171,7 @@ define(function (require) {
         return Promise.try(function () {
           if (self.searchSource) {
 
-            var index = config.indexPattern || self.searchSource.getOwn('index');
+            let index = config.indexPattern || self.searchSource.getOwn('index');
             if (!index) return;
             if (config.clearSavedIndexPattern) {
               self.searchSource.set('index', undefined);
@@ -195,7 +195,7 @@ define(function (require) {
        * @return {Object}
        */
       self.serialize = function () {
-        var body = {};
+        let body = {};
 
         _.forOwn(mapping, function (fieldMapping, fieldName) {
           if (self[fieldName] != null) {
@@ -222,7 +222,7 @@ define(function (require) {
        */
       self.save = function () {
 
-        var body = self.serialize();
+        let body = self.serialize();
 
         // Slugify the object id
         self.id = slugifyId(self.id);
@@ -235,7 +235,7 @@ define(function (require) {
       };
 
       self.saveSource = function (source) {
-        var finish = function (id) {
+        let finish = function (id) {
           self.id = id;
           return es.indices.refresh({
             index: kbnIndex
@@ -250,7 +250,7 @@ define(function (require) {
         .catch(function (err) {
           // record exists, confirm overwriting
           if (_.get(err, 'origError.status') === 409) {
-            var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
+            let confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
             return safeConfirm(confirmMessage).then(
               function () {

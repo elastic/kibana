@@ -1,10 +1,10 @@
 define(function (require) {
   return function GetColumnsProvider(Private) {
-    var _ = require('lodash');
-    var AggConfig = Private(require('ui/Vis/AggConfig'));
+    let _ = require('lodash');
+    let AggConfig = Private(require('ui/Vis/AggConfig'));
 
     return function getColumns(vis, minimal) {
-      var aggs = vis.aggs.getResponseAggs();
+      let aggs = vis.aggs.getResponseAggs();
 
       if (minimal == null) minimal = !vis.isHierarchical();
 
@@ -23,10 +23,10 @@ define(function (require) {
       }
 
       // supposed to be bucket,...metrics,bucket,...metrics
-      var columns = [];
+      let columns = [];
 
       // seperate the metrics
-      var grouped = _.groupBy(aggs, function (agg) {
+      let grouped = _.groupBy(aggs, function (agg) {
         return agg.schema.group;
       });
 

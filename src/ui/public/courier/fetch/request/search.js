@@ -1,12 +1,12 @@
 define(function (require) {
   return function SearchReqProvider(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
-    var AbstractRequest = Private(require('ui/courier/fetch/request/request'));
+    let searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
+    let AbstractRequest = Private(require('ui/courier/fetch/request/request'));
 
     _.class(SearchReq).inherits(AbstractRequest);
-    var Super = SearchReq.Super;
+    let Super = SearchReq.Super;
     function SearchReq(source, defer) {
       Super.call(this, source, defer);
 

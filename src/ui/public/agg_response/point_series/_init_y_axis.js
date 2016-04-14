@@ -1,10 +1,10 @@
 define(function (require) {
   return function PointSeriesInitYAxis() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     return function initYAxis(chart) {
-      var y = chart.aspects.y;
-      var x = chart.aspects.x;
+      let y = chart.aspects.y;
+      let x = chart.aspects.x;
 
       if (_.isArray(y)) {
         // TODO: vis option should allow choosing this format
@@ -15,7 +15,7 @@ define(function (require) {
         chart.yAxisLabel = y.col.title;
       }
 
-      var xAggOutput = x.agg.write();
+      let xAggOutput = x.agg.write();
       chart.yScale = xAggOutput.metricScale || null;
     };
   };
