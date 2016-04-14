@@ -11,30 +11,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonGeoJsonProvider);
 
-  // zoomPrecision maps event.zoom to a geohash precision value
-  // event.limit is the configurable max geohash precision
-  // default max precision is 7, configurable up to 12
-  const zoomPrecision = {
-    1: 2,
-    2: 2,
-    3: 2,
-    4: 3,
-    5: 3,
-    6: 4,
-    7: 4,
-    8: 5,
-    9: 5,
-    10: 6,
-    11: 6,
-    12: 7,
-    13: 7,
-    14: 8,
-    15: 9,
-    16: 10,
-    17: 11,
-    18: 12
-  };
-
   return new VislibVisType({
     name: 'tile_map',
     title: 'Tile map',
@@ -73,10 +49,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         pushFilter(filter, false, indexPatternName);
       },
       mapMoveEnd: function (event, uiState) {
-        const mapPrecision = zoomPrecision[event.zoom];
-        uiState.set('vis.params.mapCenter', event.center);
-        uiState.set('vis.params.mapZoom', event.zoom);
-        uiState.set('vis.params.mapPrecision', mapPrecision);
+        uiState.set('mapCenter', event.center);
+        uiState.set('mapZoom', event.zoom);
 
         const agg = _.get(event, 'chart.geohashGridAgg');
         if (!agg) return;
@@ -93,22 +67,14 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         if (editableAgg) {
           editableAgg.params.mapZoom = event.zoom;
           editableAgg.params.mapCenter = event.center;
-          editableAgg.params.mapPrecision = mapPrecision;
         }
       },
       mapZoomEnd: function (event, uiState) {
         const agg = _.get(event, 'chart.geohashGridAgg');
-        const mapPrecision = zoomPrecision[event.zoom];
-        uiState.set('vis.params.mapZoom', event.zoom);
-        uiState.set('vis.params.mapPrecision', mapPrecision);
+        uiState.set('mapZoom', event.zoom);
 
         if (!agg) return;
         agg.params.mapZoom = event.zoom;
-
-        if (!agg || !agg.params.autoPrecision) return;
-
-        const precision = config.get('visualization:tileMap:maxPrecision');
-        agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
 
         courier.fetch();
       }

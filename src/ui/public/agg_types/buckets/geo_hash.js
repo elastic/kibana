@@ -74,10 +74,11 @@ export default function GeoHashAggDefinition(Private, config) {
         },
         deserialize: getPrecision,
         write: function (aggConfig, output) {
-          let currZoom = aggConfig.vis.params.mapZoom;
+          let currZoom = null;
           if (aggConfig.params.mapZoom || aggConfig.vis.uiState) { // First iteration
-            currZoom = aggConfig.vis.uiState ? aggConfig.vis.uiState.get('vis.params.mapZoom') : aggConfig.params.mapZoom;
+            currZoom = aggConfig.vis.uiState ? aggConfig.vis.uiState.get('mapZoom') : aggConfig.params.mapZoom;
           }
+          currZoom = currZoom || aggConfig.vis.params.mapZoom;
           const autoPrecisionVal = zoomPrecision[currZoom];
           output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }
