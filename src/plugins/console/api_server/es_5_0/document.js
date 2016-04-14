@@ -153,8 +153,7 @@ module.exports = function (api) {
       "version": 1,
       "version_type": ["external", "external_gt", "external_gte", "force", "internal"],
       "parent": "",
-      "preference": "",
-      "dfs": "__flag__"
+      "preference": ""
     },
     data_autocomplete_rules: {
       fields: [
@@ -165,7 +164,6 @@ module.exports = function (api) {
       positions: {__one_of: [false, true]},
       term_statistics: {__one_of: [true, false]},
       field_statistics: {__one_of: [false, true]},
-      dfs: {__one_of: [true, false]},
       per_field_analyzer: {
         __template: {"FIELD": ""},
         "{field}": ""
