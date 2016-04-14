@@ -30,12 +30,19 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
    *                             be stored. Defaults to the config key
    * @return {function} - an unbind function
    */
-  config.$bind = function ($scope, key, property = key) {
-    update();
-    $scope.$on(`change:config.${key}`, update);
-    $scope.$on(`init:config`, update);
+  config.$bind = function (scope, key, property = key) {
+    config.on(key, update, scope);
     function update() {
-      $scope[property] = config.get(key);
+      scope[property] = config.get(key);
+    }
+  };
+
+  config.on = function (key, fn, scope = $rootScope) {
+    update();
+    scope.$on(`change:config.${key}`, update);
+    scope.$on(`init:config`, update);
+    function update() {
+      fn(config.get(key));
     }
   };
 
