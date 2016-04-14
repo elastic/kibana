@@ -2,8 +2,8 @@ import d3 from 'd3';
 import VislibLibLayoutSplitsPieChartChartSplitProvider from 'ui/vislib/lib/layout/splits/pie_chart/chart_split';
 import VislibLibLayoutSplitsPieChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/pie_chart/chart_title_split';
 export default function ColumnLayoutFactory(Private) {
-  var chartSplit = Private(VislibLibLayoutSplitsPieChartChartSplitProvider);
-  var chartTitleSplit = Private(VislibLibLayoutSplitsPieChartChartTitleSplitProvider);
+  let chartSplit = Private(VislibLibLayoutSplitsPieChartChartSplitProvider);
+  let chartTitleSplit = Private(VislibLibLayoutSplitsPieChartChartTitleSplitProvider);
 
   /**
    * Specifies the visualization layout for column charts.
