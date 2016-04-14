@@ -4,7 +4,7 @@ import $ from 'jquery';
 import SimpleEmitter from 'ui/utils/simple_emitter';
 import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
 export default function DispatchClass(Private) {
-  var Tooltip = Private(VislibComponentsTooltipProvider);
+  let Tooltip = Private(VislibComponentsTooltipProvider);
 
   /**
    * Handles event responses
@@ -35,19 +35,19 @@ export default function DispatchClass(Private) {
    * e: (d3.event|*), handler: (Object|*)}} Event response object
    */
   Dispatch.prototype.eventResponse = function (d, i) {
-    var datum = d._input || d;
-    var data = d3.event.target.nearestViewportElement ?
+    let datum = d._input || d;
+    let data = d3.event.target.nearestViewportElement ?
       d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-    var label = d.label ? d.label : d.name;
-    var isSeries = !!(data && data.series);
-    var isSlices = !!(data && data.slices);
-    var series = isSeries ? data.series : undefined;
-    var slices = isSlices ? data.slices : undefined;
-    var handler = this.handler;
-    var color = _.get(handler, 'data.color');
-    var isPercentage = (handler && handler._attr.mode === 'percentage');
+    let label = d.label ? d.label : d.name;
+    let isSeries = !!(data && data.series);
+    let isSlices = !!(data && data.slices);
+    let series = isSeries ? data.series : undefined;
+    let slices = isSlices ? data.slices : undefined;
+    let handler = this.handler;
+    let color = _.get(handler, 'data.color');
+    let isPercentage = (handler && handler._attr.mode === 'percentage');
 
-    var eventData = {
+    let eventData = {
       value: d.y,
       point: datum,
       datum: datum,
@@ -64,7 +64,7 @@ export default function DispatchClass(Private) {
 
     if (isSeries) {
       // Find object with the actual d value and add it to the point object
-      var object = _.find(series, { 'label': d.label });
+      let object = _.find(series, { 'label': d.label });
       eventData.value = +object.values[i].y;
 
       if (isPercentage) {
@@ -87,7 +87,7 @@ export default function DispatchClass(Private) {
   Dispatch.prototype.addEvent = function (event, callback) {
     return function (selection) {
       selection.each(function () {
-        var element = d3.select(this);
+        let element = d3.select(this);
 
         if (typeof callback === 'function') {
           return element.on(event, callback);
@@ -102,10 +102,10 @@ export default function DispatchClass(Private) {
    * @returns {Function}
    */
   Dispatch.prototype.addHoverEvent = function () {
-    var self = this;
-    var isClickable = this.listenerCount('click') > 0;
-    var addEvent = this.addEvent;
-    var $el = this.handler.el;
+    let self = this;
+    let isClickable = this.listenerCount('click') > 0;
+    let addEvent = this.addEvent;
+    let $el = this.handler.el;
     if (!this.handler.highlight) {
       this.handler.highlight = self.highlight;
     }
@@ -129,9 +129,9 @@ export default function DispatchClass(Private) {
    * @returns {Function}
    */
   Dispatch.prototype.addMouseoutEvent = function () {
-    var self = this;
-    var addEvent = this.addEvent;
-    var $el = this.handler.el;
+    let self = this;
+    let addEvent = this.addEvent;
+    let $el = this.handler.el;
     if (!this.handler.unHighlight) {
       this.handler.unHighlight = self.unHighlight;
     }
@@ -149,8 +149,8 @@ export default function DispatchClass(Private) {
    * @returns {Function}
    */
   Dispatch.prototype.addClickEvent = function () {
-    var self = this;
-    var addEvent = this.addEvent;
+    let self = this;
+    let addEvent = this.addEvent;
 
     function click(d, i) {
       self.emit('click', self.eventResponse(d, i));
@@ -166,9 +166,9 @@ export default function DispatchClass(Private) {
    * @returns {Boolean}
    */
   Dispatch.prototype.allowBrushing = function () {
-    var xAxis = this.handler.xAxis;
+    let xAxis = this.handler.xAxis;
     // Don't allow brushing for time based charts from non-time-based indices
-    var hasTimeField = this.handler.vis._attr.hasTimeField;
+    let hasTimeField = this.handler.vis._attr.hasTimeField;
 
     return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
   };
@@ -191,16 +191,16 @@ export default function DispatchClass(Private) {
   Dispatch.prototype.addBrushEvent = function (svg) {
     if (!this.isBrushable()) return;
 
-    var xScale = this.handler.xAxis.xScale;
-    var yScale = this.handler.xAxis.yScale;
-    var brush = this.createBrush(xScale, svg);
+    let xScale = this.handler.xAxis.xScale;
+    let yScale = this.handler.xAxis.yScale;
+    let brush = this.createBrush(xScale, svg);
 
     function brushEnd() {
       if (!validBrushClick(d3.event)) return;
 
-      var bar = d3.select(this);
-      var startX = d3.mouse(svg.node());
-      var startXInv = xScale.invert(startX[0]);
+      let bar = d3.select(this);
+      let startX = d3.mouse(svg.node());
+      let startXInv = xScale.invert(startX[0]);
 
       // Reset the brush value
       brush.extent([startXInv, startXInv]);
@@ -234,7 +234,7 @@ export default function DispatchClass(Private) {
    * @method highlight
    */
   Dispatch.prototype.highlight = function (element) {
-    var label = this.getAttribute('data-label');
+    let label = this.getAttribute('data-label');
     if (!label) return;
     //Opacity 1 is needed to avoid the css application
     $('[data-label]', element.parentNode).css('opacity', 1).not(
@@ -260,26 +260,26 @@ export default function DispatchClass(Private) {
    * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
    */
   Dispatch.prototype.createBrush = function (xScale, svg) {
-    var self = this;
-    var attr = self.handler._attr;
-    var height = attr.height;
-    var margin = attr.margin;
+    let self = this;
+    let attr = self.handler._attr;
+    let height = attr.height;
+    let margin = attr.margin;
 
     // Brush scale
-    var brush = d3.svg.brush()
+    let brush = d3.svg.brush()
     .x(xScale)
     .on('brushend', function brushEnd() {
 
       // Assumes data is selected at the chart level
       // In this case, the number of data objects should always be 1
-      var data = d3.select(this).data()[0];
-      var isTimeSeries = (data.ordered && data.ordered.date);
+      let data = d3.select(this).data()[0];
+      let isTimeSeries = (data.ordered && data.ordered.date);
 
       // Allows for brushing on d3.scale.ordinal()
-      var selected = xScale.domain().filter(function (d) {
+      let selected = xScale.domain().filter(function (d) {
         return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
       });
-      var range = isTimeSeries ? brush.extent() : selected;
+      let range = isTimeSeries ? brush.extent() : selected;
 
       return self.emit('brush', {
         range: range,
@@ -296,7 +296,7 @@ export default function DispatchClass(Private) {
       .call(brush)
       .call(function (brushG) {
         // hijack the brush start event to filter out right/middle clicks
-        var brushHandler = brushG.on('mousedown.brush');
+        let brushHandler = brushG.on('mousedown.brush');
         if (!brushHandler) return; // touch events in use
         brushG.on('mousedown.brush', function () {
           if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);

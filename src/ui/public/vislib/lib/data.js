@@ -7,10 +7,10 @@ import VislibComponentsLabelsLabelsProvider from 'ui/vislib/components/labels/la
 import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
 export default function DataFactory(Private) {
 
-  var injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
-  var orderKeys = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
-  var getLabels = Private(VislibComponentsLabelsLabelsProvider);
-  var color = Private(VislibComponentsColorColorProvider);
+  let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+  let orderKeys = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+  let getLabels = Private(VislibComponentsLabelsLabelsProvider);
+  let color = Private(VislibComponentsColorColorProvider);
 
   /**
    * Provides an API for pulling values off the data
@@ -28,7 +28,7 @@ export default function DataFactory(Private) {
 
     this.uiState = uiState;
 
-    var self = this;
+    let self = this;
     let offset;
 
     if (attr.mode === 'stacked') {
@@ -85,7 +85,7 @@ export default function DataFactory(Private) {
 
   Data.prototype._getLabels = function (data) {
     if (this.type === 'series') {
-      var noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
+      let noLabel = getLabels(data).length === 1 && getLabels(data)[0] === '';
       if (noLabel) {
         this._updateData();
         return [(this.get('yAxisLabel'))];
@@ -120,7 +120,7 @@ export default function DataFactory(Private) {
    * Returns the results of the addition of numbers in a filtered array.
    */
   Data.prototype._sumYs = function (arr, callback) {
-    var filteredArray = arr.filter(callback);
+    let filteredArray = arr.filter(callback);
 
     return (filteredArray.length) ? filteredArray.reduce(this._addVals) : 0;
   };
@@ -137,8 +137,8 @@ export default function DataFactory(Private) {
    *
    */
   Data.prototype._getCounts = function (i, j) {
-    var data = this.chartData();
-    var dataLengths = {};
+    let data = this.chartData();
+    let dataLengths = {};
 
     dataLengths.charts = data.length;
     dataLengths.stacks = dataLengths.charts ? data[i].series.length : 0;
@@ -151,7 +151,7 @@ export default function DataFactory(Private) {
    *
    */
   Data.prototype._createCache = function () {
-    var cache = {
+    let cache = {
       index: {
         chart: 0,
         stack: 0,
@@ -172,7 +172,7 @@ export default function DataFactory(Private) {
    * mixed datasets containing both positive and negative values.
    */
   Data.prototype._stackNegAndPosVals = function (d, y0, y) {
-    var data = this.chartData();
+    let data = this.chartData();
 
     // Storing counters and data characteristics needed to stack values properly
     if (!this._cache) {
@@ -184,7 +184,7 @@ export default function DataFactory(Private) {
 
 
     // last stack, or last value, reset the stack count and y value array
-    var lastStack = (this._cache.index.stack >= this._cache.count.stacks);
+    let lastStack = (this._cache.index.stack >= this._cache.count.stacks);
     if (lastStack) {
       this._cache.index.stack = 0;
       ++this._cache.index.value;
@@ -195,7 +195,7 @@ export default function DataFactory(Private) {
     }
 
     // last value, prepare for the next chart, if one exists
-    var lastValue = (this._cache.index.value >= this._cache.count.values);
+    let lastValue = (this._cache.index.value >= this._cache.count.values);
     if (lastValue) {
       this._cache.index.value = 0;
       ++this._cache.index.chart;
@@ -207,14 +207,14 @@ export default function DataFactory(Private) {
       }
 
       // get stack and value count for next chart
-      var chartSeries = data[this._cache.index.chart].series;
+      let chartSeries = data[this._cache.index.chart].series;
       this._cache.count.stacks = chartSeries.length;
       this._cache.count.values = chartSeries.length ? chartSeries[this._cache.index.stack].values.length : 0;
     }
   };
 
   Data.prototype.getDataType = function () {
-    var data = this.getVisData();
+    let data = this.getVisData();
     let type;
 
     data.forEach(function (obj) {
@@ -239,7 +239,7 @@ export default function DataFactory(Private) {
    */
   Data.prototype.chartData = function () {
     if (!this.data.series) {
-      var arr = this.data.rows ? this.data.rows : this.data.columns;
+      let arr = this.data.rows ? this.data.rows : this.data.columns;
       return _.toArray(arr);
     }
     return [this.data];
@@ -272,7 +272,7 @@ export default function DataFactory(Private) {
    * @return {Object}
    */
   Data.prototype.getGeoExtents = function () {
-    var visData = this.getVisData();
+    let visData = this.getVisData();
 
     return _.reduce(_.pluck(visData, 'geoJson.properties'), function (minMax, props) {
       return {
@@ -306,7 +306,7 @@ export default function DataFactory(Private) {
    * @returns {*} Data object value
    */
   Data.prototype.get = function (thing, def) {
-    var source = (this.data.rows || this.data.columns || [this.data])[0];
+    let source = (this.data.rows || this.data.columns || [this.data])[0];
     return _.get(source, thing, def);
   };
 
@@ -315,7 +315,7 @@ export default function DataFactory(Private) {
    * @returns {*}
    */
   Data.prototype.hasNullValues = function () {
-    var chartData = this.chartData();
+    let chartData = this.chartData();
 
     return chartData.some(function (chart) {
       return chart.series.some(function (obj) {
@@ -351,13 +351,13 @@ export default function DataFactory(Private) {
    * @returns {boolean}
    */
   Data.prototype.shouldBeStacked = function () {
-    var isHistogram = (this._attr.type === 'histogram');
-    var isArea = (this._attr.type === 'area');
-    var isOverlapping = (this._attr.mode === 'overlap');
-    var grouped = (this._attr.mode === 'grouped');
+    let isHistogram = (this._attr.type === 'histogram');
+    let isArea = (this._attr.type === 'area');
+    let isOverlapping = (this._attr.mode === 'overlap');
+    let grouped = (this._attr.mode === 'grouped');
 
-    var stackedHisto = isHistogram && !grouped;
-    var stackedArea = isArea && !isOverlapping;
+    let stackedHisto = isHistogram && !grouped;
+    let stackedArea = isArea && !isOverlapping;
 
     return stackedHisto || stackedArea;
   };
@@ -387,27 +387,27 @@ export default function DataFactory(Private) {
    * @returns {Number} Min y axis value
    */
   Data.prototype.getYMin = function (getValue) {
-    var self = this;
-    var arr = [];
+    let self = this;
+    let arr = [];
 
     if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
       this._attr.mode === 'silhouette') {
       return 0;
     }
 
-    var flat = this.flatten();
+    let flat = this.flatten();
     // if there is only one data point and its less than zero,
     // return 0 as the yMax value.
     if (!flat.length || flat.length === 1 && flat[0].y > 0) {
       return 0;
     }
 
-    var min = Infinity;
+    let min = Infinity;
 
     // for each object in the dataArray,
     // push the calculated y value to the initialized array (arr)
     _.each(this.chartData(), function (chart) {
-      var calculatedMin = self._getYExtent(chart, 'min', getValue);
+      let calculatedMin = self._getYExtent(chart, 'min', getValue);
       if (!_.isUndefined(calculatedMin)) {
         min = Math.min(min, calculatedMin);
       }
@@ -427,26 +427,26 @@ export default function DataFactory(Private) {
    * @returns {Number} Max y axis value
    */
   Data.prototype.getYMax = function (getValue) {
-    var self = this;
-    var arr = [];
+    let self = this;
+    let arr = [];
 
     if (self._attr.mode === 'percentage') {
       return 1;
     }
 
-    var flat = this.flatten();
+    let flat = this.flatten();
     // if there is only one data point and its less than zero,
     // return 0 as the yMax value.
     if (!flat.length || flat.length === 1 && flat[0].y < 0) {
       return 0;
     }
 
-    var max = -Infinity;
+    let max = -Infinity;
 
     // for each object in the dataArray,
     // push the calculated y value to the initialized array (arr)
     _.each(this.chartData(), function (chart) {
-      var calculatedMax = self._getYExtent(chart, 'max', getValue);
+      let calculatedMax = self._getYExtent(chart, 'max', getValue);
       if (!_.isUndefined(calculatedMax)) {
         max = Math.max(max, calculatedMax);
       }
@@ -484,7 +484,7 @@ export default function DataFactory(Private) {
       getValue = getValue || this._getY;
     }
 
-    var points = chart.series
+    let points = chart.series
     .reduce(function (points, series) {
       return points.concat(series.values);
     }, [])
@@ -519,8 +519,8 @@ export default function DataFactory(Private) {
    * @returns {Array} Array of labels (strings)
    */
   Data.prototype.returnNames = function (array, index, columns) {
-    var names = [];
-    var self = this;
+    let names = [];
+    let self = this;
 
     _.forEach(array, function (obj, i) {
       names.push({
@@ -530,7 +530,7 @@ export default function DataFactory(Private) {
       });
 
       if (obj.children) {
-        var plusIndex = index + 1;
+        let plusIndex = index + 1;
 
         _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
           names.push(namedObj);
@@ -552,10 +552,10 @@ export default function DataFactory(Private) {
    * @returns {Array} Array of names (strings)
    */
   Data.prototype.getNames = function (data, columns) {
-    var slices = data.slices;
+    let slices = data.slices;
 
     if (slices.children) {
-      var namedObj = this.returnNames(slices.children, 0, columns);
+      let namedObj = this.returnNames(slices.children, 0, columns);
 
       return _(namedObj)
       .sortBy(function (obj) {
@@ -574,7 +574,7 @@ export default function DataFactory(Private) {
    * @returns {*}
    */
   Data.prototype._removeZeroSlices = function (slices) {
-    var self = this;
+    let self = this;
 
     if (!slices.children) return slices;
 
@@ -597,11 +597,11 @@ export default function DataFactory(Private) {
    * @returns {Array} Array of unique names (strings)
    */
   Data.prototype.pieNames = function (data) {
-    var self = this;
-    var names = [];
+    let self = this;
+    let names = [];
 
     _.forEach(data, function (obj) {
-      var columns = obj.raw ? obj.raw.columns : undefined;
+      let columns = obj.raw ? obj.raw.columns : undefined;
       obj.slices = self._removeZeroSlices(obj.slices);
 
       _.forEach(self.getNames(obj, columns), function (name) {
@@ -673,17 +673,17 @@ export default function DataFactory(Private) {
    * @return {undefined}
    */
   Data.prototype._normalizeOrdered = function () {
-    var data = this.getVisData();
-    var self = this;
+    let data = this.getVisData();
+    let self = this;
 
     data.forEach(function (d) {
       if (!d.ordered || !d.ordered.date) return;
 
-      var missingMin = d.ordered.min == null;
-      var missingMax = d.ordered.max == null;
+      let missingMin = d.ordered.min == null;
+      let missingMax = d.ordered.max == null;
 
       if (missingMax || missingMin) {
-        var extent = d3.extent(self.xValues());
+        let extent = d3.extent(self.xValues());
         if (missingMin) d.ordered.min = extent[0];
         if (missingMax) d.ordered.max = extent[1];
       }
@@ -705,7 +705,7 @@ export default function DataFactory(Private) {
     values = _.map(series.rows, function (row) {
       return row[row.length - 1];
     });
-    var extents = [_.min(values), _.max(values)];
+    let extents = [_.min(values), _.max(values)];
     return extents;
   };
 
