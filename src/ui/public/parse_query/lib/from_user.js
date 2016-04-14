@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function GetQueryFromUser(es, Private) {
-    var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
+    let decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 
     /**
      * Take text from the user and make it into a query object
@@ -13,7 +13,7 @@ define(function (require) {
         return decorateQuery({query_string: {query: text}});
       }
 
-      var matchAll = getQueryStringQuery('*');
+      let matchAll = getQueryStringQuery('*');
 
       // If we get an empty object, treat it as a *
       if (_.isObject(text)) {

@@ -1,15 +1,15 @@
 define(function (require) {
 
-  var angular = require('angular');
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
+  let angular = require('angular');
+  let _ = require('lodash');
+  let rison = require('ui/utils/rison');
 
   // invokable/private angular dep
   return function ($location) {
     // feed in some of the private state from globalState
     return function (globalState, updateListeners, app) {
-      var getAppStash = function (search) {
-        var appStash = search._a && rison.decode(search._a);
+      let getAppStash = function (search) {
+        let appStash = search._a && rison.decode(search._a);
         if (app.current) {
           // Apply the defaults to appStash
           appStash = _.defaults(appStash || {}, app.defaults);
@@ -17,20 +17,20 @@ define(function (require) {
         return appStash;
       };
 
-      var diffTrans = function (trans) {
-        var obj = trans[0];
-        var update = trans[1];
+      let diffTrans = function (trans) {
+        let obj = trans[0];
+        let update = trans[1];
 
-        var diff = {};
+        let diff = {};
 
         // the keys that are currently set on obj, excluding methods
-        var objKeys = Object.keys(obj).filter(function (key) {
+        let objKeys = Object.keys(obj).filter(function (key) {
           return typeof obj[key] !== 'function';
         });
 
         if (update) {
           // the keys obj should have after applying the update
-          var updateKeys = diff.keys = Object.keys(update).filter(function (key) {
+          let updateKeys = diff.keys = Object.keys(update).filter(function (key) {
             return typeof update[key] !== 'function';
           });
 
@@ -53,8 +53,8 @@ define(function (require) {
         return diff;
       };
 
-      var notify = function (trans, diff) {
-        var listeners = null;
+      let notify = function (trans, diff) {
+        let listeners = null;
 
         if (trans[0] === app.current) {
           listeners = app.listeners;
@@ -67,11 +67,11 @@ define(function (require) {
         });
       };
 
-      var applyDiff = function (trans, diff) {
+      let applyDiff = function (trans, diff) {
         if (!diff.all.length) return;
 
-        var obj = trans[0];
-        var update = trans[1];
+        let obj = trans[0];
+        let update = trans[1];
 
         diff.remove.forEach(function (key) {
           delete obj[key];
@@ -82,13 +82,13 @@ define(function (require) {
         });
       };
 
-      var syncTrans = function (trans, forceNotify) {
+      let syncTrans = function (trans, forceNotify) {
         // obj that will be modified by update(trans[1])
         // if it is empty, we can skip it all
-        var skipWrite = !trans[0];
+        let skipWrite = !trans[0];
         trans[0] = trans[0] || {};
 
-        var diff = diffTrans(trans);
+        let diff = diffTrans(trans);
         if (!skipWrite && (forceNotify || diff.all.length)) {
           applyDiff(trans, diff);
           notify(trans, diff);
@@ -99,17 +99,17 @@ define(function (require) {
       return {
         // sync by pushing to the url
         push: function (forceNotify) {
-          var search = $location.search();
+          let search = $location.search();
 
-          var appStash = getAppStash(search) || {};
-          var globalStash = search._g ? rison.decode(search._g) : {};
+          let appStash = getAppStash(search) || {};
+          let globalStash = search._g ? rison.decode(search._g) : {};
 
-          var res = _.mapValues({
+          let res = _.mapValues({
             app: [appStash, app.current],
             global: [globalStash, globalState]
           }, function (trans, key) {
-            var diff = syncTrans(trans, forceNotify);
-            var urlKey = '_' + key.charAt(0);
+            let diff = syncTrans(trans, forceNotify);
+            let urlKey = '_' + key.charAt(0);
             if (diff.keys.length === 0) {
               delete search[urlKey];
             } else {
@@ -123,10 +123,10 @@ define(function (require) {
         },
         // sync by pulling from the url
         pull: function (forceNotify) {
-          var search = $location.search();
+          let search = $location.search();
 
-          var appStash = getAppStash(search);
-          var globalStash = search._g && rison.decode(search._g);
+          let appStash = getAppStash(search);
+          let globalStash = search._g && rison.decode(search._g);
 
           return _.mapValues({
             app: [app.current, appStash],
