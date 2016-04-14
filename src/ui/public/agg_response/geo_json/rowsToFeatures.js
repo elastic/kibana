@@ -1,7 +1,7 @@
 define(function (require) {
-  var decodeGeoHash = require('ui/utils/decode_geo_hash');
-  var AggConfigResult = require('ui/Vis/AggConfigResult');
-  var _ = require('lodash');
+  let decodeGeoHash = require('ui/utils/decode_geo_hash');
+  let AggConfigResult = require('ui/Vis/AggConfigResult');
+  let _ = require('lodash');
 
   function getAcr(val) {
     return val instanceof AggConfigResult ? val : null;
@@ -13,19 +13,19 @@ define(function (require) {
 
   function convertRowsToFeatures(table, geoI, metricI) {
     return _.transform(table.rows, function (features, row) {
-      var geohash = unwrap(row[geoI]);
+      let geohash = unwrap(row[geoI]);
       if (!geohash) return;
 
       // fetch latLn of northwest and southeast corners, and center point
-      var location = decodeGeoHash(geohash);
+      let location = decodeGeoHash(geohash);
 
-      var centerLatLng = [
+      let centerLatLng = [
         location.latitude[2],
         location.longitude[2]
       ];
 
       // order is nw, ne, se, sw
-      var rectangle = [
+      let rectangle = [
         [location.latitude[0], location.longitude[0]],
         [location.latitude[0], location.longitude[1]],
         [location.latitude[1], location.longitude[1]],

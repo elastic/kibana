@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
+  let _ = require('lodash');
+  let $ = require('jquery');
 
-  var module = require('ui/modules').get('kibana');
+  let module = require('ui/modules').get('kibana');
 
   module.directive('validateJson', function ($compile) {
     return {

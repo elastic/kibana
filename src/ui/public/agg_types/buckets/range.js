@@ -1,13 +1,13 @@
 define(function (require) {
   return function RangeAggDefinition(Private) {
-    var _ = require('lodash');
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/range'));
-    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
-    var RangeKey = Private(require('./RangeKey'));
+    let _ = require('lodash');
+    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    let createFilter = Private(require('ui/agg_types/buckets/create_filter/range'));
+    let FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+    let RangeKey = Private(require('./RangeKey'));
 
-    var keyCaches = new WeakMap();
-    var formats = new WeakMap();
+    let keyCaches = new WeakMap();
+    let formats = new WeakMap();
 
     return new BucketAggType({
       name: 'range',
@@ -17,14 +17,14 @@ define(function (require) {
         return aggConfig.params.field.displayName + ' ranges';
       },
       getKey: function (bucket, key, agg) {
-        var keys = keyCaches.get(agg);
+        let keys = keyCaches.get(agg);
 
         if (!keys) {
           keys = new Map();
           keyCaches.set(agg, keys);
         }
 
-        var id = RangeKey.idBucket(bucket);
+        let id = RangeKey.idBucket(bucket);
 
         key = keys.get(id);
         if (!key) {

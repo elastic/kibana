@@ -1,9 +1,9 @@
 define(function (require) {
   return function CourierFetchContinueIncompleteRequests(Private) {
-    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+    let INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
 
     function continueIncompleteRequests(strategy, requests, responses, fetchWithStrategy) {
-      var incomplete = [];
+      let incomplete = [];
 
       responses.forEach(function (resp, i) {
         if (resp === INCOMPLETE) {

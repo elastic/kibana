@@ -1,10 +1,10 @@
 define(function (require) {
   return function AbstractReqProvider(Private, Promise) {
-    var _ = require('lodash');
-    var moment = require('moment');
-    var errors = require('ui/errors');
-    var requestQueue = Private(require('ui/courier/_request_queue'));
-    var requestErrorHandler = Private(require('ui/courier/fetch/request/_error_handler'));
+    let _ = require('lodash');
+    let moment = require('moment');
+    let errors = require('ui/errors');
+    let requestQueue = Private(require('ui/courier/_request_queue'));
+    let requestErrorHandler = Private(require('ui/courier/fetch/request/_error_handler'));
 
     function AbstractReq(source, defer) {
       if (!(this instanceof AbstractReq) || !this.constructor || this.constructor === AbstractReq) {
@@ -29,7 +29,7 @@ define(function (require) {
       this.started = true;
       this.moment = moment();
 
-      var source = this.source;
+      let source = this.source;
       if (source.activeFetchCount) {
         source.activeFetchCount += 1;
       } else {
@@ -72,7 +72,7 @@ define(function (require) {
     };
 
     AbstractReq.prototype.retry = function () {
-      var clone = this.clone();
+      let clone = this.clone();
       this.abort();
       return clone;
     };

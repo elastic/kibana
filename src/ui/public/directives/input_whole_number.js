@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana');
+  let module = require('ui/modules').get('kibana');
 
   module.directive('inputWholeNumber', function () {
     return {
