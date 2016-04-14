@@ -1,12 +1,12 @@
 define(function (require) {
   return function HandlerBaseClass(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
-    var errors = require('ui/errors');
-    var Binder = require('ui/Binder');
+    let d3 = require('d3');
+    let _ = require('lodash');
+    let errors = require('ui/errors');
+    let Binder = require('ui/Binder');
 
-    var Data = Private(require('ui/vislib/lib/data'));
-    var Layout = Private(require('ui/vislib/lib/layout/layout'));
+    let Data = Private(require('ui/vislib/lib/data'));
+    let Layout = Private(require('ui/vislib/lib/layout/layout'));
 
     /**
      * Handles building all the components of the visualization
@@ -52,7 +52,7 @@ define(function (require) {
       // memoize so that the same function is returned every time,
       // allowing us to remove/re-add the same function
       this.getProxyHandler = _.memoize(function (event) {
-        var self = this;
+        let self = this;
         return function (e) {
           self.vis.emit(event, e);
         };
@@ -67,7 +67,7 @@ define(function (require) {
      * @private
      */
     Handler.prototype._validateData = function () {
-      var dataType = this.data.type;
+      let dataType = this.data.type;
 
       if (!dataType) {
         throw new errors.NoResults();
@@ -82,9 +82,9 @@ define(function (require) {
      * @returns {HTMLElement} With the visualization child element
      */
     Handler.prototype.render = function () {
-      var self = this;
-      var charts = this.charts = [];
-      var selection = d3.select(this.el);
+      let self = this;
+      let charts = this.charts = [];
+      let selection = d3.select(this.el);
 
       selection.selectAll('*').remove();
 
@@ -98,7 +98,7 @@ define(function (require) {
       // render the chart(s)
       selection.selectAll('.chart')
       .each(function (chartData) {
-        var chart = new self.ChartClass(self, this, chartData);
+        let chart = new self.ChartClass(self, this, chartData);
 
         self.vis.activeEvents().forEach(function (event) {
           self.enable(event, chart);
@@ -134,7 +134,7 @@ define(function (require) {
 
     function chartEventProxyToggle(method) {
       return function (event, chart) {
-        var proxyHandler = this.getProxyHandler(event);
+        let proxyHandler = this.getProxyHandler(event);
 
         _.each(chart ? [chart] : this.charts, function (chart) {
           chart.events[method](event, proxyHandler);
@@ -165,7 +165,7 @@ define(function (require) {
     Handler.prototype.error = function (message) {
       this.removeAll(this.el);
 
-      var div = d3.select(this.el)
+      let div = d3.select(this.el)
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize

@@ -1,6 +1,6 @@
 define(function (require) {
   return function GetSeriesUtilService() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     /*
      * Accepts a Kibana data object with a rows or columns key
