@@ -32,8 +32,8 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
    */
   config.$bind = function (scope, key, property = key) {
     config.on(key, update, scope);
-    function update() {
-      scope[property] = config.get(key);
+    function update(value) {
+      scope[property] = value;
     }
   };
 
