@@ -31,7 +31,7 @@ describe('plugins/elasticsearch', function () {
       };
     });
 
-    it ('only keeps the whitelisted request headers', function () {
+    it('only keeps the whitelisted request headers', function () {
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamHeaders).to.have.property('authorization');
