@@ -7,7 +7,7 @@ import uiModules from 'ui/modules';
 import scriptedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_scripted_fields.html';
 
 uiModules.get('apps/settings')
-.directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
+.directive('settingsIndicesScriptedFields', function (kbnUrl, Notifier, $filter) {
   const rowScopes = []; // track row scopes, so they can be destroyed as needed
   const filter = $filter('filter');
 
@@ -37,8 +37,6 @@ uiModules.get('apps/settings')
         rowScopes.length = 0;
 
         const fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
-        _.find($scope.fieldTypes, {index: 'scriptedFields'}).count = fields.length; // Update the tab count
-
         $scope.rows = fields.map(function (field) {
           const rowScope = $scope.$new();
           rowScope.field = field;

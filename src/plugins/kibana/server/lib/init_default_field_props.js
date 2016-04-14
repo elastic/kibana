@@ -17,6 +17,7 @@ module.exports = function initDefaultFieldProps(fields) {
         analyzed: true,
         doc_values: false,
         scripted: false,
+        exclude: false,
         count: 0
       });
 
@@ -27,6 +28,7 @@ module.exports = function initDefaultFieldProps(fields) {
         analyzed: false,
         doc_values: true,
         scripted: false,
+        exclude: false,
         count: 0
       });
     }
@@ -36,6 +38,7 @@ module.exports = function initDefaultFieldProps(fields) {
         analyzed: false,
         doc_values: true,
         scripted: false,
+        exclude: false,
         count: 0
       });
     }

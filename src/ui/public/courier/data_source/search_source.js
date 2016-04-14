@@ -1,11 +1,11 @@
 import _ from 'lodash';
 
-import NormalizeSortRequestProvider from './_normalize_sort_request';
 import rootSearchSource from './_root_search_source';
 import AbstractDataSourceProvider from './_abstract';
 import SearchRequestProvider from '../fetch/request/search';
 import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
+import NormalizeSortRequestProvider from './_normalize_sort_request';
 
 export default function SearchSourceFactory(Promise, Private) {
   var SourceAbstract = Private(AbstractDataSourceProvider);
@@ -13,6 +13,12 @@ export default function SearchSourceFactory(Promise, Private) {
   var SegmentedRequest = Private(SegmentedRequestProvider);
   var searchStrategy = Private(SearchStrategyProvider);
   var normalizeSortRequest = Private(NormalizeSortRequestProvider);
+
+  var forIp = Symbol('for which index pattern?');
+
+  function isIndexPattern(val) {
+    return Boolean(val && typeof val.toIndexList === 'function');
+  }
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
@@ -42,13 +48,31 @@ export default function SearchSourceFactory(Promise, Private) {
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
-    if (indexPattern === undefined) return this._state.index;
-    if (indexPattern === null) return delete this._state.index;
-    if (!indexPattern || typeof indexPattern.toIndexList !== 'function') {
+    var state = this._state;
+
+    var hasSource = state.source;
+    var sourceCameFromIp = hasSource && state.source.hasOwnProperty(forIp);
+    var sourceIsForOurIp = sourceCameFromIp && state.source[forIp] === state.index;
+    if (sourceIsForOurIp) {
+      delete state.source;
+    }
+
+    if (indexPattern === undefined) return state.index;
+    if (indexPattern === null) return delete state.index;
+    if (!isIndexPattern(indexPattern)) {
       throw new TypeError('expected indexPattern to be an IndexPattern duck.');
     }
 
-    this._state.index = indexPattern;
+    state.index = indexPattern;
+    if (!state.source) {
+      // imply source filtering based on the index pattern, but allow overriding
+      // it by simply setting another value for "source". When index is changed
+      state.source = function () {
+        return indexPattern.getSourceFiltering();
+      };
+      state.source[forIp] = indexPattern;
+    }
+
     return this;
   };
 

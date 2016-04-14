@@ -2,7 +2,8 @@ import ObjDefine from 'ui/utils/obj_define';
 import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 import IndexPatternsFieldTypesProvider from 'ui/index_patterns/_field_types';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
-export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
+
+export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier, config) {
   var notify = new Notifier({ location: 'IndexPattern Field' });
   var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
   var fieldTypes = Private(IndexPatternsFieldTypesProvider);
@@ -42,10 +43,12 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     var scripted = !!spec.scripted;
     var sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
     var filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
+    var isMetaField = config.get('metaFields').includes(spec.name);
 
     obj.fact('name');
     obj.fact('type');
     obj.writ('count', spec.count || 0);
+    obj.fact('exclude', Boolean(!isMetaField && spec.exclude));
 
     // scripted objs
     obj.fact('scripted', scripted);

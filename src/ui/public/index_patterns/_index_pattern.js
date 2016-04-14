@@ -13,6 +13,7 @@ import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
+
 export default function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
 
   var fieldformats = Private(RegistryFieldFormatsProvider);
@@ -37,6 +38,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     notExpandable: 'boolean',
     intervalName: 'string',
     fields: 'json',
+    fieldFilters: 'json',
     fieldFormatMap: {
       type: 'string',
       _serialize: function (map) {
@@ -65,6 +67,9 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     var self = this;
 
     setId(id);
+    if (!self.fieldFilters) {
+      self.fieldFilters = [];
+    }
 
     var docSource = new DocSource();
 
@@ -129,6 +134,18 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
           initFields();
         }
       }
+    };
+
+    // Get the source filtering configuration for that index.
+    // Fields which name appears in the given columns array will not be excluded.
+    self.getSourceFiltering = function (columns) {
+      return {
+        exclude: self
+          .getNonScriptedFields()
+          .filter(field => field.exclude && !_.contains(columns, field.name))
+          .map(field => field.name)
+          .concat(self.fieldFilters.map(filter => filter.value))
+      };
     };
 
     self.addScriptedField = function (name, script, type, lang) {
@@ -291,8 +308,18 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self._fetchFields = function () {
+      var existingFieldsByName = _.get(self, 'fields.byName', {});
+
       return mapper.getFieldsForIndexPattern(self, true)
       .then(function (fields) {
+        // copy over kibana-added properties from existing fields
+        fields.forEach(function (field) {
+          var existingField = existingFieldsByName[field.name];
+          if (existingField) {
+            field.exclude = existingField.exclude;
+          }
+        });
+
         // append existing scripted fields
         fields = fields.concat(self.getScriptedFields());
 
