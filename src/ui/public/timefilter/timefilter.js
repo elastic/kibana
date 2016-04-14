@@ -40,10 +40,6 @@ uiModules
     self.enabled = false;
 
     self.init = _.once(function () {
-      return config.init().then(self.consumeDefaults);
-    });
-
-    self.consumeDefaults = _.once(function () {
       var timeDefaults = config.get('timepicker:timeDefaults');
       var refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 

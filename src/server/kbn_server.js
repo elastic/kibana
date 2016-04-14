@@ -32,6 +32,9 @@ module.exports = class KbnServer {
       // setup this.uiExports and this.bundles
       require('../ui'),
 
+      // setup server.uiSettings
+      require('../ui/settings'),
+
       // ensure that all bundles are built, or that the
       // lazy bundle server is running
       require('../optimize'),

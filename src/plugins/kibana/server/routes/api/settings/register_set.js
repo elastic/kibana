@@ -5,26 +5,15 @@ export default function registerSet(server) {
     path: '/api/kibana/settings/{key}',
     method: 'POST',
     handler: async function (req, reply) {
-      const key = req.params.key;
-      const value = req.payload.value;
-      const client = server.plugins.elasticsearch.client;
-      const config = server.config();
-      const index = config.get('kibana.index');
-      const id = config.get('pkg.version');
-      const type = 'config';
-
-      client
-        .update({
-          index,
-          type,
-          id,
-          body: {
-            doc: {
-              [key]: value
-            }
-          }
-        })
-        .then(() => reply({}).type('application/json'))
+      const { key } = req.params;
+      const { value } = req.payload;
+      const uiSettings = server.uiSettings();
+      uiSettings
+        .set(key, value)
+        .then(() => uiSettings
+          .getUserProvided()
+          .then(settings => reply({ settings }).type('application/json'))
+        )
         .catch(reason => reply(Boom.wrap(reason)));
     }
   });

@@ -18,6 +18,7 @@ module.exports = function (chrome, internals) {
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
     .value('serverName', internals.serverName)
+    .value('uiSettings', internals.uiSettings)
     .value('sessionId', Date.now())
     .value('chrome', chrome)
     .value('esUrl', (function () {

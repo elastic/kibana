@@ -8,7 +8,8 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-module.exports = async (kbnServer, server, config) => {
+
+export default async (kbnServer, server, config) => {
 
   let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
@@ -59,7 +60,8 @@ module.exports = async (kbnServer, server, config) => {
     }
   });
 
-  server.decorate('reply', 'renderApp', function (app) {
+  server.decorate('reply', 'renderApp', async function (app) {
+    const uiSettings = server.uiSettings();
     const payload = {
       app: app,
       nav: uiExports.navLinks.inOrder,
@@ -68,6 +70,10 @@ module.exports = async (kbnServer, server, config) => {
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
+      uiSettings: {
+        defaults: await uiSettings.getDefaults(),
+        user: await uiSettings.getUserProvided()
+      },
       vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
 

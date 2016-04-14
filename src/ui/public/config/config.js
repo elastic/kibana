@@ -1,25 +1,25 @@
 import angular from 'angular';
-import { once, cloneDeep, isPlainObject } from 'lodash';
+import { once, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 const module = uiModules.get('kibana/config');
 
-uiRoutes.addSetupWork(config => config.init());
-
 // service for delivering config variables to everywhere else
-module.service(`config`, function ($rootScope, $http, chrome) {
+module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   const config = this;
   const notify = new Notifier({ location: `Config` });
-  let vals = {};
+  const { defaults, user: initialUserSettings } = uiSettings;
+  let settings = mergeSettings(defaults, initialUserSettings);
 
-  config.init = once(init);
-  config.getAll = () => cloneDeep(vals);
+  $rootScope.$broadcast(`init:config`);
+
+  config.getAll = () => cloneDeep(settings);
   config.get = key => getCurrentValue(key);
   config.set = (key, val) => change(key, isPlainObject(val) ? angular.toJson(val) : val);
   config.remove = key => change(key, null);
-  config.isDefault = key => !(key in vals) || nullOrEmpty(vals[key].userValue);
-  config.isCustom = key => key in vals && !('value' in vals[key]);
+  config.isDefault = key => !(key in settings) || nullOrEmpty(settings[key].userValue);
+  config.isCustom = key => key in settings && !('value' in settings[key]);
 
   /**
    * A little helper for binding config variables to $scopes
@@ -39,39 +39,16 @@ module.service(`config`, function ($rootScope, $http, chrome) {
     }
   };
 
-  /**
-   * Executes once and returns a promise that is resolved once the
-   * config has loaded for the first time.
-   *
-   * @return {Promise} - Resolved when the config loads initially
-   */
-  function init() {
-    const complete = notify.lifecycle(`config init`);
-    return reset()
-      .then(() => $rootScope.$broadcast(`init:config`))
-      .then(
-        complete,
-        complete.failure
-      );
-  }
-  function reset(loud) {
-    return $http
-      .get(chrome.addBasePath(`/api/kibana/settings`))
-      .then(response => {
-        vals = response.data.settings;
-        if (loud) {
-          $rootScope.$broadcast(`change:config`, vals);
-        }
-      });
-  }
   function change(key, value) {
     const oldVal = config.get(key);
     const update = value === null ? remove : edit;
     return update(key, value)
-      .then(() => reset(true))
-      .then(() => {
+      .then(res => res.data.settings)
+      .then(updatedSettings => {
         notify.log(`config change: ${key}: ${oldVal} -> ${value}`);
-        $rootScope.$broadcast(`change:config.${key}`, vals[key], oldVal);
+        settings = mergeSettings(defaults, updatedSettings);
+        $rootScope.$broadcast(`change:config`, settings);
+        $rootScope.$broadcast(`change:config.${key}`, settings[key], oldVal);
       });
   }
   function remove(key) {
@@ -84,10 +61,10 @@ module.service(`config`, function ($rootScope, $http, chrome) {
     return value === undefined || value === null;
   }
   function getCurrentValue(key) {
-    if (!(key in vals)) {
+    if (!(key in settings)) {
       return null;
     }
-    const { userValue, value: defaultValue, type } = vals[key];
+    const { userValue, value: defaultValue, type } = settings[key];
     const currentValue = config.isDefault(key) ? defaultValue : userValue;
     if (type === 'json') {
       return JSON.parse(currentValue);
@@ -95,3 +72,7 @@ module.service(`config`, function ($rootScope, $http, chrome) {
     return currentValue;
   }
 });
+
+function mergeSettings(defaults, extended) {
+  return defaultsDeep(extended, defaults);
+}
