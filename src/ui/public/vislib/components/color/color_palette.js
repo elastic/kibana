@@ -1,9 +1,9 @@
 define(function (require) {
   return function ColorPaletteUtilService(Private) {
-    var d3 = require('d3');
-    var _ = require('lodash');
+    let d3 = require('d3');
+    let _ = require('lodash');
 
-    var seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+    let seedColors = Private(require('ui/vislib/components/color/seed_colors'));
 
 
     /*
@@ -12,10 +12,10 @@ define(function (require) {
      * new colors are generated up to the value of the input number.
      */
 
-    var offset = 300; // Hue offset to start at
+    let offset = 300; // Hue offset to start at
 
-    var fraction = function (goal) {
-      var walkTree = function (numerator, denominator, bytes) {
+    let fraction = function (goal) {
+      let walkTree = function (numerator, denominator, bytes) {
         if (bytes.length) {
           return walkTree(
             (numerator * 2) + (bytes.pop() ? 1 : -1),
@@ -28,7 +28,7 @@ define(function (require) {
         }
       };
 
-      var b = (goal + 2)
+      let b = (goal + 2)
         .toString(2)
         .split('')
         .map(function (num) {
@@ -45,9 +45,9 @@ define(function (require) {
         throw new TypeError('ColorPaletteUtilService expects a number');
       }
 
-      var colors = seedColors;
+      let colors = seedColors;
 
-      var seedLength = seedColors.length;
+      let seedLength = seedColors.length;
 
       _.times(num - seedLength, function (i) {
         colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());

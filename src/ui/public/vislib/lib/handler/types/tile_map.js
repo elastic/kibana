@@ -1,14 +1,14 @@
 define(function (require) {
   return function MapHandlerProvider(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var Handler = Private(require('ui/vislib/lib/handler/handler'));
-    var Data = Private(require('ui/vislib/lib/data'));
+    let Handler = Private(require('ui/vislib/lib/handler/handler'));
+    let Data = Private(require('ui/vislib/lib/data'));
 
     return function (vis) {
-      var data = new Data(vis.data, vis._attr, vis.uiState);
+      let data = new Data(vis.data, vis._attr, vis.uiState);
 
-      var MapHandler = new Handler(vis, {
+      let MapHandler = new Handler(vis, {
         data: data
       });
 

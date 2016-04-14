@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
 
   return function RemoveZeroSlices() {
     return function removeZeroSlices(slices) {
