@@ -1,13 +1,13 @@
 define(function () {
   return function addWordBreaks(text, minLineLength) {
     text = text || '';
-    var lineSize = 0;
-    var newText = '';
-    var inHtmlTag = false;
-    var inHtmlChar = false;
+    let lineSize = 0;
+    let newText = '';
+    let inHtmlTag = false;
+    let inHtmlChar = false;
 
-    for (var i = 0, len = text.length; i < len; i++) {
-      var chr = text.charAt(i);
+    for (let i = 0, len = text.length; i < len; i++) {
+      let chr = text.charAt(i);
       newText += chr;
 
       switch (chr) {
