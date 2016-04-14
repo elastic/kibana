@@ -45,10 +45,11 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
     return update(key, value)
       .then(res => res.data.settings)
       .then(updatedSettings => {
-        notify.log(`config change: ${key}: ${oldVal} -> ${value}`);
         settings = mergeSettings(defaults, updatedSettings);
+        const newVal = getCurrentValue(key);
+        notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
         $rootScope.$broadcast(`change:config`, settings);
-        $rootScope.$broadcast(`change:config.${key}`, getCurrentValue(key), oldVal);
+        $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal);
       });
   }
   function remove(key) {
