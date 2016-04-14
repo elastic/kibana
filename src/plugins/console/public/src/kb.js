@@ -249,8 +249,8 @@ es.addServerChangeListener(function () {
   else if (version[0] === "2") {
     api = "es_2_0";
   }
-  else if (version[0] === "3") {
-    api = "es_2_0"; // TODO: change :)
+  else if (version[0] === "5") {
+    api = "es_5_0";
   }
   else {
     api = "es_1_0";
