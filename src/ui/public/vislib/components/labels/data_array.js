@@ -1,7 +1,7 @@
 define(function (require) {
   return function GetArrayUtilService(Private) {
-    var _ = require('lodash');
-    var flattenSeries = Private(require('ui/vislib/components/labels/flatten_series'));
+    let _ = require('lodash');
+    let flattenSeries = Private(require('ui/vislib/components/labels/flatten_series'));
 
     /*
      * Accepts a Kibana data object and returns an array of values objects.

@@ -1,10 +1,10 @@
 define(function (require) {
   return function ZeroInjectionUtilService(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
-    var createZeroFilledArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
-    var zeroFillDataArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
+    let orderXValues = Private(require('ui/vislib/components/zero_injection/ordered_x_keys'));
+    let createZeroFilledArray = Private(require('ui/vislib/components/zero_injection/zero_filled_array'));
+    let zeroFillDataArray = Private(require('ui/vislib/components/zero_injection/zero_fill_data_array'));
 
     /*
      * A Kibana data object may have multiple series with different array lengths.
@@ -32,12 +32,12 @@ define(function (require) {
         throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
       }
 
-      var keys = orderXValues(obj);
-      var arr = getDataArray(obj);
+      let keys = orderXValues(obj);
+      let arr = getDataArray(obj);
 
       arr.forEach(function (object) {
         object.series.forEach(function (series) {
-          var zeroArray = createZeroFilledArray(keys);
+          let zeroArray = createZeroFilledArray(keys);
 
           series.values = zeroFillDataArray(zeroArray, series.values);
         });
