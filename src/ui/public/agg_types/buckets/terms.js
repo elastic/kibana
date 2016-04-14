@@ -7,13 +7,13 @@ import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/creat
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 export default function TermsAggDefinition(Private) {
-  var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  var bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
-  var AggConfig = Private(VisAggConfigProvider);
-  var Schemas = Private(VisSchemasProvider);
-  var createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
+  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  let bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
+  let AggConfig = Private(VisAggConfigProvider);
+  let Schemas = Private(VisSchemasProvider);
+  let createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
 
-  var orderAggSchema = (new Schemas([
+  let orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
@@ -24,7 +24,7 @@ export default function TermsAggDefinition(Private) {
 
   function isNotType(type) {
     return function (agg) {
-      var field = agg.params.field;
+      let field = agg.params.field;
       return !field || field.type !== type;
     };
   }
@@ -33,7 +33,7 @@ export default function TermsAggDefinition(Private) {
     name: 'terms',
     title: 'Terms',
     makeLabel: function (agg) {
-      var params = agg.params;
+      let params = agg.params;
       return params.field.displayName + ': ' + params.order.display;
     },
     createFilter: createFilter,
@@ -73,7 +73,7 @@ export default function TermsAggDefinition(Private) {
         makeOrderAgg: function (termsAgg, state) {
           state = state || {};
           state.schema = orderAggSchema;
-          var orderAgg = new AggConfig(termsAgg.vis, state);
+          let orderAgg = new AggConfig(termsAgg.vis, state);
           orderAgg.id = termsAgg.id + '-orderAgg';
           return orderAgg;
         },
@@ -86,18 +86,18 @@ export default function TermsAggDefinition(Private) {
             }
           };
 
-          var INIT = {}; // flag to know when prevOrderBy has changed
-          var prevOrderBy = INIT;
+          let INIT = {}; // flag to know when prevOrderBy has changed
+          let prevOrderBy = INIT;
 
           $scope.$watch('responseValueAggs', updateOrderAgg);
           $scope.$watch('agg.params.orderBy', updateOrderAgg);
 
           function updateOrderAgg() {
-            var agg = $scope.agg;
-            var aggs = agg.vis.aggs;
-            var params = agg.params;
-            var orderBy = params.orderBy;
-            var paramDef = agg.type.params.byName.orderAgg;
+            let agg = $scope.agg;
+            let aggs = agg.vis.aggs;
+            let params = agg.params;
+            let orderBy = params.orderBy;
+            let paramDef = agg.type.params.byName.orderAgg;
 
             // setup the initial value of orderBy
             if (!orderBy && prevOrderBy === INIT) {
@@ -130,11 +130,11 @@ export default function TermsAggDefinition(Private) {
           }
         },
         write: function (agg, output) {
-          var vis = agg.vis;
-          var dir = agg.params.order.val;
-          var order = output.params.order = {};
+          let vis = agg.vis;
+          let dir = agg.params.order.val;
+          let order = output.params.order = {};
 
-          var orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
+          let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
 
           // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
           // thus causing issues with filtering. This probably causes other issues since float might not
@@ -153,7 +153,7 @@ export default function TermsAggDefinition(Private) {
             return;
           }
 
-          var orderAggId = orderAgg.id;
+          let orderAggId = orderAgg.id;
           if (orderAgg.parentId) {
             orderAgg = vis.aggs.byId[orderAgg.parentId];
           }

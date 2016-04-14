@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.directive('clickFocus', function () {
   return {
@@ -11,7 +11,7 @@ module.directive('clickFocus', function () {
     restrict: 'A',
     link: function ($scope, $elem) {
       function handler() {
-        var focusElem = $.find('input[name=' + $scope.clickFocus + ']');
+        let focusElem = $.find('input[name=' + $scope.clickFocus + ']');
         if (focusElem[0]) focusElem[0].focus();
       }
 
