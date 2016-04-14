@@ -17,7 +17,6 @@ function createProxy(server, method, route, config) {
       proxy: {
         mapUri: mapUri(server),
         agent: createAgent(server),
-        xforward: true,
         timeout: server.config().get('elasticsearch.requestTimeout'),
         onResponse: function (err, responseFromUpstream, request, reply) {
           reply(err, responseFromUpstream);
