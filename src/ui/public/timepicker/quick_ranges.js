@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana');
+  let module = require('ui/modules').get('kibana');
 
   module.constant('quickRanges', [
     { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
