@@ -9,7 +9,9 @@ module.exports = function mapUri(server, prefix) {
   };
 
   const filterHeaders = function (originalHeaders) {
-    const originalHeadersNormalized = _.mapKeys(originalHeaders, _.rearg(normalizeHeader, 1, 0));
+    const originalHeadersNormalized = _.mapKeys(originalHeaders, function (headerValue, headerName) {
+      return normalizeHeader(headerName);
+    });
     const headersToKeep = server.config().get('elasticsearch.requestHeaders');
     const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
 
