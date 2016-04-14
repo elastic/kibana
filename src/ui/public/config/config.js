@@ -48,7 +48,7 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
         notify.log(`config change: ${key}: ${oldVal} -> ${value}`);
         settings = mergeSettings(defaults, updatedSettings);
         $rootScope.$broadcast(`change:config`, settings);
-        $rootScope.$broadcast(`change:config.${key}`, settings[key], oldVal);
+        $rootScope.$broadcast(`change:config.${key}`, getCurrentValue(key), oldVal);
       });
   }
   function remove(key) {
