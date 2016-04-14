@@ -1,11 +1,11 @@
 define(function (require) {
   return function VisTypeSchemasFactory(Private) {
-    var _ = require('lodash');
-    var IndexedArray = require('ui/IndexedArray');
-    var AggParams = Private(require('ui/agg_types/AggParams'));
+    let _ = require('lodash');
+    let IndexedArray = require('ui/IndexedArray');
+    let AggParams = Private(require('ui/agg_types/AggParams'));
 
     function Schemas(schemas) {
-      var self = this;
+      let self = this;
 
       _(schemas || [])
       .map(function (schema) {
