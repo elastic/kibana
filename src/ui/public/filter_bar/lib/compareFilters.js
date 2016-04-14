@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
+  let _ = require('lodash');
+  let angular = require('angular');
   let excludedAttributes;
   let comparators;
 
@@ -25,7 +25,7 @@ define(function (require) {
   };
 
   function mapFilter(filter) {
-    var cleaned = _.omit(filter, excludedAttributes);
+    let cleaned = _.omit(filter, excludedAttributes);
     if (comparators.negate) cleaned.negate = filter.meta && !!filter.meta.negate;
     if (comparators.disabled) cleaned.disabled = filter.meta && !!filter.meta.disabled;
     return cleaned;

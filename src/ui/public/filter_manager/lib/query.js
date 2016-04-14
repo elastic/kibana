@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   return function buildQueryFilter(query, index) {
     return {
       query: query,
