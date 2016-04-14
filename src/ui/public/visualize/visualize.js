@@ -7,11 +7,11 @@ define(function (require) {
     require('ui/visualize/visualize.less');
     require('ui/visualize/visualize_legend');
 
-    var $ = require('jquery');
-    var _ = require('lodash');
-    var visTypes = Private(require('ui/registry/vis_types'));
+    let $ = require('jquery');
+    let _ = require('lodash');
+    let visTypes = Private(require('ui/registry/vis_types'));
 
-    var notify = new Notifier({
+    let notify = new Notifier({
       location: 'Visualize'
     });
 
@@ -28,7 +28,7 @@ define(function (require) {
       template: require('ui/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
         let chart; // set in "vis" watcher
-        var minVisChartHeight = 180;
+        let minVisChartHeight = 180;
 
         if (_.isUndefined($scope.showSpyPanel)) {
           $scope.showSpyPanel = true;
@@ -36,19 +36,19 @@ define(function (require) {
 
         function getter(selector) {
           return function () {
-            var $sel = $el.find(selector);
+            let $sel = $el.find(selector);
             if ($sel.size()) return $sel;
           };
         }
 
-        var getVisEl = getter('.visualize-chart');
-        var getVisContainer = getter('.vis-container');
+        let getVisEl = getter('.visualize-chart');
+        let getVisContainer = getter('.vis-container');
 
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
-          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-          var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-          var shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
+          let requiresSearch = _.get($scope, 'vis.type.requiresSearch');
+          let isZeroHits = _.get($scope,'esResp.hits.total') === 0;
+          let shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
 
           return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
         };
@@ -57,9 +57,9 @@ define(function (require) {
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
-        var applyClassNames = function () {
-          var $visEl = getVisContainer();
-          var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
+        let applyClassNames = function () {
+          let $visEl = getVisContainer();
+          let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
 
@@ -72,8 +72,8 @@ define(function (require) {
 
         // we need to wait for some watchers to fire at least once
         // before we are "ready", this manages that
-        var prereq = (function () {
-          var fns = [];
+        let prereq = (function () {
+          let fns = [];
 
           return function register(fn) {
             fns.push(fn);
@@ -91,14 +91,14 @@ define(function (require) {
           };
         }());
 
-        var loadingDelay = config.get('visualization:loadingDelay');
+        let loadingDelay = config.get('visualization:loadingDelay');
         $scope.loadingStyle = {
           '-webkit-transition-delay': loadingDelay,
           'transition-delay': loadingDelay
         };
 
         function shouldHaveFullSpy() {
-          var $visEl = getVisEl();
+          let $visEl = getVisEl();
           if (!$visEl) return;
 
           return ($visEl.height() < minVisChartHeight)
@@ -115,7 +115,7 @@ define(function (require) {
         });
 
         $scope.$watch('vis', prereq(function (vis, oldVis) {
-          var $visEl = getVisEl();
+          let $visEl = getVisEl();
           if (!$visEl) return;
 
           if (!attr.editableVis) {
