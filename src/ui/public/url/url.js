@@ -8,7 +8,7 @@ uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
 function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {
-  var self = this;
+  let self = this;
 
   /**
    * Navigate to a url
@@ -70,10 +70,10 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
 
     return template.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
       // remove filters
-      var key = expr.split('|')[0].trim();
+      let key = expr.split('|')[0].trim();
 
       // verify that the expression can be evaluated
-      var p = $parse(key)(paramObj);
+      let p = $parse(key)(paramObj);
 
       // if evaluation can't be made, throw
       if (_.isUndefined(p)) {
@@ -109,7 +109,7 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
    * @return {string} - the computed url
    */
   self.getRouteUrl = function (obj, route) {
-    var template = obj && obj.routes && obj.routes[route];
+    let template = obj && obj.routes && obj.routes[route];
     if (template) return self.eval(template, obj);
   };
 
@@ -143,7 +143,7 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
   let reloading;
 
   self._changeLocation = function (type, url, paramObj, replace) {
-    var prev = {
+    let prev = {
       path: $location.path(),
       search: $location.search()
     };
@@ -152,13 +152,13 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
     $location[type](url);
     if (replace) $location.replace();
 
-    var next = {
+    let next = {
       path: $location.path(),
       search: $location.search()
     };
 
     if (self._shouldAutoReload(next, prev)) {
-      var appState = getAppState();
+      let appState = getAppState();
       if (appState) appState.destroy();
 
       reloading = $rootScope.$on('$locationChangeSuccess', function () {
@@ -174,13 +174,13 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
   self._shouldAutoReload = function (next, prev) {
     if (reloading) return false;
 
-    var route = $route.current && $route.current.$$route;
+    let route = $route.current && $route.current.$$route;
     if (!route) return false;
 
     if (next.path !== prev.path) return false;
 
-    var reloadOnSearch = route.reloadOnSearch;
-    var searchSame = _.isEqual(next.search, prev.search);
+    let reloadOnSearch = route.reloadOnSearch;
+    let searchSame = _.isEqual(next.search, prev.search);
 
     return (reloadOnSearch && searchSame) || !reloadOnSearch;
   };
