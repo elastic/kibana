@@ -1,6 +1,6 @@
 define(function (require) {
   return function UniqLabelUtilService() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     /*
      * Accepts an array of data objects and a formatter function.

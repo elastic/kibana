@@ -1,11 +1,11 @@
 define(function (require) {
   return function ColumnLayoutFactory(Private) {
-    var d3 = require('d3');
+    let d3 = require('d3');
 
-    var chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
-    var yAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/y_axis_split'));
-    var xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));
-    var chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_title_split'));
+    let chartSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_split'));
+    let yAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/y_axis_split'));
+    let xAxisSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/x_axis_split'));
+    let chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/column_chart/chart_title_split'));
 
     /**
      * Specifies the visualization layout for column charts.
