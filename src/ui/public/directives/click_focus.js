@@ -1,7 +1,7 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana');
-  var _ = require('lodash');
-  var $ = require('jquery');
+  let module = require('ui/modules').get('kibana');
+  let _ = require('lodash');
+  let $ = require('jquery');
 
   module.directive('clickFocus', function () {
     return {
@@ -11,7 +11,7 @@ define(function (require) {
       restrict: 'A',
       link: function ($scope, $elem) {
         function handler() {
-          var focusElem = $.find('input[name=' + $scope.clickFocus + ']');
+          let focusElem = $.find('input[name=' + $scope.clickFocus + ']');
           if (focusElem[0]) focusElem[0].focus();
         }
 

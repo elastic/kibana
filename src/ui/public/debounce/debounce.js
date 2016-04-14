@@ -2,8 +2,8 @@
 // borrowed heavily from https://github.com/shahata/angular-debounce
 
 define(function (require) {
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana');
+  let _ = require('lodash');
+  let module = require('ui/modules').get('kibana');
 
   module.service('debounce', ['$timeout', function ($timeout) {
     return function (func, wait, options) {
@@ -20,14 +20,14 @@ define(function (require) {
         self = this;
         args = arguments;
 
-        var later = function () {
+        let later = function () {
           timeout = null;
           if (!options.leading || options.trailing) {
             result = func.apply(self, args);
           }
         };
 
-        var callNow = options.leading && !timeout;
+        let callNow = options.leading && !timeout;
 
         if (timeout) {
           $timeout.cancel(timeout);

@@ -1,13 +1,13 @@
 define(function (require) {
   return function PendingRequestList() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     /**
      * Queue of pending requests, requests are removed as
      * they are processed by fetch.[sourceType]().
      * @type {Array}
      */
-    var queue = [];
+    let queue = [];
 
     queue.getInactive = function (/* strategies */) {
       return queue.get.apply(queue, arguments)
@@ -22,7 +22,7 @@ define(function (require) {
 
     queue.get = function (...strategies) {
       return queue.filter(function (req) {
-        var strategyMatch = !strategies.length;
+        let strategyMatch = !strategies.length;
         if (!strategyMatch) {
           strategyMatch = strategies.some(function (strategy) {
             return req.strategy === strategy;

@@ -1,22 +1,22 @@
 define(function (require) {
   return function HierarchicalTooltipFormaterProvider($rootScope, $compile, $sce) {
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
-    var collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
-    var $tooltipScope = $rootScope.$new();
-    var numeral = require('numeral');
+    let _ = require('lodash');
+    let $ = require('jquery');
+    let $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
+    let collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
+    let $tooltipScope = $rootScope.$new();
+    let numeral = require('numeral');
 
     $compile($tooltip)($tooltipScope);
 
     return function (columns) {
       return function (event) {
-        var datum = event.datum;
+        let datum = event.datum;
 
         // Collect the current leaf and parents into an array of values
         $tooltipScope.rows = collectBranch(datum);
 
-        var metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
+        let metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
         // Map those values to what the tooltipSource.rows format.
         _.forEachRight($tooltipScope.rows, function (row, i, rows) {

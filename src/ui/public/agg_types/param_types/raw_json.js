@@ -1,9 +1,9 @@
 define(function (require) {
   return function RawJSONAggParamFactory(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    var editorHtml = require('ui/agg_types/controls/raw_json.html');
+    let BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    let editorHtml = require('ui/agg_types/controls/raw_json.html');
 
     _.class(RawJSONAggParam).inherits(BaseAggParam);
     function RawJSONAggParam(config) {
@@ -26,7 +26,7 @@ define(function (require) {
      */
     RawJSONAggParam.prototype.write = function (aggConfig, output) {
       let paramJSON;
-      var param = aggConfig.params[this.name];
+      let param = aggConfig.params[this.name];
 
       if (!param) {
         return;
@@ -45,7 +45,7 @@ define(function (require) {
           .keys()
           .union(_.keys(b))
           .transform(function (dest, key) {
-            var val = compare(a[key], b[key]);
+            let val = compare(a[key], b[key]);
             if (val !== undefined) dest[key] = val;
           }, {})
           .value();

@@ -1,8 +1,8 @@
 define(function (require) {
   return function AggTypeService(Private) {
-    var IndexedArray = require('ui/IndexedArray');
+    let IndexedArray = require('ui/IndexedArray');
 
-    var aggs = {
+    let aggs = {
       metrics: [
         Private(require('ui/agg_types/metrics/count')),
         Private(require('ui/agg_types/metrics/avg')),

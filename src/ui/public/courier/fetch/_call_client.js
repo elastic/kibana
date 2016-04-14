@@ -1,29 +1,29 @@
 define(function (require) {
   return function CourierFetchCallClient(Private, Promise, es, esShardTimeout, sessionId) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var isRequest = Private(require('ui/courier/fetch/_is_request'));
-    var mergeDuplicateRequests = Private(require('ui/courier/fetch/_merge_duplicate_requests'));
+    let isRequest = Private(require('ui/courier/fetch/_is_request'));
+    let mergeDuplicateRequests = Private(require('ui/courier/fetch/_merge_duplicate_requests'));
 
-    var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
-    var DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
+    let ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
+    let DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
 
     function callClient(strategy, requests) {
       // merging docs can change status to DUPLICATE, capture new statuses
-      var statuses = mergeDuplicateRequests(requests);
+      let statuses = mergeDuplicateRequests(requests);
 
       // get the actual list of requests that we will be fetching
-      var executable = statuses.filter(isRequest);
-      var execCount = executable.length;
+      let executable = statuses.filter(isRequest);
+      let execCount = executable.length;
 
       if (!execCount) return Promise.resolve([]);
 
       // resolved by respond()
       let esPromise;
-      var defer = Promise.defer();
+      let defer = Promise.defer();
 
       // for each respond with either the response or ABORTED
-      var respond = function (responses) {
+      let respond = function (responses) {
         responses = responses || [];
         return Promise.map(requests, function (req, i) {
           switch (statuses[i]) {
@@ -43,7 +43,7 @@ define(function (require) {
 
 
       // handle a request being aborted while being fetched
-      var requestWasAborted = Promise.method(function (req, i) {
+      let requestWasAborted = Promise.method(function (req, i) {
         if (statuses[i] === ABORTED) {
           defer.reject(new Error('Request was aborted twice?'));
         }

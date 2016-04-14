@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
   require('ui/watch_multi');
-  var ConfigTemplate = require('ui/ConfigTemplate');
-  var angular = require('angular');
-  var module = require('ui/modules').get('kibana');
+  let ConfigTemplate = require('ui/ConfigTemplate');
+  let angular = require('angular');
+  let module = require('ui/modules').get('kibana');
 
   require('ui/directives/input_focus');
 
@@ -26,13 +26,13 @@ define(function (require) {
         configObject: '='
       },
       link: function ($scope, element, attr) {
-        var tmpScope = $scope.$new();
+        let tmpScope = $scope.$new();
 
         $scope.$watch('configObject', function (newVal) {
           $scope[attr.configObject] = $scope.configObject;
         });
 
-        var wrapTmpl = function (tmpl) {
+        let wrapTmpl = function (tmpl) {
           if ($scope.configSubmit) {
             return '<form role="form" class="container-fluid" ng-submit="configSubmit()">' + tmpl + '</form>';
           } else {
@@ -44,7 +44,7 @@ define(function (require) {
           'configSubmit',
           'configTemplate.current || configTemplate'
         ], function () {
-          var tmpl = $scope.configTemplate;
+          let tmpl = $scope.configTemplate;
           if (tmpl instanceof ConfigTemplate) {
             tmpl = tmpl.toString();
           }
@@ -52,7 +52,7 @@ define(function (require) {
           tmpScope.$destroy();
           tmpScope = $scope.$new();
 
-          var html = '';
+          let html = '';
           if (tmpl) {
             html = $compile('' +
               '<div class="config" ng-show="configTemplate">' +

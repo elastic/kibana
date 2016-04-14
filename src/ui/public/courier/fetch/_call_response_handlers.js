@@ -1,12 +1,12 @@
 define(function (require) {
   return function CourierFetchCallResponseHandlers(Private, Promise) {
-    var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
-    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
-    var notify = Private(require('ui/courier/fetch/_notifier'));
+    let ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
+    let INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+    let notify = Private(require('ui/courier/fetch/_notifier'));
 
-    var SearchTimeout = require('ui/errors').SearchTimeout;
-    var RequestFailure = require('ui/errors').RequestFailure;
-    var ShardFailure = require('ui/errors').ShardFailure;
+    let SearchTimeout = require('ui/errors').SearchTimeout;
+    let RequestFailure = require('ui/errors').RequestFailure;
+    let ShardFailure = require('ui/errors').ShardFailure;
 
     function callResponseHandlers(requests, responses) {
       return Promise.map(requests, function (req, i) {
@@ -14,7 +14,7 @@ define(function (require) {
           return ABORTED;
         }
 
-        var resp = responses[i];
+        let resp = responses[i];
 
         if (resp.timed_out) {
           notify.warning(new SearchTimeout());
