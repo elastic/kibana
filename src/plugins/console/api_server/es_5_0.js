@@ -18,8 +18,7 @@ let parts = [
   require('./es_5_0/snapshot_restore'),
   require('./es_5_0/search'),
   require('./es_5_0/settings'),
-  require('./es_5_0/templates'),
-  require('./es_5_0/warmers')
+  require('./es_5_0/templates')
 ];
 
 function ES_5_0() {

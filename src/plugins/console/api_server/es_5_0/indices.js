@@ -175,7 +175,6 @@ module.exports = function (api) {
     url_components: {
       "feature": [
         "_mappings",
-        "_warmers",
         "_aliases"
       ]
     }
