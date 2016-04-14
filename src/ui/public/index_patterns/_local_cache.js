@@ -1,21 +1,21 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
+  let _ = require('lodash');
+  let angular = require('angular');
 
   return function LocalCacheFactory() {
     function LocalCache(opts) {
       opts = opts || {};
-      var _id = opts.id || function (o) { return '' + o; };
-      var _cache = {};
+      let _id = opts.id || function (o) { return '' + o; };
+      let _cache = {};
 
       this.get = function (obj) {
-        var id = _id(obj);
+        let id = _id(obj);
         return _cache[id] ? JSON.parse(_cache[id]) : null;
       };
 
       this.set = function (obj, val) {
-        var id = _id(obj);
-        var clean = !_cache.hasOwnProperty(id);
+        let id = _id(obj);
+        let clean = !_cache.hasOwnProperty(id);
         _cache[id] = angular.toJson(val);
         return clean;
       };
@@ -26,7 +26,7 @@ define(function (require) {
           return;
         }
 
-        var id = _id(obj);
+        let id = _id(obj);
         delete _cache[id];
       };
     }

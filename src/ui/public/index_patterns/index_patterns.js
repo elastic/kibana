@@ -1,21 +1,21 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana/index_patterns');
+  let module = require('ui/modules').get('kibana/index_patterns');
   require('ui/filters/short_dots');
 
   function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
-    var self = this;
-    var _ = require('lodash');
-    var errors = require('ui/errors');
+    let self = this;
+    let _ = require('lodash');
+    let errors = require('ui/errors');
 
-    var IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
-    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
+    let IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
+    let patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
-    var notify = new Notifier({ location: 'IndexPatterns Service'});
+    let notify = new Notifier({ location: 'IndexPatterns Service'});
 
     self.get = function (id) {
       if (!id) return self.make();
 
-      var cache = patternCache.get(id);
+      let cache = patternCache.get(id);
       return cache || patternCache.set(id, self.make(id));
     };
 
