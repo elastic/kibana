@@ -4,11 +4,14 @@ import _ from 'lodash';
 
 module.exports = function mapUri(server, prefix) {
 
+  const normalizeHeader = function (header) {
+    return header.trim().toLowerCase();
+  };
+
   const filterHeaders = function (originalHeaders) {
+    const originalHeadersNormalized = _.mapKeys(originalHeaders, _.rearg(normalizeHeader, 1, 0));
     const headersToKeep = server.config().get('elasticsearch.requestHeaders');
-    const headersToKeepNormalized = headersToKeep.map(function (header) {
-      return header.trim().toLowerCase();
-    });
+    const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
 
     return _.pick(originalHeaders, headersToKeepNormalized);
   };
