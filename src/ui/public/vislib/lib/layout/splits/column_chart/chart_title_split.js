@@ -13,11 +13,11 @@ define(function () {
      */
     return function (selection) {
       selection.each(function (data) {
-        var div = d3.select(this);
-        var parent = $(this).parents('.vis-wrapper');
+        let div = d3.select(this);
+        let parent = $(this).parents('.vis-wrapper');
 
         if (!data.series) {
-          var splits = div.selectAll('.chart-title')
+          let splits = div.selectAll('.chart-title')
           .data(function (d) {
             return d.rows ? d.rows : d.columns;
           })

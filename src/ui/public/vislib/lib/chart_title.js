@@ -5,8 +5,8 @@ import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
 export default function ChartTitleFactory(Private) {
 
-  var ErrorHandler = Private(VislibLibErrorHandlerProvider);
-  var Tooltip = Private(VislibComponentsTooltipProvider);
+  let ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  let Tooltip = Private(VislibComponentsTooltipProvider);
 
   /**
    * Appends chart titles to the visualization
@@ -34,9 +34,9 @@ export default function ChartTitleFactory(Private) {
    * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
    */
   ChartTitle.prototype.render = function () {
-    var el = d3.select(this.el).select('.chart-title').node();
-    var width = el ? el.clientWidth : 0;
-    var height = el ? el.clientHeight : 0;
+    let el = d3.select(this.el).select('.chart-title').node();
+    let width = el ? el.clientWidth : 0;
+    let height = el ? el.clientHeight : 0;
 
     return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
   };
@@ -49,14 +49,14 @@ export default function ChartTitleFactory(Private) {
    * @returns {Function} Truncates text
    */
   ChartTitle.prototype.truncate = function (size) {
-    var self = this;
+    let self = this;
 
     return function (selection) {
       selection.each(function () {
-        var text = d3.select(this);
-        var n = text[0].length;
-        var maxWidth = size / n * 0.9;
-        var length = this.getComputedTextLength();
+        let text = d3.select(this);
+        let n = text[0].length;
+        let maxWidth = size / n * 0.9;
+        let length = this.getComputedTextLength();
         let str;
         let avg;
         let end;
@@ -96,14 +96,14 @@ export default function ChartTitleFactory(Private) {
    * @returns {Function} Appends chart titles to a D3 selection
    */
   ChartTitle.prototype.draw = function (width, height) {
-    var self = this;
+    let self = this;
 
     return function (selection) {
       selection.each(function () {
-        var div = d3.select(this);
-        var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
-        var size = dataType === 'rows' ? height : width;
-        var txtHtOffset = 11;
+        let div = d3.select(this);
+        let dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
+        let size = dataType === 'rows' ? height : width;
+        let txtHtOffset = 11;
 
         self.validateWidthandHeight(width, height);
 
