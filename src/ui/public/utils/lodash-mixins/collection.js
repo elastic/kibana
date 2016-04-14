@@ -15,7 +15,7 @@ export default function (_) {
      * @return {array} - the objs argument
      */
     move: function (objs, obj, below, qualifier) {
-      var origI = _.isNumber(obj) ? obj : objs.indexOf(obj);
+      let origI = _.isNumber(obj) ? obj : objs.indexOf(obj);
       if (origI === -1) return objs;
 
       if (_.isNumber(below)) {
@@ -27,11 +27,11 @@ export default function (_) {
       below = !!below;
       qualifier = _.callback(qualifier);
 
-      var above = !below;
-      var finder = below ? _.findIndex : _.findLastIndex;
+      let above = !below;
+      let finder = below ? _.findIndex : _.findLastIndex;
 
       // find the index of the next/previous obj that meets the qualifications
-      var targetI = finder(objs, function (otherAgg, otherI) {
+      let targetI = finder(objs, function (otherAgg, otherI) {
         if (below && otherI <= origI) return;
         if (above && otherI >= origI) return;
         return !!qualifier(otherAgg, otherI);
@@ -58,8 +58,8 @@ export default function (_) {
      * @return {object}
      */
     organizeBy: function (collection, callback) {
-      var buckets = {};
-      var prop = typeof callback === 'function' ? false : callback;
+      let buckets = {};
+      let prop = typeof callback === 'function' ? false : callback;
 
       function add(key, obj) {
         if (!buckets[key]) buckets[key] = [];
@@ -67,14 +67,14 @@ export default function (_) {
       }
 
       _.each(collection, function (obj) {
-        var keys = prop === false ? callback(obj) : obj[prop];
+        let keys = prop === false ? callback(obj) : obj[prop];
 
         if (!_.isArray(keys)) {
           add(keys, obj);
           return;
         }
 
-        var length = keys.length;
+        let length = keys.length;
         while (length-- > 0) {
           add(keys[length], obj);
         }
@@ -108,14 +108,14 @@ export default function (_) {
      * @return {Array} dest
      */
     pushAll: function (source, dest) {
-      var start = dest.length;
-      var adding = source.length;
+      let start = dest.length;
+      let adding = source.length;
 
       // allocate - http://goo.gl/e2i0S0
       dest.length = start + adding;
 
       // fill sparse positions
-      var i = -1;
+      let i = -1;
       while (++i < adding) dest[start + i] = source[i];
 
       return dest;

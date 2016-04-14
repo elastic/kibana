@@ -1,7 +1,7 @@
 import VisSchemasProvider from 'ui/vis/schemas';
 
 export default function VisTypeFactory(Private) {
-  var VisTypeSchemas = Private(VisSchemasProvider);
+  let VisTypeSchemas = Private(VisSchemasProvider);
 
   function VisType(opts) {
     opts = opts || {};

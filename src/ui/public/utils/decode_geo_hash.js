@@ -16,22 +16,22 @@
  * @return {Object} interval
  */
 function decodeGeoHash(geohash) {
-  var BITS = [16, 8, 4, 2, 1];
-  var BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
-  var is_even = 1;
-  var lat = [];
-  var lon = [];
+  let BITS = [16, 8, 4, 2, 1];
+  let BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+  let is_even = 1;
+  let lat = [];
+  let lon = [];
   lat[0] = -90.0;
   lat[1] = 90.0;
   lon[0] = -180.0;
   lon[1] = 180.0;
-  var lat_err = 90.0;
-  var lon_err = 180.0;
-  for (var i = 0; i < geohash.length; i++) {
-    var c = geohash[i];
-    var cd = BASE32.indexOf(c);
-    for (var j = 0; j < 5; j++) {
-      var mask = BITS[j];
+  let lat_err = 90.0;
+  let lon_err = 180.0;
+  for (let i = 0; i < geohash.length; i++) {
+    let c = geohash[i];
+    let cd = BASE32.indexOf(c);
+    for (let j = 0; j < 5; j++) {
+      let mask = BITS[j];
       if (is_even) {
         lon_err /= 2;
         refine_interval(lon, cd, mask);

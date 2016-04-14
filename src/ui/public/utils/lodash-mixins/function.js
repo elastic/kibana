@@ -13,11 +13,11 @@ export default function (_) {
      * @return {Function} - the wrapper method
      */
     onceWithCb: function (fn) {
-      var callbacks = [];
+      let callbacks = [];
 
       // on initial flush, call the init function, but ensure
       // that it only happens once
-      var flush = _.once(function (cntx, args) {
+      let flush = _.once(function (cntx, args) {
         args.push(function finishedOnce() {
           // override flush to simply schedule an asynchronous clear
           flush = function () {
@@ -33,8 +33,8 @@ export default function (_) {
       });
 
       return function runOnceWithCb() {
-        var args = [].slice.call(arguments, 0);
-        var cb = args[args.length - 1];
+        let args = [].slice.call(arguments, 0);
+        let cb = args[args.length - 1];
 
         if (typeof cb === 'function') {
           callbacks.push(cb);
