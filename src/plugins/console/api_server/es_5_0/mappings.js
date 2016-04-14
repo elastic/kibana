@@ -1,7 +1,7 @@
 let _ = require("lodash");
 
 var INDEX_SETTING = {
-  __one_of: ['analyzed', 'not_analyzed', 'no']
+  __one_of: ['analyzed', 'not_analyzed', 'no', true, false]
 }, BOOLEAN = {
   __one_of: [true, false]
 };
@@ -80,27 +80,10 @@ module.exports = function (api) {
       'dynamic_date_formats': ['yyyy-MM-dd'],
       'date_detection': BOOLEAN,
       'numeric_detection': BOOLEAN,
-      'transform': {
-        __template: {
-          script: {}
-        },
-        __one_of: [
-          {
-            __scope_link: "GLOBAL.script"
-          },
-          [
-            {
-              __scope_link: "GLOBAL.script"
-            }
-          ]
-        ]
-
-
-      },
       'properties': {
         '*': {
           type: {
-            __one_of: ['string', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
+            __one_of: ['text', 'keyword', 'string', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
               'binary', 'object', 'nested', "geo_point", "geo_shape"
             ]
           },
@@ -113,9 +96,13 @@ module.exports = function (api) {
           },
           boost: 1.0,
           null_value: '',
+
+          // norms
           omit_norms: {
             __one_of: [true, false]
           },
+          norms: BOOLEAN,
+
           index_options: {
             __one_of: ['docs', 'freqs', 'positions']
           },
