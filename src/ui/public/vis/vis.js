@@ -11,7 +11,7 @@ export default function VisFactory(Notifier, Private) {
     location: 'Vis'
   });
 
-  function Vis(indexPattern, state) {
+  function Vis(indexPattern, state, uiState) {
     state = state || {};
 
     if (_.isString(state)) {
@@ -21,6 +21,7 @@ export default function VisFactory(Notifier, Private) {
     }
 
     this.indexPattern = indexPattern;
+    this.__uiState = uiState;
 
     // http://aphyr.com/data/posts/317/state.gif
     this.setState(state);
@@ -102,7 +103,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.clone = function () {
-    return new Vis(this.indexPattern, this.getState());
+    return new Vis(this.indexPattern, this.getState(), this.__uiState);
   };
 
   Vis.prototype.requesting = function () {
@@ -123,6 +124,29 @@ export default function VisFactory(Notifier, Private) {
       if (!agg.type || !agg.type.name) return false;
       return agg.type.name === aggTypeName;
     });
+  };
+
+  Vis.prototype.hasUiState = function () {
+    return !!this.__uiState;
+  };
+
+  Vis.prototype.setUiState = function (uiState) {
+    this.__uiState = uiState;
+
+    // getting a uiState dynamically requires that we rebuild statefull components
+    this.setState(this.getState());
+  };
+
+  Vis.prototype.getUiState = function () {
+    return this.__uiState;
+  };
+
+  Vis.prototype.getUiStateValue = function (key, def) {
+    if (this.hasUiState()) {
+      return this.getUiState().get(key, def);
+    }
+
+    return def;
   };
 
   return Vis;

@@ -46,54 +46,21 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
 
         pushFilter(filter, false, indexPatternName);
       },
-      mapMoveEnd: function (event) {
+      mapMoveEnd(event) {
         const agg = _.get(event, 'chart.geohashGridAgg');
-        if (!agg) return;
+        if (!agg || !agg.hasUiState()) return;
 
-        agg.params.mapZoom = event.zoom;
-        agg.params.mapCenter = [event.center.lat, event.center.lng];
-
-        const editableVis = agg.vis.getEditableVis();
-        if (!editableVis) return;
-
-        const editableAgg = editableVis.aggs.byId[agg.id];
-        if (editableAgg) {
-          editableAgg.params.mapZoom = event.zoom;
-          editableAgg.params.mapCenter = [event.center.lat, event.center.lng];
-        }
+        const uiState = agg.getUiState();
+        uiState.setSilent('mapZoom', event.zoom);
+        uiState.setSilent('mapCenter', [event.center.lat, event.center.lng]);
       },
-      mapZoomEnd: function (event) {
+      mapZoomEnd(event) {
         const agg = _.get(event, 'chart.geohashGridAgg');
-        if (!agg || !agg.params.autoPrecision) return;
+        if (!agg || !agg.hasUiState()) return;
+        const uiState = agg.getUiState();
 
-        // zoomPrecision maps event.zoom to a geohash precision value
-        // event.limit is the configurable max geohash precision
-        // default max precision is 7, configurable up to 12
-        const zoomPrecision = {
-          1: 2,
-          2: 2,
-          3: 2,
-          4: 3,
-          5: 3,
-          6: 4,
-          7: 4,
-          8: 5,
-          9: 5,
-          10: 6,
-          11: 6,
-          12: 7,
-          13: 7,
-          14: 8,
-          15: 9,
-          16: 10,
-          17: 11,
-          18: 12
-        };
-
-        const precision = config.get('visualization:tileMap:maxPrecision');
-        agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
-
-        courier.fetch();
+        uiState.setSilent('mapZoom', event.zoom);
+        if (agg.params.autoPrecision) courier.fetch();
       }
     },
     responseConverter: geoJsonConverter,

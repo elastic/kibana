@@ -139,6 +139,7 @@ uiModules
     $scope.editableVis = editableVis;
     $scope.state = $state;
     $scope.uiState = $state.makeStateful('uiState');
+    $scope.vis.setUiState($scope.uiState.createChild('ui/vis'));
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 

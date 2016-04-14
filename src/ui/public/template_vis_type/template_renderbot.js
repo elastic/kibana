@@ -4,8 +4,8 @@ export default function TemplateRenderbotFactory(Private, $compile, $rootScope) 
   var Renderbot = Private(VisRenderbotProvider);
 
   _.class(TemplateRenderbot).inherits(Renderbot);
-  function TemplateRenderbot(vis, $el, uiState) {
-    TemplateRenderbot.Super.call(this, vis, $el, uiState);
+  function TemplateRenderbot(vis, $el) {
+    TemplateRenderbot.Super.call(this, vis, $el);
 
     this.$scope = $rootScope.$new();
     this.$scope.vis = vis;

@@ -10,6 +10,10 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     self.vis = vis;
     self._opts = opts = (opts || {});
 
+    if (vis.hasUiState()) {
+      this.__uiState = vis.getUiState().createChild(`agg/${this.id}`);
+    }
+
     // setters
     self.type = opts.type;
     self.schema = opts.schema;
@@ -299,6 +303,22 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   AggConfig.prototype.fieldIsTimeField = function () {
     var timeFieldName = this.vis.indexPattern.timeFieldName;
     return timeFieldName && this.fieldName() === timeFieldName;
+  };
+
+  AggConfig.prototype.hasUiState = function () {
+    return !!this.__uiState;
+  };
+
+  AggConfig.prototype.getUiState = function () {
+    return this.__uiState;
+  };
+
+  AggConfig.prototype.getUiStateValue = function (key, def) {
+    if (this.hasUiState()) {
+      return this.getUiState().get(key, def);
+    }
+
+    return def;
   };
 
   return AggConfig;
