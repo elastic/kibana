@@ -5,17 +5,17 @@ import formatMsg from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
 /* eslint no-console: 0 */
 
-var notifs = [];
-var version = metadata.version;
-var buildNum = metadata.buildNum;
-var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
+let notifs = [];
+let version = metadata.version;
+let buildNum = metadata.buildNum;
+let consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
-var log = _.bindKey(console, 'log');
+let log = _.bindKey(console, 'log');
 
 // used to identify the first call to fatal, set to false there
-var firstFatal = true;
+let firstFatal = true;
 
-var fatalToastTemplate = (function lazyTemplate(tmpl) {
+let fatalToastTemplate = (function lazyTemplate(tmpl) {
   let compiled;
   return function (vars) {
     return (compiled || (compiled = _.template(tmpl)))(vars);
@@ -32,7 +32,7 @@ function now() {
 function closeNotif(notif, cb = _.noop, key) {
   return function () {
     // this === notif
-    var i = notifs.indexOf(notif);
+    let i = notifs.indexOf(notif);
     if (i !== -1) notifs.splice(i, 1);
 
     cancelTimer(notif);
@@ -59,7 +59,7 @@ function timerCanceler(notif, cb = _.noop, key) {
  * intervals and clears the notif once the notif _lifetime_ has been reached.
  */
 function startNotifTimer(notif, cb) {
-  var interval = 1000;
+  let interval = 1000;
 
   if (notif.lifetime === Infinity) return;
 
@@ -99,7 +99,7 @@ function add(notif, cb) {
     return notif.timerId ? true : false;
   };
 
-  var dup = _.find(notifs, function (item) {
+  let dup = _.find(notifs, function (item) {
     return item.content === notif.content && item.lifetime === notif.lifetime;
   });
 
@@ -120,7 +120,7 @@ function add(notif, cb) {
 }
 
 function formatInfo() {
-  var info = [];
+  let info = [];
 
   if (!_.isUndefined(version)) {
     info.push(`Version: ${version}`);
@@ -145,7 +145,7 @@ function formatStack(err) {
  * Functionality to check that
  */
 function Notifier(opts) {
-  var self = this;
+  let self = this;
   opts = opts || {};
 
   // label type thing to say where notifications came from
@@ -200,7 +200,7 @@ Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
  * @return {function} - the wrapped function
  */
 Notifier.prototype.timed = function (name, fn) {
-  var self = this;
+  let self = this;
 
   if (typeof name === 'function') {
     fn = name;
@@ -208,8 +208,8 @@ Notifier.prototype.timed = function (name, fn) {
   }
 
   return function WrappedNotifierFunction() {
-    var cntx = this;
-    var args = arguments;
+    let cntx = this;
+    let args = arguments;
 
     return self.event(name, function () {
       return fn.apply(cntx, args);
@@ -245,13 +245,13 @@ Notifier.prototype._showFatal = function (err) {
     });
   }
 
-  var html = fatalToastTemplate({
+  let html = fatalToastTemplate({
     info: formatInfo(),
     msg: formatMsg(err, this.from),
     stack: formatStack(err)
   });
 
-  var $container = $('#fatal-splash-screen');
+  let $container = $('#fatal-splash-screen');
 
   if (!$container.size()) {
     $(document.body)
@@ -320,7 +320,7 @@ if (log === _.noop) {
   Notifier.prototype.log = _.noop;
 } else {
   Notifier.prototype.log = function () {
-    var args = [].slice.apply(arguments);
+    let args = [].slice.apply(arguments);
     if (this.from) args.unshift(this.from + ':');
     log.apply(null, args);
   };
@@ -329,15 +329,15 @@ if (log === _.noop) {
 // general functionality used by .event() and .lifecycle()
 function createGroupLogger(type, opts) {
   // Track the groups managed by this logger
-  var groups = window[type + 'Groups'] = {};
+  let groups = window[type + 'Groups'] = {};
 
   return function logger(name, success) {
     let status; // status of the timer
     let exec; // function to execute and wrap
     let ret; // return value
 
-    var complete = function (val) { logger(name, true); return val; };
-    var failure = function (err) { logger(name, false); throw err; };
+    let complete = function (val) { logger(name, true); return val; };
+    let failure = function (err) { logger(name, false); throw err; };
 
     if (typeof success === 'function' || success === void 0) {
       // start
@@ -353,7 +353,7 @@ function createGroupLogger(type, opts) {
     }
     else {
       groups[name] = now() - (groups[name] || 0);
-      var time = ' in ' + groups[name].toFixed(2) + 'ms';
+      let time = ' in ' + groups[name].toFixed(2) + 'ms';
 
       // end
       if (success) {

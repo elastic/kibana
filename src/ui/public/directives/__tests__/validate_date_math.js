@@ -7,7 +7,7 @@ import 'ui/directives/validate_date_math';
 describe('Validate date math directive', function () {
   let $compile;
   let $rootScope;
-  var html = '<input type="text" ng-model="value" validate-date-math />';
+  let html = '<input type="text" ng-model="value" validate-date-math />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -17,7 +17,7 @@ describe('Validate date math directive', function () {
   }));
 
   it('should allow valid date math', function () {
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
 
     $rootScope.value = 'now';
     $rootScope.$digest();
@@ -41,7 +41,7 @@ describe('Validate date math directive', function () {
   });
 
   it('should disallow invalid date math', function () {
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
 
     $rootScope.value = 'hello, world';
     $rootScope.$digest();
@@ -61,7 +61,7 @@ describe('Validate date math directive', function () {
   });
 
   it('should allow empty values', function () {
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
 
     $rootScope.value = '';
     $rootScope.$digest();

@@ -10,13 +10,13 @@ import $ from 'jquery';
 import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 
 describe('Vislib Time Marker Test Suite', function () {
-  var height = 50;
-  var color = '#ff0000';
-  var opacity = 0.5;
-  var width = 3;
-  var customClass = 'custom-time-marker';
-  var dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
-  var myTimes = dateMathTimes.map(function (dateMathString) {
+  let height = 50;
+  let color = '#ff0000';
+  let opacity = 0.5;
+  let width = 3;
+  let customClass = 'custom-time-marker';
+  let dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
+  let myTimes = dateMathTimes.map(function (dateMathString) {
     return {
       time: dateMathString,
       class: customClass,
@@ -25,14 +25,14 @@ describe('Vislib Time Marker Test Suite', function () {
       width: width
     };
   });
-  var getExtent = function (dataArray, func) {
+  let getExtent = function (dataArray, func) {
     return func(dataArray, function (obj) {
       return func(obj.values, function (d) {
         return d.x;
       });
     });
   };
-  var times = [];
+  let times = [];
   let TimeMarker;
   let defaultMarker;
   let customMarker;

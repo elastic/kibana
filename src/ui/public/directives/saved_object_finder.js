@@ -4,11 +4,11 @@ import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
 
-  var services = Private(SavedObjectsSavedObjectRegistryProvider).byLoaderPropertiesName;
+  let services = Private(SavedObjectsSavedObjectRegistryProvider).byLoaderPropertiesName;
 
   return {
     restrict: 'E',
@@ -23,19 +23,19 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
     controller: function ($scope, $element, $timeout) {
-      var self = this;
+      let self = this;
 
       // the text input element
-      var $input = $element.find('input[ng-model=filter]');
+      let $input = $element.find('input[ng-model=filter]');
 
       // The number of items to show in the list
       $scope.perPage = config.get('savedObjects:perPage');
 
       // the list that will hold the suggestions
-      var $list = $element.find('ul');
+      let $list = $element.find('ul');
 
       // the current filter string, used to check that returned results are still useful
-      var currentFilter = $scope.filter;
+      let currentFilter = $scope.filter;
 
       // the most recently entered search/filter
       let prevSearch;
@@ -95,7 +95,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
           $scope.userOnChoose(hit, $event);
         }
 
-        var url = self.makeUrl(hit);
+        let url = self.makeUrl(hit);
         if (!url || url === '#' || url.charAt(0) !== '#') return;
 
         $event.preventDefault();
@@ -133,7 +133,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
           case 'enter':
             if (self.hitCount !== 1) return;
 
-            var hit = self.hits[0];
+            let hit = self.hits[0];
             if (!hit) return;
 
             self.onChoose(hit, $event);
@@ -206,8 +206,8 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
           case 'enter':
             if (!self.selector.enabled) break;
 
-            var hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
-            var hit = self.hits[hitIndex];
+            let hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
+            let hit = self.hits[hitIndex];
             if (!hit) break;
 
             self.onChoose(hit, $event);
@@ -249,7 +249,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         // but ensure that we don't search for the same
         // thing twice. This is called from multiple places
         // and needs to be smart about when it actually searches
-        var filter = currentFilter;
+        let filter = currentFilter;
         if (prevSearch === filter) return;
 
         prevSearch = filter;
@@ -265,7 +265,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       }
 
       function scrollIntoView($element, snapTop) {
-        var el = $element[0];
+        let el = $element[0];
 
         if (!el) return;
 

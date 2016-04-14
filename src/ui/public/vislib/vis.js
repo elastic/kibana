@@ -10,10 +10,10 @@ import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_t
 export default function VisFactory(Private) {
 
 
-  var ResizeChecker = Private(VislibLibResizeCheckerProvider);
-  var Events = Private(EventsProvider);
-  var handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
-  var chartTypes = Private(VislibVisualizationsVisTypesProvider);
+  let ResizeChecker = Private(VislibLibResizeCheckerProvider);
+  let Events = Private(EventsProvider);
+  let handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
+  let chartTypes = Private(VislibVisualizationsVisTypesProvider);
 
   /**
    * Creates the visualizations.
@@ -49,7 +49,7 @@ export default function VisFactory(Private) {
    * @param data {Object} Elasticsearch query results
    */
   Vis.prototype.render = function (data, uiState) {
-    var chartType = this._attr.type;
+    let chartType = this._attr.type;
 
     if (!data) {
       throw new Error('No valid data!');
@@ -118,7 +118,7 @@ export default function VisFactory(Private) {
    * @method destroy
    */
   Vis.prototype.destroy = function () {
-    var selection = d3.select(this.el).select('.vis-wrapper');
+    let selection = d3.select(this.el).select('.vis-wrapper');
 
     this.binder.destroy();
     this.resizeChecker.destroy();
@@ -160,9 +160,9 @@ export default function VisFactory(Private) {
    * @returns {*}
    */
   Vis.prototype.on = function (event, listener) {
-    var first = this.listenerCount(event) === 0;
-    var ret = Events.prototype.on.call(this, event, listener);
-    var added = this.listenerCount(event) > 0;
+    let first = this.listenerCount(event) === 0;
+    let ret = Events.prototype.on.call(this, event, listener);
+    let added = this.listenerCount(event) > 0;
 
     // if this is the first listener added for the event
     // enable the event in the handler
@@ -179,9 +179,9 @@ export default function VisFactory(Private) {
    * @returns {*}
    */
   Vis.prototype.off = function (event, listener) {
-    var last = this.listenerCount(event) === 1;
-    var ret = Events.prototype.off.call(this, event, listener);
-    var removed = this.listenerCount(event) === 0;
+    let last = this.listenerCount(event) === 1;
+    let ret = Events.prototype.off.call(this, event, listener);
+    let removed = this.listenerCount(event) === 0;
 
     // Once all listeners are removed, disable the events in the handler
     if (last && removed && this.handler) this.handler.disable(event);

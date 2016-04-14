@@ -209,8 +209,8 @@ Then sit back and wait. There will probably be discussion about the pull request
 
 After a pull is submitted, it needs to get to review. If you have commit permission on the Kibana repo you will probably perform these steps while submitting your pull request. If not, a member of the elastic organization will do them for you, though you can help by suggesting a reviewer for your changes if you've interacted with someone while working on the issue.
 
-1. Assign the `review` tag. This signals to the team that someone needs to give this attention.
-1. Assign version tags. If the pull is related to an existing issue (and it should be!), that issue probably has a version tag (eg `4.0.1`) on it. Assign the same version tag to your pull. You may end up with 2 or more version tags if the changes requires backporting
+1. Assign the `review` label. This signals to the team that someone needs to give this attention.
+1. Do **not** assign a version label. Someone from Elastic staff will assign a version label, if necessary, when your pull request is ready to be merged.
 1. Find someone to review your pull. Don't just pick any yahoo, pick the right person. The right person might be the original reporter of the issue, but it might also be the person most familiar with the code you've changed. If neither of those things apply, or your change is small in scope, try to find someone on the Kibana team without a ton of existing reviews on their plate. As a rule, most pulls will require 2 reviewers, but the first reviewer will pick the 2nd.
 
 ### Review engaged

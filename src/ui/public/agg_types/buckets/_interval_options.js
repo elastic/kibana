@@ -3,7 +3,7 @@ import 'ui/directives/input_whole_number';
 export default function IntervalOptionsService(Private) {
 
   // shorthand
-  var ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
+  let ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
 
   return [
     {
@@ -14,6 +14,10 @@ export default function IntervalOptionsService(Private) {
         // to be the time field. (see #3028)
         return agg.fieldIsTimeField();
       }
+    },
+    {
+      display: 'Millisecond',
+      val: 'ms'
     },
     {
       display: 'Second',

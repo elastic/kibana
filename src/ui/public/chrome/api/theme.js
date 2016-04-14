@@ -66,7 +66,7 @@ module.exports = function (chrome, internals) {
    * @return {chrome}
    */
   chrome.addApplicationClass = function (val) {
-    var classes = internals.applicationClasses || [];
+    let classes = internals.applicationClasses || [];
     classes.push(val);
     classes = _.uniq(classes);
 
@@ -81,8 +81,8 @@ module.exports = function (chrome, internals) {
    * @return {chrome}
    */
   chrome.removeApplicationClass = function (val) {
-    var classesToRemove = [].concat(val || []);
-    var classes = internals.applicationClasses || [];
+    let classesToRemove = [].concat(val || []);
+    let classes = internals.applicationClasses || [];
     _.pull(classes, ...classesToRemove);
 
     internals.applicationClasses = classes;
