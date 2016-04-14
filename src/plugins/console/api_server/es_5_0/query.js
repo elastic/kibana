@@ -190,19 +190,11 @@ module.exports = function (api) {
         }
       }
     },
-    filtered: {
-      __template: {
-        query: {},
-        filter: {}
-      },
-      query: {},
-      filter: {}
-    },
     fuzzy: {
       '{field}': {
         'value': '',
         'boost': 1.0,
-        'min_similarity': 0.5,
+        'fuzziness': 0.5,
         'prefix_length': 0
       }
     },
@@ -302,7 +294,7 @@ module.exports = function (api) {
         __one_of: [true, false]
       },
       fuzzy_max_expansions: 50,
-      fuzzy_min_sim: 0.5,
+      fuzziness: 0.5,
       fuzzy_prefix_length: 0,
       phrase_slop: 0,
       boost: 1.0,
@@ -526,8 +518,7 @@ module.exports = function (api) {
       __template: {
         'FIELD': ['VALUE1', 'VALUE2']
       },
-      '{field}': [''],
-      minimum_match: 1
+      '{field}': ['']
     },
     wildcard: {
       __template: {
@@ -547,7 +538,6 @@ module.exports = function (api) {
       },
       path: '',
       query: {},
-      filter: {},
       score_mode: {
         __one_of: ['avg', 'total', 'max', 'none']
       }
@@ -606,7 +596,6 @@ module.exports = function (api) {
           ]
         },
         query: {},
-        filter: {},
         functions: [
           _.defaults(
             {
