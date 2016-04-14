@@ -22,7 +22,7 @@ module.exports = function (api) {
       timeout: 1,
       from: 0,
       size: 10,
-      search_type: ["dfs_query_then_fetch", "dfs_query_and_fetch", "query_then_fetch", "query_and_fetch", "count", "scan"],
+      search_type: ["dfs_query_then_fetch", "dfs_query_and_fetch", "query_then_fetch", "query_and_fetch"],
       terminate_after: 10,
       lowercase_expanded_terms: ["true", "false"],
       analyze_wildcard: "__flag__",
