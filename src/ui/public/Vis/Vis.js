@@ -1,11 +1,11 @@
 define(function (require) {
   return function VisFactory(Notifier, Private) {
-    var _ = require('lodash');
-    var aggTypes = Private(require('ui/agg_types/index'));
-    var visTypes = Private(require('ui/registry/vis_types'));
-    var AggConfigs = Private(require('ui/Vis/AggConfigs'));
+    let _ = require('lodash');
+    let aggTypes = Private(require('ui/agg_types/index'));
+    let visTypes = Private(require('ui/registry/vis_types'));
+    let AggConfigs = Private(require('ui/Vis/AggConfigs'));
 
-    var notify = new Notifier({
+    let notify = new Notifier({
       location: 'Vis'
     });
 
@@ -29,10 +29,10 @@ define(function (require) {
         type = visTypes.byName[type || 'histogram'];
       }
 
-      var schemas = type.schemas;
+      let schemas = type.schemas;
 
-      var aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
-        var schema = schemas.all.byName[oldGroupName];
+      let aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
+        let schema = schemas.all.byName[oldGroupName];
 
         if (!schema) {
           notify.log('unable to match old schema', oldGroupName, 'to a new schema');
@@ -40,12 +40,12 @@ define(function (require) {
         }
 
         oldConfigs.forEach(function (oldConfig) {
-          var agg = {
+          let agg = {
             schema: schema.name,
             type: oldConfig.agg,
           };
 
-          var aggType = aggTypes.byName[agg.type];
+          let aggType = aggTypes.byName[agg.type];
           if (!aggType) {
             notify.log('unable to find an agg type for old confg', oldConfig);
             return;
@@ -116,7 +116,7 @@ define(function (require) {
     };
 
     Vis.prototype.hasSchemaAgg = function (schemaName, aggTypeName) {
-      var aggs = this.aggs.bySchemaName[schemaName] || [];
+      let aggs = this.aggs.bySchemaName[schemaName] || [];
       return aggs.some(function (agg) {
         if (!agg.type || !agg.type.name) return false;
         return agg.type.name === aggTypeName;

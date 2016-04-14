@@ -1,22 +1,22 @@
 define(function (require) {
   return function VislibVisBuildChartData(Private) {
-    var aggResponse = Private(require('ui/agg_response/index'));
-    var Table = Private(require('ui/agg_response/tabify/_table'));
+    let aggResponse = Private(require('ui/agg_response/index'));
+    let Table = Private(require('ui/agg_response/tabify/_table'));
 
     return function (esResponse) {
-      var vis = this.vis;
+      let vis = this.vis;
 
       if (vis.isHierarchical()) {
         // the hierarchical converter is very self-contained (woot!)
         return aggResponse.hierarchical(vis, esResponse);
       }
 
-      var tableGroup = aggResponse.tabify(vis, esResponse, {
+      let tableGroup = aggResponse.tabify(vis, esResponse, {
         canSplit: true,
         asAggConfigResults: true
       });
 
-      var converted = convertTableGroup(vis, tableGroup);
+      let converted = convertTableGroup(vis, tableGroup);
       if (!converted) {
         // mimic a row of tables that doesn't have any tables
         // https://github.com/elastic/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
@@ -29,11 +29,11 @@ define(function (require) {
     };
 
     function convertTableGroup(vis, tableGroup) {
-      var tables = tableGroup.tables;
-      var firstChild = tables[0];
+      let tables = tableGroup.tables;
+      let firstChild = tables[0];
       if (firstChild instanceof Table) {
 
-        var chart = convertTable(vis, firstChild);
+        let chart = convertTable(vis, firstChild);
         // if chart is within a split, assign group title to its label
         if (tableGroup.$parent) {
           chart.label = tableGroup.title;
@@ -42,13 +42,13 @@ define(function (require) {
       }
 
       if (!tables.length) return;
-      var out = {};
+      let out = {};
       let outList;
 
       tables.forEach(function (table) {
         if (!outList) {
-          var aggConfig = table.aggConfig;
-          var direction = aggConfig.params.row ? 'rows' : 'columns';
+          let aggConfig = table.aggConfig;
+          let direction = aggConfig.params.row ? 'rows' : 'columns';
           outList = out[direction] = [];
         }
 
