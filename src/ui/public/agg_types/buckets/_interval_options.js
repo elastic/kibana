@@ -1,10 +1,10 @@
 define(function (require) {
   return function IntervalOptionsService(Private) {
-    var moment = require('moment');
+    let moment = require('moment');
     require('ui/directives/input_whole_number');
 
     // shorthand
-    var ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
+    let ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
 
     return [
       {

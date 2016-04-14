@@ -1,6 +1,6 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana');
-  var $ = require('jquery');
+  let module = require('ui/modules').get('kibana');
+  let $ = require('jquery');
 
   module.directive('kbnInfiniteScroll', function () {
     return {
@@ -9,20 +9,20 @@ define(function (require) {
         more: '='
       },
       link: function ($scope, $element, attrs) {
-        var $window = $(window);
+        let $window = $(window);
         let checkTimer;
 
         function onScroll() {
           if (!$scope.more) return;
 
-          var winHeight = $window.height();
-          var winBottom = winHeight + $window.scrollTop();
-          var elTop = $element.offset().top;
-          var remaining = elTop - winBottom;
+          let winHeight = $window.height();
+          let winBottom = winHeight + $window.scrollTop();
+          let elTop = $element.offset().top;
+          let remaining = elTop - winBottom;
 
           if (remaining <= winHeight * 0.50) {
             $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
-              var more = $scope.more();
+              let more = $scope.more();
             });
           }
         }

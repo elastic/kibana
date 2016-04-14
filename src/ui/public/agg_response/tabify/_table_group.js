@@ -1,6 +1,6 @@
 define(function (require) {
   return function TableGroupProvider() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     /**
      * Simple object that wraps multiple tables. It contains information about the aggConfig

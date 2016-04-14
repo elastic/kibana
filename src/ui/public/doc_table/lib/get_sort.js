@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
 
   /**
    * Take a sorting array and make it into an object
@@ -8,7 +8,7 @@ define(function (require) {
    * @returns {object} a sort object suitable for returning to elasticsearch
    */
   function getSort(sort, indexPattern) {
-    var sortObj = {};
+    let sortObj = {};
     let field;
     let direction;
 

@@ -1,6 +1,6 @@
 define(function (require) {
   return function BaseAggParamFactory() {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     function BaseAggParam(config) {
       _.assign(this, config);

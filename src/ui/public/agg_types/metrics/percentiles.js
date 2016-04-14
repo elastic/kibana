@@ -1,17 +1,17 @@
 define(function (require) {
   return function AggTypeMetricPercentilesProvider(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
-    var ordinalSuffix = require('ui/utils/ordinal_suffix');
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    let getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
+    let ordinalSuffix = require('ui/utils/ordinal_suffix');
+    let fieldFormats = Private(require('ui/registry/field_formats'));
 
-    var percentsEditor = require('ui/agg_types/controls/percentiles.html');
+    let percentsEditor = require('ui/agg_types/controls/percentiles.html');
     // required by the percentiles editor
     require('ui/number_list');
 
-    var valueProps = {
+    let valueProps = {
       makeLabel: function () {
         return ordinalSuffix(this.key) + ' percentile of ' + this.fieldDisplayName();
       }
@@ -35,7 +35,7 @@ define(function (require) {
         }
       ],
       getResponseAggs: function (agg) {
-        var ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+        let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
         return agg.params.percents.map(function (percent) {
           return new ValueAggConfig(percent);
