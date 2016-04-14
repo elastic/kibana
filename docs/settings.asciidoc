@@ -378,7 +378,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 
 `elasticsearch.requestHeaders:` added[5.0]:: List of Kibana client-side headers to send to Elasticsearch.
 +
-*default*: `[]`
+*default*: `[ 'authorization' ]`
 
 `elasticsearch.shardTimeout` added[4.2]:: How long Elasticsearch should wait for responses from shards. Set to 0 to disable.
 +
