@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
+  let _ = require('lodash');
+  let angular = require('angular');
 
   /**
    * Take text from the model and present it to the user as a string
