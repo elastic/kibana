@@ -24,7 +24,7 @@ define(function (require) {
           hits: 0,
           description: '',
           timelion_sheet: ['.es(*)'],
-          timelion_interval: '1d',
+          timelion_interval: '1m',
           timelion_other_interval: '1d',
           timelion_chart_height: 275,
           timelion_columns: 3,
