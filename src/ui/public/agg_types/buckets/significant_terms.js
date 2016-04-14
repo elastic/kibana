@@ -3,8 +3,8 @@ import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_a
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 export default function SignificantTermsAggDefinition(Private) {
-  var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  var createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
+  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  let createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
 
   return new BucketAggType({
     name: 'significant_terms',

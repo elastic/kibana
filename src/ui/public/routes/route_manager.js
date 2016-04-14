@@ -4,16 +4,16 @@ import wrapRouteWithPrep from './wrap_route_with_prep';
 import RouteSetupManager from './route_setup_manager';
 
 function RouteManager() {
-  var self = this;
-  var setup = new RouteSetupManager();
-  var when = [];
-  var defaults = [];
+  let self = this;
+  let setup = new RouteSetupManager();
+  let when = [];
+  let defaults = [];
   let otherwise;
 
   self.config = function ($routeProvider) {
     when.forEach(function (args) {
-      var path = args[0];
-      var route = args[1] || {};
+      let path = args[0];
+      let route = args[1] || {};
 
       // merge in any defaults
       defaults.forEach(function (args) {

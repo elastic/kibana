@@ -2,8 +2,8 @@ import _ from 'lodash';
 export default function PointSeriesInitYAxis() {
 
   return function initYAxis(chart) {
-    var y = chart.aspects.y;
-    var x = chart.aspects.x;
+    let y = chart.aspects.y;
+    let x = chart.aspects.x;
 
     if (_.isArray(y)) {
       // TODO: vis option should allow choosing this format
@@ -14,7 +14,7 @@ export default function PointSeriesInitYAxis() {
       chart.yAxisLabel = y.col.title;
     }
 
-    var xAggOutput = x.agg.write();
+    let xAggOutput = x.agg.write();
     chart.yScale = xAggOutput.metricScale || null;
   };
 };

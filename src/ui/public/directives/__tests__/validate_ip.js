@@ -7,7 +7,7 @@ import 'ui/directives/validate_ip';
 describe('Validate IP directive', function () {
   let $compile;
   let $rootScope;
-  var html = '<input type="text" ng-model="value" validate-ip />';
+  let html = '<input type="text" ng-model="value" validate-ip />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -17,7 +17,7 @@ describe('Validate IP directive', function () {
   }));
 
   it('should allow empty input', function () {
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
 
     $rootScope.value = '';
     $rootScope.$digest();
@@ -33,7 +33,7 @@ describe('Validate IP directive', function () {
   });
 
   it('should allow valid IP addresses', function () {
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
 
     $rootScope.value = '0.0.0.0';
     $rootScope.$digest();
@@ -53,7 +53,7 @@ describe('Validate IP directive', function () {
   });
 
   it('should disallow invalid IP addresses', function () {
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
 
     $rootScope.value = 'hello, world';
     $rootScope.$digest();

@@ -6,9 +6,9 @@ uiModules
     restrict: 'A',
     link: function ($scope, $elem, attrs) {
       $elem.bind('click', function () {
-        var message = attrs.confirmation || 'Are you sure?';
+        let message = attrs.confirmation || 'Are you sure?';
         if (window.confirm(message)) { // eslint-disable-line no-alert
-          var action = attrs.confirmClick;
+          let action = attrs.confirmClick;
           if (action) {
             $scope.$apply($scope.$eval(action));
           }

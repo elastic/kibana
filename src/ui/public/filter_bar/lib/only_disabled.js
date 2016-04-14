@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-var pluckDisabled = function (filter) {
+let pluckDisabled = function (filter) {
   return _.get(filter, 'meta.disabled');
 };
 
