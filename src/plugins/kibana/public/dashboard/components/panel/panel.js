@@ -55,6 +55,9 @@ uiModules
           // create child ui state from the savedObj
           const uiState = panelConfig.uiState || {};
           $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
+          if (panelConfig.uiState) {
+            panelConfig.uiState = $scope.uiState;
+          }
 
           $scope.filter = function (field, value, operator) {
             const index = $scope.savedObj.searchSource.get('index').id;
