@@ -11,7 +11,7 @@ describe('plugins/elasticsearch', function () {
     beforeEach(function () {
       const get = sinon.stub()
       .withArgs('elasticsearch.url').returns('http://foobar:9200')
-      .withArgs('elasticsearch.requestHeaders').returns(['x-my-custom-HEADER', 'Authorization']);
+      .withArgs('elasticsearch.requestHeadersWhitelist').returns(['x-my-custom-HEADER', 'Authorization']);
       const config = function () { return { get: get }; };
       server = {
         config: config

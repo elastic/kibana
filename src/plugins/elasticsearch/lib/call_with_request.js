@@ -7,7 +7,7 @@ import filterHeaders from './filter_headers';
 
 module.exports = (server, client) => {
   return (req, endpoint, params = {}) => {
-    const filteredHeaders = filterHeaders(req.headers, server.config().get('elasticsearch.requestHeaders'));
+    const filteredHeaders = filterHeaders(req.headers, server.config().get('elasticsearch.requestHeadersWhitelist'));
     _.set(params, 'headers', filteredHeaders);
     const path = toPath(endpoint);
     const api = _.get(client, path);
