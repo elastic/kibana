@@ -12,10 +12,10 @@ define(function (require) {
       };
     }
 
-    var props = {
+    const props = {
       inherits: describeConst(function (SuperClass) {
 
-        var prototype = Object.create(SuperClass.prototype, {
+        const prototype = Object.create(SuperClass.prototype, {
           constructor: describeConst(this),
           superConstructor: describeConst(SuperClass)
         });
