@@ -9,7 +9,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Range Agg', function () {
 
-  var buckets = values(resp.aggregations[1].buckets);
+  let buckets = values(resp.aggregations[1].buckets);
 
   let range;
   let Vis;
@@ -21,7 +21,7 @@ describe('Range Agg', function () {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    var BytesFormat = Private(RegistryFieldFormatsProvider).byId.bytes;
+    let BytesFormat = Private(RegistryFieldFormatsProvider).byId.bytes;
 
     indexPattern.fieldFormatMap.bytes = new BytesFormat({
       pattern: '0,0.[000] b'
@@ -32,7 +32,7 @@ describe('Range Agg', function () {
 
   describe('formating', function () {
     it('formats bucket keys properly', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -49,8 +49,8 @@ describe('Range Agg', function () {
         ]
       });
 
-      var agg = vis.aggs.byTypeName.range[0];
-      var format = function (val) {
+      let agg = vis.aggs.byTypeName.range[0];
+      let format = function (val) {
         return agg.fieldFormatter()(agg.getKey(val));
       };
       expect(format(buckets[0])).to.be('-∞ to 1 KB');

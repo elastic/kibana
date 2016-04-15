@@ -5,7 +5,7 @@ import sinon from 'auto-release-sinon';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('toggle filters', function () {
-  var storeNames = {
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -75,7 +75,7 @@ describe('toggle filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
       $rootScope.$digest();
 

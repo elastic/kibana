@@ -11,14 +11,14 @@ import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
-var dataArray = [
+let dataArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
 
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
@@ -28,8 +28,8 @@ var names = [
 
 dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
-    var beforeEvent = 'click';
-    var afterEvent = 'brush';
+    let beforeEvent = 'click';
+    let afterEvent = 'brush';
     let vis;
     let persistedState;
     let secondVis;
@@ -129,7 +129,7 @@ dataArray.forEach(function (data, i) {
     });
 
     describe('on Method', function () {
-      var events = [
+      let events = [
         beforeEvent,
         afterEvent
       ];
@@ -173,7 +173,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should cause a listener for each event to be attached to each chart', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
 
         charts.forEach(function (chart, i) {
           expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
@@ -220,7 +220,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove a listener', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
 
         expect(vis.listeners(beforeEvent)).to.not.contain(listener1);
         expect(vis.listeners(beforeEvent)).to.contain(listener2);
@@ -236,7 +236,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove the event and all listeners when only event passed an argument', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
         vis.off(afterEvent);
 
         // should remove 'brush' event
@@ -251,7 +251,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove the event from the chart when the last listener is removed', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
         vis.off(afterEvent, listener2);
 
         expect(vis.listenerCount(afterEvent)).to.be(0);

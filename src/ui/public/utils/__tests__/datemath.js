@@ -6,10 +6,10 @@ import sinon from 'auto-release-sinon';
 
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time
-  var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
-  var anchor =  '2014-01-01T06:06:06.666Z';
-  var unix = moment(anchor).valueOf();
-  var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+  let spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+  let anchor =  '2014-01-01T06:06:06.666Z';
+  let unix = moment(anchor).valueOf();
+  let format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
   let clock;
 
   describe('errors', function () {
@@ -80,8 +80,8 @@ describe('dateMath', function () {
     });
 
     _.each(spans, function (span) {
-      var nowEx = 'now-5' + span;
-      var thenEx =  anchor + '||-5' + span;
+      let nowEx = 'now-5' + span;
+      let thenEx =  anchor + '||-5' + span;
 
       it('should return 5' + span + ' ago', function () {
         expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(5, span).format(format));
@@ -104,8 +104,8 @@ describe('dateMath', function () {
     });
 
     _.each(spans, function (span) {
-      var nowEx = 'now+5' + span;
-      var thenEx =  anchor + '||+5' + span;
+      let nowEx = 'now+5' + span;
+      let thenEx =  anchor + '||+5' + span;
 
       it('should return 5' + span + ' from now', function () {
         expect(dateMath.parse(nowEx).format()).to.eql(now.add(5, span).format());

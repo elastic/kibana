@@ -1,7 +1,7 @@
 define(function () {
   return function ReturnPieNames() {
     return function returnNames(array, index, columns) {
-      var names = [];
+      let names = [];
 
       array.forEach(function (obj) {
         names.push({ key: obj.name, index: index });

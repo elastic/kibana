@@ -2,12 +2,12 @@ import _ from 'lodash';
 import inflector from 'ui/indexed_array/inflector';
 
 
-var pathGetter = _(_.get).rearg(1, 0).ary(2);
-var inflectIndex = inflector('by');
-var inflectOrder = inflector('in', 'Order');
+let pathGetter = _(_.get).rearg(1, 0).ary(2);
+let inflectIndex = inflector('by');
+let inflectOrder = inflector('in', 'Order');
 
-var CLEAR_CACHE = {};
-var OPT_NAMES = IndexedArray.OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
+let CLEAR_CACHE = {};
+let OPT_NAMES = IndexedArray.OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
 
 /**
  * Generic extension of Array class, which will index (and reindex) the
@@ -69,11 +69,11 @@ IndexedArray.prototype._setupIndices = function (props, inflect, op) {
   // shortcut for empty props
   if (!props || props.length === 0) return;
 
-  var self = this;
+  let self = this;
   return props.map(function (prop) {
 
-    var from = pathGetter.partial(prop).value();
-    var to = inflect(prop);
+    let from = pathGetter.partial(prop).value();
+    let to = inflect(prop);
     let cache;
 
     Object.defineProperty(self, to, {
@@ -105,7 +105,7 @@ IndexedArray.prototype._setupIndices = function (props, inflect, op) {
  * @return {undefined}
  */
 IndexedArray.prototype._clearIndices = function () {
-  var self = this;
+  let self = this;
   self._indexNames.forEach(function (name) {
     self[name] = CLEAR_CACHE;
   });
@@ -120,7 +120,7 @@ IndexedArray.prototype._clearIndices = function () {
  * @return {[type]}        [description]
  */
 'pop push shift splice unshift reverse'.split(' ').forEach(function (method) {
-  var orig = Array.prototype[method];
+  let orig = Array.prototype[method];
 
   IndexedArray.prototype[method] = function (/* args... */) {
     // call the original method with this context
@@ -141,7 +141,7 @@ IndexedArray.prototype._clearIndices = function () {
 * @return {array} - the removed data
 */
 IndexedArray.prototype.remove = function (predicate, context) {
-  var out = _.remove(this, predicate, context);
+  let out = _.remove(this, predicate, context);
   _.remove(this.raw, predicate, context);
   this._clearIndices();
   return out;

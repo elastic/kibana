@@ -18,7 +18,7 @@ describe('Query decorator', function () {
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        var keys = {};
+        let keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }
