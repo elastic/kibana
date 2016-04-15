@@ -14,7 +14,10 @@ export default function () {
       let filterAdded = false;
 
       filters.forEach(function (filt) {
-        if (filt.hasOwnProperty(filterKey)) {
+        const isDisabled = filt.meta.disabled;
+        const isSameFilterType = filt.hasOwnProperty(filterKey);
+        if (!isDisabled && isSameFilterType) {
+          _.assign(pendingFilter.meta, filt.meta); // be sure to keep any meta data
           _.assign(filt, pendingFilter);
           filterAdded = true;
         }

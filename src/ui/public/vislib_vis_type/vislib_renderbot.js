@@ -46,7 +46,6 @@ module.exports = function VislibRenderbotFactory(Private) {
   VislibRenderbot.prototype.buildChartData = buildChartData;
   VislibRenderbot.prototype.render = function (esResponse) {
     this.chartData = this.buildChartData(esResponse);
-    this.chartData.title = this.vis.title || '';
     this.vislibVis.render(this.chartData, this.uiState);
   };
 
