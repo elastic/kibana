@@ -118,6 +118,10 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         key: 'share',
         description: 'Share Dashboard',
         template: require('plugins/kibana/dashboard/partials/share.html')
+      }, {
+        key: 'options',
+        description: 'Options',
+        template: require('plugins/kibana/dashboard/partials/options.html')
       }];
 
       $scope.refresh = _.bindKey(courier, 'fetch');

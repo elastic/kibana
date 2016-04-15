@@ -3,7 +3,7 @@ import expect from 'expect.js';
 describe('_.organize', function () {
 
   it('it works', function () {
-    var col = [
+    let col = [
       {
         name: 'one',
         roles: ['user', 'admin', 'owner']
@@ -22,7 +22,7 @@ describe('_.organize', function () {
       }
     ];
 
-    var resp = _.organizeBy(col, 'roles');
+    let resp = _.organizeBy(col, 'roles');
     expect(resp).to.have.property('user');
     expect(resp.user).to.have.length(4);
 
@@ -34,15 +34,15 @@ describe('_.organize', function () {
   });
 
   it('behaves just like groupBy in normal scenarios', function () {
-    var col = [
+    let col = [
       { name: 'one' },
       { name: 'two' },
       { name: 'three' },
       { name: 'four' }
     ];
 
-    var orgs = _.organizeBy(col, 'name');
-    var groups = _.groupBy(col, 'name');
+    let orgs = _.organizeBy(col, 'name');
+    let groups = _.groupBy(col, 'name');
     expect(orgs).to.eql(groups);
   });
 });

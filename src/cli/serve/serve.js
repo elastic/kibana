@@ -1,9 +1,11 @@
 import _ from 'lodash';
-const { isWorker } = require('cluster');
-const { resolve } = require('path');
+import { isWorker } from 'cluster';
+import { resolve } from 'path';
+
+import readYamlConfig from './read_yaml_config';
+import { fromRoot } from '../../utils';
 
 const cwd = process.cwd();
-import { fromRoot } from '../../utils';
 
 let canCluster;
 try {
@@ -21,21 +23,16 @@ const pathCollector = function () {
   };
 };
 
+const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function initServerSettings(opts, extraCliOptions) {
-  const readYamlConfig = require('./read_yaml_config');
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
   const has = _.partial(_.has, settings);
   const merge = _.partial(_.merge, settings);
-
-  if (opts.dev) {
-    try { merge(readYamlConfig(fromRoot('config/kibana.dev.yml'))); }
-    catch (e) { null; }
-  }
 
   if (opts.dev) {
     set('env', 'development');
@@ -79,8 +76,11 @@ module.exports = function (program) {
   .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
   .option(
     '-c, --config <path>',
-    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-    process.env.CONFIG_PATH || fromRoot('config/kibana.yml'))
+    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
+    'Use mulitple --config args to include multiple config files.',
+    configPathCollector,
+    [ process.env.CONFIG_PATH || fromRoot('config/kibana.yml') ]
+  )
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
   .option('-Q, --silent', 'Prevent all logging')
@@ -116,6 +116,10 @@ module.exports = function (program) {
 
   command
   .action(async function (opts) {
+    if (opts.dev) {
+      opts.config.push(fromRoot('config/kibana.dev.yml'));
+    }
+
     const settings = initServerSettings(opts, this.getUnknownOptions());
 
     if (canCluster && opts.dev && !isWorker) {
@@ -134,8 +138,11 @@ module.exports = function (program) {
     catch (err) {
       const { server } = kbnServer;
 
-      if (server) server.log(['fatal'], err);
-      console.error('FATAL', err);
+      if (err.code === 'EADDRINUSE') {
+        logFatal(`Port ${err.port} is already in use. Another instance of Kibana may be running!`, server);
+      } else {
+        logFatal(err, server);
+      }
 
       kbnServer.close();
       process.exit(1); // eslint-disable-line no-process-exit
@@ -144,3 +151,10 @@ module.exports = function (program) {
     return kbnServer;
   });
 };
+
+function logFatal(message, server) {
+  if (server) {
+    server.log(['fatal'], message);
+  }
+  console.error('FATAL', message);
+}

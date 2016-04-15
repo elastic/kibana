@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
 export default function PointSeriesGetAspects(Private) {
-  var fakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
+  let fakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
 
-  var map = {
+  let map = {
     segment: 'x',
     metric: 'y',
     radius: 'z',
@@ -12,12 +12,12 @@ export default function PointSeriesGetAspects(Private) {
   };
 
   function columnToAspect(aspects, col, i) {
-    var schema = col.aggConfig.schema.name;
+    let schema = col.aggConfig.schema.name;
 
-    var name = map[schema];
+    let name = map[schema];
     if (!name) throw new TypeError('unknown schema name "' + schema + '"');
 
-    var aspect = {
+    let aspect = {
       i: i,
       col: col,
       agg: col.aggConfig
@@ -36,7 +36,7 @@ export default function PointSeriesGetAspects(Private) {
    *                    may be undefined, a single aspect, or an array of aspects.
    */
   return function getAspects(vis, table) {
-    var aspects = _(table.columns)
+    let aspects = _(table.columns)
     // write each column into the aspects under it's group
     .transform(columnToAspect, {})
     // unwrap groups that only have one value, and validate groups that have more

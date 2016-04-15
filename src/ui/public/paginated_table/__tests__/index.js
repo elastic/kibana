@@ -13,11 +13,11 @@ describe('paginated table', function () {
   let $scope;
   let $elScope;
   let $orderBy;
-  var defaultPerPage = 10;
+  let defaultPerPage = 10;
 
-  var makeData = function (colCount, rowCount) {
-    var columns = [];
-    var rows = [];
+  let makeData = function (colCount, rowCount) {
+    let columns = [];
+    let rows = [];
 
     if (_.isNumber(colCount)) {
       _.times(colCount, function (i) {
@@ -29,7 +29,7 @@ describe('paginated table', function () {
 
     if (_.isNumber(rowCount)) {
       _.times(rowCount, function (col) {
-        var rowItems = [];
+        let rowItems = [];
 
         _.times(columns.length, function (row) {
           rowItems.push('item' + col + row);
@@ -47,7 +47,7 @@ describe('paginated table', function () {
     };
   };
 
-  var renderTable = function (cols, rows, perPage, sort) {
+  let renderTable = function (cols, rows, perPage, sort) {
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
@@ -68,23 +68,23 @@ describe('paginated table', function () {
 
   describe('rendering', function () {
     it('should not display without rows', function () {
-      var cols = [{
+      let cols = [{
         title: 'test1'
       }];
-      var rows = [];
+      let rows = [];
 
       renderTable(cols, rows);
       expect($el.children().size()).to.be(0);
     });
 
     it('should render columns and rows', function () {
-      var data = makeData(2, 2);
-      var cols = data.columns;
-      var rows = data.rows;
+      let data = makeData(2, 2);
+      let cols = data.columns;
+      let rows = data.rows;
 
       renderTable(cols, rows);
       expect($el.children().size()).to.be(1);
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       // should pad rows
       expect(tableRows.size()).to.be(defaultPerPage);
       // should contain the row data
@@ -96,13 +96,13 @@ describe('paginated table', function () {
 
     it('should paginate rows', function () {
       // note: paginate truncates pages, so don't make too many
-      var rowCount = _.random(16, 24);
-      var perPageCount = _.random(5, 8);
-      var data = makeData(3, rowCount);
-      var pageCount = Math.ceil(rowCount / perPageCount);
+      let rowCount = _.random(16, 24);
+      let perPageCount = _.random(5, 8);
+      let data = makeData(3, rowCount);
+      let pageCount = Math.ceil(rowCount / perPageCount);
 
       renderTable(data.columns, data.rows, perPageCount);
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.size()).to.be(perPageCount);
       // add 2 for the first and last page links
       expect($el.find('paginate-controls a').size()).to.be(pageCount + 2);
@@ -132,7 +132,7 @@ describe('paginated table', function () {
     // });
 
     it('should not sort by default', function () {
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be(data.rows[0][0]);
       expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be(data.rows[lastRowIndex][0]);
     });
@@ -142,7 +142,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(999);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
@@ -155,7 +155,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(0);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
@@ -186,7 +186,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(0);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('aaaa');
       expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('zzzz');
     });
@@ -197,7 +197,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(0);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('zzzz');
       expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
     });
@@ -209,7 +209,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(0);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be(data.rows[0][0]);
       expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
     });
@@ -223,7 +223,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
       expect(tableRows.eq(lastRowIndex).find('td').eq(1).text()).to.be('zzzz');
     });
@@ -233,15 +233,15 @@ describe('paginated table', function () {
   describe('sorting duplicate columns', function () {
     let data;
     let paginatedTable;
-    var colText = 'test row';
+    let colText = 'test row';
 
     beforeEach(function () {
-      var cols = [
+      let cols = [
         { title: colText },
         { title: colText },
         { title: colText }
       ];
-      var rows = [
+      let rows = [
         ['bbbb', 'aaaa', 'zzzz'],
         ['cccc', 'cccc', 'aaaa'],
         ['zzzz', 'bbbb', 'bbbb'],
@@ -254,7 +254,7 @@ describe('paginated table', function () {
     });
 
     it('should have duplicate column titles', function () {
-      var columns = $el.find('thead th span');
+      let columns = $el.find('thead th span');
       columns.each(function () {
         expect($(this).text()).to.be(colText);
       });
@@ -265,7 +265,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(2);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('cccc');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('cccc');
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('aaaa');
@@ -279,7 +279,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(2);
       $scope.$digest();
 
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('cccc');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('cccc');
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('aaaa');
@@ -302,7 +302,7 @@ describe('paginated table', function () {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 
-      var sorters = $el.find('thead th i');
+      let sorters = $el.find('thead th i');
       expect(sorters.eq(0).hasClass('fa-sort')).to.be(true);
       expect(sorters.eq(1).hasClass('fa-sort')).to.be(false);
       expect(sorters.eq(2).hasClass('fa-sort')).to.be(true);
@@ -333,7 +333,7 @@ describe('paginated table', function () {
     });
 
     it('should append object markup', function () {
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('h1').size()).to.be(0);
       expect(tableRows.eq(1).find('h1').size()).to.be(1);
       expect(tableRows.eq(2).find('h1').size()).to.be(0);
@@ -342,7 +342,7 @@ describe('paginated table', function () {
     it('should sort using object value', function () {
       paginatedTable.sortColumn(0);
       $scope.$digest();
-      var tableRows = $el.find('tbody tr');
+      let tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('h1').size()).to.be(0);
       expect(tableRows.eq(1).find('h1').size()).to.be(0);
       // html row should be the last row

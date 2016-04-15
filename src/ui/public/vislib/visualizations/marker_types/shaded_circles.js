@@ -3,7 +3,7 @@ import L from 'leaflet';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
 export default function ShadedCircleMarkerFactory(Private) {
 
-  var BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
+  let BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
 
   /**
    * Map overlay: circle markers that are shaded to illustrate values
@@ -14,19 +14,19 @@ export default function ShadedCircleMarkerFactory(Private) {
    */
   _.class(ShadedCircleMarker).inherits(BaseMarker);
   function ShadedCircleMarker(map, geoJson, params) {
-    var self = this;
+    let self = this;
     ShadedCircleMarker.Super.apply(this, arguments);
 
     // super min and max from all chart data
-    var min = this.geoJson.properties.allmin;
-    var max = this.geoJson.properties.allmax;
+    let min = this.geoJson.properties.allmin;
+    let max = this.geoJson.properties.allmax;
 
     // multiplier to reduce size of all circles
-    var scaleFactor = 0.8;
+    let scaleFactor = 0.8;
 
     this._createMarkerGroup({
       pointToLayer: function (feature, latlng) {
-        var radius = self._geohashMinDistance(feature) * scaleFactor;
+        let radius = self._geohashMinDistance(feature) * scaleFactor;
         return L.circle(latlng, radius);
       }
     });
@@ -41,8 +41,8 @@ export default function ShadedCircleMarkerFactory(Private) {
    * @return {Number}
    */
   ShadedCircleMarker.prototype._geohashMinDistance = function (feature) {
-    var centerPoint = _.get(feature, 'properties.center');
-    var geohashRect = _.get(feature, 'properties.rectangle');
+    let centerPoint = _.get(feature, 'properties.center');
+    let geohashRect = _.get(feature, 'properties.rectangle');
 
     // centerPoint is an array of [lat, lng]
     // geohashRect is the 4 corners of the geoHash rectangle
@@ -50,16 +50,16 @@ export default function ShadedCircleMarkerFactory(Private) {
     //   clockwise, each value being an array of [lat, lng]
 
     // center lat and southeast lng
-    var east   = L.latLng([centerPoint[0], geohashRect[2][1]]);
+    let east   = L.latLng([centerPoint[0], geohashRect[2][1]]);
     // southwest lat and center lng
-    var north  = L.latLng([geohashRect[3][0], centerPoint[1]]);
+    let north  = L.latLng([geohashRect[3][0], centerPoint[1]]);
 
     // get latLng of geohash center point
-    var center = L.latLng([centerPoint[0], centerPoint[1]]);
+    let center = L.latLng([centerPoint[0], centerPoint[1]]);
 
     // get smallest radius at center of geohash grid rectangle
-    var eastRadius  = Math.floor(center.distanceTo(east));
-    var northRadius = Math.floor(center.distanceTo(north));
+    let eastRadius  = Math.floor(center.distanceTo(east));
+    let northRadius = Math.floor(center.distanceTo(north));
     return _.min([eastRadius, northRadius]);
   };
 

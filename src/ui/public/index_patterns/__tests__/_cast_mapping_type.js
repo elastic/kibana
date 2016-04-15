@@ -20,7 +20,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should cast numeric types to "number"', function () {
-    var types = [
+    let types = [
       'float',
       'double',
       'integer',
@@ -36,7 +36,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should treat non-numeric known types as what they are', function () {
-    var types = [
+    let types = [
       'date',
       'boolean',
       'ip',
@@ -53,7 +53,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should cast text and keyword types to "string"', function () {
-    var types = [
+    let types = [
       'keyword',
       'text'
     ];

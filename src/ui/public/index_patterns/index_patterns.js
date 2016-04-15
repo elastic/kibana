@@ -9,20 +9,20 @@ import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana/index_patterns');
+let module = uiModules.get('kibana/index_patterns');
 
 function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
-  var self = this;
+  let self = this;
 
-  var IndexPattern = Private(IndexPatternsIndexPatternProvider);
-  var patternCache = Private(IndexPatternsPatternCacheProvider);
+  let IndexPattern = Private(IndexPatternsIndexPatternProvider);
+  let patternCache = Private(IndexPatternsPatternCacheProvider);
 
-  var notify = new Notifier({ location: 'IndexPatterns Service'});
+  let notify = new Notifier({ location: 'IndexPatterns Service'});
 
   self.get = function (id) {
     if (!id) return self.make();
 
-    var cache = patternCache.get(id);
+    let cache = patternCache.get(id);
     return cache || patternCache.set(id, self.make(id));
   };
 

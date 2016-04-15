@@ -6,11 +6,11 @@ import Notifier from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
-  var message = 'Oh, the humanity!';
+  let message = 'Oh, the humanity!';
   let notifier;
   let params;
-  var version = window.__KBN__.version;
-  var buildNum = window.__KBN__.buildNum;
+  let version = window.__KBN__.version;
+  let buildNum = window.__KBN__.buildNum;
 
   beforeEach(function () {
     ngMock.module('kibana');
@@ -56,7 +56,7 @@ describe('Notifier', function () {
     });
 
     it('sets timeRemaining and decrements', function () {
-      var notif = notify('error');
+      let notif = notify('error');
 
       expect(notif.timeRemaining).to.equal(300);
       $interval.flush(1000);
@@ -64,8 +64,8 @@ describe('Notifier', function () {
     });
 
     it('closes notification on lifetime expiry', function () {
-      var expectation = sinon.mock();
-      var notif = notifier.error(message, expectation);
+      let expectation = sinon.mock();
+      let notif = notifier.error(message, expectation);
 
       expectation.once();
       expectation.withExactArgs('ignore');
@@ -76,7 +76,7 @@ describe('Notifier', function () {
     });
 
     it('allows canceling of timer', function () {
-      var notif = notify('error');
+      let notif = notify('error');
 
       expect(notif.timerId).to.not.be(undefined);
       notif.cancelTimer();
@@ -85,7 +85,7 @@ describe('Notifier', function () {
     });
 
     it('resets timer on addition to stack', function () {
-      var notif = notify('error');
+      let notif = notify('error');
 
       $interval.flush(100000);
       expect(notif.timeRemaining).to.equal(200);
@@ -95,12 +95,12 @@ describe('Notifier', function () {
     });
 
     it('allows reporting', function () {
-      var includesReport = _.includes(notify('error').actions, 'report');
+      let includesReport = _.includes(notify('error').actions, 'report');
       expect(includesReport).to.true;
     });
 
     it('allows accepting', function () {
-      var includesAccept = _.includes(notify('error').actions, 'accept');
+      let includesAccept = _.includes(notify('error').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -133,12 +133,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      var includesReport = _.includes(notify('warning').actions, 'report');
+      let includesReport = _.includes(notify('warning').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      var includesAccept = _.includes(notify('warning').actions, 'accept');
+      let includesAccept = _.includes(notify('warning').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -171,12 +171,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      var includesReport = _.includes(notify('info').actions, 'report');
+      let includesReport = _.includes(notify('info').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      var includesAccept = _.includes(notify('info').actions, 'accept');
+      let includesAccept = _.includes(notify('info').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -197,13 +197,13 @@ describe('Notifier', function () {
   function testVersionInfo(fnName) {
     context('when version is configured', function () {
       it('adds version to notification', function () {
-        var notification = notify(fnName);
+        let notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
     context('when build number is configured', function () {
       it('adds buildNum to notification', function () {
-        var notification = notify(fnName);
+        let notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);
       });
     });
