@@ -22,7 +22,7 @@ module.exports = function ({ Plugin }) {
         password: string(),
         shardTimeout: number().default(0),
         requestTimeout: number().default(30000),
-        requestHeaders: array().items(string()).single().default(DEFAULT_REQUEST_HEADERS),
+        requestHeaders: array().items().single().default(DEFAULT_REQUEST_HEADERS),
         pingTimeout: number().default(ref('requestTimeout')),
         startupTimeout: number().default(5000),
         ssl: object({

@@ -376,7 +376,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 + 
 *default*: `500000`
 
-`elasticsearch.requestHeaders:` added[5.0]:: List of Kibana client-side headers to send to Elasticsearch.
+`elasticsearch.requestHeaders:` added[5.0]:: List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side headers, set this value to null, not []. Setting it to [] will send the default list of headers.
 +
 *default*: `[ 'authorization' ]`
 
