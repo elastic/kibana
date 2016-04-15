@@ -9,14 +9,15 @@ export default function () {
       // we need to check if the point.orig is set, if not use try the point.aggConfigResult
       const filters = _.clone($state.filters || []);
       const pendingFilter = { meta: { negate: negate, index: index }};
-      _.extend(pendingFilter, filter);
+      _.assign(pendingFilter, filter);
       const filterKey = _.keys(filter)[0];
       let filterAdded = false;
 
       filters.forEach(function (filt) {
-        const isDisabled = filt.meta.disabled;
+        const isDisabled = filt.meta && filt.meta.disabled;
         const isSameFilterType = filt.hasOwnProperty(filterKey);
-        if (!isDisabled && isSameFilterType) {
+        const isSameIndex = filt.meta && (filt.meta.index === index);
+        if (!isDisabled && isSameFilterType && isSameIndex) {
           _.assign(pendingFilter.meta, filt.meta); // be sure to keep any meta data
           _.assign(filt, pendingFilter);
           filterAdded = true;
