@@ -14,7 +14,7 @@ module.exports = function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    const filteredHeaders = filterHeaders(request.headers, server.config().get('elasticsearch.requestHeaders'));
+    const filteredHeaders = filterHeaders(request.headers, server.config().get('elasticsearch.requestHeadersWhitelist'));
     done(null, url, filteredHeaders);
   };
 };
