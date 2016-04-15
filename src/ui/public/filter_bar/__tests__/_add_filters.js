@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('add filters', function () {
-  var storeNames = {
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -88,7 +88,7 @@ describe('add filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
 
       // set up the watchers, add new filters, and crank the digest loop
       $rootScope.$digest();
@@ -109,7 +109,7 @@ describe('add filters', function () {
 
   describe('filter reconciliation', function () {
     it('should de-dupe appState filters being added', function () {
-      var newFilter = _.cloneDeep(filters[1]);
+      let newFilter = _.cloneDeep(filters[1]);
       appState.filters = filters;
       $rootScope.$digest();
       expect(appState.filters.length).to.be(3);
@@ -120,7 +120,7 @@ describe('add filters', function () {
     });
 
     it('should de-dupe globalState filters being added', function () {
-      var newFilter = _.cloneDeep(filters[1]);
+      let newFilter = _.cloneDeep(filters[1]);
       globalState.filters = filters;
       $rootScope.$digest();
       expect(globalState.filters.length).to.be(3);
@@ -131,16 +131,16 @@ describe('add filters', function () {
     });
 
     it('should mutate global filters on appState filter changes', function () {
-      var idx = 1;
+      let idx = 1;
       globalState.filters = filters;
       $rootScope.$digest();
 
-      var appFilter = _.cloneDeep(filters[idx]);
+      let appFilter = _.cloneDeep(filters[idx]);
       appFilter.meta.negate = true;
       queryFilter.addFilters(appFilter);
       $rootScope.$digest();
 
-      var res = queryFilter.getFilters();
+      let res = queryFilter.getFilters();
       expect(res).to.have.length(3);
       _.each(res, function (filter, i) {
         expect(filter.$state.store).to.be('globalState');

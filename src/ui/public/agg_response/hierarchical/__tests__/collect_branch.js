@@ -4,7 +4,7 @@ import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
 import expect from 'expect.js';
 describe('collectBranch()', function () {
   let results;
-  var convert = function (name) {
+  let convert = function (name) {
     return 'converted:' + name;
   };
 
