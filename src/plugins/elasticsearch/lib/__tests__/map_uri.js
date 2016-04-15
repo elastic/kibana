@@ -5,18 +5,9 @@ import sinon from 'sinon';
 describe('plugins/elasticsearch', function () {
   describe('lib/map_uri', function () {
 
-    let server;
     let request;
 
     beforeEach(function () {
-      const get = sinon.stub()
-      .withArgs('elasticsearch.url').returns('http://foobar:9200')
-      .withArgs('elasticsearch.requestHeadersWhitelist').returns(['x-my-custom-HEADER', 'Authorization']);
-      const config = function () { return { get: get }; };
-      server = {
-        config: config
-      };
-
       request = {
         path: '/elasticsearch/some/path',
         headers: {
@@ -31,7 +22,16 @@ describe('plugins/elasticsearch', function () {
       };
     });
 
-    it('only keeps the whitelisted request headers', function () {
+    it('only sends the whitelisted request headers', function () {
+
+      const get = sinon.stub()
+      .withArgs('elasticsearch.url').returns('http://foobar:9200')
+      .withArgs('elasticsearch.requestHeadersWhitelist').returns(['x-my-custom-HEADER', 'Authorization']);
+      const config = function () { return { get: get }; };
+      const server = {
+        config: config
+      };
+
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
         expect(upstreamHeaders).to.have.property('authorization');
@@ -39,5 +39,38 @@ describe('plugins/elasticsearch', function () {
         expect(Object.keys(upstreamHeaders).length).to.be(2);
       });
     });
+
+    it('sends no headers if whitelist is set to []', function () {
+
+      const get = sinon.stub()
+      .withArgs('elasticsearch.url').returns('http://foobar:9200')
+      .withArgs('elasticsearch.requestHeadersWhitelist').returns([]);
+      const config = function () { return { get: get }; };
+      const server = {
+        config: config
+      };
+
+      mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
+        expect(err).to.be(null);
+        expect(Object.keys(upstreamHeaders).length).to.be(0);
+      });
+    });
+
+    it('sends no headers if whitelist is set to no value', function () {
+
+      const get = sinon.stub()
+      .withArgs('elasticsearch.url').returns('http://foobar:9200')
+      .withArgs('elasticsearch.requestHeadersWhitelist').returns([ null ]); // This is how Joi returns it
+      const config = function () { return { get: get }; };
+      const server = {
+        config: config
+      };
+
+      mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
+        expect(err).to.be(null);
+        expect(Object.keys(upstreamHeaders).length).to.be(0);
+      });
+    });
+
   });
 });
