@@ -489,7 +489,7 @@ context_tests(
 );
 
 function tt(term, template, meta) {
-  var term = {name: term, template: template};
+  term = {name: term, template: template};
   if (meta) {
     term.meta = meta;
   }

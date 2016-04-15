@@ -1,22 +1,22 @@
 import $ from 'jquery';
 export default function PointSeriesTooltipFormatter($compile, $rootScope) {
 
-  var $tooltipScope = $rootScope.$new();
-  var $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
+  let $tooltipScope = $rootScope.$new();
+  let $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
   $compile($tooltip)($tooltipScope);
 
   return function tooltipFormatter(event) {
-    var datum = event.datum;
+    let datum = event.datum;
     if (!datum || !datum.aggConfigResult) return '';
 
-    var details = $tooltipScope.details = [];
-    var result = { $parent: datum.aggConfigResult };
+    let details = $tooltipScope.details = [];
+    let result = { $parent: datum.aggConfigResult };
 
     function addDetail(result) {
-      var agg = result.aggConfig;
-      var value = result.value;
+      let agg = result.aggConfig;
+      let value = result.value;
 
-      var detail = {
+      let detail = {
         value: agg.fieldFormatter()(value),
         label: agg.makeLabel()
       };
