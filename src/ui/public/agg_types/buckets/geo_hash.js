@@ -70,9 +70,9 @@ export default function GeoHashAggDefinition(Private, config) {
       {
         name: 'precision',
         editor: precisionTemplate,
+        deserialize: getPrecision,
         controller: function ($scope) {
         },
-        deserialize: getPrecision,
         write: function (aggConfig, output) {
           let currZoom = null;
           if (aggConfig.params.mapZoom || aggConfig.vis.uiState) { // First iteration
