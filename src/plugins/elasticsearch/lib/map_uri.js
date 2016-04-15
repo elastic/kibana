@@ -1,22 +1,8 @@
 import querystring from 'querystring';
 import { resolve } from 'url';
-import _ from 'lodash';
+import filterHeaders from './filter_headers';
 
 module.exports = function mapUri(server, prefix) {
-
-  const normalizeHeader = function (header) {
-    return header.trim().toLowerCase();
-  };
-
-  const filterHeaders = function (originalHeaders) {
-    const originalHeadersNormalized = _.mapKeys(originalHeaders, function (headerValue, headerName) {
-      return normalizeHeader(headerName);
-    });
-    const headersToKeep = server.config().get('elasticsearch.requestHeaders');
-    const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
-
-    return _.pick(originalHeaders, headersToKeepNormalized);
-  };
 
   const config = server.config();
   return function (request, done) {
@@ -28,6 +14,7 @@ module.exports = function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    done(null, url, filterHeaders(request.headers));
+    const filteredHeaders = filterHeaders(request.headers, server.config().get('elasticsearch.requestHeaders'));
+    done(null, url, filteredHeaders);
   };
 };
