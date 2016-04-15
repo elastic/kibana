@@ -1,44 +1,47 @@
 import angular from 'angular';
-import errors from 'ui/errors';
 import _ from 'lodash';
+
+import errors from 'ui/errors';
 import slugifyId from 'ui/utils/slugify_id';
-import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
-import CourierDataSourceSearchSourceProvider from 'ui/courier/data_source/search_source';
-import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import MappingSetupProvider from 'ui/utils/mapping_setup';
+
+import DocSourceProvider from '../data_source/doc_source';
+import SearchSourceProvider from '../data_source/search_source';
+
 export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
 
-  var DocSource = Private(CourierDataSourceDocSourceProvider);
-  var SearchSource = Private(CourierDataSourceSearchSourceProvider);
-  var mappingSetup = Private(UtilsMappingSetupProvider);
+  let DocSource = Private(DocSourceProvider);
+  let SearchSource = Private(SearchSourceProvider);
+  let mappingSetup = Private(MappingSetupProvider);
 
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};
 
     // save an easy reference to this
-    var self = this;
+    let self = this;
 
     /************
      * Initialize config vars
      ************/
     // the doc which is used to store this object
-    var docSource = new DocSource();
+    let docSource = new DocSource();
 
     // type name for this object, used as the ES-type
-    var type = config.type;
+    let type = config.type;
 
     // Create a notifier for sending alerts
-    var notify = new Notifier({
+    let notify = new Notifier({
       location: 'Saved ' + type
     });
 
     // mapping definition for the fields that this object will expose
-    var mapping = mappingSetup.expandShorthand(config.mapping);
+    let mapping = mappingSetup.expandShorthand(config.mapping);
 
     // default field values, assigned when the source is loaded
-    var defaults = config.defaults || {};
+    let defaults = config.defaults || {};
 
-    var afterESResp = config.afterESResp || _.noop;
-    var customInit = config.init || _.noop;
+    let afterESResp = config.afterESResp || _.noop;
+    let customInit = config.init || _.noop;
 
     // optional search source which this object configures
     self.searchSource = config.searchSource && new SearchSource();
@@ -110,7 +113,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
 
       if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, self.id);
 
-      var meta = resp._source.kibanaSavedObjectMeta || {};
+      let meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
 
       if (!config.indexPattern && self._source.indexPattern) {
@@ -148,15 +151,15 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       if (!self.searchSource) return;
 
       // if we have a searchSource, set its state based on the searchSourceJSON field
-      var state;
+      let state;
       try {
         state = JSON.parse(searchSourceJson);
       } catch (e) {
         state = {};
       }
 
-      var oldState = self.searchSource.toJSON();
-      var fnProps = _.transform(oldState, function (dynamic, val, name) {
+      let oldState = self.searchSource.toJSON();
+      let fnProps = _.transform(oldState, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
@@ -173,7 +176,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       return Promise.try(function () {
         if (self.searchSource) {
 
-          var index = config.indexPattern || self.searchSource.getOwn('index');
+          let index = config.indexPattern || self.searchSource.getOwn('index');
           if (!index) return;
           if (config.clearSavedIndexPattern) {
             self.searchSource.set('index', undefined);
@@ -197,7 +200,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * @return {Object}
      */
     self.serialize = function () {
-      var body = {};
+      let body = {};
 
       _.forOwn(mapping, function (fieldMapping, fieldName) {
         if (self[fieldName] != null) {
@@ -224,7 +227,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      */
     self.save = function () {
 
-      var body = self.serialize();
+      let body = self.serialize();
 
       // Slugify the object id
       self.id = slugifyId(self.id);
@@ -237,7 +240,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     };
 
     self.saveSource = function (source) {
-      var finish = function (id) {
+      let finish = function (id) {
         self.id = id;
         return es.indices.refresh({
           index: kbnIndex
@@ -252,7 +255,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       .catch(function (err) {
         // record exists, confirm overwriting
         if (_.get(err, 'origError.status') === 409) {
-          var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
+          let confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
           return safeConfirm(confirmMessage).then(
             function () {

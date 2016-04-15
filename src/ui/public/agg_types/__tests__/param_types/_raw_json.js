@@ -1,21 +1,21 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 import AggTypesParamTypesRawJsonProvider from 'ui/agg_types/param_types/raw_json';
 
 
 module.exports = describe('JSON', function () {
-  var paramName = 'json_test';
-  var BaseAggParam;
-  var JsonAggParam;
-  var aggParam;
-  var aggConfig;
-  var output;
+  let paramName = 'json_test';
+  let BaseAggParam;
+  let JsonAggParam;
+  let aggParam;
+  let aggConfig;
+  let output;
 
   function initAggParam(config) {
     config = config || {};
-    var defaults = {
+    let defaults = {
       name: paramName,
       type: 'json'
     };
@@ -59,7 +59,7 @@ module.exports = describe('JSON', function () {
     });
 
     it('should append param when valid JSON', function () {
-      var jsonData = JSON.stringify({
+      let jsonData = JSON.stringify({
         new_param: 'should exist in output'
       });
 
@@ -75,7 +75,7 @@ module.exports = describe('JSON', function () {
     });
 
     it('should not overwrite existing params', function () {
-      var jsonData = JSON.stringify({
+      let jsonData = JSON.stringify({
         new_param: 'should exist in output',
         existing: 'should be used'
       });
@@ -88,7 +88,7 @@ module.exports = describe('JSON', function () {
     });
 
     it('should drop nulled params', function () {
-      var jsonData = JSON.stringify({
+      let jsonData = JSON.stringify({
         new_param: 'should exist in output',
         field: null
       });

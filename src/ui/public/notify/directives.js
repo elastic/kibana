@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 import toasterTemplate from 'ui/notify/partials/toaster.html';
-var notify = uiModules.get('kibana/notify');
+import 'ui/notify/notify.less';
+
+let notify = uiModules.get('kibana/notify');
 
 notify.directive('kbnNotifications', function () {
   return {

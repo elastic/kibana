@@ -1,9 +1,8 @@
 import expect from 'expect.js';
-import util from 'util';
+import { format } from 'util';
+
 import * as kbnTestServer from '../../../../../test/utils/kbn_server';
-
-const format = util.format;
-
+import fromRoot from '../../../../utils/from_root';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
@@ -11,9 +10,15 @@ describe('plugins/elasticsearch', function () {
     let kbnServer;
 
     before(function () {
-      this.timeout(15000); // sometimes waiting for server takes longer than 10
+      this.timeout(60000); // sometimes waiting for server takes longer than 10
 
-      kbnServer = kbnTestServer.createServer();
+      kbnServer = kbnTestServer.createServer({
+        plugins: {
+          scanDirs: [
+            fromRoot('src/plugins')
+          ]
+        }
+      });
       return kbnServer.ready()
       .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });

@@ -1,8 +1,9 @@
 import _ from 'lodash';
-import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_field_format/FieldFormat';
+
+import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
 export default function TruncateFormatProvider(Private) {
-  var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
-  var omission = '...';
+  let FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  let omission = '...';
 
   _.class(Truncate).inherits(FieldFormat);
 
@@ -15,7 +16,7 @@ export default function TruncateFormatProvider(Private) {
   Truncate.fieldType = ['string'];
 
   Truncate.prototype._convert = function (val) {
-    var length = this.param('fieldLength');
+    let length = this.param('fieldLength');
     if (length > 0) {
       return _.trunc(val, {
         'length': length + omission.length,

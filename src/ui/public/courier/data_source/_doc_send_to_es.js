@@ -1,11 +1,12 @@
 import _ from 'lodash';
+
 import errors from 'ui/errors';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
+import RequestQueueProvider from 'ui/courier/_request_queue';
+import FetchProvider from 'ui/courier/fetch/fetch';
 
 export default function (Promise, Private, es) {
-  var requestQueue = Private(CourierRequestQueueProvider);
-  var courierFetch = Private(CourierFetchFetchProvider);
+  let requestQueue = Private(RequestQueueProvider);
+  let courierFetch = Private(FetchProvider);
 
   /**
    * Backend for doUpdate and doIndex
@@ -15,9 +16,9 @@ export default function (Promise, Private, es) {
    * @param  {String} body - HTTP request body
    */
   return function (method, validateVersion, body, ignore) {
-    var doc = this;
+    let doc = this;
     // straight assignment will causes undefined values
-    var params = _.pick(this._state, ['id', 'type', 'index']);
+    let params = _.pick(this._state, ['id', 'type', 'index']);
     params.body = body;
     params.ignore = ignore || [409];
 
@@ -32,7 +33,7 @@ export default function (Promise, Private, es) {
       doc._storeVersion(resp._version);
       doc.id(resp._id);
 
-      var docFetchProm;
+      let docFetchProm;
       if (method !== 'index') {
         docFetchProm = doc.fetch();
       } else {
@@ -50,13 +51,13 @@ export default function (Promise, Private, es) {
       // notify pending request for this same document that we have updates
       docFetchProm.then(function (fetchResp) {
         // use the key to compair sources
-        var key = doc._versionKey();
+        let key = doc._versionKey();
 
         // clear the queue and filter out the removed items, pushing the
         // unmatched ones back in.
-        var respondTo = requestQueue.splice(0).filter(function (req) {
-          var isDoc = req.source._getType() === 'doc';
-          var keyMatches = isDoc && req.source._versionKey() === key;
+        let respondTo = requestQueue.splice(0).filter(function (req) {
+          let isDoc = req.source._getType() === 'doc';
+          let keyMatches = isDoc && req.source._versionKey() === key;
 
           // put some request back into the queue
           if (!keyMatches) {

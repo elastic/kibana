@@ -1,7 +1,11 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
+import expect from 'expect.js';
+import url from 'url';
+import SetupError from '../setup_error';
 
+import serverConfig from '../../../../../test/server_config';
 import checkEsVersion from '../check_es_version';
 
 describe('plugins/elasticsearch', function () {
@@ -23,7 +27,7 @@ describe('plugins/elasticsearch', function () {
             status: {
               red: sinon.stub()
             },
-            url: 'http://localhost:9210'
+            url: url.format(serverConfig.servers.elasticsearch)
           }
         }
       };
@@ -65,20 +69,24 @@ describe('plugins/elasticsearch', function () {
 
     it('fails with a single node that is out of date', function () {
       setNodes('1.4.4', '1.4.2', '1.4.5');
-      return checkEsVersion(server)
-      .then(function () {
-        throw new Error('expected validation to fail');
-      }, _.noop);
+
+      checkEsVersion(server)
+      .catch(function (e) {
+        expect(e).to.be.a(SetupError);
+      });
     });
 
-    it('passes if that single node is a client node', function () {
+    it('fails if that single node is a client node', function () {
       setNodes(
         '1.4.4',
         { version: '1.4.2', attributes: { client: 'true' } },
         '1.4.5'
       );
 
-      return checkEsVersion(server);
+      checkEsVersion(server)
+      .catch(function (e) {
+        expect(e).to.be.a(SetupError);
+      });
     });
 
   });

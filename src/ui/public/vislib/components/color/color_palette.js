@@ -3,14 +3,14 @@ import _ from 'lodash';
 import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
 export default function ColorPaletteUtilService(Private) {
 
-  var seedColors = Private(VislibComponentsColorSeedColorsProvider);
+  let seedColors = Private(VislibComponentsColorSeedColorsProvider);
 
   function spectrum(start, end, fraction) {
     start = d3.rgb(start);
     end = d3.rgb(end);
 
     function scale(c1, c2) {
-      var num = (c1 + Math.round((c2 - c1) * fraction));
+      let num = (c1 + Math.round((c2 - c1) * fraction));
       num = Math.max(Math.min(num, 255), 0);
       return num;
     }
@@ -23,16 +23,16 @@ export default function ColorPaletteUtilService(Private) {
   function createLevel(seed, level) {
     if (level < 1) return seed;
 
-    var levelSize = Math.pow(2, level - 1);
-    var steps = _.times(levelSize, function (i) {
-      var numerator = -1 + ((i + 1) * 2);
-      var denominator = Math.pow(2, level);
+    let levelSize = Math.pow(2, level - 1);
+    let steps = _.times(levelSize, function (i) {
+      const numerator = -1 + ((i + 1) * 2);
+      const denominator = Math.pow(2, level);
       return numerator / denominator;
     });
 
-    var colors = _.map(seed, function (color, i) {
-      var c1 = seed[(i || seed.length) - 1]; // Make a circle, use previous color, or last color in seed array
-      var c2 = color;
+    let colors = _.map(seed, function (color, i) {
+      let c1 = seed[(i || seed.length) - 1]; // Make a circle, use previous color, or last color in seed array
+      let c2 = color;
       return _.map(steps, function (fraction) {
         return spectrum(c1, c2, fraction);
       });
@@ -45,11 +45,11 @@ export default function ColorPaletteUtilService(Private) {
     if (num <= seedColors.length) return seedColors;
 
     // Need more colors!
-    var colors = seedColors;
-    var original = seedColors.base;
+    let colors = seedColors;
+    const original = seedColors.base;
 
     // Figure out what level of the tree we're on
-    var level = Math.log(colors.length / original.length) / Math.log(2);
+    let level = Math.log(colors.length / original.length) / Math.log(2);
 
     // Add new levels until we have enough colors
     while (colors.length <= num) {

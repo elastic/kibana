@@ -29,12 +29,18 @@ uiModules.get('kibana')
         refresh();
       });
 
-      $scope.highlightSeries = function (label) {
-        $('[data-label]', $elem.siblings()).not(function (els, el) { return $(el).data('label') !== label;}).css('opacity', 0.5);
+      $scope.highlight = function (event) {
+        var el = event.currentTarget;
+        var handler = $scope.renderbot.vislibVis.handler;
+        if (!handler) return;
+        handler.highlight.call(el, handler.el);
       };
 
-      $scope.unhighlightSeries = function () {
-        $('[data-label]', $elem.siblings()).css('opacity', 1);
+      $scope.unhighlight = function (event) {
+        var el = event.currentTarget;
+        var handler = $scope.renderbot.vislibVis.handler;
+        if (!handler) return;
+        handler.unHighlight.call(el, handler.el);
       };
 
       $scope.setColor = function (label, color) {
@@ -84,7 +90,7 @@ uiModules.get('kibana')
       // Most of these functions were moved directly from the old Legend class. Not a fan of this.
       function getLabels(data, type) {
         if (!data) return [];
-        var data = data.columns || data.rows || [data];
+        data = data.columns || data.rows || [data];
         if (type === 'pie') return Data.prototype.pieNames(data);
         return getSeriesLabels(data);
       };

@@ -7,9 +7,9 @@ import _ from 'lodash';
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
 function getSort(sort, indexPattern) {
-  var sortObj = {};
-  var field;
-  var direction;
+  let sortObj = {};
+  let field;
+  let direction;
 
   function isSortable(field) {
     return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);

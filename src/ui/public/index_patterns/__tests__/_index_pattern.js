@@ -1,30 +1,30 @@
 import _ from 'lodash';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import Promise from 'bluebird';
 import errors from 'ui/errors';
-import IndexedArray from 'ui/IndexedArray';
+import IndexedArray from 'ui/indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
-import CourierDataSourceDocSourceProvider from 'ui/courier/data_source/doc_source';
+import DocSourceProvider from 'ui/courier/data_source/doc_source';
 import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
 describe('index pattern', function () {
-  var IndexPattern;
-  var mapper;
-  var mappingSetup;
-  var mockLogstashFields;
-  var DocSource;
-  var config;
-  var docSourceResponse;
-  var indexPatternId = 'test-pattern';
-  var indexPattern;
-  var calculateIndices;
-  var $rootScope;
-  var intervals;
+  let IndexPattern;
+  let mapper;
+  let mappingSetup;
+  let mockLogstashFields;
+  let DocSource;
+  let config;
+  let docSourceResponse;
+  let indexPatternId = 'test-pattern';
+  let indexPattern;
+  let calculateIndices;
+  let $rootScope;
+  let intervals;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
@@ -33,7 +33,7 @@ describe('index pattern', function () {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
-    DocSource = Private(CourierDataSourceDocSourceProvider);
+    DocSource = Private(DocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
 
@@ -77,7 +77,7 @@ describe('index pattern', function () {
 
   // helper function to create index patterns
   function create(id, payload) {
-    var indexPattern = new IndexPattern(id);
+    let indexPattern = new IndexPattern(id);
     DocSource.prototype.doIndex.returns(Promise.resolve(id));
     payload = _.defaults(payload || {}, docSourceResponse(id));
     setDocsourcePayload(payload);
@@ -129,16 +129,16 @@ describe('index pattern', function () {
 
   describe('getScriptedFields', function () {
     it('should return all scripted fields', function () {
-      var scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
-      var respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
+      let scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
+      let respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
       expect(respNames).to.eql(scriptedNames);
     });
   });
 
   describe('getNonScriptedFields', function () {
     it('should return all non-scripted fields', function () {
-      var notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
-      var respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
+      let notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
+      let respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
       expect(respNames).to.eql(notScriptedNames);
     });
 
@@ -146,11 +146,11 @@ describe('index pattern', function () {
 
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
-    require('testUtils/noDigestPromises').activateForSuite();
-    var indexPatternId = 'test-pattern';
-    var indexPattern;
-    var fieldLength;
-    var truncatedFields;
+    require('test_utils/no_digest_promises').activateForSuite();
+    let indexPatternId = 'test-pattern';
+    let indexPattern;
+    let fieldLength;
+    let truncatedFields;
 
     beforeEach(function () {
       fieldLength = mockLogstashFields.length;
@@ -181,8 +181,8 @@ describe('index pattern', function () {
         indexPattern.refreshFields(),
       ])
       .then(function (data) {
-        var expected = data[0]; // just the fields in the index
-        var fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
+        let expected = data[0]; // just the fields in the index
+        let fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
 
         expect(_.pluck(fields, 'name')).to.eql(_.pluck(expected, 'name'));
       });
@@ -193,15 +193,15 @@ describe('index pattern', function () {
       setDocsourcePayload(docSourceResponse(indexPatternId));
 
       // add spy to indexPattern.getScriptedFields
-      var scriptedFieldsSpy = sinon.spy(indexPattern, 'getScriptedFields');
+      let scriptedFieldsSpy = sinon.spy(indexPattern, 'getScriptedFields');
 
       // refresh fields, which will fetch
       return indexPattern.refreshFields().then(function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        var scripted = _.where(mockLogstashFields, { scripted: true });
-        var expected = _.filter(indexPattern.fields, { scripted: true });
+        let scripted = _.where(mockLogstashFields, { scripted: true });
+        let expected = _.filter(indexPattern.fields, { scripted: true });
         expect(_.pluck(expected, 'name')).to.eql(_.pluck(scripted, 'name'));
       });
     });
@@ -210,11 +210,11 @@ describe('index pattern', function () {
   describe('add and remove scripted fields', function () {
     it('should append the scripted field', function () {
       // keep a copy of the current scripted field count
-      var saveSpy = sinon.spy(indexPattern, 'save');
-      var oldCount = indexPattern.getScriptedFields().length;
+      let saveSpy = sinon.spy(indexPattern, 'save');
+      let oldCount = indexPattern.getScriptedFields().length;
 
       // add a new scripted field
-      var scriptedField = {
+      let scriptedField = {
         name: 'new scripted field',
         script: 'false',
         type: 'boolean'
@@ -222,17 +222,17 @@ describe('index pattern', function () {
       indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
       indexPattern._indexFields(); // normally triggered by docSource.onUpdate()
 
-      var scriptedFields = indexPattern.getScriptedFields();
+      let scriptedFields = indexPattern.getScriptedFields();
       expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).to.have.length(oldCount + 1);
       expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
     });
 
     it('should remove scripted field, by name', function () {
-      var saveSpy = sinon.spy(indexPattern, 'save');
-      var scriptedFields = indexPattern.getScriptedFields();
-      var oldCount = scriptedFields.length;
-      var scriptedField = _.last(scriptedFields);
+      let saveSpy = sinon.spy(indexPattern, 'save');
+      let scriptedFields = indexPattern.getScriptedFields();
+      let oldCount = scriptedFields.length;
+      let scriptedField = _.last(scriptedFields);
 
       indexPattern.removeScriptedField(scriptedField.name);
 
@@ -242,8 +242,8 @@ describe('index pattern', function () {
     });
 
     it('should not allow duplicate names', function () {
-      var scriptedFields = indexPattern.getScriptedFields();
-      var scriptedField = _.last(scriptedFields);
+      let scriptedFields = indexPattern.getScriptedFields();
+      let scriptedField = _.last(scriptedFields);
       expect(function () {
         indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       }).to.throwError(function (e) {
@@ -254,9 +254,9 @@ describe('index pattern', function () {
 
   describe('popularizeField', function () {
     it('should increment the poplarity count by default', function () {
-      var saveSpy = sinon.stub(indexPattern, 'save');
+      let saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
-        var oldCount = field.count;
+        let oldCount = field.count;
 
         indexPattern.popularizeField(field.name);
 
@@ -266,10 +266,10 @@ describe('index pattern', function () {
     });
 
     it('should increment the poplarity count', function () {
-      var saveSpy = sinon.stub(indexPattern, 'save');
+      let saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
-        var oldCount = field.count;
-        var incrementAmount = 4;
+        let oldCount = field.count;
+        let incrementAmount = 4;
 
         indexPattern.popularizeField(field.name, incrementAmount);
 
@@ -280,9 +280,9 @@ describe('index pattern', function () {
 
     it('should decrement the poplarity count', function () {
       indexPattern.fields.forEach(function (field, i) {
-        var oldCount = field.count;
-        var incrementAmount = 4;
-        var decrementAmount = -2;
+        let oldCount = field.count;
+        let incrementAmount = 4;
+        let decrementAmount = -2;
 
         indexPattern.popularizeField(field.name, incrementAmount);
         indexPattern.popularizeField(field.name, decrementAmount);
@@ -293,7 +293,7 @@ describe('index pattern', function () {
 
     it('should not go below 0', function () {
       indexPattern.fields.forEach(function (field) {
-        var decrementAmount = -Number.MAX_VALUE;
+        let decrementAmount = -Number.MAX_VALUE;
         indexPattern.popularizeField(field.name, decrementAmount);
         expect(field.count).to.equal(0);
       });
@@ -301,9 +301,9 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
+    require('test_utils/no_digest_promises').activateForSuite();
     context('when index pattern is an interval', function () {
-      var interval;
+      let interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
@@ -311,11 +311,11 @@ describe('index pattern', function () {
 
       it('invokes interval toDetailedIndexList with given start/stop times', async function () {
         await indexPattern.toDetailedIndexList(1, 2);
-        var id = indexPattern.id;
+        let id = indexPattern.id;
         expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
       });
       it('is fulfilled by the result of interval toDetailedIndexList', async function () {
-        var indexList = await indexPattern.toDetailedIndexList();
+        let indexList = await indexPattern.toDetailedIndexList();
         expect(indexList[0].index).to.equal('foo');
         expect(indexList[1].index).to.equal('bar');
       });
@@ -340,13 +340,13 @@ describe('index pattern', function () {
 
       it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
         await indexPattern.toDetailedIndexList(1, 2, 'sortOrder');
-        var id = indexPattern.id;
-        var field = indexPattern.timeFieldName;
+        let id = indexPattern.id;
+        let field = indexPattern.timeFieldName;
         expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
 
       it('is fulfilled by the result of calculateIndices', async function () {
-        var indexList = await indexPattern.toDetailedIndexList();
+        let indexList = await indexPattern.toDetailedIndexList();
         expect(indexList[0].index).to.equal('foo');
         expect(indexList[1].index).to.equal('bar');
       });
@@ -361,7 +361,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        var indexList = await indexPattern.toDetailedIndexList();
+        let indexList = await indexPattern.toDetailedIndexList();
         expect(indexList.index).to.equal(indexPattern.id);
       });
     });
@@ -372,7 +372,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        var indexList = await indexPattern.toDetailedIndexList();
+        let indexList = await indexPattern.toDetailedIndexList();
         expect(indexList.index).to.equal(indexPattern.id);
       });
     });
@@ -380,9 +380,9 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
 
-      var interval;
+      let interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
@@ -390,11 +390,11 @@ describe('index pattern', function () {
 
       it('invokes interval toIndexList with given start/stop times', async function () {
         await indexPattern.toIndexList(1, 2);
-        var id = indexPattern.id;
+        let id = indexPattern.id;
         expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
       });
       it('is fulfilled by the result of interval toIndexList', async function () {
-        var indexList = await indexPattern.toIndexList();
+        let indexList = await indexPattern.toIndexList();
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
       });
@@ -411,7 +411,7 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -420,20 +420,20 @@ describe('index pattern', function () {
 
       it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
         await indexPattern.toIndexList(1, 2, 'sortOrder');
-        var id = indexPattern.id;
-        var field = indexPattern.timeFieldName;
+        let id = indexPattern.id;
+        let field = indexPattern.timeFieldName;
         expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
 
       it('is fulfilled by the result of calculateIndices', async function () {
-        var indexList = await indexPattern.toIndexList();
+        let indexList = await indexPattern.toIndexList();
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
       });
     });
 
     context('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      require('test_utils/no_digest_promises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -442,7 +442,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        var indexList = await indexPattern.toIndexList();
+        let indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });
@@ -453,7 +453,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', function () {
-        var indexList;
+        let indexList;
         indexPattern.toIndexList().then(function (val) {
           indexList = val;
         });

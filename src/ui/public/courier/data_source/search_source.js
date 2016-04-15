@@ -1,16 +1,18 @@
 import _ from 'lodash';
-import rootSearchSource from 'ui/courier/data_source/_root_search_source';
-import CourierDataSourceAbstractProvider from 'ui/courier/data_source/_abstract';
-import CourierFetchRequestSearchProvider from 'ui/courier/fetch/request/search';
-import CourierFetchRequestSegmentedProvider from 'ui/courier/fetch/request/segmented';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
-import CourierDataSourceNormalizeSortRequestProvider from 'ui/courier/data_source/_normalize_sort_request';
+
+import NormalizeSortRequestProvider from './_normalize_sort_request';
+import rootSearchSource from './_root_search_source';
+import AbstractDataSourceProvider from './_abstract';
+import SearchRequestProvider from '../fetch/request/search';
+import SegmentedRequestProvider from '../fetch/request/segmented';
+import SearchStrategyProvider from '../fetch/strategy/search';
+
 export default function SearchSourceFactory(Promise, Private) {
-  var SourceAbstract = Private(CourierDataSourceAbstractProvider);
-  var SearchRequest = Private(CourierFetchRequestSearchProvider);
-  var SegmentedRequest = Private(CourierFetchRequestSegmentedProvider);
-  var searchStrategy = Private(CourierFetchStrategySearchProvider);
-  var normalizeSortRequest = Private(CourierDataSourceNormalizeSortRequestProvider);
+  let SourceAbstract = Private(AbstractDataSourceProvider);
+  let SearchRequest = Private(SearchRequestProvider);
+  let SegmentedRequest = Private(SegmentedRequestProvider);
+  let searchStrategy = Private(SearchStrategyProvider);
+  let normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
@@ -69,7 +71,7 @@ export default function SearchSourceFactory(Promise, Private) {
    * @return {undefined|searchSource}
    */
   SearchSource.prototype.getParent = function (onlyHardLinked) {
-    var self = this;
+    let self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
     return onlyHardLinked ? undefined : Private(rootSearchSource).get();
@@ -90,9 +92,9 @@ export default function SearchSourceFactory(Promise, Private) {
   };
 
   SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
-    var self = this;
+    let self = this;
     return Promise.try(function addRequest() {
-      var req = new SegmentedRequest(self, Promise.defer(), initFunction);
+      let req = new SegmentedRequest(self, Promise.defer(), initFunction);
 
       // return promises created by the completion handler so that
       // errors will bubble properly
@@ -137,7 +139,7 @@ export default function SearchSourceFactory(Promise, Private) {
    */
   SearchSource.prototype._mergeProp = function (state, val, key) {
     if (typeof val === 'function') {
-      var source = this;
+      let source = this;
       return Promise.cast(val(this))
       .then(function (newVal) {
         return source._mergeProp(state, newVal, key);

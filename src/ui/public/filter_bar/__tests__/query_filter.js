@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
-import './_getFilters';
-import './_addFilters';
-import './_removeFilters';
-import './_updateFilters';
-import './_toggleFilters';
-import './_invertFilters';
-import './_pinFilters';
+import ngMock from 'ng_mock';
+import './_get_filters';
+import './_add_filters';
+import './_remove_filters';
+import './_update_filters';
+import './_toggle_filters';
+import './_invert_filters';
+import './_pin_filters';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import EventsProvider from 'ui/events';
-var queryFilter;
-var EventEmitter;
-var $rootScope;
+let queryFilter;
+let EventEmitter;
+let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {

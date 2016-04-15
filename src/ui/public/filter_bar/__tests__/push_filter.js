@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import FilterBarPushFilterProvider from 'ui/filter_bar/push_filter';
 describe('Filter Bar pushFilter()', function () {
 
-  var pushFilterFn;
+  let pushFilterFn;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -21,9 +21,9 @@ describe('Filter Bar pushFilter()', function () {
   });
 
   describe('pushFilter($state)()', function () {
-    var $state;
-    var pushFilter;
-    var filter;
+    let $state;
+    let pushFilter;
+    let filter;
 
     beforeEach(ngMock.inject(function (Private, $injector) {
       $state = {filters:[]};
@@ -32,7 +32,7 @@ describe('Filter Bar pushFilter()', function () {
     }));
 
     it('should create the filters property it needed', function () {
-      var altState = {};
+      let altState = {};
       pushFilterFn(altState)(filter);
       expect(altState.filters).to.be.an(Array);
     });
@@ -40,7 +40,7 @@ describe('Filter Bar pushFilter()', function () {
     it('should replace the filters property instead of modifying it', function () {
       // If we push directly instead of using pushFilter a $watch('filters') does not trigger
 
-      var oldFilters;
+      let oldFilters;
 
       oldFilters = $state.filters;
       $state.filters.push(filter);

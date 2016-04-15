@@ -1,21 +1,21 @@
-import CourierFetchFetchProvider from 'ui/courier/fetch/fetch';
-import CourierFetchStrategySearchProvider from 'ui/courier/fetch/strategy/search';
-import CourierRequestQueueProvider from 'ui/courier/_request_queue';
-import CourierLooperLooperProvider from 'ui/courier/looper/_looper';
+import FetchProvider from '../fetch';
+import SearchStrategyProvider from '../fetch/strategy/search';
+import RequestQueueProvider from '../_request_queue';
+import LooperProvider from './_looper';
 
 export default function SearchLooperService(Private, Promise, Notifier, $rootScope) {
-  var fetch = Private(CourierFetchFetchProvider);
-  var searchStrategy = Private(CourierFetchStrategySearchProvider);
-  var requestQueue = Private(CourierRequestQueueProvider);
+  let fetch = Private(FetchProvider);
+  let searchStrategy = Private(SearchStrategyProvider);
+  let requestQueue = Private(RequestQueueProvider);
 
-  var Looper = Private(CourierLooperLooperProvider);
-  var notif = new Notifier({ location: 'Search Looper' });
+  let Looper = Private(LooperProvider);
+  let notif = new Notifier({ location: 'Search Looper' });
 
   /**
    * The Looper which will manage the doc fetch interval
    * @type {Looper}
    */
-  var searchLooper = new Looper(null, function () {
+  let searchLooper = new Looper(null, function () {
     $rootScope.$broadcast('courier:searchRefresh');
     return fetch.these(
       requestQueue.getInactive(searchStrategy)

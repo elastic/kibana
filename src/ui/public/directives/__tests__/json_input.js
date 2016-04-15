@@ -1,14 +1,14 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'ui/directives/json_input';
 
 
 describe('JSON input validation', function () {
-  var $compile;
-  var $rootScope;
-  var html = '<input ng-model="value" json-input require-keys=true />';
-  var element;
+  let $compile;
+  let $rootScope;
+  let html = '<input ng-model="value" json-input require-keys=true />';
+  let element;
 
   beforeEach(ngMock.module('kibana'));
 
@@ -28,8 +28,8 @@ describe('JSON input validation', function () {
   });
 
   it('should be able to not require keys', function () {
-    var html = '<input ng-model="value" json-input require-keys=false />';
-    var element = $compile(html)($rootScope);
+    let html = '<input ng-model="value" json-input require-keys=false />';
+    let element = $compile(html)($rootScope);
 
     element.val('{}');
     element.trigger('input');

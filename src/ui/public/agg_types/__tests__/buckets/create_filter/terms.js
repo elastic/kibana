@@ -1,16 +1,16 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
-import VisProvider from 'ui/Vis';
-import VisAggConfigProvider from 'ui/Vis/AggConfig';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 describe('AggConfig Filters', function () {
 
   describe('terms', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -21,12 +21,12 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a match filter for terms', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      var aggConfig = vis.aggs.byTypeName.terms[0];
-      var filter = createFilter(aggConfig, 'apache');
+      let aggConfig = vis.aggs.byTypeName.terms[0];
+      let filter = createFilter(aggConfig, 'apache');
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('match');
       expect(filter.query.match).to.have.property('_type');

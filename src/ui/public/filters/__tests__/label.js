@@ -2,14 +2,14 @@ import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import faker from 'faker';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
 
 // Load kibana and its applications
 
-var filter;
+let filter;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

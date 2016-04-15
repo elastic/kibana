@@ -1,16 +1,18 @@
 import _ from 'lodash';
-import CourierDataSourceDocSendToEsProvider from 'ui/courier/data_source/_doc_send_to_es';
-import CourierDataSourceAbstractProvider from 'ui/courier/data_source/_abstract';
-import CourierFetchRequestDocProvider from 'ui/courier/fetch/request/doc';
-import CourierFetchStrategyDocProvider from 'ui/courier/fetch/strategy/doc';
+
 import 'ui/es';
 import 'ui/storage';
 
+import DocSendToEsProvider from './_doc_send_to_es';
+import AbstractDataSourceProvider from './_abstract';
+import DocRequestProvider from '../fetch/request/doc';
+import DocStrategyProvider from '../fetch/strategy/doc';
+
 export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
-  var sendToEs = Private(CourierDataSourceDocSendToEsProvider);
-  var SourceAbstract = Private(CourierDataSourceAbstractProvider);
-  var DocRequest = Private(CourierFetchRequestDocProvider);
-  var docStrategy = Private(CourierFetchStrategyDocProvider);
+  let sendToEs = Private(DocSendToEsProvider);
+  let SourceAbstract = Private(AbstractDataSourceProvider);
+  let DocRequest = Private(DocRequestProvider);
+  let docStrategy = Private(DocStrategyProvider);
 
   _.class(DocSource).inherits(SourceAbstract);
   function DocSource(initialState) {
@@ -97,7 +99,7 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
    * @return {string}
    */
   DocSource.prototype._versionKey = function () {
-    var state = this._state;
+    let state = this._state;
 
     if (!state.index || !state.type || !state.id) return;
     return 'DocVersion:' + (
@@ -123,10 +125,10 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
    * @return {[type]} [description]
    */
   DocSource.prototype._getStoredVersion = function () {
-    var key = this._versionKey();
+    let key = this._versionKey();
     if (!key) return;
 
-    var v = sessionStorage.get(key);
+    let v = sessionStorage.get(key);
     this._version = v ? _.parseInt(v) : void 0;
     return this._version;
   };
@@ -139,7 +141,7 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
   DocSource.prototype._storeVersion = function (version) {
     if (!version) return this._clearVersion();
 
-    var key = this._versionKey();
+    let key = this._versionKey();
     if (!key) return;
     this._version = version;
     sessionStorage.set(key, version);
@@ -149,7 +151,7 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
    * Clears the stored version for a DocSource
    */
   DocSource.prototype._clearVersion = function () {
-    var key = this._versionKey();
+    let key = this._versionKey();
     if (!key) return;
     sessionStorage.remove(key);
   };

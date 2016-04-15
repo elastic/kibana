@@ -1,4 +1,4 @@
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/utils/date_math';
 import expect from 'expect.js';
 import moment from 'moment';
 import _ from 'lodash';
@@ -6,11 +6,11 @@ import sinon from 'auto-release-sinon';
 
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time
-  var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
-  var anchor =  '2014-01-01T06:06:06.666Z';
-  var unix = moment(anchor).valueOf();
-  var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
-  var clock;
+  let spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+  let anchor =  '2014-01-01T06:06:06.666Z';
+  let unix = moment(anchor).valueOf();
+  let format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+  let clock;
 
   describe('errors', function () {
     it('should return undefined if passed something falsy', function () {
@@ -39,10 +39,10 @@ describe('dateMath', function () {
   });
 
   describe('objects and strings', function () {
-    var mmnt;
-    var date;
-    var string;
-    var now;
+    let mmnt;
+    let date;
+    let string;
+    let now;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -70,8 +70,8 @@ describe('dateMath', function () {
   });
 
   describe('subtraction', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -80,8 +80,8 @@ describe('dateMath', function () {
     });
 
     _.each(spans, function (span) {
-      var nowEx = 'now-5' + span;
-      var thenEx =  anchor + '||-5' + span;
+      let nowEx = 'now-5' + span;
+      let thenEx =  anchor + '||-5' + span;
 
       it('should return 5' + span + ' ago', function () {
         expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(5, span).format(format));
@@ -94,8 +94,8 @@ describe('dateMath', function () {
   });
 
   describe('addition', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -104,8 +104,8 @@ describe('dateMath', function () {
     });
 
     _.each(spans, function (span) {
-      var nowEx = 'now+5' + span;
-      var thenEx =  anchor + '||+5' + span;
+      let nowEx = 'now+5' + span;
+      let thenEx =  anchor + '||+5' + span;
 
       it('should return 5' + span + ' from now', function () {
         expect(dateMath.parse(nowEx).format()).to.eql(now.add(5, span).format());
@@ -119,8 +119,8 @@ describe('dateMath', function () {
   });
 
   describe('rounding', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);

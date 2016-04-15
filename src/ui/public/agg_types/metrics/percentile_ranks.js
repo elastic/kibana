@@ -1,22 +1,22 @@
 import _ from 'lodash';
 import valuesEditor from 'ui/agg_types/controls/percentile_ranks.html';
 import 'ui/number_list';
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/MetricAggType';
-import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/getResponseAggConfigClass';
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import getPercentileValue from './percentiles_get_value';
 
 export default function AggTypeMetricPercentileRanksProvider(Private) {
-  var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  var fieldFormats = Private(RegistryFieldFormatsProvider);
+  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+  let fieldFormats = Private(RegistryFieldFormatsProvider);
 
   // required by the values editor
 
-  var valueProps = {
+  let valueProps = {
     makeLabel: function () {
-      var field = this.field();
-      var format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+      let field = this.field();
+      let format = (field && field.format) || fieldFormats.getDefaultInstance('number');
 
       return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + this.fieldDisplayName() + '"';
     }
@@ -37,10 +37,15 @@ export default function AggTypeMetricPercentileRanksProvider(Private) {
         name: 'values',
         editor: valuesEditor,
         default: []
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        }
       }
     ],
     getResponseAggs: function (agg) {
-      var ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+      let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
       return agg.params.values.map(function (value) {
         return new ValueAggConfig(value);

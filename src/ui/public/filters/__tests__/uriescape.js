@@ -1,13 +1,13 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
 
 
-var filter;
+let filter;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

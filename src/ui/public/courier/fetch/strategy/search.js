@@ -1,6 +1,8 @@
-import { toJson } from 'ui/utils/aggressive_parse';
 import _ from 'lodash';
 import angular from 'angular';
+
+import { toJson } from 'ui/utils/aggressive_parse';
+
 export default function FetchStrategyForSearch(Private, Promise, timefilter) {
 
   return {
@@ -20,7 +22,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
             return indexList;
           }
 
-          var timeBounds = timefilter.getBounds();
+          const timeBounds = timefilter.getBounds();
           return indexList.toIndexList(timeBounds.min, timeBounds.max);
         })
         .then(function (indexList) {

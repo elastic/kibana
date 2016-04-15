@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import Notifier from 'ui/notify/notifier';
-import SimpleEmitter from 'ui/utils/SimpleEmitter';
+import SimpleEmitter from 'ui/utils/simple_emitter';
 
 export default function EventsProvider(Private, Promise) {
-  var notify = new Notifier({ location: 'EventEmitter' });
+  const notify = new Notifier({ location: 'EventEmitter' });
 
   _.class(Events).inherits(SimpleEmitter);
   function Events() {
@@ -23,7 +23,7 @@ export default function EventsProvider(Private, Promise) {
       this._listeners[name] = [];
     }
 
-    var listener = {
+    const listener = {
       handler: handler
     };
     this._listeners[name].push(listener);
@@ -75,8 +75,8 @@ export default function EventsProvider(Private, Promise) {
    * @returns {Promise}
    */
   Events.prototype.emit = function (name) {
-    var self = this;
-    var args = _.rest(arguments);
+    const self = this;
+    const args = _.rest(arguments);
 
     if (!self._listeners[name]) {
       return self._emitChain;

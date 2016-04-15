@@ -1,6 +1,6 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
 import d3 from 'd3';
 import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
@@ -9,23 +9,23 @@ import VislibComponentsColorMappedColorsProvider from 'ui/vislib/components/colo
 import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
 
 describe('Vislib Color Module Test Suite', function () {
-  var seedColors;
-  var mappedColors;
+  let seedColors;
+  let mappedColors;
   let config;
 
   describe('Color (main)', function () {
     let previousConfig;
-    var getColors;
-    var arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
-    var arrayOfNumbers = [1, 2, 3, 4, 5];
-    var arrayOfUndefinedValues = [undefined, undefined, undefined];
-    var arrayOfObjects = [{}, {}, {}];
-    var arrayOfBooleans = [true, false, true];
-    var arrayOfNullValues = [null, null, null];
-    var emptyObject = {};
-    var nullValue = null;
-    var notAValue;
-    var color;
+    let getColors;
+    let arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
+    let arrayOfNumbers = [1, 2, 3, 4, 5];
+    let arrayOfUndefinedValues = [undefined, undefined, undefined];
+    let arrayOfObjects = [{}, {}, {}];
+    let arrayOfBooleans = [true, false, true];
+    let arrayOfNullValues = [null, null, null];
+    let emptyObject = {};
+    let nullValue = null;
+    let notAValue;
+    let color;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject((Private, config) => {
@@ -243,9 +243,9 @@ describe('Vislib Color Module Test Suite', function () {
   });
 
   describe('Color Palette', function () {
-    var colorCount = 42;
-    var colors;
-    var colorFn;
+    let colorCount = 42;
+    let colors;
+    let colorFn;
 
     function hue(color) {
       return d3.hsl(color).h;

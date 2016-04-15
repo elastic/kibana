@@ -7,8 +7,8 @@ export default uiRegistry({
   group: ['fieldType'],
 
   constructor: function (config, $rootScope) {
-    var self = this;
-    var defaultMap;
+    let self = this;
+    let defaultMap;
 
     function init() {
       parseDefaultTypeMap();
@@ -56,7 +56,7 @@ export default uiRegistry({
      * @return {FieldFormat}
      */
     self.getInstance = _.memoize(function (formatId) {
-      var FieldFormat = self.byId[formatId];
+      let FieldFormat = self.byId[formatId];
       return new FieldFormat();
     });
 
@@ -67,8 +67,8 @@ export default uiRegistry({
      * @return {FieldFormat}
      */
     self.getDefaultInstance = _.memoize(function (fieldType) {
-      var conf = self.getDefaultConfig(fieldType);
-      var FieldFormat = self.byId[conf.id];
+      let conf = self.getDefaultConfig(fieldType);
+      let FieldFormat = self.byId[conf.id];
       return new FieldFormat(conf.params);
     });
 

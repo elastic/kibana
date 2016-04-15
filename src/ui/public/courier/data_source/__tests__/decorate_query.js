@@ -1,24 +1,24 @@
 import moment from 'moment';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import _ from 'lodash';
-import CourierDataSourceDecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
+import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
 
-  var config;
+  let config;
 
-  var indexPattern;
+  let indexPattern;
 
-  var getComputedFields;
+  let getComputedFields;
 
-  var fn;
+  let fn;
   beforeEach(ngMock.module(
     'kibana',
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        var keys = {};
+        let keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }
@@ -29,7 +29,7 @@ describe('Query decorator', function () {
 
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
     config = _config_;
-    fn = Private(CourierDataSourceDecorateQueryProvider);
+    fn = Private(DecorateQueryProvider);
   }));
 
   it('should be a function', function () {

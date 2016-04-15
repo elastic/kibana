@@ -1,17 +1,17 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import AggResponsePointSeriesInitXAxisProvider from 'ui/agg_response/point_series/_init_x_axis';
 describe('initXAxis', function () {
 
-  var initXAxis;
+  let initXAxis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     initXAxis = Private(AggResponsePointSeriesInitXAxisProvider);
   }));
 
-  var baseChart = {
+  let baseChart = {
     aspects: {
       x: {
         agg: {
@@ -27,7 +27,7 @@ describe('initXAxis', function () {
   };
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
-    var chart = _.cloneDeep(baseChart);
+    let chart = _.cloneDeep(baseChart);
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
@@ -35,7 +35,7 @@ describe('initXAxis', function () {
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
-    var chart = _.cloneDeep(baseChart);
+    let chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
 
     initXAxis(chart);
@@ -50,7 +50,7 @@ describe('initXAxis', function () {
   });
 
   it('reads the interval param from the x agg', function () {
-    var chart = _.cloneDeep(baseChart);
+    let chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
     chart.aspects.x.agg.write = _.constant({ params: { interval: 10 } });
 

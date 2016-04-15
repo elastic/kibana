@@ -1,4 +1,4 @@
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import $ from 'jquery';
 import expect from 'expect.js';
 
@@ -36,7 +36,7 @@ describe('chrome nav controls', function () {
       };
     });
 
-    var $el = compile();
+    let $el = compile();
     expect($el.find('#testTemplateEl')).to.have.length(1);
   });
 
@@ -63,7 +63,7 @@ describe('chrome nav controls', function () {
       };
     });
 
-    var $el = compile();
+    let $el = compile();
     expect(
       $el.find('.testControl')
       .toArray()

@@ -17,23 +17,23 @@ export default function GeoHashGridAggResponseFixture() {
   //   },
   // });
 
-  var geoHashCharts = _.union(
+  let geoHashCharts = _.union(
     _.range(48, 57), // 0-9
     _.range(65, 90), // A-Z
     _.range(97, 122) // a-z
   );
 
-  var totalDocCount = 0;
+  let totalDocCount = 0;
 
-  var tags = _.times(_.random(4, 20), function (i) {
+  let tags = _.times(_.random(4, 20), function (i) {
     // random number of tags
-    var docCount = 0;
-    var buckets = _.times(_.random(40, 200), function () {
+    let docCount = 0;
+    let buckets = _.times(_.random(40, 200), function () {
       return _.sample(geoHashCharts, 3).join('');
     })
     .sort()
     .map(function (geoHash) {
-      var count = _.random(1, 5000);
+      let count = _.random(1, 5000);
 
       totalDocCount += count;
       docCount += count;

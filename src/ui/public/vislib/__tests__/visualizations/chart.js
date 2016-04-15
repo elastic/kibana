@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import angular from 'angular';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import VislibVisProvider from 'ui/vislib/vis';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
@@ -9,17 +9,17 @@ import VislibVisualizationsColumnChartProvider from 'ui/vislib/visualizations/co
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  var ColumnChart;
-  var Chart;
-  var Data;
-  var persistedState;
-  var Vis;
-  var chartData = {};
-  var vis;
-  var el;
-  var myChart;
-  var config;
-  var data = {
+  let ColumnChart;
+  let Chart;
+  let Data;
+  let persistedState;
+  let Vis;
+  let chartData = {};
+  let vis;
+  let el;
+  let myChart;
+  let config;
+  let data = {
     hits      : 621,
     label     : '',
     ordered   : {

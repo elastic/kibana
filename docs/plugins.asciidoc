@@ -1,9 +1,11 @@
 [[kibana-plugins]]
-== Kibana Plugins added[4.2]
+== Kibana Plugins
 
-Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana plugin` 
+Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin` 
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
 `installedPlugins` directory and unpacking the plugin files into a new directory.
+
+A list of existing Kibana plugins is available on https://github.com/elastic/kibana/wiki/Known-Plugins[GitHub].
 
 [float]
 === Installing Plugins
@@ -11,27 +13,22 @@ command to manage these modules. You can also install a plugin manually by movin
 Use the following command to install a plugin:
 
 [source,shell]
-bin/kibana plugin --install <org>/<package>/<version>
+bin/kibana-plugin install <package name or URL>
 
-You can also use `-i` instead of `--install`, as in the following example:
-
-[source,shell]
-bin/kibana plugin -i elasticsearch/marvel/latest
-
-Because the organization given is `elasticsearch`, the plugin management tool automatically downloads the 
-plugin from `download.elastic.co`.
+When you specify a plugin name without a URL, the plugin tool attempts to download the plugin from `download.elastic.co`.
 
 [float]
-=== Installing Plugins from an Arbitrary URL
+==== Installing Plugins from an Arbitrary URL
 
-You can specify a URL to a plugin with the `-u` or `--url` options after the `-i` or `--install` option, as in the
-following example:
+You can specify a URL to a specific plugin, as in the following example:
 
 [source,shell]
-bin/kibana plugin -i sample-plugin -u https://some.sample.url/directory
-Installing sample-plugin
-Attempting to extract from https://some.sample.url/directory
-Downloading <some number> bytes....................
+$ bin/kibana-plugin install https://download.elastic.co/kibana/x-pack/x-pack-5.0.0-snapshot.zip
+Attempting to transfer from https://download.elastic.co/kibana/x-pack//x-pack-5.0.0-snapshot.zip
+Transferring <some number> bytes....................
+Transfer complete
+Retrieving metadata from plugin archive
+Extracting plugin archive
 Extraction complete
 Optimizing and caching browser bundles...
 Plugin installation complete
@@ -41,13 +38,17 @@ You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 [float]
 === Installing Plugins to an Arbitrary Directory
 
-Use the `-d` or `--plugin-dir` option to specify a directory for plugins, as in the following example:
+Use the `-d` or `--plugin-dir` option after the `install` command to specify a directory for plugins, as in the following 
+example:
 
 [source,shell]
-bin/kibana plugin -i elasticsearch/sample-plugin/latest -d <path/to/directory>
+$ bin/kibana-plugin install file:///some/local/path/x-pack.zip -d path/to/directory
 Installing sample-plugin
-Attempting to extract from https://download.elastic.co/elasticsearch/sample-plugin/sample-plugin-latest.tar.gz
-Downloading <some number> bytes....................
+Attempting to transfer from file:///some/local/path/x-pack.zip
+Transferring <some number> bytes....................
+Transfer complete
+Retrieving metadata from plugin archive
+Extracting plugin archive
 Extraction complete
 Optimizing and caching browser bundles...
 Plugin installation complete
@@ -57,13 +58,17 @@ NOTE: This command creates the specified directory if it does not already exist.
 [float]
 === Removing Plugins
 
-Use the `--remove` or `-r` option to remove a plugin, including any configuration information, as in the following 
-example:
+Use the `remove` command to remove a plugin, including any configuration information, as in the following example:
 
 [source,shell]
-bin/kibana plugin --remove marvel
+$ bin/kibana-plugin remove timelion
 
-You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
+You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins/` directory.
+
+[float]
+=== Listing Installed Plugins
+
+Use the `list` command to list the currently installed plugins.
 
 [float]
 === Updating Plugins
@@ -74,27 +79,28 @@ To update a plugin, remove the current version and reinstall the plugin.
 === Configuring the Plugin Manager
 
 By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager 
-to perform. You can control the level of feedback with the `--quiet` and `--silent` options. Use the `--quiet` option to 
-suppress all non-error output. Use the `--silent` option to suppress all output.
+to perform. You can control the level of feedback for the `install` and `remove` commands with the `--quiet` and 
+`--silent` options. Use the `--quiet` option to suppress all non-error output. Use the `--silent` option to suppress all 
+output.
 
-By default, plugin manager requests do not time out. Use the `--timeout` option, followed by a time, to change this 
-behavior, as in the following examples:
+By default, plugin manager installation requests do not time out. Use the `--timeout` option, followed by a time, to
+change this behavior, as in the following examples:
 
 [source,shell]
 .Waits for 30 seconds before failing
-bin/kibana plugin --install username/sample-plugin --timeout 30s
+bin/kibana-plugin install --timeout 30s sample-plugin 
 
 [source,shell]
 .Waits for 1 minute before failing
-bin/kibana plugin --install username/sample-plugin --timeout 1m
+bin/kibana-plugin install --timeout 1m sample-plugin 
 
 [float]
 ==== Plugins and Custom Kibana Configurations
 
-Use the `-c` or `--config` options to specify the path to the configuration file used to start Kibana. By default, Kibana 
-uses the configuration file `config/kibana.yml`. When you change your installed plugins, the `bin/kibana plugin` command 
-restarts the Kibana server. When you are using a customized configuration file, you must specify the
-path to that configuration file each time you use the `bin/kibana plugin` command.
+Use the `-c` or `--config` options with the `install` and `remove` commands to specify the path to the configuration file 
+used to start Kibana. By default, Kibana uses the configuration file `config/kibana.yml`. When you change your installed 
+plugins, the `bin/kibana-plugin` command restarts the Kibana server. When you are using a customized configuration file, 
+you must specify the path to that configuration file each time you use the `bin/kibana-plugin` command.
 
 [float]
 === Plugin Manager Exit Codes
@@ -110,9 +116,14 @@ path to that configuration file each time you use the `bin/kibana plugin` comman
 == Switching Plugin Functionality
 
 The Kibana UI serves as a framework that can contain several different plugins. You can switch between these 
-plugins by clicking the image:images/app-button.png[Plugin Chooser] *Plugin chooser* button to display icons for the
-installed plugins:
+plugins by clicking the icons for your desired plugins in the left-hand navigation bar.
 
-image::images/app-picker.png[]
+[float]
+=== Disabling Plugins
 
-Click a plugin's icon to switch to that plugin's functionality.
+Use the following command to disable a plugin:
+
+[source,shell]
+./bin/kibana --<plugin ID>.enabled=false
+
+You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.

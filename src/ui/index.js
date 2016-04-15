@@ -3,20 +3,20 @@ import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import Boom from 'boom';
 import { resolve } from 'path';
-import fromRoot from '../utils/fromRoot';
+import fromRoot from '../utils/from_root';
 import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 module.exports = async (kbnServer, server, config) => {
 
-  let loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
+  const loadingGif = readFile(fromRoot('src/ui/public/loading.gif'), { encoding: 'base64'});
 
-  let uiExports = kbnServer.uiExports = new UiExports({
+  const uiExports = kbnServer.uiExports = new UiExports({
     urlBasePath: config.get('server.basePath')
   });
 
-  let bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
+  const bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
   bundlerEnv.addContext('env', config.get('env.name'));
   bundlerEnv.addContext('urlBasePath', config.get('server.basePath'));
   bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
@@ -28,14 +28,14 @@ module.exports = async (kbnServer, server, config) => {
     uiExports.consumePlugin(plugin);
   }
 
-  let bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
+  const bundles = kbnServer.bundles = new UiBundleCollection(bundlerEnv, config.get('optimize.bundleFilter'));
 
   for (let app of uiExports.getAllApps()) {
     bundles.addApp(app);
   }
 
   for (let gen of uiExports.getBundleProviders()) {
-    let bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps(), kbnServer.plugins);
+    const bundle = await gen(UiBundle, bundlerEnv, uiExports.getAllApps(), kbnServer.plugins);
     if (bundle) bundles.add(bundle);
   }
 
@@ -47,8 +47,8 @@ module.exports = async (kbnServer, server, config) => {
     path: '/app/{id}',
     method: 'GET',
     handler: function (req, reply) {
-      let id = req.params.id;
-      let app = uiExports.apps.byId[id];
+      const id = req.params.id;
+      const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       if (kbnServer.status.isGreen()) {
@@ -59,25 +59,16 @@ module.exports = async (kbnServer, server, config) => {
     }
   });
 
-  const defaultInjectedVars = {};
-  if (config.has('kibana')) {
-    defaultInjectedVars.kbnIndex = config.get('kibana.index');
-  }
-  if (config.has('elasticsearch')) {
-    defaultInjectedVars.esRequestTimeout = config.get('elasticsearch.requestTimeout');
-    defaultInjectedVars.esShardTimeout = config.get('elasticsearch.shardTimeout');
-    defaultInjectedVars.esApiVersion = config.get('elasticsearch.apiVersion');
-  }
-
   server.decorate('reply', 'renderApp', function (app) {
     const payload = {
       app: app,
-      nav: uiExports.apps,
+      nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
-      vars: defaults(app.getInjectedVars() || {}, defaultInjectedVars),
+      serverName: config.get('server.name'),
+      vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
 
     return this.view(app.templateName, {
