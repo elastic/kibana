@@ -3,16 +3,16 @@ import _ from 'lodash';
 // returns a flattened version
 export default function FlattenHitProvider(config, $rootScope) {
 
-  var metaFields = config.get('metaFields');
+  let metaFields = config.get('metaFields');
   $rootScope.$on('change:config.metaFields', function () {
     metaFields = config.get('metaFields');
   });
 
   function flattenHit(indexPattern, hit) {
-    var flat = {};
+    let flat = {};
 
     // recursively merge _source
-    var fields = indexPattern.fields.byName;
+    let fields = indexPattern.fields.byName;
     (function flatten(obj, keyPrefix) {
       keyPrefix = keyPrefix ? keyPrefix + '.' : '';
       _.forOwn(obj, function (val, key) {
@@ -20,8 +20,8 @@ export default function FlattenHitProvider(config, $rootScope) {
 
         if (flat[key] !== void 0) return;
 
-        var hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
-        var isValue = !_.isPlainObject(val);
+        let hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
+        let isValue = !_.isPlainObject(val);
 
         if (hasValidMapping || isValue) {
           flat[key] = val;

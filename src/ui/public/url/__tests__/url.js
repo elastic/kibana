@@ -81,7 +81,7 @@ describe('kbnUrl', function () {
         }
       };
 
-      var unbind = sinon.stub();
+      let unbind = sinon.stub();
       sinon.stub($rootScope, '$on').returns(unbind);
       $route.reload = sinon.stub();
 
@@ -89,7 +89,7 @@ describe('kbnUrl', function () {
       kbnUrl.change('/url');
       expect($rootScope.$on.callCount).to.be(1);
 
-      var handler = $rootScope.$on.firstCall.args[1];
+      let handler = $rootScope.$on.firstCall.args[1];
       handler();
       expect(unbind.callCount).to.be(1);
       expect($route.reload.callCount).to.be(1);
@@ -151,9 +151,9 @@ describe('kbnUrl', function () {
     });
 
     it('should uri encode replaced params', function () {
-      var url = '/some/path/';
-      var params = { replace: faker.Lorem.words(3).join(' ') };
-      var check = encodeURIComponent(params.replace);
+      let url = '/some/path/';
+      let params = { replace: faker.Lorem.words(3).join(' ') };
+      let check = encodeURIComponent(params.replace);
       sinon.stub($location, 'url');
 
       kbnUrl.change(url + '{{replace}}', params);
@@ -163,22 +163,22 @@ describe('kbnUrl', function () {
 
     it('should parse angular expression in substitutions and uri encode the results', function () {
       // build url by piecing together these parts
-      var urlParts = ['/', '/', '?', '&', '#'];
+      let urlParts = ['/', '/', '?', '&', '#'];
       // make sure it can parse templates with weird spacing
-      var wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
+      let wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
       // make sure filters are evaluated via angular expressions
-      var objIndex = 4; // used to case one replace as an object
-      var filters = ['', 'uppercase', '', 'uppercase', 'rison'];
+      let objIndex = 4; // used to case one replace as an object
+      let filters = ['', 'uppercase', '', 'uppercase', 'rison'];
 
       // the words (template keys) used must all be unique
-      var words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
+      let words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
         if (filters[i].length) {
           return word + '|' + filters[i];
         }
         return word;
       });
 
-      var replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
+      let replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
         // make selected replacement into an object
         if (i === objIndex) {
           return { replace: word };
@@ -188,19 +188,19 @@ describe('kbnUrl', function () {
       });
 
       // build the url and test url
-      var url = '';
-      var testUrl = '';
+      let url = '';
+      let testUrl = '';
       urlParts.forEach(function (part, i) {
         url += part + wrappers[i][0] + words[i] + wrappers[i][1];
-        var locals = {};
+        let locals = {};
         locals[words[i].split('|')[0]] = replacements[i];
         testUrl += part + encodeURIComponent($rootScope.$eval(words[i], locals));
       });
 
       // create the locals replacement object
-      var params = {};
+      let params = {};
       replacements.forEach(function (replacement, i) {
-        var word = words[i].split('|')[0];
+        let word = words[i].split('|')[0];
         params[word] = replacement;
       });
 
@@ -213,7 +213,7 @@ describe('kbnUrl', function () {
     });
 
     it('should handle dot notation', function () {
-      var url = '/some/thing/{{that.is.substituted}}';
+      let url = '/some/thing/{{that.is.substituted}}';
 
       kbnUrl.change(url, {
         that: {
@@ -227,8 +227,8 @@ describe('kbnUrl', function () {
     });
 
     it('should throw when params are missing', function () {
-      var url = '/{{replace_me}}';
-      var params = {};
+      let url = '/{{replace_me}}';
+      let params = {};
 
       try {
         kbnUrl.change(url, params);
@@ -240,8 +240,8 @@ describe('kbnUrl', function () {
     });
 
     it('should throw when filtered params are missing', function () {
-      var url = '/{{replace_me|number}}';
-      var params = {};
+      let url = '/{{replace_me|number}}';
+      let params = {};
 
       try {
         kbnUrl.change(url, params);
@@ -253,10 +253,10 @@ describe('kbnUrl', function () {
     });
 
     it('should change the entire url', function () {
-      var path = '/test/path';
-      var search = {search: 'test'};
-      var hash = 'hash';
-      var newPath = '/new/location';
+      let path = '/test/path';
+      let search = {search: 'test'};
+      let hash = 'hash';
+      let newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -276,10 +276,10 @@ describe('kbnUrl', function () {
 
   describe('changePath', function () {
     it('should change just the path', function () {
-      var path = '/test/path';
-      var search = {search: 'test'};
-      var hash = 'hash';
-      var newPath = '/new/location';
+      let path = '/test/path';
+      let search = {search: 'test'};
+      let hash = 'hash';
+      let newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -299,10 +299,10 @@ describe('kbnUrl', function () {
 
   describe('redirect', function () {
     it('should change the entire url', function () {
-      var path = '/test/path';
-      var search = {search: 'test'};
-      var hash = 'hash';
-      var newPath = '/new/location';
+      let path = '/test/path';
+      let search = {search: 'test'};
+      let hash = 'hash';
+      let newPath = '/new/location';
 
       $location.path(path).search(search).hash(hash);
 
@@ -340,10 +340,10 @@ describe('kbnUrl', function () {
 
   describe('redirectPath', function () {
     it('should only change the path', function () {
-      var path = '/test/path';
-      var search = {search: 'test'};
-      var hash = 'hash';
-      var newPath = '/new/location';
+      let path = '/test/path';
+      let search = {search: 'test'};
+      let hash = 'hash';
+      let newPath = '/new/location';
 
       $location
         .path(path)

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import IndexPatternsMapFieldProvider from 'ui/index_patterns/_map_field';
 export default function transformMappingIntoFields(Private, kbnIndex, config) {
-  var mapField = Private(IndexPatternsMapFieldProvider);
+  let mapField = Private(IndexPatternsMapFieldProvider);
 
 
   /**
@@ -14,15 +14,15 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
    *                    use-cases
    */
   return function (response) {
-    var fields = {};
+    let fields = {};
     _.each(response, function (index, indexName) {
       if (indexName === kbnIndex) return;
       _.each(index.mappings, function (mappings) {
         _.each(mappings, function (field, name) {
-          var keys = Object.keys(field.mapping);
+          let keys = Object.keys(field.mapping);
           if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-          var mapping = mapField(field, name);
+          let mapping = mapField(field, name);
 
           if (fields[name]) {
             if (fields[name].type !== mapping.type) {
@@ -39,7 +39,7 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
     config.get('metaFields').forEach(function (meta) {
       if (fields[meta]) return;
 
-      var field = { mapping: {} };
+      let field = { mapping: {} };
       field.mapping[meta] = {};
       fields[meta] = mapField(field, meta);
     });

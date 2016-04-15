@@ -5,7 +5,7 @@ import _ from 'lodash';
 export default function (indexPattern, defaultFormat) {
 
   function convert(hit, val, fieldName) {
-    var field = indexPattern.fields.byName[fieldName];
+    let field = indexPattern.fields.byName[fieldName];
     if (!field) return defaultFormat.convert(val, 'html');
     return field.format.getConverterFor('html')(val, field, hit);
   }
@@ -15,12 +15,12 @@ export default function (indexPattern, defaultFormat) {
 
     // use and update the partial cache, but don't rewrite it. _source is stored in partials
     // but not $$_formatted
-    var partials = hit.$$_partialFormatted || (hit.$$_partialFormatted = {});
-    var cache = hit.$$_formatted = {};
+    let partials = hit.$$_partialFormatted || (hit.$$_partialFormatted = {});
+    let cache = hit.$$_formatted = {};
 
     _.forOwn(indexPattern.flattenHit(hit), function (val, fieldName) {
       // sync the formatted and partial cache
-      var formatted = partials[fieldName] == null ? convert(hit, val, fieldName) : partials[fieldName];
+      let formatted = partials[fieldName] == null ? convert(hit, val, fieldName) : partials[fieldName];
       cache[fieldName] = partials[fieldName] = formatted;
     });
 
@@ -28,7 +28,7 @@ export default function (indexPattern, defaultFormat) {
   }
 
   formatHit.formatField = function (hit, fieldName) {
-    var partials = hit.$$_partialFormatted;
+    let partials = hit.$$_partialFormatted;
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];
     }
@@ -37,7 +37,7 @@ export default function (indexPattern, defaultFormat) {
       partials = hit.$$_partialFormatted = {};
     }
 
-    var val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+    let val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
     return partials[fieldName] = convert(hit, val, fieldName);
   };
 
