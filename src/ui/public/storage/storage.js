@@ -2,7 +2,7 @@ import modules from 'ui/modules';
 import angular from 'angular';
 
 function Storage(store) {
-  var self = this;
+  let self = this;
   self.store = store;
 
   self.get = function (key) {
@@ -30,7 +30,7 @@ function Storage(store) {
   };
 }
 
-var createService = function (type) {
+let createService = function (type) {
   return function ($window) {
     return new Storage($window[type]);
   };

@@ -66,7 +66,7 @@ module.exports = class RouteSetupManager {
     )
     .then(() => {
       // wait for the queue to fill up, then do all the work
-      var defer = Promise.defer();
+      let defer = Promise.defer();
       userWork.resolveWhenFull(defer);
 
       return defer.promise.then(() => Promise.all(userWork.doWork()));

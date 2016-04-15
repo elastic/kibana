@@ -5,7 +5,7 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
   // didn't incorportate with the indexPattern cache to prevent id collisions.
   let cachedPromise;
 
-  var getIds = function () {
+  let getIds = function () {
     if (cachedPromise) {
       // retrun a clone of the cached response
       return cachedPromise.then(function (cachedResp) {

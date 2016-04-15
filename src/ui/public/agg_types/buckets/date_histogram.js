@@ -10,17 +10,17 @@ import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interv
 import ConfigDefaultsProvider from 'ui/config/defaults';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
 export default function DateHistogramAggType(timefilter, config, Private) {
-  var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  var TimeBuckets = Private(TimeBucketsProvider);
-  var createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
-  var intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
-  var configDefaults = Private(ConfigDefaultsProvider);
+  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  let TimeBuckets = Private(TimeBucketsProvider);
+  let createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
+  let intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
+  let configDefaults = Private(ConfigDefaultsProvider);
 
-  var detectedTimezone = tzDetect.determine().name();
-  var tzOffset = moment().format('Z');
+  let detectedTimezone = tzDetect.determine().name();
+  let tzOffset = moment().format('Z');
 
   function getInterval(agg) {
-    var interval = _.get(agg, ['params', 'interval']);
+    let interval = _.get(agg, ['params', 'interval']);
     if (interval && interval.val === 'custom') interval = _.get(agg, ['params', 'customInterval']);
     return interval;
   }
@@ -39,8 +39,8 @@ export default function DateHistogramAggType(timefilter, config, Private) {
       date: true
     },
     makeLabel: function (agg) {
-      var output = this.params.write(agg);
-      var params = output.params;
+      let output = this.params.write(agg);
+      let params = output.params;
       return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
     },
     createFilter: createFilter,
@@ -81,7 +81,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
         name: 'interval',
         type: 'optioned',
         deserialize: function (state) {
-          var interval = _.find(intervalOptions, {val: state});
+          let interval = _.find(intervalOptions, {val: state});
           return interval || _.find(intervalOptions, function (option) {
             // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
             // but this maps the old values to the new values
@@ -98,16 +98,16 @@ export default function DateHistogramAggType(timefilter, config, Private) {
           setBounds(agg);
           agg.buckets.setInterval(getInterval(agg));
 
-          var interval = agg.buckets.getInterval();
+          let interval = agg.buckets.getInterval();
           output.bucketInterval = interval;
           output.params.interval = interval.expression;
 
-          var isDefaultTimezone = config.get('dateFormat:tz') === configDefaults['dateFormat:tz'].value;
+          let isDefaultTimezone = config.get('dateFormat:tz') === configDefaults['dateFormat:tz'].value;
           output.params.time_zone = isDefaultTimezone ?
             (detectedTimezone || tzOffset) :
             config.get('dateFormat:tz');
 
-          var scaleMetrics = interval.scaled && interval.scale < 1;
+          let scaleMetrics = interval.scaled && interval.scale < 1;
           if (scaleMetrics) {
             scaleMetrics = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
               return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
@@ -140,7 +140,7 @@ export default function DateHistogramAggType(timefilter, config, Private) {
         name: 'extended_bounds',
         default: {},
         write: function (agg, output) {
-          var val = agg.params.extended_bounds;
+          let val = agg.params.extended_bounds;
 
           if (val.min != null || val.max != null) {
             output.params.extended_bounds = {

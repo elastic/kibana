@@ -3,26 +3,26 @@ import expect from 'expect.js';
 describe('formatMsg', function () {
 
   it('should prepend the second argument to result', function () {
-    var actual = formatMsg('error message', 'unit_test');
+    let actual = formatMsg('error message', 'unit_test');
 
     expect(actual).to.equal('unit_test: error message');
   });
 
   it('should handle a simple string', function () {
-    var actual = formatMsg('error message');
+    let actual = formatMsg('error message');
 
     expect(actual).to.equal('error message');
   });
 
   it('should handle a simple Error object', function () {
-    var err = new Error('error message');
-    var actual = formatMsg(err);
+    let err = new Error('error message');
+    let actual = formatMsg(err);
 
     expect(actual).to.equal('error message');
   });
 
   it('should handle a simple Angular $http error object', function () {
-    var err = {
+    let err = {
       data: {
         statusCode: 403,
         error: 'Forbidden',
@@ -32,13 +32,13 @@ describe('formatMsg', function () {
       config: {},
       statusText: 'Forbidden'
     };
-    var actual = formatMsg(err);
+    let actual = formatMsg(err);
 
     expect(actual).to.equal('Error 403 Forbidden: [security_exception] action [indices:data/read/mget] is unauthorized for user [user]');
   });
 
   it('should handle an extended elasticsearch error', function () {
-    var err = {
+    let err = {
       resp : {
         error : {
           root_cause : [
@@ -50,7 +50,7 @@ describe('formatMsg', function () {
       }
     };
 
-    var actual = formatMsg(err);
+    let actual = formatMsg(err);
 
     expect(actual).to.equal('I am the detailed message');
   });

@@ -3,24 +3,24 @@ import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private) {
-  var filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  let filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
       function addCell($tr, contents) {
-        var $cell = $(document.createElement('td'));
+        let $cell = $(document.createElement('td'));
 
         // TODO: It would be better to actually check the type of the field, but we don't have
         // access to it here. This may become a problem with the switch to BigNumber
         if (_.isNumeric(contents)) $cell.addClass('numeric-value');
 
-        var createAggConfigResultCell = function (aggConfigResult) {
-          var $cell = $(document.createElement('td'));
-          var $state = getAppState();
-          var clickHandler = filterBarClickHandler($state);
+        let createAggConfigResultCell = function (aggConfigResult) {
+          let $cell = $(document.createElement('td'));
+          let $state = getAppState();
+          let clickHandler = filterBarClickHandler($state);
           $cell.scope = $scope.$new();
           $cell.addClass('cell-hover');
           $cell.attr('ng-click', 'clickHandler($event)');
@@ -71,19 +71,19 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         attr.kbnRows,
         attr.kbnRowsMin
       ], function (vals) {
-        var rows = vals[0];
-        var min = vals[1];
+        let rows = vals[0];
+        let min = vals[1];
 
         $el.empty();
 
         if (!_.isArray(rows)) rows = [];
-        var width = rows.reduce(maxRowSize, 0);
+        let width = rows.reduce(maxRowSize, 0);
 
         if (isFinite(min) && rows.length < min) {
           // clone the rows so that we can add elements to it without upsetting the original
           rows = _.clone(rows);
           // crate the empty row which will be pushed into the row list over and over
-          var emptyRow = new Array(width);
+          let emptyRow = new Array(width);
           // fill the empty row with values
           _.times(width, function (i) { emptyRow[i] = ''; });
           // push as many empty rows into the row array as needed
@@ -91,7 +91,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         }
 
         rows.forEach(function (row) {
-          var $tr = $(document.createElement('tr')).appendTo($el);
+          let $tr = $(document.createElement('tr')).appendTo($el);
           row.forEach(function (cell) {
             addCell($tr, cell);
           });
