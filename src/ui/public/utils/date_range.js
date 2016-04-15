@@ -11,7 +11,7 @@ export default {
     }
   },
   parse: function (rangeString, format) {
-    var chunks = rangeString.split(' to ');
+    let chunks = rangeString.split(' to ');
     if (chunks.length === 2) return {from: moment(chunks[0], format), to: moment(chunks[1], format)};
 
     chunks = rangeString.split('Before ');
