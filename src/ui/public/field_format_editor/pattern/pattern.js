@@ -11,7 +11,7 @@ uiModules
     require: ['ngModel', '^fieldEditor'],
     scope: true,
     link: function ($scope, $el, attrs, cntrls) {
-      var ngModelCntrl = cntrls[0];
+      let ngModelCntrl = cntrls[0];
 
       $scope.$bind('inputs', attrs.inputs);
       $scope.$bind('placeholder', attrs.placeholder);

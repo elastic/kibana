@@ -84,6 +84,9 @@
 
 // /node_modules/bootstrap/less/buttons.less
   .btn {
+    background-color: @dark-button-bg;
+    color: @dark-button-font;
+
     &:hover,
     &:focus,
     &.focus {
@@ -106,7 +109,10 @@
 // /node_modules/bootstrap/less/list-group.less
   .list-group-item {
     background-color: @list-group-bg;
-    border-color: @list-group-border;
+    border: 0 none transparent;
+    &:nth-child(even) {
+      background-color: @gray4;
+    }
   }
 
   a.list-group-item,
@@ -188,8 +194,9 @@
 
 // /node_modules/bootstrap/less/navs.less
   .nav-tabs {
-    border-bottom: 1px solid @nav-tabs-border-color;
+    border-bottom: 1px solid @gray4;
     > li {
+      margin-bottom: -2px;
       > a {
         &:hover {
           border-color: @nav-tabs-link-hover-border-color @nav-tabs-link-hover-border-color @nav-tabs-border-color;
@@ -200,9 +207,9 @@
         &,
         &:hover,
         &:focus {
-          color: @nav-tabs-active-link-hover-color;
-          background-color: @nav-tabs-active-link-hover-bg;
-          border-color: @nav-tabs-active-link-hover-border-color;
+          color: @white;
+          background-color: @gray4;
+          border: 0 none transparent;
         }
       }
     }
@@ -214,6 +221,10 @@
     color: @navbar-default-color;
     background-color: @navbar-default-bg;
     border-color: @navbar-default-border;
+    button {
+      color: @white;
+      background-color: transparent;
+    }
   }
 
 
@@ -276,16 +287,6 @@
     .visualize-show-spy {
       border-top-color: @visualize-show-spy-border;
 
-      &-tab {
-        border-color: @visualize-show-spy-border;
-        background: @visualize-show-spy-bg;
-        color: @visualize-show-spy-color;
-
-        &:hover {
-          background-color: @visualize-show-spy-hover-bg;
-          color: @visualize-show-spy-hover-color;
-        }
-      }
     }
     .visualize-spy-container {
       pre {
@@ -322,15 +323,6 @@
 // /src/ui/public/vislib/styles/_legend.less
   .legend-col-wrapper {
 
-    .legend-toggle {
-      &:hover {
-        color: @sidebar-hover-color;
-        background-color: @sidebar-hover-bg;
-      }
-
-      background-color: @sidebar-bg;
-    }
-
     .legend-ul {
       border-left-color: @sidebar-bg;
       color: @legend-item-color;
@@ -348,7 +340,7 @@
     }
 
     &-full {
-      background-color: @sidebar-hover-bg;
+      background-color: @gray3;
     }
 
     &-details {
@@ -437,15 +429,13 @@
   }
 
   .leaflet-left {
-    .leaflet-control {
+    .leaflet-control,
+    .leaflet-draw-actions {
       a,
       a:hover {
-        color: @tilemap-leaflet-control-color;
+        color: @dark-button-font;
+        background-color: @dark-button-bg;
       }
-    }
-
-    .leaflet-draw-actions a {
-      background-color: @tilemap-leaflet-control-draw-action-bg;
     }
   }
 
@@ -486,7 +476,7 @@
 
 // /src/ui/public/styles/config.less
   .config {
-    border-bottom-color: @config-border;
+    border-bottom: 0 none transparent;
 
     .config-close {
       background-color: @config-close-bg;
@@ -511,7 +501,7 @@
         background-color: @list-group-menu-item-active-bg;
       }
       &:hover {
-        background-color: @list-group-menu-item-hover-bg;
+        background-color: @gray2;
       }
       li {
         color: @list-group-menu-item-color;
@@ -533,6 +523,10 @@
       .pagination-other-pages {
         &-list {
           > li {
+            a {
+              background-color: @dark-button-bg;
+              color: @white;
+            }
             &.active a {
               color: @paginate-page-link-active-color;
             }
@@ -579,5 +573,17 @@
         }
       }
     }
+  }
+
+  saved-object-finder .form-group span {
+    background-color: @input-bg;
+    color: @dark-button-font;
+  }
+  saved-object-finder .paginate-heading {
+    color: @text-color;
+  }
+  .kibana-nav-actions .active {
+    background-color: @config-bg;
+    color: @dark-button-font;
   }
 }

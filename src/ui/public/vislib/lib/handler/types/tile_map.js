@@ -3,13 +3,13 @@ import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 export default function MapHandlerProvider(Private) {
 
-  var Handler = Private(VislibLibHandlerHandlerProvider);
-  var Data = Private(VislibLibDataProvider);
+  let Handler = Private(VislibLibHandlerHandlerProvider);
+  let Data = Private(VislibLibDataProvider);
 
   return function (vis) {
-    var data = new Data(vis.data, vis._attr, vis.uiState);
+    let data = new Data(vis.data, vis._attr, vis.uiState);
 
-    var MapHandler = new Handler(vis, {
+    let MapHandler = new Handler(vis, {
       data: data
     });
 
