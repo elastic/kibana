@@ -238,9 +238,5 @@ export default function configDefaultsProvider() {
         If IE compatibility is not important this can probably be disabled (set to 0).
       `,
     },
-    'url:limit': {
-      value: 2082,
-      description: 'When the application url reaches this length we will start to aggressively fail.',
-    },
   };
 };
