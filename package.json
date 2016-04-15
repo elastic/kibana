@@ -130,6 +130,7 @@
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "rimraf": "2.4.3",
+    "rison-node": "1.0.0",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",
     "semver": "5.1.0",
