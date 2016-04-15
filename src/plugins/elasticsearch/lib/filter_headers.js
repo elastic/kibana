@@ -3,6 +3,10 @@ import _ from 'lodash';
 module.exports = function (originalHeaders, headersToKeep) {
 
   const normalizeHeader = function (header) {
+    if (!header) {
+      return '';
+    }
+    header = header.toString();
     return header.trim().toLowerCase();
   };
 
