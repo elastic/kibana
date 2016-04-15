@@ -1,33 +1,12 @@
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
+import KbnUrlProvider from 'ui/url';
 
 import './error_url_overflow.less';
 import template from './error_url_overflow.html';
+import { UrlOverflowServiceProvider } from './url_overflow_service';
 
-const key = 'error/url-overflow/url';
-const store = window.sessionStorage || {
-  getItem() {},
-  setItem() {},
-  removeItem() {},
-};
-
-export function OverflowedUrlStoreProvider() {
-  let value = store.getItem(key);
-
-  return {
-    set(v) {
-      value = v;
-      store.setItem(key, value);
-    },
-    get() {
-      return value;
-    },
-    clear() {
-      value = null;
-      store.removeItem(key);
-    }
-  };
-}
+export * from './url_overflow_service';
 
 uiRoutes
 .when('/error/url-overflow', {
@@ -35,17 +14,17 @@ uiRoutes
   controllerAs: 'controller',
   controller: class OverflowController {
     constructor(Private, config, $scope) {
-      const overflowedUrlStore = Private(OverflowedUrlStoreProvider);
-      this.url = overflowedUrlStore.get();
+      const kbnUrl = Private(KbnUrlProvider);
+      const urlOverflow = Private(UrlOverflowServiceProvider);
 
-      if (!this.url) {
-        window.location.hash = '#/';
+      if (!urlOverflow.get()) {
+        kbnUrl.redirectPath('/');
         return;
       }
 
-      this.limit = config.get('url:limit');
-
-      $scope.$on('$destroy', () => overflowedUrlStore.clear());
+      this.url = urlOverflow.get();
+      this.limit = urlOverflow.failLength();
+      $scope.$on('$destroy', () => urlOverflow.clear());
     }
   }
 });

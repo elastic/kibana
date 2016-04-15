@@ -1,5 +1,9 @@
 import _ from 'lodash';
+import { format as formatUrl, parse as parseUrl } from 'url';
+
 import modules from 'ui/modules';
+import Notifier from 'ui/notify/notifier';
+import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 module.exports = function (chrome, internals) {
 
@@ -26,7 +30,7 @@ module.exports = function (chrome, internals) {
       return a.href;
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
-    .run(($location) => {
+    .run(($location, $rootScope, Private) => {
       chrome.getFirstPathSegment = () => {
         return $location.path().split('/')[1];
       };
@@ -34,6 +38,29 @@ module.exports = function (chrome, internals) {
       chrome.getBreadcrumbs = () => {
         return $location.path().split('/').slice(1);
       };
+
+      const notify = new Notifier();
+      const urlOverflow = Private(UrlOverflowServiceProvider);
+      const check = (event) => {
+        if ($location.path() === '/error/url-overflow') return;
+
+        try {
+          if (urlOverflow.check($location.absUrl()) <= 150) {
+            notify.warning(`
+              The URL has gotten big and may cause Kibana
+              to stop working. Please simplify the data on screen.
+            `);
+          }
+        } catch (e) {
+          const { host, path, search, protocol } = parseUrl(window.location.href);
+          // rewrite the entire url to force the browser to reload and
+          // discard any potentially unstable state from before
+          window.location.href = formatUrl({ host, path, search, protocol, hash: '#/error/url-overflow' });
+        }
+      };
+
+      $rootScope.$on('$routeUpdate', check);
+      $rootScope.$on('$routeChangeStart', check);
     });
 
     require('../directives')(chrome, internals);

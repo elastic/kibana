@@ -1,23 +1,18 @@
 <div class="app-container error-url-overflow-app">
-  <div class="alert alert-danger" role="alert">
-    <strong>Woah there!</strong>
-    Your url {{controller.over ? 'met' : 'exceeded'}} the configured limit of {{controller.limit}} characters.
-  </div>
+  <h3>
+    <i aria-hidden="true" class="fa fa-warning text-danger"></i> Woah there!
+  </h3>
+  <p>
+    That's a big URL you have there. I have some unfortunate news: Your browser doesn't play nice with Kibana's bacon-double-cheese-burger-with-extra-fries sized URL. To keep you from running into problems Kibana limits URLs in your browser to {{controller.limit}} characters for your safety.
+  </p>
 
-  <h3>Your URL</h3>
-  <pre>{{controller.url}}</pre>
-
-  <h3>Tips</h3>
-  <ul>
-    <li>
-      Saved objects can sometimes persist some unexpectedly large values that get put into the url when they load. You may be able to edit these saved objects in the <a href="#/settings/objects">"objects" section of the settings app</a>.
-    </li>
-    <li>
-      Sometimes dashboards with too many panels can cause the state
-      to grow in length very quickly.
-    </li>
-    <li>
-      Maybe you could temporarily raise the <code>uri:limit</code> setting in the <a href="#/settings/advanced">advanced settings</a> app.
-    </li>
-  </ul>
+  <h3>Ok, how do I fix this?</h3>
+  <p>This usually only happens with big, complex dashboards, so you have some options:</p>
+  <ol>
+    <li>Remove some stuff from your dashboard. This will reduce the length of the URL and keep IE in a good place.</li>
+    <li>Don't use IE. Every other supported browser we know of doesn't have this limit.</li>
+  </ol>
+  <br>
+  <br>
+  <p><small>Foot note: Party size candy bars are tiny. Party size sub sandwiches are massive. Really makes you think.</small></p>
 </div>

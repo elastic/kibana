@@ -5,12 +5,10 @@ import qs from 'ui/utils/query_string';
 import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
 import KbnUrlProvider from 'ui/url';
-import { OverflowedUrlStoreProvider } from 'ui/error_url_overflow';
 
-export default function StateProvider(Private, $rootScope, $location, config) {
-  const notify = new Notifier();
+const notify = new Notifier();
+export default function StateProvider(Private, $rootScope, $location) {
   const Events = Private(EventsProvider);
-  const overflowedUrlStore = Private(OverflowedUrlStoreProvider);
 
   _.class(State).inherits(Events);
   function State(urlParam, defaults) {
@@ -108,29 +106,6 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       $location.search(search).replace();
     } else {
       $location.search(search);
-    }
-
-    if (overflowedUrlStore.get()) return;
-
-    const absUrl = $location.absUrl();
-    const urlLength = absUrl.length;
-    const warnLength = config.get('url:warnLength');
-    const failLength = config.get('url:limit');
-
-    if (failLength && urlLength >= failLength) {
-      overflowedUrlStore.set(absUrl);
-      window.location.hash = '#/error/url-overflow';
-      throw new TypeError(`
-        The URL has gotten too big and kibana can no longer
-        continue. Please refresh to return to your previous state.
-      `);
-    }
-
-    if (warnLength && urlLength >= warnLength) {
-      notify.warning(`
-        The URL has gotten big and may cause Kibana
-        to stop working. Please simplify the data on screen.
-      `);
     }
   };
 

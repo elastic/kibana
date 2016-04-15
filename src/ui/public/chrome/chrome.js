@@ -10,7 +10,6 @@ import 'ui/timefilter';
 import 'ui/private';
 import 'ui/promises';
 import 'ui/directives/kbn_src';
-import '../error_url_overflow';
 import 'ui/watch_multi';
 
 let chrome = {};
