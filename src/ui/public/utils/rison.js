@@ -484,11 +484,12 @@ define(function () {
 
   // return the next non-whitespace character, or undefined
   rison.parser.prototype.next = function () {
+      let c;
       let s = this.string;
       let i = this.index;
       do {
           if (i == s.length) return undefined;
-          let c = s.charAt(i++);
+          c = s.charAt(i++);
       } while (rison.parser.WHITESPACE.indexOf(c) >= 0);
       this.index = i;
       return c;
