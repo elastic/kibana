@@ -106,6 +106,8 @@ describe('docViews', function () {
         expect($scope.filter.calledOnce).to.be(true);
         cell.find('.fa-search-minus').first().click();
         expect($scope.filter.calledTwice).to.be(true);
+        cell.find('.fa-asterisk').first().click();
+        expect($scope.filter.calledThrice).to.be(true);
       });
 
       it('should NOT apply a filter when clicking non-filterable fields', function () {
@@ -115,6 +117,8 @@ describe('docViews', function () {
         expect($scope.filter.calledOnce).to.be(false);
         cell.find('.fa-search-minus').first().click();
         expect($scope.filter.calledTwice).to.be(false);
+        cell.find('.fa-asterisk').first().click();
+        expect($scope.filter.calledOnce).to.be(true);
       });
     });
 
