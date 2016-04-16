@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-module.exports = function (originalHeaders, headersToKeep) {
+export default function (originalHeaders, headersToKeep) {
 
   const normalizeHeader = function (header) {
     if (!header) {
@@ -19,4 +19,4 @@ module.exports = function (originalHeaders, headersToKeep) {
   });
 
   return _.pick(originalHeaders, headersToKeepNormalized);
-};
+}
