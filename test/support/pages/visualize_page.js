@@ -1,15 +1,8 @@
-define(function (require) {
+import { common, defaultTimeout, remote } from '../';
 
-  var config = require('intern').config;
-  var registerSuite = require('intern!object');
-  var Common = require('./common');
-
-  var defaultTimeout = config.timeouts.default;
-  var common;
-
-  function VisualizePage(remote) {
+export default (function () {
+  function VisualizePage() {
     this.remote = remote;
-    common = new Common(this.remote);
   }
 
   VisualizePage.prototype = {
@@ -688,4 +681,4 @@ define(function (require) {
   };
 
   return VisualizePage;
-});
+}());
