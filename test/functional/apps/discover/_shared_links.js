@@ -1,16 +1,10 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var expect = require('intern/dojo/node!expect.js');
+import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('shared links', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
       var baseUrl;
       // The message changes for Firefox < 41 and Firefox >= 41
       // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
@@ -19,11 +13,6 @@ define(function (require) {
       var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-
         baseUrl = common.getHostPort();
 
         var fromTime = '2015-09-19 06:31:44.000';
@@ -141,5 +130,5 @@ define(function (require) {
 
       });
     });
-  };
+  }());
 });

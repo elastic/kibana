@@ -1,15 +1,15 @@
-// in test/support/pages/common.js
-define(function (require) {
-  var config = require('intern').config;
+import { common, config, defaultTimeout, remote } from '../';
+
+export default (function () {
   var Promise = require('bluebird');
   var moment = require('moment');
-  var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
-  var getUrl = require('intern/dojo/node!../../utils/get_url');
-  var fs = require('intern/dojo/node!fs');
-  var _ = require('intern/dojo/node!lodash');
-  var parse = require('intern/dojo/node!url').parse;
-  var format = require('intern/dojo/node!url').format;
-  var path = require('intern/dojo/node!path');
+  var testSubjSelector = require('@spalger/test-subj-selector');
+  var getUrl = require('../../utils/get_url');
+  var fs = require('fs');
+  var _ = require('lodash');
+  var parse = require('url').parse;
+  var format = require('url').format;
+  var path = require('path');
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -36,7 +36,7 @@ define(function (require) {
     return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
   }
 
-  function Common(remote) {
+  function Common() {
     this.remote = remote;
     if (remote.get.wrapper !== injectTimestampQuery) {
       this.remote.get = _.wrap(this.remote.get, injectTimestampQuery);
@@ -45,8 +45,6 @@ define(function (require) {
     }
   }
 
-
-  var defaultTimeout = config.timeouts.default;
 
   Common.prototype = {
     constructor: Common,
@@ -234,7 +232,7 @@ define(function (require) {
 
         return self.saveScreenshot(filename)
         .finally(function () {
-          throw new Error(reason);
+          throw reason;
         });
       };
     },
@@ -263,4 +261,4 @@ define(function (require) {
   };
 
   return Common;
-});
+}());

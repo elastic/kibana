@@ -1,19 +1,13 @@
-// in test/support/pages/header_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var Common = require('./common');
+import { common, remote, defaultTimeout } from '../';
 
-  var common;
+export default (function () {
 
   // the page object is created as a constructor
   // so we can provide the remote Command object
   // at runtime
-  function HeaderPage(remote) {
+  function HeaderPage() {
     this.remote = remote;
-    common = new Common(this.remote);
   }
-
-  var defaultTimeout = config.timeouts.default;
 
   HeaderPage.prototype = {
     constructor: HeaderPage,
@@ -140,4 +134,4 @@ define(function (require) {
   };
 
   return HeaderPage;
-});
+}());

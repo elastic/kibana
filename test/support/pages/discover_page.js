@@ -1,15 +1,10 @@
-// in test/support/pages/discover_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var Common = require('./common');
+import { remote, common, defaultTimeout } from '../';
 
-  var defaultTimeout = config.timeouts.default;
-  var common;
+export default (function () {
   var thisTime;
 
-  function DiscoverPage(remote) {
+  function DiscoverPage() {
     this.remote = remote;
-    common = new Common(this.remote);
     thisTime = this.remote.setFindTimeout(defaultTimeout);
   }
 
@@ -221,4 +216,4 @@ define(function (require) {
   };
 
   return DiscoverPage;
-});
+}());
