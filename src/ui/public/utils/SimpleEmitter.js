@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var BaseObject = require('ui/utils/BaseObject');
+  let _ = require('lodash');
+  let BaseObject = require('ui/utils/BaseObject');
 
   /**
    * Simple event emitter class used in the vislib. Calls
@@ -21,7 +21,7 @@ define(function (require) {
    * @return {SimpleEmitter} - this, for chaining
    */
   SimpleEmitter.prototype.on = function (name, handler) {
-    var handlers = this._listeners[name];
+    let handlers = this._listeners[name];
     if (!handlers) handlers = this._listeners[name] = [];
 
     handlers.push(handler);
@@ -69,8 +69,8 @@ define(function (require) {
    */
   SimpleEmitter.prototype.emit = _.restParam(function (name, args) {
     if (!this._listeners[name]) return this;
-    var listeners = this.listeners(name);
-    var i = -1;
+    let listeners = this.listeners(name);
+    let i = -1;
 
     while (++i < listeners.length) {
       listeners[i].apply(this, args);
