@@ -12,13 +12,13 @@ describe('Buckets wrapper', function () {
 
   function test(aggResp, count, keys) {
     it('reads the length', function () {
-      var buckets = new Buckets(aggResp);
+      let buckets = new Buckets(aggResp);
       expect(buckets).to.have.length(count);
     });
 
     it('itterates properly, passing in the key', function () {
-      var buckets = new Buckets(aggResp);
-      var keysSent = [];
+      let buckets = new Buckets(aggResp);
+      let keysSent = [];
       buckets.forEach(function (bucket, key) {
         keysSent.push(key);
       });
@@ -29,7 +29,7 @@ describe('Buckets wrapper', function () {
   }
 
   describe('with object style buckets', function () {
-    var aggResp = {
+    let aggResp = {
       buckets: {
         '0-100': {},
         '100-200': {},
@@ -37,14 +37,14 @@ describe('Buckets wrapper', function () {
       }
     };
 
-    var count = 3;
-    var keys = ['0-100', '100-200', '200-300'];
+    let count = 3;
+    let keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
   });
 
   describe('with array style buckets', function () {
-    var aggResp = {
+    let aggResp = {
       buckets: [
         { key: '0-100', value: {} },
         { key: '100-200', value: {} },
@@ -52,8 +52,8 @@ describe('Buckets wrapper', function () {
       ]
     };
 
-    var count = 3;
-    var keys = ['0-100', '100-200', '200-300'];
+    let count = 3;
+    let keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
   });

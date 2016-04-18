@@ -2,14 +2,14 @@ import _ from 'lodash';
 export default function (id) {
   if (id == null) return;
 
-  var trans = {
+  let trans = {
     '/' : '-slash-',
     '\\?' : '-questionmark-',
     '\\&' : '-ampersand-',
     '=' : '-equal-'
   };
   _.each(trans, function (val, key) {
-    var regex = new RegExp(key, 'g');
+    let regex = new RegExp(key, 'g');
     id = id.replace(regex, val);
   });
   id = id.replace(/[\s]+/g, '-');

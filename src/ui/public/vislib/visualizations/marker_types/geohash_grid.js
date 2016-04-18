@@ -3,7 +3,7 @@ import L from 'leaflet';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
 export default function GeohashGridMarkerFactory(Private) {
 
-  var BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
+  let BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
 
   /**
    * Map overlay: rectangles that show the geohash grid bounds
@@ -14,19 +14,19 @@ export default function GeohashGridMarkerFactory(Private) {
    */
   _.class(GeohashGridMarker).inherits(BaseMarker);
   function GeohashGridMarker(map, geoJson, params) {
-    var self = this;
+    let self = this;
     GeohashGridMarker.Super.apply(this, arguments);
 
     // super min and max from all chart data
-    var min = this.geoJson.properties.allmin;
-    var max = this.geoJson.properties.allmax;
+    let min = this.geoJson.properties.allmin;
+    let max = this.geoJson.properties.allmax;
 
     this._createMarkerGroup({
       pointToLayer: function (feature, latlng) {
-        var geohashRect = feature.properties.rectangle;
+        let geohashRect = feature.properties.rectangle;
         // get bounds from northEast[3] and southWest[1]
         // corners in geohash rectangle
-        var corners = [
+        let corners = [
           [geohashRect[3][0], geohashRect[3][1]],
           [geohashRect[1][0], geohashRect[1][1]]
         ];

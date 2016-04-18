@@ -2,7 +2,7 @@ import _ from 'lodash';
 import VislibComponentsZeroInjectionFlattenDataProvider from 'ui/vislib/components/zero_injection/flatten_data';
 export default function UniqueXValuesUtilService(Private) {
 
-  var flattenDataArray = Private(VislibComponentsZeroInjectionFlattenDataProvider);
+  let flattenDataArray = Private(VislibComponentsZeroInjectionFlattenDataProvider);
 
   /*
    * Accepts a Kibana data object.
@@ -16,8 +16,8 @@ export default function UniqueXValuesUtilService(Private) {
       throw new TypeError('UniqueXValuesUtilService expects an object');
     }
 
-    var flattenedData = flattenDataArray(obj);
-    var uniqueXValues = new Map();
+    let flattenedData = flattenDataArray(obj);
+    let uniqueXValues = new Map();
 
     let charts;
     if (!obj.series) {
@@ -26,17 +26,17 @@ export default function UniqueXValuesUtilService(Private) {
       charts = [obj];
     }
 
-    var isDate = charts.every(function (chart) {
+    let isDate = charts.every(function (chart) {
       return chart.ordered && chart.ordered.date;
     });
 
-    var isOrdered = charts.every(function (chart) {
+    let isOrdered = charts.every(function (chart) {
       return chart.ordered;
     });
 
     flattenedData.forEach(function (d, i) {
-      var key = d.x;
-      var prev = uniqueXValues.get(key);
+      let key = d.x;
+      let prev = uniqueXValues.get(key);
 
       if (d.xi != null) {
         i = d.xi;
