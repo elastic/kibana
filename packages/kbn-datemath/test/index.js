@@ -156,4 +156,32 @@ describe('dateMath', function () {
     });
   });
 
+  describe('math and rounding', function () {
+    let now;
+
+    beforeEach(function () {
+      clock = sinon.useFakeTimers(unix);
+      now = moment();
+    });
+
+    it('should round to the nearest second with 0 value', function () {
+      const val = dateMath.parse('now-0s/s').format(format)
+      expect(val).to.eql(now.startOf('s').format(format));
+    });
+
+    it('should subtract 17s, rounded to the nearest second', function () {
+      const val = dateMath.parse('now-17s/s').format(format);
+      expect(val).to.eql(now.startOf('s').subtract(17, 's').format(format));
+    });
+
+    it('should add 555ms, rounded to the nearest millisecond', function () {
+      const val = dateMath.parse('now+555ms/ms').format(format);
+      expect(val).to.eql(now.add(555, 'ms').startOf('ms').format(format));
+    });
+
+    it('should subtract 555ms, rounded to the nearest second', function () {
+      const val = dateMath.parse('now-555ms/s').format(format);
+      expect(val).to.eql(now.subtract(555, 'ms').startOf('s').format(format));
+    });
+  });
 });
