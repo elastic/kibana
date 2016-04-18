@@ -82,8 +82,17 @@ function parseDateMath(mathString, time, roundUp) {
       }
     }
 
-    unit = mathString.substring(i++);
-    i = num.length + unit.length;
+    unit = mathString.charAt(i++);
+
+    // append additional characters in the unit
+    for(let j=i; j < len; j++) {
+      let unitChar = mathString.charAt(i);
+      if ((/[a-z]/i).test(unitChar)) {
+        unit += unitChar;
+        i++;
+      }
+      else break;
+    }
 
     if (!_.contains(units, unit)) {
       return;
