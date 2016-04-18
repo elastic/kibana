@@ -2,11 +2,11 @@ import _ from 'lodash';
 import modules from 'ui/modules';
 import StateManagementStateProvider from 'ui/state_management/state';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-var urlParam = '_a';
+let urlParam = '_a';
 
 function AppStateProvider(Private, $rootScope, getAppState) {
-  var State = Private(StateManagementStateProvider);
-  var PersistedState = Private(PersistedStatePersistedStateProvider);
+  let State = Private(StateManagementStateProvider);
+  let PersistedState = Private(PersistedStatePersistedStateProvider);
   let persistedStates;
   let eventUnsubscribers;
 
@@ -30,31 +30,31 @@ function AppStateProvider(Private, $rootScope, getAppState) {
 
   AppState.prototype.makeStateful = function (prop) {
     if (persistedStates[prop]) return persistedStates[prop];
-    var self = this;
+    let self = this;
 
     // set up the ui state
     persistedStates[prop] = new PersistedState();
 
     // update the app state when the stateful instance changes
-    var updateOnChange = function () {
-      var replaceState = false; // TODO: debouncing logic
+    let updateOnChange = function () {
+      let replaceState = false; // TODO: debouncing logic
 
       self[prop] = persistedStates[prop].getChanges();
       self.save(replaceState);
     };
-    var handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
+    let handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
     handlerOnChange('on');
     eventUnsubscribers.push(() => handlerOnChange('off'));
 
     // update the stateful object when the app state changes
-    var persistOnChange = function (changes) {
+    let persistOnChange = function (changes) {
       if (!changes) return;
 
       if (changes.indexOf(prop) !== -1) {
         persistedStates[prop].set(self[prop]);
       }
     };
-    var handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
+    let handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
     handlePersist('on');
     eventUnsubscribers.push(() => handlePersist('off'));
 
@@ -80,7 +80,7 @@ modules.get('kibana/global_state')
 
   // Checks to see if the appState might already exist, even if it hasn't been newed up
   get.previouslyStored = function () {
-    var search = $location.search();
+    let search = $location.search();
     return search[urlParam] ? true : false;
   };
 

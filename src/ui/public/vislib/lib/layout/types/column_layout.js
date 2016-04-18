@@ -5,10 +5,10 @@ import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from 'ui/vislib/lib/la
 import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_title_split';
 export default function ColumnLayoutFactory(Private) {
 
-  var chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
-  var yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
-  var xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
-  var chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
+  let chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
+  let yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
+  let xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
+  let chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
 
   /**
    * Specifies the visualization layout for column charts.

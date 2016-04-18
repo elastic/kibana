@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 // Provides a tiny subset of the excelent API from
 // bluebird, reimplemented using the $q service
@@ -9,7 +9,7 @@ module.service('Promise', function ($q, $timeout) {
   function Promise(fn) {
     if (typeof this === 'undefined') throw new Error('Promise constructor must be called with "new"');
 
-    var defer = $q.defer();
+    let defer = $q.defer();
     try {
       fn(defer.resolve, defer.reject);
     } catch (e) {
@@ -20,12 +20,12 @@ module.service('Promise', function ($q, $timeout) {
 
   Promise.all = Promise.props = $q.all;
   Promise.resolve = function (val) {
-    var defer = $q.defer();
+    let defer = $q.defer();
     defer.resolve(val);
     return defer.promise;
   };
   Promise.reject = function (reason) {
-    var defer = $q.defer();
+    let defer = $q.defer();
     defer.reject(reason);
     return defer.promise;
   };
@@ -36,7 +36,7 @@ module.service('Promise', function ($q, $timeout) {
   };
   Promise.method = function (fn) {
     return function () {
-      var args = Array.prototype.slice.call(arguments);
+      let args = Array.prototype.slice.call(arguments);
       return Promise.try(fn, args, this);
     };
   };
@@ -64,7 +64,7 @@ module.service('Promise', function ($q, $timeout) {
     return obj && typeof obj.then === 'function';
   };
   Promise.halt = _.once(function () {
-    var promise = new Promise();
+    let promise = new Promise();
     promise.then = _.constant(promise);
     promise.catch = _.constant(promise);
     return promise;
@@ -155,7 +155,7 @@ module.factory('PromiseEmitter', function (Promise) {
    * @return {Promise}
    */
   function PromiseEmitter(fn, handler) {
-    var prom = new Promise(fn);
+    let prom = new Promise(fn);
 
     if (!handler) return prom;
 

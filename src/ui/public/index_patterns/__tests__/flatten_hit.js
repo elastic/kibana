@@ -13,7 +13,7 @@ describe('IndexPattern#flattenHit()', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    var indexPattern = {
+    let indexPattern = {
       fields: {
         byName: {
           'message': { type: 'string' },

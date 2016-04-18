@@ -3,7 +3,7 @@ import uiModules from 'ui/modules';
 // Debounce service, angularized version of lodash debounce
 // borrowed heavily from https://github.com/shahata/angular-debounce
 
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.service('debounce', ['$timeout', function ($timeout) {
   return function (func, wait, options) {
@@ -20,14 +20,14 @@ module.service('debounce', ['$timeout', function ($timeout) {
       self = this;
       args = arguments;
 
-      var later = function () {
+      let later = function () {
         timeout = null;
         if (!options.leading || options.trailing) {
           result = func.apply(self, args);
         }
       };
 
-      var callNow = options.leading && !timeout;
+      let callNow = options.leading && !timeout;
 
       if (timeout) {
         $timeout.cancel(timeout);
