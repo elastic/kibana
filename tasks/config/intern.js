@@ -6,6 +6,7 @@ module.exports = function (grunt) {
     options: {
       runType: 'runner',
       config: 'test/intern',
+      bail: true,
       reporters: ['Console']
     },
     dev: {},
