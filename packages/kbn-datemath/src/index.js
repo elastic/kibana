@@ -59,7 +59,7 @@ function parseDateMath(mathString, time, roundUp) {
     } else if (c === '-') {
       type = 2;
     } else {
-      return undefined;
+      return;
     }
 
     if (isNaN(mathString.charAt(i))) {
@@ -70,7 +70,7 @@ function parseDateMath(mathString, time, roundUp) {
       var numFrom = i;
       while (!isNaN(mathString.charAt(i))) {
         i++;
-        if (i > 10) return undefined;
+        if (i > 10) return;
       }
       num = parseInt(mathString.substring(numFrom, i), 10);
     }
@@ -78,13 +78,15 @@ function parseDateMath(mathString, time, roundUp) {
     if (type === 0) {
       // rounding is only allowed on whole, single, units (eg M or 1M, not 0.5M or 2M)
       if (num !== 1) {
-        return undefined;
+        return;
       }
     }
-    unit = mathString.charAt(i++);
+
+    unit = mathString.substring(i++);
+    i = num.length + unit.length;
 
     if (!_.contains(units, unit)) {
-      return undefined;
+      return;
     } else {
       if (type === 0) {
         if (roundUp) dateTime.endOf(unit);
@@ -96,6 +98,7 @@ function parseDateMath(mathString, time, roundUp) {
       }
     }
   }
+
   return dateTime;
 }
 
