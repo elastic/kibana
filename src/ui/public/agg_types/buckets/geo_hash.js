@@ -3,11 +3,11 @@ import moment from 'moment';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
 export default function GeoHashAggDefinition(Private, config) {
-  var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  var defaultPrecision = 2;
+  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  let defaultPrecision = 2;
 
   function getPrecision(precision) {
-    var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
+    let maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
 
     precision = parseInt(precision, 10);
 

@@ -3,9 +3,9 @@ import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_ag
 import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
 export default function AggTypeMetricMaxProvider(Private) {
-  var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  var percentiles = Private(AggTypesMetricsPercentilesProvider);
+  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+  let percentiles = Private(AggTypesMetricsPercentilesProvider);
 
   return new MetricAggType({
     name: 'median',
