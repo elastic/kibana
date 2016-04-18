@@ -69,7 +69,7 @@ describe('navbar-extensions directive', function () {
 
     it('should append to end then order == 0', function () {
       registerExtension({ order: 0 });
-      var $el = init();
+      let $el = init();
 
       expect($el.find('button').last().hasClass('test-button')).to.be.ok();
     });
@@ -96,7 +96,7 @@ describe('navbar-extensions directive', function () {
             <i aria-hidden="true" class="fa fa-rocket"></i>
           </button>`
       });
-      var $el = init();
+      let $el = init();
 
       expect($el.find('button').length).to.equal(3);
       expect($el.find('button').last().hasClass('test-button-2')).to.be.ok();
