@@ -6,10 +6,10 @@ import expect from 'expect.js';
 
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time
-  var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y', 'ms'];
-  var anchor =  '2014-01-01T06:06:06.666Z';
-  var unix = moment(anchor).valueOf();
-  var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+  const spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y', 'ms'];
+  const anchor =  '2014-01-01T06:06:06.666Z';
+  const unix = moment(anchor).valueOf();
+  const format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
   let clock;
 
   describe('errors', function () {
@@ -89,8 +89,8 @@ describe('dateMath', function () {
 
     _.each([5, 12, 247], function (len) {
       _.each(spans, function (span) {
-        var nowEx = `now-${len}${span}`;
-        var thenEx =  `${anchor}||-${len}${span}`;
+        const nowEx = `now-${len}${span}`;
+        const thenEx =  `${anchor}||-${len}${span}`;
 
         it('should return ' + len + span + ' ago', function () {
           expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(len, span).format(format));
@@ -119,8 +119,8 @@ describe('dateMath', function () {
 
     _.each([5, 12, 247], function (len) {
       _.each(spans, function (span) {
-        var nowEx = `now+${len}${span}`;
-        var thenEx =  `${anchor}||+${len}${span}`;
+        const nowEx = `now+${len}${span}`;
+        const thenEx =  `${anchor}||+${len}${span}`;
 
         it('should return ' + len + span + ' from now', function () {
           expect(dateMath.parse(nowEx).format(format)).to.eql(now.add(len, span).format(format));
