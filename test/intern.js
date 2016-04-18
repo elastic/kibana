@@ -4,6 +4,7 @@ define(function (require) {
 
   return _.assign({
     debug: true,
+    bail: true,
     capabilities: {
       'selenium-version': '2.53.0',
       // must match URL in tasks/config/downloadSelenium.js
