@@ -89,8 +89,8 @@ describe('dateMath', function () {
 
     _.each([5, 12, 247], function (len) {
       _.each(spans, function (span) {
-        var nowEx = 'now-' + len + span;
-        var thenEx =  anchor + '||-' + len + span;
+        var nowEx = `now-${len}${span}`;
+        var thenEx =  `${anchor}||-${len}${span}`;
 
         it('should return ' + len + span + ' ago', function () {
           expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(len, span).format(format));
@@ -117,29 +117,28 @@ describe('dateMath', function () {
       clock.restore();
     });
 
-    _.each(spans, function (span) {
-      var nowEx = 'now+5' + span;
-      var thenEx =  anchor + '||+5' + span;
+    _.each([5, 12, 247], function (len) {
+      _.each(spans, function (span) {
+        var nowEx = `now+${len}${span}`;
+        var thenEx =  `${anchor}||+${len}${span}`;
 
-      it('should return 5' + span + ' from now', function () {
-        expect(dateMath.parse(nowEx).format()).to.eql(now.add(5, span).format());
-      });
+        it('should return ' + len + span + ' from now', function () {
+          expect(dateMath.parse(nowEx).format(format)).to.eql(now.add(len, span).format(format));
+        });
 
-      it('should return 5' + span + ' after ' + anchor, function () {
-        expect(dateMath.parse(thenEx).format()).to.eql(anchored.add(5, span).format());
+        it('should return ' + len + span + ' after ' + anchor, function () {
+          expect(dateMath.parse(thenEx).format(format)).to.eql(anchored.add(len, span).format(format));
+        });
       });
     });
-
   });
 
   describe('rounding', function () {
     let now;
-    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
-      anchored = moment(anchor);
     });
 
     afterEach(function () {
@@ -155,7 +154,6 @@ describe('dateMath', function () {
         expect(dateMath.parse('now/' + span, true).format(format)).to.eql(now.endOf(span).format(format));
       });
     });
-
   });
 
 });
