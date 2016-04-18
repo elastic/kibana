@@ -6,7 +6,7 @@ import expect from 'expect.js';
 
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time
-  var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+  var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y', 'ms'];
   var anchor =  '2014-01-01T06:06:06.666Z';
   var unix = moment(anchor).valueOf();
   var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
@@ -87,16 +87,18 @@ describe('dateMath', function () {
       clock.restore();
     });
 
-    _.each(spans, function (span) {
-      var nowEx = 'now-5' + span;
-      var thenEx =  anchor + '||-5' + span;
+    _.each([5, 12, 247], function (len) {
+      _.each(spans, function (span) {
+        var nowEx = 'now-' + len + span;
+        var thenEx =  anchor + '||-' + len + span;
 
-      it('should return 5' + span + ' ago', function () {
-        expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(5, span).format(format));
-      });
+        it('should return ' + len + span + ' ago', function () {
+          expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(len, span).format(format));
+        });
 
-      it('should return 5' + span + ' before ' + anchor, function () {
-        expect(dateMath.parse(thenEx).format(format)).to.eql(anchored.subtract(5, span).format(format));
+        it('should return ' + len + span + ' before ' + anchor, function () {
+          expect(dateMath.parse(thenEx).format(format)).to.eql(anchored.subtract(len, span).format(format));
+        });
       });
     });
   });
