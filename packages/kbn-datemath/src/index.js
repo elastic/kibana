@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+var units = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 var unitsAsc = _.sortBy(units, function (unit) {
   return moment.duration(1, unit).valueOf();
 });
