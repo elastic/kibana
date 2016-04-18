@@ -11,8 +11,9 @@ define(function (require) {
       'idle-timeout': 99
     },
     environments: [{
-      browserName: 'firefox'
+      browserName: 'chrome'
     }],
+    tunnel: 'NullTunnel',
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
       'test/functional/status_page/index',
