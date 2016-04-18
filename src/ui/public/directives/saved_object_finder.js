@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
