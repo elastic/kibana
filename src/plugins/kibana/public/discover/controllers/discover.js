@@ -3,7 +3,7 @@ import angular from 'angular';
 import moment from 'moment';
 import getSort from 'ui/doc_table/lib/get_sort';
 import rison from 'ui/utils/rison';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/notify';

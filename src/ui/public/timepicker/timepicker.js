@@ -1,6 +1,6 @@
 import html from 'ui/timepicker/timepicker.html';
 import _ from 'lodash';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import Notifier from 'ui/notify/notifier';
 import 'ui/directives/input_datetime';
