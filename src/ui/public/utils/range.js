@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  let _ = require('lodash');
 
   /**
    * Regexp portion that matches our number
@@ -14,7 +14,7 @@ define(function (require) {
    *
    * @type {String}
    */
-  var _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
+  let _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
 
   /**
    * Regexp for the interval notation
@@ -26,11 +26,11 @@ define(function (require) {
    *
    * @type {RegExp}
    */
-  var RANGE_RE = new RegExp('^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$');
+  let RANGE_RE = new RegExp('^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$');
 
   function parse(input) {
 
-    var match = String(input).match(RANGE_RE);
+    let match = String(input).match(RANGE_RE);
     if (!match) {
       throw new TypeError('expected input to be in interval notation eg. (100, 200]');
     }
@@ -44,7 +44,7 @@ define(function (require) {
   }
 
   function Range(/* minIncl, min, max, maxIncl */) {
-    var args = _.toArray(arguments);
+    let args = _.toArray(arguments);
     if (args[1] > args[2]) args.reverse();
 
     this.minInclusive = args[0];
