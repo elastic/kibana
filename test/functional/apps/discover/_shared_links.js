@@ -131,4 +131,4 @@ import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } 
       });
     });
   }());
-});
+}());

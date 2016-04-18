@@ -8,28 +8,38 @@ import VisualizePage from './pages/visualize_page';
 
 const kbnInternVars = global.__kibana__intern__;
 
-const NOT_AVAILABLE = {
-  toString() { return 'NOT AVAILABLE UNTIL TESTS START TO RUN'; }
-};
+exports.bdd = kbnInternVars.bdd;
+exports.intern = kbnInternVars.intern;
+exports.config = exports.intern.config;
+exports.defaultTimeout = exports.config.defaultTimeout;
+exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.elasticsearch));
 
-export const bdd = kbnInternVars.bdd;
-export const intern = kbnInternVars.intern;
-export const config = intern.config;
-export const defaultTimeout = config.defaultTimeout;
-export const scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
+defineDelayedExport('remote', (suite) => suite.remote);
+defineDelayedExport('common', () => new Common());
+defineDelayedExport('discoverPage', () => new DiscoverPage());
+defineDelayedExport('headerPage', () => new HeaderPage());
+defineDelayedExport('settingsPage', () => new SettingsPage());
+defineDelayedExport('visualizePage', () => new VisualizePage());
 
-export let remote = NOT_AVAILABLE;
-export let common = NOT_AVAILABLE;
-export let discoverPage = NOT_AVAILABLE;
-export let settingsPage = NOT_AVAILABLE;
-export let headerPage = NOT_AVAILABLE;
-export let visualizePage = NOT_AVAILABLE;
+// creates an export for values that aren't actually avaialable until
+// until tests start to run. These getters will throw errors if the export
+// is accessed before it's available, hopefully making debugging easier.
+// Once the first before() handler is called the onEarliestBefore() handlers
+// will fire and rewrite all of these exports to be their correct value.
+function defineDelayedExport(name, define) {
+  Object.defineProperty(exports, name, {
+    configurable: true,
+    get() {
+      throw new TypeError(
+        'remote is not available until tests start to run. Move your ' +
+        'usage of the import inside a test setup hook or a test itself.'
+      );
+    }
+  });
 
-kbnInternVars.onEarliestBefore(function () {
-  remote = this.remote;
-  common = new Common();
-  discoverPage = new DiscoverPage();
-  headerPage = new HeaderPage();
-  settingsPage = new SettingsPage();
-  visualizePage = new VisualizePage();
-});
+  kbnInternVars.onEarliestBefore(function () {
+    Object.defineProperty(exports, name, {
+      value: define(this),
+    });
+  });
+}

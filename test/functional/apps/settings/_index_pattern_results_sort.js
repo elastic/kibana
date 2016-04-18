@@ -129,5 +129,5 @@ import {
         });
       }); // end describe pagination
     }); // end index result field sort
-  });
+  }());
 }());
