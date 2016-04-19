@@ -1,6 +1,6 @@
 import errors from 'ui/errors';
 export default function EnsureSomeIndexPatternsFn(Private, Notifier, $location, kbnUrl) {
-  var notify = new Notifier();
+  let notify = new Notifier();
 
   return function ensureSomeIndexPatterns() {
     return function promiseHandler(patterns) {

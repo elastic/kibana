@@ -5,7 +5,7 @@ import moment from 'moment';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function XAxisFactory(Private) {
 
-  var ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  let ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
   /**
    * Adds an x axis to the visualization
@@ -47,7 +47,7 @@ export default function XAxisFactory(Private) {
    * @returns {*} D3 scale function
    */
   XAxis.prototype.getScale = function () {
-    var ordered = this.ordered;
+    let ordered = this.ordered;
 
     if (ordered && ordered.date) {
       return d3.time.scale.utc();
@@ -65,7 +65,7 @@ export default function XAxisFactory(Private) {
    * @returns {*} D3 scale function
    */
   XAxis.prototype.getDomain = function (scale) {
-    var ordered = this.ordered;
+    let ordered = this.ordered;
 
     if (ordered && ordered.date) {
       return this.getTimeDomain(scale, this.xValues);
@@ -99,10 +99,10 @@ export default function XAxisFactory(Private) {
    * @param extent
    */
   XAxis.prototype._calculateExtent = function (data, extent) {
-    var ordered = this.ordered;
-    var opts = [ordered[extent]];
+    let ordered = this.ordered;
+    let opts = [ordered[extent]];
 
-    var point = d3[extent](data);
+    let point = d3[extent](data);
     if (this.expandLastBucket && extent === 'max') {
       point = this.addInterval(point);
     }
@@ -146,17 +146,17 @@ export default function XAxisFactory(Private) {
    * @returns {number} - x + n intervals
    */
   XAxis.prototype.modByInterval = function (x, n) {
-    var ordered = this.ordered;
+    let ordered = this.ordered;
     if (!ordered) return x;
-    var interval = ordered.interval;
+    let interval = ordered.interval;
     if (!interval) return x;
 
     if (!ordered.date) {
       return x += (ordered.interval * n);
     }
 
-    var y = moment(x);
-    var method = n > 0 ? 'add' : 'subtract';
+    let y = moment(x);
+    let method = n > 0 ? 'add' : 'subtract';
 
     _.times(Math.abs(n), function () {
       y[method](interval);
@@ -187,7 +187,7 @@ export default function XAxisFactory(Private) {
    * @returns {*} D3 scale function
    */
   XAxis.prototype.getRange = function (domain, width) {
-    var ordered = this.ordered;
+    let ordered = this.ordered;
 
     if (ordered && ordered.date) {
       return domain.range([0, width]);
@@ -203,7 +203,7 @@ export default function XAxisFactory(Private) {
    * @returns {*} D3 x scale function
    */
   XAxis.prototype.getXScale = function (width) {
-    var domain = this.getDomain(this.getScale());
+    let domain = this.getDomain(this.getScale());
 
     return this.getRange(domain, width);
   };
@@ -235,7 +235,7 @@ export default function XAxisFactory(Private) {
    * @returns {Function} Renders the x axis to a D3 selection
    */
   XAxis.prototype.draw = function () {
-    var self = this;
+    let self = this;
     let div;
     let width;
     let height;
@@ -283,8 +283,8 @@ export default function XAxisFactory(Private) {
    * @returns {Function} Filters or rotates x axis tick labels
    */
   XAxis.prototype.filterOrRotate = function () {
-    var self = this;
-    var ordered = self.ordered;
+    let self = this;
+    let ordered = self.ordered;
     let axis;
     let labels;
 
@@ -312,13 +312,13 @@ export default function XAxisFactory(Private) {
    * @returns {Function} Rotates x axis tick labels of a D3 selection
    */
   XAxis.prototype.rotateAxisLabels = function () {
-    var self = this;
+    let self = this;
     let text;
-    var barWidth = self.xScale.rangeBand();
-    var maxRotatedLength = 180;
-    var xAxisPadding = 15;
+    let barWidth = self.xScale.rangeBand();
+    let maxRotatedLength = 180;
+    let xAxisPadding = 15;
     let svg;
-    var lengths = [];
+    let lengths = [];
     let length;
     self._attr.isRotated = false;
 
@@ -367,13 +367,13 @@ export default function XAxisFactory(Private) {
    * @returns {*|jQuery}
    */
   XAxis.prototype.truncateLabel = function (text, size) {
-    var node = d3.select(text).node();
-    var str = $(node).text();
-    var width = node.getBBox().width;
-    var chars = str.length;
-    var pxPerChar = width / chars;
-    var endChar = 0;
-    var ellipsesPad = 4;
+    let node = d3.select(text).node();
+    let str = $(node).text();
+    let width = node.getBBox().width;
+    let chars = str.length;
+    let pxPerChar = width / chars;
+    let endChar = 0;
+    let ellipsesPad = 4;
 
     if (width > size) {
       endChar = Math.floor((size / pxPerChar) - ellipsesPad);
@@ -396,14 +396,14 @@ export default function XAxisFactory(Private) {
    * @returns {Function}
    */
   XAxis.prototype.filterAxisLabels = function () {
-    var self = this;
-    var startX = 0;
+    let self = this;
+    let startX = 0;
     let maxW;
     let par;
     let myX;
     let myWidth;
     let halfWidth;
-    var padding = 1.1;
+    let padding = 1.1;
 
     return function (selection) {
       selection.selectAll('.tick text')
@@ -435,7 +435,7 @@ export default function XAxisFactory(Private) {
    * @returns {Function}
    */
   XAxis.prototype.fitTitles = function () {
-    var visEls = $('.vis-wrapper');
+    let visEls = $('.vis-wrapper');
     let xAxisChartTitle;
     let yAxisChartTitle;
     let text;
@@ -444,12 +444,12 @@ export default function XAxisFactory(Private) {
     return function () {
 
       visEls.each(function () {
-        var visEl = d3.select(this);
-        var $visEl = $(this);
-        var xAxisTitle = $visEl.find('.x-axis-title');
-        var yAxisTitle = $visEl.find('.y-axis-title');
-        var titleWidth = xAxisTitle.width();
-        var titleHeight = yAxisTitle.height();
+        let visEl = d3.select(this);
+        let $visEl = $(this);
+        let xAxisTitle = $visEl.find('.x-axis-title');
+        let yAxisTitle = $visEl.find('.y-axis-title');
+        let titleWidth = xAxisTitle.width();
+        let titleHeight = yAxisTitle.height();
 
         text = visEl.select('.x-axis-title')
         .select('svg')
@@ -503,17 +503,17 @@ export default function XAxisFactory(Private) {
    * @method updateXaxisHeight
    */
   XAxis.prototype.updateXaxisHeight = function () {
-    var selection = d3.select(this.el).selectAll('.vis-wrapper');
+    let selection = d3.select(this.el).selectAll('.vis-wrapper');
 
     selection.each(function () {
-      var visEl = d3.select(this);
+      let visEl = d3.select(this);
 
       if (visEl.select('.inner-spacer-block').node() === null) {
         visEl.select('.y-axis-spacer-block')
         .append('div')
         .attr('class', 'inner-spacer-block');
       }
-      var xAxisHt = visEl.select('.x-axis-wrapper').style('height');
+      let xAxisHt = visEl.select('.x-axis-wrapper').style('height');
 
       visEl.select('.inner-spacer-block').style('height', xAxisHt);
     });

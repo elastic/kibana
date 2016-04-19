@@ -4,9 +4,9 @@ import VislibComponentsLabelsUniqLabelsProvider from 'ui/vislib/components/label
 import VislibComponentsLabelsPiePieLabelsProvider from 'ui/vislib/components/labels/pie/pie_labels';
 export default function LabelUtilService(Private) {
 
-  var createArr = Private(VislibComponentsLabelsDataArrayProvider);
-  var getArrOfUniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
-  var getPieLabels = Private(VislibComponentsLabelsPiePieLabelsProvider);
+  let createArr = Private(VislibComponentsLabelsDataArrayProvider);
+  let getArrOfUniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
+  let getPieLabels = Private(VislibComponentsLabelsPiePieLabelsProvider);
 
   /*
    * Accepts a Kibana data object and returns an array of unique labels (strings).
