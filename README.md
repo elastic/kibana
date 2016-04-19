@@ -11,7 +11,7 @@ Timelion pronounced time-lion, not time-leon, brings together totally independen
 Timelion makes all that possible, and more. Timelion is an Elastic {Re}search project into time series, but its more than just an experiment: Its completely usable. By you. Right now.
 
 ### Installation
-- Run this, bounce the Kibana server. and refresh your browser: `./bin/kibana plugin -i kibana/timelion`
+- Run this, bounce the Kibana server. and refresh your browser: `./bin/kibana plugin -i elastic/timelion`
 - **Timelion requires the latest version of Kibana.** Always. What does that mean? I means if a beta version of kibana 9.2.1492 comes out, you'll need to install the latest version of Kibana to install Timelion.
 - **You can not install from the archives that github provides**. They are not built versions, they won't work, use the command above.
 
@@ -34,7 +34,7 @@ There’s 25 different functions, from simple arithmetic like addition and divis
 ### Go get it
 I won't give it all away, there’s more to it than just this post. Timelion will launch a tutorial to step you through configuration and some simple starter functions, the rest is up to you to discover.
 
-Installing it is easy, run this, bounce the Kibana server. and refresh your browser: `./bin/kibana plugin -i kibana/timelion`. Or you can try it on Found, the best hosted Elasticsearch in the history of the universe, for free: Found by Elastic 
+Installing it is easy, run this, bounce the Kibana server. and refresh your browser: `./bin/kibana plugin -i elastic/timelion`. Or you can try it on Found, the best hosted Elasticsearch in the history of the universe, for free: Found by Elastic 
 
 You can also install offline by grabbing [the latest build](https://download.elasticsearch.org/kibana/timelion/timelion-latest.tar.gz) and using the `--url` parameter to point the plugin installer at say, `file:///Users/ItsAYou/timelion-latest.tar.gz` 
 
