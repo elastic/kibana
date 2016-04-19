@@ -38,8 +38,9 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   };
 
   config.on = function (key, fn, scope = $rootScope) {
+    const postfix = key === `*` ? `` : `.${key}`;
     update();
-    scope.$on(`change:config.${key}`, update);
+    scope.$on(`change:config${postfix}`, update);
     scope.$on(`init:config`, update);
     function update() {
       fn(config.get(key));

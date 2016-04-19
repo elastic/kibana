@@ -32,20 +32,13 @@ module.run(function ($interval) {
 if (!!kbnIndex) {
   require('ui/config');
   module.run(function ($rootScope, config) {
-    let configInitListener = $rootScope.$on('init:config', function () {
-      applyConfig();
-      configInitListener();
-    });
-
-    $rootScope.$on('change:config', applyConfig);
-
-    function applyConfig() {
+    config.on('*', function applyConfig() {
       Notifier.applyConfig({
         errorLifetime: config.get('notifications:lifetime:error'),
         warningLifetime: config.get('notifications:lifetime:warning'),
         infoLifetime: config.get('notifications:lifetime:info')
       });
-    }
+    });
   });
 }
 
