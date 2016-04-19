@@ -48,6 +48,12 @@ export const gsub = base.keys({
   replacement: Joi.string().allow('')
 });
 
+export const join = base.keys({
+  type_id: Joi.string().only('join').required(),
+  source_field: Joi.string().allow(''),
+  separator: Joi.string().allow('')
+});
+
 export const set = base.keys({
   type_id: Joi.string().only('set').required(),
   target_field: Joi.string().allow(''),
