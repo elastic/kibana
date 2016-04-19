@@ -55,7 +55,7 @@ describe('Scanner', function () {
 
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function (error, response) {
+      .then(function (response) {
         expect(search.called).to.be(true);
         expect(scroll.called).to.be(true);
       });
@@ -78,6 +78,19 @@ describe('Scanner', function () {
       .then(function (response) {
         expect(response.hits[0]).to.be('ONE');
         expect(response.hits[1]).to.be(undefined);
+      });
+    });
+
+    it('should reject when an error occurs', function (done) {
+      search.restore();
+      search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
+      return scanner.scanAndMap('')
+      .then(function (response) {
+        done(new Error('should reject'));
+      })
+      .catch(function (error) {
+        expect(error.message).to.be('fail.');
+        done();
       });
     });
 
