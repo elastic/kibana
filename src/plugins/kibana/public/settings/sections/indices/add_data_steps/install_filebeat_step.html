@@ -18,7 +18,7 @@
       </a>)
     </li>
 
-    <li>
+    <li ng-if="installStep.results.pipeline.processors.length">
       Configure Filebeat to send data through your new Elasticsearch pipeline
       (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html">
         instructions
@@ -34,6 +34,23 @@ output:
    index: "your-base-index-name"
    parameters:
      pipeline: "{{installStep.pipelineId}}"</pre>
+      <em>NOTE</em>: The Filebeat config takes a base index name and automatically rotates the target index by appending "-{date}"
+      to the end, so if your pattern was "filebeat-*" you would make the index name "filebeat" in filebeat.yml.<br /><br />
+    </li>
+
+
+    <li ng-if="!installStep.results.pipeline.processors.length">
+      Configure Filebeat to send data to Elasticsearch
+      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html">
+      instructions
+    </a>)<br />
+      At minimum you'll need to configure Filebeat's Elasticsearch output with a hostname and an index name.
+      Your config should end up looking something like this:<br /><br />
+      <pre>
+output:
+ elasticsearch:
+   hosts: ["your-elasticsearch-host"]
+   index: "your-base-index-name"</pre>
       <em>NOTE</em>: The Filebeat config takes a base index name and automatically rotates the target index by appending "-{date}"
       to the end, so if your pattern was "filebeat-*" you would make the index name "filebeat" in filebeat.yml.<br /><br />
     </li>
