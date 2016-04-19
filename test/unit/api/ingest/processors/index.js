@@ -8,6 +8,7 @@ define(function (require) {
   var join = require('./_join');
   var lowercase = require('./_lowercase');
   var remove = require('./_remove');
+  var rename = require('./_rename');
   var set = require('./_set');
 
   return function processors(bdd, scenarioManager, request) {
@@ -20,6 +21,7 @@ define(function (require) {
     join(bdd, scenarioManager, request);
     lowercase(bdd, scenarioManager, request);
     remove(bdd, scenarioManager, request);
+    rename(bdd, scenarioManager, request);
     set(bdd, scenarioManager, request);
   };
 

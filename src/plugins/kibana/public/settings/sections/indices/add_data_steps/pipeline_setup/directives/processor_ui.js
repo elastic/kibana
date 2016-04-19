@@ -8,4 +8,5 @@ import './processor_ui_gsub';
 import './processor_ui_join';
 import './processor_ui_lowercase';
 import './processor_ui_remove';
+import './processor_ui_rename';
 import './processor_ui_set';
