@@ -15,7 +15,6 @@ let notify = new Notifier({
   location: 'timepicker',
 });
 
-
 module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
   return {
     restrict: 'E',
