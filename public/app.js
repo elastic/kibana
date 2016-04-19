@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var logoUrl = require('./logo.png');
+var configFile = require('../timelion.json');
 
 require('angularSortableView');
 
