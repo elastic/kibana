@@ -3,7 +3,7 @@ import rowsToFeatures from 'ui/agg_response/geo_json/rows_to_features';
 import AggResponseGeoJsonTooltipFormatterProvider from 'ui/agg_response/geo_json/_tooltip_formatter';
 export default function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
 
-  var tooltipFormatter = Private(AggResponseGeoJsonTooltipFormatterProvider);
+  let tooltipFormatter = Private(AggResponseGeoJsonTooltipFormatterProvider);
 
   return function (vis, table) {
 
@@ -13,13 +13,13 @@ export default function TileMapConverterFn(Private, timefilter, $compile, $rootS
       });
     }
 
-    var geoI = columnIndex('segment');
-    var metricI = columnIndex('metric');
-    var geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
-    var metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
+    let geoI = columnIndex('segment');
+    let metricI = columnIndex('metric');
+    let geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
+    let metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
 
-    var features = rowsToFeatures(table, geoI, metricI);
-    var values = features.map(function (feature) {
+    let features = rowsToFeatures(table, geoI, metricI);
+    let values = features.map(function (feature) {
       return feature.properties.value;
     });
 

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 export default function buildPhraseFilter(field, value, indexPattern) {
-  var filter = { meta: { index: indexPattern.id} };
+  let filter = { meta: { index: indexPattern.id} };
 
   if (field.scripted) {
     filter.script = {

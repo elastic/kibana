@@ -1,7 +1,7 @@
 import StringifyTypesNumeralProvider from 'ui/stringify/types/_numeral';
 
 export default function NumberFormatProvider(Private) {
-  var Numeral = Private(StringifyTypesNumeralProvider);
+  let Numeral = Private(StringifyTypesNumeralProvider);
   return Numeral.factory({
     id: 'number',
     title: 'Number',

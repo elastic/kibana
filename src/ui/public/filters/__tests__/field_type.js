@@ -9,7 +9,7 @@ let filter;
 
 let types;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 
@@ -59,7 +59,7 @@ describe('fieldType array filter', function () {
   });
 
   it('should allow negation', function () {
-    var resultNames = _.pluck(filter(types, '!string'), 'name');
+    let resultNames = _.pluck(filter(types, '!string'), 'name');
     expect(resultNames).to.eql(['n1', 'n2', 'i1', 'd1']);
   });
 });

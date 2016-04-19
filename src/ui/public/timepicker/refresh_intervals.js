@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.constant('refreshIntervals', [
   { value : 0, display: 'Off', section: 0},

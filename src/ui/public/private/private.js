@@ -23,10 +23,10 @@ import uiModules from 'ui/modules';
  * ```js
  * define(function (require) {
  *   return function ServerHealthProvider(Private, Promise) {
- *     var ping = Private(require('ui/ping'));
+ *     let ping = Private(require('ui/ping'));
  *     return {
  *       check: Promise.method(function () {
- *         var attempts = 0;
+ *         let attempts = 0;
  *         return (function attempt() {
  *           attempts += 1;
  *           return ping.ping()
@@ -87,7 +87,7 @@ import uiModules from 'ui/modules';
  */
 
 
-var nextId = _.partial(_.uniqueId, 'privateProvider#');
+let nextId = _.partial(_.uniqueId, 'privateProvider#');
 
 function name(fn) {
   return fn.name || fn.toString().split('\n').shift();
@@ -95,11 +95,11 @@ function name(fn) {
 
 uiModules.get('kibana')
 .provider('Private', function () {
-  var provider = this;
+  let provider = this;
 
   // one cache/swaps per Provider
-  var cache = {};
-  var swaps = {};
+  let cache = {};
+  let swaps = {};
 
   // return the uniq id for this function
   function identify(fn) {
@@ -117,15 +117,15 @@ uiModules.get('kibana')
   };
 
   provider.swap = function (fn, prov) {
-    var id = identify(fn);
+    let id = identify(fn);
     swaps[id] = prov;
   };
 
   provider.$get = ['$injector', function PrivateFactory($injector) {
 
     // prevent circular deps by tracking where we came from
-    var privPath = [];
-    var pathToString = function () {
+    let privPath = [];
+    let pathToString = function () {
       return privPath.map(name).join(' -> ');
     };
 
@@ -140,8 +140,8 @@ uiModules.get('kibana')
 
       privPath.push(prov);
 
-      var context = {};
-      var instance = $injector.invoke(prov, context, locals);
+      let context = {};
+      let instance = $injector.invoke(prov, context, locals);
       if (!_.isObject(instance)) instance = context;
 
       privPath.pop();
@@ -167,7 +167,7 @@ uiModules.get('kibana')
 
     // main api, get the appropriate instance for a provider
     function Private(prov) {
-      var id = identify(prov);
+      let id = identify(prov);
       let $delegateId;
       let $delegateProv;
 
