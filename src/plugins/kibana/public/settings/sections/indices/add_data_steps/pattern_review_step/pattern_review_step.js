@@ -1,8 +1,8 @@
 import modules from 'ui/modules';
-import template from 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html';
+import template from './pattern_review_step.html';
 import _ from 'lodash';
-import editFieldTypeHTML from 'plugins/kibana/settings/sections/indices/partials/_edit_field_type.html';
-import keysDeep from './pipeline_setup/lib/keys_deep';
+import editFieldTypeHTML from '../../partials/_edit_field_type.html';
+import keysDeep from '../pipeline_setup/lib/keys_deep';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
@@ -59,13 +59,15 @@ modules.get('apps/settings')
 
         const knownFieldTypes = {};
         this.dateFields = [];
-        this.pipeline.model.processors.forEach((processor) => {
-          if (processor.typeId === 'date') {
-            const field = processor.targetField || '@timestamp';
-            knownFieldTypes[field] = 'date';
-            this.dateFields.push(field);
-          }
-        });
+        if (this.pipeline) {
+          this.pipeline.model.processors.forEach((processor) => {
+            if (processor.typeId === 'date') {
+              const field = processor.targetField || '@timestamp';
+              knownFieldTypes[field] = 'date';
+              this.dateFields.push(field);
+            }
+          });
+        }
         geoPointFields.forEach(fieldName => knownFieldTypes[fieldName] = 'geo_point');
 
         _.defaults(this.indexPattern, {
