@@ -54,6 +54,11 @@ export const join = base.keys({
   separator: Joi.string().allow('')
 });
 
+export const lowercase = base.keys({
+  type_id: Joi.string().only('lowercase').required(),
+  source_field: Joi.string().allow('')
+});
+
 export const set = base.keys({
   type_id: Joi.string().only('set').required(),
   target_field: Joi.string().allow(''),
