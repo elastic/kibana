@@ -42,17 +42,17 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('relies on metricAgg#getValue() for the size of the children', function () {
-      var aggData = {
+      let aggData = {
         buckets: [
           { key: 'foo' },
           { key: 'bar' }
         ]
       };
 
-      var football = {};
+      let football = {};
       fixture.metric.getValue = _.constant(football);
 
-      var children = transform(fixture.agg, fixture.metric, aggData);
+      let children = transform(fixture.agg, fixture.metric, aggData);
       expect(children).to.be.an(Array);
       expect(children).to.have.length(2);
       expect(children[0]).to.have.property('size', football);
@@ -60,7 +60,7 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('should create two levels of metrics', function () {
-      var children = transform(fixture.agg, fixture.metric, fixture.aggData);
+      let children = transform(fixture.agg, fixture.metric, fixture.aggData);
       fixture.metric.getValue = function (b) { return b.doc_count; };
 
       expect(children).to.be.an(Array);

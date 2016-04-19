@@ -11,16 +11,16 @@ uiModules.get('kibana')
   $rootScope.$watch(_.bindKey(chrome, 'getActiveTabTitle'), docTitle.update);
 })
 .service('docTitle', function ($rootScope) {
-  var baseTitle = document.title;
-  var self = this;
+  let baseTitle = document.title;
+  let self = this;
 
   let lastChange;
 
   function render() {
     lastChange = lastChange || [];
 
-    var parts = [lastChange[0]];
-    var activeTabTitle = chrome.getActiveTabTitle();
+    let parts = [lastChange[0]];
+    let activeTabTitle = chrome.getActiveTabTitle();
 
     if (activeTabTitle) parts.push(activeTabTitle);
 

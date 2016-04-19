@@ -6,7 +6,7 @@ import 'ui/filters/start_from';
 
 let filter;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

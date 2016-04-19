@@ -4,12 +4,12 @@ import _ from 'lodash';
 import EventsProvider from 'ui/events';
 export default function ReflowWatcherService(Private, $rootScope, $http) {
 
-  var EventEmitter = Private(EventsProvider);
-  var $body = $(document.body);
-  var $window = $(window);
+  let EventEmitter = Private(EventsProvider);
+  let $body = $(document.body);
+  let $window = $(window);
 
-  var MOUSE_EVENTS = 'mouseup';
-  var WINDOW_EVENTS = 'resize';
+  let MOUSE_EVENTS = 'mouseup';
+  let WINDOW_EVENTS = 'resize';
 
   _.class(ReflowWatcher).inherits(EventEmitter);
   /**
