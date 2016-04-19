@@ -24,16 +24,19 @@ define(function (require) {
         return scenarioManager.reload('emptyKibana')
         // and load a set of makelogs data
         .then(function loadIfEmptyMakelogs() {
+          common.debug('Load Kibana index with Logstash pattern = '
+            + common.execCommand('cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
+            + ' --input=kibana.JSON --output=http://localhost:9200/.kibana"'));
           return scenarioManager.loadIfEmpty('logstashFunctional');
         })
-        .then(function (navigateTo) {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
+        // .then(function (navigateTo) {
+        //   common.debug('navigateTo');
+        //   return settingsPage.navigateTo();
+        // })
+        // .then(function () {
+        //   common.debug('createIndexPattern');
+        //   return settingsPage.createIndexPattern();
+        // })
         .then(function () {
           common.debug('discover');
           return common.navigateToApp('discover');

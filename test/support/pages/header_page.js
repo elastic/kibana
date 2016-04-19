@@ -31,22 +31,22 @@ define(function (require) {
 
     clickDiscover: function () {
       common.debug('click Discover tab');
-      this.clickSelector('a[href*=\'discover\']');
+      return this.clickSelector('a[href*=\'discover\']');
     },
 
     clickVisualize: function () {
       common.debug('click Visualize tab');
-      this.clickSelector('a[href*=\'visualize\']');
+      return this.clickSelector('a[href*=\'visualize\']');
     },
 
     clickDashboard: function () {
       common.debug('click Dashboard tab');
-      this.clickSelector('a[href*=\'dashboard\']');
+      return this.clickSelector('a[href*=\'dashboard\']');
     },
 
     clickSettings: function () {
       common.debug('click Settings tab');
-      this.clickSelector('a[href*=\'settings\']');
+      return this.clickSelector('a[href*=\'settings\']');
     },
 
     clickTimepicker: function clickTimepicker() {
@@ -135,7 +135,7 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout * 10)
       .findByCssSelector('.spinner.ng-hide');
-    }
+    },
 
   };
 

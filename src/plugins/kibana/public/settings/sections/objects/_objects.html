@@ -42,7 +42,8 @@
               <button
                 ng-click="edit(service, item)"
                 class="btn btn-default"
-                aria-label="Edit">
+                aria-label="Edit"
+                data-test-subj="edit-{{ item.title }}">
                 <span class="sr-only">Edit</span>
                 <i aria-hidden="true" class="fa fa-pencil"></i>
               </button>
@@ -50,7 +51,8 @@
               <button
                 ng-click="open(item)"
                 class="btn btn-info"
-                aria-label="Hide">
+                aria-label="Hide"
+                data-test-subj="open-{{ item.title }}">
                 <span class="sr-only">Hide</span>
                 <i aria-hidden="true" class="fa fa-eye"></i>
               </button>
@@ -60,7 +62,8 @@
               <input
                 ng-click="toggleItem(item)"
                 ng-checked="selectedItems.indexOf(item) >= 0"
-                type="checkbox" >
+                type="checkbox"
+                data-test-subj="checkbox-{{ item.title }}" >
             </div>
 
             <div class="item-title">

@@ -71,7 +71,7 @@ define(function (require) {
 
       bdd.describe('data table', function indexPatternCreation() {
         var testSubName = 'DataTable';
-        var vizName1 = 'Visualization ' + testSubName;
+        var vizName1 = 'Visualization☺漢字 ' + testSubName;
 
         bdd.it('should be able to save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)

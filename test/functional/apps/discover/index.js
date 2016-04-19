@@ -18,9 +18,9 @@ define(function (require) {
       return remote.setWindowSize(1200,800);
     });
 
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
-    });
+    // bdd.after(function unloadMakelogs() {
+    //   return scenarioManager.unload('logstashFunctional');
+    // });
 
     discoverTest(bdd, scenarioManager);
 

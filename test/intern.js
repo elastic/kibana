@@ -10,7 +10,7 @@ define(function (require) {
       'idle-timeout': 99
     },
     environments: [{
-      browserName: 'firefox'
+      browserName: 'chrome'
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [

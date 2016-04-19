@@ -1,0 +1,1 @@
+{".kibana":{"mappings":{"config":{"properties":{"buildNum":{"type":"keyword"},"defaultIndex":{"type":"text"}}},"index-pattern":{"properties":{"fieldFormatMap":{"type":"text"},"fields":{"type":"text"},"intervalName":{"type":"text"},"notExpandable":{"type":"boolean"},"timeFieldName":{"type":"text"},"title":{"type":"text"}}},"server":{"properties":{"uuid":{"type":"keyword"}}}}}}

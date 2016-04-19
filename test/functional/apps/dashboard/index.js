@@ -8,7 +8,7 @@ define(function (require) {
   var dashboardTest = require('./_dashboard');
 
   bdd.describe('dashboard app', function () {
-    var scenarioManager;
+    //var scenarioManager;
     var remote;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
     this.timeout = config.timeouts.default;

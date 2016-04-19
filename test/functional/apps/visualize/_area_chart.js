@@ -29,8 +29,7 @@ define(function (require) {
         var toTime = '2015-09-23 18:31:44.000';
 
         common.debug('navigateToApp visualize');
-        return common.navigateToApp('visualize')//;
-        // })
+        return common.navigateToApp('visualize')
         .then(function () {
           common.debug('clickAreaChart');
           return visualizePage.clickAreaChart();
@@ -78,7 +77,7 @@ define(function (require) {
 
       bdd.describe('area charts', function indexPatternCreation() {
         var testSubName = 'AreaChart';
-        var vizName1 = 'Visualization ' + testSubName;
+        var vizName1 = 'Visualization漢字 ' + testSubName;
 
         bdd.it('should save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)
@@ -86,9 +85,9 @@ define(function (require) {
             common.debug('Saved viz message = ' + message);
             expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
           })
-          .then(function testVisualizeWaitForToastMessageGone() {
-            return visualizePage.waitForToastMessageGone();
-          })
+          // .then(function testVisualizeWaitForToastMessageGone() {
+          //   return visualizePage.waitForToastMessageGone();
+          // })
           .then(function loadSavedVisualization() {
             return visualizePage.loadSavedVisualization(vizName1);
           })
@@ -186,7 +185,31 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
+        bdd.it('should edit and show correct JSON', function pageHeader() {
+          var self = remote;
 
+          var expectedBody = { title: 'Visualization漢字 AreaChart',
+             visState: '{"title":"New Visualization","type":"area","params":{"shareYAxis":true,'
+             + '"addTooltip":true,"addLegend":true,"smoothLines":false,"scale":"linear",'
+             + '"interpolate":"linear","mode":"stacked","times":[],"addTimeMarker":false,'
+             + '"defaultYExtents":false,"setYExtents":false,"yAxis":{}},"aggs":[{"id":"1",'
+             + '"type":"count","schema":"metric","params":{}},{"id":"2","type":"date_histogram",'
+             + '"schema":"segment","params":{"field":"@timestamp","interval":"auto",'
+             + '"customInterval":"2h","min_doc_count":1,"extended_bounds":{}}}],"listeners":{}}',
+             uiStateJSON: '{}',
+             description: '',
+             version: 1,
+             kibanaSavedObjectMeta: { searchSourceJSON: '{"index":"logstash-*","query":'
+             + '{"query_string":{"query":"*","analyze_wildcard":true}},"filter":[]}' }
+          };
+
+          return common.getKibanaObject('visualization', vizName1)
+          .then(function (kObject) {
+            common.debug('kObject = ' + kObject);
+            expect(kObject).to.eql(expectedBody);
+          });
+
+        });
 
       });
     });

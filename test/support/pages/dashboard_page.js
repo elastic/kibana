@@ -27,14 +27,14 @@ define(function (require) {
     clickAddVisualization: function clickAddVisualization() {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.ng-scope[aria-label="Add Visualization"]')
+      .findByCssSelector('button.ng-scope[aria-label="Add a panel to the dashboard"]')
       .click();
     },
 
     filterVizNames: function filterVizNames(vizName) {
       return this.remote
       .setFindTimeout(defaultTimeout)
-      .findByCssSelector('input[placeholder="Visualization Filter"]')
+      .findByCssSelector('input[placeholder="Visualizations Filter..."]')
       .click()
       .pressKeys(vizName);
     },

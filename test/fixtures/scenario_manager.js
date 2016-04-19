@@ -2,6 +2,7 @@ var path = require('path');
 var elasticsearch = require('elasticsearch');
 var Promise = require('bluebird');
 var config = require('./config').scenarios;
+var fs = require('fs');
 
 function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
@@ -30,6 +31,16 @@ ScenarioManager.prototype.load = function (id) {
     var loadIndexDefinition;
     if (bulk.indexDefinition) {
       var body = require(path.join(scenario.baseDir, bulk.indexDefinition));
+
+      console.log('BODY=' + body.settings.number_of_shards);
+
+      fs.readFile(path.join(scenario.baseDir, bulk.indexDefinition), 'utf8', function (err,data) {
+        if (err) {
+          return console.log(err);
+        }
+        console.log(data);
+      });
+
       loadIndexDefinition = self.client.indices.create({
         index: bulk.indexName,
         body: body

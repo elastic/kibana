@@ -2,6 +2,7 @@ define(function (require) {
   var Common = require('../../../support/pages/common');
   var SettingsPage = require('../../../support/pages/settings_page');
   var expect = require('intern/dojo/node!expect.js');
+  var moment = require('moment');
 
   return function (bdd, scenarioManager) {
     bdd.describe('creating and deleting default index', function describeIndexTests() {
@@ -21,8 +22,12 @@ define(function (require) {
       });
 
       bdd.describe('index pattern creation', function indexPatternCreation() {
+        moment().format('YYYY-MM-DD_HH:m:s');
         bdd.before(function () {
-          return settingsPage.createIndexPattern();
+          return settingsPage.createIndexPattern()
+          .then(function () {
+            common.elasticDump('.kibana','kibana_w_indexPattern-' + moment().format('YYYY-MM-DD_HH-m-s') + '.JSON');
+          });
         });
 
         bdd.it('should have index pattern in page header', function pageHeader() {

@@ -67,7 +67,7 @@ define(function (require) {
 
       bdd.describe('vertical bar chart', function indexPatternCreation() {
         var testSubName = 'VerticalBarChart';
-        var vizName1 = 'Visualization ' + testSubName;
+        var vizName1 = 'Visualization☺ ' + testSubName;
 
 
         bdd.it('should save and load', function pageHeader() {

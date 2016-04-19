@@ -66,7 +66,7 @@ define(function (require) {
 
       bdd.describe('line charts', function indexPatternCreation() {
         var testSubName = 'LineChart';
-        var vizName1 = 'Visualization ' + testSubName;
+        var vizName1 = 'Visualization漢字 ' + testSubName;
 
         bdd.it('should be able to save and load', function pageHeader() {
 

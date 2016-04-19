@@ -17,7 +17,22 @@ define(function (require) {
         dashboardPage = new DashboardPage(this.remote);
 
         common.debug('navigateToApp dashboard');
-        return common.navigateToApp('dashboard')
+        return scenarioManager.reload('emptyKibana')
+        // and load a set of makelogs data
+        .then(function loadIfEmptyMakelogs() {
+          return scenarioManager.loadIfEmpty('logstashFunctional');
+        })
+        .then(function () {
+          common.debug('Load Kibana index with Visualizations = \n'
+          + common.execCommand('cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
+          + ' --input=kibanaVis-mapping.JSON'
+          + ' --output=http://localhost:9200/.kibana"  --type=mapping'));
+          common.debug('Load Kibana index with Visualizations = \n'
+          + common.execCommand('cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
+          + ' --input=kibanaVis.JSON'
+          + ' --output=http://localhost:9200/.kibana"'));
+          return common.navigateToApp('dashboard');
+        })
         .catch(common.handleError(this));
       });
 
