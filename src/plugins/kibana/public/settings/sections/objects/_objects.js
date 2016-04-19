@@ -97,7 +97,7 @@ uiModules.get('apps/settings')
         Promise.map($scope.services, (service) =>
           service.service.scanAll('')
             .then(results => results.hits.map(hit => _.extend(hit, { type: service.type })))
-            .catch(error => notify.error)
+            .catch(error => notify.error(error))
         ).then((results) => retrieveAndExportDocs(_.flattenDeep(results)));
       };
 
