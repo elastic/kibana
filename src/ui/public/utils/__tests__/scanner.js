@@ -81,6 +81,19 @@ describe('Scanner', function () {
       });
     });
 
+    it('should reject when an error occurs', function (done) {
+      search.restore();
+      search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
+      return scanner.scanAndMap('')
+      .then(function (response) {
+        done(new Error('should reject'));
+      })
+      .catch(function (error) {
+        expect(error.message).to.be('fail.');
+        done();
+      });
+    });
+
     it('should scroll across multiple pages', function () {
       scroll.restore();
       let oneResult = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one']}}; // eslint-disable-line max-len
