@@ -2,6 +2,7 @@ import modules from 'ui/modules';
 import template from 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html';
 import _ from 'lodash';
 import editFieldTypeHTML from 'plugins/kibana/settings/sections/indices/partials/_edit_field_type.html';
+import keysDeep from './pipeline_setup/lib/keys_deep';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
@@ -23,6 +24,8 @@ modules.get('apps/settings')
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
+        const fields = _.reject(keysDeep(this.sampleDoc), key => _.isPlainObject(_.get(this.sampleDoc, key)));
+
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
@@ -45,12 +48,13 @@ modules.get('apps/settings')
           id: 'filebeat-*',
           title: 'filebeat-*',
           timeFieldName: pickDefaultTimeFieldName(this.dateFields),
-          fields: _.map(this.sampleDoc, (value, key) => {
-            let type = knownFieldTypes[key] || typeof value;
-            if (type === 'object' && _.isArray(value) && !_.isEmpty(value)) {
-              type = typeof value[0];
+          fields: _.map(fields, (fieldName) => {
+            const fieldValue = _.get(this.sampleDoc, fieldName);
+            let type = knownFieldTypes[fieldName] || typeof fieldValue;
+            if (type === 'object' && _.isArray(fieldValue) && !_.isEmpty(fieldValue)) {
+              type = typeof fieldValue[0];
             }
-            return {name: key, type: type};
+            return {name: fieldName, type: type};
           })
         });
 
@@ -73,7 +77,7 @@ modules.get('apps/settings')
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const sampleValue = this.sampleDoc[field.name];
+            const sampleValue = _.get(this.sampleDoc, field.name);
             return [
               _.escape(field.name),
               {
@@ -81,7 +85,7 @@ modules.get('apps/settings')
                 scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes, buildRows: buildRows}),
                 value: field.type
               },
-              typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
+              _.escape(sampleValue)
             ];
           });
         };
