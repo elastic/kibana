@@ -1,4 +1,3 @@
-import d3 from 'd3';
 import _ from 'lodash';
 import expect from 'expect.js';
 import visFixture from 'plugins/tagcloud/vis/components/__tests__/fixtures/vis_fixture';
