@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 
 function ParamClassStub(parent, body) {
-  var stub = sinon.spy(body || function () {
+  let stub = sinon.spy(body || function () {
     stub.Super && stub.Super.call(this);
   });
   if (parent) _.class(stub).inherits(parent);
@@ -14,7 +14,7 @@ function ParamClassStub(parent, body) {
  * This method should be passed directly to ngMock.inject();
  *
  * ```js
- * var stubParamClasses = require('./utils/_stub_agg_params');
+ * let stubParamClasses = require('./utils/_stub_agg_params');
  * describe('something', function () {
  *   beforeEach(ngMock.inject(stubParamClasses));
  * })
@@ -24,7 +24,7 @@ function ParamClassStub(parent, body) {
  * @return {undefined}
  */
 module.exports = function stubParamClasses(Private) {
-  var BaseAggParam = Private.stub(
+  let BaseAggParam = Private.stub(
     require('ui/agg_types/param_types/base'),
     new ParamClassStub(null, function (config) {
       _.assign(this, config);

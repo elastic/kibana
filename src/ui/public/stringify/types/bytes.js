@@ -1,7 +1,7 @@
 import StringifyTypesNumeralProvider from 'ui/stringify/types/_numeral';
 
 export default function BytesFormatProvider(Private) {
-  var Numeral = Private(StringifyTypesNumeralProvider);
+  let Numeral = Private(StringifyTypesNumeralProvider);
   return Numeral.factory({
     id: 'bytes',
     title: 'Bytes',

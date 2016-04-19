@@ -27,26 +27,26 @@ uiModules.get('kibana')
      * @return {undefined}
      */
     $delegate.constructor.prototype.$bind = function (to, from, $sourceScope) {
-      var $source = $sourceScope || this.$parent;
-      var $target = this;
+      let $source = $sourceScope || this.$parent;
+      let $target = this;
 
       // parse expressions
-      var $to = $parse(to);
+      let $to = $parse(to);
       if (!$to.assign) errorNotAssignable(to, from);
-      var $from = $parse(from);
+      let $from = $parse(from);
 
       // bind scopes to expressions
-      var getTarget = function () { return $to($target); };
-      var setTarget = function (v) { return $to.assign($target, v); };
-      var getSource = function () { return $from($source); };
-      var setSource = function (v) { return $from.assignOrFail($source, v); };
+      let getTarget = function () { return $to($target); };
+      let setTarget = function (v) { return $to.assign($target, v); };
+      let getSource = function () { return $from($source); };
+      let setSource = function (v) { return $from.assignOrFail($source, v); };
 
       // to support writing from the child to the parent we need to know
       // which source has changed. Track the source value and anytime it
       // changes (even if the target value changed too) push from source
       // to target. If the source hasn't changed then the change is from
       // the target and push accordingly
-      var lastSourceVal = getSource();
+      let lastSourceVal = getSource();
 
       $from.assignOrFail = $from.assign || function () {
         // revert the change and throw an error, child writes aren't supported
@@ -55,19 +55,19 @@ uiModules.get('kibana')
       };
 
       // if we are syncing down a literal, then we use loose equality check
-      var strict = !$from.literal;
-      var compare = strict ? strictEquality : angular.equals;
+      let strict = !$from.literal;
+      let compare = strict ? strictEquality : angular.equals;
 
 
       // push the initial value down, start off in sync
       setTarget(lastSourceVal);
 
       $target.$watch(function () {
-        var sourceVal = getSource();
-        var targetVal = getTarget();
+        let sourceVal = getSource();
+        let targetVal = getTarget();
 
-        var outOfSync = !compare(sourceVal, targetVal);
-        var sourceChanged = outOfSync && !compare(sourceVal, lastSourceVal);
+        let outOfSync = !compare(sourceVal, targetVal);
+        let sourceChanged = outOfSync && !compare(sourceVal, lastSourceVal);
 
         if (sourceChanged) setTarget(sourceVal);
         else if (outOfSync) setSource(targetVal);

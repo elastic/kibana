@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-var units = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
-var unitsAsc = _.sortBy(units, function (unit) {
+let units = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
+let unitsAsc = _.sortBy(units, function (unit) {
   return moment.duration(1, unit).valueOf();
 });
-var unitsDesc = unitsAsc.reverse();
+let unitsDesc = unitsAsc.reverse();
 
 /* This is a simplified version of elasticsearch's date parser */
 function parse(text, roundUp) {
@@ -14,7 +14,7 @@ function parse(text, roundUp) {
   if (_.isDate(text)) return moment(text);
 
   let time;
-  var mathString = '';
+  let mathString = '';
   let index;
   let parseString;
 
@@ -42,12 +42,12 @@ function parse(text, roundUp) {
 }
 
 function parseDateMath(mathString, time, roundUp) {
-  var dateTime = time;
-  var i = 0;
-  var len = mathString.length;
+  let dateTime = time;
+  let i = 0;
+  let len = mathString.length;
 
   while (i < len) {
-    var c = mathString.charAt(i++);
+    let c = mathString.charAt(i++);
     let type;
     let num;
     let unit;
@@ -67,7 +67,7 @@ function parseDateMath(mathString, time, roundUp) {
     } else if (mathString.length === 2) {
       num = mathString.charAt(i);
     } else {
-      var numFrom = i;
+      let numFrom = i;
       while (!isNaN(mathString.charAt(i))) {
         i++;
         if (i > 10) return undefined;

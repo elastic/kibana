@@ -19,7 +19,7 @@ uiModules.get('kibana').directive('validateDateMath', function () {
           return null;
         }
 
-        var moment = dateMath.parse(input);
+        let moment = dateMath.parse(input);
         ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
         return input;
       }

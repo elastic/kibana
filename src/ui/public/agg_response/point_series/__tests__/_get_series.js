@@ -5,7 +5,7 @@ import AggResponsePointSeriesGetSeriesProvider from 'ui/agg_response/point_serie
 describe('getSeries', function () {
   let getSeries;
 
-  var agg = { fieldFormatter: _.constant(_.identity) };
+  let agg = { fieldFormatter: _.constant(_.identity) };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -19,7 +19,7 @@ describe('getSeries', function () {
   }
 
   it('produces a single series with points for each row', function () {
-    var rows = [
+    let rows = [
       [1, 2, 3],
       [1, 2, 3],
       [1, 2, 3],
@@ -27,7 +27,7 @@ describe('getSeries', function () {
       [1, 2, 3]
     ].map(wrapRows);
 
-    var chart = {
+    let chart = {
       aspects: {
         x: { i: 0 },
         y: { i: 1 },
@@ -35,13 +35,13 @@ describe('getSeries', function () {
       }
     };
 
-    var series = getSeries(rows, chart);
+    let series = getSeries(rows, chart);
 
     expect(series)
       .to.be.an('array')
       .and.to.have.length(1);
 
-    var siri = series[0];
+    let siri = series[0];
     expect(siri)
       .to.be.an('object')
       .and.have.property('label', '')
@@ -60,7 +60,7 @@ describe('getSeries', function () {
   });
 
   it('produces multiple series if there are multiple y aspects', function () {
-    var rows = [
+    let rows = [
       [1, 2, 3],
       [1, 2, 3],
       [1, 2, 3],
@@ -68,7 +68,7 @@ describe('getSeries', function () {
       [1, 2, 3]
     ].map(wrapRows);
 
-    var chart = {
+    let chart = {
       aspects: {
         x: { i: 0 },
         y: [
@@ -78,7 +78,7 @@ describe('getSeries', function () {
       }
     };
 
-    var series = getSeries(rows, chart);
+    let series = getSeries(rows, chart);
 
     expect(series)
       .to.be.an('array')
@@ -103,7 +103,7 @@ describe('getSeries', function () {
   });
 
   it('produces multiple series if there is a series aspect', function () {
-    var rows = [
+    let rows = [
       ['0', 3],
       ['1', 3],
       ['1', 'NaN'],
@@ -114,7 +114,7 @@ describe('getSeries', function () {
       ['1', 3]
     ].map(wrapRows);
 
-    var chart = {
+    let chart = {
       aspects: {
         x: { i: -1 },
         series: { i: 0, agg: agg },
@@ -122,7 +122,7 @@ describe('getSeries', function () {
       }
     };
 
-    var series = getSeries(rows, chart);
+    let series = getSeries(rows, chart);
 
     expect(series)
       .to.be.an('array')
@@ -147,7 +147,7 @@ describe('getSeries', function () {
   });
 
   it('produces multiple series if there is a series aspect and multipl y aspects', function () {
-    var rows = [
+    let rows = [
       ['0', 3, 4],
       ['1', 3, 4],
       ['0', 3, 4],
@@ -156,7 +156,7 @@ describe('getSeries', function () {
       ['1', 3, 4]
     ].map(wrapRows);
 
-    var chart = {
+    let chart = {
       aspects: {
         x: { i: -1 },
         series: { i: 0, agg: agg },
@@ -167,7 +167,7 @@ describe('getSeries', function () {
       }
     };
 
-    var series = getSeries(rows, chart);
+    let series = getSeries(rows, chart);
 
     expect(series)
       .to.be.an('array')
@@ -197,7 +197,7 @@ describe('getSeries', function () {
   });
 
   it('produces a series list in the same order as its corresponding metric column', function () {
-    var rows = [
+    let rows = [
       ['0', 3, 4],
       ['1', 3, 4],
       ['0', 3, 4],
@@ -206,7 +206,7 @@ describe('getSeries', function () {
       ['1', 3, 4]
     ].map(wrapRows);
 
-    var chart = {
+    let chart = {
       aspects: {
         x: { i: -1 },
         series: { i: 0, agg: agg },
@@ -217,7 +217,7 @@ describe('getSeries', function () {
       }
     };
 
-    var series = getSeries(rows, chart);
+    let series = getSeries(rows, chart);
     expect(series[0]).to.have.property('label', '0: 0');
     expect(series[1]).to.have.property('label', '0: 1');
     expect(series[2]).to.have.property('label', '1: 0');
@@ -230,7 +230,7 @@ describe('getSeries', function () {
       y.i = i;
     });
 
-    var series2 = getSeries(rows, chart);
+    let series2 = getSeries(rows, chart);
     expect(series2[0]).to.have.property('label', '0: 1');
     expect(series2[1]).to.have.property('label', '0: 0');
     expect(series2[2]).to.have.property('label', '1: 1');

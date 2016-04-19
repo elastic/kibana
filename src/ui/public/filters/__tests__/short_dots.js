@@ -10,7 +10,7 @@ let filter;
 
 let config;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

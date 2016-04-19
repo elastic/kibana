@@ -11,16 +11,16 @@ import uiModules from 'ui/modules';
 
 uiModules.get('kibana')
 .directive('visualizeLegend', function (Private, getAppState) {
-  var Data = Private(VislibLibDataProvider);
-  var colorPalette = Private(VislibComponentsColorColorProvider);
-  var filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
+  let Data = Private(VislibLibDataProvider);
+  let colorPalette = Private(VislibComponentsColorColorProvider);
+  let filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
   return {
     restrict: 'E',
     template: html,
     link: function ($scope, $elem) {
-      var $state = getAppState();
-      var clickHandler = filterBarClickHandler($state);
+      let $state = getAppState();
+      let clickHandler = filterBarClickHandler($state);
       $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
       $scope.$watch('renderbot.chartData', function (data) {
@@ -30,29 +30,29 @@ uiModules.get('kibana')
       });
 
       $scope.highlight = function (event) {
-        var el = event.currentTarget;
-        var handler = $scope.renderbot.vislibVis.handler;
+        let el = event.currentTarget;
+        let handler = $scope.renderbot.vislibVis.handler;
         if (!handler) return;
         handler.highlight.call(el, handler.el);
       };
 
       $scope.unhighlight = function (event) {
-        var el = event.currentTarget;
-        var handler = $scope.renderbot.vislibVis.handler;
+        let el = event.currentTarget;
+        let handler = $scope.renderbot.vislibVis.handler;
         if (!handler) return;
         handler.unHighlight.call(el, handler.el);
       };
 
       $scope.setColor = function (label, color) {
-        var colors = $scope.uiState.get('vis.colors') || {};
+        let colors = $scope.uiState.get('vis.colors') || {};
         colors[label] = color;
         $scope.uiState.set('vis.colors', colors);
         refresh();
       };
 
       $scope.toggleLegend = function () {
-        var bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
-        var bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
+        let bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
+        let bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
         $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
         $scope.uiState.set('vis.legendOpen', $scope.open);
       };
@@ -62,7 +62,7 @@ uiModules.get('kibana')
       };
 
       $scope.canFilter = function (legendData) {
-        var filters = clickHandler({point: legendData}, true) || [];
+        let filters = clickHandler({point: legendData}, true) || [];
         return filters.length;
       };
 
@@ -77,7 +77,7 @@ uiModules.get('kibana')
       ];
 
       function refresh() {
-        var vislibVis = $scope.renderbot.vislibVis;
+        let vislibVis = $scope.renderbot.vislibVis;
 
         if ($scope.uiState.get('vis.legendOpen') == null && vislibVis._attr.addLegend != null) {
           $scope.open = vislibVis._attr.addLegend;
@@ -96,7 +96,7 @@ uiModules.get('kibana')
       };
 
       function getSeriesLabels(data) {
-        var values = data.map(function (chart) {
+        let values = data.map(function (chart) {
           return chart.series;
         })
         .reduce(function (a, b) {
