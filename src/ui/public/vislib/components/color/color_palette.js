@@ -3,7 +3,7 @@ import _ from 'lodash';
 import VislibComponentsColorSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
 export default function ColorPaletteUtilService(Private) {
 
-  var seedColors = Private(VislibComponentsColorSeedColorsProvider);
+  let seedColors = Private(VislibComponentsColorSeedColorsProvider);
 
 
   /*
@@ -12,10 +12,10 @@ export default function ColorPaletteUtilService(Private) {
    * new colors are generated up to the value of the input number.
    */
 
-  var offset = 300; // Hue offset to start at
+  let offset = 300; // Hue offset to start at
 
-  var fraction = function (goal) {
-    var walkTree = function (numerator, denominator, bytes) {
+  let fraction = function (goal) {
+    let walkTree = function (numerator, denominator, bytes) {
       if (bytes.length) {
         return walkTree(
           (numerator * 2) + (bytes.pop() ? 1 : -1),
@@ -28,7 +28,7 @@ export default function ColorPaletteUtilService(Private) {
       }
     };
 
-    var b = (goal + 2)
+    let b = (goal + 2)
       .toString(2)
       .split('')
       .map(function (num) {
@@ -45,9 +45,9 @@ export default function ColorPaletteUtilService(Private) {
       throw new TypeError('ColorPaletteUtilService expects a number');
     }
 
-    var colors = seedColors;
+    let colors = seedColors;
 
-    var seedLength = seedColors.length;
+    let seedLength = seedColors.length;
 
     _.times(num - seedLength, function (i) {
       colors.push(d3.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).toString());

@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function AggConfigFactory(Private, fieldTypeFilter) {
-  var fieldFormats = Private(RegistryFieldFormatsProvider);
+  let fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
-    var self = this;
+    let self = this;
 
     self.id = String(opts.id || AggConfig.nextId(vis.aggs));
     self.vis = vis;
@@ -26,13 +26,13 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    * @return {array} - the list that was passed in
    */
   AggConfig.ensureIds = function (list) {
-    var have = [];
-    var haveNot = [];
+    let have = [];
+    let haveNot = [];
     list.forEach(function (obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
-    var nextId = AggConfig.nextId(have);
+    let nextId = AggConfig.nextId(have);
     haveNot.forEach(function (obj) {
       obj.id = String(nextId++);
     });
@@ -97,12 +97,12 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    * @return {undefined}
    */
   AggConfig.prototype.fillDefaults = function (from) {
-    var self = this;
+    let self = this;
     from = from || self.params || {};
-    var to = self.params = {};
+    let to = self.params = {};
 
     self.getAggParams().forEach(function (aggParam) {
-      var val = from[aggParam.name];
+      let val = from[aggParam.name];
 
       if (val == null) {
         if (aggParam.default == null) return;
@@ -116,11 +116,11 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
       }
 
       if (aggParam.deserialize) {
-        var isTyped = _.isFunction(aggParam.type);
+        let isTyped = _.isFunction(aggParam.type);
 
-        var isType = isTyped && (val instanceof aggParam.type);
-        var isObject = !isTyped && _.isObject(val);
-        var isDeserialized = (isType || isObject);
+        let isType = isTyped && (val instanceof aggParam.type);
+        let isObject = !isTyped && _.isObject(val);
+        let isDeserialized = (isType || isObject);
 
         if (!isDeserialized) {
           val = aggParam.deserialize(val, self);
@@ -140,12 +140,12 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    * @return {object} the new params object
    */
   AggConfig.prototype.resetParams = function () {
-    var fieldParam = this.type && this.type.params.byName.field;
+    let fieldParam = this.type && this.type.params.byName.field;
     let field;
 
     if (fieldParam) {
-      var prevField = this.params.field;
-      var fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, fieldParam.filterFieldTypes);
+      let prevField = this.params.field;
+      let fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, fieldParam.filterFieldTypes);
       field = _.contains(fieldOpts, prevField) ? prevField : null;
     }
 
@@ -161,10 +161,10 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
       throw new TypeError('The "' + this.type.title + '" aggregation does not support filtering.');
     }
 
-    var field = this.field();
-    var label = this.fieldDisplayName();
+    let field = this.field();
+    let label = this.fieldDisplayName();
     if (field && !field.filterable) {
-      var message = 'The "' + label + '" field can not be used for filtering.';
+      let message = 'The "' + label + '" field can not be used for filtering.';
       if (field.scripted) {
         message = 'The "' + label + '" field is scripted and can not be used for filtering.';
       }
@@ -181,7 +181,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    * @return {[type]} [description]
    */
   AggConfig.prototype.requesting = function () {
-    var self = this;
+    let self = this;
     self.type && self.type.params.forEach(function (param) {
       if (param.onRequest) param.onRequest(self);
     });
@@ -198,14 +198,14 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
    */
   AggConfig.prototype.toDsl = function () {
     if (this.type.hasNoDsl) return;
-    var output = this.write();
+    let output = this.write();
 
-    var configDsl = {};
+    let configDsl = {};
     configDsl[this.type.dslName || this.type.name] = output.params;
 
     // if the config requires subAggs, write them to the dsl as well
     if (output.subAggs) {
-      var subDslLvl = configDsl.aggs || (configDsl.aggs = {});
+      let subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
       });
@@ -215,11 +215,11 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   AggConfig.prototype.toJSON = function () {
-    var self = this;
-    var params = self.params;
+    let self = this;
+    let params = self.params;
 
-    var outParams = _.transform(self.getAggParams(), function (out, aggParam) {
-      var val = params[aggParam.name];
+    let outParams = _.transform(self.getAggParams(), function (out, aggParam) {
+      let val = params[aggParam.name];
 
       // don't serialize undefined/null values
       if (val == null) return;
@@ -264,7 +264,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     }
 
     if (!this.type) return '';
-    var pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
+    let pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
     return pre += this.type.makeLabel(this);
   };
 
@@ -273,31 +273,31 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   AggConfig.prototype.fieldFormatter = function (contentType, defaultFormat) {
-    var format = this.type && this.type.getFormat(this);
+    let format = this.type && this.type.getFormat(this);
     if (format) return format.getConverterFor(contentType);
     return this.fieldOwnFormatter(contentType, defaultFormat);
   };
 
   AggConfig.prototype.fieldOwnFormatter = function (contentType, defaultFormat) {
-    var field = this.field();
-    var format = field && field.format;
+    let field = this.field();
+    let format = field && field.format;
     if (!format) format = defaultFormat;
     if (!format) format = fieldFormats.getDefaultInstance('string');
     return format.getConverterFor(contentType);
   };
 
   AggConfig.prototype.fieldName = function () {
-    var field = this.field();
+    let field = this.field();
     return field ? field.name : '';
   };
 
   AggConfig.prototype.fieldDisplayName = function () {
-    var field = this.field();
+    let field = this.field();
     return field ? (field.displayName || this.fieldName()) : '';
   };
 
   AggConfig.prototype.fieldIsTimeField = function () {
-    var timeFieldName = this.vis.indexPattern.timeFieldName;
+    let timeFieldName = this.vis.indexPattern.timeFieldName;
     return timeFieldName && this.fieldName() === timeFieldName;
   };
 

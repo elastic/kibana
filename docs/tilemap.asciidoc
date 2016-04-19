@@ -78,9 +78,7 @@ Enter a string in the *Custom Label* field to change the display label.
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
-*Exclude Pattern Flags*:: A standard set of Java flags for the exclusion pattern.
 *Include Pattern*:: Specify a pattern in this field to include in the results.
-*Include Pattern Flags*:: A standard set of Java flags for the inclusion pattern.
 *JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation 
 definition, as in the following example:
 
