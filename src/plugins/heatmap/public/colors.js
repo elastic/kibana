@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   { displayName: 'Yellow - Green', name: 'YlGn', min: 3, max: 9, value: 6 },
   { displayName: 'Yellow - Green - Blue', name: 'YlGnBu', min: 3, max: 9, value: 6 },
   { displayName: 'Green - Blue', name: 'GnBu', min: 3, max: 9, value: 6 },

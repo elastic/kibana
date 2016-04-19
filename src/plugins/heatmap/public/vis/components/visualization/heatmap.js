@@ -1,12 +1,12 @@
-var d3 = require('d3');
-var _ = require('lodash');
-var axis = require('plugins/heatmap/vis/components/axis/axis');
-var colorbrewer = require('plugins/heatmap/vis/components/colorbrewer/colorbrewer');
-var gGenerator = require('plugins/heatmap/vis/components/elements/g');
-var layout = require('plugins/heatmap/vis/components/visualization/heatmap_layout');
-var legendGenerator = require('plugins/heatmap/vis/components/legend/legend');
-var rect = require('plugins/heatmap/vis/components/elements/rect');
-var valuator = require('plugins/heatmap/vis/components/utils/valuator');
+import d3 from 'd3';
+import _ from 'lodash';
+import axis from 'plugins/heatmap/vis/components/axis/axis';
+import colorbrewer from 'plugins/heatmap/vis/components/colorbrewer/colorbrewer';
+import gGenerator from 'plugins/heatmap/vis/components/elements/g';
+import layout from 'plugins/heatmap/vis/components/visualization/heatmap_layout';
+import legendGenerator from 'plugins/heatmap/vis/components/legend/legend';
+import rect from 'plugins/heatmap/vis/components/elements/rect';
+import valuator from 'plugins/heatmap/vis/components/utils/valuator';
 
 function heatmap() {
   var accessor = function (d) { return d; };
@@ -19,11 +19,9 @@ function heatmap() {
   var cAxis = { title: '', filterBy: 0, rotateLabels: true, rotationAngle: '-45' };
   var rAxis = { title: '', filterBy: 0, rotateLabels: true, rotationAngle: '-30'};
   var padding = 0;
-  // var sort = { row: false, col: false };
-  // var reverse = { row: false, col: false };
   var cellClass = 'cell';
   var colorScale = d3.scale.quantile();
-  var colors = "PuBuGn";
+  var colors = 'PuBuGn';
   var numberOfColors = 6;
   var opacityScale = d3.scale.linear();
   var opacityRange = [1, 1];
@@ -159,7 +157,11 @@ function heatmap() {
 
       // Legend
       container
-        .datum([Math.min(0, colorScale.domain()[0])].concat(colorScale.quantiles()).concat(colorScale.domain()[1]))
+        .datum(
+          [Math.min(0, colorScale.domain()[0])]
+            .concat(colorScale.quantiles())
+            .concat(colorScale.domain()[1])
+        )
         .call(legend);
     });
   }
@@ -305,4 +307,4 @@ function heatmap() {
   return chart;
 }
 
-module.exports = heatmap;
+export default heatmap;

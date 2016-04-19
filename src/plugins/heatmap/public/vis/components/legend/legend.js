@@ -1,8 +1,8 @@
-var d3 = require('d3');
-var numeral = require('numeral');
-var gGenerator = require('plugins/heatmap/vis/components/elements/g');
-var rectGenerator = require('plugins/heatmap/vis/components/elements/rect');
-var textGenerator = require('plugins/heatmap/vis/components/elements/text');
+import d3 from 'd3';
+import numeral from 'numeral';
+import gGenerator from 'plugins/heatmap/vis/components/elements/g';
+import rectGenerator from 'plugins/heatmap/vis/components/elements/rect';
+import textGenerator from 'plugins/heatmap/vis/components/elements/text';
 
 function legend() {
   var cssClass = 'legend';
@@ -161,12 +161,6 @@ function legend() {
     return generator;
   };
 
-  generator.text = function (v) {
-    if (!arguments.length) { return text; }
-    text = v;
-    return generator;
-  };
-
   generator.textPadding = function (v) {
     if (!arguments.length) { return textPadding; }
     textPadding = v;
@@ -213,4 +207,4 @@ function legend() {
   return generator;
 }
 
-module.exports = legend;
+export default legend;

@@ -1,5 +1,5 @@
-var d3 = require('d3');
-var _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
 
 function valuator(v) {
   if (_.isFunction(v)) { return v; }
@@ -9,4 +9,4 @@ function valuator(v) {
   return d3.functor(v);
 };
 
-module.exports = valuator;
+export default valuator;

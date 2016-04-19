@@ -1,8 +1,8 @@
-var d3 = require('d3');
-var _ = require('lodash');
-var control = require('plugins/heatmap/vis/components/control/events');
-var layoutGenerator = require('plugins/heatmap/vis/components/layout/generator');
-var chartGenerator = require('plugins/heatmap/vis/components/visualization/generator');
+import d3 from 'd3';
+import _ from 'lodash';
+import control from 'plugins/heatmap/vis/components/control/events';
+import layoutGenerator from 'plugins/heatmap/vis/components/layout/generator';
+import chartGenerator from 'plugins/heatmap/vis/components/visualization/generator';
 
 function vis() {
   var events = control();
@@ -35,7 +35,6 @@ function vis() {
   }
 
   // Public API
-
   generator.options = function (v) {
     if (!arguments.length) { return opts; }
     opts = _.isPlainObject(v) ? v : opts;
@@ -57,4 +56,4 @@ function vis() {
   return generator;
 }
 
-module.exports = vis;
+export default vis;

@@ -1,4 +1,4 @@
-var d3 = require('d3');
+import d3 from 'd3';
 
 function truncate() {
   var maxCharLength = 10;
@@ -26,4 +26,4 @@ function truncate() {
   return component;
 };
 
-module.exports = truncate;
+export default truncate;

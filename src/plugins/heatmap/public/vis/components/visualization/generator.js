@@ -1,7 +1,7 @@
-var d3 = require('d3');
-var _ = require('lodash');
-var builder = require('plugins/heatmap/vis/components/utils/builder');
-var heatmap = require('plugins/heatmap/vis/components/visualization/heatmap');
+import d3 from 'd3';
+import _ from 'lodash';
+import builder from 'plugins/heatmap/vis/components/utils/builder';
+import heatmap from 'plugins/heatmap/vis/components/visualization/heatmap';
 
 function chartGenerator() {
   var opts = {};
@@ -33,4 +33,4 @@ function chartGenerator() {
   return generator;
 }
 
-module.exports = chartGenerator;
+export default chartGenerator;

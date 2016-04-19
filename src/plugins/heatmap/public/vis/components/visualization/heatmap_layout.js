@@ -1,4 +1,4 @@
-var d3 = require('d3');
+import d3 from 'd3';
 
 function heatmapLayout() {
   var row = function (d) { return d.row; };
@@ -85,4 +85,4 @@ function heatmapLayout() {
   return layout;
 }
 
-module.exports = heatmapLayout;
+export default heatmapLayout;

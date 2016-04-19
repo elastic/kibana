@@ -1,12 +1,17 @@
-require('plugins/heatmap/heatmap.less');
-require('plugins/heatmap/color_directive.js');
-require('plugins/heatmap/lib/heatmap_controller.js');
-require('plugins/heatmap/lib/heatmap_directive.js');
+import 'plugins/heatmap/heatmap.less';
+import 'plugins/heatmap/color_directive.js';
+import 'plugins/heatmap/lib/heatmap_controller.js';
+import 'plugins/heatmap/lib/heatmap_directive.js';
+import colors from 'plugins/heatmap/colors.js';
+import heatmapTemplate from 'plugins/heatmap/heatmap.html';
+import heatmapVisParamsTemplate from 'plugins/heatmap/heatmap_vis_params.html';
+
+// register the provider with the visTypes registry
+require('ui/registry/vis_types').register(HeatmapProvider);
 
 function HeatmapProvider(Private) {
-  var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-  var Schemas = Private(require('ui/Vis/Schemas'));
-  var colors = require('plugins/heatmap/colors.js');
+  const TemplateVisType = Private('ui/template_vis_type/TemplateVisType');
+  const Schemas = Private('ui/Vis/Schemas');
 
   return new TemplateVisType({
     name: 'heatmap',
@@ -14,7 +19,7 @@ function HeatmapProvider(Private) {
     description: 'A heat map is a graphical representation of data where the individual ' +
       'values contained in a matrix are represented as colors.',
     icon: 'fa-th',
-    template: require('plugins/heatmap/heatmap.html'),
+    template: heatmapTemplate,
     params: {
       defaults: {
         margin: { top: 20, right: 200, bottom: 100, left: 100 },
@@ -29,7 +34,7 @@ function HeatmapProvider(Private) {
       },
       colors: colors,
       legendNumberFormats: ['number', 'bytes', 'currency', 'percentage'],
-      editor: require('plugins/heatmap/heatmap_vis_params.html')
+      editor: heatmapVisParamsTemplate
     },
     schemas: new Schemas([
       {
@@ -64,4 +69,4 @@ function HeatmapProvider(Private) {
   });
 }
 
-require('ui/registry/vis_types').register(HeatmapProvider);
+export default HeatmapProvider;

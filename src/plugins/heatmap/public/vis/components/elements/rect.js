@@ -1,4 +1,5 @@
-var d3 = require('d3');
+import d3 from 'd3';
+import _ from 'lodash';
 
 function rect() {
   var color = d3.scale.category10();
@@ -45,79 +46,79 @@ function rect() {
   }
 
   // Public API
-  element.x = function (_) {
+  element.x = function (v) {
     if (!arguments.length) return x;
-    x = d3.functor(_);
+    x = d3.functor(v);
     return element;
   };
 
-  element.y = function (_) {
+  element.y = function (v) {
     if (!arguments.length) return y;
-    y = d3.functor(_);
+    y = d3.functor(v);
     return element;
   };
 
-  element.rx = function (_) {
+  element.rx = function (v) {
     if (!arguments.length) return rx;
-    rx = d3.functor(_);
+    rx = d3.functor(v);
     return element;
   };
 
-  element.ry = function (_) {
+  element.ry = function (v) {
     if (!arguments.length) return ry;
-    ry = d3.functor(_);
+    ry = d3.functor(v);
     return element;
   };
 
-  element.width = function (_) {
+  element.width = function (v) {
     if (!arguments.length) return width;
-    width = d3.functor(_);
+    width = d3.functor(v);
     return element;
   };
 
-  element.height = function (_) {
+  element.height = function (v) {
     if (!arguments.length) return height;
-    height = d3.functor(_);
+    height = d3.functor(v);
     return element;
   };
 
-  element.class= function (_) {
+  element.class = function (v) {
     if (!arguments.length) return cssClass;
-    cssClass = _;
+    cssClass = _.isString(v) ? v : cssClass;
     return element;
   };
 
-  element.fill = function (_) {
+  element.fill = function (v) {
     if (!arguments.length) return fill;
-    fill = _;
+    fill = v;
     return element;
   };
 
-  element.fillOpacity = function (_) {
+  element.fillOpacity = function (v) {
     if (!arguments.length) return fillOpacity;
-    fillOpacity = _;
+    fillOpacity = v;
     return element;
   };
 
-  element.stroke = function (_) {
+  element.stroke = function (v) {
     if (!arguments.length) return stroke;
-    stroke = _;
+    stroke = v;
     return element;
   };
 
-  element.strokeWidth = function (_) {
+  element.strokeWidth = function (v) {
     if (!arguments.length) return strokeWidth;
-    strokeWidth = _;
+    strokeWidth = v;
     return element;
   };
 
-  element.strokeOpacity = function (_) {
+  element.strokeOpacity = function (v) {
     if (!arguments.length) return strokeOpacity;
-    strokeOpacity = _;
+    strokeOpacity = v;
     return element;
   };
 
   return element;
 };
 
-module.exports = rect;
+export default rect;

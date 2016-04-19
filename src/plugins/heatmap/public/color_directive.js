@@ -1,12 +1,15 @@
-var _ = require('lodash');
-var colorbrewer = require('plugins/heatmap/vis/components/colorbrewer/colorbrewer');
-var gElement = require('plugins/heatmap/vis/components/elements/g');
-var rectElement = require('plugins/heatmap/vis/components/elements/rect');
+import _ from 'lodash';
+import d3 from 'd3';
+import colorbrewer from 'plugins/heatmap/vis/components/colorbrewer/colorbrewer';
+import gElement from 'plugins/heatmap/vis/components/elements/g';
+import rectElement from 'plugins/heatmap/vis/components/elements/rect';
+import uiModules from 'ui/modules';
+import colorTemplate from 'plugins/heatmap/colors.html';
 
-var module = require('ui/modules').get('heatmap');
+const module = uiModules.get('kibana/heatmap', ['kibana']);
 
 module.directive('colorMap', function () {
-  function link (scope, element, attrs) {
+  function link(scope, element, attrs) {
     scope.colorScale = colorbrewer[scope.name];
     scope.colors = scope.colorScale[scope.value];
     scope.min = _.first(Object.keys(scope.colorScale));
@@ -21,7 +24,7 @@ module.directive('colorMap', function () {
         .y(0)
         .width(size)
         .height(size)
-        .fill(function (d) { return d; })
+        .fill(function (d) { return d; });
 
       function draw(selection) {
         selection.each(function (data, index) {
@@ -33,7 +36,8 @@ module.directive('colorMap', function () {
         });
       }
 
-      d3.select(element[0]).select('svg.colors')
+      d3.select(element[0])
+        .select('svg.colors')
         .datum(colors)
         .call(draw);
     }
@@ -59,7 +63,7 @@ module.directive('colorMap', function () {
       name: '=',
       value: '='
     },
-    template: require('plugins/heatmap/colors.html'),
+    template: colorTemplate,
     link: link
   };
 });

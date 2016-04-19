@@ -1,17 +1,15 @@
-var d3 = require('d3');
-var _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
 
 // Adds event listeners to DOM elements
 function events() {
   var processor = function (e) { return e; };
   var listeners = {};
-  var element;
+  var svg;
 
   function control(selection) {
     selection.each(function () {
-      if (!element) {
-        element = d3.select(this);
-      }
+      svg = d3.select(this);
 
       d3.entries(listeners).forEach(function (d) {
         svg.on(d.key, function () {
@@ -41,4 +39,4 @@ function events() {
   return control;
 };
 
-module.exports = events;
+export default events;

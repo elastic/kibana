@@ -1,5 +1,5 @@
-var d3 = require('d3');
-var _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
 
 function builder(obj, func) {
   if (!_.isPlainObject(obj)) {
@@ -19,4 +19,4 @@ function builder(obj, func) {
   return func;
 };
 
-module.exports = builder;
+export default builder;

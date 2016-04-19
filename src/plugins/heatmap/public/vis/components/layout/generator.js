@@ -1,7 +1,7 @@
-var d3 = require('d3');
-var attrs = require('plugins/heatmap/vis/components/utils/attrs');
-var baseLayout = require('plugins/heatmap/vis/components/layout/layout');
-var gGenerator = require('plugins/heatmap/vis/components/elements/g');
+import d3 from 'd3';
+import attrs from 'plugins/heatmap/vis/components/utils/attrs';
+import baseLayout from 'plugins/heatmap/vis/components/layout/layout';
+import gGenerator from 'plugins/heatmap/vis/components/elements/g';
 
 function layoutGenerator() {
   var layout = baseLayout();
@@ -26,4 +26,4 @@ function layoutGenerator() {
   return generator;
 }
 
-module.exports = layoutGenerator;
+export default layoutGenerator;

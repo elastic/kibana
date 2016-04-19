@@ -1,5 +1,5 @@
-var d3 = require('d3');
-var _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
 
 function gGenerator() {
   var cssClass = 'group';
@@ -35,4 +35,4 @@ function gGenerator() {
   return generator;
 }
 
-module.exports = gGenerator;
+export default gGenerator;

@@ -1,5 +1,5 @@
-var d3 = require('d3');
-var truncate = require('plugins/heatmap/vis/components/axis/truncate');
+import d3 from 'd3';
+import truncate from 'plugins/heatmap/vis/components/axis/truncate';
 
 function rotate() {
   var axisLength = 100;
@@ -83,4 +83,4 @@ function rotate() {
   return component;
 };
 
-module.exports = rotate;
+export default rotate;

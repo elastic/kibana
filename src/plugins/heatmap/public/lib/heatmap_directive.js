@@ -1,11 +1,13 @@
-var d3 = require('d3');
-var _ = require('lodash');
-var visGenerator = require('plugins/heatmap/vis/index');
+import d3 from 'd3';
+import _ from 'lodash';
+import visGenerator from 'plugins/heatmap/vis/index';
+import uiModules from 'ui/modules';
+import angular from 'angular';
 
-var module = require('ui/modules').get('heatmap');
+const module = uiModules.get('kibana/heatmap', ['kibana']);
 
-module.directive('heatmap', function () {
-  function link (scope, element, attrs) {
+module.directive('kbnHeatmap', function () {
+  function link(scope, element, attrs) {
     angular.element(document).ready(function () {
       var vis = visGenerator();
       var svg = d3.select(element[0]);

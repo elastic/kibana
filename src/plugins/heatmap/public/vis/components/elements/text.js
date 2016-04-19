@@ -1,4 +1,5 @@
-var d3 = require('d3');
+import d3 from 'd3';
+import _ from 'lodash';
 
 function text() {
   var x = function (d) { return d.x || 0; };
@@ -16,79 +17,79 @@ function text() {
       var text = d3.select(this).selectAll('text.' + cssClass)
         .data(data);
 
-        text.exit().remove();
+      text.exit().remove();
 
-        text.enter().append('text')
-          .attr('class', cssClass);
+      text.enter().append('text')
+        .attr('class', cssClass);
 
-        text
-          .attr('transform', transform)
-          .attr('x', x)
-          .attr('y', y)
-          .attr('dx', dx)
-          .attr('dy', dy)
-          .style('fill', fill)
-          .style('text-anchor', anchor)
-          .text(texts);
+      text
+        .attr('transform', transform)
+        .attr('x', x)
+        .attr('y', y)
+        .attr('dx', dx)
+        .attr('dy', dy)
+        .style('fill', fill)
+        .style('text-anchor', anchor)
+        .text(texts);
     });
   }
 
   // Public API
-  element.x = function (_) {
+  element.x = function (v) {
     if (!arguments.length) { return x; }
-    x = d3.functor(_);
+    x = d3.functor(v);
     return element;
   };
 
-  element.y = function (_) {
+  element.y = function (v) {
     if (!arguments.length) { return y; }
-    y = d3.functor(_);
+    y = d3.functor(v);
     return element;
   };
 
-  element.dx = function (_) {
+  element.dx = function (v) {
     if (!arguments.length) { return dx; }
-    dx = d3.functor(_);
+    dx = d3.functor(v);
     return element;
   };
 
-  element.dy = function (_) {
+  element.dy = function (v) {
     if (!arguments.length) { return dy; }
-    dy = d3.functor(_);
+    dy = d3.functor(v);
     return element;
   };
 
-  element.transform = function (_) {
+  element.transform = function (v) {
     if (!arguments.length) { return transform; }
-    transform = _;
+    transform = v;
     return element;
   };
 
-  element.class= function (_) {
+  element.class = function (v) {
     if (!arguments.length) { return cssClass; }
-    cssClass = _;
+    cssClass = _.isString(v) ? v : cssClass;
     return element;
   };
 
-  element.anchor = function (_) {
+  element.anchor = function (v) {
     if (!arguments.length) { return anchor; }
-    anchor = _;
+    anchor = v;
     return element;
   };
 
-  element.fill = function (_) {
+  element.fill = function (v) {
     if (!arguments.length) { return fill; }
-    fill = _;
+    fill = v;
     return element;
   };
 
-  element.text = function (_) {
+  element.text = function (v) {
     if (!arguments.length) { return texts; }
-    texts = _;
+    texts = v;
     return element;
   };
 
   return element;
 };
 
-module.exports = text;
+export default text;

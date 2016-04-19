@@ -1,6 +1,6 @@
-var d3 = require('d3');
-var _ = require('lodash');
-var rotate = require('plugins/heatmap/vis/components/axis/rotate');
+import d3 from 'd3';
+import _ from 'lodash';
+import rotate from 'plugins/heatmap/vis/components/axis/rotate';
 
 function axes() {
   var scale = d3.scale.linear();
@@ -140,4 +140,4 @@ function axes() {
   return generator;
 };
 
-module.exports = axes;
+export default axes;

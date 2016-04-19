@@ -1,19 +1,21 @@
-var _ = require('lodash');
-var module = require('ui/modules').get('heatmap');
+import _ from 'lodash';
+import uiModules from 'ui/modules';
 
-module.controller('HeatmapController', function ($scope, Private) {
-  var tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
+const module = uiModules.get('kibana/heatmap', ['kibana']);
+
+module.controller('KbnHeatmapController', function ($scope, Private) {
+  const tabifyAggResponse = Private('ui/agg_response/tabify/tabify');
 
   function getLabel(agg, name) {
     return agg.bySchemaName[name] ? agg.bySchemaName[name][0].makeLabel() : '';
   }
 
   function processTableGroups(tableGroups, $scope) {
-    var columnAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName['columns'], 'id'));
-    var rowAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName['rows'], 'id'));
-    var metricsAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName['metric'], 'id'));
-    var dataLabels = { [columnAggId]: 'col', [rowAggId]: 'row', [metricsAggId]: 'value' };
+    const columnAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.columns, 'id'));
+    const rowAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.rows, 'id'));
+    const metricsAggId = _.first(_.pluck($scope.vis.aggs.bySchemaName.metric, 'id'));
 
+    var dataLabels = { [columnAggId]: 'col', [rowAggId]: 'row', [metricsAggId]: 'value' };
     var cells = [];
 
     tableGroups.tables.forEach(function (table) {

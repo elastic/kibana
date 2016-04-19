@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var builder = require('plugins/heatmap/vis/components/utils/builder');
+import _ from 'lodash';
+import builder from 'plugins/heatmap/vis/components/utils/builder';
 
 function attrs(generator) {
   return function () {
@@ -27,7 +27,7 @@ function attrs(generator) {
           return getValue(filterFunctions(funcs, attr), attr);
         }
 
-        _.forEach(filter(funcs, attr), function (func) {
+        _.forEach(filterFunctions(funcs, attr), function (func) {
           func[attr](value);
         });
       }
@@ -43,4 +43,4 @@ function attrs(generator) {
   };
 };
 
-module.exports = attrs;
+export default attrs;

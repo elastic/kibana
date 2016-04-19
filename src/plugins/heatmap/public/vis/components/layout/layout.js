@@ -1,5 +1,5 @@
-var d3 = require('d3');
-var _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
 
 function formatType(length, type, cols) {
   var output = {};
@@ -91,4 +91,4 @@ function baseLayout() {
   return layout;
 }
 
-module.exports = baseLayout;
+export default baseLayout;
