@@ -16,7 +16,7 @@ describe('$scope.$bind', function () {
     expect($rootScope.$bind).to.be.a('function');
     expect($scope).to.have.property('$bind', $rootScope.$bind);
 
-    var $isoScope = $scope.$new(true);
+    let $isoScope = $scope.$new(true);
     expect($isoScope).to.have.property('$bind', $rootScope.$bind);
   });
 
@@ -33,7 +33,7 @@ describe('$scope.$bind', function () {
   });
 
   it('sets up a binding from the child to the parent scope', function () {
-    var stub = sinon.stub();
+    let stub = sinon.stub();
 
     $rootScope.val = 'foo';
     $scope.$bind('localVal', 'val');
@@ -47,8 +47,8 @@ describe('$scope.$bind', function () {
   });
 
   it('pulls from the scopes $parent by default', function () {
-    var $parent = $rootScope.$new();
-    var $self = $parent.$new();
+    let $parent = $rootScope.$new();
+    let $self = $parent.$new();
 
     $parent.val = 'foo';
     $self.val = 'bar';
@@ -58,8 +58,8 @@ describe('$scope.$bind', function () {
   });
 
   it('accepts an alternate scope to read from', function () {
-    var $parent = $rootScope.$new();
-    var $self = $parent.$new();
+    let $parent = $rootScope.$new();
+    let $self = $parent.$new();
 
     $parent.val = 'foo';
     $self.val = 'bar';

@@ -4,15 +4,15 @@ import AggResponseTabifyResponseWriterProvider from 'ui/agg_response/tabify/_res
 import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
 export default function tabifyAggResponseProvider(Private, Notifier) {
 
-  var AggConfig = Private(VisAggConfigProvider);
-  var TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
-  var Buckets = Private(AggResponseTabifyBucketsProvider);
-  var notify = new Notifier({ location: 'agg_response/tabify'});
+  let AggConfig = Private(VisAggConfigProvider);
+  let TabbedAggResponseWriter = Private(AggResponseTabifyResponseWriterProvider);
+  let Buckets = Private(AggResponseTabifyBucketsProvider);
+  let notify = new Notifier({ location: 'agg_response/tabify'});
 
   function tabifyAggResponse(vis, esResponse, respOpts) {
-    var write = new TabbedAggResponseWriter(vis, respOpts);
+    let write = new TabbedAggResponseWriter(vis, respOpts);
 
-    var topLevelBucket = _.assign({}, esResponse.aggregations, {
+    let topLevelBucket = _.assign({}, esResponse.aggregations, {
       doc_count: esResponse.hits.total
     });
 
@@ -31,13 +31,13 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
    * @returns {undefined}
    */
   function collectBucket(write, bucket, key) {
-    var agg = write.aggStack.shift();
+    let agg = write.aggStack.shift();
 
     switch (agg.schema.group) {
       case 'buckets':
-        var buckets = new Buckets(bucket[agg.id]);
+        let buckets = new Buckets(bucket[agg.id]);
         if (buckets.length) {
-          var splitting = write.canSplit && agg.schema.name === 'split';
+          let splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
             write.split(agg, buckets, function forEachBucket(subBucket, key) {
               collectBucket(write, subBucket, agg.getKey(subBucket), key);
@@ -63,7 +63,7 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
         }
         break;
       case 'metrics':
-        var value = agg.getValue(bucket);
+        let value = agg.getValue(bucket);
         write.cell(agg, value, function () {
           if (!write.aggStack.length) {
             // row complete
@@ -82,7 +82,7 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
   // write empty values for each bucket agg, then write
   // the metrics from the initial bucket using collectBucket()
   function passEmptyBuckets(write, bucket, key) {
-    var agg = write.aggStack.shift();
+    let agg = write.aggStack.shift();
 
     switch (agg.schema.group) {
       case 'metrics':

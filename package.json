@@ -16,7 +16,6 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
-  "main": "src/server/KbnServer.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
@@ -131,6 +130,7 @@
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "rimraf": "2.4.3",
+    "rison-node": "1.0.0",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",
     "semver": "5.1.0",
