@@ -126,6 +126,16 @@ export function remove(processorApiDocument) {
   };
 }
 
+export function rename(processorApiDocument) {
+  return {
+    rename: {
+      tag: processorApiDocument.processor_id,
+      field: processorApiDocument.source_field,
+      to: processorApiDocument.target_field
+    }
+  };
+}
+
 export function set(processorApiDocument) {
   return {
     set: {
