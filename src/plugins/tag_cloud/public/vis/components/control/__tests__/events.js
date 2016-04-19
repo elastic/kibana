@@ -1,24 +1,9 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import expect from 'expect.js';
+import visFixture from 'plugins/tagcloud/vis/components/__tests__/fixtures/vis_fixture';
+import remove from 'plugins/tagcloud/vis/components/__tests__/fixtures/remove';
 import eventsFunction from 'plugins/tagcloud/vis/components/control/events';
-
-function visFixture() {
-  let div = document.createElement('div');
-  let element = document.body.appendChild(div);
-
-  element.setAttribute('style', 'position: relative');
-  element.style.width = '500px';
-  element.style.height = '500px';
-
-  return element;
-}
-
-function remove(element) {
-  let el = d3.select(element);
-  el.remove();
-  el = null;
-}
 
 describe('events tests', function () {
   let totalListenerCount;
