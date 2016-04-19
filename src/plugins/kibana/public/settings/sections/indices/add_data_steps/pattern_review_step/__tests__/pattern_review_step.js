@@ -1,8 +1,7 @@
 import expect from 'expect.js';
-import _ from 'lodash';
 import ngMock from 'ng_mock';
 
-describe.only('pattern review directive', function () {
+describe('pattern review directive', function () {
   let $rootScope;
   let $compile;
 
