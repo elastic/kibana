@@ -15,6 +15,7 @@ module.exports = function (kbnServer, server, config) {
     handler: function (request, reply) {
       return reply({
         name: config.get('server.name'),
+        uuid: config.get('uuid'),
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       });

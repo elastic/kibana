@@ -14,12 +14,12 @@ describe('Vislib _chart Test Suite', function () {
   let Data;
   let persistedState;
   let Vis;
-  var chartData = {};
+  let chartData = {};
   let vis;
   let el;
   let myChart;
   let config;
-  var data = {
+  let data = {
     hits      : 621,
     label     : '',
     ordered   : {

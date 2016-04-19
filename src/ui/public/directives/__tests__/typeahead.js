@@ -7,8 +7,8 @@ import 'plugins/kibana/discover/index';
 
 // TODO: This should not be needed, timefilter is only included here, it should move
 
-var typeaheadHistoryCount = 10;
-var typeaheadName = 'unittest';
+let typeaheadHistoryCount = 10;
+let typeaheadName = 'unittest';
 let $parentScope;
 let $typeaheadScope;
 let $elem;
@@ -16,13 +16,13 @@ let $typeaheadInputScope;
 let typeaheadCtrl;
 let PersistedLog;
 
-var markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
+let markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
   '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
   '<kbn-typeahead-items></kbn-typeahead-items>' +
   '</div>';
-var typeaheadItems = ['abc', 'def', 'ghi'];
+let typeaheadItems = ['abc', 'def', 'ghi'];
 
-var init = function () {
+let init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -64,7 +64,7 @@ var init = function () {
 describe('typeahead directive', function () {
   describe('typeahead requirements', function () {
     describe('missing input', function () {
-      var goodMarkup = markup;
+      let goodMarkup = markup;
 
       before(function () {
         markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
@@ -99,9 +99,9 @@ describe('typeahead directive', function () {
       });
 
       it('should not save empty entries', function () {
-        var entries = typeaheadItems.slice(0);
+        let entries = typeaheadItems.slice(0);
         entries.push('', 'jkl');
-        for (var i = 0; i < entries.length; i++) {
+        for (let i = 0; i < entries.length; i++) {
           $typeaheadScope.inputModel.$setViewValue(entries[i]);
           typeaheadCtrl.persistEntry();
         }
@@ -129,14 +129,14 @@ describe('typeahead directive', function () {
       });
 
       it('should order fitlered results', function () {
-        var entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
-        var allEntries = typeaheadItems.concat(entries);
-        var startMatches = allEntries.filter(function (item) {
+        let entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
+        let allEntries = typeaheadItems.concat(entries);
+        let startMatches = allEntries.filter(function (item) {
           return /^a/.test(item);
         });
         typeaheadCtrl.history.add.returns(allEntries);
 
-        for (var i = 0; i < entries.length; i++) {
+        for (let i = 0; i < entries.length; i++) {
           $typeaheadScope.inputModel.$setViewValue(entries[i]);
           typeaheadCtrl.persistEntry();
         }
@@ -144,7 +144,7 @@ describe('typeahead directive', function () {
         typeaheadCtrl.filterItemsByQuery('a');
 
         expect($typeaheadScope.filteredItems).to.contain('phantogram');
-        var nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
+        let nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
 
         startMatches.forEach(function (item) {
           expect($typeaheadScope.filteredItems).to.contain(item);

@@ -8,11 +8,11 @@ import EventsProvider from 'ui/events';
 import ReflowWatcherProvider from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {
 
-  var $body = $(document.body);
-  var $window = $(window);
-  var expectStubbedEventAndEl = function (stub, event, $el) {
+  let $body = $(document.body);
+  let $window = $(window);
+  let expectStubbedEventAndEl = function (stub, event, $el) {
     expect(stub.getCalls().some(function (call) {
-      var events = call.args[0].split(' ');
+      let events = call.args[0].split(' ');
       return _.contains(events, event) && $el.is(call.thisValue);
     })).to.be(true);
   };
@@ -22,19 +22,20 @@ describe('Reflow watcher', function () {
   let $rootScope;
   let $onStub;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function () {
+    // stub jQuery's $.on method while creating the reflowWatcher
+    $onStub = sinon.stub($.fn, 'on');
+  }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     EventEmitter = Private(EventsProvider);
-
-    // stub jQuery's $.on method while creating the reflowWatcher
-    $onStub = sinon.stub($.fn, 'on');
     reflowWatcher = Private(ReflowWatcherProvider);
-    $onStub.restore();
-
     // setup the reflowWatchers $http watcher
     $rootScope.$apply();
   }));
+  afterEach(function () {
+    $onStub.restore();
+  });
 
   it('is an event emitter', function () {
     expect(reflowWatcher).to.be.an(EventEmitter);
@@ -69,7 +70,7 @@ describe('Reflow watcher', function () {
   });
 
   it('triggers the "reflow" event within a new angular tick', function () {
-    var stub = sinon.stub();
+    let stub = sinon.stub();
     reflowWatcher.on('reflow', stub);
     reflowWatcher.trigger();
 

@@ -2,9 +2,9 @@ import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 export default function () {
-  var self = this;
-  var scriptFields = {};
-  var fielddataFields = [];
+  let self = this;
+  let scriptFields = {};
+  let fielddataFields = [];
 
   fielddataFields = _.pluck(self.fields.byType.date, 'name');
 

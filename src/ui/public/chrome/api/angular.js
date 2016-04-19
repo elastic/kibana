@@ -7,7 +7,7 @@ module.exports = function (chrome, internals) {
   chrome.getBreadcrumbs = _.noop;
 
   chrome.setupAngular = function () {
-    var kibana = modules.get('kibana');
+    let kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
       kibana.value(name, val);
@@ -21,7 +21,7 @@ module.exports = function (chrome, internals) {
     .value('sessionId', Date.now())
     .value('chrome', chrome)
     .value('esUrl', (function () {
-      var a = document.createElement('a');
+      let a = document.createElement('a');
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))

@@ -7,14 +7,14 @@ export default function mapRangeProvider(Promise, courier) {
     .indexPatterns
     .get(filter.meta.index)
     .then(function (indexPattern) {
-      var key = Object.keys(filter.range)[0];
-      var convert = indexPattern.fields.byName[key].format.getConverterFor('text');
-      var range = filter.range[key];
+      let key = Object.keys(filter.range)[0];
+      let convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+      let range = filter.range[key];
 
-      var left = has(range, 'gte') ? range.gte : range.gt;
+      let left = has(range, 'gte') ? range.gte : range.gt;
       if (left == null) left = -Infinity;
 
-      var right = has(range, 'lte') ? range.lte : range.lt;
+      let right = has(range, 'lte') ? range.lte : range.lt;
       if (right == null) right = Infinity;
 
       return {

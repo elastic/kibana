@@ -2,7 +2,7 @@ import _ from 'lodash';
 import UiApp from './ui_app';
 import Collection from '../utils/collection';
 
-let byIdCache = Symbol('byId');
+const byIdCache = Symbol('byId');
 
 module.exports = class UiAppCollection extends Collection {
 
@@ -25,7 +25,7 @@ module.exports = class UiAppCollection extends Collection {
       return this.hidden.new(spec);
     }
 
-    let app = new UiApp(this.uiExports, spec);
+    const app = new UiApp(this.uiExports, spec);
 
     if (_.includes(this.claimedIds, app.id)) {
       throw new Error('Unable to create two apps with the id ' + app.id + '.');
