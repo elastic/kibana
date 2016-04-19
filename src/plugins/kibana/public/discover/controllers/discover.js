@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import ConfigTemplate from 'ui/config_template';
 import getSort from 'ui/doc_table/lib/get_sort';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import dateMath from 'ui/utils/date_math';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -96,14 +95,23 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.toggleInterval = function () {
     $scope.showInterval = !$scope.showInterval;
   };
-  // config panel templates
-  $scope.configTemplate = new ConfigTemplate({
-    load: require('plugins/kibana/discover/partials/load_search.html'),
-    save: require('plugins/kibana/discover/partials/save_search.html'),
-    share: require('plugins/kibana/discover/partials/share_search.html'),
-    filter: require('ui/chrome/config/filter.html'),
-    interval: require('ui/chrome/config/interval.html')
-  });
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'New Search',
+    run: function () { kbnUrl.change('/discover'); }
+  }, {
+    key: 'save',
+    description: 'Save Search',
+    template: require('plugins/kibana/discover/partials/save_search.html')
+  }, {
+    key: 'open',
+    description: 'Load Saved Search',
+    template: require('plugins/kibana/discover/partials/load_search.html')
+  }, {
+    key: 'share',
+    description: 'Share Search',
+    template: require('plugins/kibana/discover/partials/share_search.html')
+  }];
   $scope.timefilter = timefilter;
 
 
@@ -287,7 +295,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
 
       return savedSearch.save()
       .then(function (id) {
-        $scope.configTemplate.close('save');
+        $scope.kbnTopNav.close('save');
 
         if (id) {
           notify.info('Saved Data Source "' + savedSearch.title + '"');

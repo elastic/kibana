@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 export default function MapFieldFn(Private, config) {
-  var castMappingType = Private(IndexPatternsCastMappingTypeProvider);
+  let castMappingType = Private(IndexPatternsCastMappingTypeProvider);
 
   /**
    * Accepts a field object and its name, and tries to give it a mapping
@@ -10,14 +10,11 @@ export default function MapFieldFn(Private, config) {
    * @return {Object} - the resulting field after overrides and tweaking
    */
   return function mapField(field, name) {
-    var keys = Object.keys(field.mapping);
+    let keys = Object.keys(field.mapping);
     if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-    var mapping = _.cloneDeep(field.mapping[keys.shift()]);
-    mapping.type = castMappingType(mapping.type);
-
     // Override the mapping, even if elasticsearch says otherwise
-    var mappingOverrides = {
+    let mappingOverrides = {
       _source: { type: '_source' },
       _index: { type: 'string' },
       _type: { type: 'string' },
@@ -32,6 +29,8 @@ export default function MapFieldFn(Private, config) {
       }
     };
 
+    let mapping = _.cloneDeep(field.mapping[keys.shift()]);
+
     if (!mapping.index || mapping.index === 'no') {
       // elasticsearch responds with false sometimes and 'no' others
       mapping.indexed = false;
@@ -39,7 +38,9 @@ export default function MapFieldFn(Private, config) {
       mapping.indexed = true;
     }
 
-    mapping.analyzed = mapping.index === 'analyzed' ? true : false;
+    mapping.analyzed = mapping.index === 'analyzed' || mapping.type === 'text';
+
+    mapping.type = castMappingType(mapping.type);
 
     if (mappingOverrides[name]) {
       _.merge(mapping, mappingOverrides[name]);

@@ -5,13 +5,13 @@ import IndexPatternsFieldFormatFieldFormatProvider from 'ui/index_patterns/_fiel
 import RangeKeyProvider from './range_key';
 import rangesTemplate from 'ui/agg_types/controls/ranges.html';
 export default function RangeAggDefinition(Private) {
-  var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  var createFilter = Private(AggTypesBucketsCreateFilterRangeProvider);
-  var FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
-  var RangeKey = Private(RangeKeyProvider);
+  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  let createFilter = Private(AggTypesBucketsCreateFilterRangeProvider);
+  let FieldFormat = Private(IndexPatternsFieldFormatFieldFormatProvider);
+  let RangeKey = Private(RangeKeyProvider);
 
-  var keyCaches = new WeakMap();
-  var formats = new WeakMap();
+  let keyCaches = new WeakMap();
+  let formats = new WeakMap();
 
   return new BucketAggType({
     name: 'range',
@@ -21,16 +21,16 @@ export default function RangeAggDefinition(Private) {
       return aggConfig.params.field.displayName + ' ranges';
     },
     getKey: function (bucket, key, agg) {
-      var keys = keyCaches.get(agg);
+      let keys = keyCaches.get(agg);
 
       if (!keys) {
         keys = new Map();
         keyCaches.set(agg, keys);
       }
 
-      var id = RangeKey.idBucket(bucket);
+      let id = RangeKey.idBucket(bucket);
 
-      var key = keys.get(id);
+      key = keys.get(id);
       if (!key) {
         key = new RangeKey(bucket);
         keys.set(id, key);

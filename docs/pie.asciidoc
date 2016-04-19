@@ -50,8 +50,8 @@ in a name to display on the visualization.
 {ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation. The value of the 
 *Size* parameter defines the number of entries this aggregation returns.
 
-After defining an initial bucket aggregation, you can define sub-aggregations to refine the visualization. Click *+ Add 
-Sub Aggregation* to define a sub-aggregation, then choose *Split Slices* to select a sub-aggregation from the list of 
+After defining an initial bucket aggregation, you can define sub-buckets to refine the visualization. Click *+ Add 
+sub-buckets* to define a sub-aggregation, then choose *Split Slices* to select a sub-bucket from the list of 
 types.
 
 When multiple aggregations are defined on a chart's axis, you can use the up or down arrows to the right of the 
@@ -64,9 +64,7 @@ Enter a string in the *Custom Label* field to change the display label.
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
-*Exclude Pattern Flags*:: A standard set of Java flags for the exclusion pattern.
 *Include Pattern*:: Specify a pattern in this field to include in the results.
-*Include Pattern Flags*:: A standard set of Java flags for the inclusion pattern.
 *JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation 
 definition, as in the following example:
 
@@ -84,7 +82,7 @@ Select the *Options* tab to change the following aspects of the table:
 *Show Tooltip*:: Check this box to enable the display of tooltips.
 *Show Legend*:: Check this box to enable the display of a legend next to the chart.
 
-After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 
 [float]

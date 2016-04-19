@@ -15,7 +15,7 @@ describe('Vislib Split Function Test Suite', function () {
     let xAxisSplit;
     let yAxisSplit;
     let el;
-    var data = {
+    let data = {
       rows: [
         {
           hits      : 621,
@@ -173,18 +173,20 @@ describe('Vislib Split Function Test Suite', function () {
     });
 
     describe('chart title split function', function () {
-      let newEl;
-      let fixture;
+      var visEl;
+      var newEl;
+      var fixture;
 
       beforeEach(ngMock.inject(function () {
-        el.append('div').attr('class', 'x-axis-chart-title');
-        el.append('div').attr('class', 'y-axis-chart-title');
-        d3.select('.x-axis-chart-title').call(chartTitleSplit);
-        d3.select('.y-axis-chart-title').call(chartTitleSplit);
+        visEl = el.append('div').attr('class', 'vis-wrapper');
+        visEl.append('div').attr('class', 'x-axis-chart-title');
+        visEl.append('div').attr('class', 'y-axis-chart-title');
+        visEl.select('.x-axis-chart-title').call(chartTitleSplit);
+        visEl.select('.y-axis-chart-title').call(chartTitleSplit);
 
         newEl = d3.select('body').append('div')
-          .attr('class', 'series')
-          .datum({ series: []});
+          .attr('class', 'vis-wrapper')
+          .datum({ series: [] });
 
         newEl.append('div').attr('class', 'x-axis-chart-title');
         newEl.append('div').attr('class', 'y-axis-chart-title');

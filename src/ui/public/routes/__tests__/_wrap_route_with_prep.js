@@ -18,16 +18,16 @@ describe('wrapRouteWithPrep fn', function () {
     routes = new RouteManager();
   });
 
-  var SchedulingTest = function (opts) {
+  let SchedulingTest = function (opts) {
     opts = opts || {};
 
-    var delaySetup = opts.delayUserWork ? 0 : 50;
-    var delayUserWork = opts.delayUserWork ? 50 : 0;
+    let delaySetup = opts.delayUserWork ? 0 : 50;
+    let delayUserWork = opts.delayUserWork ? 50 : 0;
 
     return function () {
       ngMock.module('kibana', 'kibana/notify');
-      var setupComplete = false;
-      var userWorkComplete = false;
+      let setupComplete = false;
+      let userWorkComplete = false;
       let route;
       let Private;
       let Promise;
