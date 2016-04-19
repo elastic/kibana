@@ -27,7 +27,7 @@ describe('buildHierarchicalData()', function () {
     }));
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -37,7 +37,7 @@ describe('buildHierarchicalData()', function () {
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
         ]
       });
-      var buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
+      let buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
       results = createRawData(vis, fixtures.threeTermBuckets);
@@ -48,7 +48,7 @@ describe('buildHierarchicalData()', function () {
       expect(results.columns).to.have.length(6);
       _.each(results.columns, function (column) {
         expect(column).to.have.property('aggConfig');
-        var agg = column.aggConfig;
+        let agg = column.aggConfig;
         expect(column).to.have.property('categoryName', agg.schema.name);
         expect(column).to.have.property('id', agg.id);
         expect(column).to.have.property('aggType', agg.type);

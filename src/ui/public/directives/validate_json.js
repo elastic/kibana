@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
 
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.directive('validateJson', function ($compile) {
   return {
