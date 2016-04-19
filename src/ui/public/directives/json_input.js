@@ -15,7 +15,7 @@ uiModules
       function fromJSON(value) {
         try {
           value = JSON.parse(value);
-          var validity = !scope.$eval(attrs.requireKeys) ? true : _.keys(value).length > 0;
+          let validity = !scope.$eval(attrs.requireKeys) ? true : _.keys(value).length > 0;
           ngModelCntrl.$setValidity('json', validity);
         } catch (e) {
           ngModelCntrl.$setValidity('json', false);

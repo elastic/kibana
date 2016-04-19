@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import IndexedArray from 'ui/indexed_array';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
-var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
+let notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 
 /**
  * Create a registry, which is just a Private module provider.
@@ -16,7 +16,7 @@ var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
  *
  * + register a module
  * ```js
- * var registry = require('ui/registry/vis_types');
+ * let registry = require('ui/registry/vis_types');
  * registry.add(function InjectablePrivateModule($http, Promise) {
  *   ...
  * })
@@ -24,7 +24,7 @@ var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
  *
  * + get all registered modules
  * ```js
- * var visTypes = Private(RegistryVisTypesProvider);
+ * let visTypes = Private(RegistryVisTypesProvider);
  * ```
  *
  *
@@ -49,10 +49,10 @@ var notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
 export default function createRegistry(spec) {
   spec = spec || {};
 
-  var constructor = _.has(spec, 'constructor') && spec.constructor;
-  var iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
-  var props = _.omit(spec, notPropsOptNames);
-  var providers = [];
+  let constructor = _.has(spec, 'constructor') && spec.constructor;
+  let iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
+  let props = _.omit(spec, notPropsOptNames);
+  let providers = [];
 
   /**
    * This is the Private module that will be instanciated by
@@ -62,10 +62,10 @@ export default function createRegistry(spec) {
    *                          that were registered, the registry spec
    *                          defines how things will be indexed.
    */
-  var registry = function (Private, $injector) {
+  let registry = function (Private, $injector) {
     // index all of the modules
     iaOpts.initialSet = providers.map(Private);
-    var modules = new IndexedArray(iaOpts);
+    let modules = new IndexedArray(iaOpts);
 
     // mixin other props
     _.assign(modules, props);
