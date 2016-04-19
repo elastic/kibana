@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import layoutCloud from 'plugins/tagcloud/vis/components/d3.layout.cloud/d3.layout.cloud';
+import layoutCloud from 'd3-cloud';
 import gGenerator from 'plugins/tagcloud/vis/components/elements/g';
 import textElement from 'plugins/tagcloud/vis/components/elements/text';
 import valuator from 'plugins/tagcloud/vis/components/utils/valuator';
