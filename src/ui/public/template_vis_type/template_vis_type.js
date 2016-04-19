@@ -2,8 +2,8 @@ import _ from 'lodash';
 import VisVisTypeProvider from 'ui/vis/vis_type';
 import TemplateVisTypeTemplateRenderbotProvider from 'ui/template_vis_type/template_renderbot';
 export default function TemplateVisTypeFactory(Private) {
-  var VisType = Private(VisVisTypeProvider);
-  var TemplateRenderbot = Private(TemplateVisTypeTemplateRenderbotProvider);
+  let VisType = Private(VisVisTypeProvider);
+  let TemplateRenderbot = Private(TemplateVisTypeTemplateRenderbotProvider);
 
   _.class(TemplateVisType).inherits(VisType);
   function TemplateVisType(opts) {

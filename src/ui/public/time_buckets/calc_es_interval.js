@@ -2,8 +2,8 @@ import moment from 'moment';
 import dateMath from 'ui/utils/date_math';
 export default function () {
 
-  var unitsDesc = dateMath.unitsDesc;
-  var largeMax = unitsDesc.indexOf('M');
+  let unitsDesc = dateMath.unitsDesc;
+  let largeMax = unitsDesc.indexOf('M');
 
   /**
    * Convert a moment.duration into an es
@@ -14,9 +14,9 @@ export default function () {
    * @return {object}
    */
   function esDuration(duration) {
-    for (var i = 0; i < unitsDesc.length; i++) {
-      var unit = unitsDesc[i];
-      var val = duration.as(unit);
+    for (let i = 0; i < unitsDesc.length; i++) {
+      let unit = unitsDesc[i];
+      let val = duration.as(unit);
       // find a unit that rounds neatly
       if (val >= 1 && Math.floor(val) === val) {
 
@@ -35,7 +35,7 @@ export default function () {
       }
     }
 
-    var ms = duration.as('ms');
+    let ms = duration.as('ms');
     return {
       value: ms,
       unit: 'ms',

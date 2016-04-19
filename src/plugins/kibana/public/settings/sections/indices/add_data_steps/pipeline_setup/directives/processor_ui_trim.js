@@ -15,7 +15,8 @@ app.directive('processorUiTrim', function () {
       const pipeline = $scope.pipeline;
 
       function consumeNewInputObject() {
-        $scope.fields = keysDeep(processor.inputObject);
+        const allKeys = keysDeep(processor.inputObject);
+        $scope.fields = _.filter(allKeys, (key) => { return _.isString(_.get(processor.inputObject, key)); });
         refreshFieldData();
       }
 

@@ -8,7 +8,7 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 
-var module = uiModules.get('kibana/config');
+let module = uiModules.get('kibana/config');
 
 uiRoutes.addSetupWork(function (config) {
   return config.init();
@@ -16,13 +16,13 @@ uiRoutes.addSetupWork(function (config) {
 
 // service for delivering config variables to everywhere else
 module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, buildNum) {
-  var config = this;
+  let config = this;
 
-  var defaults = Private(ConfigDefaultsProvider);
-  var DelayedUpdater = Private(ConfigDelayedUpdaterProvider);
-  var vals = Private(ConfigValsProvider);
+  let defaults = Private(ConfigDefaultsProvider);
+  let DelayedUpdater = Private(ConfigDelayedUpdaterProvider);
+  let vals = Private(ConfigValsProvider);
 
-  var notify = new Notifier({
+  let notify = new Notifier({
     location: 'Config'
   });
 
@@ -30,8 +30,8 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
   // update once it is requested by calling #set() or #clear().
   let updater;
 
-  var DocSource = Private(DocSourceProvider);
-  var doc = (new DocSource())
+  let DocSource = Private(DocSourceProvider);
+  let doc = (new DocSource())
     .index(kbnIndex)
     .type('config')
     .id(kbnVersion);
@@ -47,13 +47,13 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
    * @return {Promise} - Resolved when the config loads initially
    */
   config.init = _.once(function () {
-    var complete = notify.lifecycle('config init');
+    let complete = notify.lifecycle('config init');
 
     return (function getDoc() {
 
       // used to apply an entire es response to the vals, silentAndLocal will prevent
       // event/notifications/writes from occuring.
-      var applyMassUpdate = function (resp, silentAndLocal) {
+      let applyMassUpdate = function (resp, silentAndLocal) {
         _.union(_.keys(resp._source), _.keys(vals)).forEach(function (key) {
           change(key, resp._source[key], silentAndLocal);
         });
@@ -132,7 +132,7 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
   config.$bind = function ($scope, key, property) {
     if (!property) property = key;
 
-    var update = function () {
+    let update = function () {
       $scope[property] = config.get(key);
     };
 

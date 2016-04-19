@@ -115,7 +115,7 @@ export function registerPost(server) {
       };
 
       const pipelineParams = {
-        path: `_ingest/pipeline/${ingestConfigName}`,
+        path: `/_ingest/pipeline/${ingestConfigName}`,
         method: 'PUT',
         body: pipeline
       };
