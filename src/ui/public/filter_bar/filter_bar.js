@@ -11,17 +11,17 @@ import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filt
 import FilterBarLibChangeTimeFilterProvider from 'ui/filter_bar/lib/change_time_filter';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 
 module.directive('filterBar', function (Private, Promise, getAppState) {
-  var mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
-  var mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
-  var extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
-  var filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
-  var changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
-  var queryFilter = Private(FilterBarQueryFilterProvider);
-  var privateFilterFieldRegex = /(^\$|meta)/;
+  let mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
+  let mapFlattenAndWrapFilters = Private(FilterBarLibMapFlattenAndWrapFiltersProvider);
+  let extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
+  let filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
+  let changeTimeFilter = Private(FilterBarLibChangeTimeFilterProvider);
+  let queryFilter = Private(FilterBarQueryFilterProvider);
+  let privateFilterFieldRegex = /(^\$|meta)/;
 
   return {
     restrict: 'E',
@@ -48,7 +48,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
 
       $scope.aceLoaded = function (editor) {
         editor.$blockScrolling = Infinity;
-        var session = editor.getSession();
+        let session = editor.getSession();
         session.setTabSize(2);
         session.setUseSoftTabs(true);
       };
@@ -141,7 +141,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       }
 
       function updateFilters() {
-        var filters = queryFilter.getFilters();
+        let filters = queryFilter.getFilters();
         mapAndFlattenFilters(filters).then(function (results) {
           // used to display the current filters in the state
           $scope.filters = _.sortBy(results, function (filter) {

@@ -3,9 +3,9 @@ import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 
 export default function PieHandler(Private) {
-  var Handler = Private(VislibLibHandlerHandlerProvider);
-  var Data = Private(VislibLibDataProvider);
-  var ChartTitle = Private(VislibLibChartTitleProvider);
+  let Handler = Private(VislibLibHandlerHandlerProvider);
+  let Data = Private(VislibLibDataProvider);
+  let ChartTitle = Private(VislibLibChartTitleProvider);
 
   /*
    * Handler for Pie visualizations.

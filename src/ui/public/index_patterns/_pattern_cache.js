@@ -1,9 +1,9 @@
 import _ from 'lodash';
 export default function PatternCache() {
 
-  var vals = {};
+  let vals = {};
 
-  var validId = function (id) {
+  let validId = function (id) {
     return typeof id !== 'object';
   };
 

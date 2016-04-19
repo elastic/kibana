@@ -2,7 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
 import getSort from 'ui/doc_table/lib/get_sort';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import dateMath from 'ui/utils/date_math';
 import 'ui/doc_table';
 import 'ui/visualize';

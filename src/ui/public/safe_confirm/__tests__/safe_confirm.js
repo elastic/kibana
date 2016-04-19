@@ -34,7 +34,7 @@ describe('ui/safe_confirm', function () {
       expect($window.confirm.called).to.be(false);
     });
     it('returned promise is not resolved', function () {
-      var isResolved = false;
+      let isResolved = false;
       function markAsResolved() {
         isResolved = true;
       }
