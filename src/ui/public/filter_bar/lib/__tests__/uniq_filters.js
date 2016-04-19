@@ -4,16 +4,16 @@ describe('Filter Bar Directive', function () {
   describe('uniqFilter', function () {
 
     it('should filter out dups', function () {
-      var before = [
+      let before = [
         { query: { _type: { match: { query: 'apache', type: 'phrase' } } } },
         { query: { _type: { match: { query: 'apache', type: 'phrase' } } } }
       ];
-      var results = uniqFilters(before);
+      let results = uniqFilters(before);
       expect(results).to.have.length(1);
     });
 
     it('should filter out duplicates, ignoring meta attributes', function () {
-      var before = [
+      let before = [
         {
           meta: { negate: true },
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
@@ -23,12 +23,12 @@ describe('Filter Bar Directive', function () {
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
         }
       ];
-      var results = uniqFilters(before);
+      let results = uniqFilters(before);
       expect(results).to.have.length(1);
     });
 
     it('should filter out duplicates, ignoring $state attributes', function () {
-      var before = [
+      let before = [
         {
           $state: { store: 'appState' },
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
@@ -38,7 +38,7 @@ describe('Filter Bar Directive', function () {
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
         }
       ];
-      var results = uniqFilters(before);
+      let results = uniqFilters(before);
       expect(results).to.have.length(1);
     });
   });

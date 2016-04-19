@@ -17,7 +17,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let dataObj;
   let xTitle;
   let yTitle;
-  var data = {
+  let data = {
     hits: 621,
     label: '',
     ordered: {

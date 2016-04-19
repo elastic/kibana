@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import IndexPatternsFieldFormatContentTypesProvider from 'ui/index_patterns/_field_format/content_types';
 export default function FieldFormatClassProvider(config, $rootScope, Private) {
-  var contentTypes = Private(IndexPatternsFieldFormatContentTypesProvider);
+  let contentTypes = Private(IndexPatternsFieldFormatContentTypesProvider);
 
   function FieldFormat(params) {
-    var self = this;
+    let self = this;
 
     // give the constructor a more appropriate name
     self.type = self.constructor;
@@ -59,7 +59,7 @@ export default function FieldFormatClassProvider(config, $rootScope, Private) {
    * @return {any}
    */
   FieldFormat.prototype.param = function (name) {
-    var val = this._params[name];
+    let val = this._params[name];
     if (val || val === false || val === 0) {
       // truthy, false, or 0 are fine
       // '', NaN, null, undefined, etc are not
@@ -84,10 +84,10 @@ export default function FieldFormatClassProvider(config, $rootScope, Private) {
    * @return {object}
    */
   FieldFormat.prototype.toJSON = function () {
-    var type = this.type;
-    var defaults = this._paramDefaults;
+    let type = this.type;
+    let defaults = this._paramDefaults;
 
-    var params = _.transform(this._params, function (uniqParams, val, param) {
+    let params = _.transform(this._params, function (uniqParams, val, param) {
       if (val !== defaults[param]) {
         uniqParams[param] = val;
       }

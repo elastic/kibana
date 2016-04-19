@@ -12,13 +12,13 @@ import $ from 'jquery';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-var dateHistogramArray = [
+let dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+let names = [
   'series',
   'columns',
   'rows',

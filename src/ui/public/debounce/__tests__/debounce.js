@@ -27,14 +27,14 @@ describe('debounce service', function () {
 
   describe('API', function () {
     it('should have a cancel method', function () {
-      var bouncer = debounce(function () {}, 100);
+      let bouncer = debounce(function () {}, 100);
       expect(bouncer).to.have.property('cancel');
     });
   });
 
   describe('delayed execution', function () {
     it('should delay execution', function () {
-      var bouncer = debounce(spy, 100);
+      let bouncer = debounce(spy, 100);
       bouncer();
       expect(spy.callCount).to.be(0);
       $timeout.flush();
@@ -42,7 +42,7 @@ describe('debounce service', function () {
     });
 
     it('should fire on leading edge', function () {
-      var bouncer = debounce(spy, 100, { leading: true });
+      let bouncer = debounce(spy, 100, { leading: true });
       bouncer();
       expect(spy.callCount).to.be(1);
       $timeout.flush();
@@ -50,7 +50,7 @@ describe('debounce service', function () {
     });
 
     it('should only fire on leading edge', function () {
-      var bouncer = debounce(spy, 100, { leading: true, trailing: false });
+      let bouncer = debounce(spy, 100, { leading: true, trailing: false });
       bouncer();
       expect(spy.callCount).to.be(1);
       $timeout.flush();
@@ -58,8 +58,8 @@ describe('debounce service', function () {
     });
 
     it('should reset delayed execution', function (done) {
-      var cancelSpy = sinon.spy($timeout, 'cancel');
-      var bouncer = debounce(spy, 100);
+      let cancelSpy = sinon.spy($timeout, 'cancel');
+      let bouncer = debounce(spy, 100);
       bouncer();
       setTimeout(function () {
         bouncer();
@@ -74,8 +74,8 @@ describe('debounce service', function () {
 
   describe('cancel', function () {
     it('should cancel the $timeout', function () {
-      var cancelSpy = sinon.spy($timeout, 'cancel');
-      var bouncer = debounce(spy, 100);
+      let cancelSpy = sinon.spy($timeout, 'cancel');
+      let bouncer = debounce(spy, 100);
       bouncer();
       bouncer.cancel();
       expect(cancelSpy.callCount).to.be(1);

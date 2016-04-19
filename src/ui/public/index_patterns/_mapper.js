@@ -7,19 +7,19 @@ import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_t
 import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 export default function MapperService(Private, Promise, es, config, kbnIndex) {
 
-  var transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
-  var intervals = Private(IndexPatternsIntervalsProvider);
-  var patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
+  let transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
+  let intervals = Private(IndexPatternsIntervalsProvider);
+  let patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
-  var LocalCache = Private(IndexPatternsLocalCacheProvider);
+  let LocalCache = Private(IndexPatternsLocalCacheProvider);
 
   function Mapper() {
 
     // Save a reference to mapper
-    var self = this;
+    let self = this;
 
     // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-    var fieldCache = self.cache = new LocalCache();
+    let fieldCache = self.cache = new LocalCache();
 
     /**
      * Gets an object containing all fields with their mappings
@@ -29,9 +29,9 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
      * @async
      */
     self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-      var id = indexPattern.id;
+      let id = indexPattern.id;
 
-      var cache = fieldCache.get(id);
+      let cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
       if (!skipIndexPatternCache) {
@@ -49,7 +49,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
         });
       }
 
-      var promise = Promise.resolve(id);
+      let promise = Promise.resolve(id);
       if (indexPattern.intervalName) {
         promise = self.getIndicesForIndexPattern(indexPattern)
         .then(function (existing) {
@@ -80,8 +80,8 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
         index: patternToWildcard(indexPattern.id)
       })
       .then(function (resp) {
-        // var all = Object.keys(resp).sort();
-        var all = _(resp)
+        // let all = Object.keys(resp).sort();
+        let all = _(resp)
         .map(function (index, key) {
           if (index.aliases) {
             return [Object.keys(index.aliases), key];
@@ -94,8 +94,8 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
         .uniq(true)
         .value();
 
-        var matches = all.filter(function (existingIndex) {
-          var parsed = moment(existingIndex, indexPattern.id);
+        let matches = all.filter(function (existingIndex) {
+          let parsed = moment(existingIndex, indexPattern.id);
           return existingIndex === parsed.format(indexPattern.id);
         });
 

@@ -4,7 +4,7 @@ import 'ui/promises';
 import Notifier from 'ui/notify/notifier';
 
 export default function LooperFactory($timeout, Promise) {
-  var notify = new Notifier();
+  let notify = new Notifier();
 
   function Looper(ms, fn) {
     this._fn = fn;
@@ -130,7 +130,7 @@ export default function LooperFactory($timeout, Promise) {
    * @return {undefined}
    */
   Looper.prototype._loopTheLoop = function () {
-    var self = this;
+    let self = this;
 
     if (self.active) {
       self.onHastyLoop();

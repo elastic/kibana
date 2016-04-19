@@ -8,14 +8,14 @@ import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
 
 export default function ColumnHandler(Private) {
-  var injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
-  var Handler = Private(VislibLibHandlerHandlerProvider);
-  var Data = Private(VislibLibDataProvider);
-  var XAxis = Private(VislibLibXAxisProvider);
-  var YAxis = Private(VislibLibYAxisProvider);
-  var AxisTitle = Private(VislibLibAxisTitleProvider);
-  var ChartTitle = Private(VislibLibChartTitleProvider);
-  var Alerts = Private(VislibLibAlertsProvider);
+  let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+  let Handler = Private(VislibLibHandlerHandlerProvider);
+  let Data = Private(VislibLibDataProvider);
+  let XAxis = Private(VislibLibXAxisProvider);
+  let YAxis = Private(VislibLibYAxisProvider);
+  let AxisTitle = Private(VislibLibAxisTitleProvider);
+  let ChartTitle = Private(VislibLibChartTitleProvider);
+  let Alerts = Private(VislibLibAlertsProvider);
 
   /*
    * Create handlers for Area, Column, and Line charts which
@@ -25,7 +25,7 @@ export default function ColumnHandler(Private) {
     opts = opts || {};
 
     return function (vis) {
-      var isUserDefinedYAxis = vis._attr.setYExtents;
+      let isUserDefinedYAxis = vis._attr.setYExtents;
       let data;
 
       if (opts.zeroFill) {
@@ -78,8 +78,8 @@ export default function ColumnHandler(Private) {
           test: function (vis, data) {
             if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
 
-            var hasPos = data.getYMax(data._getY) > 0;
-            var hasNeg = data.getYMin(data._getY) < 0;
+            let hasPos = data.getYMax(data._getY) > 0;
+            let hasNeg = data.getYMin(data._getY) < 0;
             return (hasPos && hasNeg);
           }
         },

@@ -78,8 +78,8 @@ module.exports = function (server) {
   server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
   server.expose('createClient', createClient);
-  server.expose('callWithRequestFactory', callWithRequest);
-  server.expose('callWithRequest', callWithRequest(noAuthClient));
+  server.expose('callWithRequestFactory', _.partial(callWithRequest, server));
+  server.expose('callWithRequest', callWithRequest(server, noAuthClient));
   server.expose('errors', elasticsearch.errors);
 
   return client;
