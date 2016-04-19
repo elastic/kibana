@@ -5,7 +5,7 @@ module.exports = function (kbnServer, server, config) {
 
   kbnServer.metrics = new Samples(12);
 
-  server.plugins.good.monitor.on('ops', function (event) {
+  server.plugins['even-better'].monitor.on('ops', function (event) {
     let now = Date.now();
     let secSinceLast = (now - lastReport) / 1000;
     lastReport = now;
