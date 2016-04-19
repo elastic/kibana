@@ -55,7 +55,7 @@ describe('events tests', function () {
 
     it('should set the listeners object', function () {
       events.listeners(listeners); // Add listeners
-      expect(_.deepEqual(events.listeners(), listeners)).to.be.ok();
+      expect(_.isEqual(events.listeners(), listeners)).to.be.ok();
     });
   });
 });
