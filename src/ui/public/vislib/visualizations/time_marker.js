@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 export default function TimeMarkerFactory() {
 
   function TimeMarker(times, xScale, height) {
