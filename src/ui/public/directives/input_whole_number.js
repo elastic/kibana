@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.directive('inputWholeNumber', function () {
   return {

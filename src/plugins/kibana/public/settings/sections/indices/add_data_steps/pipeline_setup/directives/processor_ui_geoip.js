@@ -2,6 +2,7 @@ import uiModules from 'ui/modules';
 import _ from 'lodash';
 import keysDeep from '../lib/keys_deep';
 import template from '../views/processor_ui_geoip.html';
+import '../styles/_processor_ui_geoip.less';
 
 const app = uiModules.get('kibana');
 
@@ -27,6 +28,24 @@ app.directive('processorUiGeoip', function () {
         pipeline.setDirty();
       }
 
+      function splitValues(delimitedList) {
+        return delimitedList.split('\n');
+      }
+
+      function joinValues(valueArray) {
+        return valueArray.join('\n');
+      }
+
+      function updateDatabaseFields() {
+        const fieldsString = $scope.databaseFields.replace(/,/g, '\n');
+        processor.databaseFields = _(splitValues(fieldsString)).map(_.trim).compact().value();
+        $scope.databaseFields = joinValues(processor.databaseFields);
+      }
+
+      $scope.databaseFields = joinValues(processor.databaseFields);
+
+      $scope.$watch('databaseFields', updateDatabaseFields);
+
       $scope.$watch('processor.inputObject', consumeNewInputObject);
 
       $scope.$watch('processor.sourceField', () => {
@@ -35,6 +54,8 @@ app.directive('processorUiGeoip', function () {
       });
 
       $scope.$watch('processor.targetField', processorUiChanged);
+      $scope.$watch('processor.databaseFile', processorUiChanged);
+      $scope.$watchCollection('processor.databaseFields', processorUiChanged);
     }
   };
 });

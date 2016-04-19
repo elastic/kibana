@@ -22,7 +22,7 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
     }));
 
-    var filters = [
+    let filters = [
       null,
       [
         { meta: { index: 'logstash-*' }, exists: { field: '_type' } },
