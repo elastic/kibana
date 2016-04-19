@@ -19,16 +19,8 @@ uiRoutes
 uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
-
   let Events = Private(EventsProvider);
   let diff = Private(UtilsDiffTimePickerValsProvider);
-
-  config.$bind($rootScope, 'dateFormat:dow', 'dateFormat_dow');
-
-  $rootScope.$watch('dateFormat_dow', function (day) {
-    const dow = moment.weekdays().indexOf(day);
-    moment.locale(moment.locale(), { week: { dow } });
-  });
 
   function convertISO8601(stringTime) {
     let obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
