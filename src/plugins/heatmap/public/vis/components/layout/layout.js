@@ -5,20 +5,20 @@ function formatType(length, type, cols) {
   var output = {};
 
   switch (type) {
-  case 'grid':
-    output.rows = cols ? Math.ceil(length / cols) : Math.round(Math.sqrt(length));
-    output.columns = cols || Math.ceil(Math.sqrt(length));
-    break;
+    case 'grid':
+      output.rows = cols ? Math.ceil(length / cols) : Math.round(Math.sqrt(length));
+      output.columns = cols || Math.ceil(Math.sqrt(length));
+      break;
 
-  case 'columns':
-    output.rows = 1;
-    output.columns = length;
-    break;
+    case 'columns':
+      output.rows = 1;
+      output.columns = length;
+      break;
 
-  default:
-    output.rows = length;
-    output.columns = 1;
-    break;
+    default:
+      output.rows = length;
+      output.columns = 1;
+      break;
   }
 
   return output;
