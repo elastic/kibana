@@ -15,7 +15,7 @@ describe('Vislib Split Function Test Suite', function () {
     let xAxisSplit;
     let yAxisSplit;
     let el;
-    var data = {
+    let data = {
       rows: [
         {
           hits      : 621,

@@ -35,7 +35,7 @@ export default function MarkerFactory() {
     // ensure we only ever create 1 legend
     if (this._legend) return;
 
-    var self = this;
+    let self = this;
 
     // create the legend control, keep a reference
     self._legend = L.control({position: 'bottomright'});
@@ -43,17 +43,17 @@ export default function MarkerFactory() {
     self._legend.onAdd = function () {
       // creates all the neccessary DOM elements for the control, adds listeners
       // on relevant map events, and returns the element containing the control
-      var $div = $('<div>').addClass('tilemap-legend');
+      let $div = $('<div>').addClass('tilemap-legend');
 
       _.each(self._legendColors, function (color, i) {
-        var labelText = self._legendQuantizer
+        let labelText = self._legendQuantizer
         .invertExtent(color)
         .map(self._valueFormatter)
         .join(' – ');
 
-        var label = $('<div>').text(labelText);
+        let label = $('<div>').text(labelText);
 
-        var icon = $('<i>').css({
+        let icon = $('<i>').css({
           background: color,
           'border-color': self.darkerColor(color)
         });
@@ -76,7 +76,7 @@ export default function MarkerFactory() {
    * @return {Object}
    */
   BaseMarker.prototype.applyShadingStyle = function (value) {
-    var color = this._legendQuantizer(value);
+    let color = this._legendQuantizer(value);
 
     return {
       fillColor: color,
@@ -96,11 +96,11 @@ export default function MarkerFactory() {
    * return {undefined}
    */
   BaseMarker.prototype.bindPopup = function (feature, layer) {
-    var self = this;
+    let self = this;
 
-    var popup = layer.on({
+    let popup = layer.on({
       mouseover: function (e) {
-        var layer = e.target;
+        let layer = e.target;
         // bring layer to front if not older browser
         if (!L.Browser.ie && !L.Browser.opera) {
           layer.bringToFront();
@@ -130,7 +130,7 @@ export default function MarkerFactory() {
   };
 
   BaseMarker.prototype.destroy = function () {
-    var self = this;
+    let self = this;
 
     // remove popups
     self.popups = self.popups.filter(function (popup) {
@@ -160,13 +160,13 @@ export default function MarkerFactory() {
    * @param options {Object} Options to pass to L.geoJson
    */
   BaseMarker.prototype._createMarkerGroup = function (options) {
-    var self = this;
-    var defaultOptions = {
+    let self = this;
+    let defaultOptions = {
       onEachFeature: function (feature, layer) {
         self.bindPopup(feature, layer);
       },
       style: function (feature) {
-        var value = _.get(feature, 'properties.value');
+        let value = _.get(feature, 'properties.value');
         return self.applyShadingStyle(value);
       },
       filter: self._filterToMapBounds()
@@ -184,10 +184,10 @@ export default function MarkerFactory() {
    * @return {boolean}
    */
   BaseMarker.prototype._filterToMapBounds = function () {
-    var self = this;
+    let self = this;
     return function (feature) {
-      var mapBounds = self.map.getBounds();
-      var bucketRectBounds = _.get(feature, 'properties.rectangle');
+      let mapBounds = self.map.getBounds();
+      let bucketRectBounds = _.get(feature, 'properties.rectangle');
       return mapBounds.intersects(bucketRectBounds);
     };
   };
@@ -203,11 +203,11 @@ export default function MarkerFactory() {
    */
   BaseMarker.prototype._showTooltip = function (feature, latLng) {
     if (!this.map) return;
-    var lat = _.get(feature, 'geometry.coordinates.1');
-    var lng = _.get(feature, 'geometry.coordinates.0');
+    let lat = _.get(feature, 'geometry.coordinates.1');
+    let lng = _.get(feature, 'geometry.coordinates.0');
     latLng = latLng || L.latLng(lat, lng);
 
-    var content = this._tooltipFormatter(feature);
+    let content = this._tooltipFormatter(feature);
 
     if (!content) return;
     this._createTooltip(content, latLng);
@@ -239,15 +239,15 @@ export default function MarkerFactory() {
    * return {undefined}
    */
   BaseMarker.prototype.quantizeLegendColors = function () {
-    var min = _.get(this.geoJson, 'properties.allmin', 0);
-    var max = _.get(this.geoJson, 'properties.allmax', 1);
-    var quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
+    let min = _.get(this.geoJson, 'properties.allmin', 0);
+    let max = _.get(this.geoJson, 'properties.allmax', 1);
+    let quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
 
-    var reds1 = ['#ff6128'];
-    var reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
-    var reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-    var bottomCutoff = 2;
-    var middleCutoff = 24;
+    let reds1 = ['#ff6128'];
+    let reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
+    let reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
+    let bottomCutoff = 2;
+    let middleCutoff = 24;
 
     if (max - min <= bottomCutoff) {
       this._legendColors = reds1;

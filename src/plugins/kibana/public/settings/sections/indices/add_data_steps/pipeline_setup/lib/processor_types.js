@@ -109,6 +109,8 @@ export class GeoIp extends Processor {
     super(processorId, 'geoip', 'Geo IP');
     this.sourceField = '';
     this.targetField = 'geoip';
+    this.databaseFile = '';
+    this.databaseFields = [];
   }
 
   get description() {
@@ -122,7 +124,9 @@ export class GeoIp extends Processor {
       processorId: this.processorId,
       typeId: this.typeId,
       sourceField: this.sourceField || '',
-      targetField: this.targetField || ''
+      targetField: this.targetField || '',
+      databaseFile: this.databaseFile || '',
+      databaseFields: this.databaseFields || []
     };
   }
 };

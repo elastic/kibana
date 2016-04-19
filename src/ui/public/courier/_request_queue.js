@@ -6,7 +6,7 @@ export default function PendingRequestList() {
    * they are processed by fetch.[sourceType]().
    * @type {Array}
    */
-  var queue = [];
+  let queue = [];
 
   queue.getInactive = function (/* strategies */) {
     return queue.get.apply(queue, arguments)
@@ -21,7 +21,7 @@ export default function PendingRequestList() {
 
   queue.get = function (...strategies) {
     return queue.filter(function (req) {
-      var strategyMatch = !strategies.length;
+      let strategyMatch = !strategies.length;
       if (!strategyMatch) {
         strategyMatch = strategies.some(function (strategy) {
           return req.strategy === strategy;

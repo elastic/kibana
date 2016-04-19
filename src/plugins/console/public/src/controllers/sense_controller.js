@@ -13,7 +13,7 @@ module.run(function (Private, $rootScope) {
 
 module.controller('SenseController', function SenseController($scope, docTitle) {
 
-  docTitle.change('Sense');
+  docTitle.change('Console');
 
   // require the root app code, which expects to execute once the dom is loaded up
   require('../app');

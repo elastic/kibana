@@ -5,8 +5,8 @@ import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 export default function TileMapFactory(Private) {
 
-  var Chart = Private(VislibVisualizationsChartProvider);
-  var TileMapMap = Private(VislibVisualizationsMapProvider);
+  let Chart = Private(VislibVisualizationsChartProvider);
+  let TileMapMap = Private(VislibVisualizationsMapProvider);
 
   /**
    * Tile Map Visualization: renders maps
@@ -41,7 +41,7 @@ export default function TileMapFactory(Private) {
    * @return {Function} - function to add a map to a selection
    */
   TileMap.prototype.draw = function () {
-    var self = this;
+    let self = this;
 
     // clean up old maps
     self.destroy();
@@ -86,7 +86,7 @@ export default function TileMapFactory(Private) {
    */
   TileMap.prototype._appendGeoExtents = function () {
     // add allmin and allmax to geoJson
-    var geoMinMax = this.handler.data.getGeoExtents();
+    let geoMinMax = this.handler.data.getGeoExtents();
     this.geoJson.properties.allmin = geoMinMax.min;
     this.geoJson.properties.allmax = geoMinMax.max;
   };
@@ -98,9 +98,9 @@ export default function TileMapFactory(Private) {
    * @param selection {Object} d3 selection
    */
   TileMap.prototype._appendMap = function (selection) {
-    var container = $(selection).addClass('tilemap');
+    let container = $(selection).addClass('tilemap');
 
-    var map = new TileMapMap(container, this._chartData, {
+    let map = new TileMapMap(container, this._chartData, {
       // center: this._attr.mapCenter,
       // zoom: this._attr.mapZoom,
       events: this.events,
