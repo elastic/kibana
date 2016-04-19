@@ -117,6 +117,15 @@ export function lowercase(processorApiDocument) {
   };
 }
 
+export function remove(processorApiDocument) {
+  return {
+    remove: {
+      tag: processorApiDocument.processor_id,
+      field: processorApiDocument.source_field
+    }
+  };
+}
+
 export function set(processorApiDocument) {
   return {
     set: {

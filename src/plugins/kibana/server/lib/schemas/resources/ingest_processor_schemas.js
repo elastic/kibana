@@ -59,6 +59,11 @@ export const lowercase = base.keys({
   source_field: Joi.string().allow('')
 });
 
+export const remove = base.keys({
+  type_id: Joi.string().only('remove').required(),
+  source_field: Joi.string().allow('')
+});
+
 export const set = base.keys({
   type_id: Joi.string().only('set').required(),
   target_field: Joi.string().allow(''),
