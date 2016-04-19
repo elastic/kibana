@@ -12,6 +12,18 @@ function pickDefaultTimeFieldName(dateFields) {
   return _.includes(dateFields, '@timestamp') ? '@timestamp' : dateFields[0];
 }
 
+function isGeoPointObject(object) {
+  if(_.isPlainObject(object)) {
+    const keys = _.keys(object);
+    if (keys.length === 2 && _.contains(keys, 'lat') && _.contains(keys, 'lon')) {
+      return true;
+    }
+  }
+  else {
+    return false;
+  }
+}
+
 modules.get('apps/settings')
   .directive('patternReviewStep', function () {
     return {
@@ -24,31 +36,43 @@ modules.get('apps/settings')
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
-        const fields = _.reject(keysDeep(this.sampleDoc), key => _.isPlainObject(_.get(this.sampleDoc, key)));
-
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
+        const fields = keysDeep(this.sampleDoc);
+        const geoPointFields = _.filter(fields, key => isGeoPointObject(_.get(this.sampleDoc, key)));
+        const indexPatternFields = _(fields)
+        .reject((field) => {
+          let shouldReject = false;
+          geoPointFields.forEach((geoPointField) => {
+            if (field === `${geoPointField}.lat` || field === `${geoPointField}.lon`) {
+              shouldReject = true;
+            }
+          });
+          return shouldReject;
+        })
+        .reject((field) => {
+          const value = _.get(this.sampleDoc, field);
+          return _.isPlainObject(value) && !isGeoPointObject(value);
+        })
+        .value();
 
         const knownFieldTypes = {};
         this.dateFields = [];
         this.pipeline.model.processors.forEach((processor) => {
-          if (processor.typeId === 'geoip') {
-            const field = processor.targetField || 'geoip';
-            knownFieldTypes[field] = 'geo_point';
-          }
-          else if (processor.typeId === 'date') {
+          if (processor.typeId === 'date') {
             const field = processor.targetField || '@timestamp';
             knownFieldTypes[field] = 'date';
             this.dateFields.push(field);
           }
         });
+        geoPointFields.forEach(fieldName => knownFieldTypes[fieldName] = 'geo_point');
 
         _.defaults(this.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
           timeFieldName: pickDefaultTimeFieldName(this.dateFields),
-          fields: _.map(fields, (fieldName) => {
+          fields: _.map(indexPatternFields, (fieldName) => {
             const fieldValue = _.get(this.sampleDoc, fieldName);
             let type = knownFieldTypes[fieldName] || typeof fieldValue;
             if (type === 'object' && _.isArray(fieldValue) && !_.isEmpty(fieldValue)) {
@@ -85,7 +109,7 @@ modules.get('apps/settings')
                 scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes, buildRows: buildRows}),
                 value: field.type
               },
-              _.escape(sampleValue)
+              typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
             ];
           });
         };
