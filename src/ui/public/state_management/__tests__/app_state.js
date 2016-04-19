@@ -27,7 +27,7 @@ describe('State Management', function () {
     });
 
     it('should use passed in params', function () {
-      var params = {
+      let params = {
         test: true,
         mock: false
       };
@@ -46,8 +46,8 @@ describe('State Management', function () {
     });
 
     it('should be destroyed on $routeChangeStart', function () {
-      var destroySpy = sinon.spy(appState, 'destroy');
-      var url = '/test/path';
+      let destroySpy = sinon.spy(appState, 'destroy');
+      let url = '/test/path';
 
       $rootScope.$emit('$routeChangeStart');
 

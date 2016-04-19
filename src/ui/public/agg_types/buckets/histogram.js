@@ -7,8 +7,8 @@ import intervalTemplate from 'ui/agg_types/controls/interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 export default function HistogramAggDefinition(Private) {
-  var BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  var createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
+  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  let createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
 
 
   return new BucketAggType({
@@ -49,7 +49,7 @@ export default function HistogramAggDefinition(Private) {
         default: {},
         editor: extendedBoundsTemplate,
         write: function (aggConfig, output) {
-          var val = aggConfig.params.extended_bounds;
+          let val = aggConfig.params.extended_bounds;
 
           if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
             output.params.extended_bounds = {
@@ -61,7 +61,7 @@ export default function HistogramAggDefinition(Private) {
 
         // called from the editor
         shouldShow: function (aggConfig) {
-          var field = aggConfig.params.field;
+          let field = aggConfig.params.field;
           if (
             field
             && (field.type === 'number' || field.type === 'date')
