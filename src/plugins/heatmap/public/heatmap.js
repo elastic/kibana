@@ -3,6 +3,8 @@ import 'plugins/heatmap/color_directive.js';
 import 'plugins/heatmap/lib/heatmap_controller.js';
 import 'plugins/heatmap/lib/heatmap_directive.js';
 import colors from 'plugins/heatmap/colors.js';
+import TemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import VisSchemasProvider from 'ui/vis/schemas';
 import heatmapTemplate from 'plugins/heatmap/heatmap.html';
 import heatmapVisParamsTemplate from 'plugins/heatmap/heatmap_vis_params.html';
 
@@ -10,8 +12,8 @@ import heatmapVisParamsTemplate from 'plugins/heatmap/heatmap_vis_params.html';
 require('ui/registry/vis_types').register(HeatmapProvider);
 
 function HeatmapProvider(Private) {
-  const TemplateVisType = Private('ui/template_vis_type/TemplateVisType');
-  const Schemas = Private('ui/Vis/Schemas');
+  const TemplateVisType = Private(TemplateVisTypeProvider);
+  const Schemas = Private(VisSchemasProvider);
 
   return new TemplateVisType({
     name: 'heatmap',

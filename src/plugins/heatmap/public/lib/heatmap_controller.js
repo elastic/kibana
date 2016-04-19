@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import uiModules from 'ui/modules';
+import tabify from 'ui/agg_response/tabify/tabify';
 
 const module = uiModules.get('kibana/heatmap', ['kibana']);
 
 module.controller('KbnHeatmapController', function ($scope, Private) {
-  const tabifyAggResponse = Private('ui/agg_response/tabify/tabify');
+  const tabifyAggResponse = Private(tabify);
 
   function getLabel(agg, name) {
     return agg.bySchemaName[name] ? agg.bySchemaName[name][0].makeLabel() : '';
