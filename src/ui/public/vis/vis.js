@@ -3,11 +3,11 @@ import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
 export default function VisFactory(Notifier, Private) {
-  var aggTypes = Private(AggTypesIndexProvider);
-  var visTypes = Private(RegistryVisTypesProvider);
-  var AggConfigs = Private(VisAggConfigsProvider);
+  let aggTypes = Private(AggTypesIndexProvider);
+  let visTypes = Private(RegistryVisTypesProvider);
+  let AggConfigs = Private(VisAggConfigsProvider);
 
-  var notify = new Notifier({
+  let notify = new Notifier({
     location: 'Vis'
   });
 
@@ -31,10 +31,10 @@ export default function VisFactory(Notifier, Private) {
       type = visTypes.byName[type || 'histogram'];
     }
 
-    var schemas = type.schemas;
+    let schemas = type.schemas;
 
-    var aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
-      var schema = schemas.all.byName[oldGroupName];
+    let aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
+      let schema = schemas.all.byName[oldGroupName];
 
       if (!schema) {
         notify.log('unable to match old schema', oldGroupName, 'to a new schema');
@@ -42,12 +42,12 @@ export default function VisFactory(Notifier, Private) {
       }
 
       oldConfigs.forEach(function (oldConfig) {
-        var agg = {
+        let agg = {
           schema: schema.name,
           type: oldConfig.agg,
         };
 
-        var aggType = aggTypes.byName[agg.type];
+        let aggType = aggTypes.byName[agg.type];
         if (!aggType) {
           notify.log('unable to find an agg type for old confg', oldConfig);
           return;
@@ -118,7 +118,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.hasSchemaAgg = function (schemaName, aggTypeName) {
-    var aggs = this.aggs.bySchemaName[schemaName] || [];
+    let aggs = this.aggs.bySchemaName[schemaName] || [];
     return aggs.some(function (agg) {
       if (!agg.type || !agg.type.name) return false;
       return agg.type.name === aggTypeName;

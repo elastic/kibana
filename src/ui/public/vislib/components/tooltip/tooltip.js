@@ -4,7 +4,7 @@ import Binder from 'ui/binder';
 import positionTooltip from './position_tooltip';
 import $ from 'jquery';
 
-var allContents = [];
+let allContents = [];
 
 /**
  * Add tooltip and listeners to visualization elements
@@ -59,13 +59,13 @@ Tooltip.prototype.$getSizer = _.once(function () {
  * Show the tooltip, positioning it based on the content and chart container
  */
 Tooltip.prototype.show = function () {
-  var $tooltip = this.$get();
-  var $chart = this.$getChart();
-  var html = $tooltip.html();
+  let $tooltip = this.$get();
+  let $chart = this.$getChart();
+  let html = $tooltip.html();
 
   if (!$chart) return;
 
-  var placement = positionTooltip({
+  let placement = positionTooltip({
     $window: $(window),
     $chart: $chart,
     $el: $tooltip,
@@ -84,7 +84,7 @@ Tooltip.prototype.show = function () {
  * Hide the tooltip, clearing its contents
  */
 Tooltip.prototype.hide = function () {
-  var $tooltip = this.$get();
+  let $tooltip = this.$get();
   allContents = [];
   $tooltip.css({
     visibility: 'hidden',
@@ -100,7 +100,7 @@ Tooltip.prototype.hide = function () {
  * @return {Object} jQuery node for the chart
  */
 Tooltip.prototype.$getChart = function () {
-  var chart = $(this.container && this.container.node());
+  let chart = $(this.container && this.container.node());
   return chart.size() ? chart : false;
 };
 
@@ -111,7 +111,7 @@ Tooltip.prototype.$getChart = function () {
  * @return {Function} Renders tooltip on a D3 selection
  */
 Tooltip.prototype.render = function () {
-  var self = this;
+  let self = this;
 
   /**
    * Calculates values for the tooltip placement
@@ -119,17 +119,17 @@ Tooltip.prototype.render = function () {
    * @param {Object} selection D3 selection object
    */
   return function (selection) {
-    var $tooltip = self.$get();
-    var id = self.id;
-    var order = self.order;
+    let $tooltip = self.$get();
+    let id = self.id;
+    let order = self.order;
 
-    var tooltipSelection = d3.select($tooltip.get(0));
+    let tooltipSelection = d3.select($tooltip.get(0));
 
     if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
       self.container = d3.select(self.el).select('.' + self.containerClass);
     }
 
-    var $chart = self.$getChart();
+    let $chart = self.$getChart();
     if ($chart) {
       self.binder.jqOn($chart, 'mouseleave', function (event) {
         // only clear when we leave the chart, so that
@@ -139,7 +139,7 @@ Tooltip.prototype.render = function () {
     }
 
     selection.each(function (d, i) {
-      var element = d3.select(this);
+      let element = d3.select(this);
 
       function render(html) {
         allContents = _.filter(allContents, function (content) {
@@ -148,7 +148,7 @@ Tooltip.prototype.render = function () {
 
         if (html) allContents.push({ id: id, html: html, order: order });
 
-        var allHtml = _(allContents)
+        let allHtml = _(allContents)
         .sortBy('order')
         .pluck('html')
         .compact()
@@ -167,7 +167,7 @@ Tooltip.prototype.render = function () {
           return render();
         }
 
-        var events = self.events ? self.events.eventResponse(d, i) : d;
+        let events = self.events ? self.events.eventResponse(d, i) : d;
         return render(self.formatter(events));
       });
 

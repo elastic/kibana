@@ -7,7 +7,7 @@ export default function TimeMarkerFactory() {
       return new TimeMarker(times, xScale, height);
     }
 
-    var currentTimeArr = [{
+    let currentTimeArr = [{
       'time': new Date().getTime(),
       'class': 'time-marker',
       'color': '#c80000',
@@ -29,14 +29,14 @@ export default function TimeMarkerFactory() {
   }
 
   TimeMarker.prototype._isTimeBasedChart = function (selection) {
-    var data = selection.data();
+    let data = selection.data();
     return data.every(function (datum) {
       return (datum.ordered && datum.ordered.date);
     });
   };
 
   TimeMarker.prototype.render = function (selection) {
-    var self = this;
+    let self = this;
 
     // return if not time based chart
     if (!self._isTimeBasedChart(selection)) return;

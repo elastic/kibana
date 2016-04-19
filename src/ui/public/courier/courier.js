@@ -24,18 +24,18 @@ import RedirectWhenMissingProvider from './_redirect_when_missing';
 uiModules.get('kibana/courier')
 .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
   function Courier() {
-    var self = this;
+    let self = this;
 
-    var DocSource = Private(DocSourceProvider);
-    var SearchSource = Private(SearchSourceProvider);
-    var searchStrategy = Private(SearchStrategyProvider);
+    let DocSource = Private(DocSourceProvider);
+    let SearchSource = Private(SearchSourceProvider);
+    let searchStrategy = Private(SearchStrategyProvider);
 
-    var requestQueue = Private(RequestQueueProvider);
-    var errorHandlers = Private(ErrorHandlersProvider);
+    let requestQueue = Private(RequestQueueProvider);
+    let errorHandlers = Private(ErrorHandlersProvider);
 
-    var fetch = Private(FetchProvider);
-    var docLooper = self.docLooper = Private(DocLooperProvider);
-    var searchLooper = self.searchLooper = Private(SearchLooperProvider);
+    let fetch = Private(FetchProvider);
+    let docLooper = self.docLooper = Private(DocLooperProvider);
+    let searchLooper = self.searchLooper = Private(SearchLooperProvider);
 
     // expose some internal modules
     self.setRootSearchSource = Private(RootSearchSourceProvider).set;
@@ -47,7 +47,7 @@ uiModules.get('kibana/courier')
     self.DocSource = DocSource;
     self.SearchSource = SearchSource;
 
-    var HastyRefresh = errors.HastyRefresh;
+    let HastyRefresh = errors.HastyRefresh;
 
     /**
      * update the time between automatic search requests
@@ -135,8 +135,8 @@ uiModules.get('kibana/courier')
 
     // Listen for refreshInterval changes
     $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-      var refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-      var refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
+      let refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
+      let refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
       if (_.isNumber(refreshValue) && !refreshPause) {
         self.fetchInterval(refreshValue);
       } else {
@@ -144,7 +144,7 @@ uiModules.get('kibana/courier')
       }
     });
 
-    var onFatalDefer = Promise.defer();
+    let onFatalDefer = Promise.defer();
     onFatalDefer.promise.then(self.close);
     Notifier.fatalCallbacks.push(onFatalDefer.resolve);
   }
