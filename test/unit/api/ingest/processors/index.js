@@ -12,6 +12,7 @@ define(function (require) {
   var set = require('./_set');
   var split = require('./_split');
   var trim = require('./_trim');
+  var uppercase = require('./_uppercase');
 
   return function processors(bdd, scenarioManager, request) {
     append(bdd, scenarioManager, request);
@@ -27,6 +28,7 @@ define(function (require) {
     set(bdd, scenarioManager, request);
     split(bdd, scenarioManager, request);
     trim(bdd, scenarioManager, request);
+    uppercase(bdd, scenarioManager, request);
   };
 
 });
