@@ -11,9 +11,7 @@ export default uiRegistry({
     let defaultMap;
 
     function init() {
-      parseDefaultTypeMap();
-      $rootScope.$on('init:config', parseDefaultTypeMap);
-      $rootScope.$on('change:config.format:defaultTypeMap', parseDefaultTypeMap);
+      config.on('format:defaultTypeMap', parseDefaultTypeMap);
     }
 
 
@@ -73,8 +71,8 @@ export default uiRegistry({
     });
 
 
-    function parseDefaultTypeMap() {
-      defaultMap = config.get('format:defaultTypeMap');
+    function parseDefaultTypeMap(value) {
+      defaultMap = value;
       _.forOwn(self, function (fn) {
         if (_.isFunction(fn) && fn.cache) {
           // clear all memoize caches

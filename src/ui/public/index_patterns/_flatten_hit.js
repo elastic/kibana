@@ -1,12 +1,10 @@
 import _ from 'lodash';
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
-export default function FlattenHitProvider(config, $rootScope) {
-
+export default function FlattenHitProvider(config) {
   let metaFields = config.get('metaFields');
-  $rootScope.$on('change:config.metaFields', function () {
-    metaFields = config.get('metaFields');
-  });
+
+  config.on('metaFields', value => metaFields = value);
 
   function flattenHit(indexPattern, hit) {
     let flat = {};
@@ -47,7 +45,7 @@ export default function FlattenHitProvider(config, $rootScope) {
     return flat;
   }
 
-  return function (indexPattern) {
+  return function flattenHitWrapper(indexPattern) {
     function cachedFlatten(hit) {
       return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit));
     }
