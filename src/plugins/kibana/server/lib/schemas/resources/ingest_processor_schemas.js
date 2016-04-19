@@ -75,3 +75,9 @@ export const set = base.keys({
   target_field: Joi.string().allow(''),
   value: Joi.string().allow('')
 });
+
+export const split = base.keys({
+  type_id: Joi.string().only('split').required(),
+  source_field: Joi.string().allow(''),
+  separator: Joi.string().allow('')
+});

@@ -10,3 +10,4 @@ import './processor_ui_lowercase';
 import './processor_ui_remove';
 import './processor_ui_rename';
 import './processor_ui_set';
+import './processor_ui_split';
