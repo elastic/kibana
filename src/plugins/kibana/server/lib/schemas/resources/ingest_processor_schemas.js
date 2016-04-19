@@ -81,3 +81,9 @@ export const split = base.keys({
   source_field: Joi.string().allow(''),
   separator: Joi.string().allow('')
 });
+
+export const trim = base.keys({
+  type_id: Joi.string().only('trim').required(),
+  source_field: Joi.string().allow('')
+});
+

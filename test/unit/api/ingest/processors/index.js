@@ -11,6 +11,7 @@ define(function (require) {
   var rename = require('./_rename');
   var set = require('./_set');
   var split = require('./_split');
+  var trim = require('./_trim');
 
   return function processors(bdd, scenarioManager, request) {
     append(bdd, scenarioManager, request);
@@ -25,6 +26,7 @@ define(function (require) {
     rename(bdd, scenarioManager, request);
     set(bdd, scenarioManager, request);
     split(bdd, scenarioManager, request);
+    trim(bdd, scenarioManager, request);
   };
 
 });
