@@ -42,7 +42,7 @@ describe('Layout: base tests', function () {
     });
 
     it('should be a function', function () {
-      chai.assert.isFunction(cols);
+      expect(_.isFunction(cols)).to.be(true);
     });
 
     it('should create columns', function () {
