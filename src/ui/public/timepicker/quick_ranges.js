@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-var module = uiModules.get('kibana');
+let module = uiModules.get('kibana');
 
 module.constant('quickRanges', [
   { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },

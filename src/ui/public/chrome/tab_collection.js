@@ -4,10 +4,10 @@ import { startsWith, get, set, omit, wrap, pick } from 'lodash';
 import { parse } from 'url';
 
 function TabCollection(opts = {}) {
-  var tabs = [];
-  var specs = null;
-  var defaults = opts.defaults || {};
-  var activeTab = null;
+  let tabs = [];
+  let specs = null;
+  let defaults = opts.defaults || {};
+  let activeTab = null;
 
   this.set = function (_specs) {
     specs = _.cloneDeep([].concat(_specs || []));

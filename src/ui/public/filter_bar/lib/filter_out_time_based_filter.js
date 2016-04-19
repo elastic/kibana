@@ -1,7 +1,7 @@
 import _ from 'lodash';
 export default function filterOutTimeBaseFilter(courier, Promise) {
   return Promise.method(function (filters) {
-    var id = _.get(filters, '[0].meta.index');
+    let id = _.get(filters, '[0].meta.index');
     if (id == null) return;
 
     return courier.indexPatterns.get(id).then(function (indexPattern) {

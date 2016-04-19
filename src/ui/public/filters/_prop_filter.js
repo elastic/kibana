@@ -23,9 +23,9 @@ function propFilter(prop) {
     if (!_.isArray(filters)) filters = filters.split(',');
     if (_.contains(filters, '*')) return list;
 
-    var options = filters.reduce(function (options, filter) {
-      var type = 'include';
-      var value = filter;
+    let options = filters.reduce(function (options, filter) {
+      let type = 'include';
+      let value = filter;
 
       if (filter.charAt(0) === '!') {
         type = 'exclude';
@@ -38,12 +38,12 @@ function propFilter(prop) {
     }, {});
 
     return list.filter(function (item) {
-      var value = item[prop];
+      let value = item[prop];
 
-      var excluded = options.exclude && _.contains(options.exclude, value);
+      let excluded = options.exclude && _.contains(options.exclude, value);
       if (excluded) return false;
 
-      var included = !options.include || _.contains(options.include, value);
+      let included = !options.include || _.contains(options.include, value);
       if (included) return true;
 
       return false;

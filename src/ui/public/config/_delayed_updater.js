@@ -4,14 +4,14 @@ import ConfigValsProvider from 'ui/config/_vals';
 import Notifier from 'ui/notify/notifier';
 
 export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
-  var notify = new Notifier();
+  let notify = new Notifier();
 
-  var vals = Private(ConfigValsProvider);
+  let vals = Private(ConfigValsProvider);
 
   return function DelayedUpdater(doc) {
-    var updater = this;
-    var queue = [];
-    var log = {};
+    let updater = this;
+    let queue = [];
+    let log = {};
     let timer;
 
     updater.fire = function () {
@@ -23,8 +23,8 @@ export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
 
       let method;
       let body;
-      var updated = [];
-      var deleted = [];
+      let updated = [];
+      let deleted = [];
 
       // seperate the log into lists
       Object.keys(log).forEach(function (key) {
@@ -55,8 +55,8 @@ export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
     };
 
     updater.update = function (key, val, silentAndLocal) {
-      var newVal = val;
-      var oldVal = vals[key];
+      let newVal = val;
+      let oldVal = vals[key];
 
       if (angular.equals(newVal, oldVal)) {
         return Promise.resolve();
@@ -72,7 +72,7 @@ export default function DelayedUpdaterFactory(Private, $rootScope, Promise) {
 
       if (silentAndLocal) return Promise.resolve();
 
-      var defer = Promise.defer();
+      let defer = Promise.defer();
       queue.push(defer);
       notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
       $rootScope.$broadcast('change:config.' + key, newVal, oldVal);
