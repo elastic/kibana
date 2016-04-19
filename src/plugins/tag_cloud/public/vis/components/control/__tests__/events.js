@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import visFixture from 'plugins/tagcloud/vis/components/__tests__/fixtures/vis_fixture';
-import remove from 'plugins/tagcloud/vis/components/__tests__/fixtures/remove';
+import { remove } from 'plugins/tagcloud/vis/components/__tests__/fixtures/remove';
 import eventsFunction from 'plugins/tagcloud/vis/components/control/events';
 
 describe('events tests', function () {
