@@ -35,7 +35,7 @@ module.controller('KbnHeatmapController', function ($scope, Private) {
 
         // if no columns or rows, then return '_all'
         if (!cell.col && !cell.row) {
-          cell['col'] = '_all';
+          cell.col = '_all';
         }
 
         cells.push(cell);
