@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import ServerStatus from './server_status';
 import { join } from 'path';
-module.exports = function (kbnServer, server, config) {
 
+export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
 
   if (server.plugins.good) {
@@ -22,11 +22,18 @@ module.exports = function (kbnServer, server, config) {
     }
   });
 
-  server.decorate('reply', 'renderStatusPage', function () {
-    let app = kbnServer.uiExports.getHiddenApp('status_page');
-    let resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
-    resp.code(kbnServer.status.isGreen() ? 200 : 503);
-    return resp;
+  server.decorate('reply', 'renderStatusPage', async function () {
+    const app = kbnServer.uiExports.getHiddenApp('status_page');
+    const response = await getResponse(this);
+    response.code(kbnServer.status.isGreen() ? 200 : 503);
+    return response;
+
+    function getResponse(ctx) {
+      if (app) {
+        return ctx.renderApp(app);
+      }
+      return ctx(kbnServer.status.toString());
+    }
   });
 
   server.route({
