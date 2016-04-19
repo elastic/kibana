@@ -5,8 +5,8 @@ import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/fi
 import BoundToConfigObjProvider from 'ui/bound_to_config_obj';
 import dateTemplate from 'ui/stringify/editors/date.html';
 export default function DateTimeFormatProvider(Private) {
-  var FieldFormat = Private(IndexPatternsFieldFormatProvider);
-  var BoundToConfigObj = Private(BoundToConfigObjProvider);
+  let FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  let BoundToConfigObj = Private(BoundToConfigObjProvider);
 
 
   _.class(DateTime).inherits(FieldFormat);
@@ -27,7 +27,7 @@ export default function DateTimeFormatProvider(Private) {
     template: dateTemplate,
     controllerAs: 'cntrl',
     controller: function ($interval, $scope) {
-      var self = this;
+      let self = this;
       self.sampleInputs = [
         Date.now(),
         +moment().startOf('year'),
@@ -43,11 +43,11 @@ export default function DateTimeFormatProvider(Private) {
   DateTime.prototype._convert = function (val) {
     // don't give away our ref to converter so
     // we can hot-swap when config changes
-    var pattern = this.param('pattern');
-    var timezone = this.param('timezone');
+    let pattern = this.param('pattern');
+    let timezone = this.param('timezone');
 
-    var timezoneChanged = this._timeZone !== timezone;
-    var datePatternChanged = this._memoizedPattern !== pattern;
+    let timezoneChanged = this._timeZone !== timezone;
+    let datePatternChanged = this._memoizedPattern !== pattern;
     if (timezoneChanged || datePatternChanged) {
       this._timeZone = timezone;
       this._memoizedPattern = pattern;

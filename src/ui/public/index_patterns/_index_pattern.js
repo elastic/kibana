@@ -15,23 +15,23 @@ import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 export default function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
 
-  var fieldformats = Private(RegistryFieldFormatsProvider);
-  var getIds = Private(IndexPatternsGetIdsProvider);
-  var mapper = Private(IndexPatternsMapperProvider);
-  var intervals = Private(IndexPatternsIntervalsProvider);
-  var DocSource = Private(DocSourceProvider);
-  var mappingSetup = Private(UtilsMappingSetupProvider);
-  var FieldList = Private(IndexPatternsFieldListProvider);
+  let fieldformats = Private(RegistryFieldFormatsProvider);
+  let getIds = Private(IndexPatternsGetIdsProvider);
+  let mapper = Private(IndexPatternsMapperProvider);
+  let intervals = Private(IndexPatternsIntervalsProvider);
+  let DocSource = Private(DocSourceProvider);
+  let mappingSetup = Private(UtilsMappingSetupProvider);
+  let FieldList = Private(IndexPatternsFieldListProvider);
 
-  var flattenHit = Private(IndexPatternsFlattenHitProvider);
-  var calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
-  var patternCache = Private(IndexPatternsPatternCacheProvider);
+  let flattenHit = Private(IndexPatternsFlattenHitProvider);
+  let calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
+  let patternCache = Private(IndexPatternsPatternCacheProvider);
 
-  var type = 'index-pattern';
+  let type = 'index-pattern';
 
-  var notify = new Notifier();
+  let notify = new Notifier();
 
-  var mapping = mappingSetup.expandShorthand({
+  let mapping = mappingSetup.expandShorthand({
     title: 'string',
     timeFieldName: 'string',
     notExpandable: 'boolean',
@@ -42,8 +42,8 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
       _serialize: function (map) {
         if (map == null) return;
 
-        var count = 0;
-        var serialized = _.transform(map, function (flat, format, field) {
+        let count = 0;
+        let serialized = _.transform(map, function (flat, format, field) {
           if (!format) return;
           count++;
           flat[field] = format;
@@ -54,7 +54,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
       _deserialize: function (map) {
         if (map == null) return {};
         return _.mapValues(angular.fromJson(map), function (mapping) {
-          var FieldFormat = fieldformats.byId[mapping.id];
+          let FieldFormat = fieldformats.byId[mapping.id];
           return FieldFormat && new FieldFormat(mapping.params);
         });
       }
@@ -62,11 +62,11 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
   });
 
   function IndexPattern(id) {
-    var self = this;
+    let self = this;
 
     setId(id);
 
-    var docSource = new DocSource();
+    let docSource = new DocSource();
 
     self.init = function () {
       // tell the docSource where to find the doc
@@ -134,7 +134,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     self.addScriptedField = function (name, script, type, lang) {
       type = type || 'string';
 
-      var scriptFields = _.pluck(self.getScriptedFields(), 'name');
+      let scriptFields = _.pluck(self.getScriptedFields(), 'name');
 
       if (_.contains(scriptFields, name)) {
         throw new errors.DuplicateField(name);
@@ -152,7 +152,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self.removeScriptedField = function (name) {
-      var fieldIndex = _.findIndex(self.fields, {
+      let fieldIndex = _.findIndex(self.fields, {
         name: name,
         scripted: true
       });
@@ -165,10 +165,10 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     self.popularizeField = function (fieldName, unit) {
       if (unit == null) unit = 1;
 
-      var field = _.get(self, ['fields', 'byName', fieldName]);
+      let field = _.get(self, ['fields', 'byName', fieldName]);
       if (!field) return;
 
-      var count = Math.max((field.count || 0) + unit, 0);
+      let count = Math.max((field.count || 0) + unit, 0);
       if (field.count !== count) {
         field.count = count;
         self.save();
@@ -200,7 +200,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
-      var interval = self.getInterval();
+      let interval = self.getInterval();
 
       if (interval) {
         return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
@@ -230,7 +230,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self.prepBody = function () {
-      var body = {};
+      let body = {};
 
       // serialize json fields
       _.forOwn(mapping, function (fieldMapping, fieldName) {
@@ -254,12 +254,12 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     }
 
     self.create = function () {
-      var body = self.prepBody();
+      let body = self.prepBody();
       return docSource.doCreate(body)
       .then(setId)
       .catch(function (err) {
         if (_.get(err, 'origError.status') === 409) {
-          var confirmMessage = 'Are you sure you want to overwrite this?';
+          let confirmMessage = 'Are you sure you want to overwrite this?';
 
           return safeConfirm(confirmMessage).then(
             function () {
@@ -280,7 +280,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self.save = function () {
-      var body = self.prepBody();
+      let body = self.prepBody();
       return docSource.doIndex(body).then(setId);
     };
 
