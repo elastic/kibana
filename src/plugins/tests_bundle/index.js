@@ -1,5 +1,5 @@
 import { union } from 'lodash';
-
+import defaultsProvider from '../../ui/settings/defaults';
 import findSourceFiles from './find_source_files';
 import { fromRoot } from '../../utils';
 
@@ -56,6 +56,8 @@ export default (kibana) => {
             loader: 'istanbul-instrumenter'
           });
         }
+
+        env.defaultUiSettings = defaultsProvider();
 
         return new UiBundle({
           id: 'tests',
