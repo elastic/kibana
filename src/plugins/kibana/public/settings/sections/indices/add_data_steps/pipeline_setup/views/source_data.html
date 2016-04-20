@@ -1,31 +1,20 @@
-<div class="form-group">
-  <label>Current Line:</label>
-  <div class="controls">
-    <select
-      class="form-control"
-      ng-options="sample.message for sample in samples"
-      ng-model="selectedSample"
-      ng-disabled="disabled">
-    </select>
-    <button
-      aria-label="Previous Line"
-      tooltip="Previous Line"
-      tooltip-append-to-body="true"
-      ng-click="previousLine()"
-      type="button"
-      class="btn btn-xs btn-default"
-      ng-disabled="disabled">
-      <i aria-hidden="true" class="fa fa-chevron-left"></i>
-    </button>
-    <button
-      aria-label="Next Line"
-      tooltip="Next Line"
-      tooltip-append-to-body="true"
-      ng-click="nextLine()"
-      type="button"
-      class="btn btn-xs btn-default"
-      ng-disabled="disabled">
-      <i aria-hidden="true" class="fa fa-chevron-right"></i>
-    </button>
-  </div>
-</div>
+<button
+  aria-label="Previous Sample Record"
+  tooltip="Previous Sample Record"
+  tooltip-append-to-body="true"
+  ng-click="previousLine()"
+  type="button"
+  class="btn btn-xs btn-primary"
+  ng-disabled="disabled">
+  <i aria-hidden="true" class="fa fa-caret-left"></i>
+</button>
+<button
+  aria-label="Next Sample Record"
+  tooltip="Next Sample Record"
+  tooltip-append-to-body="true"
+  ng-click="nextLine()"
+  type="button"
+  class="btn btn-xs btn-primary"
+  ng-disabled="disabled">
+  <i aria-hidden="true" class="fa fa-caret-right"></i>
+</button>
