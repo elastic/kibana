@@ -1,13 +1,13 @@
 import { saveAs } from '@spalger/filesaver';
-import _ from 'lodash';
+import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
 import angular from 'angular';
 import registry from 'plugins/kibana/settings/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/settings/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
-const MAX_SIZE = Math.pow(2, 31) - 1;
 
+const MAX_SIZE = Math.pow(2, 31) - 1;
 
 uiRoutes
 .when('/settings/objects', {
@@ -41,9 +41,9 @@ uiModules.get('apps/settings')
         });
 
         $q.all(services).then(function (data) {
-          $scope.services = _.sortBy(data, 'title');
+          $scope.services = sortBy(data, 'title');
           let tab = $scope.services[0];
-          if ($state.tab) $scope.currentTab = tab = _.find($scope.services, {title: $state.tab});
+          if ($state.tab) $scope.currentTab = tab = find($scope.services, {title: $state.tab});
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);
@@ -83,21 +83,23 @@ uiModules.get('apps/settings')
       };
 
       $scope.bulkDelete = function () {
-        $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(refreshData).then(function () {
+        $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id')).then(refreshData).then(function () {
           $scope.selectedItems.length = 0;
         });
       };
 
       $scope.bulkExport = function () {
-        const objs = $scope.selectedItems.map(_.partialRight(_.extend, {type: $scope.currentTab.type}));
+        const objs = $scope.selectedItems.map(partialRight(extend, {type: $scope.currentTab.type}));
         retrieveAndExportDocs(objs);
       };
 
-      $scope.exportAll = () => Promise.map($scope.services, service => service.service
-        .scanAll('')
-        .then(results => results.hits.map(hit => _.extend(hit, { type: service.type })))
-        .catch(error => notify.error(error))
-      ).then(results => retrieveAndExportDocs(_.flattenDeep(results)));
+      $scope.exportAll = () => Promise
+        .map($scope.services, service => service.service
+          .scanAll('')
+          .then(result => result.hits.map(hit => extend(hit, { type: service.type })))
+        )
+        .then(results => retrieveAndExportDocs(flattenDeep(results)))
+        .catch(error => notify.error(error));
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
@@ -106,7 +108,7 @@ uiModules.get('apps/settings')
           body: {docs: objs.map(transformToMget)}
         })
         .then(function (response) {
-          saveToFile(response.docs.map(_.partialRight(_.pick, '_id', '_type', '_source')));
+          saveToFile(response.docs.map(partialRight(pick, '_id', '_type', '_source')));
         });
       }
 
@@ -129,7 +131,7 @@ uiModules.get('apps/settings')
         }
 
         return Promise.map(docs, function (doc) {
-          const service = _.find($scope.services, {type: doc._type}).service;
+          const service = find($scope.services, {type: doc._type}).service;
           return service.get().then(function (obj) {
             obj.id = doc._id;
             return obj.applyESResp(doc).then(function () {
