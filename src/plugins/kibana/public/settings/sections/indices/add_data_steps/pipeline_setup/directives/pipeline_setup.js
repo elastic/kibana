@@ -69,6 +69,13 @@ app.directive('pipelineSetup', function () {
         pipeline.updateParents();
       });
 
+      $scope.$watch('processorType', (newVal) => {
+        if (!newVal) return;
+
+        pipeline.add(newVal.Type);
+        $scope.processorType = '';
+      });
+
       $scope.$watch('pipeline.dirty', simulatePipeline);
     }
   };

@@ -19,15 +19,11 @@
 </div>
 
 <div class="form-group">
-  <label>Processor Type:</label>
   <select
     class="form-control"
     ng-options="processorType.title for processorType in processorTypes"
-    ng-model="processorType">
+    ng-model="processorType"
+    ng-disabled="pipeline.hasCompileError">
+    <option value="">Select a Processor...</option>
   </select>
 </div>
-<button
-  ng-click="pipeline.add(processorType.Type)"
-  ng-disabled="!processorType || pipeline.hasCompileError">
-  Add Processor
-</button>
