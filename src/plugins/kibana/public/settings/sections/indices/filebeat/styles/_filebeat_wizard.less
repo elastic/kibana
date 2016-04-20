@@ -1,0 +1,75 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+filebeat-wizard {
+  //************* Common Styles? *********************//
+  .btn-primary.collapser {
+    background-color: transparent;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  button.collapser {
+    i {
+      color: @kibanaBlue3;
+      font-size: 1.5em;
+    }
+
+    &:hover {
+      i {
+        color: @kibanaBlue1;
+      }
+    }
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+
+    em {
+      font-style: normal;
+      color: @kibanaPink1;
+    }
+  }
+
+  .btn-primary {
+    &:hover {
+      background-color: @kibanaBlue1;
+    }
+  }
+
+  .btn-secondary {
+    background-color: white;
+    border-color: @kibanaBlue3;
+    color: @kibanaBlue3;
+
+    &:hover {
+      background-color: @kibanaBlue1;
+    }
+  }
+  //************* Common Styles? *********************//
+
+  .filebeat-wizard-buttons {
+    display: flex;
+    float: none;
+
+    div {
+      width:100px;
+      flex: 1 1 auto;
+      display: flex;
+    }
+
+    :nth-child(1) {
+      justify-content: flex-start;
+    }
+    :nth-child(2) {
+      justify-content: center;
+    }
+    :nth-child(3) {
+      justify-content: flex-end;
+    }
+  }
+}

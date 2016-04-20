@@ -7,9 +7,14 @@ processor-ui-container-header {
     display: flex;
     align-items: center;
     flex: 1 0 auto;
-    background-color: @settings-pipeline-setup-processor-container-overlay-bg;
-    border-bottom: 1px solid;
-    border-bottom-color: @settings-pipeline-setup-processor-container-header-border;
+    background-color: @settings-filebeat-wizard-panel-bg;
+    border: none;
+    padding: 10px;
+
+    button {
+      width: 22px;
+      border-radius: 4px;
+    }
 
     &-toggle {
       flex: 0 0 auto;

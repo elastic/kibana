@@ -1,27 +1,39 @@
-<pipeline-output pipeline="pipeline" samples="samples" sample="sample"></pipeline-output>
+<h2>
+  <em>Couple of things to review and configure.</em> Define your pipeline by adding processors to it. Processors are applied in the order that they are defined. As you define your pipeline, cycle through your samples to see the output.
+</h2>
+<div class="main-panels">
+  <div class="left-panel">
+    <label>Processor Pipeline</label>
+    <div class="pipeline">
+      <ul
+        class="pipeline-container"
+        ng-show="pipeline.processors.length > 0">
+        <li ng-repeat="processor in pipeline.processors track by processor.processorId">
+          <processor-ui-container pipeline="pipeline" processor="processor"></processor-ui-container>
+        </li>
+      </ul>
 
-<div class="form-group">
-  <label>Processor Pipeline:</label>
-  <ul
-    class="pipeline-container"
-    ng-show="pipeline.processors.length > 0">
-    <li ng-repeat="processor in pipeline.processors track by processor.processorId">
-      <processor-ui-container pipeline="pipeline" processor="processor"></processor-ui-container>
-    </li>
-  </ul>
-  <div
-    class="empty-pipeline"
-    ng-hide="pipeline.processors.length > 0">
-    <p>Your pipeline is currently empty. Add a processor to get started!</p>
+      <div class="add-processor">
+        <div
+          class="form-group"
+          ng-hide="pipeline.processors.length > 0">
+          <label>
+            Your pipeline is currently empty. Add a processor to get started!
+          </label>
+        </div>
+        <div class="add-processor-dropdown">
+          <select
+            class="form-control"
+            ng-options="processorType.title for processorType in processorTypes"
+            ng-model="processorType"
+            ng-disabled="pipeline.hasCompileError">
+            <option value="">Select a Processor...</option>
+          </select>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-<div class="form-group">
-  <select
-    class="form-control"
-    ng-options="processorType.title for processorType in processorTypes"
-    ng-model="processorType"
-    ng-disabled="pipeline.hasCompileError">
-    <option value="">Select a Processor...</option>
-  </select>
+  <div class="right-panel">
+    <pipeline-output pipeline="pipeline" samples="samples" sample="sample"></pipeline-output>
+  </div>
 </div>

@@ -4,15 +4,15 @@
 
 output-preview {
   .visual {
-    background-color: @settings-pipeline-setup-output-preview-bg;
-    border: 1px solid;
-    border-color: @settings-pipeline-setup-output-preview-border;
+    border: none;
+    background-color: @settings-filebeat-wizard-panel-bg;
+    border-radius: 0;
     overflow-x: auto;
   }
 
   .visual.collapsed {
     max-height: 125px;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
   pre {
