@@ -2,7 +2,9 @@
   <em>Couple of things to review and configure.</em> Define your pipeline by adding processors to it. Processors are applied in the order that they are defined. As you define your pipeline, cycle through your samples to see the output.
 </h2>
 <div class="main-panels">
-  <div class="left-panel">
+  <div
+    ng-hide="expandContext < 1"
+    class="left-panel">
     <label>Processor Pipeline</label>
     <div class="pipeline">
       <ul
@@ -33,7 +35,31 @@
       </div>
     </div>
   </div>
-  <div class="right-panel">
+  <div class="center-panel">
+    <div class="buttons">
+      <button
+        aria-label="Collapse Left Panel"
+        tooltip="Collapse Left Panel"
+        ng-click="expandContext = expandContext - 1"
+        ng-disabled="expandContext < 1"
+        type="button"
+        class="btn btn-primary btn-xs collapser">
+        <i aria-hidden="true" class="fa fa-chevron-circle-left"></i>
+      </button>
+      <button
+        aria-label="Collapse Right Panel"
+        tooltip="Collapse Right Panel"
+        ng-click="expandContext = expandContext + 1"
+        ng-disabled="expandContext > 1"
+        type="button"
+        class="btn btn-primary btn-xs collapser">
+        <i aria-hidden="true" class="fa fa-chevron-circle-right"></i>
+      </button>
+    </div>
+  </div>
+  <div
+    ng-hide="expandContext > 1"
+    class="right-panel">
     <pipeline-output pipeline="pipeline" samples="samples" sample="sample"></pipeline-output>
   </div>
 </div>
