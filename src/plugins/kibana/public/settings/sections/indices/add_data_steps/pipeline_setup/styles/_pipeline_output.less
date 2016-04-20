@@ -1,3 +1,7 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
 pipeline-output {
   display: block;
 
@@ -6,6 +10,7 @@ pipeline-output {
 
     label {
       width: 100%;
+      .flex-parent(1 0 auto);
     }
   }
 

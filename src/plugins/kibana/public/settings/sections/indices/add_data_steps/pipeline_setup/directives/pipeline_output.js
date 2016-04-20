@@ -9,7 +9,9 @@ app.directive('pipelineOutput', function () {
     restrict: 'E',
     template: pipelineOutputTemplate,
     scope: {
-      pipeline: '='
+      pipeline: '=',
+      samples: '=',
+      sample: '='
     },
     controller: function ($scope) {
       $scope.collapsed = true;
