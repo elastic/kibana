@@ -29,14 +29,14 @@ app.directive('sourceData', function () {
 
       $scope.previousLine = function () {
         let currentIndex = samples.indexOf($scope.selectedSample);
-        if (currentIndex <= 0) return;
+        if (currentIndex <= 0) currentIndex = samples.length;
 
         $scope.selectedSample = samples[currentIndex - 1];
       };
 
       $scope.nextLine = function () {
         let currentIndex = samples.indexOf($scope.selectedSample);
-        if (currentIndex >= samples.length - 1) return;
+        if (currentIndex >= samples.length - 1) currentIndex = -1;
 
         $scope.selectedSample = samples[currentIndex + 1];
       };

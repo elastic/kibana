@@ -1,12 +1,9 @@
-<div class="form-group">
-  <div class="header-line">
-    <label>Pipeline Output:</label>
-    <a
-      ng-click="collapsed = false"
-      ng-show="collapsed">expand</a>
-    <a
-      ng-click="collapsed = true"
-      ng-hide="collapsed">collapse</a>
-  </div>
-  <pre class="output" ng-class="{ collapsed: collapsed }">{{ pipeline.output | json }}</pre>
+<div class="header-line">
+  <label>Pipeline Output</label>
+  <source-data
+    sample="sample"
+    samples="samples"
+    disabled="pipeline.hasCompileError">
+  </source-data>
 </div>
+<pre class="output">{{ pipeline.output | json }}</pre>
