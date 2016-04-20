@@ -6,25 +6,25 @@
 <div class="install-filebeat">
   <ol>
     <li>Install Filebeat on all servers on which you want to tail logs
-      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-installation.html">
+      (<a target="_blank" ng-href="{{installStep.docLinks.installation}}">
         instructions
       </a>)
     </li>
 
     <li>
       Point Filebeat at the log files you want to tail
-      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-configuration.html">
+      (<a target="_blank" ng-href="{{installStep.docLinks.configuration}}">
         instructions
       </a>)
     </li>
 
     <li ng-if="installStep.results.pipeline.processors.length">
       Configure Filebeat to send data through your new Elasticsearch pipeline
-      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html">
+      (<a target="_blank" ng-href="{{installStep.docLinks.elasticsearchOutput}}">
         instructions
       </a>)<br />
       At minimum you'll need to configure Filebeat's Elasticsearch output with a hostname, an index name, and a
-      <a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html#_parameters">
+      <a target="_blank" ng-href="{{installStep.docLinks.elasticsearchOutputAnchorParameters}}">
         paramaters
       </a> block. Your config should end up looking something like this:<br /><br />
       <pre>
@@ -62,7 +62,7 @@ output:
     </li>
 
     <li>Run Filebeat on each server
-      (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/_step_5_starting_filebeat.html">
+      (<a target="_blank" ng-href="{{installStep.docLinks.startup}}">
         instructions
       </a>)
     </li>
