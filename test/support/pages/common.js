@@ -93,7 +93,6 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
-            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var loginPage = new RegExp('login').test(currentUrl);
             if (loginPage) {
               self.debug('Found loginPage = ' + loginPage + ', username = '
@@ -103,7 +102,11 @@ define(function (require) {
               .then(function () {
                 return self.remote.getCurrentUrl();
               });
+            } else {
+              return self.remote.getCurrentUrl();
             }
+          })
+          .then(function (currentUrl) {
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
