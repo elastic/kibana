@@ -37,7 +37,7 @@ app.directive('outputPreview', function () {
       };
     },
     controller: function ($scope, debounce) {
-      $scope.collapsed = true;
+      $scope.collapsed = false;
 
       const updateOutput = debounce(function () {
         $scope.updateUi();
