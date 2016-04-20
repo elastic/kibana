@@ -77,6 +77,8 @@ app.directive('pipelineSetup', function () {
       });
 
       $scope.$watch('pipeline.dirty', simulatePipeline);
+
+      $scope.expandContext = 1;
     }
   };
 });
