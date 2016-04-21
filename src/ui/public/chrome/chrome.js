@@ -12,6 +12,15 @@ import 'ui/promises';
 import 'ui/directives/kbn_src';
 import 'ui/watch_multi';
 
+import angularApi from './api/angular';
+import appsApi from './api/apps';
+import controlsApi from './api/controls';
+import navApi from './api/nav';
+import tabsApi from './api/tabs';
+import templateApi from './api/template';
+import themeApi from './api/theme';
+import xsrfApi from './api/xsrf';
+
 let chrome = {};
 let internals = _.defaults(
   _.cloneDeep(metadata),
@@ -32,14 +41,14 @@ $('<link>').attr({
   rel: 'shortcut icon'
 }).appendTo('head');
 
-require('./api/apps')(chrome, internals);
-require('./api/xsrf')(chrome, internals);
-require('./api/nav')(chrome, internals);
-require('./api/angular')(chrome, internals);
-require('./api/controls')(chrome, internals);
-require('./api/tabs')(chrome, internals);
-require('./api/template')(chrome, internals);
-require('./api/theme')(chrome, internals);
+appsApi(chrome, internals);
+xsrfApi(chrome, internals);
+navApi(chrome, internals);
+angularApi(chrome, internals);
+controlsApi(chrome, internals);
+tabsApi(chrome, internals);
+templateApi(chrome, internals);
+themeApi(chrome, internals);
 
 chrome.bootstrap = function () {
   chrome.setupAngular();

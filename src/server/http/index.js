@@ -5,13 +5,15 @@ import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';
+import shortUrlLookupProvider from './short_url_lookup';
+import setupConnectionMixin from './setup_connection';
+import xsrfMixin from './xsrf';
+
 module.exports = async function (kbnServer, server, config) {
-
-
   server = kbnServer.server = new Hapi.Server();
 
-  const shortUrlLookup = require('./short_url_lookup')(server);
-  await kbnServer.mixin(require('./setup_connection'));
+  const shortUrlLookup = shortUrlLookupProvider(server);
+  await kbnServer.mixin(setupConnectionMixin);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -124,5 +126,5 @@ module.exports = async function (kbnServer, server, config) {
     }
   });
 
-  return kbnServer.mixin(require('./xsrf'));
+  return kbnServer.mixin(xsrfMixin);
 };

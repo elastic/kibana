@@ -1,4 +1,4 @@
-export default function (_) {
+export function extend(_) {
 
   const DOT_PREFIX_RE = /(.).+?\./g;
 

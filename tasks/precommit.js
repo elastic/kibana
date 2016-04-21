@@ -1,4 +1,4 @@
-export default function (grunt) {
+module.exports = function (grunt) {
   grunt.registerTask('precommit', [
     'collectFilesToCommit',
     'checkAddedFilenames',

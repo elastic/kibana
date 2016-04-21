@@ -1,4 +1,4 @@
-export default function (_) {
+export function extend(_) {
   _.mixin(_, {
 
 

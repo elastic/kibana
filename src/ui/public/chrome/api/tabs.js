@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import TabCollection from '../tab_collection';
 
-module.exports = function (chrome, internals) {
+export default function (chrome, internals) {
 
   internals.tabs = new TabCollection({
     defaults: {

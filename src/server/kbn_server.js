@@ -4,6 +4,17 @@ import { promisify, resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 
+import configSetupMixin from './config/setup';
+import httpMixin from './http';
+import loggingMixin from './logging';
+import statusMixin from './status';
+import pidMixin from './pid';
+import pluginsScanMixin from './plugins/scan';
+import configCompleteMixin from './config/complete';
+import uiMixin from '../ui';
+import optimizeMixin from '../optimize';
+import pluginsInitializeMixin from './plugins/initialize';
+
 let rootDir = fromRoot('.');
 
 module.exports = class KbnServer {
@@ -15,30 +26,25 @@ module.exports = class KbnServer {
     this.settings = settings || {};
 
     this.ready = constant(this.mixin(
-      require('./config/setup'), // sets this.config, reads this.settings
-      require('./http'), // sets this.server
-      require('./logging'),
-      require('./status'),
-
+      // sets this.config, reads this.settings
+      configSetupMixin,
+      // sets this.server
+      httpMixin,
+      loggingMixin,
+      statusMixin,
       // writes pid file
-      require('./pid'),
-
+      pidMixin,
       // find plugins and set this.plugins
-      require('./plugins/scan'),
-
+      pluginsScanMixin,
       // tell the config we are done loading plugins
-      require('./config/complete'),
-
+      configCompleteMixin,
       // setup this.uiExports and this.bundles
-      require('../ui'),
-
+      uiMixin,
       // ensure that all bundles are built, or that the
       // lazy bundle server is running
-      require('../optimize'),
-
+      optimizeMixin,
       // finally, initialize the plugins
-      require('./plugins/initialize'),
-
+      pluginsInitializeMixin,
       () => {
         if (this.config.get('server.autoListen')) {
           this.ready = constant(resolve());

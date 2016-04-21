@@ -1,4 +1,4 @@
-import { Binder } from './';
+import Binder from './binder';
 
 export default class BinderFor extends Binder {
   constructor(emitter) {
