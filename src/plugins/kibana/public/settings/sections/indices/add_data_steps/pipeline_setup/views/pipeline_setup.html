@@ -1,5 +1,5 @@
 <h2>
-  <em>Couple of things to review and configure.</em> Define your pipeline by adding processors to it. Processors are applied in the order that they are defined. As you define your pipeline, cycle through your samples to see the output.
+  <em>Let's build a pipeline!</em> Ingest pipelines are an easy way to modify documents before they're indexed in Elasticsearch. They're composed of processors which can change your data in many ways. Create a pipeline below while cycling through your samples to see its effect on your data.
 </h2>
 <div class="main-panels">
   <div
@@ -47,8 +47,8 @@
   <div class="center-panel">
     <div class="buttons">
       <button
-        aria-label="Collapse Left Panel"
-        tooltip="Collapse Left Panel"
+        aria-label="{{expandContext > 1 ? 'Expand Right Panel' : 'Collapse Left Panel'}}"
+        tooltip="{{expandContext > 1 ? 'Expand Right Panel' : 'Collapse Left Panel'}}"
         ng-click="expandContext = expandContext - 1"
         ng-disabled="expandContext < 1"
         type="button"
@@ -56,8 +56,8 @@
         <i aria-hidden="true" class="fa fa-chevron-circle-left"></i>
       </button>
       <button
-        aria-label="Collapse Right Panel"
-        tooltip="Collapse Right Panel"
+        aria-label="{{expandContext < 1 ? 'Expand Left Panel' : 'Collapse Right Panel'}}"
+        tooltip="{{expandContext < 1 ? 'Expand Left Panel' : 'Collapse Right Panel'}}"
         ng-click="expandContext = expandContext + 1"
         ng-disabled="expandContext > 1"
         type="button"
