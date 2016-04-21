@@ -24,7 +24,7 @@ export default class MockClusterFork extends EventEmitter {
             dead = true;
             this.emit('exit');
             cluster.emit('exit', this, this.exitCode || 0);
-          }());
+          })();
         }),
       },
       isDead: sinon.spy(() => dead),
@@ -39,6 +39,6 @@ export default class MockClusterFork extends EventEmitter {
       await wait();
       dead = false;
       this.emit('online');
-    }());
+    })();
   }
 }
