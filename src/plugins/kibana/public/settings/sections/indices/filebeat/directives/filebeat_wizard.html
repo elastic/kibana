@@ -5,73 +5,77 @@
   </div>
 </div>
 
-<div>
-  <div class="wizard-step-headings" ng-class="{complete: wizard.complete}">
-      <span ng-class="{active: wizard.currentStep === 0}"
-            class="wizard-step-heading"
-            ng-click="wizard.setCurrentStep(0)">
-        1. Paste
-      </span>
-      <span ng-class="{active: wizard.currentStep === 1, aheadActive: wizard.currentStep < 1}"
-            class="wizard-step-heading"
-            ng-click="wizard.currentStep < 1 || wizard.setCurrentStep(1)">
-        2. Parse
-      </span>
-      <span ng-class="{active: wizard.currentStep === 2, aheadActive: wizard.currentStep < 2}"
-            class="wizard-step-heading"
-            ng-click="wizard.currentStep < 2 || wizard.setCurrentStep(2)">
-        3. Review
-      </span>
-      <span ng-class="{active: wizard.currentStep === 3, aheadActive: wizard.currentStep < 3}"
-            class="wizard-step-heading"
-            ng-click="wizard.currentStep < 3 || wizard.setCurrentStep(3)">
-        4. Install Filebeat
-      </span>
-  </div>
+<form name="wizard.form">
+    <div>
+      <div class="wizard-step-headings" ng-class="{complete: wizard.complete}">
+          <span ng-class="{active: wizard.currentStep === 0}"
+                class="wizard-step-heading"
+                ng-click="wizard.setCurrentStep(0)">
+            1. Paste
+          </span>
+          <span ng-class="{active: wizard.currentStep === 1, aheadActive: wizard.currentStep < 1}"
+                class="wizard-step-heading"
+                ng-click="wizard.currentStep < 1 || wizard.setCurrentStep(1)">
+            2. Parse
+          </span>
+          <span ng-class="{active: wizard.currentStep === 2, aheadActive: wizard.currentStep < 2}"
+                class="wizard-step-heading"
+                ng-click="wizard.currentStep < 2 || wizard.setCurrentStep(2)">
+            3. Review
+          </span>
+          <span ng-class="{active: wizard.currentStep === 3, aheadActive: wizard.currentStep < 3}"
+                class="wizard-step-heading"
+                ng-click="wizard.currentStep < 3 || wizard.setCurrentStep(3)">
+            4. Install Filebeat
+          </span>
+      </div>
 
-  <div ng-switch="wizard.currentStep">
-    <div ng-switch-when="0">
-      <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
-      <div class="nav-buttons">
-        <button ng-disabled="!wizard.stepResults.samples" ng-click="wizard.nextStep()">Next</button>
+      <div ng-switch="wizard.currentStep">
+        <div ng-switch-when="0">
+          <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
+          <div class="nav-buttons">
+            <button ng-disabled="wizard.form.$pristine || wizard.form.$invalid" ng-click="wizard.nextStep()">Next</button>
+          </div>
+        </div>
+
+        <div ng-switch-when="1">
+          <pipeline-setup
+            pipeline="wizard.stepResults.pipeline"
+            samples="wizard.stepResults.samples">
+          </pipeline-setup>
+
+          <div class="nav-buttons">
+            <button ng-click="wizard.prevStep()">Prev</button>
+            <button ng-disabled="!wizard.stepResults.pipeline" ng-click="wizard.nextStep()">Next</button>
+          </div>
+        </div>
+
+        <div ng-switch-when="2">
+          <pattern-review-step
+            index-pattern="wizard.stepResults.indexPattern"
+            pipeline="wizard.stepResults.pipeline"
+            sample-doc="wizard.stepResults.pipeline.output"
+            pattern-validator="wizard.patternValidator"
+            pattern-error-message="'Filebeat uses daily rotating indices so your index pattern must end with \'-*\''">
+          </pattern-review-step>
+
+          <div class="nav-buttons">
+            <button ng-click="wizard.prevStep()">Prev</button>
+            <button ng-disabled="wizard.form.$invalid"
+                    ng-click="wizard.save()">
+              Save
+            </button>
+          </div>
+        </div>
+
+        <div ng-switch-when="3">
+          <install-filebeat-step results="wizard.stepResults"></install-filebeat-step>
+
+          <div class="nav-buttons">
+            Click Done to go explore your data
+            <button ng-click="wizard.nextStep()">Done</button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div ng-switch-when="1">
-      <pipeline-setup
-        pipeline="wizard.stepResults.pipeline"
-        samples="wizard.stepResults.samples">
-      </pipeline-setup>
-
-      <div class="nav-buttons">
-        <button ng-click="wizard.prevStep()">Prev</button>
-        <button ng-disabled="!wizard.stepResults.pipeline" ng-click="wizard.nextStep()">Next</button>
-      </div>
-    </div>
-
-    <div ng-switch-when="2">
-      <pattern-review-step
-        index-pattern="wizard.stepResults.indexPattern"
-        pipeline="wizard.stepResults.pipeline"
-        sample-doc="wizard.stepResults.pipeline.output">
-      </pattern-review-step>
-
-      <div class="nav-buttons">
-        <button ng-click="wizard.prevStep()">Prev</button>
-        <button ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
-                ng-click="wizard.save()">
-          Save
-        </button>
-      </div>
-    </div>
-
-    <div ng-switch-when="3">
-      <install-filebeat-step results="wizard.stepResults"></install-filebeat-step>
-
-      <div class="nav-buttons">
-        Click Done to go explore your data
-        <button ng-click="wizard.nextStep()">Done</button>
-      </div>
-    </div>
-  </div>
-</div>
+</form>

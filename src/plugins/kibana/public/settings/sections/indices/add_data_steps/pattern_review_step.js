@@ -18,11 +18,18 @@ modules.get('apps/settings')
       scope: {
         indexPattern: '=',
         pipeline: '=',
-        sampleDoc: '='
+        sampleDoc: '=',
+        patternValidator: '=',
+        patternErrorMessage: '='
       },
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
+        const formWatcher = $scope.$watch('reviewStep.form', () => {
+          this.form.pattern.$validators.pattern = this.patternValidator;
+          return formWatcher();
+        });
+
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
