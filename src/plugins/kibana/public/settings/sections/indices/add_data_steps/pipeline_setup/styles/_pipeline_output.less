@@ -3,22 +3,20 @@
 @import (reference) "~ui/styles/theme";
 
 pipeline-output {
-  display: block;
+  flex: 1 1 1px;
+  display: flex;
+  flex-direction: column;
 
   .header-line {
     display: flex;
 
     label {
       width: 100%;
-      .flex-parent(1 0 auto);
     }
   }
 
   pre {
-    min-height: 100px;
-  }
-
-  pre.collapsed {
-    max-height: 100px;
+    min-height: 300px;
+    flex: 1 1 1px;
   }
 }

@@ -32,8 +32,17 @@
   <div ng-switch="wizard.currentStep">
     <div ng-switch-when="0">
       <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
-      <div class="nav-buttons">
-        <button ng-disabled="!wizard.stepResults.samples" ng-click="wizard.nextStep()">Next</button>
+      <div class="filebeat-wizard-buttons">
+        <div></div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-disabled="!wizard.stepResults.samples"
+            ng-click="wizard.nextStep()">
+            Next
+          </button>
+        </div>
+        <div></div>
       </div>
     </div>
 
@@ -43,9 +52,23 @@
         samples="wizard.stepResults.samples">
       </pipeline-setup>
 
-      <div class="nav-buttons">
-        <button ng-click="wizard.prevStep()">Prev</button>
-        <button ng-disabled="!wizard.stepResults.pipeline" ng-click="wizard.nextStep()">Next</button>
+      <div class="filebeat-wizard-buttons">
+        <div>
+          <button
+            class="btn btn-secondary"
+            ng-click="wizard.prevStep()">
+            Prev
+          </button>
+        </div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-disabled="!wizard.stepResults.pipeline"
+            ng-click="wizard.nextStep()">
+            Next
+          </button>
+        </div>
+        <div></div>
       </div>
     </div>
 
@@ -56,12 +79,23 @@
         sample-doc="wizard.stepResults.pipeline.output">
       </pattern-review-step>
 
-      <div class="nav-buttons">
-        <button ng-click="wizard.prevStep()">Prev</button>
-        <button ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
+      <div class="filebeat-wizard-buttons">
+        <div>
+          <button
+            class="btn btn-secondary"
+            ng-click="wizard.prevStep()">
+            Prev
+          </button>
+        </div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
                 ng-click="wizard.save()">
           Save
         </button>
+      </div>
+        <div></div>
       </div>
     </div>
 
@@ -70,7 +104,11 @@
 
       <div class="nav-buttons">
         Click Done to go explore your data
-        <button ng-click="wizard.nextStep()">Done</button>
+        <button
+          class="btn btn-primary"
+          ng-click="wizard.nextStep()">
+          Done
+        </button>
       </div>
     </div>
   </div>

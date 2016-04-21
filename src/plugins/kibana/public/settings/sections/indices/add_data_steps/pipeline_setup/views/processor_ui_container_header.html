@@ -1,11 +1,11 @@
 <div class="processor-ui-container-header">
   <button
-    aria-label="{{ processor.collapsed ? 'Open Editor' : 'Close Editor' }}"
-    tooltip="{{ processor.collapsed ? 'Open Editor' : 'Close Editor' }}"
+    aria-label="{{ processor.collapsed ? 'Expand Processor' : 'Collapse Processor' }}"
+    tooltip="{{ processor.collapsed ? 'Expand Processor' : 'Collapse Processor' }}"
     tooltip-append-to-body="true"
     ng-click="processor.collapsed = !processor.collapsed"
     type="button"
-    class="btn btn-default btn-xs processor-ui-container-header-toggle">
+    class="btn btn-primary btn-xs processor-ui-container-header-toggle">
     <i aria-hidden="true" ng-class="{ 'fa-caret-down': !processor.collapsed, 'fa-caret-right': processor.collapsed }" class="fa"></i>
   </button>
 
@@ -31,7 +31,7 @@
       tooltip-append-to-body="true"
       ng-click="pipeline.moveUp(processor)"
       type="button"
-      class="btn btn-xs btn-default"
+      class="btn btn-xs btn-primary"
       ng-disabled="pipeline.hasCompileError">
       <i aria-hidden="true" class="fa fa-caret-up"></i>
     </button>
@@ -42,7 +42,7 @@
       tooltip-append-to-body="true"
       ng-click="pipeline.moveDown(processor)"
       type="button"
-      class="btn btn-xs btn-default"
+      class="btn btn-xs btn-primary"
       ng-disabled="pipeline.hasCompileError">
       <i aria-hidden="true" class="fa fa-caret-down"></i>
     </button>

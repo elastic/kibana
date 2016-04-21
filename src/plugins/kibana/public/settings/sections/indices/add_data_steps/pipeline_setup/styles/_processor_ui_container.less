@@ -5,6 +5,8 @@
 processor-ui-container {
   display: block;
   margin-bottom: 1px;
+  border-bottom: 2px solid;
+  border-color: white;
 
   .processor-ui-container-body {
     display: block;
@@ -12,7 +14,8 @@ processor-ui-container {
     position: relative;
 
     &-content {
-      padding: 5px;
+      padding: 10px;
+      background-color: white;
     }
 
     .overlay {
@@ -23,7 +26,7 @@ processor-ui-container {
       left: -5000px;
       width: 10000px;
       height: 10000px;
-      background-color: @settings-pipeline-setup-processor-container-overlay-bg;
+      background-color: @settings-filebeat-wizard-processor-container-overlay-bg;
     }
 
     &.locked {
@@ -37,4 +40,14 @@ processor-ui-container {
     margin-bottom: 5px;
   }
 
+  .form-control {
+    background-color: #f5fafb;
+    border-color: #86bbcb;
+    border-width: 1px;
+    border-radius: 4px;
+  }
+
+  label {
+    font-weight: normal;
+  }
 }
