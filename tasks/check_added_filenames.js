@@ -16,4 +16,4 @@ module.exports = function registerCheckAddedFilenames(grunt) {
       grunt.fail.fatal(`Filenames must use snake_case.\n${invalid}`);
     }
   });
-}
+};

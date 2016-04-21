@@ -43,4 +43,4 @@ module.exports = function (grunt) {
     grunt.config.set('eslint.staged.options.paths', files);
     grunt.task.run(['eslint:staged']);
   });
-}
+};
