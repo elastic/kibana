@@ -2,7 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 
 import metadata from 'ui/metadata';
-import 'babel/polyfill';
+import 'babel-polyfill';
 import 'ui/timefilter';
 import 'ui/notify';
 import 'ui/private';
