@@ -1,0 +1,73 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+.wizard-container {
+  padding: 0 10px;
+
+  .form-group {
+    margin-bottom: 5px;
+  }
+
+  .form-control {
+    background-color: #f5fafb;
+    border-color: @kibanaBlue3;
+    border-width: 1px;
+    border-radius: 4px;
+  }
+
+  label {
+    font-weight: normal;
+  }
+}
+
+.wizard-step-headings{
+  padding-top: 14px;
+
+  .wizard-step-heading {
+    font-size: 1.3em;
+    padding: 6px 18px;
+    margin: 0 2px;
+    background-color: @settings-add-data-wizard-step-heading-complete-background;
+    color: @settings-add-data-wizard-step-heading-complete-color;
+
+    &.active {
+      cursor: default;
+      background-color: @settings-add-data-wizard-step-heading-active-background;
+      color: @settings-add-data-wizard-step-heading-active-color;
+    }
+    &.aheadActive {
+      cursor: default;
+      background-color: @settings-add-data-wizard-step-heading-incomplete-background;
+      color: @settings-add-data-wizard-step-heading-incomplete-color;
+    }
+  }
+
+  &.complete {
+    .wizard-step-heading:not(.active) {
+      cursor: default;
+    }
+  }
+}
+
+.wizard-step-title {
+  padding-bottom: 14px;
+}
+
+.pattern-review {
+  .time-field-input {
+    padding-left: 14px;
+    margin-bottom: 0;
+  }
+
+  .pattern-input {
+    width: 300px;
+  }
+}
+
+.paste-samples {
+  textarea {
+    width: 100%;
+    height: 250px;
+  }
+}
