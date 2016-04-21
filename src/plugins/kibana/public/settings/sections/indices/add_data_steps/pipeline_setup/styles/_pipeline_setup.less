@@ -10,10 +10,18 @@ pipeline-setup {
     .left-panel {
       .flex-parent(1, 1, 1px);
       width: 50%;
-      margin-right:10px;
 
       &>label {
         margin-bottom: 2px;
+      }
+    }
+
+    .center-panel {
+      .flex-parent(0, 0, auto, column);
+      justify-content: center;
+
+      .buttons {
+        .flex-parent(0, 0, auto, column);
       }
     }
 
