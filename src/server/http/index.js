@@ -163,8 +163,12 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
-      const url = await shortUrlLookup.getUrl(request.params.urlId);
-      reply().redirect(config.get('server.basePath') + url);
+      try {
+        const url = await shortUrlLookup.getUrl(request.params.urlId);
+        reply().redirect(config.get('server.basePath') + url);
+      } catch (err) {
+        reply(err);
+      }
     }
   });
 
@@ -172,8 +176,12 @@ module.exports = function (kbnServer, server, config) {
     method: 'POST',
     path: '/shorten',
     handler: async function (request, reply) {
-      const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
-      reply(urlId);
+      try {
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        reply(urlId);
+      } catch (err) {
+        reply(err);
+      }
     }
   });
 
