@@ -32,8 +32,9 @@ export function download(settings, logger) {
 
     return _downloadSingle(settings, logger, sourceUrl)
     .catch((err) => {
-      if ((err instanceof UnsupportedProtocolError)
-        || (err.message === 'ENOTFOUND')) {
+      const isUnsupportedProtocol = err instanceof UnsupportedProtocolError;
+      const isDownloadResourceNotFound = err.message === 'ENOTFOUND';
+      if (isUnsupportedProtocol || isDownloadResourceNotFound) {
         return tryNext();
       }
       throw (err);
