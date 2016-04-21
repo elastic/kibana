@@ -38,8 +38,8 @@
   <div class="center-panel">
     <div class="buttons">
       <button
-        aria-label="Collapse Left Panel"
-        tooltip="Collapse Left Panel"
+        aria-label="{{expandContext > 1 ? 'Expand Right Panel' : 'Collapse Left Panel'}}"
+        tooltip="{{expandContext > 1 ? 'Expand Right Panel' : 'Collapse Left Panel'}}"
         ng-click="expandContext = expandContext - 1"
         ng-disabled="expandContext < 1"
         type="button"
@@ -47,8 +47,8 @@
         <i aria-hidden="true" class="fa fa-chevron-circle-left"></i>
       </button>
       <button
-        aria-label="Collapse Right Panel"
-        tooltip="Collapse Right Panel"
+        aria-label="{{expandContext < 1 ? 'Expand Left Panel' : 'Collapse Right Panel'}}"
+        tooltip="{{expandContext < 1 ? 'Expand Left Panel' : 'Collapse Right Panel'}}"
         ng-click="expandContext = expandContext + 1"
         ng-disabled="expandContext > 1"
         type="button"
