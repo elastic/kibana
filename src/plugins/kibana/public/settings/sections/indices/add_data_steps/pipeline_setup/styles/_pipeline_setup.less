@@ -3,6 +3,31 @@
 @import (reference) "~ui/styles/theme";
 
 pipeline-setup {
+  .main-panels {
+    display: flex;
+    margin-bottom: 10px;
+
+    .left-panel {
+      .flex-parent(1, 1, 1px);
+      width: 50%;
+      margin-right:10px;
+
+      &>label {
+        margin-bottom: 2px;
+      }
+    }
+
+    .right-panel {
+      .flex-parent(1, 1, 1px, column);
+      width: 50%;
+    }
+
+    .pipeline {
+      min-height: 450px;
+      background-color: @settings-filebeat-wizard-panel-bg;
+    }
+  }
+
   label {
     margin-bottom: 0px;
   }
@@ -10,20 +35,36 @@ pipeline-setup {
   ul.pipeline-container {
     list-style-type: none;
     padding: 0px;
+    margin-bottom: 0px;
 
     &>li {
-      border: 1px solid;
-      border-color: @settings-pipeline-setup-pipeline-border;
+      padding: 1px;
     }
   }
 
-  .empty-pipeline {
-    border: 1px solid;
-    border-color: @settings-pipeline-setup-pipeline-border;
-    padding: 5px;
+  pre {
+    border: none;
+    background-color: @settings-filebeat-wizard-panel-bg;
+    border-radius: 0px;
+    white-space: pre-wrap;
+    margin: 0px;
+  }
 
-    p {
-      font-size: 15px;
+  .add-processor {
+    padding:10px;
+    margin-bottom: 10px;
+
+    &-dropdown {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      select {
+        background-color: @settings-filebeat-wizard-processor-select-bg;
+        border: none;
+        width: auto;
+        margin-right: 5px;
+      }
     }
   }
 }
