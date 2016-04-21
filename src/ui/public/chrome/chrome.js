@@ -4,7 +4,7 @@ import angular from 'angular';
 
 
 import metadata from 'ui/metadata';
-import 'babel/polyfill';
+import 'babel-polyfill';
 import $ from 'jquery';
 import 'ui/timefilter';
 import 'ui/private';
