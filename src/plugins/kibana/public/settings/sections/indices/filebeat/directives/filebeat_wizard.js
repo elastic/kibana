@@ -19,6 +19,11 @@ modules.get('apps/settings')
     controller: function ($scope, AppState, safeConfirm, kbnUrl, $http, Notifier, $window, config, Private) {
       const ingest = Private(IngestProvider);
       const $state = this.state = new AppState();
+      const filebeatWizardForm = this.form;
+
+      this.patternValidator = function (modelValue, viewValue) {
+        return viewValue.search(/.+-\*$/) !== -1;
+      };
 
       var notify = new Notifier({
         location: 'Add Data'

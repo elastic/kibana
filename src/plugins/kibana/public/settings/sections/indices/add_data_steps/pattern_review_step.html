@@ -4,29 +4,33 @@
   fields can be changed if we got it wrong!
 </div>
 
-<div class="pattern-review">
-  <div>
-    <label>Index name or pattern</label>
-    <kbn-info info="Patterns allow you to define dynamic index names using * as a wildcard. Example: filebeat-*"></kbn-info>
+<form name="reviewStep.form">
+  <div class="pattern-review">
+    <div class="alert alert-danger" ng-show="reviewStep.form.pattern.$error.pattern">{{ reviewStep.patternErrorMessage }}</div>
+    <div>
+      <label>Index name or pattern</label>
+      <kbn-info
+        info="Patterns allow you to define dynamic index names using * as a wildcard. Example: filebeat-*"></kbn-info>
+    </div>
+    <input name="pattern" required ng-model="reviewStep.indexPattern.id" class="pattern-input"/>
+    <label>
+      <input ng-model="reviewStep.isTimeBased" type="checkbox"/>
+      time based
+    </label>
+    <label ng-if="reviewStep.isTimeBased" class="time-field-input">
+      Time Field
+      <select ng-model="reviewStep.indexPattern.timeFieldName" name="time_field_name">
+        <option ng-repeat="field in reviewStep.dateFields" value="{{field}}">
+          {{field}}
+        </option>
+      </select>
+    </label>
   </div>
-  <input ng-model="reviewStep.indexPattern.id" class="pattern-input"/>
-  <label>
-    <input ng-model="reviewStep.isTimeBased" type="checkbox"/>
-    time based
-  </label>
-  <label ng-if="reviewStep.isTimeBased" class="time-field-input">
-    Time Field
-    <select ng-model="reviewStep.indexPattern.timeFieldName" name="time_field_name">
-      <option ng-repeat="field in reviewStep.dateFields" value="{{field}}">
-        {{field}}
-      </option>
-    </select>
-  </label>
-</div>
 
-<div>
-  <paginated-table
-    columns="reviewStep.columns"
-    rows="reviewStep.rows">
-  </paginated-table>
-</div>
+  <div>
+    <paginated-table
+      columns="reviewStep.columns"
+      rows="reviewStep.rows">
+    </paginated-table>
+  </div>
+</form>
