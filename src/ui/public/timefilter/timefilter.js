@@ -19,10 +19,8 @@ uiRoutes
 uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
-
   let Events = Private(EventsProvider);
   let diff = Private(UtilsDiffTimePickerValsProvider);
-
 
   function convertISO8601(stringTime) {
     let obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
