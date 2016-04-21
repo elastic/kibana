@@ -21,4 +21,4 @@ module.exports = function (grunt) {
     grunt.config.set('eslint.staged.files.src', files);
     grunt.task.run(['eslint:staged']);
   });
-}
+};
