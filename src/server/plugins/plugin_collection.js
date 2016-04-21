@@ -41,7 +41,13 @@ module.exports = class Plugins extends Collection {
     const api = new PluginApi(this.kbnServer, path);
     this[pluginApis].add(api);
 
-    const output = [].concat(require(path)(api) || []);
+    // add compatibility for es6 modules built by babel
+    const defaultExport = require(path);
+    if (defaultExport && defaultExport.__esModule) {
+      defaultExport = defaultExport.default;
+    }
+
+    const output = [].concat(defaultExport(api) || []);
     const config = this.kbnServer.config;
 
     if (!output.length) return;

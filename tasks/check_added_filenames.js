@@ -1,6 +1,6 @@
 import { isAdded, getFilename } from './utils/files_to_commit';
 
-export default function registerCheckAddedFilenames(grunt) {
+module.exports = function registerCheckAddedFilenames(grunt) {
   grunt.registerTask('checkAddedFilenames', function () {
     grunt.task.requires('collectFilesToCommit');
 

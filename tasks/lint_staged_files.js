@@ -6,7 +6,7 @@ import minimatch from 'minimatch';
 
 const root = resolve(__dirname, '..');
 
-export default function (grunt) {
+module.exports = function (grunt) {
   grunt.registerTask('lintStagedFiles', function () {
     grunt.task.requires('collectFilesToCommit');
 
