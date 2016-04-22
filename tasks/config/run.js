@@ -5,6 +5,7 @@ module.exports = function (grunt) {
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
   let uiConfig = require(root('test/server_config'));
+  let chromedriver = require('chromedriver');
 
   const stdDevArgs = [
     '--env.name=development',
@@ -112,35 +113,31 @@ module.exports = function (grunt) {
       ]
     },
 
-    seleniumServer: {
+    chromeDriver: {
       options: {
         wait: false,
-        ready: /Selenium Server is up and running/,
-        quiet: true,
-        failOnError: false
-      },
-      cmd: 'java',
-      args: [
-        '-jar',
-        '<%= downloadSelenium.options.selenium.path %>',
-        '-port',
-        uiConfig.servers.webdriver.port,
-      ]
-    },
-
-    devSeleniumServer: {
-      options: {
-        wait: false,
-        ready: /Selenium Server is up and running/,
+        ready: /Starting ChromeDriver/,
         quiet: false,
         failOnError: false
       },
-      cmd: 'java',
+      cmd: chromedriver.path,
       args: [
-        '-jar',
-        '<%= downloadSelenium.options.selenium.path %>',
-        '-port',
-        uiConfig.servers.webdriver.port,
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub',
+      ]
+    },
+
+    devChromeDriver: {
+      options: {
+        wait: false,
+        ready: /Starting ChromeDriver/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: chromedriver.path,
+      args: [
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub',
       ]
     },
 
