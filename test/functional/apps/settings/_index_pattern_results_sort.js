@@ -94,7 +94,7 @@ define(function (require) {
         });
 
         bdd.it('makelogs data should have expected number of fields', function () {
-          return common.tryForTime(defaultTimeout, function () {
+          return common.try(function () {
             return settingsPage.getFieldsTabCount()
             .then(function (tabCount) {
               expect(tabCount).to.be('' + expectedFieldCount);
