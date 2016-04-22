@@ -9,6 +9,7 @@ export default (function () {
   var _ = require('lodash');
   var parse = require('url').parse;
   var format = require('url').format;
+  var util = require('util');
   var path = require('path');
 
   function injectTimestampQuery(func, url) {
@@ -210,12 +211,12 @@ export default (function () {
       return this.tryForTime(defaultTimeout, block);
     },
 
-    log: function log(logString) {
-      console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
+    log(...args) {
+      console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
     },
 
-    debug: function debug(logString) {
-      if (config.debug) this.log(logString);
+    debug(...args) {
+      if (config.debug) this.log(...args);
     },
 
     sleep: function sleep(sleepMilliseconds) {
