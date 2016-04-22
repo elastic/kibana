@@ -37,7 +37,12 @@ export default (grunt) => {
       '-k', '100',
       rpm.filePath,
       '-r', 'external-1'
-    ]);
+    ], {
+      env: {
+        'AWS_ACCESS_KEY': rpm.awsKey,
+        'AWS_SECRET_KEY': rpm.awsSecret
+      }
+    });
   }
 
   grunt.registerTask('publishPackages:staging', [
@@ -96,7 +101,9 @@ export default (grunt) => {
             filePath: platform.rpmPath,
             bucket: packages[environment].bucket,
             prefix: packages[environment].rpmPrefix.replace('XXXXXXX', trimmedHash),
-            signingKeyName: signature.name
+            signingKeyName: signature.name,
+            awsKey: aws.key,
+            awsSecret: aws.secret
           });
         }
       });
