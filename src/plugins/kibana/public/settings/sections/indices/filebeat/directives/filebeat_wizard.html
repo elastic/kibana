@@ -25,7 +25,7 @@
   <div ng-switch="wizard.currentStep">
     <div ng-switch-when="0">
       <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
-      <div class="filebeat-wizard-buttons">
+      <div class="wizard-nav-buttons">
         <div></div>
         <div>
           <button
@@ -45,7 +45,7 @@
         samples="wizard.stepResults.samples">
       </pipeline-setup>
 
-      <div class="filebeat-wizard-buttons">
+      <div class="wizard-nav-buttons">
         <div>
           <button
             class="btn btn-secondary"
@@ -71,7 +71,7 @@
         sample-doc="wizard.stepResults.pipeline.output">
       </pattern-review-step>
 
-      <div class="filebeat-wizard-buttons">
+      <div class="wizard-nav-buttons">
         <div>
           <button
             class="btn btn-secondary"
