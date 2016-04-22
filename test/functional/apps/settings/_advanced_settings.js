@@ -35,11 +35,11 @@ define(function (require) {
           .then(function (advancedSetting) {
             expect(advancedSetting).to.be('America/Phoenix');
           })
-          .then(function (advancedSetting) {
+          .then(function () {
             return settingsPage.setAdvancedSettings('dateFormat:tz', 'UTC');
           })
-          .then(function (advancedSetting) {
-            ;return settingsPage.clickIndicesTab();
+          .then(function () {
+            return settingsPage.clickIndicesTab();
           })
           .catch(common.handleError(this));
         });
