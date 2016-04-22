@@ -85,8 +85,8 @@
             ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
                 ng-click="wizard.save()">
           Save
-        </button>
-      </div>
+          </button>
+        </div>
         <div></div>
       </div>
     </div>
@@ -94,13 +94,16 @@
     <div ng-switch-when="3">
       <install-filebeat-step results="wizard.stepResults"></install-filebeat-step>
 
-      <div class="nav-buttons">
-        Click Done to go explore your data
-        <button
-          class="btn btn-primary"
-          ng-click="wizard.nextStep()">
-          Done
-        </button>
+      <div class="wizard-nav-buttons">
+        <div></div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-click="wizard.nextStep()">
+            Done
+          </button>
+        </div>
+        <div></div>
       </div>
     </div>
   </div>
