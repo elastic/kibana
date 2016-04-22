@@ -62,8 +62,11 @@ define(function (require) {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
+      // navUrl includes user:password@ for use with Shield
+       // appUrl excludes user:password@ to match what getCurrentUrl returns
+      var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + appUrl);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl + ' (navUrl=' + navUrl + ')');
 
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
@@ -107,6 +110,7 @@ define(function (require) {
             // }
           })
           .then(function (currentUrl) {
+            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
