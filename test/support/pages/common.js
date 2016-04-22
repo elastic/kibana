@@ -64,7 +64,7 @@ define(function (require) {
       self.debug('navigating to ' + appName + ' url: ' + navUrl);
 
       var doNavigation = function (url) {
-        return self.tryForTime(defaultTimeout, function () {
+        return self.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           self.debug('navigate to: ' + url);
           return self.remote.get(url)
@@ -110,7 +110,7 @@ define(function (require) {
       return doNavigation(navUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
-        return self.tryForTime(defaultTimeout, function () {
+        return self.try(function () {
           // give the app time to update the URL
           return self.sleep(501)
           .then(function () {
@@ -206,6 +206,10 @@ define(function (require) {
       }
 
       return Promise.try(attempt);
+    },
+
+    try(block) {
+      return this.tryForTime(defaultTimeout, block);
     },
 
     log: function log(logString) {
