@@ -171,6 +171,7 @@ export default (function () {
       var tempMessage;
 
       function attempt() {
+        self.debug('tryForTime starting attempt');
         lastTry = Date.now();
 
         if (lastTry - start > timeout) {
@@ -179,6 +180,7 @@ export default (function () {
 
         return Promise
         .try(block)
+        .then(() => self.debug('tryForTime success'))
         .catch(function tryForTimeCatch(err) {
           self.debug('tryForTime failure: ' + err.message);
           tempMessage = err.message;
