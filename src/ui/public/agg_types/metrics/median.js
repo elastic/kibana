@@ -22,6 +22,11 @@ export default function AggTypeMetricMaxProvider(Private) {
       {
         name: 'percents',
         default: [50]
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        }
       }
     ],
     getResponseAggs: percentiles.getResponseAggs,
