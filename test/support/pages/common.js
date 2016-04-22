@@ -62,11 +62,8 @@ define(function (require) {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      // navUrl includes user:password@ for use with Shield
-       // appUrl excludes user:password@ to match what getCurrentUrl returns
-      var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + appUrl + ' (navUrl=' + navUrl + ')');
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
@@ -96,18 +93,18 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
-            // var loginPage = new RegExp('login').test(currentUrl);
-            // if (loginPage) {
-            //   self.debug('Found loginPage = ' + loginPage + ', username = '
-            //     + config.servers.kibana.shield.username);
-            //   return shieldPage.login(config.servers.kibana.shield.username,
-            //     config.servers.kibana.shield.password)
-            //   .then(function () {
-            //     return self.remote.getCurrentUrl();
-            //   });
-            // } else {
-            return self.remote.getCurrentUrl();
-            // }
+            var loginPage = new RegExp('login').test(currentUrl);
+            if (loginPage) {
+              self.debug('Found loginPage = ' + loginPage + ', username = '
+                + config.servers.kibana.shield.username);
+              return shieldPage.login(config.servers.kibana.shield.username,
+                config.servers.kibana.shield.password)
+              .then(function () {
+                return self.remote.getCurrentUrl();
+              });
+            } else {
+              return self.remote.getCurrentUrl();
+            }
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
@@ -119,7 +116,6 @@ define(function (require) {
               self.debug(msg);
               throw new Error(msg);
             }
-
             return currentUrl;
           });
         });
