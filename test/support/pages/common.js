@@ -54,76 +54,58 @@ export default (function () {
       return getUrl.baseUrl(config.servers.kibana);
     },
 
-    navigateToApp: function (appName, testStatusPage) {
-      var self = this;
+    async navigateToApp(appName, testStatusPage) {
       // navUrl includes user:password@ for use with Shield
       // appUrl excludes user:password@ to match what getCurrentUrl returns
       var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + navUrl);
+      this.debug('navigating, app: %j url: %j', appName, navUrl);
 
-      var doNavigation = function (url) {
-        return self.try(function () {
-          // since we're using hash URLs, always reload first to force re-render
-          self.debug('navigate to: ' + url);
-          return self.remote.get(url)
-          .then(function () {
-            self.debug('returned from get, calling refresh');
-            return self.remote.refresh();
-          })
-          .then(function () {
-            self.debug('check testStatusPage');
-            if (testStatusPage !== false) {
-              self.debug('self.checkForKibanaApp()');
-              return self.checkForKibanaApp()
-              .then(function (kibanaLoaded) {
-                self.debug('kibanaLoaded = ' + kibanaLoaded);
-                if (!kibanaLoaded) {
-                  var msg = 'Kibana is not loaded, retrying';
-                  self.debug(msg);
-                  throw new Error(msg);
-                }
-              });
-            }
-          })
-          .then(function () {
-            return self.remote.getCurrentUrl();
-          })
-          .then(function (currentUrl) {
-            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-            var navSuccessful = new RegExp(appUrl).test(currentUrl);
-            if (!navSuccessful) {
-              var msg = 'App failed to load: ' + appName +
-              ' in ' + defaultTimeout + 'ms' +
-              ' appUrl = ' + appUrl +
-              ' currentUrl = ' + currentUrl;
-              self.debug(msg);
-              throw new Error(msg);
-            }
+      const navigate = async () => {
+        await this.remote.get(navUrl);
+        await this.remote.refresh();
 
-            return currentUrl;
-          });
-        });
+        if (testStatusPage !== false) {
+          this.debug('checking that application is kibana, not status page');
+          if (!await this.checkAppIsKibana()) {
+            throw new Error('App is not kibana, retrying');
+          }
+        }
       };
 
-      return doNavigation(navUrl)
-      .then(function (currentUrl) {
-        var lastUrl = currentUrl;
-        return self.try(function () {
-          // give the app time to update the URL
-          return self.sleep(501)
-          .then(function () {
-            return self.remote.getCurrentUrl();
-          })
-          .then(function (currentUrl) {
-            self.debug('in doNavigation url = ' + currentUrl);
-            if (lastUrl !== currentUrl) {
-              lastUrl = currentUrl;
-              throw new Error('URL changed, waiting for it to settle');
-            }
-          });
-        });
+      const verifyPropertyNavigation = async () => {
+        let currentUrl = await this.remote.getCurrentUrl();
+        currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
+
+        if (!currentUrl.includes(appUrl)) {
+          throw new Error(
+            `App failed to load: "${appName}"\n` +
+            `  appUrl = ${appUrl}\n` +
+            `  currentUrl = ${currentUrl}`
+          );
+        }
+      };
+
+      await this.try(async () => {
+        await navigate();
+        await this.waitForUrlToStabilize();
+        await verifyPropertyNavigation();
       });
+    },
+
+    async waitForUrlToStabilize(pauseMs = 500) {
+      let prevUrl;
+      let curUrl;
+
+      do {
+        if (prevUrl) {
+          this.debug('waiting for url to stabilize');
+          this.sleep(pauseMs);
+        }
+
+        prevUrl = curUrl;
+        curUrl = await this.remote.getCurrentUrl();
+      } while (prevUrl !== curUrl);
     },
 
     runScript: function (fn, timeout) {
@@ -164,7 +146,7 @@ export default (function () {
       });
     },
 
-    checkForKibanaApp: function () {
+    checkAppIsKibana() {
       var self = this;
 
       return self.getApp()
