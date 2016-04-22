@@ -81,13 +81,12 @@ import {
         bdd.it('load query should show query name', function () {
           return discoverPage.loadSavedSearch(queryName1)
           .then(function () {
-            return common.sleep(3000);
-          })
-          .then(function () {
-            return discoverPage.getCurrentQueryName();
-          })
-          .then(function (actualQueryNameString) {
-            expect(actualQueryNameString).to.be(queryName1);
+            return common.try(function () {
+              return discoverPage.getCurrentQueryName()
+              .then(function (actualQueryNameString) {
+                expect(actualQueryNameString).to.be(queryName1);
+              });
+            });
           })
           .catch(common.handleError(this));
         });
@@ -110,8 +109,8 @@ import {
             '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
             '118.562', '63.524', '17.587', '2.537'
           ];
-          return common.sleep(4000)
-          .then(function () {
+
+          return common.try(function () {
             return verifyChartData(expectedBarChartData);
           })
           .catch(common.handleError(this));
@@ -152,10 +151,9 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -167,10 +165,9 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -180,10 +177,9 @@ import {
           var expectedBarChartData = [ '66.598', '129.458'];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -193,10 +189,9 @@ import {
           var expectedBarChartData = [ '122.535'];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -206,10 +201,9 @@ import {
           var expectedBarChartData = [ '122.535'];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -224,10 +218,9 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(4000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
