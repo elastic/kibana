@@ -14,10 +14,10 @@ define(function (require) {
 
         return scenarioManager.reload('emptyKibana')
         .then(function () {
-          return settingsPage.navigateTo()
-          .then(function () {
-            return settingsPage.clickIndicesTab();
-          });
+          return settingsPage.navigateTo();
+        })
+        .then(function () {
+          return settingsPage.clickIndicesTab();
         });
       });
 
