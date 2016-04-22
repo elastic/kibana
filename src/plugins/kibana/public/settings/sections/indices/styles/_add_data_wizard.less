@@ -50,6 +50,32 @@
   padding-bottom: 14px;
 }
 
+.nav-buttons {
+  float: right;
+}
+
+.wizard-nav-buttons {
+  display: flex;
+  float: none;
+  margin-top: 14px;
+
+  div {
+    width:100px;
+    flex: 1 1 auto;
+    display: flex;
+  }
+
+  :nth-child(1) {
+    justify-content: flex-start;
+  }
+  :nth-child(2) {
+    justify-content: center;
+  }
+  :nth-child(3) {
+    justify-content: flex-end;
+  }
+}
+
 .paste-samples {
   textarea {
     width: 100%;
