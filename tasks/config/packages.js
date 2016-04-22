@@ -6,8 +6,6 @@ export default (grunt) => {
   const debFolder = 'debian';
 
   return {
-    signingKeyId: process.env.KIBANA_SIGNING_KEY_ID,
-    signingKeyName: process.env.KIBANA_SIGNING_KEY_NAME,
     staging: {
       bucket: 'download.elasticsearch.org',
       debPrefix: `${stagingPath}/${debFolder}`,

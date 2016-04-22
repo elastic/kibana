@@ -69,8 +69,9 @@ export default (grunt) => {
   });
 
   grunt.registerTask('_publishPackages:upload', function (environment) {
-    const done = this.async();
     const aws = grunt.file.readJSON('.aws-config.json');
+    const signature = grunt.file.readJSON('.signing-config.json');
+
     const simpleGit = new SimpleGit();
     const revparse = promisify(simpleGit.revparse, simpleGit);
 
@@ -83,7 +84,7 @@ export default (grunt) => {
             filePath: platform.debPath,
             bucket: packages[environment].bucket,
             prefix: packages[environment].debPrefix.replace('XXXXXXX', trimmedHash),
-            signatureKeyId: packages.signingKeyId,
+            signatureKeyId: signature.id,
             arch: platform.name.match('x64') ? 'amd64' : 'i386',
             awsKey: aws.key,
             awsSecret: aws.secret
@@ -95,7 +96,7 @@ export default (grunt) => {
             filePath: platform.rpmPath,
             bucket: packages[environment].bucket,
             prefix: packages[environment].rpmPrefix.replace('XXXXXXX', trimmedHash),
-            signingKeyName: packages.signingKeyName
+            signingKeyName: signature.name
           });
         }
       });
