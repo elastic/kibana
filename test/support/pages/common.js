@@ -93,18 +93,18 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
-            var loginPage = new RegExp('login').test(currentUrl);
-            if (loginPage) {
-              self.debug('Found loginPage = ' + loginPage + ', username = '
-                + config.servers.kibana.shield.username);
-              return shieldPage.login(config.servers.kibana.shield.username,
-                config.servers.kibana.shield.password)
-              .then(function () {
-                return self.remote.getCurrentUrl();
-              });
-            } else {
-              return self.remote.getCurrentUrl();
-            }
+            // var loginPage = new RegExp('login').test(currentUrl);
+            // if (loginPage) {
+            //   self.debug('Found loginPage = ' + loginPage + ', username = '
+            //     + config.servers.kibana.shield.username);
+            //   return shieldPage.login(config.servers.kibana.shield.username,
+            //     config.servers.kibana.shield.password)
+            //   .then(function () {
+            //     return self.remote.getCurrentUrl();
+            //   });
+            // } else {
+            return self.remote.getCurrentUrl();
+            // }
           })
           .then(function (currentUrl) {
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
