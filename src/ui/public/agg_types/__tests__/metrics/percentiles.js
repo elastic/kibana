@@ -32,7 +32,7 @@ describe('AggTypeMetricPercentilesProvider class', function () {
     let responseAggs = aggTypeMetricPercentiles.getResponseAggs(aggConfig);
     let ninetyFifthPercentileLabel = responseAggs[0].makeLabel();
 
-    expect(ninetyFifthPercentileLabel).to.be('95th prince of bytes');
+    expect(ninetyFifthPercentileLabel).to.be('95th percentile of prince');
   });
 
 });
