@@ -37,7 +37,7 @@ define(function (require) {
       parsed.query = {};
     }
     func(parsed);
-    return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
+    return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash'));
   }
 
   function Common(remote) {
@@ -125,7 +125,7 @@ define(function (require) {
         });
       };
 
-      return doNavigation(navUrl)
+      return doNavigation(appUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
