@@ -240,22 +240,19 @@ import {
             return discoverPage.getBarChartData()
             .then(function compareData(paths) {
               // the largest bars are over 100 pixels high so this is less than 1% tolerance
-              var barHeightTolerance = 1;
-              var stringResults = '';
-              var hasFailure = false;
-              for (var y = 0; y < expectedBarChartData.length; y++) {
-                stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
-                 ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
-                if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
-                  hasFailure = true;
-                };
-              };
+              const barHeightTolerance = 1;
+              let hasFailure = false;
+              const debugLines = [];
+
+              expectedBarChartData.forEach((expected, i) => {
+                const actual = paths[i];
+                const pass = Math.abs(expected - actual) < barHeightTolerance;
+                debugLines.push(`  ${i}: pass: ${pass}, expected: ${expected}, actual: ${actual}`);
+                if (!pass) hasFailure = true;
+              });
+
               if (hasFailure) {
-                common.log(stringResults);
-                common.log(paths);
-              }
-              for (var x = 0; x < expectedBarChartData.length; x++) {
-                expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
+                throw new Error(`Chart data does not match expected:\n${debugLines.join('\n')}`);
               }
             });
           });
