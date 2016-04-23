@@ -12,6 +12,7 @@ var eslint = require('gulp-eslint');
 var rimraf = require('rimraf');
 var zip = require('gulp-zip');
 var fs = require('fs');
+var child = require('child_process');
 
 var pkg = require('./package.json');
 var packageName = pkg.name  + '-' + pkg.version;
@@ -182,4 +183,21 @@ gulp.task('dev', ['sync'], function (done) {
     'series_functions/**/*',
     'timelion.json'
   ], ['sync', 'lint']);
+});
+
+gulp.task('test', [], function (done) {
+  // A complete hack, but I have no wifi and I want to write tests
+  child.exec('cd ../kibana/installedPlugins/timelion; npm test', function (err, stdout, stderr) {
+    if (err) done(err.code);
+    else done();
+
+    if (stdout) process.stdout.write(stdout);
+    if (stderr) process.stderr.write(stderr);
+  });
+});
+
+gulp.task('dev:test', [], function (done) {
+  gulp.watch([
+    '../kibana/installedPlugins/timelion/**/__test__/**/*'
+  ], ['test']);
 });
