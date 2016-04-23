@@ -6,7 +6,7 @@ env:
   amd: true
   node: true
   browser: true
-
+  jasmine: true
 
 rules:
   block-scoped-var: 2
