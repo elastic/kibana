@@ -33,9 +33,9 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
     let avgLabel = responseAggs[1].makeLabel();
     let upperStdDevLabel = responseAggs[2].makeLabel();
 
-    expect(lowerStdDevLabel).to.be('Lower custom label of memory');
+    expect(lowerStdDevLabel).to.be('Lower custom label');
     expect(avgLabel).to.be('Average of memory'); // not expected to use custom label
-    expect(upperStdDevLabel).to.be('Upper custom label of memory');
+    expect(upperStdDevLabel).to.be('Upper custom label');
   });
 
 });
