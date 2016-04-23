@@ -16,7 +16,7 @@ timefield | *string* | Field of type "date" to use for x-axis
 interval | *string* | **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker  
 url | *string* | Elasticsearch server URL, eg http://localhost:9200  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
 #### .graphite()
 Pull data from graphite. Configure your graphite server in timelion.json
@@ -25,7 +25,7 @@ Argument | Accepts | Description
 --- | --- | ---
 metric | *string* | Graphite metric to pull, eg _test-data.users.*.data  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
 #### .quandl()
 Pull data from quandl.com using the quandl code. Stick your free API key in timelion.json. API is rate limited without a key
@@ -35,7 +35,7 @@ Argument | Accepts | Description
 code | *string* | The quandl code to plot. You can find these on quandl.com.  
 position | *number* | Some quandl sources return multiple series, which one should I use? 1 based index.  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
 #### .static()
 Draws a single value across the chart
@@ -45,7 +45,7 @@ Argument | Accepts | Description
 value | *number* | The single vale to to display  
 label | *string* | A quick way to set the label for the series. You could also use the .label() function  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
 #### .worldbank_indicators()
 Pull data from http://data.worldbank.org/ using the country name and indicator. The worldbank provides mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent time ranges.
@@ -55,7 +55,7 @@ Argument | Accepts | Description
 country | *string* | Worldbank country identifier. Usually the country's 2 letter code  
 indicator | *string* | The indicator code to use. You'll have to look this up on data.worldbank.org. Often pretty obtuse. Eg SP.POP.TOTL is population  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
 #### .worldbank()
 Pull data from http://data.worldbank.org/ using path to series. The worldbank provides mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent time ranges.
@@ -64,7 +64,7 @@ Argument | Accepts | Description
 --- | --- | ---
 code | *string* | Worldbank API path. This is usually everything after the domain, before the querystring. Eg: /en/countries/ind;chn/indicators/DPANUSSPF.  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, nearest, none, scale  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
 ### Chainable functions
 Chainable functions can not start a chain. Somewhere before them must be a data source function. Chainable functions modify the data output directly from a data source, or from another chainable function that has a data source somewhere before it.
@@ -127,7 +127,7 @@ Fills null values using a defined fit function
 
 Argument | Accepts | Description
 --- | --- | ---
-mode | *string* | The algorithm to use for fitting the series to the target. One of: average, nearest, none, scale  
+mode | *string* | The algorithm to use for fitting the series to the target. One of: average, carry, nearest, none, scale  
 
 #### .hide()
 Hide the series by default

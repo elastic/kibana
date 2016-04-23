@@ -3,9 +3,10 @@ var config = require('../../timelion.json');
 try {config = _.merge(config, require('../../timelion.private.json'));} catch (e) {}; //eslint-disable-line no-empty
 
 var buildTarget = require('../../lib/build_target.js');
-var targetSeries;
 
 module.exports = function (setup) {
+  var targetSeries;
+
   var tlConfig = {
     time: {
       from: 'now-12M',
