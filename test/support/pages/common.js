@@ -125,7 +125,7 @@ define(function (require) {
         });
       };
 
-      return doNavigation(appUrl)
+      return doNavigation(navUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
