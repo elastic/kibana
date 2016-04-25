@@ -16,6 +16,7 @@ export default function visualizationLoader(savedVisualizations, Private) { // I
         savedObj: savedVis,
         panel: panel,
         uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
+        setUiState(uiState) { savedVis.vis.setUiState(uiState); },
         editUrl: savedVisualizations.urlFor(panel.id)
       };
     });

@@ -58,6 +58,9 @@ uiModules
           if (panelConfig.uiState) {
             panelConfig.uiState = $scope.uiState;
           }
+          if (panelConfig.setUiState) {
+            panelConfig.setUiState($scope.uiState);
+          }
 
           $scope.filter = function (field, value, operator) {
             const index = $scope.savedObj.searchSource.get('index').id;

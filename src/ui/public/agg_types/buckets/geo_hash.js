@@ -75,8 +75,8 @@ export default function GeoHashAggDefinition(Private, config) {
         },
         write: function (aggConfig, output) {
           let currZoom = null;
-          if (aggConfig.params.mapZoom || aggConfig.vis.uiState) { // First iteration
-            currZoom = aggConfig.vis.uiState ? aggConfig.vis.uiState.get('mapZoom') : aggConfig.params.mapZoom;
+          if (aggConfig.params.mapZoom || aggConfig.vis.hasUiState()) { // First iteration
+            currZoom = aggConfig.vis.hasUiState() ? aggConfig.vis.uiStateVal('mapZoom') : aggConfig.params.mapZoom;
           }
           currZoom = currZoom || aggConfig.vis.params.mapZoom;
           const autoPrecisionVal = zoomPrecision[currZoom];
