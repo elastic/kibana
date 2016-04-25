@@ -103,7 +103,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.clone = function () {
-    return new Vis(this.indexPattern, this.getState());
+    return new Vis(this.indexPattern, this.getState(), this.getUiState());
   };
 
   Vis.prototype.requesting = function () {
@@ -135,7 +135,7 @@ export default function VisFactory(Notifier, Private) {
   Vis.prototype.getUiState = function () {
     return this.__uiState;
   };
-  Vis.prototype.uiStateVal = function(key, val) {
+  Vis.prototype.uiStateVal = function (key, val) {
     if (this.hasUiState()) {
       if (_.isUndefined(val)) {
         return this.__uiState.get(key);

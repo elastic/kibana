@@ -74,11 +74,8 @@ export default function GeoHashAggDefinition(Private, config) {
         controller: function ($scope) {
         },
         write: function (aggConfig, output) {
-          let currZoom = null;
-          if (aggConfig.params.mapZoom || aggConfig.vis.hasUiState()) { // First iteration
-            currZoom = aggConfig.vis.hasUiState() ? aggConfig.vis.uiStateVal('mapZoom') : aggConfig.params.mapZoom;
-          }
-          currZoom = currZoom || aggConfig.vis.params.mapZoom;
+          const vis = aggConfig.vis;
+          const currZoom = vis.hasUiState() ? vis.uiStateVal('mapZoom') : vis.params.mapZoom;
           const autoPrecisionVal = zoomPrecision[currZoom];
           output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }

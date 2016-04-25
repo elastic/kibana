@@ -23,7 +23,7 @@ export default function HandlerBaseClass(Private) {
       return new Handler(vis, opts);
     }
 
-    this.data = opts.data || new Data(vis.data, vis._attr, vis.getUiState());
+    this.data = opts.data || new Data(vis.data, vis._attr, vis.uiState);
     this.vis = vis;
     this.el = vis.el;
     this.ChartClass = vis.ChartClass;
