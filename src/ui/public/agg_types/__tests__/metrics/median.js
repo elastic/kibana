@@ -51,7 +51,7 @@ describe('AggTypeMetricMedianProvider class', function () {
   });
 
   it ('asks Elasticsearch for the 50th percentile', function () {
-    expect(aggDsl.percentiles.percents).to.be.an([50]);
+    expect(aggDsl.percentiles.percents).to.eql([50]);
   });
 
   it ('asks Elasticsearch for array-based values in the aggregation response', function () {
