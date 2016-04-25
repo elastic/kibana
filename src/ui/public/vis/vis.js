@@ -11,7 +11,7 @@ export default function VisFactory(Notifier, Private) {
     location: 'Vis'
   });
 
-  function Vis(indexPattern, state) {
+  function Vis(indexPattern, state, uiState) {
     state = state || {};
 
     if (_.isString(state)) {
@@ -24,6 +24,7 @@ export default function VisFactory(Notifier, Private) {
 
     // http://aphyr.com/data/posts/317/state.gif
     this.setState(state);
+    this.__uiState = uiState;
   }
 
   Vis.convertOldState = function (type, oldState) {
@@ -123,6 +124,25 @@ export default function VisFactory(Notifier, Private) {
       if (!agg.type || !agg.type.name) return false;
       return agg.type.name === aggTypeName;
     });
+  };
+
+  Vis.prototype.hasUiState = function () {
+    return !!this.__uiState;
+  };
+  Vis.prototype.setUiState = function (uiState) {
+    this.__uiState = uiState;
+  };
+  Vis.prototype.getUiState = function () {
+    return this.__uiState;
+  };
+  Vis.prototype.uiStateVal = function(key, val) {
+    if (this.hasUiState()) {
+      if (_.isUndefined(val)) {
+        return this.__uiState.get(key);
+      }
+      return this.__uiState.set(key, val);
+    }
+    return val;
   };
 
   return Vis;
