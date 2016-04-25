@@ -199,7 +199,7 @@ define(function (require) {
     tryForTime: function (timeout, block) {
       var self = this;
       var start = Date.now();
-      var retryDelay = 502;
+      var retryDelay = 1502;
       var lastTry = 0;
       var tempMessage;
 
