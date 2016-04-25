@@ -10,6 +10,10 @@ define(function (require) {
   var parse = require('intern/dojo/node!url').parse;
   var format = require('intern/dojo/node!url').format;
   var path = require('intern/dojo/node!path');
+  var ShieldPage = require('../../support/pages/shield_page');
+
+  var shieldPage;
+
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -33,7 +37,7 @@ define(function (require) {
       parsed.query = {};
     }
     func(parsed);
-    return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
+    return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash'));
   }
 
   function Common(remote) {
@@ -43,6 +47,7 @@ define(function (require) {
       remote.get.wrapper = injectTimestampQuery;
       this.remote.getCurrentUrl = _.wrap(this.remote.getCurrentUrl, removeTimestampQuery);
     }
+    shieldPage = new ShieldPage(this.remote);
   }
 
 
@@ -57,11 +62,8 @@ define(function (require) {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      // navUrl includes user:password@ for use with Shield
-      // appUrl excludes user:password@ to match what getCurrentUrl returns
-      var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + navUrl);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.try(function () {
@@ -90,24 +92,36 @@ define(function (require) {
           .then(function () {
             return self.remote.getCurrentUrl();
           })
+          // .then(function (currentUrl) {
+          //   var loginPage = new RegExp('login').test(currentUrl);
+          //   if (loginPage) {
+          //     self.debug('Found loginPage = ' + loginPage + ', username = '
+          //       + config.servers.kibana.shield.username);
+          //     return shieldPage.login(config.servers.kibana.shield.username,
+          //       config.servers.kibana.shield.password)
+          //     .then(function () {
+          //       return self.remote.getCurrentUrl();
+          //     });
+          //   } else {
+          //     return self.remote.getCurrentUrl();
+          //   }
+          // })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
-              ' in ' + defaultTimeout + 'ms' +
               ' appUrl = ' + appUrl +
               ' currentUrl = ' + currentUrl;
               self.debug(msg);
               throw new Error(msg);
             }
-
             return currentUrl;
           });
         });
       };
 
-      return doNavigation(navUrl)
+      return doNavigation(appUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.try(function () {
@@ -185,7 +199,7 @@ define(function (require) {
     tryForTime: function (timeout, block) {
       var self = this;
       var start = Date.now();
-      var retryDelay = 502;
+      var retryDelay = 1502;
       var lastTry = 0;
       var tempMessage;
 
