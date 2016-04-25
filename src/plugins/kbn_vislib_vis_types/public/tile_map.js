@@ -50,28 +50,15 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       },
       mapMoveEnd: function (event, uiState) {
         uiState.set('mapCenter', event.center);
-
-        const agg = _.get(event, 'chart.geohashGridAgg');
-        if (!agg) return;
-        agg.params.mapCenter = event.center;
-
-        const editableVis = agg.vis.getEditableVis();
-        if (!editableVis) return;
-
-
-        const editableAgg = editableVis.aggs.byId[agg.id];
-        if (editableAgg) {
-          editableAgg.params.mapCenter = event.center;
-        }
+        uiState.set('mapZoom', event.zoom);
       },
       mapZoomEnd: function (event, uiState) {
-        const agg = _.get(event, 'chart.geohashGridAgg');
         uiState.set('mapZoom', event.zoom);
 
-        if (!agg) return;
-        agg.params.mapZoom = event.zoom;
-
-        courier.fetch();
+        const agg = _.get(event, 'chart.geohashGridAgg');
+        if (agg && agg.params.autoPrecision) {
+          courier.fetch();
+        }
       }
     },
     responseConverter: geoJsonConverter,
