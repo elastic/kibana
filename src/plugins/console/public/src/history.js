@@ -3,8 +3,6 @@ const { uniq } = require('lodash');
 const storage = require('./storage');
 const chrome = require('ui/chrome');
 
-const defaultServerUrl = chrome.getInjected('defaultServerUrl');
-
 const history = module.exports = {
   restoreFromHistory() {
     // default method for history.restoreFromHistory
@@ -26,11 +24,7 @@ const history = module.exports = {
       .map(key => storage.get(key));
   },
 
-  getHistoricalServers() {
-    return uniq(history.getHistory().map(req => req.server));
-  },
-
-  addToHistory(server, endpoint, method, data) {
+  addToHistory(endpoint, method, data) {
     var keys = history.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     $.each(keys, function (i, k) {
@@ -41,18 +35,16 @@ const history = module.exports = {
     var k = "hist_elem_" + timestamp;
     storage.set(k, {
       time: timestamp,
-      server: server,
       endpoint: endpoint,
       method: method,
       data: data
     });
   },
 
-  updateCurrentState(server, content) {
+  updateCurrentState(content) {
     var timestamp = new Date().getTime();
     storage.set("editor_state", {
       time: timestamp,
-      server: server === defaultServerUrl ? undefined : server,
       content: content
     });
   },
@@ -60,8 +52,8 @@ const history = module.exports = {
   getSavedEditorState() {
     const saved = storage.get('editor_state');
     if (!saved) return;
-    const { time, server = defaultServerUrl, content } = saved;
-    return { time, server, content };
+    const { time, content } = saved;
+    return { time, content };
   },
 
   clearHistory($el) {
