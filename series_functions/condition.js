@@ -38,8 +38,6 @@ module.exports = new Chainable('condition', {
     var config = args.byName;
     return alter(args, function (eachSeries) {
       var data = _.map(eachSeries.data, function (point, i) {
-        var newValue;
-
         function getNumber(source) {
           if (argType(source) === 'number') return source;
           if (argType(source) === 'null') return null;
