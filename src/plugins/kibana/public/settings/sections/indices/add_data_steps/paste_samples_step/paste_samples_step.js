@@ -1,5 +1,5 @@
 import modules from 'ui/modules';
-import template from 'plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step.html';
+import template from './paste_samples_step.html';
 import _ from 'lodash';
 
 modules.get('apps/settings')
