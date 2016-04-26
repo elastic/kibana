@@ -11,7 +11,6 @@ define(function (require) {
       bdd.before(function () {
         common = new Common(this.remote);
         settingsPage = new SettingsPage(this.remote);
-
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           return settingsPage.navigateTo();

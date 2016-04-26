@@ -26,7 +26,7 @@ define(function (require) {
         bdd.before(function () {
           return settingsPage.createIndexPattern()
           .then(function () {
-            common.elasticDump('.kibana','kibana_w_indexPattern-' + moment().format('YYYY-MM-DD_HH-m-s') + '.JSON');
+            return common.elasticDump('.kibana','kibana_w_indexPattern-' + moment().format('YYYY-MM-DD_HH-m-s') + '.JSON');
           });
         });
 

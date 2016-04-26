@@ -20,13 +20,13 @@ define(function (require) {
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
-        // start each test with an empty kibana index
-        return scenarioManager.reload('emptyKibana')
-        // and load a set of makelogs data
-        .then(function loadIfEmptyMakelogs() {
-          common.debug('Load Kibana index with Logstash pattern = '
-            + common.execCommand('cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-            + ' --input=kibana.JSON --output=http://localhost:9200/.kibana"'));
+        common.debug('scenarioManager.unload(emptyKibana)');
+        return scenarioManager.unload('emptyKibana')
+        .then(function () {
+          common.debug('load kibana index with logstash-* pattern');
+          return common.elasticLoad('kibana3.json','.kibana');
+        })
+        .then(function () {
           return scenarioManager.loadIfEmpty('logstashFunctional');
         })
         // .then(function (navigateTo) {

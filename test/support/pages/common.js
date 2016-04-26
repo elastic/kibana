@@ -16,9 +16,14 @@ define(function (require) {
   const execSync = require('intern/dojo/node!child_process').execSync;
   const resolve = require('intern/dojo/node!path').resolve;
   var __dirname = path.resolve(path.dirname());
+  var __pwd = path.resolve('.');
   const bin = resolve(__dirname, '../../node_modules/.bin/elasticdump');
   const esUrl = 'http://localhost:9200'; //url.format(config.servers.elasticsearch);
   const kIndex = '.kibana';
+  // var argv        = require('intern/dojo/node!optimist').argv;
+  // var util        = require('../../../node_modules/util');
+  var Elasticdump = require('intern/dojo/node!elasticdump').elasticdump;
+
 
 
   function injectTimestampQuery(func, url) {
@@ -303,77 +308,74 @@ define(function (require) {
       return result;
     },
 
+    /*
+    ** This function is basically copied from
+    ** https://github.com/taskrabbit/elasticsearch-dump/blob/master/bin/elasticdump
+    ** and allows calling elasticdump for importing or exporting data from Elasticsearch
+    */
+    elasticdumpModule: function elasticdumpModule(input, output) {
+      var self = this;
+
+      var options = {
+        limit:           100,
+        offset:          0,
+        debug:           false,
+        type:            'data',
+        delete:          false,
+        all:             false,
+        maxSockets:      null,
+        input:           input,
+        'input-index':   null,
+        output:          output,
+        'output-index':  null,
+        inputTransport:  null,
+        outputTransport: null,
+        searchBody:      null,
+        sourceOnly:      false,
+        jsonLines:       false,
+        format:          '',
+        'ignore-errors': false,
+        scrollTime:      '10m',
+        timeout:         null,
+        skip:            null,
+        toLog:           null,
+      };
+      // this.debug(options);
+      var dumper = new Elasticdump(options.input, options.output, options);
+
+      dumper.on('log',   function (message) { self.debug(message); });
+      // dumper.on('debug', function (message) { self.debug(message); });
+      // dumper.on('error', function (error) {   self.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
+
+      var promise = new Promise(function (resolve, reject) {
+        dumper.dump(function (error, totalWrites) {
+          if (error) {
+            reject(Error(error));
+          } else {
+            resolve ('elasticdumpModule success');
+          }
+        });
+      });
+      return promise;
+    },
+
     elasticDump: function elasticDump(index, file) {
       var self = this;
-      var esUrl = 'http://localhost:9200'; //url.format(config.servers.elasticsearch);
-      var commandMapping;
-      var commandData;
-      var platform = this.remote.session.capabilities.platform;
-      this.debug('Platform = ' + platform);
-      if (platform === 'WINDOWS') {
-        commandMapping = 'cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-        + ' --input=' + esUrl + '/' + index + ' --output=mapping-' + file  + '  --type=mapping"';
-        commandData = 'cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-        + ' --input=' + esUrl + '/' + index + ' --output=' + file  + '  --type=data"';
-      } else {
-        commandMapping = 'node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-        + ' --input=' + esUrl + '/' + index + ' --output=mapping-' + file  + '  --type=mapping';
-        commandData = 'node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-        + ' --input=' + esUrl + '/' + index + ' --output=' + file  + '  --type=data';
-      }
-      this.execCommand(commandMapping).toString('utf8');
-      this.execCommand(commandData).toString('utf8');
-    }
-    //
-    // elasticdump: function () {
-    //   var err;
-    //   var stdout;
-    //   var stderr;
-    //   return new Promise(function (resolve, reject) {
-    //     exec('cmd.exe C:\node_modules\.bin\elasticdump--input=http://localhost:9200/.kibana --output=$',
-    //      (err, stdout, stderr)
-    //       .then(function () {
-    //         this.debug('WE MADE IT HERE ');
-    //         if (err) {
-    //           reject(err);
-    //         } else {
-    //           resolve({ stdout, stderr });
-    //         }
-    //       })
-    //     );
-    //   });
-    // }
-    //
+      return this.elasticdumpModule(url.format(config.servers.elasticsearch) + '/' + index, 'mapping_' + file)
+      .then(function () {
+        return self.elasticdumpModule(url.format(config.servers.elasticsearch) + '/' + index, file);
+      });
+    },
 
-
-
-
-
-    // elasticdumpx: function () {
-    //   var self = this;
-    //   var platform = this.remote.session.capabilities.platform;
-    //   this.debug('Platform = ' + platform);
-    //   if (platform === 'WINDOWS') {
-    //     self.debug('execFileSync cmd.exe ' + bin + '--input=http://localhost:9200/.kibana'
-    //
-    //      + ' ' + '--output=$');
-    //     execFileSync('cmd.exe', [
-    //       bin,
-    //       '--input=http://localhost:9200/.kibana',
-    //       '--output=$'
-    //       // '--input=' + esUrl + '/' + kIndex + '',
-    //       // '--output=$' // write output to stdout
-    //     ]).toString('utf8');
-    //   } else {
-    //     return execFileSync(bin, [
-    //       '--input=http://localhost:9200/.kibana',
-    //       '--output=$'
-    //
-    //       // '--input=' + esUrl + '/' + kIndex + '',
-    //       // '--output=$' // write output to stdout
-    //     ]).toString('utf8');
-    //   }
-    // }
+    elasticLoad: function elasticLoad(file, index) {
+      // TODO: should we have a flag to delete the index first?
+      // or use scenarioManager.unload(index) ?
+      var self = this;
+      return this.elasticdumpModule('mapping_' + file, url.format(config.servers.elasticsearch) + '/' + index)
+      .then(function () {
+        return self.elasticdumpModule(file, url.format(config.servers.elasticsearch) + '/' + index);
+      });
+    },
 
   };
 

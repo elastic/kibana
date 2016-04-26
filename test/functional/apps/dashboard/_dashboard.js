@@ -17,20 +17,16 @@ define(function (require) {
         dashboardPage = new DashboardPage(this.remote);
 
         common.debug('navigateToApp dashboard');
-        return scenarioManager.reload('emptyKibana')
+        return scenarioManager.unload('emptyKibana')
         // and load a set of makelogs data
         .then(function loadIfEmptyMakelogs() {
+          common.debug('load kibana index with visualizations');
+          return common.elasticLoad('kibana4.json','.kibana');
+        })
+        .then(function () {
           return scenarioManager.loadIfEmpty('logstashFunctional');
         })
         .then(function () {
-          common.debug('Load Kibana index with Visualizations = \n'
-          + common.execCommand('cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-          + ' --input=kibanaVis-mapping.JSON'
-          + ' --output=http://localhost:9200/.kibana"  --type=mapping'));
-          common.debug('Load Kibana index with Visualizations = \n'
-          + common.execCommand('cmd.exe /c "node c:\\git\\elasticsearch-dump\\bin\\elasticdump'
-          + ' --input=kibanaVis.JSON'
-          + ' --output=http://localhost:9200/.kibana"'));
           return common.navigateToApp('dashboard');
         })
         .catch(common.handleError(this));
@@ -38,12 +34,12 @@ define(function (require) {
 
 
       bdd.describe('add visualizations to dashboard', function indexPatternCreation() {
-        var visualizations = ['Visualization AreaChart',
-          'Visualization DataTable',
-          'Visualization LineChart',
+        var visualizations = ['Visualization漢字 AreaChart',
+          'Visualization☺漢字 DataTable',
+          'Visualization漢字 LineChart',
           'Visualization PieChart',
           'Visualization TileMap',
-          'Visualization VerticalBarChart',
+          'Visualization☺ VerticalBarChart',
           'Visualization MetricChart'
         ];
 
@@ -110,12 +106,12 @@ define(function (require) {
         });
 
         bdd.it('should have all the expected initial sizes', function pageHeader() {
-          var visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization AreaChart' },
-            { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization DataTable' },
-            { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization LineChart' },
+          var visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
+            { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺漢字 DataTable' },
+            { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 LineChart' },
             { dataCol: '10', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization PieChart' },
             { dataCol: '1', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization TileMap' },
-            { dataCol: '4', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization VerticalBarChart' },
+            { dataCol: '4', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺ VerticalBarChart' },
             { dataCol: '7', dataRow: '3', dataSizeX: '3', dataSizeY: '2', title: 'Visualization MetricChart' }
           ];
           return common.tryForTime(10000, function () {
