@@ -40,6 +40,10 @@ module.exports = async function (kbnServer, server, config) {
     path.pop();
   };
 
+  for (let plugin of plugins) {
+    await plugin.preInit();
+  }
+
   for (let {id} of plugins) {
     await initialize(id);
   }
