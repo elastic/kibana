@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 module.exports = {
   'valueFormatter': _.identity,
+  'geohashGridAgg': { 'vis': { 'params': {} } },
   'geoJson': {
     'type': 'FeatureCollection',
     'features': [
