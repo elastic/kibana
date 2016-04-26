@@ -11,11 +11,12 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
       return details.valProp;
     },
     makeLabel: function () {
-      let details = this.keyedDetails(this.params.customLabel)[this.key];
-      return details.title + ' of ' + this.fieldDisplayName();
+      const fieldDisplayName = this.fieldDisplayName();
+      const details = this.keyedDetails(this.params.customLabel, fieldDisplayName);
+      return _.get(details, [this.key, 'title']);
     },
-    keyedDetails: function (customLabel) {
-      const label = customLabel ? customLabel : 'Standard Deviation';
+    keyedDetails: function (customLabel, fieldDisplayName) {
+      const label = customLabel ? customLabel : 'Standard Deviation of ' + fieldDisplayName;
       return {
         std_lower: {
           valProp: ['std_deviation_bounds', 'lower'],
@@ -23,7 +24,7 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
         },
         avg: {
           valProp: 'avg',
-          title: 'Average'
+          title: 'Average of ' + fieldDisplayName
         },
         std_upper: {
           valProp: ['std_deviation_bounds', 'upper'],

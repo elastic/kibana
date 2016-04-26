@@ -49,20 +49,19 @@ if (!!kbnIndex) {
   });
 }
 
-/**
- * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
- */
-// modules
-//   .get('exceptionOverride')
-//   .factory('$exceptionHandler', function () {
-//     return function (exception, cause) {
-//       rootNotifier.fatal(exception, cause);
-//     };
-//   });
-
 window.onerror = function (err, url, line) {
   rootNotifier.fatal(new Error(err + ' (' + url + ':' + line + ')'));
   return true;
 };
+
+if (window.addEventListener) {
+  const notify = new Notifier({
+    location: 'Promise'
+  });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    notify.log(`Detected an unhandled Promise rejection.\n${e.reason}`);
+  });
+}
 
 export default rootNotifier;

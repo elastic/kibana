@@ -87,8 +87,9 @@ export default function ($compile) {
       }
 
       const $childScope = $scope.$new();
-      const $el = $compile(templateToRender)($childScope);
-      $element.find('#template_wrapper').html($el);
+      const $el = $element.find('#template_wrapper').html(templateToRender).contents();
+      $compile($el)($childScope);
+
       this.rendered = { $childScope, $el, key: currentKey };
     }
   };

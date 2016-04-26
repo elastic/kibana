@@ -1,6 +1,6 @@
 import html from 'ui/timepicker/timepicker.html';
 import _ from 'lodash';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import Notifier from 'ui/notify/notifier';
 import 'ui/directives/input_datetime';
@@ -15,7 +15,6 @@ let notify = new Notifier({
   location: 'timepicker',
 });
 
-
 module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
   return {
     restrict: 'E',
@@ -28,10 +27,6 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
     },
     template: html,
     controller: function ($scope) {
-      let init = function () {
-        $scope.setMode($scope.mode);
-      };
-
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
       $scope.modes = ['quick', 'relative', 'absolute'];
       $scope.activeTab = $scope.activeTab || 'filter';
@@ -115,7 +110,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.mode = thisMode;
       };
 
-      $scope.setQuick = function (from, to, description) {
+      $scope.setQuick = function (from, to) {
         $scope.from = from;
         $scope.to = to;
       };
@@ -154,7 +149,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.interval = interval;
       };
 
-      init();
+      $scope.setMode($scope.mode);
     }
   };
 });
