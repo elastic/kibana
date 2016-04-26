@@ -89,25 +89,13 @@ export function registerPost(server) {
       };
 
       const templateParams = {
-        order: 0,
+        order: 1,
         create: true,
         name: ingestConfigName,
         body: {
           template: indexPatternId,
           mappings: {
             _default_: {
-              dynamic_templates: [{
-                string_fields: {
-                  match: '*',
-                  match_mapping_type: 'string',
-                  mapping: {
-                    type: 'text',
-                    fields: {
-                      raw: {type: 'keyword', ignore_above: 256}
-                    }
-                  }
-                }
-              }],
               properties: mappings
             }
           }
