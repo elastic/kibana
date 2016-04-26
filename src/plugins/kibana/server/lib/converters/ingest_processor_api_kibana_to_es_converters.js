@@ -48,9 +48,9 @@ export function date(processorApiDocument) {
   return {
     date: {
       tag: processorApiDocument.processor_id,
-      match_field: processorApiDocument.source_field,
+      field: processorApiDocument.source_field,
       target_field: processorApiDocument.target_field,
-      match_formats: formats,
+      formats: formats,
       timezone: processorApiDocument.timezone,
       locale: processorApiDocument.locale
     }
@@ -131,7 +131,7 @@ export function rename(processorApiDocument) {
     rename: {
       tag: processorApiDocument.processor_id,
       field: processorApiDocument.source_field,
-      to: processorApiDocument.target_field
+      target_field: processorApiDocument.target_field
     }
   };
 }

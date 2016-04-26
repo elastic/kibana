@@ -38,6 +38,12 @@ output:
       to the end, so if your pattern was "filebeat-*" you would make the index name "filebeat" in filebeat.yml.<br /><br />
     </li>
 
+    <li ng-if="installStep.results.indexPattern.id !== 'filebeat-*'">
+      Edit <code>filebeat.template.json</code> (in the Filebeat directory). The line that reads
+      <code>"template": "filebeat-*"</code> should become
+      <code>"template": "{{ installStep.results.indexPattern.id }}"</code>.
+    </li>
+
     <li>Run Filebeat on each server
       (<a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/_step_5_starting_filebeat.html">
         instructions

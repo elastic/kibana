@@ -205,26 +205,34 @@ kbn-settings-indices {
   .time-and-pattern > div {}
 }
 
+.wizard-container {
+  padding: 0 10px;
+}
+
 .wizard-step-headings{
-  margin-top: 1em;
+  padding-top: 1em;
 
   .wizard-step-heading {
-    font-size: 1.5em;
-    padding-right: 1.5em;
+    font-size: 1.3em;
+    padding: .3em 1em;
+    margin: 0 .1em;
+    background-color: @settings-add-data-wizard-step-heading-complete-background;
+    color: @settings-add-data-wizard-step-heading-complete-color;
 
     &.active {
       cursor: default;
-      font-weight: bold;
+      background-color: @settings-add-data-wizard-step-heading-active-background;
+      color: @settings-add-data-wizard-step-heading-active-color;
     }
     &.aheadActive {
       cursor: default;
-      font-weight: 300;
+      background-color: @settings-add-data-wizard-step-heading-incomplete-background;
+      color: @settings-add-data-wizard-step-heading-incomplete-color;
     }
   }
 
   &.complete {
     .wizard-step-heading:not(.active) {
-      color: #dddddd;
       cursor: default;
     }
   }
