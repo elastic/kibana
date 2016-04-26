@@ -94,7 +94,7 @@ define(function (require) {
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
-        return common.tryForTime(defaultTimeout, function () {
+        return common.try(function () {
           return self.getTimeFieldOption(selection).click()
           .then(function () {
             return self.getTimeFieldOption(selection).isSelected();
@@ -176,7 +176,7 @@ define(function (require) {
       var self = this;
       var selector = 'li.kbn-settings-tab.active a small';
 
-      return common.tryForTime(defaultTimeout, function () {
+      return common.try(function () {
         return self.remote.setFindTimeout(defaultTimeout / 10)
         .findByCssSelector(selector).getVisibleText()
         .then(function (theText) {
@@ -288,14 +288,14 @@ define(function (require) {
     createIndexPattern: function () {
       var self = this;
 
-      return common.tryForTime(defaultTimeout, function () {
+      return common.try(function () {
         return self.selectTimeFieldOption('@timestamp')
         .then(function () {
           return self.getCreateButton().click();
         });
       })
       .then(function () {
-        return common.tryForTime(defaultTimeout, function () {
+        return common.try(function () {
           return self.remote.getCurrentUrl()
           .then(function (currentUrl) {
             if (!currentUrl.match(/indices\/.+\?/)) {
@@ -312,7 +312,7 @@ define(function (require) {
       var self = this;
       var alertText;
 
-      return common.tryForTime(defaultTimeout, function () {
+      return common.try(function () {
         return self.clickDeletePattern()
         .then(function () {
           return self.remote.getAlertText();
@@ -325,7 +325,7 @@ define(function (require) {
         });
       })
       .then(function () {
-        return common.tryForTime(defaultTimeout, function () {
+        return common.try(function () {
           return self.remote.getCurrentUrl()
           .then(function (currentUrl) {
             if (currentUrl.match(/indices\/.+\?/)) {

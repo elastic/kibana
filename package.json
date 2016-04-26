@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "@bigfunger/decompress-zip": "0.2.0-stripfix2",
+    "@elastic/datemath": "2.2.0",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -130,6 +131,7 @@
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "rimraf": "2.4.3",
+    "rison-node": "1.0.0",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",
     "semver": "5.1.0",
