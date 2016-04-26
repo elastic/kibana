@@ -2,7 +2,8 @@ import modules from 'ui/modules';
 import template from './pattern_review_step.html';
 import _ from 'lodash';
 import editFieldTypeHTML from '../../partials/_edit_field_type.html';
-import keysDeep from '../pipeline_setup/lib/keys_deep';
+import isGeoPointObject from './lib/is_geo_point_object';
+import forEachField from './lib/for_each_field';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
@@ -10,18 +11,6 @@ function pickDefaultTimeFieldName(dateFields) {
   }
 
   return _.includes(dateFields, '@timestamp') ? '@timestamp' : dateFields[0];
-}
-
-function isGeoPointObject(object) {
-  if (_.isPlainObject(object)) {
-    const keys = _.keys(object);
-    if (keys.length === 2 && _.contains(keys, 'lat') && _.contains(keys, 'lon')) {
-      return true;
-    }
-  }
-  else {
-    return false;
-  }
 }
 
 modules.get('apps/settings')
@@ -36,26 +25,10 @@ modules.get('apps/settings')
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
+        this.errors = [];
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
-        const fields = keysDeep(this.sampleDoc);
-        const geoPointFields = _.filter(fields, key => isGeoPointObject(_.get(this.sampleDoc, key)));
-        const indexPatternFields = _(fields)
-        .reject((field) => {
-          let shouldReject = false;
-          geoPointFields.forEach((geoPointField) => {
-            if (field === `${geoPointField}.lat` || field === `${geoPointField}.lon`) {
-              shouldReject = true;
-            }
-          });
-          return shouldReject;
-        })
-        .reject((field) => {
-          const value = _.get(this.sampleDoc, field);
-          return _.isPlainObject(value) && !isGeoPointObject(value);
-        })
-        .value();
 
         const knownFieldTypes = {};
         this.dateFields = [];
@@ -68,20 +41,35 @@ modules.get('apps/settings')
             }
           });
         }
-        geoPointFields.forEach(fieldName => knownFieldTypes[fieldName] = 'geo_point');
+
+        const fields = {};
+        forEachField(this.sampleDoc, (value, fieldName) => {
+          let type = knownFieldTypes[fieldName] || typeof value;
+          if (isGeoPointObject(value)) {
+            type = 'geo_point';
+            knownFieldTypes[fieldName] = 'geo_point';
+          }
+
+          if (!_.isUndefined(fields[fieldName]) && (fields[fieldName].type !== type)) {
+            this.errors.push(`Error in field ${fieldName} - conflicting types '${fields[fieldName].type}' and '${type}'`);
+          }
+          else {
+            fields[fieldName] = {type, value};
+          }
+        });
+
+        const indexPatternFields = _(fields)
+        .map((field, fieldName) => {
+          return {name: fieldName, type: field.type};
+        })
+        .reject({type: 'object'})
+        .value();
 
         _.defaults(this.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
           timeFieldName: pickDefaultTimeFieldName(this.dateFields),
-          fields: _.map(indexPatternFields, (fieldName) => {
-            const fieldValue = _.get(this.sampleDoc, fieldName);
-            let type = knownFieldTypes[fieldName] || typeof fieldValue;
-            if (type === 'object' && _.isArray(fieldValue) && !_.isEmpty(fieldValue)) {
-              type = typeof fieldValue[0];
-            }
-            return {name: fieldName, type: type};
-          })
+          fields: indexPatternFields
         });
 
         this.isTimeBased = !!this.indexPattern.timeFieldName;
@@ -103,7 +91,7 @@ modules.get('apps/settings')
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const sampleValue = _.get(this.sampleDoc, field.name);
+            const sampleValue = fields[field.name].value;
             return [
               _.escape(field.name),
               {
