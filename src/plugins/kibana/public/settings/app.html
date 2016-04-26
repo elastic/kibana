@@ -2,11 +2,15 @@
   <nav class="navbar navbar-default navbar-static-top subnav" data-test-subj="settingsNav">
     <div class="container-fluid">
       <bread-crumbs></bread-crumbs>
-      <ul class="nav navbar-nav">
+      <ul ng-hide="!section" class="nav navbar-nav">
         <li ng-repeat="section in sections" ng-class="section.class">
           <a class="navbar-link" kbn-href="{{section.url}}" data-test-subj="{{section.name}}">{{section.display}}</a>
         </li>
       </ul>
+
+      <div ng-hide="section" class="nav navbar-nav">
+        <span class="navbar-link">{{ sectionName }}</span>
+      </div>
     </div>
   </nav>
 
