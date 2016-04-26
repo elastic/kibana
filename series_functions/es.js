@@ -5,8 +5,16 @@ var Datasource = require('../lib/classes/datasource');
 
 function buildRequest(config, tlConfig) {
 
-  var filter = {range:{}};
-  filter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
+  var bool = {must: []};
+
+  if (config.kibana) {
+    var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
+    bool.must = kibanaFilters;
+  }
+
+  var timeFilter = {range:{}};
+  timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
+  bool.must.push(timeFilter);
 
   var searchRequest = {
     index: config.index,
@@ -18,7 +26,9 @@ function buildRequest(config, tlConfig) {
               query: config.q
             }
           }],
-          filter: filter
+          filter: {
+            bool: bool
+          }
         }
       },
       aggs: {
@@ -75,6 +85,11 @@ module.exports = new Datasource('es', {
       help: 'Field of type "date" to use for x-axis'
     },
     {
+      name: 'kibana',
+      types: ['boolean', 'null'],
+      help: 'Respect filters on Kibana dashboards. Only has an effect when using on Kibana dashboards'
+    },
+    {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
       help: '**DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker'
@@ -94,9 +109,12 @@ module.exports = new Datasource('es', {
       index: tlConfig.file.es.default_index,
       timefield: tlConfig.file.es.timefield,
       interval: tlConfig.time.interval,
+      kibana: true,
       url: tlConfig.file.es.url,
       fit: 'nearest'
     });
+
+    console.log(JSON.stringify(tlConfig.request.payload.extended.es));
 
     if (!tlConfig.file.es.allow_url_parameter && args.byName.url) {
       throw new Error('url= is not allowed');

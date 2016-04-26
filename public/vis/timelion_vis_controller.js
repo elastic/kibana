@@ -4,11 +4,9 @@ define(function (require) {
 
   require('plugins/timelion/directives/refresh_hack');
 
-
   var _ = require('lodash');
   var module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
   module.controller('TimelionVisController', function ($scope, Private, Notifier, $http, $rootScope, timefilter) {
-
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var timezone = Private(require('plugins/timelion/services/timezone'))();
     var notify = new Notifier({
@@ -16,11 +14,17 @@ define(function (require) {
     });
 
     $scope.search = function run() {
+      console.log(_.pluck(queryFilter.getFilters(), 'query'));
       var expression = $scope.vis.params.expression;
       if (!expression) return;
 
       $http.post('../api/timelion/run', {
         sheet: [expression],
+        extended: {
+          es: {
+            filters: _.pluck(queryFilter.getFilters(), 'query')
+          }
+        },
         time: _.extend(timefilter.time, {
           interval: $scope.vis.params.interval,
           timezone: timezone
@@ -52,52 +56,7 @@ define(function (require) {
     // When auto refresh happens
     $scope.$on('courier:searchRefresh', $scope.search);
 
-    $scope.$on('fetch', function () {
-      $scope.search();
-      console.log('Double up LOL');
-    });
+    $scope.$on('fetch', $scope.search);
 
   });
 });
-
-/*
-define(function (require) {
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
-
-  module.controller('TimelionVisController', function ($scope, $http, timefilter, Private, Notifier, $rootScope) {
-    var timezone = Private(require('plugins/timelion/services/timezone'))();
-    var notify = new Notifier({
-      location: 'Timelion'
-    });
-
-    function run() {
-      var expression = $scope.vis.params.expression;
-      if (!expression) return;
-
-      $http.post('../api/timelion/run', {
-        sheet: $scope.state.sheet,
-        time: _.extend(timefilter.time, {
-          interval: '1d', // Make this automatic
-          timezone: timezone
-        }),
-      })
-      // data, status, headers, config
-      .success(function (resp) {
-        $scope.sheet = resp.sheet;
-      })
-      .error(function (resp) {
-        $scope.sheet = [];
-        var err = new Error(resp.message);
-        err.stack = resp.stack;
-        notify.error(err);
-      });
-    };
-
-    $rootScope.$watch('courier:searchRefresh', run);
-    $scope.$watch('vis.params.expression', function (expression) {
-      console.log(expression);
-    });
-  });
-});
-*/
