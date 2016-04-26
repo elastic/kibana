@@ -1,11 +1,23 @@
 // invokes a series_function with the specified arguments
-module.exports = function invokeSeriesFn(fn, args) {
-  var promises = [fn(args)].concat(args);
-  return Promise.all(promises).then(function (outputAndInput) {
-    var result = {
-      output: outputAndInput.shift(),
-      input: outputAndInput
-    };
-    return result;
+var _ = require('lodash');
+var tlConfig = require('../fixtures/tlConfig');
+var indexArguments = require('../../../handlers/lib/index_arguments');
+
+module.exports = function invokeSeriesFn(fnDef, args) {
+  return Promise.all(args).then(function (args) {
+    args.byName = indexArguments(fnDef, args);
+
+    var input = _.cloneDeep(args);
+
+    return Promise.resolve(fnDef.originalFn(args, tlConfig)).then(function (output) {
+      var result = {
+        output: output,
+        input: input
+      };
+      return result;
+    }).catch(function (err) {
+      console.log(err.stack);
+      return err;
+    });
   });
 };
