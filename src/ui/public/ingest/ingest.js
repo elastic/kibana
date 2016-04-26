@@ -59,4 +59,16 @@ export default function IngestProvider($rootScope, $http, config) {
     });
   };
 
+  this.getProcessors = function () {
+    function unpack(response) {
+      return response.data;
+    }
+
+    return $http.get(`${ingestAPIPrefix}/processors`)
+    .then(unpack)
+    .catch(err => {
+      throw ('Error communicating with Kibana server');
+    });
+  };
+
 }
