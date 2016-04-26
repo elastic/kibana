@@ -156,6 +156,16 @@ module.exports = function (kibana) {
       })
 
       server.route({
+        path: '/api/console/proxy/settings',
+        method: 'GET',
+        handler: function (req, reply) {
+          reply({
+            url: server.config().get('elasticsearch.url')
+          });
+        }
+      })
+
+      server.route({
         path: '/api/console/api_server',
         method: ['GET', 'POST'],
         handler: function (req, reply) {
