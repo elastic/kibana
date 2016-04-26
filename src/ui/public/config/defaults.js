@@ -237,14 +237,5 @@ export default function configDefaultsProvider() {
       description: 'The time in milliseconds which an information notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.'
     },
-    'url:warnLength': {
-      value: 1900,
-      description: `
-        When the application url reaches this length we will start warning about
-        potential issues. Internet Explorer supports urls up to
-        <a href="https://support.microsoft.com/en-us/kb/208427">2,083 characters</a> long.
-        If IE compatibility is not important this can probably be disabled (set to 0).
-      `,
-    },
   };
 };
