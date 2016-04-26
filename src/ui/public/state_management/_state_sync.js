@@ -1,6 +1,6 @@
 import angular from 'angular';
 import _ from 'lodash';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 
 
 // invokable/private angular dep
