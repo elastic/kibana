@@ -5,7 +5,16 @@
   <div
     ng-hide="expandContext < 1"
     class="left-panel">
-    <label>Processor Pipeline</label>
+    <label>
+      Processor Pipeline
+      <a
+        aria-label="A pipeline is a definition of a series of processors that are to be executed in the same order as they are declared."
+        tooltip="A pipeline is a definition of a series of processors that are to be executed in the same order as they are declared."
+        tooltip-append-to-body="true"
+        target="_blank">
+        <i aria-hidden="true" class="fa fa-question-circle"></i>
+      </a>
+    </label>
     <div class="pipeline">
       <ul
         class="pipeline-container"

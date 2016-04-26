@@ -21,7 +21,7 @@ module.exports = function initDefaultFieldProps(fields) {
       });
 
       results.push({
-        name: newField.name + '.raw',
+        name: newField.name + '.keyword',
         type: 'string',
         indexed: true,
         analyzed: false,
