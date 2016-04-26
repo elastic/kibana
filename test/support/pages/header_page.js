@@ -20,7 +20,7 @@ define(function (require) {
 
     clickSelector: function (selector) {
       var self = this.remote;
-      return common.tryForTime(defaultTimeout, function () {
+      return common.try(function () {
         return self.setFindTimeout(defaultTimeout)
         .findByCssSelector(selector)
         .then(function (tab) {

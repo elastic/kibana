@@ -2,8 +2,10 @@ import moment from 'moment-timezone';
 import _ from 'lodash';
 
 export default function configDefaultsProvider() {
-  // wrapped in provider so that a new instance is given to each app/test
+  const weekdays = moment.weekdays().slice();
+  const [defaultWeekday] = weekdays;
 
+  // wrapped in provider so that a new instance is given to each app/test
   return {
     'buildNum': {
       readonly: true
@@ -45,6 +47,12 @@ export default function configDefaultsProvider() {
       ' interval between measurements. Keys are' +
       ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
       'ISO8601 intervals.</a>'
+    },
+    'dateFormat:dow': {
+      value: defaultWeekday,
+      description: 'What day should weeks start on?',
+      type: 'select',
+      options: weekdays
     },
     'defaultIndex': {
       value: null,
