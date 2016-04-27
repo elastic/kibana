@@ -67,7 +67,7 @@ export default function IngestProvider($rootScope, $http, config) {
     return $http.get(`${ingestAPIPrefix}/processors`)
     .then(unpack)
     .catch(err => {
-      throw ('Error communicating with Kibana server');
+      throw ('Error fetching enabled processors');
     });
   };
 

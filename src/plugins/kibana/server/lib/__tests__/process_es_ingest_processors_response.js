@@ -21,7 +21,7 @@ describe('processESIngestSimulateResponse', function () {
     const expected = [ 'proc_foo', 'proc_bar' ];
     const actual = processESIngestProcessorsResponse(response);
 
-    expect(actual).to.eql(expected);
+    expect(_.isEqual(actual, expected)).to.be.ok();
   });
 
   it('should return a unique list of processors', function () {
@@ -49,7 +49,7 @@ describe('processESIngestSimulateResponse', function () {
     const expected = [ 'proc_foo', 'proc_bar' ];
     const actual = processESIngestProcessorsResponse(response);
 
-    expect(actual).to.eql(expected);
+    expect(_.isEqual(actual, expected)).to.be.ok();
   });
 
   it('should combine the available processors from all nodes', function () {
@@ -75,16 +75,16 @@ describe('processESIngestSimulateResponse', function () {
     const expected = [ 'proc_foo', 'proc_bar' ];
     const actual = processESIngestProcessorsResponse(response);
 
-    expect(actual).to.eql(expected);
+    expect(_.isEqual(actual, expected)).to.be.ok();
   });
 
   it('should return an empty array for unexpected response', function () {
-    expect(processESIngestProcessorsResponse({ nodes: {}})).to.eql([]);
-    expect(processESIngestProcessorsResponse({})).to.eql([]);
-    expect(processESIngestProcessorsResponse(undefined)).to.eql([]);
-    expect(processESIngestProcessorsResponse(null)).to.eql([]);
-    expect(processESIngestProcessorsResponse('')).to.eql([]);
-    expect(processESIngestProcessorsResponse(1)).to.eql([]);
+    expect(_.isEqual(processESIngestProcessorsResponse({ nodes: {}}), [])).to.be.ok();
+    expect(_.isEqual(processESIngestProcessorsResponse({}), [])).to.be.ok();
+    expect(_.isEqual(processESIngestProcessorsResponse(undefined), [])).to.be.ok();
+    expect(_.isEqual(processESIngestProcessorsResponse(null), [])).to.be.ok();
+    expect(_.isEqual(processESIngestProcessorsResponse(''), [])).to.be.ok();
+    expect(_.isEqual(processESIngestProcessorsResponse(1), [])).to.be.ok();
   });
 
 });
