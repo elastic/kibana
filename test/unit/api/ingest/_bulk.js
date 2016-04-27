@@ -70,7 +70,7 @@ define(function (require) {
           .attach('csv', 'test/unit/data/fake_names_big.csv')
           .expect(200)
           .then((bulkResponse) => {
-            expect(bulkResponse.body.length).to.be(2);
+            expect(bulkResponse.body.length).to.be(14);
           });
       });
 
