@@ -10,6 +10,9 @@ define(function (require) {
   var parse = require('intern/dojo/node!url').parse;
   var format = require('intern/dojo/node!url').format;
   var path = require('intern/dojo/node!path');
+  var ShieldPage = require('../../support/pages/shield_page');
+
+  var shieldPage;
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -43,10 +46,11 @@ define(function (require) {
       remote.get.wrapper = injectTimestampQuery;
       this.remote.getCurrentUrl = _.wrap(this.remote.getCurrentUrl, removeTimestampQuery);
     }
+    shieldPage = new ShieldPage(this.remote);
   }
 
 
-  var defaultTimeout = config.timeouts.default;
+  var defaultTimeout = config.timeouts.findTimeout;
 
   Common.prototype = {
     constructor: Common,
@@ -89,6 +93,20 @@ define(function (require) {
           })
           .then(function () {
             return self.remote.getCurrentUrl();
+          })
+          .then(function (currentUrl) {
+            var loginPage = new RegExp('login').test(currentUrl);
+            if (loginPage) {
+              self.debug('Found loginPage = ' + loginPage + ', username = '
+                + config.servers.kibana.shield.username);
+              return shieldPage.login(config.servers.kibana.shield.username,
+                config.servers.kibana.shield.password)
+              .then(function () {
+                return self.remote.getCurrentUrl();
+              });
+            } else {
+              return currentUrl;
+            }
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');

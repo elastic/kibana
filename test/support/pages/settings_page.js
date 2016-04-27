@@ -4,7 +4,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var Common = require('./common');
 
-  var defaultTimeout = config.timeouts.default;
+  var defaultTimeout = config.timeouts.findTimeout;
   var common;
 
   function settingsPage(remote) {
@@ -40,7 +40,8 @@ define(function (require) {
         return common.sleep(1000);
       })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
-        return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
+        return self.remote.setFindTimeout(defaultTimeout)
+        .findByCssSelector('option[label="' + propertyValue + '"]')
         .click();
       })
       .then(function setAdvancedSettingsClickSaveButton() {
