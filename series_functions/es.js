@@ -114,8 +114,6 @@ module.exports = new Datasource('es', {
       fit: 'nearest'
     });
 
-    console.log(JSON.stringify(tlConfig.request.payload.extended.es));
-
     if (!tlConfig.file.es.allow_url_parameter && args.byName.url) {
       throw new Error('url= is not allowed');
     }
