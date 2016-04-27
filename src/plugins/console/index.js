@@ -8,7 +8,7 @@ module.exports = function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
   const src = resolve(__dirname, 'public/src/');
   const { existsSync } = require('fs');
-  const { startsWith, endsWith } = require('lodash');
+  const { size } = require('lodash');
 
   const apps = [
     {
@@ -19,6 +19,9 @@ module.exports = function (kibana) {
       injectVars: function (server, options) {
         let { proxyTargets, defaultServerUrl } = options;
         const config = server.config();
+
+        // treat an empty array like it's nothing
+        if (!size(proxyTargets)) proxyTargets = undefined;
 
         if (!defaultServerUrl) {
           if (proxyTargets) {
@@ -132,8 +135,9 @@ module.exports = function (kibana) {
           function checkProxyTarget(req, reply) {
             const uri = req.pre.proxyTarget;
 
-            if (!options.proxyTargets) return reply();
-            if (options.proxyTargets.some(t => uri.startsWith(t))) {
+            const targets = size(options.proxyTargets) && options.proxyTargets;
+            if (!targets) return reply();
+            if (targets.some(t => uri.startsWith(t))) {
               reply();
             } else {
               const err = Boom.forbidden();
