@@ -1,0 +1,86 @@
+Backport PR #6773
+---------
+
+**Commit 1:**
+[state] add configurable warning level based on url length
+
+* Original sha: 55db90d3ab1d3ae8fef8c450b72c351978a67ab0
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-04-04T21:57:45Z
+
+**Commit 2:**
+[state] add a hard length limit that will start throwing errors
+
+* Original sha: 64699aa53df0f20fd4a962dbd3e14a092b9d8355
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-04-04T22:14:06Z
+
+**Commit 3:**
+Merge branch 'master' of github.com:elastic/kibana into implement/betterWarningForUrlLength
+
+* Original sha: 4c70d6959d2c07fc0a4de2a58cb68e8846d7eb1d
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-04-06T07:05:47Z
+
+**Commit 4:**
+[dashboard] cleanup quietly to prevent error
+
+* Original sha: 1dace5c5a3a585a699d079865320129130df0357
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-04-06T08:50:55Z
+
+**Commit 5:**
+[errorview] add url overflow display
+
+* Original sha: 8b4ebf5fcfb3d119da21dc88c46acedc55582370
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-04-06T08:51:47Z
+
+**Commit 6:**
+[errorview] persist the overflow url so that refresh works
+
+* Original sha: e308db927c9895e330a04fb3a8dccf7dc86aec22
+* Authored by spalger <spalger@users.noreply.github.com> on 2016-04-06T09:05:13Z
+
+**Commit 7:**
+Merge branch 'master' of github.com:elastic/kibana into implement/betterWarningForUrlLength
+
+* Original sha: 121e4f23f4d4830230c7e7b65d8119a1cf824a93
+* Authored by spalger <email@spalger.com> on 2016-04-15T18:49:12Z
+
+**Commit 8:**
+[config] remove url limit config, it should adapt automatically
+
+* Original sha: 281b38b4afcae934a19edfd29ac14a3b52d68c73
+* Authored by spalger <email@spalger.com> on 2016-04-15T23:38:05Z
+
+**Commit 9:**
+[chrome] rework url overflow detection
+
+The previous version of this pr relied on the State service to catch times when the URL would grow out of control. While overflows will commonly occur in the State service, this didn't handle urls that were navigated to using a link. They worked because the state service would eventually be called, but the failure was unexpected and required interaction to trigger.
+
+This new approach does the checking at a higher level, in the chrome.
+
+We also removed the `url:limit` configuration value in favor of browser detection (I was not able to find or come up with a way to quietly and quickly feature detect this). The new limits are 2000 characters for IE and 25000 for all other browsers.
+
+* Original sha: 116521c6be68676ac2c808bfb065d209f3fa708c
+* Authored by spalger <email@spalger.com> on 2016-04-15T23:40:18Z
+
+**Commit 10:**
+Merge branch 'master' of github.com:elastic/kibana into implement/betterWarningForUrlLength
+
+* Original sha: aa030d758958821c387dba19defb2ab5d1fafaff
+* Authored by spalger <email@spalger.com> on 2016-04-26T16:51:22Z
+
+**Commit 11:**
+[ui/config] remove unused default
+
+* Original sha: b333c514cc44df787b6fe997dc6f70a04755498e
+* Authored by spalger <email@spalger.com> on 2016-04-26T16:52:29Z
+
+**Commit 12:**
+Merge branch 'master' of github.com:elastic/kibana into implement/betterWarningForUrlLength
+
+* Original sha: 133d7e577ab16343b50e556d14b66096a5f73c4d
+* Authored by spalger <email@spalger.com> on 2016-04-27T23:17:44Z
+
+**Commit 13:**
+[urlOverflow] assign magic numbers to variables
+
+* Original sha: 8b978818fca895400aac640391d253528586ae50
+* Authored by spalger <email@spalger.com> on 2016-04-27T23:24:17Z
