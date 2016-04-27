@@ -61,7 +61,7 @@ export function geoip(processorApiDocument) {
   const processor = {
     geoip: {
       tag: processorApiDocument.processor_id,
-      source_field: processorApiDocument.source_field
+      field: processorApiDocument.source_field
     }
   };
   if (!_.isEmpty(processorApiDocument.target_field)) {
@@ -71,7 +71,7 @@ export function geoip(processorApiDocument) {
     processor.geoip.database_file = processorApiDocument.database_file;
   }
   if (!_.isEmpty(processorApiDocument.database_fields)) {
-    processor.geoip.fields = processorApiDocument.database_fields;
+    processor.geoip.properties = processorApiDocument.database_fields;
   }
 
   return processor;
