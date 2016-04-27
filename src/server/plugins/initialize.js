@@ -19,7 +19,7 @@ module.exports = async function (kbnServer, server, config) {
 
 
   let path = [];
-  const initialize = async function (id) {
+  const initialize = async function (id, fn) {
     let plugin = plugins.byId[id];
 
     if (includes(path, id)) {
@@ -33,18 +33,18 @@ module.exports = async function (kbnServer, server, config) {
         throw new Error(`Unmet requirement "${reqId}" for plugin "${id}"`);
       }
 
-      await initialize(reqId);
+      await initialize(reqId, fn);
     }
 
-    await plugin.init();
+    await plugin[fn]();
     path.pop();
   };
 
-  for (let plugin of plugins) {
-    await plugin.preInit();
+  for (let {id} of plugins) {
+    await initialize(id, 'preInit');
   }
 
   for (let {id} of plugins) {
-    await initialize(id);
+    await initialize(id, 'init');
   }
 };
