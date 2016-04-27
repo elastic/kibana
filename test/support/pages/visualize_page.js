@@ -1,15 +1,8 @@
-define(function (require) {
+import { common, defaultTimeout, remote } from '../';
 
-  var config = require('intern').config;
-  var registerSuite = require('intern!object');
-  var Common = require('./common');
-
-  var defaultTimeout = config.timeouts.default;
-  var common;
-
-  function VisualizePage(remote) {
+export default (function () {
+  function VisualizePage() {
     this.remote = remote;
-    common = new Common(this.remote);
   }
 
   VisualizePage.prototype = {
@@ -422,7 +415,6 @@ define(function (require) {
     getAreaChartData: function getAreaChartData(aggregateName) {
 
       var self = this.remote;
-      var chartData = [];
       var tempArray = [];
       var chartSections = 0;
       var chartMap = {};
@@ -459,19 +451,22 @@ define(function (require) {
         .getAttribute('d');
       })
       .then(function (data) {
-        common.debug(data);
         // This area chart data starts with a 'M'ove to a x,y location, followed
         // by a bunch of 'L'ines from that point to the next.  Those points are
         // the values we're going to use to calculate the data values we're testing.
         // So git rid of the one 'M' and split the rest on the 'L's.
-        tempArray = data.replace('M','').split('L');
-        chartSections = tempArray.length / 2;
-        common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
-        for (var i = 0; i < chartSections; i++) {
-          chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
-          common.debug('chartData[i] =' + chartData[i]);
+        if (!String(data).match(/^M\d+(\.\d+)?,\d+(\.\d+)(L\d+(\.\d+)?,\d+(\.\d+)?)*Z$/)) {
+          throw new Error('path data is not valid: ' + JSON.stringify(data));
         }
-        return chartData;
+
+        const yPositions = data.slice(1, -1).split('L').map(pair => pair.split(',').map(parseFloat).pop());
+        common.debug('reading path data out of area chart');
+        common.debug('y values: %j, height: %j, yAxisLabel: %j', yPositions.length, yAxisHeight, yAxisLabel);
+
+        return yPositions.map(position => {
+          const value = Math.round((yAxisHeight - position) / yAxisHeight * yAxisLabel);
+          common.debug('    position: %j, value: %j', position, value);
+        });
       });
     },
 
@@ -688,4 +683,4 @@ define(function (require) {
   };
 
   return VisualizePage;
-});
+}());

@@ -1,22 +1,18 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  scenarioManager,
+  common,
+  discoverPage,
+  settingsPage,
+  headerPage,
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('discover app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
@@ -85,13 +81,12 @@ define(function (require) {
         bdd.it('load query should show query name', function () {
           return discoverPage.loadSavedSearch(queryName1)
           .then(function () {
-            return common.sleep(3000);
-          })
-          .then(function () {
-            return discoverPage.getCurrentQueryName();
-          })
-          .then(function (actualQueryNameString) {
-            expect(actualQueryNameString).to.be(queryName1);
+            return common.try(function () {
+              return discoverPage.getCurrentQueryName()
+              .then(function (actualQueryNameString) {
+                expect(actualQueryNameString).to.be(queryName1);
+              });
+            });
           })
           .catch(common.handleError(this));
         });
@@ -114,8 +109,8 @@ define(function (require) {
             '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
             '118.562', '63.524', '17.587', '2.537'
           ];
-          return common.sleep(4000)
-          .then(function () {
+
+          return common.try(function () {
             return verifyChartData(expectedBarChartData);
           })
           .catch(common.handleError(this));
@@ -156,10 +151,9 @@ define(function (require) {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -171,10 +165,9 @@ define(function (require) {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -184,10 +177,9 @@ define(function (require) {
           var expectedBarChartData = [ '66.598', '129.458'];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -197,10 +189,9 @@ define(function (require) {
           var expectedBarChartData = [ '122.535'];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -210,10 +201,9 @@ define(function (require) {
           var expectedBarChartData = [ '122.535'];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(2000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -228,10 +218,9 @@ define(function (require) {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(4000);
-          })
-          .then(function () {
-            return verifyChartData(expectedBarChartData);
+            return common.try(function () {
+              return verifyChartData(expectedBarChartData);
+            });
           })
           .catch(common.handleError(this));
         });
@@ -251,22 +240,19 @@ define(function (require) {
             return discoverPage.getBarChartData()
             .then(function compareData(paths) {
               // the largest bars are over 100 pixels high so this is less than 1% tolerance
-              var barHeightTolerance = 1;
-              var stringResults = '';
-              var hasFailure = false;
-              for (var y = 0; y < expectedBarChartData.length; y++) {
-                stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
-                 ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
-                if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
-                  hasFailure = true;
-                };
-              };
+              const barHeightTolerance = 1;
+              let hasFailure = false;
+              const debugLines = [];
+
+              expectedBarChartData.forEach((expected, i) => {
+                const actual = paths[i];
+                const pass = Math.abs(expected - actual) < barHeightTolerance;
+                debugLines.push(`  ${i}: pass: ${pass}, expected: ${expected}, actual: ${actual}`);
+                if (!pass) hasFailure = true;
+              });
+
               if (hasFailure) {
-                common.log(stringResults);
-                common.log(paths);
-              }
-              for (var x = 0; x < expectedBarChartData.length; x++) {
-                expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
+                throw new Error(`Chart data does not match expected:\n${debugLines.join('\n')}`);
               }
             });
           });
@@ -275,5 +261,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

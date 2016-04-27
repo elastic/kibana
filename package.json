@@ -151,6 +151,7 @@
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "4.1.8",
     "chokidar": "1.4.3",
+    "chromedriver": "2.21.2",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
     "expect.js": "0.3.1",
@@ -168,7 +169,7 @@
     "gruntify-eslint": "1.0.1",
     "html-entities": "1.1.3",
     "husky": "0.8.1",
-    "intern": "3.0.1",
+    "intern": "3.1.1",
     "istanbul-instrumenter-loader": "0.1.3",
     "karma": "0.13.9",
     "karma-chrome-launcher": "0.2.0",
@@ -189,6 +190,7 @@
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
+    "source-map-support": "0.4.0",
     "supertest-as-promised": "2.0.2"
   },
   "engines": {

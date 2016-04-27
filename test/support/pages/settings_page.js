@@ -1,15 +1,10 @@
 // in test/support/pages/settings_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var Promise = require('bluebird');
-  var Common = require('./common');
+var Promise = require('bluebird');
+import { common, remote, defaultTimeout } from '../';
 
-  var defaultTimeout = config.timeouts.default;
-  var common;
-
-  function settingsPage(remote) {
+export default (function () {
+  function settingsPage() {
     this.remote = remote;
-    common = new Common(this.remote);
   }
 
   settingsPage.prototype = {
@@ -341,4 +336,4 @@ define(function (require) {
   };
 
   return settingsPage;
-});
+}());

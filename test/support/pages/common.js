@@ -1,15 +1,16 @@
-// in test/support/pages/common.js
-define(function (require) {
-  var config = require('intern').config;
+import { common, config, defaultTimeout, remote } from '../';
+
+export default (function () {
   var Promise = require('bluebird');
   var moment = require('moment');
-  var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
-  var getUrl = require('intern/dojo/node!../../utils/get_url');
-  var fs = require('intern/dojo/node!fs');
-  var _ = require('intern/dojo/node!lodash');
-  var parse = require('intern/dojo/node!url').parse;
-  var format = require('intern/dojo/node!url').format;
-  var path = require('intern/dojo/node!path');
+  var testSubjSelector = require('@spalger/test-subj-selector');
+  var getUrl = require('../../utils/get_url');
+  var fs = require('fs');
+  var _ = require('lodash');
+  var parse = require('url').parse;
+  var format = require('url').format;
+  var util = require('util');
+  var path = require('path');
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -36,7 +37,7 @@ define(function (require) {
     return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
   }
 
-  function Common(remote) {
+  function Common() {
     this.remote = remote;
     if (remote.get.wrapper !== injectTimestampQuery) {
       this.remote.get = _.wrap(this.remote.get, injectTimestampQuery);
@@ -46,8 +47,6 @@ define(function (require) {
   }
 
 
-  var defaultTimeout = config.timeouts.default;
-
   Common.prototype = {
     constructor: Common,
 
@@ -55,76 +54,58 @@ define(function (require) {
       return getUrl.baseUrl(config.servers.kibana);
     },
 
-    navigateToApp: function (appName, testStatusPage) {
-      var self = this;
+    async navigateToApp(appName, testStatusPage) {
       // navUrl includes user:password@ for use with Shield
       // appUrl excludes user:password@ to match what getCurrentUrl returns
       var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + navUrl);
+      this.debug('navigating, app: %j url: %j', appName, navUrl);
 
-      var doNavigation = function (url) {
-        return self.try(function () {
-          // since we're using hash URLs, always reload first to force re-render
-          self.debug('navigate to: ' + url);
-          return self.remote.get(url)
-          .then(function () {
-            self.debug('returned from get, calling refresh');
-            return self.remote.refresh();
-          })
-          .then(function () {
-            self.debug('check testStatusPage');
-            if (testStatusPage !== false) {
-              self.debug('self.checkForKibanaApp()');
-              return self.checkForKibanaApp()
-              .then(function (kibanaLoaded) {
-                self.debug('kibanaLoaded = ' + kibanaLoaded);
-                if (!kibanaLoaded) {
-                  var msg = 'Kibana is not loaded, retrying';
-                  self.debug(msg);
-                  throw new Error(msg);
-                }
-              });
-            }
-          })
-          .then(function () {
-            return self.remote.getCurrentUrl();
-          })
-          .then(function (currentUrl) {
-            currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-            var navSuccessful = new RegExp(appUrl).test(currentUrl);
-            if (!navSuccessful) {
-              var msg = 'App failed to load: ' + appName +
-              ' in ' + defaultTimeout + 'ms' +
-              ' appUrl = ' + appUrl +
-              ' currentUrl = ' + currentUrl;
-              self.debug(msg);
-              throw new Error(msg);
-            }
+      const navigate = async () => {
+        await this.remote.get(navUrl);
+        await this.remote.refresh();
 
-            return currentUrl;
-          });
-        });
+        if (testStatusPage !== false) {
+          this.debug('checking that application is kibana, not status page');
+          if (!await this.checkAppIsKibana()) {
+            throw new Error('App is not kibana, retrying');
+          }
+        }
       };
 
-      return doNavigation(navUrl)
-      .then(function (currentUrl) {
-        var lastUrl = currentUrl;
-        return self.try(function () {
-          // give the app time to update the URL
-          return self.sleep(501)
-          .then(function () {
-            return self.remote.getCurrentUrl();
-          })
-          .then(function (currentUrl) {
-            self.debug('in doNavigation url = ' + currentUrl);
-            if (lastUrl !== currentUrl) {
-              lastUrl = currentUrl;
-              throw new Error('URL changed, waiting for it to settle');
-            }
-          });
-        });
+      const verifyPropertyNavigation = async () => {
+        let currentUrl = await this.remote.getCurrentUrl();
+        currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
+
+        if (!currentUrl.includes(appUrl)) {
+          throw new Error(
+            `App failed to load: "${appName}"\n` +
+            `  appUrl = ${appUrl}\n` +
+            `  currentUrl = ${currentUrl}`
+          );
+        }
+      };
+
+      await this.try(async () => {
+        await navigate();
+        await this.waitForUrlToStabilize();
+        await verifyPropertyNavigation();
       });
+    },
+
+    async waitForUrlToStabilize(pauseMs = 500) {
+      let prevUrl;
+      let curUrl;
+
+      do {
+        if (prevUrl) {
+          this.debug('waiting for url to stabilize');
+          this.sleep(pauseMs);
+        }
+
+        prevUrl = curUrl;
+        curUrl = await this.remote.getCurrentUrl();
+      } while (prevUrl !== curUrl);
     },
 
     runScript: function (fn, timeout) {
@@ -165,7 +146,7 @@ define(function (require) {
       });
     },
 
-    checkForKibanaApp: function () {
+    checkAppIsKibana() {
       var self = this;
 
       return self.getApp()
@@ -190,6 +171,7 @@ define(function (require) {
       var tempMessage;
 
       function attempt() {
+        self.debug('tryForTime starting attempt');
         lastTry = Date.now();
 
         if (lastTry - start > timeout) {
@@ -198,6 +180,7 @@ define(function (require) {
 
         return Promise
         .try(block)
+        .then(() => self.debug('tryForTime success'))
         .catch(function tryForTimeCatch(err) {
           self.debug('tryForTime failure: ' + err.message);
           tempMessage = err.message;
@@ -212,12 +195,12 @@ define(function (require) {
       return this.tryForTime(defaultTimeout, block);
     },
 
-    log: function log(logString) {
-      console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
+    log(...args) {
+      console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
     },
 
-    debug: function debug(logString) {
-      if (config.debug) this.log(logString);
+    debug(...args) {
+      if (config.debug) this.log(...args);
     },
 
     sleep: function sleep(sleepMilliseconds) {
@@ -238,7 +221,7 @@ define(function (require) {
 
         return self.saveScreenshot(filename)
         .finally(function () {
-          throw new Error(reason);
+          throw reason;
         });
       };
     },
@@ -267,4 +250,4 @@ define(function (require) {
   };
 
   return Common;
-});
+}());
