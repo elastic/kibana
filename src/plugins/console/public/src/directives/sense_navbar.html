@@ -20,14 +20,33 @@
       placeholder="http://servername:port"
       aria-label="Server Name"
       class="form-control"
+      ng-if="!sense.allowedServers"
       ng-focus="navbar.updateServerUrlHistory()"
       ng-blur="navbar.commitServerUrlFormModel()"
-
       sense-uib-typeahead="url for url in navbar.serverUrlHistory"
       ng-model="navbar.serverUrlFormModel"
       typeahead-append-to-body="true"
       typeahead-focus-first="false"
+      required
+    >
 
+    <select
+      aria-label="Server"
+      class="form-control"
+      ng-if="sense.allowedServers && sense.allowedServers.length > 1"
+      ng-options="server for server in sense.allowedServers"
+      ng-model="navbar.serverUrlFormModel"
       required>
+    </select>
+
+    <input
+      type="text"
+      aria-label="Server"
+      class="form-control"
+      ng-if="sense.allowedServers && sense.allowedServers.length === 1"
+      ng-model="navbar.serverUrlFormModel"
+      ng-disabled="true"
+      required>
+    </select>
   </form>
 </navbar>
