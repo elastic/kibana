@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import angular from 'angular';
 
 function BaseObject(attributes) {
