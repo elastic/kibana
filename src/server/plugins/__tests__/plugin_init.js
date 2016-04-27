@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import pluginInit from '../plugin_init';
 
-describe.only('Plugin init', () => {
+describe('Plugin init', () => {
   const getPluginCollection = (plugins) => ({
     byId: plugins,
     toArray: () => values(plugins)
