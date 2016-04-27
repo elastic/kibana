@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var $ = require('jquery');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 require('flot');
 require('flotTime');
@@ -12,7 +12,7 @@ require('flotSymbol');
 var app = require('ui/modules').get('apps/timelion', []);
 var template = '<div class="chart-title"></div><div class="chart-canvas"></div>';
 
-app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Private) {
+app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Private, config) {
   return {
     restrict: 'A',
     scope: {
@@ -24,6 +24,9 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
       var timezone = Private(require('plugins/timelion/services/timezone'))();
       var getxAxisFormatter = Private(require('./xaxis_formatter'));
 
+      // TODO: I wonder if we should supply our own moment that sets this every time?
+      // could just use angular's injection to provide a moment service?
+      moment.tz.setDefault(config.get('dateFormat:tz'));
 
       $scope.search = $scope.search || _.noop;
 
