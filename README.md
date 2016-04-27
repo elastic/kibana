@@ -6,6 +6,7 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 - Elasticsearch master
 - Kibana binary package
+- 512 MB of available RAM
 
 ## Installation
 
@@ -13,7 +14,6 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 * Extract the files
 * Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
-
 
 ## Upgrade from previous version
 

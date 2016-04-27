@@ -16,8 +16,10 @@ define(function (require) {
     functionalSuites: [
       'test/functional/index'
     ],
+
     excludeInstrumentation: /.*/,
-    // this is how long a test can run before timing out
+
     defaultTimeout: 90000,
+    defaultFindTimeout: 10000  // this is how long we try to find elements on page
   }, serverConfig);
 });

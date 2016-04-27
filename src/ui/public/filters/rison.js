@@ -1,4 +1,4 @@
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import uiModules from 'ui/modules';
 let module = uiModules.get('kibana');
 
