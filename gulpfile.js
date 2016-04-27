@@ -103,8 +103,9 @@ gulp.task('docs', function (done) {
 gulp.task('version', function (done) {
   var kibanaVersion = pkg.version.split('-')[0];
   var timelionVersion = pkg.version.split('-')[1];
-  console.log(semver.patch(timelionVersion));
-  child.exec('npm version --no-git-tag-version ' + kibanaVersion + '-' + '0.1.' + (semver.patch(timelionVersion) + 1), function () {
+  var newVersion = kibanaVersion + '-' + '0.1.' + (semver.patch(timelionVersion) + 1);
+  child.exec('npm version --no-git-tag-version ' + newVersion, function () {
+    console.log('Timelion version is ' + newVersion);
     done();
   });
 });
