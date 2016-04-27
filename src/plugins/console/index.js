@@ -18,10 +18,16 @@ module.exports = function (kibana) {
       icon: 'plugins/console/logo.svg',
       injectVars: function (server, options) {
         let { proxyTargets, defaultServerUrl } = options;
+        const config = server.config();
 
         if (!defaultServerUrl) {
-          if (proxyTargets) defaultServerUrl = proxyTargets[0];
-          else defaultServerUrl = 'http://localhost:9200';
+          if (proxyTargets) {
+            defaultServerUrl = proxyTargets[0];
+          } else if (config.has('elasticsearch.url')) {
+            defaultServerUrl = config.get('elasticsearch.url');
+          } else {
+            defaultServerUrl = 'http://localhost:9200';
+          }
         }
 
         return { proxyTargets, defaultServerUrl };
