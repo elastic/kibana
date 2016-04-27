@@ -2,7 +2,7 @@ import LazyServer from './lazy_server';
 import LazyOptimizer from './lazy_optimizer';
 import { fromRoot } from '../../utils';
 
-export default async (kbnServer, kibanaHapiServer, config) => {
+export async function mixin(kbnServer, kibanaHapiServer, config) {
   let server = new LazyServer(
     config.get('optimize.lazyHost'),
     config.get('optimize.lazyPort'),

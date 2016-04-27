@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import modules from 'ui/modules';
+import directivesProvider from '../directives';
 
-module.exports = function (chrome, internals) {
+export default function (chrome, internals) {
 
   chrome.getFirstPathSegment = _.noop;
   chrome.getBreadcrumbs = _.noop;
@@ -36,7 +37,7 @@ module.exports = function (chrome, internals) {
       };
     });
 
-    require('../directives')(chrome, internals);
+    directivesProvider(chrome, internals);
 
     modules.link(kibana);
   };

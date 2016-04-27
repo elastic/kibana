@@ -3,7 +3,7 @@ import { isStaged, getFilename } from './utils/files_to_commit';
 
 const root = resolve(__dirname, '..');
 
-export default function (grunt) {
+module.exports = function (grunt) {
   grunt.registerTask('lintStagedFiles', function () {
     grunt.task.requires('collectFilesToCommit');
 
@@ -21,4 +21,4 @@ export default function (grunt) {
     grunt.config.set('eslint.staged.files.src', files);
     grunt.task.run(['eslint:staged']);
   });
-}
+};

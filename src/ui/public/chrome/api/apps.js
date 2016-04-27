@@ -1,7 +1,7 @@
 import { clone, get } from 'lodash';
 import { resolve } from 'url';
 
-module.exports = function (chrome, internals) {
+export default function (chrome, internals) {
 
   if (get(internals, 'app.navLink.url')) {
     internals.app.navLink.url = resolve(window.location.href, internals.app.navLink.url);

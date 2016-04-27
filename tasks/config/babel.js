@@ -1,5 +1,5 @@
 let { defaults } = require('lodash');
-let babelOptions = require('../../src/optimize/babel_options');
+let babelOptions = require('../../src/optimize/babel/options');
 
 module.exports = {
   build: {

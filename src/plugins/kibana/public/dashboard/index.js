@@ -17,11 +17,10 @@ import DocTitleProvider from 'ui/doc_title';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
+import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import savedDashboardRegister from 'plugins/kibana/dashboard/services/saved_dashboard_register';
 
-
-
-require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
-
+savedObjectRegistry.register(savedDashboardRegister);
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

@@ -7,7 +7,6 @@ import DefinePlugin from 'webpack/lib/DefinePlugin';
 import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 
 import fromRoot from '../utils/from_root';
-import babelOptions from './babel_options';
 import { inherits } from 'util';
 import { defaults, transform } from 'lodash';
 import { resolve } from 'path';
@@ -116,18 +115,13 @@ class BaseOptimizer {
           { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
           { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack${mapQ}` },
           {
-            test: /\.js$/,
+            test: /\.jsx?$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
-            query: babelOptions.webpack
-          },
-          {
-            test: /\.jsx$/,
-            exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
-            query: defaults({
-              nonStandard: true,
-            }, babelOptions.webpack)
+            loader: 'babel-loader',
+            query: {
+              presets: ['@elastic/babel-preset-kibana/webpack'],
+              cacheDirectory: process.env.WEBPACK_BABEL_CACHE_PATH
+            }
           }
         ].concat(this.env.loaders),
         postLoaders: this.env.postLoaders || [],

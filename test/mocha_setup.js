@@ -1,7 +1,7 @@
 var sinon = require('sinon');
 var autoRelease = require('auto-release-sinon');
 
-require('babel/register')(require('../src/optimize/babel_options').node);
+require('../src/optimize/babel/register');
 
 // hook into the global afterEach variable to allow autoReleaseSinon to register
 // an afterEach handler before mocha has exposed itself to the test files.

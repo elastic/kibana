@@ -3,7 +3,7 @@ import Scanner from 'ui/utils/scanner';
 import 'plugins/kibana/discover/saved_searches/_saved_search';
 import 'ui/notify';
 import uiModules from 'ui/modules';
-
+import savedObjectRegistry from 'plugins/kibana/settings/saved_object_registry';
 
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'
@@ -11,7 +11,7 @@ const module = uiModules.get('discover/saved_searches', [
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
-require('plugins/kibana/settings/saved_object_registry').register({
+savedObjectRegistry.register({
   service: 'savedSearches',
   title: 'searches'
 });
