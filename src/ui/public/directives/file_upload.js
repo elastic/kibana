@@ -12,11 +12,11 @@ module.directive('fileUpload', function () {
     scope: {
       onRead: '&',
       onLocate: '&',
-      label: '='
+      uploadSelector: '@'
     },
     template: html,
     link: function ($scope, $elem, attrs) {
-      let $button = $elem.find('.upload');
+      let $button = $elem.find($scope.uploadSelector);
       let $dropzone = $elem.find('.dropzone');
 
       const handleFile = (file) => {
