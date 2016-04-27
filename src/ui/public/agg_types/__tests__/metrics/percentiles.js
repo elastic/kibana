@@ -18,19 +18,19 @@ describe('AggTypeMetricPercentilesProvider class', function () {
   }));
 
   it('uses the custom label if it is set', function () {
-    let vis = new Vis(indexPattern, {});
+    const vis = new Vis(indexPattern, {});
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
     // anything else)
-    let aggConfig = vis.aggs[0];
+    const aggConfig = vis.aggs[0];
     aggConfig.params.customLabel = 'prince';
     aggConfig.params.percents = [ 95 ];
     aggConfig.params.field = {
       displayName: 'bytes'
     };
 
-    let responseAggs = aggTypeMetricPercentiles.getResponseAggs(aggConfig);
-    let ninetyFifthPercentileLabel = responseAggs[0].makeLabel();
+    const responseAggs = aggTypeMetricPercentiles.getResponseAggs(aggConfig);
+    const ninetyFifthPercentileLabel = responseAggs[0].makeLabel();
 
     expect(ninetyFifthPercentileLabel).to.be('95th percentile of prince');
   });
