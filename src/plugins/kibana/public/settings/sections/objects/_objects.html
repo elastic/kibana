@@ -3,7 +3,7 @@
     <div class="header">
       <h2 class="title">Edit Saved Objects</h2>
       <button class="btn btn-default controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export Everything</button>
-      <file-upload on-read="importAll(fileContents)">
+      <file-upload on-read="importAll(fileContents)" upload-selector="button.upload">
         <button class="btn btn-default controls upload" ng-click>
           <i aria-hidden="true" class="fa fa-upload"></i> Import
         </button>
