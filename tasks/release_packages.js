@@ -38,10 +38,10 @@ export default (grunt) => {
       rpm.filePath,
       '-r', 'external-1'
     ], {
-      env: {
+      env: Object.assign({}, {
         'AWS_ACCESS_KEY': rpm.awsKey,
         'AWS_SECRET_KEY': rpm.awsSecret
-      }
+      }, process.env)
     });
   }
 
@@ -76,7 +76,7 @@ export default (grunt) => {
   grunt.registerTask('_publishPackages:upload', function (environment) {
     const aws = grunt.file.readJSON('.aws-config.json');
     const signature = grunt.file.readJSON('.signing-config.json');
-
+    const done = this.async();
     const simpleGit = new SimpleGit();
     const revparse = promisify(simpleGit.revparse, simpleGit);
 
@@ -107,6 +107,7 @@ export default (grunt) => {
           });
         }
       });
+      done();
     });
   });
 };
