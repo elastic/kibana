@@ -45,7 +45,8 @@ app.directive('pipelineSetup', function () {
       ingest.getProcessors()
       .then((enabledProcessorTypeIds) => {
         $scope.processorTypes = buildProcessorTypeList(enabledProcessorTypeIds);
-      });
+      })
+      .catch(notify.error);
 
       const pipeline = new Pipeline();
       // Loads pre-existing pipeline which will exist if the user returns from
