@@ -13,6 +13,7 @@ var rimraf = require('rimraf');
 var zip = require('gulp-zip');
 var fs = require('fs');
 var child = require('child_process');
+var semver = require('semver');
 
 var pkg = require('./package.json');
 var packageName = pkg.name  + '-' + pkg.version;
@@ -99,6 +100,16 @@ gulp.task('docs', function (done) {
   writeDocs(done);
 });
 
+gulp.task('version', function (done) {
+  var kibanaVersion = pkg.version.split('-')[0];
+  var timelionVersion = pkg.version.split('-')[1];
+  console.log(semver.patch(timelionVersion));
+  child.exec('npm version --no-git-tag-version ' + kibanaVersion + '-' + '0.1.' + (semver.patch(timelionVersion) + 1), function () {
+    done();
+  });
+});
+
+
 gulp.task('lint', function (done) {
   return gulp.src(['server/**/*.js', 'public/**/*.js', 'public/**/*.jsx'])
     // eslint() attaches the lint output to the eslint property
@@ -184,6 +195,7 @@ gulp.task('dev', ['sync'], function (done) {
     'timelion.json'
   ], ['sync', 'lint']);
 });
+
 
 gulp.task('test', [], function (done) {
   // A complete hack, but I have no wifi and I want to write tests
