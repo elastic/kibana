@@ -2,7 +2,7 @@ import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../plugins
 import _ from 'lodash';
 import angular from 'angular';
 
-export default function IngestProvider($rootScope, $http, config) {
+export default function IngestProvider($rootScope, $http, config, $q) {
 
   const ingestAPIPrefix = '../api/kibana/ingest';
 
@@ -55,7 +55,7 @@ export default function IngestProvider($rootScope, $http, config) {
     return $http.post(`${ingestAPIPrefix}/simulate`, pack(pipeline))
     .then(unpack)
     .catch(err => {
-      throw ('Error communicating with Kibana server');
+      return $q.reject(new Error('Error simulating pipeline'));
     });
   };
 
@@ -67,7 +67,7 @@ export default function IngestProvider($rootScope, $http, config) {
     return $http.get(`${ingestAPIPrefix}/processors`)
     .then(unpack)
     .catch(err => {
-      throw ('Error fetching enabled processors');
+      return $q.reject(new Error('Error fetching enabled processors'));
     });
   };
 
