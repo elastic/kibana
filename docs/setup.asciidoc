@@ -5,6 +5,7 @@ All you need is:
 
 * Elasticsearch {esversion}
 * A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
+* 512 MB of available RAM
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
 ** Which Elasticsearch indices you want to search.

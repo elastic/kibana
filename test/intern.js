@@ -27,8 +27,8 @@ define(function (require) {
       }
     },
     timeouts: {
-      // this is how long a test can run before timing out
-      default: 90000
+      default: 90000, // this is how long a test can run before timing out
+      findTimeout: 10000  // this is how long we try to find elements on page
     },
   }, serverConfig);
 });
