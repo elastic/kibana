@@ -1,0 +1,26 @@
+Backport PR #7046
+---------
+
+**Commit 1:**
+Minimal changes to support Shield Login.
+
+* Original sha: ae6aaa3e8645c2636bea80f261052e9b8a45eb02
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-04-25T16:44:10Z
+
+**Commit 2:**
+Change to doNavigation(appUrl).
+
+* Original sha: 14be3691f50d0fcd0988cac0d192e60467955ecb
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-04-25T17:00:16Z
+
+**Commit 3:**
+Revert back to doNavigation(navUrl).
+
+* Original sha: fbb3e2011bd978f409bd606dd4a8a54bba61ceeb
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-04-25T17:40:35Z
+
+**Commit 4:**
+Change 'self' to 'remote'.
+
+* Original sha: 935fee7df1de9467ba773d085de3c0f81a5d1ee8
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-04-27T20:21:39Z
