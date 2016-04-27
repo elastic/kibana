@@ -81,7 +81,7 @@ module.exports = function (api) {
       'properties': {
         '*': {
           type: {
-            __one_of: ['text', 'keyword', 'string', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
+            __one_of: ['text', 'keyword', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
               'binary', 'object', 'nested', "geo_point", "geo_shape"
             ]
           },
