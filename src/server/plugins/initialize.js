@@ -1,4 +1,5 @@
-import { includes, keys } from 'lodash';
+import pluginInit from './plugin_init';
+
 module.exports = async function (kbnServer, server, config) {
 
   if (!config.get('plugins.initialize')) {
@@ -17,34 +18,5 @@ module.exports = async function (kbnServer, server, config) {
 
   });
 
-
-  let path = [];
-  const initialize = async function (id, fn) {
-    let plugin = plugins.byId[id];
-
-    if (includes(path, id)) {
-      throw new Error(`circular dependencies found: "${path.concat(id).join(' -> ')}"`);
-    }
-
-    path.push(id);
-
-    for (let reqId of plugin.requiredIds) {
-      if (!plugins.byId[reqId]) {
-        throw new Error(`Unmet requirement "${reqId}" for plugin "${id}"`);
-      }
-
-      await initialize(reqId, fn);
-    }
-
-    await plugin[fn]();
-    path.pop();
-  };
-
-  for (let {id} of plugins) {
-    await initialize(id, 'preInit');
-  }
-
-  for (let {id} of plugins) {
-    await initialize(id, 'init');
-  }
+  await pluginInit(plugins);
 };
