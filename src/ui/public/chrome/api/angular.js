@@ -5,6 +5,8 @@ import modules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
+const URL_LIMIT_WARN_WITHIN = 150;
+
 module.exports = function (chrome, internals) {
 
   chrome.getFirstPathSegment = _.noop;
@@ -45,7 +47,7 @@ module.exports = function (chrome, internals) {
         if ($location.path() === '/error/url-overflow') return;
 
         try {
-          if (urlOverflow.check($location.absUrl()) <= 150) {
+          if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
             notify.warning(`
               The URL has gotten big and may cause Kibana
               to stop working. Please simplify the data on screen.

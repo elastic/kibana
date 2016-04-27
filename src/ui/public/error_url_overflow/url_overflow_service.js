@@ -1,3 +1,6 @@
+const URL_MAX_IE = 2000;
+const URL_MAX_OTHERS = 25000;
+const IE_REGEX = /(;MSIE |Edge\/\d)/;
 
 export class UrlOverflowService {
   constructor() {
@@ -11,7 +14,7 @@ export class UrlOverflowService {
     // FIXME: Couldn't find a way to test for browser compatibility without
     // complex redirect and cookie based "feature-detection" page, so going
     // with user-agent detection for now.
-    this._ieLike = /(;MSIE |Edge\/\d)/.test(window.navigator.userAgent);
+    this._ieLike = IE_REGEX.test(window.navigator.userAgent);
 
     this._val = store.getItem(key);
     this._sync = () => {
@@ -21,7 +24,7 @@ export class UrlOverflowService {
   }
 
   failLength() {
-    return this._ieLike ? 2000 : 25000;
+    return this._ieLike ? URL_MAX_IE : URL_MAX_OTHERS;
   }
 
   set(v) {
