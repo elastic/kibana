@@ -1,8 +1,6 @@
 let _ = require("lodash");
 
-var INDEX_SETTING = {
-  __one_of: ['analyzed', 'not_analyzed', 'no', true, false]
-}, BOOLEAN = {
+var BOOLEAN = {
   __one_of: [true, false]
 };
 
@@ -58,7 +56,7 @@ module.exports = function (api) {
         'enabled': BOOLEAN
       },
       '_field_names': {
-        'index': INDEX_SETTING
+        'index': BOOLEAN
       },
       '_routing': {
         'required': BOOLEAN,
@@ -90,7 +88,7 @@ module.exports = function (api) {
 
           // strings
           store: BOOLEAN,
-          index: INDEX_SETTING,
+          index: BOOLEAN,
           term_vector: {
             __one_of: ['no', 'yes', 'with_offsets', 'with_positions', 'with_positions_offsets']
           },
