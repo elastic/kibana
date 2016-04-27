@@ -3,7 +3,7 @@ define(function (require) {
   var config = require('intern').config;
   var Common = require('./common');
 
-  var defaultTimeout = config.timeouts.default;
+  var defaultTimeout = config.timeouts.findTimeout;
   var common;
   var thisTime;
 
