@@ -14,16 +14,16 @@ define(function (require) {
     constructor: ShieldPage,
 
     login: function login(user, pwd) {
-      var self = this.remote;
-      return self.setFindTimeout(5000)
+      var remote = this.remote;
+      return remote.setFindTimeout(5000)
       .findById('username')
       .type(user)
       .then(function () {
-        return self.findById('password')
+        return remote.findById('password')
         .type(pwd);
       })
       .then(function () {
-        return self.findByCssSelector('.btn')
+        return remote.findByCssSelector('.btn')
         .click();
       });
     }
