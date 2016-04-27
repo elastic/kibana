@@ -95,10 +95,6 @@ module.exports = function (api) {
           boost: 1.0,
           null_value: '',
 
-          // norms
-          omit_norms: {
-            __one_of: [true, false]
-          },
           norms: BOOLEAN,
 
           index_options: {
