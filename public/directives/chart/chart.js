@@ -17,10 +17,13 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
     restrict: 'A',
     scope: {
       chart: '=', // The flot object, data, config and all
-      search: '=' // The function to execute to kick off a search
+      search: '=', // The function to execute to kick off a search
+      interval: '=' // Required for formatting x-axis ticks
     },
     link: function ($scope, $elem) {
       var timezone = Private(require('plugins/timelion/services/timezone'))();
+      var getxAxisFormatter = Private(require('./xaxis_formatter'));
+
 
       $scope.search = $scope.search || _.noop;
 
@@ -30,7 +33,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         canvas: true,
         xaxis: {
           mode: 'time',
-          tickLength: 0,
+          tickLength: 5,
           timezone: 'browser'
         },
         selection: {
@@ -74,11 +77,14 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         if (!$scope.plot) return;
         console.log('redrawing');
         $timeout(function () {
+          drawPlot($scope.chart);
+          /*
           // This is a lot faster than calling drawPlot(); Stolen from the borked flot.resize plugin
-          // TODO: Currently resizing breaks tooltips
+          // However this will break tooltips
           $scope.plot.resize();
           $scope.plot.setupGrid();
           $scope.plot.draw();
+          */
         }, 0);
       });
 
@@ -181,6 +187,21 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         $('.chart-title', $elem).text(title == null ? '' : title);
 
         var options = _.cloneDeep(defaultOptions);
+
+
+        // Get the X-axis tick format
+        var format = getxAxisFormatter($scope.interval);
+
+        // Use moment to format ticks so we get timezone correction
+        options.xaxis.tickFormatter = function (val) {
+          return moment(val).format(format);
+        };
+
+        // Calculate how many ticks can fit on the axis
+        var tickLetterWidth = 7;
+        var tickPadding = 45;
+        options.xaxis.ticks = Math.floor($elem.width() / ((format.length * tickLetterWidth) + tickPadding));
+
         var series = _.map(plotConfig, function (series, index) {
           series = _.cloneDeep(_.defaults(series, {
             shadowSize: 0,

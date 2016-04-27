@@ -4,7 +4,7 @@ var configFile = require('../timelion.json');
 
 require('angularSortableView');
 
-require('plugins/timelion/directives/chart_directive');
+require('plugins/timelion/directives/chart/chart');
 require('plugins/timelion/directives/interval/interval');
 
 require('plugins/timelion/directives/expression_directive');

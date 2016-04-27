@@ -48,7 +48,7 @@
           ng-click="setActiveCell($index)"
           ng-class="{active: $index === state.selected}"
           >
-          <div chart="sheet[$index]" search="search"></div>
+          <div chart="sheet[$index]" search="search" interval="state.interval"></div>
           <div class="cell-actions">
             <div class="cell-id" ng-click="removeCell($index)" tooltip="Remove" tooltip-append-to-body="1"><span>{{$index + 1}}</span></div>
             <div class="cell-move" tooltip="Drag to reorder" tooltip-append-to-body="1" sv-handle><span class="fa fa-arrows"></span></div>
