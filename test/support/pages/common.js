@@ -50,7 +50,7 @@ define(function (require) {
   }
 
 
-  var defaultTimeout = config.timeouts.default;
+  var defaultTimeout = config.timeouts.findTimeout;
 
   Common.prototype = {
     constructor: Common,
