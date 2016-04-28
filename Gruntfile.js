@@ -62,7 +62,8 @@ module.exports = function (grunt) {
       'postcss-unique-selectors': '1.0.0',
       'postcss-minify-selectors': '1.4.6',
       'postcss-single-charset': '0.3.0',
-      'regenerator': '0.8.36'
+      'regenerator': '0.8.36',
+      'readable-stream': '2.1.0'
     }
   };
 
