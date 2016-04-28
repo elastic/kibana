@@ -1,12 +1,11 @@
-// in test/support/pages/shield_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var defaultTimeout = config.timeouts.findTimeout;
+import { remote, defaultFindTimeout } from '../';
 
+// in test/support/pages/shield_page.js
+export default (function (require) {
   // the page object is created as a constructor
   // so we can provide the remote Command object
   // at runtime
-  function ShieldPage(remote) {
+  function ShieldPage() {
     this.remote = remote;
   }
 
@@ -15,7 +14,7 @@ define(function (require) {
 
     login: function login(user, pwd) {
       var remote = this.remote;
-      return remote.setFindTimeout(defaultTimeout)
+      return remote.setFindTimeout(defaultFindTimeout)
       .findById('username')
       .type(user)
       .then(function () {
@@ -32,4 +31,4 @@ define(function (require) {
   };
 
   return ShieldPage;
-});
+}());
