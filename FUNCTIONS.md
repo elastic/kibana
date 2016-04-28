@@ -10,7 +10,7 @@ Pull data from an elasticsearch instance
 Argument | Accepts | Description
 --- | --- | ---
 q | *string* | Query in lucene query string syntax  
-metric | *string* | An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes"  
+metric | *string* | An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes", or just "count"  
 index | *string* | Index to query, wildcards accepted  
 timefield | *string* | Field of type "date" to use for x-axis  
 kibana | *boolean* | Respect filters on Kibana dashboards. Only has an effect when using on Kibana dashboards  

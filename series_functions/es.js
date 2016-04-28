@@ -84,7 +84,8 @@ module.exports = new Datasource('es', {
       name: 'metric',
       types: ['string', 'null'],
       multi: true,
-      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes"'
+      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field.' +
+        ' Eg "sum:bytes", or just "count"'
     },
     {
       name: 'index',
