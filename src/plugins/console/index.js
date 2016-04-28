@@ -55,7 +55,7 @@ module.exports = function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultServerUrl: Joi.string().optional(),
-        proxyTargets: Joi.array().items(Joi.string()).optional(),
+        proxyTargets: Joi.array().items(Joi.string()).single().optional(),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
         ssl: Joi.object({
           verify: Joi.boolean(),
