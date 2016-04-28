@@ -19,7 +19,8 @@ module.exports = function (kbnServer, server, config) {
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       });
-    }
+    },
+    config: {auth: false}
   });
 
   server.decorate('reply', 'renderStatusPage', function () {
@@ -34,6 +35,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/status',
     handler: function (request, reply) {
       return reply.renderStatusPage();
-    }
+    },
+    config: {auth: false}
   });
 };
