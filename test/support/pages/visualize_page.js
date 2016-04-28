@@ -1,15 +1,8 @@
-define(function (require) {
+import { common, defaultFindTimeout, remote } from '../';
 
-  var config = require('intern').config;
-  var registerSuite = require('intern!object');
-  var Common = require('./common');
-
-  var defaultTimeout = config.timeouts.findTimeout;
-  var common;
-
-  function VisualizePage(remote) {
+export default (function () {
+  function VisualizePage() {
     this.remote = remote;
-    common = new Common(this.remote);
   }
 
   VisualizePage.prototype = {
@@ -17,63 +10,63 @@ define(function (require) {
 
     clickAreaChart: function clickAreaChart() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Area chart')
       .click();
     },
 
     clickDataTable: function clickDataTable() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Data table')
       .click();
     },
 
     clickLineChart: function clickLineChart() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Line chart')
         .click();
     },
 
     clickMarkdownWidget: function clickMarkdownWidget() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Markdown widget')
       .click();
     },
 
     clickMetric: function clickMetric() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Metric')
       .click();
     },
 
     clickPieChart: function clickPieChart() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Pie chart')
       .click();
     },
 
     clickTileMap: function clickTileMap() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Tile map')
       .click();
     },
 
     clickVerticalBarChart: function clickVerticalBarChart() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByPartialLinkText('Vertical bar chart')
       .click();
     },
 
     getChartTypeCount: function getChartTypeCount() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findAllByCssSelector('a.wizard-vis-type.ng-scope')
       .length;
     },
@@ -81,7 +74,7 @@ define(function (require) {
     getChartTypes: function getChartTypes() {
       var types = [];
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findAllByCssSelector('.wizard-type-heading h4')
       .then(function (chartTypes) {
         function getChartType(chart) {
@@ -97,14 +90,14 @@ define(function (require) {
 
     clickAbsoluteButton: function clickAbsoluteButton() {
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       .findByCssSelector('ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")')
       .click();
     },
 
     setFromTime: function setFromTime(timeString) {
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       .findByCssSelector('input[ng-model="absolute.from"]')
       .clearValue()
       .type(timeString);
@@ -112,7 +105,7 @@ define(function (require) {
 
     setToTime: function setToTime(timeString) {
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       .findByCssSelector('input[ng-model="absolute.to"]')
       .clearValue()
       .type(timeString);
@@ -120,14 +113,14 @@ define(function (require) {
 
     clickGoButton: function clickGoButton() {
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       .findByClassName('kbn-timepicker-go')
       .click();
     },
 
     collapseChart: function collapseChart() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('div.visualize-show-spy > div > i')
       .click();
     },
@@ -141,14 +134,14 @@ define(function (require) {
 
     clickMetricEditor: function clickMetricEditor() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('button[aria-label="Open Editor"]')
       .click();
     },
 
     clickNewSearch: function clickNewSearch() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.list-group-item a')
       .click();
     },
@@ -156,18 +149,18 @@ define(function (require) {
     setValue: function setValue(newValue) {
       var self = this.remote;
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       .findByCssSelector('button[ng-click="numberListCntr.add()"]')
       .click()
       .then(function () {
         return self
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
         .clearValue();
       })
       .then(function () {
         return self
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
         .type(newValue);
       });
@@ -175,14 +168,14 @@ define(function (require) {
 
     clickSavedSearch: function clickSavedSearch() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]')
       .click();
     },
 
     selectSearch: function selectSearch(searchName) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByLinkText(searchName)
       .click();
     },
@@ -190,7 +183,7 @@ define(function (require) {
 
     getErrorMessage: function getErrorMessage() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.item>h4')
       .getVisibleText();
     },
@@ -198,7 +191,7 @@ define(function (require) {
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
     clickBucket: function clickBucket(bucketName) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findAllByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope')
       .then(function (chartTypes) {
         common.debug('found bucket types ' + chartTypes.length);
@@ -220,21 +213,21 @@ define(function (require) {
 
     selectAggregation: function selectAggregation(myString) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('option[label="' + myString + '"]')
       .click();
     },
 
     getField: function getField() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.ng-valid-required[name="field"] option[selected="selected"]')
       .getVisibleText();
     },
 
     selectField: function selectField(fieldValue) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       // the css below should be more selective
       .findByCssSelector('option[label="' + fieldValue + '"]')
       .click();
@@ -242,7 +235,7 @@ define(function (require) {
 
     orderBy: function orderBy(fieldValue) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
         'option.ng-binding.ng-scope:contains("' + fieldValue + '")'
       )
@@ -252,12 +245,12 @@ define(function (require) {
     getInterval: function getInterval() {
       var self = this;
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('select[ng-model="agg.params.interval"]')
       .getProperty('selectedIndex')
       .then(function (selectedIndex) {
         return self.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('select[ng-model="agg.params.interval"] option:nth-child(' + (selectedIndex + 1) + ')')
         .getProperty('label');
       });
@@ -265,21 +258,21 @@ define(function (require) {
 
     setInterval: function setInterval(newValue) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('select[ng-model="agg.params.interval"]')
       .type(newValue);
     },
 
     setNumericInterval: function setNumericInterval(newValue) {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[name="interval"]')
       .type(newValue);
     },
 
     clickGo: function clickGo() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.btn-success')
       .click();
     },
@@ -287,7 +280,7 @@ define(function (require) {
 
     clickNewVisualization: function clickNewVisualization() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('button[aria-label="New Visualization"]')
       .click();
     },
@@ -296,7 +289,7 @@ define(function (require) {
     saveVisualization: function saveVisualization(vizName) {
       var self = this;
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('button[aria-label="Save Visualization"]')
       .click()
       .then(function () {
@@ -305,7 +298,7 @@ define(function (require) {
       .then(function () {
         common.debug('saveButton button clicked');
         return self.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByName('visTitle')
         .type(vizName);
       })
@@ -313,7 +306,7 @@ define(function (require) {
       .then(function () {
         common.debug('click submit button');
         return self.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('.config button[type="submit"]')
         .click();
       })
@@ -321,7 +314,7 @@ define(function (require) {
       // it's only there for about 5 seconds
       .then(function () {
         return self.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
         .getVisibleText();
       });
@@ -329,7 +322,7 @@ define(function (require) {
 
     clickLoadSavedVisButton: function clickLoadSavedVisButton() {
       return this.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector('button[aria-label="Load Saved Visualization"]')
         .click();
     },
@@ -349,7 +342,7 @@ define(function (require) {
       common.debug('clickVisualizationByLinkText(' + vizName + ')');
 
       return this.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByLinkText(vizName)
         .click();
     },
@@ -379,7 +372,7 @@ define(function (require) {
 
     getXAxisLabels: function getXAxisLabels() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findAllByCssSelector('.x > g')
       .then(function (chartTypes) {
         function getChartType(chart) {
@@ -398,7 +391,7 @@ define(function (require) {
 
     getYAxisLabels: function getYAxisLabels() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findAllByCssSelector('.y > g')
       .then(function (chartTypes) {
         function getChartType(chart) {
@@ -432,7 +425,7 @@ define(function (require) {
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
       .getVisibleText()
       .then(function (yLabel) {
@@ -445,7 +438,7 @@ define(function (require) {
       // 2). find and save the y-axis pixel size (the chart height)
       .then(function () {
         return self
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('rect.background') // different here
         .getAttribute('height');
       })
@@ -454,7 +447,7 @@ define(function (require) {
         common.debug('height --------- ' + yAxisHeight);
       })
       .then(function () {
-        return self.setFindTimeout(defaultTimeout * 2)
+        return self.setFindTimeout(defaultFindTimeout * 2)
         .findByCssSelector('path[data-label="' + aggregateName + '"]')
         .getAttribute('d');
       })
@@ -484,7 +477,7 @@ define(function (require) {
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
         .getVisibleText()
         .then(function (yLabel) {
@@ -495,7 +488,7 @@ define(function (require) {
         // 2). find and save the y-axis pixel size (the chart height)
         .then(function getRect() {
           return self
-          .setFindTimeout(defaultTimeout)
+          .setFindTimeout(defaultFindTimeout)
           .findByCssSelector('clipPath rect')
           .getAttribute('height')
           .then(function (theHeight) {
@@ -507,7 +500,7 @@ define(function (require) {
         // 3). get the chart-wrapper elements
         .then(function getChartWrapper() {
           return self
-          .setFindTimeout(defaultTimeout * 2)
+          .setFindTimeout(defaultFindTimeout * 2)
           .findAllByCssSelector('.chart-wrapper')
           .then(function (chartTypes) {
 
@@ -547,7 +540,7 @@ define(function (require) {
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type')
       .then(function setYAxisLabel(y) {
         return y
@@ -561,7 +554,7 @@ define(function (require) {
       // 2). find and save the y-axis pixel size (the chart height)
       .then(function getRect() {
         return self
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findByCssSelector('rect.background')
         .then(function getRectHeight(chartAreaObj) {
           return chartAreaObj
@@ -576,7 +569,7 @@ define(function (require) {
       // 3). get the chart-wrapper elements
       .then(function () {
         return self
-        .setFindTimeout(defaultTimeout * 2)
+        .setFindTimeout(defaultFindTimeout * 2)
         // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
         .findAllByCssSelector('svg > g > g.series.\\30 > rect') // rect
         .then(function (chartTypes) {
@@ -608,7 +601,7 @@ define(function (require) {
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       // path.slice:nth-child(11)
       .findAllByCssSelector('path.slice')
       .then(function (chartTypes) {
@@ -630,41 +623,41 @@ define(function (require) {
 
     getChartAreaWidth: function getChartAreaWidth() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('clipPath rect')
       .getAttribute('width');
     },
     getChartAreaHeight: function getChartAreaHeight() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('clipPath rect')
       .getAttribute('height');
     },
 
     getDataTableData: function getDataTableData() {
       return this.remote
-      .setFindTimeout(defaultTimeout * 2)
+      .setFindTimeout(defaultFindTimeout * 2)
       .findByCssSelector('table.table.table-condensed tbody')
       .getVisibleText();
     },
 
     getMarkdownData: function getMarkdownData() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('visualize.ng-isolate-scope')
       .getVisibleText();
     },
 
     clickColumns: function clickColumns() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('div.schemaEditors.ng-scope > div > div > button:nth-child(2)')
       .click();
     },
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-      return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
+      return common.tryForTime(defaultFindTimeout * 5, function tryingForTime() {
         return self.remote
         .setFindTimeout(100)
         .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
@@ -681,11 +674,11 @@ define(function (require) {
 
     waitForVisualization: function waitForVisualization() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('visualize-legend');
     }
 
   };
 
   return VisualizePage;
-});
+}());

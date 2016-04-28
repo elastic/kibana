@@ -1,19 +1,8 @@
-define(function (require) {
-  var bdd = require('intern!bdd');
-  var config = require('intern').config;
-  var url = require('intern/dojo/node!url');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
+import { bdd, defaultTimeout, scenarioManager } from '../../../support';
 
-  var initialStateTest = require('./_initial_state');
-  var creationChangesTest = require('./_creation_form_changes');
-  var indexPatternCreateDeleteTest = require('./_index_pattern_create_delete');
-  var indexPatternResultsSortTest = require('./_index_pattern_results_sort');
-  var indexPatternPopularityTest = require('./_index_pattern_popularity');
-  var advancedSettingsTest = require('./_advanced_settings');
-
+(function () {
   bdd.describe('settings app', function () {
-    var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = config.timeouts.default;
+    this.timeout = defaultTimeout;
 
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
@@ -31,11 +20,11 @@ define(function (require) {
       });
     });
 
-    advancedSettingsTest(bdd, scenarioManager);
-    initialStateTest(bdd, scenarioManager);
-    creationChangesTest(bdd, scenarioManager);
-    indexPatternCreateDeleteTest(bdd, scenarioManager);
-    indexPatternResultsSortTest(bdd, scenarioManager);
-    indexPatternPopularityTest(bdd, scenarioManager);
+    require('./_initial_state');
+    require('./_creation_form_changes');
+    require('./_index_pattern_create_delete');
+    require('./_index_pattern_results_sort');
+    require('./_index_pattern_popularity');
+    require('./_advanced_settings');
   });
-});
+}());
