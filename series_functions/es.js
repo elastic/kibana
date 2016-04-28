@@ -32,7 +32,7 @@ function buildRequest(config, tlConfig) {
         }
       },
       aggs: {
-        series: {
+        time_buckets: {
           date_histogram: {
             field: config.timefield,
             interval: config.interval,
@@ -49,15 +49,26 @@ function buildRequest(config, tlConfig) {
     }
   };
 
-  if (config.metric) {
-    var metric = config.metric.split(':');
-    if (metric[0] && metric[1]) {
-      searchRequest.body.aggs.series.aggs = {metric: {}};
-      searchRequest.body.aggs.series.aggs.metric[metric[0]] = {field: metric[1]};
+  searchRequest.body.aggs.time_buckets.aggs = {};
+
+  _.each(config.metric, function (metric, i) {
+    var metric = metric.split(':');
+    if (metric[0] === 'count') {
+      // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
+      // It simplifies the aggregation tree walking code considerably
+      searchRequest.body.aggs.time_buckets.aggs[metric] = {
+        bucket_script: {
+          buckets_path: '_count',
+          script: {inline: '_value', lang: 'expression'}
+        }
+      };
+    } else if (metric[0] && metric[1]) {
+      searchRequest.body.aggs.time_buckets.aggs[metric] = {};
+      searchRequest.body.aggs.time_buckets.aggs[metric][metric[0]] = {field: metric[1]};
     } else {
-      throw new Error ('`metric` requires metric:field');
+      throw new Error ('`metric` requires metric:field or simply count');
     }
-  }
+  });
 
   return searchRequest;
 }
@@ -72,6 +83,7 @@ module.exports = new Datasource('es', {
     {
       name: 'metric',
       types: ['string', 'null'],
+      multi: true,
       help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes"'
     },
     {
@@ -122,31 +134,35 @@ module.exports = new Datasource('es', {
 
     var body = buildRequest(config, tlConfig);
 
+    function aggResponseToSeriesList(aggs) {
+      var timestamps = _.pluck(aggs.time_buckets.buckets, 'key');
+
+      var series = {};
+      _.each(aggs.time_buckets.buckets, function (bucket) {
+        _.forOwn(bucket, function (val, key) {
+          if (_.isPlainObject(val)) {
+            series[key] = series[key] || [];
+            series[key].push(val.value);
+          }
+        });
+      });
+
+      return _.map(series, function (values, name) {
+        return {
+          data: _.zip(timestamps, values),
+          type: 'series',
+          fit: config.fit,
+          label: config.q + '/' + name
+        };
+      });
+    }
+
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
 
-      var data = _.map(resp.aggregations.series.buckets, function (bucket) {
-        var value;
-        if (resp.aggregations.series.buckets[0].metric != null) {
-          value = bucket.metric.value;
-        } else {
-          value = bucket.doc_count;
-        }
-        return [bucket.key, value];
-      });
-
       return {
         type: 'seriesList',
-        list: [{
-          data:  data,
-          type: 'series',
-          fit: config.fit,
-          _meta: {
-            es_request: body
-          },
-          //cacheKey: cacheKey,
-          label: config.q
-        }]
+        list: aggResponseToSeriesList(resp.aggregations)
       };
     });
   }
