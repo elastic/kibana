@@ -118,6 +118,7 @@ module.exports = new Datasource('es', {
 
     var config = _.defaults(_.clone(args.byName), {
       q: '*',
+      metric: ['count'],
       index: tlConfig.file.es.default_index,
       timefield: tlConfig.file.es.timefield,
       interval: tlConfig.time.interval,
