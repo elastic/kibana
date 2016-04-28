@@ -24,12 +24,16 @@ export default function StateProvider(Private, $rootScope, $location) {
         self.fetch();
       }),
 
-      // beginning of full route update, new app will be initialized before
-      // $routeChangeSuccess or $routeChangeError
       $rootScope.$on('$routeChangeSuccess', function () {
         if (self._persistAcrossApps) {
           self.fetch();
-        } else {
+        }
+      }),
+
+      // beginning of full route update, new app will be initialized before
+      // $routeChangeSuccess or $routeChangeError
+      $rootScope.$on('$routeChangeStart', function () {
+        if (!self._persistAcrossApps) {
           self.destroy();
         }
       })
