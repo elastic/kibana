@@ -8,6 +8,7 @@ require('flotCrosshair');
 require('flotCanvas');
 require('flotSelection');
 require('flotSymbol');
+require('flotStack');
 
 var app = require('ui/modules').get('apps/timelion', []);
 var template = '<div class="chart-title"></div><div class="chart-canvas"></div>';

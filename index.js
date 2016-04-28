@@ -60,6 +60,10 @@ module.exports = function (kibana) {
         flotSelection$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.selection'),
           imports: 'flot'
+        },
+        flotStack$: {
+          path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.stack'),
+          imports: 'flot'
         }
       }
     },

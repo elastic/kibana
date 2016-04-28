@@ -9,6 +9,11 @@ module.exports = function indexArguments(functionDef, unorderedArgs) {
   // Validation, does not change the arguments
   _.each(unorderedArgs, function (arg, i) {
     var type = argType(arg);
+
+    if (!functionDef.args[i]) {
+      throw new Error ('Unknown argument #' + i + ' supplied to ' + functionDef.name);
+    }
+
     var required = functionDef.args[i].types;
     var multi = functionDef.args[i].multi;
     var name = functionDef.args[i].name;
