@@ -32,8 +32,11 @@ module.exports = function (tlConfig) {
   function invoke(fnName, args) {
     var functionDef = getFunctionByName(fnName);
 
-    args = repositionArguments(functionDef, args);
-    args = _.map(args, function (item) {
+    function resolveArgument(item) {
+      if (_.isArray(item)) {
+        return Promise.all(_.map(item, resolveArgument));
+      }
+
       if (_.isObject(item)) {
         switch (item.type) {
           case 'function':
@@ -68,8 +71,10 @@ module.exports = function (tlConfig) {
       } else {
         return item;
       }
-    });
+    }
 
+    args = repositionArguments(functionDef, args);
+    args = _.map(args, resolveArgument);
 
     return Promise.all(args).then(function (args) {
       args.byName = indexArguments(functionDef, args);
