@@ -3,6 +3,47 @@ var moment = require('moment');
 var toMS = require('../lib/to_milliseconds.js');
 var Datasource = require('../lib/classes/datasource');
 
+function createDateAgg(config, tlConfig) {
+  var dateAgg = {
+    time_buckets: {
+      meta: {type: 'time_buckets'},
+      date_histogram: {
+        field: config.timefield,
+        interval: config.interval,
+        time_zone: tlConfig.time.timezone,
+        extended_bounds: {
+          min: tlConfig.time.from,
+          max: tlConfig.time.to
+        },
+        min_doc_count: 0
+      }
+    }
+  };
+
+  dateAgg.time_buckets.aggs = {};
+  _.each(config.metric, function (metric, i) {
+    var metric = metric.split(':');
+    if (metric[0] === 'count') {
+      // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
+      // It simplifies the aggregation tree walking code considerably
+      dateAgg.time_buckets.aggs[metric] = {
+        bucket_script: {
+          buckets_path: '_count',
+          script: {inline: '_value', lang: 'expression'}
+        }
+      };
+    } else if (metric[0] && metric[1]) {
+      var metricName = metric[0] + '(' + metric[1] + ')';
+      dateAgg.time_buckets.aggs[metricName] = {};
+      dateAgg.time_buckets.aggs[metricName][metric[0]] = {field: metric[1]};
+    } else {
+      throw new Error ('`metric` requires metric:field or simply count');
+    }
+  });
+
+  return dateAgg;
+}
+
 function buildRequest(config, tlConfig) {
 
   var bool = {must: []};
@@ -16,61 +57,52 @@ function buildRequest(config, tlConfig) {
   timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
   bool.must.push(timeFilter);
 
-  var searchRequest = {
-    index: config.index,
-    body: {
-      query: {
-        bool: {
-          must: [{
-            query_string: {
-              query: config.q
-            }
-          }],
-          filter: {
-            bool: bool
-          }
-        }
+
+  var aggs = {
+    'q': {
+      meta: {type: 'split'},
+      filters: {
+        filters: _.chain(config.q).map(function (q) {
+          return [q, {query_string:{query: q}}];
+        }).zipObject(),
       },
-      aggs: {
-        time_buckets: {
-          date_histogram: {
-            field: config.timefield,
-            interval: config.interval,
-            time_zone: tlConfig.time.timezone,
-            extended_bounds: {
-              min: tlConfig.time.from,
-              max: tlConfig.time.to
-            },
-            min_doc_count: 0
-          }
-        }
-      },
-      size: 0
+      aggs: {}
     }
   };
 
-  searchRequest.body.aggs.time_buckets.aggs = {};
+  var aggCursor = aggs.q.aggs;
 
-  _.each(config.metric, function (metric, i) {
-    var metric = metric.split(':');
-    if (metric[0] === 'count') {
-      // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
-      // It simplifies the aggregation tree walking code considerably
-      searchRequest.body.aggs.time_buckets.aggs[metric] = {
-        bucket_script: {
-          buckets_path: '_count',
-          script: {inline: '_value', lang: 'expression'}
-        }
+  _.each(config.split, function (field, i) {
+    var field = field.split(':');
+    if (field[0] && field[1]) {
+      aggCursor[field[0]] = {
+        meta: {type: 'split'},
+        terms: {
+          field: field[0],
+          size: field[1]
+        },
+        aggs: {}
       };
-    } else if (metric[0] && metric[1]) {
-      searchRequest.body.aggs.time_buckets.aggs[metric] = {};
-      searchRequest.body.aggs.time_buckets.aggs[metric][metric[0]] = {field: metric[1]};
+      aggCursor = aggCursor[field[0]].aggs;
     } else {
-      throw new Error ('`metric` requires metric:field or simply count');
+      throw new Error ('`split` requires field:limit');
     }
   });
 
-  return searchRequest;
+  _.assign(aggCursor, createDateAgg(config, tlConfig));
+
+
+
+  return {
+    index: config.index,
+    body: {
+      query: {
+        bool: bool
+      },
+      aggs: aggs,
+      size: 0
+    }
+  };
 }
 
 module.exports = new Datasource('es', {
@@ -78,6 +110,7 @@ module.exports = new Datasource('es', {
     {
       name: 'q',
       types: ['string', 'null'],
+      multi: true,
       help: 'Query in lucene query string syntax'
     },
     {
@@ -86,6 +119,12 @@ module.exports = new Datasource('es', {
       multi: true,
       help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field.' +
         ' Eg "sum:bytes", or just "count"'
+    },
+    {
+      name: 'split',
+      types: ['string', 'null'],
+      multi: true,
+      help: 'An elasticsearch field to split the series on and a limit. Eg, "hostname:10" to get the top 10 hostnames'
     },
     {
       name: 'index',
@@ -137,24 +176,50 @@ module.exports = new Datasource('es', {
     var body = buildRequest(config, tlConfig);
 
     function aggResponseToSeriesList(aggs) {
-      var timestamps = _.pluck(aggs.time_buckets.buckets, 'key');
 
-      var series = {};
-      _.each(aggs.time_buckets.buckets, function (bucket) {
+      function flattenBucket(bucket, path, result) {
+        result = result || {};
+        path = path || [];
         _.forOwn(bucket, function (val, key) {
-          if (_.isPlainObject(val)) {
-            series[key] = series[key] || [];
-            series[key].push(val.value);
+          if (!_.isPlainObject(val)) return;
+          if (_.get(val, 'meta.type') === 'split') {
+            _.each(val.buckets, function (bucket, bucketKey) {
+              if (bucket.key == null) bucket.key = bucketKey; // For handling "keyed" response formats, eg filters agg
+              flattenBucket(bucket, path.concat([key + ':' + bucket.key]), result);
+            });
+          } else if (_.get(val, 'meta.type') === 'time_buckets') {
+            var metrics = timeBucketsToPairs(val.buckets);
+            _.each(metrics, function (pairs, metricName) {
+              result[path.concat([metricName]).join(' > ')] = pairs;
+            });
           }
         });
-      });
+        return result;
+      }
 
-      return _.map(series, function (values, name) {
+      function timeBucketsToPairs(buckets) {
+        var timestamps = _.pluck(buckets, 'key');
+        var series = {};
+        _.each(buckets, function (bucket) {
+          _.forOwn(bucket, function (val, key) {
+            if (_.isPlainObject(val)) {
+              series[key] = series[key] || [];
+              series[key].push(val.value);
+            }
+          });
+        });
+
+        return _.mapValues(series, function (values) {
+          return _.zip(timestamps, values);
+        });
+      }
+
+      return _.map(flattenBucket(aggs), function (values, name) {
         return {
-          data: _.zip(timestamps, values),
+          data: values,
           type: 'series',
           fit: config.fit,
-          label: config.q + '/' + name
+          label: name
         };
       });
     }
