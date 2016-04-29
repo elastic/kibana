@@ -5,24 +5,28 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
   var args = [];
 
   _.each(unorderedArgs, function (unorderedArg, i) {
-    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
+    var argDef;
+    var targetIndex;
+    var value;
 
+    if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       var argIndex = _.findIndex(functionDef.args, function (orderedArg) {
         return unorderedArg.name === orderedArg.name;
       });
-
-      var argDef = functionDef.args[argIndex];
-
-      // For arguments that are allowed to be passed multiple times
-      if (argDef.multi) {
-        args[argIndex] = args[argIndex] || [];
-        args[argIndex].push(unorderedArg.value);
-      } else {
-        args[argIndex] = unorderedArg.value;
-      }
-
+      argDef = functionDef.args[argIndex];
+      targetIndex = argIndex;
+      value = unorderedArg.value;
     } else {
-      args[i] = unorderedArg;
+      argDef = functionDef.args[i];
+      targetIndex = i;
+      value = unorderedArg;
+    }
+
+    if (argDef.multi) {
+      args[targetIndex] = args[targetIndex] || [];
+      args[targetIndex].push(value);
+    } else {
+      args[targetIndex] = value;
     }
   });
 
