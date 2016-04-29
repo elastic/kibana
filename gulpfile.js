@@ -125,7 +125,7 @@ gulp.task('lint', function (done) {
 });
 
 gulp.task('clean', function (done) {
-  Promise.each([buildDir, targetDir], function (dir) {
+  Promise.each([packageRoot, targetDir], function (dir) {
     return new Promise(function (resolve, reject) {
       rimraf(dir, function (err) {
         if (err) return reject(err);
