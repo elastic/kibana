@@ -2,7 +2,7 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import Pipeline from '../pipeline';
-import * as processorTypes from '../processor_types';
+import * as processorTypes from '../../processors/view_models';
 
 describe('processor pipeline', function () {
 

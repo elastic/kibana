@@ -75,7 +75,6 @@ app.directive('pipelineSetup', function () {
 
         pipeline.add(newVal.Type);
         $scope.processorType = '';
-        console.log(pipeline);
       });
 
       $scope.$watch('pipeline.dirty', simulatePipeline);
