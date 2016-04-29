@@ -1,5 +1,6 @@
 import modules from 'ui/modules';
 import template from 'plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step.html';
+import { filebeat as docLinks } from '../../../../../../../ui/public/documentation_links';
 import _ from 'lodash';
 
 modules.get('apps/settings')
@@ -13,6 +14,8 @@ modules.get('apps/settings')
       bindToController: true,
       controllerAs: 'pasteStep',
       controller: function ($scope) {
+        this.docLinks = docLinks;
+        
         if (_.isUndefined(this.rawSamples)) {
           this.rawSamples = '';
         }
