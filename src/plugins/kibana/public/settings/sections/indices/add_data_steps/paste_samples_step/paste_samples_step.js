@@ -1,6 +1,7 @@
 import modules from 'ui/modules';
 import template from './paste_samples_step.html';
 import _ from 'lodash';
+import './styles/_add_data_paste_samples_step.less';
 
 modules.get('apps/settings')
   .directive('pasteSamplesStep', function () {
