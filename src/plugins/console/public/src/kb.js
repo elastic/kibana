@@ -239,21 +239,19 @@ function setActiveApi(api) {
 }
 
 es.addServerChangeListener(function () {
-  var version = es.getVersion(), api;
-  if (!version || version.length == 0) {
-    api = "es_1_0";
-  }
-  else if (version[0] === "1") {
-    api = "es_1_0";
-  }
-  else if (version[0] === "2") {
-    api = "es_2_0";
-  }
-  else if (version[0] === "3") {
-    api = "es_2_0"; // TODO: change :)
-  }
-  else {
-    api = "es_1_0";
+  var version = es.getVersion() || [];
+  var api;
+
+  switch (version[0]) {
+    case '5':
+      api = 'es_5_0';
+      break;
+    case '2':
+      api = 'es_2_0';
+      break;
+    case '1':
+    default:
+      api = 'es_1_0';
   }
 
   if (api) {

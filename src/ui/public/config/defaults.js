@@ -236,6 +236,6 @@ export default function configDefaultsProvider() {
       value: 5000,
       description: 'The time in milliseconds which an information notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.'
-    }
+    },
   };
 };
