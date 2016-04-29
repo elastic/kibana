@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('intern/dojo/node!lodash');
   var expect = require('intern/dojo/node!expect.js');
   var fakeNamesIndexTemplate = require('intern/dojo/node!../../data/fake_names_index_template.json');
+  var fs = require('intern/dojo/node!fs');
 
   return function (bdd, scenarioManager, request) {
     const es = scenarioManager.client;
@@ -25,15 +26,18 @@ define(function (require) {
         });
       });
 
-      bdd.it('should require a multipart/form-data request with a csv file attached', function () {
+      bdd.it('should accept a multipart/form-data request with a csv file attached', function () {
         return request.post('/kibana/names/_bulk')
         .attach('csv', 'test/unit/data/fake_names.csv')
         .expect(200);
       });
 
-      bdd.it('should return 400 if no csv is provided', function () {
+      bdd.it('should also accept the raw csv data in the payload body', function () {
+        var csvData = fs.readFileSync('test/unit/data/fake_names_big.csv', {encoding: 'utf8'});
+
         return request.post('/kibana/names/_bulk')
-        .expect(400);
+        .send(csvData)
+        .expect(200);
       });
 
       bdd.it('should return JSON results', function () {
@@ -117,19 +121,29 @@ define(function (require) {
       });
 
       bdd.describe('optional parameters', function () {
-        bdd.it('should accept a custom delimiter for parsing the CSV', function () {
-          return request.post('/kibana/names/_bulk')
-          .field('delimiter', '|')
+        bdd.it('should accept a custom delimiter query string param for parsing the CSV', function () {
+          return request.post('/kibana/names/_bulk?delimiter=|')
           .attach('csv', 'test/unit/data/fake_names_pipe_delimited.csv')
           .expect(200)
           .then((bulkResponse) => {
             expect(bulkResponse.body[0]).to.have.property('created');
             expect(bulkResponse.body[0].created).to.be(2);
             expect(bulkResponse.body[0]).to.not.have.property('errors');
+
+            return es.indices.refresh();
+          })
+          .then(() => {
+            return es.search({
+              index: 'names'
+            });
+          })
+          .then((searchResponse) => {
+            const doc = _.get(searchResponse, 'hits.hits[0]._source');
+            expect(doc).to.only.have.keys('Number', 'Gender', 'NameSet');
           });
         });
 
-        bdd.it('should accept a boolean pipeline parameter enabling use of the index pattern\'s associated pipeline', function () {
+        bdd.it('should accept a boolean pipeline query string parameter enabling use of the index pattern\'s associated pipeline', function () {
           return es.transport.request({
             path: '_ingest/pipeline/kibana-names',
             method: 'put',
@@ -145,8 +159,7 @@ define(function (require) {
             }
           })
           .then((res) => {
-            return request.post('/kibana/names/_bulk')
-            .field('pipeline', 'true')
+            return request.post('/kibana/names/_bulk?pipeline=true')
             .attach('csv', 'test/unit/data/fake_names.csv')
             .expect(200);
           })

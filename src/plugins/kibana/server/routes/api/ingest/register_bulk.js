@@ -4,7 +4,6 @@ import _ from 'lodash';
 import hi from 'highland';
 import { patternToIngest } from '../../../../common/lib/convert_pattern_and_ingest_name';
 import { PassThrough } from 'stream';
-import bulkRequestSchema from '../../../lib/schemas/bulk_request_schema';
 import JSONStream from 'JSONStream';
 
 export function registerBulk(server) {
@@ -15,23 +14,22 @@ export function registerBulk(server) {
       payload: {
         output: 'stream',
         maxBytes: 1024 * 1024 * 1024
-      },
-      validate: {
-        payload: bulkRequestSchema
       }
     },
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       const indexPattern = req.params.id;
-      const usePipeline = req.payload.pipeline;
-      const csv = req.payload.csv;
-      const fileName = csv.hapi.filename;
+      const usePipeline = req.query.pipeline;
+      const delimiter = _.get(req.query, 'delimiter', ',');
       const responseStream = new PassThrough();
       const parser = parse({
         columns: true,
         auto_parse: true,
-        delimiter: _.get(req.payload, 'delimiter', ',')
+        delimiter: delimiter
       });
+
+      const csv = req.payload.csv ? req.payload.csv : req.payload;
+      const fileName = req.payload.csv ? csv.hapi.filename : '';
 
       let currentLine = 2; // Starts at 2 since we parse the header separately
 
@@ -48,7 +46,7 @@ export function registerBulk(server) {
           push(null, doc);
         }
         else {
-          push(null, {index: {_id: `L${currentLine} - ${fileName}`}});
+          push(null, {index: _.isEmpty(fileName) ? {} : {_id: `L${currentLine} - ${fileName}`}});
           push(null, doc);
           currentLine++;
           next();
