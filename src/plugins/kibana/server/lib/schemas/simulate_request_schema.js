@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import * as ingestProcessorSchemas from './resources/ingest_processor_schemas';
+import * as ingestProcessorSchemas from '../processors/schemas';
 import _ from 'lodash';
 
 export default Joi.object({
