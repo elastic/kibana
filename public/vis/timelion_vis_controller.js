@@ -14,7 +14,7 @@ define(function (require) {
     });
 
     $scope.search = function run() {
-      console.log(_.pluck(queryFilter.getFilters(), 'query'));
+      console.log(queryFilter.getFilters(), 'query');
       var expression = $scope.vis.params.expression;
       if (!expression) return;
 
@@ -22,7 +22,7 @@ define(function (require) {
         sheet: [expression],
         extended: {
           es: {
-            filters: _.pluck(queryFilter.getFilters(), 'query')
+            filters: queryFilter.getFilters()
           }
         },
         time: _.extend(timefilter.time, {

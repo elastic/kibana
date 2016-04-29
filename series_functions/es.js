@@ -46,11 +46,12 @@ function createDateAgg(config, tlConfig) {
 
 function buildRequest(config, tlConfig) {
 
-  var bool = {must: []};
+  var bool = {must: [], must_not: []};
 
   if (config.kibana) {
     var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
-    bool.must = kibanaFilters;
+    bool.must = _.chain(kibanaFilters).filter(function (filter) {return !filter.meta.negate;}).pluck('query').values();
+    bool.must_not = _.chain(kibanaFilters).filter(function (filter) {return filter.meta.negate;}).pluck('query').values();
   }
 
   var timeFilter = {range:{}};
