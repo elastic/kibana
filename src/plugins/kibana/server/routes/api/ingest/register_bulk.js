@@ -19,7 +19,7 @@ export function registerBulk(server) {
     handler: function (req, reply) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       const indexPattern = req.params.id;
-      const usePipeline = req.query.pipeline;
+      const usePipeline = req.query.pipeline === 'true';
       const delimiter = _.get(req.query, 'delimiter', ',');
       const responseStream = new PassThrough();
       const parser = parse({
