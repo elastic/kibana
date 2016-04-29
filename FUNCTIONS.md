@@ -89,7 +89,7 @@ Change the color of the series
 
 Argument | Accepts | Description
 --- | --- | ---
-color | *string* | Color of series, as hex, eg #c6c6c6 is a lovely light grey.  
+color | *string* | Color of series, as hex, eg #c6c6c6 is a lovely light grey. If you specify multiple colors, and have multiple series, you will get a gradient, eg "#00B1CC:#00FF94:#FF3A39:#CC1A6F"  
 
 #### .condition()
 Compares each point to a number, or the same point in another series using an operator, then sets its valueto the result if the condition proves true, with an optional else.
