@@ -33,6 +33,8 @@ export default class BasePathProxy {
       this.basePath = `/${sample(alphabet, 3).join('')}`;
       config.set('server.basePath', this.basePath);
     }
+    
+    config.set('server.maxPayloadBytes', 1024 * 1024 * 1024);
 
     setupLogging(null, this.server, config);
     setupConnection(null, this.server, config);
