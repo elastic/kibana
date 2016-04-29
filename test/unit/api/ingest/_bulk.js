@@ -143,7 +143,8 @@ define(function (require) {
           });
         });
 
-        bdd.it('should accept a boolean pipeline query string parameter enabling use of the index pattern\'s associated pipeline', function () {
+        bdd.it('should accept a boolean pipeline query string parameter enabling use of the index pattern\'s associated pipeline',
+        function () {
           return es.transport.request({
             path: '_ingest/pipeline/kibana-names',
             method: 'put',
