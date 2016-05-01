@@ -28,7 +28,7 @@
             class="fa fa-columns"></i>
         </span>
         <span ng-if="!indexPattern.metaFields.includes(field)">
-          <i ng-click="updateFilterInQuery('_exists_', field, '+')"
+          <i ng-click="filter('_exists_', field, '+')"
             tooltip="Filter for field present"
             tooltip-append-to-body="1"
             class="fa fa-asterisk"></i>
