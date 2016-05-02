@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         '--package', targetDir,
         '-s', 'dir', // input type
         '--name', 'kibana',
-        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
+        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data',
         '--version', version,
         '--url', 'https://www.elastic.co',
         '--vendor', 'Elasticsearch,\ Inc.',
@@ -32,7 +32,8 @@ module.exports = function (grunt) {
         '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
         '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
         '--config-files', '/opt/kibana/config/kibana.yml',
-        '--template-value', 'user=kibana'
+        '--template-value', 'user=kibana',
+        '--template-value', 'group=kibana'
       ];
 
       const files = buildDir + '/=/opt/kibana';
