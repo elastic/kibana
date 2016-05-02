@@ -232,17 +232,25 @@ export default function MapFactory(Private) {
       // TODO: Different drawTypes need differ info. Need a switch on the object creation
       let bounds = e.layer.getBounds();
 
+      let SElng = bounds.getSouthEast().lng;
+      if (SElng > 180) {
+        SElng -= 360;
+      }
+      let NWlng = bounds.getNorthWest().lng;
+      if (NWlng < -180) {
+        NWlng += 360;
+      }
       self._events.emit(drawType, {
         e: e,
         chart: self._chartData,
         bounds: {
           top_left: {
             lat: bounds.getNorthWest().lat,
-            lon: bounds.getNorthWest().lng
+            lon: NWlng
           },
           bottom_right: {
             lat: bounds.getSouthEast().lat,
-            lon: bounds.getSouthEast().lng
+            lon: SElng
           }
         }
       });

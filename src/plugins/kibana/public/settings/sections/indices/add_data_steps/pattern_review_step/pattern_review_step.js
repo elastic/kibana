@@ -4,6 +4,7 @@ import _ from 'lodash';
 import editFieldTypeHTML from '../../partials/_edit_field_type.html';
 import isGeoPointObject from './lib/is_geo_point_object';
 import forEachField from './lib/for_each_field';
+import './styles/_add_data_pattern_review_step.less';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {

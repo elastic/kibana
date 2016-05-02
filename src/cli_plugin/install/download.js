@@ -1,5 +1,6 @@
 import downloadHttpFile from './downloaders/http';
 import downloadLocalFile from './downloaders/file';
+import { UnsupportedProtocolError } from '../lib/errors';
 import { parse } from 'url';
 
 export function _downloadSingle(settings, logger, sourceUrl) {
@@ -8,8 +9,10 @@ export function _downloadSingle(settings, logger, sourceUrl) {
 
   if (/^file/.test(urlInfo.protocol)) {
     downloadPromise = downloadLocalFile(logger, decodeURI(urlInfo.path), settings.tempArchiveFile);
-  } else {
+  } else if (/^https?/.test(urlInfo.protocol)) {
     downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
+  } else {
+    downloadPromise = Promise.reject(new UnsupportedProtocolError());
   }
 
   return downloadPromise;
@@ -29,7 +32,9 @@ export function download(settings, logger) {
 
     return _downloadSingle(settings, logger, sourceUrl)
     .catch((err) => {
-      if (err.message === 'ENOTFOUND') {
+      const isUnsupportedProtocol = err instanceof UnsupportedProtocolError;
+      const isDownloadResourceNotFound = err.message === 'ENOTFOUND';
+      if (isUnsupportedProtocol || isDownloadResourceNotFound) {
         return tryNext();
       }
       throw (err);

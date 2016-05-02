@@ -25,7 +25,7 @@
   <div ng-switch="wizard.currentStep">
     <div ng-switch-when="0">
       <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
-      <div class="filebeat-wizard-buttons">
+      <div class="wizard-nav-buttons">
         <div></div>
         <div>
           <button
@@ -45,7 +45,7 @@
         samples="wizard.stepResults.samples">
       </pipeline-setup>
 
-      <div class="filebeat-wizard-buttons">
+      <div class="wizard-nav-buttons">
         <div>
           <button
             class="btn btn-secondary"
@@ -56,7 +56,6 @@
         <div>
           <button
             class="btn btn-primary"
-            ng-disabled="!wizard.stepResults.pipeline"
             ng-click="wizard.nextStep()">
             Next
           </button>
@@ -72,7 +71,7 @@
         sample-doc="wizard.stepResults.pipeline.output">
       </pattern-review-step>
 
-      <div class="filebeat-wizard-buttons">
+      <div class="wizard-nav-buttons">
         <div>
           <button
             class="btn btn-secondary"
@@ -86,8 +85,8 @@
             ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
                 ng-click="wizard.save()">
           Save
-        </button>
-      </div>
+          </button>
+        </div>
         <div></div>
       </div>
     </div>
@@ -95,13 +94,16 @@
     <div ng-switch-when="3">
       <install-filebeat-step results="wizard.stepResults"></install-filebeat-step>
 
-      <div class="nav-buttons">
-        Click Done to go explore your data
-        <button
-          class="btn btn-primary"
-          ng-click="wizard.nextStep()">
-          Done
-        </button>
+      <div class="wizard-nav-buttons">
+        <div></div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-click="wizard.nextStep()">
+            Done
+          </button>
+        </div>
+        <div></div>
       </div>
     </div>
   </div>

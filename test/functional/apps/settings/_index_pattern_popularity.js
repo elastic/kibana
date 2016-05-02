@@ -1,19 +1,16 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  scenarioManager,
+  settingsPage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('index result popularity', function describeIndexTests() {
-      var common;
-      var settingsPage;
-      var remote;
-
       bdd.before(function () {
-        common = new Common(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        remote = this.remote;
-
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
@@ -111,5 +108,5 @@ define(function (require) {
         });
       }); // end 'change popularity'
     }); // end index result popularity
-  };
-});
+  }());
+}());

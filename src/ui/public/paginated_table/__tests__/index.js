@@ -47,12 +47,13 @@ describe('paginated table', function () {
     };
   };
 
-  let renderTable = function (cols, rows, perPage) {
+  let renderTable = function (cols, rows, perPage, sort) {
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
+    $scope.sort = sort || {};
 
-    $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage">')($scope);
+    $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage" sort="sort">')($scope);
 
     $scope.$digest();
   };
@@ -158,6 +159,26 @@ describe('paginated table', function () {
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be('bbbb');
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
       expect(tableRows.eq(0).find('td').eq(2).text()).to.be('zzzz');
+    });
+
+    it('should set the sort direction to asc when it\'s not explicity set', function () {
+      paginatedTable.sortColumn(1);
+      $scope.$digest();
+
+      var tableRows = $el.find('tbody tr');
+      expect(tableRows.eq(2).find('td').eq(1).text()).to.be('cccc');
+      expect(tableRows.eq(1).find('td').eq(1).text()).to.be('bbbb');
+      expect(tableRows.eq(0).find('td').eq(1).text()).to.be('aaaa');
+    });
+
+    it('should allow you to explicitly set the sort direction', function () {
+      paginatedTable.sortColumn(1, 'desc');
+      $scope.$digest();
+
+      var tableRows = $el.find('tbody tr');
+      expect(tableRows.eq(0).find('td').eq(1).text()).to.be('zzzz');
+      expect(tableRows.eq(1).find('td').eq(1).text()).to.be('cccc');
+      expect(tableRows.eq(2).find('td').eq(1).text()).to.be('bbbb');
     });
 
     it('should sort ascending on first invocation', function () {
@@ -289,35 +310,6 @@ describe('paginated table', function () {
 
   });
 
-  describe('custom sorting', function () {
-    let data;
-    let paginatedTable;
-    let sortHandler;
-
-    beforeEach(function () {
-      sortHandler = sinon.spy();
-      data = makeData(3, 3);
-      $scope.cols = data.columns;
-      $scope.rows = data.rows;
-      $scope.perPage = defaultPerPage;
-      $scope.sortHandler = sortHandler;
-
-      $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage"' +
-        'sort-handler="sortHandler">')($scope);
-
-      $scope.$digest();
-      paginatedTable = $el.isolateScope().paginatedTable;
-    });
-
-    // TODO: This is failing randomly
-    it('should allow custom sorting handler', function () {
-      let columnIndex = 1;
-      paginatedTable.sortColumn(columnIndex);
-      $scope.$digest();
-      expect(sortHandler.callCount).to.be(1);
-      expect(sortHandler.getCall(0).args[0]).to.be(columnIndex);
-    });
-  });
 
   describe('object rows', function () {
     let cols;
