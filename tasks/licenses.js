@@ -13,11 +13,15 @@ module.exports = function (grunt) {
     var options = { start: process.cwd(), json: true };
     var checkQueueLength = 2;
 
+    function getLicenses(info, dependency) {
+      if (config.overrides[dependency]) return config.overrides[dependency];
+      if (info && info.licenses) return _.flatten([info.licenses]);
+    }
+
     function processPackage(info, dependency) {
       var pkgInfo = {};
       pkgInfo.name = dependency;
-      pkgInfo.licenses = config.overrides[dependency] || (info && info.licenses);
-      pkgInfo.licenses = _.isArray(pkgInfo.licenses) ? pkgInfo.licenses : [pkgInfo.licenses];
+      pkgInfo.licenses = getLicenses(info, dependency);
       pkgInfo.valid = (function () {
         if (_.intersection(pkgInfo.licenses, config.licenses).length > 0) {
           return true;
