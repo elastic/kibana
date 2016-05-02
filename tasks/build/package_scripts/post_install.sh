@@ -10,7 +10,7 @@ user_create() {
   useradd -r "$1"
 }
 
-if ! user_check "kibana" ; then
-  user_create "kibana"
+if ! user_check "<%= user %>" ; then
+  user_create "<%= user %>"
 fi
-chown kibana /opt/kibana/optimize
+chown <%= user %> /opt/kibana/optimize
