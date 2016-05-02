@@ -108,7 +108,7 @@ export class GeoIp extends Processor {
   constructor(processorId) {
     super(processorId, 'geoip', 'Geo IP');
     this.sourceField = '';
-    this.targetField = 'geoip';
+    this.targetField = '';
     this.databaseFile = '';
     this.databaseFields = [];
   }
