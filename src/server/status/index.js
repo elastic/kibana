@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import ServerStatus from './server_status';
+import wrapAuthConfig from './wrap_auth_config';
 import { join } from 'path';
+
 module.exports = function (kbnServer, server, config) {
 
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -9,7 +11,9 @@ module.exports = function (kbnServer, server, config) {
     kbnServer.mixin(require('./metrics'));
   }
 
-  server.route({
+  const wrapAuth = wrapAuthConfig(config.get('statusPage.disableAuth'));
+
+  server.route(wrapAuth({
     method: 'GET',
     path: '/api/status',
     handler: function (request, reply) {
@@ -19,9 +23,8 @@ module.exports = function (kbnServer, server, config) {
         status: kbnServer.status.toJSON(),
         metrics: kbnServer.metrics
       });
-    },
-    config: {auth: false}
-  });
+    }
+  }));
 
   server.decorate('reply', 'renderStatusPage', function () {
     let app = kbnServer.uiExports.getHiddenApp('status_page');
@@ -30,12 +33,11 @@ module.exports = function (kbnServer, server, config) {
     return resp;
   });
 
-  server.route({
+  server.route(wrapAuth({
     method: 'GET',
     path: '/status',
     handler: function (request, reply) {
       return reply.renderStatusPage();
-    },
-    config: {auth: false}
-  });
+    }
+  }));
 };
