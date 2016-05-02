@@ -121,6 +121,10 @@ module.exports = () => Joi.object({
       )
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false)
+  }).default(),
+
+  statusPage: Joi.object({
+    disableAuth: Joi.boolean().default(false)
   }).default()
 
 }).default();
