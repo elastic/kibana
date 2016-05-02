@@ -31,7 +31,8 @@ module.exports = function (grunt) {
         '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
         '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
         '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
-        '--config-files', '/opt/kibana/config/kibana.yml'
+        '--config-files', '/opt/kibana/config/kibana.yml',
+        '--template-value', 'user=kibana'
       ];
 
       const files = buildDir + '/=/opt/kibana';

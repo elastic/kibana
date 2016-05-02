@@ -10,8 +10,8 @@ user_remove() {
 
 case $1 in
     purge|0)
-        if user_check "kibana" ; then
-          user_remove "kibana"
+        if user_check "<%= user %>"  ; then
+          user_remove "<%= user %>"
         fi
         ;;
 esac
