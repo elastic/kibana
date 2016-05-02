@@ -217,6 +217,7 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
 
           if (series._hide) {
             series.data = [];
+            series.stack = false;
             //series.color = "#ddd";
             series.label = '(hidden) ' + series.label;
           }

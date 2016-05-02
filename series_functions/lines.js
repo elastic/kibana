@@ -20,7 +20,7 @@ module.exports = new Chainable('lines', {
     {
       name: 'stack',
       types: ['boolean', 'null'],
-      help: 'Stack lines, often misleading. At least use some fill if you use this'
+      help: 'Stack lines, often misleading. At least use some fill if you use this.'
     },
     {
       name: 'show',

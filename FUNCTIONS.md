@@ -162,7 +162,7 @@ Argument | Accepts | Description
 --- | --- | ---
 width | *number* | Line thickness  
 fill | *number* | Number between 0 and 10. Use for making area charts  
-stack | *boolean* | Stack lines, often misleading. At least use some fill if you use this  
+stack | *boolean* | Stack lines, often misleading. At least use some fill if you use this.  
 show | *number* | Show or hide lines  
 steps | *number* | Show line as step, eg, do not interpolate between points  
 
