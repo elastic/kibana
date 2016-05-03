@@ -7,6 +7,8 @@ fi
 if [ -x /etc/init.d/kibana ]; then
     if command -v invoke-rc.d >/dev/null; then
         invoke-rc.d kibana stop
+    elif command -v service >/dev/null; then
+        service kibana stop
     else
         /etc/init.d/kibana stop
     fi
