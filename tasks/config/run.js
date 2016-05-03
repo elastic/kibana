@@ -25,18 +25,13 @@ module.exports = function (grunt) {
     return flags;
   }, []);
 
-  const devEnv = Object.assign(process.env, {
-    NODE_OPTIONS: '--max-old-space-size=1024'
-  });
-
   return {
     testServer: {
       options: {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -51,8 +46,7 @@ module.exports = function (grunt) {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -70,8 +64,7 @@ module.exports = function (grunt) {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -87,8 +80,7 @@ module.exports = function (grunt) {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -156,8 +148,7 @@ module.exports = function (grunt) {
       options: {
         wait: false,
         ready: /Optimization .+ complete/,
-        quiet: false,
-        env: devEnv
+        quiet: true
       },
       cmd: './build/kibana/bin/kibana',
       args: [
