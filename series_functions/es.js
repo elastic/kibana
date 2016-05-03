@@ -50,14 +50,18 @@ function buildRequest(config, tlConfig) {
 
   if (config.kibana) {
     var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
-    bool.must = _.chain(kibanaFilters).filter(function (filter) {return !filter.meta.negate;}).pluck('query').values();
-    bool.must_not = _.chain(kibanaFilters).filter(function (filter) {return filter.meta.negate;}).pluck('query').values();
+    bool.must.push.apply(bool.must, _.chain(kibanaFilters).filter(function (filter) {return !filter.meta.negate;}).pluck('query').values());
+    bool.must_not.push.apply(bool.must_not, _.chain(kibanaFilters)
+      .filter(function (filter) {return filter.meta.negate;}).pluck('query').values());
   }
 
   var timeFilter = {range:{}};
   timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
   bool.must.push(timeFilter);
 
+
+  console.log(timeFilter);
+  console.log(JSON.stringify(bool));
 
   var aggs = {
     'q': {
@@ -91,7 +95,6 @@ function buildRequest(config, tlConfig) {
   });
 
   _.assign(aggCursor, createDateAgg(config, tlConfig));
-
 
 
   return {
