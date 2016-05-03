@@ -48,20 +48,18 @@ function buildRequest(config, tlConfig) {
 
   var bool = {must: [], must_not: []};
 
-  if (config.kibana) {
-    var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
-    bool.must.push.apply(bool.must, _.chain(kibanaFilters).filter(function (filter) {return !filter.meta.negate;}).pluck('query').values());
-    bool.must_not.push.apply(bool.must_not, _.chain(kibanaFilters)
-      .filter(function (filter) {return filter.meta.negate;}).pluck('query').values());
-  }
-
   var timeFilter = {range:{}};
   timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
   bool.must.push(timeFilter);
 
+  if (config.kibana) {
+    var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
+    bool.must.push
+      .apply(bool.must, _.chain(kibanaFilters).filter(function (filter) {return !filter.meta.negate;}).pluck('query').value());
 
-  console.log(timeFilter);
-  console.log(JSON.stringify(bool));
+    bool.must_not.push
+      .apply(bool.must_not, _.chain(kibanaFilters).filter(function (filter) {return filter.meta.negate;}).pluck('query').value());
+  }
 
   var aggs = {
     'q': {
