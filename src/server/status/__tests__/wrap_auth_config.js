@@ -3,7 +3,7 @@ import wrapAuthConfig from '../wrap_auth_config';
 
 describe('Status wrapAuthConfig', () => {
   let options;
-  
+
   beforeEach(() => {
     options = {
       method: 'GET',
@@ -13,7 +13,7 @@ describe('Status wrapAuthConfig', () => {
       }
     };
   });
-  
+
   it('should return a function', () => {
     expect(wrapAuthConfig()).to.be.a('function');
     expect(wrapAuthConfig(true)).to.be.a('function');
