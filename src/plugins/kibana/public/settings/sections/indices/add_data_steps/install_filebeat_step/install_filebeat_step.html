@@ -7,7 +7,7 @@ Now that you've got a fresh pipeline and index pattern, let's throw some data at
     <li>
       <span>
         <strong>Install Filebeat</strong> on all servers on which you want to tail logs &nbsp;
-        <a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-installation.html">
+        <a target="_blank" ng-href="{{installStep.docLinks.installation}}">
             <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
         </a>
       </span>
@@ -16,7 +16,7 @@ Now that you've got a fresh pipeline and index pattern, let's throw some data at
     <li>
       <span>
         <strong>Point Filebeat</strong> at the log files you want to tail &nbsp;
-        <a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-configuration.html">
+        <a target="_blank" ng-href="{{installStep.docLinks.configuration}}">
           <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
         </a>
       </span>
@@ -25,12 +25,12 @@ Now that you've got a fresh pipeline and index pattern, let's throw some data at
     <li ng-if="installStep.results.pipeline.processors.length">
       <span>
         <strong>Configure Filebeat</strong> to send data through your new Elasticsearch pipeline &nbsp;
-        <a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html">
+        <a target="_blank" ng-href="{{installStep.docLinks.elasticsearchOutput}}">
           <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
         </a><br/>
         At minimum you'll need to configure Filebeat's Elasticsearch output with a hostname, an index name, and a
         <a target="_blank"
-           href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html#_parameters">
+           ng-href="{{installStep.docLinks.elasticsearchOutputAnchorParameters}}">
           <i aria-hidden="true" class="fa fa-info-circle"></i> paramaters
         </a> block. Your config should end up looking something like this:<br/>
       <pre>
@@ -49,7 +49,7 @@ output:
     <li ng-if="!installStep.results.pipeline.processors.length">
       <span>
         <strong>Configure Filebeat</strong> to send data to Elasticsearch &nbsp;
-        <a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/elasticsearch-output.html">
+        <a target="_blank" ng-href="{{installStep.docLinks.elasticsearchOutput}}">
           <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
         </a><br/>
         At minimum you'll need to configure Filebeat's Elasticsearch output with a hostname and an index name.
@@ -67,7 +67,7 @@ output:
     <li>
       <span>
         <strong>Run Filebeat</strong> on each server &nbsp;
-        <a target="_blank" href="https://www.elastic.co/guide/en/beats/filebeat/master/_step_5_starting_filebeat.html">
+        <a target="_blank" ng-href="{{installStep.docLinks.startup}}">
           <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
         </a>
       </span>
