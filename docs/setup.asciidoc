@@ -24,10 +24,8 @@ To get Kibana up and running:
 
 On Unix, you can instead run the package manager suited for your distribution.
 
-////
 [float]
 include::kibana-repositories.asciidoc[]
-////
 
 That's it! Kibana is now running on port 5601.
 
