@@ -154,6 +154,8 @@ gulp.task('release', ['package'], function (done) {
   _.each(keys, function (key) {
     if (yargs.latest) {
       key += 'timelion-latest.zip';
+    } else if (yargs.asVersion) {
+      key += 'timelion-' + yargs.asVersion + '.zip';
     } else {
       key += filename;
     }
