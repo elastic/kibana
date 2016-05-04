@@ -32,8 +32,7 @@ modules.get('apps/settings')
       bindToController: true,
       controller: function ($scope, Private) {
         this.errors = [];
-        const knownFieldTypes = {};
-        const fields = {};
+        const sampleFields = {};
 
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
@@ -44,25 +43,24 @@ modules.get('apps/settings')
 
           if (isGeoPointObject(value)) {
             type = 'geo_point';
-            knownFieldTypes[fieldName] = 'geo_point';
           }
 
           if (type === 'string' && moment(value, moment.ISO_8601).isValid()) {
             type = 'date';
           }
 
-          if (!_.isUndefined(fields[fieldName]) && (fields[fieldName].type !== type)) {
-            this.errors.push(`Error in field ${fieldName} - conflicting types '${fields[fieldName].type}' and '${type}'`);
+          if (!_.isUndefined(sampleFields[fieldName]) && (sampleFields[fieldName].type !== type)) {
+            this.errors.push(`Error in field ${fieldName} - conflicting types '${sampleFields[fieldName].type}' and '${type}'`);
           }
           else {
-            fields[fieldName] = {type, value};
+            sampleFields[fieldName] = {type, value};
           }
         });
 
         _.defaults(this.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
-          fields: _(fields)
+          fields: _(sampleFields)
             .map((field, fieldName) => {
               return {name: fieldName, type: field.type};
             })
@@ -82,7 +80,7 @@ modules.get('apps/settings')
           }
         });
         $scope.$watch('reviewStep.indexPattern.fields', (fields) => {
-          this.dateFields = findFieldsByType(this.indexPattern.fields, 'date');
+          this.dateFields = findFieldsByType(fields, 'date');
         }, true);
 
 
@@ -91,12 +89,12 @@ modules.get('apps/settings')
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const sampleValue = fields[field.name].value;
+            const sampleValue = sampleFields[field.name].value;
             return [
               _.escape(field.name),
               {
                 markup: editFieldTypeHTML,
-                scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes, buildRows: buildRows}),
+                scope: _.assign($scope.$new(), {field: field, sampleFields: sampleFields, buildRows: buildRows}),
                 value: field.type
               },
               typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
