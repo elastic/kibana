@@ -1,11 +1,11 @@
-import { remote, common, defaultTimeout } from '../';
+import { remote, common, defaultFindTimeout } from '../';
 
 export default (function () {
   var thisTime;
 
   function DiscoverPage() {
     this.remote = remote;
-    thisTime = this.remote.setFindTimeout(defaultTimeout);
+    thisTime = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
   DiscoverPage.prototype = {
