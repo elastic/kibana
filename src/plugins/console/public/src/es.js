@@ -2,6 +2,7 @@ let _ = require('lodash');
 let $ = require('jquery');
 
 let baseUrl;
+let allowedServers = require('ui/chrome').getInjected('proxyTargets');
 let serverChangeListeners = [];
 let esVersion = [];
 
@@ -82,6 +83,11 @@ module.exports.forceRefresh = function () {
 };
 
 module.exports.setBaseUrl = function (base, force) {
+  if (allowedServers && !allowedServers.includes(base)) {
+    console.log(base, 'is not a valid server, setting to the first allowed server');
+    base = allowedServers[0];
+  }
+
   if (baseUrl !== base || force) {
     var old = baseUrl;
     baseUrl = base;

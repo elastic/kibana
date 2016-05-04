@@ -1,13 +1,14 @@
 import { ProxyConfigCollection } from './server/proxy_config_collection';
 
 module.exports = function (kibana) {
-  let { resolve, join, sep } = require('path');
-  let Joi = require('joi');
-  let Boom = require('boom');
-  let modules = resolve(__dirname, 'public/webpackShims/');
-  let src = resolve(__dirname, 'public/src/');
-  let { existsSync } = require('fs');
-  const { startsWith, endsWith } = require('lodash');
+  const { resolve, join, sep } = require('path');
+  const { parse: parseUri, format: formatUri } = require('url');
+  const Joi = require('joi');
+  const Boom = require('boom');
+  const modules = resolve(__dirname, 'public/webpackShims/');
+  const src = resolve(__dirname, 'public/src/');
+  const { existsSync } = require('fs');
+  const { size } = require('lodash');
 
   const apps = [
     {
@@ -16,7 +17,23 @@ module.exports = function (kibana) {
       main: 'plugins/console/console',
       icon: 'plugins/console/logo.svg',
       injectVars: function (server, options) {
-        return options;
+        let { proxyTargets, defaultServerUrl } = options;
+        const config = server.config();
+
+        // treat an empty array like it's nothing
+        if (!size(proxyTargets)) proxyTargets = undefined;
+
+        if (!defaultServerUrl) {
+          if (proxyTargets) {
+            defaultServerUrl = proxyTargets[0];
+          } else if (config.has('elasticsearch.url')) {
+            defaultServerUrl = config.get('elasticsearch.url');
+          } else {
+            defaultServerUrl = 'http://localhost:9200';
+          }
+        }
+
+        return { proxyTargets, defaultServerUrl };
       }
     }
   ];
@@ -37,7 +54,8 @@ module.exports = function (kibana) {
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultServerUrl: Joi.string().default('http://localhost:9200'),
+        defaultServerUrl: Joi.string().optional(),
+        proxyTargets: Joi.array().items(Joi.string()).single().optional(),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
         ssl: Joi.object({
           verify: Joi.boolean(),
@@ -96,22 +114,55 @@ module.exports = function (kibana) {
         },
 
         pre: [
-          function filterUri(req, reply) {
-            const { uri } = req.query;
+          {
+            assign: 'proxyTarget',
+            method(req, reply) {
+              const rawUri = req.query.uri;
+              req.query.uri = null; // prevent accidental usage
 
-            if (!filters.some(re => re.test(uri))) {
+              const { protocol, hostname, port, pathname, search, hash } = parseUri(rawUri);
+              reply(formatUri({
+                protocol,
+                hostname,
+                port,
+                pathname: resolve(pathname), // resolve any path traversal
+                search,
+                hash
+              }));
+            }
+          },
+
+          function checkProxyTarget(req, reply) {
+            const uri = req.pre.proxyTarget;
+
+            const targets = size(options.proxyTargets) && options.proxyTargets;
+            if (!targets) return reply();
+            if (targets.some(t => uri.startsWith(t))) {
+              reply();
+            } else {
               const err = Boom.forbidden();
-              err.output.payload = "Error connecting to '" + uri + "':\n\nUnable to send requests to that url.";
+              err.output.payload = `Error connecting to '${uri}':\n\nUnable to send requests to that url.`;
               err.output.headers['content-type'] = 'text/plain';
               reply(err);
-            } else {
-              reply();
             }
+          },
+
+          function checkProxyFilters(req, reply) {
+            const uri = req.pre.proxyTarget;
+
+            if (filters.some(re => re.test(uri))) {
+              return reply();
+            }
+
+            const err = Boom.forbidden();
+            err.output.payload = `Error connecting to '${uri}':\n\nUnable to send requests to that url.`;
+            err.output.headers['content-type'] = 'text/plain';
+            reply(err);
           }
         ],
 
         handler(req, reply) {
-          const { uri } = req.query;
+          const uri = req.pre.proxyTarget;
 
           reply.proxy({
             uri,
@@ -119,7 +170,9 @@ module.exports = function (kibana) {
             passThrough: true,
             onResponse(err, res, request, reply, settings, ttl) {
               if (err != null) {
-                reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+                reply(`Error connecting to '${uri}':\n\n${err.message}`)
+                  .type(`text/plain`)
+                  .code(502);
               } else {
                 reply(null, res);
               }

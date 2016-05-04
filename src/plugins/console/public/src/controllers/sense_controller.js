@@ -1,4 +1,5 @@
 import 'ui/doc_title';
+import chrome from 'ui/chrome';
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 
 const module = require('ui/modules').get('app/sense');
@@ -33,6 +34,7 @@ module.controller('SenseController', function SenseController($scope, docTitle) 
     input.focus();
   };
 
+  this.allowedServers = chrome.getInjected('proxyTargets');
   this.serverUrl = es.getBaseUrl();
 
   // read server url changes into scope
