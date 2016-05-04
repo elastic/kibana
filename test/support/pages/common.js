@@ -52,6 +52,10 @@ export default (function () {
       return getUrl.baseUrl(config.servers.kibana);
     },
 
+    getEsHostPort: function getHostPort() {
+      return getUrl.baseUrl(config.servers.elasticsearch);
+    },
+
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
       // navUrl includes user:password@ for use with Shield
