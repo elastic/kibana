@@ -41,6 +41,9 @@ module.exports = {
     settings: {
       pathname: kibanaURL,
       hash: '/settings'
+    },
+    console: {
+      pathname: 'app/console',
     }
   }
 };
