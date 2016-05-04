@@ -30,7 +30,7 @@ import isGeoPointObject from './is_geo_point_object';
 // type fields.
 
 function forEachFieldAux(value, iteratee, fieldName) {
-  if ((!_.isObject(value) && !_.isArray(value)) || isGeoPointObject(value)) {
+  if (!_.isObject(value) || isGeoPointObject(value)) {
     iteratee(value, fieldName);
   }
   else if (_.isPlainObject(value)) {
