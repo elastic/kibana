@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var $ = require('jquery');
 var moment = require('moment-timezone');
+var observeResize = require('./observe_resize');
 
 require('flot');
 require('flotTime');
@@ -9,6 +10,8 @@ require('flotCanvas');
 require('flotSelection');
 require('flotSymbol');
 require('flotStack');
+
+require('./observe_resize');
 
 var app = require('ui/modules').get('apps/timelion', []);
 var template = '<div class="chart-title"></div><div class="chart-canvas"></div>';
@@ -77,19 +80,18 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
         drawPlot($scope.chart);
       };
 
+      /*
       $(window).resize(function () {
         if (!$scope.plot) return;
         console.log('redrawing');
         $timeout(function () {
           drawPlot($scope.chart);
-          /*
-          // This is a lot faster than calling drawPlot(); Stolen from the borked flot.resize plugin
-          // However this will break tooltips
-          $scope.plot.resize();
-          $scope.plot.setupGrid();
-          $scope.plot.draw();
-          */
         }, 0);
+      });
+      */
+
+      observeResize($elem, function () {
+        drawPlot($scope.chart);
       });
 
       $scope.$on('$destroy', function () {
