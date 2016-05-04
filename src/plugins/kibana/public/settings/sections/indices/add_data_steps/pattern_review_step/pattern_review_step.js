@@ -5,6 +5,7 @@ import editFieldTypeHTML from '../../partials/_edit_field_type.html';
 import isGeoPointObject from './lib/is_geo_point_object';
 import forEachField from './lib/for_each_field';
 import './styles/_add_data_pattern_review_step.less';
+import moment from 'moment';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
@@ -12,6 +13,10 @@ function pickDefaultTimeFieldName(dateFields) {
   }
 
   return _.includes(dateFields, '@timestamp') ? '@timestamp' : dateFields[0];
+}
+
+function findFieldsByType(indexPatternFields, type) {
+  return _.map(_.filter(indexPatternFields, {type}), 'name');
 }
 
 modules.get('apps/settings')
@@ -27,28 +32,23 @@ modules.get('apps/settings')
       bindToController: true,
       controller: function ($scope, Private) {
         this.errors = [];
+        const knownFieldTypes = {};
+        const fields = {};
+
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
 
-        const knownFieldTypes = {};
-        this.dateFields = [];
-        if (this.pipeline) {
-          this.pipeline.model.processors.forEach((processor) => {
-            if (processor.typeId === 'date') {
-              const field = processor.targetField || '@timestamp';
-              knownFieldTypes[field] = 'date';
-              this.dateFields.push(field);
-            }
-          });
-        }
-
-        const fields = {};
         forEachField(this.sampleDoc, (value, fieldName) => {
-          let type = knownFieldTypes[fieldName] || typeof value;
+          let type = typeof value;
+
           if (isGeoPointObject(value)) {
             type = 'geo_point';
             knownFieldTypes[fieldName] = 'geo_point';
+          }
+
+          if (type === 'string' && moment(value, moment.ISO_8601).isValid()) {
+            type = 'date';
           }
 
           if (!_.isUndefined(fields[fieldName]) && (fields[fieldName].type !== type)) {
@@ -59,21 +59,16 @@ modules.get('apps/settings')
           }
         });
 
-        const indexPatternFields = _(fields)
-        .map((field, fieldName) => {
-          return {name: fieldName, type: field.type};
-        })
-        .reject({type: 'object'})
-        .value();
-
         _.defaults(this.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
-          timeFieldName: pickDefaultTimeFieldName(this.dateFields),
-          fields: indexPatternFields
+          fields: _(fields)
+            .map((field, fieldName) => {
+              return {name: fieldName, type: field.type};
+            })
+            .reject({type: 'object'})
+            .value()
         });
-
-        this.isTimeBased = !!this.indexPattern.timeFieldName;
 
         $scope.$watch('reviewStep.indexPattern.id', (value) => {
           this.indexPattern.title = value;
@@ -87,8 +82,12 @@ modules.get('apps/settings')
           }
         });
         $scope.$watch('reviewStep.indexPattern.fields', (fields) => {
-          this.dateFields = _.map(_.filter(fields, {type: 'date'}), 'name');
+          this.dateFields = findFieldsByType(this.indexPattern.fields, 'date');
         }, true);
+
+
+        this.dateFields = findFieldsByType(this.indexPattern.fields, 'date');
+        this.isTimeBased = !_.isEmpty(this.dateFields);
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
