@@ -49,6 +49,10 @@ modules.get('apps/settings')
             type = 'date';
           }
 
+          if (value === null) {
+            type = 'string';
+          }
+
           if (!_.isUndefined(sampleFields[fieldName]) && (sampleFields[fieldName].type !== type)) {
             this.errors.push(`Error in field ${fieldName} - conflicting types '${sampleFields[fieldName].type}' and '${type}'`);
           }
