@@ -2,6 +2,7 @@ define(function (require) {
   var Promise = require('bluebird');
   var _ = require('intern/dojo/node!lodash');
   var expect = require('intern/dojo/node!expect.js');
+  var moment = require('intern/dojo/node!moment');
 
   const testPipeline = {
     processors: [{
@@ -53,6 +54,15 @@ define(function (require) {
           .expect(200)
           .then(function (response) {
             expect(response.body[0].output.dob).to.be('1979-07-05T00:00:00.000Z');
+          });
+      });
+
+      bdd.it('should return a date in ISO 8601 format', function () {
+        return request.post('/kibana/ingest/simulate')
+          .send(testPipeline)
+          .expect(200)
+          .then(function (response) {
+            expect(moment(response.body[0].output.dob, moment.ISO_8601).isValid()).to.be(true);
           });
       });
 
