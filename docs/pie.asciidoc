@@ -80,7 +80,6 @@ Select the *Options* tab to change the following aspects of the table:
 
 *Donut*:: Display the chart as a sliced ring instead of a sliced pie.
 *Show Tooltip*:: Check this box to enable the display of tooltips.
-*Show Legend*:: Check this box to enable the display of a legend next to the chart.
 
 After changing options, click the *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
