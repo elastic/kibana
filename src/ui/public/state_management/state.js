@@ -1,13 +1,14 @@
 import _ from 'lodash';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
 import qs from 'ui/utils/query_string';
 import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
+import KbnUrlProvider from 'ui/url';
 
-
+const notify = new Notifier();
 export default function StateProvider(Private, $rootScope, $location) {
-  let Events = Private(EventsProvider);
+  const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
   function State(urlParam, defaults) {
@@ -27,10 +28,14 @@ export default function StateProvider(Private, $rootScope, $location) {
       // beginning of full route update, new app will be initialized before
       // $routeChangeSuccess or $routeChangeError
       $rootScope.$on('$routeChangeStart', function () {
+        if (!self._persistAcrossApps) {
+          self.destroy();
+        }
+      }),
+
+      $rootScope.$on('$routeChangeSuccess', function () {
         if (self._persistAcrossApps) {
           self.fetch();
-        } else {
-          self.destroy();
         }
       })
     ]);
@@ -44,7 +49,6 @@ export default function StateProvider(Private, $rootScope, $location) {
     try {
       return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
     } catch (e) {
-      let notify = new Notifier();
       notify.error('Unable to parse URL');
       search[this._urlParam] = rison.encode(this._defaults);
       $location.search(search).replace();

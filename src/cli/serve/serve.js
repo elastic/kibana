@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { statSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
 
@@ -117,7 +118,14 @@ module.exports = function (program) {
   command
   .action(async function (opts) {
     if (opts.dev) {
-      opts.config.push(fromRoot('config/kibana.dev.yml'));
+      try {
+        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
+        if (statSync(kbnDevConfig).isFile()) {
+          opts.config.push(kbnDevConfig);
+        }
+      } catch (err) {
+        // ignore, kibana.dev.yml does not exist
+      }
     }
 
     const settings = initServerSettings(opts, this.getUnknownOptions());

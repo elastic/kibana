@@ -1,4 +1,4 @@
-import { common, config, defaultTimeout, remote } from '../';
+import { common, config, defaultFindTimeout, remote, shieldPage } from '../';
 
 export default (function () {
   var Promise = require('bluebird');
@@ -46,7 +46,6 @@ export default (function () {
     }
   }
 
-
   Common.prototype = {
     constructor: Common,
 
@@ -63,7 +62,7 @@ export default (function () {
       self.debug('navigating to ' + appName + ' url: ' + navUrl);
 
       var doNavigation = function (url) {
-        return self.tryForTime(defaultTimeout, function () {
+        return self.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           self.debug('navigate to: ' + url);
           return self.remote.get(url)
@@ -90,11 +89,25 @@ export default (function () {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
+            var loginPage = new RegExp('login').test(currentUrl);
+            if (loginPage) {
+              self.debug('Found loginPage = ' + loginPage + ', username = '
+                + config.servers.kibana.shield.username);
+              return shieldPage.login(config.servers.kibana.shield.username,
+                config.servers.kibana.shield.password)
+              .then(function () {
+                return self.remote.getCurrentUrl();
+              });
+            } else {
+              return currentUrl;
+            }
+          })
+          .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
-              ' in ' + defaultTimeout + 'ms' +
+              ' in ' + defaultFindTimeout + 'ms' +
               ' appUrl = ' + appUrl +
               ' currentUrl = ' + currentUrl;
               self.debug(msg);
@@ -109,7 +122,7 @@ export default (function () {
       return doNavigation(navUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
-        return self.tryForTime(defaultTimeout, function () {
+        return self.try(function () {
           // give the app time to update the URL
           return self.sleep(501)
           .then(function () {
@@ -153,7 +166,7 @@ export default (function () {
     getApp: function () {
       var self = this;
 
-      return self.remote.setFindTimeout(defaultTimeout)
+      return self.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.app-wrapper .application')
       .then(function () {
         return self.runScript(function () {
@@ -207,6 +220,10 @@ export default (function () {
       return Promise.try(attempt);
     },
 
+    try(block) {
+      return this.tryForTime(defaultFindTimeout, block);
+    },
+
     log(...args) {
       console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
     },
@@ -256,7 +273,7 @@ export default (function () {
     findTestSubject: function findTestSubject(selector) {
       this.debug('in findTestSubject: ' + testSubjSelector(selector));
       return this.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector(testSubjSelector(selector));
     }
   };

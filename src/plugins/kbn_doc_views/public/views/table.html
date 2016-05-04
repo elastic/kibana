@@ -27,6 +27,15 @@
             tooltip-append-to-body="1"
             class="fa fa-columns"></i>
         </span>
+        <span ng-if="!indexPattern.metaFields.includes(field)">
+          <i ng-click="filter('_exists_', field, '+')"
+            tooltip="Filter for field present"
+            tooltip-append-to-body="1"
+            class="fa fa-asterisk"></i>
+        </span>
+        <span ng-if="indexPattern.metaFields.includes(field)" tooltip="Unable to filter for presence of meta fields">
+          <i class="fa fa-asterisk text-muted"></i>
+        </span>
       </td>
 
       <td>

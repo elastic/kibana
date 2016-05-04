@@ -1,4 +1,4 @@
-import { common, remote, defaultTimeout } from '../';
+import { common, remote, defaultFindTimeout } from '../';
 
 export default (function () {
 
@@ -13,9 +13,9 @@ export default (function () {
     constructor: HeaderPage,
 
     clickSelector: function (selector) {
-      var self = this.remote;
-      return common.tryForTime(defaultTimeout, function () {
-        return self.setFindTimeout(defaultTimeout)
+      var self = this;
+      return common.try(function () {
+        return self.remote.setFindTimeout(defaultFindTimeout)
         .findByCssSelector(selector)
         .then(function (tab) {
           return tab.click();
@@ -44,31 +44,31 @@ export default (function () {
     },
 
     clickTimepicker: function clickTimepicker() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByLinkText('Absolute').click();
     },
 
     setFromTime: function setFromTime(timeString) {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model=\'absolute.from\']')
       .clearValue()
       .type(timeString);
     },
 
     setToTime: function setToTime(timeString) {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model=\'absolute.to\']')
       .clearValue()
       .type(timeString);
     },
 
     clickGoButton: function clickGoButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByClassName('kbn-timepicker-go')
       .click();
     },
@@ -99,13 +99,13 @@ export default (function () {
     },
 
     collapseTimepicker: function collapseTimepicker() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.fa.fa-chevron-circle-up')
       .click();
     },
 
     getToastMessage: function getToastMessage() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
       .getVisibleText();
     },
@@ -113,13 +113,13 @@ export default (function () {
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
 
-      return self.remote.setFindTimeout(defaultTimeout)
+      return self.remote.setFindTimeout(defaultFindTimeout)
         .waitForDeletedByCssSelector('kbn-truncated.toast-message');
     },
 
     clickToastOK: function clickToastOK() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('button[ng-if="notif.accept"]')
       .click();
     },
@@ -127,7 +127,7 @@ export default (function () {
     getSpinnerDone: function getSpinnerDone() {
       var self = this;
       return this.remote
-      .setFindTimeout(defaultTimeout * 10)
+      .setFindTimeout(defaultFindTimeout * 10)
       .findByCssSelector('.spinner.ng-hide');
     }
 
