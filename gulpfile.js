@@ -45,7 +45,7 @@ var exclude = Object.keys(pkg.devDependencies).map(function (name) {
 });
 
 function writeDocs(done) {
-  require('babel-register');
+  require('babel-core/register');
   var fs = require('fs');
   var helpish = require('./lib/functions_md');
 
