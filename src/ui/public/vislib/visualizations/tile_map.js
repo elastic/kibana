@@ -104,7 +104,7 @@ export default function TileMapFactory(Private) {
       mapZoom: this.handler.vis.uiState.get('mapZoom')
     } : {};
 
-    const params = _.assign({}, this._chartData.geohashGridAgg.vis.params, uiStateParams);
+    const params = _.assign({}, _.get(this._chartData, 'geoAgg.vis.params'), uiStateParams);
 
     const map = new TileMapMap(container, this._chartData, {
       center: params.mapCenter,

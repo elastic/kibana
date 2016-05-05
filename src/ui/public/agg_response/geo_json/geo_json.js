@@ -34,8 +34,8 @@ export default function TileMapConverterFn(Private, timefilter, $compile, $rootS
         properties: {
           min: _.min(values),
           max: _.max(values),
-          zoom: geoAgg.vis.uiStateVal('mapZoom'),
-          center: geoAgg.vis.uiStateVal('mapCenter')
+          zoom: geoAgg && geoAgg.vis.uiStateVal('mapZoom'),
+          center: geoAgg && geoAgg.vis.uiStateVal('mapCenter')
         }
       }
     };
