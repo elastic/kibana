@@ -58,13 +58,46 @@ pipeline-setup {
       display: flex;
       justify-content: flex-start;
       align-items: center;
+    }
+  }
 
-      select.form-control {
-        background-color: @settings-filebeat-wizard-processor-select-bg;
-        border: none;
-        width: auto;
-        margin-right: 5px;
+  .ui-select-choices {
+    max-height: 350px !important;
+  }
+
+  .ui-select-container {
+    display: inline-block;
+    width: 450px;
+
+    .form-control {
+      background-color: @settings-filebeat-wizard-processor-select-bg !important;
+      border: none !important;
+    }
+
+    .ui-select-choices-row {
+      &>a {
+        padding: 6px 12px !important;
+        white-space: normal !important;
+      }
+
+      border-bottom: solid 1px;
+      border-bottom-color: @kibanaBlue5;
+
+      label {
+        margin-bottom: 0;
+      }
+
+      .processor-help-text {
+        color: #8b8b8b;
+        font-size: 0.9em;
+      }
+
+      &.active {
+        .processor-help-text {
+          color: #FFF;
+        }
       }
     }
   }
+
 }
