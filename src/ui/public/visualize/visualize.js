@@ -18,7 +18,7 @@ uiModules
     location: 'Visualize'
   });
 
-  function esRespConvertorFactory($el, chartType) {
+  function esRespConvertorFactory($el, $legend, chartType) {
     chartType = {
       pie: 'pie',
       line: 'line',
@@ -36,11 +36,14 @@ uiModules
     function decodeBucketData(buckets, aggregations) {
       const chartDatasetConfigs = {};
       if (!buckets) { return chartDatasetConfigs; }
+
       const maxAggDepth = buckets.length - 1;
       let currDepth = 0;
+      // meant to recursively crawl through es aggregations
+      // to make sense of the data for a charting library
       function decodeBucket(bucket, aggResp) {
         const bucketId = bucket.id;
-        if (!chartDatasetConfigs[bucket.id]) {
+        if (!chartDatasetConfigs[bucket.id]) { // add a empty dataset if we haven't
           chartDatasetConfigs[bucketId] = {
             data: [],
             labels: [],
@@ -51,7 +54,7 @@ uiModules
         aggResp.buckets.forEach((bucket) => {
           config.data.push(bucket.doc_count);
           config.labels.push(bucket.key);
-          if (currDepth < maxAggDepth) {
+          if (currDepth < maxAggDepth) { // Crawl through the structure if we should
             const nextBucket = buckets[++currDepth];
             decodeBucket(nextBucket, bucket[nextBucket.id]);
             currDepth--;
@@ -60,15 +63,19 @@ uiModules
       }
       decodeBucket(buckets[0], aggregations[buckets[0].id]);
       const arrDatasets = buckets.map(bucket => { return chartDatasetConfigs[bucket.id]; });
+      // Make some colors for all of the data points.
       arrDatasets.forEach(set => {
         const colorOffset = 10000;
         let numDataPoints = set.data.length;
-        const maxColors = Math.pow(16,6) - colorOffset;
+        const maxColors = Math.pow(16,6) - (colorOffset * 2);
         const difference = maxColors / numDataPoints;
         let currColor = colorOffset;
-        while (numDataPoints-- > 0) {
+        do {
           set.backgroundColor.push(makeColor(currColor));
           currColor += difference;
+        } while (--numDataPoints > 0);
+        if (chartType !== 'pie') {
+          set.backgroundColor = set.backgroundColor[0];
         }
       });
 
@@ -91,6 +98,9 @@ uiModules
           datasets: decodedData
         },
         options: {
+          legend: {
+            display: false
+          },
           tooltips: {
             callbacks: {
               title: function () { return 'hello world'; },
@@ -102,6 +112,8 @@ uiModules
           }
         }
       });
+
+      $legend.html(myChart.generateLegend());
     };
   }
 
@@ -117,7 +129,7 @@ uiModules
     },
     template: visualizeTemplate,
     link: function ($scope, $el, attr) {
-      const esRespConvertor = esRespConvertorFactory($el.find('#canvas-chart'), $scope.vis.type.name);
+      const esRespConvertor = esRespConvertorFactory($el.find('#canvas-chart'), $el.find('#chart-legend'), $scope.vis.type.name);
       let chart; // set in "vis" watcher
       let minVisChartHeight = 180;
 
