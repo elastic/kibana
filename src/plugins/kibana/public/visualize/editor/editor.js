@@ -106,7 +106,7 @@ uiModules
   }
 
   let $state = $scope.$state = (function initState() {
-    const savedVisState = vis.getFullState();
+    const savedVisState = vis.getState();
     const stateDefaults = {
       uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
       linked: !!savedVis.savedSearchId,
@@ -120,7 +120,7 @@ uiModules
     if (!angular.equals($state.vis, savedVisState)) {
       Promise.try(function () {
         editableVis.setState($state.vis);
-        vis.setState(editableVis.getState());
+        vis.setState(editableVis.getEnabledState());
       })
       .catch(courier.redirectWhenMissing({
         'index-pattern-field': '/visualize'
@@ -149,9 +149,9 @@ uiModules
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
     $scope.resetEditableVis = transferVisState(vis, editableVis);
     $scope.$watch(function () {
-      return editableVis.getState();
+      return editableVis.getEnabledState();
     }, function (newState) {
-      editableVis.dirty = !angular.equals(newState, vis.getState());
+      editableVis.dirty = !angular.equals(newState, vis.getEnabledState());
 
       $scope.responseValueAggs = null;
       try {
@@ -291,8 +291,8 @@ uiModules
 
   function transferVisState(fromVis, toVis, stage) {
     return function () {
-      const view = fromVis.getState();
-      const full = fromVis.getFullState();
+      const view = fromVis.getEnabledState();
+      const full = fromVis.getState();
       toVis.setState(view);
       editableVis.dirty = false;
       $state.vis = full;
