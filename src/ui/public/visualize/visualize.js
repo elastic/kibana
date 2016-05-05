@@ -6,6 +6,7 @@ import _ from 'lodash';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeTemplate from 'ui/visualize/visualize.html';
+import Chart from 'chart';
 uiModules
 .get('kibana/directive')
 .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
@@ -16,6 +17,93 @@ uiModules
   let notify = new Notifier({
     location: 'Visualize'
   });
+
+  function esRespConvertorFactory($el, chartType) {
+    chartType = {
+      pie: 'pie',
+      line: 'line',
+      area: 'line',
+      histogram: 'bar'
+    }[chartType];
+    let myChart;
+    function makeColor(num) {
+      let hexStr = Math.round(num).toString(16);
+      while (hexStr.length / 6 !== 1) {
+        hexStr = '0' + hexStr;
+      }
+      return '#' + hexStr;
+    }
+    function decodeBucketData(buckets, aggregations) {
+      const chartDatasetConfigs = {};
+      if (!buckets) { return chartDatasetConfigs; }
+      const maxAggDepth = buckets.length - 1;
+      let currDepth = 0;
+      function decodeBucket(bucket, aggResp) {
+        const bucketId = bucket.id;
+        if (!chartDatasetConfigs[bucket.id]) {
+          chartDatasetConfigs[bucketId] = {
+            data: [],
+            labels: [],
+            backgroundColor: []
+          };
+        }
+        const config = chartDatasetConfigs[bucketId];
+        aggResp.buckets.forEach((bucket) => {
+          config.data.push(bucket.doc_count);
+          config.labels.push(bucket.key);
+          if (currDepth < maxAggDepth) {
+            const nextBucket = buckets[++currDepth];
+            decodeBucket(nextBucket, bucket[nextBucket.id]);
+            currDepth--;
+          }
+        });
+      }
+      decodeBucket(buckets[0], aggregations[buckets[0].id]);
+      const arrDatasets = buckets.map(bucket => { return chartDatasetConfigs[bucket.id]; });
+      arrDatasets.forEach(set => {
+        const colorOffset = 10000;
+        let numDataPoints = set.data.length;
+        const maxColors = Math.pow(16,6) - colorOffset;
+        const difference = maxColors / numDataPoints;
+        let currColor = colorOffset;
+        while (numDataPoints-- > 0) {
+          set.backgroundColor.push(makeColor(currColor));
+          currColor += difference;
+        }
+      });
+
+      return arrDatasets;
+    }
+    return function convertEsRespAndAggConfig(esResp, aggConfigs) {
+      const chartDatasetConfigs = [];
+      const aggConfigMap = aggConfigs.byId;
+      const decodedData = decodeBucketData(aggConfigs.bySchemaGroup.buckets, esResp.aggregations);
+      const flattenedLabels = _.reduce(decodedData, (prev, dataset) => {
+        return prev.concat(dataset.labels);
+      }, []);
+      if (myChart) { // Not a fan of this, i should be using update
+        myChart.destroy();
+      }
+      myChart = new Chart($el, {
+        type: chartType,
+        data: {
+          labels: flattenedLabels,
+          datasets: decodedData
+        },
+        options: {
+          tooltips: {
+            callbacks: {
+              title: function () { return 'hello world'; },
+              label: function (item, data) {
+                const dataset = data.datasets[item.datasetIndex];
+                return dataset.labels[item.index] + ': ' + dataset.data[item.index];
+              }
+            }
+          }
+        }
+      });
+    };
+  }
 
   return {
     restrict: 'E',
@@ -29,6 +117,7 @@ uiModules
     },
     template: visualizeTemplate,
     link: function ($scope, $el, attr) {
+      const esRespConvertor = esRespConvertorFactory($el.find('#canvas-chart'), $scope.vis.type.name);
       let chart; // set in "vis" watcher
       let minVisChartHeight = 180;
 
@@ -148,6 +237,7 @@ uiModules
 
       $scope.$watch('esResp', prereq(function (resp, prevResp) {
         if (!resp) return;
+        esRespConvertor(resp, $scope.vis.aggs);
         $scope.renderbot.render(resp);
       }));
 
