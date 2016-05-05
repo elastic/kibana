@@ -81,21 +81,25 @@ export default function VisFactory(Notifier, Private) {
     this.aggs = new AggConfigs(this, state.aggs);
   };
 
-  Vis.prototype.getState = function (full) {
+  Vis.prototype.getStateInternal = function (includeDisabled) {
     return {
       title: this.title,
       type: this.type.name,
       params: this.params,
       aggs: this.aggs
-        .filter(agg => full || agg.enabled)
+        .filter(agg => includeDisabled || agg.enabled)
         .map(agg => agg.toJSON())
         .filter(Boolean),
       listeners: this.listeners
     };
   };
 
-  Vis.prototype.getFullState = function () {
-    return this.getState(true);
+  Vis.prototype.getEnabledState = function () {
+    return this.getStateInternal(false);
+  };
+
+  Vis.prototype.getState = function () {
+    return this.getStateInternal(true);
   };
 
   Vis.prototype.createEditableVis = function () {
@@ -107,7 +111,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.clone = function () {
-    return new Vis(this.indexPattern, this.getFullState());
+    return new Vis(this.indexPattern, this.getState());
   };
 
   Vis.prototype.requesting = function () {
