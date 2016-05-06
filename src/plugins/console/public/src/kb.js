@@ -238,7 +238,27 @@ function setActiveApi(api) {
   ACTIVE_API = api;
 }
 
-setActiveApi('es_2_0');
+es.addServerChangeListener(function () {
+  var version = es.getVersion() || [];
+  var api;
+
+  switch (version[0]) {
+    case '5':
+      api = 'es_5_0';
+      break;
+    case '2':
+      api = 'es_2_0';
+      break;
+    case '1':
+    default:
+      api = 'es_1_0';
+  }
+
+  if (api) {
+    setActiveApi(api);
+  }
+
+});
 
 module.exports.setActiveApi = setActiveApi;
 module.exports.getGlobalAutocompleteComponents = getGlobalAutocompleteComponents;
