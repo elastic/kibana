@@ -9,8 +9,8 @@ module.exports = new Chainable('legend', {
     },
     {
       name: 'position',
-      types: ['string', 'null'],
-      help: 'Corner to place the legend in: nw, ne, se, or sw'
+      types: ['string', 'boolean', 'null'],
+      help: 'Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend'
     },
     {
       name: 'columns',
@@ -23,8 +23,13 @@ module.exports = new Chainable('legend', {
     return alter(args, function (eachSeries, position, columns) {
       eachSeries._global = eachSeries._global || {};
       eachSeries._global.legend = eachSeries._global.legend || {};
-      eachSeries._global.legend.position = position;
       eachSeries._global.legend.noColumns = columns;
+
+      if (position === false) {
+        eachSeries._global.legend.show = false;
+      } else {
+        eachSeries._global.legend.position = position;
+      }
 
       return eachSeries;
     });
