@@ -50,14 +50,6 @@ pipeline-setup {
     }
   }
 
-  pre {
-    border: none;
-    background-color: @settings-filebeat-wizard-panel-bg;
-    border-radius: 0px;
-    white-space: pre-wrap;
-    margin: 0px;
-  }
-
   .add-processor {
     padding:10px;
     margin-bottom: 10px;
@@ -67,12 +59,16 @@ pipeline-setup {
       justify-content: flex-start;
       align-items: center;
 
-      select {
+      select.form-control {
         background-color: @settings-filebeat-wizard-processor-select-bg;
         border: none;
         width: auto;
         margin-right: 5px;
       }
     }
+  }
+
+  textarea.form-control {
+    min-height: 150px;
   }
 }

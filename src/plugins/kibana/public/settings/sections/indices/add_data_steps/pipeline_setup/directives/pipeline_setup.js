@@ -12,7 +12,8 @@ import '../processors';
 import pipelineSetupTemplate from '../views/pipeline_setup.html';
 
 const app = uiModules.get('kibana');
-function buildProcessorTypeList() {
+
+function buildProcessorTypeList(enabledProcessorTypeIds) {
   return _(ProcessorTypes)
     .map(Type => {
       const instance = new Type();
@@ -23,6 +24,8 @@ function buildProcessorTypeList() {
       };
     })
     .compact()
+    .filter((processorType) => enabledProcessorTypeIds.includes(processorType.typeId))
+    .sortBy('title')
     .value();
 }
 
@@ -37,8 +40,14 @@ app.directive('pipelineSetup', function () {
     controller: function ($scope, debounce, Private, Notifier) {
       const ingest = Private(IngestProvider);
       const notify = new Notifier({ location: `Ingest Pipeline Setup` });
-      $scope.processorTypes = _.sortBy(buildProcessorTypeList(), 'title');
       $scope.sample = {};
+
+      //determines which processors are available on the cluster
+      ingest.getProcessors()
+      .then((enabledProcessorTypeIds) => {
+        $scope.processorTypes = buildProcessorTypeList(enabledProcessorTypeIds);
+      })
+      .catch(notify.error);
 
       const pipeline = new Pipeline();
       // Loads pre-existing pipeline which will exist if the user returns from

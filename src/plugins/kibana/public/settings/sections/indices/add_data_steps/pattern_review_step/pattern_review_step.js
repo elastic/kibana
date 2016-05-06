@@ -1,7 +1,8 @@
 import modules from 'ui/modules';
-import template from 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step.html';
+import template from './pattern_review_step.html';
 import _ from 'lodash';
 import editFieldTypeHTML from 'plugins/kibana/settings/sections/indices/partials/_edit_field_type.html';
+import './styles/_add_data_pattern_review_step.less';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
