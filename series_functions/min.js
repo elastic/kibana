@@ -10,7 +10,8 @@ module.exports = new Chainable('min', {
     {
       name: 'value',
       types: ['seriesList', 'number'],
-      help: 'Number, series to min with the input series. If passing a seriesList it must contain exactly 1 series.'
+      help: 'Sets the point to whichever is lower, the existing value, or the one passed.' +
+      ' If passing a seriesList it must contain exactly 1 series.'
 
     }
 
