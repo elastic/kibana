@@ -1,0 +1,84 @@
+<h2><em>Follow these instructions to install Filebeat.</em>
+Now that you've got a fresh pipeline and index pattern, let's throw some data at it!
+</h2>
+
+<div class="install-filebeat">
+  <ol>
+    <li>
+      <span>
+        <strong>Install Filebeat</strong> on all servers on which you want to tail logs &nbsp;
+        <a target="_blank" ng-href="{{installStep.docLinks.installation}}">
+            <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
+        </a>
+      </span>
+    </li>
+
+    <li>
+      <span>
+        <strong>Point Filebeat</strong> at the log files you want to tail &nbsp;
+        <a target="_blank" ng-href="{{installStep.docLinks.configuration}}">
+          <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
+        </a>
+      </span>
+    </li>
+
+    <li ng-if="installStep.results.pipeline.processors.length">
+      <span>
+        <strong>Configure Filebeat</strong> to send data through your new Elasticsearch pipeline &nbsp;
+        <a target="_blank" ng-href="{{installStep.docLinks.elasticsearchOutput}}">
+          <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
+        </a><br/>
+        At minimum you'll need to configure Filebeat's Elasticsearch output with a hostname, an index name, and a
+        <a target="_blank"
+           ng-href="{{installStep.docLinks.elasticsearchOutputAnchorParameters}}">
+          <i aria-hidden="true" class="fa fa-info-circle"></i> paramaters
+        </a> block. Your config should end up looking something like this:<br/>
+      <pre>
+output:
+ elasticsearch:
+   hosts: ["your-elasticsearch-host"]
+   index: "your-base-index-name"
+   parameters:
+     pipeline: "{{installStep.pipelineId}}"</pre>
+        <em>NOTE</em>: The Filebeat config takes a base index name and automatically rotates the target index by appending "-{date}"
+        to the end, so if your pattern was "filebeat-*" you would make the index name "filebeat" in filebeat.yml.<br />
+      </span>
+    </li>
+
+
+    <li ng-if="!installStep.results.pipeline.processors.length">
+      <span>
+        <strong>Configure Filebeat</strong> to send data to Elasticsearch &nbsp;
+        <a target="_blank" ng-href="{{installStep.docLinks.elasticsearchOutput}}">
+          <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
+        </a><br/>
+        At minimum you'll need to configure Filebeat's Elasticsearch output with a hostname and an index name.
+        Your config should end up looking something like this:<br />
+        <pre>
+output:
+ elasticsearch:
+   hosts: ["your-elasticsearch-host"]
+   index: "your-base-index-name"</pre>
+      <em>NOTE</em>: The Filebeat config takes a base index name and automatically rotates the target index by appending "-{date}"
+      to the end, so if your pattern was "filebeat-*" you would make the index name "filebeat" in filebeat.yml.<br />
+      </span>
+    </li>
+
+    <li>
+      <span>
+        <strong>Run Filebeat</strong> on each server &nbsp;
+        <a target="_blank" ng-href="{{installStep.docLinks.startup}}">
+          <i aria-hidden="true" class="fa fa-info-circle"></i> instructions
+        </a>
+      </span>
+    </li>
+    <li>
+      <span>
+        <strong>Verify your filebeat installation below.</strong> We'll poll your new index pattern for documents and let you know when
+        they show up. If you'd like to skip this step, simply click Done now.
+      </span>
+    </li>
+  </ol>
+</div>
+
+<pattern-checker pattern="installStep.results.indexPattern.id"/>

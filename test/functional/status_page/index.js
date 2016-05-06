@@ -1,15 +1,10 @@
-define(function (require) {
-  var bdd = require('intern!bdd');
-  var expect = require('intern/dojo/node!expect.js');
-  var config = require('intern').config;
-  var Common = require('../../support/pages/common');
+import { bdd, common } from '../../support';
+
+(function () {
+  var expect = require('expect.js');
 
   bdd.describe('status page', function () {
-    var common;
-
     bdd.before(function () {
-      common = new Common(this.remote);
-      // load the status page
       return common.navigateToApp('status_page', false);
     });
 
@@ -27,4 +22,4 @@ define(function (require) {
       .catch(common.handleError(self));
     });
   });
-});
+}());

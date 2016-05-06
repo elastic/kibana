@@ -1,0 +1,11 @@
+<h2><em>Provide some sample logs.</em>
+Paste in one or more lines from the file you intend to tail. We'll use these samples in the following steps to help
+you build an ingest pipeline and configure a Kibana index pattern. Log lines can be raw strings or
+formatted as JSON. If your logs are raw strings but you intend to use
+  <a target="_window" ng-href="{{pasteStep.docLinks.exportedFields}}">Filebeat's metadata</a>,
+you'll want to paste the JSON as it will come out of Filebeat.
+</h2>
+
+<div class="paste-samples form-group">
+  <textarea class="form-control" ng-model="pasteStep.rawSamples" placeholder="Paste your sample log lines here, separated by a newline"></textarea>
+</div>

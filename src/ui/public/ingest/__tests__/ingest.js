@@ -113,4 +113,36 @@ describe('Ingest Service', function () {
       expect($rootScope.$broadcast.calledWith('ingest:updated')).to.be.ok();
     });
   });
+
+  describe('getProcessors', () => {
+
+    it('Calls the processors GET endpoint of the ingest API', function () {
+      $httpBackend
+      .expectGET('../api/kibana/ingest/processors')
+      .respond('ok');
+
+      ingest.getProcessors();
+      $httpBackend.flush();
+    });
+
+    it('Throws user-friendly error when there is an error in the request', function (done) {
+      $httpBackend
+      .when('GET', '../api/kibana/ingest/processors')
+      .respond(404);
+
+      ingest.getProcessors()
+      .then(
+        () => {
+          throw new Error('expected an error response');
+        },
+        (error) => {
+          expect(error.message).to.be('Error fetching enabled processors');
+          done();
+        });
+
+      $httpBackend.flush();
+    });
+
+  });
+
 });
