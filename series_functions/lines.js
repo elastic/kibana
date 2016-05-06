@@ -24,12 +24,12 @@ module.exports = new Chainable('lines', {
     },
     {
       name: 'show',
-      types: ['number', 'null'],
+      types: ['number', 'boolean', 'null'],
       help: 'Show or hide lines'
     },
     {
       name: 'steps',
-      types: ['number', 'null'],
+      types: ['number', 'boolean', 'null'],
       help: 'Show line as step, eg, do not interpolate between points'
     }
   ],
