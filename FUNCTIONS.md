@@ -152,7 +152,7 @@ Set the position and style of the legend on the plot
 
 Argument | Accepts | Description
 --- | --- | ---
-position | *string* | Corner to place the legend in: nw, ne, se, or sw  
+position | *string/boolean* | Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend  
 columns | *number* | Number of columns to divide the legend into  
 
 #### .lines()
@@ -163,22 +163,22 @@ Argument | Accepts | Description
 width | *number* | Line thickness  
 fill | *number* | Number between 0 and 10. Use for making area charts  
 stack | *boolean* | Stack lines, often misleading. At least use some fill if you use this.  
-show | *number* | Show or hide lines  
-steps | *number* | Show line as step, eg, do not interpolate between points  
+show | *number/boolean* | Show or hide lines  
+steps | *number/boolean* | Show line as step, eg, do not interpolate between points  
 
 #### .max()
 Maximum values of one or more series in a seriesList to each position, in each series, of the input seriesList
 
 Argument | Accepts | Description
 --- | --- | ---
-value | *seriesList/number* | Number, series to max with the input series. If passing a seriesList it must contain exactly 1 series.  
+value | *seriesList/number* | Sets the point to whichever is higher, the existing value, or the one passed. If passing a seriesList it must contain exactly 1 series.  
 
 #### .min()
 Minimum values of one or more series in a seriesList to each position, in each series, of the input seriesList
 
 Argument | Accepts | Description
 --- | --- | ---
-value | *seriesList/number* | Number, series to min with the input series. If passing a seriesList it must contain exactly 1 series.  
+value | *seriesList/number* | Sets the point to whichever is lower, the existing value, or the one passed. If passing a seriesList it must contain exactly 1 series.  
 
 #### .movingaverage()
 Calculate the moving average over a given window. Nice for smoothing noisey series

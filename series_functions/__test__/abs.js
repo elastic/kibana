@@ -3,7 +3,7 @@ var fn = require(`../${filename}`);
 
 var _ = require('lodash');
 var expect = require('chai').expect;
-var seriesList = require('./fixtures/seriesList.js');
+var seriesList = require('./fixtures/seriesList.js')();
 var invoke = require('./helpers/invoke_series_fn.js');
 
 describe(filename, function () {

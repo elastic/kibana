@@ -9,7 +9,7 @@ describe(filename, () => {
 
   var seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/seriesList.js');
+    seriesList = require('./fixtures/seriesList.js')();
   });
 
   it('creates the bars property, with defaults, on all series', () => {
