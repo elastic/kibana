@@ -6,6 +6,7 @@ import SettingsPage from './pages/settings_page';
 import HeaderPage from './pages/header_page';
 import VisualizePage from './pages/visualize_page';
 import ShieldPage from './pages/shield_page';
+import ConsolePage from './pages/console_page';
 
 const kbnInternVars = global.__kibana__intern__;
 
@@ -23,6 +24,7 @@ defineDelayedExport('headerPage', () => new HeaderPage());
 defineDelayedExport('settingsPage', () => new SettingsPage());
 defineDelayedExport('visualizePage', () => new VisualizePage());
 defineDelayedExport('shieldPage', () => new ShieldPage());
+defineDelayedExport('consolePage', () => new ConsolePage());
 
 // creates an export for values that aren't actually avaialable until
 // until tests start to run. These getters will throw errors if the export
