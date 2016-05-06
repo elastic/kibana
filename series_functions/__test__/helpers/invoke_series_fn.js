@@ -16,7 +16,6 @@ module.exports = function invokeSeriesFn(fnDef, args) {
       };
       return result;
     }).catch(function (err) {
-      console.log(err.stack);
       return err;
     });
   });
