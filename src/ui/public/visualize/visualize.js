@@ -33,6 +33,7 @@ uiModules
       }
       return '#' + hexStr;
     }
+    const isPieChart = (chartType === 'pie');
     function decodeBucketData(buckets, aggregations) {
       const chartDatasetConfigs = {};
       if (!buckets) { return chartDatasetConfigs; }
@@ -64,17 +65,21 @@ uiModules
       decodeBucket(buckets[0], aggregations[buckets[0].id]);
       const arrDatasets = buckets.map(bucket => { return chartDatasetConfigs[bucket.id]; });
       // Make some colors for all of the data points.
+      // This need to be different, instead of looking at all the colors
+      // you should look at RGB separate and limit the number from there
+      // then multiply to get your result
       arrDatasets.forEach(set => {
-        const colorOffset = 10000;
+        const allTheColors = Math.pow(16, 6);
+        const colorOffset = allTheColors / 8;
         let numDataPoints = set.data.length;
-        const maxColors = Math.pow(16,6) - (colorOffset * 2);
+        const maxColors = allTheColors - (colorOffset * 2);
         const difference = maxColors / numDataPoints;
         let currColor = colorOffset;
-        do {
+        while (numDataPoints-- > 0) {
           set.backgroundColor.push(makeColor(currColor));
           currColor += difference;
-        } while (--numDataPoints > 0);
-        if (chartType !== 'pie') {
+        }
+        if (!isPieChart) {
           set.backgroundColor = set.backgroundColor[0];
         }
       });
@@ -86,7 +91,7 @@ uiModules
       const aggConfigMap = aggConfigs.byId;
       const decodedData = decodeBucketData(aggConfigs.bySchemaGroup.buckets, esResp.aggregations);
       const flattenedLabels = _.reduce(decodedData, (prev, dataset) => {
-        return prev.concat(dataset.labels);
+        return _.uniq(prev.concat(dataset.labels));
       }, []);
       if (myChart) { // Not a fan of this, i should be using update
         myChart.destroy();
@@ -98,6 +103,12 @@ uiModules
           datasets: decodedData
         },
         options: {
+          legendCallback: function (chartObj) {
+            const multipleBuckets = aggConfigs.bySchemaGroup.buckets.length > 1;
+            const legendItems = multipleBuckets || isPieChart ? flattenedLabels : [aggConfigs.bySchemaGroup.metrics[0]._opts.type];
+            const itemsHtmlArr = legendItems.map(item => { return '<li>' + item + '</li>'; });
+            return '<ul>' + itemsHtmlArr.join('') + '</ul>';
+          },
           legend: {
             display: false
           },
