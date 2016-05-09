@@ -1,8 +1,11 @@
 import modules from 'ui/modules';
 import template from './pattern_review_step.html';
 import _ from 'lodash';
-import editFieldTypeHTML from 'plugins/kibana/settings/sections/indices/partials/_edit_field_type.html';
+import editFieldTypeHTML from '../../partials/_edit_field_type.html';
+import isGeoPointObject from './lib/is_geo_point_object';
+import forEachField from './lib/for_each_field';
 import './styles/_add_data_pattern_review_step.less';
+import moment from 'moment';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
@@ -10,6 +13,10 @@ function pickDefaultTimeFieldName(dateFields) {
   }
 
   return _.includes(dateFields, '@timestamp') ? '@timestamp' : dateFields[0];
+}
+
+function findFieldsByType(indexPatternFields, type) {
+  return _.map(_.filter(indexPatternFields, {type}), 'name');
 }
 
 modules.get('apps/settings')
@@ -24,38 +31,46 @@ modules.get('apps/settings')
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
+        this.errors = [];
+        const sampleFields = {};
+
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
         }
 
-        const knownFieldTypes = {};
-        this.dateFields = [];
-        this.pipeline.model.processors.forEach((processor) => {
-          if (processor.typeId === 'geoip') {
-            const field = processor.targetField || 'geoip';
-            knownFieldTypes[field] = 'geo_point';
+        forEachField(this.sampleDoc, (value, fieldName) => {
+          let type = typeof value;
+
+          if (isGeoPointObject(value)) {
+            type = 'geo_point';
           }
-          else if (processor.typeId === 'date') {
-            const field = processor.targetField || '@timestamp';
-            knownFieldTypes[field] = 'date';
-            this.dateFields.push(field);
+
+          if (type === 'string' && moment(value, moment.ISO_8601).isValid()) {
+            type = 'date';
+          }
+
+          if (value === null) {
+            type = 'string';
+          }
+
+          if (!_.isUndefined(sampleFields[fieldName]) && (sampleFields[fieldName].type !== type)) {
+            this.errors.push(`Error in field ${fieldName} - conflicting types '${sampleFields[fieldName].type}' and '${type}'`);
+          }
+          else {
+            sampleFields[fieldName] = {type, value};
           }
         });
 
         _.defaults(this.indexPattern, {
           id: 'filebeat-*',
           title: 'filebeat-*',
-          timeFieldName: pickDefaultTimeFieldName(this.dateFields),
-          fields: _.map(this.sampleDoc, (value, key) => {
-            let type = knownFieldTypes[key] || typeof value;
-            if (type === 'object' && _.isArray(value) && !_.isEmpty(value)) {
-              type = typeof value[0];
-            }
-            return {name: key, type: type};
-          })
+          fields: _(sampleFields)
+            .map((field, fieldName) => {
+              return {name: fieldName, type: field.type};
+            })
+            .reject({type: 'object'})
+            .value()
         });
-
-        this.isTimeBased = !!this.indexPattern.timeFieldName;
 
         $scope.$watch('reviewStep.indexPattern.id', (value) => {
           this.indexPattern.title = value;
@@ -69,17 +84,21 @@ modules.get('apps/settings')
           }
         });
         $scope.$watch('reviewStep.indexPattern.fields', (fields) => {
-          this.dateFields = _.map(_.filter(fields, {type: 'date'}), 'name');
+          this.dateFields = findFieldsByType(fields, 'date');
         }, true);
+
+
+        this.dateFields = findFieldsByType(this.indexPattern.fields, 'date');
+        this.isTimeBased = !_.isEmpty(this.dateFields);
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const sampleValue = this.sampleDoc[field.name];
+            const {type: detectedType, value: sampleValue} = sampleFields[field.name];
             return [
               _.escape(field.name),
               {
                 markup: editFieldTypeHTML,
-                scope: _.assign($scope.$new(), {field: field, knownFieldTypes: knownFieldTypes, buildRows: buildRows}),
+                scope: _.assign($scope.$new(), {field: field, detectedType: detectedType, buildRows: buildRows}),
                 value: field.type
               },
               typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
