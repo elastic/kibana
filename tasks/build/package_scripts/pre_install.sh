@@ -1,6 +1,5 @@
 #!/bin/sh
 
-echo -n "Stopping kibana service..."
 if command -v systemctl >/dev/null && systemctl is-active kibana.service >/dev/null; then
     systemctl --no-reload stop kibana.service
 elif [ -x /etc/init.d/kibana ]; then
@@ -12,4 +11,3 @@ elif [ -x /etc/init.d/kibana ]; then
         /etc/init.d/kibana stop
     fi
 fi
-echo " OK"
