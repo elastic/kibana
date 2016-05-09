@@ -75,6 +75,9 @@ describe('AggConfig Filters', function () {
       expect(fieldParams).to.have.property('lte');
       expect(fieldParams.lte).to.be.a('number');
 
+      expect(fieldParams).to.have.property('format');
+      expect(fieldParams.format).to.be('epoch_millis');
+
       expect(fieldParams.gte).to.be.lessThan(fieldParams.lte);
 
       expect(filter).to.have.property('meta');
