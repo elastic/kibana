@@ -29,6 +29,7 @@ module.exports = function (grunt) {
         '--maintainer', 'Kibana Team\ \<info@elastic.co\>',
         '--license', 'Apache\ 2.0',
         '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
+        '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
         '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
         '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
         '--config-files', '/opt/kibana/config/kibana.yml',
