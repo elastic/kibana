@@ -1,4 +1,4 @@
-<select ng-if="sampleFields[field.name].type !== 'geo_point'" name="field_type" ng-model="field.type" ng-change="buildRows()">
+<select ng-if="detectedType !== 'geo_point'" name="field_type" ng-model="field.type" ng-change="buildRows()">
   <option value="string">string</option>
   <option value="number">number</option>
   <option value="boolean">boolean</option>
@@ -7,6 +7,6 @@
   <option value="ip">ip</option>
 </select>
 
-<span ng-if="sampleFields[field.name].type === 'geo_point'">
+<span ng-if="detectedType === 'geo_point'">
   geo_point
 </span>

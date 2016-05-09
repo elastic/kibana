@@ -93,12 +93,12 @@ modules.get('apps/settings')
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const sampleValue = sampleFields[field.name].value;
+            const {type: detectedType, value: sampleValue} = sampleFields[field.name];
             return [
               _.escape(field.name),
               {
                 markup: editFieldTypeHTML,
-                scope: _.assign($scope.$new(), {field: field, sampleFields: sampleFields, buildRows: buildRows}),
+                scope: _.assign($scope.$new(), {field: field, detectedType: detectedType, buildRows: buildRows}),
                 value: field.type
               },
               typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
