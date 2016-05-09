@@ -31,6 +31,16 @@ module.exports = function () {
       ],
       type: 'series',
       label: 'All the same'
+    },
+    {
+      data:  [
+        [1000, 3.1415926535],
+        [2000, 2],
+        [3000, 1.439],
+        [4000, 0.3424235],
+      ],
+      type: 'series',
+      label: 'Decimauled'
     }]
   };
 };

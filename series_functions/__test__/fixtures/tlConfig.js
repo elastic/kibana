@@ -4,5 +4,13 @@ module.exports = function () {
     request: {}
   });
 
-  tlConfig.setTargetSeries([1000, 2000, 3000, 4000]);
+  tlConfig.time = {
+    interval: '1s',
+    from: 1000,
+    to: 4001
+  };
+
+  tlConfig.setTargetSeries();
+
+  return tlConfig;
 };

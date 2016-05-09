@@ -20,22 +20,24 @@ describe(filename, () => {
   });
 
   it('generates a gradient', () => {
-    const expected = ['#000000', '#111111', '#222222'];
-    return invoke(fn, [seriesList, '#000:#222']).then((r) => {
+    const expected = ['#000000', '#111111', '#222222', '#333333'];
+    const fourLongList = {
+      type: 'seriesList',
+      list: seriesList.list.slice(0,4)
+    };
+    return invoke(fn, [fourLongList, '#000:#333']).then((r) => {
       const colors = _.map(r.output.list, 'color');
       _.each(colors, (color, i) => expect(color).to.equal(expected[i]));
     });
   });
 
   it('throws if you pass more colors than series', () => {
-    const expected = ['#000000', '#111111', '#222222'];
     invoke(fn, [seriesList, '#000:#111:#222:#333']).catch((e) => {
       expect(e).to.be.an(Error);
     });
   });
 
   it('throws if you do not pass a color', () => {
-    const expected = ['#000000', '#111111', '#222222'];
     invoke(fn, [seriesList, '']).catch((e) => {
       expect(e).to.be.an(Error);
     });

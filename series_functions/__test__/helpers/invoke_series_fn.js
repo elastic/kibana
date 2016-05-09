@@ -1,6 +1,6 @@
 // invokes a series_function with the specified arguments
 var _ = require('lodash');
-var tlConfig = require('../fixtures/tlConfig');
+var tlConfig = require('../fixtures/tlConfig')();
 var indexArguments = require('../../../handlers/lib/index_arguments');
 
 module.exports = function invokeSeriesFn(fnDef, args) {
@@ -10,6 +10,7 @@ module.exports = function invokeSeriesFn(fnDef, args) {
     var input = _.cloneDeep(args);
 
     return Promise.resolve(fnDef.originalFn(args, tlConfig)).then(function (output) {
+
       var result = {
         output: output,
         input: input
