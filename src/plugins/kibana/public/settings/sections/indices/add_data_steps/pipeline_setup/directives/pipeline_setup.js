@@ -10,6 +10,7 @@ import './source_data';
 import './processor_ui_container';
 import '../processors';
 import pipelineSetupTemplate from '../views/pipeline_setup.html';
+import 'string-resources';
 
 const app = uiModules.get('kibana');
 
