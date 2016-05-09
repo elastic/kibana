@@ -2,12 +2,13 @@ import uiModules from 'ui/modules';
 import _ from 'lodash';
 import Pipeline from '../lib/pipeline';
 import angular from 'angular';
-import * as ProcessorTypes from '../lib/processor_types';
+import * as ProcessorTypes from '../processors/view_models';
 import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';
 import './pipeline_output';
 import './source_data';
-import './processor_ui';
+import './processor_ui_container';
+import '../processors';
 import pipelineSetupTemplate from '../views/pipeline_setup.html';
 
 const app = uiModules.get('kibana');
