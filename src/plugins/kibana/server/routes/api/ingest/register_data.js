@@ -1,5 +1,5 @@
 import { Promise } from 'bluebird';
-import { parse, transform } from 'csv';
+import parse from 'csv-parse';
 import _ from 'lodash';
 import hi from 'highland';
 import { patternToIngest } from '../../../../common/lib/convert_pattern_and_ingest_name';

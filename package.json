@@ -96,7 +96,7 @@
     "clipboard": "1.5.5",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
-    "csv": "0.4.6",
+    "csv-parse": "1.1.0",
     "d3": "3.5.6",
     "elasticsearch": "10.1.2",
     "elasticsearch-browser": "10.1.2",
