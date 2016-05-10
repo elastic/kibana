@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 user_check() {
   getent passwd "$1" > /dev/null 2>&1
