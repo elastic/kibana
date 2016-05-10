@@ -1,17 +1,16 @@
-define(function (require) {
-  var expect = require('intern/dojo/node!expect.js');
-  var Common = require('../../../support/pages/common');
-  var SettingsPage = require('../../../support/pages/settings_page');
+import {
+  bdd,
+  common,
+  scenarioManager,
+  settingsPage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('initial state', function () {
-      var common;
-      var settingsPage;
-
       bdd.before(function () {
-        common = new Common(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           return settingsPage.navigateTo();
@@ -61,5 +60,5 @@ define(function (require) {
         .catch(common.handleError(this));
       });
     });
-  };
-});
+  }());
+}());

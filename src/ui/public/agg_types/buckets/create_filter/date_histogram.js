@@ -8,7 +8,8 @@ export default function createDateHistogramFilterProvider(Private) {
 
     return buildRangeFilter(agg.params.field, {
       gte: start.valueOf(),
-      lte: start.add(interval).subtract(1, 'ms').valueOf()
+      lte: start.add(interval).subtract(1, 'ms').valueOf(),
+      format: 'epoch_millis'
     }, agg.vis.indexPattern);
   };
 

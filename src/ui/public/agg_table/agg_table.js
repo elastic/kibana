@@ -15,6 +15,7 @@ uiModules
     scope: {
       table: '=',
       perPage: '=?',
+      sort: '=?',
       exportTitle: '=?'
     },
     controllerAs: 'aggTable',
@@ -26,7 +27,6 @@ uiModules
     controller: function ($scope) {
       let self = this;
 
-      self.sort = null;
       self._saveAs = require('@spalger/filesaver').saveAs;
       self.csv = {
         separator: config.get('csv:separator'),
