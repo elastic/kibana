@@ -16,7 +16,9 @@ module.exports = function (kibana) {
       main: 'plugins/console/console',
       icon: 'plugins/console/logo.svg',
       injectVars: function (server, options) {
-        return options;
+        const varsToInject = options;
+        varsToInject.elasticsearchUrl = server.config().get('elasticsearch.url');
+        return varsToInject;
       }
     }
   ];
@@ -152,16 +154,6 @@ module.exports = function (kibana) {
         method: 'GET',
         config: {
           ...proxyRouteConfig
-        }
-      })
-
-      server.route({
-        path: '/api/console/proxy/settings',
-        method: 'GET',
-        handler: function (req, reply) {
-          reply({
-            url: server.config().get('elasticsearch.url')
-          });
         }
       })
 

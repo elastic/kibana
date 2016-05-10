@@ -6,6 +6,8 @@ let RowParser = require('./row_parser');
 let InputMode = require('./mode/input');
 let utils = require('../utils');
 let es = require('../es');
+import chrome from 'ui/chrome';
+
 const smartResize = require('../smart_resize');
 
 function isInt(x) {
@@ -524,41 +526,37 @@ function SenseEditor($el) {
       cb = $.noop;
     }
 
-    $.ajax('../api/console/proxy/settings')
-    .then(function (proxySettings) {
-      editor.getRequestsInRange(range, true, function (requests) {
+    editor.getRequestsInRange(range, true, function (requests) {
 
-        var result = _.map(requests, function requestToCurl(req) {
+      var result = _.map(requests, function requestToCurl(req) {
 
-          if (typeof req === "string") {
-            // no request block
-            return req;
-          }
+        if (typeof req === "string") {
+          // no request block
+          return req;
+        }
 
-          var
-            es_path = req.url,
-            es_method = req.method,
-            es_data = req.data;
+        var
+          es_path = req.url,
+          es_method = req.method,
+          es_data = req.data;
 
-          var url = es.constructESUrl(proxySettings.url, es_path);
+        const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
+        var url = es.constructESUrl(elasticsearchBaseUrl, es_path);
 
-          var ret = 'curl -X' + es_method + ' "' + url + '"';
-          if (es_data && es_data.length) {
-            ret += " -d'\n";
-            // since Sense doesn't allow single quote json string any single qoute is within a string.
-            ret += es_data.join("\n").replace(/'/g, '\\"');
-            if (es_data.length > 1) {
-              ret += "\n";
-            } // end with a new line
-            ret += "'";
-          }
-          return ret;
-        });
-
-        cb(result.join("\n"));
+        var ret = 'curl -X' + es_method + ' "' + url + '"';
+        if (es_data && es_data.length) {
+          ret += " -d'\n";
+          // since Sense doesn't allow single quote json string any single qoute is within a string.
+          ret += es_data.join("\n").replace(/'/g, '\\"');
+          if (es_data.length > 1) {
+            ret += "\n";
+          } // end with a new line
+          ret += "'";
+        }
+        return ret;
       });
-    }, function (err) {
-      console.error('Could not get proxy settings');
+
+      cb(result.join("\n"));
     });
   };
 
