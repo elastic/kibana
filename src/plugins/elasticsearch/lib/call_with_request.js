@@ -3,12 +3,12 @@ import Promise from 'bluebird';
 import Boom from 'boom';
 import getBasicAuthRealm from './get_basic_auth_realm';
 import toPath from 'lodash/internal/toPath';
+import filterHeaders from './filter_headers';
 
-module.exports = (client) => {
+module.exports = (server, client) => {
   return (req, endpoint, params = {}) => {
-    if (req.headers.authorization) {
-      _.set(params, 'headers.authorization', req.headers.authorization);
-    }
+    const filteredHeaders = filterHeaders(req.headers, server.config().get('elasticsearch.requestHeadersWhitelist'));
+    _.set(params, 'headers', filteredHeaders);
     const path = toPath(endpoint);
     const api = _.get(client, path);
     let apiContext = _.get(client, path.slice(0, -1));

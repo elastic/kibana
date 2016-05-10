@@ -1,31 +1,21 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var VisualizePage = require('../../../support/pages/visualize_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  headerPage,
+  scenarioManager,
+  settingsPage,
+  visualizePage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-      var visualizePage;
-      var remote;
-      var fromTime;
-      var toTime;
+      var fromTime = '2015-09-19 06:31:44.000';
+      var toTime = '2015-09-23 18:31:44.000';
 
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
-        fromTime = '2015-09-19 06:31:44.000';
-        toTime = '2015-09-23 18:31:44.000';
 
         var testSubName = 'MetricChart';
         common.debug('Start of test' + testSubName + 'Visualization');
@@ -312,5 +302,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
