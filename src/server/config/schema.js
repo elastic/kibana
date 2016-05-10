@@ -124,7 +124,7 @@ module.exports = () => Joi.object({
   }).default(),
 
   statusPage: Joi.object({
-    disableAuth: Joi.boolean().default(false)
+    allowAnonymous: Joi.boolean().default(false)
   }).default()
 
 }).default();

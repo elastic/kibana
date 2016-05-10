@@ -11,7 +11,7 @@ module.exports = function (kbnServer, server, config) {
     kbnServer.mixin(require('./metrics'));
   }
 
-  const wrapAuth = wrapAuthConfig(config.get('statusPage.disableAuth'));
+  const wrapAuth = wrapAuthConfig(config.get('statusPage.allowAnonymous'));
 
   server.route(wrapAuth({
     method: 'GET',

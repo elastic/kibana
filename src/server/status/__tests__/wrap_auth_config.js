@@ -26,13 +26,13 @@ describe('Status wrapAuthConfig', () => {
     expect(wrapped).to.not.have.property('config');
   });
 
-  it('should not add auth config if disableAuth is false', () => {
+  it('should not add auth config if allowAnonymous is false', () => {
     const wrapAuth = wrapAuthConfig(false);
     const wrapped = wrapAuth(options);
     expect(wrapped).to.not.have.property('config');
   });
 
-  it('should add auth config if disableAuth is true', () => {
+  it('should add auth config if allowAnonymous is true', () => {
     const wrapAuth = wrapAuthConfig(true);
     const wrapped = wrapAuth(options);
     expect(wrapped).to.have.property('config');
