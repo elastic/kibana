@@ -8,9 +8,9 @@ import JSONStream from 'JSONStream';
 
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
 
-export function registerBulk(server) {
+export function registerData(server) {
   server.route({
-    path: '/api/kibana/{id}/_bulk',
+    path: '/api/kibana/{id}/_data',
     method: 'POST',
     config: {
       payload: {
