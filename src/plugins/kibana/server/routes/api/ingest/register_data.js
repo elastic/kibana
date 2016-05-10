@@ -48,7 +48,7 @@ export function registerData(server) {
           push(null, doc);
         }
         else {
-          push(null, {index: _.isEmpty(fileName) ? {} : {_id: `L${currentLine} - ${fileName}`}});
+          push(null, {index: _.isEmpty(fileName) ? {} : {_id: `${fileName}:${currentLine}`}});
           push(null, doc);
           currentLine++;
           next();
@@ -73,7 +73,8 @@ export function registerData(server) {
         return _.reduce(response.items, (memo, docResponse) => {
           const indexResult = docResponse.index;
           if (indexResult.error) {
-            if (_.isUndefined(_.get(memo, 'errors.index'))) {
+            const hasIndexingErrors = _.isUndefined(_.get(memo, 'errors.index'));
+            if (hasIndexingErrors) {
               _.set(memo, 'errors.index', []);
             }
             memo.errors.index.push(_.pick(indexResult, ['_id', 'error']));
