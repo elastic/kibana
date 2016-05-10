@@ -55,8 +55,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       mapZoomEnd: function (event, uiState) {
         uiState.set('mapZoom', event.zoom);
 
-        const agg = _.get(event, 'chart.geohashGridAgg');
-        if (agg && agg.params.autoPrecision) {
+        const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
+        if (autoPrecision) {
           courier.fetch();
         }
       }
