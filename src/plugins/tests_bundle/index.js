@@ -19,21 +19,21 @@ export default (kibana) => {
         let config = kibana.config;
 
         const testGlobs = ['src/ui/public/**/*.js'];
-        const testingPluginId = config.get('tests_bundle.pluginId');
+        const testingPluginIds = config.get('tests_bundle.pluginId');
 
-        if (testingPluginId) {
-          const plugin = plugins.byId[testingPluginId];
-          if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + testingPluginId);
+        if (testingPluginIds) {
+          testGlobs.push('!src/ui/public/**/__tests__/**/*');
+          testingPluginIds.split(',').forEach((pluginId) => {
+            const plugin = plugins.byId[pluginId];
+            if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
 
-          // add the modules from all of this plugins apps
-          for (let app of plugin.apps) {
-            modules = union(modules, app.getModules());
-          }
+            // add the modules from all of this plugins apps
+            for (let app of plugin.apps) {
+              modules = union(modules, app.getModules());
+            }
 
-          testGlobs.push(
-            '!src/ui/public/**/__tests__/**/*',
-            `${plugin.publicDir}/**/__tests__/**/*.js`
-          );
+            testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+          });
         } else {
 
           // add the modules from all of the apps
