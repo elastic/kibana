@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 echo -n "Stopping kibana service..."
 if command -v systemctl >/dev/null && systemctl is-active kibana.service >/dev/null; then
