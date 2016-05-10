@@ -7,7 +7,7 @@ define(function (require) {
 
   return function (bdd, scenarioManager, request) {
     const es = scenarioManager.client;
-    bdd.describe('_bulk', function () {
+    bdd.describe('_data', function () {
 
       bdd.beforeEach(function () {
         return es.indices.putTemplate({
@@ -27,7 +27,7 @@ define(function (require) {
       });
 
       bdd.it('should accept a multipart/form-data request with a csv file attached', function () {
-        return request.post('/kibana/names/_bulk')
+        return request.post('/kibana/names/_data')
         .attach('csv', 'test/unit/data/fake_names.csv')
         .expect(200);
       });
@@ -35,23 +35,23 @@ define(function (require) {
       bdd.it('should also accept the raw csv data in the payload body', function () {
         var csvData = fs.readFileSync('test/unit/data/fake_names_big.csv', {encoding: 'utf8'});
 
-        return request.post('/kibana/names/_bulk')
+        return request.post('/kibana/names/_data')
         .send(csvData)
         .expect(200);
       });
 
       bdd.it('should return JSON results', function () {
-        return request.post('/kibana/names/_bulk')
+        return request.post('/kibana/names/_data')
         .attach('csv', 'test/unit/data/fake_names.csv')
         .expect('Content-Type', /json/)
         .expect(200);
       });
 
       bdd.it('should index one document per row in the csv', function () {
-        return request.post('/kibana/names/_bulk')
+        return request.post('/kibana/names/_data')
         .attach('csv', 'test/unit/data/fake_names.csv')
         .expect(200)
-        .then((bulkResponse) => {
+        .then(() => {
           return es.indices.refresh()
           .then(() => {
             return es.count({ index: 'names' })
@@ -63,58 +63,58 @@ define(function (require) {
       });
 
       bdd.it('should stream a chunked response', function () {
-        return request.post('/kibana/names/_bulk')
+        return request.post('/kibana/names/_data')
         .attach('csv', 'test/unit/data/fake_names.csv')
         .expect('Transfer-Encoding', 'chunked')
         .expect(200);
       });
 
       bdd.it('should respond with an array of one or more "result objects"', function () {
-        return request.post('/kibana/names/_bulk')
+        return request.post('/kibana/names/_data')
           .attach('csv', 'test/unit/data/fake_names_big.csv')
           .expect(200)
-          .then((bulkResponse) => {
-            expect(bulkResponse.body.length).to.be(14);
+          .then((dataResponse) => {
+            expect(dataResponse.body.length).to.be(14);
           });
       });
 
       bdd.describe('result objects', function () {
 
         bdd.it('should include a count of created documents', function () {
-          return request.post('/kibana/names/_bulk')
+          return request.post('/kibana/names/_data')
           .attach('csv', 'test/unit/data/fake_names.csv')
           .expect(200)
-          .then((bulkResponse) => {
-            expect(bulkResponse.body[0]).to.have.property('created');
-            expect(bulkResponse.body[0].created).to.be(100);
+          .then((dataResponse) => {
+            expect(dataResponse.body[0]).to.have.property('created');
+            expect(dataResponse.body[0].created).to.be(100);
           });
         });
 
         bdd.it('should report any indexing errors per document under an "errors.index" key', function () {
-          return request.post('/kibana/names/_bulk')
+          return request.post('/kibana/names/_data')
             .attach('csv', 'test/unit/data/fake_names_with_mapping_errors.csv')
             .expect(200)
-            .then((bulkResponse) => {
-              expect(bulkResponse.body[0]).to.have.property('created');
-              expect(bulkResponse.body[0].created).to.be(98);
-              expect(bulkResponse.body[0]).to.have.property('errors');
-              expect(bulkResponse.body[0].errors).to.have.property('index');
-              expect(bulkResponse.body[0].errors.index.length).to.be(2);
+            .then((dataResponse) => {
+              expect(dataResponse.body[0]).to.have.property('created');
+              expect(dataResponse.body[0].created).to.be(98);
+              expect(dataResponse.body[0]).to.have.property('errors');
+              expect(dataResponse.body[0].errors).to.have.property('index');
+              expect(dataResponse.body[0].errors.index.length).to.be(2);
             });
         });
 
         bdd.it('should report any csv parsing errors under an "errors.other" key', function () {
-          return request.post('/kibana/names/_bulk')
+          return request.post('/kibana/names/_data')
             .attach('csv', 'test/unit/data/fake_names_with_parse_errors.csv')
             .expect(200)
-            .then((bulkResponse) => {
+            .then((dataResponse) => {
               // parse errors immediately abort indexing
-              expect(bulkResponse.body[0]).to.have.property('created');
-              expect(bulkResponse.body[0].created).to.be(0);
+              expect(dataResponse.body[0]).to.have.property('created');
+              expect(dataResponse.body[0].created).to.be(0);
 
-              expect(bulkResponse.body[0]).to.have.property('errors');
-              expect(bulkResponse.body[0].errors).to.have.property('other');
-              expect(bulkResponse.body[0].errors.other.length).to.be(1);
+              expect(dataResponse.body[0]).to.have.property('errors');
+              expect(dataResponse.body[0].errors).to.have.property('other');
+              expect(dataResponse.body[0].errors.other.length).to.be(1);
             });
         });
 
@@ -122,13 +122,13 @@ define(function (require) {
 
       bdd.describe('optional parameters', function () {
         bdd.it('should accept a custom delimiter query string param for parsing the CSV', function () {
-          return request.post('/kibana/names/_bulk?delimiter=|')
+          return request.post('/kibana/names/_data?delimiter=|')
           .attach('csv', 'test/unit/data/fake_names_pipe_delimited.csv')
           .expect(200)
-          .then((bulkResponse) => {
-            expect(bulkResponse.body[0]).to.have.property('created');
-            expect(bulkResponse.body[0].created).to.be(2);
-            expect(bulkResponse.body[0]).to.not.have.property('errors');
+          .then((dataResponse) => {
+            expect(dataResponse.body[0]).to.have.property('created');
+            expect(dataResponse.body[0].created).to.be(2);
+            expect(dataResponse.body[0]).to.not.have.property('errors');
 
             return es.indices.refresh();
           })
@@ -160,7 +160,7 @@ define(function (require) {
             }
           })
           .then((res) => {
-            return request.post('/kibana/names/_bulk?pipeline=true')
+            return request.post('/kibana/names/_data?pipeline=true')
             .attach('csv', 'test/unit/data/fake_names.csv')
             .expect(200);
           })
