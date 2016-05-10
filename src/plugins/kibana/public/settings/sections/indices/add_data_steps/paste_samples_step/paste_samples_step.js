@@ -1,5 +1,6 @@
 import modules from 'ui/modules';
 import template from './paste_samples_step.html';
+import { filebeat as docLinks } from '../../../../../../../../ui/public/documentation_links/documentation_links';
 import _ from 'lodash';
 import './styles/_add_data_paste_samples_step.less';
 
@@ -14,6 +15,8 @@ modules.get('apps/settings')
       bindToController: true,
       controllerAs: 'pasteStep',
       controller: function ($scope) {
+        this.docLinks = docLinks;
+
         if (_.isUndefined(this.rawSamples)) {
           this.rawSamples = '';
         }

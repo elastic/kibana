@@ -4,6 +4,7 @@ module.exports = function (grunt) {
   let {resolve} = require('path');
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
+  let buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
   let uiConfig = require(root('test/server_config'));
 
   const stdDevArgs = [
@@ -25,18 +26,13 @@ module.exports = function (grunt) {
     return flags;
   }, []);
 
-  const devEnv = Object.assign(process.env, {
-    NODE_OPTIONS: '--max-old-space-size=1024'
-  });
-
   return {
     testServer: {
       options: {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -51,8 +47,7 @@ module.exports = function (grunt) {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -70,8 +65,7 @@ module.exports = function (grunt) {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -87,8 +81,7 @@ module.exports = function (grunt) {
         wait: false,
         ready: /Server running/,
         quiet: false,
-        failOnError: false,
-        env: devEnv
+        failOnError: false
       },
       cmd: binScript,
       args: [
@@ -156,10 +149,9 @@ module.exports = function (grunt) {
       options: {
         wait: false,
         ready: /Optimization .+ complete/,
-        quiet: false,
-        env: devEnv
+        quiet: true
       },
-      cmd: './build/kibana/bin/kibana',
+      cmd: buildScript,
       args: [
         '--env.name=production',
         '--logging.json=false',

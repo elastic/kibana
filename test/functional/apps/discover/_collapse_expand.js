@@ -12,10 +12,8 @@ import {
 
   (function () {
     bdd.describe('discover tab', function describeIndexTests() {
-      var baseUrl;
 
       bdd.before(function () {
-        baseUrl = common.getHostPort();
 
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
@@ -26,7 +24,7 @@ import {
         .then(function loadIfEmptyMakelogs() {
           return scenarioManager.loadIfEmpty('logstashFunctional');
         })
-        .then(function (navigateTo) {
+        .then(function () {
           common.debug('navigateTo');
           return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         })
