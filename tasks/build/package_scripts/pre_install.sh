@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if command -v systemctl >/dev/null && systemctl is-active kibana.service >/dev/null; then
     systemctl --no-reload stop kibana.service
