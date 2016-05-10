@@ -22,7 +22,7 @@ modules.get('apps/settings')
           location: 'Add Data'
         });
 
-        var totalSteps = 4;
+        var totalSteps = 3;
         this.stepResults = {};
 
         this.setCurrentStep = (step) => {
@@ -49,8 +49,7 @@ modules.get('apps/settings')
         };
 
         this.save = () => {
-          const processors = this.stepResults.pipeline.processors.map(processor => processor.model);
-          return ingest.save(this.stepResults.indexPattern, processors)
+          return ingest.save(this.stepResults.indexPattern)
             .then(
               () => {
                 this.nextStep();
@@ -76,9 +75,6 @@ modules.get('apps/settings')
               .then(
                 () => {
                   if ($state.currentStep < 1) {
-                    delete this.stepResults.pipeline;
-                  }
-                  if ($state.currentStep < 2) {
                     delete this.stepResults.indexPattern;
                   }
                   this.currentStep = newValue;
