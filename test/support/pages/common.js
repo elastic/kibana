@@ -1,4 +1,4 @@
-import { common, config, defaultFindTimeout, remote, shieldPage } from '../';
+import { common, config, defaultTryTimeout, defaultFindTimeout, remote, shieldPage } from '../';
 
 export default (function () {
   var Promise = require('bluebird');
@@ -225,7 +225,7 @@ export default (function () {
     },
 
     try(block) {
-      return this.tryForTime(defaultFindTimeout, block);
+      return this.tryForTime(defaultTryTimeout, block);
     },
 
     log(...args) {
