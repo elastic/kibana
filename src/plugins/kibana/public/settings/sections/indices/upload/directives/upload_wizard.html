@@ -8,17 +8,12 @@
       <span ng-class="{active: wizard.currentStep === 1, aheadActive: wizard.currentStep < 1}"
             class="wizard-step-heading"
             ng-click="wizard.currentStep < 1 || wizard.setCurrentStep(1)">
-        2. Parse
+        2. Review
       </span>
       <span ng-class="{active: wizard.currentStep === 2, aheadActive: wizard.currentStep < 2}"
             class="wizard-step-heading"
             ng-click="wizard.currentStep < 2 || wizard.setCurrentStep(2)">
-        3. Review
-      </span>
-      <span ng-class="{active: wizard.currentStep === 3, aheadActive: wizard.currentStep < 3}"
-            class="wizard-step-heading"
-            ng-click="wizard.currentStep < 3 || wizard.setCurrentStep(3)">
-        4. Upload
+        3. Upload
       </span>
   </div>
 
@@ -47,35 +42,9 @@
     </div>
 
     <div ng-switch-when="1">
-      <pipeline-setup
-        pipeline="wizard.stepResults.pipeline"
-        samples="wizard.stepResults.samples">
-      </pipeline-setup>
-
-      <div class="wizard-nav-buttons">
-        <div>
-          <button
-            class="btn btn-secondary"
-            ng-click="wizard.prevStep()">
-            Prev
-          </button>
-        </div>
-        <div>
-          <button
-            class="btn btn-primary"
-            ng-click="wizard.nextStep()">
-            Next
-          </button>
-        </div>
-        <div></div>
-      </div>
-    </div>
-
-    <div ng-switch-when="2">
       <pattern-review-step
         index-pattern="wizard.stepResults.indexPattern"
-        pipeline="wizard.stepResults.pipeline"
-        sample-doc="wizard.stepResults.pipeline.output">
+        sample-doc="wizard.stepResults.samples[0]">
       </pattern-review-step>
 
       <div class="wizard-nav-buttons">
@@ -98,7 +67,7 @@
       </div>
     </div>
 
-    <div ng-switch-when="3">
+    <div ng-switch-when="2">
       <upload-data-step results="wizard.stepResults"></upload-data-step>
 
       <div class="wizard-nav-buttons">
