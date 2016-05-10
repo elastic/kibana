@@ -14,4 +14,4 @@ module.exports = function offsetTime(milliseconds, offset, reverse) {
 
   var momentObj = moment(milliseconds)[mode](parts[1], parts[2]);
   return momentObj.valueOf();
-}
+};

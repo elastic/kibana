@@ -4,22 +4,6 @@ This document is auto generated from the timelion code. Do not submit pulls agai
 ### Data sources
 Data sources can start a chain, they don't need to be attached to anything, but they still need to start with a `.` (dot). Data retreived from a data source can be passed into the chainable functions in the next section.
 
-#### .es()
-Pull data from an elasticsearch instance
-
-Argument | Accepts | Description
---- | --- | ---
-q | *string* | Query in lucene query string syntax  
-metric | *string* | An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes", or just "count"  
-split | *string* | An elasticsearch field to split the series on and a limit. Eg, "hostname:10" to get the top 10 hostnames  
-index | *string* | Index to query, wildcards accepted  
-timefield | *string* | Field of type "date" to use for x-axis  
-kibana | *boolean* | Respect filters on Kibana dashboards. Only has an effect when using on Kibana dashboards  
-interval | *string* | **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker  
-url | *string* | Elasticsearch server URL, eg http://localhost:9200  
-offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
-fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
-
 #### .graphite()
 Pull data from graphite. Configure your graphite server in timelion.json
 
@@ -65,6 +49,22 @@ Pull data from http://data.worldbank.org/ using path to series. The worldbank pr
 Argument | Accepts | Description
 --- | --- | ---
 code | *string* | Worldbank API path. This is usually everything after the domain, before the querystring. Eg: /en/countries/ind;chn/indicators/DPANUSSPF.  
+offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
+fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
+
+#### .es()
+Pull data from an elasticsearch instance
+
+Argument | Accepts | Description
+--- | --- | ---
+q | *string* | Query in lucene query string syntax  
+metric | *string* | An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field. Eg "sum:bytes", or just "count"  
+split | *string* | An elasticsearch field to split the series on and a limit. Eg, "hostname:10" to get the top 10 hostnames  
+index | *string* | Index to query, wildcards accepted  
+timefield | *string* | Field of type "date" to use for x-axis  
+kibana | *boolean* | Respect filters on Kibana dashboards. Only has an effect when using on Kibana dashboards  
+interval | *string* | **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker  
+url | *string* | Elasticsearch server URL, eg http://localhost:9200  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 

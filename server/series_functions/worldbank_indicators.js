@@ -16,7 +16,8 @@ module.exports = new Datasource ('worldbank_indicators', {
     {
       name: 'indicator',
       types: ['string', 'null'],
-      help: 'The indicator code to use. You\'ll have to look this up on data.worldbank.org. Often pretty obtuse. Eg SP.POP.TOTL is population'
+      help: 'The indicator code to use. You\'ll have to look this up on data.worldbank.org.' +
+        ' Often pretty obtuse. Eg SP.POP.TOTL is population'
     }
   ],
   aliases: ['wbi'],
