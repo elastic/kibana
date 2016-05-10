@@ -48,17 +48,37 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   };
 
   function change(key, value) {
-    const oldVal = config.get(key);
-    const update = value === null ? remove : edit;
-    return update(key, value)
+    const initialVal = config.get(key);
+    const persistentUpdate = value === null ? remove : edit;
+    localUpdate(value);
+
+    return persistentUpdate(key, value)
       .then(res => res.data.settings)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
-        const newVal = getCurrentValue(key);
-        notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
-        $rootScope.$broadcast(`change:config`, settings);
-        $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal);
+      })
+      .catch(reason => {
+        localUpdate(initialVal);
+        notify.error(reason);
       });
+
+    function localUpdate(newVal) {
+      const oldVal = config.get(key);
+      patch(newVal);
+      advertise(oldVal);
+    }
+    function patch(value) {
+      if (!(key in settings)) {
+        settings[key] = {};
+      }
+      settings[key].userValue = value;
+    }
+    function advertise(oldVal) {
+      const newVal = config.get(key);
+      notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
+      $rootScope.$broadcast(`change:config`, settings);
+      $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal);
+    }
   }
   function remove(key) {
     return $http.delete(chrome.addBasePath(`/api/kibana/settings/${key}`));
