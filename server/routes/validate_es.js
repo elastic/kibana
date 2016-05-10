@@ -3,7 +3,7 @@ module.exports = function (server) {
     method: 'GET',
     path: '/api/timelion/validate/es',
     handler: function (request, reply) {
-      var config = require('../timelion.json');
+      var config = require('../../timelion.json');
       var callWithRequest = server.plugins.elasticsearch.callWithRequest;
 
       var body = {
