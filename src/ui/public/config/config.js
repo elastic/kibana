@@ -52,7 +52,9 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
     const persistentUpdate = value === null ? remove : edit;
     localUpdate(value);
 
-    return persistentUpdate(key, value)
+    return Promise
+      .resolve()
+      .then(() => persistentUpdate(key, value))
       .then(res => res.data.settings)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
