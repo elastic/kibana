@@ -6,6 +6,8 @@ import { patternToIngest } from '../../../../common/lib/convert_pattern_and_inge
 import { PassThrough } from 'stream';
 import JSONStream from 'JSONStream';
 
+const ONE_GIGABYTE = 1024 * 1024 * 1024;
+
 export function registerBulk(server) {
   server.route({
     path: '/api/kibana/{id}/_bulk',
@@ -13,7 +15,7 @@ export function registerBulk(server) {
     config: {
       payload: {
         output: 'stream',
-        maxBytes: 1024 * 1024 * 1024
+        maxBytes: ONE_GIGABYTE
       }
     },
     handler: function (req, reply) {
