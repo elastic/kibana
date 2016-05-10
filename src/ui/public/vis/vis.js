@@ -2,6 +2,7 @@ import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import PersistedState from 'ui/persisted_state/persisted_state';
 export default function VisFactory(Notifier, Private) {
   let aggTypes = Private(AggTypesIndexProvider);
   let visTypes = Private(RegistryVisTypesProvider);
@@ -24,7 +25,7 @@ export default function VisFactory(Notifier, Private) {
 
     // http://aphyr.com/data/posts/317/state.gif
     this.setState(state);
-    this.__uiState = uiState;
+    this.setUiState(uiState);
   }
 
   Vis.convertOldState = function (type, oldState) {
@@ -103,7 +104,8 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.clone = function () {
-    return new Vis(this.indexPattern, this.getState(), this.getUiState());
+    const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
+    return new Vis(this.indexPattern, this.getState(), uiJson);
   };
 
   Vis.prototype.requesting = function () {
@@ -130,7 +132,9 @@ export default function VisFactory(Notifier, Private) {
     return !!this.__uiState;
   };
   Vis.prototype.setUiState = function (uiState) {
-    this.__uiState = uiState;
+    if (uiState instanceof PersistedState) {
+      this.__uiState = uiState;
+    }
   };
   Vis.prototype.getUiState = function () {
     return this.__uiState;
