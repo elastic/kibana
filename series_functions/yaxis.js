@@ -38,7 +38,7 @@ module.exports = new Chainable('yaxis', {
 
       var yaxes = eachSeries._global.yaxes = eachSeries._global.yaxes || [];
       var myAxis = yaxes[yaxis - 1] = yaxes[yaxis - 1] || {};
-      myAxis.position = position;
+      myAxis.position = position || (yaxis % 2 ? 'left' : 'right');
       myAxis.min = min == null ? 0 : min;
       myAxis.max = max;
 
