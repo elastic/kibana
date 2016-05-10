@@ -5,6 +5,10 @@ import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 const module = uiModules.get('kibana/config');
 
+uiRoutes.addSetupWork(config => {
+  config.init();
+});
+
 // service for delivering config variables to everywhere else
 module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   const config = this;
@@ -12,8 +16,7 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   const { defaults, user: initialUserSettings } = uiSettings;
   let settings = mergeSettings(defaults, initialUserSettings);
 
-  $rootScope.$broadcast(`init:config`);
-
+  config.init = once(() => $rootScope.$broadcast(`init:config`));
   config.getAll = () => cloneDeep(settings);
   config.get = key => getCurrentValue(key);
   config.set = (key, val) => change(key, isPlainObject(val) ? angular.toJson(val) : val);
