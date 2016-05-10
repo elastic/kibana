@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "@bigfunger/decompress-zip": "0.2.0-stripfix2",
+    "@elastic/datemath": "2.2.0",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -189,6 +190,7 @@
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
+    "source-map-support": "0.4.0",
     "supertest-as-promised": "2.0.2"
   },
   "engines": {

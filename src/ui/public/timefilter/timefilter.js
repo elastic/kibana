@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 import 'ui/state_management/global_state';
 import 'ui/config';
 import EventsProvider from 'ui/events';
@@ -19,10 +19,8 @@ uiRoutes
 uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
-
   let Events = Private(EventsProvider);
   let diff = Private(UtilsDiffTimePickerValsProvider);
-
 
   function convertISO8601(stringTime) {
     let obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
