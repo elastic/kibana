@@ -2,9 +2,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 describe('config component', function () {
-  let $scope;
   let config;
-  let defaults;
+  let $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
@@ -22,9 +21,10 @@ describe('config component', function () {
   describe('#set', function () {
 
     it('stores a value in the config val set', function () {
-      let initial = config.get('dateFormat');
+      const original = config.get('dateFormat');
       config.set('dateFormat', 'notaformat');
       expect(config.get('dateFormat')).to.be('notaformat');
+      config.set('dateFormat', original);
     });
 
   });
@@ -32,26 +32,27 @@ describe('config component', function () {
   describe('#$bind', function () {
 
     it('binds a config key to a $scope property', function () {
-      let dateFormat = config.get('dateFormat');
+      const dateFormat = config.get('dateFormat');
       config.$bind($scope, 'dateFormat');
       expect($scope).to.have.property('dateFormat', dateFormat);
     });
 
     it('alows overriding the property name', function () {
-      let dateFormat = config.get('dateFormat');
+      const dateFormat = config.get('dateFormat');
       config.$bind($scope, 'dateFormat', 'defaultDateFormat');
       expect($scope).to.not.have.property('dateFormat');
       expect($scope).to.have.property('defaultDateFormat', dateFormat);
     });
 
     it('keeps the property up to date', function () {
-      let dateFormat = config.get('dateFormat');
-      let newDateFormat = dateFormat + ' NEW NEW NEW!';
+      const original = config.get('dateFormat');
+      const newDateFormat = original + ' NEW NEW NEW!';
       config.$bind($scope, 'dateFormat');
 
-      expect($scope).to.have.property('dateFormat', dateFormat);
+      expect($scope).to.have.property('dateFormat', original);
       config.set('dateFormat', newDateFormat);
       expect($scope).to.have.property('dateFormat', newDateFormat);
+      config.set('dateFormat', original);
 
     });
 
