@@ -44,3 +44,5 @@ error messages.
 information and all requests.
 `ops.interval`:: *Default: 10000* Set the interval in milliseconds to sample system and process performance metrics. 
 The minimum value is 100.
+`statusPage.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` removes the
+requirement to be authenticated to view the Kibana server status page.
