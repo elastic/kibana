@@ -1,0 +1,395 @@
+{
+  "order": 0,
+  "template": "names",
+  "settings": {},
+  "mappings": {
+    "_default_": {
+      "dynamic_templates": [
+        {
+          "string_fields": {
+            "mapping": {
+              "type": "text",
+              "fields": {
+                "raw": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              }
+            },
+            "match_mapping_type": "string",
+            "match": "*"
+          }
+        }
+      ],
+      "properties": {
+        "Company": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "MoneyGramMTCN": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "CountryFull": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "NationalID": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "foo": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Kilograms": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "GivenName": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Birthday": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Latitude": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "Gender": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "TelephoneNumber": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Vehicle": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "CVV2": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "Pounds": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "Centimeters": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "MiddleInitial": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Number": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "CCType": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "UPS": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "TropicalZodiac": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "TelephoneCountryCode": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "Age": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "Password": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "ZipCode": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "CCNumber": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "Color": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "GUID": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Title": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "WesternUnionMTCN": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "FeetInches": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "City": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "NameSet": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Longitude": {
+          "index": true,
+          "type": "double",
+          "doc_values": true
+        },
+        "EmailAddress": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "MothersMaiden": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Occupation": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "StreetAddress": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "CCExpires": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "BrowserUserAgent": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Username": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "State": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "StateFull": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Country": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Domain": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "Surname": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "BloodType": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  },
+  "aliases": {}
+}
