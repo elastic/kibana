@@ -64,6 +64,10 @@ module.exports = function (kibana) {
         flotStack$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.stack'),
           imports: 'flot'
+        },
+        flotAxisLabels$: {
+          path: path.resolve(__dirname, 'vendor_components/flot/jquery.flot.axislabels'),
+          imports: 'flot'
         }
       }
     },

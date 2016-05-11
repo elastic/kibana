@@ -10,6 +10,8 @@ require('flotCanvas');
 require('flotSelection');
 require('flotSymbol');
 require('flotStack');
+require('flotAxisLabels');
+
 
 require('./observe_resize');
 
@@ -224,7 +226,11 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
           }
 
           if (series._global) {
-            _.merge(options, series._global);
+            _.merge(options, series._global, function (objVal, srcVal) {
+              // This is kind of gross, it means that you can't replace a global value with a null
+              // best you can do is an empty string. Deal with it.
+              if (objVal == null) return srcVal;
+            });
           }
 
           return series;

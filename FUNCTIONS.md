@@ -266,4 +266,6 @@ yaxis | *number* | The numbered y-axis to plot this series on, eg .yaxis(2) for 
 min | *number* | Min value  
 max | *number* | Max value  
 position | *string* | left or right  
+label | *string* | Label for axis  
+color | *string* | Color of axis label  
 
