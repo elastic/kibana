@@ -121,8 +121,8 @@ define(function (require) {
       });
 
       bdd.describe('optional parameters', function () {
-        bdd.it('should accept a custom delimiter query string param for parsing the CSV', function () {
-          return request.post('/kibana/names/_data?delimiter=|')
+        bdd.it('should accept a custom csv_delimiter query string param for parsing the CSV', function () {
+          return request.post('/kibana/names/_data?csv_delimiter=|')
           .attach('csv', 'test/unit/fixtures/fake_names_pipe_delimited.csv')
           .expect(200)
           .then((dataResponse) => {

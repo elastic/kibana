@@ -22,7 +22,7 @@ export function registerData(server) {
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       const indexPattern = req.params.id;
       const usePipeline = req.query.pipeline === 'true';
-      const delimiter = _.get(req.query, 'delimiter', ',');
+      const delimiter = _.get(req.query, 'csv_delimiter', ',');
       const responseStream = new PassThrough();
       const parser = parse({
         columns: true,
