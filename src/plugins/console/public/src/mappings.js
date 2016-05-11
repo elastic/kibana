@@ -279,8 +279,6 @@ function autocomplete_retriever() {
   }, 60000);
 }
 
-es.addServerChangeListener(retrieveAutocompleteInfoFromServer);
-
 module.exports = _.assign(mappingObj, {
   getFields: getFields,
   getIndices: getIndices,
