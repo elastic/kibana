@@ -27,7 +27,8 @@ export function registerData(server) {
       const parser = parse({
         columns: true,
         auto_parse: true,
-        delimiter: delimiter
+        delimiter: delimiter,
+        skip_empty_lines: true
       });
 
       const csv = req.payload.csv ? req.payload.csv : req.payload;
