@@ -81,7 +81,7 @@ function restartNotifTimer(notif, cb) {
   startNotifTimer(notif, cb);
 }
 
-Notifier.prototype.add = function (notif, cb) {
+function add(notif, cb) {
   _.set(notif, 'info.version', version);
   _.set(notif, 'info.buildNum', buildNum);
 
@@ -117,7 +117,9 @@ Notifier.prototype.add = function (notif, cb) {
   notif.stacks = [notif.stack];
   notifs.push(notif);
   return notif;
-};
+}
+
+Notifier.prototype.add = add;
 
 function formatInfo() {
   let info = [];
@@ -271,7 +273,7 @@ Notifier.prototype._showFatal = function (err) {
  * @param  {Error|String} err
  */
 Notifier.prototype.error = function (err, cb) {
-  return this.add({
+  return add({
     type: 'danger',
     content: formatMsg(err, this.from),
     icon: 'warning',
@@ -288,7 +290,7 @@ Notifier.prototype.error = function (err, cb) {
  * @return {[type]}     [description]
  */
 Notifier.prototype.warning = function (msg, cb) {
-  return this.add({
+  return add({
     type: 'warning',
     content: formatMsg(msg, this.from),
     icon: 'warning',
@@ -304,7 +306,7 @@ Notifier.prototype.warning = function (msg, cb) {
  * @return {[type]}     [description]
  */
 Notifier.prototype.info = function (msg, cb) {
-  return this.add({
+  return add({
     type: 'info',
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
