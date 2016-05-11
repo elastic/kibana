@@ -35,6 +35,7 @@ module.exports = function (kibana) {
 
   return new kibana.Plugin({
     id: 'console',
+    require: [ 'elasticsearch' ],
 
     config: function (Joi) {
       return Joi.object({
