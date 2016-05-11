@@ -54,14 +54,15 @@ module.service(`config`, function (Private, $rootScope, $http, chrome, uiSetting
 
   function change(key, value) {
     const oldVal = key in settings ? settings[key].userValue : undefined;
-    const unchanged = oldVal === value;
+    const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
+    const unchanged = oldVal === newVal;
     if (unchanged) {
       return Promise.resolve();
     }
     const initialVal = config.get(key);
-    localUpdate(key, value);
+    localUpdate(key, newVal);
 
-    return delayedUpdate(key, value)
+    return delayedUpdate(key, newVal)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
       })
