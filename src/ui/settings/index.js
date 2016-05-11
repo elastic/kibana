@@ -7,6 +7,7 @@ export default function setupSettings(kbnServer, server, config) {
     getDefaults,
     getUserProvided,
     set,
+    setMany,
     remove
   };
 
@@ -31,19 +32,19 @@ export default function setupSettings(kbnServer, server, config) {
       .then(user => hydrateUserSettings(user));
   }
 
-  function set(key, value) {
+  function setMany(changes) {
     const { client } = server.plugins.elasticsearch;
     const clientSettings = getClientSettings(config);
     return client
       .update({
         ...clientSettings,
-        body: {
-          doc: {
-            [key]: value
-          }
-        }
+        body: { doc: changes }
       })
       .then(() => ({}));
+  }
+
+  function set(key, value) {
+    return setMany({ [key]: value });
   }
 
   function remove(key) {

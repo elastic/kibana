@@ -3,6 +3,7 @@ import { once, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
+import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
 
 uiRoutes.addSetupWork(config => {
@@ -10,10 +11,11 @@ uiRoutes.addSetupWork(config => {
 });
 
 // service for delivering config variables to everywhere else
-module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
+module.service(`config`, function (Private, $rootScope, $http, chrome, uiSettings) {
   const config = this;
   const notify = new Notifier({ location: `Config` });
   const { defaults, user: initialUserSettings } = uiSettings;
+  const delayedUpdate = Private(ConfigDelayedUpdaterProvider);
   let settings = mergeSettings(defaults, initialUserSettings);
 
   config.init = once(() => $rootScope.$broadcast(`init:config`));
@@ -51,49 +53,52 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   };
 
   function change(key, value) {
+    const oldVal = key in settings ? settings[key].userValue : undefined;
+    const unchanged = oldVal === value;
+    if (unchanged) {
+      return Promise.resolve();
+    }
     const initialVal = config.get(key);
-    const persistentUpdate = value === null ? remove : edit;
-    localUpdate(value);
+    localUpdate(key, value);
 
-    return Promise
-      .resolve()
-      .then(() => persistentUpdate(key, value))
-      .then(res => res.data.settings)
+    return delayedUpdate(key, value)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
       })
       .catch(reason => {
-        localUpdate(initialVal);
+        localUpdate(key, initialVal);
         notify.error(reason);
       });
+  }
 
-    function localUpdate(newVal) {
-      const oldVal = config.get(key);
-      patch(newVal);
-      advertise(oldVal);
+  function localUpdate(key, newVal) {
+    const oldVal = config.get(key);
+    patch(key, newVal);
+    advertise(key, oldVal);
+  }
+
+  function patch(key, value) {
+    if (!(key in settings)) {
+      settings[key] = {};
     }
-    function patch(value) {
-      if (!(key in settings)) {
-        settings[key] = {};
-      }
+    if (value === null) {
+      delete settings[key].userValue;
+    } else {
       settings[key].userValue = value;
     }
-    function advertise(oldVal) {
-      const newVal = config.get(key);
-      notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
-      $rootScope.$broadcast(`change:config`, settings);
-      $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal);
-    }
   }
-  function remove(key) {
-    return $http.delete(chrome.addBasePath(`/api/kibana/settings/${key}`));
+
+  function advertise(key, oldVal) {
+    const newVal = config.get(key);
+    notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
+    $rootScope.$broadcast(`change:config`, settings);
+    $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal);
   }
-  function edit(key, value) {
-    return $http.post(chrome.addBasePath(`/api/kibana/settings/${key}`), { value });
-  }
+
   function nullOrEmpty(value) {
     return value === undefined || value === null;
   }
+
   function getCurrentValue(key) {
     if (!(key in settings)) {
       return null;
@@ -107,6 +112,6 @@ module.service(`config`, function ($rootScope, $http, chrome, uiSettings) {
   }
 });
 
-function mergeSettings(defaults, extended) {
+function mergeSettings(extended, defaults) {
   return defaultsDeep(extended, defaults);
 }

@@ -26,10 +26,10 @@ uiModules.get('apps/settings')
       const loading = function (conf, fn) {
         conf.loading = true;
         fn()
-        .finally(function () {
-          conf.loading = conf.editing = false;
-        })
-        .catch(notify.fatal);
+          .then(function () {
+            conf.loading = conf.editing = false;
+          })
+          .catch(notify.fatal);
       };
 
       $scope.maybeCancel = function ($event, conf) {
