@@ -22,11 +22,7 @@ uiModules
           if (!('draggableItemCtrl' in itemScope)) {
             return; // only [draggable-item] is draggable
           }
-          const $handle = $(handle);
-          const $anywhereInParentChain = $handle.parents().addBack();
-          const scope = $handle.scope();
-          const movable = !scope.dragHandles || scope.dragHandles.is($anywhereInParentChain);
-          return movable;
+          return itemScope.draggableItemCtrl.moves(handle);
         }
       });
 
