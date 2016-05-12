@@ -8,7 +8,6 @@ uiModules
     restrict: 'A',
     require: '^draggableContainer',
     scope: true,
-    bindToController: true,
     controllerAs: 'draggableItemCtrl',
     controller($scope, $attrs, $parse) {
       const dragHandles = $();
@@ -26,6 +25,8 @@ uiModules
         const movable = dragHandles.is($anywhereInParentChain);
         return movable;
       };
+    },
+    link($scope, $el, attr) {
     }
   };
 });
