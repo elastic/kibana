@@ -76,12 +76,6 @@ describe('draggable_* directives', function () {
       expect($scope.drake.canMove(item[0])).to.eql(false);
     });
 
-    it('should be able to move [draggable-item] children', function () {
-      const { $scope, $elem } = init(`<div draggable-item="items[0]"></div>`);
-      const item = $elem.find(`[draggable-item]`);
-      expect($scope.drake.canMove(item[0])).to.eql(true);
-    });
-
     it('shouldn\'t be able to move [draggable-item] if it has a handle', function () {
       const { $scope, $elem } = init(`
         <div draggable-item="items[0]">
