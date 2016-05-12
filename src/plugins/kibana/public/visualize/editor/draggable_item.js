@@ -17,9 +17,6 @@ uiModules
         dragHandles.push(...$el);
       };
       this.moves = handle => {
-        if (dragHandles.length === 0) {
-          return true;
-        }
         const $handle = $(handle);
         const $anywhereInParentChain = $handle.parents().addBack();
         const movable = dragHandles.is($anywhereInParentChain);
