@@ -101,33 +101,25 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
             if ($scope.from.toString().split('/')[1]) $scope.relative.from.round = true;
             if ($scope.to.toString().split('/')[1]) $scope.relative.to.round = true;
 
-            var i;
+            function setAs(unit, duration, scope) {
+              var as = duration.as(unit);
 
-            for (i = 0; i < unitsTo.length; i++) {
-              var asTo = durationTo.as(unitsTo[i]);
-
-              if (asTo > 1) {
-                $scope.relative.to.count = Math.round(asTo);
-                $scope.relative.to.unit = unitsTo[i];
-                break;
+              if (as > 1) {
+                scope.count = Math.round(as);
+                scope.unit = unit;
+                return true;
               }
+              return false;
             }
 
-            for (i = 0; i < unitsFrom.length; i++) {
-              var asFrom = durationFrom.as(unitsFrom[i]);
-
-              if (asFrom > 1) {
-                $scope.relative.from.count = Math.round(asFrom);
-                $scope.relative.from.unit = unitsFrom[i];
-                break;
-              }
-            }
+            unitsTo.some(function (unit) {return setAs(unit, durationTo, $scope.relative.to);});
+            unitsFrom.some(function (unit) {return setAs(unit, durationFrom, $scope.relative.from);});
 
             if ($scope.from.toString().split('/')[1]) $scope.relative.from.round = true;
             if ($scope.to.toString().split('/')[1]) $scope.relative.to.round = true;
 
-            $scope.formatRelativeFrom();
-            $scope.formatRelativeTo();
+            $scope.formatRelative('from');
+            $scope.formatRelative('to');
 
             break;
           case 'absolute':
@@ -148,32 +140,27 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
         $scope.absolute.to = moment();
       };
 
-      $scope.formatRelativeFrom = function () {
-        var parsed = dateMath.parse(getRelativeFromString());
-        $scope.relative.from.preview = parsed ? parsed.format($scope.format) : undefined;
-        return parsed;
-      };
-
-      $scope.formatRelativeTo = function () {
-        var parsed = dateMath.parse(getRelativeToString());
-        $scope.relative.to.preview = parsed ? parsed.format($scope.format) : undefined;
+      $scope.formatRelative = function (reference) {
+        var parsed = dateMath.parse(getRelativeString(reference));
+        $scope.relative[reference].preview = parsed ? parsed.format($scope.format) : undefined;
         return parsed;
       };
 
       $scope.applyRelative = function () {
-        $scope.from = getRelativeFromString();
-        $scope.to = getRelativeToString();
+        $scope.from = getRelativeString('from');
+        $scope.to = getRelativeString('to');
       };
 
-      function getRelativeFromString() {
-        return 'now-' + $scope.relative.from.count + $scope.relative.from.unit + (
-            $scope.relative.from.round ? '/' + $scope.relative.from.unit : '');
+      function getRelativeString(reference) {
+        var modifier = '+';
+
+        if (reference === 'from') {
+          modifier = '-';
+        }
+
+        return 'now' + modifier + $scope.relative[reference].count + $scope.relative[reference].unit + (
+            $scope.relative[reference].round ? '/' + $scope.relative[reference].unit : '');
       }
-
-      function getRelativeToString() {
-        return 'now+' + $scope.relative.to.count + $scope.relative.to.unit + (
-            $scope.relative.to.round ? '/' + $scope.relative.to.unit : '');
-      };
 
       $scope.applyAbsolute = function () {
         $scope.from = moment($scope.absolute.from);
