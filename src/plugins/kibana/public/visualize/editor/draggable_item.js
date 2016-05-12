@@ -11,14 +11,11 @@ uiModules
     bindToController: true,
     controllerAs: 'draggableItemCtrl',
     controller($scope, $attrs, $parse) {
-      this.dragHandles = this.dragHandles || $();
       this.getItem = () => $parse($attrs.draggableItem)($scope);
       this.registerHandle = $el => {
+        this.dragHandles = this.dragHandles || $();
         this.dragHandles.push(...$el);
       };
-    },
-    link($scope, $el, attr, ctrl) {
-      $scope.dragHandles = $();
     }
   };
 });

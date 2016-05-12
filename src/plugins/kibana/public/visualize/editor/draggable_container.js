@@ -25,7 +25,7 @@ uiModules
           const $handle = $(handle);
           const $anywhereInParentChain = $handle.parents().addBack();
           const scope = $handle.scope();
-          const movable = scope.dragHandles.length === 0 || scope.dragHandles.is($anywhereInParentChain);
+          const movable = !scope.dragHandles || scope.dragHandles.is($anywhereInParentChain);
           return movable;
         }
       });
