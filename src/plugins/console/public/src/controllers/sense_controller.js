@@ -32,13 +32,4 @@ module.controller('SenseController', function SenseController($scope, docTitle) 
     event.preventDefault();
     input.focus();
   };
-
-  this.serverUrl = es.getBaseUrl();
-
-  // read server url changes into scope
-  es.addServerChangeListener((server) => {
-    $scope.$evalAsync(() => {
-      this.serverUrl = server;
-    });
-  });
 });
