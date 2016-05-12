@@ -67,10 +67,11 @@ describe('draggable_* directives', function () {
     it('shouldn\'t be able to move extraneous [draggable-item] elements', function () {
       const anotherParent = angular.element(`<div draggable-container="items">`);
       const item = angular.element(`<div draggable-item="items[0]">`);
+      const scope = $rootScope.$new();
       anotherParent.append(item);
-      $compile(anotherParent)($rootScope);
-      $compile(item)($rootScope);
-      $rootScope.$apply();
+      $compile(anotherParent)(scope);
+      $compile(item)(scope);
+      scope.$apply();
       const { $scope } = init();
       expect($scope.drake.canMove(item[0])).to.eql(false);
     });
@@ -102,12 +103,13 @@ describe('draggable_* directives', function () {
     });
   });
 
-  describe('draggable_items', function () {
+  describe('draggable_item', function () {
     it('should be required to be a child to [draggable-container]', function () {
       const item = angular.element(`<div draggable-item="items[0]">`);
+      const scope = $rootScope.$new();
       expect(() => {
-        $compile(item)($rootScope);
-        $rootScope.$apply();
+        $compile(item)(scope);
+        scope.$apply();
       }).to.throwException(/controller(.+)draggableContainer(.+)required/i);
     });
   });
@@ -115,9 +117,10 @@ describe('draggable_* directives', function () {
   describe('draggable_handle', function () {
     it('should be required to be a child to [draggable-item]', function () {
       const handle = angular.element(`<div draggable-handle>`);
+      const scope = $rootScope.$new();
       expect(() => {
-        $compile(handle)($rootScope);
-        $rootScope.$apply();
+        $compile(handle)(scope);
+        scope.$apply();
       }).to.throwException(/controller(.+)draggableItem(.+)required/i);
     });
   });
