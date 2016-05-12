@@ -1,10 +1,15 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Join extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'join', 'Join');
-    this.sourceField = '';
-    this.separator = '';
+    _.assign(this,
+      {
+        sourceField: '',
+        separator: ''
+      },
+      _.pick(oldProcessor, ['sourceField', 'separator']));
   }
 
   get description() {

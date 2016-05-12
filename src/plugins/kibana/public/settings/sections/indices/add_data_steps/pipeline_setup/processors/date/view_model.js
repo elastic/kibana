@@ -1,14 +1,19 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Date extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'date', 'Date');
-    this.sourceField = '';
-    this.targetField = '@timestamp';
-    this.formats = [];
-    this.timezone = 'Etc/UTC';
-    this.locale = 'ENGLISH';
-    this.customFormat = '';
+    _.assign(this,
+      {
+        sourceField: '',
+        targetField: '@timestamp',
+        formats: [],
+        timezone: 'Etc/UTC',
+        locale: 'ENGLISH',
+        customFormat: ''
+      },
+      _.pick(oldProcessor, ['sourceField', 'targetField', 'formats', 'timezone', 'locale', 'customFormat']));
   }
 
   get description() {

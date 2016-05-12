@@ -3,10 +3,14 @@ import keysDeep from '../../lib/keys_deep';
 import Processor from '../base/view_model';
 
 export class Grok extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'grok', 'Grok');
-    this.sourceField = '';
-    this.pattern = '';
+    _.assign(this,
+      {
+        sourceField: '',
+        pattern: ''
+      },
+      _.pick(oldProcessor, ['sourceField', 'pattern']));
   }
 
   get description() {

@@ -1,9 +1,14 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Trim extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'trim', 'Trim');
-    this.sourceField = '';
+    _.assign(this,
+      {
+        sourceField: ''
+      },
+      _.pick(oldProcessor, ['sourceField']));
   }
 
   get description() {

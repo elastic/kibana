@@ -109,20 +109,19 @@ export default class Pipeline {
     processors[index] = temp;
   }
 
-  addExisting(existingProcessor) {
-    const Type = existingProcessor.constructor;
-    const newProcessor = this.add(Type);
-    _.assign(newProcessor, _.omit(existingProcessor, 'processorId'));
+  addExisting(oldProcessor) {
+    const Type = oldProcessor.constructor;
+    const newProcessor = this.add(Type, oldProcessor);
 
     return newProcessor;
   }
 
-  add(ProcessorType) {
+  add(ProcessorType, oldProcessor) {
     const processors = this.processors;
 
     this.processorCounter += 1;
     const processorId = `processor_${this.processorCounter}`;
-    const newProcessor = new ProcessorType(processorId);
+    const newProcessor = new ProcessorType(processorId, oldProcessor);
     processors.push(newProcessor);
 
     return newProcessor;

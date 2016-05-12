@@ -2,11 +2,15 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Convert extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'convert', 'Convert');
-    this.sourceField = '';
-    this.targetField = '';
-    this.type = 'auto';
+    _.assign(this,
+      {
+        sourceField: '',
+        targetField: '',
+        type: 'auto'
+      },
+      _.pick(oldProcessor, ['sourceField', 'targetField', 'type']));
   }
 
   get description() {
