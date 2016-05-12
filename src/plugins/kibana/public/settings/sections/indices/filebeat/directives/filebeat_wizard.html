@@ -3,30 +3,57 @@
       <span ng-class="{active: wizard.currentStep === 0}"
             class="wizard-step-heading"
             ng-click="wizard.setCurrentStep(0)">
-        1. Paste
+        1. New/Edit
       </span>
       <span ng-class="{active: wizard.currentStep === 1, aheadActive: wizard.currentStep < 1}"
             class="wizard-step-heading"
-            ng-click="wizard.currentStep < 1 || wizard.setCurrentStep(1)">
-        2. Parse
+            ng-click="wizard.setCurrentStep(1)">
+        2. Paste
       </span>
       <span ng-class="{active: wizard.currentStep === 2, aheadActive: wizard.currentStep < 2}"
             class="wizard-step-heading"
             ng-click="wizard.currentStep < 2 || wizard.setCurrentStep(2)">
-        3. Review
+        3. Parse
       </span>
       <span ng-class="{active: wizard.currentStep === 3, aheadActive: wizard.currentStep < 3}"
             class="wizard-step-heading"
             ng-click="wizard.currentStep < 3 || wizard.setCurrentStep(3)">
-        4. Install Filebeat
+        4. Review
+      </span>
+      <span ng-class="{active: wizard.currentStep === 4, aheadActive: wizard.currentStep < 4}"
+            class="wizard-step-heading"
+            ng-click="wizard.currentStep < 4 || wizard.setCurrentStep(4)">
+        5. Install Filebeat
       </span>
   </div>
 
   <div ng-switch="wizard.currentStep">
     <div ng-switch-when="0">
-      <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
+      <select-pipeline pipeline="wizard.stepResults.pipeline"></select-pipeline>
       <div class="wizard-nav-buttons">
         <div></div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-disabled="!wizard.stepResults.pipeline"
+            ng-click="wizard.nextStep()">
+            Next
+          </button>
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <div ng-switch-when="1">
+      <paste-samples-step samples="wizard.stepResults.samples" raw-samples="wizard.stepResults.rawSamples"></paste-samples-step>
+      <div class="wizard-nav-buttons">
+        <div>
+          <button
+            class="btn btn-secondary"
+            ng-click="wizard.prevStep()">
+            Prev
+          </button>
+        </div>
         <div>
           <button
             class="btn btn-primary"
@@ -39,7 +66,7 @@
       </div>
     </div>
 
-    <div ng-switch-when="1">
+    <div ng-switch-when="2">
       <pipeline-setup
         pipeline="wizard.stepResults.pipeline"
         samples="wizard.stepResults.samples">
@@ -64,7 +91,7 @@
       </div>
     </div>
 
-    <div ng-switch-when="2">
+    <div ng-switch-when="3">
       <pattern-review-step
         index-pattern="wizard.stepResults.indexPattern"
         pipeline="wizard.stepResults.pipeline"
@@ -91,7 +118,7 @@
       </div>
     </div>
 
-    <div ng-switch-when="3">
+    <div ng-switch-when="4">
       <install-filebeat-step results="wizard.stepResults"></install-filebeat-step>
 
       <div class="wizard-nav-buttons">

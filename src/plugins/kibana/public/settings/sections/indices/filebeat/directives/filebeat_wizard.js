@@ -4,6 +4,7 @@ import IngestProvider from 'ui/ingest';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup';
+import 'plugins/kibana/settings/sections/indices/add_data_steps/select_pipeline';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step';
 import '../../styles/_add_data_wizard.less';
 
@@ -24,7 +25,7 @@ modules.get('apps/settings')
         location: 'Add Data'
       });
 
-      var totalSteps = 4;
+      var totalSteps = 5;
       this.stepResults = {};
 
       this.setCurrentStep = (step) => {
@@ -77,10 +78,10 @@ modules.get('apps/settings')
           return safeConfirm('Going back will reset any changes you\'ve made to this step, do you want to continue?')
             .then(
               () => {
-                if ($state.currentStep < 1) {
+                if ($state.currentStep < 2) {
                   delete this.stepResults.pipeline;
                 }
-                if ($state.currentStep < 2) {
+                if ($state.currentStep < 3) {
                   delete this.stepResults.indexPattern;
                 }
                 this.currentStep = newValue;
