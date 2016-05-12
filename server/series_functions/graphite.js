@@ -28,7 +28,9 @@ module.exports = new Datasource ('graphite', {
       '&until=' + time.max +
       '&target=' + config.metric;
 
-    return fetch(URL).then(function (resp) { return resp.json(); }).then(function (resp) {
+    return fetch(URL).then(function (resp) {
+      return resp.json();
+    }).then(function (resp) {
       var list = _.map(resp, function (series) {
         var data = _.map(series.datapoints, function (point) {
           return [point[1] * 1000, point[0]];
@@ -40,6 +42,7 @@ module.exports = new Datasource ('graphite', {
           label: series.target
         };
       });
+
       return {
         type: 'seriesList',
         list: list
