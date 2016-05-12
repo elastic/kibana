@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import * as ingestProcessorApiKibanaToEsConverters from '../processors/converters';
+import * as ingestProcessorApiKibanaToEsConverters from '../processors/kibana_to_es_converters';
 
 export default function ingestPipelineApiKibanaToEsConverter(pipelineApiDocument) {
   return {

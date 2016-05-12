@@ -10,24 +10,9 @@ import './source_data';
 import './processor_ui_container';
 import '../processors';
 import pipelineSetupTemplate from '../views/pipeline_setup.html';
+import buildProcessorTypeArray from '../lib/build_processor_type_array';
 
 const app = uiModules.get('kibana');
-
-function buildProcessorTypeList(enabledProcessorTypeIds) {
-  return _(ProcessorTypes)
-    .map(Type => {
-      const instance = new Type();
-      return {
-        typeId: instance.typeId,
-        title: instance.title,
-        Type
-      };
-    })
-    .compact()
-    .filter((processorType) => enabledProcessorTypeIds.includes(processorType.typeId))
-    .sortBy('title')
-    .value();
-}
 
 app.directive('pipelineSetup', function () {
   return {
@@ -45,7 +30,10 @@ app.directive('pipelineSetup', function () {
       //determines which processors are available on the cluster
       ingest.getProcessors()
       .then((enabledProcessorTypeIds) => {
-        $scope.processorTypes = buildProcessorTypeList(enabledProcessorTypeIds);
+        $scope.processorTypes = _(buildProcessorTypeArray(ProcessorTypes))
+          .filter((processorType) => enabledProcessorTypeIds.includes(processorType.typeId))
+          .sortBy('title')
+          .value();
       })
       .catch(notify.error);
 
