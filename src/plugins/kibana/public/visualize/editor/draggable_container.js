@@ -25,7 +25,7 @@ uiModules
           const $handle = $(handle);
           const $anywhereInParentChain = $handle.parents().addBack();
           const scope = $handle.scope();
-          const movable = scope.dragHandles.is($anywhereInParentChain);
+          const movable = scope.dragHandles.length === 0 || scope.dragHandles.is($anywhereInParentChain);
           return movable;
         }
       });
@@ -53,6 +53,7 @@ uiModules
       drake.on('dragend', markDragging(false));
       drake.on('drop', drop);
       $scope.$on('$destroy', drake.destroy);
+      $scope.drake = drake;
 
       function markDragging(isDragging) {
         return el => {

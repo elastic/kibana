@@ -11,5 +11,4 @@ uiModules
       $el.addClass('gu-handle');
     }
   };
-
 });
