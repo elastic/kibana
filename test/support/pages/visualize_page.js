@@ -226,11 +226,14 @@ export default (function () {
     },
 
     selectField: function selectField(fieldValue) {
-      return this.remote
-      .setFindTimeout(defaultFindTimeout)
-      // the css below should be more selective
-      .findByCssSelector('option[label="' + fieldValue + '"]')
-      .click();
+      var self = this;
+      return common.try(function () {
+        return self.remote
+        .setFindTimeout(defaultFindTimeout)
+        // the css below should be more selective
+        .findByCssSelector('option[label="' + fieldValue + '"]')
+        .click();
+      });
     },
 
     orderBy: function orderBy(fieldValue) {
@@ -341,10 +344,12 @@ export default (function () {
       var self = this;
       common.debug('clickVisualizationByLinkText(' + vizName + ')');
 
-      return this.remote
+      return common.try(function () {
+        return self.remote
         .setFindTimeout(defaultFindTimeout)
         .findByLinkText(vizName)
         .click();
+      });
     },
 
     // this starts by clicking the Load Saved Viz button, not from the
