@@ -1,1 +1,1 @@
-require('../src/ui/public/string_resources/index');
+require('ui/string_resources/index');

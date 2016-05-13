@@ -32,7 +32,7 @@
             class="btn btn-primary"
             ng-disabled="!wizard.stepResults.samples"
             ng-click="wizard.nextStep()">
-            Next
+            {{'commonButtons.next' | resource}}
           </button>
         </div>
         <div></div>
@@ -50,14 +50,14 @@
           <button
             class="btn btn-secondary"
             ng-click="wizard.prevStep()">
-            Prev
+            {{'commonButtons.previous' | resource}}
           </button>
         </div>
         <div>
           <button
             class="btn btn-primary"
             ng-click="wizard.nextStep()">
-            Next
+            {{'commonButtons.next' | resource}}
           </button>
         </div>
         <div></div>
@@ -76,15 +76,15 @@
           <button
             class="btn btn-secondary"
             ng-click="wizard.prevStep()">
-            Prev
+            {{'commonButtons.previous' | resource}}
           </button>
         </div>
         <div>
           <button
             class="btn btn-primary"
             ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
-                ng-click="wizard.save()">
-          Save
+            ng-click="wizard.save()">
+            {{'commonButtons.save' | resource}}
           </button>
         </div>
         <div></div>
@@ -100,7 +100,7 @@
           <button
             class="btn btn-primary"
             ng-click="wizard.nextStep()">
-            Done
+            {{'commonButtons.done' | resource}}
           </button>
         </div>
         <div></div>

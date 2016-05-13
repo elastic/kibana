@@ -6,6 +6,7 @@ import 'plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_st
 import 'plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step';
 import '../../styles/_add_data_wizard.less';
+import 'string-resources';
 
 // wrapper directive, which sets up the breadcrumb for all filebeat steps
 modules.get('apps/settings')
