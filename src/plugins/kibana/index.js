@@ -19,14 +19,13 @@ module.exports = function (kibana) {
         title: 'Kibana',
         listed: false,
         description: 'the kibana you know and love',
-        //icon: 'plugins/kibana/settings/sections/about/barcode.svg',
         main: 'plugins/kibana/kibana',
         uses: [
           'visTypes',
           'spyModes',
           'fieldFormats',
           'navbarExtensions',
-          'settingsSections',
+          'managementSections',
           'docViews'
         ],
 
@@ -62,9 +61,9 @@ module.exports = function (kibana) {
           icon: 'plugins/kibana/assets/dashboard.svg',
         },
         {
-          title: 'Settings',
+          title: 'Management',
           order: 1000,
-          url: '/app/kibana#/settings',
+          url: '/app/kibana#/management',
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
         }

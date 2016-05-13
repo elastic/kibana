@@ -15,7 +15,7 @@ uiModules
   const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier();
 
-  const services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
+  const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
     return {
       type: service.type,
@@ -79,7 +79,7 @@ uiModules
           const service = _.find(services, { type: type });
           if (!service) return;
 
-          $scope.editUrl = '#settings/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
+          $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
         });
 
       });

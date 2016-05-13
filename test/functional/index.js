@@ -22,7 +22,7 @@ define(function (require) {
       'intern/dojo/node!../support/index',
       'intern/dojo/node!./apps/discover',
       'intern/dojo/node!./status_page',
-      'intern/dojo/node!./apps/settings',
+      'intern/dojo/node!./apps/management',
       'intern/dojo/node!./apps/visualize',
       'intern/dojo/node!./apps/console',
       'intern/dojo/node!./apps/dashboard'
