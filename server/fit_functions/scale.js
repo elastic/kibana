@@ -48,7 +48,10 @@ module.exports = function (dataTuples, targetTuples) {
       if (spreadCount > 0) {
         // Naively distibute the nextRealNumber amoungst the buckets
         // Without considering where it is headed next
-        step = nextRealNumber / spreadCount;
+        // We do spreadCount + 1 so that we include nextRealNumber when we smooth things out,
+        // since we'll overwrite it anyway.
+        // Thus [5, null, null, 30] becomes [5, 10, 10, 10]
+        step = nextRealNumber / (spreadCount + 1);
         while (spreadCount > 0) {
 
           result[i - spreadCount][1] = step;
@@ -68,4 +71,3 @@ module.exports = function (dataTuples, targetTuples) {
 
   return result;
 };
-
