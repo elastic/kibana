@@ -1,3 +1,5 @@
+var moment = require('moment');
+
 module.exports = function () {
   var tlConfig = require('../../../handlers/lib/tl_config.js')({
     server: {},
@@ -5,9 +7,9 @@ module.exports = function () {
   });
 
   tlConfig.time = {
-    interval: '1s',
-    from: 1000,
-    to: 4001
+    interval: '1y',
+    from: moment('1980-01-01T00:00:00Z'),
+    to: moment('1983-01-01T00:00:00Z'),
   };
 
   tlConfig.setTargetSeries();

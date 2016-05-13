@@ -2,7 +2,8 @@ const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
 const _ = require('lodash');
-const expect = require('chai').expect;
+const assert = require('chai');
+const expect = assert.expect;
 const invoke = require('./helpers/invoke_series_fn.js');
 
 describe(filename, () => {
@@ -53,8 +54,10 @@ describe(filename, () => {
     });
 
     it('does not allow undefined symbols', () => {
-      return invoke(fn, [seriesList, null, null, null, null, 'beer']).catch((e) => {
-        expect(e).to.be.an(Error);
+      return invoke(fn, [seriesList, null, null, null, null, 'beer'])
+      .then(expect.fail)
+      .catch((e) => {
+        expect(e).to.be.an('error');
       });
     });
   });

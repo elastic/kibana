@@ -1,9 +1,10 @@
 // invokes a series_function with the specified arguments
 var _ = require('lodash');
-var tlConfig = require('../fixtures/tlConfig')();
 var indexArguments = require('../../../handlers/lib/index_arguments');
 
-module.exports = function invokeSeriesFn(fnDef, args) {
+module.exports = function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
+  var tlConfig = _.merge(require('../fixtures/tlConfig')(), tlConfigOverrides);
+
   return Promise.all(args).then(function (args) {
     args.byName = indexArguments(fnDef, args);
 
@@ -16,8 +17,6 @@ module.exports = function invokeSeriesFn(fnDef, args) {
         input: input
       };
       return result;
-    }).catch(function (err) {
-      return err;
     });
   });
 };

@@ -3,19 +3,19 @@ var moment = require('moment');
 var splitInterval = require('./split_interval.js');
 
 module.exports = function (tlConfig) {
-  var min = tlConfig.time.from;
-  var max = tlConfig.time.to;
+  var min = moment(tlConfig.time.from);
+  var max = moment(tlConfig.time.to);
 
   var intervalParts = splitInterval(tlConfig.time.interval);
 
-  var current = moment(min).startOf(intervalParts.unit).valueOf();
+  var current = min.startOf(intervalParts.unit);
+
   var targetSeries = [];
 
-  while (current < max) {
-    targetSeries.push(current);
-    current = moment(current).add(intervalParts.count, intervalParts.unit).valueOf();
+  while (current.valueOf() < max.valueOf()) {
+    targetSeries.push(current.valueOf());
+    current = current.add(intervalParts.count, intervalParts.unit);
   }
 
   return targetSeries;
 };
-

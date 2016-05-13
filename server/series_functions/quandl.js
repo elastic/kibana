@@ -34,17 +34,18 @@ module.exports = new Datasource ('quandl', {
     var config = _.defaults(args.byName, {
       code: 'WIKI/AAPL',
       position: 1,
-      interval: intervalMap[tlConfig.time.interval] || 'daily',
+      interval: intervalMap[tlConfig.time.interval],
       apikey: tlConfig.file.quandl.key
     });
 
     if (!config.interval) {
-      throw 'quandl() unsupported interval: ' + tlConfig.time.interval + '. quandl() supports: ' + _.keys(intervalMap).join(', ');
+      throw new Error('quandl() unsupported interval: ' + tlConfig.time.interval +
+      '. quandl() supports: ' + _.keys(intervalMap).join(', '));
     }
 
     var time = {
-      min: moment(tlConfig.time.from).format('YYYY-MM-DD'),
-      max:  moment(tlConfig.time.to).format('YYYY-MM-DD')
+      min: moment.utc(tlConfig.time.from).format('YYYY-MM-DD'),
+      max:  moment.utc(tlConfig.time.to).format('YYYY-MM-DD')
     };
 
     // POSITIONS
