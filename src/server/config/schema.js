@@ -123,7 +123,7 @@ module.exports = () => Joi.object({
     profile: Joi.boolean().default(false)
   }).default(),
 
-  statusPage: Joi.object({
+  status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default()
 
