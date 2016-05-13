@@ -43,9 +43,9 @@ uiRoutes
       return savedVisualizations.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
         'visualization': '/visualize',
-        'search': '/settings/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern': '/settings/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern-field': '/settings/objects/savedVisualizations/' + $route.current.params.id
+        'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+        'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+        'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
       }));
     }
   }
