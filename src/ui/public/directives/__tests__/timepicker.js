@@ -222,7 +222,7 @@ describe('timepicker directive', function () {
 
     it('has a preview of the "to" input', function (done) {
       let preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.to.preview"]');
-      expect(preview.text()).to.be(moment().add(15, 'minutes').format($scope.format));
+      expect(preview.text()).to.be(moment().add(1, 'minutes').format($scope.format));
       done();
     });
 
@@ -268,7 +268,7 @@ describe('timepicker directive', function () {
       expect(select.find('option').length).to.be(7);
 
       // Check each relative option, make sure it is in the list
-      _.each($scope.relativeOptions, function (unit, i) {
+      _.each($scope.relativeOptions.from, function (unit, i) {
         expect(select.find('option')[i].text).to.be(unit.text);
       });
       done();
@@ -280,7 +280,7 @@ describe('timepicker directive', function () {
       expect(select.find('option').length).to.be(7);
 
       // Check each relative option, make sure it is in the list
-      _.each($scope.relativeOptions, function (unit, i) {
+      _.each($scope.relativeOptions.to, function (unit, i) {
         expect(select.find('option')[i].text).to.be(unit.text);
       });
       done();
