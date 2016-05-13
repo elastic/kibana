@@ -12,7 +12,7 @@ user_remove() {
 REMOVE_USER=false
 
 case $1 in
-
+  # Includes cases for all valid arguments, exit 1 otherwise
   # Debian
   purge)
     REMOVE_USER=true
