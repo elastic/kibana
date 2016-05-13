@@ -10,7 +10,7 @@ module.exports = function (dataTuples, targetTuples) {
   return _.map(targetTuples, function (bucket, h) {
     var time = bucket[0];
 
-    if (dataTuples[0] && time > dataTuples[0][0]) {
+    if (dataTuples[0] && time >= dataTuples[0][0]) {
       currentCarry = dataTuples[0][1];
       dataTuples.shift();
     }
