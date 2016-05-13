@@ -1,5 +1,6 @@
 module.exports = function (grunt) {
   var readline = require('readline');
+  var url = require('url');
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [
@@ -35,16 +36,14 @@ module.exports = function (grunt) {
 
   grunt.registerTask('_release:complete', function () {
     grunt.log.ok('Builds released');
-    grunt.log.write(
-`
-${grunt.config.get('platforms').reduce((t, p) => {
-  return (
-`${t}https://download.elastic.co/kibana/kibana/${p.buildName}.tar.gz
-https://download.elastic.co/kibana/kibana/${p.buildName}.zip
-`
-  );
-}, '')}
-`
-);
+    var links = grunt.config.get('s3.release.upload').reduce((t, {dest}) => {
+      var link = url.format({
+        protocol: 'https',
+        hostname: 'download.elastic.co',
+        pathname: dest
+      });
+      return `${t}${link}\n`;
+    }, '');
+    grunt.log.write(links);
   });
 };
