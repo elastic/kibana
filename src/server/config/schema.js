@@ -110,6 +110,10 @@ module.exports = () => Joi.object({
       )
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false)
+  }).default(),
+
+  statusPage: Joi.object({
+    allowAnonymous: Joi.boolean().default(false)
   }).default()
 
 }).default();
