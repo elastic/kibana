@@ -19,7 +19,14 @@
 
   <div class="form-group">
     <label>Type</label>
+    <select
+      ng-if="editor.field.scripted"
+      ng-model="editor.field.type"
+      ng-options="type as type for type in ['number', 'string']"
+      class="form-control">
+    </select>
     <input
+      ng-if="!editor.field.scripted"
       ng-model="editor.field.type"
       readonly
       class="form-control">
@@ -81,6 +88,15 @@
         </button>
       </span>
     </div>
+  </div>
+
+  <div ng-if="editor.field.scripted" class="form-group">
+    <label>Language</label>
+    <select
+      ng-model="editor.field.lang"
+      ng-options="lang as lang for lang in editor.scriptingLangs"
+      class="form-control">
+    </select>
   </div>
 
   <div ng-if="editor.field.scripted">
