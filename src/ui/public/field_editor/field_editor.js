@@ -30,7 +30,7 @@ uiModules
 
       self.scriptingInfo = scriptingInfo;
       self.scriptingWarning = scriptingWarning;
-      self.scriptingLangs = getScriptingLangs();
+      getScriptingLangs();
 
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
@@ -133,11 +133,11 @@ uiModules
       function getScriptingLangs() {
         es.cluster.getSettings({
           include_defaults : true,
-          filter_path : "**.script.engine.*.inline"
+          filter_path : '**.script.engine.*.inline'
         })
-        .then(function(s) {
-          self.scriptingLangs = _.keys(_.pick(d.defaults.script.engine, function(e) {
-            return !!e.inline.search && !!e.inline.aggs
+        .then(function (d) {
+          self.scriptingLangs = _.keys(_.pick(d.defaults.script.engine, function (e) {
+            return !!e.inline.search && !!e.inline.aggs;
           }));
         });
       }
