@@ -46,7 +46,7 @@ module.exports = class Datasource extends TimelionFunction {
         seriesList.list = _.map(seriesList.list, function (series) {
           if (series.data.length === 0) throw new Error(name + '() returned no results');
           series.data = offsetSeries(series.data, args.byName.offset);
-          series.fit = args.byName.fit || 'nearest';
+          series.fit = args.byName.fit || series.fit || 'nearest';
           return series;
         });
         return seriesList;

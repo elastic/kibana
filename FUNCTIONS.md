@@ -28,7 +28,7 @@ Draws a single value across the chart
 
 Argument | Accepts | Description
 --- | --- | ---
-value | *number* | The single vale to to display  
+value | *number/string* | The single value to to display, you can also pass several values and I will interpolate them evenly across your time range.  
 label | *string* | A quick way to set the label for the series. You could also use the .label() function  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
