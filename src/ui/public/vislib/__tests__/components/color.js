@@ -243,7 +243,7 @@ describe('Vislib Color Module Test Suite', function () {
   });
 
   describe('Color Palette', function () {
-    let num1 = 45;
+    let num1 = 73; // 72 is the minimum size
     let num2 = 72;
     let num3 = 90;
     let string = 'Welcome';
