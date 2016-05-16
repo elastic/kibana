@@ -35,7 +35,7 @@ import {
           return common.try(function () {
             return consolePage.getRequest()
             .then(function (actualRequest) {
-              expect(actualRequest).to.eql(expectedRequest);
+              return expect(actualRequest).to.eql(expectedRequest);
             });
           });
         })
@@ -54,7 +54,7 @@ import {
             return consolePage.getResponse()
             .then(function (actualResponse) {
               common.debug(actualResponse);
-              expect(actualResponse).to.contain(expectedResponseContains);
+              return expect(actualResponse).to.contain(expectedResponseContains);
             });
           });
         })
