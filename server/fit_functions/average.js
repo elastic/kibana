@@ -16,6 +16,10 @@ module.exports = function (dataTuples, targetTuples) {
     var i = 0;
     var avgSet = [];
 
+    // This is naive, it doesn't consider where the line is going next,
+    // It simply writes the point and moves on once it hits <= time.
+    // Thus this algorithm will tend to lag the trend.
+    // Deal with it, or write something better.
     while (i < dataTuplesQueue.length && dataTuplesQueue[i][0] <= time) {
       avgSet.push(dataTuplesQueue[i][1]);
       i++;
@@ -27,7 +31,6 @@ module.exports = function (dataTuples, targetTuples) {
 
     return avgSet.length ? (sum / avgSet.length) : NaN;
   });
-
 
   // Phase 2: Upsample if needed
   // If we have any NaNs we are probably resampling from a big interval to a small one (eg, 1M as 1d)

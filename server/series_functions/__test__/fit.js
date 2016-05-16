@@ -8,22 +8,6 @@ var _ = require('lodash');
 
 describe(filename, function () {
 
-  /*
-  var seriesList;
-  beforeEach(function () {
-    seriesList = (function () {
-      var buckets = _.times(8, function (i) {
-        return moment.utc('1980-01-01T00:00:00.000Z').add(i, 'y');
-      });
-
-      var list = _.times(8, function (i) {
-        return Math.pow(2, i);
-      });
-      return getSeriesList('powahs', buckets, list);
-    }());
-  });
-  */
-
   describe('carry', function () {
     it('should maintain the previous value until it changes', function () {
       var seriesList = getSeriesList('',[

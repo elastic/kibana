@@ -31,7 +31,7 @@ module.exports = new Datasource ('static', {
       var end = _.last(target)[0];
       var step = (end - begin) / (points.length - 1);
       data = _.map(points, function (point, i) {
-        return [begin + (i * step), point];
+        return [begin + (i * step), parseFloat(point)];
       });
     } else {
       data = _.map(target, function (bucket) {
