@@ -35,7 +35,7 @@ import {
           return common.try(function () {
             return consolePage.getRequest()
             .then(function (actualRequest) {
-              return expect(actualRequest).to.eql(expectedRequest);
+              expect(actualRequest).to.eql(expectedRequest);
             });
           });
         })
@@ -44,8 +44,10 @@ import {
 
       bdd.it('default request reponse should contain .kibana' , function () {
         var expectedResponseContains = '"_index": ".kibana",';
-        var elasticsearch = common.getEsHostPort();
-        return consolePage.setServer(elasticsearch)
+        return common.getEsHostPort()
+        .then(function (elasticsearch) {
+          return consolePage.setServer(elasticsearch);
+        })
         .then(function () {
           return consolePage.clickPlay();
         })
@@ -54,7 +56,7 @@ import {
             return consolePage.getResponse()
             .then(function (actualResponse) {
               common.debug(actualResponse);
-              return expect(actualResponse).to.contain(expectedResponseContains);
+              expect(actualResponse).to.contain(expectedResponseContains);
             });
           });
         })
