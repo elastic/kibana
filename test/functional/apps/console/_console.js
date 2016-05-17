@@ -42,25 +42,20 @@ import {
         .catch(common.handleError(this));
       });
 
-      // bdd.it('default request reponse should contain .kibana' , function () {
-      //   var expectedResponseContains = '"_index": ".kibana",';
-      //   var elasticsearch = common.getEsHostPort();
-      //   return consolePage.setServer(elasticsearch)
-      //   .then(function () {
-      //     return consolePage.clickPlay();
-      //   })
-      //   .then(function () {
-      //     return common.try(function () {
-      //       return consolePage.getResponse()
-      //       .then(function (actualResponse) {
-      //         common.debug(actualResponse);
-      //         expect(actualResponse).to.contain(expectedResponseContains);
-      //       });
-      //     });
-      //   })
-      //   .catch(common.handleError(this));
-      // });
-
+      bdd.it('default request response should contain .kibana' , function () {
+        var expectedResponseContains = '"_index": ".kibana",';
+        consolePage.clickPlay()
+        .then(function () {
+          return common.try(function () {
+            return consolePage.getResponse()
+            .then(function (actualResponse) {
+              common.debug(actualResponse);
+              expect(actualResponse).to.contain(expectedResponseContains);
+            });
+          });
+        })
+        .catch(common.handleError(this));
+      });
 
 
     });
