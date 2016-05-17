@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-function timeBucketsToPairs(buckets) {
+export function timeBucketsToPairs(buckets) {
   var timestamps = _.pluck(buckets, 'key');
   var series = {};
   _.each(buckets, function (bucket) {
@@ -17,7 +17,7 @@ function timeBucketsToPairs(buckets) {
   });
 }
 
-function flattenBucket(bucket, path, result) {
+export function flattenBucket(bucket, path, result) {
   result = result || {};
   path = path || [];
   _.forOwn(bucket, function (val, key) {
@@ -37,7 +37,7 @@ function flattenBucket(bucket, path, result) {
   return result;
 }
 
-module.exports = function aggResponseToSeriesList(aggs, config) {
+export default function toSeriesList(aggs, config) {
   return _.map(flattenBucket(aggs), function (values, name) {
     return {
       data: values,

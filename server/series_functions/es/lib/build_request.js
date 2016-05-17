@@ -9,13 +9,19 @@ module.exports =  function buildRequest(config, tlConfig) {
   timeFilter.range[config.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
   bool.must.push(timeFilter);
 
+  // Use the kibana filter bar filters
   if (config.kibana) {
     var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
     bool.must.push
-      .apply(bool.must, _.chain(kibanaFilters).filter(function (filter) {return !filter.meta.negate;}).pluck('query').value());
-
+      .apply(bool.must,
+        _.chain(kibanaFilters)
+        .filter(function (filter) {return !filter.meta.negate;})
+        .pluck('query').value());
     bool.must_not.push
-      .apply(bool.must_not, _.chain(kibanaFilters).filter(function (filter) {return filter.meta.negate;}).pluck('query').value());
+      .apply(bool.must_not,
+        _.chain(kibanaFilters)
+        .filter(function (filter) {return filter.meta.negate;})
+        .pluck('query').value());
   }
 
   var aggs = {
@@ -24,7 +30,7 @@ module.exports =  function buildRequest(config, tlConfig) {
       filters: {
         filters: _.chain(config.q).map(function (q) {
           return [q, {query_string:{query: q}}];
-        }).zipObject(),
+        }).zipObject().value(),
       },
       aggs: {}
     }
@@ -32,18 +38,18 @@ module.exports =  function buildRequest(config, tlConfig) {
 
   var aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function (field, i) {
-    var field = field.split(':');
-    if (field[0] && field[1]) {
-      aggCursor[field[0]] = {
+  _.each(config.split, function (clause, i) {
+    var clause = clause.split(':');
+    if (clause[0] && clause[1]) {
+      aggCursor[clause[0]] = {
         meta: {type: 'split'},
         terms: {
-          field: field[0],
-          size: field[1]
+          field: clause[0],
+          size: parseInt(clause[1], 10)
         },
         aggs: {}
       };
-      aggCursor = aggCursor[field[0]].aggs;
+      aggCursor = aggCursor[clause[0]].aggs;
     } else {
       throw new Error ('`split` requires field:limit');
     }
