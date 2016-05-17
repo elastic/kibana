@@ -23,7 +23,8 @@ define(function (require) {
       'intern/dojo/node!./apps/discover',
       'intern/dojo/node!./status_page',
       'intern/dojo/node!./apps/settings',
-      'intern/dojo/node!./apps/visualize'
+      'intern/dojo/node!./apps/visualize',
+      'intern/dojo/node!./apps/console'
     ], function () {});
   });
 });

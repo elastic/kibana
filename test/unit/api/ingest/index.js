@@ -8,6 +8,7 @@ define(function (require) {
   var expect = require('intern/dojo/node!expect.js');
   var post = require('./_post');
   var del = require('./_del');
+  var data = require('./_data');
   var simulate = require('./_simulate');
   var processors = require('./_processors');
   var processorTypes = require('./processors/index');
@@ -26,6 +27,7 @@ define(function (require) {
 
     post(bdd, scenarioManager, request);
     del(bdd, scenarioManager, request);
+    data(bdd, scenarioManager, request);
     simulate(bdd, scenarioManager, request);
     processors(bdd, scenarioManager, request);
     processorTypes(bdd, scenarioManager, request);
