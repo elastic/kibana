@@ -3,7 +3,7 @@ var moment = require('moment');
 var toMS = require('../../lib/to_milliseconds.js');
 var Datasource = require('../../lib/classes/datasource');
 var buildRequest = require('./lib/build_request');
-var aggResponseToSeriesList = require('./lib/agg_response_to_series_list');
+import toSeriesList from './lib/agg_response_to_series_list';
 
 module.exports = new Datasource('es', {
   args: [
@@ -75,10 +75,11 @@ module.exports = new Datasource('es', {
 
     var body = buildRequest(config, tlConfig);
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
+      console.log(JSON.stringify(resp, null, ' '));
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
       return {
         type: 'seriesList',
-        list: aggResponseToSeriesList(resp.aggregations, config)
+        list: toSeriesList(resp.aggregations, config)
       };
     });
   }
