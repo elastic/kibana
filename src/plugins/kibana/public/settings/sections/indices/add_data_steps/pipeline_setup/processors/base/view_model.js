@@ -1,5 +1,5 @@
 export default class Processor {
-  constructor(processorId, typeId, title) {
+  constructor(processorId, typeId, title, helpText) {
     if (!typeId || !title) {
       throw new Error('Cannot instantiate the base Processor class.');
     }
@@ -7,6 +7,7 @@ export default class Processor {
     this.processorId = processorId;
     this.title = title;
     this.typeId = typeId;
+    this.helpText = helpText;
     this.collapsed = false;
     this.parent = undefined;
     this.inputObject = undefined;

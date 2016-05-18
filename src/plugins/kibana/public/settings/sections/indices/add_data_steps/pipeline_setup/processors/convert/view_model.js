@@ -3,7 +3,14 @@ import Processor from '../base/view_model';
 
 export class Convert extends Processor {
   constructor(processorId) {
-    super(processorId, 'convert', 'Convert');
+    super(
+      processorId,
+      'convert',
+      'Convert',
+      `Converts an existing field’s value to a different type, such as converting
+a string to an integer. If the field value is an array, all members will be
+converted.`
+    );
     this.sourceField = '';
     this.targetField = '';
     this.type = 'auto';

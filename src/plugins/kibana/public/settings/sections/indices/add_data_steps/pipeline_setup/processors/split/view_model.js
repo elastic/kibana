@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Split extends Processor {
   constructor(processorId) {
-    super(processorId, 'split', 'Split');
+    super(
+      processorId,
+      'split',
+      'Split',
+      `Splits a field into an array using a separator character.`
+    );
     this.sourceField = '';
     this.separator = '';
   }

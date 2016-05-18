@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Remove extends Processor {
   constructor(processorId) {
-    super(processorId, 'remove', 'Remove');
+    super(
+      processorId,
+      'remove',
+      'Remove',
+      `Removes an existing field.`
+    );
     this.sourceField = '';
   }
 
