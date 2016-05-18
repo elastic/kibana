@@ -89,4 +89,5 @@ module.exports = function (grunt) {
   // load task definitions
   grunt.task.loadTasks('tasks');
   grunt.task.loadTasks('tasks/build');
+  grunt.task.loadTasks('tasks/rebuild');
 };
