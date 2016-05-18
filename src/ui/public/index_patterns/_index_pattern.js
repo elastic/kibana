@@ -75,7 +75,7 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
       .id(self.id);
 
       // listen for config changes and update field list
-      config.on('*', initFields);
+      config.on('*', () => initFields());
 
       return mappingSetup.isDefined(type)
       .then(function (defined) {
