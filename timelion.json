@@ -4,8 +4,7 @@
   },
   "es": {
     "timefield": "@timestamp",
-    "default_index": "_all",
-    "allow_url_parameter": false
+    "default_index": "_all"
   },
   "graphite": {
     "url": "https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite"

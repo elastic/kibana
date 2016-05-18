@@ -16,11 +16,13 @@ module.exports =  function buildRequest(config, tlConfig) {
       .apply(bool.must,
         _.chain(kibanaFilters)
         .filter(function (filter) {return !filter.meta.negate;})
+        .filter(function (filter) {return !filter.meta.disabled;})
         .pluck('query').value());
     bool.must_not.push
       .apply(bool.must_not,
         _.chain(kibanaFilters)
         .filter(function (filter) {return filter.meta.negate;})
+        .filter(function (filter) {return !filter.meta.disabled;})
         .pluck('query').value());
   }
 
