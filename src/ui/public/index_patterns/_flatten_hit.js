@@ -4,7 +4,9 @@ import _ from 'lodash';
 export default function FlattenHitProvider(config) {
   let metaFields = config.get('metaFields');
 
-  config.on('metaFields', value => metaFields = value);
+  config.on('metaFields', value => {
+    metaFields = value;
+  });
 
   function flattenHit(indexPattern, hit) {
     let flat = {};
