@@ -54,6 +54,7 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
         $el
           .text(displayName)
           .attr('title', name)
+          .addClass('discover-field-name')
           .toggleClass('no-results', results)
           .toggleClass('scripted', scripted)
           .prepend(typeIcon(type));
