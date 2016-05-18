@@ -27,18 +27,23 @@ function stubResponse(response) {
 describe(filename, () => {
   var tlConfig;
 
-  describe('Missing indices', () => {
-    beforeEach(() => {
+  describe('seriesList processor', () => {
+    it('throws an error then the index is missing', () => {
       tlConfig = stubResponse({
         _shards: {total: 0}
       });
-    });
-
-    it('should throw an error', () => {
       return invoke(es, [5], tlConfig)
       .then(expect.fail)
       .catch((e) => {
         expect(e).to.be.an('error');
+      });
+    });
+
+    it('returns a seriesList', () => {
+      tlConfig = stubResponse(esResponse);
+      return invoke(es, [5], tlConfig)
+      .then((r) => {
+        expect(r.output.type).to.eql('seriesList');
       });
     });
   });
@@ -148,6 +153,7 @@ describe(filename, () => {
           request: {payload: {extended: {es: {filters:[
             {query: {query_string: {query: 'foo'}}, meta: {negate: false}},
             {query: {query_string: {query: 'foo'}}, meta: {negate: true}},
+            {query: {query_string: {query: 'baz'}}, meta: {disabled: true}},
           ]}}}}
         });
       });

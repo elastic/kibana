@@ -45,11 +45,6 @@ module.exports = new Datasource('es', {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
       help: '**DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker'
-    },
-    {
-      name: 'url',
-      types: ['string', 'null'],
-      help: 'Elasticsearch server URL, eg http://localhost:9200'
     }
   ],
   help: 'Pull data from an elasticsearch instance',
@@ -63,19 +58,13 @@ module.exports = new Datasource('es', {
       timefield: tlConfig.file.es.timefield,
       interval: tlConfig.time.interval,
       kibana: true,
-      url: tlConfig.file.es.url,
       fit: 'nearest'
     });
-
-    if (!tlConfig.file.es.allow_url_parameter && args.byName.url) {
-      throw new Error('url= is not allowed');
-    }
 
     var callWithRequest = tlConfig.server.plugins.elasticsearch.callWithRequest;
 
     var body = buildRequest(config, tlConfig);
     return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
-      console.log(JSON.stringify(resp, null, ' '));
       if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
       return {
         type: 'seriesList',

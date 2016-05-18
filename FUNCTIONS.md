@@ -64,7 +64,6 @@ index | *string* | Index to query, wildcards accepted
 timefield | *string* | Field of type "date" to use for x-axis  
 kibana | *boolean* | Respect filters on Kibana dashboards. Only has an effect when using on Kibana dashboards  
 interval | *string* | **DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker  
-url | *string* | Elasticsearch server URL, eg http://localhost:9200  
 offset | *string* | Offset the series retrieval by a date expression. Eg -1M to make events from one month ago appear as if they are happening now  
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale  
 
