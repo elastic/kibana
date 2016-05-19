@@ -4,7 +4,7 @@ import _ from 'lodash';
 export default function FlattenHitProvider(config) {
   let metaFields = config.get('metaFields');
 
-  config.on('metaFields', value => {
+  config.watch('metaFields', value => {
     metaFields = value;
   });
 

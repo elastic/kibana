@@ -38,7 +38,7 @@ chrome
     courier.start();
   });
 
-  config.on('dateFormat:tz', setDefaultTimezone, $scope);
+  config.watch('dateFormat:tz', setDefaultTimezone, $scope);
 
   function setDefaultTimezone(tz) {
     moment.tz.setDefault(tz);
