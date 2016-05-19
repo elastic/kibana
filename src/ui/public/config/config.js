@@ -21,7 +21,7 @@ module.service(`config`, function (Private, $rootScope, $http, chrome, uiSetting
   config.isDefault = key => !(key in settings) || nullOrEmpty(settings[key].userValue);
   config.isCustom = key => key in settings && !('value' in settings[key]);
   config.watchAll = (fn, scope) => watchAll(scope, fn);
-  config.watch = (key, fn, scope) => watch(scope, fn, key);
+  config.watch = (key, fn, scope) => watch(key, scope, fn);
 
   /**
    * A little helper for binding config variables to $scopes
@@ -33,13 +33,13 @@ module.service(`config`, function (Private, $rootScope, $http, chrome, uiSetting
    * @return {function} - an unbind function
    */
   config.bindToScope = function (scope, key, property = key) {
-    return watch(scope, update, key);
+    return watch(key, scope, update);
     function update(newVal) {
       scope[property] = newVal;
     }
   };
 
-  function watch(scope = $rootScope, fn, key) {
+  function watch(key, scope = $rootScope, fn) {
     const newVal = config.get(key);
     const update = (e, ...args) => fn(...args);
     fn(newVal, null, key, config);
