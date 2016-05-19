@@ -33,13 +33,13 @@ describe('config component', function () {
 
     it('binds a config key to a $scope property', function () {
       const dateFormat = config.get('dateFormat');
-      config.$bind($scope, 'dateFormat');
+      config.bindToScope($scope, 'dateFormat');
       expect($scope).to.have.property('dateFormat', dateFormat);
     });
 
     it('alows overriding the property name', function () {
       const dateFormat = config.get('dateFormat');
-      config.$bind($scope, 'dateFormat', 'defaultDateFormat');
+      config.bindToScope($scope, 'dateFormat', 'defaultDateFormat');
       expect($scope).to.not.have.property('dateFormat');
       expect($scope).to.have.property('defaultDateFormat', dateFormat);
     });
@@ -47,7 +47,7 @@ describe('config component', function () {
     it('keeps the property up to date', function () {
       const original = config.get('dateFormat');
       const newDateFormat = original + ' NEW NEW NEW!';
-      config.$bind($scope, 'dateFormat');
+      config.bindToScope($scope, 'dateFormat');
 
       expect($scope).to.have.property('dateFormat', original);
       config.set('dateFormat', newDateFormat);

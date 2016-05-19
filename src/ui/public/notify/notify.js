@@ -31,8 +31,8 @@ module.run(function ($interval) {
 // expect access to config (since it's dependent on kibana)
 if (!!kbnIndex) {
   require('ui/config');
-  module.run(function ($rootScope, config) {
-    config.on('*', function applyConfig() {
+  module.run(function (config) {
+    config.watchAll(() => {
       Notifier.applyConfig({
         errorLifetime: config.get('notifications:lifetime:error'),
         warningLifetime: config.get('notifications:lifetime:warning'),

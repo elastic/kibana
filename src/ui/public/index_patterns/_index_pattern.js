@@ -77,7 +77,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
       };
 
-      config.on('*', () => {
+      config.watchAll(() => {
         if (this._initialized) {
           this._initFields(); // re-initialize fields when config changes
         }

@@ -6,12 +6,12 @@ export default uiRegistry({
   index: ['id'],
   group: ['fieldType'],
 
-  constructor: function (config, $rootScope) {
+  constructor: function (config) {
     let self = this;
     let defaultMap;
 
     function init() {
-      config.on('format:defaultTypeMap', parseDefaultTypeMap);
+      config.watch('format:defaultTypeMap', parseDefaultTypeMap);
     }
 
 

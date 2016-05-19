@@ -26,7 +26,7 @@ export default function BoundToConfigObjProvider(config) {
 
       const configKey = value.substr(1);
 
-      config.on(configKey, function update(value) {
+      config.watch(configKey, function update(value) {
         self[prop] = value;
       });
     });

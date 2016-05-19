@@ -4,7 +4,7 @@ export default function registerDelete(server) {
   server.route({
     path: '/api/kibana/settings/{key}',
     method: 'DELETE',
-    handler: async function (req, reply) {
+    handler: function (req, reply) {
       const { key } = req.params;
       const uiSettings = server.uiSettings();
       uiSettings
