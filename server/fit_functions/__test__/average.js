@@ -62,6 +62,11 @@ describe(filename, function () {
           [moment.utc('1985', 'YYYY').valueOf(), null],
         ];
 
+        // This returns 1, 5, 9 instead of the expected 2, 6, 10 because the average function does not consider "future"
+        // values, rather just the next upcoming value from the end of the previously predicted bucket. Eg, When
+        // interpolating a weekly series into daily, in which the buckets fall on sundays, this coming Sunday's bucket
+        // will be distributed Mon-Sun instead of say Thur-Wed.
+        // Essentially the algorithm is left aligned instead of centered
         expect(_.map(fn(data, target), 1)).to.eql([1, 5, 9]);
       });
 
