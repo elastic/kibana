@@ -38,7 +38,7 @@ modules.get('apps/settings')
             this.setCurrentStep($state.currentStep + 1);
           }
           else if ($state.currentStep + 1 === totalSteps) {
-            kbnUrl.change('/discover');
+            kbnUrl.change('/discover', null, {index: this.stepResults.indexPattern.id});
           }
         };
 
