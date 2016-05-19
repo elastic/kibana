@@ -23,10 +23,6 @@ module.exports = new Chainable('fit', {
 
       var noNulls = _.filter(eachSeries.data, 1);
 
-      //console.log('input', JSON.stringify(noNulls, null, ' '));
-      //console.log('target', JSON.stringify(eachSeries.data, null, ' '));
-      //console.log(mode);
-
       eachSeries.data = fitFunctions[mode](noNulls, eachSeries.data);
       return eachSeries;
     });
