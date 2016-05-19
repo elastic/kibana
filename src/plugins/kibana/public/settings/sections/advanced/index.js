@@ -35,14 +35,6 @@ uiModules.get('apps/settings')
             value: def.userValue,
             isCustom: config.isCustom(name)
           }))
-          .sortBy(def => {
-            if (def.isCustom) {
-              return 3;
-            }
-            const user = def.value;
-            const edited = user !== undefined && user !== null;
-            return edited ? 2 : 1;
-          })
           .value();
         const writable = _.reject(editable, 'readonly');
         $scope.configs = writable;
