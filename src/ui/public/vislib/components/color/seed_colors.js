@@ -22,7 +22,7 @@ const normal = [
   '#97c461',
   '#c5d558',
   '#f3eb4f',
-  '#fbe63f'
+  '#ffeb6b'
 ];
 const dark = [
   '#caaa52',
@@ -48,7 +48,7 @@ const dark = [
   '#7b9e59',
   '#9fb55a',
   '#cbc952',
-  '#cbbb55'
+  '#e1d76e'
 ];
 const light = [
   '#fbe27d',
@@ -74,7 +74,7 @@ const light = [
   '#b6d06f',
   '#d5de77',
   '#f6ef84',
-  '#fcee7d'
+  '#fff88e'
 ];
 
 define(function () {
