@@ -107,7 +107,9 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
 
   function getCurrentValue(key) {
     if (!(key in settings)) {
-      return null;
+      throw new Error(`Unexpected \`config.get("${key}", fn)\` call on unrecognized configuration setting "${key}".
+Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
+any custom setting value for "${key}" may fix this issue.`);
     }
     const { userValue, value: defaultValue, type } = settings[key];
     const currentValue = config.isDefault(key) ? defaultValue : userValue;
