@@ -4,7 +4,7 @@ export default function registerGet(server) {
   server.route({
     path: '/api/kibana/settings',
     method: 'GET',
-    handler: async function (req, reply) {
+    handler: function (req, reply) {
       server
         .uiSettings()
         .getUserProvided()

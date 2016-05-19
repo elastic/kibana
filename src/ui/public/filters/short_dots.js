@@ -13,7 +13,7 @@ uiModules
 function shortDotsFilterProvider(config) {
   let filter;
 
-  config.on('shortDots:enable', updateFilter);
+  config.watch('shortDots:enable', updateFilter);
 
   return wrapper;
 

@@ -21,8 +21,7 @@ uiModules.get('apps/settings')
       };
 
       // react to changes of the config values
-      const unhook = $rootScope.$on('change:config', changed);
-      $scope.$on('$destroy', unhook);
+      config.watchAll(changed, $scope);
 
       // initial config setup
       changed();
