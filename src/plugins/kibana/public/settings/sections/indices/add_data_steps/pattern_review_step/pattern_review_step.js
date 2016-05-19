@@ -27,7 +27,8 @@ modules.get('apps/settings')
       scope: {
         indexPattern: '=',
         pipeline: '=',
-        sampleDoc: '='
+        sampleDoc: '=',
+        defaultIndexInput: '='
       },
       controllerAs: 'reviewStep',
       bindToController: true,
@@ -40,6 +41,10 @@ modules.get('apps/settings')
           helpText: 'The name of the Elasticsearch index you want to add data to.',
           defaultValue: 'data'
         };
+
+        if (this.defaultIndexInput) {
+          this.patternInput.defaultValue = this.defaultIndexInput;
+        }
 
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
