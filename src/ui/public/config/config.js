@@ -40,6 +40,11 @@ module.service(`config`, function (Private, $rootScope, $http, chrome, uiSetting
   };
 
   function watch(key, scope = $rootScope, fn) {
+    if (!(key in settings)) {
+      throw new Error(`Unexpected \`config.watch("${key}", fn)\` call on unrecognized configuration setting "${key}".
+Setting an initial value via \`config.set("${key}", value)\` before binding
+any custom setting configuration watchers for "${key}" may fix this issue.`);
+    }
     const newVal = config.get(key);
     const update = (e, ...args) => fn(...args);
     fn(newVal, null, key, config);
