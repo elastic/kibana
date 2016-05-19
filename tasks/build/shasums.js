@@ -8,8 +8,8 @@ module.exports = function (grunt) {
 
     readdir(targetDir)
     .map(function (archive) {
-      // only sha the archives
-      if (!archive.match(/\.zip$|\.tar.gz$/)) return;
+      // only sha the archives and packages
+      if (!archive.match(/\.zip$|\.tar.gz$|\.deb$|\.rpm$/)) return;
 
       return exec('shasum ' + archive + ' > ' + archive + '.sha1.txt', {
         cwd: targetDir

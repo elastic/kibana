@@ -16,6 +16,7 @@ module.exports = function createServices(grunt) {
         '--install-prefix', service.outputDir,
         '--overwrite',
         '--user', 'kibana',
+        '--group', 'kibana',
         '--sysv-log-path', '/var/log/kibana/',
         '-p', service.name,
         '-v', service.version,
@@ -25,6 +26,6 @@ module.exports = function createServices(grunt) {
 
     grunt.file.mkdir(userScriptsDir);
     exec('please-manage-user', ['--output', userScriptsDir, 'kibana']);
-    appendFileSync(resolve(userScriptsDir, 'installer.sh'), 'chown kibana /opt/kibana/optimize');
+    appendFileSync(resolve(userScriptsDir, 'installer.sh'), 'chown kibana:kibana /opt/kibana/optimize');
   });
 };
