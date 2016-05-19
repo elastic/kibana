@@ -42,7 +42,7 @@ module.exports = class Datasource extends TimelionFunction {
         config.time.to = offsetTime(config.time.to, args.byName.offset);
       }
 
-      return originalFunction(args, config).then(function (seriesList) {
+      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
         seriesList.list = _.map(seriesList.list, function (series) {
           if (series.data.length === 0) throw new Error(name + '() returned no results');
           series.data = offsetSeries(series.data, args.byName.offset);

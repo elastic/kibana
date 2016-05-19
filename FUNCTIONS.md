@@ -256,6 +256,15 @@ Argument | Accepts | Description
 --- | --- | ---
 title | *string* | Title for the plot.  
 
+#### .trend()
+Fills null values using a defined fit function
+
+Argument | Accepts | Description
+--- | --- | ---
+mode | *string* | The algorithm to use for generating the trend line. One of: linear, linearorigin, log, polynomial  
+start | *number* | Where to start calculating from the beginning or end. For example -10 would start calculating 10 points from the end, +15 would start 15 points from the beginning. Default: 0  
+end | *number* | Where to stop calculating from the beginning or end. For example -10 would stop calculating 10 points from the end, +15 would stop 15 points from the beginning. Default: 0  
+
 #### .yaxis()
 Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis
 
