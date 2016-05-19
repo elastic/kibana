@@ -18,7 +18,7 @@ module.exports = class TimelionFunction {
 
     this.fn = function (args, tlConfig) {
       var config = _.clone(tlConfig);
-      return originalFunction(args, config).then(function (seriesList) {
+      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
         seriesList.list = _.map(seriesList.list, function (series) {
           var target = tlConfig.getTargetSeries();
 
