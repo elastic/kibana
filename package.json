@@ -16,7 +16,6 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
-  "main": "src/server/KbnServer.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
@@ -24,18 +23,19 @@
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "contributors": [
-    "Spencer Alger <spencer.alger@elastic.co>",
-    "Matt Bargar <matt.bargar@elastic.co>",
-    "Jon Budzenski <jonathan.budzenski@elastic.co>",
     "Chris Cowan <chris.cowan@elastic.co>",
     "Court Ewing <court@elastic.co>",
+    "Jim Unger <jim.unger@elastic.co>",
     "Joe Fleming <joe.fleming@elastic.co>",
+    "Jon Budzenski <jonathan.budzenski@elastic.co>",
+    "Juan Thomassie <juan.thomassie@elastic.co>",
     "Khalah Jones-Golden <khalah.jones@elastic.co>",
     "Lukas Olson <lukas.olson@elastic.co>",
-    "Juan Thomassie <juan.thomassie@elastic.co>",
+    "Matt Bargar <matt.bargar@elastic.co>",
+    "Nicolás Bevacqua <nico@elastic.co>",
     "Shelby Sturgis <shelby@elastic.co>",
-    "Tim Sullivan <tim@elastic.co>",
-    "Jim Unger <jim.unger@elastic.co>"
+    "Spencer Alger <spencer.alger@elastic.co>",
+    "Tim Sullivan <tim@elastic.co>"
   ],
   "scripts": {
     "test": "grunt test",
@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "@bigfunger/decompress-zip": "0.2.0-stripfix2",
+    "@elastic/datemath": "2.2.0",
     "@spalger/angular-bootstrap": "0.12.1",
     "@spalger/filesaver": "1.1.2",
     "@spalger/leaflet-draw": "0.2.3",
@@ -81,10 +82,10 @@
     "ansicolors": "0.3.2",
     "autoprefixer": "5.1.1",
     "autoprefixer-loader": "2.0.0",
-    "babel": "5.8.23",
-    "babel-core": "5.8.23",
+    "babel": "5.8.38",
+    "babel-core": "5.8.38",
     "babel-loader": "5.3.2",
-    "babel-runtime": "5.8.20",
+    "babel-runtime": "5.8.38",
     "bluebird": "2.9.34",
     "boom": "2.8.0",
     "bootstrap": "3.3.6",
@@ -126,22 +127,25 @@
     "mkdirp": "0.5.1",
     "moment": "2.10.6",
     "moment-timezone": "0.4.1",
+    "node-uuid": "1.4.7",
     "raw-loader": "0.5.1",
     "request": "2.61.0",
     "rimraf": "2.4.3",
+    "rison-node": "1.0.0",
     "rjs-repack-loader": "1.0.6",
     "script-loader": "0.6.1",
     "semver": "5.1.0",
     "style-loader": "0.12.3",
     "tar": "2.2.0",
     "url-loader": "0.5.6",
+    "validate-npm-package-name": "2.2.2",
     "webpack": "1.12.1",
     "webpack-directory-name-as-main": "1.0.0",
     "whatwg-fetch": "0.9.0",
     "wreck": "6.2.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.0.2",
+    "@elastic/eslint-config-kibana": "0.0.3",
     "Nonsense": "0.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
@@ -156,7 +160,7 @@
     "grunt-cli": "0.1.13",
     "grunt-contrib-clean": "0.6.0",
     "grunt-contrib-copy": "0.8.1",
-    "grunt-esvm": "3.0.3",
+    "grunt-esvm": "3.1.1",
     "grunt-karma": "0.12.0",
     "grunt-run": "0.5.0",
     "grunt-s3": "0.2.0-alpha.3",
@@ -170,7 +174,6 @@
     "karma-chrome-launcher": "0.2.0",
     "karma-coverage": "0.5.1",
     "karma-firefox-launcher": "0.1.6",
-    "karma-growl-reporter": "0.1.1",
     "karma-ie-launcher": "0.2.0",
     "karma-mocha": "0.2.0",
     "karma-safari-launcher": "0.1.1",
@@ -179,16 +182,18 @@
     "makelogs": "3.0.0-beta3",
     "marked-text-renderer": "0.1.0",
     "mocha": "2.3.0",
+    "ncp": "2.0.0",
     "nock": "2.10.0",
     "npm": "2.11.0",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
+    "source-map-support": "0.4.0",
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "4.3.2",
-    "npm": "2.14.22"
+    "node": "4.4.4",
+    "npm": "2.15.1"
   }
 }

@@ -5,8 +5,8 @@ import FilterBarLibExtractTimeFilterProvider from 'ui/filter_bar/lib/extract_tim
 
 describe('Filter Bar Directive', function () {
   describe('extractTimeFilter()', function () {
-    var extractTimeFilter;
-    var $rootScope;
+    let extractTimeFilter;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',
@@ -22,7 +22,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the matching filter for the defualt time field', function (done) {
-      var filters = [
+      let filters = [
         { meta: { index: 'logstash-*' }, query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
         { meta: { index: 'logstash-*' }, range: { 'time': { gt: 1388559600000, lt: 1388646000000 } } }
       ];
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should not return the non-matching filter for the defualt time field', function (done) {
-      var filters = [
+      let filters = [
         { meta: { index: 'logstash-*' }, query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
         { meta: { index: 'logstash-*' }, range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } }
       ];

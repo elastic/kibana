@@ -12,12 +12,12 @@ export default function ZeroFillDataArrayUtilService(Private) {
       throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
     }
 
-    var i;
-    var val;
-    var index;
-    var max = arr2.length;
+    let i;
+    let val;
+    let index;
+    let max = arr2.length;
 
-    var getX = function (d) {
+    let getX = function (d) {
       return d.x === val.x;
     };
 

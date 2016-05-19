@@ -2,12 +2,11 @@ import _ from 'lodash';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'plugins/kibana/visualize/editor/sidebar';
 import 'plugins/kibana/visualize/editor/agg_filter';
-import 'ui/navbar';
+import 'ui/navbar_extensions';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
 import angular from 'angular';
-import ConfigTemplate from 'ui/config_template';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import DocTitleProvider from 'ui/doc_title';
@@ -80,12 +79,27 @@ uiModules
 
   const searchSource = savedVis.searchSource;
 
-  // config panel templates
-  const configTemplate = new ConfigTemplate({
-    save: require('plugins/kibana/visualize/editor/panels/save.html'),
-    load: require('plugins/kibana/visualize/editor/panels/load.html'),
-    share: require('plugins/kibana/visualize/editor/panels/share.html'),
-  });
+  $scope.topNavMenu = [{
+    key: 'new',
+    description: 'New Visualization',
+    run: function () { kbnUrl.change('/visualize', {}); }
+  }, {
+    key: 'save',
+    template: require('plugins/kibana/visualize/editor/panels/save.html'),
+    description: 'Save Visualization'
+  }, {
+    key: 'load',
+    template: require('plugins/kibana/visualize/editor/panels/load.html'),
+    description: 'Load Saved Visualization',
+  }, {
+    key: 'share',
+    template: require('plugins/kibana/visualize/editor/panels/share.html'),
+    description: 'Share Visualization'
+  }, {
+    key: 'refresh',
+    description: 'Refresh',
+    run: function () { $scope.fetch(); }
+  }];
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);
@@ -125,9 +139,8 @@ uiModules
     $scope.editableVis = editableVis;
     $scope.state = $state;
     $scope.uiState = $state.makeStateful('uiState');
-
-    $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
-    $scope.configTemplate = configTemplate;
+    $scope.timefilter = timefilter;
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
     editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -228,12 +241,14 @@ uiModules
 
   $scope.doSave = function () {
     savedVis.id = savedVis.title;
+    // vis.title was not bound and it's needed to reflect title into visState
+    $state.vis.title = savedVis.title;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
     savedVis.save()
     .then(function (id) {
-      configTemplate.close('save');
+      $scope.kbnTopNav.close('save');
 
       if (id) {
         notify.info('Saved Visualization "' + savedVis.title + '"');

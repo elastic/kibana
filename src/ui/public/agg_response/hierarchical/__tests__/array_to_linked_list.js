@@ -4,7 +4,7 @@ import expect from 'expect.js';
 describe('buildHierarchicalData()', function () {
   describe('arrayToLinkedList', function () {
 
-    var results;
+    let results;
     beforeEach(function () {
       results = arrayToLinkedList([
         { id: 1 },

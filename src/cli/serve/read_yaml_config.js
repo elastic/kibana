@@ -1,75 +1,40 @@
-import _ from 'lodash';
-import fs from 'fs';
-import yaml from 'js-yaml';
+import { chain, isArray, isPlainObject, forOwn, memoize, set, transform } from 'lodash';
+import { readFileSync as read } from 'fs';
+import { safeLoad } from 'js-yaml';
+import { red } from 'ansicolors';
 
-import fromRoot from '../../utils/from_root';
+import { fromRoot } from '../../utils';
+import { rewriteLegacyConfig } from './legacy_config';
+import { checkForDeprecatedConfig } from './deprecated_config';
 
-let legacySettingMap = {
-  // server
-  port: 'server.port',
-  host: 'server.host',
-  pid_file: 'pid.file',
-  ssl_cert_file: 'server.ssl.cert',
-  ssl_key_file: 'server.ssl.key',
+const log = memoize(function (message) {
+  console.log(red('WARNING:'), message);
+});
 
-  // logging
-  log_file: 'logging.dest',
+export function merge(sources) {
+  return transform(sources, (merged, source) => {
+    forOwn(source, function apply(val, key) {
+      if (isPlainObject(val)) {
+        forOwn(val, function (subVal, subKey) {
+          apply(subVal, key + '.' + subKey);
+        });
+        return;
+      }
 
-  // kibana
-  kibana_index: 'kibana.index',
-  default_app_id: 'kibana.defaultAppId',
+      if (isArray(val)) {
+        set(merged, key, []);
+        val.forEach((subVal, i) => apply(subVal, key + '.' + i));
+        return;
+      }
 
-  // es
-  ca: 'elasticsearch.ssl.ca',
-  elasticsearch_preserve_host: 'elasticsearch.preserveHost',
-  elasticsearch_url: 'elasticsearch.url',
-  kibana_elasticsearch_client_crt: 'elasticsearch.ssl.cert',
-  kibana_elasticsearch_client_key: 'elasticsearch.ssl.key',
-  kibana_elasticsearch_password: 'elasticsearch.password',
-  kibana_elasticsearch_username: 'elasticsearch.username',
-  ping_timeout: 'elasticsearch.pingTimeout',
-  request_timeout: 'elasticsearch.requestTimeout',
-  shard_timeout: 'elasticsearch.shardTimeout',
-  startup_timeout: 'elasticsearch.startupTimeout',
-  verify_ssl: 'elasticsearch.ssl.verify',
-};
-
-const deprecatedSettings = {
-  'server.xsrf.token': 'server.xsrf.token is deprecated. It is no longer used when providing xsrf protection.'
-};
-
-module.exports = function (path) {
-  if (!path) return {};
-
-  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
-
-  function apply(config, val, key) {
-    if (_.isPlainObject(val)) {
-      _.forOwn(val, function (subVal, subKey) {
-        apply(config, subVal, key + '.' + subKey);
-      });
-    }
-    else if (_.isArray(val)) {
-      config[key] = [];
-      val.forEach((subVal, i) => {
-        apply(config, subVal, key + '.' + i);
-      });
-    }
-    else {
-      _.set(config, key, val);
-    }
-  }
-
-  _.each(deprecatedSettings, function (message, setting) {
-    if (_.has(file, setting)) console.error(message);
-  });
-
-  // transform legeacy options into new namespaced versions
-  return _.transform(file, function (config, val, key) {
-    if (legacySettingMap.hasOwnProperty(key)) {
-      key = legacySettingMap[key];
-    }
-
-    apply(config, val, key);
+      set(merged, key, val);
+    });
   }, {});
-};
+}
+
+export default function (paths) {
+  const files = [].concat(paths || []);
+  const yamls = files.map(path => safeLoad(read(path, 'utf8')));
+  const config = merge(yamls.map(file => rewriteLegacyConfig(file, log)));
+  return checkForDeprecatedConfig(config, log);
+}

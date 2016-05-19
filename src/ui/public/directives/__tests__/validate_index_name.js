@@ -6,9 +6,9 @@ import 'ui/directives/validate_index_name';
 // Load the kibana app dependencies.
 
 describe('Validate index name directive', function () {
-  var $compile;
-  var $rootScope;
-  var html = '<input type="text" ng-model="indexName" validate-index-name />';
+  let $compile;
+  let $rootScope;
+  let html = '<input type="text" ng-model="indexName" validate-index-name />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -19,12 +19,12 @@ describe('Validate index name directive', function () {
 
   function checkPattern(input) {
     $rootScope.indexName = input;
-    var element = $compile(html)($rootScope);
+    let element = $compile(html)($rootScope);
     $rootScope.$digest();
     return element;
   }
 
-  var badPatterns = [
+  let badPatterns = [
     null,
     undefined,
     '',
@@ -41,7 +41,7 @@ describe('Validate index name directive', function () {
     'foo,bar',
   ];
 
-  var goodPatterns = [
+  let goodPatterns = [
     '...',
     'foo',
     'foo.bar',
@@ -53,7 +53,7 @@ describe('Validate index name directive', function () {
 
   badPatterns.forEach(function (pattern) {
     it('should not accept index pattern: ' + pattern, function () {
-      var element = checkPattern(pattern);
+      let element = checkPattern(pattern);
       expect(element.hasClass('ng-invalid')).to.be(true);
       expect(element.hasClass('ng-valid')).to.not.be(true);
     });
@@ -61,7 +61,7 @@ describe('Validate index name directive', function () {
 
   goodPatterns.forEach(function (pattern) {
     it('should accept index pattern: ' + pattern, function () {
-      var element = checkPattern(pattern);
+      let element = checkPattern(pattern);
       expect(element.hasClass('ng-invalid')).to.not.be(true);
       expect(element.hasClass('ng-valid')).to.be(true);
     });

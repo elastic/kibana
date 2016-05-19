@@ -8,11 +8,11 @@ import AggTypesParamTypesOptionedProvider from 'ui/agg_types/param_types/optione
 import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
 describe('AggParams class', function () {
 
-  var AggParams;
-  var BaseAggParam;
-  var FieldAggParam;
-  var OptionedAggParam;
-  var RegexAggParam;
+  let AggParams;
+  let BaseAggParam;
+  let FieldAggParam;
+  let OptionedAggParam;
+  let RegexAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // stub out the param classes before we get the AggParams
@@ -28,11 +28,11 @@ describe('AggParams class', function () {
 
   describe('constructor args', function () {
     it('accepts an array of param defs', function () {
-      var params = [
+      let params = [
         { name: 'one' },
         { name: 'two' }
       ];
-      var aggParams = new AggParams(params);
+      let aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams).to.be.an(Array);
@@ -42,43 +42,43 @@ describe('AggParams class', function () {
 
   describe('AggParam creation', function () {
     it('Uses the FieldAggParam class for params with the name "field"', function () {
-      var params = [
+      let params = [
         { name: 'field' }
       ];
-      var aggParams = new AggParams(params);
+      let aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(FieldAggParam);
     });
 
     it('Uses the OptionedAggParam class for params of type "optioned"', function () {
-      var params = [
+      let params = [
         {
           name: 'interval',
           type: 'optioned'
         }
       ];
-      var aggParams = new AggParams(params);
+      let aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(OptionedAggParam);
     });
 
     it('Uses the RegexAggParam class for params of type "regex"', function () {
-      var params = [
+      let params = [
         {
           name: 'exclude',
           type: 'regex'
         }
       ];
-      var aggParams = new AggParams(params);
+      let aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(RegexAggParam);
     });
 
     it('Always converts the params to a BaseAggParam', function () {
-      var params = [
+      let params = [
         {
           name: 'height',
           editor: '<blink>high</blink>'
@@ -92,7 +92,7 @@ describe('AggParams class', function () {
           editor: '<blink>small</blink>'
         }
       ];
-      var aggParams = new AggParams(params);
+      let aggParams = new AggParams(params);
 
       expect(BaseAggParam).to.have.property('callCount', params.length);
       expect(FieldAggParam).to.have.property('callCount', 0);

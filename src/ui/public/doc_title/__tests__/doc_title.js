@@ -5,11 +5,11 @@ import ngMock from 'ng_mock';
 import DocTitleProvider from 'ui/doc_title';
 
 describe('docTitle Service', function () {
-  var initialDocTitle;
-  var MAIN_TITLE = 'Kibana 4';
+  let initialDocTitle;
+  let MAIN_TITLE = 'Kibana 4';
 
-  var docTitle;
-  var $rootScope;
+  let docTitle;
+  let $rootScope;
 
   beforeEach(function () {
     initialDocTitle = document.title;
@@ -36,9 +36,9 @@ describe('docTitle Service', function () {
 
   describe('setup', function () {
     it('resets the title when a route change begins', function () {
-      var spy = $rootScope.$on;
+      let spy = $rootScope.$on;
 
-      var found = spy.args.some(function (args) {
+      let found = spy.args.some(function (args) {
         return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
       });
 
@@ -61,7 +61,7 @@ describe('docTitle Service', function () {
   });
 
   describe('#change', function () {
-    var getActiveTabStub;
+    let getActiveTabStub;
 
     beforeEach(function () {
       getActiveTabStub = sinon.stub(require('ui/chrome'), 'getActiveTab');

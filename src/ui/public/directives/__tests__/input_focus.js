@@ -5,14 +5,14 @@ import $ from 'jquery';
 import 'ui/directives/input_focus';
 
 describe('Input focus directive', function () {
-  var $compile;
-  var $rootScope;
-  var $timeout;
-  var element;
-  var $el;
-  var selectedEl;
-  var selectedText;
-  var inputValue = 'Input Text Value';
+  let $compile;
+  let $rootScope;
+  let $timeout;
+  let element;
+  let $el;
+  let selectedEl;
+  let selectedText;
+  let inputValue = 'Input Text Value';
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {

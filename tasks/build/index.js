@@ -22,6 +22,7 @@ module.exports = function (grunt) {
       'stop:optimizeBuild',
       '_build:downloadNodeBuilds:finish',
       '_build:versionedLinks',
+      '_build:osShellScripts',
       '_build:archives',
       grunt.option('os-packages') ? [
         '_build:pleaseRun',

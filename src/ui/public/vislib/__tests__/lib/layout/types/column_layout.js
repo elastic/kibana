@@ -6,10 +6,10 @@ import expect from 'expect.js';
 import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
 
 describe('Vislib Column Layout Test Suite', function () {
-  var layoutType;
-  var columnLayout;
-  var el;
-  var data = {
+  let layoutType;
+  let columnLayout;
+  let el;
+  let data = {
     hits: 621,
     label: '',
     ordered: {

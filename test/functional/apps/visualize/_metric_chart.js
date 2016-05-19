@@ -1,31 +1,21 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var VisualizePage = require('../../../support/pages/visualize_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  headerPage,
+  scenarioManager,
+  settingsPage,
+  visualizePage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-      var visualizePage;
-      var remote;
-      var fromTime;
-      var toTime;
+      var fromTime = '2015-09-19 06:31:44.000';
+      var toTime = '2015-09-23 18:31:44.000';
 
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
-        fromTime = '2015-09-19 06:31:44.000';
-        toTime = '2015-09-23 18:31:44.000';
 
         var testSubName = 'MetricChart';
         common.debug('Start of test' + testSubName + 'Visualization');
@@ -199,8 +189,10 @@ define(function (require) {
         });
 
         bdd.it('should show Standard Deviation', function pageHeader() {
-          var standardDeviationBytes = [ '-1,435.138', 'Lower Standard Deviation of bytes',
-            '5,727.314', 'Average of bytes', '12,889.766', 'Upper Standard Deviation of bytes'
+          var standardDeviationBytes = [
+            '-1,435.138', 'Lower Standard Deviation of bytes',
+            '5,727.314', 'Average of bytes',
+            '12,889.766', 'Upper Standard Deviation of bytes'
           ];
           common.debug('Aggregation = Standard Deviation');
           return visualizePage.selectAggregation('Standard Deviation')
@@ -252,18 +244,16 @@ define(function (require) {
         });
 
         bdd.it('should show Percentiles', function pageHeader() {
-          // This SHOULD be the expected result but the top item is cut off.
-          //  See https://github.com/elastic/kibana/issues/5721
-          // var percentileMachineRam = ['2,147,483,648', '1st percentile of machine.ram', '3,221,225,472',
-          //   '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
-          //   '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
-          //   '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
-          // ];
-          var percentileMachineRam = ['3,221,225,472',
-            '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
-            '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
-            '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
+          var percentileMachineRam = [
+            '2,147,483,648', '1st percentile of machine.ram',
+            '3,221,225,472', '5th percentile of machine.ram',
+            '7,516,192,768', '25th percentile of machine.ram',
+            '12,884,901,888', '50th percentile of machine.ram',
+            '18,253,611,008', '75th percentile of machine.ram',
+            '32,212,254,720', '95th percentile of machine.ram',
+            '32,212,254,720', '99th percentile of machine.ram'
           ];
+
           common.debug('Aggregation = Percentiles');
           return visualizePage.selectAggregation('Percentiles')
           .then(function selectField() {
@@ -312,5 +302,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

@@ -6,19 +6,19 @@ import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
 
-  var config;
+  let config;
 
-  var indexPattern;
+  let indexPattern;
 
-  var getComputedFields;
+  let getComputedFields;
 
-  var fn;
+  let fn;
   beforeEach(ngMock.module(
     'kibana',
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        var keys = {};
+        let keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }

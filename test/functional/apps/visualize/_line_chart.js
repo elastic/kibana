@@ -1,27 +1,18 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var VisualizePage = require('../../../support/pages/visualize_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  headerPage,
+  scenarioManager,
+  settingsPage,
+  visualizePage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-      var visualizePage;
-      var remote;
-
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
@@ -69,7 +60,7 @@ define(function (require) {
         })
         .then(function selectField() {
           common.debug('Field = extension');
-          return visualizePage.selectField('extension');
+          return visualizePage.selectField('extension.raw');
         })
         .then(function setInterval() {
           common.debug('switch from Rows to Columns');
@@ -122,7 +113,7 @@ define(function (require) {
           // sleep a bit before trying to get the chart data
           return common.sleep(3000)
           .then(function () {
-            return visualizePage.getLineChartData()
+            return visualizePage.getLineChartData('fill="#57c17b"')
             .then(function showData(data) {
               var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
               for (var x = 0; x < data.length; x++) {
@@ -161,5 +152,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

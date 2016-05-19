@@ -9,15 +9,15 @@ import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
-  var AxisTitle;
-  var Data;
-  var PersistedState;
-  var axisTitle;
-  var el;
-  var dataObj;
-  var xTitle;
-  var yTitle;
-  var data = {
+  let AxisTitle;
+  let Data;
+  let PersistedState;
+  let axisTitle;
+  let el;
+  let dataObj;
+  let xTitle;
+  let yTitle;
+  let data = {
     hits: 621,
     label: '',
     ordered: {

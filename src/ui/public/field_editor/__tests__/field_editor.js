@@ -6,13 +6,13 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('FieldEditor directive', function () {
 
-  var Field;
-  var StringFormat;
-  var $rootScope;
+  let Field;
+  let StringFormat;
+  let $rootScope;
 
-  var compile;
-  var $scope;
-  var $el;
+  let compile;
+  let $scope;
+  let $el;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
@@ -41,13 +41,13 @@ describe('FieldEditor directive', function () {
 
     it('exposes $scope.editor, a controller for the editor', function () {
       compile();
-      var editor = $scope.editor;
+      let editor = $scope.editor;
       expect(editor).to.be.an('object');
     });
   });
 
   describe('$scope.editor', function () {
-    var editor;
+    let editor;
 
     beforeEach(function () {
       compile();
@@ -63,8 +63,8 @@ describe('FieldEditor directive', function () {
     });
 
     describe('editor.field', function () {
-      var field;
-      var actual;
+      let field;
+      let actual;
 
       beforeEach(function () {
         field = editor.field;
@@ -81,8 +81,8 @@ describe('FieldEditor directive', function () {
       });
 
       it('reflects changes to the index patterns field', function () {
-        var a = {};
-        var b = {};
+        let a = {};
+        let b = {};
 
         actual.script = a;
         expect(field.script).to.be(a);
@@ -92,7 +92,7 @@ describe('FieldEditor directive', function () {
       });
 
       it('is fully mutable, unlike the index patterns field', function () {
-        var origName = actual.name;
+        let origName = actual.name;
         actual.name = 'john';
         expect(actual.name).to.not.be('john');
         expect(actual.name).to.be(origName);

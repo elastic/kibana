@@ -4,14 +4,14 @@ import sinon from 'auto-release-sinon';
 import RouteManager from 'ui/routes/route_manager';
 import expect from 'expect.js';
 
-var routes; // will contain an new instance of RouteManager for each test
-var chainableMethods = [
+let routes; // will contain an new instance of RouteManager for each test
+let chainableMethods = [
   { name: 'when', args: ['', {}] },
   { name: 'otherwise', args: [{}] },
   { name: 'defaults', args: [/regexp/, {}] }
 ];
 
-var $rp;
+let $rp;
 describe('routes/route_manager', function () {
   beforeEach(ngMock.module('kibana', function ($routeProvider) {
     $rp = $routeProvider;
@@ -31,7 +31,7 @@ describe('routes/route_manager', function () {
 
   describe('#otherwise', function () {
     it('should forward the last otherwise route', function () {
-      var otherRoute = {};
+      let otherRoute = {};
       routes.otherwise({});
       routes.otherwise(otherRoute);
 
@@ -68,7 +68,7 @@ describe('routes/route_manager', function () {
 
   describe('#config', function () {
     it('should add defined routes to the global $routeProvider service in order', function () {
-      var args = [
+      let args = [
         ['/one', {}],
         ['/two', {}]
       ];
@@ -81,8 +81,8 @@ describe('routes/route_manager', function () {
 
       expect($rp.when.callCount).to.be(args.length);
       _.times(args.length, function (i) {
-        var call = $rp.when.getCall(i);
-        var a = args.shift();
+        let call = $rp.when.getCall(i);
+        let a = args.shift();
 
         expect(call.args[0]).to.be(a[0]);
         expect(call.args[1]).to.be(a[1]);

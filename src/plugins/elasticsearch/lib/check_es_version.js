@@ -12,12 +12,6 @@ module.exports = function (server) {
   return client.nodes.info()
   .then(function (info) {
     const badNodes = _.filter(info.nodes, function (node) {
-      // remove client nodes (Logstash)
-      const isClient = _.get(node, 'attributes.client');
-      if (isClient != null && esBool(isClient) === true) {
-        return false;
-      }
-
       // remove nodes that satify required engine version
       return !versionSatisfies(node.version, engineVersion);
     });

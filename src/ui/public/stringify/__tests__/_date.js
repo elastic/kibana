@@ -3,11 +3,11 @@ import ngMock from 'ng_mock';
 import moment from 'moment-timezone';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Date Format', function () {
-  var fieldFormats;
-  var settings;
-  var convert;
-  var $scope;
-  var off;
+  let fieldFormats;
+  let settings;
+  let convert;
+  let $scope;
+  let off;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, config, $rootScope) {
@@ -15,8 +15,8 @@ describe('Date Format', function () {
     settings = config;
 
     fieldFormats = Private(RegistryFieldFormatsProvider);
-    var DateFormat = fieldFormats.getType('date');
-    var date = new DateFormat();
+    let DateFormat = fieldFormats.getType('date');
+    let date = new DateFormat();
 
     convert = date.convert.bind(date);
   }));
@@ -30,17 +30,17 @@ describe('Date Format', function () {
     function setDefaultTimezone() {
       moment.tz.setDefault(settings.get('dateFormat:tz'));
     }
-    var time = 1445027693942;
+    let time = 1445027693942;
 
     off = $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
 
     settings.set('dateFormat:tz', 'America/Chicago');
     $scope.$digest();
-    var chicagoTime = convert(time);
+    let chicagoTime = convert(time);
 
     settings.set('dateFormat:tz', 'America/Phoenix');
     $scope.$digest();
-    var phoenixTime = convert(time);
+    let phoenixTime = convert(time);
 
     expect(chicagoTime).not.to.equal(phoenixTime);
     off();

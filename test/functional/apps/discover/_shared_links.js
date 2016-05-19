@@ -1,29 +1,18 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var expect = require('intern/dojo/node!expect.js');
+import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('shared links', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
       var baseUrl;
       // The message changes for Firefox < 41 and Firefox >= 41
       // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
       // var expectedToastMessage = 'Share search: URL copied to clipboard.';
       // Pass either one.
-      var expectedToastMessage = /Share search: URL (selected. Press Ctrl\+C to copy.|copied to clipboard.)/;
+      var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-
         baseUrl = common.getHostPort();
 
         var fromTime = '2015-09-19 06:31:44.000';
@@ -51,6 +40,11 @@ define(function (require) {
           common.debug('setAbsoluteRange');
           return headerPage.setAbsoluteRange(fromTime, toTime);
         })
+        .then(function () {
+          //After hiding the time picker, we need to wait for
+          //the refresh button to hide before clicking the share button
+          return common.sleep(1000);
+        })
         .catch(common.handleError(this));
       });
 
@@ -74,10 +68,10 @@ define(function (require) {
           var expectedUrl = baseUrl
             + '/app/kibana?_t=1453775307251#'
             + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
-            + ':(from:%272015-09-19T06:31:44.000Z%27,mode:absolute,to:%272015-09'
-            + '-23T18:31:44.000Z%27))&_a=(columns:!(%27@timestamp%27,_source),index:%27logstash-'
-            + '*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query'
-            + ':%27*%27)),sort:!(%27@timestamp%27,desc))';
+            + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
+            + '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-'
+            + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
+            + ':\'*\')),sort:!(\'@timestamp\',desc))';
           return discoverPage.getSharedUrl()
           .then(function (actualUrl) {
             // strip the timestamp out of each URL
@@ -136,5 +130,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

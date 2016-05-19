@@ -13,7 +13,7 @@ class Status extends EventEmitter {
 
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
-      var tags = ['status', name];
+      let tags = ['status', name];
       tags.push(this.state === 'red' ? 'error' : 'info');
 
       server.log(tags, {

@@ -9,10 +9,10 @@ import AggTypesBucketsCreateFilterFiltersProvider from 'ui/agg_types/buckets/cre
 
 describe('AggConfig Filters', function () {
   describe('filters', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -23,7 +23,7 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a filters filter', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -39,8 +39,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.filters[0];
-      var filter = createFilter(aggConfig, '_type:nginx');
+      let aggConfig = vis.aggs.byTypeName.filters[0];
+      let filter = createFilter(aggConfig, '_type:nginx');
       expect(_.omit(filter, 'meta')).to.eql(aggConfig.params.filters[1].input);
       expect(filter.meta).to.have.property('index', indexPattern.id);
 

@@ -5,7 +5,8 @@ define(function (require) {
   return _.assign({
     debug: true,
     capabilities: {
-      'selenium-version': '2.48.2',
+      'selenium-version': '2.53.0',
+      // must match URL in tasks/config/downloadSelenium.js
       'idle-timeout': 99
     },
     environments: [{
@@ -13,21 +14,13 @@ define(function (require) {
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
-      'test/functional/status_page/index',
-      'test/functional/apps/settings/index',
-      'test/functional/apps/discover/index',
-      'test/functional/apps/visualize/index'
+      'test/functional/index'
     ],
-    excludeInstrumentation: /(fixtures|node_modules)\//,
-    loaderOptions: {
-      paths: {
-        'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
-        'moment': './node_modules/moment/moment.js'
-      }
-    },
-    timeouts: {
-      // this is how long a test can run before timing out
-      default: 90000
-    },
+
+    excludeInstrumentation: /.*/,
+
+    defaultTimeout: 90000,
+    defaultTryTimeout: 40000, // tryForTime could include multiple 'find timeouts'
+    defaultFindTimeout: 10000  // this is how long we try to find elements on page
   }, serverConfig);
 });

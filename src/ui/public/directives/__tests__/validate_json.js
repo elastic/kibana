@@ -5,26 +5,26 @@ import 'ui/directives/validate_json';
 
 // Load the kibana app dependencies.
 
-var $parentScope;
-var $elemScope;
-var $elem;
-var mockScope = '';
+let $parentScope;
+let $elemScope;
+let $elem;
+let mockScope = '';
 
-var input = {
+let input = {
   valid: '{ "test": "json input" }',
   invalid: 'strings are not json'
 };
 
-var markup = {
+let markup = {
   textarea: '<textarea ng-model="mockModel" validate-json></textarea>',
   input: '<input type="text" ng-model="mockModel" validate-json>'
 };
 
-var init = function (type) {
+let init = function (type) {
   // Load the application
   ngMock.module('kibana');
   type = type || 'input';
-  var elMarkup = markup[type];
+  let elMarkup = markup[type];
 
   // Create the scope
   ngMock.inject(function ($injector, $rootScope, $compile) {
@@ -39,7 +39,7 @@ var init = function (type) {
 };
 
 describe('validate-json directive', function () {
-  var checkValid = function (inputVal, className) {
+  let checkValid = function (inputVal, className) {
     $parentScope.mockModel = inputVal;
     $elem.scope().$digest();
     expect($elem.hasClass(className)).to.be(true);

@@ -1,27 +1,21 @@
-// in test/support/pages/header_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var Common = require('./common');
+import { common, remote, defaultFindTimeout } from '../';
 
-  var common;
+export default (function () {
 
   // the page object is created as a constructor
   // so we can provide the remote Command object
   // at runtime
-  function HeaderPage(remote) {
+  function HeaderPage() {
     this.remote = remote;
-    common = new Common(this.remote);
   }
-
-  var defaultTimeout = config.timeouts.default;
 
   HeaderPage.prototype = {
     constructor: HeaderPage,
 
     clickSelector: function (selector) {
-      var self = this.remote;
-      return common.tryForTime(defaultTimeout, function () {
-        return self.setFindTimeout(defaultTimeout)
+      var self = this;
+      return common.try(function () {
+        return self.remote.setFindTimeout(defaultFindTimeout)
         .findByCssSelector(selector)
         .then(function (tab) {
           return tab.click();
@@ -50,31 +44,31 @@ define(function (require) {
     },
 
     clickTimepicker: function clickTimepicker() {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByClassName('navbar-timepicker-time-desc').click();
+      return this.remote.setFindTimeout(defaultFindTimeout)
+      .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByLinkText('Absolute').click();
     },
 
     setFromTime: function setFromTime(timeString) {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model=\'absolute.from\']')
       .clearValue()
       .type(timeString);
     },
 
     setToTime: function setToTime(timeString) {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model=\'absolute.to\']')
       .clearValue()
       .type(timeString);
     },
 
     clickGoButton: function clickGoButton() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByClassName('kbn-timepicker-go')
       .click();
     },
@@ -100,46 +94,32 @@ define(function (require) {
         return self.clickGoButton();
       })
       .then(function () {
-        self.collapseTimepicker();
+        return self.collapseTimepicker();
       });
     },
 
     collapseTimepicker: function collapseTimepicker() {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.fa.fa-chevron-up')
+      return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('.fa.fa-chevron-circle-up')
       .click();
     },
 
     getToastMessage: function getToastMessage() {
-      return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+      return this.remote.setFindTimeout(defaultFindTimeout)
+      .findDisplayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
       .getVisibleText();
     },
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-      return common.tryForTime(defaultTimeout, function () {
-        return self.remote.setFindTimeout(500)
-        .findAllByCssSelector('kbn-truncated.toast-message')
-        .then(function toastMessage(messages) {
-          if (messages.length > 0) {
-            common.debug('toast message found, waiting...');
-            throw new Error('waiting for toast message to clear');
-          } else {
-            common.debug('toast message clear');
-            return messages;
-          }
-        })
-        .catch(function () {
-          common.debug('toast message not found');
-          return;
-        });
-      });
+
+      return self.remote.setFindTimeout(defaultFindTimeout)
+        .waitForDeletedByCssSelector('kbn-truncated.toast-message');
     },
 
     clickToastOK: function clickToastOK() {
       return this.remote
-      .setFindTimeout(defaultTimeout)
+      .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('button[ng-if="notif.accept"]')
       .click();
     },
@@ -147,11 +127,11 @@ define(function (require) {
     getSpinnerDone: function getSpinnerDone() {
       var self = this;
       return this.remote
-      .setFindTimeout(defaultTimeout * 10)
-      .findByCssSelector('span.spinner.ng-hide');
+      .setFindTimeout(defaultFindTimeout * 10)
+      .findByCssSelector('.spinner.ng-hide');
     }
 
   };
 
   return HeaderPage;
-});
+}());

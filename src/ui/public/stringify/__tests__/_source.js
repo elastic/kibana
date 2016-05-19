@@ -7,7 +7,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import FixturesHitsProvider from 'fixtures/hits';
 describe('_source formatting', function () {
 
-  var fieldFormats;
+  let fieldFormats;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -15,10 +15,10 @@ describe('_source formatting', function () {
   }));
 
   describe('Source format', function () {
-    var indexPattern;
-    var hits;
-    var format;
-    var convertHtml;
+    let indexPattern;
+    let hits;
+    let format;
+    let convertHtml;
 
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
@@ -28,8 +28,8 @@ describe('_source formatting', function () {
     }));
 
     it('uses the _source, field, and hit to create a <dl>', function () {
-      var hit = _.first(hits);
-      var $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
+      let hit = _.first(hits);
+      let $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
       expect($dl.is('dl')).to.be.ok();
       expect($dl.find('dt')).to.have.length(_.keys(indexPattern.flattenHit(hit)).length);
     });

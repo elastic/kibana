@@ -12,18 +12,18 @@ import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source'
 // Load the kibana app dependencies.
 
 
-var $parentScope;
+let $parentScope;
 
 
-var $scope;
+let $scope;
 
 
-var $timeout;
+let $timeout;
 
 
-var searchSource;
+let searchSource;
 
-var init = function ($elem, props) {
+let init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
@@ -41,13 +41,13 @@ var init = function ($elem, props) {
   });
 };
 
-var destroy = function () {
+let destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };
 
 describe('docTable', function () {
-  var $elem;
+  let $elem;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(function () {

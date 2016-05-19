@@ -4,7 +4,7 @@
 .vis-tooltip-sizing-clone {
   visibility: hidden;
   line-height: 1.1;
-  font-size: 12px;
+  font-size: @font-size-base;
   font-weight: normal;
   background: @tooltip-bg;
   color: @tooltip-color;
@@ -24,28 +24,24 @@
     margin: @tooltip-space @tooltip-space 0;
   }
 
+  .tooltip-label {
+    font-family: @font-family-sans-serif;
+
+    th {
+      font-weight: @tooltip-bold;
+    }
+  }
+
+  .tooltip-value {
+    font-family: @font-family-sans-serif;
+  }
+
   table {
     td,th {
       padding: @tooltip-space-tight;
 
       &.row-bucket {
         word-break: break-all;
-      }
-    }
-
-    // if there is a header, give it a border that matches
-    // those in the body
-    thead tr {
-      border-bottom: 1px solid;
-      border-bottom-color: @tooltip-table-border;
-    }
-
-    // only apply to tr in the body, not the header
-    tbody tr {
-      border-top: 1px solid;
-      border-top-color: @tooltip-table-border;
-      &:first-child {
-        border-top: none;
       }
     }
   }

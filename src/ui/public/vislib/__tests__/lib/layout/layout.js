@@ -12,13 +12,13 @@ import $ from 'jquery';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-var dateHistogramArray = [
+let dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
@@ -27,11 +27,11 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
-    var Layout;
-    var vis;
-    var persistedState;
-    var numberOfCharts;
-    var testLayout;
+    let Layout;
+    let vis;
+    let persistedState;
+    let numberOfCharts;
+    let testLayout;
 
     beforeEach(ngMock.module('kibana'));
 

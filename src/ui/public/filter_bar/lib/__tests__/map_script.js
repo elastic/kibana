@@ -5,8 +5,8 @@ import FilterBarLibMapScriptProvider from 'ui/filter_bar/lib/map_script';
 
 describe('Filter Bar Directive', function () {
   describe('mapScript()', function () {
-    var mapScript;
-    var $rootScope;
+    let mapScript;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',
@@ -22,7 +22,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      var filter = {
+      let filter = {
         meta: { index: 'logstash-*', field: 'script number' },
         script: { script: 'doc["script number"].value * 5', params: { value: 35}}
       };
@@ -35,7 +35,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
+      let filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
       mapScript(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

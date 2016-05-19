@@ -1,22 +1,18 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  discoverPage,
+  headerPage,
+  scenarioManager,
+  settingsPage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('discover app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
@@ -50,7 +46,6 @@ define(function (require) {
         var queryName1 = 'Query # 1';
         var fromTimeString = 'September 19th 2015, 06:31:44.000';
         var toTimeString = 'September 23rd 2015, 18:31:44.000';
-
 
         bdd.it('search php should show the correct hit count', function () {
           var expectedHitCount = '445';
@@ -142,7 +137,7 @@ define(function (require) {
             + ' Here&rsquo;s...", "twitter:card": "summary", "twitter:image": "'
             + 'http://IMAGES1.laweekly.com/imager/the-rapture-at-the-mayan-7-25/u/original/2463272/rapturetn05.jpg",'
             + ' "twitter:site": "@laweekly" } machine.os:win 7 machine.ram:7,516,192,768 _id:AU_x3_g4GFA8no6QjkYX'
-            + ' _type:apache _index:logstash-2015.09.22 _score: relatedContent.article:modified_time:November 27th'
+            + ' _type:apache _index:logstash-2015.09.22 _score: - relatedContent.article:modified_time:November 27th'
             + ' 2014, 16:00:51.000, November 27th 2014, 16:28:42.000 relatedContent.article:published_time:July 26th'
             + ' 2007, 19:42:30.000, December 13th 2007, 20:19:35.000';
           return discoverPage.getDocTableIndex(1)
@@ -220,7 +215,7 @@ define(function (require) {
             + ' "Arts", "og:site_name": "LA Weekly", "twitter:title": "Shopping Daze", "twitter:description": "LA'
             + ' Weekly is the definitive source of information for news, music, movies, restaurants, reviews, and'
             + ' events in Los Angeles.", "twitter:card": "summary", "twitter:site": "@laweekly" } machine.os:osx'
-            + ' machine.ram:15,032,385,536 _id:AU_x3_g3GFA8no6QjkFm _type:apache _index:logstash-2015.09.20 _score:'
+            + ' machine.ram:15,032,385,536 _id:AU_x3_g3GFA8no6QjkFm _type:apache _index:logstash-2015.09.20 _score: -'
             + ' relatedContent.article:modified_time:October 28th 2014, 22:00:08.000, November 26th 2014,'
             + ' 01:05:47.000, November 26th 2014, 03:52:35.000, November 26th 2014, 04:15:21.000, November 27th 2014,'
             + ' 16:01:03.000 relatedContent.article:published_time:October 21st 2005, 01:10:25.000, March 5th 2006,'
@@ -264,5 +259,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

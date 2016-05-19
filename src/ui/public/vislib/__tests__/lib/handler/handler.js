@@ -12,13 +12,13 @@ import $ from 'jquery';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-var dateHistogramArray = [
+let dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
@@ -27,10 +27,10 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
-    var Handler;
-    var vis;
-    var persistedState;
-    var events = [
+    let Handler;
+    let vis;
+    let persistedState;
+    let events = [
       'click',
       'brush'
     ];
@@ -58,7 +58,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('enable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
@@ -80,7 +80,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('disable Method', function () {
-      var charts;
+      let charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;

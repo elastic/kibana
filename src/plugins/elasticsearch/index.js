@@ -5,12 +5,14 @@ import healthCheck from './lib/health_check';
 import exposeClient from './lib/expose_client';
 import createProxy, { createPath } from './lib/create_proxy';
 
+const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+
 module.exports = function ({ Plugin }) {
   return new Plugin({
     require: ['kibana'],
 
     config(Joi) {
-      const { array, boolean, number, object, string } = Joi;
+      const { array, boolean, number, object, string, ref } = Joi;
 
       return object({
         enabled: boolean().default(true),
@@ -20,7 +22,8 @@ module.exports = function ({ Plugin }) {
         password: string(),
         shardTimeout: number().default(0),
         requestTimeout: number().default(30000),
-        pingTimeout: number().default(30000),
+        requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
+        pingTimeout: number().default(ref('requestTimeout')),
         startupTimeout: number().default(5000),
         ssl: object({
           verify: boolean().default(true),
@@ -31,6 +34,16 @@ module.exports = function ({ Plugin }) {
         apiVersion: Joi.string().default('master'),
         engineVersion: Joi.string().valid('^5.0.0').default('^5.0.0')
       }).default();
+    },
+
+    uiExports: {
+      injectDefaultVars(server, options) {
+        return {
+          esRequestTimeout: options.requestTimeout,
+          esShardTimeout: options.shardTimeout,
+          esApiVersion: options.apiVersion,
+        };
+      }
     },
 
     init(server, options) {

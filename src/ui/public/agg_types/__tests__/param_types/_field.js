@@ -5,8 +5,8 @@ import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 import AggTypesParamTypesFieldProvider from 'ui/agg_types/param_types/field';
 describe('Field', function () {
 
-  var BaseAggParam;
-  var FieldAggParam;
+  let BaseAggParam;
+  let FieldAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
@@ -17,7 +17,7 @@ describe('Field', function () {
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      var aggParam = new FieldAggParam({
+      let aggParam = new FieldAggParam({
         name: 'field'
       });
 

@@ -5,15 +5,15 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('invert filters', function () {
-  var storeNames = {
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var filters;
-  var queryFilter;
-  var $rootScope;
-  var appState;
-  var globalState;
+  let filters;
+  let queryFilter;
+  let $rootScope;
+  let appState;
+  let globalState;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -76,7 +76,7 @@ describe('invert filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
 
       // set up the watchers

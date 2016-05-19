@@ -1,16 +1,24 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import Notifier from 'ui/notify/notifier';
+
 describe('Notifier', function () {
+  let $interval;
+  let message = 'Oh, the humanity!';
+  let notifier;
+  let params;
+  let version = window.__KBN__.version;
+  let buildNum = window.__KBN__.buildNum;
 
-  var message = 'Oh, the humanity!';
-  var notifier;
-  var params;
-  var version = window.__KBN__.version;
-  var buildNum = window.__KBN__.buildNum;
+  beforeEach(function () {
+    ngMock.module('kibana');
 
-  beforeEach(ngMock.module('kibana'));
+    ngMock.inject(function (_$interval_) {
+      $interval = _$interval_;
+    });
+  });
 
   beforeEach(function () {
     params = { location: 'foo' };
@@ -47,13 +55,52 @@ describe('Notifier', function () {
       expect(notify('error').lifetime).to.equal(300000);
     });
 
+    it('sets timeRemaining and decrements', function () {
+      let notif = notify('error');
+
+      expect(notif.timeRemaining).to.equal(300);
+      $interval.flush(1000);
+      expect(notif.timeRemaining).to.equal(299);
+    });
+
+    it('closes notification on lifetime expiry', function () {
+      let expectation = sinon.mock();
+      let notif = notifier.error(message, expectation);
+
+      expectation.once();
+      expectation.withExactArgs('ignore');
+
+      $interval.flush(300000);
+
+      expect(notif.timerId).to.be(undefined);
+    });
+
+    it('allows canceling of timer', function () {
+      let notif = notify('error');
+
+      expect(notif.timerId).to.not.be(undefined);
+      notif.cancelTimer();
+
+      expect(notif.timerId).to.be(undefined);
+    });
+
+    it('resets timer on addition to stack', function () {
+      let notif = notify('error');
+
+      $interval.flush(100000);
+      expect(notif.timeRemaining).to.equal(200);
+
+      notify('error');
+      expect(notif.timeRemaining).to.equal(300);
+    });
+
     it('allows reporting', function () {
-      var includesReport = _.includes(notify('error').actions, 'report');
+      let includesReport = _.includes(notify('error').actions, 'report');
       expect(includesReport).to.true;
     });
 
     it('allows accepting', function () {
-      var includesAccept = _.includes(notify('error').actions, 'accept');
+      let includesAccept = _.includes(notify('error').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -86,12 +133,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      var includesReport = _.includes(notify('warning').actions, 'report');
+      let includesReport = _.includes(notify('warning').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      var includesAccept = _.includes(notify('warning').actions, 'accept');
+      let includesAccept = _.includes(notify('warning').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -124,12 +171,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      var includesReport = _.includes(notify('info').actions, 'report');
+      let includesReport = _.includes(notify('info').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      var includesAccept = _.includes(notify('info').actions, 'accept');
+      let includesAccept = _.includes(notify('info').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -150,13 +197,13 @@ describe('Notifier', function () {
   function testVersionInfo(fnName) {
     context('when version is configured', function () {
       it('adds version to notification', function () {
-        var notification = notify(fnName);
+        let notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
     context('when build number is configured', function () {
       it('adds buildNum to notification', function () {
-        var notification = notify(fnName);
+        let notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);
       });
     });

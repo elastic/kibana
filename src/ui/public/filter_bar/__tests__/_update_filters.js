@@ -5,14 +5,14 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('update filters', function () {
-  var storeNames = {
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var queryFilter;
-  var appState;
-  var globalState;
-  var $rootScope;
+  let queryFilter;
+  let appState;
+  let globalState;
+  let $rootScope;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -39,8 +39,8 @@ describe('update filters', function () {
   }));
 
   describe('updating', function () {
-    var currentFilter;
-    var newFilter;
+    let currentFilter;
+    let newFilter;
 
     beforeEach(function () {
       newFilter = _.cloneDeep({

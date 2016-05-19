@@ -6,13 +6,13 @@ import ngMock from 'ng_mock';
 import 'ui/filters/moment';
 
 
-var filter;
+let filter;
 
-var config;
-var anchor = '2014-01-01T06:06:06.666';
-var clock;
+let config;
+let anchor = '2014-01-01T06:06:06.666';
+let clock;
 
-var init = function (expandable) {
+let init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

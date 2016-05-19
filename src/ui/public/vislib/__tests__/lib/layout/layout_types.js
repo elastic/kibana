@@ -5,8 +5,8 @@ import expect from 'expect.js';
 import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
 
 describe('Vislib Layout Types Test Suite', function () {
-  var layoutType;
-  var layoutFunc;
+  let layoutType;
+  let layoutFunc;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

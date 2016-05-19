@@ -1,8 +1,8 @@
 import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
-import fromRoot from '../utils/from_root';
-import pkg from '../utils/package_json';
+import { isWorker } from 'cluster';
+import { fromRoot, pkg } from '../utils';
 
 let rootDir = fromRoot('.');
 
@@ -19,6 +19,9 @@ module.exports = class KbnServer {
       require('./http'), // sets this.server
       require('./logging'),
       require('./status'),
+
+      // writes pid file
+      require('./pid'),
 
       // find plugins and set this.plugins
       require('./plugins/scan'),
@@ -74,9 +77,13 @@ module.exports = class KbnServer {
 
     await this.ready();
     await fromNode(cb => server.start(cb));
-    await require('./pid')(this, server, config);
 
-    server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
+    if (isWorker) {
+      // help parent process know when we are ready
+      process.send(['WORKER_LISTENING']);
+    }
+
+    server.log(['listening', 'info'], `Server running at ${server.info.uri}`);
     return server;
   }
 

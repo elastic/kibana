@@ -22,9 +22,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
   }
 
   describe('', function () {
-    var vis;
-    var persistedState;
-    var SimpleEmitter;
+    let vis;
+    let persistedState;
+    let SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -39,7 +39,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('extends the SimpleEmitter class', function () {
-      var events = _.pluck(vis.handler.charts, 'events');
+      let events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function (dispatch) {
         expect(dispatch).to.be.a(SimpleEmitter);
@@ -48,8 +48,8 @@ describe('Vislib Dispatch Class Test Suite', function () {
   });
 
   describe('Stock event handlers', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -65,11 +65,11 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
     describe('addEvent method', function () {
       it('returns a function that binds the passed event to a selection', function () {
-        var chart = _.first(vis.handler.charts);
-        var apply = chart.events.addEvent('event', _.noop);
+        let chart = _.first(vis.handler.charts);
+        let apply = chart.events.addEvent('event', _.noop);
         expect(apply).to.be.a('function');
 
-        var els = getEls(vis.el, 3, 'div');
+        let els = getEls(vis.el, 3, 'div');
         apply(els);
         els.each(function () {
           expect(d3.select(this).on('event')).to.be(_.noop);
@@ -88,11 +88,11 @@ describe('Vislib Dispatch Class Test Suite', function () {
         });
 
         it('returns a function that binds ' + event + ' events to a selection', function () {
-          var chart = _.first(vis.handler.charts);
-          var apply = chart.events[name](d3.select(document.createElement('svg')));
+          let chart = _.first(vis.handler.charts);
+          let apply = chart.events[name](d3.select(document.createElement('svg')));
           expect(apply).to.be.a('function');
 
-          var els = getEls(vis.el, 3, 'div');
+          let els = getEls(vis.el, 3, 'div');
           apply(els);
           els.each(function () {
             expect(d3.select(this).on(event)).to.be.a('function');
@@ -109,7 +109,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     describe('addMousePointer method', function () {
       it('should be a function', function () {
         vis.handler.charts.forEach(function (chart) {
-          var pointer = chart.events.addMousePointer;
+          let pointer = chart.events.addMousePointer;
 
           expect(_.isFunction(pointer)).to.be(true);
         });
@@ -119,9 +119,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
   describe('Custom event handlers', function () {
     it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
-      var vis;
-      var persistedState;
-      var chart;
+      let vis;
+      let persistedState;
+      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();
@@ -139,9 +139,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('can be added after rendering', function () {
-      var vis;
-      var persistedState;
-      var chart;
+      let vis;
+      let persistedState;
+      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();

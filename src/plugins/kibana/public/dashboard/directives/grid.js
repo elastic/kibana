@@ -27,7 +27,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       // number of columns to render
       const COLS = 12;
       // number of pixed between each column/row
-      const SPACER = 10;
+      const SPACER = 0;
       // pixels used by all of the spacers (gridster puts have a spacer on the ends)
       const spacerSize = SPACER * COLS;
 
@@ -46,7 +46,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
             stop: readGridsterChangeHandler
           },
           draggable: {
-            handle: '.panel-heading, .panel-title',
+            handle: '.panel-move, .fa-arrows',
             stop: readGridsterChangeHandler
           }
         }).data('gridster');
@@ -83,14 +83,15 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         });
 
         $scope.$on('$destroy', function () {
+          safeLayout.cancel();
           $window.off('resize', safeLayout);
 
           if (!gridster) return;
           gridster.$widgets.each(function (i, el) {
             const panel = getPanelFor(el);
-            removePanel(panel);
             // stop any animations
             panel.$el.stop();
+            removePanel(panel, true);
             // not that we will, but lets be safe
             makePanelSerializeable(panel);
           });
@@ -125,9 +126,9 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
       }
 
       // tell gridster to remove the panel, and cleanup our metadata
-      function removePanel(panel) {
+      function removePanel(panel, silent) {
         // remove from grister 'silently' (don't reorganize after)
-        gridster.remove_widget(panel.$el);
+        gridster.remove_widget(panel.$el, silent);
 
         // destroy the scope
         panel.$scope.$destroy();
@@ -232,4 +233,3 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
     }
   };
 });
-

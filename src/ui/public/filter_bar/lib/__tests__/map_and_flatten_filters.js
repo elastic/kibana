@@ -5,8 +5,8 @@ import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {
-    var mapAndFlattenFilters;
-    var $rootScope;
+    let mapAndFlattenFilters;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
     }));
 
-    var filters = [
+    let filters = [
       null,
       [
         { meta: { index: 'logstash-*' }, exists: { field: '_type' } },

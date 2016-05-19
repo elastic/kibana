@@ -1,4 +1,4 @@
-module.exports = (kibana) => {
+export default (kibana) => {
   if (!kibana.config.get('env.dev')) return;
   return new kibana.Plugin({
     uiExports: {

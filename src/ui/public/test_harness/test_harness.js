@@ -18,8 +18,8 @@ $('body').attr('id', 'test-harness-body'); // so we can make high priority selec
 
 
 /*** Setup seeded random ***/
-var seedInput = parse(window.location.href, true).query.seed;
-var seed = _.add(seedInput, 0) || Date.now();
+let seedInput = parse(window.location.href, true).query.seed;
+let seed = _.add(seedInput, 0) || Date.now();
 Math.random = _.bindKey(new Nonsense(seed), 'frac');
 Math.random.nonsense = new Nonsense(seed);
 console.log('Random-ness seed: ' + seed);
@@ -37,8 +37,8 @@ before(function () {
   // before the tests start, load the sourcemap and hook into error generation for the mocha reporter
   this.timeout(30000);
 
-  var mapper;
-  var Runner = window.Mocha.Runner;
+  let mapper;
+  let Runner = window.Mocha.Runner;
 
   Runner.prototype.emit = _.wrap(Runner.prototype.emit, function (emit, event, test, err) {
     if (err && mapper) err = mapper.mapError(err);

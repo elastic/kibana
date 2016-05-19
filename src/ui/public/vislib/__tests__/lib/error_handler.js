@@ -5,8 +5,8 @@ import ngMock from 'ng_mock';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 
 describe('Vislib ErrorHandler Test Suite', function () {
-  var ErrorHandler;
-  var errorHandler;
+  let ErrorHandler;
+  let errorHandler;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
