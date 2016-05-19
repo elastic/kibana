@@ -2,6 +2,7 @@ import _ from 'lodash';
 import 'ui/filters/uriescape';
 import 'ui/filters/rison';
 import uiModules from 'ui/modules';
+import rison from 'rison-node';
 
 
 uiModules.get('kibana/url')
@@ -17,8 +18,8 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
    * @param  {Object} [paramObj] - optional set of parameters for the url template
    * @return {undefined}
    */
-  self.change = function (url, paramObj) {
-    self._changeLocation('url', url, paramObj);
+  self.change = function (url, paramObj, appState) {
+    self._changeLocation('url', url, paramObj, false, appState);
   };
 
   /**
@@ -40,8 +41,8 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
    * @param  {Object} [paramObj] - optional set of parameters for the url template
    * @return {undefined}
    */
-  self.redirect = function (url, paramObj) {
-    self._changeLocation('url', url, paramObj, true);
+  self.redirect = function (url, paramObj, appState) {
+    self._changeLocation('url', url, paramObj, true, appState);
   };
 
   /**
@@ -142,7 +143,7 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
   /////
   let reloading;
 
-  self._changeLocation = function (type, url, paramObj, replace) {
+  self._changeLocation = function (type, url, paramObj, replace, appState) {
     let prev = {
       path: $location.path(),
       search: $location.search()
@@ -151,6 +152,10 @@ function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getA
     url = self.eval(url, paramObj);
     $location[type](url);
     if (replace) $location.replace();
+
+    if (appState) {
+      $location.search('_a', rison.encode(appState));
+    }
 
     let next = {
       path: $location.path(),
