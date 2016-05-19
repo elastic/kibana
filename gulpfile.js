@@ -199,6 +199,5 @@ gulp.task('test', [], function () {
   return gulp.src([
     'server/**/__test__/**/*.js'
   ], { read: false })
-  .pipe(mocha({ reporter: 'list' }))
-  .on('error', gulpUtil.log);
+  .pipe(mocha({ reporter: 'list' }));
 });
