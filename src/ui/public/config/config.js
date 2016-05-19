@@ -107,7 +107,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
 
   function getCurrentValue(key) {
     if (!(key in settings)) {
-      throw new Error(`Unexpected \`config.get("${key}", fn)\` call on unrecognized configuration setting "${key}".
+      throw new Error(`Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
 Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
 any custom setting value for "${key}" may fix this issue.`);
     }
