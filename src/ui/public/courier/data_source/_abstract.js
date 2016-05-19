@@ -310,7 +310,7 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
 
         /**
         * Translate a filter into a query to support es 3+
-        * @param  {Object} filter - The fitler to translate
+        * @param  {Object} filter - The filter to translate
         * @return {Object} the query version of that filter
         */
         let translateToQuery = function (filter) {
