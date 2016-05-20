@@ -34,36 +34,47 @@ uiModules
       return '#' + hexStr;
     }
     const isPieChart = (chartType === 'pie');
-    function decodeBucketData(buckets, aggregations) {
-      const chartDatasetConfigs = {};
-      if (!buckets) { return chartDatasetConfigs; }
+    function decodeBucketData(aggConfigs, aggregations) {
+      const datasetMap = {};
+      const xAxisLabels = [];
+      // If there is no data
+      if (!aggConfigs) { return datasetMap; }
 
-      const maxAggDepth = buckets.length - 1;
+      const maxAggDepth = aggConfigs.length - 1;
       let currDepth = 0;
       // meant to recursively crawl through es aggregations
       // to make sense of the data for a charting library
-      function decodeBucket(bucket, aggResp) {
-        const bucketId = bucket.id;
-        if (!chartDatasetConfigs[bucket.id]) { // add a empty dataset if we haven't
-          chartDatasetConfigs[bucketId] = {
-            data: [],
-            labels: [],
-            backgroundColor: []
-          };
-        }
-        const config = chartDatasetConfigs[bucketId];
+      function decodeBucket(aggConfig, aggResp) {
         aggResp.buckets.forEach((bucket) => {
-          config.data.push(bucket.doc_count);
-          config.labels.push(bucket.key);
+          const isFirstAggConfig = currDepth === 0;
+
+          if (isFirstAggConfig) { // Sets the labels for the X-Axis
+            xAxisLabels.push(bucket.key);
+          }
           if (currDepth < maxAggDepth) { // Crawl through the structure if we should
-            const nextBucket = buckets[++currDepth];
-            decodeBucket(nextBucket, bucket[nextBucket.id]);
+            const nextAggConfig = aggConfigs[++currDepth];
+            decodeBucket(nextAggConfig, bucket[nextAggConfig.id]);
             currDepth--;
+          } else {
+            const isDateBucket = aggConfig.__type.dslName === 'date_histogram';
+            const legendLabel = (isFirstAggConfig  && isDateBucket && !isPieChart) ? 'Count' : bucket.key;
+            const dataset = datasetMap[legendLabel] || [];
+            dataset.push(bucket.doc_count);
+            datasetMap[legendLabel] = dataset;
           }
         });
       }
-      decodeBucket(buckets[0], aggregations[buckets[0].id]);
-      const arrDatasets = buckets.map(bucket => { return chartDatasetConfigs[bucket.id]; });
+      const firstAggConfig = aggConfigs[0];
+      decodeBucket(firstAggConfig, aggregations[firstAggConfig.id]);
+      const legendLabels = [];
+      const arrDatasets = _.map(datasetMap, (val, key) => {
+        legendLabels.push(key);
+        return {
+          data: val,
+          label: key,
+          backgroundColor: []
+        };
+      });
       // Make some colors for all of the data points.
       // This need to be different, instead of looking at all the colors
       // you should look at RGB separate and limit the number from there
@@ -76,7 +87,9 @@ uiModules
         const difference = maxColors / numDataPoints;
         let currColor = colorOffset;
         while (numDataPoints-- > 0) {
-          set.backgroundColor.push(makeColor(currColor));
+          if (isPieChart) {
+            set.backgroundColor.push(makeColor(currColor));
+          }
           currColor += difference;
         }
         if (!isPieChart) {
@@ -84,28 +97,29 @@ uiModules
         }
       });
 
-      return arrDatasets;
+      return {
+        legend: legendLabels,
+        labels: xAxisLabels,
+        dataConfigs: arrDatasets
+      };
     }
     return function convertEsRespAndAggConfig(esResp, aggConfigs) {
-      const chartDatasetConfigs = [];
       const aggConfigMap = aggConfigs.byId;
       const decodedData = decodeBucketData(aggConfigs.bySchemaGroup.buckets, esResp.aggregations);
-      const flattenedLabels = _.reduce(decodedData, (prev, dataset) => {
-        return _.uniq(prev.concat(dataset.labels));
-      }, []);
       if (myChart) { // Not a fan of this, i should be using update
         myChart.destroy();
       }
       myChart = new Chart($el, {
         type: chartType,
         data: {
-          labels: flattenedLabels,
-          datasets: decodedData
+          labels: decodedData.labels,
+          datasets: decodedData.dataConfigs
         },
+        fill: false,
         options: {
           legendCallback: function (chartObj) {
             const multipleBuckets = aggConfigs.bySchemaGroup.buckets.length > 1;
-            const legendItems = multipleBuckets || isPieChart ? flattenedLabels : [aggConfigs.bySchemaGroup.metrics[0]._opts.type];
+            const legendItems = multipleBuckets || isPieChart ? decodedData.legend : [aggConfigs.bySchemaGroup.metrics[0]._opts.type];
             const itemsHtmlArr = legendItems.map(item => { return '<li>' + item + '</li>'; });
             return '<ul>' + itemsHtmlArr.join('') + '</ul>';
           },
@@ -117,7 +131,7 @@ uiModules
               title: function () { return 'hello world'; },
               label: function (item, data) {
                 const dataset = data.datasets[item.datasetIndex];
-                return dataset.labels[item.index] + ': ' + dataset.data[item.index];
+                return dataset.label + ': ' + dataset.data[item.index];
               }
             }
           }
