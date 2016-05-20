@@ -27,9 +27,6 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
         config.set('defaultIndex', indexPattern.id);
       }
 
-      return refreshKibanaIndex();
-    })
-    .then(() => {
       indexPatterns.getIds.clearCache();
       $rootScope.$broadcast('ingest:updated');
     });
@@ -41,7 +38,6 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
     }
 
     return $http.delete(`${ingestAPIPrefix}/${ingestId}`)
-    .then(refreshKibanaIndex)
     .then(() => {
       indexPatterns.getIds.clearCache();
       $rootScope.$broadcast('ingest:updated');
