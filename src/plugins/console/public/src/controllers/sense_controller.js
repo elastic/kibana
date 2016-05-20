@@ -13,7 +13,7 @@ module.run(function (Private, $rootScope) {
 
 module.controller('SenseController', function SenseController($scope, docTitle) {
 
-  docTitle.change('Sense');
+  docTitle.change('Console');
 
   // require the root app code, which expects to execute once the dom is loaded up
   require('../app');
@@ -32,13 +32,4 @@ module.controller('SenseController', function SenseController($scope, docTitle) 
     event.preventDefault();
     input.focus();
   };
-
-  this.serverUrl = es.getBaseUrl();
-
-  // read server url changes into scope
-  es.addServerChangeListener((server) => {
-    $scope.$evalAsync(() => {
-      this.serverUrl = server;
-    });
-  });
 });

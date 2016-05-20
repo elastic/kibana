@@ -12,11 +12,11 @@ uiModules
         'ngModel': '='
       },
       link: function ($scope, elem, attr, ngModel) {
-        var illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
-        var isValid = function (input) {
+        let illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
+        let isValid = function (input) {
           if (input == null || input === '' || input === '.' || input === '..') return false;
 
-          var match = _.find(illegalCharacters, function (character) {
+          let match = _.find(illegalCharacters, function (character) {
             return input.indexOf(character) >= 0;
           });
           return !match;
@@ -24,7 +24,7 @@ uiModules
 
         // From User
         ngModel.$parsers.unshift(function (value) {
-          var valid = isValid(value);
+          let valid = isValid(value);
           ngModel.$setValidity('indexNameInput', valid);
           return valid ? value : undefined;
         });

@@ -5,6 +5,7 @@ import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 import Logger from '../../lib/logger';
+import { UnsupportedProtocolError } from '../../lib/errors';
 import { download, _downloadSingle } from '../download';
 import { join } from 'path';
 
@@ -74,12 +75,12 @@ describe('kibana cli', function () {
           });
         });
 
-        it('should throw an ENOTFOUND error for an invalid url', function () {
+        it('should throw an UnsupportedProtocolError for an invalid url', function () {
           const sourceUrl = 'i am an invalid url';
 
           return _downloadSingle(settings, logger, sourceUrl)
           .then(shouldReject, function (err) {
-            expect(err.message).to.match(/ENOTFOUND/);
+            expect(err).to.be.an(UnsupportedProtocolError);
             expectWorkingPathEmpty();
           });
         });

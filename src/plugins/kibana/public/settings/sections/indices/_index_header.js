@@ -16,7 +16,7 @@ uiModules
       $scope.delete = attrs.delete ? $scope.delete : null;
       $scope.setDefault = attrs.setDefault ? $scope.setDefault : null;
       $scope.refreshFields = attrs.refreshFields ? $scope.refreshFields : null;
-      config.$bind($scope, 'defaultIndex');
+      config.bindToScope($scope, 'defaultIndex');
     }
   };
 });

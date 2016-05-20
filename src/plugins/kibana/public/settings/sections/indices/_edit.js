@@ -56,7 +56,7 @@ uiModules.get('apps/settings')
 
   $scope.removePattern = function () {
     if ($scope.indexPattern.id === config.get('defaultIndex')) {
-      config.delete('defaultIndex');
+      config.remove('defaultIndex');
       if (otherIds.length) {
         config.set('defaultIndex', otherIds[0]);
       }

@@ -10,20 +10,19 @@ uiModules
     return Private(shortDotsFilterProvider);
   });
 
-function shortDotsFilterProvider(config, $rootScope) {
+function shortDotsFilterProvider(config) {
   let filter;
 
-  function updateFilter() {
-    filter = config.get('shortDots:enable') ? _.shortenDottedString : _.identity;
+  config.watch('shortDots:enable', updateFilter);
+
+  return wrapper;
+
+  function updateFilter(enabled) {
+    filter = enabled ? _.shortenDottedString : _.identity;
   }
-
-  updateFilter();
-  $rootScope.$on('change:config.shortDots:enable', updateFilter);
-  $rootScope.$on('init:config', updateFilter);
-
-  return function (str) {
+  function wrapper(str) {
     return filter(str);
-  };
+  }
 }
 
 export default shortDotsFilterProvider;
