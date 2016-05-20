@@ -31,21 +31,14 @@ module.run(function ($interval) {
 // expect access to config (since it's dependent on kibana)
 if (!!kbnIndex) {
   require('ui/config');
-  module.run(function ($rootScope, config) {
-    let configInitListener = $rootScope.$on('init:config', function () {
-      applyConfig();
-      configInitListener();
-    });
-
-    $rootScope.$on('change:config', applyConfig);
-
-    function applyConfig() {
+  module.run(function (config) {
+    config.watchAll(() => {
       Notifier.applyConfig({
         errorLifetime: config.get('notifications:lifetime:error'),
         warningLifetime: config.get('notifications:lifetime:warning'),
         infoLifetime: config.get('notifications:lifetime:info')
       });
-    }
+    });
   });
 }
 
