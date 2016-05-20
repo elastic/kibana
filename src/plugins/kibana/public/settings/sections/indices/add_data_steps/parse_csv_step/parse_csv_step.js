@@ -55,7 +55,11 @@ modules.get('apps/settings')
                     return `${error.type} at row ${error.row} - ${error.message}`;
                   });
                   this.columns = results.meta.fields;
-                  this.rows = _.map(results.data, _.values);
+                  this.rows = _.map(results.data, (row) => {
+                    return _.map(this.columns, (columnName) => {
+                      return row[columnName];
+                    });
+                  });
                   this.samples = results.data;
                   this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
                 });
