@@ -16,7 +16,7 @@ modules.get('apps/settings')
     scope: {},
     bindToController: true,
     controllerAs: 'wizard',
-    controller: function ($scope, AppState, safeConfirm, kbnUrl, $http, Notifier, $window, config, Private) {
+    controller: function ($scope, AppState, safeConfirm, kbnUrl, Notifier, $window, Private) {
       const ingest = Private(IngestProvider);
       const $state = this.state = new AppState();
 

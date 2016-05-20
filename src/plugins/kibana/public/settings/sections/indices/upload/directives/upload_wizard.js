@@ -3,8 +3,8 @@ import template from 'plugins/kibana/settings/sections/indices/upload/directives
 import IngestProvider from 'ui/ingest';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/parse_csv_step';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup';
 import 'plugins/kibana/settings/sections/indices/add_data_steps/upload_data_step';
+import '../../styles/_add_data_wizard.less';
 
 modules.get('apps/settings')
   .directive('uploadWizard', function () {
@@ -14,7 +14,7 @@ modules.get('apps/settings')
       scope: {},
       bindToController: true,
       controllerAs: 'wizard',
-      controller: function ($scope, AppState, safeConfirm, kbnUrl, $http, Notifier, $window, config, Private) {
+      controller: function ($scope, AppState, safeConfirm, kbnUrl, Notifier, $window, Private) {
         const ingest = Private(IngestProvider);
         const $state = this.state = new AppState();
 
