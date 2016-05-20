@@ -227,7 +227,7 @@ export default (function () {
 
     selectField: function selectField(fieldValue) {
       var self = this;
-      return common.try(function tryThis() {
+      return common.try(function tryingForTime() {
         return self.remote
         .setFindTimeout(defaultFindTimeout)
         // the css below should be more selective
@@ -316,7 +316,7 @@ export default (function () {
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
       .then(function () {
-        return common.try(function tryThis() {
+        return common.try(function tryingForTime() {
           return self.remote
           .setFindTimeout(defaultFindTimeout)
           .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
@@ -346,7 +346,7 @@ export default (function () {
       var self = this;
       common.debug('clickVisualizationByLinkText(' + vizName + ')');
 
-      return common.try(function tryThis() {
+      return common.try(function tryingForTime() {
         return self.remote
         .setFindTimeout(defaultFindTimeout)
         .findByLinkText(vizName)
@@ -664,7 +664,7 @@ export default (function () {
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-      return common.try(function tryThis() {
+      return common.try(function tryingForTime() {
         return self.remote
         .setFindTimeout(100)
         .findAllByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')

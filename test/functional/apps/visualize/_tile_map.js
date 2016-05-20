@@ -61,7 +61,7 @@ import {
         })
         .then(function () {
           common.debug('Click field geo.coordinates');
-          return common.tryForTime(1000, function () {
+          return common.try(function tryingForTime() {
             return visualizePage.selectField('geo.coordinates');
           });
         })
