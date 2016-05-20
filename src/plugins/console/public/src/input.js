@@ -59,7 +59,7 @@ var zc = (function setupZeroClipboard() {
 
   zc.on('wrongflash noflash', function () {
     if (!storage.get('flash_warning_shown')) {
-      alert('Sense needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
+      alert('Console needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
       storage.set('flash_warning_shown', 'true');
     }
     $copyAsCURL.hide();
@@ -158,7 +158,7 @@ function sendCurrentRequestToES() {
           ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 404)
         ) {
           // we have someone on the other side. Add to history
-          history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
+          history.addToHistory(es_path, es_method, es_data);
 
 
           let value = xhr.responseText;

@@ -3,7 +3,7 @@ import addOrdinalSuffix from 'ui/utils/ordinal_suffix';
 import expect from 'expect.js';
 
 describe('ordinal suffix util', function () {
-  var checks = {
+  let checks = {
     1: 'st',
     2: 'nd',
     3: 'rd',
@@ -37,8 +37,8 @@ describe('ordinal suffix util', function () {
   };
 
   _.forOwn(checks, function (expected, num) {
-    var int = parseInt(num, 10);
-    var float = int + Math.random();
+    let int = parseInt(num, 10);
+    let float = int + Math.random();
 
     it('knowns ' + int, function () {
       expect(addOrdinalSuffix(num)).to.be(num + '' + expected);

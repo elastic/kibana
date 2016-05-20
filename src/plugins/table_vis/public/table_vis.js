@@ -38,7 +38,11 @@ function TableVisTypeProvider(Private) {
       defaults: {
         perPage: 10,
         showPartialRows: false,
-        showMeticsAtAllLevels: false
+        showMeticsAtAllLevels: false,
+        sort: {
+          columnIndex: null,
+          direction: null
+        }
       },
       editor: '<table-vis-params></table-vis-params>'
     },

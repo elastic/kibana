@@ -15,7 +15,7 @@ let buildYAxis;
 let yAxis;
 let yAxisDiv;
 
-var timeSeries = [
+let timeSeries = [
   1408734060000,
   1408734090000,
   1408734120000,
@@ -28,7 +28,7 @@ var timeSeries = [
   1408734330000
 ];
 
-var defaultGraphData = [
+let defaultGraphData = [
   [ 8, 23, 30, 28, 36, 30, 26, 22, 29, 24 ],
   [ 2, 13, 20, 18, 26, 20, 16, 12, 19, 14 ]
 ];
@@ -43,7 +43,7 @@ function makeSeriesData(data) {
 }
 
 function createData(seriesData) {
-  var data = {
+  let data = {
     hits: 621,
     label: 'test',
     ordered: {
@@ -59,7 +59,7 @@ function createData(seriesData) {
     yAxisLabel: 'Count'
   };
 
-  var node = $('<div>').css({
+  let node = $('<div>').css({
     height: 40,
     width: 40
   })
@@ -72,7 +72,7 @@ function createData(seriesData) {
   yAxisDiv = el.append('div')
   .attr('class', 'y-axis-div');
 
-  var dataObj = new Data(data, {
+  let dataObj = new Data(data, {
     defaultYMin: true
   }, persistedState);
 
@@ -133,10 +133,10 @@ describe('Vislib yAxis Class Test Suite', function () {
     let yScale;
     let graphData;
     let domain;
-    var height = 50;
+    let height = 50;
 
     function checkDomain(min, max) {
-      var domain = yScale.domain();
+      let domain = yScale.domain();
       expect(domain[0]).to.be.lessThan(min + 1);
       expect(domain[1]).to.be.greaterThan(max - 1);
       return domain;
@@ -181,9 +181,9 @@ describe('Vislib yAxis Class Test Suite', function () {
 
 
       it('should have domain between 0 and max value', function () {
-        var min = 0;
-        var max = _.max(_.flattenDeep(graphData));
-        var domain = checkDomain(min, max);
+        let min = 0;
+        let max = _.max(_.flattenDeep(graphData));
+        let domain = checkDomain(min, max);
         expect(domain[1]).to.be.greaterThan(0);
         checkRange();
       });
@@ -200,9 +200,9 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('should have domain between min value and 0', function () {
-        var min = _.min(_.flattenDeep(graphData));
-        var max = 0;
-        var domain = checkDomain(min, max);
+        let min = _.min(_.flattenDeep(graphData));
+        let max = 0;
+        let domain = checkDomain(min, max);
         expect(domain[0]).to.be.lessThan(0);
         checkRange();
       });
@@ -219,9 +219,9 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('should have domain between min and max values', function () {
-        var min = _.min(_.flattenDeep(graphData));
-        var max = _.max(_.flattenDeep(graphData));
-        var domain = checkDomain(min, max);
+        let min = _.min(_.flattenDeep(graphData));
+        let max = _.max(_.flattenDeep(graphData));
+        let domain = checkDomain(min, max);
         expect(domain[0]).to.be.lessThan(0);
         expect(domain[1]).to.be.greaterThan(0);
         checkRange();
@@ -236,8 +236,8 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('should throw a NaN error', function () {
-        var min = 'Not a number';
-        var max = 12;
+        let min = 'Not a number';
+        let max = 12;
 
         expect(function () {
           yAxis._validateUserExtents(min, max);
@@ -250,7 +250,7 @@ describe('Vislib yAxis Class Test Suite', function () {
         domain = [];
         domain[0] = yAxis._attr.yAxis.min = 20;
         domain[1] = yAxis._attr.yAxis.max = 80;
-        var newDomain = yAxis._validateUserExtents(domain);
+        let newDomain = yAxis._validateUserExtents(domain);
 
         expect(newDomain[0]).to.be(domain[0] / 100);
         expect(newDomain[1]).to.be(domain[1] / 100);
@@ -258,7 +258,7 @@ describe('Vislib yAxis Class Test Suite', function () {
 
       it('should return the user defined value', function () {
         domain = [20, 50];
-        var newDomain = yAxis._validateUserExtents(domain);
+        let newDomain = yAxis._validateUserExtents(domain);
 
         expect(newDomain[0]).to.be(domain[0]);
         expect(newDomain[1]).to.be(domain[1]);
@@ -267,8 +267,8 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     describe('should throw an error when', function () {
       it('min === max', function () {
-        var min = 12;
-        var max = 12;
+        let min = 12;
+        let max = 12;
 
         expect(function () {
           yAxis._validateAxisExtents(min, max);
@@ -276,8 +276,8 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('min > max', function () {
-        var min = 30;
-        var max = 10;
+        let min = 30;
+        let max = 10;
 
         expect(function () {
           yAxis._validateAxisExtents(min, max);
@@ -287,7 +287,7 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getScaleType method', function () {
-    var fnNames = ['linear', 'log', 'square root'];
+    let fnNames = ['linear', 'log', 'square root'];
 
     it('should return a function', function () {
       fnNames.forEach(function (fnName) {
@@ -319,7 +319,7 @@ describe('Vislib yAxis Class Test Suite', function () {
     });
 
     it('should return a yMin value of 1', function () {
-      var yMin = yAxis._logDomain(0, 200)[0];
+      let yMin = yAxis._logDomain(0, 200)[0];
       expect(yMin).to.be(1);
     });
   });
@@ -343,13 +343,13 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     it('should use percentage format for percentages', function () {
       yAxis._attr.mode = 'percentage';
-      var tickFormat = yAxis.getYAxis().tickFormat();
+      let tickFormat = yAxis.getYAxis().tickFormat();
       expect(tickFormat(1)).to.be('100%');
     });
 
     it('should use decimal format for small values', function () {
       yAxis.yMax = 1;
-      var tickFormat = yAxis.getYAxis().tickFormat();
+      let tickFormat = yAxis.getYAxis().tickFormat();
       expect(tickFormat(0.8)).to.be('0.8');
     });
 
@@ -384,23 +384,23 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('#tickFormat()', function () {
-    var formatter = function () {};
+    let formatter = function () {};
 
     it('returns a basic number formatter by default', function () {
-      var yAxis = buildYAxis();
+      let yAxis = buildYAxis();
       expect(yAxis.tickFormat()).to.not.be(formatter);
       expect(yAxis.tickFormat()(1)).to.be('1');
     });
 
     it('returns the yAxisFormatter when passed', function () {
-      var yAxis = buildYAxis({
+      let yAxis = buildYAxis({
         yAxisFormatter: formatter
       });
       expect(yAxis.tickFormat()).to.be(formatter);
     });
 
     it('returns a percentage formatter when the vis is in percentage mode', function () {
-      var yAxis = buildYAxis({
+      let yAxis = buildYAxis({
         yAxisFormatter: formatter,
         _attr: {
           mode: 'percentage'

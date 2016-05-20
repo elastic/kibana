@@ -1,12 +1,12 @@
 module.exports = function ({env, bundle}) {
 
-  let pluginSlug = env.pluginInfo.sort()
-  .map(p => ' *  - ' + p)
-  .join('\n');
+  const pluginSlug = env.pluginInfo.sort()
+    .map(p => ' *  - ' + p)
+    .join('\n');
 
-  let requires = bundle.modules
-  .map(m => `require(${JSON.stringify(m)});`)
-  .join('\n');
+  const requires = bundle.modules
+    .map(m => `require(${JSON.stringify(m)});`)
+    .join('\n');
 
   return `
 /**
@@ -28,13 +28,16 @@ window.__KBN__ = {
     esShardTimeout: 1500,
     esApiVersion: '2.0',
     esRequestTimeout: '300000'
+  },
+  uiSettings: {
+    defaults: ${JSON.stringify(env.defaultUiSettings, null, 2).split('\n').join('\n    ')},
+    user: {}
   }
 };
 
 require('ui/test_harness');
 ${requires}
 require('ui/test_harness').bootstrap(/* go! */);
-
 `;
 
 };

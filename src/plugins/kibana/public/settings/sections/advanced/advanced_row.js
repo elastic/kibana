@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
-import ConfigDefaultsProvider from 'ui/config/defaults';
 import uiModules from 'ui/modules';
 import advancedRowTemplate from 'plugins/kibana/settings/sections/advanced/advanced_row.html';
 
 uiModules.get('apps/settings')
-.directive('advancedRow', function (config, Notifier, Private) {
+.directive('advancedRow', function (config, Notifier) {
   return {
     restrict: 'A',
     replace: true,
@@ -16,7 +15,6 @@ uiModules.get('apps/settings')
       configs: '='
     },
     link: function ($scope) {
-      const configDefaults = Private(ConfigDefaultsProvider);
       const notify = new Notifier();
       const keyCodes = {
         ESC: 27
@@ -29,10 +27,10 @@ uiModules.get('apps/settings')
       const loading = function (conf, fn) {
         conf.loading = true;
         fn()
-        .finally(function () {
-          conf.loading = conf.editing = false;
-        })
-        .catch(notify.fatal);
+          .then(function () {
+            conf.loading = conf.editing = false;
+          })
+          .catch(notify.fatal);
       };
 
       $scope.maybeCancel = function ($event, conf) {
@@ -51,7 +49,7 @@ uiModules.get('apps/settings')
       $scope.save = function (conf) {
         loading(conf, function () {
           if (conf.unsavedValue === conf.defVal) {
-            return config.clear(conf.name);
+            return config.remove(conf.name);
           }
 
           return config.set(conf.name, conf.unsavedValue);
@@ -64,7 +62,7 @@ uiModules.get('apps/settings')
 
       $scope.clear = function (conf) {
         return loading(conf, function () {
-          return config.clear(conf.name);
+          return config.remove(conf.name);
         });
       };
 

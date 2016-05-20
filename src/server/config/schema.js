@@ -29,13 +29,15 @@ module.exports = () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
+  uuid: Joi.string().guid().default(),
+
   server: Joi.object({
     name: Joi.string().default(os.hostname()),
     host: Joi.string().hostname().default('0.0.0.0'),
     port: Joi.number().default(5601),
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
-    defaultRoute: Joi.string(),
+    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
       cert: Joi.string(),
@@ -119,6 +121,10 @@ module.exports = () => Joi.object({
       )
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false)
+  }).default(),
+
+  status: Joi.object({
+    allowAnonymous: Joi.boolean().default(false)
   }).default()
 
 }).default();

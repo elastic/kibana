@@ -1,5 +1,5 @@
 import getSort from 'ui/doc_table/lib/get_sort';
-var defaultSort = {time: 'desc'};
+let defaultSort = {time: 'desc'};
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
