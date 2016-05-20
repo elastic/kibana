@@ -14,6 +14,11 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
         return unorderedArg.name === orderedArg.name;
       });
       argDef = functionDef.args[argIndex];
+
+      if (!argDef) {
+        throw new Error('Unknown argument to ' + functionDef.name + ': ' + unorderedArg.name);
+      }
+
       targetIndex = argIndex;
       value = unorderedArg.value;
     } else {
