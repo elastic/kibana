@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 import uiModules from 'ui/modules';
 
 uiModules.get('kibana').directive('validateDateMath', function () {

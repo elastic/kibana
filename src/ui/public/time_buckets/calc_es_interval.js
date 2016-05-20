@@ -1,5 +1,5 @@
 import moment from 'moment';
-import dateMath from 'ui/utils/date_math';
+import dateMath from '@elastic/datemath';
 export default function () {
 
   let unitsDesc = dateMath.unitsDesc;

@@ -53,9 +53,22 @@ describe('Scanner', function () {
       scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, mockScroll));
     });
 
+    it('should reject when an error occurs', function (done) {
+      search.restore();
+      search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
+      return scanner.scanAndMap('')
+      .then(function (response) {
+        done(new Error('should reject'));
+      })
+      .catch(function (error) {
+        expect(error.message).to.be('fail.');
+        done();
+      });
+    });
+
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function (error, response) {
+      .then(function (response) {
         expect(search.called).to.be(true);
         expect(scroll.called).to.be(true);
       });
