@@ -50,10 +50,12 @@ uiModules
       $scope.$on('drag-start', e => {
         $scope.editorWasOpen = $scope.editorOpen;
         $scope.editorOpen = false;
+        $scope.$emit('agg-drag-start', $scope.agg);
       });
 
       $scope.$on('drag-end', e => {
         $scope.editorOpen = $scope.editorWasOpen;
+        $scope.$emit('agg-drag-end', $scope.agg);
       });
 
       $scope.remove = function (agg) {
