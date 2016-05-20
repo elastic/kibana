@@ -214,14 +214,14 @@ export default (function () {
     },
 
     hasNoResults: function hasNoResults() {
-      return thisTime
+      return common
         .findTestSubject('discoverNoResult')
         .then(() => true)
         .catch(() => false);
     },
 
     getNoResultsTimepicker: function getNoResultsTimepicker() {
-      return thisTime.findTestSubject('discoverNoResultsTimefilter');
+      return common.findTestSubject('discoverNoResultsTimefilter');
     },
 
     hasNoResultsTimepicker: function hasNoResultsTimepicker() {

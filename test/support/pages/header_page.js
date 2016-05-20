@@ -49,7 +49,7 @@ export default (function () {
     },
 
     isTimepickerOpen: function isTimepickerOpen() {
-      return this.remote.setFindTimeout(defaultTimeout)
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findDisplayedByClassName('config')
       .then(() => true)
       .catch(() => false);
