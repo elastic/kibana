@@ -61,7 +61,6 @@ function updateSettings({ fontSize, wrapMode, autocomplete}) {
   setWrapMode(wrapMode);
   setAutocomplete(autocomplete);
   require('./input').focus();
-  es.forceRefresh();
   return getCurrentSettings();
 }
 

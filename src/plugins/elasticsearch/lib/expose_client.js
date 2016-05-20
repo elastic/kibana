@@ -5,6 +5,7 @@ const readFile = (file) => require('fs').readFileSync(file, 'utf8');
 import util from 'util';
 import url from 'url';
 import callWithRequest from './call_with_request';
+import filterHeaders from './filter_headers';
 
 module.exports = function (server) {
   const config = server.config();
@@ -78,8 +79,9 @@ module.exports = function (server) {
   server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
   server.expose('createClient', createClient);
-  server.expose('callWithRequestFactory', callWithRequest);
-  server.expose('callWithRequest', callWithRequest(noAuthClient));
+  server.expose('callWithRequestFactory', _.partial(callWithRequest, server));
+  server.expose('callWithRequest', callWithRequest(server, noAuthClient));
+  server.expose('filterHeaders', filterHeaders);
   server.expose('errors', elasticsearch.errors);
 
   return client;

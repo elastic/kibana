@@ -119,6 +119,8 @@ function add(notif, cb) {
   return notif;
 }
 
+Notifier.prototype.add = add;
+
 function formatInfo() {
   let info = [];
 

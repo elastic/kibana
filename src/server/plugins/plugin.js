@@ -59,9 +59,11 @@ module.exports = class Plugin {
     this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
+    this.externalPreInit = opts.preInit || _.noop;
     this.externalInit = opts.init || _.noop;
     this.configPrefix = opts.configPrefix || this.id;
     this.getConfigSchema = opts.config || _.noop;
+    this.preInit = _.once(this.preInit);
     this.init = _.once(this.init);
     this[extendInitFns] = [];
 
@@ -98,6 +100,10 @@ module.exports = class Plugin {
       config.removeSchema(this.configPrefix);
       return false;
     }
+  }
+
+  async preInit() {
+    return await this.externalPreInit(this.kbnServer.server);
   }
 
   async init() {
