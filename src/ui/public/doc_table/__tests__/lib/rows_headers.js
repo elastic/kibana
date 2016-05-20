@@ -46,12 +46,6 @@ describe('Doc Table', function () {
   //
   let columnTests = function (elemType, parentElem) {
 
-    it('should create a time column if the timefield is defined', function (done) {
-      let childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      done();
-    });
-
     it('should be able to add and remove columns', function (done) {
       let childElems;
       // Should include a column for toggling and the time column by default
