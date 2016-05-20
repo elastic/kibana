@@ -1,3 +1,9 @@
+/*
+* Algorithms from
+* copyright(c) 2013 Tom Alexander
+* Licensed under the MIT license.
+*/
+
 var _ = require('lodash');
 
 function sum(data, fn) {
