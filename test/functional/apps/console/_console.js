@@ -44,7 +44,7 @@ import {
 
       bdd.it('default request response should contain .kibana' , function () {
         var expectedResponseContains = '"_index": ".kibana",';
-        consolePage.clickPlay()
+        return consolePage.clickPlay()
         .then(function () {
           return common.try(function () {
             return consolePage.getResponse()
@@ -56,7 +56,6 @@ import {
         })
         .catch(common.handleError(this));
       });
-
 
 
     });
