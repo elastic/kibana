@@ -41,6 +41,9 @@ uiModules
           if (count < schema.max) return true;
         });
       });
+
+      $scope.$on('agg-drag-start', e => $scope.dragging = true);
+      $scope.$on('agg-drag-end', e => $scope.dragging = false);
     }
   };
 
