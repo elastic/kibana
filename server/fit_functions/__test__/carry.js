@@ -4,7 +4,7 @@ var moment = require('moment');
 var expect = require('chai').expect;
 var _ = require('lodash');
 
-describe.only(filename, function () {
+describe(filename, function () {
   it('fills holes in the data', function () {
     var data = [
       [moment.utc('1980', 'YYYY').valueOf(), 10],
