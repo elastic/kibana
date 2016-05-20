@@ -16,10 +16,6 @@ uiModules.get('apps/settings')
   return {
     restrict: 'E',
     link: function ($scope) {
-      const keyCodes = {
-        ESC: 27
-      };
-
       // react to changes of the config values
       config.watchAll(changed, $scope);
 
