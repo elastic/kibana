@@ -1,16 +1,14 @@
-var alter = require('../lib/alter.js');
+var alter = require('../../lib/alter.js');
 var _ = require('lodash');
-var Chainable = require('../lib/classes/chainable');
-var regression = require('regression');
+var Chainable = require('../../lib/classes/chainable');
+import * as regress from './lib/regress';
 
-var loadFunctions = require('../lib/load_functions.js');
+var loadFunctions = require('../../lib/load_functions.js');
 var fitFunctions  = loadFunctions('fit_functions');
 
 var validRegressions = {
   linear: 'linear',
-  linearorigin: 'linearThroughOrigin',
   log: 'logarithmic',
-  polynomial: 'polynomial'
 };
 
 module.exports = new Chainable('trend', {
@@ -41,7 +39,6 @@ module.exports = new Chainable('trend', {
   fn: function absFn(args) {
     let newSeries = _.cloneDeep(args.byName.inputSeries);
 
-
     _.each(newSeries.list, function (series) {
       const length = series.data.length;
       let start = args.byName.start == null ? 0 : args.byName.start;
@@ -51,9 +48,7 @@ module.exports = new Chainable('trend', {
 
       const subset = series.data.slice(start, end);
 
-      console.log(subset, start, end);
-
-      const result = regression(validRegressions[args.byName.mode || 'linear'], subset).points;
+      const result = regress[args.byName.mode || 'linear'](subset);
 
       _.each(series.data, function (point) {
         point[1] = null;
