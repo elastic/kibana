@@ -1,7 +1,6 @@
 import moment from 'moment-timezone';
-import _ from 'lodash';
 
-export default function configDefaultsProvider() {
+export default function defaultSettingsProvider() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
@@ -28,25 +27,26 @@ export default function configDefaultsProvider() {
       value: 'Browser',
       description: 'Which timezone should be used.  "Browser" will use the timezone detected by your browser.',
       type: 'select',
-      options: _.union(['Browser'], moment.tz.names())
+      options: ['Browser', ...moment.tz.names()]
     },
     'dateFormat:scaled': {
       type: 'json',
       value:
-        '[\n' +
-        '  ["", "HH:mm:ss.SSS"],\n' +
-        '  ["PT1S", "HH:mm:ss"],\n' +
-        '  ["PT1M", "HH:mm"],\n' +
-        '  ["PT1H",\n' +
-        '      "YYYY-MM-DD HH:mm"],\n' +
-        '  ["P1DT", "YYYY-MM-DD"],\n' +
-        '  ["P1YT", "YYYY"]\n' +
-        ']',
-      description: 'Values that define the format used in situations where timebased' +
-      ' data is rendered in order, and formatted timestamps should adapt to the' +
-      ' interval between measurements. Keys are' +
-      ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
-      'ISO8601 intervals.</a>'
+`[
+  ["", "HH:mm:ss.SSS"],
+  ["PT1S", "HH:mm:ss"],
+  ["PT1M", "HH:mm"],
+  ["PT1H", "YYYY-MM-DD HH:mm"],
+  ["P1DT", "YYYY-MM-DD"],
+  ["P1YT", "YYYY"]
+]`,
+      description: (
+        'Values that define the format used in situations where timebased' +
+        ' data is rendered in order, and formatted timestamps should adapt to the' +
+        ' interval between measurements. Keys are' +
+        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
+        'ISO8601 intervals.</a>'
+      )
     },
     'dateFormat:dow': {
       value: defaultWeekday,
@@ -113,14 +113,14 @@ export default function configDefaultsProvider() {
           attribution: 'Maps provided by USGS',
           styles: '',
         }
-      }, null, '  '),
+      }, null, 2),
       type: 'json',
       description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
     },
     'visualization:colorMapping': {
       type: 'json',
       value: JSON.stringify({
-        'Count': '#6eadc1'
+        Count: '#6eadc1'
       }),
       description: 'Maps values to specified colors within visualizations'
     },
@@ -155,15 +155,14 @@ export default function configDefaultsProvider() {
     },
     'format:defaultTypeMap': {
       type: 'json',
-      value: [
-        '{',
-        '  "ip": { "id": "ip", "params": {} },',
-        '  "date": { "id": "date", "params": {} },',
-        '  "number": { "id": "number", "params": {} },',
-        '  "_source": { "id": "_source", "params": {} },',
-        '  "_default_": { "id": "string", "params": {} }',
-        '}',
-      ].join('\n'),
+      value:
+`{
+  "ip": { "id": "ip", "params": {} },
+  "date": { "id": "date", "params": {} },
+  "number": { "id": "number", "params": {} },
+  "_source": { "id": "_source", "params": {} },
+  "_default_": { "id": "string", "params": {} }
+}`,
       description: 'Map of the format name to use by default for each field type. ' +
         '"_default_" is used if the field type is not mentioned explicitly'
     },
@@ -194,24 +193,22 @@ export default function configDefaultsProvider() {
     },
     'timepicker:timeDefaults': {
       type: 'json',
-      value: [
-        '{',
-        '  "from": "now-15m",',
-        '  "to": "now",',
-        '  "mode": "quick"',
-        '}'
-      ].join('\n'),
+      value:
+`{
+  "from": "now-15m",
+  "to": "now",
+  "mode": "quick"
+}`,
       description: 'The timefilter selection to use when Kibana is started without one'
     },
     'timepicker:refreshIntervalDefaults': {
       type: 'json',
-      value: [
-        '{',
-        '  "display": "Off",',
-        '  "pause": false,',
-        '  "value": 0',
-        '}'
-      ].join('\n'),
+      value:
+`{
+  "display": "Off",
+  "pause": false,
+  "value": 0
+}`,
       description: 'The timefilter\'s default refresh interval'
     },
     'dashboard:defaultDarkTheme': {

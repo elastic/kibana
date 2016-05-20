@@ -20,10 +20,7 @@ module.exports = function (opts) {
     let rootSearchSource = Private(CourierDataSourceRootSearchSourceProvider);
     let path = _.get($route, 'current.$$route.originalPath');
 
-    return config.init()
-    .then(function () {
-      return getIds();
-    })
+    return getIds()
     .then(function (patterns) {
       let defaultId = config.get('defaultIndex');
       let defined = !!defaultId;
@@ -31,7 +28,7 @@ module.exports = function (opts) {
       let required = !notRequiredRe || !path.match(notRequiredRe);
 
       if (defined && !exists) {
-        config.clear('defaultIndex');
+        config.remove('defaultIndex');
         defaultId = defined = false;
       }
 
