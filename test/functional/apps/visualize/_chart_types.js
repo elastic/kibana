@@ -35,7 +35,7 @@ import {
 
           var expectedChartTypes = [
             'Area chart', 'Data table', 'Line chart', 'Markdown widget',
-            'Metric', 'Pie chart', 'Tile map', 'Vertical bar chart'
+            'Metric', 'Pie chart', 'Tag cloud', 'Tile map', 'Vertical bar chart'
           ];
           // find all the chart types and make sure there all there
           return visualizePage.getChartTypes()

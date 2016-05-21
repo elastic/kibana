@@ -1,0 +1,55 @@
+<div class="form-group">
+  <div class="form-group">
+    <label>Layout algorithm</label>
+    <select ng-model="vis.params.spiral" class="form-control">
+      <option value="archimedean" selected="selected">archimedean</option>
+      <option value="rectangular">rectangular</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Text Scale</label>
+    <select ng-model="vis.params.textScale" class="form-control">
+      <option value="linear" selected="selected">linear</option>
+      <option value="log">log</option>
+      <option value="sqrt">square root</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Font Style</label>
+    <select ng-model="vis.params.fontStyle" class="form-control">
+      <option value="normal" selected="selected">normal</option>
+      <option value="italic">italic</option>
+      <option value="oblique">oblique</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Font Weight</label>
+    <select ng-model="vis.params.fontWeight" class="form-control">
+      <option value="normal" selected="selected">normal</option>
+      <option value="bold">bold</option>
+      <option value="bolder">bolder</option>
+      <option value="lighter">lighter</option>
+    </select>
+  </div>
+
+  <label>Number of orientations</label>
+  <input type="number" ng-model="vis.params.orientations" class="form-control">
+
+  <label>Minimum orientation angle - {{ vis.params.fromDegree }} degrees</label>
+  <input type="range" ng-model="vis.params.fromDegree" class="form-control" min="-90" max="90">
+
+  <label>Maximum orientation angle - {{ vis.params.toDegree }} degrees</label>
+  <input type="range" ng-model="vis.params.toDegree" class="form-control" min="-90" max="90">
+
+  <label>Minimum Font Size - {{ vis.params.minFontSize }}px</label>
+  <input type="range" ng-model="vis.params.minFontSize" class="form-control" min="12" max="120">
+
+  <label>Maximum Font Size - {{ vis.params.maxFontSize }}px</label>
+  <input type="range" ng-model="vis.params.maxFontSize" class="form-control" min="12" max="120">
+
+  <label>Time Interval - {{ vis.params.timeInterval }}ms</label>
+  <input type="range" ng-model="vis.params.timeInterval" class="form-control" min="100" max="2000">
+</div>
