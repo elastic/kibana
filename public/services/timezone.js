@@ -1,25 +1,16 @@
-define(function (require) {
-  var tzDetect = require('jstimezonedetect').jstz;
-  var moment = require('moment');
+const tzDetect = require('jstimezonedetect').jstz;
+const moment = require('moment');
 
-  return function timezoneFn(config, Private) {
-    return function () {
-      var configuredTZ = config.get('dateFormat:tz', 'Browser');
-      var configDefaults = Private(require('ui/config/defaults'));
-      var detectedTimezone = tzDetect.determine().name();
-      var isDefaultTimezone;
+module.exports = function timezoneFn(config, Private) {
+  return function () {
 
-      try {
-        isDefaultTimezone = configuredTZ === configDefaults['dateFormat:tz'].value;
-      } catch (e) {
-        return detectedTimezone;
-      }
+    if (config.isDefault('dateFormat:tz')) {
+      const detectedTimezone = tzDetect.determine().name();
+      if (detectedTimezone) return detectedTimezone;
+      else return moment().format('Z');
+    } else {
+      return config.get('dateFormat:tz', 'Browser');
+    }
 
-      var timezone = isDefaultTimezone ?
-        (detectedTimezone || moment().format('Z')) :
-        configuredTZ;
-
-      return timezone;
-    };
   };
-});
+};
