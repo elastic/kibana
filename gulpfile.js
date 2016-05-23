@@ -1,6 +1,7 @@
 
 var gulp = require('gulp');
 var _ = require('lodash');
+var glob = require('glob');
 var yargs = require('yargs').argv;
 var aws = require('aws-sdk');
 var path = require('path');
@@ -99,10 +100,8 @@ gulp.task('docs', function (done) {
 });
 
 gulp.task('version', function (done) {
-  var kibanaVersion = pkg.version.split('-')[0];
-  var timelionVersion = pkg.version.split('-')[1];
-  var newVersion = kibanaVersion + '-' + '0.1.' + (semver.patch(timelionVersion) + 1);
-  child.exec('npm version --no-git-tag-version ' + newVersion, function () {
+  var newVersion = '0.1.' + (semver.patch(pkg.version) + 1);
+  child.exec('npm version --no-git-tag-version ' + pkg.kbnVersion + '-' + pkg.timelionVersion, function () {
     console.log('Timelion version is ' + newVersion);
     done();
   });
@@ -138,47 +137,55 @@ gulp.task('build', ['clean'], function (done) {
 });
 
 gulp.task('package', ['build'], function (done) {
-  return gulp.src(path.join(packageRoot, '**', '*'))
-    .pipe(zip(packageName + '.zip'))
-    .pipe(gulp.dest(targetDir));
+  function writePackages(versions, done) {
+    if (!versions.length) { done(); return; }
+
+    // Write a new version so it works with the Kibana package manager
+    var editable = _.cloneDeep(pkg);
+    editable.version = versions.shift();
+    require('fs').writeFileSync(buildTarget + '/' + 'package.json', JSON.stringify(editable, null, '  '));
+
+    var archiveName = editable.name  + '-' + editable.version + '.zip';
+
+    gulp.src(path.join(packageRoot, '**', '*'))
+      .pipe(zip(archiveName))
+      .pipe(gulp.dest(targetDir))
+      .on('end', function () {
+        gulpUtil.log('Packaged', archiveName);
+        writePackages(versions, done);
+      });
+  }
+
+  // Write one archive for every supported kibana version, plus one with the actual timelion version
+  var pkgVersions = _.map(pkg.kibanas, function (kbn) {
+    return kbn + '-' + pkg.version;
+  });
+  pkgVersions.push(pkg.version);
+
+  writePackages(pkgVersions, done);
 });
 
 gulp.task('release', ['package'], function (done) {
-  var filename = packageName + '.zip';
+  function upload(files, done) {
+    if (!files.length) { done(); return; }
 
-  // Upload to both places.
-  var keys = ['kibana/timelion/', 'elastic/timelion/'];
-
-  _.each(keys, function (key) {
-    if (yargs.latest) {
-      key += 'timelion-latest.zip';
-    } else if (yargs.asVersion) {
-      key += 'timelion-' + yargs.asVersion + '.zip';
-    } else {
-      key += filename;
-    }
+    var filename = _.last(files.shift().split('/'));
     var s3 = new aws.S3();
     var params = {
       Bucket: 'download.elasticsearch.org',
-      Key: key,
+      Key: 'kibana/timelion/' + filename,
       Body: fs.createReadStream(path.join(targetDir, filename))
     };
     s3.upload(params, function (err, data) {
       if (err) return done(err);
       gulpUtil.log('Finished', gulpUtil.colors.cyan('uploaded') + ' Available at ' + data.Location);
-      keys.pop();
+      upload(files, done);
     });
-  });
-
-  function waitForUpload() {
-    if (keys.length) {//we want it to match
-      setTimeout(waitForUpload, 50);//wait 50 millisecnds then recheck
-      return;
-    }
-    done();
-    //real action
   }
-  waitForUpload();
+
+  glob(targetDir + '/*.zip', function (err, files) {
+    upload(files, done);
+  });
 });
 
 gulp.task('dev', ['sync'], function (done) {
