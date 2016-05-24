@@ -2,7 +2,7 @@
   <td class="name">
     <b>{{conf.name}}</b>
     <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
-      (Default: <i>{{conf.defVal == undefined ? 'null' : conf.defVal}}</i>)
+      (Default: <i>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</i>)
     </span>
     <span class="smaller" ng-show="conf.isCustom">
       (Custom setting)
