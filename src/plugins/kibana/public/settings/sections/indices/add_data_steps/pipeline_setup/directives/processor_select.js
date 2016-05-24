@@ -43,12 +43,16 @@ app.directive('processorSelect', function () {
       })
       .catch(notify.error);
 
-      $scope.selectedItem = { value: '' };
       $scope.$watch('selectedItem.value', (newVal) => {
         if (!newVal) return;
 
         $scope.processorType = newVal.Type;
-        $scope.selectedItem.value = '';
+      });
+
+      $scope.$watch('processorType', processorType => {
+        if (!processorType) {
+          $scope.selectedItem = { value: '' };
+        }
       });
     }
   };
