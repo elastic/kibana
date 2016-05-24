@@ -1,16 +1,11 @@
-// in test/support/pages/discover_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var Common = require('./common');
+import { remote, common, defaultFindTimeout } from '../';
 
-  var defaultTimeout = config.timeouts.default;
-  var common;
+export default (function () {
   var thisTime;
 
-  function DiscoverPage(remote) {
+  function DiscoverPage() {
     this.remote = remote;
-    common = new Common(this.remote);
-    thisTime = this.remote.setFindTimeout(defaultTimeout);
+    thisTime = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
   DiscoverPage.prototype = {
@@ -48,9 +43,7 @@ define(function (require) {
       })
       .then(function clickSave() {
         common.debug('--find save button');
-        return thisTime
-        .findDisplayedByCssSelector('button[ng-disabled="!opts.savedSearch.title"]')
-        .click();
+        return common.findTestSubject('discover-save-search-btn').click();
       })
       .catch(common.handleError(this));
     },
@@ -76,13 +69,13 @@ define(function (require) {
 
     clickLoadSavedSearchButton: function clickLoadSavedSearchButton() {
       return thisTime
-      .findByCssSelector('button[aria-label="Load Saved Search"]')
+      .findDisplayedByCssSelector('button[aria-label="Load Saved Search"]')
       .click();
     },
 
     getCurrentQueryName: function getCurrentQueryName() {
       return thisTime
-        .findByCssSelector('span.kibana-nav-info-title')
+        .findByCssSelector('span.kibana-nav-info-title span')
         .getVisibleText();
     },
 
@@ -223,4 +216,4 @@ define(function (require) {
   };
 
   return DiscoverPage;
-});
+}());

@@ -13,7 +13,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      var filter = { query: { match_all: {} } };
+      let filter = { query: { match_all: {} } };
       mapDefault(filter).then(function (result) {
         expect(result).to.have.property('key', 'query');
         expect(result).to.have.property('value', '{"match_all":{}}');
@@ -23,7 +23,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should work with undefined filter types', function (done) {
-      var filter = {
+      let filter = {
         'bool': {
           'must': {
             'term': {
@@ -41,7 +41,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined if there is no valid key', function (done) {
-      var filter = { meta: {} };
+      let filter = { meta: {} };
       mapDefault(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

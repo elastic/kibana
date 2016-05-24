@@ -9,10 +9,10 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 export default function (Private) {
-  var fieldFormats = Private(RegistryFieldFormatsProvider);
-  var flattenHit = Private(IndexPatternsFlattenHitProvider);
+  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  let flattenHit = Private(IndexPatternsFlattenHitProvider);
 
-  var Field = Private(IndexPatternsFieldProvider);
+  let Field = Private(IndexPatternsFieldProvider);
 
   function StubIndexPattern(pattern, timeField, fields) {
     this.id = pattern;

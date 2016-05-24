@@ -12,19 +12,19 @@ function unwrap(val) {
 
 function convertRowsToFeatures(table, geoI, metricI) {
   return _.transform(table.rows, function (features, row) {
-    var geohash = unwrap(row[geoI]);
+    let geohash = unwrap(row[geoI]);
     if (!geohash) return;
 
     // fetch latLn of northwest and southeast corners, and center point
-    var location = decodeGeoHash(geohash);
+    let location = decodeGeoHash(geohash);
 
-    var centerLatLng = [
+    let centerLatLng = [
       location.latitude[2],
       location.longitude[2]
     ];
 
     // order is nw, ne, se, sw
-    var rectangle = [
+    let rectangle = [
       [location.latitude[0], location.longitude[0]],
       [location.latitude[0], location.longitude[1]],
       [location.latitude[1], location.longitude[1]],

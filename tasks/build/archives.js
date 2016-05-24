@@ -1,6 +1,6 @@
 module.exports = function createPackages(grunt) {
   let { config } = grunt;
-  let { resolve } = require('path');
+  let { resolve, relative } = require('path');
   let { execFile } = require('child_process');
   let { all, fromNode } = require('bluebird');
 
@@ -13,13 +13,13 @@ module.exports = function createPackages(grunt) {
 
   let archives = async (platform) => {
     // kibana.tar.gz
-    await exec('tar', ['-zchf', platform.tarPath, platform.buildName]);
+    await exec('tar', ['-zchf', relative(buildPath, platform.tarPath), platform.buildName]);
 
     // kibana.zip
     if (/windows/.test(platform.name)) {
-      await exec('zip', ['-rq', '-ll', platform.zipPath, platform.buildName]);
+      await exec('zip', ['-rq', '-ll', relative(buildPath, platform.zipPath), platform.buildName]);
     } else {
-      await exec('zip', ['-rq', platform.zipPath, platform.buildName]);
+      await exec('zip', ['-rq', relative(buildPath, platform.zipPath), platform.buildName]);
     }
   };
 

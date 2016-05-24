@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('remove filters', function () {
-  var storeNames = {
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -69,7 +69,7 @@ describe('remove filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
       $rootScope.$digest();
 
@@ -116,7 +116,7 @@ describe('remove filters', function () {
       appState.filters.push(filters[2]);
       $rootScope.$digest();
 
-      var missedFilter = _.cloneDeep(filters[0]);
+      let missedFilter = _.cloneDeep(filters[0]);
       missedFilter.meta = {
         negate: !filters[0].meta.negate
       };

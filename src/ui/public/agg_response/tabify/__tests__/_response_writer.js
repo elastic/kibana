@@ -42,15 +42,15 @@ describe('ResponseWriter class', function () {
     defineSetup(true);
 
     it('gets the columns for the vis', function () {
-      var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-      var writer = new ResponseWriter(vis);
+      let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+      let writer = new ResponseWriter(vis);
 
       expect(getColumns).to.have.property('callCount', 1);
       expect(getColumns.firstCall.args[0]).to.be(vis);
     });
 
     it('collects the aggConfigs from each column in aggStack', function () {
-      var aggs = [
+      let aggs = [
         { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
         { type: 'terms', schema: 'segment', params: { field: 'extension' } },
         { type: 'avg', schema: 'metric', params: { field: '@timestamp' } }
@@ -60,12 +60,12 @@ describe('ResponseWriter class', function () {
         return { aggConfig: agg };
       }));
 
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: aggs
       });
 
-      var writer = new ResponseWriter(vis);
+      let writer = new ResponseWriter(vis);
       expect(writer.aggStack).to.be.an('array');
       expect(writer.aggStack).to.have.length(aggs.length);
       writer.aggStack.forEach(function (agg, i) {
@@ -74,40 +74,40 @@ describe('ResponseWriter class', function () {
     });
 
     it('sets canSplit=true by default', function () {
-      var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-      var writer = new ResponseWriter(vis);
+      let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+      let writer = new ResponseWriter(vis);
       expect(writer).to.have.property('canSplit', true);
     });
 
     it('sets canSplit=false when config says to', function () {
-      var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-      var writer = new ResponseWriter(vis, { canSplit: false });
+      let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+      let writer = new ResponseWriter(vis, { canSplit: false });
       expect(writer).to.have.property('canSplit', false);
     });
 
     describe('sets partialRows', function () {
       it('to the value of the config if set', function () {
-        var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        var partial = Boolean(Math.round(Math.random()));
+        let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        let partial = Boolean(Math.round(Math.random()));
 
-        var writer = new ResponseWriter(vis, { partialRows: partial });
+        let writer = new ResponseWriter(vis, { partialRows: partial });
         expect(writer).to.have.property('partialRows', partial);
       });
 
       it('to the value of vis.isHierarchical if no config', function () {
-        var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        var hierarchical = Boolean(Math.round(Math.random()));
+        let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        let hierarchical = Boolean(Math.round(Math.random()));
         sinon.stub(vis, 'isHierarchical').returns(hierarchical);
 
-        var writer = new ResponseWriter(vis, {});
+        let writer = new ResponseWriter(vis, {});
         expect(writer).to.have.property('partialRows', hierarchical);
       });
     });
 
     it('starts off with a root TableGroup', function () {
-      var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+      let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
 
-      var writer = new ResponseWriter(vis);
+      let writer = new ResponseWriter(vis);
       expect(writer.root).to.be.a(TableGroup);
       expect(writer.splitStack).to.be.an('array');
       expect(writer.splitStack).to.have.length(1);
@@ -120,29 +120,29 @@ describe('ResponseWriter class', function () {
 
     describe('#response()', function () {
       it('returns the root TableGroup if splitting', function () {
-        var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        var writer = new ResponseWriter(vis);
+        let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        let writer = new ResponseWriter(vis);
         expect(writer.response()).to.be(writer.root);
       });
 
       it('returns the first table if not splitting', function () {
-        var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        var writer = new ResponseWriter(vis, { canSplit: false });
-        var table = writer._table();
+        let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        let writer = new ResponseWriter(vis, { canSplit: false });
+        let table = writer._table();
         expect(writer.response()).to.be(table);
       });
 
       it('adds columns to all of the tables', function () {
-        var vis = new Vis(indexPattern, {
+        let vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
             { type: 'terms', params: { field: '_type' }, schema: 'split' },
             { type: 'count', schema: 'metric' }
           ]
         });
-        var buckets = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
-        var writer = new ResponseWriter(vis);
-        var tables = [];
+        let buckets = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+        let writer = new ResponseWriter(vis);
+        let tables = [];
 
         writer.split(vis.aggs[0], buckets, function () {
           writer.cell(vis.aggs[1], 100, function () {
@@ -154,11 +154,11 @@ describe('ResponseWriter class', function () {
           expect(table.columns == null).to.be(true);
         });
 
-        var resp = writer.response();
+        let resp = writer.response();
         expect(resp).to.be.a(TableGroup);
         expect(resp.tables).to.have.length(2);
 
-        var nginx = resp.tables.shift();
+        let nginx = resp.tables.shift();
         expect(nginx).to.have.property('aggConfig', vis.aggs[0]);
         expect(nginx).to.have.property('key', 'nginx');
         expect(nginx.tables).to.have.length(1);
@@ -166,7 +166,7 @@ describe('ResponseWriter class', function () {
           expect(_.contains(tables, table)).to.be(true);
         });
 
-        var apache = resp.tables.shift();
+        let apache = resp.tables.shift();
         expect(apache).to.have.property('aggConfig', vis.aggs[0]);
         expect(apache).to.have.property('key', 'apache');
         expect(apache.tables).to.have.length(1);
@@ -184,16 +184,16 @@ describe('ResponseWriter class', function () {
 
     describe('#split()', function () {
       it('with break if the user has specified that splitting is to be disabled', function () {
-        var vis = new Vis(indexPattern, {
+        let vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
             { type: 'terms', schema: 'split', params: { field: '_type' } },
             { type: 'count', schema: 'metric' }
           ]
         });
-        var agg = vis.aggs.bySchemaName.split[0];
-        var buckets = new Buckets({ buckets: [ { key: 'apache' } ]});
-        var writer = new ResponseWriter(vis, { canSplit: false });
+        let agg = vis.aggs.bySchemaName.split[0];
+        let buckets = new Buckets({ buckets: [ { key: 'apache' } ]});
+        let writer = new ResponseWriter(vis, { canSplit: false });
 
         expect(function () {
           writer.split(agg, buckets, _.noop);
@@ -201,7 +201,7 @@ describe('ResponseWriter class', function () {
       });
 
       it('forks the acrStack and rewrites the parents', function () {
-        var vis = new Vis(indexPattern, {
+        let vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
             { type: 'terms', params: { field: 'extension' }, schema: 'segment' },
@@ -211,10 +211,10 @@ describe('ResponseWriter class', function () {
           ]
         });
 
-        var writer = new ResponseWriter(vis, { asAggConfigResults: true });
-        var extensions = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
-        var types = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
-        var os = new Buckets({ buckets: [ { key: 'window' }, { key: 'osx' } ] });
+        let writer = new ResponseWriter(vis, { asAggConfigResults: true });
+        let extensions = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
+        let types = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+        let os = new Buckets({ buckets: [ { key: 'window' }, { key: 'osx' } ] });
 
         extensions.forEach(function (b, extension) {
           writer.cell(vis.aggs[0], extension, function () {
@@ -230,11 +230,11 @@ describe('ResponseWriter class', function () {
           });
         });
 
-        var tables = _.flattenDeep(_.pluck(writer.response().tables, 'tables'));
+        let tables = _.flattenDeep(_.pluck(writer.response().tables, 'tables'));
         expect(tables.length).to.be(types.length);
 
         // collect the far left acr from each table
-        var leftAcrs = _.pluck(tables, 'rows[0][0]');
+        let leftAcrs = _.pluck(tables, 'rows[0][0]');
 
         leftAcrs.forEach(function (acr, i, acrs) {
           expect(acr.aggConfig).to.be(vis.aggs[0]);
@@ -243,7 +243,7 @@ describe('ResponseWriter class', function () {
 
           // for all but the last acr, compare to the next
           if (i + 1 >= acrs.length) return;
-          var acr2 = leftAcrs[i + 1];
+          let acr2 = leftAcrs[i + 1];
 
           expect(acr.key).to.be(acr2.key);
           expect(acr.value).to.be(acr2.value);
@@ -258,8 +258,8 @@ describe('ResponseWriter class', function () {
     describe('#cell()', function () {
       it('logs a cell in the ResponseWriters row buffer, calls the block arg, then removes the value from the buffer',
       function () {
-        var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        var writer = new ResponseWriter(vis);
+        let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        let writer = new ResponseWriter(vis);
 
         expect(writer.rowBuffer).to.have.length(0);
         writer.cell({}, 500, function () {
@@ -272,10 +272,10 @@ describe('ResponseWriter class', function () {
 
     describe('#row()', function () {
       it('writes the ResponseWriters internal rowBuffer into a table', function () {
-        var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        var writer = new ResponseWriter(vis);
+        let vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        let writer = new ResponseWriter(vis);
 
-        var table = writer._table();
+        let table = writer._table();
         writer.cell({}, 1, function () {
           writer.cell({}, 2, function () {
             writer.cell({}, 3, function () {
@@ -289,7 +289,7 @@ describe('ResponseWriter class', function () {
       });
 
       it('always writes to the table group at the top of the split stack', function () {
-        var vis = new Vis(indexPattern, {
+        let vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
             { type: 'terms', schema: 'split', params: { field: '_type' } },
@@ -298,20 +298,20 @@ describe('ResponseWriter class', function () {
             { type: 'count', schema: 'metric' }
           ]
         });
-        var splits = vis.aggs.bySchemaName.split;
+        let splits = vis.aggs.bySchemaName.split;
 
-        var type = splits[0];
-        var typeBuckets = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+        let type = splits[0];
+        let typeBuckets = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
 
-        var ext = splits[1];
-        var extBuckets = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
+        let ext = splits[1];
+        let extBuckets = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
 
-        var os = splits[2];
-        var osBuckets = new Buckets({ buckets: [ { key: 'windows' }, { key: 'mac' } ] });
+        let os = splits[2];
+        let osBuckets = new Buckets({ buckets: [ { key: 'windows' }, { key: 'mac' } ] });
 
-        var count = vis.aggs[3];
+        let count = vis.aggs[3];
 
-        var writer = new ResponseWriter(vis);
+        let writer = new ResponseWriter(vis);
         writer.split(type, typeBuckets, function () {
           writer.split(ext, extBuckets, function () {
             writer.split(os, osBuckets, function (bucket, key) {
@@ -322,9 +322,9 @@ describe('ResponseWriter class', function () {
           });
         });
 
-        var resp = writer.response();
-        var sum = 0;
-        var tables = 0;
+        let resp = writer.response();
+        let sum = 0;
+        let tables = 0;
         (function recurse(t) {
           if (t.tables) {
             // table group
@@ -347,7 +347,7 @@ describe('ResponseWriter class', function () {
       });
 
       it('writes partial rows for hierarchical vis', function () {
-        var vis = new Vis(indexPattern, {
+        let vis = new Vis(indexPattern, {
           type: 'pie',
           aggs: [
             { type: 'terms', schema: 'segment', params: { field: '_type' }},
@@ -355,8 +355,8 @@ describe('ResponseWriter class', function () {
           ]
         });
 
-        var writer = new ResponseWriter(vis);
-        var table = writer._table();
+        let writer = new ResponseWriter(vis);
+        let table = writer._table();
         writer.cell(vis.aggs[0], 'apache', function () {
           writer.row();
         });
@@ -366,7 +366,7 @@ describe('ResponseWriter class', function () {
       });
 
       it('skips partial rows for non-hierarchical vis', function () {
-        var vis = new Vis(indexPattern, {
+        let vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
             { type: 'terms', schema: 'segment', params: { field: '_type' }},
@@ -374,8 +374,8 @@ describe('ResponseWriter class', function () {
           ]
         });
 
-        var writer = new ResponseWriter(vis);
-        var table = writer._table();
+        let writer = new ResponseWriter(vis);
+        let table = writer._table();
         writer.cell(vis.aggs[0], 'apache', function () {
           writer.row();
         });

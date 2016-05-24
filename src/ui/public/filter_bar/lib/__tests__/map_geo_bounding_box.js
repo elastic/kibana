@@ -22,7 +22,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters with bounds', function (done) {
-      var filter = {
+      let filter = {
         meta: {
           index: 'logstash-*'
         },
@@ -50,7 +50,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
+      let filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
       mapGeoBoundingBox(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

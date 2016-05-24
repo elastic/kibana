@@ -1,7 +1,7 @@
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 
 export default function AggTypeMetricAvgProvider(Private) {
-  var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
 
   return new MetricAggType({
     name: 'avg',

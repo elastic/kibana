@@ -7,6 +7,7 @@ import tabifyPm from 'ui/agg_response/tabify/tabify';
 import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import StateManagementAppStateProvider from 'ui/state_management/app_state';
 describe('Controller', function () {
 
   let $rootScope;
@@ -17,6 +18,7 @@ describe('Controller', function () {
   let $el;
   let Vis;
   let fixtures;
+  let AppState;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -24,6 +26,7 @@ describe('Controller', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
+    AppState = Private(StateManagementAppStateProvider);
     TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
   }));
@@ -57,6 +60,7 @@ describe('Controller', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
+    $rootScope.uiState = new AppState({uiState: {}}).makeStateful('uiState');
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')
@@ -101,6 +105,23 @@ describe('Controller', function () {
 
     expect(!$scope.hasSomeRows).to.be.ok();
     expect(!$scope.tableGroups).to.be.ok();
+  });
+
+  it('sets the sort on the scope when it is passed as a vis param', function () {
+    const sortObj = {
+      columnIndex: 1,
+      direction: 'asc'
+    };
+    initController(new OneRangeVis({sort: sortObj}));
+
+    // modify the data to not have any buckets
+    const resp = _.cloneDeep(fixtures.oneRangeBucket);
+    resp.aggregations.agg_2.buckets = {};
+
+    attachEsResponseToScope(resp);
+
+    expect($scope.sort.columnIndex).to.equal(sortObj.columnIndex);
+    expect($scope.sort.direction).to.equal(sortObj.direction);
   });
 
   it('sets #hasSomeRows properly if the table group is empty', function () {

@@ -37,15 +37,15 @@ uiModules.get('kibana')
       if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
       if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
 
-      var $scope = this;
-      var vals = new Array(expressions.length);
-      var prev = new Array(expressions.length);
-      var fire = false;
-      var init = 0;
-      var neededInits = expressions.length;
+      let $scope = this;
+      let vals = new Array(expressions.length);
+      let prev = new Array(expressions.length);
+      let fire = false;
+      let init = 0;
+      let neededInits = expressions.length;
 
       // first, register all of the multi-watchers
-      var unwatchers = expressions.map(function (expr, i) {
+      let unwatchers = expressions.map(function (expr, i) {
         expr = normalizeExpression($scope, expr);
         if (!expr) return;
 
@@ -62,7 +62,7 @@ uiModules.get('kibana')
 
       // then, the watcher that checks to see if any of
       // the other watchers triggered this cycle
-      var flip = false;
+      let flip = false;
       unwatchers.push($scope.$watch(function () {
         if (init < neededInits) return init;
 
@@ -85,7 +85,7 @@ uiModules.get('kibana')
 
     function normalizeExpression($scope, expr) {
       if (!expr) return;
-      var norm = {
+      let norm = {
         fn: $scope.$watch,
         deep: false
       };

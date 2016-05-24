@@ -27,25 +27,20 @@ routes
 });
 
 chrome
-.setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') 6px 10px / 140px 50px no-repeat #e8488b'
-})
 .setTabDefaults({
   resetWhenActive: true,
   lastUrlStore: window.sessionStorage,
   activeIndicatorColor: '#656a76'
 })
-.setRootController('kibana', function ($scope, $rootScope, courier, config) {
-  function setDefaultTimezone() {
-    moment.tz.setDefault(config.get('dateFormat:tz'));
-  }
-
+.setRootController('kibana', function ($scope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
     courier.start();
   });
 
-  $scope.$on('init:config', setDefaultTimezone);
-  $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
+  config.watch('dateFormat:tz', setDefaultTimezone, $scope);
+
+  function setDefaultTimezone(tz) {
+    moment.tz.setDefault(tz);
+  }
 });

@@ -1,7 +1,6 @@
 import $ from 'jquery';
 
 import UiModules from 'ui/modules';
-import ConfigTemplate from 'ui/config_template';
 
 export default function (chrome, internals) {
 
@@ -46,10 +45,6 @@ export default function (chrome, internals) {
         // and some local values
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
-        $scope.appSwitcherTemplate = new ConfigTemplate({
-          switcher: '<app-switcher></app-switcher>'
-        });
-
         return chrome;
       }
     };
