@@ -54,7 +54,7 @@ import {
           var expectedHitCount = '445';
           return discoverPage.query('php')
           .then(function () {
-            return common.tryForTime(20 * 1000, function tryingForTime() {
+            return common.try(function tryingForTime() {
               return discoverPage.getHitCount()
               .then(function compareData(hitCount) {
                 expect(hitCount).to.be(expectedHitCount);
@@ -79,7 +79,7 @@ import {
           var expectedHitCount = '11,156';
           return discoverPage.query('_type:apache')
           .then(function () {
-            return common.tryForTime(20 * 1000, function tryingForTime() {
+            return common.try(function tryingForTime() {
               return discoverPage.getHitCount()
               .then(function compareData(hitCount) {
                 expect(hitCount).to.be(expectedHitCount);
@@ -232,7 +232,7 @@ import {
             return common.sleep(2000);
           })
           .then(function () {
-            return common.tryForTime(20 * 1000, function tryingForTime() {
+            return common.try(function tryingForTime() {
               return discoverPage.getDocTableIndex(1)
               .then(function (rowData) {
                 expect(rowData).to.be(ExpectedDoc);

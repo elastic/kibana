@@ -102,7 +102,7 @@ import {
             683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
           ];
 
-          return common.tryForTime(5000, function () {
+          return common.try(function tryingForTime() {
             return visualizePage.getXAxisLabels()
             .then(function compareLabels(labels) {
               common.debug('X-Axis labels = ' + labels);
