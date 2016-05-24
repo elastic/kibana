@@ -59,9 +59,11 @@ function timerCanceler(notif, cb = _.noop, key) {
  * intervals and clears the notif once the notif _lifetime_ has been reached.
  */
 function startNotifTimer(notif, cb) {
-  let interval = 1000;
+  const interval = 1000;
 
-  if (notif.lifetime === Infinity) return;
+  if (notif.lifetime === Infinity) {
+    return;
+  }
 
   notif.timeRemaining = Math.floor(notif.lifetime / interval);
 
@@ -119,7 +121,19 @@ function add(notif, cb) {
   return notif;
 }
 
+function set(opts, cb) {
+  if (this._sovereignNotif) {
+    this._sovereignNotif.clear();
+  }
+  if (!opts.content && !opts.markdown) {
+    return null;
+  }
+  this._sovereignNotif = add(opts, cb);
+  return this._sovereignNotif;
+}
+
 Notifier.prototype.add = add;
+Notifier.prototype.set = set;
 
 function formatInfo() {
   let info = [];
@@ -159,7 +173,7 @@ function Notifier(opts) {
 }
 
 Notifier.config = {
-  bannerLifetime: Infinity,
+  bannerLifetime: 3000000,
   errorLifetime: 300000,
   warningLifetime: 10000,
   infoLifetime: 5000,
@@ -272,6 +286,7 @@ Notifier.prototype._showFatal = function (err) {
 /**
  * Alert the user of an error that occured
  * @param  {Error|String} err
+ * @param  {Function} cb
  */
 Notifier.prototype.error = function (err, cb) {
   return add({
@@ -287,8 +302,8 @@ Notifier.prototype.error = function (err, cb) {
 
 /**
  * Warn the user abort something
- * @param  {[type]} msg [description]
- * @return {[type]}     [description]
+ * @param  {String} msg
+ * @param  {Function} cb
  */
 Notifier.prototype.warning = function (msg, cb) {
   return add({
@@ -303,8 +318,8 @@ Notifier.prototype.warning = function (msg, cb) {
 
 /**
  * Display a debug message
- * @param  {String} msg [description]
- * @return {[type]}     [description]
+ * @param  {String} msg
+ * @param  {Function} cb
  */
 Notifier.prototype.info = function (msg, cb) {
   return add({
@@ -319,23 +334,17 @@ Notifier.prototype.info = function (msg, cb) {
 
 /**
  * Display a banner message
- * @param  {String} msg [description]
- * @return {[type]}     [description]
+ * @param  {String} msg
+ * @param  {Function} cb
  */
 Notifier.prototype.banner = function (msg, cb) {
-  if (this._lastBanner) {
-    this._lastBanner.clear();
-  }
-  if (!msg) {
-    return null;
-  }
-  this._lastBanner = add({
+  return this.set({
     type: 'banner',
-    markdown: msg,
+    title: 'Attention',
+    markdown: formatMsg(msg, this.from),
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
-  return this._lastBanner;
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;

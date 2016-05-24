@@ -221,10 +221,11 @@ export default function defaultSettingsProvider() {
     },
     'notifications:banner': {
       type: 'markdown',
-      description: 'A custom banner intended for temporary notices to all users. Markdown supported.'
+      description: 'A custom banner intended for temporary notices to all users. Markdown supported.',
+      value: ''
     },
     'notifications:lifetime:banner': {
-      value: Infinity,
+      value: 3000000,
       description: 'The time in milliseconds which a banner notification ' +
       'will be displayed on-screen for. Setting to Infinity will disable.'
     },
