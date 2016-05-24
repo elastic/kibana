@@ -11,19 +11,7 @@ module.exports =  function buildRequest(config, tlConfig) {
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    var kibanaFilters = _.get(tlConfig, 'request.payload.extended.es.filters') || [];
-    bool.must.push
-      .apply(bool.must,
-        _.chain(kibanaFilters)
-        .filter(function (filter) {return !filter.meta.negate;})
-        .filter(function (filter) {return !filter.meta.disabled;})
-        .pluck('query').value());
-    bool.must_not.push
-      .apply(bool.must_not,
-        _.chain(kibanaFilters)
-        .filter(function (filter) {return filter.meta.negate;})
-        .filter(function (filter) {return !filter.meta.disabled;})
-        .pluck('query').value());
+    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter') || {};
   }
 
   var aggs = {

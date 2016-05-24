@@ -150,33 +150,36 @@ describe(filename, () => {
             from: 1,
             to: 5,
           },
-          request: {payload: {extended: {es: {filters:[
-            {query: {query_string: {query: 'foo'}}, meta: {negate: false}},
-            {query: {query_string: {query: 'foo'}}, meta: {negate: true}},
-            {query: {query_string: {query: 'baz'}}, meta: {disabled: true}},
-          ]}}}}
+          request: {payload: {extended: {es: {filter:{
+            bool: {
+              must: [
+                {query: {query_string: {query: 'foo'}}}
+              ],
+              must_not: [
+                {query: {query_string: {query: 'bar'}}},
+                {query: {query_string: {query: 'baz'}}}
+              ]
+            }
+          }}}}}
         });
       });
 
-      it('push any filters supplied in payload.extended.es.filters into the bool', () => {
+      it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         let request = fn(config, tlConfig);
-        let must = request.body.query.bool.must;
-        let mustNot = request.body.query.bool.must_not;
-        expect(must.length).to.eql(2);
-        expect(mustNot.length).to.eql(1);
+        let filter = request.body.query.bool.filter.bool;
+        expect(filter.must.length).to.eql(1);
+        expect(filter.must_not.length).to.eql(2);
       });
 
       it('does not include filters if config.kibana = false', () => {
         config.kibana = false;
         let request = fn(config, tlConfig);
-        let must = request.body.query.bool.must;
-        let mustNot = request.body.query.bool.must_not;
-        expect(must.length).to.eql(1);
-        expect(mustNot.length).to.eql(0);
+        let filter = request.body.query.bool.filter;
+        expect(request.body.query.bool.filter).to.eql(undefined);
       });
 
-      it('adds a time filter to the bool query first', () => {
+      it('adds a time filter to the bool querys must clause', () => {
         let request = fn(config, tlConfig);
         expect(request.body.query.bool.must.length).to.eql(1);
         expect(request.body.query.bool.must[0]).to.eql({range: {'@timestamp': {
@@ -187,7 +190,7 @@ describe(filename, () => {
 
         config.kibana = true;
         request = fn(config, tlConfig);
-        expect(request.body.query.bool.must.length).to.eql(2);
+        expect(request.body.query.bool.must.length).to.eql(1);
       });
     });
 

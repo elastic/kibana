@@ -1,20 +1,21 @@
 define(function (require) {
   require('plugins/timelion/directives/chart/chart');
   require('plugins/timelion/directives/interval/interval');
-
   require('plugins/timelion/directives/refresh_hack');
+  require('ui/state_management/app_state');
 
   var _ = require('lodash');
   var module = require('ui/modules').get('kibana/timelion_vis', ['kibana']);
-  module.controller('TimelionVisController', function ($scope, Private, Notifier, $http, $rootScope, timefilter) {
+  module.controller('TimelionVisController', function ($scope, Private, Notifier, $http, $rootScope, timefilter, getAppState) {
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var timezone = Private(require('plugins/timelion/services/timezone'))();
+    var dashboardContext = Private(require('plugins/timelion/services/dashboard_context'));
+
     var notify = new Notifier({
       location: 'Timelion'
     });
 
     $scope.search = function run() {
-      console.log(queryFilter.getFilters(), 'query');
       var expression = $scope.vis.params.expression;
       if (!expression) return;
 
@@ -22,7 +23,7 @@ define(function (require) {
         sheet: [expression],
         extended: {
           es: {
-            filters: queryFilter.getFilters()
+            filter: dashboardContext()
           }
         },
         time: _.extend(timefilter.time, {
