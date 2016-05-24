@@ -27,6 +27,12 @@ import {
           common.debug('load kibana index with logstash-* pattern');
           return common.elasticLoad('kibana3.json','.kibana');
         })
+        // we're navigating to another page to re-hash the url so we don't get
+        // a toast about failing to find the query from the previous test
+        .then(function () {
+          common.debug('navigateTo settings');
+          return common.navigateToApp('settings');
+        })
         .then(function () {
           common.debug('navigateTo discover');
           return common.navigateToApp('discover');
