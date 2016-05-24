@@ -197,7 +197,7 @@
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
-    "node": "4.3.2",
-    "npm": "2.14.22"
+    "node": "4.4.4",
+    "npm": "2.15.1"
   }
 }

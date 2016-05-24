@@ -13,8 +13,7 @@ import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
-export default function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
-
+export default function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, safeConfirm) {
   let fieldformats = Private(RegistryFieldFormatsProvider);
   let getIds = Private(IndexPatternsGetIdsProvider);
   let mapper = Private(IndexPatternsMapperProvider);
@@ -76,8 +75,11 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
       .id(self.id);
 
       // listen for config changes and update field list
-      $rootScope.$on('change:config', function () {
-        initFields();
+      config.watchAll(() => {
+        if (self.fields) {
+          // re-init fields when config changes, but only if we already had fields
+          initFields();
+        }
       });
 
       return mappingSetup.isDefined(type)

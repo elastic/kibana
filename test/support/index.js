@@ -14,6 +14,7 @@ exports.bdd = kbnInternVars.bdd;
 exports.intern = kbnInternVars.intern;
 exports.config = exports.intern.config;
 exports.defaultTimeout = exports.config.defaultTimeout;
+exports.defaultTryTimeout = exports.config.defaultTryTimeout;
 exports.defaultFindTimeout = exports.config.defaultFindTimeout;
 exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.elasticsearch));
 

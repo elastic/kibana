@@ -94,7 +94,7 @@ import {
 
         bdd.it('should show the correct hit count', function () {
           var expectedHitCount = '14,004';
-          return common.tryForTime(20 * 1000, function tryingForTime() {
+          return common.try(function tryingForTime() {
             return discoverPage.getHitCount()
             .then(function compareData(hitCount) {
               expect(hitCount).to.be(expectedHitCount);
@@ -243,7 +243,7 @@ import {
 
 
         function verifyChartData(expectedBarChartData) {
-          return common.tryForTime(20 * 1000, function tryingForTime() {
+          return common.try(function tryingForTime() {
             return discoverPage.getBarChartData()
             .then(function compareData(paths) {
               // the largest bars are over 100 pixels high so this is less than 1% tolerance

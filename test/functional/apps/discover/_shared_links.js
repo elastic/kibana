@@ -102,7 +102,7 @@ import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } 
           var re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
           return discoverPage.clickShortenUrl()
           .then(function () {
-            return common.tryForTime(20 * 1000, function tryingForTime() {
+            return common.try(function tryingForTime() {
               return discoverPage.getShortenedUrl()
               .then(function (actualUrl) {
                 expect(actualUrl).to.match(re);

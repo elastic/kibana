@@ -14,7 +14,7 @@ uiModules.get('apps/settings')
 
       $scope.showAddNew = !/^\/settings\/indices$/.test($route.current.$$route.originalPath);
       $scope.editingId = $route.current.params.indexPatternId;
-      config.$bind($scope, 'defaultIndex');
+      config.bindToScope($scope, 'defaultIndex');
 
       function refreshIndexPatternList() {
         indexPatterns.getIds.clearCache();
