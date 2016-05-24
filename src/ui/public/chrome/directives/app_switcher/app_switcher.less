@@ -77,11 +77,7 @@ body { overflow-x: hidden; }
     > a {
       display: block;
       height: 100%;
-      color: @white;
-    }
-
-    &:hover {
-      background-color: @app-links-active-background;
+      color: #ebf7fa;
     }
 
     .app-icon {
@@ -127,38 +123,14 @@ body { overflow-x: hidden; }
       line-height: @app-icon-height;
     }
 
+    &:hover,
     &.active {
       background-color: @app-links-active-background;
       > a {
-        color: #333;
+        color: @white;
         text-decoration: none;
       }
-      img {
-        filter: none;
-      }
     }
-
-    &:nth-child(1) {
-      background-color: @firstLinkColor;
-      &:hover {
-        background-color: lighten(@firstLinkColor, 5%);
-      }
-    }
-
-    &:nth-child(2) {
-      background-color: @secondLinkColor;
-      &:hover {
-        background-color: lighten(@secondLinkColor, 5%);
-      }
-    }
-
-    &:nth-child(3) {
-      background-color: @thirdLinkColor;
-      &:hover {
-        background-color: lighten(@thirdLinkColor, 5%);
-      }
-    }
-
   }
 
 }
