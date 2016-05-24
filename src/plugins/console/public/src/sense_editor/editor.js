@@ -6,6 +6,8 @@ let RowParser = require('./row_parser');
 let InputMode = require('./mode/input');
 let utils = require('../utils');
 let es = require('../es');
+import chrome from 'ui/chrome';
+
 const smartResize = require('../smart_resize');
 
 function isInt(x) {
@@ -538,7 +540,8 @@ function SenseEditor($el) {
           es_method = req.method,
           es_data = req.data;
 
-        var url = es.constructESUrl(es.getBaseUrl() || "localhost:9200", es_path);
+        const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
+        var url = es.constructESUrl(elasticsearchBaseUrl, es_path);
 
         var ret = 'curl -X' + es_method + ' "' + url + '"';
         if (es_data && es_data.length) {

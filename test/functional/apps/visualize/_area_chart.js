@@ -1,29 +1,17 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var DiscoverPage = require('../../../support/pages/discover_page');
-  var VisualizePage = require('../../../support/pages/visualize_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  headerPage,
+  scenarioManager,
+  settingsPage,
+  visualizePage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var discoverPage;
-      var visualizePage;
-      var remote;
-
-      bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        discoverPage = new DiscoverPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
-      });
-
       bdd.before(function () {
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
@@ -186,10 +174,9 @@ define(function (require) {
         });
 
         bdd.it('should edit and show correct JSON', function pageHeader() {
-          var self = remote;
 
           var expectedBody = { title: 'Visualization漢字 AreaChart',
-             visState: '{"title":"New Visualization","type":"area","params":{"shareYAxis":true,'
+             visState: '{"title":"Visualization漢字 AreaChart","type":"area","params":{"shareYAxis":true,'
              + '"addTooltip":true,"addLegend":true,"smoothLines":false,"scale":"linear",'
              + '"interpolate":"linear","mode":"stacked","times":[],"addTimeMarker":false,'
              + '"defaultYExtents":false,"setYExtents":false,"yAxis":{}},"aggs":[{"id":"1",'
@@ -213,5 +200,5 @@ define(function (require) {
 
       });
     });
-  };
-});
+  }());
+}());

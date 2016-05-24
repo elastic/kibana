@@ -18,7 +18,7 @@ describe('appSwitcher directive', function () {
 
   function setup(href, links) {
     return ngMock.inject(function ($window, $rootScope, $compile, Private) {
-      var domLocation = Private(DomLocationProvider);
+      let domLocation = Private(DomLocationProvider);
 
       $rootScope.chrome = {
         getNavLinks: constant(cloneDeep(links)),
@@ -46,14 +46,14 @@ describe('appSwitcher directive', function () {
   }
 
   context('when one link is for the active app', function () {
-    var myLink = {
+    let myLink = {
       active: true,
       title: 'myLink',
       url: 'http://localhost:555/app/myApp',
       lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl'
     };
 
-    var notMyLink = {
+    let notMyLink = {
       active: false,
       title: 'notMyLink',
       url: 'http://localhost:555/app/notMyApp',
@@ -63,27 +63,27 @@ describe('appSwitcher directive', function () {
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
 
     it('links to the inactive apps base url', function () {
-      var $myLink = env.$el.findTestSubject('appLink').eq(0);
+      let $myLink = env.$el.findTestSubject('appLink').eq(0);
       expect($myLink.prop('href')).to.be(myLink.url);
       expect($myLink.prop('href')).to.not.be(myLink.lastSubUrl);
     });
 
     it('links to the inactive apps last sub url', function () {
-      var $notMyLink = env.$el.findTestSubject('appLink').eq(1);
+      let $notMyLink = env.$el.findTestSubject('appLink').eq(1);
       expect($notMyLink.prop('href')).to.be(notMyLink.lastSubUrl);
       expect($notMyLink.prop('href')).to.not.be(notMyLink.url);
     });
   });
 
   context('when none of the links are for the active app', function () {
-    var myLink = {
+    let myLink = {
       active: false,
       title: 'myLink',
       url: 'http://localhost:555/app/myApp',
       lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl'
     };
 
-    var notMyLink = {
+    let notMyLink = {
       active: false,
       title: 'notMyLink',
       url: 'http://localhost:555/app/notMyApp',
@@ -93,9 +93,9 @@ describe('appSwitcher directive', function () {
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
 
     it('links to the lastSubUrl for each', function () {
-      var $links = env.$el.findTestSubject('appLink');
-      var $myLink = $links.eq(0);
-      var $notMyLink = $links.eq(1);
+      let $links = env.$el.findTestSubject('appLink');
+      let $myLink = $links.eq(0);
+      let $notMyLink = $links.eq(1);
 
       expect($myLink.prop('href')).to.be(myLink.lastSubUrl);
       expect($myLink.prop('href')).to.not.be(myLink.url);
@@ -106,19 +106,19 @@ describe('appSwitcher directive', function () {
   });
 
   context('clicking a link with matching href but missing hash', function () {
-    var url = 'http://localhost:555/app/myApp?query=1';
+    let url = 'http://localhost:555/app/myApp?query=1';
     beforeEach(setup(url + '#/lastSubUrl', [
       { url: url }
     ]));
 
     it('just prevents propogation (no reload)', function () {
-      var event = new $.Event('click');
+      let event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
 
-      var $link = env.$el.findTestSubject('appLink');
+      let $link = env.$el.findTestSubject('appLink');
       expect($link.prop('href')).to.be(url);
       $link.trigger(event);
 
@@ -129,19 +129,19 @@ describe('appSwitcher directive', function () {
   });
 
   context('clicking a link that matches entire url', function () {
-    var url = 'http://localhost:555/app/myApp#/lastSubUrl';
+    let url = 'http://localhost:555/app/myApp#/lastSubUrl';
     beforeEach(setup(url, [
       { url: url }
     ]));
 
     it('calls window.location.reload and prevents propogation', function () {
-      var event = new $.Event('click');
+      let event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
 
-      var $link = env.$el.findTestSubject('appLink');
+      let $link = env.$el.findTestSubject('appLink');
       expect($link.prop('href')).to.be(env.currentHref);
       $link.trigger(event);
 
@@ -152,21 +152,21 @@ describe('appSwitcher directive', function () {
   });
 
   context('clicking a link with matching href but changed hash', function () {
-    var rootUrl = 'http://localhost:555/app/myApp?query=1';
-    var url = rootUrl + '#/lastSubUrl2';
+    let rootUrl = 'http://localhost:555/app/myApp?query=1';
+    let url = rootUrl + '#/lastSubUrl2';
 
     beforeEach(setup(url + '#/lastSubUrl', [
       { url: url }
     ]));
 
     it('calls window.location.reload and prevents propogation', function () {
-      var event = new $.Event('click');
+      let event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isDefaultPrevented()).to.be(false);
       expect(event.isPropagationStopped()).to.be(false);
 
-      var $link = env.$el.findTestSubject('appLink');
+      let $link = env.$el.findTestSubject('appLink');
       expect($link.prop('href')).to.be(url);
       $link.trigger(event);
 
@@ -185,7 +185,7 @@ describe('appSwitcher directive', function () {
     ]));
 
     it('allows click through', function () {
-      var event = new $.Event('click');
+      let event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);
@@ -206,7 +206,7 @@ describe('appSwitcher directive', function () {
     ]));
 
     it('allows click through', function () {
-      var event = new $.Event('click');
+      let event = new $.Event('click');
 
       expect(env.location.reload.callCount).to.be(0);
       expect(event.isPropagationStopped()).to.be(false);

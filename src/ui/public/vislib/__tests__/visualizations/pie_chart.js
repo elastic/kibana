@@ -11,39 +11,39 @@ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_s
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
-var rowAgg = [
+let rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-var colAgg = [
+let colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-var sliceAgg = [
+let sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-var aggArray = [
+let aggArray = [
   rowAgg,
   colAgg,
   sliceAgg
 ];
 
-var names = [
+let names = [
   'rows',
   'columns',
   'slices'
 ];
 
-var sizes = [
+let sizes = [
   0,
   5,
   15,
@@ -53,13 +53,13 @@ var sizes = [
 ];
 
 describe('No global chart settings', function () {
-  var visLibParams1 = {
+  let visLibParams1 = {
     el: '<div class=chart1></div>',
     type: 'pie',
     addLegend: true,
     addTooltip: true
   };
-  var visLibParams2 = {
+  let visLibParams2 = {
     el: '<div class=chart2></div>',
     type: 'pie',
     addLegend: true,
@@ -83,13 +83,13 @@ describe('No global chart settings', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
-    var id1 = 1;
-    var id2 = 1;
-    var stubVis1 = new Vis(indexPattern, {
+    let id1 = 1;
+    let id2 = 1;
+    let stubVis1 = new Vis(indexPattern, {
       type: 'pie',
       aggs: rowAgg
     });
-    var stubVis2 = new Vis(indexPattern, {
+    let stubVis2 = new Vis(indexPattern, {
       type: 'pie',
       aggs: colAgg
     });
@@ -120,19 +120,19 @@ describe('No global chart settings', function () {
   });
 
   describe('_validatePieData method', function () {
-    var allZeros = [
+    let allZeros = [
       { slices: { children: [] } },
       { slices: { children: [] } },
       { slices: { children: [] } }
     ];
 
-    var someZeros = [
+    let someZeros = [
       { slices: { children: [{}] } },
       { slices: { children: [{}] } },
       { slices: { children: [] } }
     ];
 
-    var noZeros = [
+    let noZeros = [
       { slices: { children: [{}] } },
       { slices: { children: [{}] } },
       { slices: { children: [{}] } }
@@ -157,7 +157,7 @@ describe('No global chart settings', function () {
 
 aggArray.forEach(function (dataAgg, i) {
   describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
-    var visLibParams = {
+    let visLibParams = {
       type: 'pie',
       addLegend: true,
       addTooltip: true
@@ -177,8 +177,8 @@ aggArray.forEach(function (dataAgg, i) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
-      var id = 1;
-      var stubVis = new Vis(indexPattern, {
+      let id = 1;
+      let stubVis = new Vis(indexPattern, {
         type: 'pie',
         aggs: dataAgg
       });

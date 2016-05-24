@@ -2,20 +2,21 @@ import _ from 'lodash';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 export default function AggTypeMetricStandardDeviationProvider(Private) {
-  var MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  var getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
 
-  var responseAggConfigProps = {
+  let responseAggConfigProps = {
     valProp: function () {
-      var details = this.keyedDetails(this.params.customLabel)[this.key];
+      let details = this.keyedDetails(this.params.customLabel)[this.key];
       return details.valProp;
     },
     makeLabel: function () {
-      var details = this.keyedDetails(this.params.customLabel)[this.key];
-      return details.title + ' of ' + this.fieldDisplayName();
+      const fieldDisplayName = this.fieldDisplayName();
+      const details = this.keyedDetails(this.params.customLabel, fieldDisplayName);
+      return _.get(details, [this.key, 'title']);
     },
-    keyedDetails: function (customLabel) {
-      const label = customLabel ? customLabel : 'Standard Deviation';
+    keyedDetails: function (customLabel, fieldDisplayName) {
+      const label = customLabel ? customLabel : 'Standard Deviation of ' + fieldDisplayName;
       return {
         std_lower: {
           valProp: ['std_deviation_bounds', 'lower'],
@@ -23,7 +24,7 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
         },
         avg: {
           valProp: 'avg',
-          title: 'Average'
+          title: 'Average of ' + fieldDisplayName
         },
         std_upper: {
           valProp: ['std_deviation_bounds', 'upper'],
@@ -48,7 +49,7 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
     ],
 
     getResponseAggs: function (agg) {
-      var ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
+      let ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
 
       return [
         new ValueAggConfig('std_lower'),

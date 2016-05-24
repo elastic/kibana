@@ -1,4 +1,3 @@
-
 import angular from 'angular';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -18,19 +17,20 @@ let config;
 let hits;
 let indexPattern;
 let indexPatternList;
+let shortDotsValue;
 
 // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
 const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, $timeout, _config_) {
+    shortDotsValue = _config_.get('shortDots:enable');
     config = _config_;
+    config.set('shortDots:enable', false);
     $parentScope = $rootScope;
     _.assign($parentScope, props);
     $compile($elem)($parentScope);
 
     // Required for test to run solo. Sigh
-    $timeout(function () {
-      $elem.scope().$digest();
-    }, 0);
+    $timeout(() => $elem.scope().$digest(), 0);
 
     $scope = $elem.isolateScope();
   });
@@ -39,6 +39,7 @@ const init = function ($elem, props) {
 const destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
+  config.set('shortDots:enable', shortDotsValue);
 };
 
 describe('discover field chooser directives', function () {
@@ -80,9 +81,7 @@ describe('discover field chooser directives', function () {
     $scope.$digest();
   }));
 
-  afterEach(function () {
-    destroy();
-  });
+  afterEach(() => destroy());
 
   const getSections = function (ctx) {
     return {
@@ -108,17 +107,26 @@ describe('discover field chooser directives', function () {
 
     it('should have 2 popular fields, 1 unpopular field and no selected fields', function (done) {
       const section = getSections($elem);
+      const popular = find('popular');
+      const unpopular = find('unpopular');
 
       expect(section.selected.find('li').length).to.be(0);
 
-      expect(section.popular.text()).to.contain('ssl');
-      expect(section.popular.text()).to.contain('@timestamp');
-      expect(section.popular.text()).to.not.contain('ip\n');
+      expect(popular).to.contain('ssl');
+      expect(popular).to.contain('@timestamp');
+      expect(popular).to.not.contain('ip\n');
 
-      expect(section.unpopular.text()).to.contain('extension');
-      expect(section.unpopular.text()).to.contain('machine.os');
-      expect(section.unpopular.text()).to.not.contain('ssl');
+      expect(unpopular).to.contain('extension');
+      expect(unpopular).to.contain('machine.os');
+      expect(unpopular).to.not.contain('ssl');
       done();
+
+      function find(popularity) {
+        return section[popularity]
+          .find('.discover-field-name')
+          .map((i, el) => $(el).text())
+          .toArray();
+      }
     });
 
 

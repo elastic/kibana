@@ -47,5 +47,9 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       // resend SIGINT
       process.kill(process.pid, 'SIGINT');
     });
+
+    process.on('unhandledRejection', function (reason, promise) {
+      server.log(['warning'], `Detected an unhandled Promise rejection.\n${reason}`);
+    });
   });
 });

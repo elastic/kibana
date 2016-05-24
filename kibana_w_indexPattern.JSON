@@ -1,3 +1,0 @@
-{"_index":".kibana","_type":"config","_id":"5.0.0-snapshot","_score":1,"_source":{"buildNum":8467,"dateFormat:tz":"UTC"}}
-{"_index":".kibana","_type":"server","_id":"LeeD-ASUS-5601","_score":1,"_source":{"uuid":"bbc03c47-0d22-4e44-9736-f909893954cc"}}
-{"_index":".kibana","_type":"index-pattern","_id":"logstash-*","_score":1,"_source":{"title":"logstash-*","timeFieldName":"@timestamp"}}

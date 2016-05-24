@@ -16,7 +16,9 @@ module.exports = function (kibana) {
       main: 'plugins/console/console',
       icon: 'plugins/console/logo.svg',
       injectVars: function (server, options) {
-        return options;
+        const varsToInject = options;
+        varsToInject.elasticsearchUrl = server.config().get('elasticsearch.url');
+        return varsToInject;
       }
     }
   ];
@@ -33,11 +35,11 @@ module.exports = function (kibana) {
 
   return new kibana.Plugin({
     id: 'console',
+    require: [ 'elasticsearch' ],
 
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultServerUrl: Joi.string().default('http://localhost:9200'),
         proxyFilter: Joi.array().items(Joi.string()).single().default(['.*']),
         ssl: Joi.object({
           verify: Joi.boolean(),
@@ -88,10 +90,7 @@ module.exports = function (kibana) {
       const proxyRouteConfig = {
         validate: {
           query: Joi.object().keys({
-            uri: Joi.string().uri({
-              allowRelative: false,
-              shema: ['http:', 'https:'],
-            }),
+            uri: Joi.string()
           }).unknown(true),
         },
 
@@ -111,15 +110,23 @@ module.exports = function (kibana) {
         ],
 
         handler(req, reply) {
-          const { uri } = req.query;
+          let baseUri = server.config().get('elasticsearch.url');
+          let { uri:path } = req.query;
 
+          baseUri = baseUri.replace(/\/+$/, '');
+          path = path.replace(/^\/+/, '');
+          const uri = baseUri + '/' + path;
+
+          const requestHeadersWhitelist = server.config().get('elasticsearch.requestHeadersWhitelist');
+          const filterHeaders = server.plugins.elasticsearch.filterHeaders;
           reply.proxy({
-            uri,
+            mapUri: function (request, done) {
+              done(null, uri, filterHeaders(request.headers, requestHeadersWhitelist))
+            },
             xforward: true,
-            passThrough: true,
             onResponse(err, res, request, reply, settings, ttl) {
               if (err != null) {
-                reply("Error connecting to '" + request.query.uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
+                reply("Error connecting to '" + uri + "':\n\n" + err.message).type("text/plain").statusCode = 502;
               } else {
                 reply(null, res);
               }

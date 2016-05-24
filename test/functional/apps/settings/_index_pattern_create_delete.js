@@ -1,20 +1,17 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var expect = require('intern/dojo/node!expect.js');
-  var moment = require('moment');
+import {
+  bdd,
+  common,
+  remote,
+  scenarioManager,
+  settingsPage
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
     bdd.describe('creating and deleting default index', function describeIndexTests() {
-      var common;
-      var settingsPage;
-      var remote;
-
       bdd.before(function () {
-        common = new Common(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        remote = this.remote;
-
         return scenarioManager.reload('emptyKibana')
         .then(function () {
           return settingsPage.navigateTo();
@@ -22,12 +19,8 @@ define(function (require) {
       });
 
       bdd.describe('index pattern creation', function indexPatternCreation() {
-        moment().format('YYYY-MM-DD_HH:m:s');
         bdd.before(function () {
-          return settingsPage.createIndexPattern()
-          .then(function () {
-            return common.elasticDump('.kibana','kibana_w_indexPattern-' + moment().format('YYYY-MM-DD_HH-m-s') + '.JSON');
-          });
+          return settingsPage.createIndexPattern();
         });
 
         bdd.it('should have index pattern in page header', function pageHeader() {
@@ -106,5 +99,5 @@ define(function (require) {
         });
       });
     });
-  };
-});
+  }());
+}());

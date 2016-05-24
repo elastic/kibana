@@ -2,10 +2,10 @@ import VisAggConfigProvider from 'ui/vis/agg_config';
 import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
 
 export default function PointSeriesFakeXAxis(Private) {
-  var AggConfig = Private(VisAggConfigProvider);
-  var AggType = Private(AggTypesAggTypeProvider);
+  let AggConfig = Private(VisAggConfigProvider);
+  let AggType = Private(AggTypesAggTypeProvider);
 
-  var allAgg = new AggType({
+  let allAgg = new AggType({
     name: 'all',
     title: 'All docs',
     ordered: false,
@@ -13,7 +13,7 @@ export default function PointSeriesFakeXAxis(Private) {
   });
 
   return function makeFakeXAxis(vis) {
-    var fake = new AggConfig(vis, {
+    let fake = new AggConfig(vis, {
       type: allAgg,
       schema: vis.type.schemas.all.byName.segment
     });

@@ -8,10 +8,10 @@ import getEditorType from './get_editor_type';
  * @param {object} current value of setting
  * @returns {object} the editable config object
  */
-function toEditableConfig(def, name, value) {
-  const isCustom = !def;
-  if (isCustom) def = {};
-
+function toEditableConfig({ def, name, value, isCustom }) {
+  if (!def) {
+    def = {};
+  }
   const conf = {
     name,
     value,

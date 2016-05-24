@@ -238,29 +238,7 @@ function setActiveApi(api) {
   ACTIVE_API = api;
 }
 
-es.addServerChangeListener(function () {
-  var version = es.getVersion(), api;
-  if (!version || version.length == 0) {
-    api = "es_1_0";
-  }
-  else if (version[0] === "1") {
-    api = "es_1_0";
-  }
-  else if (version[0] === "2") {
-    api = "es_2_0";
-  }
-  else if (version[0] === "3") {
-    api = "es_2_0"; // TODO: change :)
-  }
-  else {
-    api = "es_1_0";
-  }
-
-  if (api) {
-    setActiveApi(api);
-  }
-
-});
+setActiveApi('es_5_0');
 
 module.exports.setActiveApi = setActiveApi;
 module.exports.getGlobalAutocompleteComponents = getGlobalAutocompleteComponents;

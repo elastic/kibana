@@ -1,55 +1,44 @@
-// in test/support/pages/dashboard_page.js
-define(function (require) {
-  var config = require('intern').config;
-  var Common = require('./common');
+import { remote, common, defaultFindTimeout } from '../';
 
-  var defaultTimeout = config.timeouts.default;
-  var common;
+export default (function () {
   var thisTime;
 
-  function DashboardPage(remote) {
+  function DashboardPage() {
     this.remote = remote;
-    common = new Common(this.remote);
-    thisTime = this.remote.setFindTimeout(defaultTimeout);
+    thisTime = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
   DashboardPage.prototype = {
     constructor: DashboardPage,
 
-
     clickNewDashboard: function clickNewDashboard() {
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button.ng-scope[aria-label="New Dashboard"]')
       .click();
     },
 
     clickAddVisualization: function clickAddVisualization() {
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button.ng-scope[aria-label="Add a panel to the dashboard"]')
       .click();
     },
 
     filterVizNames: function filterVizNames(vizName) {
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('input[placeholder="Visualizations Filter..."]')
       .click()
       .pressKeys(vizName);
     },
 
     clickVizNameLink: function clickVizNameLink(vizName) {
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByLinkText(vizName)
       .click();
     },
 
     closeAddVizualizationPanel: function closeAddVizualizationPanel() {
       common.debug('-------------close panel');
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('i.fa fa-chevron-up')
       .click();
     },
@@ -58,14 +47,23 @@ define(function (require) {
       var self = this;
       return this.clickAddVisualization()
       .then(function () {
+        common.debug('filter visualization (' + vizName + ')');
         return self.filterVizNames(vizName);
       })
+      // this second wait is usually enough to avoid the
+      // 'stale element reference: element is not attached to the page document'
+      // on the next step
       .then(function () {
         return common.sleep(1000);
       })
       .then(function () {
-        return self.clickVizNameLink(vizName);
+        // but wrap in a try loop since it can still happen
+        return common.try(function () {
+          common.debug('click visualization (' + vizName + ')');
+          return self.clickVizNameLink(vizName);
+        });
       })
+      // this second click of 'Add' collapses the Add Visualization pane
       .then(function () {
         return self.clickAddVisualization();
       });
@@ -73,8 +71,7 @@ define(function (require) {
 
     saveDashboard: function saveDashboard(dashName) {
       var self = this;
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button.ng-scope[aria-label="Save Dashboard"]')
       .click()
       .then(function () {
@@ -82,32 +79,27 @@ define(function (require) {
       })
       .then(function () {
         common.debug('saveButton button clicked');
-        return self.remote
-        .setFindTimeout(defaultTimeout)
+        return thisTime
         .findById('dashboardTitle')
         .type(dashName);
       })
       // click save button
       .then(function () {
-        return self.remote
-        .setFindTimeout(defaultTimeout)
+        return thisTime
         .findByCssSelector('.btn-primary')
         .click();
       })
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
       .then(function () {
-        return self.remote
-        .setFindTimeout(defaultTimeout)
+        return thisTime
         .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
         .getVisibleText();
       });
     },
 
     clickDashboardByLinkText: function clickDashboardByLinkText(dashName) {
-      var self = this;
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByLinkText(dashName)
       .click();
     },
@@ -116,8 +108,7 @@ define(function (require) {
     // entry, or at least to a single page of results
     loadSavedDashboard: function loadSavedDashboard(dashName) {
       var self = this;
-      return this.remote
-      .setFindTimeout(defaultTimeout)
+      return thisTime
       .findByCssSelector('button.ng-scope[aria-label="Load Saved Dashboard"]')
       .click()
       .then(function filterDashboard() {
@@ -206,4 +197,4 @@ define(function (require) {
   };
 
   return DashboardPage;
-});
+}());

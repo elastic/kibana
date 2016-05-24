@@ -1,25 +1,32 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var HeaderPage = require('../../../support/pages/header_page');
-  var DashboardPage = require('../../../support/pages/dashboard_page');
-  var expect = require('intern/dojo/node!expect.js');
+import {
+  bdd,
+  common,
+  dashboardPage,
+  headerPage,
+  scenarioManager
+} from '../../../support';
 
-  return function (bdd, scenarioManager) {
-    bdd.describe('dashboard app', function describeIndexTests() {
-      var common;
-      var headerPage;
-      var settingsPage;
-      var dashboardPage;
+(function () {
+  var expect = require('expect.js');
+
+  (function () {
+    bdd.describe('discover tab', function describeIndexTests() {
 
       bdd.before(function () {
-        common = new Common(this.remote);
-        headerPage = new HeaderPage(this.remote);
-        dashboardPage = new DashboardPage(this.remote);
 
+        var fromTime = '2015-09-19 06:31:44.000';
+        var toTime = '2015-09-23 18:31:44.000';
+
+        common.debug('Starting dashboard before method');
         common.debug('navigateToApp dashboard');
         return scenarioManager.unload('emptyKibana')
+        .then(function () {
+          return common.try(function () {
+            return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+          });
+        })
         // and load a set of makelogs data
-        .then(function loadIfEmptyMakelogs() {
+        .then(function loadkibana4() {
           common.debug('load kibana index with visualizations');
           return common.elasticLoad('kibana4.json','.kibana');
         })
@@ -33,7 +40,7 @@ define(function (require) {
       });
 
 
-      bdd.describe('add visualizations to dashboard', function indexPatternCreation() {
+      bdd.describe('add visualizations to dashboard', function dashboardTest() {
         var visualizations = ['Visualization漢字 AreaChart',
           'Visualization☺漢字 DataTable',
           'Visualization漢字 LineChart',
@@ -44,7 +51,7 @@ define(function (require) {
         ];
 
 
-        bdd.it('should be able to add visualizations to dashboard', function pageHeader() {
+        bdd.it('should be able to add visualizations to dashboard', function addVisualizations() {
 
           function addVisualizations(arr) {
             return arr.reduce(function (promise, vizName) {
@@ -62,7 +69,7 @@ define(function (require) {
 
         });
 
-        bdd.it('set the timepicker time to that which contains our test data', function pageHeader() {
+        bdd.it('set the timepicker time to that which contains our test data', function setTimepicker() {
           var fromTime = '2015-09-19 06:31:44.000';
           var toTime = '2015-09-23 18:31:44.000';
           var testSubName = 'Dashboard Test 1';
@@ -80,7 +87,7 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should save and load dashboard', function pageHeader() {
+        bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
           var testSubName = 'Dashboard Test 1';
 // save time on the dashboard?
           return dashboardPage.saveDashboard(testSubName)
@@ -94,7 +101,7 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should have all the expected visualizations', function pageHeader() {
+        bdd.it('should have all the expected visualizations', function checkVisualizations() {
           return common.tryForTime(10000, function () {
             return dashboardPage.getPanelTitles()
             .then(function (panelTitles) {
@@ -105,7 +112,7 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        bdd.it('should have all the expected initial sizes', function pageHeader() {
+        bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
           var visObjects = [ { dataCol: '1', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 AreaChart' },
             { dataCol: '4', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization☺漢字 DataTable' },
             { dataCol: '7', dataRow: '1', dataSizeX: '3', dataSizeY: '2', title: 'Visualization漢字 LineChart' },
@@ -124,8 +131,8 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-
       });
+
     });
-  };
-});
+  }());
+}());

@@ -6,8 +6,8 @@ import Notifier from 'ui/notify/notifier';
 import 'ui/notify/directives';
 import chrome from 'ui/chrome';
 import { kbnIndex } from 'ui/metadata';
-var module = modules.get('kibana/notify');
-var rootNotifier = new Notifier();
+let module = modules.get('kibana/notify');
+let rootNotifier = new Notifier();
 
 module.factory('createNotifier', function () {
   return function (opts) {
@@ -31,38 +31,30 @@ module.run(function ($interval) {
 // expect access to config (since it's dependent on kibana)
 if (!!kbnIndex) {
   require('ui/config');
-  module.run(function ($rootScope, config) {
-    var configInitListener = $rootScope.$on('init:config', function () {
-      applyConfig();
-      configInitListener();
-    });
-
-    $rootScope.$on('change:config', applyConfig);
-
-    function applyConfig() {
+  module.run(function (config) {
+    config.watchAll(() => {
       Notifier.applyConfig({
         errorLifetime: config.get('notifications:lifetime:error'),
         warningLifetime: config.get('notifications:lifetime:warning'),
         infoLifetime: config.get('notifications:lifetime:info')
       });
-    }
+    });
   });
 }
-
-/**
- * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
- */
-// modules
-//   .get('exceptionOverride')
-//   .factory('$exceptionHandler', function () {
-//     return function (exception, cause) {
-//       rootNotifier.fatal(exception, cause);
-//     };
-//   });
 
 window.onerror = function (err, url, line) {
   rootNotifier.fatal(new Error(err + ' (' + url + ':' + line + ')'));
   return true;
 };
+
+if (window.addEventListener) {
+  const notify = new Notifier({
+    location: 'Promise'
+  });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    notify.log(`Detected an unhandled Promise rejection.\n${e.reason}`);
+  });
+}
 
 export default rootNotifier;

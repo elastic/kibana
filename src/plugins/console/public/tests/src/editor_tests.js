@@ -9,7 +9,6 @@ var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
 
 module("Editor", {
   setup: function () {
-    es.setBaseUrl("http://localhost:9200");
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
 

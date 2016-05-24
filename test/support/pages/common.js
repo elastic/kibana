@@ -1,30 +1,23 @@
-// in test/support/pages/common.js
-define(function (require) {
-  var config = require('intern').config;
+import { common, config, defaultTryTimeout, defaultFindTimeout, remote, shieldPage } from '../';
+
+export default (function () {
   var Promise = require('bluebird');
   var moment = require('moment');
-  var testSubjSelector = require('intern/dojo/node!@spalger/test-subj-selector');
-  var getUrl = require('intern/dojo/node!../../utils/get_url');
-  var fs = require('intern/dojo/node!fs');
-  var _ = require('intern/dojo/node!lodash');
-  var parse = require('intern/dojo/node!url').parse;
-  var format = require('intern/dojo/node!url').format;
-  var path = require('intern/dojo/node!path');
-  var url = require('intern/dojo/node!url');
-//  var runElasticdump  = require('../run_elasticdump');
-  const exec = require('intern/dojo/node!child_process').exec;
-  const execSync = require('intern/dojo/node!child_process').execSync;
-  const resolve = require('intern/dojo/node!path').resolve;
+  var testSubjSelector = require('@spalger/test-subj-selector');
+  var getUrl = require('../../utils/get_url');
+  var fs = require('fs');
+  var _ = require('lodash');
+  var parse = require('url').parse;
+  var format = require('url').format;
+  var util = require('util');
+  var path = require('path');
+  var url = require('url');
+  var resolve = require('path').resolve;
   var __dirname = path.resolve(path.dirname());
   var __pwd = path.resolve('.');
-  const bin = resolve(__dirname, '../../node_modules/.bin/elasticdump');
-  const esUrl = 'http://localhost:9200'; //url.format(config.servers.elasticsearch);
-  const kIndex = '.kibana';
-  // var argv        = require('intern/dojo/node!optimist').argv;
-  // var util        = require('../../../node_modules/util');
-  var Elasticdump = require('intern/dojo/node!elasticdump').elasticdump;
-
-
+  var bin = resolve(__dirname, '../../node_modules/.bin/elasticdump');
+  var Elasticdump = require('elasticdump').elasticdump;
+  var kIndex = '.kibana';
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -51,7 +44,7 @@ define(function (require) {
     return format(_.pick(parsed, 'protocol', 'hostname', 'port', 'pathname', 'query', 'hash', 'auth'));
   }
 
-  function Common(remote) {
+  function Common() {
     this.remote = remote;
     if (remote.get.wrapper !== injectTimestampQuery) {
       this.remote.get = _.wrap(this.remote.get, injectTimestampQuery);
@@ -60,14 +53,15 @@ define(function (require) {
     }
   }
 
-
-  var defaultTimeout = config.timeouts.default;
-
   Common.prototype = {
     constructor: Common,
 
     getHostPort: function getHostPort() {
       return getUrl.baseUrl(config.servers.kibana);
+    },
+
+    getEsHostPort: function getHostPort() {
+      return getUrl.baseUrl(config.servers.elasticsearch);
     },
 
     navigateToApp: function (appName, testStatusPage) {
@@ -80,7 +74,7 @@ define(function (require) {
       self.debug('navigating to ' + appName + ' url: ' + navUrl);
 
       var doNavigation = function (url) {
-        return self.tryForTime(defaultTimeout, function () {
+        return self.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           self.debug('navigate to: ' + url);
           return self.remote.get(url)
@@ -107,11 +101,25 @@ define(function (require) {
             return self.remote.getCurrentUrl();
           })
           .then(function (currentUrl) {
+            var loginPage = new RegExp('login').test(currentUrl);
+            if (loginPage) {
+              self.debug('Found loginPage = ' + loginPage + ', username = '
+                + config.servers.kibana.shield.username);
+              return shieldPage.login(config.servers.kibana.shield.username,
+                config.servers.kibana.shield.password)
+              .then(function () {
+                return self.remote.getCurrentUrl();
+              });
+            } else {
+              return currentUrl;
+            }
+          })
+          .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
             var navSuccessful = new RegExp(appUrl).test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
-              ' in ' + defaultTimeout + 'ms' +
+              ' in ' + defaultFindTimeout + 'ms' +
               ' appUrl = ' + appUrl +
               ' currentUrl = ' + currentUrl;
               self.debug(msg);
@@ -126,7 +134,7 @@ define(function (require) {
       return doNavigation(navUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
-        return self.tryForTime(defaultTimeout, function () {
+        return self.try(function () {
           // give the app time to update the URL
           return self.sleep(501)
           .then(function () {
@@ -170,7 +178,7 @@ define(function (require) {
     getApp: function () {
       var self = this;
 
-      return self.remote.setFindTimeout(defaultTimeout)
+      return self.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.app-wrapper .application')
       .then(function () {
         return self.runScript(function () {
@@ -224,12 +232,16 @@ define(function (require) {
       return Promise.try(attempt);
     },
 
-    log: function log(logString) {
-      console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
+    try(block) {
+      return this.tryForTime(defaultTryTimeout, block);
     },
 
-    debug: function debug(logString) {
-      if (config.debug) this.log(logString);
+    log(...args) {
+      console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
+    },
+
+    debug(...args) {
+      if (config.debug) this.log(...args);
     },
 
     sleep: function sleep(sleepMilliseconds) {
@@ -250,7 +262,7 @@ define(function (require) {
 
         return self.saveScreenshot(filename)
         .finally(function () {
-          throw new Error(reason);
+          throw reason;
         });
       };
     },
@@ -273,7 +285,7 @@ define(function (require) {
     findTestSubject: function findTestSubject(selector) {
       this.debug('in findTestSubject: ' + testSubjSelector(selector));
       return this.remote
-        .setFindTimeout(defaultTimeout)
+        .setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector(testSubjSelector(selector));
     },
 
@@ -300,34 +312,26 @@ define(function (require) {
       });
     },
 
-    execCommand: function execCommand(command) {
-      var self = this;
-      var kObject;
-      var result = execSync(command, {encoding: 'utf8'});
-      console.log('execCommand: ' + command);
-      return result;
-    },
-
     /*
     ** This function is basically copied from
     ** https://github.com/taskrabbit/elasticsearch-dump/blob/master/bin/elasticdump
     ** and allows calling elasticdump for importing or exporting data from Elasticsearch
     */
-    elasticdumpModule: function elasticdumpModule(input, output) {
+    elasticdumpModule: function elasticdumpModule(myinput, myoutput, index, mytype) {
       var self = this;
 
       var options = {
         limit:           100,
         offset:          0,
         debug:           false,
-        type:            'data',
+        type:            mytype,
         delete:          false,
         all:             false,
         maxSockets:      null,
-        input:           input,
+        input:           myinput,
         'input-index':   null,
-        output:          output,
-        'output-index':  null,
+        output:          myoutput,
+        'output-index':  index,
         inputTransport:  null,
         outputTransport: null,
         searchBody:      null,
@@ -340,16 +344,17 @@ define(function (require) {
         skip:            null,
         toLog:           null,
       };
-      // this.debug(options);
+      self.debug(options);
       var dumper = new Elasticdump(options.input, options.output, options);
 
       dumper.on('log',   function (message) { self.debug(message); });
-      // dumper.on('debug', function (message) { self.debug(message); });
-      // dumper.on('error', function (error) {   self.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
+      dumper.on('debug', function (message) { self.debug(message); });
+      dumper.on('error', function (error)   { self.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
 
       var promise = new Promise(function (resolve, reject) {
         dumper.dump(function (error, totalWrites) {
           if (error) {
+            self.debug('THERE WAS AN ERROR :-(');
             reject(Error(error));
           } else {
             resolve ('elasticdumpModule success');
@@ -361,9 +366,11 @@ define(function (require) {
 
     elasticDump: function elasticDump(index, file) {
       var self = this;
-      return this.elasticdumpModule(url.format(config.servers.elasticsearch) + '/' + index, 'mapping_' + file)
+      self.debug('Dumping mapping from ' + url.format(config.servers.elasticsearch) + '/' + index + ' to (mapping_' + file + ')');
+      return this.elasticdumpModule(url.format(config.servers.elasticsearch), 'mapping_' + file, index, 'mapping')
       .then(function () {
-        return self.elasticdumpModule(url.format(config.servers.elasticsearch) + '/' + index, file);
+        self.debug('Dumping data from ' + url.format(config.servers.elasticsearch) + '/' + index + ' to (' + file + ')');
+        return self.elasticdumpModule(url.format(config.servers.elasticsearch), file,index, 'data');
       });
     },
 
@@ -371,13 +378,15 @@ define(function (require) {
       // TODO: should we have a flag to delete the index first?
       // or use scenarioManager.unload(index) ?
       var self = this;
-      return this.elasticdumpModule('mapping_' + file, url.format(config.servers.elasticsearch) + '/' + index)
+      self.debug('Loading mapping (mapping_' + file + ') into ' + url.format(config.servers.elasticsearch) + '/' + index);
+      return this.elasticdumpModule('mapping_' + file, url.format(config.servers.elasticsearch), index, 'mapping')
       .then(function () {
-        return self.elasticdumpModule(file, url.format(config.servers.elasticsearch) + '/' + index);
+        self.debug('Loading data (' + file + ')');
+        return self.elasticdumpModule(file, url.format(config.servers.elasticsearch), index, 'data');
       });
     },
 
   };
 
   return Common;
-});
+}());
