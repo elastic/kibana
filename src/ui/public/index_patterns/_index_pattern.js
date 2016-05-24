@@ -109,7 +109,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       this._watching = true;
 
       config.watchAll(() => {
-        if (this._initialized) {
+        if (this._fieldsInitialized) {
           this._initFields(); // re-init fields when config changes, but only if we already had fields
         }
       });
@@ -217,23 +217,25 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     }
 
     toDetailedIndexList(start, stop, sortDirection) {
-      const interval = this.getInterval();
-      if (interval) {
-        return Promise.resolve(intervals.toIndexList(
-          this.id, interval, start, stop, sortDirection
-        ));
-      }
+      return Promise.resolve().then(() => {
+        const interval = this.getInterval();
+        if (interval) {
+          return intervals.toIndexList(
+            this.id, interval, start, stop, sortDirection
+          );
+        }
 
-      if (this.isWildcard() && this.hasTimeField() && this.canExpandIndices()) {
-        return calculateIndices(
-          this.id, this.timeFieldName, start, stop, sortDirection
-        );
-      }
+        if (this.isWildcard() && this.hasTimeField() && this.canExpandIndices()) {
+          return calculateIndices(
+            this.id, this.timeFieldName, start, stop, sortDirection
+          );
+        }
 
-      return Promise.resolve({
-        index: this.id,
-        min: -Infinity,
-        max: Infinity
+        return {
+          index: this.id,
+          min: -Infinity,
+          max: Infinity
+        };
       });
     }
 
@@ -310,7 +312,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     }
 
     _initFields(fields) {
-      this._initialized = true;
+      this._fieldsInitialized = true;
       this.fields = new FieldList(this, fields || this.fields || []);
     }
 
