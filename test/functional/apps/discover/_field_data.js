@@ -254,8 +254,7 @@ import {
             return headerPage.waitForToastMessageGone();
           })
           .then(function () {
-            common.debug('navigateTo visualize');
-            return common.navigateToApp('visualize');
+            return discoverPage.query('*');
           })
           .catch(common.handleError(this));
         });
