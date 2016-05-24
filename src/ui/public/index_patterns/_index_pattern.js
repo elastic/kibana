@@ -219,11 +219,15 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     toDetailedIndexList(start, stop, sortDirection) {
       const interval = this.getInterval();
       if (interval) {
-        return intervals.toIndexList(this.id, interval, start, stop, sortDirection);
+        return Promise.resolve(intervals.toIndexList(
+          this.id, interval, start, stop, sortDirection
+        ));
       }
 
       if (this.isWildcard() && this.hasTimeField() && this.canExpandIndices()) {
-        return calculateIndices(this.id, this.timeFieldName, start, stop, sortDirection);
+        return calculateIndices(
+          this.id, this.timeFieldName, start, stop, sortDirection
+        );
       }
 
       return Promise.resolve({
