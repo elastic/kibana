@@ -5,7 +5,7 @@ import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
     this.timeout = defaultTimeout;
 
     bdd.before(function () {
-      return remote.setWindowSize(1200,800);
+      remote.setWindowSize(1200,800);
       return scenarioManager.loadIfEmpty('logstashFunctional');
     });
 
