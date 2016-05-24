@@ -161,12 +161,8 @@ gulp.task('package', ['build'], function (done) {
   }
 
   // Write one archive for every supported kibana version, plus one with the actual timelion version
-  var pkgVersions = _.map(pkg.kibanas, function (kbn) {
-    return kbn + '-' + pkg.version;
-  });
-  pkgVersions.push(pkg.version);
 
-  writePackages(pkgVersions, done);
+  writePackages(pkg.kibanas.concat([pkg.version]), done);
 });
 
 gulp.task('release', ['package'], function (done) {
