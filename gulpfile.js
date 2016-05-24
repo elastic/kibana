@@ -27,7 +27,7 @@ var targetDir = path.resolve(__dirname, 'target');
 var buildTarget = path.resolve(buildDir, pkg.name);
 var kibanaPluginDir = path.resolve(__dirname, '../kibana/installedPlugins/' + pkg.name);
 
-var include = [
+var build = [
   'package.json',
   'index.js',
   'node_modules',
@@ -36,9 +36,13 @@ var include = [
   'vendor_components',
   'init.js',
   'server',
-  'timelion.json',
-  'timelion.private.json'
+  'timelion.json'
 ];
+
+var develop = build.concat([
+  'timelion.private.json'
+]);
+
 var exclude = Object.keys(pkg.devDependencies).map(function (name) {
   return path.join('node_modules', name);
 });
@@ -57,7 +61,7 @@ function writeDocs(done) {
   });
 }
 
-function syncPluginTo(dest, done) {
+function syncPluginTo(include, dest, done) {
   mkdirp(dest, function (err) {
     if (err) return done(err);
     Promise.all(include.map(function (name) {
@@ -92,7 +96,7 @@ function syncPluginTo(dest, done) {
 }
 
 gulp.task('sync', function (done) {
-  syncPluginTo(kibanaPluginDir, done);
+  syncPluginTo(develop, kibanaPluginDir, done);
 });
 
 gulp.task('docs', function (done) {
@@ -133,7 +137,7 @@ gulp.task('clean', function (done) {
 });
 
 gulp.task('build', ['clean'], function (done) {
-  syncPluginTo(buildTarget, done);
+  syncPluginTo(build, buildTarget, done);
 });
 
 gulp.task('package', ['build'], function (done) {

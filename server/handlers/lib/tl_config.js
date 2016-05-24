@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var config = require('../../../timelion.json');
-try {config = _.merge(config, require('../../timelion.private.json'));} catch (e) {}; //eslint-disable-line no-empty
+try {config = _.merge(config, require('../../../timelion.private.json'));} catch (e) {}; //eslint-disable-line no-empty
 
 var buildTarget = require('../../lib/build_target.js');
 
