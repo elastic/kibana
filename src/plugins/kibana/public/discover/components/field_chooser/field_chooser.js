@@ -4,7 +4,7 @@ import 'ui/filters/unique';
 import 'plugins/kibana/discover/components/field_chooser/discover_field';
 import _ from 'lodash';
 import $ from 'jquery';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import fieldCalculator from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
 import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
 import uiModules from 'ui/modules';

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export default function normalizeSortRequest(config) {
-  var defaultSortOptions = config.get('sort:options');
+  let defaultSortOptions = config.get('sort:options');
 
   /**
    * Decorate queries with default parameters
@@ -9,7 +9,7 @@ export default function normalizeSortRequest(config) {
    * @returns {object}
    */
   return function (sortObject, indexPattern) {
-    var normalizedSort = [];
+    let normalizedSort = [];
 
     // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
     return [].concat(sortObject).map(function (sortable) {
@@ -22,10 +22,10 @@ export default function normalizeSortRequest(config) {
     { someField: "desc" } into { someField: { "order": "desc"}}
   */
   function normalize(sortable, indexPattern) {
-    var normalized = {};
-    var sortField = _.keys(sortable)[0];
-    var sortValue = sortable[sortField];
-    var indexField = indexPattern.fields.byName[sortField];
+    let normalized = {};
+    let sortField = _.keys(sortable)[0];
+    let sortValue = sortable[sortField];
+    let indexField = indexPattern.fields.byName[sortField];
 
     if (indexField && indexField.scripted && indexField.sortable) {
       let direction;
@@ -43,6 +43,10 @@ export default function normalizeSortRequest(config) {
         sortValue = { order: sortValue };
       }
       sortValue = _.defaults({}, sortValue, defaultSortOptions);
+
+      if (sortField === '_score') {
+        delete sortValue.unmapped_type;
+      }
     }
 
     normalized[sortField] = sortValue;

@@ -7,6 +7,8 @@ export default function CastMappingTypeFn() {
     immutable: true,
     initialSet: [
       { name: 'string',       type: 'string',     group: 'base'   },
+      { name: 'text',         type: 'string',     group: 'base'   },
+      { name: 'keyword',      type: 'string',     group: 'base'   },
       { name: 'date',         type: 'date',       group: 'base'   },
       { name: 'boolean',      type: 'boolean',    group: 'base'   },
       { name: 'float',        type: 'number',     group: 'number' },
@@ -32,7 +34,7 @@ export default function CastMappingTypeFn() {
   function castMappingType(name) {
     if (!name) return 'unknown';
 
-    var match = castMappingType.types.byName[name];
+    let match = castMappingType.types.byName[name];
     return match ? match.type : 'string';
   }
 

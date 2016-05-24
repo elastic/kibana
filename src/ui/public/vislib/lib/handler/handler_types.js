@@ -3,7 +3,7 @@ import VislibLibHandlerTypesPieProvider from 'ui/vislib/lib/handler/types/pie';
 import VislibLibHandlerTypesTileMapProvider from 'ui/vislib/lib/handler/types/tile_map';
 
 export default function HandlerTypeFactory(Private) {
-  var pointSeries = Private(VislibLibHandlerTypesPointSeriesProvider);
+  let pointSeries = Private(VislibLibHandlerTypesPointSeriesProvider);
 
   /**
    * Handles the building of each visualization

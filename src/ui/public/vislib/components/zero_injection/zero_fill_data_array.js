@@ -15,9 +15,9 @@ export default function ZeroFillDataArrayUtilService(Private) {
     let i;
     let val;
     let index;
-    var max = arr2.length;
+    let max = arr2.length;
 
-    var getX = function (d) {
+    let getX = function (d) {
       return d.x === val.x;
     };
 

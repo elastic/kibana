@@ -87,8 +87,9 @@ async function mergePackageData(settings, packages) {
  */
 async function extractArchive(settings) {
   const filter = {
-    paths: [ settings.plugins[0].folder ]
+    paths: [ `kibana/${settings.plugins[0].folder}` ]
   };
+
   await extractFiles(settings.tempArchiveFile, settings.workingPath, 2, filter);
 }
 
