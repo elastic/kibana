@@ -191,7 +191,7 @@
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
-    "supertest-as-promised": "2.0.2",
+    "source-map-support": "0.4.0",
     "supertest-as-promised": "2.0.2"
   },
   "engines": {
