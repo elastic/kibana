@@ -14,7 +14,6 @@ require('ui/modules')
     scope: {},
     link($scope, $el, attrs, sense) {
       $scope.sense = sense
-      $scope.navbar.link($scope)
     },
     controllerAs: 'navbar',
     controller: class SenseNavbarController {
@@ -49,21 +48,6 @@ require('ui/modules')
           this.menu.open('welcome')
         }
 
-        this.updateServerUrlHistory();
-      }
-
-      link($scope) {
-        $scope.$watch('sense.serverUrl', (url) => {
-          this.serverUrlFormModel = url
-        })
-      }
-
-      updateServerUrlHistory() {
-        this.serverUrlHistory = history.getHistoricalServers();
-      }
-
-      commitServerUrlFormModel() {
-        es.setBaseUrl(this.serverUrlFormModel);
       }
     }
   };

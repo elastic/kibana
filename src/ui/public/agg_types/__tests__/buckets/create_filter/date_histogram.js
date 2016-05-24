@@ -72,13 +72,13 @@ describe('AggConfig Filters', function () {
       expect(fieldParams).to.have.property('gte');
       expect(fieldParams.gte).to.be.a('number');
 
-      expect(fieldParams).to.have.property('lte');
-      expect(fieldParams.lte).to.be.a('number');
+      expect(fieldParams).to.have.property('lt');
+      expect(fieldParams.lt).to.be.a('number');
 
       expect(fieldParams).to.have.property('format');
       expect(fieldParams.format).to.be('epoch_millis');
 
-      expect(fieldParams.gte).to.be.lessThan(fieldParams.lte);
+      expect(fieldParams.gte).to.be.lessThan(fieldParams.lt);
 
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', vis.indexPattern.id);
@@ -102,7 +102,7 @@ describe('AggConfig Filters', function () {
         let params = filter.range[field.name];
 
         expect(params.gte).to.be(+bucketStart);
-        expect(params.lte).to.be(+bucketStart.clone().add(interval).subtract(1, 'ms'));
+        expect(params.lt).to.be(+bucketStart.clone().add(interval));
       });
     });
   });

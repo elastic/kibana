@@ -8,7 +8,7 @@ let fieldFormats;
 let FieldFormat;
 let config;
 
-let formatIds = [
+const formatIds = [
   'bytes',
   'date',
   'duration',
@@ -73,7 +73,7 @@ module.exports = describe('conformance', function () {
     basicPatternTests('number', require('numeral'))();
 
     it('tries to parse strings', function () {
-      let number = new (fieldFormats.getType('number'))({ pattern: '0.0b' });
+      const number = new (fieldFormats.getType('number'))({ pattern: '0.0b' });
       expect(number.convert(123.456)).to.be('123.5B');
       expect(number.convert('123.456')).to.be('123.5B');
     });
@@ -81,11 +81,11 @@ module.exports = describe('conformance', function () {
   });
 
   function basicPatternTests(id, lib) {
-    let confKey = id === 'date' ? 'dateFormat' : 'format:' + id + ':defaultPattern';
+    const confKey = id === 'date' ? 'dateFormat' : 'format:' + id + ':defaultPattern';
 
     return function () {
       it('converts using the format:' + id + ':defaultPattern config', function () {
-        let inst = fieldFormats.getInstance(id);
+        const inst = fieldFormats.getInstance(id);
         [
           '0b',
           '0 b',
@@ -93,26 +93,31 @@ module.exports = describe('conformance', function () {
           '0.[000]b',
           '0.[0]b'
         ].forEach(function (pattern) {
-          let num = _.random(-10000, 10000, true);
+          const original = config.get(confKey);
+          const num = _.random(-10000, 10000, true);
           config.set(confKey, pattern);
           expect(inst.convert(num)).to.be(lib(num).format(pattern));
+          config.set(confKey, original);
         });
       });
 
       it('uses the pattern param if available', function () {
-        let num = _.random(-10000, 10000, true);
-        let defFormat = '0b';
-        let customFormat = '0.00000%';
+        const original = config.get(confKey);
+        const num = _.random(-10000, 10000, true);
+        const defFormat = '0b';
+        const customFormat = '0.00000%';
 
         config.set(confKey, defFormat);
-        let defInst = fieldFormats.getInstance(id);
+        const defInst = fieldFormats.getInstance(id);
 
-        let Type = fieldFormats.getType(id);
-        let customInst = new Type({ pattern: customFormat });
+        const Type = fieldFormats.getType(id);
+        const customInst = new Type({ pattern: customFormat });
 
         expect(defInst.convert(num)).to.not.be(customInst.convert(num));
         expect(defInst.convert(num)).to.be(lib(num).format(defFormat));
         expect(customInst.convert(num)).to.be(lib(num).format(customFormat));
+
+        config.set(confKey, original);
       });
     };
   }

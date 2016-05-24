@@ -65,7 +65,7 @@ import {
           var expectedCount = ['14,004', 'Count'];
 
           // initial metric of "Count" is selected by default
-          return common.tryForTime(2000, function () {
+          return common.try(function tryingForTime() {
             return visualizePage.getMetric()
             .then(function (metricValue) {
               expect(expectedCount).to.eql(metricValue.split('\n'));
@@ -88,7 +88,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(avgMachineRam).to.eql(metricValue.split('\n'));
@@ -110,7 +110,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(sumPhpMemory).to.eql(metricValue.split('\n'));
@@ -133,7 +133,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   // only comparing the text label!
@@ -156,7 +156,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(minTimestamp).to.eql(metricValue.split('\n'));
@@ -178,7 +178,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(maxRelatedContentArticleModifiedTime).to.eql(metricValue.split('\n'));
@@ -204,7 +204,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(standardDeviationBytes).to.eql(metricValue.split('\n'));
@@ -226,7 +226,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(uniqueCountClientip).to.eql(metricValue.split('\n'));
@@ -264,7 +264,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(percentileMachineRam).to.eql(metricValue.split('\n'));
@@ -290,7 +290,7 @@ import {
             return visualizePage.clickGo();
           })
           .then(function () {
-            return common.tryForTime(2000, function () {
+            return common.try(function tryingForTime() {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
                   expect(percentileRankBytes).to.eql(metricValue.split('\n'));

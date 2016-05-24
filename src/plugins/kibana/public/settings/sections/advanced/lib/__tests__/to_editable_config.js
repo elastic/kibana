@@ -82,5 +82,5 @@ describe('Settings', function () {
 });
 
 function invoke({ def = false, name = 'woah', value = 'forreal' } = {}) {
-  return toEditableConfig(def, name, value);
+  return toEditableConfig({ def, name, value, isCustom: def === false });
 }

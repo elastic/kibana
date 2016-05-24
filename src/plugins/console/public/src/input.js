@@ -158,7 +158,7 @@ function sendCurrentRequestToES() {
           ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 404)
         ) {
           // we have someone on the other side. Add to history
-          history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
+          history.addToHistory(es_path, es_method, es_data);
 
 
           let value = xhr.responseText;
