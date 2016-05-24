@@ -6,6 +6,7 @@ import es from 'event-stream';
 import readYamlConfig from '../read_yaml_config';
 import expect from 'expect.js';
 const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
+const cli = follow(`../../../../bin/kibana`);
 
 function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));
@@ -25,13 +26,14 @@ describe(`Server logging configuration`, function () {
     let asserted = false;
     let json = Infinity;
     const conf = setLoggingJson(true);
-    const child = spawn(`./bin/kibana`, [`--config`, testConfigFile]);
+    const child = spawn(cli, [`--config`, testConfigFile]);
 
-    child.on('error', () => {
-      done(new Error('error in child process while attempting to reload config.'));
+    child.on('error', err => {
+      done(new Error(`error in child process while attempting to reload config.
+${err.stack || err.message || err}`));
     });
 
-    child.on('exit', (code) => {
+    child.on('exit', code => {
       expect(asserted).to.eql(true);
       expect(code === null || code === 0).to.eql(true);
       done();
@@ -51,10 +53,15 @@ describe(`Server logging configuration`, function () {
       }));
 
     function parseJsonLogLine(line) {
-      const data = JSON.parse(line);
-      const listening = data.tags.indexOf(`listening`) !== -1;
-      if (listening) {
-        switchToPlainTextLog();
+      try {
+        const data = JSON.parse(line);
+        const listening = data.tags.indexOf(`listening`) !== -1;
+        if (listening) {
+          switchToPlainTextLog();
+        }
+      } catch (err) {
+        expect(`Error parsing log line as JSON\n
+${err.stack || err.message || err}`).to.eql(true);
       }
     }
 

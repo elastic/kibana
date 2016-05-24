@@ -26,7 +26,6 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function readServerSettings(opts, extraCliOptions) {
-  const readYamlConfig = require('./read_yaml_config');
   const settings = readYamlConfig(opts.config);
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
