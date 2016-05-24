@@ -58,11 +58,35 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     return FieldFormat && new FieldFormat(mapping.params);
   }
 
+  function updateFromElasticSearch(indexPattern, response) {
+    if (!response.found) {
+      throw new errors.SavedObjectNotFound(type, indexPattern.id);
+    }
+
+    _.forOwn(mapping, (fieldMapping, name) => {
+      if (!fieldMapping._deserialize) {
+        return;
+      }
+      response._source[name] = fieldMapping._deserialize(
+        response._source[name], response, name, fieldMapping
+      );
+    });
+
+    // give index pattern all of the values in _source
+    _.assign(indexPattern, response._source);
+
+    indexPattern._indexFields();
+
+    // any time index pattern in ES is updated, update index pattern object
+    indexPattern._docSource
+      .onUpdate()
+      .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+  }
+
   class IndexPattern {
     constructor(id) {
-      this.id = id;
+      this._setId(id);
       this._docSource = new DocSource();
-
       this.metaFields = config.get('metaFields');
       this.getComputedFields = getComputedFields.bind(this);
 
@@ -70,73 +94,52 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       this.formatHit = formatHit(this, fieldformats.getDefaultInstance('string'));
       this.formatField = this.formatHit.formatField;
 
-      this.routes = {
-        edit: '/settings/indices/{{id}}',
-        addField: '/settings/indices/{{id}}/create-field',
-        indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-        scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
-      };
+      this.routes = IndexPattern.routes;
+    }
+
+    _setId(id) {
+      this.id = id;
+      return id;
+    }
+
+    _watch() {
+      if (this._watching) {
+        return;
+      }
+      this._watching = true;
 
       config.watchAll(() => {
         if (this._initialized) {
-          this._initFields(); // re-initialize fields when config changes
+          this._initFields(); // re-init fields when config changes, but only if we already had fields
         }
       });
     }
 
     init() {
-      // tell the docSource where to find the doc
       this._docSource
         .index(kbnIndex)
         .type(type)
         .id(this.id);
 
+      this._watch();
+
       return mappingSetup
         .isDefined(type)
         .then(defined => {
-          // create mapping for this type if one does not exist
           if (defined) {
             return true;
           }
           return mappingSetup.setup(type, mapping);
         })
         .then(() => {
-          const reapply = response => {
-            if (!response.found) {
-              throw new errors.SavedObjectNotFound(type, this.id);
-            }
-
-            // deserialize any json fields
-            _.forOwn(mapping, (fieldMapping, name) => {
-              if (fieldMapping._deserialize) {
-                response._source[name] = fieldMapping._deserialize(response._source[name], response, name, fieldMapping);
-              }
-            });
-
-            _.assign(this, response._source);
-
-            this._indexFields();
-
-            // any time obj is updated, re-call reapply
-            this._docSource
-              .onUpdate()
-              .then(reapply, notify.fatal);
-          };
-
           if (!this.id) {
-            return; // no document to fetch from elasticsearch
+            return; // no id === no elasticsearch document
           }
-
           return this._docSource
             .fetch()
-            .then(reapply);
+            .then(response => updateFromElasticSearch(this, response));
         })
         .then(() => this);
-    }
-
-    _initFields(fields) {
-      this._initialized = true;
-      this.fields = new FieldList(this, fields || this.fields || []);
     }
 
     _indexFields() {
@@ -164,6 +167,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         scripted: true,
         lang: lang
       });
+
       this.save();
     }
 
@@ -172,7 +176,6 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         name: name,
         scripted: true
       });
-
       this.fields.splice(fieldIndex, 1);
       this.save();
     }
@@ -182,12 +185,12 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       if (!field) {
         return;
       }
-
       const count = Math.max((field.count || 0) + unit, 0);
-      if (field.count !== count) {
-        field.count = count;
-        this.save();
+      if (field.count === count) {
+        return;
       }
+      field.count = count;
+      this.save();
     }
 
     getNonScriptedFields() {
@@ -254,12 +257,11 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
         }
       });
 
-      // ensure that the docSource has the current self.id
+      // ensure that the docSource has the current this.id
       this._docSource.id(this.id);
 
       // clear the indexPattern list cache
       getIds.clearCache();
-
       return body;
     }
 
@@ -267,10 +269,8 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       const body = this.prepBody();
       return this._docSource
         .doCreate(body)
-        .then(id => {
-          this.id = id;
-        })
-        .catch(function (err) {
+        .then(id => this._setId(id))
+        .catch(err => {
           if (_.get(err, 'origError.status') !== 409) {
             return Promise.resolve(false);
           }
@@ -279,15 +279,13 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
           return safeConfirm(confirmMessage)
             .then(() => Promise
               .try(() => {
-                const cached = patternCache.get(self.id);
+                const cached = patternCache.get(this.id);
                 if (cached) {
                   return cached.then(pattern => pattern.destroy());
                 }
               })
               .then(() => this._docSource.doIndex(body))
-              .then(id => {
-                this.id = id;
-              }),
+              .then(id => this._setId(id)),
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
         });
@@ -297,25 +295,28 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       const body = this.prepBody();
       return this._docSource
         .doIndex(body)
-        .then(id => {
-          this.id = id;
-        });
+        .then(id => this._setId(id));
     }
 
     refreshFields() {
       return mapper
         .clearCache(this)
-        .then(this._fetchFields)
-        .then(this.save);
+        .then(() => this._fetchFields())
+        .then(() => this.save());
+    }
+
+    _initFields(fields) {
+      this._initialized = true;
+      this.fields = new FieldList(this, fields || this.fields || []);
     }
 
     _fetchFields() {
       return mapper
         .getFieldsForIndexPattern(this, true)
         .then(fields => {
-          // append existing scripted fields
-          const allFields = fields.concat(this.getScriptedFields());
-          this._initFields(allFields);
+          const scripted = this.getScriptedFields();
+          const all = fields.concat(scripted);
+          this._initFields(all);
         });
     }
 
@@ -331,6 +332,13 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       patternCache.clear(this.id);
       this._docSource.destroy();
     }
+  }
+
+  IndexPattern.routes = {
+    edit: '/settings/indices/{{id}}',
+    addField: '/settings/indices/{{id}}/create-field',
+    indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
   };
 
   return IndexPattern;
