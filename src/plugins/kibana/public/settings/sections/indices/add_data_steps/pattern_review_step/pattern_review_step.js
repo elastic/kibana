@@ -38,7 +38,7 @@ modules.get('apps/settings')
 
         this.patternInput = {
           label: 'Index name',
-          helpText: 'The name of the Elasticsearch index you want to add data to.',
+          helpText: 'The name of the Elasticsearch index you want to create for your data.',
           defaultValue: '',
           placeholder: 'Name'
         };
