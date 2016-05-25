@@ -71,11 +71,14 @@ export default async (kbnServer, server, config) => {
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
       uiSettings: {
-        defaults: await uiSettings.getDefaults(),
-        user: await uiSettings.getUserProvided()
+        defaults: await uiSettings.getDefaults()
       },
       vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
+
+    if (server.plugins.elasticsearch.status.state !== 'red') {
+      payload.uiSettings.user = await uiSettings.getUserProvided();
+    }
 
     return this.view(app.templateName, {
       app: app,
