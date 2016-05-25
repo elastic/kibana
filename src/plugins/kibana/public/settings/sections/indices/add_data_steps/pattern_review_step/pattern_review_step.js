@@ -39,7 +39,8 @@ modules.get('apps/settings')
         this.patternInput = {
           label: 'Index name',
           helpText: 'The name of the Elasticsearch index you want to add data to.',
-          defaultValue: 'data'
+          defaultValue: '',
+          placeholder: 'Name'
         };
 
         if (this.defaultIndexInput) {
