@@ -2,6 +2,7 @@ import modules from 'ui/modules';
 import template from './upload_data_step.html';
 import _ from 'lodash';
 import IngestProvider from 'ui/ingest';
+import './styles/_add_data_upload_data_step.less';
 
 modules.get('apps/settings')
 .directive('uploadDataStep', function () {
@@ -12,7 +13,7 @@ modules.get('apps/settings')
     },
     bindToController: true,
     controllerAs: 'uploadStep',
-    controller: function (Notifier, $window, Private) {
+    controller: function (Notifier, $window, Private, $scope) {
       const ingest = Private(IngestProvider);
       const notify = new Notifier({
         location: 'Add Data'
@@ -39,6 +40,20 @@ modules.get('apps/settings')
           $window.scrollTo(0, 0);
         }
       );
+
+      this.showAllErrors = false;
+      this.defaultErrorLimit = 10;
+      this.displayErrors = [];
+      $scope.$watchGroup(['uploadStep.formattedErrors', 'uploadStep.showAllErrors'], (newValues) => {
+        const [formattedErrors, showAllErrors] = newValues;
+
+        if (showAllErrors && formattedErrors) {
+          this.displayErrors = formattedErrors;
+        }
+        else if (formattedErrors) {
+          this.displayErrors = formattedErrors.slice(0, this.defaultErrorLimit + 1);
+        }
+      });
     }
   };
 });
