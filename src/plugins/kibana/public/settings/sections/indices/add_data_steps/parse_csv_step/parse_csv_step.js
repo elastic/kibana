@@ -54,13 +54,25 @@ modules.get('apps/settings')
                   this.formattedErrors = _.map(results.errors, (error) => {
                     return `${error.type} at row ${error.row + 1} - ${error.message}`;
                   });
+                  _.forEach(results.meta.fields, (field) => {
+                    if (_.isEmpty(field)) {
+                      this.formattedErrors.push('Column names must not be blank');
+                    }
+                  });
+
                   this.columns = results.meta.fields;
                   this.rows = _.map(results.data, (row) => {
                     return _.map(this.columns, (columnName) => {
                       return row[columnName];
                     });
                   });
-                  this.samples = results.data;
+
+                  if (_.isUndefined(this.formattedErrors) || _.isEmpty(this.formattedErrors)) {
+                    this.samples = results.data;
+                  }
+                  else {
+                    delete this.samples;
+                  }
                   this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
                 });
               }
