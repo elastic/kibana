@@ -39,6 +39,7 @@ export default (grunt) => {
         '--config-files', config.path.kibanaConfig,
         '--template-value', `user=${config.user}`,
         '--template-value', `group=${config.group}`,
+        '--template-value', `optimizeDir=${config.path.home}/optimize`,
 
         //config folder is moved to path.conf, exclude {path.home}/config
         //uses relative path to --prefix, strip the leading /
