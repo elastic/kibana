@@ -4,7 +4,7 @@ import { promisify } from 'bluebird';
 import readline from 'readline';
 
 export default (grunt) => {
-  const packages = grunt.config.get('packages');
+  const publishConfig = grunt.config.get('packages').publish;
   const platforms = grunt.config.get('platforms');
 
   function debS3(deb) {
@@ -87,8 +87,8 @@ export default (grunt) => {
         if (platform.debPath) {
           debS3({
             filePath: platform.debPath,
-            bucket: packages[environment].bucket,
-            prefix: packages[environment].debPrefix.replace('XXXXXXX', trimmedHash),
+            bucket: publishConfig[environment].bucket,
+            prefix: publishConfig[environment].debPrefix.replace('XXXXXXX', trimmedHash),
             signatureKeyId: signature.id,
             arch: platform.name.match('x64') ? 'amd64' : 'i386',
             awsKey: aws.key,
@@ -99,8 +99,8 @@ export default (grunt) => {
         if (platform.rpmPath) {
           rpmS3({
             filePath: platform.rpmPath,
-            bucket: packages[environment].bucket,
-            prefix: packages[environment].rpmPrefix.replace('XXXXXXX', trimmedHash),
+            bucket: publishConfig[environment].bucket,
+            prefix: publishConfig[environment].rpmPrefix.replace('XXXXXXX', trimmedHash),
             signingKeyName: signature.name,
             awsKey: aws.key,
             awsSecret: aws.secret
