@@ -38,20 +38,16 @@
 
   <div class="timelion-container" scroll-class="timelion-scroll-class-body" scroll-limit=27>
     <div class="timelion-container-sheet">
-      <div class="timelion-container-sheet-margin"
-        sv-root sv-part="state.sheet"
-        sv-on-sort="drop($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-        <div class="chart-container col-md-{{12 / state.columns}} col-sm-12 col-xs-12" sv-element
-          timelion-grid timelion-grid-rows="state.rows"
-          ng-repeat="cell in state.sheet track by $index"
-          ng-click="setActiveCell($index)"
-          ng-class="{active: $index === state.selected}"
+      <div class="timelion-container-sheet-margin">
+
+          <timelion-cells
+            state="state"
+            sheet="sheet"
+            on-search="search"
+            on-select="setActiveCell"
           >
-          <div chart="sheet[$index]" search="search" interval="state.interval"></div>
-          <div class="cell-actions">
-            <div class="cell-id" ng-click="removeCell($index)" tooltip="Remove" tooltip-append-to-body="1"><span>{{$index + 1}}</span></div>
-            <div class="cell-move" tooltip="Drag to reorder" tooltip-append-to-body="1" sv-handle><span class="fa fa-arrows"></span></div>
-          </div>
+          </timelion-cells>
+
         </div>
       </div>
     </div>
