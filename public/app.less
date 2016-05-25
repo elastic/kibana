@@ -231,34 +231,14 @@ div.doc-container {
     z-index: 10;
   }
 
-  .cell-move {
+  .cell-action {
     opacity: 0;
   }
 }
 
 .chart-container:hover {
-
-  .cell-id {
-    background-color: #a00;
-    border-color: #a00;
-    color: #fff;
-
-    &:hover {
-      opacity: 1;
-    }
-
-    &:after {
-      content: "X";
-    }
-
-    span {
-      display: none;
-    }
-  }
-
-  .cell-move {
+  .cell-action {
     opacity: 0.50;
-
     &:hover {
       opacity: 1;
     }

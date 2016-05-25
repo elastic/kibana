@@ -6,33 +6,21 @@ require('plugins/timelion/directives/chart/chart');
 require('plugins/timelion/directives/timelion_grid');
 
 var app = require('ui/modules').get('apps/timelion', ['angular-sortable-view']);
-var html = require('./cells.html');
+var html = require('./fullscreen.html');
 
-app.directive('timelionCells', function () {
+app.directive('timelionFullscreen', function () {
   return {
     restrict: 'E',
     scope: {
-      sheet: '=',
+      expression: '=',
+      series: '=',
       state: '=',
       transient: '=',
       onSearch: '=',
-      onSelect: '=',
     },
     template: html,
     link: function ($scope, $elem) {
       console.log($scope);
-
-      $scope.removeCell = function (index) {
-        console.log('remove', index);
-        _.pullAt($scope.state.sheet, index);
-        $scope.onSearch();
-      };
-
-      $scope.dropCell = function (item, partFrom, partTo, indexFrom, indexTo) {
-        $scope.onSelect(indexTo);
-        _.move($scope.sheet, indexFrom, indexTo);
-      };
-
     }
   };
 });

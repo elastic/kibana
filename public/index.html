@@ -40,7 +40,19 @@
     <div class="timelion-container-sheet">
       <div class="timelion-container-sheet-margin">
 
+          <timelion-fullscreen
+            ng-show="transient.fullscreen"
+            transient="transient"
+            state="state"
+            series="sheet[state.selected]"
+            expression="state.sheet[state.selected]"
+            on-search="search"
+          >
+          </timelion-fullscreen>
+
           <timelion-cells
+            ng-show="!transient.fullscreen"
+            transient="transient"
             state="state"
             sheet="sheet"
             on-search="search"
