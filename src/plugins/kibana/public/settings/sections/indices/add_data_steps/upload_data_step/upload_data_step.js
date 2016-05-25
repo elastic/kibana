@@ -4,6 +4,14 @@ import _ from 'lodash';
 import IngestProvider from 'ui/ingest';
 import './styles/_add_data_upload_data_step.less';
 
+function formatIndexError(errorDoc) {
+  const lineNumber = errorDoc._id.substr(errorDoc._id.lastIndexOf(':') + 1);
+  const errorType = errorDoc.error.type;
+  const errorReason = errorDoc.error.reason;
+
+  return `Line ${lineNumber}: ${errorType} - ${errorReason}`;
+}
+
 modules.get('apps/settings')
 .directive('uploadDataStep', function () {
   return {
@@ -27,9 +35,7 @@ modules.get('apps/settings')
           this.formattedErrors = [];
           _.forEach(res.data, (response) => {
             this.created += response.created;
-            this.formattedErrors = this.formattedErrors.concat(_.map(_.get(response, 'errors.index'), (doc) => {
-              return `Line ${doc._id.substr(doc._id.lastIndexOf(':') + 1)}: ${doc.error.type} - ${doc.error.reason}`;
-            }));
+            this.formattedErrors = this.formattedErrors.concat(_.map(_.get(response, 'errors.index'), formatIndexError));
             if (!_.isEmpty(_.get(response, 'errors.other'))) {
               this.formattedErrors = this.formattedErrors.concat(response.errors.other);
             }
