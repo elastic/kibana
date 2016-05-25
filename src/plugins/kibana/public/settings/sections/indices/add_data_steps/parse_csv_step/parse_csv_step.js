@@ -52,7 +52,7 @@ modules.get('apps/settings')
               complete: (results) => {
                 $scope.$apply(() => {
                   this.formattedErrors = _.map(results.errors, (error) => {
-                    return `${error.type} at row ${error.row} - ${error.message}`;
+                    return `${error.type} at row ${error.row + 1} - ${error.message}`;
                   });
                   this.columns = results.meta.fields;
                   this.rows = _.map(results.data, (row) => {
