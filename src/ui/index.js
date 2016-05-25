@@ -61,6 +61,7 @@ export default async (kbnServer, server, config) => {
   });
 
   server.decorate('reply', 'renderApp', async function (app) {
+    const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
     const uiSettings = server.uiSettings();
     const payload = {
       app: app,
@@ -71,14 +72,11 @@ export default async (kbnServer, server, config) => {
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
       uiSettings: {
-        defaults: await uiSettings.getDefaults()
+        defaults: await uiSettings.getDefaults(),
+        user: isElasticsearchPluginRed ? {} : await uiSettings.getUserProvided()
       },
       vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
-
-    if (server.plugins.elasticsearch.status.state !== 'red') {
-      payload.uiSettings.user = await uiSettings.getUserProvided();
-    }
 
     return this.view(app.templateName, {
       app: app,
