@@ -105,7 +105,7 @@ gulp.task('docs', function (done) {
 
 gulp.task('version', function (done) {
   var newVersion = '0.1.' + (semver.patch(pkg.version) + 1);
-  child.exec('npm version --no-git-tag-version ' + pkg.kbnVersion + '-' + pkg.timelionVersion, function () {
+  child.exec('npm version --no-git-tag-version ' + newVersion, function () {
     console.log('Timelion version is ' + newVersion);
     done();
   });
