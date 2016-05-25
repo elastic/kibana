@@ -1,16 +1,13 @@
-module.exports = function createServices(grunt) {
-  const { resolve } = require('path');
-  const { appendFileSync } = require('fs');
-  const exec = require('../utils/exec');
+import { resolve } from 'path';
+import { appendFileSync } from 'fs';
+import exec from '../utils/exec';
 
+export default (grunt) => {
   const userScriptsDir = grunt.config.get('userScriptsDir');
   const { path, user, group } = grunt.config.get('packages');
 
   grunt.registerTask('_build:pleaseRun', function () {
-    // TODO(sissel): Detect if 'pleaserun' is found, and provide a useful error
-    // to the user if it is missing.
-
-    grunt.config.get('services').forEach(function (service) {
+    grunt.config.get('services').forEach((service) => {
       grunt.file.mkdir(service.outputDir);
       exec('pleaserun', [
         '--install',
