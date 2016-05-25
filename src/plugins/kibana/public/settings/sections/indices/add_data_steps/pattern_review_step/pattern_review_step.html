@@ -8,10 +8,12 @@
     <div ng-show="reviewStep.errors.length" class="alert alert-danger">
       <div ng-repeat="error in reviewStep.errors">{{ error }}</div>
     </div>
-    <div class="alert alert-danger" ng-show="reviewStep.form.pattern.$error.lowercase">
+    <div class="alert alert-danger"
+         ng-show="reviewStep.form.pattern.$dirty && reviewStep.form.pattern.$error.lowercase">
       Index names must be all lowercase
     </div>
-    <div class="alert alert-danger" ng-show="reviewStep.form.pattern.$error.indexNameInput">
+    <div class="alert alert-danger"
+         ng-show="reviewStep.form.pattern.$dirty && reviewStep.form.pattern.$error.indexNameInput">
       An index name must not be empty and cannot contain whitespace or any of the following characters: ", *, \, <, |, ,, >, /, ?
     </div>
 
@@ -23,6 +25,7 @@
            required
            validate-index-name
            validate-lowercase
+           placeholder="{{reviewStep.patternInput.placeholder}}"
            aria-describedby="pattern-help"/>
     <label>
       <input ng-model="reviewStep.isTimeBased" type="checkbox"/>
