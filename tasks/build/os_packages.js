@@ -32,14 +32,20 @@ module.exports = function (grunt) {
         '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
         '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
         '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
-        '--config-files', '/opt/kibana/config/kibana.yml',
+        '--config-files', '/etc/kibana/kibana.yml',
         '--template-value', 'user=kibana',
         '--template-value', 'group=kibana'
+
+        //uses relative path to --prefix
+        '--exclude', 'usr/share/kibana/config'
       ];
 
-      const files = buildDir + '/=/opt/kibana';
-      const sysv = servicesByName.sysv.outputDir + '/etc/=/etc/';
-      const systemd = servicesByName.systemd.outputDir + '/lib/=/lib/';
+      const files = [
+        `${buildDir}/=/usr/share/kibana/`,
+        `${buildDir}/config/=/etc/kibana/`,
+        `${servicesByName.sysv.outputDir}/etc/=/etc/`,
+        `${servicesByName.systemd.outputDir}/lib/=/lib/`
+      ];
 
       //Manually find flags, multiple args without assignment are not entirely parsed
       var flags = grunt.option.flags().join(',');
@@ -50,10 +56,10 @@ module.exports = function (grunt) {
 
       grunt.file.mkdir(targetDir);
       if (buildDeb || noneSpecified) {
-        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files, sysv, systemd));
+        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files));
       }
       if (buildRpm || noneSpecified) {
-        fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv, systemd));
+        fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files));
       }
 
     });
