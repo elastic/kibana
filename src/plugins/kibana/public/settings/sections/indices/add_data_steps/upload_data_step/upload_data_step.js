@@ -28,7 +28,7 @@ modules.get('apps/settings')
           _.forEach(res.data, (response) => {
             this.created += response.created;
             this.formattedErrors = this.formattedErrors.concat(_.map(_.get(response, 'errors.index'), (doc) => {
-              return `${doc._id.split('-', 1)[0].replace('L', 'Line ').trim()}: ${doc.error.type} - ${doc.error.reason}`;
+              return `Line ${doc._id.substr(doc._id.lastIndexOf(':') + 1)}: ${doc.error.type} - ${doc.error.reason}`;
             }));
             if (!_.isEmpty(_.get(response, 'errors.other'))) {
               this.formattedErrors = this.formattedErrors.concat(response.errors.other);
