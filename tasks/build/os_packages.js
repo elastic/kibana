@@ -8,19 +8,24 @@ module.exports = function (grunt) {
   const packageScriptsDir = config.get('packageScriptsDir');
   const servicesByName = indexBy(config.get('services'), 'name');
   const packageConfig = config.get('packages');
+  const fpm = args => exec('fpm', args);
 
   grunt.registerTask('_build:osPackages', function () {
-    config.get('platforms').forEach(({ name, buildDir }) => {
-      // TODO(sissel): Check if `fpm` is available
-      if (!(/linux-x(86|64)$/.test(name))) return;
-
-      const arch = /x64$/.test(name) ? 'x86_64' : 'i386';
-      const fpm = args => exec('fpm', args);
-
-      const args = [
+    config.get('platforms')
+    .filter(({ name }) => /linux-x(86|64)$/.test(name))
+    .map(({ name, buildDir }) => {
+      const architecture = /x64$/.test(name) ? 'x86_64' : 'i386';
+      return {
+        buildDir,
+        architecture
+      };
+    })
+    .forEach(({ buildDir, architecture }) => {
+      const baseOptions = [
         '--force',
         '--package', targetDir,
         '-s', 'dir', // input type
+        '--architecture', architecture,
         '--name', packageConfig.name,
         '--description', packageConfig.description,
         '--version', packageConfig.version,
@@ -40,8 +45,15 @@ module.exports = function (grunt) {
         //uses relative path to --prefix, strip the leading /
         '--exclude', `${packageConfig.path.home.slice(1)}/config`
       ];
-
-      const files = [
+      const debOptions = [
+        '-t', 'deb',
+        '--deb-priority', 'optional'
+      ];
+      const rpmOptions = [
+        '-t', 'rpm',
+        '--rpm-os', 'linux'
+      ];
+      const args = [
         `${buildDir}/=${packageConfig.path.home}/`,
         `${buildDir}/config/=${packageConfig.path.conf}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
@@ -49,18 +61,14 @@ module.exports = function (grunt) {
       ];
 
       //Manually find flags, multiple args without assignment are not entirely parsed
-      var flags = grunt.option.flags().join(',');
-
-      const buildDeb = !!flags.match('deb');
-      const buildRpm = !!flags.match('rpm');
-      const noneSpecified = !buildRpm && !buildDeb;
-
-      grunt.file.mkdir(targetDir);
-      if (buildDeb || noneSpecified) {
-        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files));
+      const flags = grunt.option.flags().join(',');
+      const buildDeb = flags.includes('deb') || !flags.length;
+      const buildRpm = flags.includes('rpm') || !flags.length;
+      if (buildDeb) {
+        fpm([...baseOptions, ...debOptions, ...args]);
       }
-      if (buildRpm || noneSpecified) {
-        fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files));
+      if (buildRpm) {
+        fpm([...baseOptions, ...rpmOptions, ...args]);
       }
 
     });
