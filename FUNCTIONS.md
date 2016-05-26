@@ -256,6 +256,14 @@ Argument | Accepts | Description
 --- | --- | ---
 title | *string* | Title for the plot.  
 
+#### .trim()
+Set N buckets at the start or end of a series to null to fit the "partial bucket issue"
+
+Argument | Accepts | Description
+--- | --- | ---
+start | *number* | Buckets to trim from the beginning of the series. Default: 1  
+end | *number* | Buckets to trim from the end of the series. Default: 1  
+
 #### .yaxis()
 Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis
 
