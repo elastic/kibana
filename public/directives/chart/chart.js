@@ -108,11 +108,13 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
       });
 
       $scope.$on('timelionPlotHover', function (angularEvent, flotEvent, pos, time) {
+        if (!$scope.plot) return;
         $scope.plot.setCrosshair(pos);
         debouncedSetLegendNumbers(pos);
       });
 
       $scope.$on('timelionPlotLeave', function (angularEvent, flotEvent, pos, time) {
+        if (!$scope.plot) return;
         $scope.plot.clearCrosshair();
         clearLegendNumbers();
       });
