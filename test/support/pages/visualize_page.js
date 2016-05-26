@@ -425,7 +425,6 @@ export default (function () {
       var chartData = [];
       var tempArray = [];
       var chartSections = 0;
-      var chartMap = {};
       var height = 0;
       var yAxisLabel = 0;
       var yAxisHeight = 0;

@@ -3,8 +3,7 @@ import {
   common,
   discoverPage,
   headerPage,
-  scenarioManager,
-  settingsPage
+  scenarioManager
 } from '../../../support';
 
 (function () {
@@ -17,21 +16,25 @@ import {
         var toTime = '2015-09-23 18:31:44.000';
 
         // start each test with an empty kibana index
-        return scenarioManager.reload('emptyKibana')
-        // and load a set of makelogs data
-        .then(function loadIfEmptyMakelogs() {
-          return scenarioManager.loadIfEmpty('logstashFunctional');
-        })
-        .then(function (navigateTo) {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
+        common.debug('scenarioManager.unload(emptyKibana)');
+        return scenarioManager.unload('emptyKibana')
+        .then(function () {
+          return common.try(function () {
+            return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+          });
         })
         .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
+          common.debug('load kibana index with logstash-* pattern');
+          return common.elasticLoad('kibana3.json','.kibana');
+        })
+        // we're navigating to another page to re-hash the url so we don't get
+        // a toast about failing to find the query from the previous test
+        .then(function () {
+          common.debug('navigateTo settings');
+          return common.navigateToApp('settings');
         })
         .then(function () {
-          common.debug('discover');
+          common.debug('navigateTo discover');
           return common.navigateToApp('discover');
         })
         .then(function () {
@@ -252,6 +255,12 @@ import {
           })
           .then(function () {
             return headerPage.clickToastOK();
+          })
+          .then(function () {
+            return headerPage.waitForToastMessageGone();
+          })
+          .then(function () {
+            return discoverPage.query('*');
           })
           .catch(common.handleError(this));
         });

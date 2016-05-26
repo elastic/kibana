@@ -14,10 +14,7 @@ import { bdd, defaultTimeout, scenarioManager } from '../../../support';
     });
 
     bdd.after(function () {
-      return scenarioManager.unload('makelogs')
-      .then(function () {
-        scenarioManager.unload('emptyKibana');
-      });
+      return scenarioManager.unload('makelogs');
     });
 
     require('./_initial_state');

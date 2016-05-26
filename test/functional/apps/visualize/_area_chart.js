@@ -16,29 +16,8 @@ import {
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          return settingsPage.clickAdvancedTab();
-        })
-        .then(function GetAdvancedSetting() {
-          common.debug('check for required UTC timezone');
-          return settingsPage.getAdvancedSettings('dateFormat:tz');
-        })
-        .then(function (advancedSetting) {
-          expect(advancedSetting).to.be('UTC');
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
+        common.debug('navigateToApp visualize');
+        return common.navigateToApp('visualize')
         .then(function () {
           common.debug('clickAreaChart');
           return visualizePage.clickAreaChart();
@@ -86,7 +65,7 @@ import {
 
       bdd.describe('area charts', function indexPatternCreation() {
         var testSubName = 'AreaChart';
-        var vizName1 = 'Visualization ' + testSubName;
+        var vizName1 = 'Visualization漢字 ' + testSubName;
 
         bdd.it('should save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)
@@ -94,9 +73,9 @@ import {
             common.debug('Saved viz message = ' + message);
             expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
           })
-          .then(function testVisualizeWaitForToastMessageGone() {
-            return visualizePage.waitForToastMessageGone();
-          })
+          // .then(function testVisualizeWaitForToastMessageGone() {
+          //   return visualizePage.waitForToastMessageGone();
+          // })
           .then(function loadSavedVisualization() {
             return visualizePage.loadSavedVisualization(vizName1);
           })
@@ -194,7 +173,30 @@ import {
           .catch(common.handleError(this));
         });
 
+        bdd.it('should edit and show correct JSON', function pageHeader() {
 
+          var expectedBody = { title: 'Visualization漢字 AreaChart',
+             visState: '{"title":"Visualization漢字 AreaChart","type":"area","params":{"shareYAxis":true,'
+             + '"addTooltip":true,"addLegend":true,"smoothLines":false,"scale":"linear",'
+             + '"interpolate":"linear","mode":"stacked","times":[],"addTimeMarker":false,'
+             + '"defaultYExtents":false,"setYExtents":false,"yAxis":{}},"aggs":[{"id":"1",'
+             + '"type":"count","schema":"metric","params":{}},{"id":"2","type":"date_histogram",'
+             + '"schema":"segment","params":{"field":"@timestamp","interval":"auto",'
+             + '"customInterval":"2h","min_doc_count":1,"extended_bounds":{}}}],"listeners":{}}',
+             uiStateJSON: '{}',
+             description: '',
+             version: 1,
+             kibanaSavedObjectMeta: { searchSourceJSON: '{"index":"logstash-*","query":'
+             + '{"query_string":{"query":"*","analyze_wildcard":true}},"filter":[]}' }
+          };
+
+          return common.getKibanaObject('visualization', vizName1)
+          .then(function (kObject) {
+            common.debug('kObject = ' + kObject);
+            expect(kObject).to.eql(expectedBody);
+          });
+
+        });
 
       });
     });

@@ -20,6 +20,7 @@ define(function (require) {
 
     require([
       'intern/dojo/node!../support/index',
+      'intern/dojo/node!./apps/dashboard',
       'intern/dojo/node!./apps/discover',
       'intern/dojo/node!./status_page',
       'intern/dojo/node!./apps/settings',

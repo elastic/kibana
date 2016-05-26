@@ -18,19 +18,16 @@ import {
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
-        // start each test with an empty kibana index
-        return scenarioManager.reload('emptyKibana')
-        // and load a set of makelogs data
-        .then(function loadIfEmptyMakelogs() {
-          return scenarioManager.loadIfEmpty('logstashFunctional');
+        common.debug('scenarioManager.unload(emptyKibana)');
+        return scenarioManager.unload('emptyKibana')
+        .then(function () {
+          return common.try(function () {
+            return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+          });
         })
         .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
+          common.debug('load kibana index with logstash-* pattern');
+          return common.elasticLoad('kibana3.json','.kibana');
         })
         .then(function () {
           common.debug('discover');

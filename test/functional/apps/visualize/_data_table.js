@@ -16,29 +16,9 @@ import {
       var toTime = '2015-09-23 18:31:44.000';
 
       bdd.before(function () {
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          return settingsPage.clickAdvancedTab();
-        })
-        .then(function GetAdvancedSetting() {
-          common.debug('check for required UTC timezone');
-          return settingsPage.getAdvancedSettings('dateFormat:tz');
-        })
-        .then(function (advancedSetting) {
-          expect(advancedSetting).to.be('UTC');
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
+        common.debug('navigateToApp visualize');
+        return common.navigateToApp('visualize')
+        // })
         .then(function () {
           common.debug('clickDataTable');
           return visualizePage.clickDataTable();
@@ -79,7 +59,7 @@ import {
 
       bdd.describe('data table', function indexPatternCreation() {
         var testSubName = 'DataTable';
-        var vizName1 = 'Visualization ' + testSubName;
+        var vizName1 = 'Visualization☺漢字 ' + testSubName;
 
         bdd.it('should be able to save and load', function pageHeader() {
           return visualizePage.saveVisualization(vizName1)

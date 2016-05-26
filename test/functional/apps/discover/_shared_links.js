@@ -1,4 +1,4 @@
-import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } from '../../../support';
+import { bdd, common, discoverPage, headerPage, scenarioManager } from '../../../support';
 
 (function () {
   var expect = require('expect.js');
@@ -19,18 +19,16 @@ import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } 
         var toTime = '2015-09-23 18:31:44.000';
 
         // start each test with an empty kibana index
-        return scenarioManager.reload('emptyKibana')
-        // and load a set of makelogs data
-        .then(function loadIfEmptyMakelogs() {
-          return scenarioManager.loadIfEmpty('logstashFunctional');
-        })
-        .then(function (navigateTo) {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
+        common.debug('scenarioManager.unload(emptyKibana)');
+        return scenarioManager.unload('emptyKibana')
+        .then(function () {
+          return common.try(function () {
+            return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+          });
         })
         .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
+          common.debug('load kibana index with logstash-* pattern');
+          return common.elasticLoad('kibana3.json','.kibana');
         })
         .then(function () {
           common.debug('discover');
@@ -64,23 +62,29 @@ import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } 
         });
 
 
-        bdd.it('should show the correct formatted URL', function () {
-          var expectedUrl = baseUrl
-            + '/app/kibana?_t=1453775307251#'
-            + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
-            + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
-            + '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-'
-            + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
-            + ':\'*\')),sort:!(\'@timestamp\',desc))';
-          return discoverPage.getSharedUrl()
-          .then(function (actualUrl) {
-            // strip the timestamp out of each URL
-            expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
-
-              .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
-          })
-          .catch(common.handleError(this));
-        });
+        // bdd.it('should show the correct formatted URL', function () {
+        //   var expectedUrl = baseUrl
+        //     + '/app/kibana?_t=1453775307251#'
+        //     + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
+        //     + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
+        //     + '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-'
+        //     + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
+        //     + ':\'*\')),sort:!(\'@timestamp\',desc))';
+        //   return common.try(function () {
+        //     return discoverPage.getSharedUrl()
+        //     .then(function () {
+        //       //After hiding the time picker, we need to wait for
+        //       //the refresh button to hide before clicking the share button
+        //       return common.sleep(1000);
+        //     })
+        //     .then(function (actualUrl) {
+        //       // strip the timestamp out of each URL
+        //       expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
+        //         .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
+        //     });
+        //   })
+        //   .catch(common.handleError(this));
+        // });
 
         bdd.it('should show toast message for copy to clipboard', function () {
           return discoverPage.clickCopyToClipboard()

@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import { common, remote, defaultFindTimeout } from '../';
+import { common, remote, headerPage, defaultTimeout, defaultFindTimeout } from '../';
 
 export default (function () {
   function SettingsPage() {
@@ -24,6 +24,11 @@ export default (function () {
     clickAdvancedTab: function () {
       common.debug('in clickAdvancedTab');
       return common.findTestSubject('settingsNav advanced').click();
+    },
+
+    clickObjectsTab: function () {
+      common.debug('in clickObjectsTab');
+      return common.findTestSubject('settingsNav objects').click();
     },
 
     setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
@@ -332,7 +337,131 @@ export default (function () {
       .then(function () {
         return alertText;
       });
+    },
+
+    /*
+    **  DON'T USE these export methods!  We don't have a way to handle the
+    ** open/save browser dialog box yet.
+    */
+    exportDashboard: function exportDashboard(objName) {
+      return this.exportObject('dashboards', objName);
+    },
+
+    exportSearch: function exportSearch(objName) {
+      return this.exportObject('searches', objName);
+    },
+
+    exportVisualization: function exportVisualization(objName) {
+      return this.exportObject('visualizations', objName);
+    },
+
+    exportObject: function exportObject(objectType, objName) {
+      var self = this;
+      return headerPage.clickSettings()
+      .then(function () {
+        return self.clickObjectsTab();
+      })
+      .then(function selectObjectTypeTab() {
+        common.debug('selectObjectTypeTab ' + objectType);
+        return self.remote
+        // .setFindTimeout(defaultTimeout)
+        .setFindTimeout(30000)
+        .findByCssSelector('[title="' + objectType + '"]')
+        .click();
+      })
+      // check the checkbox next to the object name
+      .then(function checkBoxForObject() {
+        return self.remote
+        .findByCssSelector('[data-test-subj="checkbox-' + objName + '"]')
+        .click();
+      })
+      .then(function exportIt() {
+        return self.remote
+        .setFindTimeout(defaultTimeout)
+        .findByCssSelector('[aria-label="Export"]')
+        .click();
+      });
+      // TODO: Handle open/save dialog
+    },
+
+
+    editDashboard: function editDashboard(objName) {
+      return this.editObject('dashboards', objName);
+    },
+
+    editSearch: function editSearch(objName) {
+      return this.editObject('searches', objName);
+    },
+
+    editVisualization: function editVisualization(objName) {
+      return this.editObject('visualizations', objName);
+    },
+
+    editObject: function editObject(objectType, objName) {
+      var self = this;
+      return headerPage.clickSettings()
+      .then(function () {
+        return self.clickObjectsTab();
+      })
+      .then(function selectObjectTypeTab() {
+        common.debug('selectObjectTypeTab ' + objectType);
+        return self.remote
+        .setFindTimeout(defaultTimeout)
+        .findByCssSelector('[title="' + objectType + '"]')
+        .click();
+      })
+      // click the edit pencil next to the object name
+      .then(function checkBoxForObject() {
+        return self.remote
+        .findByCssSelector('[data-test-subj="edit-' + objName + '"]')
+        .click();
+      })
+      .then(function () {
+        return self.remote
+        .findByCssSelector('[data-test-subj="kibanaSavedObjectMeta.searchSourceJSON"]')
+        .getVisibleText();
+      });
+    },
+
+    editObjectx: function editObject(objectType, objName) {
+      var self = this;
+      return headerPage.clickSettings()
+      .then(function () {
+        return self.clickObjectsTab();
+      })
+      .then(function selectObjectTypeTab() {
+        common.debug('selectObjectTypeTab ' + objectType);
+        return self.remote
+        .setFindTimeout(defaultTimeout)
+        .findByCssSelector('[title="' + objectType + '"]')
+        .click();
+      })
+      // click the edit pencil next to the object name
+      .then(function checkBoxForObject() {
+        return self.remote
+        .findByCssSelector('[data-test-subj="edit-' + objName + '"]')
+        .click();
+      })
+      .then(function () {
+        return self.remote
+        .findAllByCssSelector('[data-test-subj]');
+      })
+      .then(function (chartTypes) {
+
+        function getChartType(chart) {
+          return chart.getVisibleText();
+          // .then(function (chartString) {
+          //   return chart.click();
+          // });
+        }
+
+        var getChartTypesPromises = chartTypes.map(getChartType);
+        return Promise.all(getChartTypesPromises);
+      });
     }
+
+
+
   };
 
   return SettingsPage;

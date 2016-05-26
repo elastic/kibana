@@ -2,19 +2,29 @@ import { bdd, remote, common, defaultTimeout, scenarioManager } from '../../../s
 
 (function () {
   bdd.describe('visualize app', function () {
+
     this.timeout = defaultTimeout;
 
     bdd.before(function () {
       var self = this;
+      common.debug('Starting visualize before method');
       remote.setWindowSize(1200,800);
       // load a set of makelogs data
-      common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
-      return scenarioManager.loadIfEmpty('logstashFunctional');
-    });
-
-
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
+      common.debug('scenarioManager.unload(emptyKibana)');
+      return scenarioManager.unload('emptyKibana')
+      .then(function () {
+        return common.try(function () {
+          return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+        });
+      })
+      .then(function () {
+        common.debug('load kibana index with logstash-* pattern');
+        return common.elasticLoad('kibana3.json','.kibana');
+      })
+      .then(function () {
+        common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
+        return scenarioManager.loadIfEmpty('logstashFunctional');
+      });
     });
 
     require('./_chart_types');
