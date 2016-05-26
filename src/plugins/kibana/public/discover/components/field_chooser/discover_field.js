@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import html from 'plugins/kibana/discover/components/field_chooser/discover_field.html';
 import _ from 'lodash';
-import 'ui/directives/css_truncate';
-import 'ui/directives/field_name';
+import '../../../../../../ui/public/directives/css_truncate';
+import '../../../../../../ui/public/directives/field_name';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../../ui/public/modules';
 const app = uiModules.get('apps/discover');
 
 

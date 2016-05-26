@@ -1,8 +1,8 @@
-import 'ui/field_editor';
+import '../../../../../../ui/public/field_editor';
 import 'plugins/kibana/settings/sections/indices/_index_header';
-import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
-import UrlProvider from 'ui/url';
-import uiRoutes from 'ui/routes';
+import IndexPatternsFieldProvider from '../../../../../../ui/public/index_patterns/_field';
+import UrlProvider from '../../../../../../ui/public/url';
+import uiRoutes from '../../../../../../ui/public/routes';
 import fieldEditorTemplate from 'plugins/kibana/settings/sections/indices/_field_editor.html';
 
 uiRoutes

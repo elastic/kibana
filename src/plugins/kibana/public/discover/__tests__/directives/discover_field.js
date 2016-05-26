@@ -5,7 +5,7 @@ import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
-import 'ui/private';
+import '../../../../../../ui/public/private';
 import 'plugins/kibana/discover/components/field_chooser/discover_field';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

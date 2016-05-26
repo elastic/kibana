@@ -13,7 +13,7 @@ import 'plugins/kibana/visualize/editor/sidebar';
 import 'plugins/kibana/visualize/editor/vis_options';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
-import uiRoutes from 'ui/routes';
+import uiRoutes from '../../../../ui/public/routes';
 
 
 uiRoutes

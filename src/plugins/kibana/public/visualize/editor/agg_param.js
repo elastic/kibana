@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../ui/public/modules';
 
 uiModules
 .get('app/visualize')

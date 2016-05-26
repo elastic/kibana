@@ -1,12 +1,12 @@
-import IndexedArray from 'ui/indexed_array';
+import IndexedArray from '../../../../../ui/public/indexed_array';
 import _ from 'lodash';
 import $ from 'jquery';
 import aggSelectHtml from 'plugins/kibana/visualize/editor/agg_select.html';
 import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
-import 'ui/filters/match_any';
+import '../../../../../ui/public/filters/match_any';
 import 'plugins/kibana/visualize/editor/agg_param';
-import AggTypesIndexProvider from 'ui/agg_types/index';
-import uiModules from 'ui/modules';
+import AggTypesIndexProvider from '../../../../../ui/public/agg_types/index';
+import uiModules from '../../../../../ui/public/modules';
 import aggParamsTemplate from 'plugins/kibana/visualize/editor/agg_params.html';
 
 uiModules

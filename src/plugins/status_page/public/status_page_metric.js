@@ -5,7 +5,7 @@ import numeral from 'numeral';
 import toTitleCase from './lib/to_title_case';
 import formatNumber from './lib/format_number';
 import readStatData from './lib/read_stat_data';
-import uiModules from 'ui/modules';
+import uiModules from '../../../ui/public/modules';
 import statusPageMetricTemplate from 'plugins/status_page/status_page_metric.html';
 
 function calcAvg(metricList, metricNumberType) {

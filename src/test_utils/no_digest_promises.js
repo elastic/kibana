@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird';
-import 'ui/promises';
-import uiModules from 'ui/modules';
+import '../ui/public/promises';
+import uiModules from '../ui/public/modules';
 
 Bluebird.longStackTraces();
 

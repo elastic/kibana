@@ -1,10 +1,10 @@
 import 'plugins/table_vis/table_vis.less';
 import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
-import 'ui/agg_table';
-import 'ui/agg_table/agg_table_group';
-import TemplateVisTypeTemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
-import VisSchemasProvider from 'ui/vis/schemas';
+import '../../../ui/public/agg_table';
+import '../../../ui/public/agg_table/agg_table_group';
+import TemplateVisTypeTemplateVisTypeProvider from '../../../ui/public/template_vis_type/template_vis_type';
+import VisSchemasProvider from '../../../ui/public/vis/schemas';
 import tableVisTemplate from 'plugins/table_vis/table_vis.html';
 // we need to load the css ourselves
 

@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { IndexPatternMissingIndices } from 'ui/errors';
-import 'ui/directives/validate_index_name';
-import 'ui/directives/auto_select_if_only_one';
+import { IndexPatternMissingIndices } from '../../../../../../ui/public/errors';
+import '../../../../../../ui/public/directives/validate_index_name';
+import '../../../../../../ui/public/directives/auto_select_if_only_one';
 import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import uiRoutes from '../../../../../../ui/public/routes';
+import uiModules from '../../../../../../ui/public/modules';
 import createTemplate from 'plugins/kibana/settings/sections/indices/_create.html';
 
 

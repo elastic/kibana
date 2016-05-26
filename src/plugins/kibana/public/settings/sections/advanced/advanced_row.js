@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import 'ui/elastic_textarea';
-import uiModules from 'ui/modules';
+import '../../../../../../ui/public/elastic_textarea';
+import uiModules from '../../../../../../ui/public/modules';
 import advancedRowTemplate from 'plugins/kibana/settings/sections/advanced/advanced_row.html';
 
 uiModules.get('apps/settings')

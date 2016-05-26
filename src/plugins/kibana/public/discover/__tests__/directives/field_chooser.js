@@ -4,7 +4,7 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import $ from 'jquery';
-import 'ui/private';
+import '../../../../../../ui/public/private';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';

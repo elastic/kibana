@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
-import uiModules from 'ui/modules';
+import VislibComponentsColorColorPaletteProvider from '../../../../../ui/public/vislib/components/color/color_palette';
+import uiModules from '../../../../../ui/public/modules';
 uiModules
 .get('kibana')
 .directive('nestingIndicator', function ($rootScope, $parse, Private) {

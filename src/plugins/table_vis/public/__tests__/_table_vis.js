@@ -3,8 +3,8 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
-import VisProvider from 'ui/vis';
+import AggResponseTabifyTableGroupProvider from '../../../../ui/public/agg_response/tabify/_table_group';
+import VisProvider from '../../../../ui/public/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Integration', function () {
 

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import Binder from 'ui/binder';
+import Binder from '../../../../../ui/public/binder';
 import 'gridster';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../ui/public/modules';
 
 const app = uiModules.get('app/dashboard');
 

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
-import docViewsRegistry from 'ui/registry/doc_views';
+import docViewsRegistry from '../../../../ui/public/registry/doc_views';
 
 import jsonHtml from './json.html';
 

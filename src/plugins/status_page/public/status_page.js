@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import notify from 'ui/notify';
+import notify from '../../../ui/public/notify';
 import $ from 'jquery';
-import 'ui/autoload/styles';
+import '../../../ui/public/autoload/styles';
 import 'plugins/status_page/status_page_metric';
 import 'plugins/status_page/status_page.less';
-import uiModules from 'ui/modules';
+import uiModules from '../../../ui/public/modules';
 
 
 const chrome = require('ui/chrome')

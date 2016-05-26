@@ -3,10 +3,10 @@ import 'plugins/kibana/settings/sections/indices/_indexed_fields';
 import 'plugins/kibana/settings/sections/indices/_scripted_fields';
 import 'plugins/kibana/settings/sections/indices/_index_header';
 import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
-import UrlProvider from 'ui/url';
+import UrlProvider from '../../../../../../ui/public/url';
 import PluginsKibanaSettingsSectionsIndicesFieldTypesProvider from 'plugins/kibana/settings/sections/indices/_field_types';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import uiRoutes from '../../../../../../ui/public/routes';
+import uiModules from '../../../../../../ui/public/modules';
 import editTemplate from 'plugins/kibana/settings/sections/indices/_edit.html';
 
 uiRoutes

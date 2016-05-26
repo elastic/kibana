@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import VisProvider from 'ui/vis';
-import uiModules from 'ui/modules';
+import VisProvider from '../../../../../ui/public/vis';
+import uiModules from '../../../../../ui/public/modules';
 uiModules
 .get('app/visualize')
 .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import 'ui/notify';
-import uiModules from 'ui/modules';
+import '../../../../../ui/public/notify';
+import uiModules from '../../../../../ui/public/modules';
 
 
 const module = uiModules.get('discover/saved_searches', [

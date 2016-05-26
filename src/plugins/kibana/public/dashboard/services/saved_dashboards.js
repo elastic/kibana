@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import Scanner from 'ui/utils/scanner';
+import Scanner from '../../../../../ui/public/utils/scanner';
 import 'plugins/kibana/dashboard/services/_saved_dashboard';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../ui/public/modules';
 const module = uiModules.get('app/dashboard');
 
 // bring in the factory
