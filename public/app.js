@@ -7,7 +7,7 @@ require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fullscreen/fullscreen');
 require('plugins/timelion/directives/interval/interval');
 require('plugins/timelion/directives/expression_directive');
-require('plugins/timelion/directives/scroll_class');
+require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/docs');
 
 require('plugins/timelion/app.less');

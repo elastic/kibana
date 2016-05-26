@@ -1,4 +1,4 @@
-<div class="timelion app-container" ng-controller="timelion">
+<div class="timelion app-container" ng-controller="timelion" fixed-element-root>
 
   <kbn-top-nav name="timelion" config="topNavMenu">
     <div class="kibana-nav-info ng-scope">
@@ -15,7 +15,7 @@
     </div>
   </kbn-top-nav>
 
-  <navbar class="timelion-navbar" scroll-class="timelion-scroll-class-header" scroll-limit=27 ng-show="chrome.getVisible()">
+  <navbar class="timelion-navbar" fixed-element="timelion-navbar-fixed">
     <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
       <div class="input-group">
         <input input-focus
@@ -36,7 +36,7 @@
     </form>
   </navbar>
 
-  <div class="timelion-container" scroll-class="timelion-scroll-class-body" scroll-limit=27>
+  <div class="timelion-container" fixed-element-body="timelion-container-fixed">
     <div class="timelion-container-sheet">
       <div class="timelion-container-sheet-margin">
 

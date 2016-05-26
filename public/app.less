@@ -20,6 +20,10 @@
 
   &-container {
     margin: 20px;
+
+    &-fixed {
+      margin: 25px;
+    }
   }
 
   &-container-drawer {
@@ -99,6 +103,14 @@
 
 navbar.timelion-navbar {
 
+  &-fixed {
+    border-top: 5px solid @navbar-default-bg;
+    top: 0;
+    left: @as-closed-width;
+    right: 0px;
+    position: fixed;
+  }
+
   input, select {
     height: 34px;
   }
@@ -113,21 +125,7 @@ navbar.timelion-navbar {
 }
 
 .timelion-scroll-class {
-  &-header {
-    border-top: 5px solid @navbar-default-bg;
-    top: 0;
-    left: @as-closed-width;
-    right: 0px;
-    position: fixed;
-  }
 
-  &-options {
-    display: none !important;
-  }
-
-  &-body {
-    margin-top: 60px;
-  }
 }
 
 .chart-container.running {
