@@ -60,6 +60,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   ```sh
   npm start
   ```
+- Now you can point your web browser to https://localhost:5601 and start playing with Kibana! _Please note that in dev mode, Kibana launches also basePath proxy in port 5603, and you will be a notice in the log about that, but the port to access Kibana is 5601._
 
 #### `config/kibana.dev.yml`
 
