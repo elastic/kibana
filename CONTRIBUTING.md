@@ -151,6 +151,25 @@ Once you've got the services running, execute the following:
 - At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
+- https://theintern.github.io/
+- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
+
+#### Building OS packages
+
+Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+```sh
+apt-get install ruby-dev rpm
+gem install fpm -v 1.5.0 # required by pleaserun 0.0.16
+gem install pleaserun -v 0.0.16 # higher versions fail at the moment
+npm run build:ospackages
+```
+
+To specify a package to build you can add `rpm` or `deb` as an argument.
+```sh
+npm run build:ospackages -- --rpm
+```
+
+Distributable packages can be found in `target/` after the build completes.
 
 ### Submit a pull request
 
