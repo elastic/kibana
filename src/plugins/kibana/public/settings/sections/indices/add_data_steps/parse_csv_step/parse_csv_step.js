@@ -54,6 +54,9 @@ modules.get('apps/settings')
                   this.formattedErrors = _.map(results.errors, (error) => {
                     return `${error.type} at row ${error.row + 1} - ${error.message}`;
                   });
+                  if (results.meta.fields.length > _.uniq(results.meta.fields).length) {
+                    this.formattedErrors.push('Column names must be unique');
+                  }
                   _.forEach(results.meta.fields, (field) => {
                     if (_.isEmpty(field)) {
                       this.formattedErrors.push('Column names must not be blank');
