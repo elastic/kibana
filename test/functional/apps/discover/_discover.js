@@ -242,7 +242,7 @@ import {
         });
 
         bdd.it('should not show "no results"', () => {
-          discoverPage.hasNoResults().then(visible => {
+          return discoverPage.hasNoResults().then(visible => {
             expect(visible).to.be(false);
           });
         });
@@ -289,21 +289,21 @@ import {
         });
 
         bdd.it('should show "no results"', () => {
-          discoverPage.hasNoResults().then(visible => {
+          return discoverPage.hasNoResults().then(visible => {
             expect(visible).to.be(true);
           })
           .catch(common.handleError(this));
         });
 
         bdd.it('should suggest a new time range is picked', () => {
-          discoverPage.hasNoResultsTimepicker().then(visible => {
+          return discoverPage.hasNoResultsTimepicker().then(visible => {
             expect(visible).to.be(true);
           })
           .catch(common.handleError(this));
         });
 
         bdd.it('should open and close the time picker', () => {
-          isTimepickerOpen(false)
+          return isTimepickerOpen(false)
             .click()
             .then(() => isTimepickerOpen(true))
             .click()
