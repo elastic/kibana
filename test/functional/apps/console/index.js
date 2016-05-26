@@ -8,10 +8,6 @@ import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
       return remote.setWindowSize(1200,800);
     });
 
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
-    });
-
     require('./_console');
   });
 }());

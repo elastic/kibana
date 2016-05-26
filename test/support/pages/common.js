@@ -11,6 +11,13 @@ export default (function () {
   var format = require('url').format;
   var util = require('util');
   var path = require('path');
+  var url = require('url');
+  var resolve = require('path').resolve;
+  var __dirname = path.resolve(path.dirname());
+  var __pwd = path.resolve('.');
+  var bin = resolve(__dirname, '../../node_modules/.bin/elasticdump');
+  var Elasticdump = require('elasticdump').elasticdump;
+  var kIndex = '.kibana';
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
@@ -279,7 +286,81 @@ export default (function () {
       return this.remote
         .setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector(testSubjSelector(selector));
-    }
+    },
+
+    /*
+    ** This function is basically copied from
+    ** https://github.com/taskrabbit/elasticsearch-dump/blob/master/bin/elasticdump
+    ** and allows calling elasticdump for importing or exporting data from Elasticsearch
+    */
+    elasticdumpModule: function elasticdumpModule(myinput, myoutput, index, mytype) {
+      var self = this;
+
+      var options = {
+        limit:           100,
+        offset:          0,
+        debug:           false,
+        type:            mytype,
+        delete:          false,
+        all:             false,
+        maxSockets:      null,
+        input:           myinput,
+        'input-index':   null,
+        output:          myoutput,
+        'output-index':  index,
+        inputTransport:  null,
+        outputTransport: null,
+        searchBody:      null,
+        sourceOnly:      false,
+        jsonLines:       false,
+        format:          '',
+        'ignore-errors': false,
+        scrollTime:      '10m',
+        timeout:         null,
+        skip:            null,
+        toLog:           null,
+      };
+      self.debug(options);
+      var dumper = new Elasticdump(options.input, options.output, options);
+
+      dumper.on('log',   function (message) { self.debug(message); });
+      dumper.on('debug', function (message) { self.debug(message); });
+      dumper.on('error', function (error)   { self.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
+
+      var promise = new Promise(function (resolve, reject) {
+        dumper.dump(function (error, totalWrites) {
+          if (error) {
+            self.debug('THERE WAS AN ERROR :-(');
+            reject(Error(error));
+          } else {
+            resolve ('elasticdumpModule success');
+          }
+        });
+      });
+      return promise;
+    },
+
+    elasticDump: function elasticDump(index, file) {
+      var self = this;
+      self.debug('Dumping mapping from ' + url.format(config.servers.elasticsearch) + '/' + index + ' to (mapping_' + file + ')');
+      return this.elasticdumpModule(url.format(config.servers.elasticsearch), 'mapping_' + file, index, 'mapping')
+      .then(function () {
+        self.debug('Dumping data from ' + url.format(config.servers.elasticsearch) + '/' + index + ' to (' + file + ')');
+        return self.elasticdumpModule(url.format(config.servers.elasticsearch), file,index, 'data');
+      });
+    },
+
+    elasticLoad: function elasticLoad(file, index) {
+      // TODO: should we have a flag to delete the index first?
+      // or use scenarioManager.unload(index) ?
+      var self = this;
+      self.debug('Loading mapping (mapping_' + file + ') into ' + url.format(config.servers.elasticsearch) + '/' + index);
+      return this.elasticdumpModule('mapping_' + file, url.format(config.servers.elasticsearch), index, 'mapping')
+      .then(function () {
+        self.debug('Loading data (' + file + ')');
+        return self.elasticdumpModule(file, url.format(config.servers.elasticsearch), index, 'data');
+      });
+    },
   };
 
   return Common;
