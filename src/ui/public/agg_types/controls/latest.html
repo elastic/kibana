@@ -1,0 +1,15 @@
+<div class="form-group">
+  <label for="sort">
+    Sort On
+  </label>
+
+  <select
+    class="form-control"
+    name="sort"
+    required
+    ng-model="agg.params.sort"
+    ng-show="indexedFields.length"
+    auto-select-if-only-one="indexedFields"
+    ng-options="field as field.displayName group by field.type for field in indexedFields">
+  </select>
+</div>
