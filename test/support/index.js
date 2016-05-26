@@ -5,6 +5,7 @@ import DiscoverPage from './pages/discover_page';
 import SettingsPage from './pages/settings_page';
 import HeaderPage from './pages/header_page';
 import VisualizePage from './pages/visualize_page';
+import DashboardPage from './pages/dashboard_page';
 import ShieldPage from './pages/shield_page';
 import ConsolePage from './pages/console_page';
 
@@ -24,6 +25,7 @@ defineDelayedExport('discoverPage', () => new DiscoverPage());
 defineDelayedExport('headerPage', () => new HeaderPage());
 defineDelayedExport('settingsPage', () => new SettingsPage());
 defineDelayedExport('visualizePage', () => new VisualizePage());
+defineDelayedExport('dashboardPage', () => new DashboardPage());
 defineDelayedExport('shieldPage', () => new ShieldPage());
 defineDelayedExport('consolePage', () => new ConsolePage());
 
