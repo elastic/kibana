@@ -3,7 +3,8 @@ import {
   common,
   dashboardPage,
   headerPage,
-  scenarioManager
+  scenarioManager,
+  esClient
 } from '../../../support';
 
 (function () {
@@ -22,7 +23,7 @@ import {
         return scenarioManager.unload('emptyKibana')
         .then(function () {
           return common.try(function () {
-            return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+            return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
           });
         })
         // and load a set of makelogs data
