@@ -13,11 +13,7 @@ export default (function () {
   var path = require('path');
   var url = require('url');
   var resolve = require('path').resolve;
-  var __dirname = path.resolve(path.dirname());
-  var __pwd = path.resolve('.');
-  var bin = resolve(__dirname, '../../node_modules/.bin/elasticdump');
   var Elasticdump = require('elasticdump').elasticdump;
-  var kIndex = '.kibana';
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
