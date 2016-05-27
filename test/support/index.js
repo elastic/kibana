@@ -1,4 +1,5 @@
 import url from 'url';
+import EsClient from './es_client';
 import ScenarioManager from '../fixtures/scenario_manager';
 import Common from './pages/common';
 import DiscoverPage from './pages/discover_page';
@@ -18,6 +19,7 @@ exports.defaultTimeout = exports.config.defaultTimeout;
 exports.defaultTryTimeout = exports.config.defaultTryTimeout;
 exports.defaultFindTimeout = exports.config.defaultFindTimeout;
 exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.elasticsearch));
+exports.esClient = new EsClient(url.format(exports.config.servers.elasticsearch));
 
 defineDelayedExport('remote', (suite) => suite.remote);
 defineDelayedExport('common', () => new Common());
