@@ -26,7 +26,7 @@ authority for your Elasticsearch instance.
 to `false`.
 `elasticsearch.pingTimeout:`:: *Default: the value of the `elasticsearch.requestTimeout` setting* Time in milliseconds to 
 wait for Elasticsearch to respond to pings.
-`elasticsearch.requestTimeout:`:: *Default: 300000* Time in milliseconds to wait for responses from the back end or 
+`elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait for responses from the back end or 
 Elasticsearch. This value must be a positive integer.
 `elasticsearch.shardTimeout:`:: *Default: 0* Time in milliseconds for Elasticsearch to wait for responses from shards. Set 
 to 0 to disable.
