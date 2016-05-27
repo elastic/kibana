@@ -26,6 +26,6 @@ module.exports = function createServices(grunt) {
 
     grunt.file.mkdir(userScriptsDir);
     exec('please-manage-user', ['--output', userScriptsDir, 'kibana']);
-    appendFileSync(resolve(userScriptsDir, 'installer.sh'), 'chown kibana:kibana /opt/kibana/optimize');
+    appendFileSync(resolve(userScriptsDir, 'installer.sh'), 'chown -R kibana:kibana /opt/kibana/optimize');
   });
 };
