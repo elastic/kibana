@@ -1,10 +1,15 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Rename extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'rename', 'Rename');
-    this.sourceField = '';
-    this.targetField = '';
+    _.assign(this,
+      {
+        sourceField: '',
+        targetField: ''
+      },
+      _.pick(oldProcessor, ['sourceField', 'targetField']));
   }
 
   get description() {

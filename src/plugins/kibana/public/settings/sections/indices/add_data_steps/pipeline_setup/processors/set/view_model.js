@@ -1,10 +1,15 @@
 import Processor from '../base/view_model';
+import _ from 'lodash';
 
 export class Set extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'set', 'Set');
-    this.targetField = '';
-    this.value = '';
+    _.assign(this,
+      {
+        targetField: '',
+        value: ''
+      },
+      _.pick(oldProcessor, ['targetField', 'value']));
   }
 
   get description() {

@@ -1,10 +1,15 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Split extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'split', 'Split');
-    this.sourceField = '';
-    this.separator = '';
+    _.assign(this,
+      {
+        sourceField: '',
+        separator: ''
+      },
+      _.pick(oldProcessor, ['sourceField', 'separator']));
   }
 
   get description() {

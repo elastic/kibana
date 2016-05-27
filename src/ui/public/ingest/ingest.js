@@ -71,4 +71,31 @@ export default function IngestProvider($rootScope, $http, config, $q) {
     });
   };
 
+  this.getPipelines = function () {
+    function unpack(response) {
+      return response.data;
+    }
+
+    return $http.get(`${ingestAPIPrefix}/pipelines`)
+    .then(unpack)
+    .catch(err => {
+      return $q.reject(new Error('Error fetching pipelines'));
+    });
+  };
+
+  this.getPipeline = function (id) {
+    function unpack(response) {
+      const pipeline = response.data;
+      pipeline.processors = _.map(pipeline.processors, processor => keysToCamelCaseShallow(processor));
+
+      return pipeline;
+    }
+
+    return $http.get(`${ingestAPIPrefix}/pipeline/${id}`)
+    .then(unpack)
+    .catch(err => {
+      return $q.reject(new Error('Error fetching pipeline'));
+    });
+  };
+
 }

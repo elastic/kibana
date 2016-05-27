@@ -1,9 +1,14 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Uppercase extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'uppercase', 'Uppercase');
-    this.sourceField = '';
+    _.assign(this,
+      {
+        sourceField: ''
+      },
+      _.pick(oldProcessor, ['sourceField']));
   }
 
   get description() {

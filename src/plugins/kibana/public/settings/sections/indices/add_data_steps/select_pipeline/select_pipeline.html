@@ -1,0 +1,10 @@
+<h2><em>New or Existing?</em>
+Do you want to create a new pipeline, or edit an existing pipline?
+</h2>
+
+<select
+  class="form-control"
+  ng-options="pipeline as pipeline for pipeline in selectPipeline.pipelines"
+  ng-model="selectPipeline.pipelineName">
+  <option value="">Create a new pipeline</option>
+</select>

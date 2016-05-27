@@ -1,11 +1,16 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Gsub extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'gsub', 'Gsub');
-    this.sourceField = '';
-    this.pattern = '';
-    this.replacement = '';
+    _.assign(this,
+      {
+        sourceField: '',
+        pattern: '',
+        replacement: ''
+      },
+      _.pick(oldProcessor, ['sourceField', 'pattern', 'replacement']));
   }
 
   get description() {

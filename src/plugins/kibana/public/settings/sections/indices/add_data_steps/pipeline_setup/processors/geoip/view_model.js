@@ -1,12 +1,17 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class GeoIp extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'geoip', 'Geo IP');
-    this.sourceField = '';
-    this.targetField = '';
-    this.databaseFile = '';
-    this.databaseFields = [];
+    _.assign(this,
+      {
+        sourceField: '',
+        targetField: '',
+        databaseFile: '',
+        databaseFields: []
+      },
+      _.pick(oldProcessor, ['sourceField', 'targetField', 'databaseFile', 'databaseFields']));
   }
 
   get description() {

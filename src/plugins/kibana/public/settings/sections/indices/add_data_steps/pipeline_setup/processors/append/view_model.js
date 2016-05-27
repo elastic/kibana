@@ -1,10 +1,15 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Append extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(processorId, 'append', 'Append');
-    this.targetField = '';
-    this.values = [];
+    _.assign(this,
+      {
+        targetField: '',
+        values: []
+      },
+      _.pick(oldProcessor, ['targetField', 'values']));
   }
 
   get description() {
