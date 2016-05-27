@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Uppercase extends Processor {
   constructor(processorId) {
-    super(processorId, 'uppercase', 'Uppercase');
+    super(
+      processorId,
+      'uppercase',
+      'Uppercase',
+      `Converts a string to its uppercase equivalent.`
+    );
     this.sourceField = '';
   }
 

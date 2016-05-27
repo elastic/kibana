@@ -9,6 +9,7 @@ import './pipeline_output';
 import './source_data';
 import './processor_ui_container';
 import '../processors';
+import 'angular-ui-select';
 import pipelineSetupTemplate from '../views/pipeline_setup.html';
 
 const app = uiModules.get('kibana');
@@ -20,6 +21,7 @@ function buildProcessorTypeList(enabledProcessorTypeIds) {
       return {
         typeId: instance.typeId,
         title: instance.title,
+        helpText: instance.helpText,
         Type
       };
     })
@@ -79,11 +81,12 @@ app.directive('pipelineSetup', function () {
         pipeline.updateParents();
       });
 
-      $scope.$watch('processorType', (newVal) => {
+      $scope.processorType = { value: '' };
+      $scope.$watch('processorType.value', (newVal) => {
         if (!newVal) return;
 
         pipeline.add(newVal.Type);
-        $scope.processorType = '';
+        $scope.processorType.value = '';
       });
 
       $scope.$watch('pipeline.dirty', simulatePipeline);

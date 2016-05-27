@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Date extends Processor {
   constructor(processorId) {
-    super(processorId, 'date', 'Date');
+    super(
+      processorId,
+      'date',
+      'Date',
+      `Parses dates from fields.`
+    );
     this.sourceField = '';
     this.targetField = '@timestamp';
     this.formats = [];

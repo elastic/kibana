@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Lowercase extends Processor {
   constructor(processorId) {
-    super(processorId, 'lowercase', 'Lowercase');
+    super(
+      processorId,
+      'lowercase',
+      'Lowercase',
+      `Converts a string to its lowercase equivalent.`
+    );
     this.sourceField = '';
   }
 
