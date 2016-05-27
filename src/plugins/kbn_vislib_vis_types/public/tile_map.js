@@ -50,7 +50,6 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
       },
       mapMoveEnd: function (event, uiState) {
         uiState.set('mapCenter', event.center);
-        uiState.set('mapZoom', event.zoom);
       },
       mapZoomEnd: function (event, uiState) {
         uiState.set('mapZoom', event.zoom);
