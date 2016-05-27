@@ -6,8 +6,8 @@ import { createInterface } from 'readline';
 export default (grunt) => {
   grunt.registerTask('_rebuild:confirm', function () {
     const newVersion = grunt.option('buildversion') || grunt.config.get('pkg').version;
-    const newBuildNum = grunt.option('buildnum') || grunt.config.get('buildNum');
-    const newSha = grunt.option('buildsha') || grunt.config.get('buildSha');
+    const newBuildNum = grunt.option('buildnum') || grunt.config.get('build.number');
+    const newSha = grunt.option('buildsha') || grunt.config.get('build.sha');
 
     grunt.config('rebuild', { newVersion, newBuildNum, newSha });
 
