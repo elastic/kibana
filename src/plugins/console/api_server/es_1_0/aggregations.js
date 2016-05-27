@@ -247,6 +247,7 @@ var rules = {
       __template: {
         "field": ""
       },
+      "field": "{field}",
       "precision_threshold": 100,
       "rehash": true,
       "script": "_value",
