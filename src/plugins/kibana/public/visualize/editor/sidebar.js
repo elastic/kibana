@@ -15,7 +15,6 @@ uiModules
     controllerAs: 'sidebar',
     controller: function ($scope) {
       $scope.$bind('vis', 'editableVis');
-      $scope.$bind('outputVis', 'vis');
       $scope.$watch('vis.type', (visType) => {
         if (visType) {
           this.showData = visType.schemas.buckets || visType.schemas.metrics;

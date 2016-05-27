@@ -47,6 +47,8 @@ export default function MapFactory(Private) {
     this._valueFormatter = params.valueFormatter || _.identity;
     this._tooltipFormatter = params.tooltipFormatter || _.identity;
     this._geoJson = _.get(this._chartData, 'geoJson');
+    this._mapZoom = params.zoom || defaultMapZoom;
+    this._mapCenter = params.center || defaultMapCenter;
     this._attr = params.attr || {};
 
     let mapOptions = {
@@ -211,7 +213,8 @@ export default function MapFactory(Private) {
     this.map.on('moveend', function setZoomCenter(ev) {
       if (!self.map) return;
       // update internal center and zoom references
-      self._mapCenter = self.map.getCenter();
+      const uglyCenter = self.map.getCenter();
+      self._mapCenter = [uglyCenter.lat, uglyCenter.lng];
       self._mapZoom = self.map.getZoom();
       self._addMarkers();
 
@@ -271,10 +274,6 @@ export default function MapFactory(Private) {
 
   TileMapMap.prototype._createMap = function (mapOptions) {
     if (this.map) this.destroy();
-
-    // get center and zoom from mapdata, or use defaults
-    this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-    this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
 
     // add map tiles layer, using the mapTiles object settings
     if (this._attr.wms && this._attr.wms.enabled) {
