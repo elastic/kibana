@@ -12,7 +12,7 @@ import {
   var expect = require('expect.js');
 
   (function () {
-    bdd.describe('discover tab', function describeIndexTests() {
+    bdd.describe('dashboard tab', function describeIndexTests() {
 
       bdd.before(function () {
 
