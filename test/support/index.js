@@ -1,5 +1,6 @@
 import url from 'url';
 import EsClient from './es_client';
+import ElasticDump from './elastic_dump';
 import ScenarioManager from '../fixtures/scenario_manager';
 import Common from './pages/common';
 import DiscoverPage from './pages/discover_page';
@@ -30,6 +31,7 @@ defineDelayedExport('visualizePage', () => new VisualizePage());
 defineDelayedExport('dashboardPage', () => new DashboardPage());
 defineDelayedExport('shieldPage', () => new ShieldPage());
 defineDelayedExport('consolePage', () => new ConsolePage());
+defineDelayedExport('elasticDump', () => new ElasticDump());
 
 // creates an export for values that aren't actually avaialable until
 // until tests start to run. These getters will throw errors if the export
