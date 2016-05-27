@@ -27,6 +27,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatRadius: 25,
         heatBlur: 15,
         heatNormalizeData: true,
+        mapZoom: 2,
+        mapCenter: [15, 5],
         wms: config.get('visualization:tileMap:WMSdefaults')
       },
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
@@ -46,54 +48,16 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
 
         pushFilter(filter, false, indexPatternName);
       },
-      mapMoveEnd: function (event) {
-        const agg = _.get(event, 'chart.geohashGridAgg');
-        if (!agg) return;
-
-        agg.params.mapZoom = event.zoom;
-        agg.params.mapCenter = [event.center.lat, event.center.lng];
-
-        const editableVis = agg.vis.getEditableVis();
-        if (!editableVis) return;
-
-        const editableAgg = editableVis.aggs.byId[agg.id];
-        if (editableAgg) {
-          editableAgg.params.mapZoom = event.zoom;
-          editableAgg.params.mapCenter = [event.center.lat, event.center.lng];
-        }
+      mapMoveEnd: function (event, uiState) {
+        uiState.set('mapCenter', event.center);
       },
-      mapZoomEnd: function (event) {
-        const agg = _.get(event, 'chart.geohashGridAgg');
-        if (!agg || !agg.params.autoPrecision) return;
+      mapZoomEnd: function (event, uiState) {
+        uiState.set('mapZoom', event.zoom);
 
-        // zoomPrecision maps event.zoom to a geohash precision value
-        // event.limit is the configurable max geohash precision
-        // default max precision is 7, configurable up to 12
-        const zoomPrecision = {
-          1: 2,
-          2: 2,
-          3: 2,
-          4: 3,
-          5: 3,
-          6: 4,
-          7: 4,
-          8: 5,
-          9: 5,
-          10: 6,
-          11: 6,
-          12: 7,
-          13: 7,
-          14: 8,
-          15: 9,
-          16: 10,
-          17: 11,
-          18: 12
-        };
-
-        const precision = config.get('visualization:tileMap:maxPrecision');
-        agg.params.precision = Math.min(zoomPrecision[event.zoom], precision);
-
-        courier.fetch();
+        const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
+        if (autoPrecision) {
+          courier.fetch();
+        }
       }
     },
     responseConverter: geoJsonConverter,

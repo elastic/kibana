@@ -81,6 +81,7 @@ describe('TileMap Tests', function () {
 
     it('should only add controls if data exists', function () {
       let noData = {
+        geohashGridAgg: { vis: { params: {} } },
         geoJson: {
           features: [],
           properties: {},
