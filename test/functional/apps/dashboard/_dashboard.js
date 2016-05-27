@@ -4,7 +4,8 @@ import {
   dashboardPage,
   headerPage,
   scenarioManager,
-  esClient
+  esClient,
+  elasticDump
 } from '../../../support';
 
 (function () {
@@ -20,7 +21,7 @@ import {
 
         common.debug('Starting dashboard before method');
         common.debug('navigateToApp dashboard');
-        return scenarioManager.unload('emptyKibana')
+        return esClient.delete('.kibana')
         .then(function () {
           return common.try(function () {
             return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
@@ -29,7 +30,7 @@ import {
         // and load a set of makelogs data
         .then(function loadkibana4() {
           common.debug('load kibana index with visualizations');
-          return common.elasticLoad('kibana4.json','.kibana');
+          return elasticDump.elasticLoad('dashboard','.kibana');
         })
         .then(function () {
           return scenarioManager.loadIfEmpty('logstashFunctional');
@@ -65,7 +66,7 @@ import {
 
           return addVisualizations(visualizations)
           .then(function () {
-            console.log('all done');
+            common.debug('done adding visualizations');
           });
 
         });
