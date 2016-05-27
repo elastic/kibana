@@ -3,9 +3,9 @@
     {{ groupName }}
   </div>
 
-  <div class="vis-editor-agg-group" ng-class="groupName">
+  <div ng-class="groupName" draggable-container="vis.aggs" class="vis-editor-agg-group">
     <!-- wrapper needed for nesting-indicator -->
-    <div ng-repeat="agg in group" class="vis-editor-agg-wrapper">
+    <div ng-repeat="agg in group" draggable-item="agg" class="vis-editor-agg-wrapper">
       <!-- agg.html - controls for aggregation -->
       <ng-form vis-editor-agg name="aggForm" class="vis-editor-agg"></ng-form>
     </div>

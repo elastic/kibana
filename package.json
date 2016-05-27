@@ -95,6 +95,7 @@
     "commander": "2.8.1",
     "css-loader": "0.17.0",
     "d3": "3.5.6",
+    "dragula": "3.7.0",
     "elasticsearch": "10.1.2",
     "elasticsearch-browser": "10.1.2",
     "expiry-js": "0.1.7",
