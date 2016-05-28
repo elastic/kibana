@@ -16,7 +16,7 @@ import { bdd, common } from '../../support';
         .findByCssSelector('.plugin_status_breakdown')
         .getVisibleText()
         .then(function (text) {
-          expect(text.indexOf('plugin:kibana Ready')).to.be.above(-1);
+          expect(text.indexOf('kibana 1.0.0 Ready')).to.be.above(-1);
         });
       })
       .catch(common.handleError(self));
