@@ -11,9 +11,6 @@ export default (function () {
   var format = require('url').format;
   var util = require('util');
   var path = require('path');
-  var url = require('url');
-  var resolve = require('path').resolve;
-  var Elasticdump = require('elasticdump').elasticdump;
 
   function injectTimestampQuery(func, url) {
     var formatted = modifyQueryString(url, function (parsed) {
