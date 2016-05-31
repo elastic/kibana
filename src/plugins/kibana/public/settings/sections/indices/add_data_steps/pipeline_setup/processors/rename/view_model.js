@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Rename extends Processor {
   constructor(processorId) {
-    super(processorId, 'rename', 'Rename');
+    super(
+      processorId,
+      'rename',
+      'Rename',
+      `Renames an existing field.`
+    );
     this.sourceField = '';
     this.targetField = '';
   }

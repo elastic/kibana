@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Trim extends Processor {
   constructor(processorId) {
-    super(processorId, 'trim', 'Trim');
+    super(
+      processorId,
+      'trim',
+      'Trim',
+      `Trims whitespace from field.`
+    );
     this.sourceField = '';
   }
 

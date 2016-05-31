@@ -2,7 +2,13 @@ import Processor from '../base/view_model';
 
 export class GeoIp extends Processor {
   constructor(processorId) {
-    super(processorId, 'geoip', 'Geo IP');
+    super(
+      processorId,
+      'geoip',
+      'Geo IP',
+      `Adds information about the geographical location of IP addresses,
+based on data from the Maxmind database.`
+    );
     this.sourceField = '';
     this.targetField = '';
     this.databaseFile = '';

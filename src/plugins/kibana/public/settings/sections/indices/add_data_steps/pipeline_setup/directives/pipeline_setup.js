@@ -2,37 +2,21 @@ import uiModules from 'ui/modules';
 import _ from 'lodash';
 import Pipeline from '../lib/pipeline';
 import angular from 'angular';
-import * as ProcessorTypes from '../processors/view_models';
 import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';
 import './pipeline_output';
 import './source_data';
 import './processor_ui_container';
+import './processor_select';
 import '../processors';
-import pipelineSetupTemplate from '../views/pipeline_setup.html';
+import template from '../views/pipeline_setup.html';
 
 const app = uiModules.get('kibana');
-
-function buildProcessorTypeList(enabledProcessorTypeIds) {
-  return _(ProcessorTypes)
-    .map(Type => {
-      const instance = new Type();
-      return {
-        typeId: instance.typeId,
-        title: instance.title,
-        Type
-      };
-    })
-    .compact()
-    .filter((processorType) => enabledProcessorTypeIds.includes(processorType.typeId))
-    .sortBy('title')
-    .value();
-}
 
 app.directive('pipelineSetup', function () {
   return {
     restrict: 'E',
-    template: pipelineSetupTemplate,
+    template: template,
     scope: {
       samples: '=',
       pipeline: '='
@@ -41,13 +25,6 @@ app.directive('pipelineSetup', function () {
       const ingest = Private(IngestProvider);
       const notify = new Notifier({ location: `Ingest Pipeline Setup` });
       $scope.sample = {};
-
-      //determines which processors are available on the cluster
-      ingest.getProcessors()
-      .then((enabledProcessorTypeIds) => {
-        $scope.processorTypes = buildProcessorTypeList(enabledProcessorTypeIds);
-      })
-      .catch(notify.error);
 
       const pipeline = new Pipeline();
       // Loads pre-existing pipeline which will exist if the user returns from
@@ -79,11 +56,10 @@ app.directive('pipelineSetup', function () {
         pipeline.updateParents();
       });
 
-      $scope.$watch('processorType', (newVal) => {
-        if (!newVal) return;
-
-        pipeline.add(newVal.Type);
-        $scope.processorType = '';
+      $scope.$watch('processorType', processorType => {
+        if (!processorType) return;
+        pipeline.add(processorType);
+        $scope.processorType = null;
       });
 
       $scope.$watch('pipeline.dirty', simulatePipeline);

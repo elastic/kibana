@@ -2,7 +2,12 @@ import Processor from '../base/view_model';
 
 export class Gsub extends Processor {
   constructor(processorId) {
-    super(processorId, 'gsub', 'Gsub');
+    super(
+      processorId,
+      'gsub',
+      'Gsub',
+      `Converts a string field by applying a regular expression and a replacement.`
+    );
     this.sourceField = '';
     this.pattern = '';
     this.replacement = '';
