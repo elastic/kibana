@@ -1,4 +1,4 @@
-import { common, config, defaultTryTimeout, defaultFindTimeout, remote, shieldPage } from '../';
+import { config, defaultTryTimeout, defaultFindTimeout, remote, shieldPage } from '../';
 
 export default (function () {
   var Promise = require('bluebird');
@@ -280,6 +280,7 @@ export default (function () {
         .setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector(testSubjSelector(selector));
     }
+
   };
 
   return Common;
