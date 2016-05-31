@@ -18,7 +18,6 @@ export default (function () {
     ** and allows calling elasticdump for importing or exporting data from Elasticsearch
     */
     elasticdumpModule: function elasticdumpModule(myinput, myoutput, index, mytype) {
-      var self = this;
 
       var options = {
         limit:           100,
