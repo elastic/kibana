@@ -1,16 +1,28 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Gsub extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(
       processorId,
       'gsub',
       'Gsub',
       `Converts a string field by applying a regular expression and a replacement.`
     );
-    this.sourceField = '';
-    this.pattern = '';
-    this.replacement = '';
+
+    _.defaults(
+      this,
+      _.pick(oldProcessor, [
+        'sourceField',
+        'pattern',
+        'replacement'
+      ]),
+      {
+        sourceField: '',
+        pattern: '',
+        replacement: ''
+      }
+    );
   }
 
   get description() {

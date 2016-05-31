@@ -1,15 +1,26 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Rename extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(
       processorId,
       'rename',
       'Rename',
       `Renames an existing field.`
     );
-    this.sourceField = '';
-    this.targetField = '';
+
+    _.defaults(
+      this,
+      _.pick(oldProcessor, [
+        'sourceField',
+        'targetField'
+      ]),
+      {
+        sourceField: '',
+        targetField: ''
+      }
+    );
   }
 
   get description() {

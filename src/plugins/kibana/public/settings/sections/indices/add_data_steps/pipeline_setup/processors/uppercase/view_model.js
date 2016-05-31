@@ -1,14 +1,24 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Uppercase extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(
       processorId,
       'uppercase',
       'Uppercase',
       `Converts a string to its uppercase equivalent.`
     );
-    this.sourceField = '';
+
+    _.defaults(
+      this,
+      _.pick(oldProcessor, [
+        'sourceField'
+      ]),
+      {
+        sourceField: ''
+      }
+    );
   }
 
   get description() {

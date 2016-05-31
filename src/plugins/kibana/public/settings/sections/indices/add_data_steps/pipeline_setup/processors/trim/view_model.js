@@ -1,14 +1,24 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Trim extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(
       processorId,
       'trim',
       'Trim',
       `Trims whitespace from field.`
     );
-    this.sourceField = '';
+
+    _.defaults(
+      this,
+      _.pick(oldProcessor, [
+        'sourceField'
+      ]),
+      {
+        sourceField: ''
+      }
+    );
   }
 
   get description() {

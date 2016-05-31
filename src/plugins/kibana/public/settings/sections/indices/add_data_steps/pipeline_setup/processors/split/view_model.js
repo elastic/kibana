@@ -1,15 +1,26 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Split extends Processor {
-  constructor(processorId) {
+  constructor(processorId, oldProcessor) {
     super(
       processorId,
       'split',
       'Split',
       `Splits a field into an array using a separator character.`
     );
-    this.sourceField = '';
-    this.separator = '';
+
+    _.defaults(
+      this,
+      _.pick(oldProcessor, [
+        'sourceField',
+        'separator'
+      ]),
+      {
+        sourceField: '',
+        separator: ''
+      }
+    );
   }
 
   get description() {
