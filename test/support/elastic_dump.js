@@ -11,7 +11,6 @@ export default (function () {
   }
 
   ElasticDump.prototype = {
-    constructor: ElasticDump,
 
     /*
     ** This function is basically copied from
@@ -45,11 +44,9 @@ export default (function () {
         skip:            null,
         toLog:           null,
       };
-      // common.debug(options);
       var dumper = new Elasticdump(options.input, options.output, options);
 
       dumper.on('log',   function (message) { common.debug(message); });
-      // dumper.on('debug', function (message) { common.debug(message); });
       dumper.on('error', function (error)   { common.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
 
       var promise = new Promise(function (resolve, reject) {
