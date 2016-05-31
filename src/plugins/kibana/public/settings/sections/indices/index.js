@@ -27,7 +27,7 @@ uiModules.get('apps/settings')
     template: indexTemplate,
     link: function ($scope) {
       $scope.editingId = $route.current.params.indexPatternId;
-      config.$bind($scope, 'defaultIndex');
+      config.bindToScope($scope, 'defaultIndex');
 
       $scope.$watch('defaultIndex', function () {
         const ids = $route.current.locals.indexPatternIds;

@@ -6,6 +6,7 @@ import SettingsPage from './pages/settings_page';
 import HeaderPage from './pages/header_page';
 import VisualizePage from './pages/visualize_page';
 import ShieldPage from './pages/shield_page';
+import ConsolePage from './pages/console_page';
 
 const kbnInternVars = global.__kibana__intern__;
 
@@ -13,6 +14,7 @@ exports.bdd = kbnInternVars.bdd;
 exports.intern = kbnInternVars.intern;
 exports.config = exports.intern.config;
 exports.defaultTimeout = exports.config.defaultTimeout;
+exports.defaultTryTimeout = exports.config.defaultTryTimeout;
 exports.defaultFindTimeout = exports.config.defaultFindTimeout;
 exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.elasticsearch));
 
@@ -23,6 +25,7 @@ defineDelayedExport('headerPage', () => new HeaderPage());
 defineDelayedExport('settingsPage', () => new SettingsPage());
 defineDelayedExport('visualizePage', () => new VisualizePage());
 defineDelayedExport('shieldPage', () => new ShieldPage());
+defineDelayedExport('consolePage', () => new ConsolePage());
 
 // creates an export for values that aren't actually avaialable until
 // until tests start to run. These getters will throw errors if the export

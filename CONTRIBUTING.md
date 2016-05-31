@@ -55,7 +55,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
   npm run elasticsearch
   ```
 
-- Start the development server. _On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command._
+- Start the development server. _On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum._
 
   ```sh
   npm start
@@ -184,9 +184,9 @@ npm run test:ui:runner
 
 Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
 ```sh
-gem install pleaserun
-apt-get install ruby-dev
-gem install fpm
+apt-get install ruby-dev rpm
+gem install fpm -v 1.5.0 # required by pleaserun 0.0.16
+gem install pleaserun -v 0.0.16 # higher versions fail at the moment
 npm run build:ospackages
 ```
 

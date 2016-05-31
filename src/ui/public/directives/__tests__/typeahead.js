@@ -128,7 +128,7 @@ describe('typeahead directive', function () {
         expect($typeaheadScope.items.length).to.be(typeaheadItems.length);
       });
 
-      it('should order fitlered results', function () {
+      it('should order filtered results', function () {
         let entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
         let allEntries = typeaheadItems.concat(entries);
         let startMatches = allEntries.filter(function (item) {

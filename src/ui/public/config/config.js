@@ -1,124 +1,28 @@
 import angular from 'angular';
-import _ from 'lodash';
-import ConfigDefaultsProvider from 'ui/config/defaults';
-import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
-import ConfigValsProvider from 'ui/config/_vals';
-import DocSourceProvider from 'ui/courier/data_source/doc_source';
+import { once, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
-
-let module = uiModules.get('kibana/config');
-
-uiRoutes.addSetupWork(function (config) {
-  return config.init();
-});
+import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
+const module = uiModules.get('kibana/config');
 
 // service for delivering config variables to everywhere else
-module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, buildNum) {
-  let config = this;
+module.service(`config`, function (Private, $rootScope, $http, chrome, uiSettings) {
+  const config = this;
+  const notify = new Notifier({ location: `Config` });
+  const { defaults, user: initialUserSettings } = uiSettings;
+  const delayedUpdate = Private(ConfigDelayedUpdaterProvider);
+  let settings = mergeSettings(defaults, initialUserSettings);
 
-  let defaults = Private(ConfigDefaultsProvider);
-  let DelayedUpdater = Private(ConfigDelayedUpdaterProvider);
-  let vals = Private(ConfigValsProvider);
-
-  let notify = new Notifier({
-    location: 'Config'
-  });
-
-  // active or previous instance of DelayedUpdater. This will log and then process an
-  // update once it is requested by calling #set() or #clear().
-  let updater;
-
-  let DocSource = Private(DocSourceProvider);
-  let doc = (new DocSource())
-    .index(kbnIndex)
-    .type('config')
-    .id(kbnVersion);
-
-  /******
-   * PUBLIC API
-   ******/
-
-  /**
-   * Executes once and returns a promise that is resolved once the
-   * config has loaded for the first time.
-   *
-   * @return {Promise} - Resolved when the config loads initially
-   */
-  config.init = _.once(function () {
-    let complete = notify.lifecycle('config init');
-
-    return (function getDoc() {
-
-      // used to apply an entire es response to the vals, silentAndLocal will prevent
-      // event/notifications/writes from occuring.
-      let applyMassUpdate = function (resp, silentAndLocal) {
-        _.union(_.keys(resp._source), _.keys(vals)).forEach(function (key) {
-          change(key, resp._source[key], silentAndLocal);
-        });
-      };
-
-      return doc.fetch().then(function initDoc(resp) {
-        if (!resp.found) {
-          return doc.doIndex({
-            buildNum: buildNum
-          }).then(getDoc);
-        } else {
-          // apply update, and keep it quiet the first time
-          applyMassUpdate(resp, true);
-
-          // don't keep it quiet other times
-          doc.onUpdate(function (resp) {
-            applyMassUpdate(resp, false);
-          });
-        }
-      });
-    }())
-    .then(function () {
-      $rootScope.$broadcast('init:config');
-    })
-    .then(complete, complete.failure);
-  });
-
-  config.get = function (key, defaultVal) {
-    let keyVal;
-
-    if (vals[key] == null) {
-      if (defaultVal == null) {
-        keyVal = defaults[key].value;
-      } else {
-        keyVal = _.cloneDeep(defaultVal);
-      }
-    } else {
-      keyVal = vals[key];
-    }
-
-    if (defaults[key] && defaults[key].type === 'json') {
-      return JSON.parse(keyVal);
-    }
-    return keyVal;
-  };
-
-  // sets a value in the config
-  config.set = function (key, val) {
-    if (_.isPlainObject(val)) {
-      return change(key, angular.toJson(val));
-    } else {
-      return change(key, val);
-    }
-  };
-
-  // clears a value from the config
-  config.clear = function (key) {
-    return change(key);
-  };
-  // alias for clear
-  config.delete = config.clear;
-
-  config.close = function () {
-    if (updater) updater.fire();
-  };
+  config.getAll = () => cloneDeep(settings);
+  config.get = (key, defaultValue) => getCurrentValue(key, defaultValue);
+  config.set = (key, val) => change(key, isPlainObject(val) ? angular.toJson(val) : val);
+  config.remove = key => change(key, null);
+  config.isDeclared = key => key in settings;
+  config.isDefault = key => !config.isDeclared(key) || nullOrEmpty(settings[key].userValue);
+  config.isCustom = key => config.isDeclared(key) && !('value' in settings[key]);
+  config.watchAll = (fn, scope) => watchAll(scope, fn);
+  config.watch = (key, fn, scope) => watch(key, scope, fn);
 
   /**
    * A little helper for binding config variables to $scopes
@@ -129,34 +33,99 @@ module.service('config', function (Private, kbnVersion, kbnIndex, $rootScope, bu
    *                             be stored. Defaults to the config key
    * @return {function} - an unbind function
    */
-  config.$bind = function ($scope, key, property) {
-    if (!property) property = key;
-
-    let update = function () {
-      $scope[property] = config.get(key);
-    };
-
-    update();
-    return _.partial(_.invoke, [
-      $scope.$on('change:config.' + key, update),
-      $scope.$on('init:config', update)
-    ], 'call');
+  config.bindToScope = function (scope, key, property = key) {
+    return watch(key, scope, update);
+    function update(newVal) {
+      scope[property] = newVal;
+    }
   };
 
-  /*****
-   * PRIVATE API
-   *****/
-  function change(key, val, silentAndLocal) {
-    // if the previous updater has already fired, then start over with null
-    if (updater && updater.fired) updater = null;
-    // create a new updater
-    if (!updater) updater = new DelayedUpdater(doc);
-    // return a promise that will be resolved once the action is eventually done
-    return updater.update(key, val, silentAndLocal);
+  function watch(key, scope = $rootScope, fn) {
+    if (!config.isDeclared(key)) {
+      throw new Error(`Unexpected \`config.watch("${key}", fn)\` call on unrecognized configuration setting "${key}".
+Setting an initial value via \`config.set("${key}", value)\` before binding
+any custom setting configuration watchers for "${key}" may fix this issue.`);
+    }
+    const newVal = config.get(key);
+    const update = (e, ...args) => fn(...args);
+    fn(newVal, null, key, config);
+    return scope.$on(`change:config.${key}`, update);
   }
 
-  config._vals = function () {
-    return _.cloneDeep(vals);
-  };
+  function watchAll(scope = $rootScope, fn) {
+    const update = (e, ...args) => fn(...args);
+    fn(null, null, null, config);
+    return scope.$on(`change:config`, update);
+  }
 
+  function change(key, value) {
+    const declared = config.isDeclared(key);
+    const oldVal = declared ? settings[key].userValue : undefined;
+    const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
+    const unchanged = oldVal === newVal;
+    if (unchanged) {
+      return Promise.resolve();
+    }
+    const initialVal = declared ? config.get(key) : undefined;
+    localUpdate(key, newVal, initialVal);
+
+    return delayedUpdate(key, newVal)
+      .then(updatedSettings => {
+        settings = mergeSettings(defaults, updatedSettings);
+      })
+      .catch(reason => {
+        localUpdate(key, initialVal, config.get(key));
+        notify.error(reason);
+      });
+  }
+
+  function localUpdate(key, newVal, oldVal) {
+    patch(key, newVal);
+    advertise(key, oldVal);
+  }
+
+  function patch(key, value) {
+    if (!config.isDeclared(key)) {
+      settings[key] = {};
+    }
+    if (value === null) {
+      delete settings[key].userValue;
+    } else {
+      settings[key].userValue = value;
+    }
+  }
+
+  function advertise(key, oldVal) {
+    const newVal = config.get(key);
+    notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
+    $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal, key, config);
+    $rootScope.$broadcast(`change:config`,        newVal, oldVal, key, config);
+  }
+
+  function nullOrEmpty(value) {
+    return value === undefined || value === null;
+  }
+
+  function getCurrentValue(key, defaultValueForGetter) {
+    if (!config.isDeclared(key)) {
+      if (defaultValueForGetter === undefined) {
+        throw new Error(`Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
+Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
+any custom setting value for "${key}" may fix this issue.
+You can also save an step using \`config.get("${key}", defaultValue)\`, which
+will set the initial value if one is not already set.`);
+      }
+      config.set(key, defaultValueForGetter);
+    }
+    const { userValue, value: defaultValue, type } = settings[key];
+    const currentValue = config.isDefault(key) ? defaultValue : userValue;
+    if (type === 'json') {
+      return JSON.parse(currentValue);
+    }
+    return currentValue;
+  }
 });
+
+function mergeSettings(extended, defaults) {
+  return defaultsDeep(extended, defaults);
+}

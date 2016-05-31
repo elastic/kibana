@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import 'ui/filters/short_dots';
 import uiModules from 'ui/modules';
 let module = uiModules.get('kibana');
@@ -52,11 +53,14 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
         let displayName = $filter('shortDots')(name);
 
         $el
-          .text(displayName)
           .attr('title', name)
           .toggleClass('no-results', results)
           .toggleClass('scripted', scripted)
-          .prepend(typeIcon(type));
+          .prepend(typeIcon(type))
+          .append($('<span>')
+            .text(displayName)
+            .addClass('discover-field-name')
+          );
       });
     }
   };

@@ -55,7 +55,7 @@ export default function mapFilterProvider(Promise, Private) {
   /**
    * Map the filter into an object with the key and value exposed so it's
    * easier to work with in the template
-   * @param {object} fitler The filter the map
+   * @param {object} filter The filter the map
    * @returns {Promise}
    */
   return function (filter) {

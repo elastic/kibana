@@ -1,4 +1,4 @@
-import { common, config, defaultFindTimeout, remote, shieldPage } from '../';
+import { common, config, defaultTryTimeout, defaultFindTimeout, remote, shieldPage } from '../';
 
 export default (function () {
   var Promise = require('bluebird');
@@ -9,6 +9,7 @@ export default (function () {
   var _ = require('lodash');
   var parse = require('url').parse;
   var format = require('url').format;
+  var util = require('util');
   var path = require('path');
 
   function injectTimestampQuery(func, url) {
@@ -50,6 +51,10 @@ export default (function () {
 
     getHostPort: function getHostPort() {
       return getUrl.baseUrl(config.servers.kibana);
+    },
+
+    getEsHostPort: function getHostPort() {
+      return getUrl.baseUrl(config.servers.elasticsearch);
     },
 
     navigateToApp: function (appName, testStatusPage) {
@@ -220,15 +225,15 @@ export default (function () {
     },
 
     try(block) {
-      return this.tryForTime(defaultFindTimeout, block);
+      return this.tryForTime(defaultTryTimeout, block);
     },
 
-    log: function log(logString) {
-      console.log(moment().format('HH:mm:ss.SSS') + ': ' + logString);
+    log(...args) {
+      console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
     },
 
-    debug: function debug(logString) {
-      if (config.debug) this.log(logString);
+    debug(...args) {
+      if (config.debug) this.log(...args);
     },
 
     sleep: function sleep(sleepMilliseconds) {

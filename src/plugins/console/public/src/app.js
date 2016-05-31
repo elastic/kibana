@@ -10,15 +10,10 @@ let utils = require('./utils');
 let _ = require('lodash');
 const chrome = require('ui/chrome');
 
-const defaultServerUrl = chrome.getInjected('defaultServerUrl');
-
 $(document.body).removeClass('fouc');
 
-// set the value of the server and/or the input and clear the output
-function resetToValues(server, content) {
-  if (server != null) {
-    es.setBaseUrl(server);
-  }
+// set the value of the input and clear the output
+function resetToValues(content) {
   if (content != null) {
     input.update(content);
   }
@@ -31,10 +26,10 @@ function loadSavedState() {
 
   if (sourceLocation == "stored") {
     if (previousSaveState) {
-      resetToValues(previousSaveState.server, previousSaveState.content);
+      resetToValues(previousSaveState.content);
     }
     else {
-      resetToValues(defaultServerUrl);
+      resetToValues();
       input.autoIndent();
     }
   }
@@ -44,17 +39,14 @@ function loadSavedState() {
       loadFrom.headers = {Accept: "application/vnd.github.v3.raw"};
     }
     $.ajax(loadFrom).done(function (data) {
-      resetToValues(defaultServerUrl, data);
+      resetToValues(data);
       input.moveToNextRequestEdge(true);
       input.highlightCurrentRequestsAndUpdateActionBar();
       input.updateActionsBar();
     });
   }
-  else if (previousSaveState) {
-    resetToValues(previousSaveState.server);
-  }
   else {
-    resetToValues(defaultServerUrl);
+    resetToValues();
   }
   input.moveToNextRequestEdge(true);
 }
@@ -69,15 +61,12 @@ function setupAutosave() {
     }
     timer = setTimeout(saveCurrentState, saveDelay);
   });
-
-  es.addServerChangeListener(saveCurrentState);
 }
 
 function saveCurrentState() {
   try {
     var content = input.getValue();
-    var server = es.getBaseUrl();
-    history.updateCurrentState(server, content);
+    history.updateCurrentState(content);
   }
   catch (e) {
     console.log("Ignoring saving error: " + e);
