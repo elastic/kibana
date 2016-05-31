@@ -50,7 +50,7 @@ export default (function () {
 
     isTimepickerOpen: function isTimepickerOpen() {
       return this.remote.setFindTimeout(defaultFindTimeout)
-      .findDisplayedByClassName('config')
+      .findDisplayedByCssSelector('.kbn-timepicker')
       .then(() => true)
       .catch(() => false);
     },
