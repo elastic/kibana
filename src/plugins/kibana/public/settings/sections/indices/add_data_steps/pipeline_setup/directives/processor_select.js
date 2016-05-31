@@ -4,7 +4,7 @@ import '../styles/_processor_select.less';
 import template from '../views/processor_select.html';
 import * as ProcessorTypes from '../processors/view_models';
 import IngestProvider from 'ui/ingest';
-import 'angular-ui-select';
+import 'ui-select';
 
 const app = uiModules.get('kibana');
 
