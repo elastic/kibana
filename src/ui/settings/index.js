@@ -29,7 +29,8 @@ export default function setupSettings(kbnServer, server, config) {
     return client
       .get({ ...clientSettings })
       .then(res => res._source)
-      .then(user => hydrateUserSettings(user));
+      .then(user => hydrateUserSettings(user))
+      .catch(e => { return {}; });
   }
 
   function setMany(changes) {
