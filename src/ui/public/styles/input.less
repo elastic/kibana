@@ -12,3 +12,13 @@ select {
   color: @input-color;
   background-color: @input-bg;
 }
+
+input[kbn-edit-field] {
+  border-color: transparent;
+  background-color: transparent;
+  cursor: pointer;
+  &:focus {
+    cursor: text;
+    border-color: #999;
+  }
+}
