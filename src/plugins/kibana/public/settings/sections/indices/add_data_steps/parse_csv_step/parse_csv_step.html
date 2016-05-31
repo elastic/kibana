@@ -20,7 +20,7 @@
 
   <div ng-if="!!wizard.formattedErrors.length" class="alert alert-warning parse-error">
     <ul>
-      <li ng-repeat="error in wizard.formattedErrors">{{ error }}</li>
+      <li ng-repeat="error in wizard.formattedErrors track by $index">{{ error }}</li>
     </ul>
   </div>
 

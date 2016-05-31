@@ -17,6 +17,7 @@ modules.get('apps/settings')
       bindToController: true,
       controllerAs: 'wizard',
       controller: function ($scope) {
+        const maxSampleRows = 10;
 
         this.delimiterOptions = [
           {
@@ -43,17 +44,24 @@ modules.get('apps/settings')
 
         this.parse = () => {
           if (!this.file) return;
+          let row = 1;
+          let rows = [];
+          let data = [];
 
           const config = _.assign(
             {
               header: true,
-              preview: 10,
               dynamicTyping: true,
-              complete: (results) => {
-                $scope.$apply(() => {
-                  this.formattedErrors = _.map(results.errors, (error) => {
-                    return `${error.type} at row ${error.row + 1} - ${error.message}`;
-                  });
+              step: (results, parser) => {
+                if (row > maxSampleRows) {
+                  parser.abort();
+
+                  // The complete callback isn't automatically called if parsing is manually aborted
+                  config.complete();
+                  return;
+                }
+                if (row === 1) {
+                  // Collect general information on the first pass
                   if (results.meta.fields.length > _.uniq(results.meta.fields).length) {
                     this.formattedErrors.push('Column names must be unique');
                   }
@@ -64,19 +72,33 @@ modules.get('apps/settings')
                   });
 
                   this.columns = results.meta.fields;
-                  this.rows = _.map(results.data, (row) => {
-                    return _.map(this.columns, (columnName) => {
-                      return row[columnName];
-                    });
+                  this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
+                }
+
+                this.formattedErrors = _.map(results.errors, (error) => {
+                  return `${error.type} at line ${row + 1} - ${error.message}`;
+                });
+
+                data = data.concat(results.data);
+
+                rows = rows.concat(_.map(results.data, (row) => {
+                  return _.map(this.columns, (columnName) => {
+                    return row[columnName];
                   });
+                }));
+
+                ++row;
+              },
+              complete: () => {
+                $scope.$apply(() => {
+                  this.rows = rows;
 
                   if (_.isUndefined(this.formattedErrors) || _.isEmpty(this.formattedErrors)) {
-                    this.samples = results.data;
+                    this.samples = data;
                   }
                   else {
                     delete this.samples;
                   }
-                  this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
                 });
               }
             },
@@ -86,8 +108,17 @@ modules.get('apps/settings')
           Papa.parse(this.file, config);
         };
 
-        $scope.$watch('wizard.parseOptions', this.parse, true);
+        $scope.$watch('wizard.parseOptions', (newValue, oldValue) => {
+          // Delimiter is auto-detected in the first run of the parse function, so we don't want to
+          // re-parse just because it's being initialized.
+          if (!_.isUndefined(oldValue)) {
+            this.parse();
+          }
+        }, true);
+
         $scope.$watch('wizard.file', () => {
+          delete this.rows;
+          delete this.columns;
           delete this.formattedErrors;
           this.parse();
         });
