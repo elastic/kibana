@@ -3,9 +3,9 @@
 @import (reference) "~ui/styles/theme";
 
 processor-select {
-  // display: flex;
-  // justify-content: flex-start;
-  // align-items: center;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 
   .ui-select-bootstrap > .ui-select-choices {
     max-height: 350px;
@@ -15,6 +15,11 @@ processor-select {
     .form-control {
       background-color: @settings-add-data-wizard-processor-select-active-bg;
     }
+  }
+
+  // Temporary bug fix - https://github.com/angular-ui/ui-select/issues/1575
+  .ui-select-search {
+    width: 100% !important;
   }
 
   .ui-select-container {
