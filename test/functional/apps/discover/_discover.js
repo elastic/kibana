@@ -244,7 +244,8 @@ import {
         bdd.it('should not show "no results"', () => {
           return discoverPage.hasNoResults().then(visible => {
             expect(visible).to.be(false);
-          });
+          })
+          .catch(common.handleError(this));
         });
 
         function verifyChartData(expectedBarChartData) {
@@ -303,17 +304,36 @@ import {
         });
 
         bdd.it('should open and close the time picker', () => {
-          return isTimepickerOpen(false)
-            .click()
-            .then(() => isTimepickerOpen(true))
-            .click()
-            .then(() => isTimepickerOpen(false))
-            .catch(common.handleError(this));
+          let i = 0;
+
+          return closeTimepicker() // close
+            .then(() => isTimepickerOpen(false)
+              .then(el => el.click()) // open
+              .then(() => isTimepickerOpen(true))
+              .then(el => el.click()) // close
+              .then(() => isTimepickerOpen(false))
+              .catch(common.handleError(this))
+            );
+
+          function closeTimepicker() {
+            return headerPage.isTimepickerOpen().then(shown => {
+              if (!shown) {
+                return;
+              }
+              return discoverPage
+                .getNoResultsTimepicker()
+                .click(); // close
+            });
+          }
 
           function isTimepickerOpen(expected) {
             return headerPage.isTimepickerOpen().then(shown => {
+              common.debug(`expect (#${++i}) timepicker to be ${peek(expected)} (is ${peek(shown)}).`);
               expect(shown).to.be(expected);
               return discoverPage.getNoResultsTimepicker();
+              function peek(state) {
+                return state ? 'open' : 'closed';
+              }
             });
           }
         });

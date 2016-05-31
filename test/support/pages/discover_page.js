@@ -215,7 +215,7 @@ export default (function () {
 
     hasNoResults: function hasNoResults() {
       return common
-        .findTestSubject('discoverNoResult')
+        .findTestSubject('discoverNoResults')
         .then(() => true)
         .catch(() => false);
     },
