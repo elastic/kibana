@@ -6,7 +6,7 @@ import { join } from 'path';
 export default function (kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
 
-  if (server.plugins.good) {
+  if (server.plugins['even-better']) {
     kbnServer.mixin(require('./metrics'));
   }
 
