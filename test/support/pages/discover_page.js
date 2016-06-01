@@ -100,7 +100,21 @@ export default (function () {
     getChartInterval: function getChartInterval() {
       return thisTime
       .findByCssSelector('a[ng-click="toggleInterval()"]')
-      .getVisibleText();
+      .getVisibleText()
+      .then(function (intervalText) {
+        if (intervalText.length > 0) {
+          return intervalText;
+        } else {
+          return thisTime
+          .findByCssSelector('select[ng-model="state.interval"]')
+          .getProperty('value') // this gets 'string:d' for Daily
+          .then(function (selectedValue) {
+            return thisTime
+            .findByCssSelector('option[value="' + selectedValue + '"]')
+            .getVisibleText();
+          });
+        }
+      });
     },
 
     setChartInterval: function setChartInterval(interval) {
