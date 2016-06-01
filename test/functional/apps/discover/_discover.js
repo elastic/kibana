@@ -152,7 +152,7 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
+            return common.sleep(4000);
           })
           .then(function () {
             return verifyChartData(expectedBarChartData);
@@ -167,7 +167,7 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
+            return common.sleep(4000);
           })
           .then(function () {
             return verifyChartData(expectedBarChartData);
@@ -181,6 +181,26 @@ import {
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
             return common.sleep(2000);
+          })
+          .then(function () {
+            return verifyChartData(expectedBarChartData);
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('browser back button should show previous interval Daily', function () {
+          var expectedChartInterval = 'Daily';
+          var expectedBarChartData = [
+            '133.196', '129.192', '129.724'
+          ];
+          return this.remote.goBack()
+          .then(function () {
+            return common.try(function tryingForTime() {
+              return discoverPage.getChartInterval()
+              .then(function (actualInterval) {
+                expect(actualInterval).to.be(expectedChartInterval);
+              });
+            });
           })
           .then(function () {
             return verifyChartData(expectedBarChartData);
