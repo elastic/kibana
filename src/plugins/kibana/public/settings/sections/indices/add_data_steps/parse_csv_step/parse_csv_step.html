@@ -1,0 +1,63 @@
+<file-upload ng-if="!wizard.file" on-locate="wizard.file = file" upload-selector="button.upload">
+  <h2><em>Pick a CSV file to get started.</em>
+    Please follow the instructions below.
+  </h2>
+
+  <div class="upload-wizard-file-upload-container">
+    <div class="upload-instructions">Drop your file here</div>
+    <div class="upload-instructions-separator">or</div>
+    <button class="btn btn-primary btn-lg controls upload" ng-click>
+      Select File
+    </button>
+    <div>Maximum upload file size: 1 GB</div>
+  </div>
+</file-upload>
+
+<div class="upload-wizard-file-preview-container" ng-if="wizard.file">
+  <h2><em>Review the sample below.</em>
+    Click next if it looks like we parsed your file correctly.
+  </h2>
+
+  <div ng-if="!!wizard.formattedErrors.length" class="alert alert-danger parse-error">
+    <ul>
+      <li ng-repeat="error in wizard.formattedErrors track by $index">{{ error }}</li>
+    </ul>
+  </div>
+
+  <div ng-if="!!wizard.formattedWarnings.length" class="alert alert-warning">
+    <ul>
+      <li ng-repeat="warning in wizard.formattedWarnings track by $index">{{ warning }}</li>
+    </ul>
+  </div>
+
+  <div class="advanced-options form-inline">
+    <span class="form-group">
+      <label>Delimiter</label>
+      <select ng-model="wizard.parseOptions.delimiter"
+              ng-options="option.value as option.label for option in wizard.delimiterOptions"
+              class="form-control">
+      </select>
+    </span>
+    <span class="form-group">
+      <label>Filename:</label>
+      {{ wizard.file.name }}
+    </span>
+  </div>
+
+  <div class="preview">
+    <table class="table table-condensed">
+      <thead>
+      <tr>
+        <th ng-repeat="col in wizard.columns track by $index">
+          <span title="{{ col }}">{{ col | limitTo:12 }}{{ col.length > 12 ? '...' : '' }}</span>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="row in wizard.rows">
+        <td ng-repeat="cell in row track by $index">{{ cell }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
