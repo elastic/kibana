@@ -31,6 +31,12 @@ app.directive('processorUiContainer', function ($compile) {
       const postLink = $compile($innerEl);
       $container.append($innerEl);
       postLink(newScope);
+
+      $scope.$watch('processorForm.$pristine', (pristine) => {
+        if (!pristine) {
+          processor.new = false;
+        }
+      });
     }
   };
 });

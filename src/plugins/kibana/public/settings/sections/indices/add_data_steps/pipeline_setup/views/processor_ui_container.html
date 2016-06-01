@@ -1,23 +1,26 @@
-<processor-ui-container-header
-  processor="processor"
-  field="sourceField"
-  pipeline="pipeline">
-</processor-ui-container-header>
-<div
-  class="processor-ui-container-body"
-  ng-class="{locked: processor.locked}">
+<form name="processorForm">
+  <processor-ui-container-header
+    processor="processor"
+    field="sourceField"
+    pipeline="pipeline">
+  </processor-ui-container-header>
   <div
-    class="processor-ui-container-body-content"
-    ng-hide="processor.collapsed">
+    class="processor-ui-container-body"
+    ng-class="{locked: processor.locked}">
     <div
-      ng-show="processor.error"
-      class="alert alert-danger">
-      {{processor.error.message}}
+      class="processor-ui-container-body-content"
+      ng-hide="processor.collapsed">
+      <div class="processor-ui-content"></div>
+      <div
+        ng-show="processor.error"
+        class="alert alert-danger">
+        {{processor.error.message}}
+      </div>
+      <output-preview
+        ng-hide="processor.error"
+        processor="processor">
+      </output-preview>
     </div>
-    <div class="processor-ui-content"></div>
-    <output-preview
-      processor="processor">
-    </output-preview>
+    <div class="overlay"></div>
   </div>
-  <div class="overlay"></div>
-</div>
+</form>
