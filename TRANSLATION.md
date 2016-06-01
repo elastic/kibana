@@ -24,8 +24,7 @@ Contributing Translations
 
 For this example, we will demonstrate translation into Maltese (Language code `mt`).
 
-- Check out the `kibana` source code with `git`,
-ensure you have an up to date copy of the source.
+- Fork the `kibana` source, and ensure you have an up to date copy of the source.
 - Ensure you have signed the agreement as in CONTRIBUTING.md
 - Choose the right [bcp47]() language code for your work.
 In this example, we will use `mt` for Maltese. Other examples
@@ -49,8 +48,7 @@ copy the `en.json` English source to _languagecode_`.json`:
 
 - Start up Kibana and verify the translation works as expected.
 
-- Run the translation tests 
-    * (TODO)
+- Ensure Kibana tests pass
 
 - Commit the `mt.json` files and push them to your own
 fork of `kibana`
@@ -138,7 +136,3 @@ Also note the prefix `create.` matching the view and controller source files.
 ```
 
 * Refresh the Kibana page and verify the UI looks the same.
-
-Translating Chart (non-Angular) components
----
-- TODO
