@@ -23,14 +23,20 @@ export default function setupSettings(kbnServer, server, config) {
     return Promise.resolve(defaultsProvider());
   }
 
+  function userSettingsNotFound(kibanaVersion) {
+    const message = 'Could not find user-provided settings for this version of Kibana (' + kibanaVersion + ')';
+    server.plugins.kibana.status.red(message);
+    return {};
+  }
+
   function getUserProvided() {
     const { client } = server.plugins.elasticsearch;
     const clientSettings = getClientSettings(config);
     return client
       .get({ ...clientSettings })
       .then(res => res._source)
-      .then(user => hydrateUserSettings(user))
-      .catch(e => { return {}; });
+      .catch(userSettingsNotFound.bind(null, clientSettings.id))
+      .then(user => hydrateUserSettings(user));
   }
 
   function setMany(changes) {
