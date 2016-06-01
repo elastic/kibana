@@ -6,6 +6,7 @@ import isGeoPointObject from './lib/is_geo_point_object';
 import forEachField from './lib/for_each_field';
 import './styles/_add_data_pattern_review_step.less';
 import moment from 'moment';
+import '../../../../../../../../ui/public/directives/validate_lowercase';
 
 function pickDefaultTimeFieldName(dateFields) {
   if (_.isEmpty(dateFields)) {
@@ -26,13 +27,25 @@ modules.get('apps/settings')
       scope: {
         indexPattern: '=',
         pipeline: '=',
-        sampleDoc: '='
+        sampleDoc: '=',
+        defaultIndexInput: '='
       },
       controllerAs: 'reviewStep',
       bindToController: true,
       controller: function ($scope, Private) {
         this.errors = [];
         const sampleFields = {};
+
+        this.patternInput = {
+          label: 'Index name',
+          helpText: 'The name of the Elasticsearch index you want to create for your data.',
+          defaultValue: '',
+          placeholder: 'Name'
+        };
+
+        if (this.defaultIndexInput) {
+          this.patternInput.defaultValue = this.defaultIndexInput;
+        }
 
         if (_.isUndefined(this.indexPattern)) {
           this.indexPattern = {};
@@ -62,7 +75,7 @@ modules.get('apps/settings')
         });
 
         _.defaults(this.indexPattern, {
-          id: 'filebeat-*',
+          id: this.patternInput.defaultValue,
           title: 'filebeat-*',
           fields: _(sampleFields)
             .map((field, fieldName) => {

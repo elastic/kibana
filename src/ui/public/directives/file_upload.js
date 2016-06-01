@@ -22,7 +22,7 @@ module.directive('fileUpload', function () {
       const handleFile = (file) => {
         if (_.isUndefined(file)) return;
 
-        if ($scope.onRead) {
+        if (_.has(attrs, 'onRead')) {
           let reader = new FileReader();
           reader.onload = function (e) {
             $scope.$apply(function () {
@@ -32,8 +32,10 @@ module.directive('fileUpload', function () {
           reader.readAsText(file);
         }
 
-        if ($scope.onLocate) {
-          $scope.onLocate({ file });
+        if (_.has(attrs, 'onLocate')) {
+          $scope.$apply(function () {
+            $scope.onLocate({ file });
+          });
         }
       };
 

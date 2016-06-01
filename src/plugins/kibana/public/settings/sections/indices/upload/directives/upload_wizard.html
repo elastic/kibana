@@ -1,0 +1,90 @@
+<div class="wizard-container">
+  <div class="wizard-step-headings" ng-class="{complete: wizard.complete}">
+    <span
+      ng-class="{active: wizard.currentStep === 0}"
+      class="wizard-step-heading"
+      ng-click="wizard.setCurrentStep(0)">
+      1. Select
+    </span>
+    <span
+      ng-class="{active: wizard.currentStep === 1, aheadActive: wizard.currentStep < 1}"
+      class="wizard-step-heading"
+      ng-click="wizard.currentStep < 1 || wizard.setCurrentStep(1)">
+      2. Review
+    </span>
+    <span
+      ng-class="{active: wizard.currentStep === 2, aheadActive: wizard.currentStep < 2}"
+      class="wizard-step-heading"
+      ng-click="wizard.currentStep < 2 || wizard.setCurrentStep(2)">
+      3. Upload
+    </span>
+  </div>
+
+  <div ng-switch="wizard.currentStep">
+    <div ng-switch-when="0">
+      <parse-csv-step file="wizard.stepResults.file" parse-options="wizard.stepResults.parseOptions" samples="wizard.stepResults.samples"></parse-csv-step>
+      <div class="wizard-nav-buttons">
+        <div>
+          <button
+            class="btn btn-secondary"
+            ng-disabled="!wizard.stepResults.file"
+            ng-click="wizard.stepResults = undefined">
+            Reset
+          </button>
+        </div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-disabled="!wizard.stepResults.samples"
+            ng-click="wizard.nextStep()">
+            Next
+          </button>
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <div ng-switch-when="1">
+      <pattern-review-step
+        index-pattern="wizard.stepResults.indexPattern"
+        default-index-input="data"
+        sample-doc="wizard.stepResults.samples[0]">
+      </pattern-review-step>
+
+      <div class="wizard-nav-buttons">
+        <div>
+          <button
+            class="btn btn-secondary"
+            ng-click="wizard.prevStep()">
+            Prev
+          </button>
+        </div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-disabled="!wizard.stepResults.indexPattern || !wizard.stepResults.indexPattern.id"
+            ng-click="wizard.save()">
+            Save
+          </button>
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <div ng-switch-when="2">
+      <upload-data-step results="wizard.stepResults"></upload-data-step>
+
+      <div class="wizard-nav-buttons">
+        <div></div>
+        <div>
+          <button
+            class="btn btn-primary"
+            ng-click="wizard.nextStep()">
+            Done
+          </button>
+        </div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+</div>

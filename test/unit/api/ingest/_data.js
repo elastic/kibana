@@ -103,6 +103,16 @@ define(function (require) {
             });
         });
 
+        bdd.it('should use the filename and line numbers as document IDs', function () {
+          return request.post('/kibana/names/_data')
+            .attach('csv', 'test/unit/fixtures/fake_names_with_mapping_errors.csv')
+            .expect(200)
+            .then((dataResponse) => {
+              const id = dataResponse.body[0].errors.index[0]._id;
+              expect(id).to.be('fake_names_with_mapping_errors.csv:2');
+            });
+        });
+
         bdd.it('should report any csv parsing errors under an "errors.other" key', function () {
           return request.post('/kibana/names/_data')
             .attach('csv', 'test/unit/fixtures/fake_names_with_parse_errors.csv')

@@ -5,6 +5,7 @@ import 'plugins/kibana/settings/sections/indices/_create';
 import 'plugins/kibana/settings/sections/indices/_edit';
 import 'plugins/kibana/settings/sections/indices/_field_editor';
 import 'plugins/kibana/settings/sections/indices/filebeat/index';
+import 'plugins/kibana/settings/sections/indices/upload/index';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/settings/sections/indices/index.html';
