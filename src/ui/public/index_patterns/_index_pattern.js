@@ -27,6 +27,8 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const type = 'index-pattern';
   const notify = new Notifier();
+  const configWatchers = new WeakMap();
+  const docSources = new WeakMap();
 
   const mapping = mappingSetup.expandShorthand({
     title: 'string',
@@ -75,18 +77,71 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
 
-    indexPattern._indexFields();
+    indexFields(indexPattern);
 
     // any time index pattern in ES is updated, update index pattern object
-    indexPattern._docSource
-      .onUpdate()
-      .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+    docSources
+    .get(indexPattern)
+    .onUpdate()
+    .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+  }
+
+  function indexFields(indexPattern) {
+    if (!indexPattern.id) {
+      return;
+    }
+    if (!indexPattern.fields) {
+      return indexPattern.refreshFields();
+    }
+    initFields(indexPattern);
+  }
+
+  function setId(indexPattern, id) {
+    indexPattern.id = id;
+    return id;
+  }
+
+  function watch(indexPattern) {
+    if (configWatchers.has(indexPattern)) {
+      return;
+    }
+    const unwatch = config.watchAll(() => {
+      if (indexPattern.fields) {
+        initFields(indexPattern); // re-init fields when config changes, but only if we already had fields
+      }
+    });
+    configWatchers.set(indexPattern, { unwatch });
+  }
+
+  function unwatch(indexPattern) {
+    if (!configWatchers.has(indexPattern)) {
+      return;
+    }
+    configWatchers.get(indexPattern).unwatch();
+    configWatchers.delete(indexPattern);
+  }
+
+  function initFields(indexPattern, input) {
+    const oldValue = indexPattern.fields;
+    const newValue = input || oldValue || [];
+    indexPattern.fields = new FieldList(indexPattern, newValue);
+  }
+
+  function fetchFields(indexPattern) {
+    return mapper
+    .getFieldsForIndexPattern(indexPattern, true)
+    .then(fields => {
+      const scripted = indexPattern.getScriptedFields();
+      const all = fields.concat(scripted);
+      initFields(indexPattern, all);
+    });
   }
 
   class IndexPattern {
     constructor(id) {
-      this._setId(id);
-      this._docSource = new DocSource();
+      setId(this, id);
+      docSources.set(this, new DocSource());
+
       this.metaFields = config.get('metaFields');
       this.getComputedFields = getComputedFields.bind(this);
 
@@ -97,59 +152,32 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       this.routes = IndexPattern.routes;
     }
 
-    _setId(id) {
-      this.id = id;
-      return id;
-    }
-
-    _watch() {
-      if (this._watching) {
-        return;
-      }
-      this._watching = true;
-
-      config.watchAll(() => {
-        if (this._fieldsInitialized) {
-          this._initFields(); // re-init fields when config changes, but only if we already had fields
-        }
-      });
-    }
-
     init() {
-      this._docSource
-        .index(kbnIndex)
-        .type(type)
-        .id(this.id);
+      docSources
+      .get(this)
+      .index(kbnIndex)
+      .type(type)
+      .id(this.id);
 
-      this._watch();
+      watch(this);
 
       return mappingSetup
-        .isDefined(type)
-        .then(defined => {
-          if (defined) {
-            return true;
-          }
-          return mappingSetup.setup(type, mapping);
-        })
-        .then(() => {
-          if (!this.id) {
-            return; // no id === no elasticsearch document
-          }
-          return this._docSource
-            .fetch()
-            .then(response => updateFromElasticSearch(this, response));
-        })
-        .then(() => this);
-    }
-
-    _indexFields() {
-      if (!this.id) {
-        return;
-      }
-      if (!this.fields) {
-        return this.refreshFields();
-      }
-      this._initFields();
+      .isDefined(type)
+      .then(defined => {
+        if (defined) {
+          return true;
+        }
+        return mappingSetup.setup(type, mapping);
+      })
+      .then(() => {
+        if (!this.id) {
+          return; // no id === no elasticsearch document
+        }
+        return docSources.get(this)
+        .fetch()
+        .then(response => updateFromElasticSearch(this, response));
+      })
+      .then(() => this);
     }
 
     addScriptedField(name, script, type = 'string', lang) {
@@ -264,7 +292,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       });
 
       // ensure that the docSource has the current this.id
-      this._docSource.id(this.id);
+      docSources.get(this).id(this.id);
 
       // clear the indexPattern list cache
       getIds.clearCache();
@@ -273,57 +301,42 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
 
     create() {
       const body = this.prepBody();
-      return this._docSource
-        .doCreate(body)
-        .then(id => this._setId(id))
-        .catch(err => {
-          if (_.get(err, 'origError.status') !== 409) {
-            return Promise.resolve(false);
-          }
-          const confirmMessage = 'Are you sure you want to overwrite this?';
+      return docSources.get(this)
+      .doCreate(body)
+      .then(id => setId(this, id))
+      .catch(err => {
+        if (_.get(err, 'origError.status') !== 409) {
+          return Promise.resolve(false);
+        }
+        const confirmMessage = 'Are you sure you want to overwrite this?';
 
-          return safeConfirm(confirmMessage)
-            .then(() => Promise
-              .try(() => {
-                const cached = patternCache.get(this.id);
-                if (cached) {
-                  return cached.then(pattern => pattern.destroy());
-                }
-              })
-              .then(() => this._docSource.doIndex(body))
-              .then(id => this._setId(id)),
-              _.constant(false) // if the user doesn't overwrite, resolve with false
-            );
-        });
+        return safeConfirm(confirmMessage)
+        .then(() => Promise
+          .try(() => {
+            const cached = patternCache.get(this.id);
+            if (cached) {
+              return cached.then(pattern => pattern.destroy());
+            }
+          })
+          .then(() => docSources.get(this).doIndex(body))
+          .then(id => setId(this, id)),
+          _.constant(false) // if the user doesn't overwrite, resolve with false
+        );
+      });
     }
 
     save() {
       const body = this.prepBody();
-      return this._docSource
-        .doIndex(body)
-        .then(id => this._setId(id));
+      return docSources.get(this)
+      .doIndex(body)
+      .then(id => setId(this, id));
     }
 
     refreshFields() {
       return mapper
-        .clearCache(this)
-        .then(() => this._fetchFields())
-        .then(() => this.save());
-    }
-
-    _initFields(fields) {
-      this._fieldsInitialized = true;
-      this.fields = new FieldList(this, fields || this.fields || []);
-    }
-
-    _fetchFields() {
-      return mapper
-        .getFieldsForIndexPattern(this, true)
-        .then(fields => {
-          const scripted = this.getScriptedFields();
-          const all = fields.concat(scripted);
-          this._initFields(all);
-        });
+      .clearCache(this)
+      .then(() => fetchFields(this))
+      .then(() => this.save());
     }
 
     toJSON() {
@@ -335,17 +348,21 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     }
 
     destroy() {
+      unwatch(this);
       patternCache.clear(this.id);
-      this._docSource.destroy();
+      docSources.get(this).destroy();
+      docSources.delete(this);
     }
   }
 
-  IndexPattern.routes = {
-    edit: '/settings/indices/{{id}}',
-    addField: '/settings/indices/{{id}}/create-field',
-    indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
-  };
+  Object.defineProperty(IndexPattern, 'routes', {
+    get: () => ({
+      edit: '/settings/indices/{{id}}',
+      addField: '/settings/indices/{{id}}/create-field',
+      indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
+      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+    })
+  });
 
   return IndexPattern;
 };
