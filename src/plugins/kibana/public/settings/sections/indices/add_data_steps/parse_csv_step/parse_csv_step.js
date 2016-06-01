@@ -18,6 +18,7 @@ modules.get('apps/settings')
       controllerAs: 'wizard',
       controller: function ($scope) {
         const maxSampleRows = 10;
+        const maxSampleColumns = 20;
 
         this.delimiterOptions = [
           {
@@ -70,8 +71,11 @@ modules.get('apps/settings')
                       this.formattedErrors.push('Column names must not be blank');
                     }
                   });
+                  if (results.meta.fields.length > maxSampleColumns) {
+                    this.formattedWarnings.push(`Preview truncated to ${maxSampleColumns} columns`);
+                  }
 
-                  this.columns = results.meta.fields;
+                  this.columns = results.meta.fields.slice(0, maxSampleColumns);
                   this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
                 }
 
@@ -120,10 +124,9 @@ modules.get('apps/settings')
           delete this.rows;
           delete this.columns;
           delete this.formattedErrors;
+          this.formattedWarnings = [];
           this.parse();
         });
-
-        this.parse();
       }
     };
   });
