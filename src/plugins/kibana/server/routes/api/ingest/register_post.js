@@ -76,9 +76,7 @@ export function registerPost(server) {
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
 
       const metaFields = _.get(config, 'metaFields.userValue', config.metaFields.value);
-      const indexPatternMetaFields = _.map(metaFields, name => {
-        return {name};
-      });
+      const indexPatternMetaFields = _.map(metaFields, name => ({name}));
 
       indexPattern.fields = initDefaultFieldProps(indexPattern.fields.concat(indexPatternMetaFields));
       indexPattern.fields = JSON.stringify(indexPattern.fields);
