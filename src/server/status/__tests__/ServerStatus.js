@@ -7,6 +7,8 @@ let Status = require('../Status');
 let ServerStatus = require('../ServerStatus');
 
 describe('ServerStatus class', function () {
+  const plugin = {id: 'name', version: '1.2.3'};
+
   let server;
   let serverStatus;
 
@@ -15,23 +17,23 @@ describe('ServerStatus class', function () {
     serverStatus = new ServerStatus(server);
   });
 
-  describe('#create(name)', function () {
-    it('should create a new status by name', function () {
-      let status = serverStatus.create('name');
+  describe('#create(plugin)', function () {
+    it('should create a new status by plugin', function () {
+      let status = serverStatus.create(plugin);
       expect(status).to.be.a(Status);
     });
   });
 
   describe('#get(name)', function () {
-    it('exposes plugins by name', function () {
-      let status = serverStatus.create('name');
+    it('exposes plugins by its id/name', function () {
+      let status = serverStatus.create(plugin);
       expect(serverStatus.get('name')).to.be(status);
     });
   });
 
   describe('#getState(name)', function () {
     it('should expose the state of the plugin by name', function () {
-      let status = serverStatus.create('name');
+      let status = serverStatus.create(plugin);
       status.green();
       expect(serverStatus.getState('name')).to.be('green');
     });
@@ -39,7 +41,7 @@ describe('ServerStatus class', function () {
 
   describe('#overall()', function () {
     it('considers each status to produce a summary', function () {
-      let status = serverStatus.create('name');
+      let status = serverStatus.create(plugin);
 
       expect(serverStatus.overall().state).to.be('uninitialized');
 
@@ -65,9 +67,13 @@ describe('ServerStatus class', function () {
 
   describe('#toJSON()', function () {
     it('serializes to overall status and individuals', function () {
-      let one = serverStatus.create('one');
-      let two = serverStatus.create('two');
-      let three = serverStatus.create('three');
+      const pluginOne = {id: 'one', version: '1.0.0'};
+      const pluginTwo = {id: 'two', version: '2.0.0'};
+      const pluginThree = {id: 'three', version: '3.0.0'};
+
+      let one = serverStatus.create(pluginOne);
+      let two = serverStatus.create(pluginTwo);
+      let three = serverStatus.create(pluginThree);
 
       one.green();
       two.yellow();
