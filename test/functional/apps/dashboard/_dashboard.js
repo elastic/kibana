@@ -20,7 +20,11 @@ import {
         var toTime = '2015-09-23 18:31:44.000';
 
         common.debug('Starting dashboard before method');
-        common.debug('navigateToApp dashboard');
+        // Calling loadIfEmpty but not chaining the response.  We can start the
+        // testing before this finishes.
+        // Loading this data takes about 10 seconds.
+        // We don't actually check the data in these tests and they would pass without the data.
+        scenarioManager.loadIfEmpty('logstashFunctional');
         return esClient.delete('.kibana')
         .then(function () {
           return common.try(function () {
@@ -28,14 +32,15 @@ import {
           });
         })
         // and load a set of makelogs data
-        .then(function loadkibana4() {
+        .then(function loadkibanaVisualizations() {
           common.debug('load kibana index with visualizations');
           return elasticDump.elasticLoad('dashboard','.kibana');
         })
+        // .then(function () {
+        //   return scenarioManager.loadIfEmpty('logstashFunctional');
+        // })
         .then(function () {
-          return scenarioManager.loadIfEmpty('logstashFunctional');
-        })
-        .then(function () {
+          common.debug('navigateToApp dashboard');
           return common.navigateToApp('dashboard');
         })
         .catch(common.handleError(this));

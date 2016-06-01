@@ -11,23 +11,11 @@ import {
 
   (function () {
     bdd.describe('visualize app', function describeIndexTests() {
-      bdd.before(function () {
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
-        .catch(common.handleError(this));
-      });
 
+      bdd.before(function () {
+        common.debug('navigateToApp visualize');
+        return common.navigateToApp('visualize');
+      });
 
       bdd.describe('chart types', function indexPatternCreation() {
 
