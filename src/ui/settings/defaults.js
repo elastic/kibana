@@ -221,7 +221,7 @@ export default function defaultSettingsProvider() {
     },
     'notifications:banner': {
       type: 'markdown',
-      description: 'A custom banner intended for temporary notices to all users. Markdown supported.',
+      description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown supported</a>.',
       value: ''
     },
     'notifications:lifetime:banner': {
