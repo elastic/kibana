@@ -91,10 +91,18 @@ describe('plugins/elasticsearch', function () {
       });
     });
 
-    it('should resolve with undefined if the nothing is upgradeable', function () {
-      const response = { hits: { hits: [ { _id: '4.0.1-beta1' }, { _id: '4.0.0-snapshot1' } ] } };
+    it('should create new config if the nothing is upgradeable', function () {
+      get.withArgs('pkg.buildNum').returns(9833);
+      client.create.returns(Promise.resolve());
+      const response = { hits: { hits: [ { _id: '4.0.1-alpha3' }, { _id: '4.0.1-beta1' }, { _id: '4.0.0-snapshot1' } ] } };
       return upgrade(response).then(function (resp) {
-        expect(resp).to.be(undefined);
+        sinon.assert.calledOnce(client.create);
+        const params = client.create.args[0][0];
+        expect(params).to.have.property('body');
+        expect(params.body).to.have.property('buildNum', 9833);
+        expect(params).to.have.property('index', '.my-kibana');
+        expect(params).to.have.property('type', 'config');
+        expect(params).to.have.property('id', '4.0.1');
       });
     });
 
