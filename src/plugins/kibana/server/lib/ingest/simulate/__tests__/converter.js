@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import _ from 'lodash';
-import ingestSimulateApiKibanaToEsConverter from '../../converters/ingest_simulate_api_kibana_to_es_converter';
+import simulateConverter from '../converter';
 
 describe('ingestSimulateApiKibanaToEsConverter', function () {
 
@@ -34,15 +34,15 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
     let actual;
 
     expected = buildExpected(undefined);
-    actual = ingestSimulateApiKibanaToEsConverter(buildSamplePipeline(undefined));
+    actual = simulateConverter.kibanaToEs(buildSamplePipeline(undefined));
     expect(actual).to.eql(expected);
 
     expected = buildExpected('foo');
-    actual = ingestSimulateApiKibanaToEsConverter(buildSamplePipeline('foo'));
+    actual = simulateConverter.kibanaToEs(buildSamplePipeline('foo'));
     expect(actual).to.eql(expected);
 
     expected = buildExpected({ foo: 'bar' });
-    actual = ingestSimulateApiKibanaToEsConverter(buildSamplePipeline({ foo: 'bar' }));
+    actual = simulateConverter.kibanaToEs(buildSamplePipeline({ foo: 'bar' }));
     expect(actual).to.eql(expected);
   });
 
@@ -78,7 +78,7 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
       ]
     };
 
-    const actual = ingestSimulateApiKibanaToEsConverter(pipeline);
+    const actual = simulateConverter.kibanaToEs(pipeline);
 
     expect(actual).to.eql(expected);
   });

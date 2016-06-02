@@ -1,12 +1,12 @@
 import Boom from 'boom';
 import _ from 'lodash';
-import ingestConfigSchema from '../../../lib/schemas/resources/ingest_config_schema';
+import ingestConfigSchema from '../../../lib/ingest/config/schema';
 import handleESError from '../../../lib/handle_es_error';
 import createMappingsFromPatternFields from '../../../lib/create_mappings_from_pattern_fields';
 import initDefaultFieldProps from '../../../lib/init_default_field_props';
 import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 import { keysToCamelCaseShallow } from '../../../../common/lib/case_conversion';
-import ingestPipelineApiKibanaToEsConverter from '../../../lib/converters/ingest_pipeline_api_kibana_to_es_converter';
+import ingestPipelineConverter from '../../../lib/ingest/pipeline/converter';
 
 export function registerPost(server) {
   const kibanaIndex = server.config().get('kibana.index');
@@ -78,7 +78,7 @@ export function registerPost(server) {
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
-      const pipeline = ingestPipelineApiKibanaToEsConverter(requestDocument.pipeline);
+      const pipeline = ingestPipelineConverter.kibanaToEs(requestDocument.pipeline);
 
       // Set up call with request params
       const patternCreateParams = {
