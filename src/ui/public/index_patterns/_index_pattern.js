@@ -29,6 +29,12 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   const notify = new Notifier();
   const configWatchers = new WeakMap();
   const docSources = new WeakMap();
+  const getRoutes = () => ({
+    edit: '/settings/indices/{{id}}',
+    addField: '/settings/indices/{{id}}/create-field',
+    indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+  });
 
   const mapping = mappingSetup.expandShorthand({
     title: 'string',
@@ -147,8 +153,10 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       this.flattenHit = flattenHit(this);
       this.formatHit = formatHit(this, fieldformats.getDefaultInstance('string'));
       this.formatField = this.formatHit.formatField;
+    }
 
-      this.routes = IndexPattern.routes;
+    get routes() {
+      return getRoutes();
     }
 
     init() {
@@ -353,15 +361,6 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       docSources.delete(this);
     }
   }
-
-  Object.defineProperty(IndexPattern, 'routes', {
-    get: () => ({
-      edit: '/settings/indices/{{id}}',
-      addField: '/settings/indices/{{id}}/create-field',
-      indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
-    })
-  });
 
   return IndexPattern;
 };
