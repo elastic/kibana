@@ -41,7 +41,13 @@ module.exports = function (kibana) {
             kbnDefaultAppId: config.get('kibana.defaultAppId')
           };
         }
-      }
+      },
+
+      injectDefaultVars(server, options) {
+        return {
+          kbnIndex: options.index
+        };
+      },
     }
   });
 

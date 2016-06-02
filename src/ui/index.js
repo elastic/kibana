@@ -59,16 +59,6 @@ module.exports = async (kbnServer, server, config) => {
     }
   });
 
-  const defaultInjectedVars = {};
-  if (config.has('kibana')) {
-    defaultInjectedVars.kbnIndex = config.get('kibana.index');
-  }
-  if (config.has('elasticsearch')) {
-    defaultInjectedVars.esRequestTimeout = config.get('elasticsearch.requestTimeout');
-    defaultInjectedVars.esShardTimeout = config.get('elasticsearch.shardTimeout');
-    defaultInjectedVars.esApiVersion = config.get('elasticsearch.apiVersion');
-  }
-
   server.decorate('reply', 'renderApp', function (app) {
     const payload = {
       app: app,
@@ -77,7 +67,7 @@ module.exports = async (kbnServer, server, config) => {
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
-      vars: defaults(app.getInjectedVars(), defaultInjectedVars),
+      vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
 
     return this.view(app.templateName, {

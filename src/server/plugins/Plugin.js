@@ -1,8 +1,10 @@
 let _ = require('lodash');
 let Joi = require('joi');
-let { attempt, fromNode } = require('bluebird');
+let Bluebird = require('bluebird');
 let { resolve } = require('path');
 let { inherits } = require('util');
+
+const extendInitFns = Symbol('extend plugin initialization');
 
 const defaultConfigSchema = Joi.object({
   enabled: Joi.boolean().default(true)
@@ -23,6 +25,7 @@ module.exports = class Plugin {
     this.externalInit = opts.init || _.noop;
     this.getConfigSchema = opts.config || _.noop;
     this.init = _.once(this.init);
+    this[extendInitFns] = [];
   }
 
   static scoped(kbnServer, path, pkg) {
@@ -51,14 +54,14 @@ module.exports = class Plugin {
     let { config } = kbnServer;
 
     // setup the hapi register function and get on with it
-    let register = (server, options, next) => {
+    const asyncRegister = async (server, options, next) => {
       this.server = server;
 
       // bind the server and options to all
       // apps created by this plugin
-      for (let app of this.apps) {
-        app.getInjectedVars = _.partial(app.getInjectedVars, server, options);
-      }
+      await Promise.all(this[extendInitFns].map(async fn => {
+        await fn.call(this, server, options);
+      }));
 
       server.log(['plugins', 'debug'], {
         tmpl: 'Initializing plugin <%= plugin.toString() %>',
@@ -72,12 +75,16 @@ module.exports = class Plugin {
       this.status = kbnServer.status.create(this);
       server.expose('status', this.status);
 
-      attempt(this.externalInit, [server, options], this).nodeify(next);
+      return await Bluebird.attempt(this.externalInit, [server, options], this);
+    };
+
+    const register = (server, options, next) => {
+      Bluebird.resolve(asyncRegister(server, options)).nodeify(next);
     };
 
     register.attributes = { name: id, version: version };
 
-    await fromNode(cb => {
+    await Bluebird.fromNode(cb => {
       kbnServer.server.register({
         register: register,
         options: config.has(id) ? config.get(id) : null
@@ -89,6 +96,10 @@ module.exports = class Plugin {
     if (this.status.state === 'uninitialized') {
       this.status.green('Ready');
     }
+  }
+
+  extendInit(fn) {
+    this[extendInitFns].push(fn);
   }
 
   toJSON() {

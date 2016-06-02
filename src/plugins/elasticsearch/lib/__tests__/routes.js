@@ -1,10 +1,7 @@
 const expect = require('expect.js');
-const util = require('util');
-const requireFromTest = require('requirefrom')('test');
-const kbnTestServer = requireFromTest('utils/kbn_server');
-
-const format = util.format;
-
+const { format } = require('util');
+const kbnTestServer = require('../../../../../test/utils/kbn_server');
+const fromRoot = require('../../../../utils/fromRoot');
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
@@ -14,7 +11,13 @@ describe('plugins/elasticsearch', function () {
     before(function () {
       this.timeout(15000); // sometimes waiting for server takes longer than 10
 
-      kbnServer = kbnTestServer.createServer();
+      kbnServer = kbnTestServer.createServer({
+        plugins: {
+          scanDirs: [
+            fromRoot('src/plugins')
+          ]
+        }
+      });
       return kbnServer.ready()
       .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });
