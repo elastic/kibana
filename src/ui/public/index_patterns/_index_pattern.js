@@ -40,7 +40,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       type: 'string',
       _serialize(map = {}) {
         const serialized = _.transform(map, serialize);
-        return angular.toJson(serialized);
+        return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
       },
       _deserialize(map = '{}') {
         return _.mapValues(angular.fromJson(map), deserialize);
@@ -49,10 +49,9 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   });
 
   function serialize(flat, format, field) {
-    if (!format) {
-      return;
+    if (format) {
+      flat[field] = format;
     }
-    flat[field] = format;
   }
 
   function deserialize(mapping) {
