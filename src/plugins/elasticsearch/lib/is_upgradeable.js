@@ -3,7 +3,7 @@ const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
 
 module.exports = function (server, doc) {
   const config = server.config();
-  if (/beta|snapshot/i.test(doc._id)) return false;
+  if (/alpha|beta|snapshot/i.test(doc._id)) return false;
   if (!doc._id) return false;
   if (doc._id === config.get('pkg.version')) return false;
 
