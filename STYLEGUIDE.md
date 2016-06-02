@@ -640,6 +640,17 @@ We use a version management system. If a line of code is no longer needed, remov
 
 While JavaScript it is not always considered an object-oriented language, it does have the building blocks for writing object oriented code. Of course, as with all things JavaScript, there are many ways this can be accomplished. Generally, we try to err on the side of readability.
 
+### ES2015 Classes
+
+Don't use them. Classes aren't really classes. They provide little to no benefit but they manage to introduce a number of issues:
+ 
+* They make proper encapsulation impossible without crazy workarounds.
+* They encourage use of inheritance which creates coupling between a subclass and the private internals of its superclass. Java developers learned long ago to
+prefer [composition over inheritance](https://en.wikipedia.org/wiki/Composition_over_inheritance).
+* They require the use of the `new` keyword, which couples callers to the details of object instantiation.
+
+Maybe classes will improve in the future. Until that day, avoid them.
+
 ### Capitalized function definition as Constructors
 
 When Defining a Class/Constructor, use the function definition syntax.
