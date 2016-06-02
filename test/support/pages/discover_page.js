@@ -225,6 +225,24 @@ export default (function () {
       return thisTime
         .findByClassName('sidebar-list')
         .getProperty('clientWidth');
+    },
+
+    hasNoResults: function hasNoResults() {
+      return common
+        .findTestSubject('discoverNoResults')
+        .then(() => true)
+        .catch(() => false);
+    },
+
+    getNoResultsTimepicker: function getNoResultsTimepicker() {
+      return common.findTestSubject('discoverNoResultsTimefilter');
+    },
+
+    hasNoResultsTimepicker: function hasNoResultsTimepicker() {
+      return this
+        .getNoResultsTimepicker()
+        .then(() => true)
+        .catch(() => false);
     }
 
   };
