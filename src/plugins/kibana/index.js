@@ -17,7 +17,8 @@ module.exports = function (kibana) {
         main: 'plugins/kibana/kibana',
         uses: [
           'visTypes',
-          'spyModes'
+          'spyModes',
+          'navbarExtensions'
         ],
 
         autoload: kibana.autoload.require.concat(
