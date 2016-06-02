@@ -1,4 +1,4 @@
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, partial } from 'lodash';
 import defaultsProvider from './defaults';
 
 export default function setupSettings(kbnServer, server, config) {
@@ -35,7 +35,7 @@ export default function setupSettings(kbnServer, server, config) {
     return client
       .get({ ...clientSettings })
       .then(res => res._source)
-      .catch(userSettingsNotFound.bind(null, clientSettings.id))
+      .catch(partial(userSettingsNotFound, clientSettings.id))
       .then(user => hydrateUserSettings(user));
   }
 
