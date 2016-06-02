@@ -12,7 +12,7 @@ module.exports = function (grunt) {
         name: pkg.name,
         description: pkg.description,
         keywords: pkg.keywords,
-        version: pkg.version,
+        version: grunt.option('kibana-version') || pkg.version,
         build: {
           number: grunt.config.get('buildNum'),
           sha: grunt.config.get('buildSha')
