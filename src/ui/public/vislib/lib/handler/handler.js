@@ -55,7 +55,7 @@ export default function HandlerBaseClass(Private) {
     this.getProxyHandler = _.memoize(function (event) {
       let self = this;
       return function (e) {
-        self.vis.emit(event, e);
+        self.vis.emit(event, e, vis.uiState);
       };
     });
   }

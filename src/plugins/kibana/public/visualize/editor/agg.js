@@ -21,7 +21,6 @@ uiModules
     template: aggTemplate,
     require: 'form',
     link: function ($scope, $el, attrs, kbnForm) {
-      $scope.$bind('outputAgg', 'outputVis.aggs.byId[agg.id]', $scope);
       $scope.editorOpen = !!$scope.agg.brandNew;
 
       $scope.$watch('editorOpen', function (open) {
@@ -47,13 +46,16 @@ uiModules
         return label ? label : '';
       };
 
-      function move(below, agg) {
-        _.move($scope.vis.aggs, agg, below, function (otherAgg) {
-          return otherAgg.schema.group === agg.schema.group;
-        });
-      }
-      $scope.moveUp = _.partial(move, false);
-      $scope.moveDown = _.partial(move, true);
+      $scope.$on('drag-start', e => {
+        $scope.editorWasOpen = $scope.editorOpen;
+        $scope.editorOpen = false;
+        $scope.$emit('agg-drag-start', $scope.agg);
+      });
+
+      $scope.$on('drag-end', e => {
+        $scope.editorOpen = $scope.editorWasOpen;
+        $scope.$emit('agg-drag-end', $scope.agg);
+      });
 
       $scope.remove = function (agg) {
         const aggs = $scope.vis.aggs;

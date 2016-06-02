@@ -98,11 +98,17 @@ export default function TileMapFactory(Private) {
    * @param selection {Object} d3 selection
    */
   TileMap.prototype._appendMap = function (selection) {
-    let container = $(selection).addClass('tilemap');
+    const container = $(selection).addClass('tilemap');
+    const uiStateParams = this.handler.vis ? {
+      mapCenter: this.handler.vis.uiState.get('mapCenter'),
+      mapZoom: this.handler.vis.uiState.get('mapZoom')
+    } : {};
 
-    let map = new TileMapMap(container, this._chartData, {
-      // center: this._attr.mapCenter,
-      // zoom: this._attr.mapZoom,
+    const params = _.assign({}, _.get(this._chartData, 'geoAgg.vis.params'), uiStateParams);
+
+    const map = new TileMapMap(container, this._chartData, {
+      center: params.mapCenter,
+      zoom: params.mapZoom,
       events: this.events,
       markerType: this._attr.mapType,
       tooltipFormatter: this.tooltipFormatter,

@@ -12,14 +12,26 @@ describe('config component', function () {
   }));
 
   describe('#get', function () {
-
     it('gives access to config values', function () {
       expect(config.get('dateFormat')).to.be.a('string');
+    });
+
+    it('supports the default value overload', function () {
+      // default values are consumed and returned atomically
+      expect(config.get('obscureProperty', 'default')).to.be('default');
+      // default values are consumed only if setting was previously unset
+      expect(config.get('obscureProperty', 'another')).to.be('default');
+      // default values are persisted
+      expect(config.get('obscureProperty')).to.be('default');
+    });
+
+    it('throws on unknown properties that don\'t have a value yet.', function () {
+      const msg = 'Unexpected `config.get("throwableProperty")` call on unrecognized configuration setting';
+      expect(config.get).withArgs('throwableProperty').to.throwException(msg);
     });
   });
 
   describe('#set', function () {
-
     it('stores a value in the config val set', function () {
       const original = config.get('dateFormat');
       config.set('dateFormat', 'notaformat');
@@ -27,6 +39,10 @@ describe('config component', function () {
       config.set('dateFormat', original);
     });
 
+    it('stores a value in a previously unknown config key', function () {
+      expect(config.set).withArgs('unrecognizedProperty', 'somevalue').to.not.throwException();
+      expect(config.get('unrecognizedProperty')).to.be('somevalue');
+    });
   });
 
   describe('#$bind', function () {

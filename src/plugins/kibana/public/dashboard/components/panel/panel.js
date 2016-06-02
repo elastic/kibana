@@ -62,6 +62,10 @@ uiModules
             if (newVal === oldVal) { return false; }
             $scope.uiState.set('panel-title', newVal);
           });
+          const panelSavedVis = _.get(panelConfig, 'savedObj.vis');  // Sometimes this will be a search, and undef
+          if (panelSavedVis) {
+            panelSavedVis.setUiState($scope.uiState);
+          }
 
           $scope.filter = function (field, value, operator) {
             const index = $scope.savedObj.searchSource.get('index').id;
