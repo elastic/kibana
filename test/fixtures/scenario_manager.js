@@ -1,3 +1,7 @@
+import {
+  common
+} from '../support';
+
 var path = require('path');
 var elasticsearch = require('elasticsearch');
 var Promise = require('bluebird');
@@ -26,6 +30,7 @@ ScenarioManager.prototype.load = function (id) {
   var scenario = config[id];
   if (!scenario) return Promise.reject('No scenario found for ' + id);
 
+  common.debug('Loading data [' + id + '].....................');
   return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
     var loadIndexDefinition;
     if (bulk.indexDefinition) {
@@ -57,6 +62,9 @@ ScenarioManager.prototype.load = function (id) {
         );
       }
     })
+    .then(function () {
+      common.debug('Finished loading [' + id + '].....................');
+    })
     .catch(function (err) {
       if (bulk.haltOnFailure === false) return;
       throw err;
@@ -79,6 +87,9 @@ ScenarioManager.prototype.unload = function (id) {
 
   return this.client.indices.delete({
     index: indices
+  })
+  .then(function () {
+    common.debug('Deleted index [' + id + '].....................');
   })
   .catch(function (reason) {
     // if the index never existed yet, or was already deleted it's OK
@@ -132,6 +143,8 @@ ScenarioManager.prototype.loadIfEmpty = function (id) {
     .then(function handleCountResponse(response) {
       if (response.count === 0) {
         return self.load(id);
+      } else {
+        common.debug('Found data [' + id + '] count = ' + response.count);
       }
     });
   }))

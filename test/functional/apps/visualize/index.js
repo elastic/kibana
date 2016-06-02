@@ -17,11 +17,7 @@ import {
       remote.setWindowSize(1200,800);
 
       common.debug('Starting visualize before method');
-      // Calling loadIfEmpty but not chaining the response.  We can start the
-      // testing before this finishes.
-      // The first test is _chart_types which does not require the data to be loaded.
-      // Loading this data takes about 10 seconds.
-      scenarioManager.loadIfEmpty('logstashFunctional');
+      var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
       return esClient.delete('.kibana')
       .then(function () {
         return common.try(function () {
@@ -31,6 +27,10 @@ import {
       .then(function loadkibanaIndexPattern() {
         common.debug('load kibana index with default index pattern');
         return elasticDump.elasticLoad('visualize','.kibana');
+      })
+      // wait for the logstash data load to finish if it hasn't already
+      .then(function () {
+        return logstash.then();
       })
       .catch(common.handleError(this));
     });
