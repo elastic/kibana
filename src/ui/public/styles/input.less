@@ -16,6 +16,11 @@ select {
 
 .kbn-edit-field {
   .real-flex-parent(row nowrap);
+  &.editing {
+    input {
+      border-color: @brand-warning !important;
+    }
+  }
   input {
     cursor: pointer;
     border-color: transparent;
@@ -30,6 +35,7 @@ select {
          opacity: 100;
          + span {
            opacity: 100;
+           + span { opacity: 100; }
          }
        }
      }
