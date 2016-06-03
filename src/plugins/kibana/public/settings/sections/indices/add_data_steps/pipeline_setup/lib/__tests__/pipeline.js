@@ -391,8 +391,11 @@ describe('processor pipeline', function () {
       pipeline.input = { bar: 'baz' };
       pipeline.add(processorTypes.Set);
 
+      pipeline.processors[0].new = false;
       pipeline.processors[0].outputObject = { field1: 'value1' };
       pipeline.processors[0].error = {}; //define an error
+
+      _.map(pipeline.processors, (processor) => { processor.new = false; });
 
       pipeline.updateOutput();
       expect(pipeline.output).to.be(pipeline.input);
@@ -407,6 +410,8 @@ describe('processor pipeline', function () {
       pipeline.processors[0].outputObject = { field1: 'value1' };
       pipeline.processors[1].outputObject = { field1: 'value2' };
       pipeline.processors[2].outputObject = { field1: 'value3' };
+
+      _.map(pipeline.processors, (processor) => { processor.new = false; });
 
       pipeline.updateOutput();
       expect(pipeline.output).to.eql({ field1: 'value3' });
@@ -428,6 +433,8 @@ describe('processor pipeline', function () {
       pipeline.processors[0].outputObject = { field1: 'value1' };
       pipeline.processors[1].outputObject = { field1: 'value2' };
       pipeline.processors[2].outputObject = { field1: 'value3' };
+
+      _.map(pipeline.processors, (processor) => { processor.new = false; });
 
       pipeline.updateOutput();
       expect(pipeline.output).to.eql({ field1: 'value3' });
@@ -451,6 +458,8 @@ describe('processor pipeline', function () {
       const expected = { foo: 'bar' };
       pipeline.processors[0].outputObject = expected;
 
+      _.map(pipeline.processors, (processor) => { processor.new = false; });
+
       pipeline.updateOutput();
       expect(pipeline.output).to.be(expected);
     });
@@ -461,6 +470,25 @@ describe('processor pipeline', function () {
 
       pipeline.updateOutput();
       expect(pipeline.output).to.be(pipeline.input);
+    });
+
+    it('should ignore new processors', function () {
+      const pipeline = new Pipeline();
+      pipeline.input = { bar: 'baz' };
+      pipeline.add(processorTypes.Set);
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.be(pipeline.input);
+
+      const expected = { field1: 'value1' };
+      pipeline.processors[0].new = false;
+      pipeline.processors[0].outputObject = expected;
+
+      pipeline.add(processorTypes.Set);
+      pipeline.processors[1].outputObject = { field1: 'value2' };
+
+      pipeline.updateOutput();
+      expect(pipeline.output).to.be(expected);
     });
 
     it('should set pipeline.dirty', function () {
