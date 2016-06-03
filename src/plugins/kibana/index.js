@@ -18,7 +18,8 @@ module.exports = function (kibana) {
         uses: [
           'visTypes',
           'spyModes',
-          'navbarExtensions'
+          'navbarExtensions',
+          'settingsSections',
         ],
 
         autoload: kibana.autoload.require.concat(
@@ -26,9 +27,7 @@ module.exports = function (kibana) {
           'plugins/kibana/visualize',
           'plugins/kibana/dashboard',
           'plugins/kibana/settings',
-          'plugins/kibana/settings/sections',
           'plugins/kibana/doc',
-          'plugins/kibana/settings/sections',
           'ui/vislib',
           'ui/agg_response',
           'ui/agg_types',
