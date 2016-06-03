@@ -65,7 +65,7 @@ uiModules.get('apps/settings')
     }
 
     ingest.delete($scope.indexPattern.id)
-    .then($scope.indexPattern.destroy)
+      .then($scope.indexPattern.destroy.bind($scope.indexPattern))
     .then(function () {
       $location.url('/settings/indices');
     })
