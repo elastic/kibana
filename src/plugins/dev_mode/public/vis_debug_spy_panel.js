@@ -9,7 +9,7 @@ function VisDetailsSpyProvider(Notifier, $filter, $rootScope, config) {
     template: visDebugSpyPanelTemplate,
     order: 5,
     link: function ($scope, $el) {
-      $scope.$watch('vis.getState() | json', function (json) {
+      $scope.$watch('vis.getEnabledState() | json', function (json) {
         $scope.visStateJson = json;
       });
     }

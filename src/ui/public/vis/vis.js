@@ -2,16 +2,18 @@ import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import PersistedStateProvider from 'ui/persisted_state/persisted_state';
 export default function VisFactory(Notifier, Private) {
   let aggTypes = Private(AggTypesIndexProvider);
   let visTypes = Private(RegistryVisTypesProvider);
   let AggConfigs = Private(VisAggConfigsProvider);
+  const PersistedState = Private(PersistedStateProvider);
 
   let notify = new Notifier({
     location: 'Vis'
   });
 
-  function Vis(indexPattern, state) {
+  function Vis(indexPattern, state, uiState) {
     state = state || {};
 
     if (_.isString(state)) {
@@ -24,6 +26,7 @@ export default function VisFactory(Notifier, Private) {
 
     // http://aphyr.com/data/posts/317/state.gif
     this.setState(state);
+    this.setUiState(uiState);
   }
 
   Vis.convertOldState = function (type, oldState) {
@@ -44,7 +47,7 @@ export default function VisFactory(Notifier, Private) {
       oldConfigs.forEach(function (oldConfig) {
         let agg = {
           schema: schema.name,
-          type: oldConfig.agg,
+          type: oldConfig.agg
         };
 
         let aggType = aggTypes.byName[agg.type];
@@ -81,16 +84,25 @@ export default function VisFactory(Notifier, Private) {
     this.aggs = new AggConfigs(this, state.aggs);
   };
 
-  Vis.prototype.getState = function () {
+  Vis.prototype.getStateInternal = function (includeDisabled) {
     return {
       title: this.title,
       type: this.type.name,
       params: this.params,
-      aggs: this.aggs.map(function (agg) {
-        return agg.toJSON();
-      }).filter(Boolean),
+      aggs: this.aggs
+        .filter(agg => includeDisabled || agg.enabled)
+        .map(agg => agg.toJSON())
+        .filter(Boolean),
       listeners: this.listeners
     };
+  };
+
+  Vis.prototype.getEnabledState = function () {
+    return this.getStateInternal(false);
+  };
+
+  Vis.prototype.getState = function () {
+    return this.getStateInternal(true);
   };
 
   Vis.prototype.createEditableVis = function () {
@@ -102,7 +114,8 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.clone = function () {
-    return new Vis(this.indexPattern, this.getState());
+    const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
+    return new Vis(this.indexPattern, this.getState(), uiJson);
   };
 
   Vis.prototype.requesting = function () {
@@ -123,6 +136,27 @@ export default function VisFactory(Notifier, Private) {
       if (!agg.type || !agg.type.name) return false;
       return agg.type.name === aggTypeName;
     });
+  };
+
+  Vis.prototype.hasUiState = function () {
+    return !!this.__uiState;
+  };
+  Vis.prototype.setUiState = function (uiState) {
+    if (uiState instanceof PersistedState) {
+      this.__uiState = uiState;
+    }
+  };
+  Vis.prototype.getUiState = function () {
+    return this.__uiState;
+  };
+  Vis.prototype.uiStateVal = function (key, val) {
+    if (this.hasUiState()) {
+      if (_.isUndefined(val)) {
+        return this.__uiState.get(key);
+      }
+      return this.__uiState.set(key, val);
+    }
+    return val;
   };
 
   return Vis;
