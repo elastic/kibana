@@ -3,13 +3,22 @@ module.exports = function (grunt) {
   grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
   grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
-
-  grunt.registerTask('test:quick', [
+  grunt.registerTask('test:coverage:server', [
+    'env:coverage',
+    'instrument',
     'test:server',
-    'test:ui',
-    'test:browser',
-    'test:api'
+    'storeCoverage',
+    'makeReport'
   ]);
+
+  grunt.registerTask('test:quick', function () {
+    grunt.task.run([
+      grunt.option('coverage') ? 'test:coverage:server' : 'test:server',
+      'test:ui',
+      grunt.option('coverage') ? 'test:coverage' : 'test:browser',
+      'test:api'
+    ]);
+  });
 
   grunt.registerTask('test:dev', [
     'run:devTestServer',
