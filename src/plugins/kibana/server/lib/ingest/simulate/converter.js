@@ -11,5 +11,8 @@ export default {
         }
       ]
     };
+  },
+  esToKibana: function (processorEsDocument) {
+    throw new Error('Not implemented');
   }
 };

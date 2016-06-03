@@ -4,84 +4,95 @@ import simulateConverter from '../converter';
 
 describe('ingestSimulateApiKibanaToEsConverter', function () {
 
-  it('populates the docs._source section and converts known processors', function () {
+  describe('kibanaToEs', () => {
 
-    function buildSamplePipeline(input) {
-      return {
-        processors: [ { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo' } ],
-        input: input
-      };
-    }
+    it('populates the docs._source section and converts known processors', function () {
 
-    function buildExpected(input) {
-      return {
-        pipeline : {
-          processors: [{
-            set: {
-              field: 'bar',
-              tag: 'processor1',
-              value: 'foo'
-            }
-          }]
-        },
-        'docs' : [
-          { '_source': input }
-        ]
-      };
-    }
+      function buildSamplePipeline(input) {
+        return {
+          processors: [ { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo' } ],
+          input: input
+        };
+      }
 
-    let expected;
-    let actual;
-
-    expected = buildExpected(undefined);
-    actual = simulateConverter.kibanaToEs(buildSamplePipeline(undefined));
-    expect(actual).to.eql(expected);
-
-    expected = buildExpected('foo');
-    actual = simulateConverter.kibanaToEs(buildSamplePipeline('foo'));
-    expect(actual).to.eql(expected);
-
-    expected = buildExpected({ foo: 'bar' });
-    actual = simulateConverter.kibanaToEs(buildSamplePipeline({ foo: 'bar' }));
-    expect(actual).to.eql(expected);
-  });
-
-  it('handles multiple processors', function () {
-    const pipeline = {
-      processors: [
-        { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo' },
-        { processor_id: 'processor2', type_id: 'set', target_field: 'bar', value: 'foo' },
-      ],
-      input: {}
-    };
-    const expected = {
-      'pipeline': {
-        'processors': [
-          {
-            set: {
-              field: 'bar',
-              tag: 'processor1',
-              value: 'foo'
-            }
+      function buildExpected(input) {
+        return {
+          pipeline : {
+            processors: [{
+              set: {
+                field: 'bar',
+                tag: 'processor1',
+                value: 'foo'
+              }
+            }]
           },
-          {
-            set: {
-              field: 'bar',
-              tag: 'processor2',
-              value: 'foo'
+          'docs' : [
+            { '_source': input }
+          ]
+        };
+      }
+
+      let expected;
+      let actual;
+
+      expected = buildExpected(undefined);
+      actual = simulateConverter.kibanaToEs(buildSamplePipeline(undefined));
+      expect(actual).to.eql(expected);
+
+      expected = buildExpected('foo');
+      actual = simulateConverter.kibanaToEs(buildSamplePipeline('foo'));
+      expect(actual).to.eql(expected);
+
+      expected = buildExpected({ foo: 'bar' });
+      actual = simulateConverter.kibanaToEs(buildSamplePipeline({ foo: 'bar' }));
+      expect(actual).to.eql(expected);
+    });
+
+    it('handles multiple processors', function () {
+      const pipeline = {
+        processors: [
+          { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo' },
+          { processor_id: 'processor2', type_id: 'set', target_field: 'bar', value: 'foo' },
+        ],
+        input: {}
+      };
+      const expected = {
+        'pipeline': {
+          'processors': [
+            {
+              set: {
+                field: 'bar',
+                tag: 'processor1',
+                value: 'foo'
+              }
+            },
+            {
+              set: {
+                field: 'bar',
+                tag: 'processor2',
+                value: 'foo'
+              }
             }
-          }
+          ]
+        },
+        'docs': [
+          {'_source': {}}
         ]
-      },
-      'docs': [
-        {'_source': {}}
-      ]
-    };
+      };
 
-    const actual = simulateConverter.kibanaToEs(pipeline);
+      const actual = simulateConverter.kibanaToEs(pipeline);
 
-    expect(actual).to.eql(expected);
+      expect(actual).to.eql(expected);
+    });
+
   });
 
+  describe('esToKibana', () => {
+
+    it('should throw a not implemented error', () => {
+      expect(simulateConverter.esToKibana).to.throwException(/not implemented/i);
+    });
+
+  });
 
 });

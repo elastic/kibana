@@ -11,6 +11,6 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
-    throw new Error('Not yet implemented.');
+    throw new Error('Not implemented');
   }
 };
