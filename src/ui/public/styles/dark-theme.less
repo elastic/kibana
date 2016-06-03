@@ -586,4 +586,13 @@
     background-color: @config-bg;
     color: @dark-button-font;
   }
+  .kbn-edit-field {
+    input {
+      background-color: @panel-bg;
+      border-color: transparent;
+      &:focus {
+        border-color: @input-border;
+      }
+    }
+  }
 }

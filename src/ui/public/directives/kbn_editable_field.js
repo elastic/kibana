@@ -31,7 +31,7 @@ module.directive('kbnEditField', ['$parse', function ($parse) {
       const parsedModel = $parse(attrs.kbnEditField);
       const getVal = parsedModel;
       const setVal = parsedModel.assign;
-      const initialValue = getVal($scope);
+      const initialValue = attrs.initialVal || getModelVal();
       $inputEl.on('keyup', evt => {
         const isEnterKey = evt.keyCode === 13;
         const isEscKey = evt.keyCode === 27;
@@ -75,7 +75,7 @@ module.directive('kbnEditField', ['$parse', function ($parse) {
         const safeVal = trimWhiteSpace(val);
         if (safeVal.length) {
           setModel(safeVal);
-          if (safeVal !== val) { // If there was some editing done to the title
+          if (safeVal !== val) { // If trimWhiteSpace had to, you know, trimWhiteSpace
             setInput(safeVal);
           }
         } else {
