@@ -71,4 +71,30 @@ describe('initDefaultFieldProps', function () {
     expect(rawField).to.have.property('scripted', false);
     expect(rawField).to.have.property('count', 0);
   });
+
+  it('should apply some overrides to metafields', function () {
+    const results = initDefaultFieldProps([{name: '_source'}, {name: '_timestamp'}]);
+    const expected = [
+      {
+        name: '_source',
+        indexed: false,
+        analyzed: false,
+        doc_values: false,
+        count: 0,
+        scripted: false,
+        type: '_source'
+      },
+      {
+        name: '_timestamp',
+        indexed: true,
+        analyzed: false,
+        doc_values: false,
+        count: 0,
+        scripted: false,
+        type: 'date'
+      }
+    ];
+
+    expect(_.isEqual(expected, results)).to.be.ok();
+  });
 });
