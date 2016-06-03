@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Remove extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'remove',
@@ -12,7 +12,7 @@ export class Remove extends Processor {
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'sourceField'
       ]),
       {

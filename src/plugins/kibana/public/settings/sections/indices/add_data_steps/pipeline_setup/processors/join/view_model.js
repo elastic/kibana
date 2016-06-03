@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Join extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'join',
@@ -13,7 +13,7 @@ separator character between each element. `
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'sourceField',
         'separator'
       ]),

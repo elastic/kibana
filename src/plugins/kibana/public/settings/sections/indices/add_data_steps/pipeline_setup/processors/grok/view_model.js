@@ -3,7 +3,7 @@ import keysDeep from '../../lib/keys_deep';
 import Processor from '../base/view_model';
 
 export class Grok extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'grok',
@@ -16,7 +16,7 @@ expression that supports aliased expressions that can be reused.`
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'sourceField',
         'pattern'
       ]),

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Rename extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'rename',
@@ -12,7 +12,7 @@ export class Rename extends Processor {
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'sourceField',
         'targetField'
       ]),

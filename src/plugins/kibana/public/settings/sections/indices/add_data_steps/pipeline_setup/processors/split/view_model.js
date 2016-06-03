@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Split extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'split',
@@ -12,7 +12,7 @@ export class Split extends Processor {
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'sourceField',
         'separator'
       ]),

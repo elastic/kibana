@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Set extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'set',
@@ -13,7 +13,7 @@ already exists, its value will be replaced with the provided one.`
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'targetField',
         'value'
       ]),

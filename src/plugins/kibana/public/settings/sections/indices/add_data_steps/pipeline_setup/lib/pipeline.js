@@ -111,7 +111,8 @@ export default class Pipeline {
 
   addExisting(oldProcessor) {
     const Type = oldProcessor.constructor;
-    const newProcessor = this.add(Type, oldProcessor);
+    const newProcessor = this.add(Type, oldProcessor.model);
+    newProcessor.collapsed = true;
 
     return newProcessor;
   }

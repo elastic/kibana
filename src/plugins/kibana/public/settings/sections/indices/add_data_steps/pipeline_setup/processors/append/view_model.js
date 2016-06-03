@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Append extends Processor {
-  constructor(processorId, oldProcessor) {
+  constructor(processorId, model) {
     super(
       processorId,
       'append',
@@ -15,7 +15,7 @@ containing the provided values if the field doesn’t exist.`
 
     _.defaults(
       this,
-      _.pick(oldProcessor, [
+      _.pick(model, [
         'targetField',
         'values'
       ]),
