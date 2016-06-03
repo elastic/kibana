@@ -2,7 +2,8 @@ import {
   bdd,
   common,
   settingsPage,
-  scenarioManager
+  scenarioManager,
+  esClient
 } from '../../../support';
 
 (function () {
@@ -11,7 +12,13 @@ import {
   (function () {
     bdd.describe('creating and deleting default index', function describeIndexTests() {
       bdd.before(function () {
-        return scenarioManager.reload('emptyKibana')
+        // delete .kibana index and then wait for Kibana to re-create it
+        return esClient.delete('.kibana')
+        .then(function () {
+          return common.try(function () {
+            return esClient.getConfigId();
+          });
+        })
         .then(function () {
           return settingsPage.navigateTo();
         });
@@ -25,7 +32,7 @@ import {
         bdd.it('should allow setting advanced settings', function () {
           return settingsPage.clickAdvancedTab()
           .then(function TestCallSetAdvancedSettingsForTimezone() {
-            common.log('calling setAdvancedSetting');
+            common.debug('calling setAdvancedSetting');
             return settingsPage.setAdvancedSettings('dateFormat:tz', 'America/Phoenix');
           })
           .then(function GetAdvancedSetting() {

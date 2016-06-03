@@ -1,4 +1,13 @@
-import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } from '../../../support';
+import {
+  bdd,
+  common,
+  discoverPage,
+  headerPage,
+  settingsPage,
+  scenarioManager,
+  esClient,
+  elasticDump
+} from '../../../support';
 
 (function () {
   var expect = require('expect.js');
@@ -18,19 +27,21 @@ import { bdd, common, discoverPage, headerPage, settingsPage, scenarioManager } 
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
-        // start each test with an empty kibana index
-        return scenarioManager.reload('emptyKibana')
+        // delete .kibana index
+        return esClient.delete('.kibana')
+        .then(function () {
+          // wait for Kibana to re-create it and add UTC and defaultIndex
+          return common.try(function () {
+            return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+          });
+        })
+        .then(function loadkibanaIndexPattern() {
+          common.debug('load kibana index with default index pattern');
+          return elasticDump.elasticLoad('visualize','.kibana');
+        })
         // and load a set of makelogs data
         .then(function loadIfEmptyMakelogs() {
           return scenarioManager.loadIfEmpty('logstashFunctional');
-        })
-        .then(function (navigateTo) {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
         })
         .then(function () {
           common.debug('discover');
