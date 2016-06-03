@@ -4,7 +4,9 @@ import defaultsProvider from './defaults';
 export default function setupSettings(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
   const uiSettings = {
+    get,
     getAll,
+    getRaw,
     getDefaults,
     getUserProvided,
     set,
@@ -15,7 +17,23 @@ export default function setupSettings(kbnServer, server, config) {
   server.decorate('server', 'uiSettings', () => uiSettings);
   kbnServer.ready().then(mirrorEsStatus);
 
+  function get(key) {
+    return getAll().then(all => all[key]);
+  }
+
   function getAll() {
+    return getRaw()
+    .then(raw => Object.keys(raw)
+      .reduce((all, key) => {
+        const item = raw[key];
+        const hasUserValue = 'userValue' in item;
+        all[key] = hasUserValue ? item.userValue : item.value;
+        return all;
+      }, {})
+    );
+  }
+
+  function getRaw() {
     return Promise
       .all([getDefaults(), getUserProvided()])
       .then(([defaults, user]) => defaultsDeep(user, defaults));
