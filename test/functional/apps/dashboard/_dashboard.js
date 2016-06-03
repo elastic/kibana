@@ -16,9 +16,6 @@ import {
 
       bdd.before(function () {
 
-        var fromTime = '2015-09-19 06:31:44.000';
-        var toTime = '2015-09-23 18:31:44.000';
-
         common.debug('Starting dashboard before method');
         var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
         return esClient.delete('.kibana')
@@ -38,7 +35,7 @@ import {
         })
         // wait for the logstash data load to finish if it hasn't already
         .then(function () {
-          return logstash.then();
+          return logstash;
         })
         .catch(common.handleError(this));
       });
@@ -93,7 +90,7 @@ import {
 
         bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
           var testSubName = 'Dashboard Test 1';
-// save time on the dashboard?
+          // TODO: save time on the dashboard and test it
           return dashboardPage.saveDashboard(testSubName)
           // click New Dashboard just to clear the one we just created
           .then(function () {

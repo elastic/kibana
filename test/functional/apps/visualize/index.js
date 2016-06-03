@@ -30,7 +30,7 @@ import {
       })
       // wait for the logstash data load to finish if it hasn't already
       .then(function () {
-        return logstash.then();
+        return logstash;
       })
       .catch(common.handleError(this));
     });
