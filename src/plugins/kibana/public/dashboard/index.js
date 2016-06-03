@@ -68,6 +68,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
         timefilter.time.to = dash.timeTo;
         timefilter.time.from = dash.timeFrom;
+        if (dash.refreshInterval) {
+          timefilter.refreshInterval = dash.refreshInterval;
+        }
       }
 
       $scope.$on('$destroy', dash.destroy);
@@ -208,6 +211,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dash.uiStateJSON = angular.toJson($uiState.getChanges());
         dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
         dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
+        dash.refreshInterval = dash.timeRestore ? timefilter.refreshInterval : undefined;
         dash.optionsJSON = angular.toJson($state.options);
 
         dash.save()
