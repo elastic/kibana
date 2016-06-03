@@ -115,6 +115,25 @@ define(function (require) {
           });
       });
 
+      bdd.it('should include meta fields specified in uiSettings in the index pattern', function metaFields() {
+        return request.post('/kibana/ingest')
+          .send(createTestData())
+          .expect(204)
+          .then(function () {
+            return scenarioManager.client.get({
+              index: '.kibana',
+              type: 'index-pattern',
+              id: 'logstash-*'
+            })
+            .then(function (res) {
+              const fields = JSON.parse(res._source.fields);
+              const sourceField = _.find(fields, {name: '_source'});
+              expect(sourceField).to.be.ok();
+              expect(sourceField).to.have.property('name', '_source');
+            });
+          });
+      });
+
       bdd.it('should create index template with _default_ mappings based on the info in the ingest config',
       function createTemplate() {
         return request.post('/kibana/ingest')
