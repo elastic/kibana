@@ -2,7 +2,6 @@ var path = require('path');
 var elasticsearch = require('elasticsearch');
 var Promise = require('bluebird');
 var config = require('./config').scenarios;
-var common = require('../support/pages/common');
 
 function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
