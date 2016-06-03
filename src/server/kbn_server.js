@@ -3,6 +3,8 @@ import { constant, once, compact, flatten } from 'lodash';
 import { promisify, resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
+import Config from './config/config';
+import loggingConfiguration from './logging/configuration';
 
 let rootDir = fromRoot('.');
 
@@ -106,5 +108,17 @@ module.exports = class KbnServer {
         cb(err);
       }
     });
+  }
+
+  applyLoggingConfiguration(settings) {
+    const config = Config.withDefaultSchema(settings);
+    const loggingOptions = loggingConfiguration(config);
+    const subset = {
+      ops: config.get('ops'),
+      logging: config.get('logging')
+    };
+    const plain = JSON.stringify(subset, null, 2);
+    this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
+    this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
   }
 };

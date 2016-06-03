@@ -2,8 +2,6 @@ import {
   bdd,
   scenarioManager,
   common,
-  // settingsPage,
-  // headerPage,
   consolePage
 } from '../../../support';
 

@@ -19,6 +19,7 @@ let typeColors = {
   req: 'green',
   res: 'green',
   ops: 'cyan',
+  config: 'cyan',
   err: 'red',
   info: 'green',
   error: 'red',

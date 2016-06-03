@@ -1,4 +1,4 @@
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, partial } from 'lodash';
 import defaultsProvider from './defaults';
 
 export default function setupSettings(kbnServer, server, config) {
@@ -23,12 +23,19 @@ export default function setupSettings(kbnServer, server, config) {
     return Promise.resolve(defaultsProvider());
   }
 
+  function userSettingsNotFound(kibanaVersion) {
+    const message = 'Could not find user-provided settings for this version of Kibana (' + kibanaVersion + ')';
+    server.plugins.kibana.status.red(message);
+    return {};
+  }
+
   function getUserProvided() {
     const { client } = server.plugins.elasticsearch;
     const clientSettings = getClientSettings(config);
     return client
       .get({ ...clientSettings })
       .then(res => res._source)
+      .catch(partial(userSettingsNotFound, clientSettings.id))
       .then(user => hydrateUserSettings(user));
   }
 

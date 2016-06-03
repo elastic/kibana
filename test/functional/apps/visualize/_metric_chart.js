@@ -21,29 +21,8 @@ import {
         common.debug('Start of test' + testSubName + 'Visualization');
         var vizName1 = 'Visualization ' + testSubName;
 
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          return settingsPage.clickAdvancedTab();
-        })
-        .then(function GetAdvancedSetting() {
-          common.debug('check for required UTC timezone');
-          return settingsPage.getAdvancedSettings('dateFormat:tz');
-        })
-        .then(function (advancedSetting) {
-          expect(advancedSetting).to.be('UTC');
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
+        common.debug('navigateToApp visualize');
+        return common.navigateToApp('visualize')
         .then(function () {
           common.debug('clickMetric');
           return visualizePage.clickMetric();
