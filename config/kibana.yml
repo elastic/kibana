@@ -88,5 +88,5 @@
 # logging.verbose: false
 
 # Set the interval in milliseconds to sample system and process performance
-# metrics. Minimum is 100ms. Defaults to 10000.
-# ops.interval: 10000
+# metrics. Minimum is 100ms. Defaults to 5000.
+# ops.interval: 5000
