@@ -1,7 +1,7 @@
 define(function (require) {
   const _ = require('lodash');
+  const registry = require('ui/registry/settings_sections');
   const toEditableConfig = require('plugins/kibana/settings/sections/advanced/lib/to_editable_config');
-
 
   require('plugins/kibana/settings/sections/advanced/advanced_row');
 
@@ -52,10 +52,10 @@ define(function (require) {
     };
   });
 
-  return {
+  registry.register(_.constant({
     order: 2,
     name: 'advanced',
     display: 'Advanced',
     url: '#/settings/advanced'
-  };
+  }));
 });
