@@ -7,16 +7,7 @@ import { bdd, defaultTimeout, scenarioManager, esClient, common } from '../../..
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     bdd.before(function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      return esClient.delete('.kibana')
-      .then(function () {
-        return common.try(function () {
-          return esClient.getConfigId();
-        });
-      })
-      .then(function () {
-        return scenarioManager.loadIfEmpty('makelogs');
-      });
+      return scenarioManager.loadIfEmpty('makelogs');
     });
 
     bdd.after(function () {

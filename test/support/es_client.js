@@ -84,7 +84,6 @@ export default (function () {
 
       return this.getConfigId()
       // now that we have the id, we can update
-      // return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
       .then(function (configId) {
         common.debug('updating config with ' + docMapString);
         return self.client.update({
@@ -100,7 +99,35 @@ export default (function () {
       .catch(function (err) {
         throw err;
       });
+    },
+
+    /**
+    * Wrap the common 'delete index', 'updateConfigDoc' into one.
+    * [docMap] is optional.
+    * @return {Promise} A promise that is resolved when elasticsearch has a response
+    */
+    deleteAndUpdateConfigDoc: function (docMap) {
+      var self = this;
+      var configId;
+
+      return this.delete('.kibana')
+      .then(function () {
+        if (!docMap) {
+          return common.try(function () {
+            return self.getConfigId();
+          });
+        } else {
+          var docMapString = JSON.stringify(docMap);
+          return common.try(function () {
+            return self.updateConfigDoc(docMap);
+          });
+        }
+      })
+      .catch(function (err) {
+        throw err;
+      });
     }
+
   };
 
   return EsClient;

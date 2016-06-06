@@ -14,12 +14,7 @@ import {
     bdd.describe('index result field sort', function describeIndexTests() {
       bdd.before(function () {
         // delete .kibana index and then wait for Kibana to re-create it
-        return esClient.delete('.kibana')
-        .then(function () {
-          return common.try(function () {
-            return esClient.getConfigId();
-          });
-        });
+        return esClient.deleteAndUpdateConfigDoc();
       });
 
       var columns = [{
