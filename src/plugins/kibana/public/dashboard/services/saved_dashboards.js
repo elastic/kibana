@@ -16,6 +16,7 @@ define(function (require) {
 
   // This is the only thing that gets injected into controllers
   module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, kbnUrl) {
+    console.log('savedDashboards', kbnIndex);
     const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'dashboard'

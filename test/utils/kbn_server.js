@@ -5,7 +5,6 @@ import { kibanaUser, kibanaServer } from '../shield';
 
 const src = requirefrom('src');
 const KbnServer = src('server/KbnServer');
-const fromRoot = src('utils/fromRoot');
 
 const SERVER_DEFAULTS = {
   server: {
@@ -17,11 +16,7 @@ const SERVER_DEFAULTS = {
   logging: {
     quiet: true
   },
-  plugins: {
-    scanDirs: [
-      fromRoot('src/plugins')
-    ]
-  },
+  plugins: {},
   optimize: {
     enabled: false
   },

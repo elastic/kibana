@@ -33,6 +33,16 @@ module.exports = function ({ Plugin }) {
       }).default();
     },
 
+    uiExports: {
+      injectDefaultVars(server, options) {
+        return {
+          esRequestTimeout: options.requestTimeout,
+          esShardTimeout: options.shardTimeout,
+          esApiVersion: options.apiVersion,
+        };
+      }
+    },
+
     init(server, options) {
       const kibanaIndex = server.config().get('kibana.index');
 
