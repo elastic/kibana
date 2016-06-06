@@ -6,7 +6,7 @@ describe('api', () => {
 
   describe('ingest', () => {
 
-    describe('register_simulate', () => {
+    describe('register_processors', () => {
 
       describe('handleResponse', function () {
 
