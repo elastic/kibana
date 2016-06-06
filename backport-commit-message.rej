@@ -1,0 +1,32 @@
+Backport PR #6759
+---------
+
+**Commit 1:**
+[ui] Added advanced setting to tweak starting day of week. Fixes #1855.
+
+* Original sha: 7740d6edd9080c5275a970d84c4f7372a690ed60
+* Authored by Nicolas Bevacqua <nicolasbevacqua@gmail.com> on 2016-04-04T19:23:46Z
+
+**Commit 2:**
+Merge branch 'master' into feature/config-switch-dow
+
+* Original sha: 324dc5df16f2c7d82fbddc86b0f4f45854fc47e8
+* Authored by Nicolás Bevacqua <hub@ponyfoo.com> on 2016-04-04T19:33:47Z
+
+**Commit 3:**
+[fix] Move start of week formatting to service so it's immediately applied.
+
+* Original sha: 6492320b82d03d8aa20226d0ebc84769a510963b
+* Authored by Nicolas Bevacqua <nicolasbevacqua@gmail.com> on 2016-04-08T17:15:37Z
+
+**Commit 4:**
+[merge] Merge with master.
+
+* Original sha: 309d6480c1318c4d9b1c4eb77f945e6e4b287fdd
+* Authored by Nicolas Bevacqua <nicolasbevacqua@gmail.com> on 2016-04-19T02:35:09Z
+
+**Commit 5:**
+[refactor] Moved global moment locale update to kbnGlobalTimepicker directive.
+
+* Original sha: 5e2911290b914402b36b8b07b18c24befbe21064
+* Authored by Nicolas Bevacqua <nicolasbevacqua@gmail.com> on 2016-04-19T02:39:24Z
