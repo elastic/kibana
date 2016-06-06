@@ -13,12 +13,7 @@ import {
     bdd.describe('creating and deleting default index', function describeIndexTests() {
       bdd.before(function () {
         // delete .kibana index and then wait for Kibana to re-create it
-        return esClient.delete('.kibana')
-        .then(function () {
-          return common.try(function () {
-            return esClient.getConfigId();
-          });
-        })
+        return esClient.deleteAndUpdateConfigDoc()
         .then(function () {
           return settingsPage.navigateTo();
         });
