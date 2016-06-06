@@ -4,6 +4,7 @@ import {
   defaultTimeout,
   settingsPage,
   scenarioManager,
+  esClient
 } from '../../../support';
 
 (function () {
@@ -12,7 +13,8 @@ import {
   (function () {
     bdd.describe('index result field sort', function describeIndexTests() {
       bdd.before(function () {
-        return scenarioManager.reload('emptyKibana');
+        // delete .kibana index and then wait for Kibana to re-create it
+        return esClient.deleteAndUpdateConfigDoc();
       });
 
       var columns = [{

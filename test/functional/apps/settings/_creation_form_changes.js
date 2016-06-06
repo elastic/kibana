@@ -3,6 +3,7 @@ import {
   common,
   settingsPage,
   scenarioManager,
+  esClient
 } from '../../../support';
 
 (function () {
@@ -11,7 +12,8 @@ import {
   (function () {
     bdd.describe('user input reactions', function () {
       bdd.beforeEach(function () {
-        return scenarioManager.reload('emptyKibana')
+        // delete .kibana index and then wait for Kibana to re-create it
+        return esClient.deleteAndUpdateConfigDoc()
         .then(function () {
           return settingsPage.navigateTo();
         });
