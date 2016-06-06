@@ -41,6 +41,7 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.0.0-rc1', '4.0.0', true);
     upgradeDoc('4.0.0-rc1-snapshot', '4.0.0', false);
     upgradeDoc('4.1.0-rc1-snapshot', '4.1.0-rc1', false);
+    upgradeDoc('5.0.0-alpha1', '5.0.0', false);
 
     it('should handle missing _id field', function () {
       let doc = {
