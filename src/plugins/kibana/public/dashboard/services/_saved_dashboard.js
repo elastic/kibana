@@ -57,7 +57,7 @@ module.factory('SavedDashboard', function (courier, config) {
     timeRestore: 'boolean',
     timeTo: 'string',
     timeFrom: 'string',
-    refreshInterval: 'string'
+    refreshInterval: 'object'
   };
 
   SavedDashboard.searchsource = true;
