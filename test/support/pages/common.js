@@ -252,16 +252,17 @@ export default (function () {
         var now = Date.now();
         var filename = ['failure', now, testName].join('_') + '.png';
 
-        return self.saveScreenshot(filename)
+        return self.saveScreenshot(filename, true)
         .finally(function () {
           throw reason;
         });
       };
     },
 
-    saveScreenshot: function saveScreenshot(filename) {
+    saveScreenshot: function saveScreenshot(filename, isFailure = false) {
       var self = this;
-      var outDir = path.resolve('test', 'output');
+      const directoryName = isFailure ? 'failure' : 'session';
+      const outDir = path.resolve('test', `/screenshots/${directoryName}`);
 
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
