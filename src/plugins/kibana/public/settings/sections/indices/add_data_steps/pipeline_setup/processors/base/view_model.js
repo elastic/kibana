@@ -13,6 +13,7 @@ export default class Processor {
     this.inputObject = undefined;
     this.outputObject = undefined;
     this.error = undefined;
+    this.new = true;
   }
 
   setParent(newParent) {

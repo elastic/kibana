@@ -4,8 +4,10 @@ function updateProcessorOutputs(pipeline, simulateResults) {
   simulateResults.forEach((result) => {
     const processor = pipeline.getProcessorById(result.processorId);
 
-    processor.outputObject = _.get(result, 'output');
-    processor.error = _.get(result, 'error');
+    if (!processor.new) {
+      processor.outputObject = _.get(result, 'output');
+      processor.error = _.get(result, 'error');
+    }
   });
 }
 
@@ -155,7 +157,7 @@ export default class Pipeline {
   }
 
   updateOutput() {
-    const processors = this.processors;
+    const processors = _.reject(this.processors, { new: true });
 
     const errorIndex = _.findIndex(processors, 'error');
     const goodProcessor = errorIndex === -1 ? _.last(processors) : processors[errorIndex - 1];

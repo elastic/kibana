@@ -1,4 +1,5 @@
 import uiModules from 'ui/modules';
+import angular from 'angular';
 import _ from 'lodash';
 import '../styles/_processor_ui_container.less';
 import './output_preview';
@@ -26,9 +27,16 @@ app.directive('processorUiContainer', function ($compile) {
       newScope.processor = processor;
 
       const template = `<processor-ui-${typeId}></processor-ui-${typeId}>`;
-      const $innerEl = $compile(template)(newScope);
+      const $innerEl = angular.element(template);
+      const postLink = $compile($innerEl);
+      $container.append($innerEl);
+      postLink(newScope);
 
-      $innerEl.appendTo($container);
+      $scope.$watch('processorForm.$pristine', (pristine) => {
+        if (!pristine) {
+          processor.new = false;
+        }
+      });
     }
   };
 });
