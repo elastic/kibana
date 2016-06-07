@@ -16,7 +16,9 @@ function compareScreenshots() {
           file: `${DIFF_SCREENSHOTS_DIR}/${screenshot}`
         },
         (err, isEqual, change, raw) => {
-          if (err) return handle(err);
+          if (err) {
+            return console.log(err);
+          }
           const changePercentage = (change * 100).toFixed(2);
           console.log(`${screenshot} has changed by ${changePercentage}%`)
         }
