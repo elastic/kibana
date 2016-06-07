@@ -33,7 +33,6 @@ module.directive('kbnEditField', ['$parse', function ($parse) {
       const getVal = parsedModel;
       const setVal = parsedModel.assign;
 
-      function toggleEditClass() { $element.toggleClass('editing', getModelVal() !== $inputEl.val()); }
       // Get the val
       function getModelVal() { return getVal($scope); }
       // Sync the veiwVal, and what is.
