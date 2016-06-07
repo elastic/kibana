@@ -1,7 +1,8 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Set extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'set',
@@ -9,8 +10,18 @@ export class Set extends Processor {
       `Sets one field and associates it with the specified value. If the field
 already exists, its value will be replaced with the provided one.`
     );
-    this.targetField = '';
-    this.value = '';
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'targetField',
+        'value'
+      ]),
+      {
+        targetField: '',
+        value: ''
+      }
+    );
   }
 
   get description() {

@@ -1,7 +1,8 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class GeoIp extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'geoip',
@@ -9,10 +10,22 @@ export class GeoIp extends Processor {
       `Adds information about the geographical location of IP addresses,
 based on data from the Maxmind database.`
     );
-    this.sourceField = '';
-    this.targetField = '';
-    this.databaseFile = '';
-    this.databaseFields = [];
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'sourceField',
+        'targetField',
+        'databaseFile',
+        'databaseFields'
+      ]),
+      {
+        sourceField: '',
+        targetField: '',
+        databaseFile: '',
+        databaseFields: []
+      }
+    );
   }
 
   get description() {

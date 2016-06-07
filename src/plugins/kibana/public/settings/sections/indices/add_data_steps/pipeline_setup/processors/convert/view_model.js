@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Convert extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'convert',
@@ -11,9 +11,20 @@ export class Convert extends Processor {
 a string to an integer. If the field value is an array, all members will be
 converted.`
     );
-    this.sourceField = '';
-    this.targetField = '';
-    this.type = 'auto';
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'sourceField',
+        'targetField',
+        'type'
+      ]),
+      {
+        sourceField: '',
+        targetField: '',
+        type: 'auto'
+      }
+    );
   }
 
   get description() {

@@ -1,14 +1,24 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Remove extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'remove',
       'Remove',
       `Removes an existing field.`
     );
-    this.sourceField = '';
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'sourceField'
+      ]),
+      {
+        sourceField: ''
+      }
+    );
   }
 
   get description() {

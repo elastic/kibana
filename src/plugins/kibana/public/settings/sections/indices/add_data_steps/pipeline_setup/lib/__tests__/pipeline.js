@@ -168,13 +168,15 @@ describe('processor pipeline', function () {
       const pipeline = new Pipeline();
 
       const testProcessor = new processorTypes.Set('foo');
-      testProcessor.foo = 'bar';
-      testProcessor.bar = 'baz';
+      testProcessor.targetField = 'bar';
+      testProcessor.value = 'baz';
+      testProcessor.invalid_property = 'bop';
 
       pipeline.addExisting(testProcessor);
 
-      expect(pipeline.processors[0].foo).to.be('bar');
-      expect(pipeline.processors[0].bar).to.be('baz');
+      expect(pipeline.processors[0].targetField).to.be('bar');
+      expect(pipeline.processors[0].value).to.be('baz');
+      expect(pipeline.processors[0].invalid_property).to.be(undefined);
       expect(pipeline.processors[0].processorId).to.not.be('foo');
     });
 

@@ -1,7 +1,8 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Join extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'join',
@@ -9,8 +10,18 @@ export class Join extends Processor {
       `Joins each element of an array into a single string using a
 separator character between each element. `
     );
-    this.sourceField = '';
-    this.separator = '';
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'sourceField',
+        'separator'
+      ]),
+      {
+        sourceField: '',
+        separator: ''
+      }
+    );
   }
 
   get description() {

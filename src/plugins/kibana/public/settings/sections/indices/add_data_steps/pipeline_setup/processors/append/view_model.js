@@ -1,7 +1,8 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Append extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'append',
@@ -11,8 +12,18 @@ and it is an array. Converts a scalar to an array and appends one or more
 values to it if the field exists and it is a scalar. Creates an array
 containing the provided values if the field doesn’t exist.`
     );
-    this.targetField = '';
-    this.values = [];
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'targetField',
+        'values'
+      ]),
+      {
+        targetField: '',
+        values: []
+      }
+    );
   }
 
   get description() {

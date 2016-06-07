@@ -1,19 +1,34 @@
+import _ from 'lodash';
 import Processor from '../base/view_model';
 
 export class Date extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'date',
       'Date',
       `Parses dates from fields.`
     );
-    this.sourceField = '';
-    this.targetField = '@timestamp';
-    this.formats = [];
-    this.timezone = 'Etc/UTC';
-    this.locale = 'ENGLISH';
-    this.customFormat = '';
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'sourceField',
+        'targetField',
+        'formats',
+        'timezone',
+        'locale',
+        'customFormat'
+      ]),
+      {
+        sourceField: '',
+        targetField: '@timestamp',
+        formats: [],
+        timezone: 'Etc/UTC',
+        locale: 'ENGLISH',
+        customFormat: ''
+      }
+    );
   }
 
   get description() {

@@ -3,7 +3,7 @@ import keysDeep from '../../lib/keys_deep';
 import Processor from '../base/view_model';
 
 export class Grok extends Processor {
-  constructor(processorId) {
+  constructor(processorId, model) {
     super(
       processorId,
       'grok',
@@ -13,8 +13,18 @@ You choose which field to extract matched fields from, as well as the
 grok pattern you expect will match. A grok pattern is like a regular
 expression that supports aliased expressions that can be reused.`
     );
-    this.sourceField = '';
-    this.pattern = '';
+
+    _.defaults(
+      this,
+      _.pick(model, [
+        'sourceField',
+        'pattern'
+      ]),
+      {
+        sourceField: '',
+        pattern: ''
+      }
+    );
   }
 
   get description() {
