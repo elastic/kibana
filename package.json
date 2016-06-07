@@ -158,6 +158,7 @@
     "event-stream": "3.3.2",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
+    "gm": "1.22.0",
     "grunt": "0.4.5",
     "grunt-babel": "5.0.1",
     "grunt-cli": "0.1.13",
