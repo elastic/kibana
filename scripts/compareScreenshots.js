@@ -1,12 +1,14 @@
-var fs = require('fs');
-var gm = require('gm').subClass({imageMagick: true});
+
+const fs = require('fs');
+const gm = require('gm').subClass({imageMagick: true});
+const path = require('path');
 
 function compareScreenshots() {
-  const BASELINE_SCREENSHOTS_DIR = 'test/screenshots/baseline';
-  const DIFF_SCREENSHOTS_DIR = 'test/screenshots/diff';
-  const SESSION_SCREENSHOTS_DIR = 'test/screenshots/session';
+  const BASELINE_SCREENSHOTS_DIR = path.join('test','screenshots','baseline');
+  const DIFF_SCREENSHOTS_DIR = path.join('test','screenshots','diff');
+  const SESSION_SCREENSHOTS_DIR = path.join('test','screenshots','session');
 
-  fs.readdir(SESSION_SCREENSHOTS_DIR, (err, files) => {
+  fs.readdir(SESSION_SCREENSHOTS_DIR, (readDirError, files) => {
     const screenshots = files.filter(file => file.indexOf('.png') !== -1);
     screenshots.forEach(screenshot => {
       gm().compare(
@@ -15,9 +17,9 @@ function compareScreenshots() {
         {
           file: `${DIFF_SCREENSHOTS_DIR}/${screenshot}`
         },
-        (err, isEqual, change, raw) => {
-          if (err) {
-            return console.log(err);
+        (comparisonError, isEqual, change, raw) => {
+          if (comparisonError) {
+            return console.log(comparisonError);
           }
           const changePercentage = (change * 100).toFixed(2);
           console.log(`${screenshot} has changed by ${changePercentage}%`)
@@ -25,9 +27,6 @@ function compareScreenshots() {
       );
     });
   });
-
-
 }
 
 compareScreenshots();
-
