@@ -262,7 +262,7 @@ export default (function () {
     saveScreenshot: function saveScreenshot(filename, isFailure = false) {
       var self = this;
       const directoryName = isFailure ? 'failure' : 'session';
-      const outDir = path.resolve('test', `/screenshots/${directoryName}`);
+      const outDir = path.resolve('test', 'screenshots', directoryName);
 
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
