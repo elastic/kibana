@@ -4,9 +4,9 @@ const gm = require('gm').subClass({imageMagick: true});
 const path = require('path');
 
 function compareScreenshots() {
-  const BASELINE_SCREENSHOTS_DIR = path.join('test','screenshots','baseline');
-  const DIFF_SCREENSHOTS_DIR = path.join('test','screenshots','diff');
-  const SESSION_SCREENSHOTS_DIR = path.join('test','screenshots','session');
+  const BASELINE_SCREENSHOTS_DIR = path.resolve('test','screenshots','baseline');
+  const DIFF_SCREENSHOTS_DIR = path.resolve('test','screenshots','diff');
+  const SESSION_SCREENSHOTS_DIR = path.resolve('test','screenshots','session');
 
   fs.readdir(SESSION_SCREENSHOTS_DIR, (readDirError, files) => {
     const screenshots = files.filter(file => file.indexOf('.png') !== -1);

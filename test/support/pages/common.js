@@ -260,13 +260,13 @@ export default (function () {
     },
 
     saveScreenshot: function saveScreenshot(filename, isFailure = false) {
-      var self = this;
+      const self = this;
       const directoryName = isFailure ? 'failure' : 'session';
       const outDir = path.resolve('test', 'screenshots', directoryName);
 
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
-        var filepath = path.resolve(outDir, filename);
+        const filepath = path.resolve(outDir, filename);
         self.debug('Taking screenshot "' + filepath + '"');
         fs.writeFileSync(filepath, data);
       })
