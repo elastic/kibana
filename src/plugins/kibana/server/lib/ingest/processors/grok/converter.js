@@ -4,16 +4,23 @@ export default {
       grok: {
         tag: processorApiDocument.processor_id,
         field: processorApiDocument.source_field,
-        pattern: processorApiDocument.pattern
+        patterns: [ processorApiDocument.pattern ],
+        ignore_failure: processorApiDocument.ignore_failure
       }
     };
   },
   esToKibana: function (processorEsDocument) {
+    let pattern = '';
+    if (processorEsDocument.patterns.length > 0) {
+      pattern = processorEsDocument.patterns[0];
+    }
+
     return {
       typeId: 'grok',
       processor_id: processorEsDocument.tag,
       source_field: processorEsDocument.field,
-      pattern: processorEsDocument.pattern
+      pattern: pattern,
+      ignore_failure: processorEsDocument.ignore_failure
     };
   }
 };
