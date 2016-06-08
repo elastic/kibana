@@ -10,12 +10,12 @@
         ng-class="{ 'management-section-info-expanded': section.showInfo }"
         class="col-xs-12 management-section management-section-{{::section.id}}">
 
-        <div class="panel panel-product">
+        <div class="panel panel-product management-panel-product">
           <div class="panel-heading panel-heading-{{::section.id}}">
             {{::section.display}}
 
             <i
-              class="fa fa-info-circle pull-right"
+              class="fa fa-info-circle pull-right panel-heading-icon"
               ng-click="section.showInfo = !!!section.showInfo"
               ng-if="section.info">
             </i>
@@ -28,7 +28,7 @@
                   class="col-xs-4 col-md-3"
                   ng-repeat="item in section.items.inOrder">
 
-                  <a kbn-href="{{::item.url}}">
+                  <a class="management-link" kbn-href="{{::item.url}}">
                     {{::item.display}}
                   </a>
                 </li>

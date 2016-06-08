@@ -41,6 +41,31 @@ kbn-management-app {
 
 kbn-management-landing {
   padding: 5px;
+}
+
+  .management-panel-product {
+    margin-bottom: 10px;
+
+    .panel-body {
+      padding-bottom: 30px;
+      position: relative;
+    }
+  }
+
+  .management-section {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .management-link {
+    font-size: 17px;
+    line-height: 32px;
+  }
+
+  .panel-heading-icon {
+    font-size: 0.9em;
+    padding: 5px;
+  }
 
   .product-overview {
     color: @kibanaGray2;
@@ -55,18 +80,8 @@ kbn-management-landing {
     position: absolute;
   }
 
-  .panel-heading i {
-    font-size: 0.9em;
-    padding: 5px;
-  }
-
-  .management-section {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-
   .management-section-info-expanded {
-    .panel-heading i {
+    .panel-heading-icon {
       color: @black;
     }
 
@@ -74,18 +89,6 @@ kbn-management-landing {
       display: block;
     }
   }
-
-  .panel-product {
-    margin-bottom: 10px;
-
-    .panel-body {
-      padding-bottom: 30px;
-      font-size: 17px;
-      line-height: 32px;
-      position: relative;
-    }
-  }
-}
 
 kbn-management-objects {
   form {
