@@ -14,11 +14,13 @@ export class Split extends Processor {
       this,
       _.pick(model, [
         'sourceField',
-        'separator'
+        'separator',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
-        separator: ''
+        separator: '',
+        ignoreFailure: false
       }
     );
   }
@@ -34,7 +36,8 @@ export class Split extends Processor {
       processorId: this.processorId,
       typeId: this.typeId,
       sourceField: this.sourceField || '',
-      separator: this.separator || ''
+      separator: this.separator || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

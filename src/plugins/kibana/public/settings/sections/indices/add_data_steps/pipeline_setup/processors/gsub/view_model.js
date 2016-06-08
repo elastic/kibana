@@ -15,12 +15,14 @@ export class Gsub extends Processor {
       _.pick(model, [
         'sourceField',
         'pattern',
-        'replacement'
+        'replacement',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
         pattern: '',
-        replacement: ''
+        replacement: '',
+        ignoreFailure: false
       }
     );
   }
@@ -36,7 +38,8 @@ export class Gsub extends Processor {
       typeId: this.typeId,
       sourceField: this.sourceField || '',
       pattern: this.pattern || '',
-      replacement: this.replacement || ''
+      replacement: this.replacement || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

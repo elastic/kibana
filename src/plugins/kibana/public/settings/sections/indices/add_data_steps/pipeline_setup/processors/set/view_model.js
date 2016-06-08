@@ -15,11 +15,13 @@ already exists, its value will be replaced with the provided one.`
       this,
       _.pick(model, [
         'targetField',
-        'value'
+        'value',
+        'ignoreFailure'
       ]),
       {
         targetField: '',
-        value: ''
+        value: '',
+        ignoreFailure: false
       }
     );
   }
@@ -34,7 +36,8 @@ already exists, its value will be replaced with the provided one.`
       processorId: this.processorId,
       typeId: this.typeId,
       targetField: this.targetField || '',
-      value: this.value || ''
+      value: this.value || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

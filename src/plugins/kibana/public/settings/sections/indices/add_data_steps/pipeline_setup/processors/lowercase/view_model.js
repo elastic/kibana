@@ -13,10 +13,12 @@ export class Lowercase extends Processor {
     _.defaults(
       this,
       _.pick(model, [
-        'sourceField'
+        'sourceField',
+        'ignoreFailure'
       ]),
       {
-        sourceField: ''
+        sourceField: '',
+        ignoreFailure: false
       }
     );
   }
@@ -30,7 +32,8 @@ export class Lowercase extends Processor {
     return {
       processorId: this.processorId,
       typeId: this.typeId,
-      sourceField: this.sourceField || ''
+      sourceField: this.sourceField || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

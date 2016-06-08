@@ -33,6 +33,7 @@ app.directive('processorUiRemove', function () {
         refreshFieldData();
         processorUiChanged();
       });
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

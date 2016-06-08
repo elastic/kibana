@@ -53,6 +53,7 @@ app.directive('processorUiDate', function () {
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watch('processor.timezone', processorUiChanged);
       $scope.$watch('processor.locale', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

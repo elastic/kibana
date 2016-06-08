@@ -38,6 +38,7 @@ app.directive('processorUiConvert', function () {
 
       $scope.$watch('processor.type', processorUiChanged);
       $scope.$watch('processor.targetField', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

@@ -15,11 +15,13 @@ separator character between each element. `
       this,
       _.pick(model, [
         'sourceField',
-        'separator'
+        'separator',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
-        separator: ''
+        separator: '',
+        ignoreFailure: false
       }
     );
   }
@@ -35,7 +37,8 @@ separator character between each element. `
       processorId: this.processorId,
       typeId: this.typeId,
       sourceField: this.sourceField || '',
-      separator: this.separator || ''
+      separator: this.separator || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

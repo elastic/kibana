@@ -18,7 +18,8 @@ export class Date extends Processor {
         'formats',
         'timezone',
         'locale',
-        'customFormat'
+        'customFormat',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
@@ -26,7 +27,8 @@ export class Date extends Processor {
         formats: [],
         timezone: 'Etc/UTC',
         locale: 'ENGLISH',
-        customFormat: ''
+        customFormat: '',
+        ignoreFailure: false
       }
     );
   }
@@ -46,7 +48,8 @@ export class Date extends Processor {
       formats: this.formats || [],
       timezone: this.timezone || '',
       locale: this.locale || '',
-      customFormat: this.customFormat || ''
+      customFormat: this.customFormat || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

@@ -36,6 +36,7 @@ app.directive('processorUiSplit', function () {
       });
 
       $scope.$watch('processor.separator', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

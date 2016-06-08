@@ -17,13 +17,15 @@ based on data from the Maxmind database.`
         'sourceField',
         'targetField',
         'databaseFile',
-        'databaseFields'
+        'databaseFields',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
         targetField: '',
         databaseFile: '',
-        databaseFields: []
+        databaseFields: [],
+        ignoreFailure: false
       }
     );
   }
@@ -41,7 +43,8 @@ based on data from the Maxmind database.`
       sourceField: this.sourceField || '',
       targetField: this.targetField || '',
       databaseFile: this.databaseFile || '',
-      databaseFields: this.databaseFields || []
+      databaseFields: this.databaseFields || [],
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

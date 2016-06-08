@@ -17,12 +17,14 @@ converted.`
       _.pick(model, [
         'sourceField',
         'targetField',
-        'type'
+        'type',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
         targetField: '',
-        type: 'auto'
+        type: 'auto',
+        ignoreFailure: false
       }
     );
   }
@@ -40,7 +42,8 @@ converted.`
       typeId: this.typeId,
       sourceField: this.sourceField || '',
       targetField: this.targetField || '',
-      type: this.type || 'auto'
+      type: this.type || 'auto',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

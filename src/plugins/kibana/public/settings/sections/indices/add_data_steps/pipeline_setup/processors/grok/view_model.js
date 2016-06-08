@@ -18,11 +18,13 @@ expression that supports aliased expressions that can be reused.`
       this,
       _.pick(model, [
         'sourceField',
-        'pattern'
+        'pattern',
+        'ignoreFailure'
       ]),
       {
         sourceField: '',
-        pattern: ''
+        pattern: '',
+        ignoreFailure: false
       }
     );
   }
@@ -42,7 +44,8 @@ expression that supports aliased expressions that can be reused.`
       processorId: this.processorId,
       typeId: this.typeId,
       sourceField: this.sourceField || '',
-      pattern: this.pattern || ''
+      pattern: this.pattern || '',
+      ignoreFailure: this.ignoreFailure
     };
   }
 };

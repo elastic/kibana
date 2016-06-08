@@ -18,6 +18,7 @@ app.directive('processorUiSet', function () {
 
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watch('processor.value', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

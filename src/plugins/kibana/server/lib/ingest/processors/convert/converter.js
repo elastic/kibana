@@ -14,7 +14,8 @@ export default {
       convert: {
         tag: processorApiDocument.processor_id,
         field: processorApiDocument.source_field,
-        type: types[processorApiDocument.type]
+        type: types[processorApiDocument.type],
+        ignore_failure: processorApiDocument.ignore_failure
       }
     };
     if (!_.isEmpty(processorApiDocument.target_field)) {
@@ -37,7 +38,8 @@ export default {
       processor_id: processorEsDocument.tag,
       source_field: processorEsDocument.field,
       target_field: processorEsDocument.target_field,
-      type: types[processorEsDocument.type]
+      type: types[processorEsDocument.type],
+      ignore_failure: processorEsDocument.ignore_failure
     };
   }
 };

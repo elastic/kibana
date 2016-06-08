@@ -34,6 +34,7 @@ app.directive('processorUiUppercase', function () {
         refreshFieldData();
         processorUiChanged();
       });
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

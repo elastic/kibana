@@ -35,6 +35,7 @@ app.directive('processorUiRename', function () {
       });
 
       $scope.$watch('processor.targetField', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

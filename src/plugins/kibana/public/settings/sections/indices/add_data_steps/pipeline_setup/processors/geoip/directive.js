@@ -56,6 +56,7 @@ app.directive('processorUiGeoip', function () {
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watch('processor.databaseFile', processorUiChanged);
       $scope.$watchCollection('processor.databaseFields', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

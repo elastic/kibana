@@ -36,6 +36,7 @@ app.directive('processorUiGsub', function () {
 
       $scope.$watch('processor.pattern', processorUiChanged);
       $scope.$watch('processor.replacement', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

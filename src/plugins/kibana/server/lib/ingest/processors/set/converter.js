@@ -4,7 +4,8 @@ export default {
       set: {
         tag: processorApiDocument.processor_id,
         field: processorApiDocument.target_field,
-        value: processorApiDocument.value
+        value: processorApiDocument.value,
+        ignore_failure: processorApiDocument.ignore_failure
       }
     };
   },
@@ -13,7 +14,8 @@ export default {
       typeId: 'set',
       processor_id: processorEsDocument.tag,
       target_field: processorEsDocument.field,
-      value: processorEsDocument.value
+      value: processorEsDocument.value,
+      ignore_failure: processorEsDocument.ignore_failure
     };
   }
 };

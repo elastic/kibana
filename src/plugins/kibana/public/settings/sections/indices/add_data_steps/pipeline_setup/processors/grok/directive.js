@@ -35,6 +35,7 @@ app.directive('processorUiGrok', function () {
       });
 
       $scope.$watch('processor.pattern', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });
