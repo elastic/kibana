@@ -4,7 +4,8 @@ export default {
       append: {
         tag: processorApiDocument.processor_id,
         field: processorApiDocument.target_field,
-        value: processorApiDocument.values
+        value: processorApiDocument.values,
+        ignore_failure: processorApiDocument.ignore_failure
       }
     };
   },
@@ -13,7 +14,8 @@ export default {
       typeId: 'append',
       processor_id: processorEsDocument.tag,
       target_field: processorEsDocument.field,
-      values: processorEsDocument.value
+      values: processorEsDocument.value,
+      ignore_failure: processorEsDocument.ignore_failure
     };
   }
 };

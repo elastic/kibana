@@ -33,6 +33,7 @@ app.directive('processorUiAppend', function () {
       $scope.$watch('values', updateValues);
       $scope.$watch('processor.targetField', processorUiChanged);
       $scope.$watchCollection('processor.values', processorUiChanged);
+      $scope.$watch('processor.ignoreFailure', processorUiChanged);
     }
   };
 });

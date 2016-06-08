@@ -17,11 +17,13 @@ containing the provided values if the field doesn’t exist.`
       this,
       _.pick(model, [
         'targetField',
-        'values'
+        'values',
+        'ignoreFailure'
       ]),
       {
         targetField: '',
-        values: []
+        values: [],
+        ignoreFailure: false
       }
     );
   }
@@ -36,7 +38,8 @@ containing the provided values if the field doesn’t exist.`
       processorId: this.processorId,
       typeId: this.typeId,
       targetField: this.targetField || '',
-      values: this.values || []
+      values: this.values || [],
+      ignoreFailure: this.ignoreFailure
     };
   }
 };
