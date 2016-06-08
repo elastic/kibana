@@ -8,6 +8,7 @@ import './pipeline_output';
 import './source_data';
 import './processor_ui_container';
 import './processor_select';
+import './ignore_failure_select';
 import '../processors';
 import template from '../views/pipeline_setup.html';
 
