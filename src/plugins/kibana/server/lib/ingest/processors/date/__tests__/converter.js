@@ -21,7 +21,8 @@ describe('ingest', () => {
               target_field: 'foo_target_field',
               formats: [ 'format1', 'format2' ],
               timezone: 'foo_timezone',
-              locale: 'foo_locale'
+              locale: 'foo_locale',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
@@ -31,7 +32,8 @@ describe('ingest', () => {
                 target_field: 'foo_target_field',
                 formats: [ 'format1', 'format2' ],
                 timezone: 'foo_timezone',
-                locale: 'foo_locale'
+                locale: 'foo_locale',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -71,7 +73,8 @@ describe('ingest', () => {
               target_field: 'foo_target_field',
               formats: [ 'iso8601', 'unix', 'unix_ms', 'tai64n' ],
               timezone: 'foo_timezone',
-              locale: 'foo_locale'
+              locale: 'foo_locale',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
@@ -83,6 +86,7 @@ describe('ingest', () => {
               custom_format: '',
               timezone: 'foo_timezone',
               locale: 'foo_locale',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

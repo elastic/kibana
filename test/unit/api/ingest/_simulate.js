@@ -9,7 +9,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'set',
       target_field: 'foo',
-      value: 'bar'
+      value: 'bar',
+      ignore_failure: false
     }],
     input: {}
   };
@@ -60,20 +61,23 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'set',
               target_field: 'foo',
-              value: 'bar'
+              value: 'bar',
+              ignore_failure: false
             },
             {
               processor_id: 'processor2',
               type_id: 'gsub',
               source_field: 'foo',
               pattern: '[',
-              replacement: '<'
+              replacement: '<',
+              ignore_failure: false
             },
             {
               processor_id: 'processor3',
               type_id: 'set',
               target_field: 'bar',
-              value: 'baz'
+              value: 'baz',
+              ignore_failure: false
             }
           ]
         };
@@ -108,20 +112,23 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'set',
               target_field: 'foo',
-              value: 'bar'
+              value: 'bar',
+              ignore_failure: false
             },
             {
               processor_id: 'processor2',
               type_id: 'gsub',
               source_field: '', //invalid source field
               pattern: '\\[',
-              replacement: '<'
+              replacement: '<',
+              ignore_failure: false
             },
             {
               processor_id: 'processor3',
               type_id: 'set',
               target_field: 'bar',
-              value: 'baz'
+              value: 'baz',
+              ignore_failure: false
             }
           ]
         };

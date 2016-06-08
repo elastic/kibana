@@ -17,13 +17,15 @@ describe('ingest', () => {
           beforeEach(function () {
             source = {
               processor_id: 'foo_processor_id',
-              source_field: 'foo_source_field'
+              source_field: 'foo_source_field',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               uppercase: {
                 tag: 'foo_processor_id',
-                field: 'foo_source_field'
+                field: 'foo_source_field',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -50,13 +52,15 @@ describe('ingest', () => {
           beforeEach(function () {
             source = {
               tag: 'foo_tag',
-              field: 'foo_field'
+              field: 'foo_field',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               typeId: 'uppercase',
               processor_id: 'foo_tag',
-              source_field: 'foo_field'
+              source_field: 'foo_field',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

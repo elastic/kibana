@@ -19,7 +19,8 @@ describe('ingest', () => {
               processor_id: 'foo_processor_id',
               source_field: 'foo_source_field',
               pattern: 'foo_pattern',
-              replacement: 'foo_replacement'
+              replacement: 'foo_replacement',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
@@ -27,7 +28,8 @@ describe('ingest', () => {
                 tag: 'foo_processor_id',
                 field: 'foo_source_field',
                 pattern: 'foo_pattern',
-                replacement: 'foo_replacement'
+                replacement: 'foo_replacement',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -56,7 +58,8 @@ describe('ingest', () => {
               tag: 'foo_tag',
               field: 'foo_field',
               pattern: 'foo_pattern',
-              replacement: 'foo_replacement'
+              replacement: 'foo_replacement',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
@@ -64,7 +67,8 @@ describe('ingest', () => {
               processor_id: 'foo_tag',
               source_field: 'foo_field',
               pattern: 'foo_pattern',
-              replacement: 'foo_replacement'
+              replacement: 'foo_replacement',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

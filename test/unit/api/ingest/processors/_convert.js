@@ -9,7 +9,8 @@ define(function (require) {
       type_id: 'convert',
       source_field: 'foo',
       target_field: 'foo',
-      type: 'auto'
+      type: 'auto',
+      ignore_failure: false
     }],
     input: { foo: '1234' }
   };
@@ -28,7 +29,8 @@ define(function (require) {
               type_id: 'convert',
               value: 'auto',
               source_field: 42,
-              target_field: 'foo'
+              target_field: 'foo',
+              ignore_failure: false
             }]
           })
           .expect(400)
@@ -58,7 +60,8 @@ define(function (require) {
             typeId: 'convert',
             sourceField: 'foo',
             targetField: 'foo',
-            type: 'string'
+            type: 'string',
+            ignore_failure: false
           }],
           input: {}
         })

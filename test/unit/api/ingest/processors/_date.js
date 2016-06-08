@@ -13,7 +13,8 @@ define(function (require) {
       formats: ['Custom'],
       timezone: 'Etc/UTC',
       locale: 'ENGLISH',
-      custom_format: 'MM/dd/yyyy'
+      custom_format: 'MM/dd/yyyy',
+      ignore_failure: false
     }],
     input: { dob: '07/05/1979' }
   };
@@ -35,7 +36,8 @@ define(function (require) {
               formats: 'Custom',
               timezone: 'Etc/UTC',
               locale: 'ENGLISH',
-              custom_format: 'MM/dd/yyyy'
+              custom_format: 'MM/dd/yyyy',
+              ignore_failure: false
             }]
           })
           .expect(400)
@@ -77,7 +79,8 @@ define(function (require) {
             formats: ['Custom'],
             timezone: 'Etc/UTC',
             locale: 'ENGLISH',
-            customFormat: 'MM/dd/yyyy'
+            customFormat: 'MM/dd/yyyy',
+            ignore_failure: false
           }],
           input: { dob: '07/05/1979' }
         })

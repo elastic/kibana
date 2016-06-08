@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'rename',
       source_field: 'foo',
-      target_field: 'bar'
+      target_field: 'bar',
+      ignore_failure: false
     }],
     input: { foo: 'value1' }
   };
@@ -25,7 +26,8 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'rename',
               source_field: 1234,
-              target_field: 'bar'
+              target_field: 'bar',
+              ignore_failure: false
             }],
             input: { foo: 'value1' }
           })
@@ -55,7 +57,8 @@ define(function (require) {
             processorId: 'processor1',
             typeId: 'rename',
             sourceField: 'foo',
-            targetField: 'bar'
+            targetField: 'bar',
+            ignore_failure: false
           }],
           input: { foo: 'value1' }
         })

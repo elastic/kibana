@@ -9,7 +9,8 @@ define(function (require) {
       type_id: 'gsub',
       source_field: 'foo',
       pattern: 'bar',
-      replacement: 'baz'
+      replacement: 'baz',
+      ignore_failure: false
     }],
     input: { foo: 'bar' }
   };
@@ -28,7 +29,8 @@ define(function (require) {
               type_id: 'gsub',
               source_field: 42,
               pattern: 'bar',
-              replacement: 'baz'
+              replacement: 'baz',
+              ignore_failure: false
             }]
           })
           .expect(400)
@@ -58,7 +60,8 @@ define(function (require) {
             typeId: 'gsub',
             sourceField: 'foo',
             pattern: 'bar',
-            replacement: 'baz'
+            replacement: 'baz',
+            ignore_failure: false
           }],
           input: { foo: 'bar' }
         })

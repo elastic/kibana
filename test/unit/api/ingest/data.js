@@ -28,7 +28,8 @@ module.exports = function createTestData() {
       processor_id: 'processor1',
       type_id: 'set',
       target_field: 'foo',
-      value: 'bar'
+      value: 'bar',
+      ignore_failure: false
     }]
   };
 };

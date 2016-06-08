@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'set',
       target_field: 'foo',
-      value: 'bar'
+      value: 'bar',
+      ignore_failure: false
     }],
     input: {}
   };
@@ -26,7 +27,8 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'set',
               value: 'bar',
-              target_field: 42
+              target_field: 42,
+              ignore_failure: false
             }]
           })
           .expect(400)
@@ -55,7 +57,8 @@ define(function (require) {
             processorId: 'processor1',
             typeId: 'set',
             targetField: 'foo',
-            value: 'bar'
+            value: 'bar',
+            ignore_failure: false
           }],
           input: {}
         })

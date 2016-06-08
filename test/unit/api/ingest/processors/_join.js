@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'join',
       source_field: 'foo',
-      separator: ' '
+      separator: ' ',
+      ignore_failure: false
     }],
     input: { foo: ['value1', 'value2'] }
   };
@@ -25,7 +26,8 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'join',
               source_field: 1234,
-              separator: ' '
+              separator: ' ',
+              ignore_failure: false
             }],
             input: { foo: ['value1', 'value2'] }
           })
@@ -55,7 +57,8 @@ define(function (require) {
             processorId: 'processor1',
             typeId: 'join',
             sourceField: 'foo',
-            separator: ' '
+            separator: ' ',
+            ignore_failure: false
           }],
           input: { foo: ['value1', 'value2'] }
         })

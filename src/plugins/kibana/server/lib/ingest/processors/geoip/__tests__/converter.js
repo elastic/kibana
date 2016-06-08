@@ -17,13 +17,15 @@ describe('ingest', () => {
           beforeEach(function () {
             source = {
               processor_id: 'foo_processor_id',
-              source_field: 'foo_source_field'
+              source_field: 'foo_source_field',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               geoip: {
                 tag: 'foo_processor_id',
-                field: 'foo_source_field'
+                field: 'foo_source_field',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -77,7 +79,8 @@ describe('ingest', () => {
               field: 'foo_field',
               target_field: 'foo_target_field',
               database_file: 'foo_database_file',
-              properties: 'foo_properties'
+              properties: 'foo_properties',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
@@ -86,7 +89,8 @@ describe('ingest', () => {
               source_field: 'foo_field',
               target_field: 'foo_target_field',
               database_file: 'foo_database_file',
-              database_fields: 'foo_properties'
+              database_fields: 'foo_properties',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

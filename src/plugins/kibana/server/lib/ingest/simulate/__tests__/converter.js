@@ -10,7 +10,7 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
 
       function buildSamplePipeline(input) {
         return {
-          processors: [ { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo' } ],
+          processors: [ { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo', ignore_failure: false } ],
           input: input
         };
       }
@@ -22,7 +22,8 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
               set: {
                 field: 'bar',
                 tag: 'processor1',
-                value: 'foo'
+                value: 'foo',
+                ignore_failure: false
               }
             }]
           },
@@ -51,8 +52,8 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
     it('handles multiple processors', function () {
       const pipeline = {
         processors: [
-          { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo' },
-          { processor_id: 'processor2', type_id: 'set', target_field: 'bar', value: 'foo' },
+          { processor_id: 'processor1', type_id: 'set', target_field: 'bar', value: 'foo', ignore_failure: false },
+          { processor_id: 'processor2', type_id: 'set', target_field: 'bar', value: 'foo', ignore_failure: false },
         ],
         input: {}
       };
@@ -63,14 +64,16 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
               set: {
                 field: 'bar',
                 tag: 'processor1',
-                value: 'foo'
+                value: 'foo',
+                ignore_failure: false
               }
             },
             {
               set: {
                 field: 'bar',
                 tag: 'processor2',
-                value: 'foo'
+                value: 'foo',
+                ignore_failure: false
               }
             }
           ]

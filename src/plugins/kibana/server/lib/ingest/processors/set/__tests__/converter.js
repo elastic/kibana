@@ -18,14 +18,16 @@ describe('ingest', () => {
             source = {
               processor_id: 'foo_processor_id',
               target_field: 'foo_target_field',
-              value: 'foo_value'
+              value: 'foo_value',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               set: {
                 tag: 'foo_processor_id',
                 field: 'foo_target_field',
-                value: 'foo_value'
+                value: 'foo_value',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -53,14 +55,16 @@ describe('ingest', () => {
             source = {
               tag: 'foo_tag',
               field: 'foo_field',
-              value: 'foo_value'
+              value: 'foo_value',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               typeId: 'set',
               processor_id: 'foo_tag',
               target_field: 'foo_field',
-              value: 'foo_value'
+              value: 'foo_value',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

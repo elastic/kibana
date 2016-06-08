@@ -18,14 +18,16 @@ describe('ingest', () => {
             source = {
               processor_id: 'foo_processor_id',
               source_field: 'foo_source_field',
-              separator: 'foo_separator'
+              separator: 'foo_separator',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               split: {
                 tag: 'foo_processor_id',
                 field: 'foo_source_field',
-                separator: 'foo_separator'
+                separator: 'foo_separator',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -53,14 +55,16 @@ describe('ingest', () => {
             source = {
               tag: 'foo_tag',
               field: 'foo_field',
-              separator: 'foo_separator'
+              separator: 'foo_separator',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               typeId: 'split',
               processor_id: 'foo_tag',
               source_field: 'foo_field',
-              separator: 'foo_separator'
+              separator: 'foo_separator',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

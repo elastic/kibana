@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'append',
       target_field: 'foo',
-      values: [ 'value1', 'value2' ]
+      values: [ 'value1', 'value2' ],
+      ignore_failure: false
     }],
     input: {}
   };
@@ -26,7 +27,8 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'append',
               values: [ 'value1', 'value2' ],
-              target_field: 42
+              target_field: 42,
+              ignore_failure: false
             }]
           })
           .expect(400)
@@ -55,7 +57,8 @@ define(function (require) {
             processorId: 'processor1',
             typeId: 'append',
             targetField: 'foo',
-            value: [ 'value1', 'value2' ]
+            value: [ 'value1', 'value2' ],
+            ignore_failure: false
           }],
           input: {}
         })

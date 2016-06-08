@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'geoip',
       source_field: 'ip',
-      target_field: 'geoip'
+      target_field: 'geoip',
+      ignore_failure: false
     }],
     input: { ip: '74.125.21.103' }
   };
@@ -30,7 +31,8 @@ define(function (require) {
   //             processor_id: 'processor1',
   //             type_id: 'geoip',
   //             source_field: 42,
-  //             target_field: 'geoip'
+  //             target_field: 'geoip',
+  //             ignore_failure: false
   //           }]
   //         })
   //         .expect(400)
@@ -59,7 +61,8 @@ define(function (require) {
   //           processorId: 'processor1',
   //           typeId: 'geoip',
   //           sourceField: 'ip',
-  //           targetField: 'geoip'
+  //           targetField: 'geoip',
+  //           ignore_failure: false
   //         }],
   //         input: { ip: '74.125.21.103' }
   //       })

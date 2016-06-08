@@ -18,14 +18,16 @@ describe('ingest', () => {
             source = {
               processor_id: 'foo_processor_id',
               source_field: 'foo_source_field',
-              target_field: 'foo_target_field'
+              target_field: 'foo_target_field',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               rename: {
                 tag: 'foo_processor_id',
                 field: 'foo_source_field',
-                target_field: 'foo_target_field'
+                target_field: 'foo_target_field',
+                ignore_failure: 'foo_ignore_failure'
               }
             };
           });
@@ -53,14 +55,16 @@ describe('ingest', () => {
             source = {
               tag: 'foo_tag',
               field: 'foo_field',
-              target_field: 'foo_target_field'
+              target_field: 'foo_target_field',
+              ignore_failure: 'foo_ignore_failure'
             };
 
             expected = {
               typeId: 'rename',
               processor_id: 'foo_tag',
               source_field: 'foo_field',
-              target_field: 'foo_target_field'
+              target_field: 'foo_target_field',
+              ignore_failure: 'foo_ignore_failure'
             };
           });
 

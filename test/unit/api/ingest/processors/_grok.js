@@ -8,7 +8,8 @@ define(function (require) {
       processor_id: 'processor1',
       type_id: 'grok',
       source_field: 'foo',
-      pattern: '%{GREEDYDATA:bar} - %{GREEDYDATA:baz}'
+      pattern: '%{GREEDYDATA:bar} - %{GREEDYDATA:baz}',
+      ignore_failure: false
     }],
     input: { foo: 'value1 - value2' }
   };
@@ -26,7 +27,8 @@ define(function (require) {
               processor_id: 'processor1',
               type_id: 'grok',
               source_field: 123,
-              pattern: '%{GREEDYDATA:bar} - %{GREEDYDATA:baz}'
+              pattern: '%{GREEDYDATA:bar} - %{GREEDYDATA:baz}',
+              ignore_failure: false
             }],
           })
           .expect(400)
@@ -60,7 +62,8 @@ define(function (require) {
             processorId: 'processor1',
             typeId: 'grok',
             sourceField: 'foo',
-            pattern: '%{GREEDYDATA:bar} - %{GREEDYDATA:baz}'
+            pattern: '%{GREEDYDATA:bar} - %{GREEDYDATA:baz}',
+            ignore_failure: false
           }],
           input: { foo: 'value1 - value2' }
         })
