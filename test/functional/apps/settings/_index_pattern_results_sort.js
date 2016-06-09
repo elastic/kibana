@@ -51,6 +51,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
           return col.selector();
         })
         .then(function (rowText) {
+          common.saveScreenshot(`Settings-indices-column-${col.heading}-sort-ascending.png`);
           expect(rowText).to.be(col.first);
         });
       });
@@ -64,6 +65,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
           return col.selector();
         })
         .then(function (rowText) {
+          common.saveScreenshot(`Settings-indices-column-${col.heading}-sort-descending.png`);
           expect(rowText).to.be(col.last);
         });
       });
@@ -115,6 +117,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
             return settingsPage.getPageFieldCount();
           })
           .then(function (pageCount) {
+            common.saveScreenshot('Settings-indices-paged');
             var expectedSize = (val < 4) ? expectedDefaultPageSize : expectedLastPageCount;
             expect(pageCount.length).to.be(expectedSize);
           });

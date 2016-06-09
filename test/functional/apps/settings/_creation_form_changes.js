@@ -30,6 +30,7 @@ bdd.describe('user input reactions', function () {
       return settingsPage.getTimeBasedIndexPatternCheckbox(waitTime);
     })
     .then(function () {
+      common.saveScreenshot('Settings-indices-hide-time-based-index-pattern');
       // we expect the promise above to fail
       var handler = common.handleError(self);
       var msg = 'Found time based index pattern checkbox';
@@ -47,6 +48,7 @@ bdd.describe('user input reactions', function () {
     .then(function () {
       return settingsPage.getCreateButton().isEnabled()
       .then(function (enabled) {
+        common.saveScreenshot('Settings-indices-enable-creation');
         expect(enabled).to.be.ok();
       });
     });
