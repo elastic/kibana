@@ -42,7 +42,7 @@ retrying.
 error messages.
 `logging.verbose`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage 
 information and all requests.
-`ops.interval`:: *Default: 10000* Set the interval in milliseconds to sample system and process performance metrics. 
+`ops.interval`:: *Default: 5000* Set the interval in milliseconds to sample system and process performance metrics.
 The minimum value is 100.
 `status.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.

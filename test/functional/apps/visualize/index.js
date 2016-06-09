@@ -1,4 +1,12 @@
-import { bdd, remote, common, defaultTimeout, scenarioManager } from '../../../support';
+import {
+  bdd,
+  remote,
+  common,
+  defaultTimeout,
+  scenarioManager,
+  esClient,
+  elasticDump
+ } from '../../../support';
 
 (function () {
   bdd.describe('visualize app', function () {
@@ -7,14 +15,20 @@ import { bdd, remote, common, defaultTimeout, scenarioManager } from '../../../s
     bdd.before(function () {
       var self = this;
       remote.setWindowSize(1200,800);
-      // load a set of makelogs data
-      common.debug('loadIfEmpty logstashFunctional ' + self.timeout);
-      return scenarioManager.loadIfEmpty('logstashFunctional');
-    });
 
-
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
+      common.debug('Starting visualize before method');
+      var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+      // delete .kibana index and update configDoc
+      return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
+      .then(function loadkibanaIndexPattern() {
+        common.debug('load kibana index with default index pattern');
+        return elasticDump.elasticLoad('visualize','.kibana');
+      })
+      // wait for the logstash data load to finish if it hasn't already
+      .then(function () {
+        return logstash;
+      })
+      .catch(common.handleError(this));
     });
 
     require('./_chart_types');

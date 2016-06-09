@@ -23,7 +23,7 @@ export default function (Private) {
     this.getSourceFiltering = sinon.spy();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
-    this.routes = IndexPattern.prototype.routes;
+    this.routes = IndexPattern.routes;
 
     this.toIndexList = _.constant(Promise.resolve([pattern]));
     this.toDetailedIndexList = _.constant(Promise.resolve([

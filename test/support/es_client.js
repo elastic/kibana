@@ -42,16 +42,12 @@ export default (function () {
       });
     },
 
-
-    /**
-    * Add fields to the config doc (like setting timezone and defaultIndex)
-    * @return {Promise} A promise that is resolved when elasticsearch has a response
+    /*
+    ** Gets configId which is needed when we're going to update the config doc.
+    ** Also used after deleting .kibana index to know Kibana has recreated it.
     */
-    updateConfigDoc: function (docMap) {
-      // first we need to get the config doc's id so we can use it in our _update call
-      var self = this;
+    getConfigId: function () {
       var configId;
-      var docMapString = JSON.stringify(docMap);
 
       return this.client.search({
         index: '.kibana',
@@ -70,11 +66,25 @@ export default (function () {
         } else {
           configId = response.hits.hits[0]._id;
           common.debug('config._id =' + configId);
+          return configId;
         }
-      })
+      });
+    },
+
+
+    /**
+    * Add fields to the config doc (like setting timezone and defaultIndex)
+    * @return {Promise} A promise that is resolved when elasticsearch has a response
+    */
+    updateConfigDoc: function (docMap) {
+      // first we need to get the config doc's id so we can use it in our _update call
+      var self = this;
+      var configId;
+      var docMapString = JSON.stringify(docMap);
+
+      return this.getConfigId()
       // now that we have the id, we can update
-      // return scenarioManager.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
-      .then(function (response) {
+      .then(function (configId) {
         common.debug('updating config with ' + docMapString);
         return self.client.update({
           index: '.kibana',
@@ -89,7 +99,35 @@ export default (function () {
       .catch(function (err) {
         throw err;
       });
+    },
+
+    /**
+    * Wrap the common 'delete index', 'updateConfigDoc' into one.
+    * [docMap] is optional.
+    * @return {Promise} A promise that is resolved when elasticsearch has a response
+    */
+    deleteAndUpdateConfigDoc: function (docMap) {
+      var self = this;
+      var configId;
+
+      return this.delete('.kibana')
+      .then(function () {
+        if (!docMap) {
+          return common.try(function () {
+            return self.getConfigId();
+          });
+        } else {
+          var docMapString = JSON.stringify(docMap);
+          return common.try(function () {
+            return self.updateConfigDoc(docMap);
+          });
+        }
+      })
+      .catch(function (err) {
+        throw err;
+      });
     }
+
   };
 
   return EsClient;
