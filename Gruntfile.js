@@ -67,7 +67,7 @@ module.exports = function (grunt) {
 
   grunt.config.merge(config);
 
-  config.userScriptsDir = __dirname + '/build/userScripts';
+  config.packageScriptsDir = __dirname + '/tasks/build/package_scripts';
   // ensure that these run first, other configs need them
   config.services = require('./tasks/config/services')(grunt);
   config.platforms = require('./tasks/config/platforms')(grunt);
