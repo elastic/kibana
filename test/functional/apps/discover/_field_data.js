@@ -85,7 +85,7 @@ import {
         });
 
         bdd.it('doc view should show Time and _source columns', function () {
-          var expectedHeader = 'Time _source';
+          var expectedHeader = '@timestamp _source';
           return discoverPage.getDocHeader()
           .then(function (header) {
             expect(header).to.be(expectedHeader);

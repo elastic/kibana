@@ -132,10 +132,14 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   $scope.uiState = $state.makeStateful('uiState');
 
   function getStateDefaults() {
+    var defaultColumns = config.get('defaultColumns');
+    if ($scope.indexPattern && $scope.indexPattern.timeFieldName) {
+      defaultColumns.unshift($scope.indexPattern.timeFieldName);
+    }
     return {
       query: $scope.searchSource.get('query') || '',
       sort: getSort.array(savedSearch.sort, $scope.indexPattern),
-      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns'),
+      columns: savedSearch.columns.length > 0 ? savedSearch.columns : defaultColumns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter'))

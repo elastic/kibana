@@ -46,32 +46,26 @@ describe('Doc Table', function () {
   //
   let columnTests = function (elemType, parentElem) {
 
-    it('should create a time column if the timefield is defined', function (done) {
-      let childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(2);
-      done();
-    });
-
     it('should be able to add and remove columns', function (done) {
       let childElems;
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('bytes');
+      expect(childElems.length).to.be(2);
+      expect($(childElems[1]).text()).to.contain('bytes');
 
       $parentScope.columns = ['bytes', 'request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(4);
-      expect($(childElems[3]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(3);
+      expect($(childElems[2]).text()).to.contain('request_body');
 
       $parentScope.columns = ['request_body'];
       parentElem.scope().$digest();
       childElems = parentElem.find(elemType);
-      expect(childElems.length).to.be(3);
-      expect($(childElems[2]).text()).to.contain('request_body');
+      expect(childElems.length).to.be(2);
+      expect($(childElems[1]).text()).to.contain('request_body');
       done();
     });
 
@@ -341,9 +335,8 @@ describe('Doc Table', function () {
       $root.$apply();
 
       $before = $row.find('td');
-      expect($before).to.have.length(3);
+      expect($before).to.have.length(2);
       expect($before.eq(0).text().trim()).to.be('');
-      expect($before.eq(1).text().trim()).to.match(/^time_formatted/);
     }));
 
     afterEach(function () {
@@ -355,11 +348,10 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(4);
+      expect($after).to.have.length(3);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
-      expect($after[2]).to.be($before[2]);
-      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
+      expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
     });
 
     it('handles two new columns at once', function () {
@@ -368,12 +360,11 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(5);
+      expect($after).to.have.length(4);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
-      expect($after[2]).to.be($before[2]);
-      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
-      expect($after.eq(4).text().trim()).to.match(/^request_body_formatted/);
+      expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
+      expect($after.eq(3).text().trim()).to.match(/^request_body_formatted/);
     });
 
     it('handles three new columns in odd places', function () {
@@ -386,13 +377,12 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(6);
+      expect($after).to.have.length(5);
       expect($after[0]).to.be($before[0]);
-      expect($after[1]).to.be($before[1]);
-      expect($after.eq(2).text().trim()).to.match(/^@timestamp_formatted/);
-      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
-      expect($after[4]).to.be($before[2]);
-      expect($after.eq(5).text().trim()).to.match(/^request_body_formatted/);
+      expect($after.eq(1).text().trim()).to.match(/^@timestamp_formatted/);
+      expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
+      expect($after[3]).to.be($before[1]);
+      expect($after.eq(4).text().trim()).to.match(/^request_body_formatted/);
     });
 
 
@@ -401,9 +391,8 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(2);
+      expect($after).to.have.length(1);
       expect($after[0]).to.be($before[0]);
-      expect($after[1]).to.be($before[1]);
     });
 
     it('handles two removed columns', function () {
@@ -412,16 +401,15 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $mid = $row.find('td');
-      expect($mid).to.have.length(4);
+      expect($mid).to.have.length(3);
 
       $root.columns.pop();
       $root.columns.pop();
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(2);
+      expect($after).to.have.length(1);
       expect($after[0]).to.be($before[0]);
-      expect($after[1]).to.be($before[1]);
     });
 
     it('handles three removed random columns', function () {
@@ -430,7 +418,7 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $mid = $row.find('td');
-      expect($mid).to.have.length(5);
+      expect($mid).to.have.length(4);
 
       $root.columns[0] = false; // _source
       $root.columns[2] = false; // bytes
@@ -438,10 +426,9 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(3);
+      expect($after).to.have.length(2);
       expect($after[0]).to.be($before[0]);
-      expect($after[1]).to.be($before[1]);
-      expect($after.eq(2).text().trim()).to.match(/^@timestamp_formatted/);
+      expect($after.eq(1).text().trim()).to.match(/^@timestamp_formatted/);
     });
 
     it('handles two columns with the same content', function () {
@@ -452,9 +439,9 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(4);
+      expect($after).to.have.length(3);
+      expect($after.eq(1).text().trim()).to.match(/^bytes_formatted/);
       expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
-      expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
     });
 
     it('handles two columns swapping position', function () {
@@ -462,17 +449,16 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $mid = $row.find('td');
-      expect($mid).to.have.length(4);
+      expect($mid).to.have.length(3);
 
       $root.columns.reverse();
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(4);
+      expect($after).to.have.length(3);
       expect($after[0]).to.be($before[0]);
-      expect($after[1]).to.be($before[1]);
-      expect($after[2]).to.be($mid[3]);
-      expect($after[3]).to.be($mid[2]);
+      expect($after[1]).to.be($mid[2]);
+      expect($after[2]).to.be($mid[1]);
     });
 
     it('handles four columns all reversing position', function () {
@@ -480,19 +466,18 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $mid = $row.find('td');
-      expect($mid).to.have.length(6);
+      expect($mid).to.have.length(5);
 
       $root.columns.reverse();
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(6);
+      expect($after).to.have.length(5);
       expect($after[0]).to.be($before[0]);
-      expect($after[1]).to.be($before[1]);
-      expect($after[2]).to.be($mid[5]);
-      expect($after[3]).to.be($mid[4]);
-      expect($after[4]).to.be($mid[3]);
-      expect($after[5]).to.be($mid[2]);
+      expect($after[1]).to.be($mid[4]);
+      expect($after[2]).to.be($mid[3]);
+      expect($after[3]).to.be($mid[2]);
+      expect($after[4]).to.be($mid[1]);
     });
 
     it('handles multiple columns with the same name', function () {
@@ -500,13 +485,12 @@ describe('Doc Table', function () {
       $root.$apply();
 
       let $after = $row.find('td');
-      expect($after).to.have.length(6);
+      expect($after).to.have.length(5);
       expect($after[0]).to.be($before[0]);
       expect($after[1]).to.be($before[1]);
-      expect($after[2]).to.be($before[2]);
+      expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
       expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
       expect($after.eq(4).text().trim()).to.match(/^bytes_formatted/);
-      expect($after.eq(5).text().trim()).to.match(/^bytes_formatted/);
     });
   });
 });

@@ -105,7 +105,7 @@ describe('Url shortener', () => {
     });
 
     it('should shorten urls with a query string in the hash', (done) => {
-      const relativeUrl = "/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"; //eslint-disable-line max-len, quotes
+      const relativeUrl = "/app/kibana#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(%27@timestamp%27,_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"; //eslint-disable-line max-len, quotes
       $httpBackend.when('POST', `${basePath}/shorten`).respond((type, route, data) => {
         expect(JSON.parse(data).url).to.be(relativeUrl);
         return [200, shareId];

@@ -97,16 +97,9 @@ module.directive('kbnTableRow', function ($compile) {
           openRowHtml
         ];
 
-        if (indexPattern.timeFieldName) {
-          newHtmls.push(cellTemplate({
-            timefield: true,
-            formatted: _displayField(row, indexPattern.timeFieldName)
-          }));
-        }
-
         $scope.columns.forEach(function (column) {
           newHtmls.push(cellTemplate({
-            timefield: false,
+            timefield: (column === indexPattern.timeFieldName),
             sourcefield: (column === '_source'),
             formatted: _displayField(row, column, true)
           }));

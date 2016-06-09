@@ -59,8 +59,11 @@ uiModules.get('kibana')
       $scope.$watch('columns', function (columns) {
         if (columns.length !== 0) return;
 
-        let $state = getAppState();
+        if ($scope.indexPattern && $scope.indexPattern.timeFieldName) {
+          $scope.columns.push($scope.indexPattern.timeFieldName);
+        }
         $scope.columns.push('_source');
+        var $state = getAppState();
         if ($state) $state.replace();
       });
 
@@ -69,7 +72,12 @@ uiModules.get('kibana')
           _.pull($scope.columns, '_source');
         }
 
-        if ($scope.columns.length === 0) $scope.columns.push('_source');
+        if ($scope.columns.length === 0) {
+          if ($scope.indexPattern && $scope.indexPattern.timeFieldName) {
+            $scope.columns.push($scope.indexPattern.timeFieldName);
+          }
+          $scope.columns.push('_source');
+        }
       });
 
 
