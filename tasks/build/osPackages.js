@@ -6,7 +6,7 @@ module.exports = function (grunt) {
   const exec = require('../utils/exec');
   const targetDir = config.get('target');
   const version = config.get('pkg.version');
-  const userScriptsDir = config.get('userScriptsDir');
+  const packageScriptsDir = config.get('packageScriptsDir');
   const servicesByName = indexBy(config.get('services'), 'name');
 
   grunt.registerTask('_build:osPackages', function () {
@@ -22,15 +22,19 @@ module.exports = function (grunt) {
         '--package', targetDir,
         '-s', 'dir', // input type
         '--name', 'kibana',
-        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
+        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data',
         '--version', version,
         '--url', 'https://www.elastic.co',
         '--vendor', 'Elasticsearch,\ Inc.',
         '--maintainer', 'Kibana Team\ \<info@elastic.co\>',
         '--license', 'Apache\ 2.0',
-        '--after-install', resolve(userScriptsDir, 'installer.sh'),
-        '--after-remove', resolve(userScriptsDir, 'remover.sh'),
-        '--config-files', '/opt/kibana/config/kibana.yml'
+        '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
+        '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
+        '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
+        '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
+        '--config-files', '/opt/kibana/config/kibana.yml',
+        '--template-value', 'user=kibana',
+        '--template-value', 'group=kibana'
       ];
 
       const files = buildDir + '/=/opt/kibana';
