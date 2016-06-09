@@ -52,6 +52,8 @@ module.directive('kbnEditField', ['$parse', function ($parse) {
       };
       this.blurInput = function () { $inputEl.blur(); };
       this.toggleEditClass = function () { $element.toggleClass('editing', getModelVal() !== $inputEl.val()); };
+      const initialValue = $attrs.initialVal || getModelVal();
+      this.getInitialVal = function () { return initialValue; };
     },
     link: function ($scope, $element, attrs, kbnEditFieldCtrl) {
       // Add necessary classesto the markup
@@ -82,10 +84,9 @@ module.directive('kbnEditField', ['$parse', function ($parse) {
       });
 
       // Click on the undo button
-      const initialValue = attrs.initialVal || ctrl.model();
       $element.find('.fa-undo').click(() => {
-        safeSetModel(initialValue);
-        ctrl.input(initialValue);
+        safeSetModel(ctrl.getInitialVal());
+        ctrl.input(ctrl.getInitialVal());
         ctrl.toggleEditClass();
       });
 

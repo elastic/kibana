@@ -82,6 +82,18 @@ describe('kbnEditableField Directive', function () {
       expect(ctrl.model()).to.equal(newVal);
     });
 
+    it('set and get the model value with non nested values', function () {
+      const scopeObj = { val: 'foo', initial: 'first' };
+      const ret = renderEl('<div kbn-edit-field="val" initial-val"{{initial}}"></div>', scopeObj);
+      const ctrl = ret[1];
+      expect(ctrl.model()).to.equal(scopeObj.val);
+      expect(ctrl.model()).to.equal($rootScope.val);
+      const newVal = 'test value';
+      ctrl.model(newVal);
+      expect(ctrl.model()).to.equal($rootScope.val);
+      expect(ctrl.model()).to.equal(newVal);
+    });
+
     it('should add an editing class when the the input val is different from the model', function () {
       const ret = renderEl('<div kbn-edit-field="a.b.c.val" initial-val"{{a.b.c.initial}}"></div>');
       const ctrl = ret[1];
