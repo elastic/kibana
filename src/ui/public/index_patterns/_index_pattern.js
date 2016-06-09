@@ -194,7 +194,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     // Get the source filtering configuration for that index.
     getSourceFiltering() {
       return {
-        exclude: self.fieldFilters.map(filter => filter.value)
+        exclude: this.fieldFilters.map(filter => filter.value)
       };
     }
 
