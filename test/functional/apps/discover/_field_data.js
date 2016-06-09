@@ -49,6 +49,7 @@ bdd.describe('discover app', function describeIndexTests() {
         return common.try(function tryingForTime() {
           return discoverPage.getHitCount()
           .then(function compareData(hitCount) {
+            common.saveScreenshot('Discover-field-data');
             expect(hitCount).to.be(expectedHitCount);
           });
         });
@@ -63,7 +64,6 @@ bdd.describe('discover app', function describeIndexTests() {
         expect(marks.indexOf('php')).to.be(0);
       });
     });
-
 
     bdd.it('search _type:apache should show the correct hit count', function () {
       var expectedHitCount = '11,156';
@@ -222,6 +222,7 @@ bdd.describe('discover app', function describeIndexTests() {
         return common.try(function tryingForTime() {
           return discoverPage.getDocTableIndex(1)
           .then(function (rowData) {
+            common.saveScreenshot('Discover-sort-down');
             expect(rowData).to.be(ExpectedDoc);
           });
         });
@@ -237,6 +238,7 @@ bdd.describe('discover app', function describeIndexTests() {
         return headerPage.getToastMessage();
       })
       .then(function (toastMessage) {
+        common.saveScreenshot('Discover-syntax-error-toast');
         expect(toastMessage).to.be(expectedError);
       })
       .then(function () {

@@ -60,12 +60,9 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
   bdd.describe('pie chart', function indexPatternCreation() {
-    var testSubName = 'PieChart';
-    var vizName1 = 'Visualization ' + testSubName;
-
+    var vizName1 = 'Visualization PieChart';
 
     bdd.it('should save and load', function pageHeader() {
-      common.debug('Start of test' + testSubName + 'Visualization');
       var remote = this.remote;
 
       return visualizePage.saveVisualization(vizName1)
@@ -96,11 +93,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function (pieData) {
         var barHeightTolerance = 1;
         common.debug('pieData.length = ' + pieData.length);
+        common.saveScreenshot('Visualize-pie-chart');
         expect(pieData.length).to.be(expectedPieChartSliceCount);
-      })
-      .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
       });
     });
 
@@ -122,7 +116,5 @@ bdd.describe('visualize app', function describeIndexTests() {
         expect(data.trim().split('\n')).to.eql(expectedTableData);
       });
     });
-
-
   });
 });

@@ -14,11 +14,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   var toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
-
-    var testSubName = 'MetricChart';
-    common.debug('Start of test' + testSubName + 'Visualization');
-    var vizName1 = 'Visualization ' + testSubName;
-
+    var vizName1 = 'Visualization MetricChart';
     common.debug('navigateToApp visualize');
     return common.navigateToApp('visualize')
     .then(function () {
@@ -34,7 +30,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
   });
 
-
   bdd.describe('metric chart', function indexPatternCreation() {
 
     bdd.it('should show Count', function pageHeader() {
@@ -44,6 +39,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       return common.try(function tryingForTime() {
         return visualizePage.getMetric()
         .then(function (metricValue) {
+          common.saveScreenshot('Visualize-metric-chart');
           expect(expectedCount).to.eql(metricValue.split('\n'));
         });
       });
