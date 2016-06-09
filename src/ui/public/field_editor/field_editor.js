@@ -24,11 +24,9 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl, config) {
+    controller: function ($scope, Notifier, kbnUrl) {
       let self = this;
       let notify = new Notifier({ location: 'Field Editor' });
-
-      const metaFields = config.get('metaFields');
 
       self.scriptingInfo = scriptingInfo;
       self.scriptingWarning = scriptingWarning;
