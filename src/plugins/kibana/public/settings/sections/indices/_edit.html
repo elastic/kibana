@@ -32,7 +32,7 @@
       </div>
 
       <form role="form">
-        <input aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
+        <input ng-disabled="state.tab == 'fieldFilters'" aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
       </form>
 
       <br />

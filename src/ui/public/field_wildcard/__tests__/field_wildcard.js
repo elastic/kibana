@@ -1,8 +1,20 @@
 import expect from 'expect.js';
+import ngMock from 'ng_mock';
 
-import { makeRegEx, fieldWildcardFilter } from '../field_wildcard';
+import FieldWildcardProvider from '../../field_wildcard';
 
 describe('fieldWildcard', function () {
+  let fieldWildcardFilter;
+  let makeRegEx;
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (config, Private) {
+    config.set('metaFields', ['_id', '_type', '_source']);
+    const fieldWildcard = Private(FieldWildcardProvider);
+    fieldWildcardFilter = fieldWildcard.fieldWildcardFilter;
+    makeRegEx = fieldWildcard.makeRegEx;
+  }));
+
   describe('makeRegEx', function () {
     it('matches * in any position', function () {
       expect('aaaaaabbbbbbbcccccc').to.match(makeRegEx('*a*b*c*'));
@@ -36,6 +48,18 @@ describe('fieldWildcard', function () {
       ];
 
       expect(original.filter(filter)).to.eql(original);
+    });
+
+    it('does not filter metaFields', function () {
+      const filter = fieldWildcardFilter([ '_*' ]);
+
+      const original = [
+        '_id',
+        '_type',
+        '_typefake'
+      ];
+
+      expect(original.filter(filter)).to.eql(['_id', '_type']);
     });
 
     it('filters values that match the globs', function () {

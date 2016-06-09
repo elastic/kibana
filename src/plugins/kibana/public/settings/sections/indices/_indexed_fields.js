@@ -5,13 +5,14 @@ import typeHtml from 'plugins/kibana/settings/sections/indices/_field_type.html'
 import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
 import uiModules from 'ui/modules';
 import indexedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_indexed_fields.html';
-import { fieldWildcardMatcher } from 'ui/field_wildcard';
+import FieldWildcardProvider from 'ui/field_wildcard';
 
 uiModules.get('apps/settings')
-.directive('settingsIndicesIndexedFields', function ($filter) {
+.directive('settingsIndicesIndexedFields', function (Private, $filter) {
   const yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
   const noTemplate = '';
   const filter = $filter('filter');
+  const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
 
   return {
     restrict: 'E',
@@ -42,7 +43,7 @@ uiModules.get('apps/settings')
           const childScope = _.assign($scope.$new(), { field: field });
           rowScopes.push(childScope);
 
-          const excluded = field.exclude || fieldWildcardMatch(field.name);
+          const excluded = fieldWildcardMatch(field.name);
 
           return [
             {

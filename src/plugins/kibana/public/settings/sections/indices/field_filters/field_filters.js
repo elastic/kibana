@@ -2,7 +2,7 @@ import { size, without } from 'lodash';
 
 import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
-import { fieldWildcardMatcher } from 'ui/field_wildcard';
+import FieldWildcardProvider from 'ui/field_wildcard';
 
 import template from './field_filters.html';
 import './field_filters.less';
@@ -10,7 +10,8 @@ import './field_filters.less';
 const notify = new Notifier();
 
 uiModules.get('kibana')
-.directive('settingsIndicesFieldFilters', function () {
+.directive('settingsIndicesFieldFilters', function (Private) {
+  const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
   return {
     restrict: 'E',
     scope: {
@@ -32,7 +33,7 @@ uiModules.get('kibana')
         $scope.$watch('indexPattern.fieldFilters', (filters) => {
           const values = filters.map(f => f.value);
           const filter = fieldWildcardMatcher(values);
-          const matches = $scope.indexPattern.fields.map(f => f.name).filter(filter).sort();
+          const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(filter).sort();
           this.sampleMatches = size(matches) ? matches : null;
         });
       }

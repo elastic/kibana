@@ -138,14 +138,9 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     // Get the source filtering configuration for that index.
-    // Fields which name appears in the given columns array will not be excluded.
-    self.getSourceFiltering = function (columns) {
+    self.getSourceFiltering = function () {
       return {
-        exclude: self
-          .getNonScriptedFields()
-          .filter(field => field.exclude && !_.contains(columns, field.name))
-          .map(field => field.name)
-          .concat(self.fieldFilters.map(filter => filter.value))
+        exclude: self.fieldFilters.map(filter => filter.value)
       };
     };
 
@@ -309,18 +304,8 @@ export default function IndexPatternFactory(Private, timefilter, Notifier, confi
     };
 
     self._fetchFields = function () {
-      const existingFieldsByName = _.get(self, 'fields.byName', {});
-
       return mapper.getFieldsForIndexPattern(self, true)
       .then(function (fields) {
-        // copy over kibana-added properties from existing fields
-        fields.forEach(function (field) {
-          var existingField = existingFieldsByName[field.name];
-          if (existingField) {
-            field.exclude = existingField.exclude;
-          }
-        });
-
         // append existing scripted fields
         fields = fields.concat(self.getScriptedFields());
 

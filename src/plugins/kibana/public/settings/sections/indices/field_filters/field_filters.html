@@ -1,7 +1,7 @@
 <h3>Field Filters</h3>
 
 <p>
-  Field filters can be used to exclude one or more fields when fetching the document source. This happens in apps like Discover for the doc table. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lowere level.
+  Field filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.
 </p>
 
 <div ng-class="{ saving: fieldFilters.saving }" class="field-filters-container">
@@ -22,7 +22,7 @@
                 ng-model="filter.value"
                 input-focus
                 ng-if="fieldFilters.editting === filter"
-                placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
+                placeholder="field name filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
                 type="text"
                 required
                 class="form-control">
@@ -63,7 +63,7 @@
             <div class="input-group">
               <input
                 ng-model="fieldFilters.newValue"
-                placeholder="field name filter, accepts wildcards (i.e. `user:*`)"
+                placeholder="field name filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
                 type="text"
                 class="form-control">
 
@@ -88,7 +88,7 @@
       <em>The selected field filters don't match any known fields.</em>
     </p>
     <p ng-if="fieldFilters.sampleMatches">
-      Based on the choosen field filters, these are the known fields that would be excluded from document sources.
+      Based on the chosen field filters, these are the known fields that would be excluded from document sources.
     </p>
     <ul>
       <li ng-repeat="match in fieldFilters.sampleMatches">{{match}}</li>

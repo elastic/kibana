@@ -36,7 +36,6 @@ uiModules
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
       self.formatParams = self.field.format.params();
-      $scope.isMetaField = _.contains(metaFields, self.field.name);
 
       // only init on first create
       self.creating = !self.indexPattern.fields.byName[self.field.name];

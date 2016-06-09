@@ -7,12 +7,13 @@ import RequestQueueProvider from '../_request_queue';
 import ErrorHandlersProvider from '../_error_handlers';
 import FetchProvider from '../fetch';
 import DecorateQueryProvider from './_decorate_query';
-import { fieldWildcardFilter } from '../../field_wildcard';
+import FieldWildcardProvider from '../../field_wildcard';
 
 export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
   let requestQueue = Private(RequestQueueProvider);
   let errorHandlers = Private(ErrorHandlersProvider);
   let courierFetch = Private(FetchProvider);
+  let { fieldWildcardFilter } = Private(FieldWildcardProvider);
 
   function SourceAbstract(initialState, strategy) {
     let self = this;
