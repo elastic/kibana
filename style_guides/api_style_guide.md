@@ -1,12 +1,12 @@
 
-# Api Style Guide
+# API Style Guide
 
 ## Paths
 
 API routes must start with the `/api/` path segment, and should be followed by the plugin id if applicable:
 
-*Right:* `/api/marvel/v1/nodes`
-*Wrong:* `/marvel/api/v1/nodes`
+*Right:* `/api/marvel/nodes`
+*Wrong:* `/marvel/api/nodes`
 
 ## Versions
 
