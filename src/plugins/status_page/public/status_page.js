@@ -37,9 +37,6 @@ const chrome = require('ui/chrome')
         ui.serverStateMessage = overall.title;
       }
 
-      // Unless the status page was explicitly requested, there is no
-      // reason to stay on the status page if the status is green; reload
-      // the window so the user is shown the page they were requesting.
       const statusPageUrl = chrome.addBasePath('/status');
       if (overall.state === 'green' && $window.location.pathname !== statusPageUrl) {
         return $window.location.reload();
