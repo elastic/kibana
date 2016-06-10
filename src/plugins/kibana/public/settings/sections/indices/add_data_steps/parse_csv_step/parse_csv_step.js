@@ -16,7 +16,7 @@ modules.get('apps/settings')
       },
       bindToController: true,
       controllerAs: 'wizard',
-      controller: function ($scope) {
+      controller: function ($scope, debounce) {
         const maxSampleRows = 10;
         const maxSampleColumns = 20;
 
@@ -43,11 +43,16 @@ modules.get('apps/settings')
           }
         ];
 
-        this.parse = () => {
+        this.parse = debounce(() => {
           if (!this.file) return;
           let row = 1;
           let rows = [];
           let data = [];
+
+          delete this.rows;
+          delete this.columns;
+          this.formattedErrors = [];
+          this.formattedWarnings = [];
 
           const config = _.assign(
             {
@@ -79,9 +84,9 @@ modules.get('apps/settings')
                   this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
                 }
 
-                this.formattedErrors = _.map(results.errors, (error) => {
+                this.formattedErrors = this.formattedErrors.concat(_.map(results.errors, (error) => {
                   return `${error.type} at line ${row + 1} - ${error.message}`;
-                });
+                }));
 
                 data = data.concat(results.data);
 
@@ -110,7 +115,7 @@ modules.get('apps/settings')
           );
 
           Papa.parse(this.file, config);
-        };
+        }, 100);
 
         $scope.$watch('wizard.parseOptions', (newValue, oldValue) => {
           // Delimiter is auto-detected in the first run of the parse function, so we don't want to
@@ -121,10 +126,6 @@ modules.get('apps/settings')
         }, true);
 
         $scope.$watch('wizard.file', () => {
-          delete this.rows;
-          delete this.columns;
-          delete this.formattedErrors;
-          this.formattedWarnings = [];
           this.parse();
         });
       }
