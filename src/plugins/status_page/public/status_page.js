@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 
 const chrome = require('ui/chrome')
 .setRootTemplate(require('plugins/status_page/status_page.html'))
-.setRootController('ui', function ($http, $scope) {
+.setRootController('ui', function ($http, $window, $scope) {
   const ui = this;
   ui.loading = false;
 
@@ -35,6 +35,14 @@ const chrome = require('ui/chrome')
       if (!ui.serverState || (ui.serverState !== overall.state)) {
         ui.serverState = overall.state;
         ui.serverStateMessage = overall.title;
+      }
+
+      // Unless the status page was explicitly requested, there is no
+      // reason to stay on the status page if the status is green; reload
+      // the window so the user is shown the page they were requesting.
+      const statusPageUrl = chrome.addBasePath('/status');
+      if ((overall.state === 'green') && ($window.location.pathname !== statusPageUrl)) {
+        return $window.location.reload();
       }
     })
     .catch(function () {
