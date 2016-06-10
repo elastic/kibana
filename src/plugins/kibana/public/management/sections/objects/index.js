@@ -8,7 +8,7 @@ import uiModules from 'ui/modules';
 // add the module deps to this module
 uiModules.get('apps/management');
 
-management.get('kibana').register('objects', {
+management.getSection('kibana').register('objects', {
   display: 'Saved Objects',
   order: 10,
   path: 'kibana/objects'

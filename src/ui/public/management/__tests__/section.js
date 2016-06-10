@@ -63,7 +63,7 @@ describe('ManagementSection', () => {
     });
   });
 
-  describe('get', () => {
+  describe('getSection', () => {
     let section;
 
     beforeEach(() => {
@@ -72,11 +72,11 @@ describe('ManagementSection', () => {
     });
 
     it('returns registered section', () => {
-      expect(section.get('about')).to.be.a(ManagementSection);
+      expect(section.getSection('about')).to.be.a(ManagementSection);
     });
 
     it('returns undefined if un-registered', () => {
-      expect(section.get('unknown')).to.be(undefined);
+      expect(section.getSection('unknown')).to.be(undefined);
     });
   });
 

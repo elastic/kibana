@@ -38,7 +38,7 @@ uiModules
     link: function ($scope) {
       timefilter.enabled = false;
       $scope.sections = management.items.inOrder;
-      $scope.section = management.get($scope.sectionName) || management;
+      $scope.section = management.getSection($scope.sectionName) || management;
 
       if ($scope.section) {
         $scope.section.items.forEach(item => {
@@ -46,7 +46,7 @@ uiModules
         });
       }
 
-      management.get('kibana').info = `Build ${buildNum}, Commit SHA ${buildSha.substr(0, 8)}`;
+      management.getSection('kibana').info = `Build ${buildNum}, Commit SHA ${buildSha.substr(0, 8)}`;
     }
   };
 });
