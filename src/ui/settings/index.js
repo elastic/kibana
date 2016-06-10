@@ -26,8 +26,12 @@ export default function setupSettings(kbnServer, server, config) {
   function userSettingsNotFound(kibanaVersion) {
     let message;
     if (server.plugins.elasticsearch.status.state === 'green') {
+      // If Kibana index is ready but we still couldn't find user-provided settings in it,
+      // turn Kibana plugin to red
       server.plugins.kibana.status.red('Could not find user-provided settings for this version of Kibana (' + kibanaVersion + ')');
     } else {
+      // Otherwise, simply log a warning because a page refresh (once the Kibana index is ready) will
+      // solve the problem
       server.log(['warning', 'settings'], 'User-provided settings were requested before the Kibana index was ready');
     }
     return {};
