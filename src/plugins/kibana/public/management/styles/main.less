@@ -73,7 +73,7 @@ kbn-management-landing {
   }
 
   .management-section-info {
-    bottom: 0;
+    bottom: 10px;
     display: none;
     color: @kibanaPink1;
     font-size: 0.8em;
@@ -103,6 +103,18 @@ kbn-management-objects {
   }
   .empty {
     color: @management-objects-empty-color;
+  }
+
+  .item {
+    padding: 12px;
+
+    .item-title {
+      margin-left: 30px;
+    }
+
+    .actions {
+      margin-top: -6px;
+    }
   }
 
   .action-bar {
@@ -160,20 +172,6 @@ kbn-management-objects-view {
       &.actions {
         width: 150px;
       }
-    }
-  }
-}
-
-.objects-settings {
-  .item {
-    padding: 12px;
-
-    .item-title {
-      margin-left: 30px;
-    }
-
-    .actions {
-      margin-top: -6px;
     }
   }
 }
