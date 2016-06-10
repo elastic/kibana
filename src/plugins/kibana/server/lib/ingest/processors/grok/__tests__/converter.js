@@ -25,7 +25,7 @@ describe('ingest', () => {
               grok: {
                 tag: 'foo_processor_id',
                 field: 'foo_source_field',
-                pattern: 'foo_pattern'
+                patterns: [ 'foo_pattern' ]
               }
             };
           });
@@ -53,7 +53,7 @@ describe('ingest', () => {
             source = {
               tag: 'foo_tag',
               field: 'foo_field',
-              pattern: 'foo_pattern'
+              patterns: [ 'foo_pattern' ]
             };
 
             expected = {
