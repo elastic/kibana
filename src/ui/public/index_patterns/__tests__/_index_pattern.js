@@ -12,6 +12,7 @@ import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
+
 describe('index pattern', function () {
   let IndexPattern;
   let mapper;
@@ -77,7 +78,7 @@ describe('index pattern', function () {
 
   // helper function to create index patterns
   function create(id, payload) {
-    let indexPattern = new IndexPattern(id);
+    const indexPattern = new IndexPattern(id);
     DocSource.prototype.doIndex.returns(Promise.resolve(id));
     payload = _.defaults(payload || {}, docSourceResponse(id));
     setDocsourcePayload(payload);
@@ -129,16 +130,16 @@ describe('index pattern', function () {
 
   describe('getScriptedFields', function () {
     it('should return all scripted fields', function () {
-      let scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
-      let respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
+      const scriptedNames = _(mockLogstashFields).where({ scripted: true }).pluck('name').value();
+      const respNames = _.pluck(indexPattern.getScriptedFields(), 'name');
       expect(respNames).to.eql(scriptedNames);
     });
   });
 
   describe('getNonScriptedFields', function () {
     it('should return all non-scripted fields', function () {
-      let notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
-      let respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
+      const notScriptedNames = _(mockLogstashFields).where({ scripted: false }).pluck('name').value();
+      const respNames = _.pluck(indexPattern.getNonScriptedFields(), 'name');
       expect(respNames).to.eql(notScriptedNames);
     });
 
@@ -147,7 +148,7 @@ describe('index pattern', function () {
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
     require('test_utils/no_digest_promises').activateForSuite();
-    let indexPatternId = 'test-pattern';
+    const indexPatternId = 'test-pattern';
     let indexPattern;
     let fieldLength;
     let truncatedFields;
@@ -181,8 +182,8 @@ describe('index pattern', function () {
         indexPattern.refreshFields(),
       ])
       .then(function (data) {
-        let expected = data[0]; // just the fields in the index
-        let fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
+        const expected = data[0]; // just the fields in the index
+        const fields = indexPattern.getNonScriptedFields(); // get all but scripted fields
 
         expect(_.pluck(fields, 'name')).to.eql(_.pluck(expected, 'name'));
       });
@@ -193,15 +194,15 @@ describe('index pattern', function () {
       setDocsourcePayload(docSourceResponse(indexPatternId));
 
       // add spy to indexPattern.getScriptedFields
-      let scriptedFieldsSpy = sinon.spy(indexPattern, 'getScriptedFields');
+      const scriptedFieldsSpy = sinon.spy(indexPattern, 'getScriptedFields');
 
       // refresh fields, which will fetch
       return indexPattern.refreshFields().then(function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        let scripted = _.where(mockLogstashFields, { scripted: true });
-        let expected = _.filter(indexPattern.fields, { scripted: true });
+        const scripted = _.where(mockLogstashFields, { scripted: true });
+        const expected = _.filter(indexPattern.fields, { scripted: true });
         expect(_.pluck(expected, 'name')).to.eql(_.pluck(scripted, 'name'));
       });
     });
@@ -210,29 +211,27 @@ describe('index pattern', function () {
   describe('add and remove scripted fields', function () {
     it('should append the scripted field', function () {
       // keep a copy of the current scripted field count
-      let saveSpy = sinon.spy(indexPattern, 'save');
-      let oldCount = indexPattern.getScriptedFields().length;
+      const saveSpy = sinon.spy(indexPattern, 'save');
+      const oldCount = indexPattern.getScriptedFields().length;
 
       // add a new scripted field
-      let scriptedField = {
+      const scriptedField = {
         name: 'new scripted field',
         script: 'false',
         type: 'boolean'
       };
       indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
-      indexPattern._indexFields(); // normally triggered by docSource.onUpdate()
-
-      let scriptedFields = indexPattern.getScriptedFields();
+      const scriptedFields = indexPattern.getScriptedFields();
       expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).to.have.length(oldCount + 1);
-      expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
+      expect(indexPattern.fields.byName[scriptedField.name].name).to.equal(scriptedField.name);
     });
 
     it('should remove scripted field, by name', function () {
-      let saveSpy = sinon.spy(indexPattern, 'save');
-      let scriptedFields = indexPattern.getScriptedFields();
-      let oldCount = scriptedFields.length;
-      let scriptedField = _.last(scriptedFields);
+      const saveSpy = sinon.spy(indexPattern, 'save');
+      const scriptedFields = indexPattern.getScriptedFields();
+      const oldCount = scriptedFields.length;
+      const scriptedField = _.last(scriptedFields);
 
       indexPattern.removeScriptedField(scriptedField.name);
 
@@ -242,8 +241,8 @@ describe('index pattern', function () {
     });
 
     it('should not allow duplicate names', function () {
-      let scriptedFields = indexPattern.getScriptedFields();
-      let scriptedField = _.last(scriptedFields);
+      const scriptedFields = indexPattern.getScriptedFields();
+      const scriptedField = _.last(scriptedFields);
       expect(function () {
         indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       }).to.throwError(function (e) {
@@ -254,9 +253,9 @@ describe('index pattern', function () {
 
   describe('popularizeField', function () {
     it('should increment the poplarity count by default', function () {
-      let saveSpy = sinon.stub(indexPattern, 'save');
+      const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
-        let oldCount = field.count;
+        const oldCount = field.count;
 
         indexPattern.popularizeField(field.name);
 
@@ -266,10 +265,10 @@ describe('index pattern', function () {
     });
 
     it('should increment the poplarity count', function () {
-      let saveSpy = sinon.stub(indexPattern, 'save');
+      const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(function (field, i) {
-        let oldCount = field.count;
-        let incrementAmount = 4;
+        const oldCount = field.count;
+        const incrementAmount = 4;
 
         indexPattern.popularizeField(field.name, incrementAmount);
 
@@ -280,9 +279,9 @@ describe('index pattern', function () {
 
     it('should decrement the poplarity count', function () {
       indexPattern.fields.forEach(function (field, i) {
-        let oldCount = field.count;
-        let incrementAmount = 4;
-        let decrementAmount = -2;
+        const oldCount = field.count;
+        const incrementAmount = 4;
+        const decrementAmount = -2;
 
         indexPattern.popularizeField(field.name, incrementAmount);
         indexPattern.popularizeField(field.name, decrementAmount);
@@ -293,7 +292,7 @@ describe('index pattern', function () {
 
     it('should not go below 0', function () {
       indexPattern.fields.forEach(function (field) {
-        let decrementAmount = -Number.MAX_VALUE;
+        const decrementAmount = -Number.MAX_VALUE;
         indexPattern.popularizeField(field.name, decrementAmount);
         expect(field.count).to.equal(0);
       });
@@ -311,11 +310,11 @@ describe('index pattern', function () {
 
       it('invokes interval toDetailedIndexList with given start/stop times', async function () {
         await indexPattern.toDetailedIndexList(1, 2);
-        let id = indexPattern.id;
+        const id = indexPattern.id;
         expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
       });
       it('is fulfilled by the result of interval toDetailedIndexList', async function () {
-        let indexList = await indexPattern.toDetailedIndexList();
+        const indexList = await indexPattern.toDetailedIndexList();
         expect(indexList[0].index).to.equal('foo');
         expect(indexList[1].index).to.equal('bar');
       });
@@ -340,13 +339,13 @@ describe('index pattern', function () {
 
       it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
         await indexPattern.toDetailedIndexList(1, 2, 'sortOrder');
-        let id = indexPattern.id;
-        let field = indexPattern.timeFieldName;
+        const id = indexPattern.id;
+        const field = indexPattern.timeFieldName;
         expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
 
       it('is fulfilled by the result of calculateIndices', async function () {
-        let indexList = await indexPattern.toDetailedIndexList();
+        const indexList = await indexPattern.toDetailedIndexList();
         expect(indexList[0].index).to.equal('foo');
         expect(indexList[1].index).to.equal('bar');
       });
@@ -361,7 +360,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        let indexList = await indexPattern.toDetailedIndexList();
+        const indexList = await indexPattern.toDetailedIndexList();
         expect(indexList.index).to.equal(indexPattern.id);
       });
     });
@@ -372,7 +371,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        let indexList = await indexPattern.toDetailedIndexList();
+        const indexList = await indexPattern.toDetailedIndexList();
         expect(indexList.index).to.equal(indexPattern.id);
       });
     });
@@ -390,11 +389,11 @@ describe('index pattern', function () {
 
       it('invokes interval toIndexList with given start/stop times', async function () {
         await indexPattern.toIndexList(1, 2);
-        let id = indexPattern.id;
+        const id = indexPattern.id;
         expect(intervals.toIndexList.calledWith(id, interval, 1, 2)).to.be(true);
       });
       it('is fulfilled by the result of interval toIndexList', async function () {
-        let indexList = await indexPattern.toIndexList();
+        const indexList = await indexPattern.toIndexList();
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
       });
@@ -420,13 +419,13 @@ describe('index pattern', function () {
 
       it('invokes calculateIndices with given start/stop times and sortOrder', async function () {
         await indexPattern.toIndexList(1, 2, 'sortOrder');
-        let id = indexPattern.id;
-        let field = indexPattern.timeFieldName;
+        const id = indexPattern.id;
+        const field = indexPattern.timeFieldName;
         expect(calculateIndices.calledWith(id, field, 1, 2, 'sortOrder')).to.be(true);
       });
 
       it('is fulfilled by the result of calculateIndices', async function () {
-        let indexList = await indexPattern.toIndexList();
+        const indexList = await indexPattern.toIndexList();
         expect(indexList[0]).to.equal('foo');
         expect(indexList[1]).to.equal('bar');
       });
@@ -442,7 +441,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', async function () {
-        let indexList = await indexPattern.toIndexList();
+        const indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

@@ -16,27 +16,22 @@ import {
 
       bdd.before(function () {
 
-        var fromTime = '2015-09-19 06:31:44.000';
-        var toTime = '2015-09-23 18:31:44.000';
-
         common.debug('Starting dashboard before method');
-        common.debug('navigateToApp dashboard');
-        return esClient.delete('.kibana')
-        .then(function () {
-          return common.try(function () {
-            return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
-          });
-        })
+        var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+        // delete .kibana index and update configDoc
+        return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
         // and load a set of makelogs data
-        .then(function loadkibana4() {
+        .then(function loadkibanaVisualizations() {
           common.debug('load kibana index with visualizations');
           return elasticDump.elasticLoad('dashboard','.kibana');
         })
         .then(function () {
-          return scenarioManager.loadIfEmpty('logstashFunctional');
-        })
-        .then(function () {
+          common.debug('navigateToApp dashboard');
           return common.navigateToApp('dashboard');
+        })
+        // wait for the logstash data load to finish if it hasn't already
+        .then(function () {
+          return logstash;
         })
         .catch(common.handleError(this));
       });
@@ -91,7 +86,7 @@ import {
 
         bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
           var testSubName = 'Dashboard Test 1';
-// save time on the dashboard?
+          // TODO: save time on the dashboard and test it
           return dashboardPage.saveDashboard(testSubName)
           // click New Dashboard just to clear the one we just created
           .then(function () {

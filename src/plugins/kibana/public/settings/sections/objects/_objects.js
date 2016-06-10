@@ -83,9 +83,12 @@ uiModules.get('apps/settings')
       };
 
       $scope.bulkDelete = function () {
-        $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id')).then(refreshData).then(function () {
+        $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+        .then(refreshData)
+        .then(function () {
           $scope.selectedItems.length = 0;
-        });
+        })
+        .catch(error => notify.error(error));
       };
 
       $scope.bulkExport = function () {

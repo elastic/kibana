@@ -5,6 +5,8 @@ import {
   discoverPage,
   settingsPage,
   headerPage,
+  esClient,
+  elasticDump
 } from '../../../support';
 
 (function () {
@@ -16,19 +18,15 @@ import {
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
-        // start each test with an empty kibana index
-        return scenarioManager.reload('emptyKibana')
+        // delete .kibana index and update configDoc
+        return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
+        .then(function loadkibanaIndexPattern() {
+          common.debug('load kibana index with default index pattern');
+          return elasticDump.elasticLoad('visualize','.kibana');
+        })
         // and load a set of makelogs data
         .then(function loadIfEmptyMakelogs() {
           return scenarioManager.loadIfEmpty('logstashFunctional');
-        })
-        .then(function (navigateTo) {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
         })
         .then(function () {
           common.debug('discover');
@@ -152,7 +150,7 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
+            return common.sleep(4000);
           })
           .then(function () {
             return verifyChartData(expectedBarChartData);
@@ -167,7 +165,7 @@ import {
           ];
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
-            return common.sleep(8000);
+            return common.sleep(4000);
           })
           .then(function () {
             return verifyChartData(expectedBarChartData);
@@ -181,6 +179,26 @@ import {
           return discoverPage.setChartInterval(chartInterval)
           .then(function () {
             return common.sleep(2000);
+          })
+          .then(function () {
+            return verifyChartData(expectedBarChartData);
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('browser back button should show previous interval Daily', function () {
+          var expectedChartInterval = 'Daily';
+          var expectedBarChartData = [
+            '133.196', '129.192', '129.724'
+          ];
+          return this.remote.goBack()
+          .then(function () {
+            return common.try(function tryingForTime() {
+              return discoverPage.getChartInterval()
+              .then(function (actualInterval) {
+                expect(actualInterval).to.be(expectedChartInterval);
+              });
+            });
           })
           .then(function () {
             return verifyChartData(expectedBarChartData);
@@ -241,6 +259,12 @@ import {
           .catch(common.handleError(this));
         });
 
+        bdd.it('should not show "no results"', () => {
+          return discoverPage.hasNoResults().then(visible => {
+            expect(visible).to.be(false);
+          })
+          .catch(common.handleError(this));
+        });
 
         function verifyChartData(expectedBarChartData) {
           return common.try(function tryingForTime() {
@@ -270,6 +294,69 @@ import {
         }
 
       });
+
+
+      bdd.describe('query #2, which has an empty time range', function () {
+        var fromTime = '1999-06-11 09:22:11.000';
+        var toTime = '1999-06-12 11:21:04.000';
+
+        bdd.before(() => {
+          common.debug('setAbsoluteRangeForAnotherQuery');
+          return headerPage
+            .setAbsoluteRange(fromTime, toTime)
+            .catch(common.handleError(this));
+        });
+
+        bdd.it('should show "no results"', () => {
+          return discoverPage.hasNoResults().then(visible => {
+            expect(visible).to.be(true);
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should suggest a new time range is picked', () => {
+          return discoverPage.hasNoResultsTimepicker().then(visible => {
+            expect(visible).to.be(true);
+          })
+          .catch(common.handleError(this));
+        });
+
+        bdd.it('should open and close the time picker', () => {
+          let i = 0;
+
+          return closeTimepicker() // close
+            .then(() => isTimepickerOpen(false)
+              .then(el => el.click()) // open
+              .then(() => isTimepickerOpen(true))
+              .then(el => el.click()) // close
+              .then(() => isTimepickerOpen(false))
+              .catch(common.handleError(this))
+            );
+
+          function closeTimepicker() {
+            return headerPage.isTimepickerOpen().then(shown => {
+              if (!shown) {
+                return;
+              }
+              return discoverPage
+                .getNoResultsTimepicker()
+                .click(); // close
+            });
+          }
+
+          function isTimepickerOpen(expected) {
+            return headerPage.isTimepickerOpen().then(shown => {
+              common.debug(`expect (#${++i}) timepicker to be ${peek(expected)} (is ${peek(shown)}).`);
+              expect(shown).to.be(expected);
+              return discoverPage.getNoResultsTimepicker();
+              function peek(state) {
+                return state ? 'open' : 'closed';
+              }
+            });
+          }
+        });
+      });
+
     });
   }());
 }());

@@ -48,6 +48,13 @@ export default (function () {
       .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
 
+    isTimepickerOpen: function isTimepickerOpen() {
+      return this.remote.setFindTimeout(defaultFindTimeout)
+      .findDisplayedByCssSelector('.kbn-timepicker')
+      .then(() => true)
+      .catch(() => false);
+    },
+
     clickAbsoluteButton: function clickAbsoluteButton() {
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByLinkText('Absolute').click();
