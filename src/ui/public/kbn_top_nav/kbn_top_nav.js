@@ -74,7 +74,7 @@ module.directive('kbnTopNav', function (Private) {
         </div>
       `;
     },
-    controller($scope, $compile, $attrs, $element) {
+    controller($scope, $attrs, $element) {
       const KbnTopNavController = Private(KbnTopNavControllerProvider);
       const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
       const getNavbarExtensions = _.memoize(function (name) {
