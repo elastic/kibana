@@ -48,7 +48,7 @@ export default function ($compile) {
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
       return defaults({}, opt, {
-        label: capitalize(opt.key),
+        label: opt.label || capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
         hideButton: !!opt.hideButton,
