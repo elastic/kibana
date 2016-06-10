@@ -39,7 +39,7 @@ uiModules.get('apps/management')
   };
 });
 
-management.get('kibana').register('settings', {
+management.getSection('kibana').register('settings', {
   display: 'Settings',
   order: 20,
   path: 'kibana/settings'

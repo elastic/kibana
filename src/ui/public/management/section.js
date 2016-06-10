@@ -62,7 +62,7 @@ export default class ManagementSection {
    * @returns {ManagementSection}
    */
 
-  get(id) {
+  getSection(id) {
     return this.items.byId[id];
   }
 }

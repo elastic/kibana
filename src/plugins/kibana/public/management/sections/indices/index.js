@@ -21,10 +21,10 @@ uiRoutes
 uiModules.get('apps/management')
 .run(function (config) {
   const index = config.get('defaultIndex');
-  const kibana = management.get('kibana');
+  const kibana = management.getSection('kibana');
 
-  if (index && kibana && kibana.get('indices')) {
-    kibana.get('indices').url = `#/management/kibana/indices/${index}`;
+  if (index && kibana && kibana.getSection('indices')) {
+    kibana.getSection('indices').url = `#/management/kibana/indices/${index}`;
   }
 })
 .directive('kbnManagementIndices', function ($route, config, kbnUrl) {
@@ -53,13 +53,13 @@ uiModules.get('apps/management')
   };
 });
 
-management.get('data').register('indices', {
+management.getSection('data').register('indices', {
   display: 'Existing Data',
   order: 0,
   path: 'kibana/indices/'
 });
 
-management.get('kibana').register('indices', {
+management.getSection('kibana').register('indices', {
   display: 'Index Patterns',
   order: 0,
   path: 'kibana/indices/'
