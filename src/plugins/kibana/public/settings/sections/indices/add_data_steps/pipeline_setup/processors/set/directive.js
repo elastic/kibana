@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import uiModules from 'ui/modules';
 import template from './view.html';
 
