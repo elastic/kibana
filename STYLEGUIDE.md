@@ -1,9 +1,9 @@
 This is a collection of style guides for Kibana projects. The include guides for the following:
 
-- [JavaScript](https://github.com/elastic/kibana/style_guides/js_style_guide.md)
-- [CSS](https://github.com/elastic/kibana/style_guides/css_style_guide.md)
-- [HTML](https://github.com/elastic/kibana/style_guides/html_style_guide.md)
-- [API](https://github.com/elastic/kibana/style_guides/api_style_guide.md)
+- [JavaScript](style_guides/js_style_guide.md)
+- [CSS](style_guides/css_style_guide.md)
+- [HTML](style_guides/html_style_guide.md)
+- [API](style_guides/api_style_guide.md)
 
 # Kibana Style Guide
 
