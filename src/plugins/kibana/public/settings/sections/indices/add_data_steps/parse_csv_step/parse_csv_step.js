@@ -71,11 +71,17 @@ modules.get('apps/settings')
                   if (results.meta.fields.length > _.uniq(results.meta.fields).length) {
                     this.formattedErrors.push('Column names must be unique');
                   }
+
+                  let hasEmptyHeader = false;
                   _.forEach(results.meta.fields, (field) => {
                     if (_.isEmpty(field)) {
-                      this.formattedErrors.push('Column names must not be blank');
+                      hasEmptyHeader = true;
                     }
                   });
+                  if (hasEmptyHeader) {
+                    this.formattedErrors.push('Column names must not be blank');
+                  }
+
                   if (results.meta.fields.length > maxSampleColumns) {
                     this.formattedWarnings.push(`Preview truncated to ${maxSampleColumns} columns`);
                   }
