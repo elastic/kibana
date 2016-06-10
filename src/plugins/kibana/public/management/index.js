@@ -42,7 +42,7 @@ uiModules
 
       if ($scope.section) {
         $scope.section.items.forEach(item => {
-          item.class = item.url === '#' + $location.path() ? 'active' : undefined;
+          item.class = `#${$location.path()}`.indexOf(item.url) > -1 ? 'active' : undefined;
         });
       }
 
