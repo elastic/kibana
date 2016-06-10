@@ -29,7 +29,7 @@ export default function ($compile) {
     }
 
     // change the current key and rerender
-    set(key) {
+    setCurrent(key) {
       if (key && !this.templates.hasOwnProperty(key)) {
         throw new TypeError(`KbnTopNav: unknown template key "${key}"`);
       }
@@ -39,11 +39,11 @@ export default function ($compile) {
     }
 
     // little usability helpers
-    which() { return this.currentKey; }
-    is(key) { return this.which() === key; }
-    open(key) { this.set(key); }
-    close(key) { (!key || this.is(key)) && this.set(null); }
-    toggle(key) { this.set(this.is(key) ? null : key); }
+    getCurrent() { return this.currentKey; }
+    isCurrent(key) { return this.getCurrent() === key; }
+    open(key) { this.setCurrent(key); }
+    close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
+    toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
 
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {

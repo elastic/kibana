@@ -58,9 +58,9 @@ module.directive('kbnTopNav', function (Private) {
               ng-repeat="menuItem in kbnTopNav.menuItems"
               aria-label="{{::menuItem.description}}"
               aria-haspopup="{{!menuItem.hasFunction}}"
-              aria-expanded="{{kbnTopNav.is(menuItem.key)}}"
-              ng-class="{active: kbnTopNav.is(menuItem.key)}"
-              ng-click="menuItem.run(menuItem)"
+              aria-expanded="{{kbnTopNav.isCurrent(menuItem.key)}}"
+              ng-class="{active: kbnTopNav.isCurrent(menuItem.key)}"
+              ng-click="menuItem.run(menuItem, kbnTopNav)"
               ng-bind="menuItem.label">
             </button>
           </div>
