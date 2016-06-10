@@ -14,7 +14,6 @@ bdd.describe('visualize app', function describeIndexTests() {
   var toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
-    var vizName1 = 'Visualization MetricChart';
     common.debug('navigateToApp visualize');
     return common.navigateToApp('visualize')
     .then(function () {
