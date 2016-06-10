@@ -24,7 +24,6 @@ export default function setupSettings(kbnServer, server, config) {
   }
 
   function userSettingsNotFound(kibanaVersion) {
-    let message;
     if (server.plugins.elasticsearch.status.state === 'green') {
       server.plugins.kibana.status.red('Could not find user-provided settings for this version of Kibana (' + kibanaVersion + ')');
     } else {
