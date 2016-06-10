@@ -112,6 +112,16 @@ describe('ingest', () => {
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
+          it('should use the last custom format if multiple are specified', () => {
+            source.formats.push('foo');
+            source.formats.push('bar');
+            expected.formats.push('CUSTOM');
+            expected.custom_format = 'bar';
+
+            const actual = esToKibana(source);
+            expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
         });
 
       });
