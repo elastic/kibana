@@ -12,7 +12,9 @@ target
 .idea
 *.iml
 *.log
-/test/output
+/test/screenshots/diff
+/test/screenshots/failure
+/test/screenshots/session
 /esvm
 .htpasswd
 .eslintcache

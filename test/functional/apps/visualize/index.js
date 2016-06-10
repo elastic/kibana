@@ -18,12 +18,8 @@ import {
 
       common.debug('Starting visualize before method');
       var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
-      return esClient.delete('.kibana')
-      .then(function () {
-        return common.try(function () {
-          return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
-        });
-      })
+      // delete .kibana index and update configDoc
+      return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
       .then(function loadkibanaIndexPattern() {
         common.debug('load kibana index with default index pattern');
         return elasticDump.elasticLoad('visualize','.kibana');

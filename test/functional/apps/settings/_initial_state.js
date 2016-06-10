@@ -2,7 +2,8 @@ import {
   bdd,
   common,
   scenarioManager,
-  settingsPage
+  settingsPage,
+  esClient
 } from '../../../support';
 
 (function () {
@@ -11,7 +12,8 @@ import {
   (function () {
     bdd.describe('initial state', function () {
       bdd.before(function () {
-        return scenarioManager.reload('emptyKibana')
+        // delete .kibana index and then wait for Kibana to re-create it
+        return esClient.deleteAndUpdateConfigDoc()
         .then(function () {
           return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
         });
