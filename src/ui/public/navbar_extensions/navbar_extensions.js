@@ -5,8 +5,7 @@ import RegistryNavbarExtensionsProvider from 'ui/registry/navbar_extensions';
 import uiModules from 'ui/modules';
 const navbar = uiModules.get('kibana/navbar');
 
-
-navbar.directive('navbarExtensions', function (Private, $compile) {
+navbar.directive('navbarExtensions', function (Private) {
   const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
   const getExtensions = _.memoize(function (name) {
     if (!name) throw new Error('navbar directive requires a name attribute');
