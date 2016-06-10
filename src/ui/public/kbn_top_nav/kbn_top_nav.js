@@ -4,6 +4,7 @@ import angular from 'angular';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';
 import KbnTopNavControllerProvider from './kbn_top_nav_controller';
+import RegistryNavbarExtensionsProvider from 'ui/registry/navbar_extensions';
 
 const module = uiModules.get('kibana');
 
@@ -62,7 +63,6 @@ module.directive('kbnTopNav', function (Private) {
               ng-click="menuItem.run(menuItem)"
               ng-bind="menuItem.label">
             </button>
-            <navbar-extensions name="${$attrs.name}"></navbar-extensions>
           </div>
           <kbn-global-timepicker></kbn-global-timepicker>
         </navbar>
@@ -76,8 +76,16 @@ module.directive('kbnTopNav', function (Private) {
     },
     controller($scope, $compile, $attrs, $element) {
       const KbnTopNavController = Private(KbnTopNavControllerProvider);
+      const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
+      const getNavbarExtensions = _.memoize(function (name) {
+        if (!name) throw new Error('navbar directive requires a name attribute');
+        return _.sortBy(navbarExtensions.byAppName[name], 'order');
+      });
 
-      $scope.kbnTopNav = new KbnTopNavController(_.get($scope, $attrs.config));
+      const extensions = getNavbarExtensions($attrs.name);
+      const controls = _.get($scope, $attrs.config, []).concat(extensions);
+
+      $scope.kbnTopNav = new KbnTopNavController(controls);
       $scope.kbnTopNav._link($scope, $element);
       return $scope.kbnTopNav;
     }
