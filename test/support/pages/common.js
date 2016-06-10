@@ -256,7 +256,7 @@ export default (function () {
         const fileName = `failure_${now}_${testName}.png`;
 
         return this.saveScreenshot(fileName, true)
-        .finally(function () {
+        .then(function () {
           throw reason;
         });
       };
