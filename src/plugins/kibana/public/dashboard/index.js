@@ -68,7 +68,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
         timefilter.time.to = dash.timeTo;
         timefilter.time.from = dash.timeFrom;
-        timefilter.refreshInterval = dash.refreshInterval;
+        if (dash.refreshInterval) {
+          timefilter.refreshInterval = dash.refreshInterval;
+        }
       }
 
       $scope.$on('$destroy', dash.destroy);
