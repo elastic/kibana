@@ -27,6 +27,9 @@ export default {
     const types = {
       //<ingest type>: <kibana type>
       auto: 'auto',
+      double: 'number',
+      int: 'number',
+      long: 'number',
       float: 'number',
       string: 'string',
       boolean: 'boolean'
