@@ -86,7 +86,7 @@ module.exports = () => Joi.object({
   .default(),
 
   ops: Joi.object({
-    interval: Joi.number().default(10000),
+    interval: Joi.number().default(5000),
   }),
 
   plugins: Joi.object({

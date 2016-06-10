@@ -1,11 +1,16 @@
 import { config, defaultTryTimeout, defaultFindTimeout, remote, shieldPage } from '../';
+import fs from 'fs';
+import mkdirp from 'mkdirp';
+import { promisify } from 'bluebird';
+
+const mkdirpAsync = promisify(mkdirp);
+const writeFileAsync = promisify(fs.writeFile);
 
 export default (function () {
   var Promise = require('bluebird');
   var moment = require('moment');
   var testSubjSelector = require('@spalger/test-subj-selector');
   var getUrl = require('../../utils/get_url');
-  var fs = require('fs');
   var _ = require('lodash');
   var parse = require('url').parse;
   var format = require('url').format;
@@ -244,34 +249,32 @@ export default (function () {
       .then(function () { self.debug('... sleep(' + sleepMilliseconds + ') end'); });
     },
 
-    handleError: function (testObj) {
-      var self = this;
-      var testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
+    handleError(testObj) {
+      const testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
+      return reason => {
+        const now = Date.now();
+        const fileName = `failure_${now}_${testName}.png`;
 
-      return function (reason) {
-        var now = Date.now();
-        var filename = ['failure', now, testName].join('_') + '.png';
-
-        return self.saveScreenshot(filename)
-        .finally(function () {
+        return this.saveScreenshot(fileName, true)
+        .then(function () {
           throw reason;
         });
       };
     },
 
-    saveScreenshot: function saveScreenshot(filename) {
-      var self = this;
-      var outDir = path.resolve('test', 'output');
+    async saveScreenshot(fileName, isFailure = false) {
+      try {
+        const directoryName = isFailure ? 'failure' : 'session';
+        const directoryPath = path.resolve(`test/screenshots/${directoryName}`);
+        const filePath = path.resolve(directoryPath, fileName);
+        this.debug(`Taking screenshot "${filePath}"`);
 
-      return self.remote.takeScreenshot()
-      .then(function writeScreenshot(data) {
-        var filepath = path.resolve(outDir, filename);
-        self.debug('Taking screenshot "' + filepath + '"');
-        fs.writeFileSync(filepath, data);
-      })
-      .catch(function (err) {
-        self.log('SCREENSHOT FAILED: ' + err);
-      });
+        const screenshot = await this.remote.takeScreenshot();
+        await mkdirpAsync(directoryPath);
+        await writeFileAsync(filePath, screenshot);
+      } catch (err) {
+        this.log(`SCREENSHOT FAILED: ${err}`);
+      }
     },
 
     findTestSubject: function findTestSubject(selector) {

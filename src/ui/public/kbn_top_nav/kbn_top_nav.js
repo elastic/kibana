@@ -50,7 +50,7 @@ module.directive('kbnTopNav', function (Private) {
       // It will no accept any programatic way of setting its name
       // besides this because it happens so early in the digest cycle
       return `
-        <navbar class="kibana-nav-options">
+        <navbar ng-show="chrome.getVisible()" class="kibana-nav-options">
           <div ng-transclude></div>
           <div class="button-group kibana-nav-actions" role="toolbar">
             <button

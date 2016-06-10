@@ -1,4 +1,4 @@
-import { bdd, defaultTimeout, scenarioManager } from '../../../support';
+import { bdd, defaultTimeout, scenarioManager, esClient, common } from '../../../support';
 
 (function () {
   bdd.describe('settings app', function () {
@@ -7,16 +7,13 @@ import { bdd, defaultTimeout, scenarioManager } from '../../../support';
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     bdd.before(function () {
-      return scenarioManager.reload('emptyKibana')
-      .then(function () {
-        return scenarioManager.loadIfEmpty('makelogs');
-      });
+      return scenarioManager.loadIfEmpty('makelogs');
     });
 
     bdd.after(function () {
       return scenarioManager.unload('makelogs')
       .then(function () {
-        scenarioManager.unload('emptyKibana');
+        return esClient.delete('.kibana');
       });
     });
 
