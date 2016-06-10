@@ -38,7 +38,7 @@
     "Tim Sullivan <tim@elastic.co>"
   ],
   "scripts": {
-    "test": "grunt test",
+    "test": "grunt test; grunt test:visualRegression",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
@@ -59,8 +59,7 @@
     "makelogs": "makelogs",
     "mocha": "mocha",
     "mocha:debug": "mocha --debug-brk",
-    "sterilize": "grunt sterilize",
-    "compareScreenshots": "node utilities/compareScreenshots"
+    "sterilize": "grunt sterilize"
   },
   "repository": {
     "type": "git",
@@ -153,6 +152,7 @@
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "4.1.8",
     "chokidar": "1.4.3",
+    "dot": "1.0.3",
     "elasticdump": "2.1.1",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
@@ -191,7 +191,7 @@
     "nock": "2.10.0",
     "npm": "2.11.0",
     "portscanner": "1.0.0",
-    "simple-git": "1.8.0",
+    "simple-git": "1.37.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4",
     "source-map-support": "0.4.0",

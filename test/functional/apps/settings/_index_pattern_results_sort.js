@@ -51,7 +51,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
           return col.selector();
         })
         .then(function (rowText) {
-          common.saveScreenshot(`Settings-indices-column-${col.heading}-sort-ascending.png`);
+          common.saveScreenshot(`Settings-indices-column-${col.heading}-sort-ascending`);
           expect(rowText).to.be(col.first);
         });
       });
@@ -65,7 +65,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
           return col.selector();
         })
         .then(function (rowText) {
-          common.saveScreenshot(`Settings-indices-column-${col.heading}-sort-descending.png`);
+          common.saveScreenshot(`Settings-indices-column-${col.heading}-sort-descending`);
           expect(rowText).to.be(col.last);
         });
       });
