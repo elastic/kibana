@@ -273,18 +273,19 @@ export default function (Private, $rootScope, getAppState, globalState, config) 
     compareOptions = _.defaults(compareOptions || {}, { disabled: true });
 
     // existing globalFilters should be mutated by appFilters
-    _.each(appFilters, function (filter, i) {
-      let match = _.find(globalFilters, function (globalFilter) {
+    for (var i = appFilters.length - 1; i >= 0; i--) {
+      var filter = appFilters[i];
+      var match = _.find(globalFilters, function (globalFilter) {
         return compareFilters(globalFilter, filter, compareOptions);
       });
 
       // no match, do nothing
-      if (!match) return;
+      if (!match) break;
 
       // matching filter in globalState, update global and remove from appState
       _.assign(match.meta, filter.meta);
       appFilters.splice(i, 1);
-    });
+    }
 
     return [
       uniqFilters(globalFilters, { disabled: true }),
