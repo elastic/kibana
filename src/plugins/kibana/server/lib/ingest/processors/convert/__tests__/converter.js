@@ -46,15 +46,7 @@ describe('ingest', () => {
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
-          it('should map [auto] type correctly', () => {
-            source.type = 'auto';
-            expected.convert.type = 'auto';
-
-            const actual = kibanaToEs(source);
-            expect(_.isEqual(actual, expected)).to.be.ok();
-          });
-
-          it('should map [number] type correctly', () => {
+          it('should map type [number] to [float]', () => {
             source.type = 'number';
             expected.convert.type = 'float';
 
@@ -62,20 +54,18 @@ describe('ingest', () => {
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
-          it('should map [string] type correctly', () => {
+          it('should leave basic types unmodified', () => {
+            source.type = 'auto';
+            expected.convert.type = 'auto';
+            expect(_.isEqual(kibanaToEs(source), expected)).to.be.ok();
+
             source.type = 'string';
             expected.convert.type = 'string';
+            expect(_.isEqual(kibanaToEs(source), expected)).to.be.ok();
 
-            const actual = kibanaToEs(source);
-            expect(_.isEqual(actual, expected)).to.be.ok();
-          });
-
-          it('should map [boolean] type correctly', () => {
             source.type = 'boolean';
             expected.convert.type = 'boolean';
-
-            const actual = kibanaToEs(source);
-            expect(_.isEqual(actual, expected)).to.be.ok();
+            expect(_.isEqual(kibanaToEs(source), expected)).to.be.ok();
           });
 
         });
@@ -114,15 +104,7 @@ describe('ingest', () => {
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
-          it('should map [auto] type correctly', () => {
-            source.type = 'auto';
-            expected.type = 'auto';
-
-            const actual = esToKibana(source);
-            expect(_.isEqual(actual, expected)).to.be.ok();
-          });
-
-          it('should map [float] type correctly', () => {
+          it('should map type [float] to [number]', () => {
             source.type = 'float';
             expected.type = 'number';
 
@@ -130,20 +112,18 @@ describe('ingest', () => {
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
-          it('should map [string] type correctly', () => {
+          it('should leave basic types unmodified', () => {
+            source.type = 'auto';
+            expected.type = 'auto';
+            expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
+
             source.type = 'string';
             expected.type = 'string';
+            expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            const actual = esToKibana(source);
-            expect(_.isEqual(actual, expected)).to.be.ok();
-          });
-
-          it('should map [boolean] type correctly', () => {
             source.type = 'boolean';
             expected.type = 'boolean';
-
-            const actual = esToKibana(source);
-            expect(_.isEqual(actual, expected)).to.be.ok();
+            expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
           });
 
         });
