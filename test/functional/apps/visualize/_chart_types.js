@@ -22,7 +22,7 @@ import {
         bdd.it('should show the correct chart types', function pageHeader() {
 
           var expectedChartTypes = [
-            'Area chart', 'Data table', 'Line chart', 'Markdown widget',
+            'Area chart', 'Data table', 'Heatmap', 'Line chart', 'Markdown widget',
             'Metric', 'Pie chart', 'Tile map', 'Vertical bar chart'
           ];
           // find all the chart types and make sure there all there

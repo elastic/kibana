@@ -1,0 +1,84 @@
+<div class="form-group">
+
+  <div class="form-group">
+    <!-- Color Scales -->
+    <h3>Color Scales</h3>
+    <label>Color Palette: </label>
+    <select ng-model="vis.params.color">
+      <option ng-repeat="item in vis.type.params.colors" value={{item.name}}>
+        {{item.displayName}}
+      </option>
+    </select>
+    <color-map name="vis.params.color" value="vis.params.numberOfColors"></color-map>
+  </div>
+
+  <!-- Margins -->
+  <div class="form-group">
+    <h3>Set Margins</h3>
+    <div>
+      <label>Left: </label>
+      <input type="range" ng-model="vis.params.margin.left" min="50" max="500" />
+      <span>{{vis.params.margin.left}}</span>
+    </div>
+    <div>
+      <label>Top: </label>
+      <input type="range" ng-model="vis.params.margin.top" min="50" max="500" />
+      <span>{{vis.params.margin.top}}</span>
+    </div>
+    <div>
+      <label>Right: </label>
+      <input type="range" ng-model="vis.params.margin.right" min="150" max="500" />
+      <span>{{vis.params.margin.right}}</span>
+    </div>
+    <div>
+      <label>Bottom: </label>
+      <input type="range" ng-model="vis.params.margin.bottom" min="50" max="500" />
+      <span>{{vis.params.margin.bottom}}</span>
+    </div>
+  </div>
+
+  <!-- Padding -->
+  <div class="form-group">
+    <h3>Padding</h3>
+    <input type="range" ng-model="vis.params.padding" min="0" max="0.9" step="0.1" />
+    <span>{{vis.params.padding}}</span>
+  </div>
+
+  <!-- Stroke Options -->
+  <div class="form-group">
+    <h3>Stroke Options</h3>
+    <div>
+      <label>Stroke Color</label>
+      <input type="text" ng-model="vis.params.stroke">
+    </div>
+    <div>
+      <label>Stroke Width</label>
+      <input type="number" ng-model="vis.params.strokeWidth">
+    </div>
+  </div>
+
+  <!-- Axis Filtering Options -->
+  <div class="form-group">
+    <h3>Axis Options</h3>
+    <div>
+      <span>Filter row axis every: </span>
+      <input type="number" ng-model="vis.params.rowAxis.filterBy">
+      <span> value.</span>
+      <br/>
+      <span>Filter column axis every: </span>
+      <input type="number" ng-model="vis.params.columnAxis.filterBy">
+      <span> value.</span>
+    </div>
+  </div>
+
+  <!-- Legend Number Format Options -->
+  <div class="form-group">
+    <h3>Legend Number Format</h3>
+    <select ng-model="vis.params.legendNumberFormat">
+      <option ng-repeat="item in vis.type.params.legendNumberFormats" value={{item}}>
+        {{item}}
+      </option>
+    </select>
+  </div>
+
+</div>
