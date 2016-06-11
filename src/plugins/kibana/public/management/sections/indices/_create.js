@@ -8,10 +8,14 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import createTemplate from 'plugins/kibana/management/sections/indices/_create.html';
 
-
 uiRoutes
-.when('/management/kibana/indices/', {
-  template: createTemplate
+.when('/management/data/index/', {
+  template: createTemplate,
+  resolve: {
+    indexPatternIds: function (courier) {
+      return courier.indexPatterns.getIds();
+    }
+  }
 });
 
 uiModules.get('apps/management')

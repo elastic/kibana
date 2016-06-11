@@ -15,7 +15,16 @@ uiRoutes
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.indexPatternId)
-      .catch(courier.redirectWhenMissing('/management/kibana/indices'));
+      .catch(courier.redirectWhenMissing('/management/data/index'));
+    }
+  }
+});
+
+uiRoutes
+.when('/management/kibana/indices', {
+  resolve: {
+    _: function ($location, config) {
+      $location.path(`/management/kibana/indices/${config.get('defaultIndex')}`);
     }
   }
 });
