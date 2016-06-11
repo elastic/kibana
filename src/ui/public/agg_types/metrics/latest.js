@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import latestEditor from 'ui/agg_types/controls/latest.html';
 
@@ -36,7 +37,7 @@ export default function AggTypeMetricAvgProvider(Private) {
       }
     ],
     getValue(agg, bucket) {
-      return bucket[agg.id].hits.hits[0]._source[agg.params.field.name];
+      return get(bucket[agg.id].hits.hits[0]._source, agg.params.field.name);
     }
   });
 };
