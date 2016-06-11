@@ -19,14 +19,6 @@ uiRoutes
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
-.run(function (config) {
-  const index = config.get('defaultIndex');
-  const kibana = management.getSection('kibana');
-
-  if (index && kibana && kibana.getSection('indices')) {
-    kibana.getSection('indices').url = `#/management/kibana/indices/${index}`;
-  }
-})
 .directive('kbnManagementIndices', function ($route, config, kbnUrl) {
   return {
     restrict: 'E',
@@ -56,7 +48,7 @@ uiModules.get('apps/management')
 management.getSection('data').register('indices', {
   display: 'Existing Data',
   order: 0,
-  path: 'kibana/indices/'
+  path: 'data/index/'
 });
 
 management.getSection('kibana').register('indices', {

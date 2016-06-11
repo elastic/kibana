@@ -21,7 +21,7 @@ uiRoutes
 
 require('ui/index_patterns/route_setup/load_default')({
   notRequiredRe: /^\/management\//,
-  whenMissingRedirectTo: '/management/kibana/indices'
+  whenMissingRedirectTo: '/management/data/index'
 });
 
 uiModules
