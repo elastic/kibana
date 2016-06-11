@@ -16,5 +16,6 @@ import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
     require('./_field_data');
     require('./_shared_links');
     require('./_collapse_expand');
+    require('./_field_filters');
   });
 }());

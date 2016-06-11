@@ -21,6 +21,16 @@ export default (function () {
       .findByCssSelector('button[aria-label=\'Search\']');
     },
 
+    getAllFieldNames: function getAllFieldNames() {
+      return thisTime
+      .findAllByClassName('discover-field-name')
+      .then(function (fields) {
+        return Promise.all(fields.map(function (field) {
+          return field.getVisibleText();
+        }));
+      });
+    },
+
     getTimespanText: function getTimespanText() {
       return thisTime
       .findByCssSelector('.kibana-nav-options .navbar-timepicker-time-desc pretty-duration')
