@@ -85,8 +85,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       // sleep a bit before trying to get the pie chart data below
       .then(function sleep() {
         return common.sleep(2000);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show 10 slices in pie chart, take screenshot', function pageHeader() {
@@ -102,8 +101,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
         common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data', function pageHeader() {
@@ -122,8 +120,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedTableData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 

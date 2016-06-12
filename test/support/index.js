@@ -1,6 +1,7 @@
 import url from 'url';
 import EsClient from './es_client';
 import ElasticDump from './elastic_dump';
+import BddWrapper from './bdd_wrapper';
 import ScenarioManager from '../fixtures/scenario_manager';
 import Common from './pages/common';
 import DiscoverPage from './pages/discover_page';
@@ -13,7 +14,6 @@ import ConsolePage from './pages/console_page';
 
 const kbnInternVars = global.__kibana__intern__;
 
-exports.bdd = kbnInternVars.bdd;
 exports.intern = kbnInternVars.intern;
 exports.config = exports.intern.config;
 exports.defaultTimeout = exports.config.defaultTimeout;
@@ -21,6 +21,7 @@ exports.defaultTryTimeout = exports.config.defaultTryTimeout;
 exports.defaultFindTimeout = exports.config.defaultFindTimeout;
 exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.elasticsearch));
 exports.esClient = new EsClient(url.format(exports.config.servers.elasticsearch));
+exports.bdd = new BddWrapper(kbnInternVars.bdd);
 
 defineDelayedExport('remote', (suite) => suite.remote);
 defineDelayedExport('common', () => new Common());

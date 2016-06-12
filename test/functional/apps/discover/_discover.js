@@ -33,8 +33,7 @@ bdd.describe('discover app', function describeIndexTests() {
     .then(function () {
       common.debug('setAbsoluteRange');
       return headerPage.setAbsoluteRange(fromTime, toTime);
-    })
-    .catch(common.handleError(this));
+    });
   });
 
 
@@ -48,8 +47,7 @@ bdd.describe('discover app', function describeIndexTests() {
       return discoverPage.getTimespanText()
       .then(function (actualTimeString) {
         expect(actualTimeString).to.be(expectedTimeRangeString);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -70,8 +68,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function (actualQueryNameString) {
         expect(actualQueryNameString).to.be(queryName1);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('load query should show query name', function () {
@@ -84,8 +81,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function (actualQueryNameString) {
         expect(actualQueryNameString).to.be(queryName1);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show the correct hit count', function () {
@@ -95,8 +91,7 @@ bdd.describe('discover app', function describeIndexTests() {
         .then(function compareData(hitCount) {
           expect(hitCount).to.be(expectedHitCount);
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show the correct bar chart', function () {
@@ -109,8 +104,7 @@ bdd.describe('discover app', function describeIndexTests() {
       return common.sleep(4000)
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct time range string in chart', function () {
@@ -118,8 +112,7 @@ bdd.describe('discover app', function describeIndexTests() {
       return discoverPage.getChartTimespan()
       .then(function (actualTimeString) {
         expect(actualTimeString).to.be(expectedTimeRangeString);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct initial chart interval of 3 hours', function () {
@@ -127,8 +120,7 @@ bdd.describe('discover app', function describeIndexTests() {
       return discoverPage.getChartInterval()
       .then(function (actualInterval) {
         expect(actualInterval).to.be(expectedChartInterval);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data for chart interval Hourly', function () {
@@ -152,8 +144,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data for chart interval Daily', function () {
@@ -167,8 +158,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data for chart interval Weekly', function () {
@@ -180,8 +170,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('browser back button should show previous interval Daily', function () {
@@ -200,8 +189,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data for chart interval Monthly', function () {
@@ -213,8 +201,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data for chart interval Yearly', function () {
@@ -226,8 +213,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data for chart interval Auto', function () {
@@ -244,8 +230,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Auto chart interval of 3 hours', function () {
@@ -253,15 +238,13 @@ bdd.describe('discover app', function describeIndexTests() {
       return discoverPage.getChartInterval()
       .then(function (actualInterval) {
         expect(actualInterval).to.be(expectedChartInterval);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should not show "no results"', () => {
       return discoverPage.hasNoResults().then(visible => {
         expect(visible).to.be(false);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     function verifyChartData(expectedBarChartData) {
@@ -301,22 +284,19 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.before(() => {
       common.debug('setAbsoluteRangeForAnotherQuery');
       return headerPage
-        .setAbsoluteRange(fromTime, toTime)
-        .catch(common.handleError(this));
+        .setAbsoluteRange(fromTime, toTime);
     });
 
     bdd.it('should show "no results"', () => {
       return discoverPage.hasNoResults().then(visible => {
         expect(visible).to.be(true);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should suggest a new time range is picked', () => {
       return discoverPage.hasNoResultsTimepicker().then(visible => {
         expect(visible).to.be(true);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should open and close the time picker', () => {

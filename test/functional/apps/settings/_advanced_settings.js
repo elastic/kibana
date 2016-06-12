@@ -33,8 +33,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       })
       .then(function (advancedSetting) {
         expect(advancedSetting).to.be('America/Phoenix');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
   });

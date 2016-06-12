@@ -26,8 +26,7 @@ bdd.describe('visualize app', function () {
     // wait for the logstash data load to finish if it hasn't already
     .then(function () {
       return logstash;
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   require('./_chart_types');

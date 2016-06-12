@@ -33,8 +33,7 @@ bdd.describe('discover app', function describeIndexTests() {
     .then(function () {
       common.debug('setAbsoluteRange');
       return headerPage.setAbsoluteRange(fromTime, toTime);
-    })
-    .catch(common.handleError(this));
+    });
   });
 
 
@@ -53,8 +52,7 @@ bdd.describe('discover app', function describeIndexTests() {
             expect(hitCount).to.be(expectedHitCount);
           });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('the search term should be highlighted in the field data', function () {
@@ -63,8 +61,7 @@ bdd.describe('discover app', function describeIndexTests() {
       .then(function (marks) {
         expect(marks.length).to.be(50);
         expect(marks.indexOf('php')).to.be(0);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -78,8 +75,7 @@ bdd.describe('discover app', function describeIndexTests() {
             expect(hitCount).to.be(expectedHitCount);
           });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('doc view should show Time and _source columns', function () {
@@ -87,8 +83,7 @@ bdd.describe('discover app', function describeIndexTests() {
       return discoverPage.getDocHeader()
       .then(function (header) {
         expect(header).to.be(expectedHeader);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('doc view should show oldest time first', function () {
@@ -139,8 +134,7 @@ bdd.describe('discover app', function describeIndexTests() {
       return discoverPage.getDocTableIndex(1)
       .then(function (rowData) {
         expect(rowData).to.be(ExpectedDoc);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('doc view should sort ascending', function () {
@@ -231,8 +225,7 @@ bdd.describe('discover app', function describeIndexTests() {
             expect(rowData).to.be(ExpectedDoc);
           });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -248,8 +241,7 @@ bdd.describe('discover app', function describeIndexTests() {
       })
       .then(function () {
         return headerPage.clickToastOK();
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 });

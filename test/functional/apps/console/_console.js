@@ -10,8 +10,7 @@ var expect = require('expect.js');
 bdd.describe('console app', function describeIndexTests() {
   bdd.before(function () {
     common.debug('navigateTo console');
-    return common.navigateToApp('console', false)
-    .catch(common.handleError(this));
+    return common.navigateToApp('console', false);
   });
 
 
@@ -34,8 +33,7 @@ bdd.describe('console app', function describeIndexTests() {
           expect(actualRequest).to.eql(expectedRequest);
         });
       });
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   bdd.it('default request response should contain .kibana' , function () {
@@ -49,7 +47,6 @@ bdd.describe('console app', function describeIndexTests() {
           expect(actualResponse).to.contain(expectedResponseContains);
         });
       });
-    })
-    .catch(common.handleError(this));
+    });
   });
 });
