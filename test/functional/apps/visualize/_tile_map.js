@@ -47,8 +47,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function () {
       return headerPage.getSpinnerDone();
-    })
-    .catch(common.handleError(this));
+    });
   });
 
 
@@ -81,8 +80,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
         common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct tile map data', function pageHeader() {
@@ -107,8 +105,7 @@ bdd.describe('visualize app', function describeIndexTests() {
           common.debug(data.split('\n'));
           expect(data.trim().split('\n')).to.eql(expectedTableData);
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 

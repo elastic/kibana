@@ -27,8 +27,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       return settingsPage.getIndexPageHeading().getVisibleText()
       .then(function (patternName) {
         expect(patternName).to.be('logstash-*');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should have index pattern in url', function url() {
@@ -37,8 +36,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
         .then(function (currentUrl) {
           expect(currentUrl).to.contain('logstash-*');
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should have expected table headers', function checkingHeader() {
@@ -65,8 +63,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
         });
 
         return Promise.all(comparedHeaders);
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 
@@ -82,8 +79,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
     bdd.it('should return to index pattern creation page', function returnToPage() {
       return common.try(function tryingForTime() {
         return settingsPage.getCreateButton();
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should remove index pattern from url', function indexNotInUrl() {
@@ -94,8 +90,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
           common.debug('currentUrl = ' + currentUrl);
           expect(currentUrl).to.not.contain('logstash-*');
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 });

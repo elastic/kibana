@@ -28,8 +28,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     // wait for the logstash data load to finish if it hasn't already
     .then(function () {
       return logstash;
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   bdd.describe('add visualizations to dashboard', function dashboardTest() {
@@ -72,8 +71,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
         common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
@@ -86,8 +84,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       })
       .then(function () {
         return dashboardPage.loadSavedDashboard(testSubName);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should have all the expected visualizations', function checkVisualizations() {
@@ -97,8 +94,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           common.log('visualization titles = ' + panelTitles);
           expect(panelTitles).to.eql(visualizations);
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should have all the expected initial sizes', function checkVisualizationSizes() {
@@ -116,8 +112,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           common.log('visualization titles = ' + panelTitles);
           expect(panelTitles).to.eql(visObjects);
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 });

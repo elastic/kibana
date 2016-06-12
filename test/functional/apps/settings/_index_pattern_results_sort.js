@@ -52,8 +52,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
         })
         .then(function (rowText) {
           expect(rowText).to.be(col.first);
-        })
-        .catch(common.handleError(this));
+        });
       });
 
       bdd.it('should sort descending', function pageHeader() {
@@ -66,8 +65,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
         })
         .then(function (rowText) {
           expect(rowText).to.be(col.last);
-        })
-        .catch(common.handleError(this));
+        });
       });
     });
   });
@@ -95,16 +93,14 @@ bdd.describe('index result field sort', function describeIndexTests() {
         .then(function (tabCount) {
           expect(tabCount).to.be('' + expectedFieldCount);
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should have correct default page size selected', function () {
       return settingsPage.getPageSize()
       .then(function (pageSize) {
         expect(pageSize).to.be('' + expectedDefaultPageSize);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should have the correct number of rows per page', function () {

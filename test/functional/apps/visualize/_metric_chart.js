@@ -31,8 +31,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function setAbsoluteRange() {
       common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       return headerPage.setAbsoluteRange(fromTime, toTime);
-    })
-    .catch(common.handleError(this));
+    });
   });
 
 
@@ -71,8 +70,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(avgMachineRam).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Sum', function pageHeader() {
@@ -93,8 +91,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(sumPhpMemory).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Median', function pageHeader() {
@@ -117,8 +114,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(medianBytes[1]).to.eql(metricValue.split('\n')[1]);
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Min', function pageHeader() {
@@ -139,8 +135,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(minTimestamp).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Max', function pageHeader() {
@@ -161,8 +156,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(maxRelatedContentArticleModifiedTime).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Standard Deviation', function pageHeader() {
@@ -187,8 +181,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(standardDeviationBytes).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Unique Count', function pageHeader() {
@@ -216,8 +209,7 @@ bdd.describe('visualize app', function describeIndexTests() {
             common.debug('metricValue=' + metricValue.split('\n'));
             expect(uniqueCountClientip).to.eql(metricValue.split('\n'));
           });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Percentiles', function pageHeader() {
@@ -247,8 +239,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(percentileMachineRam).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show Percentile Ranks', function pageHeader() {
@@ -273,8 +264,7 @@ bdd.describe('visualize app', function describeIndexTests() {
               expect(percentileRankBytes).to.eql(metricValue.split('\n'));
             });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
   });
