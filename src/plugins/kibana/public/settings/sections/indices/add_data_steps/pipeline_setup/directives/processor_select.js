@@ -25,12 +25,17 @@ function buildProcessorTypeList(enabledProcessorTypeIds) {
     .value();
 }
 
-app.directive('processorSelect', function () {
+app.directive('processorSelect', function ($timeout) {
   return {
     restrict: 'E',
     template: template,
     scope: {
       processorType: '='
+    },
+    link: function ($scope, $element) {
+      $timeout(() => {
+        $element.find('.ui-select-focusser')[0].focus();
+      });
     },
     controller: function ($scope, Private, Notifier) {
       const ingest = Private(IngestProvider);
