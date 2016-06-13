@@ -2,8 +2,6 @@ const _ = require('lodash');
 const $ = require('jquery');
 const navbar = require('ui/modules').get('kibana');
 
-require('ui/render_directive');
-
 navbar.directive('navbarExtensions', function (Private, $compile) {
   const navbarExtensionsRegistry = Private(require('ui/registry/navbar_extensions'));
   const getExtensions = _.memoize(function (name) {
