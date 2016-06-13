@@ -65,10 +65,10 @@ uiModules
           return escape(col.title);
         }));
 
-          return csvRows.map(function (row) {
-            return row.join(self.csv.separator) + '\r\n';
-          }).join('');
-        };
+        return csvRows.map(function (row) {
+          return row.join(self.csv.separator) + '\r\n';
+        }).join('');
+      };
 
       $scope.$watch('table', function () {
         let table = $scope.table;
