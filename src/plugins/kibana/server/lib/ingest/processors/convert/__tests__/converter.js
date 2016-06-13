@@ -108,7 +108,7 @@ describe('ingest', () => {
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
-          it('should map type [double], [float], [int], [long] to [number]', () => {
+          it('should map type [double], [float], [integer], [long], [short] to [number]', () => {
             source.type = 'double';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
@@ -117,13 +117,18 @@ describe('ingest', () => {
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'int';
+            source.type = 'integer';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
             source.type = 'long';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
+
+            source.type = 'short';
+            expected.type = 'number';
+            expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
+
           });
 
           it('should leave basic types unmodified', () => {

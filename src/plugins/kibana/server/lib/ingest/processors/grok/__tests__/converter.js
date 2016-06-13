@@ -26,7 +26,7 @@ describe('ingest', () => {
               grok: {
                 tag: 'foo_processor_id',
                 field: 'foo_source_field',
-                patterns: ['foo_pattern'],
+                patterns: [ 'foo_pattern' ],
                 ignore_failure: 'foo_ignore_failure'
               }
             };
@@ -55,7 +55,7 @@ describe('ingest', () => {
             source = {
               tag: 'foo_tag',
               field: 'foo_field',
-              patterns: ['foo_pattern'],
+              patterns: [ 'foo_pattern' ],
               ignore_failure: 'foo_ignore_failure'
             };
 

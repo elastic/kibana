@@ -29,9 +29,10 @@ export default {
       //<ingest type>: <kibana type>
       auto: 'auto',
       double: 'number',
-      int: 'number',
-      long: 'number',
       float: 'number',
+      integer: 'number',
+      long: 'number',
+      short: 'number',
       string: 'string',
       boolean: 'boolean'
     };
