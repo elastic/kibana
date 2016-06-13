@@ -22,6 +22,10 @@ define(function (require) {
       return newState;
     }
 
+    template.push = function (name, tpl) {
+      templates[name] = tpl;
+    };
+
     template.is = function (name) {
       return template.current === templates[name];
     };
