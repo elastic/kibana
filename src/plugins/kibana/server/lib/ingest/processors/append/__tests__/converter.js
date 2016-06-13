@@ -51,9 +51,11 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              value: 'foo_value'
+              append: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                value: 'foo_value'
+              }
             };
 
             expected = {
@@ -75,6 +77,17 @@ describe('ingest', () => {
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [append] property', () => {
+            source.foo = _.clone(source.append);
+            delete source.append;
+            expect(esToKibana).withArgs(source).to.throwException(/source object missing \[append\] property/i);
+
+            expect(esToKibana).withArgs(null).to.throwException(/source object missing \[append\] property/i);
+            expect(esToKibana).withArgs(undefined).to.throwException(/source object missing \[append\] property/i);
+            expect(esToKibana).withArgs('').to.throwException(/source object missing \[append\] property/i);
+            expect(esToKibana).withArgs({}).to.throwException(/source object missing \[append\] property/i);
           });
 
         });
