@@ -44,8 +44,7 @@ export default (function () {
       .then(function clickSave() {
         common.debug('--find save button');
         return common.findTestSubject('discover-save-search-btn').click();
-      })
-      .catch(common.handleError(this));
+      });
     },
 
     loadSavedSearch: function loadSavedSearch(searchName) {
