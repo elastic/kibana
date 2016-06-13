@@ -49,8 +49,10 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field'
+              remove: {
+                tag: 'foo_tag',
+                field: 'foo_field'
+              }
             };
 
             expected = {
@@ -66,11 +68,24 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.remove.foo = 'bar';
+            source.remove.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [remove] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[remove\] property/i;
+
+            source.foo = _.clone(source.remove);
+            delete source.remove;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });

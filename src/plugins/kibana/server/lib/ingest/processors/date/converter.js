@@ -25,11 +25,15 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'date')) {
+      throw new Error('Elasticsearch processor document missing [date] property');
+    }
+
     const standardFormats = ['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N'];
 
     const formats = [];
     let customFormat = '';
-    _.forEach(processorEsDocument.formats, (format) => {
+    _.forEach(processorEsDocument.date.formats, (format) => {
       if (_.contains(standardFormats, format.toUpperCase())) {
         formats.push(format.toUpperCase());
       } else {
@@ -40,13 +44,13 @@ export default {
 
     return {
       typeId: 'date',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
-      target_field: processorEsDocument.target_field,
+      processor_id: processorEsDocument.date.tag,
+      source_field: processorEsDocument.date.field,
+      target_field: processorEsDocument.date.target_field,
       formats: _.uniq(formats),
       custom_format: customFormat,
-      timezone: processorEsDocument.timezone,
-      locale: processorEsDocument.locale
+      timezone: processorEsDocument.date.timezone,
+      locale: processorEsDocument.date.locale
     };
   }
 };

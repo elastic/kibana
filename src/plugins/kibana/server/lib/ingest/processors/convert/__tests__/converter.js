@@ -76,10 +76,12 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              target_field: 'foo_target_field',
-              type: 'auto'
+              convert: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                target_field: 'foo_target_field',
+                type: 'auto'
+              }
             };
 
             expected = {
@@ -97,48 +99,60 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.convert.foo = 'bar';
+            source.convert.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
           it('should map type [double], [float], [integer], [long], [short] to [number]', () => {
-            source.type = 'double';
+            source.convert.type = 'double';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'float';
+            source.convert.type = 'float';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'integer';
+            source.convert.type = 'integer';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'long';
+            source.convert.type = 'long';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'short';
+            source.convert.type = 'short';
             expected.type = 'number';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
-
           });
 
           it('should leave basic types unmodified', () => {
-            source.type = 'auto';
+            source.convert.type = 'auto';
             expected.type = 'auto';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'string';
+            source.convert.type = 'string';
             expected.type = 'string';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
 
-            source.type = 'boolean';
+            source.convert.type = 'boolean';
             expected.type = 'boolean';
             expect(_.isEqual(esToKibana(source), expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [convert] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[convert\] property/i;
+
+            source.foo = _.clone(source.convert);
+            delete source.convert;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });

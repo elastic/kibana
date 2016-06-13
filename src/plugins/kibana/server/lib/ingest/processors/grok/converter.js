@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   kibanaToEs: function (processorApiDocument) {
     return {
@@ -9,15 +11,19 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'grok')) {
+      throw new Error('Elasticsearch processor document missing [grok] property');
+    }
+
     let pattern = '';
-    if (processorEsDocument.patterns.length > 0) {
-      pattern = processorEsDocument.patterns[0];
+    if (processorEsDocument.grok.patterns.length > 0) {
+      pattern = processorEsDocument.grok.patterns[0];
     }
 
     return {
       typeId: 'grok',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
+      processor_id: processorEsDocument.grok.tag,
+      source_field: processorEsDocument.grok.field,
       pattern: pattern
     };
   }

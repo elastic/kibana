@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   kibanaToEs: function (processorApiDocument) {
     return {
@@ -8,10 +10,14 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'trim')) {
+      throw new Error('Elasticsearch processor document missing [trim] property');
+    }
+
     return {
       typeId: 'trim',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field
+      processor_id: processorEsDocument.trim.tag,
+      source_field: processorEsDocument.trim.field
     };
   }
 };

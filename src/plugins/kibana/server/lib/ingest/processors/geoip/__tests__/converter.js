@@ -73,11 +73,13 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              target_field: 'foo_target_field',
-              database_file: 'foo_database_file',
-              properties: 'foo_properties'
+              geoip: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                target_field: 'foo_target_field',
+                database_file: 'foo_database_file',
+                properties: 'foo_properties'
+              }
             };
 
             expected = {
@@ -96,11 +98,24 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.geoip.foo = 'bar';
+            source.geoip.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [geoip] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[geoip\] property/i;
+
+            source.foo = _.clone(source.geoip);
+            delete source.geoip;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });
