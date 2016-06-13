@@ -85,9 +85,11 @@ export default (function () {
       })
       // click save button
       .then(function () {
-        return thisTime
-        .findByCssSelector('.btn-primary')
-        .click();
+        return common.try(function () {
+          return thisTime
+          .findByCssSelector('.btn-primary')
+          .click();
+        });
       })
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
