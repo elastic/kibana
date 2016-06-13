@@ -29,8 +29,7 @@ bdd.describe('visualize app', function describeIndexTests() {
         common.debug('returned chart types = ' + chartTypes);
         common.debug('expected chart types = ' + expectedChartTypes);
         expect(chartTypes).to.eql(expectedChartTypes);
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 });

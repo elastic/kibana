@@ -63,8 +63,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       .then(function (popularity) {
         common.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should be reset on cancel', function pageHeader() {
@@ -83,8 +82,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       .then(function (popularity) {
         common.debug('popularity = ' + popularity);
         expect(popularity).to.be('0');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('can be saved', function pageHeader() {
@@ -103,8 +101,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       .then(function (popularity) {
         common.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
-      })
-      .catch(common.handleError(this));
+      });
     });
   }); // end 'change popularity'
 }); // end index result popularity

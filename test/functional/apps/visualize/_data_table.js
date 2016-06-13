@@ -49,8 +49,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function () {
       return headerPage.getSpinnerDone();
-    })
-    .catch(common.handleError(this));
+    });
   });
 
 
@@ -72,8 +71,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function () {
         return visualizePage.waitForVisualization();
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -91,8 +89,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
         common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
