@@ -49,7 +49,6 @@ bdd.describe('user input reactions', function () {
       .then(function (enabled) {
         expect(enabled).to.be.ok();
       });
-    })
-    .catch(common.handleError(this));
+    });
   });
 });

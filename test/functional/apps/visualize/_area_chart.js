@@ -57,8 +57,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function getSpinnerDone() {
       common.debug('Waiting...');
       return headerPage.getSpinnerDone();
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
@@ -85,8 +84,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       // otherwise it hangs.
       .then(function sleep() {
         return common.sleep(2000);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -125,8 +123,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
         common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -167,8 +164,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug('getDataTableData = ' + data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedTableData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 

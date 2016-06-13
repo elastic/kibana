@@ -48,8 +48,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function () {
       return headerPage.getSpinnerDone(); // only matches the hidden spinner
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   bdd.describe('line charts', function indexPatternCreation() {
@@ -74,8 +73,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function waitForVisualization() {
         return visualizePage.waitForVisualization();
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
@@ -106,8 +104,7 @@ bdd.describe('visualize app', function describeIndexTests() {
         // take a snapshot just as an example.
         common.debug('Take screenshot');
         common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data', function pageHeader() {
@@ -122,8 +119,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
