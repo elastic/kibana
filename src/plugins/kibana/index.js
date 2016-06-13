@@ -66,6 +66,7 @@ module.exports = function (kibana) {
           url: '/app/kibana#/management',
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
+          linkToLastSubUrl: false
         }
       ],
       injectDefaultVars(server, options) {
