@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  require('ui/navbar');
+  require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');
   require('ui/share');
