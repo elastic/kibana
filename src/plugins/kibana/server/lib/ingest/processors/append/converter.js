@@ -12,7 +12,7 @@ export default {
   },
   esToKibana: function (processorEsDocument) {
     if (!_.has(processorEsDocument, 'append')) {
-      throw new Error('Source object missing [append] property');
+      throw new Error('Elasticsearch processor document missing [append] property');
     }
 
     return {
