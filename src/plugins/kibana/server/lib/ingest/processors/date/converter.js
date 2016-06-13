@@ -43,7 +43,7 @@ export default {
       processor_id: processorEsDocument.tag,
       source_field: processorEsDocument.field,
       target_field: processorEsDocument.target_field,
-      formats: formats,
+      formats: _.uniq(formats),
       custom_format: customFormat,
       timezone: processorEsDocument.timezone,
       locale: processorEsDocument.locale
