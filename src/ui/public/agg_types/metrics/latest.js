@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { noop, get } from 'lodash';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import latestEditor from 'ui/agg_types/controls/latest.html';
 
@@ -24,12 +24,27 @@ export default function AggTypeMetricAvgProvider(Private) {
       {
         name: 'sort',
         type: 'field',
+        editor: null,
+        filterFieldTypes: ['number', 'date', 'ip',  'string'],
+        default: function (agg) {
+          return agg.vis.indexPattern.timeFieldName;
+        },
+        write: noop // prevent default write, it is handled below
+      },
+      {
+        name: 'order',
+        type: 'optioned',
+        default: 'desc',
         editor: latestEditor,
+        options: [
+          { display: 'Descending', val: 'desc' },
+          { display: 'Ascending', val: 'asc' }
+        ],
         write(agg, output) {
           output.params.sort = [
             {
               [ agg.params.sort.name ]: {
-                order: 'desc'
+                order: agg.params.order.val
               }
             }
           ];

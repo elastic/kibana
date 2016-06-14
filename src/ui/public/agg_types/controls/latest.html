@@ -13,3 +13,17 @@
     ng-options="field as field.displayName group by field.type for field in indexedFields">
   </select>
 </div>
+
+<div class="form-group">
+  <label>
+    Order
+  </label>
+
+  <select
+     name="order"
+     ng-model="agg.params.order"
+     required
+     ng-options="opt as opt.display for opt in aggParam.options"
+     class="form-control">
+  </select>
+</div>
