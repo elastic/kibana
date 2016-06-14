@@ -54,6 +54,7 @@
     "jade": "^1.8.2",
     "js-yaml": "^3.2.5",
     "lodash": "^2.4.1",
+    "moment": "^2.13.0",
     "request": "^2.40.0",
     "requirefrom": "^0.2.0",
     "semver": "^4.2.0",
