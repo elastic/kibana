@@ -95,20 +95,20 @@ uiModules
             formattedColumn.class = 'visualize-table-right';
           }
 
-          let isFirstValueNumeric =
-            table.rows && table.rows[0] && table.rows[0][i] && _.isNumber(table.rows[0][i].value);
+          const isFieldNumeric = (field && field.type === 'number');
+          const isFirstValueNumeric = _.isNumber(_.get(table, `rows[0][${i}].value`));
 
-          if ((field && field.type === 'number') || isFirstValueNumeric) {
-            function sum() {
-              return _.reduce(table.rows, function (prev, curr, n, all) {return prev + curr[i].value; }, 0);
+          if (isFieldNumeric || isFirstValueNumeric) {
+            function sum(tableRows) {
+              return _.reduce(tableRows, function (prev, curr, n, all) {return prev + curr[i].value; }, 0);
             }
 
             switch ($scope.totalFunc) {
               case 'sum':
-                formattedColumn.total = sum();
+                formattedColumn.total = sum(table.rows);
                 break;
               case 'avg':
-                formattedColumn.total = sum() / table.rows.length;
+                formattedColumn.total = sum(table.rows) / table.rows.length;
                 break;
               case 'min':
                 formattedColumn.total = _.chain(table.rows).map(i).map('value').min().value();
