@@ -24,14 +24,14 @@ export default function setupSettings(kbnServer, server, config) {
   }
 
   function userSettingsNotFound(kibanaVersion) {
-    server.plugins.kibana.status.red(`Could not find user-provided settings for this version of Kibana (${kibanaVersion})`);
+    server.plugins.kibana.status.yellow(`Could not find user-provided settings for this version of Kibana (${kibanaVersion})`);
     return {};
   }
 
   function resetKibanaPluginStatusIfNecessary(user) {
     const isElasticsearchPluginGreen = server.plugins.elasticsearch.status.state === 'green';
-    const isKibanaPluginCurrentlyRed = server.plugins.kibana.status.state === 'red';
-    if (isElasticsearchPluginGreen && isKibanaPluginCurrentlyRed) {
+    const isKibanaPluginCurrentlyYellow = server.plugins.kibana.status.state === 'yellow';
+    if (isElasticsearchPluginGreen && isKibanaPluginCurrentlyYellow) {
       server.plugins.kibana.status.green('Ready');
     }
     return user;
