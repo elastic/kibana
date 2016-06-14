@@ -40,7 +40,7 @@ uiModules.get('apps/management')
 });
 
 management.getSection('kibana').register('settings', {
-  display: 'Settings',
+  display: 'Advanced Settings',
   order: 20,
   path: 'kibana/settings'
 });
