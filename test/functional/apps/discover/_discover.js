@@ -33,6 +33,9 @@ bdd.describe('discover app', function describeIndexTests() {
     .then(function () {
       common.debug('setAbsoluteRange');
       return headerPage.setAbsoluteRange(fromTime, toTime);
+    })
+    .then(function () {
+      return headerPage.getSpinnerDone();
     });
   });
 
@@ -74,13 +77,18 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('load query should show query name', function () {
       return discoverPage.loadSavedSearch(queryName1)
       .then(function () {
-        return common.sleep(3000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
-        return discoverPage.getCurrentQueryName();
+        return common.try(function () {
+          return discoverPage.getCurrentQueryName()
+          .then(function (actualQueryNameString) {
+            expect(actualQueryNameString).to.be(queryName1);
+          });
+        });
       })
-      .then(function (actualQueryNameString) {
-        expect(actualQueryNameString).to.be(queryName1);
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     });
 
@@ -101,7 +109,7 @@ bdd.describe('discover app', function describeIndexTests() {
         '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
         '118.562', '63.524', '17.587', '2.537'
       ];
-      return common.sleep(4000)
+      return headerPage.getSpinnerDone()
       .then(function () {
         return verifyChartData(expectedBarChartData);
       });
@@ -140,7 +148,7 @@ bdd.describe('discover app', function describeIndexTests() {
       ];
       return discoverPage.setChartInterval(chartInterval)
       .then(function () {
-        return common.sleep(4000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
@@ -154,7 +162,7 @@ bdd.describe('discover app', function describeIndexTests() {
       ];
       return discoverPage.setChartInterval(chartInterval)
       .then(function () {
-        return common.sleep(4000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
@@ -166,7 +174,7 @@ bdd.describe('discover app', function describeIndexTests() {
       var expectedBarChartData = [ '66.598', '129.458'];
       return discoverPage.setChartInterval(chartInterval)
       .then(function () {
-        return common.sleep(2000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
@@ -179,6 +187,9 @@ bdd.describe('discover app', function describeIndexTests() {
         '133.196', '129.192', '129.724'
       ];
       return this.remote.goBack()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      })
       .then(function () {
         return common.try(function tryingForTime() {
           return discoverPage.getChartInterval()
@@ -197,7 +208,7 @@ bdd.describe('discover app', function describeIndexTests() {
       var expectedBarChartData = [ '122.535'];
       return discoverPage.setChartInterval(chartInterval)
       .then(function () {
-        return common.sleep(2000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
@@ -209,7 +220,7 @@ bdd.describe('discover app', function describeIndexTests() {
       var expectedBarChartData = [ '122.535'];
       return discoverPage.setChartInterval(chartInterval)
       .then(function () {
-        return common.sleep(2000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
@@ -226,7 +237,7 @@ bdd.describe('discover app', function describeIndexTests() {
       ];
       return discoverPage.setChartInterval(chartInterval)
       .then(function () {
-        return common.sleep(4000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return verifyChartData(expectedBarChartData);
@@ -249,26 +260,29 @@ bdd.describe('discover app', function describeIndexTests() {
 
     function verifyChartData(expectedBarChartData) {
       return common.try(function tryingForTime() {
-        return discoverPage.getBarChartData()
-        .then(function compareData(paths) {
-          // the largest bars are over 100 pixels high so this is less than 1% tolerance
-          var barHeightTolerance = 1;
-          var stringResults = '';
-          var hasFailure = false;
-          for (var y = 0; y < expectedBarChartData.length; y++) {
-            stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
-             ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
-            if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
-              hasFailure = true;
+        return headerPage.getSpinnerDone()
+        .then(function () {
+          return discoverPage.getBarChartData()
+          .then(function compareData(paths) {
+            // the largest bars are over 100 pixels high so this is less than 1% tolerance
+            var barHeightTolerance = 1;
+            var stringResults = '';
+            var hasFailure = false;
+            for (var y = 0; y < expectedBarChartData.length; y++) {
+              stringResults += y + ': expected = ' + expectedBarChartData[y] + ', actual = ' + paths[y] +
+               ', Pass = ' + (Math.abs(expectedBarChartData[y] - paths[y]) < barHeightTolerance) + '\n';
+              if ((Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance)) {
+                hasFailure = true;
+              };
             };
-          };
-          if (hasFailure) {
-            common.log(stringResults);
-            common.log(paths);
-          }
-          for (var x = 0; x < expectedBarChartData.length; x++) {
-            expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
-          }
+            if (hasFailure) {
+              common.log(stringResults);
+              common.log(paths);
+            }
+            for (var x = 0; x < expectedBarChartData.length; x++) {
+              expect(Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance).to.be.ok();
+            }
+          });
         });
       });
 

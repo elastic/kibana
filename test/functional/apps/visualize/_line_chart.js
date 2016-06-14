@@ -73,6 +73,9 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function waitForVisualization() {
         return visualizePage.waitForVisualization();
+      })
+      .then(function waitForVisualization() {
+        return headerPage.getSpinnerDone();
       });
     });
 
@@ -85,8 +88,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       // it could also check the legend to verify the extensions
       var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
-      // sleep a bit before trying to get the chart data
-      return common.sleep(3000)
+      return headerPage.getSpinnerDone()
       .then(function () {
         return visualizePage.getLineChartData('fill="#57c17b"')
         .then(function showData(data) {

@@ -42,8 +42,8 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function () {
       return headerPage.getSpinnerDone();
     })
-    .then(function sleep() {
-      return common.sleep(1003);
+    .then(function () {
+      return headerPage.getSpinnerDone();
     })
     .then(function () {
       common.debug('setNumericInterval 4000');
@@ -82,9 +82,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function waitForVisualization() {
         return visualizePage.waitForVisualization();
       })
-      // sleep a bit before trying to get the pie chart data below
-      .then(function sleep() {
-        return common.sleep(2000);
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     });
 
@@ -92,11 +91,13 @@ bdd.describe('visualize app', function describeIndexTests() {
       var remote = this.remote;
       var expectedPieChartSliceCount = 10;
 
-      return visualizePage.getPieChartData()
-      .then(function (pieData) {
-        var barHeightTolerance = 1;
-        common.debug('pieData.length = ' + pieData.length);
-        expect(pieData.length).to.be(expectedPieChartSliceCount);
+      return common.try(function () {
+        return visualizePage.getPieChartData()
+        .then(function (pieData) {
+          var barHeightTolerance = 1;
+          common.debug('pieData.length = ' + pieData.length);
+          expect(pieData.length).to.be(expectedPieChartSliceCount);
+        });
       })
       .then(function takeScreenshot() {
         common.debug('Take screenshot');

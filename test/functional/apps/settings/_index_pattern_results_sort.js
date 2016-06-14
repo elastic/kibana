@@ -3,6 +3,7 @@ import {
   common,
   defaultTimeout,
   settingsPage,
+  headerPage,
   scenarioManager,
   esClient
 } from '../../../support';
@@ -109,7 +110,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
         return chain.then(function () {
           return settingsPage.goToPage(val)
           .then(function () {
-            return common.sleep(1000);
+            return headerPage.getSpinnerDone();
           })
           .then(function () {
             return settingsPage.getPageFieldCount();
