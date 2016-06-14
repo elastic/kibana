@@ -4,6 +4,7 @@ import install from './install';
 import Logger from '../lib/logger';
 import pkg from '../../utils/package_json';
 import { parse, parseMilliseconds } from './settings';
+import { find } from 'lodash';
 
 function processCommand(command, options) {
   let settings;
@@ -25,17 +26,16 @@ function getDefaultConfigPath() {
     '/etc/kibana/kibana.yml'
   ];
 
-  let defaultPath = paths[0];
-  paths.some(configPath => {
+  const availablePath = find(paths, configPath => {
     try {
       fs.accessSync(configPath, fs.R_OK);
-      defaultPath = configPath;
       return true;
     } catch (e) {
       //Check the next path
     }
   });
-  return defaultPath;
+
+  return availablePath || paths[0];
 }
 
 export default function pluginInstall(program) {
