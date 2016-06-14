@@ -3,11 +3,11 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
-import tabifyPm from 'ui/agg_response/tabify/tabify';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
-import VisProvider from 'ui/vis';
+import tabifyPm from '../../../../ui/public/agg_response/tabify/tabify';
+import AggResponseTabifyTableGroupProvider from '../../../../ui/public/agg_response/tabify/_table_group';
+import VisProvider from '../../../../ui/public/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import StateManagementAppStateProvider from 'ui/state_management/app_state';
+import StateManagementAppStateProvider from '../../../../ui/public/state_management/app_state';
 describe('Controller', function () {
 
   let $rootScope;

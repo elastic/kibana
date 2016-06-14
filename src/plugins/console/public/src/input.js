@@ -11,7 +11,7 @@ let storage = require('./storage');
 let utils = require('./utils');
 let es = require('./es');
 let history = require('./history');
-import uiModules from 'ui/modules';
+import uiModules from '../../../../ui/public/modules';
 
 var $el = $('#editor');
 var input = new SenseEditor($el);

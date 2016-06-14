@@ -1,21 +1,21 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import angular from 'angular';
-import chrome from 'ui/chrome';
-import 'ui/courier';
-import 'ui/config';
-import 'ui/notify';
-import 'ui/typeahead';
-import 'ui/navbar_extensions';
-import 'ui/share';
+import chrome from '../../../../ui/public/chrome';
+import '../../../../ui/public/courier';
+import '../../../../ui/public/config';
+import '../../../../ui/public/notify';
+import '../../../../ui/public/typeahead';
+import '../../../../ui/public/navbar_extensions';
+import '../../../../ui/public/share';
 import 'plugins/kibana/dashboard/directives/grid';
 import 'plugins/kibana/dashboard/components/panel/panel';
 import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
-import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import DocTitleProvider from 'ui/doc_title';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import FilterBarQueryFilterProvider from '../../../../ui/public/filter_bar/query_filter';
+import DocTitleProvider from '../../../../ui/public/doc_title';
+import uiRoutes from '../../../../ui/public/routes';
+import uiModules from '../../../../ui/public/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 
 

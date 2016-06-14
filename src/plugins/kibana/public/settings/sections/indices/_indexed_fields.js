@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import 'ui/paginated_table';
+import '../../../../../../ui/public/paginated_table';
 import nameHtml from 'plugins/kibana/settings/sections/indices/_field_name.html';
 import typeHtml from 'plugins/kibana/settings/sections/indices/_field_type.html';
 import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../../ui/public/modules';
 import indexedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_indexed_fields.html';
 
 uiModules.get('apps/settings')

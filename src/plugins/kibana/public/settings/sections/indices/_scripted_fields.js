@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import 'ui/paginated_table';
+import '../../../../../../ui/public/paginated_table';
 import popularityHtml from 'plugins/kibana/settings/sections/indices/_field_popularity.html';
 import controlsHtml from 'plugins/kibana/settings/sections/indices/_field_controls.html';
 import dateScripts from 'plugins/kibana/settings/sections/indices/_date_scripts';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../../ui/public/modules';
 import scriptedFieldsTemplate from 'plugins/kibana/settings/sections/indices/_scripted_fields.html';
 
 uiModules.get('apps/settings')

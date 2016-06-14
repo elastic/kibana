@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibProvider from 'ui/vislib';
-import uiModules from 'ui/modules';
+import VislibProvider from '../../../../../ui/public/vislib';
+import uiModules from '../../../../../ui/public/modules';
 uiModules
 .get('apps/discover')
 .directive('discoverTimechart', function (Private, $compile) {

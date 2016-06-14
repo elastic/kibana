@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uiModules from 'ui/modules';
+import uiModules from '../../../ui/public/modules';
 import tableVisParamsTemplate from 'plugins/table_vis/table_vis_params.html';
 
 uiModules.get('kibana/table_vis')

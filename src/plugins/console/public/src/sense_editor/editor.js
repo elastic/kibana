@@ -6,7 +6,7 @@ let RowParser = require('./row_parser');
 let InputMode = require('./mode/input');
 let utils = require('../utils');
 let es = require('../es');
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 
 const smartResize = require('../smart_resize');
 

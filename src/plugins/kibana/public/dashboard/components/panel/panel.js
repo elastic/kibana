@@ -1,12 +1,12 @@
 import moment from 'moment';
 import $ from 'jquery';
 import _ from 'lodash';
-import 'ui/visualize';
-import 'ui/doc_table';
+import '../../../../../../ui/public/visualize';
+import '../../../../../../ui/public/doc_table';
 import PluginsKibanaDashboardComponentsPanelLibLoadPanelProvider from 'plugins/kibana/dashboard/components/panel/lib/load_panel';
-import FilterManagerProvider from 'ui/filter_manager';
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
-import uiModules from 'ui/modules';
+import FilterManagerProvider from '../../../../../../ui/public/filter_manager';
+import UtilsBrushEventProvider from '../../../../../../ui/public/utils/brush_event';
+import uiModules from '../../../../../../ui/public/modules';
 import panelTemplate from 'plugins/kibana/dashboard/components/panel/panel.html';
 uiModules
 .get('app/dashboard')

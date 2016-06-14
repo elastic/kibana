@@ -1,7 +1,7 @@
 import { saveAs } from '@spalger/filesaver';
 import _ from 'lodash';
-import 'ui/agg_table';
-import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import '../../../ui/public/agg_table';
+import AggResponseTabifyTabifyProvider from '../../../ui/public/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);

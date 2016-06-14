@@ -5,14 +5,14 @@ import 'plugins/kibana/settings/sections/objects/index';
 import 'plugins/kibana/settings/sections/status/index';
 import 'plugins/kibana/settings/sections/about/index';
 import 'plugins/kibana/settings/styles/main.less';
-import 'ui/filters/start_from';
-import 'ui/field_editor';
+import '../../../../ui/public/filters/start_from';
+import '../../../../ui/public/field_editor';
 import 'plugins/kibana/settings/sections/indices/_indexed_fields';
 import 'plugins/kibana/settings/sections/indices/_scripted_fields';
-import 'ui/directives/bread_crumbs';
-import registry from 'ui/registry/settings_sections';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import '../../../../ui/public/directives/bread_crumbs';
+import registry from '../../../../ui/public/registry/settings_sections';
+import uiRoutes from '../../../../ui/public/routes';
+import uiModules from '../../../../ui/public/modules';
 import appTemplate from 'plugins/kibana/settings/app.html';
 
 

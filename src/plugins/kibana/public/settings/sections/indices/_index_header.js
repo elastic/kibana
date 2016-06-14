@@ -1,4 +1,4 @@
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../../ui/public/modules';
 import indexHeaderTemplate from 'plugins/kibana/settings/sections/indices/_index_header.html';
 uiModules
 .get('apps/settings')

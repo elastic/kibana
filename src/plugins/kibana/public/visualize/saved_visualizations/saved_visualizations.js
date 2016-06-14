@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import Scanner from 'ui/utils/scanner';
+import Scanner from '../../../../../ui/public/utils/scanner';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
-import uiModules from 'ui/modules';
+import RegistryVisTypesProvider from '../../../../../ui/public/registry/vis_types';
+import uiModules from '../../../../../ui/public/modules';
 const app = uiModules.get('app/visualize');
 
 

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'plugins/kibana/visualize/editor/agg_group';
 import 'plugins/kibana/visualize/editor/vis_options';
-import uiModules from 'ui/modules';
+import uiModules from '../../../../../ui/public/modules';
 import sidebarTemplate from 'plugins/kibana/visualize/editor/sidebar.html';
 uiModules
 .get('app/visualize')

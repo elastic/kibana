@@ -1,5 +1,5 @@
-import UtilsBrushEventProvider from 'ui/utils/brush_event';
-import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
+import UtilsBrushEventProvider from '../../../../../../../ui/public/utils/brush_event';
+import FilterBarFilterBarClickHandlerProvider from '../../../../../../../ui/public/filter_bar/filter_bar_click_handler';
 
 export default function visualizationLoader(savedVisualizations, Private) { // Inject services here
   const brushEvent = Private(UtilsBrushEventProvider);

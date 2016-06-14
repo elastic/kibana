@@ -3,9 +3,9 @@ import angular from 'angular';
 import rison from 'rison-node';
 import registry from 'plugins/kibana/settings/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/settings/sections/objects/_view.html';
-import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import IndexPatternsCastMappingTypeProvider from '../../../../../../ui/public/index_patterns/_cast_mapping_type';
+import uiRoutes from '../../../../../../ui/public/routes';
+import uiModules from '../../../../../../ui/public/modules';
 
 uiRoutes
 .when('/settings/objects/:service/:id', {

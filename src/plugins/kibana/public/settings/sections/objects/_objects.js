@@ -3,9 +3,9 @@ import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lo
 import angular from 'angular';
 import registry from 'plugins/kibana/settings/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/settings/sections/objects/_objects.html';
-import 'ui/directives/file_upload';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import '../../../../../../ui/public/directives/file_upload';
+import uiRoutes from '../../../../../../ui/public/routes';
+import uiModules from '../../../../../../ui/public/modules';
 
 const MAX_SIZE = Math.pow(2, 31) - 1;
 

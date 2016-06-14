@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import registry from 'ui/registry/settings_sections';
+import registry from '../../../../../../ui/public/registry/settings_sections';
 import 'plugins/kibana/settings/sections/indices/_create';
 import 'plugins/kibana/settings/sections/indices/_edit';
 import 'plugins/kibana/settings/sections/indices/_field_editor';
-import uiRoutes from 'ui/routes';
-import uiModules from 'ui/modules';
+import uiRoutes from '../../../../../../ui/public/routes';
+import uiModules from '../../../../../../ui/public/modules';
 import indexTemplate from 'plugins/kibana/settings/sections/indices/index.html';
 
 

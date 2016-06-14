@@ -16,7 +16,7 @@ import 'plugins/kibana/visualize/editor/draggable_item';
 import 'plugins/kibana/visualize/editor/draggable_handle';
 import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
-import uiRoutes from 'ui/routes';
+import uiRoutes from '../../../../ui/public/routes';
 
 
 uiRoutes

@@ -4,9 +4,9 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
-import 'ui/render_directive';
+import '../../../../ui/public/render_directive';
 import 'plugins/kbn_doc_views/views/table';
-import docViewsRegistry from 'ui/registry/doc_views';
+import docViewsRegistry from '../../../../ui/public/registry/doc_views';
 import StubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 const hit = {
   '_index': 'logstash-2014.09.09',

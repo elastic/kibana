@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import keyMap from 'ui/utils/key_map';
+import keyMap from '../ui/public/utils/key_map';
 let reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
 let KeyboardEvent = window.KeyboardEvent;
 

@@ -1,5 +1,5 @@
 import marked from 'marked';
-import uiModules from 'ui/modules';
+import uiModules from '../../../ui/public/modules';
 marked.setOptions({
   gfm: true, // Github-flavored markdown
   sanitize: true // Sanitize HTML tags
