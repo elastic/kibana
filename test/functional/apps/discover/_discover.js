@@ -58,6 +58,7 @@ bdd.describe('discover app', function describeIndexTests() {
         return headerPage.getToastMessage();
       })
       .then(function (toastMessage) {
+        common.saveScreenshot('Discover-save-query-toast');
         expect(toastMessage).to.be(expectedSavedQueryMessage);
       })
       .then(function () {
@@ -80,6 +81,7 @@ bdd.describe('discover app', function describeIndexTests() {
         return discoverPage.getCurrentQueryName();
       })
       .then(function (actualQueryNameString) {
+        common.saveScreenshot('Discover-load-query');
         expect(actualQueryNameString).to.be(queryName1);
       });
     });
@@ -289,6 +291,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('should show "no results"', () => {
       return discoverPage.hasNoResults().then(visible => {
+        common.saveScreenshot('Discover-no-results');
         expect(visible).to.be(true);
       });
     });

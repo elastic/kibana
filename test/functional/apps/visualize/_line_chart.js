@@ -52,12 +52,9 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('line charts', function indexPatternCreation() {
-    var testSubName = 'LineChart';
-    var vizName1 = 'Visualization ' + testSubName;
+    var vizName1 = 'Visualization LineChart';
 
     bdd.it('should be able to save and load', function pageHeader() {
-
-      common.debug('Start of test' + testSubName + 'Visualization');
       var remote = this.remote;
 
       return visualizePage.saveVisualization(vizName1)
@@ -90,6 +87,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function () {
         return visualizePage.getLineChartData('fill="#57c17b"')
         .then(function showData(data) {
+          common.saveScreenshot('Visualize-line-chart');
           var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
           for (var x = 0; x < data.length; x++) {
             common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
@@ -99,11 +97,6 @@ bdd.describe('visualize app', function describeIndexTests() {
           }
           common.debug('Done');
         });
-      })
-      .then(function takeScreenshot() {
-        // take a snapshot just as an example.
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
       });
     });
 

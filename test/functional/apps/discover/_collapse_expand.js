@@ -38,6 +38,7 @@ bdd.describe('discover tab', function describeIndexTests() {
 
   bdd.describe('field data', function () {
     bdd.it('should initially be expanded', function () {
+      common.saveScreenshot('Discover-sidebar-expanded');
       return discoverPage.getSidebarWidth()
         .then(function (width) {
           common.debug('expanded sidebar width = ' + width);
@@ -48,6 +49,7 @@ bdd.describe('discover tab', function describeIndexTests() {
     bdd.it('should collapse when clicked', function () {
       return discoverPage.toggleSidebarCollapse()
         .then(function () {
+          common.saveScreenshot('Discover-sidebar-collapsed');
           common.debug('discoverPage.getSidebarWidth()');
           return discoverPage.getSidebarWidth();
         })
