@@ -66,12 +66,14 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              target_field: 'foo_target_field',
-              formats: [ 'iso8601', 'unix', 'unix_ms', 'tai64n' ],
-              timezone: 'foo_timezone',
-              locale: 'foo_locale'
+              date: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                target_field: 'foo_target_field',
+                formats: [ 'iso8601', 'unix', 'unix_ms', 'tai64n' ],
+                timezone: 'foo_timezone',
+                locale: 'foo_locale'
+              }
             };
 
             expected = {
@@ -92,15 +94,15 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.date.foo = 'bar';
+            source.date.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
           });
 
           it('should treat any unknown formats as a custom format', () => {
-            source.formats.push('foo');
+            source.date.formats.push('foo');
             expected.formats.push('CUSTOM');
             expected.custom_format = 'foo';
 
@@ -109,13 +111,26 @@ describe('ingest', () => {
           });
 
           it('should use the last custom format if multiple are specified', () => {
-            source.formats.push('foo');
-            source.formats.push('bar');
+            source.date.formats.push('foo');
+            source.date.formats.push('bar');
             expected.formats.push('CUSTOM');
             expected.custom_format = 'bar';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [date] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[date\] property/i;
+
+            source.foo = _.clone(source.date);
+            delete source.date;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });
