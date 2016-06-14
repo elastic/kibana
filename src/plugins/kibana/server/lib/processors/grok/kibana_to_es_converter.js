@@ -3,7 +3,7 @@ export default function grok(processorApiDocument) {
     grok: {
       tag: processorApiDocument.processor_id,
       field: processorApiDocument.source_field,
-      pattern: processorApiDocument.pattern
+      patterns: [ processorApiDocument.pattern ]
     }
   };
 }
