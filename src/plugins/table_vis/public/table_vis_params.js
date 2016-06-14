@@ -8,6 +8,8 @@ uiModules.get('kibana/table_vis')
     restrict: 'E',
     template: tableVisParamsTemplate,
     link: function ($scope) {
+      $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
+
       $scope.$watchMulti([
         'vis.params.showPartialRows',
         'vis.params.showMeticsAtAllLevels'
