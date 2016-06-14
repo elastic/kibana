@@ -3,6 +3,7 @@ import {
   common,
   scenarioManager,
   settingsPage,
+  headerPage,
   esClient
 } from '../../../support';
 
@@ -33,7 +34,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
     function fix5030() {
       return settingsPage.setPageSize('All')
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       });
     }
 
@@ -41,7 +42,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       // increase Popularity of geo.coordinates
       return settingsPage.setPageSize('All')
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function openControlsByName() {
         common.debug('Starting openControlsByName (' + fieldName + ')');

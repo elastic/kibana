@@ -1,4 +1,4 @@
-import { common, defaultFindTimeout, remote } from '../';
+import { common, defaultFindTimeout, headerPage, remote } from '../';
 
 export default (function () {
   function VisualizePage() {
@@ -296,7 +296,7 @@ export default (function () {
       .findByCssSelector('button[aria-label="Save Visualization"]')
       .click()
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         common.debug('saveButton button clicked');
@@ -370,7 +370,7 @@ export default (function () {
       var self = this;
       return self.filterVisByName(vizName)
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function clickDashboardByLinkedText() {
         return self.clickVisualizationByLinkText(vizName);

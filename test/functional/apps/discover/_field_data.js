@@ -46,6 +46,9 @@ bdd.describe('discover app', function describeIndexTests() {
       var expectedHitCount = '445';
       return discoverPage.query('php')
       .then(function () {
+        return headerPage.getSpinnerDone();
+      })
+      .then(function () {
         return common.try(function tryingForTime() {
           return discoverPage.getHitCount()
           .then(function compareData(hitCount) {
@@ -68,6 +71,9 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('search _type:apache should show the correct hit count', function () {
       var expectedHitCount = '11,156';
       return discoverPage.query('_type:apache')
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      })
       .then(function () {
         return common.try(function tryingForTime() {
           return discoverPage.getHitCount()
@@ -213,10 +219,7 @@ bdd.describe('discover app', function describeIndexTests() {
         + ' 14:26:41.000';
       return discoverPage.clickDocSortDown()
       .then(function () {
-        // we don't technically need this sleep here because the tryForTime will retry and the
-        // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
-        // case and it can be avoided with just a few seconds sleep.
-        return common.sleep(2000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return common.try(function tryingForTime() {

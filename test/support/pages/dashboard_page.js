@@ -1,4 +1,4 @@
-import { remote, common, defaultFindTimeout } from '../';
+import { remote, common, defaultFindTimeout, headerPage } from '../';
 
 export default (function () {
   var thisTime;
@@ -54,7 +54,7 @@ export default (function () {
       // 'stale element reference: element is not attached to the page document'
       // on the next step
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         // but wrap in a try loop since it can still happen
@@ -75,7 +75,7 @@ export default (function () {
       .findByCssSelector('button.ng-scope[aria-label="Save Dashboard"]')
       .click()
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         common.debug('saveButton button clicked');
@@ -85,9 +85,11 @@ export default (function () {
       })
       // click save button
       .then(function () {
-        return thisTime
-        .findByCssSelector('.btn-primary')
-        .click();
+        return common.try(function () {
+          return thisTime
+          .findByCssSelector('.btn-primary')
+          .click();
+        });
       })
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
@@ -119,7 +121,7 @@ export default (function () {
         .type(dashName.replace('-',' '));
       })
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function clickDashboardByLinkedText() {
         return self

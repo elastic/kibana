@@ -79,11 +79,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function () {
         return visualizePage.waitForVisualization();
       })
-      // We have to sleep sometime between loading the saved visTitle
-      // and trying to access the chart below with getXAxisLabels
-      // otherwise it hangs.
-      .then(function sleep() {
-        return common.sleep(2000);
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     });
 
@@ -157,6 +154,9 @@ bdd.describe('visualize app', function describeIndexTests() {
       return visualizePage.collapseChart()
       .then(function setPageSize() {
         return settingsPage.setPageSize('All');
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       })
       .then(function getDataTableData() {
         return visualizePage.getDataTableData();

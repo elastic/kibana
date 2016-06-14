@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import { common, remote, defaultFindTimeout } from '../';
+import { common, remote, defaultFindTimeout, headerPage } from '../';
 
 export default (function () {
   function SettingsPage() {
@@ -31,7 +31,7 @@ export default (function () {
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
       .then(function () {
-        return common.sleep(1000);
+        return headerPage.getSpinnerDone();
       })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
         return self.remote.setFindTimeout(defaultFindTimeout)
@@ -89,8 +89,14 @@ export default (function () {
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
+        return headerPage.getSpinnerDone();
+      })
+      .then(function () {
         return common.try(function () {
           return self.getTimeFieldOption(selection).click()
+          .then(function () {
+            return headerPage.getSpinnerDone();
+          })
           .then(function () {
             return self.getTimeFieldOption(selection).isSelected();
           })
@@ -245,6 +251,9 @@ export default (function () {
       .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
       .then(function (button) {
         return button.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -269,6 +278,9 @@ export default (function () {
       .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
       .then(function (button) {
         return button.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -287,6 +299,9 @@ export default (function () {
         return self.selectTimeFieldOption('@timestamp')
         .then(function () {
           return self.getCreateButton().click();
+        })
+        .then(function () {
+          return headerPage.getSpinnerDone();
         });
       })
       .then(function () {
