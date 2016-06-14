@@ -14,13 +14,13 @@ uiRoutes
   template: editTemplate,
   resolve: {
     indexPattern: function ($route, config, courier) {
-      let id = $route.current.params.indexPatternId;
+      const params = $route.current.params;
 
-      if (typeof id === 'undefined') {
-        id = config.get('defaultIndex');
+      if (typeof params.indexPatternId === 'undefined') {
+        params.indexPatternId = config.get('defaultIndex');
       }
 
-      return courier.indexPatterns.get(id)
+      return courier.indexPatterns.get(params.indexPatternId)
       .catch(courier.redirectWhenMissing('/management/data/index'));
     }
   }

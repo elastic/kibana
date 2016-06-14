@@ -6,15 +6,21 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 
+const indexPatternsResolutions = {
+  indexPatternIds: function (courier) {
+    return courier.indexPatterns.getIds();
+  }
+};
 
 // add a dependency to all of the subsection routes
 uiRoutes
 .defaults(/management\/kibana\/indices/, {
-  resolve: {
-    indexPatternIds: function (courier) {
-      return courier.indexPatterns.getIds();
-    }
-  }
+  resolve: indexPatternsResolutions
+});
+
+uiRoutes
+.defaults(/management\/data\/index/, {
+  resolve: indexPatternsResolutions
 });
 
 // wrapper directive, which sets some global stuff up like the left nav
