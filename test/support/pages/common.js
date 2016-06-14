@@ -76,6 +76,9 @@ export default (function () {
           self.debug('navigate to: ' + url);
           return self.remote.get(url)
           .then(function () {
+            return self.sleep(700);
+          })
+          .then(function () {
             self.debug('returned from get, calling refresh');
             return self.remote.refresh();
           })
