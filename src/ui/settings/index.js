@@ -24,12 +24,17 @@ export default function setupSettings(kbnServer, server, config) {
   }
 
   function userSettingsNotFound(kibanaVersion) {
-    if (server.plugins.elasticsearch.status.state === 'green') {
-      server.plugins.kibana.status.red(`Could not find user-provided settings for this version of Kibana (${kibanaVersion})`);
-    } else {
-      server.log(['warning', 'settings'], 'User-provided settings were requested before the Kibana index was ready');
-    }
+    server.plugins.kibana.status.red(`Could not find user-provided settings for this version of Kibana (${kibanaVersion})`);
     return {};
+  }
+
+  function resetKibanaPluginStatusIfNecessary(user) {
+    const isElasticsearchPluginGreen = server.plugins.elasticsearch.status.state === 'green';
+    const isKibanaPluginCurrentlyRed = server.plugins.kibana.status.state === 'red';
+    if (isElasticsearchPluginGreen && isKibanaPluginCurrentlyRed) {
+      server.plugins.kibana.status.green('Ready');
+    }
+    return user;
   }
 
   function getUserProvided() {
@@ -38,6 +43,7 @@ export default function setupSettings(kbnServer, server, config) {
     return client
       .get({ ...clientSettings })
       .then(res => res._source)
+      .then(resetKibanaPluginStatusIfNecessary)
       .catch(partial(userSettingsNotFound, clientSettings.id))
       .then(user => hydrateUserSettings(user));
   }
