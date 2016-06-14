@@ -49,7 +49,7 @@ syntax], or use the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL
 When you submit a search, the histogram, Documents table, and Fields list are updated to reflect 
 the search results. The total number of hits (matching documents) is shown in the upper right corner of the
 histogram. The Documents table shows the first five hundred hits. By default, the hits are listed in reverse 
-chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time 
+chronological order, with the newest documents shown first. You can reverse the sort order by clicking on the Time 
 column header. You can also sort the table using the values in any indexed field. For more information, see <<sorting, 
 Sorting the Documents Table>>.
 
