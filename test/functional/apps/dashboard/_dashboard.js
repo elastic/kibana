@@ -42,6 +42,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
     ];
 
     bdd.it('should be able to add visualizations to dashboard', function addVisualizations() {
+      common.saveScreenshot('Dashboard-no-visualizations');
+
       function addVisualizations(arr) {
         return arr.reduce(function (promise, vizName) {
           return promise
@@ -54,13 +56,13 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       return addVisualizations(visualizations)
       .then(function () {
         common.debug('done adding visualizations');
+        common.saveScreenshot('Dashboard-add-visualizations');
       });
     });
 
     bdd.it('set the timepicker time to that which contains our test data', function setTimepicker() {
       var fromTime = '2015-09-19 06:31:44.000';
       var toTime = '2015-09-23 18:31:44.000';
-      var testSubName = 'Dashboard Test 1';
 
       // .then(function () {
       common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
@@ -69,21 +71,23 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         return common.sleep(4000);
       })
       .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
+        common.saveScreenshot('Dashboard-set-timepicker');
       });
     });
 
     bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
-      var testSubName = 'Dashboard Test 1';
+      const dashboardName = 'Dashboard Test 1';
       // TODO: save time on the dashboard and test it
-      return dashboardPage.saveDashboard(testSubName)
+      return dashboardPage.saveDashboard(dashboardName)
       // click New Dashboard just to clear the one we just created
       .then(function () {
         return dashboardPage.clickNewDashboard();
       })
       .then(function () {
-        return dashboardPage.loadSavedDashboard(testSubName);
+        return dashboardPage.loadSavedDashboard(dashboardName);
+      })
+      .then(function () {
+        common.saveScreenshot('Dashboard-load-saved');
       });
     });
 
@@ -94,6 +98,9 @@ bdd.describe('dashboard tab', function describeIndexTests() {
           common.log('visualization titles = ' + panelTitles);
           expect(panelTitles).to.eql(visualizations);
         });
+      })
+      .then(function () {
+        common.saveScreenshot('Dashboard-has-visualizations');
       });
     });
 
@@ -110,6 +117,7 @@ bdd.describe('dashboard tab', function describeIndexTests() {
         return dashboardPage.getPanelData()
         .then(function (panelTitles) {
           common.log('visualization titles = ' + panelTitles);
+          common.saveScreenshot('Dashboard-visualization-sizes');
           expect(panelTitles).to.eql(visObjects);
         });
       });

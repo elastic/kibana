@@ -1,5 +1,16 @@
-var _ = require('lodash');
+const _ = require('lodash');
+const visualRegression = require('../utilities/visual_regression');
+
 module.exports = function (grunt) {
+  grunt.registerTask(
+    'test:visualRegression',
+    'Compare screenshots and generate diff images.',
+    function () {
+      const done = this.async();
+      visualRegression.run(done);
+    }
+  );
+
   grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
   grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
@@ -21,6 +32,7 @@ module.exports = function (grunt) {
     'run:testUIServer',
     'downloadSelenium',
     'run:seleniumServer',
+    'clean:screenshots',
     'intern:dev',
     'esvm_shutdown:ui',
     'stop:seleniumServer',
@@ -35,6 +47,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:ui:runner', [
+    'clean:screenshots',
     'intern:dev'
   ]);
 
@@ -55,7 +68,7 @@ module.exports = function (grunt) {
     'intern:api'
   ]);
 
-  grunt.registerTask('test', function (subTask) {
+  grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
     grunt.task.run(_.compact([

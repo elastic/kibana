@@ -1,4 +1,7 @@
-import { bdd, common } from '../../support';
+import {
+  bdd,
+  common
+} from '../../support';
 
 var expect = require('expect.js');
 
@@ -15,6 +18,7 @@ bdd.describe('status page', function () {
       .findByCssSelector('.plugin_status_breakdown')
       .getVisibleText()
       .then(function (text) {
+        common.saveScreenshot('Status');
         expect(text.indexOf('kibana 1.0.0 Ready')).to.be.above(-1);
       });
     })

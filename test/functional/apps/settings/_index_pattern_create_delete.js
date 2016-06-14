@@ -26,6 +26,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
     bdd.it('should have index pattern in page header', function pageHeader() {
       return settingsPage.getIndexPageHeading().getVisibleText()
       .then(function (patternName) {
+        common.saveScreenshot('Settings-indices-new-index-pattern');
         expect(patternName).to.be('logstash-*');
       });
     });
@@ -72,6 +73,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       var expectedAlertText = 'Are you sure you want to remove this index pattern?';
       return settingsPage.removeIndexPattern()
       .then(function (alertText) {
+        common.saveScreenshot('Settings-indices-confirm-remove-index-pattern');
         expect(alertText).to.be(expectedAlertText);
       });
     });

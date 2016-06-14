@@ -56,6 +56,7 @@ bdd.describe('shared links', function describeIndexTests() {
       var expectedCaption = 'Share a link';
       return discoverPage.clickShare()
       .then(function () {
+        common.saveScreenshot('Discover-share-link');
         return discoverPage.getShareCaption();
       })
       .then(function (actualCaption) {
@@ -85,6 +86,7 @@ bdd.describe('shared links', function describeIndexTests() {
         return headerPage.getToastMessage();
       })
       .then(function (toastMessage) {
+        common.saveScreenshot('Discover-copy-to-clipboard-toast');
         expect(toastMessage).to.match(expectedToastMessage);
       })
       .then(function () {
@@ -98,6 +100,7 @@ bdd.describe('shared links', function describeIndexTests() {
       return discoverPage.clickShortenUrl()
       .then(function () {
         return common.try(function tryingForTime() {
+          common.saveScreenshot('Discover-shorten-url-button');
           return discoverPage.getShortenedUrl()
           .then(function (actualUrl) {
             expect(actualUrl).to.match(re);
