@@ -10,21 +10,18 @@ import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
 
 uiRoutes
-.when('/management/kibana/indices/:indexPatternId', {
+.when('/management/kibana/indices/:indexPatternId?', {
   template: editTemplate,
   resolve: {
-    indexPattern: function ($route, courier) {
-      return courier.indexPatterns.get($route.current.params.indexPatternId)
-      .catch(courier.redirectWhenMissing('/management/data/index'));
-    }
-  }
-});
+    indexPattern: function ($route, config, courier) {
+      let id = $route.current.params.indexPatternId;
 
-uiRoutes
-.when('/management/kibana/indices', {
-  resolve: {
-    _: function ($location, config) {
-      $location.path(`/management/kibana/indices/${config.get('defaultIndex')}`);
+      if (typeof id === 'undefined') {
+        id = config.get('defaultIndex');
+      }
+
+      return courier.indexPatterns.get(id)
+      .catch(courier.redirectWhenMissing('/management/data/index'));
     }
   }
 });
