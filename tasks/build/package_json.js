@@ -5,6 +5,7 @@ module.exports = function (grunt) {
   let deepModules = grunt.config.get('deepModules');
 
   grunt.registerTask('_build:packageJson', function () {
+    const { sha, number, version } = grunt.config.get('build');
 
     grunt.file.write(
       'build/kibana/package.json',
@@ -12,10 +13,10 @@ module.exports = function (grunt) {
         name: pkg.name,
         description: pkg.description,
         keywords: pkg.keywords,
-        version: pkg.version,
+        version,
         build: {
-          number: grunt.config.get('buildNum'),
-          sha: grunt.config.get('buildSha')
+          number,
+          sha
         },
         repository: pkg.repository,
         engines: {

@@ -5,9 +5,9 @@
 @status-metric-border: #aaa;
 @status-metric-title-color: #666;
 
-@status-plugins-bg: #fff;
-@status-plugins-border: #bbb;
-@status-plugins-headings-color: #666;
+@status-statuses-bg: #fff;
+@status-statuses-border: #bbb;
+@status-statuses-headings-color: #666;
 
 @status-default: #7c7c7c;
 @status-green: #94c63d;
@@ -58,13 +58,13 @@
   }
 }
 
-// plugin status table section
-.plugin_status_wrapper {
+// status status table section
+.statuses_wrapper {
   margin-top: 25px;
   margin-left: -5px;
   margin-right: -5px;
   border-top:2px solid;
-  background-color: @status-plugins-bg;
+  background-color: @status-statuses-bg;
   padding: 10px;
 
   h3 {
@@ -72,33 +72,34 @@
     margin-bottom: 3px;
   }
 
-  .missing_statuses,
-  .loading_statuses {
+  .statuses_loading,
+  .statuses_missing {
     padding: 20px;
     text-align: center;
   }
 
-  .plugin_status_breakdown {
+  .statuses {
     margin-left: 0;
     margin-right: 0;
+    margin-bottom: 30px;
 
-    .status_row {
+    .status {
       height:30px;
       line-height:30px;
       border-bottom:1px solid;
-      border-bottom-color: @status-plugins-border;
+      border-bottom-color: @status-statuses-border;
     }
 
     th {
-      color:@status-plugins-headings-color;
+      color:@status-statuses-headings-color;
       font-weight: normal;
       height:25px;
       line-height:25px;
       border-bottom:1px solid;
-      border-bottom-color: @status-plugins-border;
+      border-bottom-color: @status-statuses-border;
     }
 
-    .status_name {
+    .status_id {
       padding:0px 5px;
       border-left: 2px solid;
     }
@@ -111,17 +112,17 @@
   }
 }
 
-//plugin state
-.plugin_state(@color, @icon) {
-  .plugin_state_color {
+//status state
+.status_state(@color, @icon) {
+  .status_state_color {
     color: @color;
   }
 
-  .plugin_state_icon:before {
+  .status_state_icon:before {
     content: @icon;
   }
 
-  .status_name {
+  .status_id {
     border-left-color: @color !important;
   }
 
@@ -130,49 +131,49 @@
   }
 }
 
-.plugin_state_default {
-  .plugin_state(@status-default, @icon-default);
+.status_state_default {
+  .status_state(@status-default, @icon-default);
 }
 
-.plugin_state_green {
-  .plugin_state(@status-green, @icon-green);
+.status_state_green {
+  .status_state(@status-green, @icon-green);
 }
 
-.plugin_state_yellow {
-  .plugin_state(@status-yellow, @icon-yellow);
+.status_state_yellow {
+  .status_state(@status-yellow, @icon-yellow);
 }
 
-.plugin_state_red {
-  .plugin_state(@status-red, @icon-red);
+.status_state_red {
+  .status_state(@status-red, @icon-red);
 }
 
 //server state
 .state(@color, @icon) {
-  .state_color {
+  .overall_state_color {
     color: @color;
   }
 
-  .state_icon:before {
+  .overall_state_icon:before {
     content: @icon;
   }
 
-  .plugin_status_wrapper {
+  .statuses_wrapper {
     border-top-color: @color;
   }
 }
 
-.state_default {
+.overall_state_default {
   .state(@status-default, @icon-default);
 }
 
-.state_green {
+.overall_state_green {
   .state(@status-green, @icon-green);
 }
 
-.state_yellow {
+.overall_state_yellow {
   .state(@status-yellow, @icon-yellow);
 }
 
-.state_red {
+.overall_state_red {
   .state(@status-red, @icon-red);
 }
