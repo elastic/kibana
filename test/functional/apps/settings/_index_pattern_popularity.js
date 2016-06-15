@@ -63,6 +63,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       .then(function (popularity) {
         common.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
+        common.saveScreenshot('Settings-indices-result-popularity-updated');
       });
     });
 
@@ -101,6 +102,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       .then(function (popularity) {
         common.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
+        common.saveScreenshot('Settings-indices-result-popularity-saved');
       });
     });
   }); // end 'change popularity'

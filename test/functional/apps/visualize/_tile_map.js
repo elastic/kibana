@@ -50,14 +50,10 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
   });
 
-
   bdd.describe('tile map chart', function indexPatternCreation() {
 
     bdd.it('should save and load, take screenshot', function pageHeader() {
-      var testSubName = 'TileMap';
-      common.debug('Start of test' + testSubName + 'Visualization');
-      var vizName1 = 'Visualization ' + testSubName;
-      // var remote = this.remote;
+      var vizName1 = 'Visualization TileMap';
 
       return visualizePage.saveVisualization(vizName1)
       .then(function (message) {
@@ -79,14 +75,11 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
+        common.saveScreenshot('Visualize-site-map');
       });
     });
 
     bdd.it('should show correct tile map data', function pageHeader() {
-      var testSubName = 'TileMap';
-      common.debug('Start of test' + testSubName + 'Visualization');
-      // var remote = this.remote;
       var expectedTableData = [ 'dn 1,429', 'dp 1,418', '9y 1,215', '9z 1,099', 'dr 1,076',
         'dj 982', '9v 938', '9q 722', '9w 475', 'cb 457', 'c2 453', '9x 420', 'dq 399',
         '9r 396', '9t 274', 'c8 271', 'dh 214', 'b6 207', 'bd 206', 'b7 167', 'f0 141',
@@ -107,7 +100,5 @@ bdd.describe('visualize app', function describeIndexTests() {
         });
       });
     });
-
-
   });
 });
