@@ -23,6 +23,8 @@ function setLoggingJson(enabled) {
 
 describe(`Server logging configuration`, function () {
   it(`should be reloadable via SIGHUP process signaling`, function (done) {
+    this.timeout(60000);
+
     let asserted = false;
     let json = Infinity;
     const conf = setLoggingJson(true);
