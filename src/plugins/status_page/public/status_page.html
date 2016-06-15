@@ -26,13 +26,13 @@
       No status information available
     </h4>
 
-    <table class="status_statuses_breakdown" ng-if="ui.statuses.services">
+    <table class="status_statuses_breakdown" ng-if="ui.statuses.generic">
       <tr class="row">
-        <th class="col-xs-4">Service</th>
+        <th class="col-xs-4">ID</th>
         <th class="col-xs-8">Status</th>
       </tr>
       <tr
-        ng-repeat="status in ui.statuses.services"
+        ng-repeat="status in ui.statuses.generic"
         class="status_row status_state_default status_state_{{status.state}} row">
 
         <td class="col-xs-4 status_name">{{status.id}}</td>

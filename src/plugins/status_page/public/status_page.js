@@ -30,7 +30,7 @@ const chrome = require('ui/chrome')
       ui.metrics = data.metrics;
       ui.name = data.name;
 
-      ui.statuses = _.groupBy(data.status.statuses, s => s.plugin ? 'plugins' : 'services');
+      ui.statuses = _.groupBy(data.status.statuses, s => s.plugin ? 'plugins' : 'generic');
       if (!_.size(ui.statuses)) ui.statuses = null;
 
       const overall = data.status.overall;
