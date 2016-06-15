@@ -18,7 +18,7 @@ bdd.describe('status page', function () {
       .getVisibleText()
       .then(function (text) {
         common.saveScreenshot('Status');
-        expect(text.indexOf('kibana 1.0.0 Ready')).to.be.above(-1);
+        expect(text.indexOf('plugin:kibana')).to.be.above(-1);
       });
     })
     .catch(common.handleError(self));
