@@ -17,9 +17,11 @@ export default function HistogramVisType(Private) {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
-        isDonut: false
+        isDonut: false,
+        showOthers: 'No'
       },
-      editor: pieTemplate
+      editor: pieTemplate,
+      othersTypes: ['No', 'Yes', 'Yes, in all aggregations']
     },
     responseConverter: false,
     hierarchicalData: true,
