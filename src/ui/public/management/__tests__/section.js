@@ -12,7 +12,7 @@ describe('ManagementSection', () => {
 
     it('exposes items', () => {
       const section = new ManagementSection('kibana');
-      expect(section.items).to.beEmpty;
+      expect(section.items).to.be.empty();
     });
 
     it('sets url based on path', () => {
@@ -38,7 +38,7 @@ describe('ManagementSection', () => {
     });
 
     it('provides a reference to the parent', () => {
-      expect(section.register('about').parent).to.eql(section);
+      expect(section.register('about').parent).to.be(section);
     });
 
     it('adds item', function () {
@@ -96,8 +96,10 @@ describe('ManagementSection', () => {
     });
 
     it('is indexed on id', () => {
+      const keys = Object.keys(section.items.byId).sort();
       expect(section.items.byId).to.be.an('object');
-      expect(Object.keys(section.items.byId)).to.eql(['three', 'one', 'two']);
+
+      expect(keys).to.eql(['one', 'three', 'two']);
     });
 
     it('can be ordered', () => {
