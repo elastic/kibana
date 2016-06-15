@@ -38,7 +38,7 @@
     "Tim Sullivan <tim@elastic.co>"
   ],
   "scripts": {
-    "test": "grunt test; grunt test:visualRegression",
+    "test": "grunt test test:visualRegression",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
