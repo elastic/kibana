@@ -71,7 +71,7 @@ uiModules.get('apps/management')
     courier.indexPatterns.delete($scope.indexPattern)
     .then(refreshKibanaIndex)
     .then(function () {
-      $location.url('/management/kibana/indices');
+      $location.url('/management/data/index');
     })
     .catch(notify.fatal);
   };
