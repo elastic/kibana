@@ -95,17 +95,24 @@ export default (function () {
       // click save button
       .then(function () {
         return common.try(function () {
+          common.debug('clicking final Save button for named dashboard');
           return thisTime
           .findByCssSelector('.btn-primary')
           .click();
         });
       })
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      })
       // verify that green message at the top of the page.
       // it's only there for about 5 seconds
       .then(function () {
-        return thisTime
-        .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
-        .getVisibleText();
+        return common.try(function () {
+          common.debug('verify toast-message for saved dashboard');
+          return thisTime
+          .findByCssSelector('kbn-truncated.toast-message.ng-isolate-scope')
+          .getVisibleText();
+        });
       });
     },
 

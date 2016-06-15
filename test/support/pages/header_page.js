@@ -44,8 +44,12 @@ export default (function () {
     },
 
     clickTimepicker: function clickTimepicker() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
-      .findDisplayedByClassName('navbar-timepicker-time-desc').click();
+      .findDisplayedByClassName('navbar-timepicker-time-desc').click()
+      .then(function () {
+        return self.getSpinnerDone();
+      });
     },
 
     isTimepickerOpen: function isTimepickerOpen() {
@@ -56,8 +60,12 @@ export default (function () {
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByLinkText('Absolute').click();
+      .findByLinkText('Absolute').click()
+      .then(function () {
+        return self.getSpinnerDone();
+      });
     },
 
     setFromTime: function setFromTime(timeString) {
@@ -75,9 +83,13 @@ export default (function () {
     },
 
     clickGoButton: function clickGoButton() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByClassName('kbn-timepicker-go')
-      .click();
+      .click()
+      .then(function () {
+        return self.getSpinnerDone();
+      });
     },
 
 
@@ -106,9 +118,13 @@ export default (function () {
     },
 
     collapseTimepicker: function collapseTimepicker() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.fa.fa-chevron-circle-up')
-      .click();
+      .click()
+      .then(function () {
+        return self.getSpinnerDone();
+      });
     },
 
     getToastMessage: function getToastMessage() {
@@ -119,7 +135,6 @@ export default (function () {
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-
       return self.remote.setFindTimeout(defaultFindTimeout)
         .waitForDeletedByCssSelector('kbn-truncated.toast-message');
     },
