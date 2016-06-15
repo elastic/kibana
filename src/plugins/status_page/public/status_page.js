@@ -28,8 +28,10 @@ const chrome = require('ui/chrome')
 
       const data = resp.data;
       ui.metrics = data.metrics;
-      ui.statuses = data.status.statuses;
       ui.name = data.name;
+
+      ui.statuses = _.groupBy(data.status.statuses, s => s.plugin ? 'plugins' : 'services');
+      if (!_.size(ui.statuses)) ui.statuses = null;
 
       const overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {
