@@ -14,7 +14,7 @@ bdd.describe('status page', function () {
     var self = this;
 
     return common.tryForTime(6000, function () {
-      return common.findTestSubject('pluginStatusBreakdown')
+      return common.findTestSubject('statusBreakdown')
       .getVisibleText()
       .then(function (text) {
         common.saveScreenshot('Status');
