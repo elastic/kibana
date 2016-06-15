@@ -67,7 +67,8 @@ export default function setupSettings(kbnServer, server, config) {
 
     function copyStatus() {
       const { state } = esStatus;
-      status[state](state === 'green' ? 'Ready' : `Elasticsearch plugin is ${state}`);
+      const statusMessage = state === 'green' ? 'Ready' : `Elasticsearch plugin is ${state}`;
+      status[state](statusMessage);
     }
   }
 }
