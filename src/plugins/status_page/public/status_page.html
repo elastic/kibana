@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <div class="row status_status_wrapper">
+  <div class="row status_statuses_wrapper">
     <h3>Status Breakdown</h3>
 
     <div ng-if="!ui.statuses && ui.loading" class="loading_statuses">
@@ -26,7 +26,7 @@
       No status information available
     </h4>
 
-    <table class="status_status_breakdown" ng-if="ui.statuses.services">
+    <table class="status_statuses_breakdown" ng-if="ui.statuses.services">
       <tr class="row">
         <th class="col-xs-2">Service</th>
         <th class="col-xs-8">Status</th>
@@ -43,7 +43,7 @@
       </tr>
     </table>
 
-    <table class="status_status_breakdown" ng-if="ui.statuses.plugins">
+    <table class="status_statuses_breakdown" data-test-subj="pluginStatusBreakdown" ng-if="ui.statuses.plugins">
       <tr class="row">
         <th class="col-xs-2">Plugin</th>
         <th class="col-xs-2">Version</th>
