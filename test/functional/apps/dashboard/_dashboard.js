@@ -65,8 +65,8 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       // .then(function () {
       common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       return headerPage.setAbsoluteRange(fromTime, toTime)
-      .then(function sleep() {
-        return common.sleep(4000);
+      .then(function () {
+        return headerPage.getSpinnerDone();
       })
       .then(function takeScreenshot() {
         common.debug('Take screenshot');
