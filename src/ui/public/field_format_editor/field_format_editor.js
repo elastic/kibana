@@ -3,7 +3,7 @@ import $ from 'jquery';
 import uiModules from 'ui/modules';
 
 uiModules
-.get('app/settings')
+.get('app/management')
 .directive('fieldFormatEditor', function (Private, $compile) {
   return {
     restrict: 'A',

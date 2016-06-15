@@ -35,6 +35,10 @@ export default function (chrome, internals) {
   }
 
   function setLastUrl(link, url) {
+    if (link.linkToLastSubUrl === false) {
+      return;
+    }
+
     link.lastSubUrl = url;
     internals.appUrlStore.setItem(lastSubUrlKey(link), url);
   }
