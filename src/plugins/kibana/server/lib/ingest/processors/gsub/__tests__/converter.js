@@ -55,11 +55,13 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              pattern: 'foo_pattern',
-              replacement: 'foo_replacement',
-              ignore_failure: 'foo_ignore_failure'
+              gsub: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                pattern: 'foo_pattern',
+                replacement: 'foo_replacement',
+                ignore_failure: 'foo_ignore_failure'
+              }
             };
 
             expected = {
@@ -78,11 +80,24 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.gsub.foo = 'bar';
+            source.gsub.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [gsub] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[gsub\] property/i;
+
+            source.foo = _.clone(source.gsub);
+            delete source.gsub;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });

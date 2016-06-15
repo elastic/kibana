@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   kibanaToEs: function (processorApiDocument) {
     return {
@@ -11,13 +13,17 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'gsub')) {
+      throw new Error('Elasticsearch processor document missing [gsub] property');
+    }
+
     return {
       typeId: 'gsub',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
-      pattern: processorEsDocument.pattern,
-      replacement: processorEsDocument.replacement,
-      ignore_failure: processorEsDocument.ignore_failure
+      processor_id: processorEsDocument.gsub.tag,
+      source_field: processorEsDocument.gsub.field,
+      pattern: processorEsDocument.gsub.pattern,
+      replacement: processorEsDocument.gsub.replacement,
+      ignore_failure: processorEsDocument.gsub.ignore_failure
     };
   }
 };

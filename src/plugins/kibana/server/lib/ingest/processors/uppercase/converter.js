@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   kibanaToEs: function (processorApiDocument) {
     return {
@@ -9,11 +11,15 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'uppercase')) {
+      throw new Error('Elasticsearch processor document missing [uppercase] property');
+    }
+
     return {
       typeId: 'uppercase',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
-      ignore_failure: processorEsDocument.ignore_failure
+      processor_id: processorEsDocument.uppercase.tag,
+      source_field: processorEsDocument.uppercase.field,
+      ignore_failure: processorEsDocument.uppercase.ignore_failure
     };
   }
 };

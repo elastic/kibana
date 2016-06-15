@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   kibanaToEs: function (processorApiDocument) {
     return {
@@ -9,11 +11,15 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'remove')) {
+      throw new Error('Elasticsearch processor document missing [remove] property');
+    }
+
     return {
       typeId: 'remove',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
-      ignore_failure: processorEsDocument.ignore_failure
+      processor_id: processorEsDocument.remove.tag,
+      source_field: processorEsDocument.remove.field,
+      ignore_failure: processorEsDocument.remove.ignore_failure
     };
   }
 };

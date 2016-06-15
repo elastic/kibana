@@ -25,6 +25,10 @@ export default {
     return processor;
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'convert')) {
+      throw new Error('Elasticsearch processor document missing [convert] property');
+    }
+
     const types = {
       //<ingest type>: <kibana type>
       auto: 'auto',
@@ -39,11 +43,11 @@ export default {
 
     return {
       typeId: 'convert',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
-      target_field: processorEsDocument.target_field,
-      type: types[processorEsDocument.type],
-      ignore_failure: processorEsDocument.ignore_failure
+      processor_id: processorEsDocument.convert.tag,
+      source_field: processorEsDocument.convert.field,
+      target_field: processorEsDocument.convert.target_field,
+      type: types[processorEsDocument.convert.type],
+      ignore_failure: processorEsDocument.convert.ignore_failure
     };
   }
 };

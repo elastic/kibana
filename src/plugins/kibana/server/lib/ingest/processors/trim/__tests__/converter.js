@@ -51,9 +51,11 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              ignore_failure: 'foo_ignore_failure'
+              trim: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                ignore_failure: 'foo_ignore_failure'
+              }
             };
 
             expected = {
@@ -70,11 +72,24 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.trim.foo = 'bar';
+            source.trim.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [trim] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[trim\] property/i;
+
+            source.foo = _.clone(source.trim);
+            delete source.trim;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });

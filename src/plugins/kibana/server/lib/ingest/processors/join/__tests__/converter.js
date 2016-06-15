@@ -53,10 +53,12 @@ describe('ingest', () => {
           let expected;
           beforeEach(function () {
             source = {
-              tag: 'foo_tag',
-              field: 'foo_field',
-              separator: 'foo_separator',
-              ignore_failure: 'foo_ignore_failure'
+              join: {
+                tag: 'foo_tag',
+                field: 'foo_field',
+                separator: 'foo_separator',
+                ignore_failure: 'foo_ignore_failure'
+              }
             };
 
             expected = {
@@ -74,11 +76,24 @@ describe('ingest', () => {
           });
 
           it('should ignore additional source fields', () => {
-            source.foo = 'bar';
-            source.bar = 'baz';
+            source.join.foo = 'bar';
+            source.join.bar = 'baz';
 
             const actual = esToKibana(source);
             expect(_.isEqual(actual, expected)).to.be.ok();
+          });
+
+          it('should throw an error if argument does not have an [join] property', () => {
+            const errorMessage = /elasticsearch processor document missing \[join\] property/i;
+
+            source.foo = _.clone(source.join);
+            delete source.join;
+            expect(esToKibana).withArgs(source).to.throwException(errorMessage);
+
+            expect(esToKibana).withArgs(null).to.throwException(errorMessage);
+            expect(esToKibana).withArgs(undefined).to.throwException(errorMessage);
+            expect(esToKibana).withArgs('').to.throwException(errorMessage);
+            expect(esToKibana).withArgs({}).to.throwException(errorMessage);
           });
 
         });

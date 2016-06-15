@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
   kibanaToEs: function (processorApiDocument) {
     return {
@@ -9,11 +11,15 @@ export default {
     };
   },
   esToKibana: function (processorEsDocument) {
+    if (!_.has(processorEsDocument, 'lowercase')) {
+      throw new Error('Elasticsearch processor document missing [lowercase] property');
+    }
+
     return {
       typeId: 'lowercase',
-      processor_id: processorEsDocument.tag,
-      source_field: processorEsDocument.field,
-      ignore_failure: processorEsDocument.ignore_failure
+      processor_id: processorEsDocument.lowercase.tag,
+      source_field: processorEsDocument.lowercase.field,
+      ignore_failure: processorEsDocument.lowercase.ignore_failure
     };
   }
 };
