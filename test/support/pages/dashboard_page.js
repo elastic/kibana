@@ -1,4 +1,4 @@
-import { remote, common, defaultFindTimeout } from '../';
+import { remote, common, defaultFindTimeout, headerPage } from '../';
 
 export default (function () {
   var thisTime;
@@ -75,6 +75,9 @@ export default (function () {
       .findByCssSelector('button.ng-scope[aria-label="Save Dashboard"]')
       .click()
       .then(function () {
+        return headerPage.getSpinnerDone();
+      })
+      .then(function () {
         return common.sleep(1000);
       })
       .then(function () {
@@ -82,6 +85,9 @@ export default (function () {
         return thisTime
         .findById('dashboardTitle')
         .type(dashName);
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       })
       // click save button
       .then(function () {
