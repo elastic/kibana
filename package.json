@@ -78,6 +78,8 @@
     "angular-bootstrap-colorpicker": "3.0.19",
     "angular-elastic": "2.5.0",
     "angular-route": "1.4.7",
+    "angular-translate":"2.11.0",
+    "angular-translate-loader-partial":"2.11.0",
     "ansicolors": "0.3.2",
     "autoprefixer": "5.1.1",
     "autoprefixer-loader": "2.0.0",

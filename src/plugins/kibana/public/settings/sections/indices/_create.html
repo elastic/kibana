@@ -2,10 +2,8 @@
   <kbn-settings-indices>
     <div ng-controller="settingsIndicesCreate" class="kbn-settings-indices-create">
       <div class="page-header">
-        <h1>Configure an index pattern</h1>
-        In order to use Kibana you must configure at least one index pattern. Index patterns are
-        used to identify the Elasticsearch index to run search and analytics against. They are also
-        used to configure fields.
+        <h1 translate>create.H1_CONFIGURE_INDEX_PATTERN</h1>
+          <p translate>create.MUST_CONFIGURE_INDEX_PATTERN</p>
       </div>
       <div>
         <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
@@ -14,32 +12,23 @@
               <input
                 ng-model="index.isTimeBased"
                 type="checkbox">
-              Index contains time-based events
+              <span translate>create.CONTAINS_TIME_BASED_EVENTS_CHECKBOX</span>
             </label>
             <br>
             <label ng-if="index.isTimeBased">
               <input ng-model="index.nameIsPattern" type="checkbox">
-              Use event times to create index names <small>[DEPRECATED]</small>
+              <span translate>create.INDEX_NAME_IS_PATTERN_CHECKBOX</span>
             </label>
           </div>
 
           <div class="form-group" ng-if="index.isTimeBased && index.nameIsPattern">
             <div class="alert alert-warning">
-              <h4>Time-interval based index patterns are deprecated!</h4>
-              <p>
-                We <strong>strongly recommend</strong> using wildcard pattern names instead of
-                time-interval based index patterns.
-              </p>
-              <p>
-                Kibana is now smart enough to automatically determine which
-                indices to search against within the current time range for
-                wildcard index patterns. This means that wildcard
-                index patterns now get the same performance optimizations when
-                searching within a time range as time-interval patterns.
-              </p>
+              <h4>create.ALERT_INDEX_PATTERN_DEPRECATED</h4>
+              <p translate>create.RECOMMEND_WILD_CARD_PATTERN</p>
+              <p Ttranslate>create.RECOMMEND_WILD_CARD_PATTERN_DETAILS</p>
             </div>
             <label>
-              Index pattern interval&nbsp;
+              <span translate>create.INDEX_PATTERN_INTERVAL</span>&nbsp;
               <kbn-info info="The interval at which index names rotate."></kbn-info>
             </label>
             <select
@@ -51,12 +40,10 @@
           </div>
 
           <div class="form-group">
-            <label>
-              Index name or pattern
-            </label>
-            <p class="help-block" ng-if="!index.nameIsPattern">Patterns allow you to define dynamic index names using * as a wildcard. Example: logstash-*</p>
-            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern">Patterns allow you to define dynamic index names. Static text in an index name is denoted using brackets. Example: [logstash-]YYYY.MM.DD. Please note that weeks are setup to use ISO weeks which start on Monday. &mdash;
-              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/">Date Format Documentation</a></small></p>
+            <label translate>create.INDEX_NAME_OR_PATTERN</label>
+            <p class="help-block" ng-if="!index.nameIsPattern" translate>create.WILDCARD_DYNAMIC_INDEX_PATTERNS</p>
+            <p class="help-block" ng-if="index.isTimeBased && index.nameIsPattern"><span translate>create.STATIC_TEXT_IN_DYNAMIC_INDEX_PATTERNS</span> &mdash;
+              <small><a target="_blank" href="http://momentjs.com/docs/#/displaying/format/" translate>create.DATE_FORMAT_DOCS</a></small></p>
             <input
               ng-model="index.name"
               ng-attr-placeholder="{{index.defaultName}}"
@@ -67,40 +54,27 @@
               type="text"
               class="form-control">
               <small ng-show="index.nameInterval.name == 'weeks'">
-                <strong>Note: </strong>
-                I noticed you're using weekly indices. Kibana requires ISO weeks be used in your index creation.
-                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date">Wikipedia: ISO Week Date</a>
+                <strong translate>create.NOTE_COLON</strong>&nbsp;
+                <span translate>create.WEEKLY_ISO_NOTICE</span>
+                See <a href="https://en.wikipedia.org/wiki/ISO_week_date" target="_blank" title="Wikipedia: ISO Week Date" translate>create.WIKI_ISO_WEEK_DATE</a>
               </small>
             </div>
 
           <div class="form-group" ng-if="canExpandIndices()">
             <label>
               <input ng-model="index.notExpandable" type="checkbox">
-              Do not expand index pattern when searching <small>(Not recommended)</small>
+                  <span translate>create.EXPAND_INDEX_PATTERN_WARNING</span>
             </label>
 
             <div ng-if="index.notExpandable" class="alert alert-info">
-              This index pattern will be queried directly rather than being
-              expanded into more performant searches against individual indices.
+              <span translate>create.NOT_EXPANDABLE_PART1</span>
 
-              Elasticsearch will receive a query against <em>{{index.name}}</em>
-              and will have to search through all matching indices regardless
-              of whether they have data that matches the current time range.
+              <span translate="create.NOT_EXPANABLE_PART2" translate-values="{ indexName: '{{index.name}}' }"></span>
             </div>
 
-            <p class="help-block">
-              By default, searches against any time-based index pattern that
-              contains a wildcard will automatically be expanded to query only
-              the indices that contain data within the currently selected time
-              range.
-            </p>
+            <p class="help-block" translate>create.WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE_HELP</p>
 
-            <p class="help-block">
-              Searching against the index pattern <em>logstash-*</em> will
-              actually query elasticsearch for the specific matching indices
-              (e.g. <em>logstash-2015.12.21</em>) that fall within the current
-              time range.
-            </p>
+            <p class="help-block" translate>create.WILDCARD_DEFAULT_EXPANDED_TO_CURRENT_TIME_RANGE_EXAMPLE_HELP</p>
           </div>
 
           <section>
@@ -109,17 +83,17 @@
             </div>
 
             <div class="alert alert-info" ng-if="index.samples">
-              Attempted to match the following indices and aliases:
+              <span translate>create.SAMPLE_ALERT</span>
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
               <button type="button" ng-click="moreSamples(true)" class="btn btn-default">
-                Expand Search
+                <span translate>create.EXPAND_SEARCH</span>
               </button>
             </div>
 
             <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
-              Pattern matches {{index.existing.matchPercent}} of existing indices and aliases
+              <span translate='create.EXISTING_MATCH_PERCENT' translate-values="{ indexExistingMatchPercent: '{{index.existing.matchPercent}}' }"></span>
               <ul>
                 <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -128,12 +102,12 @@
                 ng-click="moreSamples()"
                 type="button"
                 class="btn btn-default">
-                Expand Search
+                <span translate>create.EXPAND_SEARCH</span>
               </button>
             </div>
 
             <div class="alert alert-info" ng-if="index.existing.failures.length">
-              Indices and aliases that were found, but did not match the pattern:
+              <span translate>create.NON_MATCHING_INDICES_AND_ALIASES</span>
               <ul>
                 <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -141,19 +115,20 @@
                 ng-if="index.sampleCount < index.existing.matches.length"
                 ng-click="moreSamples()"
                 class="alert-link">
-                more
+                <span translate>create.MORE</span>
               </a>
             </div>
           </section>
 
           <div class="form-group" ng-if="index.isTimeBased && !index.fetchFieldsError">
             <label>
-              Time-field name
+              <span translate>create.TIME_FIELD_NAME</span>
               &nbsp;
               <kbn-info info="This field will be used to filter events with the global time filter"></kbn-info>
               &nbsp;
               <small>
-                <a ng-click="refreshFieldList();"> refresh fields</a>
+                &nbsp;
+                <a ng-click="refreshFieldList();" translate>create.REFRESH_FIELDS</a>
               </small>
             </label>
             <select
@@ -172,7 +147,7 @@
             type="submit"
             class="btn">
             <span ng-hide="form.name.$error.indexNameInput">{{index.fetchFieldsError || "Create" }}</span>
-            <span ng-show="form.name.$error.indexNameInput">Invalid index name pattern.</span>
+            <span ng-show="form.name.$error.indexNameInput" translate>create.INVALID_INDEX_PATTERN</span>
           </button>
         </form>
       </div>

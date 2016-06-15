@@ -15,7 +15,8 @@ uiRoutes
 });
 
 uiModules.get('apps/settings')
-.controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
+.controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise,
+                                               $translate, $translatePartialLoader) {
   const notify = new Notifier();
   const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
   const intervals = indexPatterns.intervals;
@@ -36,6 +37,10 @@ uiModules.get('apps/settings')
 
   index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
   index.timeField = null;
+
+  // point angular-translate to base subdirectory where this modules i18n files are located
+  $translatePartialLoader.addPart('../plugins/kibana/settings/sections/indices');
+  $translate.refresh();
 
   $scope.canExpandIndices = function () {
     // to maximize performance in the digest cycle, move from the least
