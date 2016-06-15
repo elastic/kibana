@@ -137,11 +137,17 @@ export default (function () {
         .type(dashName.replace('-',' '));
       })
       .then(function () {
+        return headerPage.getSpinnerDone();
+      })
+      .then(function () {
         return common.sleep(1000);
       })
       .then(function clickDashboardByLinkedText() {
         return self
         .clickDashboardByLinkText(dashName);
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
