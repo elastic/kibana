@@ -66,7 +66,7 @@ ${err.stack || err.message || err}`).to.eql(true);
     }
 
     function switchToPlainTextLog() {
-      json = 2; // ignore both "reloading" messages
+      json = 3; // ignore both "reloading" messages
       setLoggingJson(false);
       child.kill(`SIGHUP`); // reload logging config
     }
