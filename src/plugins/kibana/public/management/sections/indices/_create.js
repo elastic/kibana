@@ -10,12 +10,7 @@ import createTemplate from 'plugins/kibana/management/sections/indices/_create.h
 
 uiRoutes
 .when('/management/data/index/', {
-  template: createTemplate,
-  resolve: {
-    indexPatternIds: function (courier) {
-      return courier.indexPatterns.getIds();
-    }
-  }
+  template: createTemplate
 });
 
 uiModules.get('apps/management')
