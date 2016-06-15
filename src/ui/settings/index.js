@@ -2,6 +2,7 @@ import { defaultsDeep, partial } from 'lodash';
 import defaultsProvider from './defaults';
 
 export default function setupSettings(kbnServer, server, config) {
+  const status = kbnServer.status.create('ui settings');
   const uiSettings = {
     getAll,
     getDefaults,
@@ -12,6 +13,7 @@ export default function setupSettings(kbnServer, server, config) {
   };
 
   server.decorate('server', 'uiSettings', () => uiSettings);
+  kbnServer.ready().then(mirrorEsStatus);
 
   function getAll() {
     return Promise
@@ -24,7 +26,7 @@ export default function setupSettings(kbnServer, server, config) {
   }
 
   function userSettingsNotFound(kibanaVersion) {
-    server.plugins.elasticsearch.status.yellow(`Could not find user-provided settings for this version of Kibana (${kibanaVersion})`);
+    status.red(`Could not find user-provided settings for Kibana ${kibanaVersion}`);
     return {};
   }
 
@@ -55,6 +57,18 @@ export default function setupSettings(kbnServer, server, config) {
 
   function remove(key) {
     return set(key, null);
+  }
+
+  function mirrorEsStatus() {
+    const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+
+    copyStatus();
+    esStatus.on('change', copyStatus);
+
+    function copyStatus() {
+      const { state } = esStatus;
+      status[state](state === 'green' ? 'Ready' : `Elasticsearch plugin is ${state}`);
+    }
   }
 }
 
