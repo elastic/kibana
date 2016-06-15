@@ -89,6 +89,9 @@ export default (function () {
       .then(function () {
         return headerPage.getSpinnerDone();
       })
+      .then(function () {
+        return common.sleep(1000);
+      })
       // click save button
       .then(function () {
         return common.try(function () {
