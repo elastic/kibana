@@ -113,6 +113,9 @@ export default (function () {
         return self.clickGoButton();
       })
       .then(function () {
+        return self.getSpinnerDone();
+      })
+      .then(function () {
         return self.collapseTimepicker();
       });
     },
