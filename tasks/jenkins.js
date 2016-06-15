@@ -12,9 +12,6 @@ module.exports = function (grunt) {
     path.unshift(`${HOME}/bin`);
     process.env.PATH = path.join(delimiter);
 
-    // always build os packages on jenkins
-    grunt.option('os-packages', true);
-
     grunt.task.run(compact([
       'rejectRejFiles',
       'test',

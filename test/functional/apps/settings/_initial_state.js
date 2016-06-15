@@ -20,6 +20,7 @@ bdd.describe('initial state', function () {
   bdd.it('should load with time pattern checked', function () {
     return settingsPage.getTimeBasedEventsCheckbox().isSelected()
     .then(function (selected) {
+      common.saveScreenshot('Settings-initial-state');
       expect(selected).to.be.ok();
     });
   });

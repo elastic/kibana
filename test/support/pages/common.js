@@ -256,7 +256,7 @@ export default (function () {
       const testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
       return reason => {
         const now = Date.now();
-        const fileName = `failure_${now}_${testName}.png`;
+        const fileName = `failure_${now}_${testName}`;
 
         return this.saveScreenshot(fileName, true)
         .then(function () {
@@ -269,7 +269,7 @@ export default (function () {
       try {
         const directoryName = isFailure ? 'failure' : 'session';
         const directoryPath = path.resolve(`test/screenshots/${directoryName}`);
-        const filePath = path.resolve(directoryPath, fileName);
+        const filePath = path.resolve(directoryPath, `${fileName}.png`);
         this.debug(`Taking screenshot "${filePath}"`);
 
         const screenshot = await this.remote.takeScreenshot();

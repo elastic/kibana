@@ -3,18 +3,26 @@ import states from './states';
 import { EventEmitter } from 'events';
 
 class Status extends EventEmitter {
-  constructor(plugin, server) {
+  constructor(id, server) {
     super();
 
-    this.plugin = plugin;
+    if (!id || typeof id !== 'string') {
+      throw new TypeError('Status constructor requires an `id` string');
+    }
+
+    this.id = id;
     this.since = new Date();
     this.state = 'uninitialized';
     this.message = 'uninitialized';
 
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
-      let tags = ['status', `plugin:${this.plugin.toString()}`];
-      tags.push(this.state === 'red' ? 'error' : 'info');
+
+      const tags = [
+        'status',
+        this.id,
+        this.state === 'red' ? 'error' : 'info'
+      ];
 
       server.log(tags, {
         tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
@@ -28,8 +36,7 @@ class Status extends EventEmitter {
 
   toJSON() {
     return {
-      name: this.plugin.id,
-      version: this.plugin.version,
+      id: this.id,
       state: this.state,
       icon: states.get(this.state).icon,
       message: this.message,
