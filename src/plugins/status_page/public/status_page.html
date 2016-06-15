@@ -28,21 +28,20 @@
 
     <table class="status_statuses_breakdown" ng-if="ui.statuses.services">
       <tr class="row">
-        <th class="col-xs-2">Service</th>
+        <th class="col-xs-4">Service</th>
         <th class="col-xs-8">Status</th>
       </tr>
       <tr
         ng-repeat="status in ui.statuses.services"
         class="status_row status_state_default status_state_{{status.state}} row">
 
-        <td class="col-xs-2 status_name">{{status.id}}</td>
+        <td class="col-xs-4 status_name">{{status.id}}</td>
         <td class="col-xs-8 status_message">
           <i class="fa status_state_color status_state_icon" />
           {{status.message}}
         </td>
       </tr>
     </table>
-
     <table class="status_statuses_breakdown" data-test-subj="pluginStatusBreakdown" ng-if="ui.statuses.plugins">
       <tr class="row">
         <th class="col-xs-2">Plugin</th>
