@@ -14,8 +14,7 @@ bdd.describe('status page', function () {
     var self = this;
 
     return common.tryForTime(6000, function () {
-      return self.remote
-      .findByCssSelector('.plugin_status_breakdown')
+      return common.findTestSubject('pluginStatusBreakdown')
       .getVisibleText()
       .then(function (text) {
         common.saveScreenshot('Status');
