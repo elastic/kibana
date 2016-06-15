@@ -5,9 +5,9 @@
 @status-metric-border: #aaa;
 @status-metric-title-color: #666;
 
-@status-plugins-bg: #fff;
-@status-plugins-border: #bbb;
-@status-plugins-headings-color: #666;
+@status-statuses-bg: #fff;
+@status-statuses-border: #bbb;
+@status-statuses-headings-color: #666;
 
 @status-default: #7c7c7c;
 @status-green: #94c63d;
@@ -58,13 +58,13 @@
   }
 }
 
-// plugin status table section
-.plugin_status_wrapper {
+// status status table section
+.status_status_wrapper {
   margin-top: 25px;
   margin-left: -5px;
   margin-right: -5px;
   border-top:2px solid;
-  background-color: @status-plugins-bg;
+  background-color: @status-statuses-bg;
   padding: 10px;
 
   h3 {
@@ -78,7 +78,7 @@
     text-align: center;
   }
 
-  .plugin_status_breakdown {
+  .status_status_breakdown {
     margin-left: 0;
     margin-right: 0;
 
@@ -86,16 +86,16 @@
       height:30px;
       line-height:30px;
       border-bottom:1px solid;
-      border-bottom-color: @status-plugins-border;
+      border-bottom-color: @status-statuses-border;
     }
 
     th {
-      color:@status-plugins-headings-color;
+      color:@status-statuses-headings-color;
       font-weight: normal;
       height:25px;
       line-height:25px;
       border-bottom:1px solid;
-      border-bottom-color: @status-plugins-border;
+      border-bottom-color: @status-statuses-border;
     }
 
     .status_name {
@@ -111,13 +111,13 @@
   }
 }
 
-//plugin state
-.plugin_state(@color, @icon) {
-  .plugin_state_color {
+//status state
+.status_state(@color, @icon) {
+  .status_state_color {
     color: @color;
   }
 
-  .plugin_state_icon:before {
+  .status_state_icon:before {
     content: @icon;
   }
 
@@ -130,20 +130,20 @@
   }
 }
 
-.plugin_state_default {
-  .plugin_state(@status-default, @icon-default);
+.status_state_default {
+  .status_state(@status-default, @icon-default);
 }
 
-.plugin_state_green {
-  .plugin_state(@status-green, @icon-green);
+.status_state_green {
+  .status_state(@status-green, @icon-green);
 }
 
-.plugin_state_yellow {
-  .plugin_state(@status-yellow, @icon-yellow);
+.status_state_yellow {
+  .status_state(@status-yellow, @icon-yellow);
 }
 
-.plugin_state_red {
-  .plugin_state(@status-red, @icon-red);
+.status_state_red {
+  .status_state(@status-red, @icon-red);
 }
 
 //server state
@@ -156,7 +156,7 @@
     content: @icon;
   }
 
-  .plugin_status_wrapper {
+  .status_status_wrapper {
     border-top-color: @color;
   }
 }

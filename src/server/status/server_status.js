@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import states from './states';
 import Status from './status';
+import PluginStatus from './plugin_status';
 
 module.exports = class ServerStatus {
   constructor(server) {
@@ -9,8 +10,16 @@ module.exports = class ServerStatus {
     this._created = {};
   }
 
-  create(plugin) {
-    return (this._created[plugin.id] = new Status(plugin, this.server));
+  create(id) {
+    const status = new Status(id, this.server);
+    this._created[status.id] = status;
+    return status;
+  }
+
+  createForPlugin(plugin) {
+    const status = new PluginStatus(plugin, this.server);
+    this._created[status.id] = status;
+    return status;
   }
 
   each(fn) {
@@ -22,12 +31,26 @@ module.exports = class ServerStatus {
     });
   }
 
-  get(name) {
-    return this._created[name];
+  get(id) {
+    return this._created[id];
   }
 
-  getState(name) {
-    return _.get(this._created, [name, 'state'], 'uninitialized');
+  getForPluginId(pluginId) {
+    return _.find(this._created, s =>
+      s.plugin && s.plugin.id === pluginId
+    );
+  }
+
+  getState(id) {
+    const status = this.get(id);
+    if (!status) return undefined;
+    return status.state || 'uninitialized';
+  }
+
+  getStateForPluginId(pluginId) {
+    const status = this.getForPluginId(pluginId);
+    if (!status) return undefined;
+    return status.state || 'uninitialized';
   }
 
   overall() {
