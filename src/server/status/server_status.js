@@ -2,7 +2,6 @@ import _ from 'lodash';
 
 import states from './states';
 import Status from './status';
-import PluginStatus from './plugin_status';
 
 module.exports = class ServerStatus {
   constructor(server) {
@@ -17,8 +16,8 @@ module.exports = class ServerStatus {
   }
 
   createForPlugin(plugin) {
-    const status = new PluginStatus(plugin, this.server);
-    this._created[status.id] = status;
+    const status = this.create(`plugin:${plugin.id}@${plugin.version}`);
+    status.plugin = plugin;
     return status;
   }
 

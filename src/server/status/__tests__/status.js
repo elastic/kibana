@@ -57,7 +57,6 @@ describe('Status class', function () {
 
     let json = status.toJSON();
     expect(json.id).to.eql(status.id);
-    expect(json.plugin).to.eql({ id: plugin.id, version: plugin.version });
     expect(json.state).to.eql('green');
     expect(json.message).to.eql('Ready');
   });
