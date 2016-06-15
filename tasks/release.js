@@ -1,11 +1,15 @@
 module.exports = function (grunt) {
   var readline = require('readline');
+  var url = require('url');
+  var fs = require('fs');
+  var _ = require('lodash');
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [
     '_release:confirmUpload',
     '_release:loadS3Config',
     'build',
+    '_release:setS3Uploads',
     's3:release',
     '_release:complete'
   ]);
@@ -33,18 +37,48 @@ module.exports = function (grunt) {
     });
   });
 
+  grunt.registerTask('_release:setS3Uploads', function () {
+    var uploads = grunt.config.get('platforms')
+    .reduce(function (files, platform) {
+      return files.concat(
+        platform.tarName,
+        platform.tarName + '.sha1.txt',
+        platform.zipName,
+        platform.zipName + '.sha1.txt',
+        platform.rpmName,
+        platform.rpmName && platform.rpmName + '.sha1.txt',
+        platform.debName,
+        platform.debName && platform.debName + '.sha1.txt'
+      );
+    }, [])
+    .filter(function (filename) {
+      if (_.isUndefined(filename)) return false;
+      try {
+        fs.accessSync('target/' + filename, fs.F_OK);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    })
+    .map(function (filename) {
+      return {
+        src: 'target/' + filename,
+        dest: 'kibana/kibana/' + filename
+      };
+    });
+    grunt.config.set('s3.release.upload', uploads);
+  });
+
   grunt.registerTask('_release:complete', function () {
     grunt.log.ok('Builds released');
-    grunt.log.write(
-`
-${grunt.config.get('platforms').reduce((t, p) => {
-  return (
-`${t}https://download.elastic.co/kibana/kibana/${p.buildName}.tar.gz
-https://download.elastic.co/kibana/kibana/${p.buildName}.zip
-`
-  );
-}, '')}
-`
-);
+    var links = grunt.config.get('s3.release.upload').reduce((t, {dest}) => {
+      var link = url.format({
+        protocol: 'https',
+        hostname: 'download.elastic.co',
+        pathname: dest
+      });
+      return `${t}${link}\n`;
+    }, '');
+    grunt.log.write(links);
   });
 };
