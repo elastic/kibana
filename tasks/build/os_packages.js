@@ -42,7 +42,8 @@ export default (grunt) => {
         '--template-value', `user=${packages.user}`,
         '--template-value', `group=${packages.group}`,
         '--template-value', `optimizeDir=${packages.path.home}/optimize`,
-
+        '--template-value', `configDir=${packages.path.conf}`,
+        '--template-value', `pluginsDir=${packages.path.plugins}`,
         //config folder is moved to path.conf, exclude {path.home}/config
         //uses relative path to --prefix, strip the leading /
         '--exclude', `${packages.path.home.slice(1)}/config`
