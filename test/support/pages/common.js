@@ -116,7 +116,7 @@ export default (function () {
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-            var navSuccessful = new RegExp(appUrl).test(currentUrl);
+            var navSuccessful = new RegExp(appUrl + '.{0,230}$').test(currentUrl);
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
               ' in ' + defaultFindTimeout + 'ms' +
