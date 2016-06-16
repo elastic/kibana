@@ -1,8 +1,10 @@
 import { fromRoot } from '../../utils';
+import fs from 'fs';
 import install from './install';
 import Logger from '../lib/logger';
 import pkg from '../../utils/package_json';
 import { parse, parseMilliseconds } from './settings';
+import { find } from 'lodash';
 
 function processCommand(command, options) {
   let settings;
@@ -18,6 +20,24 @@ function processCommand(command, options) {
   install(settings, logger);
 }
 
+function getDefaultConfigPath() {
+  const paths = [
+    fromRoot('config/kibana.yml'),
+    '/etc/kibana/kibana.yml'
+  ];
+
+  const availablePath = find(paths, configPath => {
+    try {
+      fs.accessSync(configPath, fs.R_OK);
+      return true;
+    } catch (e) {
+      //Check the next path
+    }
+  });
+
+  return availablePath || paths[0];
+}
+
 export default function pluginInstall(program) {
   program
   .command('install <plugin/url>')
@@ -26,7 +46,7 @@ export default function pluginInstall(program) {
   .option(
     '-c, --config <path>',
     'path to the config file',
-    fromRoot('config/kibana.yml')
+    getDefaultConfigPath()
   )
   .option(
     '-t, --timeout <duration>',

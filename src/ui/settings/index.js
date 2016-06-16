@@ -1,7 +1,8 @@
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, partial } from 'lodash';
 import defaultsProvider from './defaults';
 
 export default function setupSettings(kbnServer, server, config) {
+  const status = kbnServer.status.create('ui settings');
   const uiSettings = {
     getAll,
     getDefaults,
@@ -12,6 +13,7 @@ export default function setupSettings(kbnServer, server, config) {
   };
 
   server.decorate('server', 'uiSettings', () => uiSettings);
+  kbnServer.ready().then(mirrorEsStatus);
 
   function getAll() {
     return Promise
@@ -23,12 +25,18 @@ export default function setupSettings(kbnServer, server, config) {
     return Promise.resolve(defaultsProvider());
   }
 
+  function userSettingsNotFound(kibanaVersion) {
+    status.red(`Could not find user-provided settings for Kibana ${kibanaVersion}`);
+    return {};
+  }
+
   function getUserProvided() {
     const { client } = server.plugins.elasticsearch;
     const clientSettings = getClientSettings(config);
     return client
       .get({ ...clientSettings })
       .then(res => res._source)
+      .catch(partial(userSettingsNotFound, clientSettings.id))
       .then(user => hydrateUserSettings(user));
   }
 
@@ -49,6 +57,19 @@ export default function setupSettings(kbnServer, server, config) {
 
   function remove(key) {
     return set(key, null);
+  }
+
+  function mirrorEsStatus() {
+    const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+
+    copyStatus();
+    esStatus.on('change', copyStatus);
+
+    function copyStatus() {
+      const { state } = esStatus;
+      const statusMessage = state === 'green' ? 'Ready' : `Elasticsearch plugin is ${state}`;
+      status[state](statusMessage);
+    }
   }
 }
 

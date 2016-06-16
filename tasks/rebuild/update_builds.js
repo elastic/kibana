@@ -4,7 +4,7 @@ import { join } from 'path';
 
 export default (grunt) => {
   grunt.registerTask('_rebuild:updateBuilds', function () {
-    const buildDir = grunt.config.get('build');
+    const buildDir = grunt.config.get('buildDir');
 
     const { newVersion, newBuildNum, newSha } = grunt.config.get('rebuild');
 

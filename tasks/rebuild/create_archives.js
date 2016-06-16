@@ -3,7 +3,7 @@ import { join } from 'path';
 
 export default (grunt) => {
   grunt.registerTask('_rebuild:createArchives', function () {
-    const buildDir = grunt.config.get('build');
+    const buildDir = grunt.config.get('buildDir');
     const targetDir = grunt.config.get('target');
 
     grunt.file.mkdir('target');

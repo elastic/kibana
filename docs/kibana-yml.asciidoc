@@ -27,7 +27,7 @@ authority for your Elasticsearch instance.
 to `false`.
 `elasticsearch.pingTimeout:`:: *Default: the value of the `elasticsearch.requestTimeout` setting* Time in milliseconds to 
 wait for Elasticsearch to respond to pings.
-`elasticsearch.requestTimeout:`:: *Default: 300000* Time in milliseconds to wait for responses from the back end or 
+`elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait for responses from the back end or 
 Elasticsearch. This value must be a positive integer.
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List of Kibana client-side headers to send to Elasticsearch.
 To send *no* client-side headers, set this value to [] (an empty list).
@@ -42,7 +42,7 @@ retrying.
 error messages.
 `logging.verbose`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage 
 information and all requests.
-`ops.interval`:: *Default: 10000* Set the interval in milliseconds to sample system and process performance metrics. 
+`ops.interval`:: *Default: 5000* Set the interval in milliseconds to sample system and process performance metrics.
 The minimum value is 100.
 `status.allowAnonymous`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.

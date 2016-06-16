@@ -9,17 +9,21 @@ module.exports = function (server) {
   const client = server.plugins.elasticsearch.client;
   const config = server.config();
 
+  function createNewConfig() {
+    return client.create({
+      index: config.get('kibana.index'),
+      type: 'config',
+      body: { buildNum: config.get('pkg.buildNum') },
+      id: config.get('pkg.version')
+    });
+  }
+
   return function (response) {
     const newConfig = {};
 
     // Check to see if there are any doc. If not then we set the build number and id
     if (response.hits.hits.length === 0) {
-      return client.create({
-        index: config.get('kibana.index'),
-        type: 'config',
-        body: { buildNum: config.get('pkg.buildNum') },
-        id: config.get('pkg.version')
-      });
+      return createNewConfig();
     }
 
     // if we already have a the current version in the index then we need to stop
@@ -30,9 +34,11 @@ module.exports = function (server) {
     if (devConfig) return Promise.resolve();
 
     // Look for upgradeable configs. If none of them are upgradeable
-    // then resolve with null.
+    // then create a new one.
     const body = _.find(response.hits.hits, isUpgradeable.bind(null, server));
-    if (!body) return Promise.resolve();
+    if (!body) {
+      return createNewConfig();
+    }
 
     // if the build number is still the template string (which it wil be in development)
     // then we need to set it to the max interger. Otherwise we will set it to the build num

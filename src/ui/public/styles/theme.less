@@ -35,6 +35,11 @@
         font-size: 1.5em;
         padding: 5px 0 6px 0;
         margin: 0 10px;
+        border-bottom: 2px solid transparent;
+      }
+      // singular tabs are treated as titles
+      > li:only-child > a {
+        color: @kibanaGray1;
       }
       // Active, hover state for the getTabs
       > .active > a,

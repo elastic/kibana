@@ -39,7 +39,15 @@ module.exports = function (chrome, internals) {
       };
 
       chrome.getBreadcrumbs = () => {
-        return $location.path().split('/').slice(1);
+        let path = $location.path();
+        let length = path.length - 1;
+
+        // trim trailing slash
+        if (path.charAt(length) === '/') {
+          length--;
+        }
+
+        return path.substr(1, length).split('/');
       };
 
       const notify = new Notifier();

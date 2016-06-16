@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { find } from 'lodash';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
@@ -7,6 +7,8 @@ import Status from '../status';
 import ServerStatus from '../server_status';
 
 describe('ServerStatus class', function () {
+  const plugin = {id: 'name', version: '1.2.3'};
+
   let server;
   let serverStatus;
 
@@ -15,31 +17,63 @@ describe('ServerStatus class', function () {
     serverStatus = new ServerStatus(server);
   });
 
-  describe('#create(name)', function () {
-    it('should create a new status by name', function () {
-      let status = serverStatus.create('name');
+  describe('#create(id)', () => {
+    it('should create a new plugin with an id', () => {
+      const status = serverStatus.create('someid');
       expect(status).to.be.a(Status);
     });
   });
 
-  describe('#get(name)', function () {
-    it('exposes plugins by name', function () {
-      let status = serverStatus.create('name');
-      expect(serverStatus.get('name')).to.be(status);
+  describe('#createForPlugin(plugin)', function () {
+    it('should create a new status by plugin', function () {
+      let status = serverStatus.createForPlugin(plugin);
+      expect(status).to.be.a(Status);
     });
   });
 
-  describe('#getState(name)', function () {
-    it('should expose the state of the plugin by name', function () {
-      let status = serverStatus.create('name');
+  describe('#get(id)', () => {
+    it('exposes statuses by their id', () => {
+      const status = serverStatus.create('statusid');
+      expect(serverStatus.get('statusid')).to.be(status);
+    });
+
+    it('does not get the status for a plugin', () => {
+      serverStatus.createForPlugin(plugin);
+      expect(serverStatus.get(plugin)).to.be(undefined);
+    });
+  });
+
+  describe('#getForPluginId(plugin)', function () {
+    it('exposes plugin status for the plugin', function () {
+      let status = serverStatus.createForPlugin(plugin);
+      expect(serverStatus.getForPluginId(plugin.id)).to.be(status);
+    });
+
+    it('does not get plain statuses by their id', function () {
+      serverStatus.create('someid');
+      expect(serverStatus.getForPluginId('someid')).to.be(undefined);
+    });
+  });
+
+  describe('#getState(id)', function () {
+    it('should expose the state of a status by id', function () {
+      let status = serverStatus.create('someid');
       status.green();
-      expect(serverStatus.getState('name')).to.be('green');
+      expect(serverStatus.getState('someid')).to.be('green');
+    });
+  });
+
+  describe('#getStateForPluginId(plugin)', function () {
+    it('should expose the state of a plugin by id', function () {
+      let status = serverStatus.createForPlugin(plugin);
+      status.green();
+      expect(serverStatus.getStateForPluginId(plugin.id)).to.be('green');
     });
   });
 
   describe('#overall()', function () {
     it('considers each status to produce a summary', function () {
-      let status = serverStatus.create('name');
+      let status = serverStatus.createForPlugin(plugin);
 
       expect(serverStatus.overall().state).to.be('uninitialized');
 
@@ -65,23 +99,26 @@ describe('ServerStatus class', function () {
 
   describe('#toJSON()', function () {
     it('serializes to overall status and individuals', function () {
-      let one = serverStatus.create('one');
-      let two = serverStatus.create('two');
-      let three = serverStatus.create('three');
+      const pluginOne = {id: 'one', version: '1.0.0'};
+      const pluginTwo = {id: 'two', version: '2.0.0'};
 
-      one.green();
-      two.yellow();
-      three.red();
+      let service = serverStatus.create('some service');
+      let p1 = serverStatus.createForPlugin(pluginOne);
+      let p2 = serverStatus.createForPlugin(pluginTwo);
 
-      let obj = JSON.parse(JSON.stringify(serverStatus));
-      expect(obj).to.have.property('overall');
-      expect(obj.overall.state).to.eql(serverStatus.overall().state);
-      expect(obj.statuses).to.have.length(3);
+      service.green();
+      p1.yellow();
+      p2.red();
 
-      let outs = _.indexBy(obj.statuses, 'name');
-      expect(outs.one).to.have.property('state', 'green');
-      expect(outs.two).to.have.property('state', 'yellow');
-      expect(outs.three).to.have.property('state', 'red');
+      let json = JSON.parse(JSON.stringify(serverStatus));
+      expect(json).to.have.property('overall');
+      expect(json.overall.state).to.eql(serverStatus.overall().state);
+      expect(json.statuses).to.have.length(3);
+
+      const out = status => find(json.statuses, { id: status.id });
+      expect(out(service)).to.have.property('state', 'green');
+      expect(out(p1)).to.have.property('state', 'yellow');
+      expect(out(p2)).to.have.property('state', 'red');
     });
   });
 

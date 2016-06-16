@@ -65,7 +65,7 @@ uiRoutes
       return savedSearches.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
         'search': '/discover',
-        'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
+        'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
       }));
     }
   }
@@ -496,7 +496,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
 
     // we have a vis, just modify the aggs
     if ($scope.vis) {
-      const visState = $scope.vis.getState();
+      const visState = $scope.vis.getEnabledState();
       visState.aggs = visStateAggs;
 
       $scope.vis.setState(visState);
