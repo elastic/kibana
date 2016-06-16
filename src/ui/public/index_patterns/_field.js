@@ -71,7 +71,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
   }
 
   Field.prototype.routes = {
-    edit: '/settings/indices/edit/{{indexPattern.id}}/field/{{name}}'
+    edit: '/management/kibana/indices/{{indexPattern.id}}/field/{{name}}'
   };
 
   return Field;

@@ -23,6 +23,8 @@ function setLoggingJson(enabled) {
 
 describe(`Server logging configuration`, function () {
   it(`should be reloadable via SIGHUP process signaling`, function (done) {
+    this.timeout(60000);
+
     let asserted = false;
     let json = Infinity;
     const conf = setLoggingJson(true);
@@ -66,7 +68,7 @@ ${err.stack || err.message || err}`).to.eql(true);
     }
 
     function switchToPlainTextLog() {
-      json = 2; // ignore both "reloading" messages
+      json = 3; // ignore both "reloading" messages + ui settings status message
       setLoggingJson(false);
       child.kill(`SIGHUP`); // reload logging config
     }

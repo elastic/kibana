@@ -13,7 +13,6 @@ bdd.describe('console app', function describeIndexTests() {
     return common.navigateToApp('console', false);
   });
 
-
   bdd.it('should show the default request', function () {
     var expectedRequest = [
       'GET _search',
@@ -24,9 +23,11 @@ bdd.describe('console app', function describeIndexTests() {
       '}',
       ''
     ];
+    common.saveScreenshot('Console-help-expanded');
     // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
     return consolePage.collapseHelp()
     .then(function () {
+      common.saveScreenshot('Console-help-collapsed');
       return common.try(function () {
         return consolePage.getRequest()
         .then(function (actualRequest) {
@@ -40,6 +41,7 @@ bdd.describe('console app', function describeIndexTests() {
     var expectedResponseContains = '"_index": ".kibana",';
     return consolePage.clickPlay()
     .then(function () {
+      common.saveScreenshot('Console-default-request');
       return common.try(function () {
         return consolePage.getResponse()
         .then(function (actualResponse) {
