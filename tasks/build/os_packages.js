@@ -12,7 +12,7 @@ export default (grunt) => {
   const fpm = args => exec('fpm', args);
 
   grunt.registerTask('_build:osPackages', function () {
-    grunt.file.mkdir('target');
+    grunt.file.mkdir(targetDir);
 
     config.get('platforms')
     .filter(({ name }) => /linux-x(86|64)$/.test(name))
