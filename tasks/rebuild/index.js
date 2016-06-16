@@ -20,7 +20,6 @@ import { trim } from 'lodash';
 export default (grunt) => {
   grunt.registerTask('rebuild', 'Rebuilds targets as a new version', function () {
     grunt.task.run([
-      '_build:getProps',
       '_rebuild:confirm',
       '_rebuild:continue'
     ]);

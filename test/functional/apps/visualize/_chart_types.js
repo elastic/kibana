@@ -16,9 +16,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('chart types', function indexPatternCreation() {
-
     bdd.it('should show the correct chart types', function pageHeader() {
-
       var expectedChartTypes = [
         'Area chart', 'Data table', 'Line chart', 'Markdown widget',
         'Metric', 'Pie chart', 'Tile map', 'Vertical bar chart'
@@ -28,6 +26,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function testChartTypes(chartTypes) {
         common.debug('returned chart types = ' + chartTypes);
         common.debug('expected chart types = ' + expectedChartTypes);
+        common.saveScreenshot('Visualize-chart-types');
         expect(chartTypes).to.eql(expectedChartTypes);
       });
     });

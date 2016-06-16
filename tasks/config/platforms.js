@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   let { resolve } = require('path');
 
-  let version = grunt.config.get('pkg.version');
+  let { version } = grunt.config.get('build');
   let nodeVersion = grunt.config.get('nodeVersion');
   let rootPath = grunt.config.get('root');
   let baseUri = `https://nodejs.org/dist/v${nodeVersion}`;

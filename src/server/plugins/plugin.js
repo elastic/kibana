@@ -127,7 +127,7 @@ module.exports = class Plugin {
         server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
       }
 
-      this.status = kbnServer.status.create(this);
+      this.status = kbnServer.status.createForPlugin(this);
       server.expose('status', this.status);
 
       return await attempt(this.externalInit, [server, options], this);
