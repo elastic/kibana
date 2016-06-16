@@ -64,9 +64,6 @@ export default (function () {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      // navUrl includes user:password@ for use with Shield
-      // appUrl excludes user:password@ to match what getCurrentUrl returns
-      // var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
       self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
