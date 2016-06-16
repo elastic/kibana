@@ -9,7 +9,7 @@ const module = uiModules.get('app/dashboard');
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
-require('plugins/kibana/settings/saved_object_registry').register({
+require('plugins/kibana/management/saved_object_registry').register({
   service: 'savedDashboards',
   title: 'dashboards'
 });

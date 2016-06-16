@@ -30,10 +30,10 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   const configWatchers = new WeakMap();
   const docSources = new WeakMap();
   const getRoutes = () => ({
-    edit: '/settings/indices/{{id}}',
-    addField: '/settings/indices/{{id}}/create-field',
-    indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)'
+    edit: '/management/kibana/indices/{{id}}',
+    addField: '/management/kibana/indices/{{id}}/create-field',
+    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)'
   });
 
   const mapping = mappingSetup.expandShorthand({
