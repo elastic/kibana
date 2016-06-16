@@ -81,10 +81,16 @@ bdd.describe('dashboard tab', function describeIndexTests() {
       return dashboardPage.saveDashboard(dashboardName)
       // click New Dashboard just to clear the one we just created
       .then(function () {
-        return dashboardPage.clickNewDashboard();
+        return common.try(function () {
+          common.debug('saved Dashboard, now click New Dashboard');
+          return dashboardPage.clickNewDashboard();
+        });
       })
       .then(function () {
-        return dashboardPage.loadSavedDashboard(dashboardName);
+        return common.try(function () {
+          common.debug('now re-load previously saved dashboard');
+          return dashboardPage.loadSavedDashboard(dashboardName);
+        });
       })
       .then(function () {
         common.saveScreenshot('Dashboard-load-saved');
