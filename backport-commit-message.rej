@@ -1,0 +1,8 @@
+Backport PR #7422
+---------
+
+**Commit 1:**
+[build] Cleanup dirs on uninstall
+
+* Original sha: 29e26de7e234d4e6abcf4127732856fca5ba2727
+* Authored by Jonathan Budzenski <jbudz@users.noreply.github.com> on 2016-05-25T22:05:28Z
