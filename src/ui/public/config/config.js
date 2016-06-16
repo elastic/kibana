@@ -15,11 +15,12 @@ module.service(`config`, function (Private, $rootScope, $http, chrome, uiSetting
   let settings = mergeSettings(defaults, initialUserSettings);
 
   config.getAll = () => cloneDeep(settings);
-  config.get = key => getCurrentValue(key);
+  config.get = (key, defaultValue) => getCurrentValue(key, defaultValue);
   config.set = (key, val) => change(key, isPlainObject(val) ? angular.toJson(val) : val);
   config.remove = key => change(key, null);
-  config.isDefault = key => !(key in settings) || nullOrEmpty(settings[key].userValue);
-  config.isCustom = key => key in settings && !('value' in settings[key]);
+  config.isDeclared = key => key in settings;
+  config.isDefault = key => !config.isDeclared(key) || nullOrEmpty(settings[key].userValue);
+  config.isCustom = key => config.isDeclared(key) && !('value' in settings[key]);
   config.watchAll = (fn, scope) => watchAll(scope, fn);
   config.watch = (key, fn, scope) => watch(key, scope, fn);
 
@@ -40,7 +41,7 @@ module.service(`config`, function (Private, $rootScope, $http, chrome, uiSetting
   };
 
   function watch(key, scope = $rootScope, fn) {
-    if (!(key in settings)) {
+    if (!config.isDeclared(key)) {
       throw new Error(`Unexpected \`config.watch("${key}", fn)\` call on unrecognized configuration setting "${key}".
 Setting an initial value via \`config.set("${key}", value)\` before binding
 any custom setting configuration watchers for "${key}" may fix this issue.`);
@@ -58,33 +59,33 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
   }
 
   function change(key, value) {
-    const oldVal = key in settings ? settings[key].userValue : undefined;
+    const declared = config.isDeclared(key);
+    const oldVal = declared ? settings[key].userValue : undefined;
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
     const unchanged = oldVal === newVal;
     if (unchanged) {
       return Promise.resolve();
     }
-    const initialVal = config.get(key);
-    localUpdate(key, newVal);
+    const initialVal = declared ? config.get(key) : undefined;
+    localUpdate(key, newVal, initialVal);
 
     return delayedUpdate(key, newVal)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
       })
       .catch(reason => {
-        localUpdate(key, initialVal);
+        localUpdate(key, initialVal, config.get(key));
         notify.error(reason);
       });
   }
 
-  function localUpdate(key, newVal) {
-    const oldVal = config.get(key);
+  function localUpdate(key, newVal, oldVal) {
     patch(key, newVal);
     advertise(key, oldVal);
   }
 
   function patch(key, value) {
-    if (!(key in settings)) {
+    if (!config.isDeclared(key)) {
       settings[key] = {};
     }
     if (value === null) {
@@ -105,11 +106,16 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return value === undefined || value === null;
   }
 
-  function getCurrentValue(key) {
-    if (!(key in settings)) {
-      throw new Error(`Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
+  function getCurrentValue(key, defaultValueForGetter) {
+    if (!config.isDeclared(key)) {
+      if (defaultValueForGetter === undefined) {
+        throw new Error(`Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
 Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
-any custom setting value for "${key}" may fix this issue.`);
+any custom setting value for "${key}" may fix this issue.
+You can also save an step using \`config.get("${key}", defaultValue)\`, which
+will set the initial value if one is not already set.`);
+      }
+      config.set(key, defaultValueForGetter);
     }
     const { userValue, value: defaultValue, type } = settings[key];
     const currentValue = config.isDefault(key) ? defaultValue : userValue;

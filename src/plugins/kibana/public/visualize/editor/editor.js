@@ -43,9 +43,9 @@ uiRoutes
       return savedVisualizations.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
         'visualization': '/visualize',
-        'search': '/settings/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern': '/settings/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern-field': '/settings/objects/savedVisualizations/' + $route.current.params.id
+        'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+        'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+        'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
       }));
     }
   }
@@ -119,8 +119,8 @@ uiModules
 
     if (!angular.equals($state.vis, savedVisState)) {
       Promise.try(function () {
-        vis.setState($state.vis);
         editableVis.setState($state.vis);
+        vis.setState(editableVis.getEnabledState());
       })
       .catch(courier.redirectWhenMissing({
         'index-pattern-field': '/visualize'
@@ -139,6 +139,7 @@ uiModules
     $scope.editableVis = editableVis;
     $scope.state = $state;
     $scope.uiState = $state.makeStateful('uiState');
+    vis.setUiState($scope.uiState);
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 
@@ -149,9 +150,9 @@ uiModules
     $scope.stageEditableVis = transferVisState(editableVis, vis, true);
     $scope.resetEditableVis = transferVisState(vis, editableVis);
     $scope.$watch(function () {
-      return editableVis.getState();
+      return editableVis.getEnabledState();
     }, function (newState) {
-      editableVis.dirty = !angular.equals(newState, vis.getState());
+      editableVis.dirty = !angular.equals(newState, vis.getEnabledState());
 
       $scope.responseValueAggs = null;
       try {
@@ -291,14 +292,16 @@ uiModules
     }
   };
 
-  function transferVisState(fromVis, toVis, fetch) {
+  function transferVisState(fromVis, toVis, stage) {
     return function () {
-      toVis.setState(fromVis.getState());
+      const view = fromVis.getEnabledState();
+      const full = fromVis.getState();
+      toVis.setState(view);
       editableVis.dirty = false;
-      $state.vis = vis.getState();
+      $state.vis = full;
       $state.save();
 
-      if (fetch) $scope.fetch();
+      if (stage) $scope.fetch();
     };
   }
 

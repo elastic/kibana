@@ -13,6 +13,7 @@ export default function IpFormatProvider(Private) {
   Ip.fieldType = 'ip';
 
   Ip.prototype._convert = function (val) {
+    if (val === undefined || val === null) return '-';
     if (!isFinite(val)) return val;
 
     // shazzam!

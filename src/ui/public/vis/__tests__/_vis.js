@@ -58,7 +58,7 @@ describe('Vis Class', function () {
 
   describe('getState()', function () {
     it('should get a state that represents the... er... state', function () {
-      let state = vis.getState();
+      let state = vis.getEnabledState();
       expect(state).to.have.property('type', 'pie');
 
       expect(state).to.have.property('params');

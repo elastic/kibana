@@ -15,7 +15,7 @@ uiModules
   const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier();
 
-  const services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {
+  const services = require('plugins/kibana/management/saved_object_registry').all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
     return {
       type: service.type,
@@ -55,6 +55,10 @@ uiModules
           // create child ui state from the savedObj
           const uiState = panelConfig.uiState || {};
           $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
+          const panelSavedVis = _.get(panelConfig, 'savedObj.vis');  // Sometimes this will be a search, and undef
+          if (panelSavedVis) {
+            panelSavedVis.setUiState($scope.uiState);
+          }
 
           $scope.filter = function (field, value, operator) {
             const index = $scope.savedObj.searchSource.get('index').id;
@@ -75,7 +79,7 @@ uiModules
           const service = _.find(services, { type: type });
           if (!service) return;
 
-          $scope.editUrl = '#settings/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
+          $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
         });
 
       });

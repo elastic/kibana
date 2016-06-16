@@ -8,9 +8,10 @@ export default class UiNavLink {
     this.url = `${uiExports.urlBasePath || ''}${spec.url}`;
     this.description = spec.description;
     this.icon = spec.icon;
+    this.linkToLastSubUrl = spec.linkToLastSubUrl === false ? false : true;
   }
 
   toJSON() {
-    return pick(this, ['title', 'url', 'order', 'description', 'icon']);
+    return pick(this, ['title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl']);
   }
 }

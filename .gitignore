@@ -12,7 +12,10 @@ target
 .idea
 *.iml
 *.log
-/test/output
+/test/screenshots/diff
+/test/screenshots/failure
+/test/screenshots/session
+/test/screenshots/visual_regression_gallery.html
 /esvm
 .htpasswd
 .eslintcache

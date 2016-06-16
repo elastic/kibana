@@ -44,8 +44,7 @@ export default (function () {
       .then(function clickSave() {
         common.debug('--find save button');
         return common.findTestSubject('discover-save-search-btn').click();
-      })
-      .catch(common.handleError(this));
+      });
     },
 
     loadSavedSearch: function loadSavedSearch(searchName) {
@@ -100,7 +99,21 @@ export default (function () {
     getChartInterval: function getChartInterval() {
       return thisTime
       .findByCssSelector('a[ng-click="toggleInterval()"]')
-      .getVisibleText();
+      .getVisibleText()
+      .then(function (intervalText) {
+        if (intervalText.length > 0) {
+          return intervalText;
+        } else {
+          return thisTime
+          .findByCssSelector('select[ng-model="state.interval"]')
+          .getProperty('value') // this gets 'string:d' for Daily
+          .then(function (selectedValue) {
+            return thisTime
+            .findByCssSelector('option[value="' + selectedValue + '"]')
+            .getVisibleText();
+          });
+        }
+      });
     },
 
     setChartInterval: function setChartInterval(interval) {
@@ -211,6 +224,24 @@ export default (function () {
       return thisTime
         .findByClassName('sidebar-list')
         .getProperty('clientWidth');
+    },
+
+    hasNoResults: function hasNoResults() {
+      return common
+        .findTestSubject('discoverNoResults')
+        .then(() => true)
+        .catch(() => false);
+    },
+
+    getNoResultsTimepicker: function getNoResultsTimepicker() {
+      return common.findTestSubject('discoverNoResultsTimefilter');
+    },
+
+    hasNoResultsTimepicker: function hasNoResultsTimepicker() {
+      return this
+        .getNoResultsTimepicker()
+        .then(() => true)
+        .catch(() => false);
     }
 
   };

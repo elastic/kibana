@@ -9,6 +9,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     self.id = String(opts.id || AggConfig.nextId(vis.aggs));
     self.vis = vis;
     self._opts = opts = (opts || {});
+    self.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
     // setters
     self.type = opts.type;
@@ -232,6 +233,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
 
     return {
       id: self.id,
+      enabled: self.enabled,
       type: self.type && self.type.name,
       schema: self.schema && self.schema.name,
       params: outParams
