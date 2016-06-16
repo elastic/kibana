@@ -28,6 +28,7 @@ function toEditableConfig({ def, name, value, isCustom }) {
   conf.select = editor === 'select';
   conf.bool = editor === 'boolean';
   conf.array = editor === 'array';
+  conf.markdown = editor === 'markdown';
   conf.normal = editor === 'normal';
   conf.tooComplex = !editor;
 

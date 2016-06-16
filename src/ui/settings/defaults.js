@@ -219,6 +219,16 @@ export default function defaultSettingsProvider() {
       value: false,
       description: 'Whether the filters should have a global state (be pinned) by default'
     },
+    'notifications:banner': {
+      type: 'markdown',
+      description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown supported</a>.',
+      value: ''
+    },
+    'notifications:lifetime:banner': {
+      value: 3000000,
+      description: 'The time in milliseconds which a banner notification ' +
+      'will be displayed on-screen for. Setting to Infinity will disable.'
+    },
     'notifications:lifetime:error': {
       value: 300000,
       description: 'The time in milliseconds which an error notification ' +

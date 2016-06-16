@@ -23,7 +23,7 @@ let init = function (text) {
 
     // Create the element
     $elem = angular.element(
-      '<kbn-truncated orig="' + text + '" length="10"></kbn-truncated>'
+      '<kbn-truncated source="' + text + '" length="10"></kbn-truncated>'
     );
 
     // And compile it
@@ -37,6 +37,9 @@ let init = function (text) {
   });
 };
 
+function trimmed(text) {
+  return text.trim().replace(/\s+/g, ' ');
+}
 
 describe('kbnTruncate directive', function () {
 
@@ -47,7 +50,7 @@ describe('kbnTruncate directive', function () {
     });
 
     it('should trim long strings', function (done) {
-      expect($elem.text()).to.be('some strin... more');
+      expect(trimmed($elem.text())).to.be('some … more');
       done();
     });
 
@@ -56,15 +59,15 @@ describe('kbnTruncate directive', function () {
       done();
     });
 
-    it('should should more text if the link is clicked and less text if clicked again', function (done) {
+    it('should show more text if the link is clicked and less text if clicked again', function (done) {
       $scope.toggle();
       $scope.$digest();
-      expect($elem.text()).to.be('some string of text over 10 characters less');
+      expect(trimmed($elem.text())).to.be('some string of text over 10 characters less');
       expect($elem.find('[ng-click="toggle()"]').text()).to.be('less');
 
       $scope.toggle();
       $scope.$digest();
-      expect($elem.text()).to.be('some strin... more');
+      expect(trimmed($elem.text())).to.be('some … more');
       expect($elem.find('[ng-click="toggle()"]').text()).to.be('more');
 
       done();
@@ -79,7 +82,7 @@ describe('kbnTruncate directive', function () {
     });
 
     it('should not trim short strings', function (done) {
-      expect($elem.text()).to.be('short');
+      expect(trimmed($elem.text())).to.be('short');
       done();
     });
 
