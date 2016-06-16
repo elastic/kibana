@@ -9,9 +9,21 @@ export default (function () {
   SettingsPage.prototype = {
     constructor: SettingsPage,
 
-    clickAdvancedTab: function () {
-      common.debug('in clickAdvancedTab');
-      return common.findTestSubject('settingsNav advanced').click();
+    clickNavigation: function () {
+      // TODO: find better way to target the element
+      return this.remote.findDisplayedByCssSelector('.app-link:nth-child(5) a').click();
+    },
+
+    clickPath: function (path) {
+      return this.remote.findDisplayedByCssSelector('[kbn-href="#/management/' + path + '"]').click();
+    },
+
+    clickKibanaSettings: function () {
+      return this.clickPath('kibana/settings');
+    },
+
+    clickKibanaIndicies: function () {
+      return this.clickPath('kibana/indices');
     },
 
     getAdvancedSettings: function getAdvancedSettings(propertyName) {
@@ -20,14 +32,9 @@ export default (function () {
       .getVisibleText();
     },
 
-
-    clickAdvancedTab: function () {
-      common.debug('in clickAdvancedTab');
-      return common.findTestSubject('settingsNav advanced').click();
-    },
-
     setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
       var self = this;
+
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
       .then(function () {
@@ -60,11 +67,9 @@ export default (function () {
       .getVisibleText();
     },
 
-
     navigateTo: function () {
       return common.navigateToApp('settings');
     },
-
 
     getTimeBasedEventsCheckbox: function () {
       return this.remote.setFindTimeout(defaultFindTimeout)
@@ -120,15 +125,7 @@ export default (function () {
 
     getCreateButton: function () {
       return this.remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('.btn');
-    },
-
-    clickCreateButton: function () {
-      return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('.btn').click()
-      .then(function () {
-        return headerPage.getSpinnerDone();
-      });
+        .findDisplayedByCssSelector('[type="submit"]');
     },
 
     clickDefaultIndexButton: function () {
@@ -190,7 +187,7 @@ export default (function () {
 
     getFieldsTabCount: function () {
       var self = this;
-      var selector = 'li.kbn-settings-tab.active a small';
+      var selector = 'li.kbn-management-tab.active a small';
 
       return common.try(function () {
         return self.remote.setFindTimeout(defaultFindTimeout / 10)
@@ -317,10 +314,13 @@ export default (function () {
       var self = this;
 
       return common.try(function () {
-        return self.selectTimeFieldOption('@timestamp')
-        .then(function () {
-          return self.getCreateButton().click();
-        });
+        return self.navigateTo()
+          .then(function () {
+            return self.selectTimeFieldOption('@timestamp');
+          })
+          .then(function () {
+            return self.getCreateButton().click();
+          });
       })
       .then(function () {
         return headerPage.getSpinnerDone();
@@ -328,13 +328,15 @@ export default (function () {
       .then(function () {
         return common.try(function () {
           return self.remote.getCurrentUrl()
-          .then(function (currentUrl) {
-            if (!currentUrl.match(/indices\/.+\?/)) {
-              throw new Error('Index pattern not created');
-            } else {
-              common.debug('Index pattern created: ' + currentUrl);
-            }
-          });
+            .then(function (currentUrl) {
+              common.log('currentUrl', currentUrl);
+
+              if (!currentUrl.match(/indices\/.+\?/)) {
+                throw new Error('Index pattern not created');
+              } else {
+                common.debug('Index pattern created: ' + currentUrl);
+              }
+            });
         });
       });
     },

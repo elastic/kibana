@@ -7,13 +7,14 @@ let module = uiModules.get('kibana');
 module.directive('breadCrumbs', function () {
   return {
     restrict: 'E',
-    scope: true,
+    scope: {
+      omitCurrentPage: '='
+    },
     template: breadCrumbsTemplate,
     controller: function ($scope) {
       $scope.crumbs = chrome.getBreadcrumbs();
 
-      if (_.last($scope.crumbs) === '') {
-        // Remove the empty string from the end of the array
+      if ($scope.omitCurrentPage === true) {
         $scope.crumbs.pop();
       }
     }
