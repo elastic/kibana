@@ -14,4 +14,4 @@ user_create() {
 if ! user_check "<%= user %>" ; then
   user_create "<%= user %>"
 fi
-chown -R <%= user %>:<%= group %> /opt/kibana/optimize
+chown -R <%= user %>:<%= group %> <%= optimizeDir %>
