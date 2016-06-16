@@ -57,6 +57,10 @@ describe('Vis-Editor-Agg plugin directive', function () {
       id: '2',
       schema: makeConfig('radius')
     }];
+    $parentScope.stats = { count: 1 };
+    $parentScope.vis = {
+      type: { name: 'histogram' }
+    };
 
     // share the scope
     _.defaults($parentScope, $rootScope, Object.getPrototypeOf($rootScope));
@@ -83,5 +87,38 @@ describe('Vis-Editor-Agg plugin directive', function () {
       schema: makeConfig()
     });
     expect($parentScope.canRemove($parentScope.agg)).to.be(true);
+  });
+
+  it('can be secondary axis only for line graph with more than 2 y axis', function () {
+    $parentScope.stats.count = 2;
+    $parentScope.vis.type.name = 'line';
+
+    expect($parentScope.canBeSecondaryYAxis()).to.be(true);
+  });
+
+  it('can not be secondary axis non metric schema', function () {
+    $parentScope.agg.schema.name = 'non-metric';
+
+    expect($parentScope.canBeSecondaryYAxis()).to.be(false);
+  });
+
+  it('can not be secondary axis non y-axis title', function () {
+    $parentScope.agg.schema.title = 'non-y-axis';
+
+    expect($parentScope.canBeSecondaryYAxis()).to.be(false);
+  });
+
+  it('can not be secondary axis for histogram graph with 2 y axis', function () {
+    $parentScope.stats.count = 2;
+    $parentScope.vis.type.name = 'histogram';
+
+    expect($parentScope.canBeSecondaryYAxis()).to.be(false);
+  });
+
+  it('can not be secondary axis for line graph with only 1 y axis', function () {
+    $parentScope.stats.count = 1;
+    $parentScope.vis.type.name = 'line';
+
+    expect($parentScope.canBeSecondaryYAxis()).to.be(false);
   });
 });

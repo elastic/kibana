@@ -11,29 +11,32 @@ describe('initYAxis', function () {
     initYAxis = Private(AggResponsePointSeriesInitYAxisProvider);
   }));
 
-  function agg() {
+  function agg(onSecondaryYAxis) {
     return {
       fieldFormatter: _.constant({}),
       write: _.constant({ params: {} }),
-      type: {}
+      type: {},
+      onSecondaryYAxis: onSecondaryYAxis
     };
   }
 
-  let baseChart = {
-    aspects: {
-      y: [
-        { agg: agg(), col: { title: 'y1' } },
-        { agg: agg(), col: { title: 'y2' } },
-      ],
-      x: {
-        agg: agg(),
-        col: { title: 'x' }
+  let baseChart = function (forSecondaryYAxis) {
+    return {
+      aspects: {
+        y: [
+          { agg: agg(false), col: { title: 'y1' } },
+          { agg: agg(forSecondaryYAxis), col: { title: 'y2' } },
+        ],
+        x: {
+          agg: agg(false),
+          col: { title: 'x' }
+        }
       }
-    }
+    };
   };
 
   describe('with a single y aspect', function () {
-    let singleYBaseChart = _.cloneDeep(baseChart);
+    let singleYBaseChart = baseChart(false);
     singleYBaseChart.aspects.y = singleYBaseChart.aspects.y[0];
 
     it('sets the yAxisFormatter the the field formats convert fn', function () {
@@ -51,7 +54,7 @@ describe('initYAxis', function () {
 
   describe('with mutliple y aspects', function () {
     it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function () {
-      let chart = _.cloneDeep(baseChart);
+      let chart = baseChart(false);
       initYAxis(chart);
 
       expect(chart).to.have.property('yAxisFormatter');
@@ -61,9 +64,19 @@ describe('initYAxis', function () {
     });
 
     it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {
-      let chart = _.cloneDeep(baseChart);
+      let chart = baseChart(false);
       initYAxis(chart);
       expect(chart).to.have.property('yAxisLabel', '');
+    });
+
+    it('sets the yAxislabel for secondary axis and use the right formatter', function () {
+      let chart = baseChart(true);
+      initYAxis(chart);
+
+      expect(chart.secondYAxisLabel).to.be(chart.aspects.y[1].col.title);
+      expect(chart.secondYAxisFormatter)
+        .to.be(chart.aspects.y[1].agg.fieldFormatter())
+        .and.not.be(chart.aspects.y[0].agg.fieldFormatter());
     });
   });
 });

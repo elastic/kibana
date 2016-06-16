@@ -6,7 +6,7 @@ import VislibLibLayoutSplitsColumnChartChartTitleSplitProvider from 'ui/vislib/l
 export default function ColumnLayoutFactory(Private) {
 
   let chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
-  let yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
+  let YAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
   let xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
   let chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
 
@@ -59,7 +59,7 @@ export default function ColumnLayoutFactory(Private) {
                   {
                     type: 'div',
                     class: 'y-axis-div-wrapper',
-                    splits: yAxisSplit
+                    splits: new YAxisSplit('y-axis-div', false).build()
                   }
                 ]
               },
@@ -101,6 +101,36 @@ export default function ColumnLayoutFactory(Private) {
                     class: 'x-axis-title'
                   }
                 ]
+              }
+            ]
+          },
+          {
+            type: 'div',
+            class: 'y-axis-col-wrapper',
+            children: [
+              {
+                type: 'div',
+                class: 'secondary-y-axis-col',
+                children: [
+                  {
+                    type: 'div',
+                    class: 'secondary-y-axis-chart-title',
+                    splits: chartTitleSplit
+                  },
+                  {
+                    type: 'div',
+                    class: 'secondary-y-axis-div-wrapper',
+                    splits: new YAxisSplit('secondary-y-axis-div', true).build()
+                  },
+                  {
+                    type: 'div',
+                    class: 'secondary-y-axis-title'
+                  }
+                ]
+              },
+              {
+                type: 'div',
+                class: 'y-axis-spacer-block'
               }
             ]
           }

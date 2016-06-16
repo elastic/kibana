@@ -9,27 +9,38 @@ define(function () {
      */
 
     // render and get bounding box width
-    return function (selection, parent, opts) {
-      let yAxis = opts && opts.yAxis;
 
-      selection.each(function () {
-        let div = d3.select(this);
-
-        div.call(setWidth, yAxis);
-
-        div.selectAll('.y-axis-div')
-        .append('div')
-        .data(function (d) {
-          return d.rows ? d.rows : [d];
-        })
-        .enter()
-          .append('div')
-          .attr('class', 'y-axis-div');
-      });
+    let YAxisSplit = function (divClass, isSecondary) {
+      this.yAxisDivClass = divClass;
+      this.isSecondary = isSecondary;
     };
 
-    function setWidth(el, yAxis) {
-      if (!yAxis) return;
+    YAxisSplit.prototype.build = function () {
+      let self = this;
+      return function (selection, parent, opts) {
+        let yAxis = self.isSecondary ?
+                    opts && opts.secondaryYAxis :
+                    opts && opts.yAxis;
+
+        selection.each(function () {
+          let div = d3.select(this);
+
+          div.call(self.setWidth, yAxis);
+
+          div.selectAll('.' + self.yAxisDivClass)
+          .append('div')
+          .data(function (d) {
+            return d.rows ? d.rows : [d];
+          })
+          .enter()
+          .append('div')
+          .attr('class', self.yAxisDivClass);
+        });
+      };
+    };
+
+    YAxisSplit.prototype.setWidth = function (el, yAxis) {
+      if (!(yAxis && yAxis.el)) return;
 
       let padding = 5;
       let height = parseInt(el.node().clientHeight, 10);
@@ -43,6 +54,8 @@ define(function () {
       svg.remove();
 
       el.style('width', (width + padding) + 'px');
-    }
+    };
+
+    return YAxisSplit;
   };
 });

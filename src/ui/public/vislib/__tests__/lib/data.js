@@ -4,9 +4,12 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import dataSeries from 'fixtures/vislib/mock_data/date_histogram/_series';
+import dualAxisDataSeries from 'fixtures/vislib/mock_data/date_histogram/_dual_axis_series';
 import dataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import dualAxisDataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_dual_axis_series_neg';
 import dataStacked from 'fixtures/vislib/mock_data/stacked/_stacked';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibDualYAxisStrategy from 'ui/vislib/lib/_dual_y_axis_strategy';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 let seriesData = {
@@ -15,6 +18,22 @@ let seriesData = {
     {
       'label': '100',
       'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+    }
+  ]
+};
+
+let seriesDataWithDualAxis = {
+  'label': '',
+  'series': [
+    {
+      'label': '100',
+      'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}],
+      'onSecondaryYAxis': false
+    },
+    {
+      'label': '1001',
+      'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}],
+      'onSecondaryYAxis': true
     }
   ]
 };
@@ -104,9 +123,12 @@ let colsData = {
 describe('Vislib Data Class Test Suite', function () {
   let Data;
   let persistedState;
+  let DualYAxisStrategy;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
+    // single axis strategy is used by Data by default
+    DualYAxisStrategy = Private(VislibLibDualYAxisStrategy);
     Data = Private(VislibLibDataProvider);
     persistedState = new (Private(PersistedStatePersistedStateProvider))();
   }));
@@ -119,6 +141,54 @@ describe('Vislib Data Class Test Suite', function () {
     it('should return an object', function () {
       let rowIn = new Data(rowsData, {}, persistedState);
       expect(_.isObject(rowIn)).to.be(true);
+    });
+
+    it('should decorate the values with false if there is no secondary Axis', function () {
+      let seriesDataWithoutLabelInSeries = {
+        'label': '',
+        'series': [
+          {
+            'label': '',
+            'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          },
+          {
+            'values': [{x:10, y:11}, {x:11, y:12}, {x:12, y:13}]
+          }
+        ],
+        'yAxisLabel': 'customLabel'
+      };
+      let modifiedData = new Data(seriesDataWithoutLabelInSeries, {});
+      _.map(modifiedData.data.series[0].values, function (value) {
+        expect(value.belongsToSecondaryYAxis).to.be(false);
+      });
+      _.map(modifiedData.data.series[1].values, function (value) {
+        expect(value.belongsToSecondaryYAxis).to.be(false);
+      });
+    });
+
+    it('should decorate the values if it belongs to secondary Axis', function () {
+      let seriesDataWithoutLabelInSeries = {
+        'label': '',
+        'series': [
+          {
+            'label': '',
+            'onSecondaryYAxis': true,
+            'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          },
+          {
+            'onSecondaryYAxis': false,
+            'values': [{x:10, y:11}, {x:11, y:12}, {x:12, y:13}]
+          }
+        ],
+        'yAxisLabel': 'customLabel'
+      };
+      let modifiedData = new Data(seriesDataWithoutLabelInSeries, {});
+      _.map(modifiedData.data.series[0].values, function (value) {
+        expect(value.belongsToSecondaryYAxis).to.be(true);
+      });
+      _.map(modifiedData.data.series[1].values, function (value) {
+        expect(value.belongsToSecondaryYAxis).to.be(false);
+      });
     });
 
     it('should update label in series data', function () {
@@ -223,7 +293,7 @@ describe('Vislib Data Class Test Suite', function () {
     });
   });
 
-  describe('Data.flatten', function () {
+  describe('Data.flatten for single y axis', function () {
     let serIn;
     let rowIn;
     let colIn;
@@ -235,13 +305,15 @@ describe('Vislib Data Class Test Suite', function () {
       serIn = new Data(seriesData, {}, persistedState);
       rowIn = new Data(rowsData, {}, persistedState);
       colIn = new Data(colsData, {}, persistedState);
-      serOut = serIn.flatten();
-      rowOut = rowIn.flatten();
-      colOut = colIn.flatten();
+      serOut = serIn._flatten();
+      rowOut = rowIn._flatten();
+      colOut = colIn._flatten();
     });
 
     it('should return an array of value objects from every series', function () {
       expect(serOut.every(_.isObject)).to.be(true);
+      expect(rowOut.every(_.isObject)).to.be(true);
+      expect(colOut.every(_.isObject)).to.be(true);
     });
 
     it('should return all points from every series', testLength(seriesData));
@@ -257,9 +329,51 @@ describe('Vislib Data Class Test Suite', function () {
           }, 0);
         }, 0);
 
-        expect(data.flatten()).to.have.length(len);
+        expect(data._flatten()).to.have.length(len);
       };
     }
+  });
+
+  describe('Data.flatten for dual y axis', function () {
+    let serIn;
+    let rowIn;
+    let colIn;
+    let serOutPrimary;
+    let serOutSecondary;
+    let rowOutPrimary;
+    let rowOutSecondary;
+    let colOutPrimary;
+    let colOutSecondary;
+
+    beforeEach(function () {
+      serIn = new Data(seriesData, {}, new DualYAxisStrategy());
+      rowIn = new Data(rowsData, {}, new DualYAxisStrategy());
+      colIn = new Data(colsData, {}, new DualYAxisStrategy());
+      serOutPrimary = serIn._flatten(true);
+      serOutSecondary = serIn._flatten(false);
+      rowOutPrimary = rowIn._flatten(true);
+      rowOutSecondary = rowIn._flatten(false);
+      colOutPrimary = colIn._flatten(true);
+      colOutSecondary = colIn._flatten(false);
+    });
+
+    it('should return an array of value objects from every series', function () {
+      expect(serOutPrimary.every(_.isObject)).to.be(true);
+      expect(serOutSecondary.every(_.isObject)).to.be(true);
+      expect(rowOutPrimary.every(_.isObject)).to.be(true);
+      expect(rowOutSecondary.every(_.isObject)).to.be(true);
+      expect(colOutPrimary.every(_.isObject)).to.be(true);
+      expect(colOutSecondary.every(_.isObject)).to.be(true);
+    });
+
+    it('should return all points for specific graph in the series', function () {
+      let data = new Data(seriesDataWithDualAxis, {}, new DualYAxisStrategy());
+      let primaryChartLength = data.chartData()[0].series[0].values.length;
+      let secondaryChartLength = data.chartData()[0].series[1].values.length;
+
+      expect(data._flatten(true)).to.have.length(primaryChartLength);
+      expect(data._flatten(false)).to.have.length(secondaryChartLength);
+    });
   });
 
   describe('getYMin method', function () {
@@ -299,6 +413,31 @@ describe('Vislib Data Class Test Suite', function () {
     });
   });
 
+  describe('getSecondYMin method', function () {
+    let visData;
+    let visDataNeg;
+    let visDataStacked;
+    let minValue = 4;
+    let secondMinValue = 400;
+    let minValueNeg = -41;
+    let secondMinValueNeg = -4100;
+
+    beforeEach(function () {
+      visData = new Data(dualAxisDataSeries, {}, new DualYAxisStrategy());
+      visDataNeg = new Data(dualAxisDataSeriesNeg, {}, new DualYAxisStrategy());
+    });
+
+    // The first value in the time series is less than the min date in the
+    // date range. It also has the largest y value. This value should be excluded
+    // when calculating the Y max value since it falls outside of the range.
+    it('should return the Y domain min values', function () {
+      expect(visData.getYMin()).to.be(minValue);
+      expect(visData.getSecondYMin()).to.be(secondMinValue);
+      expect(visDataNeg.getYMin()).to.be(minValueNeg);
+      expect(visDataNeg.getSecondYMin()).to.be(secondMinValueNeg);
+    });
+  });
+
   describe('getYMax method', function () {
     let visData;
     let visDataNeg;
@@ -333,6 +472,32 @@ describe('Vislib Data Class Test Suite', function () {
       let realMax = visData.getYMax();
       let multiplier = 13.2;
       expect(visData.getYMax(function (d) { return d.y * multiplier; })).to.be(realMax * multiplier);
+    });
+  });
+
+  describe('getSecondYMax method', function () {
+    let visData;
+    let visDataNeg;
+    let visDataStacked;
+    let maxValue = 41;
+    let secondMaxValue = 4100;
+    let maxValueNeg = -4;
+    let secondMaxValueNeg = -400;
+    let maxValueStacked = 115;
+
+    beforeEach(function () {
+      visData = new Data(dualAxisDataSeries, {}, new DualYAxisStrategy());
+      visDataNeg = new Data(dualAxisDataSeriesNeg, {}, new DualYAxisStrategy());
+    });
+
+    // The first value in the time series is less than the min date in the
+    // date range. It also has the largest y value. This value should be excluded
+    // when calculating the Y max value since it falls outside of the range.
+    it('should return the Y domain min values', function () {
+      expect(visData.getYMax()).to.be(maxValue);
+      expect(visData.getSecondYMax()).to.be(secondMaxValue);
+      expect(visDataNeg.getYMax()).to.be(maxValueNeg);
+      expect(visDataNeg.getSecondYMax()).to.be(secondMaxValueNeg);
     });
   });
 

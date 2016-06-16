@@ -13,7 +13,7 @@ describe('Vislib Split Function Test Suite', function () {
     let chartSplit;
     let chartTitleSplit;
     let xAxisSplit;
-    let yAxisSplit;
+    let YAxisSplit;
     let el;
     let data = {
       rows: [
@@ -141,7 +141,7 @@ describe('Vislib Split Function Test Suite', function () {
       chartSplit = Private(VislibLibLayoutSplitsColumnChartChartSplitProvider);
       chartTitleSplit = Private(VislibLibLayoutSplitsColumnChartChartTitleSplitProvider);
       xAxisSplit = Private(VislibLibLayoutSplitsColumnChartXAxisSplitProvider);
-      yAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
+      YAxisSplit = Private(VislibLibLayoutSplitsColumnChartYAxisSplitProvider);
 
       el = d3.select('body').append('div')
         .attr('class', 'visualization')
@@ -245,7 +245,7 @@ describe('Vislib Split Function Test Suite', function () {
           .attr('class', 'rows')
           .datum({ rows: [{}, {}] });
 
-        d3.select('.rows').call(yAxisSplit);
+        d3.select('.rows').call(new YAxisSplit('y-axis-div', false).build());
 
         divs = d3.selectAll('.y-axis-div')[0];
       }));

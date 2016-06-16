@@ -35,7 +35,7 @@ describe('getSeries', function () {
       }
     };
 
-    let series = getSeries(rows, chart);
+    let series = getSeries(rows, chart, {});
 
     expect(series)
       .to.be.an('array')
@@ -77,18 +77,26 @@ describe('getSeries', function () {
         ]
       }
     };
+    let aggs = [
+      { id: 1, onSecondaryYAxis: true  },
+      { id: 2, onSecondaryYAxis: false }
+    ];
 
-    let series = getSeries(rows, chart);
+    let series = getSeries(rows, chart, aggs);
 
     expect(series)
       .to.be.an('array')
       .and.to.have.length(2);
 
+    expect(series[0].onSecondaryYAxis).to.be(true);
+    expect(series[1].onSecondaryYAxis).to.be(false);
+
     series.forEach(function (siri, i) {
       expect(siri)
         .to.be.an('object')
         .and.have.property('label', '' + i)
-        .and.have.property('values');
+        .and.have.property('values')
+        .and.have.property('onSecondaryYAxis');
 
       expect(siri.values)
         .to.be.an('array')
@@ -122,7 +130,7 @@ describe('getSeries', function () {
       }
     };
 
-    let series = getSeries(rows, chart);
+    let series = getSeries(rows, chart, {});
 
     expect(series)
       .to.be.an('array')
@@ -167,7 +175,12 @@ describe('getSeries', function () {
       }
     };
 
-    let series = getSeries(rows, chart);
+    let aggs = [
+      { id: 1, onSecondaryYAxis: true  },
+      { id: 2, onSecondaryYAxis: false }
+    ];
+
+    let series = getSeries(rows, chart, aggs);
 
     expect(series)
       .to.be.an('array')
@@ -217,7 +230,12 @@ describe('getSeries', function () {
       }
     };
 
-    let series = getSeries(rows, chart);
+    let aggs = [
+      { id: 1, onSecondaryYAxis: true  },
+      { id: 2, onSecondaryYAxis: false }
+    ];
+
+    let series = getSeries(rows, chart, aggs);
     expect(series[0]).to.have.property('label', '0: 0');
     expect(series[1]).to.have.property('label', '0: 1');
     expect(series[2]).to.have.property('label', '1: 0');
@@ -230,7 +248,7 @@ describe('getSeries', function () {
       y.i = i;
     });
 
-    let series2 = getSeries(rows, chart);
+    let series2 = getSeries(rows, chart, aggs);
     expect(series2[0]).to.have.property('label', '0: 1');
     expect(series2[1]).to.have.property('label', '0: 0');
     expect(series2[2]).to.have.property('label', '1: 1');

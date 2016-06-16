@@ -14,6 +14,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
     // setters
     self.type = opts.type;
     self.schema = opts.schema;
+    self.onSecondaryYAxis = opts.onSecondaryYAxis;
 
     // resolve the params
     self.fillDefaults(opts.params);
@@ -86,6 +87,14 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
         }
 
         this.__schema = schema;
+      },
+      onSecondaryYAxis: {
+        get: function () {
+          return this.__onSecondaryYAxis || false;
+        },
+        set: function (onSecondaryYAxis) {
+          this.__onSecondaryYAxis = onSecondaryYAxis;
+        }
       }
     }
   });
@@ -236,6 +245,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
       enabled: self.enabled,
       type: self.type && self.type.name,
       schema: self.schema && self.schema.name,
+      onSecondaryYAxis: self.onSecondaryYAxis || false,
       params: outParams
     };
   };

@@ -5,7 +5,7 @@ export default function PointSeriesGetSeries(Private) {
   let getPoint = Private(AggResponsePointSeriesGetPointProvider);
   let addToSiri = Private(AggResponsePointSeriesAddToSiriProvider);
 
-  return function getSeries(rows, chart) {
+  return function getSeries(rows, chart, aggs) {
     let aspects = chart.aspects;
     let multiY = _.isArray(aspects.y);
     let yScale = chart.yScale;
@@ -26,8 +26,10 @@ export default function PointSeriesGetSeries(Private) {
         let prefix = point.series ? point.series + ': ' : '';
         let seriesId = prefix + y.agg.id;
         let seriesLabel = prefix + y.col.title;
+        let aggId = y.agg.key ? y.agg.parentId : y.agg.id;
+        let onSecondaryYAxis = _.findWhere(aggs, {'id': aggId}).onSecondaryYAxis;
 
-        addToSiri(series, point, seriesId, seriesLabel);
+        addToSiri(series, point, seriesId, seriesLabel, onSecondaryYAxis);
       });
 
     }, new Map())

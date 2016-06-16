@@ -190,13 +190,14 @@ describe('AggConfig', function () {
   });
 
   describe('#toJSON', function () {
-    it('includes the aggs id, params, type and schema', function () {
+    it('includes the aggs id, params, type, onSecondaryYAxis and schema', function () {
       let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
             type: 'date_histogram',
-            schema: 'segment'
+            schema: 'segment',
+            onSecondaryYAxis: true
           }
         ]
       });
@@ -212,6 +213,7 @@ describe('AggConfig', function () {
       expect(state.params).to.be.an('object');
       expect(state).to.have.property('type', 'date_histogram');
       expect(state).to.have.property('schema', 'segment');
+      expect(state).to.have.property('onSecondaryYAxis', true);
     });
   });
 

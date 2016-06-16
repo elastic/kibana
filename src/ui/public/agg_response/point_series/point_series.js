@@ -27,8 +27,9 @@ export default function PointSeriesProvider(Private) {
     if (datedX) {
       setupOrderedDateXAxis(vis, chart);
     }
+    let requiredVis = vis.getEditableVis() ? vis.getEditableVis() : vis;
 
-    chart.series = getSeries(table.rows, chart);
+    chart.series = getSeries(table.rows, chart, requiredVis.aggs);
 
     delete chart.aspects;
     return chart;

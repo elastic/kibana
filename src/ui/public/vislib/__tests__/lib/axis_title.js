@@ -11,12 +11,14 @@ import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_s
 describe('Vislib AxisTitle Class Test Suite', function () {
   let AxisTitle;
   let Data;
+  let SingleYAxisStrategy;
   let PersistedState;
   let axisTitle;
   let el;
   let dataObj;
   let xTitle;
   let yTitle;
+  let secondaryYTitle;
   let data = {
     hits: 621,
     label: '',
@@ -27,6 +29,51 @@ describe('Vislib AxisTitle Class Test Suite', function () {
       min: 1408734082458
     },
     series: [
+      {
+        onSecondaryYAxis: true,
+        values: [
+          {
+            x: 1408734060000,
+            y: 80
+          },
+          {
+            x: 1408734090000,
+            y: 230
+          },
+          {
+            x: 1408734120000,
+            y: 300
+          },
+          {
+            x: 1408734150000,
+            y: 280
+          },
+          {
+            x: 1408734180000,
+            y: 360
+          },
+          {
+            x: 1408734210000,
+            y: 300
+          },
+          {
+            x: 1408734240000,
+            y: 260
+          },
+          {
+            x: 1408734270000,
+            y: 220
+          },
+          {
+            x: 1408734300000,
+            y: 290
+          },
+          {
+            x: 1408734330000,
+            y: 240
+          }
+        ]
+      },
       {
         values: [
           {
@@ -73,7 +120,8 @@ describe('Vislib AxisTitle Class Test Suite', function () {
       }
     ],
     xAxisLabel: 'Date Histogram',
-    yAxisLabel: 'Count'
+    yAxisLabel: 'Count',
+    secondYAxisLabel: 'Average age'
   };
 
   beforeEach(ngMock.module('kibana'));
@@ -95,25 +143,29 @@ describe('Vislib AxisTitle Class Test Suite', function () {
       .style('height', '20px')
       .style('width', '20px');
 
+    el.append('div')
+    .attr('class', 'secondary-y-axis-title')
+    .style('height', '20px')
+    .style('width', '20px');
 
     dataObj = new Data(data, {}, new PersistedState());
     xTitle = dataObj.get('xAxisLabel');
     yTitle = dataObj.get('yAxisLabel');
-    axisTitle = new AxisTitle($('.vis-wrapper')[0], xTitle, yTitle);
+    secondaryYTitle = dataObj.get('secondYAxisLabel');
   }));
 
   afterEach(function () {
     el.remove();
   });
 
-  describe('render Method', function () {
+  describe('render Method for single y axis', function () {
     beforeEach(function () {
       axisTitle.render();
     });
 
     it('should append an svg to div', function () {
-      expect(el.select('.x-axis-title').selectAll('svg').length).to.be(1);
-      expect(el.select('.y-axis-title').selectAll('svg').length).to.be(1);
+      expect(el.select('.x-axis-title').selectAll('svg')[0].length).to.be(1);
+      expect(el.select('.y-axis-title').selectAll('svg')[0].length).to.be(1);
     });
 
     it('should append a g element to the svg', function () {
@@ -124,6 +176,26 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     it('should append text', function () {
       expect(!!el.select('.x-axis-title').selectAll('svg').selectAll('text')).to.be(true);
       expect(!!el.select('.y-axis-title').selectAll('svg').selectAll('text')).to.be(true);
+      expect(el.select('.secondary-y-axis-title').selectAll('svg').selectAll('text')[0]).to.be(undefined);
+    });
+  });
+
+  describe('render Method for secondary y axis', function () {
+    beforeEach(function () {
+      axisTitle = new AxisTitle($('.vis-wrapper')[0], xTitle, yTitle, secondaryYTitle);
+      axisTitle.render();
+    });
+
+    it('should append an svg to div', function () {
+      expect(el.select('.x-axis-title').selectAll('svg')[0].length).to.be(1);
+      expect(el.select('.y-axis-title').selectAll('svg')[0].length).to.be(1);
+      expect(el.select('.secondary-y-axis-title').selectAll('svg')[0].length).to.be(1);
+    });
+
+    it('should append text', function () {
+      expect(el.select('.x-axis-title').selectAll('svg').selectAll('text')[0].length).to.be(1);
+      expect(el.select('.y-axis-title').selectAll('svg').selectAll('text')[0].length).to.be(1);
+      expect(el.select('.secondary-y-axis-title').selectAll('svg').selectAll('text')[0].length).to.be(1);
     });
   });
 
