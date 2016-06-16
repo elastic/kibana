@@ -116,7 +116,20 @@ export default (function () {
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-            var navSuccessful = new RegExp(appUrl + '.{0,230}$').test(currentUrl);
+            var maxAdditionalLengthOnNavUrl = 230;
+            // On several test failures at the end of the TileMap test we try to navigate back to
+            // Visualize so we can create the next Vertical Bar Chart, but we can see from the
+            // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
+            // with a new timestamped URL go? I thought that sleep(700) between the get and the
+            // refresh would solve the problem but didn't seem to always work.
+            // So this hack fails the navSuccessful check if the currentUrl doesn't match the
+            // appUrl plus up to 230 other chars.
+            // Navigating to Settings when there is a default index pattern has a URL length of 196
+            // (from debug output). Some other tabs may also be long. But a rather simple configured
+            // visualization is about 1000 chars long. So at least we catch that case.
+            var navSuccessful = new RegExp(appUrl + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+            .test(currentUrl);
+
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
               ' in ' + defaultFindTimeout + 'ms' +
