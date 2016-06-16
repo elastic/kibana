@@ -4,6 +4,7 @@ module.exports = function createPackages(grunt) {
   let { execFile } = require('child_process');
   let { all, fromNode } = require('bluebird');
 
+  const targetDir = config.get('target');
   let buildPath = resolve(config.get('root'), 'build');
   let exec = async (cmd, args) => {
     grunt.log.writeln(` > ${cmd} ${args.join(' ')}`);
@@ -29,7 +30,7 @@ module.exports = function createPackages(grunt) {
       grunt.config.get('platforms')
       .map(async platform => {
 
-        grunt.file.mkdir('target');
+        grunt.file.mkdir(targetDir);
         await archives(platform);
       })
     )
