@@ -68,13 +68,16 @@ export default (function () {
       // appUrl excludes user:password@ to match what getCurrentUrl returns
       var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + navUrl);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           self.debug('navigate to: ' + url);
           return self.remote.get(url)
+          .then(function () {
+            return self.sleep(700);
+          })
           .then(function () {
             self.debug('returned from get, calling refresh');
             return self.remote.refresh();
@@ -89,6 +92,7 @@ export default (function () {
                 if (!kibanaLoaded) {
                   var msg = 'Kibana is not loaded, retrying';
                   self.debug(msg);
+                  self.saveScreenshot('./screenshot-AppFailedToLoad.png');
                   throw new Error(msg);
                 }
               });
@@ -128,7 +132,7 @@ export default (function () {
         });
       };
 
-      return doNavigation(navUrl)
+      return doNavigation(appUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.try(function () {
