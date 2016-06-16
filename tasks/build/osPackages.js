@@ -39,11 +39,7 @@ export default (grunt) => {
         '--config-files', config.path.kibanaConfig,
         '--template-value', `user=${config.user}`,
         '--template-value', `group=${config.group}`,
-        '--template-value', `optimizeDir=${config.path.home}/optimize`,
-
-        //config folder is moved to path.conf, exclude {path.home}/config
-        //uses relative path to --prefix, strip the leading /
-        '--exclude', `${config.path.home.slice(1)}/config`
+        '--template-value', `optimizeDir=${config.path.home}/optimize`
       ];
       const debOptions = [
         '-t', 'deb',
@@ -55,7 +51,6 @@ export default (grunt) => {
       ];
       const args = [
         `${buildDir}/=${config.path.home}/`,
-        `${buildDir}/config/=${config.path.conf}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/lib/=/lib/`
       ];
