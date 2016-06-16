@@ -26,7 +26,7 @@ wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add 
 +
 [source, sh]
 --------------------------------------------------
-echo "deb http://packages.elastic.co/kibana/{branch}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
+echo "deb https://packages.elastic.co/kibana/{branch}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
 --------------------------------------------------
 +
 [WARNING]
@@ -83,9 +83,9 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 --------------------------------------------------
 [kibana-{branch}]
 name=Kibana repository for {branch}.x packages
-baseurl=http://packages.elastic.co/kibana/{branch}/centos
+baseurl=https://packages.elastic.co/kibana/{branch}/centos
 gpgcheck=1
-gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch
+gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch
 enabled=1
 --------------------------------------------------
 +

@@ -2,7 +2,7 @@ export default (grunt) => {
   const VERSION = grunt.config.get('pkg.version');
 
   const FOLDER_STAGING = `kibana/staging/${VERSION.match(/\d\.\d\.\d/)[0]}-XXXXXXX/repos/${VERSION.match(/\d\./)[0]}x`;
-  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\.\d/)[0]}`;
+  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
 
   const FOLDERNAME_DEB = 'debian';
   const FOLDERNAME_RPM = 'centos';
