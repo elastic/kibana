@@ -1,12 +1,12 @@
 import modules from 'ui/modules';
-import template from 'plugins/kibana/settings/sections/indices/upload/directives/upload_wizard.html';
+import template from 'plugins/kibana/management/sections/indices/upload/directives/upload_wizard.html';
 import IngestProvider from 'ui/ingest';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/parse_csv_step';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/upload_data_step';
+import 'plugins/kibana/management/sections/indices/add_data_steps/pattern_review_step';
+import 'plugins/kibana/management/sections/indices/add_data_steps/parse_csv_step';
+import 'plugins/kibana/management/sections/indices/add_data_steps/upload_data_step';
 import '../../styles/_add_data_wizard.less';
 
-modules.get('apps/settings')
+modules.get('apps/management')
   .directive('uploadWizard', function () {
     return {
       restrict: 'E',

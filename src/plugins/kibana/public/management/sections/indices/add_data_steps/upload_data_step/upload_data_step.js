@@ -12,7 +12,7 @@ function formatIndexError(errorDoc) {
   return `Line ${lineNumber}: ${errorType} - ${errorReason}`;
 }
 
-modules.get('apps/settings')
+modules.get('apps/management')
 .directive('uploadDataStep', function () {
   return {
     template: template,

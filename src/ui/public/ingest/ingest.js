@@ -1,4 +1,4 @@
-import PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider from 'plugins/kibana/settings/sections/indices/_refresh_kibana_index';
+import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../plugins/kibana/common/lib/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';
@@ -7,7 +7,7 @@ import chrome from 'ui/chrome';
 export default function IngestProvider($rootScope, $http, config, $q, Private, indexPatterns) {
 
   const ingestAPIPrefix = chrome.addBasePath('/api/kibana/ingest');
-  const refreshKibanaIndex = Private(PluginsKibanaSettingsSectionsIndicesRefreshKibanaIndexProvider);
+  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
 
   this.save = function (indexPattern, pipeline) {
     if (_.isEmpty(indexPattern)) {

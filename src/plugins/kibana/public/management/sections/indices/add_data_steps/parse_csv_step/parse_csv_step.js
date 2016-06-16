@@ -4,7 +4,7 @@ import modules from 'ui/modules';
 import template from './parse_csv_step.html';
 import './styles/_add_data_parse_csv_step.less';
 
-modules.get('apps/settings')
+modules.get('apps/management')
   .directive('parseCsvStep', function () {
     return {
       restrict: 'E',

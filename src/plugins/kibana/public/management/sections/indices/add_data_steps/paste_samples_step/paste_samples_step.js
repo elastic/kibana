@@ -4,7 +4,7 @@ import { filebeat as docLinks } from '../../../../../../../../ui/public/document
 import _ from 'lodash';
 import './styles/_add_data_paste_samples_step.less';
 
-modules.get('apps/settings')
+modules.get('apps/management')
   .directive('pasteSamplesStep', function () {
     return {
       template: template,

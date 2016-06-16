@@ -1,14 +1,14 @@
 import modules from 'ui/modules';
-import template from 'plugins/kibana/settings/sections/indices/filebeat/directives/filebeat_wizard.html';
+import template from 'plugins/kibana/management/sections/indices/filebeat/directives/filebeat_wizard.html';
 import IngestProvider from 'ui/ingest';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/pattern_review_step';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/paste_samples_step';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/pipeline_setup';
-import 'plugins/kibana/settings/sections/indices/add_data_steps/install_filebeat_step';
+import 'plugins/kibana/management/sections/indices/add_data_steps/pattern_review_step';
+import 'plugins/kibana/management/sections/indices/add_data_steps/paste_samples_step';
+import 'plugins/kibana/management/sections/indices/add_data_steps/pipeline_setup';
+import 'plugins/kibana/management/sections/indices/add_data_steps/install_filebeat_step';
 import '../../styles/_add_data_wizard.less';
 
 // wrapper directive, which sets up the breadcrumb for all filebeat steps
-modules.get('apps/settings')
+modules.get('apps/management')
 .directive('filebeatWizard', function () {
   return {
     restrict: 'E',

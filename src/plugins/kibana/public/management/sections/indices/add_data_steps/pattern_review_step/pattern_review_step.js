@@ -20,7 +20,7 @@ function findFieldsByType(indexPatternFields, type) {
   return _.map(_.filter(indexPatternFields, {type}), 'name');
 }
 
-modules.get('apps/settings')
+modules.get('apps/management')
   .directive('patternReviewStep', function () {
     return {
       template: template,
