@@ -34,7 +34,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
   columns.forEach(function (col) {
     bdd.describe('sort by heading - ' + col.heading, function indexPatternCreation() {
       bdd.before(function () {
-        return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
+        return settingsPage.navigateTo();
       });
 
       bdd.beforeEach(function () {
@@ -42,7 +42,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
       });
 
       bdd.afterEach(function () {
-        return settingsPage.removeIndexPattern().then(settingsPage.clickExistingIndicesAddDataLink);
+        return settingsPage.removeIndexPattern();
       });
 
       bdd.it('should sort ascending', function pageHeader() {
@@ -80,7 +80,6 @@ bdd.describe('index result field sort', function describeIndexTests() {
 
     bdd.before(function () {
       return settingsPage.navigateTo()
-      .then(settingsPage.clickExistingIndicesAddDataLink)
       .then(function () {
         return settingsPage.createIndexPattern();
       });

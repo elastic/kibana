@@ -14,7 +14,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
     // delete .kibana index and then wait for Kibana to re-create it
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
-      return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
+      return settingsPage.navigateTo();
     });
   });
 
@@ -78,9 +78,9 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       });
     });
 
-    bdd.it('should return to the add data landing page', function returnToPage() {
+    bdd.it('should return to index pattern creation page', function returnToPage() {
       return common.try(function tryingForTime() {
-        return common.findTestSubject('addData');
+        return settingsPage.getCreateButton();
       });
     });
 
