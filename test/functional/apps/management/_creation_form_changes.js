@@ -13,7 +13,7 @@ bdd.describe('user input reactions', function () {
     // delete .kibana index and then wait for Kibana to re-create it
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
-      return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
+      return settingsPage.navigateTo();
     });
   });
 

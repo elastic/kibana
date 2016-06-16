@@ -13,7 +13,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
     // delete .kibana index and then wait for Kibana to re-create it
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
-      return settingsPage.navigateTo().then(settingsPage.clickExistingIndicesAddDataLink);
+      return settingsPage.navigateTo();
     });
   });
 
@@ -22,7 +22,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
   });
 
   bdd.afterEach(function ae() {
-    return settingsPage.removeIndexPattern().then(settingsPage.clickExistingIndicesAddDataLink);
+    return settingsPage.removeIndexPattern();
   });
 
   bdd.describe('change popularity', function indexPatternCreation() {
