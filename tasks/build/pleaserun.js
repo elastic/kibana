@@ -1,10 +1,11 @@
 import { resolve } from 'path';
 import { appendFileSync } from 'fs';
 import exec from '../utils/exec';
+import { capitalize } from 'lodash';
 
 export default (grunt) => {
   const userScriptsDir = grunt.config.get('userScriptsDir');
-  const { path, user, group, name, description } = grunt.config.get('packages');
+  const { path, user, group, name } = grunt.config.get('packages');
 
   grunt.registerTask('_build:pleaseRun', function () {
     grunt.config.get('services').forEach((service) => {
@@ -15,7 +16,7 @@ export default (grunt) => {
         '--install-prefix', service.outputDir,
         '--overwrite',
         '--name', name,
-        '--description', description,
+        '--description', capitalize(name),
         '--user', user,
         '--group', group,
         '--sysv-log-path', path.logs,
