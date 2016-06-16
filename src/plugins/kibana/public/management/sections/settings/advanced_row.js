@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import 'ui/elastic_textarea';
+import 'ui/filters/markdown';
 import uiModules from 'ui/modules';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 

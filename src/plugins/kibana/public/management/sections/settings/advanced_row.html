@@ -2,7 +2,7 @@
   <td class="name">
     <b>{{conf.name}}</b>
     <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
-      (Default: <i>{{conf.defVal == undefined ? 'null' : conf.defVal}}</i>)
+      (Default: <i>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</i>)
     </span>
     <span class="smaller" ng-show="conf.isCustom">
       (Custom setting)
@@ -21,12 +21,21 @@
       role="form">
 
       <input
-        ng-show="conf.normal"
+        ng-if="conf.normal"
         ng-model="conf.unsavedValue"
         ng-keyup="maybeCancel($event, conf)"
         placeholder="{{conf.value || conf.defVal}}"
         type="text"
         class="form-control">
+
+        <textarea
+          ng-if="conf.markdown"
+          type="text"
+          class="form-control"
+          ng-model="conf.unsavedValue"
+          ng-keyup="maybeCancel($event, conf)"
+          elastic-textarea
+          ></textarea>
 
       <textarea
         ng-if="conf.json"
@@ -40,7 +49,7 @@
       <small ng-show="forms.configEdit.$error.jsonInput">Invalid JSON syntax</small>
 
       <input
-        ng-show="conf.array"
+        ng-if="conf.array"
         ng-list=","
         ng-model="conf.unsavedValue"
         ng-keyup="maybeCancel($event, conf)"
@@ -49,13 +58,13 @@
         class="form-control">
 
       <input
-        ng-show="conf.bool"
+        ng-if="conf.bool"
         ng-model="conf.unsavedValue"
         type="checkbox"
         class="form-control">
 
       <select
-        ng-show="conf.select"
+        ng-if="conf.select"
         name="conf.name"
         ng-model="conf.unsavedValue"
         ng-options="option as option for option in conf.options"
@@ -66,9 +75,10 @@
 
     <!-- Setting display formats -->
     <span ng-if="!conf.editing" data-test-subj="currentValue">
-      <span ng-show="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
-      <span ng-show="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
-      <span ng-show="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
+      <span ng-if="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
+      <span ng-if="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
+      <span ng-if="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
+      <span ng-if="conf.markdown" ng-bind-html="conf.value | markdown"></span>
     </span>
 
   </td>

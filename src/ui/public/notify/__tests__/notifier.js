@@ -185,6 +185,48 @@ describe('Notifier', function () {
     });
   });
 
+  describe('#banner', function () {
+    testVersionInfo('banner');
+
+    it('has no content', function () {
+      expect(notify('banner').content).not.to.be.defined;
+    });
+
+    it('prepends location to message for markdown', function () {
+      expect(notify('banner').markdown).to.equal(params.location + ': ' + message);
+    });
+
+    it('sets type to "banner"', function () {
+      expect(notify('banner').type).to.equal('banner');
+    });
+
+    it('sets icon to undefined', function () {
+      expect(notify('banner').icon).to.equal(undefined);
+    });
+
+    it('sets title to "Attention"', function () {
+      expect(notify('banner').title).to.equal('Attention');
+    });
+
+    it('sets lifetime to 3000000 by default', function () {
+      expect(notify('banner').lifetime).to.equal(3000000);
+    });
+
+    it('does not allow reporting', function () {
+      let includesReport = _.includes(notify('banner').actions, 'report');
+      expect(includesReport).to.false;
+    });
+
+    it('allows accepting', function () {
+      let includesAccept = _.includes(notify('banner').actions, 'accept');
+      expect(includesAccept).to.true;
+    });
+
+    it('does not include stack', function () {
+      expect(notify('banner').stack).not.to.be.defined;
+    });
+  });
+
   function notify(fnName) {
     notifier[fnName](message);
     return latestNotification();
