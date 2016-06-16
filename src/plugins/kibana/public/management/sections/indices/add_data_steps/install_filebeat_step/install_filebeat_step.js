@@ -5,7 +5,7 @@ import { patternToIngest } from '../../../../../../common/lib/convert_pattern_an
 import { filebeat as docLinks } from '../../../../../../../../ui/public/documentation_links/documentation_links';
 import './styles/_add_data_install_filebeat_step.less';
 
-modules.get('apps/settings')
+modules.get('apps/management')
   .directive('installFilebeatStep', function () {
     return {
       template: template,
