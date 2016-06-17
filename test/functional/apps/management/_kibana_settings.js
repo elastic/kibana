@@ -13,32 +13,27 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
     // delete .kibana index and then wait for Kibana to re-create it
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
+      return settingsPage.createIndexPattern();
+    })
+    .then(function () {
       return settingsPage.navigateTo();
     });
   });
 
-  bdd.describe('index pattern creation', function indexPatternCreation() {
-    bdd.before(function () {
-      return settingsPage.createIndexPattern()
-      .then(function () {
-        return settingsPage.navigateTo();
-      });
-    });
 
-    bdd.it('should allow setting advanced settings', function () {
-      return settingsPage.clickKibanaSettings()
-      .then(function TestCallSetAdvancedSettingsForTimezone() {
-        common.saveScreenshot('Settings-advanced-tab');
-        common.debug('calling setAdvancedSetting');
-        return settingsPage.setAdvancedSettings('dateFormat:tz', 'America/Phoenix');
-      })
-      .then(function GetAdvancedSetting() {
-        common.saveScreenshot('Settings-set-timezone');
-        return settingsPage.getAdvancedSettings('dateFormat:tz');
-      })
-      .then(function (advancedSetting) {
-        expect(advancedSetting).to.be('America/Phoenix');
-      });
+  bdd.it('should allow setting advanced settings', function () {
+    return settingsPage.clickKibanaSettings()
+    .then(function TestCallSetAdvancedSettingsForTimezone() {
+      common.saveScreenshot('Settings-advanced-tab');
+      common.debug('calling setAdvancedSetting');
+      return settingsPage.setAdvancedSettings('dateFormat:tz', 'America/Phoenix');
+    })
+    .then(function GetAdvancedSetting() {
+      common.saveScreenshot('Settings-set-timezone');
+      return settingsPage.getAdvancedSettings('dateFormat:tz');
+    })
+    .then(function (advancedSetting) {
+      expect(advancedSetting).to.be('America/Phoenix');
     });
   });
 });

@@ -44,6 +44,7 @@ export default (function () {
     },
 
     clickTimepicker: function clickTimepicker() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
@@ -56,6 +57,7 @@ export default (function () {
     },
 
     clickAbsoluteButton: function clickAbsoluteButton() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByLinkText('Absolute').click();
     },
@@ -75,9 +77,13 @@ export default (function () {
     },
 
     clickGoButton: function clickGoButton() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByClassName('kbn-timepicker-go')
-      .click();
+      .click()
+      .then(function () {
+        return self.getSpinnerDone();
+      });
     },
 
 
@@ -101,11 +107,15 @@ export default (function () {
         return self.clickGoButton();
       })
       .then(function () {
+        return self.getSpinnerDone();
+      })
+      .then(function () {
         return self.collapseTimepicker();
       });
     },
 
     collapseTimepicker: function collapseTimepicker() {
+      var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.fa.fa-chevron-circle-up')
       .click();
@@ -119,7 +129,6 @@ export default (function () {
 
     waitForToastMessageGone: function waitForToastMessageGone() {
       var self = this;
-
       return self.remote.setFindTimeout(defaultFindTimeout)
         .waitForDeletedByCssSelector('kbn-truncated.toast-message');
     },
