@@ -146,10 +146,7 @@ Run the tests for just your particular plugin. Assuming you plugin lives outside
 
 #### Running browser automation tests:
 
-*The Selenium server that is started currently only runs the tests in a recent version of Firefox.*
-*You can use the `PATH` environment variable to specify which version of Firefox to use.*
-
-The following will start Kibana, Elasticsearch and Selenium for you. To run the functional UI tests use the following commands
+The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
 `npm run test:ui`
 Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.
@@ -158,18 +155,7 @@ Run the functional UI tests one time and exit. This is used by the CI systems an
 Start the server required for the `test:ui:runner` tasks. Once the server is started `test:ui:runner` can be run multiple times without waiting for the server to start.
 
 `npm run test:ui:runner`
-Execute the front-end selenium tests. This requires the server started by the `test:ui:server` task.
-
-##### If you already have ElasticSearch, Kibana, and Selenium Server running:
-
-Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
-
-Once you've got the services running, execute the following:
-
-```
-sh
-npm run test:ui:runner
-```
+Execute the front-end browser tests. This requires the server started by the `test:ui:server` task.
 
 #### Browser automation notes:
 

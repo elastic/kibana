@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import { common, remote, defaultFindTimeout } from '../';
+import { common, remote, defaultFindTimeout, headerPage } from '../';
 
 export default (function () {
   function SettingsPage() {
@@ -38,6 +38,9 @@ export default (function () {
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
       .then(function () {
+        return headerPage.getSpinnerDone();
+      })
+      .then(function () {
         return common.sleep(1000);
       })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
@@ -45,9 +48,15 @@ export default (function () {
         .findByCssSelector('option[label="' + propertyValue + '"]')
         .click();
       })
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      })
       .then(function setAdvancedSettingsClickSaveButton() {
         return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
         .click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -94,6 +103,9 @@ export default (function () {
         return self.getTimeFieldNameField().click();
       })
       .then(function () {
+        return headerPage.getSpinnerDone();
+      })
+      .then(function () {
         return common.try(function () {
           return self.getTimeFieldOption(selection).click()
           .then(function () {
@@ -118,7 +130,10 @@ export default (function () {
 
     clickDefaultIndexButton: function () {
       return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('button.btn.btn-warning.ng-scope').click();
+      .findByCssSelector('button.btn.btn-warning.ng-scope').click()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      });
     },
 
     clickDeletePattern: function () {
@@ -148,7 +163,10 @@ export default (function () {
           return chart.getVisibleText()
           .then(function (chartString) {
             if (chartString === columnName) {
-              return chart.click();
+              return chart.click()
+              .then(function () {
+                return headerPage.getSpinnerDone();
+              });
             }
           });
         }
@@ -245,6 +263,9 @@ export default (function () {
       .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
       .then(function (button) {
         return button.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -261,6 +282,9 @@ export default (function () {
       .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
       .then(function (button) {
         return button.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -269,6 +293,9 @@ export default (function () {
       .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
       .then(function (button) {
         return button.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -277,6 +304,9 @@ export default (function () {
       .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
       .then(function (button) {
         return button.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -291,6 +321,9 @@ export default (function () {
           .then(function () {
             return self.getCreateButton().click();
           });
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       })
       .then(function () {
         return common.try(function () {

@@ -64,17 +64,17 @@ export default (function () {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      // navUrl includes user:password@ for use with Shield
-      // appUrl excludes user:password@ to match what getCurrentUrl returns
-      var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + navUrl);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           self.debug('navigate to: ' + url);
           return self.remote.get(url)
+          .then(function () {
+            return self.sleep(700);
+          })
           .then(function () {
             self.debug('returned from get, calling refresh');
             return self.remote.refresh();
@@ -113,7 +113,20 @@ export default (function () {
           })
           .then(function (currentUrl) {
             currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-            var navSuccessful = new RegExp(appUrl).test(currentUrl);
+            var maxAdditionalLengthOnNavUrl = 230;
+            // On several test failures at the end of the TileMap test we try to navigate back to
+            // Visualize so we can create the next Vertical Bar Chart, but we can see from the
+            // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
+            // with a new timestamped URL go? I thought that sleep(700) between the get and the
+            // refresh would solve the problem but didn't seem to always work.
+            // So this hack fails the navSuccessful check if the currentUrl doesn't match the
+            // appUrl plus up to 230 other chars.
+            // Navigating to Settings when there is a default index pattern has a URL length of 196
+            // (from debug output). Some other tabs may also be long. But a rather simple configured
+            // visualization is about 1000 chars long. So at least we catch that case.
+            var navSuccessful = new RegExp(appUrl + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+            .test(currentUrl);
+
             if (!navSuccessful) {
               var msg = 'App failed to load: ' + appName +
               ' in ' + defaultFindTimeout + 'ms' +
@@ -128,7 +141,7 @@ export default (function () {
         });
       };
 
-      return doNavigation(navUrl)
+      return doNavigation(appUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.try(function () {
