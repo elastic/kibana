@@ -3,13 +3,13 @@ import routes from 'ui/routes';
 import template from 'plugins/kibana/management/sections/indices/upload/index.html';
 import './directives/upload_wizard';
 
-routes.when('/management/data/upload/', {
+routes.when('/management/data/csv/', {
   template: template
 });
 
-management.getSection('data').register('upload', {
+management.getSection('data').register('csv', {
   display: 'Upload CSV',
   order: 10,
-  path: 'data/upload/'
+  path: 'data/csv/'
 });
 

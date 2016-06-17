@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import modules from 'ui/modules';
 import template from 'plugins/kibana/management/sections/indices/upload/directives/upload_wizard.html';
 import IngestProvider from 'ui/ingest';
@@ -62,6 +63,11 @@ modules.get('apps/management')
         };
 
         $scope.$watch('wizard.state.currentStep', (newValue, oldValue) => {
+          if (_.isUndefined(newValue)) {
+            $state.currentStep = oldValue;
+            $state.save();
+            return;
+          }
           if (this.complete) {
             $state.currentStep = totalSteps - 1;
             $state.save();
