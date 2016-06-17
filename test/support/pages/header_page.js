@@ -46,10 +46,7 @@ export default (function () {
     clickTimepicker: function clickTimepicker() {
       var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
-      .findDisplayedByClassName('navbar-timepicker-time-desc').click()
-      .then(function () {
-        return self.getSpinnerDone();
-      });
+      .findDisplayedByClassName('navbar-timepicker-time-desc').click();
     },
 
     isTimepickerOpen: function isTimepickerOpen() {
@@ -62,10 +59,7 @@ export default (function () {
     clickAbsoluteButton: function clickAbsoluteButton() {
       var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
-      .findByLinkText('Absolute').click()
-      .then(function () {
-        return self.getSpinnerDone();
-      });
+      .findByLinkText('Absolute').click();
     },
 
     setFromTime: function setFromTime(timeString) {
@@ -124,10 +118,7 @@ export default (function () {
       var self = this;
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.fa.fa-chevron-circle-up')
-      .click()
-      .then(function () {
-        return self.getSpinnerDone();
-      });
+      .click();
     },
 
     getToastMessage: function getToastMessage() {
