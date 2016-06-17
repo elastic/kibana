@@ -3,10 +3,11 @@ const crypto = require('crypto');
 export default function (server) {
   async function updateMetadata(urlId, urlDoc) {
     const client = server.plugins.elasticsearch.client;
+    const kibanaIndex = server.config().get('kibana.index');
 
     try {
       await client.update({
-        index: '.kibana',
+        index: kibanaIndex,
         type: 'url',
         id: urlId,
         body: {
@@ -25,9 +26,10 @@ export default function (server) {
   async function getUrlDoc(urlId) {
     const urlDoc = await new Promise((resolve, reject) => {
       const client = server.plugins.elasticsearch.client;
+      const kibanaIndex = server.config().get('kibana.index');
 
       client.get({
-        index: '.kibana',
+        index: kibanaIndex,
         type: 'url',
         id: urlId
       })
@@ -45,9 +47,10 @@ export default function (server) {
   async function createUrlDoc(url, urlId) {
     const newUrlId = await new Promise((resolve, reject) => {
       const client = server.plugins.elasticsearch.client;
+      const kibanaIndex = server.config().get('kibana.index');
 
       client.index({
-        index: '.kibana',
+        index: kibanaIndex,
         type: 'url',
         id: urlId,
         body: {
@@ -79,7 +82,6 @@ export default function (server) {
   return {
     async generateUrlId(url) {
       const urlId = createUrlId(url);
-
       const urlDoc = await getUrlDoc(urlId);
       if (urlDoc) return urlId;
 
