@@ -13,8 +13,8 @@ export default (grunt) => {
   const PREFIX_PRODUCTION_RPM = `${FOLDER_PRODUCTION}/${FOLDERNAME_RPM}`;
 
   const FOLDER_CONFIG = '/opt/kibana/config';
-  const FOLDER_LOGS = '/var/log/kibana';
   const FOLDER_HOME = '/opt/kibana';
+  const FOLDER_PLUGINS = `${FOLDER_HOME}/installedPlugins`;
 
   const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibana.yml`;
   const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/kibana`;
@@ -43,7 +43,7 @@ export default (grunt) => {
     version: VERSION,
     path: {
       conf: FOLDER_CONFIG,
-      logs: FOLDER_LOGS,
+      plugins: FOLDER_PLUGINS,
       home: FOLDER_HOME,
       kibanaBin: FILE_KIBANA_BINARY,
       kibanaConfig: FILE_KIBANA_CONF

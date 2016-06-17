@@ -41,7 +41,8 @@ export default (grunt) => {
         '--config-files', config.path.kibanaConfig,
         '--template-value', `user=${config.user}`,
         '--template-value', `group=${config.group}`,
-        '--template-value', `optimizeDir=${config.path.home}/optimize`
+        '--template-value', `optimizeDir=${config.path.home}/optimize`,
+        '--template-value', `pluginsDir=${config.path.plugins}`
       ];
       const debOptions = [
         '-t', 'deb',
