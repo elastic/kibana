@@ -1,0 +1,28 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+output-preview {
+  .visual {
+    border: none;
+    background-color: @settings-filebeat-wizard-panel-bg;
+    border-radius: 0;
+    overflow-x: auto;
+  }
+
+  .visual.collapsed {
+    max-height: 125px;
+    overflow-y: auto;
+  }
+
+  pre {
+    background-color: transparent;
+    border: none;
+  }
+
+  .hide-unchanged {
+    .jsondiffpatch-unchanged {
+      display: none;
+    }
+  }
+}

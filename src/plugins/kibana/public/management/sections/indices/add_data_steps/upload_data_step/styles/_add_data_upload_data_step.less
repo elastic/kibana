@@ -1,0 +1,22 @@
+@import (reference) "../../../styles/_add_data_wizard";
+
+@add-data-upload-step-multi-alert-padding: 2px;
+
+.bulk-results {
+  .alert-warning {
+    padding: @add-data-upload-step-multi-alert-padding;
+  }
+
+  ul.errors {
+    background-color: white;
+    color: @text-color;
+    padding: @alert-padding - @add-data-upload-step-multi-alert-padding;
+    list-style-position: inside;
+  }
+
+  .alert-title {
+    display: flex;
+    padding: @alert-padding - @add-data-upload-step-multi-alert-padding;
+    justify-content: space-between;
+  }
+}

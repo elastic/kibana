@@ -18,7 +18,7 @@ module.exports = function handleESError(error) {
     return Boom.forbidden(error);
   } else if (error instanceof esErrors.NotFound) {
     return Boom.notFound(error);
-  } else if (error instanceof esErrors.BadRequest || error instanceof TypeError) {
+  } else if (error instanceof esErrors.BadRequest) {
     return Boom.badRequest(error);
   } else {
     return error;
