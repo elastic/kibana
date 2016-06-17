@@ -8,6 +8,7 @@ import IndicesFieldTypesProvider from 'plugins/kibana/management/sections/indice
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html';
+import IngestProvider from 'ui/ingest';
 
 uiRoutes
 .when('/management/kibana/indices/:indexPatternId?', {
@@ -32,6 +33,7 @@ uiModules.get('apps/management')
   const notify = new Notifier();
   const $state = $scope.state = new AppState();
   const refreshKibanaIndex = Private(RefreshKibanaIndex);
+  const ingest = Private(IngestProvider);
 
   $scope.kbnUrl = Private(UrlProvider);
   $scope.indexPattern = $route.current.locals.indexPattern;
@@ -68,8 +70,8 @@ uiModules.get('apps/management')
       }
     }
 
-    courier.indexPatterns.delete($scope.indexPattern)
-    .then(refreshKibanaIndex)
+    ingest.delete($scope.indexPattern.id)
+    .then($scope.indexPattern.destroy.bind($scope.indexPattern))
     .then(function () {
       $location.url('/management/data/index');
     })

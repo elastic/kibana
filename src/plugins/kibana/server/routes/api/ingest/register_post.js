@@ -1,96 +1,137 @@
 import Boom from 'boom';
 import _ from 'lodash';
-import indexPatternSchema from '../../../lib/schemas/resources/index_pattern_schema';
+import ingestConfigSchema from '../../../lib/schemas/resources/ingest_config_schema';
 import handleESError from '../../../lib/handle_es_error';
 import createMappingsFromPatternFields from '../../../lib/create_mappings_from_pattern_fields';
 import initDefaultFieldProps from '../../../lib/init_default_field_props';
-import {templateToPattern, patternToTemplate} from '../../../lib/convert_pattern_and_template_name';
-import { keysToCamelCaseShallow } from '../../../lib/case_conversion';
+import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
+import { keysToCamelCaseShallow } from '../../../../common/lib/case_conversion';
+import ingestPipelineApiKibanaToEsConverter from '../../../lib/converters/ingest_pipeline_api_kibana_to_es_converter';
 
-module.exports = function registerPost(server) {
+export function registerPost(server) {
+  const kibanaIndex = server.config().get('kibana.index');
+
+  function patternRollback(rootError, indexPatternId, boundCallWithRequest) {
+    const deleteParams = {
+      index: kibanaIndex,
+      type: 'index-pattern',
+      id: indexPatternId
+    };
+
+    return boundCallWithRequest('delete', deleteParams)
+      .then(
+        () => {
+          throw rootError;
+        },
+        (patternDeletionError) => {
+          throw new Error(
+            `index-pattern ${indexPatternId} created successfully but index template or pipeline
+                creation failed. Failed to rollback index-pattern creation, must delete manually.
+                ${patternDeletionError.toString()}
+                ${rootError.toString()}`
+          );
+        }
+      );
+  }
+
+  function templateRollback(rootError, templateName, boundCallWithRequest) {
+    const deleteParams = {
+      name: templateName
+    };
+
+    return boundCallWithRequest('indices.deleteTemplate', deleteParams)
+      .then(
+        () => {
+          throw rootError;
+        },
+        (templateDeletionError) => {
+          throw new Error(
+            `index template ${templateName} created successfully but pipeline
+                creation failed. Failed to rollback template creation, must delete manually.
+                ${templateDeletionError.toString()}
+                ${rootError.toString()}`
+          );
+        }
+      );
+  }
+
   server.route({
     path: '/api/kibana/ingest',
     method: 'POST',
     config: {
       validate: {
-        payload: indexPatternSchema
+        payload: ingestConfigSchema
       }
     },
-    handler: function (req, reply) {
-      const kibanaIndex = server.config().get('kibana.index');
-      const callWithRequest = server.plugins.elasticsearch.callWithRequest;
+    handler: async function (req, reply) {
+      const config = await server.uiSettings().getAll();
+      const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       const requestDocument = _.cloneDeep(req.payload);
-      const indexPatternId = requestDocument.id;
-      const indexPattern = keysToCamelCaseShallow(requestDocument);
+      const indexPattern = keysToCamelCaseShallow(requestDocument.index_pattern);
+      const indexPatternId = indexPattern.id;
+      const ingestConfigName = patternToIngest(indexPatternId);
+      const shouldCreatePipeline = !_.isEmpty(requestDocument.pipeline);
       delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
-      indexPattern.fields = initDefaultFieldProps(indexPattern.fields);
 
+      const metaFields = _.get(config, 'metaFields.userValue', config.metaFields.value);
+      const indexPatternMetaFields = _.map(metaFields, name => ({name}));
+
+      indexPattern.fields = initDefaultFieldProps(indexPattern.fields.concat(indexPatternMetaFields));
       indexPattern.fields = JSON.stringify(indexPattern.fields);
       indexPattern.fieldFormatMap = JSON.stringify(indexPattern.fieldFormatMap);
 
-      return callWithRequest(req, 'indices.exists', {index: indexPatternId})
+      const pipeline = ingestPipelineApiKibanaToEsConverter(requestDocument.pipeline);
+
+      // Set up call with request params
+      const patternCreateParams = {
+        index: kibanaIndex,
+        type: 'index-pattern',
+        id: indexPatternId,
+        body: indexPattern
+      };
+
+      const templateParams = {
+        order: 1,
+        create: true,
+        name: ingestConfigName,
+        body: {
+          template: indexPatternId,
+          mappings: {
+            _default_: {
+              properties: mappings
+            }
+          }
+        }
+      };
+
+      const pipelineParams = {
+        path: `/_ingest/pipeline/${ingestConfigName}`,
+        method: 'PUT',
+        body: pipeline
+      };
+
+
+      return boundCallWithRequest('indices.exists', {index: indexPatternId})
       .then((matchingIndices) => {
         if (matchingIndices) {
           throw Boom.conflict('Cannot create an index pattern via this API if existing indices already match the pattern');
         }
 
-        const patternCreateParams = {
-          index: kibanaIndex,
-          type: 'index-pattern',
-          id: indexPatternId,
-          body: indexPattern
-        };
+        return boundCallWithRequest('create', patternCreateParams)
+        .then(() => {
+          return boundCallWithRequest('indices.putTemplate', templateParams)
+          .catch((templateError) => {return patternRollback(templateError, indexPatternId, boundCallWithRequest);});
+        })
+        .then((templateResponse) => {
+          if (!shouldCreatePipeline) {
+            return templateResponse;
+          }
 
-        return callWithRequest(req, 'create', patternCreateParams)
-        .then((patternResponse) => {
-          const templateParams = {
-            order: 0,
-            create: true,
-            name: patternToTemplate(indexPatternId),
-            body: {
-              template: indexPatternId,
-              mappings: {
-                _default_: {
-                  dynamic_templates: [{
-                    string_fields: {
-                      match: '*',
-                      match_mapping_type: 'string',
-                      mapping: {
-                        type: 'text',
-                        fields: {
-                          raw: {type: 'keyword', ignore_above: 256}
-                        }
-                      }
-                    }
-                  }],
-                  properties: mappings
-                }
-              }
-            }
-          };
-
-          return callWithRequest(req, 'indices.putTemplate', templateParams)
-          .catch((templateError) => {
-            const deleteParams = {
-              index: kibanaIndex,
-              type: 'index-pattern',
-              id: indexPatternId
-            };
-
-            return callWithRequest(req, 'delete', deleteParams)
-            .then(() => {
-              throw templateError;
-            }, (patternDeletionError) => {
-              throw new Error(
-                `index-pattern ${indexPatternId} created successfully but index template
-                creation failed. Failed to rollback index-pattern creation, must delete manually.
-                ${patternDeletionError.toString()}
-                ${templateError.toString()}`
-              );
-            });
-          });
+          return boundCallWithRequest('transport.request', pipelineParams)
+          .catch((pipelineError) => {return templateRollback(pipelineError, ingestConfigName, boundCallWithRequest);})
+          .catch((templateRollbackError) => {return patternRollback(templateRollbackError, indexPatternId, boundCallWithRequest);});
         });
       })
       .then(

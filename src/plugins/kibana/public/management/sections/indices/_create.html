@@ -62,6 +62,7 @@
               ng-attr-placeholder="{{index.defaultName}}"
               ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
               validate-index-name
+              allow-wildcard
               name="name"
               required
               type="text"
@@ -167,6 +168,7 @@
           </div>
 
           <button
+            data-test-subj="submitCreateIndexPatternFromExistingForm"
             ng-disabled="form.$invalid || index.fetchFieldsError"
             ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"

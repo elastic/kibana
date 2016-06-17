@@ -34,6 +34,9 @@ export default class BasePathProxy {
       config.set('server.basePath', this.basePath);
     }
 
+    const ONE_GIGABYTE = 1024 * 1024 * 1024;
+    config.set('server.maxPayloadBytes', ONE_GIGABYTE);
+
     setupLogging(null, this.server, config);
     setupConnection(null, this.server, config);
     this.setupRoutes();
