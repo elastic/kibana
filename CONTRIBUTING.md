@@ -111,25 +111,17 @@ The standard `npm run test` task runs several sub tasks and can take several min
 
 #### Running tests using npm task:
 
-*The Selenium server that is started currently only runs the tests in Firefox*
+*The ChromeDriver that is started currently only runs the tests in Chrome browser*
 
-To runt the functional UI tests, execute the following command:
+To run the functional UI tests, execute the following command:
 
 `npm run test:ui`
 
 The task above takes a little time to start the servers.  You can also start the servers and leave them running, and then run the tests separately:
 
-`npm run test:ui:server` will start the server required to run the selenium tests, leave this open
+`npm run test:ui:server` will start the server required to run the UI tests, leave this open
 
 `npm run test:ui:runner` will run the frontend tests and close when complete
-
-#### Running tests locally with your existing (and already running) ElasticSearch, Kibana, and Selenium Server:
-
-Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
-
-Once you've got the services running, execute the following:
-
-`npm run test:ui:runner`
 
 #### General notes:
 
