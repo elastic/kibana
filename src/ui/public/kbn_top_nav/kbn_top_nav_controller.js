@@ -1,4 +1,4 @@
-import { defaults, capitalize } from 'lodash';
+import { defaults, capitalize, isArray } from 'lodash';
 
 import uiModules from 'ui/modules';
 import filterTemplate from 'ui/chrome/config/filter.html';
@@ -19,7 +19,13 @@ export default function ($compile) {
         filter: filterTemplate,
       };
 
-      opts.forEach(rawOpt => {
+      this.addItems(opts);
+    }
+
+    addItems(rawOpts) {
+      if (!isArray(rawOpts)) rawOpts = [rawOpts];
+
+      rawOpts.forEach((rawOpt) => {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
