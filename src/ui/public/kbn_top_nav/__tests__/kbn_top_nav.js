@@ -30,7 +30,7 @@ describe('kbnTopNav directive', function () {
     const { $scope } = build();
     expect($scope.kbnTopNav.open).to.be.a(Function);
     expect($scope.kbnTopNav.close).to.be.a(Function);
-    expect($scope.kbnTopNav.is).to.be.a(Function);
+    expect($scope.kbnTopNav.getCurrent).to.be.a(Function);
     expect($scope.kbnTopNav.toggle).to.be.a(Function);
   });
 
