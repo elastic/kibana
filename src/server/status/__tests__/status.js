@@ -21,15 +21,15 @@ describe('Status class', function () {
   it('emits change when the status is set', function (done) {
     let status = serverStatus.createForPlugin(plugin);
 
-    status.once('change', function (prev, prevMsg) {
-      expect(status.state).to.be('green');
-      expect(status.message).to.be('GREEN');
-      expect(prev).to.be('uninitialized');
+    status.once('change', function (prevState, prevMsg, newState, newMsg) {
+      expect(newState).to.be('green');
+      expect(newMsg).to.be('GREEN');
+      expect(prevState).to.be('uninitialized');
 
-      status.once('change', function (prev, prevMsg) {
-        expect(status.state).to.be('red');
-        expect(status.message).to.be('RED');
-        expect(prev).to.be('green');
+      status.once('change', function (prevState, prevMsg, newState, newMsg) {
+        expect(newState).to.be('red');
+        expect(newMsg).to.be('RED');
+        expect(prevState).to.be('green');
         expect(prevMsg).to.be('GREEN');
 
         done();
