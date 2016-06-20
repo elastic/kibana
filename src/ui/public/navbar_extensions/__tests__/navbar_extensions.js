@@ -6,7 +6,6 @@ import _ from 'lodash';
 
 import navbarExtensionsRegistry from 'ui/registry/navbar_extensions';
 import Registry from 'ui/registry/_registry';
-import 'ui/navbar_extensions';
 
 const defaultMarkup = `
   <navbar-extensions name="testing"></navbar-extensions>`;
