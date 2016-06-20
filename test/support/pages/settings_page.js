@@ -3,13 +3,16 @@ define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
   var Common = require('./common');
+  var HeaderPage = require('./header_page');
 
   var defaultTimeout = config.timeouts.default;
   var common;
+  var headerPage;
 
   function settingsPage(remote) {
     this.remote = remote;
     common = new Common(this.remote);
+    headerPage = new HeaderPage(this.remote);
   }
 
   settingsPage.prototype = {
@@ -238,6 +241,9 @@ define(function (require) {
       )
       .then(function (page) {
         return page.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 

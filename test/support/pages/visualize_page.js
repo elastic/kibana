@@ -3,13 +3,16 @@ define(function (require) {
   var config = require('intern').config;
   var registerSuite = require('intern!object');
   var Common = require('./common');
+  var HeaderPage = require('./header_page');
 
   var defaultTimeout = config.timeouts.default;
   var common;
+  var headerPage;
 
   function VisualizePage(remote) {
     this.remote = remote;
     common = new Common(this.remote);
+    headerPage = new HeaderPage(this.remote);
   }
 
   VisualizePage.prototype = {
@@ -122,7 +125,10 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout * 2)
       .findByClassName('kbn-timepicker-go')
-      .click();
+      .click()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      });
     },
 
     collapseChart: function collapseChart() {
@@ -151,7 +157,10 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('li[ng-click="stepTwoMode=\'new\'"]')
-      .click();
+      .click()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      });
     },
 
     setValue: function setValue(newValue) {
@@ -178,7 +187,10 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]')
-      .click();
+      .click()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      });
     },
 
     selectSearch: function selectSearch(searchName) {
@@ -282,7 +294,10 @@ define(function (require) {
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('.btn-success')
-      .click();
+      .click()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      });
     },
 
 
