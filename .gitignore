@@ -1,5 +1,6 @@
 .aws-config.json
 .signing-config.json
+.ackrc
 .DS_Store
 .node_binaries
 node_modules
@@ -11,7 +12,10 @@ target
 .idea
 *.iml
 *.log
-/test/output
+/test/screenshots/diff
+/test/screenshots/failure/*.png
+/test/screenshots/session/*.png
+/test/screenshots/visual_regression_gallery.html
 /esvm
 .htpasswd
 .eslintcache
