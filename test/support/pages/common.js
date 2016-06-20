@@ -237,7 +237,7 @@ define(function (require) {
 
     saveScreenshot: function saveScreenshot(filename) {
       var self = this;
-      var outDir = path.resolve('test', 'output');
+      var outDir = path.resolve('test', 'screenshots');
 
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
