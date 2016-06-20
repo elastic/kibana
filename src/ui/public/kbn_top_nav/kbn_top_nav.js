@@ -46,10 +46,6 @@ module.directive('kbnTopNav', function (Private) {
     restrict: 'E',
     transclude: true,
     template($el, $attrs) {
-      // This is ugly
-      // This is necessary because of navbar-extensions
-      // It will no accept any programatic way of setting its name
-      // besides this because it happens so early in the digest cycle
       return `
         <navbar ng-show="chrome.getVisible()" class="kibana-nav-options">
           <div ng-transclude></div>

@@ -7,7 +7,6 @@ import '../kbn_top_nav';
 import KbnTopNavControllerProvider from '../kbn_top_nav_controller';
 import navbarExtensionsRegistry from 'ui/registry/navbar_extensions';
 import Registry from 'ui/registry/_registry';
-import 'ui/navbar_extensions';
 
 describe('kbnTopNav directive', function () {
   let build;
