@@ -19,6 +19,7 @@ module.exports = function (grunt) {
     'esvm:ui',
     'run:testUIServer',
     'run:chromeDriver',
+    'intern:dev',
     'esvm_shutdown:ui',
     'stop:chromeDriver',
     'stop:testUIServer'
