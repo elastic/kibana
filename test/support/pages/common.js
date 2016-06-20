@@ -226,24 +226,26 @@ define(function (require) {
 
       return function (reason) {
         var now = Date.now();
-        var filename = ['failure', now, testName].join('_') + '.png';
+        var fileName = ['failure', now, testName].join('_') + '.png';
 
-        return self.saveScreenshot(filename)
+        return self.saveScreenshot(fileName, true)
         .finally(function () {
           throw new Error(reason);
         });
       };
     },
 
-    saveScreenshot: function saveScreenshot(filename) {
+    saveScreenshot: function saveScreenshot(fileName, isFailure) {
       var self = this;
       var outDir = path.resolve('test', 'screenshots');
+      var directoryName = isFailure ? 'failure' : 'session';
+      var directoryPath = path.resolve('test', 'screenshots', directoryName);
+      var filePath = path.resolve(directoryPath, fileName);
+      self.debug('Taking screenshot "' + filePath + '"');
 
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
-        var filepath = path.resolve(outDir, filename);
-        self.debug('Taking screenshot "' + filepath + '"');
-        fs.writeFileSync(filepath, data);
+        fs.writeFileSync(filePath, data);
       })
       .catch(function (err) {
         self.log('SCREENSHOT FAILED: ' + err);
