@@ -1,22 +1,11 @@
+
+@vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
+@vis-editor-sidebar-min-width: 350px;
+@vis-editor-nesting-width: 8px;
+@vis-editor-agg-editor-spacing: 5px;
+
 .vis-editor {
   .flex-parent();
-
-  @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
-  @vis-editor-sidebar-min-width: 350px;
-  @vis-editor-nesting-width: 8px;
-  @vis-editor-agg-editor-spacing: 5px;
-
-  &-info {
-    line-height: 30px;
-    padding: 0px 10px;
-    border-bottom-left-radius: @border-radius-base;
-
-
-    &-title {
-      font-weight: bold;
-      margin-right: 10px;
-    }
-  }
 
   // For the vis-editor sidebar nav
   .navbar-default .navbar-nav {
@@ -84,8 +73,48 @@
     }
   }
 
+  .collapsible-sidebar {
+    .flex-parent(0, 0, auto);
+  }
 
-  &-content {
+  .visualization-options {
+    padding: @vis-editor-agg-editor-spacing;
+
+    .form-group {
+      margin-bottom: @vis-editor-agg-editor-spacing;
+    }
+    .form-horizontal .control-label {
+      text-align: left;
+    }
+  }
+
+  nesting-indicator {
+    display: flex;
+    flex: 0 0 auto;
+
+    > span {
+      width: @vis-editor-nesting-width;
+      background-color: @vis-editor-nesting-indicator-bg;
+    }
+  }
+
+  vis-editor-agg-group {
+    .flex-parent(0, 1, auto);
+  }
+}
+
+  .vis-editor-info {
+    line-height: 30px;
+    padding: 0px 10px;
+    border-bottom-left-radius: @border-radius-base;
+  }
+
+    .vis-editor-info-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+  .vis-editor-content {
     .flex-parent();
     z-index: 0;
 
@@ -95,11 +124,7 @@
     }
   }
 
-  .collapsible-sidebar {
-    .flex-parent(0, 0, auto);
-  }
-
-  &-sidebar {
+  .vis-editor-sidebar {
     .flex-parent(1, 0, auto);
 
     // overrided for tablet and desktop
@@ -131,6 +156,7 @@
             .flex-parent(1, 1, 1px);
             overflow: auto;
           }
+
           @media (max-width: @screen-md-min) {
             .flex-parent(1, 1, auto);
           }
@@ -168,68 +194,48 @@
     }
   }
 
-  .visualization-options {
-    padding: @vis-editor-agg-editor-spacing;
-
-    .form-group {
-      margin-bottom: @vis-editor-agg-editor-spacing;
-    }
-    .form-horizontal .control-label {
-      text-align: left;
-    }
-  }
-
-  nesting-indicator {
-    display: flex;
-    flex: 0 0 auto;
-
-    > span {
-      width: @vis-editor-nesting-width;
-      background-color: @vis-editor-nesting-indicator-bg;
-    }
-  }
-
-  &-agg {
+  .vis-editor-agg {
     .flex-parent();
 
     //IE10/11 - prevent flex item from overflowing
     flex-basis: 100%;
-
     padding: @vis-editor-agg-editor-spacing;
+  }
 
     // wraps the .vis-editor-agg and nesting-indicator ^^
-    &-wrapper {
+    .vis-editor-agg-wrapper {
       display: flex;
     }
 
-    &-group {
+    .vis-editor-agg-group {
       .flex-parent(0, 1, auto);
       color: @kibanaGray2;
     }
 
-    &-header {
+    .vis-editor-agg-header {
       display: flex;
       align-items: center;
       flex: 1 0 auto;
       margin-bottom: @vis-editor-agg-editor-spacing;
+    }
 
-      &-toggle {
+      .vis-editor-agg-header-toggle {
         flex: 0 0 auto;
         margin-right: @vis-editor-agg-editor-spacing;
       }
 
-      &-subagg-icon {
+      .vis-editor-agg-header-subagg-icon {
         flex: 0 1 auto;
         padding-right: @padding-base-vertical;
       }
 
-      &-title {
+      .vis-editor-agg-header-title {
         flex: 1 1 auto;
         .ellipsis();
         font-weight: bold;
       }
 
-      &-description {
+      .vis-editor-agg-header-description {
         font-weight: normal;
         padding-right: @vis-editor-agg-editor-spacing;
 
@@ -239,12 +245,11 @@
         }
       }
 
-      &-controls {
+      .vis-editor-agg-header-controls {
         flex: 0 0 auto;
       }
-    }
 
-    &-error {
+    .vis-editor-agg-error {
       margin: @vis-editor-agg-editor-spacing 0;
       padding: @vis-editor-agg-editor-spacing;
       text-align: center;
@@ -252,22 +257,20 @@
       color: @vis-editor-agg-error-color;
     }
 
-    &-editor {
-      &-ranges {
-        td {
-          padding: 0 @vis-editor-agg-editor-spacing @vis-editor-agg-editor-spacing 0;
-          &:last-child {
-            padding-right: 0;
-          }
+    .vis-editor-agg-editor-ranges {
+      td {
+        padding: 0 @vis-editor-agg-editor-spacing @vis-editor-agg-editor-spacing 0;
+        &:last-child {
+          padding-right: 0;
         }
-      }
-
-      &-advanced-toggle {
-        text-align: right;
       }
     }
 
-    &-form-row {
+    .vis-editor-agg-editor-advanced-toggle {
+      text-align: right;
+    }
+
+    .vis-editor-agg-form-row {
       display: flex;
 
       > * {
@@ -284,16 +287,17 @@
       }
     }
 
-    &-form-value {
+    .vis-editor-agg-form-value {
       align-self: center;
       margin: 0 0 0 @vis-editor-agg-editor-spacing;
       font-size: 1.2em;
     }
 
-    &-wide-btn {
+    .vis-editor-agg-wide-btn {
       text-align: center;
+    }
 
-      &-add {
+      .vis-editor-agg-wide-btn-add {
         width: 140px;
         margin: -2px auto 5px auto;
         text-align: center;
@@ -305,29 +309,28 @@
         border-bottom-left-radius: @border-radius-base;
         background-color: @vis-editor-agg-wide-btn-bg;
         font-weight: bold;
+
+        &:hover {
+          color: @vis-editor-agg-wide-btn-hover-color;
+          background-color: @vis-editor-agg-wide-btn-hover-bg;
+        }
       }
 
-      &-add:hover {
-        color: @vis-editor-agg-wide-btn-hover-color;
-        background-color: @vis-editor-agg-wide-btn-hover-bg;
-      }
+    .vis-editor-agg-add {
+      .flex-parent();
     }
 
-    &-add {
-      .flex-parent();
-
-      &-subagg {
+      .vis-editor-agg-add-subagg {
         margin-bottom: -@vis-editor-agg-editor-spacing - 1; // extra one pixel covers the aggs bottom border
         margin-right: -@vis-editor-agg-editor-spacing;
         margin-left: -@vis-editor-agg-editor-spacing;
       }
 
-      &-schemas {
+      .vis-editor-agg-add-schemas {
         margin: @vis-editor-agg-editor-spacing * 3;
       }
-    }
 
-    &-order-agg {
+    .vis-editor-agg-order-agg {
       border: 2px solid;
       border-color: @vis-editor-agg-editor-order-border;
       border-radius: @border-radius-base;
@@ -335,13 +338,8 @@
       margin: @vis-editor-agg-editor-spacing;
       padding: @vis-editor-agg-editor-spacing;
     }
-  }
 
-  vis-editor-agg-group {
-    .flex-parent(0, 1, auto);
-  }
-
-  &-canvas {
+  .vis-editor-canvas {
     flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
     display: flex;
     flex-direction: column;
@@ -359,11 +357,6 @@
       flex-basis: 100%;
     }
 
-    &-title {
-      text-align: center;
-      margin: 10px 0 0;
-    }
-
     visualize {
       .flex-parent();
       flex: 1 1 100%;
@@ -373,7 +366,11 @@
       position: relative;
     }
   }
-}
+
+    .vis-editor-canvas-title {
+      text-align: center;
+      margin: 10px 0 0;
+    }
 
 vis-editor,
 vis-editor-agg-group,
