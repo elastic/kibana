@@ -252,5 +252,47 @@ describe('KbnTopNavController', function () {
         expect(controller.getCurrent()).to.be(null);
       });
     });
+
+    describe('#addItems(opts)', function () {
+      it('should append to existing menu items', function () {
+        const { controller } = init();
+        const newItems = [
+          { key: 'green', template: 'Green means go' },
+          { key: 'red', template: 'Red means stop' },
+        ];
+
+        expect(controller.menuItems).to.have.length(2);
+        controller.addItems(newItems);
+        expect(controller.menuItems).to.have.length(4);
+
+        // check that the items were added
+        var matches = controller.menuItems.reduce((acc, item) => {
+          if (item.key === 'green' || item.key === 'red') {
+            acc[item.key] = item;
+          }
+          return acc;
+        }, {});
+        expect(matches).to.have.property('green');
+        expect(matches.green).to.have.property('run');
+        expect(matches).to.have.property('red');
+        expect(matches.red).to.have.property('run');
+      });
+
+      it('should take a single menu item object', function () {
+        const { controller } = init();
+        const newItem = { key: 'green', template: 'Green means go' };
+
+        expect(controller.menuItems).to.have.length(2);
+        controller.addItems(newItem);
+        expect(controller.menuItems).to.have.length(3);
+
+        // check that the items were added
+        var match = controller.menuItems.filter((item) => {
+          return item.key === 'green';
+        });
+        expect(match[0]).to.have.property('run');
+      });
+    });
+
   });
 });
