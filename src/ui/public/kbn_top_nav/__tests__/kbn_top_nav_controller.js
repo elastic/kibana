@@ -112,20 +112,20 @@ describe('KbnTopNavController', function () {
     });
   });
 
-  describe('', function () {
+  describe('methods', function () {
     const init = function () {
       const controller = new KbnTopNavController([
         { key: 'foo', template: 'Say Foo!' },
         { key: 'bar', template: 'Whisper Bar' },
       ]);
       const render = sinon.spy(controller, '_render');
-      const set = sinon.spy(controller, 'setCurrent');
-      const is = sinon.spy(controller, 'getCurrent');
+      const setCurrent = sinon.spy(controller, 'setCurrent');
+      const getCurrent = sinon.spy(controller, 'getCurrent');
 
-      return { controller, render, set };
+      return { controller, render, setCurrent, getCurrent };
     };
 
-    describe('#set([key])', function () {
+    describe('#setCurrent([key])', function () {
       it('assigns the passed key to the current key', function () {
         const { controller } = init();
         expect(controller.getCurrent()).to.not.be('foo');
@@ -167,7 +167,7 @@ describe('KbnTopNavController', function () {
       });
     });
 
-    describe('#is(key)', function () {
+    describe('#isCurrent(key)', function () {
       it('returns true when key matches', function () {
         const { controller } = init();
 
@@ -183,11 +183,11 @@ describe('KbnTopNavController', function () {
 
     describe('#open(key)', function () {
       it('alias for set', function () {
-        const { controller, set } = init();
+        const { controller, setCurrent } = init();
 
         controller.open('foo');
-        sinon.assert.calledOnce(set);
-        sinon.assert.calledWithExactly(set, 'foo');
+        sinon.assert.calledOnce(setCurrent);
+        sinon.assert.calledWithExactly(setCurrent, 'foo');
       });
     });
 
