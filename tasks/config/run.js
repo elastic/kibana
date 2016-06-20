@@ -86,7 +86,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: 'chromedriver.path',
+      cmd: chromedriver.path,
       args: [
         `--port=${uiConfig.servers.webdriver.port}`,
         '--url-base=wd/hub'
@@ -100,7 +100,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: 'chromedriver.path',
+      cmd: chromedriver.path,
       args: [
         `--port=${uiConfig.servers.webdriver.port}`,
         '--url-base=wd/hub'
