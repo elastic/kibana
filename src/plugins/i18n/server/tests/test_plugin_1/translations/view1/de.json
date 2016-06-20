@@ -1,0 +1,6 @@
+[
+  {
+    "NO_SSL": "Dont run the DE dev server using HTTPS",
+    "DEV": "Run the DE server with development mode defaults"
+  ]
+}
