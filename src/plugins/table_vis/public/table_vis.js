@@ -42,7 +42,9 @@ function TableVisTypeProvider(Private) {
         sort: {
           columnIndex: null,
           direction: null
-        }
+        },
+        showTotal: false,
+        totalFunc: 'sum'
       },
       editor: '<table-vis-params></table-vis-params>'
     },

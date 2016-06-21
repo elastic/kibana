@@ -23,3 +23,19 @@
     Calculate metrics for every bucket/level
   </label>
 </div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" ng-model="vis.params.showTotal">
+    Show total
+  </label>
+</div>
+
+<div>
+  <label>Total function</label>
+  <select ng-disabled="!vis.params.showTotal"
+          class="form-control"
+          ng-model="vis.params.totalFunc"
+          ng-options="x for x in totalAggregations">
+  </select>
+</div>

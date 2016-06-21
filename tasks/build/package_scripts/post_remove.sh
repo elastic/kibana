@@ -59,4 +59,8 @@ if [ "$REMOVE_DIRS" = "true" ]; then
   if [ -d "<%= configDir %>" ]; then
     rmdir --ignore-fail-on-non-empty "<%= configDir %>"
   fi
+
+  if [ -d "<%= dataDir %>" ]; then
+    rmdir --ignore-fail-on-non-empty "<%= dataDir %>"
+  fi
 fi

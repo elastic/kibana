@@ -9,13 +9,21 @@
   <tbody ng-repeat-end>
     <tr>
       <td>
-        <kbn-agg-table-group ng-if="table.tables" group="table" per-page="perPage" sort="sort"></kbn-agg-table-group>
+        <kbn-agg-table-group
+          ng-if="table.tables"
+          group="table"
+          per-page="perPage"
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc"></kbn-agg-table-group>
         <kbn-agg-table
           ng-if="table.rows"
           table="table"
           export-title="exportTitle"
           per-page="perPage"
-          sort="sort">
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc">
         </kbn-agg-table>
       </td>
     </tr>
@@ -33,13 +41,21 @@
   <tbody>
     <tr>
       <td ng-repeat="table in columns">
-        <kbn-agg-table-group ng-if="table.tables" group="table" per-page="perPage" sort="sort"></kbn-agg-table-group>
+        <kbn-agg-table-group
+          ng-if="table.tables"
+          group="table"
+          per-page="perPage"
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc"></kbn-agg-table-group>
         <kbn-agg-table
           ng-if="table.rows"
           table="table"
           export-title="exportTitle"
           per-page="perPage"
-          sort="sort">
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc">
         </kbn-agg-table>
       </td>
     </tr>
