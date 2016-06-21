@@ -16,12 +16,14 @@ const indexPatternsResolutions = {
 // add a dependency to all of the subsection routes
 uiRoutes
 .defaults(/management\/kibana\/indices/, {
-  resolve: indexPatternsResolutions
+  resolve: indexPatternsResolutions,
+  requireDefaultIndex: false
 });
 
 uiRoutes
 .defaults(/management\/data\/index/, {
-  resolve: indexPatternsResolutions
+  resolve: indexPatternsResolutions,
+  requireDefaultIndex: false
 });
 
 // wrapper directive, which sets some global stuff up like the left nav

@@ -4,7 +4,8 @@ import template from 'plugins/kibana/management/sections/indices/upload/index.ht
 import './directives/upload_wizard';
 
 routes.when('/management/data/csv/', {
-  template: template
+  template: template,
+  requireDefaultIndex: false
 });
 
 management.getSection('data').register('csv', {
