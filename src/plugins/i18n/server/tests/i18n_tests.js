@@ -95,8 +95,8 @@ describe('Test storing translations for test_plugin_1', function () {
   });
 
   afterEach(function (done) {
-    var translationStorePath = __dirname + '/../data/store_translations';
-    process.exec('rm -rf ' + translationStorePath + '/test_plugin_1', function (err,stdout,stderr) {
+    var translationPluginStorePath = i18n.getPluginTranslationStoragePath('test_plugin_1');
+    process.exec('rm -rf ' + translationPluginStorePath, function (err,stdout,stderr) {
       if (err) throw err;
       done();
     });

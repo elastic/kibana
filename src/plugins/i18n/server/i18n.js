@@ -2,15 +2,16 @@ var fs = require('fs');
 var path = require('path');
 var process = require('child_process');
 var os = require('os');
+var kibanaPackage = require('../../../utils/package_json');
 
 const TRANSLATION_FILE_EXTENSION = 'json';
+const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/data/store_translations';
 
 module.exports = {
   storePluginLanguageTranslations: function (pluginName, pluginTranslationPath, language) {
     var translationFiles = [];
     var languageList = [];
-    var translationStorePath = __dirname + '/data/store_translations';
-    var translationStorePluginPath = translationStorePath + '/' + pluginName;
+    var translationStorePluginPath = module.exports.getPluginTranslationStoragePath(pluginName);
     var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
 
     module.exports.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList);
@@ -43,8 +44,7 @@ module.exports = {
   },
 
   getPluginLanguageTranslation: function (pluginName, language) {
-    var translationStorePath = __dirname + '/data/store_translations';
-    var translationStorePluginPath = translationStorePath + '/' + pluginName;
+    var translationStorePluginPath = module.exports.getPluginTranslationStoragePath(pluginName);
     var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
     var translationFile = translationStorePluginPath + '/' + translationFileName;
 
@@ -72,7 +72,12 @@ module.exports = {
       }
     });
 
+  },
+
+  getPluginTranslationStoragePath: function (pluginName) {
+    return TRANSLATION_STORE_PATH + '/' + pluginName;
   }
+
 };
 
 function saveTranslationToFile(translationFullFileName, translationJson) {
