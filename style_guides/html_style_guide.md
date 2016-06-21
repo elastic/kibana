@@ -3,16 +3,26 @@
 
 ## Multiple attribute values
 
-When a node has multiple attributes that would cause it to exceed the 80-character line limit, each attribute including the first should be on its own line with a single indent. Also, when a node that is styled in this way has child nodes, there should be a blank line between the opening parent tag and the first child tag.
+When a node has multiple attributes, each attribute including the first should be on its own line with a single indent.
+
+The closing bracket should be on its own line. This allows attributes to be shuffled and edited without having to move the bracket around. It also makes it easier to scan vertically and match opening and closing brackets.
 
 ```
-<ul
+<div
   attribute1="value1"
   attribute2="value2"
-  attribute3="value3">
+  attribute3="value3"
+>
+  Hello
+</div>
+```
 
-  <li></li>
-  <li></li>
-  ...
-</ul>
+If the node doesn't have child notes, add the closing tag on the same line as the opening tag's closing bracket.
+
+```
+<div
+  attribute1="value1"
+  attribute2="value2"
+  attribute3="value3"
+></div>
 ```
