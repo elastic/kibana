@@ -48,6 +48,7 @@
     "test:ui:runner": "grunt test:ui:runner",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
+    "test:visualRegression": "grunt test:visualRegression",
     "build": "grunt build",
     "release": "grunt release",
     "start": "sh ./bin/kibana --dev",

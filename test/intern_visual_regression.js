@@ -12,7 +12,7 @@ define(function (require) {
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
-      'test/functional/index'
+      'test/visual_regression/index'
     ],
 
     excludeInstrumentation: /.*/,
