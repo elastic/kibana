@@ -18,7 +18,8 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 /** Wizard Step 1
 /********/
 routes.when('/visualize/step/1', {
-  template: templateStep(1, require('plugins/kibana/visualize/wizard/step_1.html'))
+  template: templateStep(1, require('plugins/kibana/visualize/wizard/step_1.html')),
+  requireDefaultIndex: true
 });
 
 module.controller('VisualizeWizardStep1', function ($scope, $route, $location, timefilter, Private) {
@@ -36,6 +37,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, $location, t
 /********/
 routes.when('/visualize/step/2', {
   template: templateStep(2, require('plugins/kibana/visualize/wizard/step_2.html')),
+  requireDefaultIndex: true,
   resolve: {
     indexPatternIds: function (courier) {
       return courier.indexPatterns.getIds();

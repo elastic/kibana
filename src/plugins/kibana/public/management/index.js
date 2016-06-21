@@ -16,8 +16,7 @@ import management from 'ui/management';
 
 uiRoutes
 .when('/management', {
-  template: landingTemplate,
-  requireDefaultIndex: false
+  template: landingTemplate
 });
 
 require('ui/index_patterns/route_setup/load_default')({

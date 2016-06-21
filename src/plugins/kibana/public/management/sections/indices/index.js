@@ -17,13 +17,12 @@ const indexPatternsResolutions = {
 uiRoutes
 .defaults(/management\/kibana\/indices/, {
   resolve: indexPatternsResolutions,
-  requireDefaultIndex: false
+  requireDefaultIndex: true
 });
 
 uiRoutes
 .defaults(/management\/data\/index/, {
-  resolve: indexPatternsResolutions,
-  requireDefaultIndex: false
+  resolve: indexPatternsResolutions
 });
 
 // wrapper directive, which sets some global stuff up like the left nav

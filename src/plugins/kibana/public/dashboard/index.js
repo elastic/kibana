@@ -35,6 +35,7 @@ const app = uiModules.get('app/dashboard', [
 uiRoutes
 .when('/dashboard', {
   template: indexTemplate,
+  requireDefaultIndex: true,
   resolve: {
     dash: function (savedDashboards, config) {
       return savedDashboards.get();

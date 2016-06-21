@@ -101,14 +101,14 @@ describe('routes/route_manager', function () {
       expect($rp.when.lastCall.args[1]).to.have.property('reloadOnSearch', true);
     });
 
-    it('sets route.requireDefaultIndex to true by default', function () {
+    it('sets route.requireDefaultIndex to false by default', function () {
       routes.when('/nothing-set');
       routes.when('/no-index-required', { requireDefaultIndex: false });
       routes.when('/index-required', { requireDefaultIndex: true });
       routes.config($rp);
 
       expect($rp.when.callCount).to.be(3);
-      expect($rp.when.firstCall.args[1]).to.have.property('requireDefaultIndex', true);
+      expect($rp.when.firstCall.args[1]).to.have.property('requireDefaultIndex', false);
       expect($rp.when.secondCall.args[1]).to.have.property('requireDefaultIndex', false);
       expect($rp.when.lastCall.args[1]).to.have.property('requireDefaultIndex', true);
     });
