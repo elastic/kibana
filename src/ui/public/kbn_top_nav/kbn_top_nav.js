@@ -43,18 +43,18 @@ const module = uiModules.get('kibana');
  * Programatic control of the navbar can be acheived one of two ways
  */
 module.directive('kbnTopNav', function (Private) {
+  const KbnTopNavController = Private(KbnTopNavControllerProvider);
+  const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
+  const getNavbarExtensions = _.memoize(function (name) {
+    if (!name) throw new Error('navbar directive requires a name attribute');
+    return _.sortBy(navbarExtensions.byAppName[name], 'order');
+  });
+
   return {
     restrict: 'E',
     transclude: true,
     template,
     controller($scope, $attrs, $element) {
-      const KbnTopNavController = Private(KbnTopNavControllerProvider);
-      const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
-      const getNavbarExtensions = _.memoize(function (name) {
-        if (!name) throw new Error('navbar directive requires a name attribute');
-        return _.sortBy(navbarExtensions.byAppName[name], 'order');
-      });
-
       const extensions = getNavbarExtensions($attrs.name);
       let controls = _.get($scope, $attrs.config, []);
       if (controls instanceof KbnTopNavController) {
