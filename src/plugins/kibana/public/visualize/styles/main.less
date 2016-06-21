@@ -7,81 +7,34 @@
   margin-left: 0;
   padding-left: 0;
   padding-right: 0;
+}
 
-  @media (min-width: @screen-lg) {
-    .wizard {
-      padding: 0;
-      display: flex;
-
-      div.wizard-small {
-        flex: 2;
-      }
-
-      div.wizard-large {
-        flex: 3;
-      }
-
-      .wizard-column {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 0px 2.5px;
-
-        .wizard-row {
-          flex: 1;
-          background-color: @kibanaGray6;
-        }
-      }
-    }
-  }
-
-  h3 {
+  .wizard-sub-title {
     margin-top: 0px;
     margin-bottom: 8px;
     padding: 0px 5px;
   }
 
-  .wizard-row {
-    .panel {
-      margin-bottom: 0;
-      border: none;
-    }
-
-    .panel-default > .panel-heading {
-      background-color: @kibanaGray6;
-    }
-
-    .list-group {
-      margin-bottom: 0;
-    }
-
-    .striped {
-      li:nth-child(odd) {
-        background-color: @white;
-      }
-
-      li:nth-child(even) {
-        background-color: @kibanaGray6;
-      }
-    }
-  }
-
   .wizard-type {
     flex: 1;
+
+    // TODO: When we migrate off Bootstrap, we can eliminate these "mixins".
     .list-group-item();
     .list-group-menu .list-group-menu-item();
 
     border: none;
     border-radius: 0;
     background-color: @kibanaGray6;
+  }
 
-    &-heading {
+    .wizard-type-heading {
       flex: 0 0 200px;
       display: flex;
       align-items: center;
       font-size: 1.2em;
+    }
 
-      .fa {
+      .wizard-type-heading-icon {
         flex: 0 0 auto;
         margin-right: @padding-base-horizontal;
         font-size: 1.5em;
@@ -89,16 +42,40 @@
         color: @saved-object-finder-icon-color;
       }
 
-      h4 {
+      .wizard-type-heading-text {
         flex: 1 0 auto;
       }
-    }
 
-    &-description {
+    .wizard-type-description {
       flex: 1 1 auto;
       color: @wizard-vis-type-description-color;
     }
+
+@media (min-width: @screen-lg) {
+  .wizard {
+    padding: 0;
+    display: flex;
   }
+
+    .wizard-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0px 2.5px;
+    }
+
+      .wizard-row {
+        flex: 1;
+        background-color: @kibanaGray6;
+      }
+
+    .wizard-column--small {
+      flex: 2;
+    }
+
+    .wizard-column--large {
+      flex: 3;
+    }
 }
 
 @import "../editor/styles/_editor.less";
