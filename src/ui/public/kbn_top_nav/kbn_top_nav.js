@@ -3,6 +3,7 @@ import 'ui/watch_multi';
 import angular from 'angular';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';
+import template from './kbn_top_nav.html';
 import KbnTopNavControllerProvider from './kbn_top_nav_controller';
 import RegistryNavbarExtensionsProvider from 'ui/registry/navbar_extensions';
 
@@ -45,31 +46,7 @@ module.directive('kbnTopNav', function (Private) {
   return {
     restrict: 'E',
     transclude: true,
-    template($el, $attrs) {
-      return `
-        <navbar ng-show="chrome.getVisible()" class="kibana-nav-options">
-          <div ng-transclude></div>
-          <div class="button-group kibana-nav-actions" role="toolbar">
-            <button
-              ng-repeat="menuItem in kbnTopNav.menuItems"
-              aria-label="{{::menuItem.description}}"
-              aria-haspopup="{{!menuItem.hasFunction}}"
-              aria-expanded="{{kbnTopNav.isCurrent(menuItem.key)}}"
-              ng-class="{active: kbnTopNav.isCurrent(menuItem.key)}"
-              ng-click="menuItem.run(menuItem, kbnTopNav)"
-              ng-bind="menuItem.label">
-            </button>
-          </div>
-          <kbn-global-timepicker></kbn-global-timepicker>
-        </navbar>
-        <div class="config" ng-show="kbnTopNav.rendered">
-          <div id="template_wrapper" class="container-fluid"></div>
-          <div class="config-close remove">
-            <i class="fa fa-chevron-circle-up" ng-click="kbnTopNav.close()"></i>
-          </div>
-        </div>
-      `;
-    },
+    template,
     controller($scope, $attrs, $element) {
       const KbnTopNavController = Private(KbnTopNavControllerProvider);
       const navbarExtensions = Private(RegistryNavbarExtensionsProvider);
