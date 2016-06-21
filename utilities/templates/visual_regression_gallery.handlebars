@@ -126,13 +126,14 @@
   </div>
 
   <div class="meta">
-    {{=it.branch}} - {{=it.date}}
+    {{branch}} - {{date}}
   </div>
 
-  {{~it.comparisons :comparison:index}}
-  <div class="comparison{{? comparison.change <= it.hiddenThreshold }} comparison--collapsed{{?}} {{? comparison.change >= it.warningThreshold }} comparison--warning{{?}}">
+  {{#each comparisons as |comparison|}}
+  <div class="comparison{{#lte comparison.change ../hiddenThreshold}} comparison--collapsed{{/lte}} {{#gte comparison.change ../warningThreshold }} comparison--warning{{/gte}}">
+
     <div class="comparison__title">
-      <span class="comparison__percent">({{=comparison.percentage}}%)</span> {{=comparison.name}}
+      <span class="comparison__percent">({{comparison.percentage}}%)</span> {{comparison.name}}
     </div>
 
     <div class="comparison__subTitle">
@@ -155,7 +156,7 @@
       <div class="comparisonScreenshot">
         <img
           class="comparisonScreenshot__image"
-          src="data:image/png;base64,{{=comparison.imageData.diff}}"
+          src="data:image/png;base64,{{comparison.imageData.diff}}"
         />
       </div>
 
@@ -166,7 +167,7 @@
       >
         <img
           class="comparisonScreenshot__image"
-          src="data:image/png;base64,{{=comparison.imageData.session}}"
+          src="data:image/png;base64,{{comparison.imageData.session}}"
         />
       </div>
 
@@ -174,12 +175,12 @@
       <div class="comparisonScreenshot comparisonScreenshot--baseline">
         <img
           class="comparisonScreenshot__image"
-          src="data:image/png;base64,{{=comparison.imageData.baseline}}"
+          src="data:image/png;base64,{{comparison.imageData.baseline}}"
         />
       </div>
     </div>
   </div>
-  {{~}}
+  {{/each}}
 
 <script>
 
