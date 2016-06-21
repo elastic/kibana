@@ -21,6 +21,7 @@ import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 uiRoutes
 .when('/visualize/create', {
   template: editorTemplate,
+  requireDefaultIndex: true,
   resolve: {
     savedVis: function (savedVisualizations, courier, $route, Private) {
       const visTypes = Private(RegistryVisTypesProvider);

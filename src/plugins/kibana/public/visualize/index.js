@@ -21,7 +21,8 @@ import uiRoutes from 'ui/routes';
 
 uiRoutes
 .when('/visualize', {
-  redirectTo: '/visualize/step/1'
+  redirectTo: '/visualize/step/1',
+  requireDefaultIndex: true
 });
 
 // preloading

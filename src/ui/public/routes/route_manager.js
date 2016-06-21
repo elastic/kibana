@@ -27,7 +27,7 @@ function RouteManager() {
       }
 
       if (route.requireDefaultIndex === void 0) {
-        route.requireDefaultIndex = true;
+        route.requireDefaultIndex = false;
       }
 
       wrapRouteWithPrep(route, setup);
