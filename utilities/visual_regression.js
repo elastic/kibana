@@ -3,7 +3,7 @@ import bluebird, {
   fromNode,
   promisify,
 } from 'bluebird';
-import dot from 'dot';
+import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
 import imageDiff from 'image-diff';
@@ -15,33 +15,42 @@ const readDirAsync = promisify(fs.readdir);
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
-// Preserve whitespace in our HTML output.
-dot.templateSettings.strip = false;
 
-const templates = dot.process({
-  path: path.resolve('./utilities/templates')
+Handlebars.registerHelper('lte', function lessThanEquals(value, threshold, options) {
+  if (value <= threshold) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
 });
 
-function buildGallery(comparisons) {
+Handlebars.registerHelper('gte', function greaterThanEquals(value, threshold, options) {
+  if (value >= threshold) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
+});
+
+async function buildGallery(comparisons) {
   const simpleGit = new SimpleGit();
   const asyncBranch = promisify(simpleGit.branch, simpleGit);
+  const branch = await asyncBranch();
 
-  return asyncBranch().then(data => {
-    const branch = data.current;
+  const template = Handlebars.compile(await readFileAsync(
+    path.resolve('./utilities/templates/visual_regression_gallery.handlebars')
+  , 'utf8'));
 
-    const html = templates.visual_regression_gallery({
-      date: moment().format('MMMM Do YYYY, h:mm:ss a'),
-      branch,
-      hiddenThreshold: 0,
-      warningThreshold: 0.03,
-      comparisons,
-    });
-
-    return writeFileAsync(
-      path.resolve('./test/screenshots/visual_regression_gallery.html'),
-      html
-    );
+  const html = template({
+    date: moment().format('MMMM Do YYYY, h:mm:ss a'),
+    branch: branch.current,
+    hiddenThreshold: 0,
+    warningThreshold: 0.03,
+    comparisons,
   });
+
+  return writeFileAsync(
+    path.resolve('./test/screenshots/visual_regression_gallery.html'),
+    html
+  );
 }
 
 async function compareScreenshots() {
