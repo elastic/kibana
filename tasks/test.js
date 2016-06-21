@@ -72,7 +72,8 @@ module.exports = function (grunt) {
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'eslint:source',
       'licenses',
-      'test:quick'
+      'test:quick',
+      'test:visualRegression'
     ]));
   });
 
