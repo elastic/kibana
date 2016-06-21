@@ -14,6 +14,7 @@ export default (grunt) => {
 
   const FOLDER_CONFIG = '/opt/kibana/config';
   const FOLDER_HOME = '/opt/kibana';
+  const FOLDER_DATA = '/var/lib/kibana';
   const FOLDER_PLUGINS = `${FOLDER_HOME}/installedPlugins`;
 
   const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibana.yml`;
@@ -43,6 +44,7 @@ export default (grunt) => {
     version: VERSION,
     path: {
       conf: FOLDER_CONFIG,
+      data: FOLDER_DATA,
       plugins: FOLDER_PLUGINS,
       home: FOLDER_HOME,
       kibanaBin: FILE_KIBANA_BINARY,

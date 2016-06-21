@@ -6,6 +6,7 @@ let path = require('path');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 const randomBytes = require('crypto').randomBytes;
+const getData = require('../path').getData;
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -82,6 +83,10 @@ module.exports = () => Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
     initialize: Joi.boolean().default(true)
+  }).default(),
+
+  path: Joi.object({
+    data: Joi.string().default(getData())
   }).default(),
 
   optimize: Joi.object({
