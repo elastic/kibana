@@ -5,6 +5,7 @@ const installer = require('./plugin_installer');
 const remover = require('./plugin_remover');
 const lister = require('./plugin_lister');
 const pluginLogger = require('./plugin_logger');
+const getConfig = require('../../server/path').getConfig;
 
 export default function pluginCli(program) {
   function processCommand(command, options) {
@@ -43,7 +44,7 @@ export default function pluginCli(program) {
     .option(
       '-c, --config <path>',
       'Path to the config file',
-      fromRoot('config/kibana.yml')
+      getConfig()
     )
     .option(
       '-t, --timeout <duration>',

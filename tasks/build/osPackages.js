@@ -42,7 +42,10 @@ export default (grunt) => {
         '--template-value', `user=${config.user}`,
         '--template-value', `group=${config.group}`,
         '--template-value', `optimizeDir=${config.path.home}/optimize`,
-        '--template-value', `pluginsDir=${config.path.plugins}`
+        '--template-value', `pluginsDir=${config.path.plugins}`,
+        '--template-value', `dataDir=${config.path.data}`,
+        //uses relative path to --prefix, strip the leading /
+        '--exclude', `${config.path.home.slice(1)}/installedPlugins/.data`
       ];
       const debOptions = [
         '-t', 'deb',
@@ -54,6 +57,7 @@ export default (grunt) => {
       ];
       const args = [
         `${buildDir}/=${config.path.home}/`,
+        `${buildDir}/installedPlugins/.data/=${config.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/lib/=/lib/`
       ];

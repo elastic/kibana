@@ -55,4 +55,8 @@ if [ "$REMOVE_DIRS" = "true" ]; then
   if [ -d "<%= pluginsDir %>" ]; then
     rm -rf "<%= pluginsDir %>"
   fi
+
+  if [ -d "<%= dataDir %>" ]; then
+    rmdir --ignore-fail-on-non-empty "<%= dataDir %>"
+  fi
 fi
