@@ -2,6 +2,7 @@ import { fromRoot } from '../../utils';
 import remove from './remove';
 import Logger from '../lib/logger';
 import { parse } from './settings';
+import { getConfig } from '../../server/path';
 
 function processCommand(command, options) {
   let settings;
@@ -25,7 +26,7 @@ export default function pluginRemove(program) {
   .option(
     '-c, --config <path>',
     'path to the config file',
-    fromRoot('config/kibana.yml')
+    getConfig()
   )
   .option(
     '-d, --plugin-dir <path>',

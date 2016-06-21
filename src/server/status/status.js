@@ -82,8 +82,8 @@ states.all.forEach(function (state) {
       return;
     }
 
-    this.emit(state.id, previous, previousMsg);
-    this.emit('change', previous, previousMsg);
+    this.emit(state.id, previous, previousMsg, this.state, this.message);
+    this.emit('change', previous, previousMsg, this.state, this.message);
   };
 });
 
