@@ -20,7 +20,6 @@ uiRoutes
 });
 
 require('ui/index_patterns/route_setup/load_default')({
-  notRequiredRe: /^\/management\/data\//,
   whenMissingRedirectTo: '/management/data/index'
 });
 
