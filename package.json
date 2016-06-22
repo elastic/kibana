@@ -1,9 +1,10 @@
 {
   "name": "timelion",
-  "version": "0.1.347",
+  "version": "0.1.348",
   "kibanas": [
     "5.0.0-alpha2",
-    "5.0.0-alpha3"
+    "5.0.0-alpha3",
+    "5.0.0-alpha4"
   ],
   "dependencies": {
     "body-parser": "^1.12.0",
