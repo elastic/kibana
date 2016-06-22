@@ -20,13 +20,14 @@ import uiRoutes from 'ui/routes';
 
 
 uiRoutes
-.when('/visualize', {
-  redirectTo: '/visualize/step/1',
+.defaults(/visualize/, {
   requireDefaultIndex: true
+})
+.when('/visualize', {
+  redirectTo: '/visualize/step/1'
 });
 
 // preloading
 
 require('ui/saved_objects/saved_object_registry')
 .register(require('plugins/kibana/visualize/saved_visualizations/saved_visualization_register'));
-

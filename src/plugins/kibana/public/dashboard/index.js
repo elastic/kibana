@@ -18,10 +18,7 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 
-
-
 require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
-
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -33,9 +30,11 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 uiRoutes
+.defaults(/dashboard/, {
+  requireDefaultIndex: true
+})
 .when('/dashboard', {
   template: indexTemplate,
-  requireDefaultIndex: true,
   resolve: {
     dash: function (savedDashboards, config) {
       return savedDashboards.get();
