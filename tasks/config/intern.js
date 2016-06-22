@@ -13,7 +13,13 @@ module.exports = function (grunt) {
     api: {
       options: {
         runType: 'client',
-        config: 'test/api_intern'
+        config: 'test/intern_api'
+      }
+    },
+    visualRegression: {
+      options: {
+        runType: 'runner',
+        config: 'test/intern_visual_regression'
       }
     }
   };
