@@ -10,7 +10,6 @@ let notify = new Notifier({
 
 module.exports = function (opts) {
   opts = opts || {};
-  let notRequiredRe = opts.notRequiredRe || null;
   let whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
   let defaultRequiredToasts = null;
 
@@ -18,21 +17,20 @@ module.exports = function (opts) {
   .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config, indexPatterns) {
     let getIds = Private(GetIdsProvider);
     let rootSearchSource = Private(CourierDataSourceRootSearchSourceProvider);
-    let path = _.get($route, 'current.$$route.originalPath');
+    let route = _.get($route, 'current.$$route');
 
     return getIds()
     .then(function (patterns) {
       let defaultId = config.get('defaultIndex');
       let defined = !!defaultId;
       let exists = _.contains(patterns, defaultId);
-      let required = !notRequiredRe || !path.match(notRequiredRe);
 
       if (defined && !exists) {
         config.remove('defaultIndex');
         defaultId = defined = false;
       }
 
-      if (!defined && required) {
+      if (!defined && route.requireDefaultIndex) {
         throw new NoDefaultIndexPattern();
       }
 

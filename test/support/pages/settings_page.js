@@ -14,16 +14,20 @@ export default (function () {
       return this.remote.findDisplayedByCssSelector('.app-link:nth-child(5) a').click();
     },
 
-    clickPath: function (path) {
-      return this.remote.findDisplayedByCssSelector('[kbn-href="#/management/' + path + '"]').click();
+    clickLinkText: function (text) {
+      return this.remote.findDisplayedByLinkText(text).click();
     },
 
     clickKibanaSettings: function () {
-      return this.clickPath('kibana/settings');
+      return this.clickLinkText('Advanced Settings');
     },
 
     clickKibanaIndicies: function () {
-      return this.clickPath('kibana/indices');
+      return this.clickLinkText('Index Patterns');
+    },
+
+    clickExistingData: function () {
+      return this.clickLinkText('Existing Data');
     },
 
     getAdvancedSettings: function getAdvancedSettings(propertyName) {
@@ -315,6 +319,9 @@ export default (function () {
 
       return common.try(function () {
         return self.navigateTo()
+          .then(function () {
+            return self.clickExistingData();
+          })
           .then(function () {
             return self.selectTimeFieldOption('@timestamp');
           })

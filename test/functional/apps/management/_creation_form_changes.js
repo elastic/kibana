@@ -14,6 +14,9 @@ bdd.describe('user input reactions', function () {
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
       return settingsPage.navigateTo();
+    })
+    .then(function () {
+      return settingsPage.clickExistingData();
     });
   });
 
