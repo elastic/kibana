@@ -1,27 +1,32 @@
-var _ = require('lodash');
-var npm = require('npm');
-var npmLicense = require('license-checker');
+import _ from 'lodash';
+import {
+  fromNode,
+} from 'bluebird';
+import npm from 'npm';
+import npmLicense from 'license-checker';
 
-module.exports = function (grunt) {
-  grunt.registerTask('licenses', 'Checks dependency licenses', function () {
+export default function licenses(grunt) {
+  grunt.registerTask('licenses', 'Checks dependency licenses', async function () {
+    const config = this.options();
+    const done = this.async();
 
-    var config = this.options();
+    const result = {};
+    const options = { start: process.cwd(), json: true };
+    const checkQueueLength = 2;
 
-    var done = this.async();
+    function getLicenses(dependency) {
+      if (config.overrides[dependency.name]) {
+        return config.overrides[dependency.name];
+      }
 
-    var result = {};
-    var options = { start: process.cwd(), json: true };
-    var checkQueueLength = 2;
-
-    function getLicenses(info, dependency) {
-      if (config.overrides[dependency]) return config.overrides[dependency];
-      if (info && info.licenses) return _.flatten([info.licenses]);
+      if (dependency && dependency.licenses) {
+        return _.flatten([dependency.licenses]);
+      }
     }
 
-    function processPackage(info, dependency) {
-      var pkgInfo = {};
-      pkgInfo.name = dependency;
-      pkgInfo.licenses = getLicenses(info, dependency);
+    function processPackage(dependency) {
+      const pkgInfo = Object.assign({}, dependency);
+      pkgInfo.licenses = getLicenses(dependency);
       pkgInfo.valid = (function () {
         if (_.intersection(pkgInfo.licenses, config.licenses).length > 0) {
           return true;
@@ -31,49 +36,59 @@ module.exports = function (grunt) {
       return pkgInfo;
     }
 
-    npmLicense.init(options, function (allDependencies) {
-      // Only check production NPM dependencies, not dev
-      npm.load({production: true}, function () {
-        npm.commands.list([], true, function (a, b, npmList) {
-
-          // Recurse npm --production --json ls output, create array of package@version
-          var getDependencies = function (dependencies, list) {
-            list = list || [];
-            _.each(dependencies, function (info, dependency) {
-              list.push(dependency + '@' + info.version);
-              if (info.dependencies) {
-                getDependencies(info.dependencies, list);
-              }
-            });
-            return list;
-          };
-
-          var productionDependencies = {};
-          _.each(getDependencies(npmList.dependencies), function (packageAndVersion) {
-            productionDependencies[packageAndVersion] = allDependencies[packageAndVersion];
-          });
-
-          var licenseStats = _.map(productionDependencies, processPackage);
-          var invalidLicenses = _.filter(licenseStats, function (pkg) { return !pkg.valid; });
-
-          if (!grunt.option('only-invalid')) {
-            grunt.log.debug(JSON.stringify(licenseStats, null, 2));
-          }
-
-
-          if (invalidLicenses.length) {
-            grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
-            grunt.fail.warn(
-              'Non-confirming licenses: ' + _.pluck(invalidLicenses, 'name').join(', '),
-              invalidLicenses.length
-            );
-          }
-
-          done();
-        });
+    const allDependencies = await fromNode(cb => {
+      npmLicense.init(options, result => {
+        cb(undefined, result);
       });
     });
 
+    // Only check production NPM dependencies, not dev
+    await fromNode(cb => npm.load({production: true}, cb));
 
+    const npmList = await fromNode(cb => {
+      npm.commands.list([], true, (a, b, npmList) => cb(undefined, npmList));
+    });
+
+    // Recurse npm --production --json ls output, create array of dependency
+    // objects, each with a name prop formatted as 'package@version' and a
+    // path prop leading back to the root dependency.
+    function getDependencies(dependencies, path, list = []) {
+      Object.keys(dependencies).forEach(name => {
+        const dependency = dependencies[name];
+        const newPath = path ? `${path} -> ${dependency.from}` : dependency.from;
+        list.push({
+          path: newPath,
+          name: name + '@' + dependency.version
+        });
+
+        if (dependency.dependencies) {
+          getDependencies(dependency.dependencies, newPath, list);
+        }
+      });
+      return list;
+    };
+
+    const productionDependencies = {};
+    getDependencies(npmList.dependencies).forEach(dependency => {
+      productionDependencies[dependency.name] =
+        Object.assign({}, allDependencies[dependency.name], dependency);
+    });
+
+    const licenseStats = _.map(productionDependencies, processPackage);
+    const invalidLicenses = licenseStats.filter(pkg => !pkg.valid);
+
+    if (!grunt.option('only-invalid')) {
+      grunt.log.debug(JSON.stringify(licenseStats, null, 2));
+    }
+
+    if (invalidLicenses.length) {
+      grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
+      grunt.fail.warn(
+        `Non-confirming licenses:\n ${_.pluck(invalidLicenses, 'path').join('\n')}`,
+        invalidLicenses.length
+      );
+    }
+
+    done();
   });
 };
