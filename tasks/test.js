@@ -2,8 +2,18 @@ const _ = require('lodash');
 const visualRegression = require('../utilities/visual_regression');
 
 module.exports = function (grunt) {
+  grunt.registerTask('test:visualRegression', [
+    'intern:visualRegression:takeScreenshots',
+    'test:visualRegression:buildGallery'
+  ]);
+
+  grunt.registerTask('test:visualRegression:takeScreenshots', [
+    'clean:screenshots',
+    'intern:visualRegression'
+  ]);
+
   grunt.registerTask(
-    'test:visualRegression',
+    'test:visualRegression:buildGallery',
     'Compare screenshots and generate diff images.',
     function () {
       const done = this.async();
@@ -72,8 +82,7 @@ module.exports = function (grunt) {
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'eslint:source',
       'licenses',
-      'test:quick',
-      'test:visualRegression'
+      'test:quick'
     ]));
   });
 

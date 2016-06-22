@@ -23,36 +23,64 @@ exports.scenarioManager = new ScenarioManager(url.format(exports.config.servers.
 exports.esClient = new EsClient(url.format(exports.config.servers.elasticsearch));
 exports.bdd = new BddWrapper(kbnInternVars.bdd);
 
-defineDelayedExport('remote', (suite) => suite.remote);
-defineDelayedExport('common', () => new Common());
-defineDelayedExport('discoverPage', () => new DiscoverPage());
-defineDelayedExport('headerPage', () => new HeaderPage());
-defineDelayedExport('settingsPage', () => new SettingsPage());
-defineDelayedExport('visualizePage', () => new VisualizePage());
-defineDelayedExport('dashboardPage', () => new DashboardPage());
-defineDelayedExport('shieldPage', () => new ShieldPage());
-defineDelayedExport('consolePage', () => new ConsolePage());
-defineDelayedExport('elasticDump', () => new ElasticDump());
+const delayedExports = [{
+  name: 'remote',
+  exportProvider: (suite) => suite.remote
+}, {
+  name: 'common',
+  exportProvider: () => new Common()
+}, {
+  name: 'discoverPage',
+  exportProvider: () => new DiscoverPage()
+}, {
+  name: 'headerPage',
+  exportProvider: () => new HeaderPage()
+}, {
+  name: 'settingsPage',
+  exportProvider: () => new SettingsPage()
+}, {
+  name: 'visualizePage',
+  exportProvider: () => new VisualizePage()
+}, {
+  name: 'dashboardPage',
+  exportProvider: () => new DashboardPage()
+}, {
+  name: 'shieldPage',
+  exportProvider: () => new ShieldPage()
+}, {
+  name: 'consolePage',
+  exportProvider: () => new ConsolePage()
+}, {
+  name: 'elasticDump',
+  exportProvider: () => new ElasticDump()
+}];
 
-// creates an export for values that aren't actually avaialable until
-// until tests start to run. These getters will throw errors if the export
+delayedExports.forEach(exportConfig => {
+  delayExportUntilInit(
+    exportConfig.name,
+    exportConfig.exportProvider
+  );
+});
+
+// Creates an export for values that aren't actually avaialable until
+// tests start to run. These getters will throw errors if the export
 // is accessed before it's available, hopefully making debugging easier.
-// Once the first before() handler is called the onEarliestBefore() handlers
+// Once the first before() handler is called the onInit() call
 // will fire and rewrite all of these exports to be their correct value.
-function defineDelayedExport(name, define) {
+function delayExportUntilInit(name, provideExport) {
   Object.defineProperty(exports, name, {
     configurable: true,
     get() {
       throw new TypeError(
-        'remote is not available until tests start to run. Move your ' +
+        'Remote is not available until tests start to run. Move your ' +
         'usage of the import inside a test setup hook or a test itself.'
       );
     }
   });
 
-  kbnInternVars.onEarliestBefore(function () {
+  kbnInternVars.onInit(function defineExport() {
     Object.defineProperty(exports, name, {
-      value: define(this),
+      value: provideExport(this),
     });
   });
 }
