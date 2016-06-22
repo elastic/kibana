@@ -4,7 +4,7 @@ module.exports = function (plugin) {
 
   var kibanaDir = resolve(plugin.root, '../kibana');
 
-  var cmd = 'bin/kibana';
+  var cmd = (process.platform === 'win32') ? 'bin\\kibana.bat' : 'bin/kibana';
   var args = ['--dev', '--plugin-path', plugin.root];
   execFileSync(cmd, args, {
     cwd: kibanaDir,
