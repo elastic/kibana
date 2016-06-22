@@ -36,10 +36,12 @@ const app = uiModules.get('apps/discover', [
 ]);
 
 uiRoutes
+.defaults(/discover/, {
+  requireDefaultIndex: true
+})
 .when('/discover/:id?', {
   template: indexTemplate,
   reloadOnSearch: false,
-  requireDefaultIndex: true,
   resolve: {
     ip: function (Promise, courier, config, $location) {
       return courier.indexPatterns.getIds()
