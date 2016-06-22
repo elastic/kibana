@@ -15,6 +15,9 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
       return settingsPage.navigateTo();
+    })
+    .then(function () {
+      return settingsPage.clickExistingData();
     });
   });
 
