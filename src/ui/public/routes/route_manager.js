@@ -26,6 +26,10 @@ function RouteManager() {
         route.reloadOnSearch = false;
       }
 
+      if (route.requireDefaultIndex === void 0) {
+        route.requireDefaultIndex = false;
+      }
+
       wrapRouteWithPrep(route, setup);
       $routeProvider.when(path, route);
     });
