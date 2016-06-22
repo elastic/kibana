@@ -144,8 +144,12 @@ kbn-management-objects {
 kbn-management-advanced {
   // super specific rule to override bootstrap's equally specific rule
   // https://github.com/twbs/bootstrap/blob/1f329f8f17aa989eabc6e94bdcab93e69ef0e463/less/tables.less#L35
-  .table > tbody > tr > td {
-    vertical-align: middle;
+  .table {
+    table-layout: fixed;
+
+    tbody > tr > td {
+      vertical-align: middle;
+    }
   }
 }
 
