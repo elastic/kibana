@@ -34,7 +34,10 @@ bdd.describe('index result field sort', function describeIndexTests() {
   columns.forEach(function (col) {
     bdd.describe('sort by heading - ' + col.heading, function indexPatternCreation() {
       bdd.before(function () {
-        return settingsPage.navigateTo();
+        return settingsPage.navigateTo()
+        .then(function () {
+          return settingsPage.clickExistingData();
+        });
       });
 
       bdd.beforeEach(function () {
