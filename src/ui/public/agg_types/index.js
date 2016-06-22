@@ -6,7 +6,7 @@ import AggTypesMetricsSumProvider from 'ui/agg_types/metrics/sum';
 import AggTypesMetricsMedianProvider from 'ui/agg_types/metrics/median';
 import AggTypesMetricsMinProvider from 'ui/agg_types/metrics/min';
 import AggTypesMetricsMaxProvider from 'ui/agg_types/metrics/max';
-import AggTypesMetricsLatestProvider from 'ui/agg_types/metrics/latest';
+import AggTypesMetricsTopProvider from 'ui/agg_types/metrics/top';
 import AggTypesMetricsStdDeviationProvider from 'ui/agg_types/metrics/std_deviation';
 import AggTypesMetricsCardinalityProvider from 'ui/agg_types/metrics/cardinality';
 import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
@@ -34,7 +34,7 @@ export default function AggTypeService(Private) {
       Private(AggTypesMetricsCardinalityProvider),
       Private(AggTypesMetricsPercentilesProvider),
       Private(AggTypesMetricsPercentileRanksProvider),
-      Private(AggTypesMetricsLatestProvider)
+      Private(AggTypesMetricsTopProvider)
     ],
     buckets: [
       Private(AggTypesBucketsDateHistogramProvider),

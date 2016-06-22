@@ -1,15 +1,16 @@
 import { noop, get } from 'lodash';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import latestEditor from 'ui/agg_types/controls/latest.html';
+import topEditor from 'ui/agg_types/controls/top.html';
 
-export default function AggTypeMetricAvgProvider(Private) {
+export default function AggTypeMetricTopProvider(Private) {
   let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
 
   return new MetricAggType({
     name: 'top_hits',
-    title: 'Latest',
+    title: 'Top',
     makeLabel: function (aggConfig) {
-      return 'Latest ' + aggConfig.params.field.displayName;
+      const prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Latest' : 'Earliest';
+      return `${prefix} ${aggConfig.params.field.displayName}`;
     },
     params: [
       {
@@ -22,7 +23,7 @@ export default function AggTypeMetricAvgProvider(Private) {
         }
       },
       {
-        name: 'sort',
+        name: 'sortField',
         type: 'field',
         editor: null,
         filterFieldTypes: ['number', 'date', 'ip',  'string'],
@@ -32,10 +33,10 @@ export default function AggTypeMetricAvgProvider(Private) {
         write: noop // prevent default write, it is handled below
       },
       {
-        name: 'order',
+        name: 'sortOrder',
         type: 'optioned',
         default: 'desc',
-        editor: latestEditor,
+        editor: topEditor,
         options: [
           { display: 'Descending', val: 'desc' },
           { display: 'Ascending', val: 'asc' }
@@ -43,8 +44,8 @@ export default function AggTypeMetricAvgProvider(Private) {
         write(agg, output) {
           output.params.sort = [
             {
-              [ agg.params.sort.name ]: {
-                order: agg.params.order.val
+              [ agg.params.sortField.name ]: {
+                order: agg.params.sortOrder.val
               }
             }
           ];
