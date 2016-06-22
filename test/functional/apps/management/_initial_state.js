@@ -14,6 +14,9 @@ bdd.describe('initial state', function () {
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
       return settingsPage.navigateTo();
+    })
+    .then(function () {
+      return settingsPage.clickExistingData();
     });
   });
 
