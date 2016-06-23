@@ -6,11 +6,14 @@ export default (function (require) {
   // so we can provide the remote Command object
   // at runtime
   function ShieldPage() {
-    this.remote = remote;
   }
 
   ShieldPage.prototype = {
     constructor: ShieldPage,
+
+    init(remote) {
+      this.remote = remote;
+    },
 
     login: function login(user, pwd) {
       var remote = this.remote;

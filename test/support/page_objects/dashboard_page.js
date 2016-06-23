@@ -4,12 +4,15 @@ export default (function () {
   var thisTime;
 
   function DashboardPage() {
-    this.remote = remote;
-    thisTime = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
   DashboardPage.prototype = {
     constructor: DashboardPage,
+
+    init(remote) {
+      this.remote = remote;
+      thisTime = this.remote.setFindTimeout(defaultFindTimeout);
+    },
 
     clickNewDashboard: function clickNewDashboard() {
       return thisTime

@@ -21,6 +21,6 @@ bdd.describe('status page', function () {
         expect(text.indexOf('plugin:kibana')).to.be.above(-1);
       });
     })
-    .catch(common.handleError(self));
+    .catch(common.createErrorHandler(self));
   });
 });

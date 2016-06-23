@@ -1,10 +1,12 @@
 import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
 
+import PageObjects from '../../../support/page_objects';
+
 bdd.describe('discover app', function () {
   this.timeout = defaultTimeout;
 
   bdd.before(function () {
-    return remote.setWindowSize(1200,800);
+    return PageObjects.remote.setWindowSize(1200,800);
   });
 
   bdd.after(function unloadMakelogs() {
