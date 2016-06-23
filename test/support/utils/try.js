@@ -3,11 +3,12 @@ import bluebird from 'bluebird';
 
 import {
   defaultTryTimeout
-} from './index';
+} from '../index';
 
 import Log from './log.js';
 
-export default {
+class Try {
+
   tryForTime(timeout, block) {
     var self = this;
     var start = Date.now();
@@ -32,9 +33,12 @@ export default {
     }
 
     return bluebird.try(attempt);
-  },
+  }
 
   try(block) {
     return this.tryForTime(defaultTryTimeout, block);
   }
-};
+
+}
+
+export default new Try();

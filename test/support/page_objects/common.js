@@ -22,8 +22,10 @@ import {
   shieldPage
 } from '../index';
 
-import Log from '../log.js';
-import Try from '../try.js';
+import {
+  Log,
+  Try,
+} from '../utils';
 
 const mkdirpAsync = promisify(mkdirp);
 const writeFileAsync = promisify(fs.writeFile);

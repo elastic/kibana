@@ -1,8 +1,11 @@
 
 import url from 'url';
-import EsClient from './es_client';
-import ElasticDump from './elastic_dump';
-import BddWrapper from './bdd_wrapper';
+
+import {
+  BddWrapper,
+  ElasticDump,
+  EsClient,
+} from './utils';
 import ScenarioManager from '../fixtures/scenario_manager';
 import PageObjects from './page_objects';
 

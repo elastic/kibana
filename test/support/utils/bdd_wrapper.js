@@ -1,11 +1,11 @@
 
 import { attempt } from 'bluebird';
 
-import PageObjects from './page_objects';
+import PageObjects from '../page_objects';
 
 export default class BddWrapper {
-  constructor(real) {
-    this.real = real;
+  constructor(bdd) {
+    this.bdd = bdd;
   }
 
   errorWrapper = fn => {
@@ -19,26 +19,26 @@ export default class BddWrapper {
   }
 
   describe = (name, fn) => {
-    this.real.describe(name, fn);
+    this.bdd.describe(name, fn);
   }
 
   before = (fn) => {
-    this.real.before(this.errorWrapper(fn));
+    this.bdd.before(this.errorWrapper(fn));
   }
 
   beforeEach = (fn) => {
-    this.real.beforeEach(this.errorWrapper(fn));
+    this.bdd.beforeEach(this.errorWrapper(fn));
   }
 
   it = (name, fn) => {
-    this.real.it(name, this.errorWrapper(fn));
+    this.bdd.it(name, this.errorWrapper(fn));
   }
 
   afterEach = (fn) => {
-    this.real.afterEach(this.errorWrapper(fn));
+    this.bdd.afterEach(this.errorWrapper(fn));
   }
 
   after = (fn) => {
-    this.real.after(this.errorWrapper(fn));
+    this.bdd.after(this.errorWrapper(fn));
   }
 }

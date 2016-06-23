@@ -1,5 +1,7 @@
-import { config } from './';
-import Log from './log.js';
+import { config } from '../';
+import {
+  Log,
+} from './';
 
 export default (function () {
   var util = require('util');

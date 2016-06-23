@@ -1,6 +1,8 @@
 
-import Log from './log.js';
-import Try from './try.js';
+import {
+  Log,
+  Try,
+} from './';
 
 export default (function () {
 
