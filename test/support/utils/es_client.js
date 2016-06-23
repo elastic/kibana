@@ -1,4 +1,8 @@
-import { common, remote} from './';
+
+import {
+  Log,
+  Try,
+} from './';
 
 export default (function () {
 
@@ -6,7 +10,6 @@ export default (function () {
   var Promise = require('bluebird');
 
   function EsClient(server) {
-    this.remote = remote;
     if (!server) throw new Error('No server defined');
 
     // NOTE: some large sets of test data can take several minutes to load
@@ -36,7 +39,7 @@ export default (function () {
       .catch(function (reason) {
         // if the index never existed yet, or was already deleted it's OK
         if (reason.message.indexOf('index_not_found_exception') < 0) {
-          common.debug('reason.message: ' + reason.message);
+          Log.debug('reason.message: ' + reason.message);
           throw reason;
         }
       });
@@ -65,7 +68,7 @@ export default (function () {
           );
         } else {
           configId = response.hits.hits[0]._id;
-          common.debug('config._id =' + configId);
+          Log.debug('config._id =' + configId);
           return configId;
         }
       });
@@ -85,7 +88,7 @@ export default (function () {
       return this.getConfigId()
       // now that we have the id, we can update
       .then(function (configId) {
-        common.debug('updating config with ' + docMapString);
+        Log.debug('updating config with ' + docMapString);
         return self.client.update({
           index: '.kibana',
           type: 'config',
@@ -113,12 +116,12 @@ export default (function () {
       return this.delete('.kibana')
       .then(function () {
         if (!docMap) {
-          return common.try(function () {
+          return Try.try(function () {
             return self.getConfigId();
           });
         } else {
           var docMapString = JSON.stringify(docMap);
-          return common.try(function () {
+          return Try.try(function () {
             return self.updateConfigDoc(docMap);
           });
         }

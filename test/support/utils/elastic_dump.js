@@ -1,4 +1,7 @@
-import { common, config} from './';
+import { config } from '../';
+import {
+  Log,
+} from './';
 
 export default (function () {
   var util = require('util');
@@ -45,13 +48,13 @@ export default (function () {
       };
       var dumper = new Elasticdump(options.input, options.output, options);
 
-      dumper.on('log',   function (message) { common.debug(message); });
-      dumper.on('error', function (error)   { common.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
+      dumper.on('log',   function (message) { Log.debug(message); });
+      dumper.on('error', function (error)   { Log.debug('error', 'Error Emitted => ' + (error.message || JSON.stringify(error))); });
 
       var promise = new Promise(function (resolve, reject) {
         dumper.dump(function (error, totalWrites) {
           if (error) {
-            common.debug('THERE WAS AN ERROR :-(');
+            Log.debug('THERE WAS AN ERROR :-(');
             reject(Error(error));
           } else {
             resolve ('elasticdumpModule success');
@@ -70,12 +73,12 @@ export default (function () {
     */
     elasticDump: function elasticDump(index, file) {
       var self = this;
-      common.debug('Dumping mapping from ' + url.format(config.servers.elasticsearch) + '/' + index
+      Log.debug('Dumping mapping from ' + url.format(config.servers.elasticsearch) + '/' + index
         + ' to (' + file + '.mapping.json)');
       return this.elasticdumpModule(url.format(config.servers.elasticsearch),
         file + '.mapping.json', index, 'mapping')
       .then(function () {
-        common.debug('Dumping data from ' + url.format(config.servers.elasticsearch) + '/' + index
+        Log.debug('Dumping data from ' + url.format(config.servers.elasticsearch) + '/' + index
           + ' to (' + file + '.data.json)');
         return self.elasticdumpModule(url.format(config.servers.elasticsearch),
           file + '.data.json', index, 'data');
@@ -92,12 +95,12 @@ export default (function () {
       // TODO: should we have a flag to delete the index first?
       // or use scenarioManager.unload(index) ? <<- currently this
       var self = this;
-      common.debug('Loading mapping (test/fixtures/dump_data/' + file + '.mapping.json) into '
+      Log.debug('Loading mapping (test/fixtures/dump_data/' + file + '.mapping.json) into '
         + url.format(config.servers.elasticsearch) + '/' + index);
       return this.elasticdumpModule('test/fixtures/dump_data/' + file + '.mapping.json',
         url.format(config.servers.elasticsearch), index, 'mapping')
       .then(function () {
-        common.debug('Loading data (test/fixtures/dump_data/' + file + '.data.json) into '
+        Log.debug('Loading data (test/fixtures/dump_data/' + file + '.data.json) into '
           + url.format(config.servers.elasticsearch) + '/' + index);
         return self.elasticdumpModule('test/fixtures/dump_data/' + file + '.data.json',
           url.format(config.servers.elasticsearch), index, 'data');

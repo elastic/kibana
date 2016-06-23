@@ -35,7 +35,7 @@ bdd.describe('user input reactions', function () {
     .then(function () {
       common.saveScreenshot('Settings-indices-hide-time-based-index-pattern');
       // we expect the promise above to fail
-      var handler = common.handleError(self);
+      var handler = common.createErrorHandler(self);
       var msg = 'Found time based index pattern checkbox';
       handler(msg);
     })

@@ -2,11 +2,14 @@ import { common, defaultFindTimeout, remote } from '../';
 
 export default (function () {
   function VisualizePage() {
-    this.remote = remote;
   }
 
   VisualizePage.prototype = {
     constructor: VisualizePage,
+
+    init(remote) {
+      this.remote = remote;
+    },
 
     clickAreaChart: function clickAreaChart() {
       return this.remote
