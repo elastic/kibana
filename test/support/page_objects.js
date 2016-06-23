@@ -20,7 +20,7 @@ const visualizePage = new VisualizePage();
 export default {
   isInitialized: false,
 
-  init: function init(remote) {
+  init(remote) {
     this.isInitialized = true;
     this.remote = remote;
     common.init(remote);
@@ -33,7 +33,7 @@ export default {
     visualizePage.init(remote);
   },
 
-  checkInitialization() {
+  assertInitialized() {
     if (this.isInitialized) {
       return true;
     }
@@ -41,34 +41,34 @@ export default {
   },
 
   get common() {
-    return this.checkInitialization() && common;
+    return this.assertInitialized() && common;
   },
 
   get console() {
-    return this.checkInitialization() && consolePage;
+    return this.assertInitialized() && consolePage;
   },
 
   get dashboard() {
-    return this.checkInitialization() && dashboardPage;
+    return this.assertInitialized() && dashboardPage;
   },
 
   get discover() {
-    return this.checkInitialization() && discoverPage;
+    return this.assertInitialized() && discoverPage;
   },
 
   get header() {
-    return this.checkInitialization() && headerPage;
+    return this.assertInitialized() && headerPage;
   },
 
   get settings() {
-    return this.checkInitialization() && settingsPage;
+    return this.assertInitialized() && settingsPage;
   },
 
   get shield() {
-    return this.checkInitialization() && shieldPage;
+    return this.assertInitialized() && shieldPage;
   },
 
   get visualize() {
-    return this.checkInitialization() && visualizePage;
+    return this.assertInitialized() && visualizePage;
   },
 };
