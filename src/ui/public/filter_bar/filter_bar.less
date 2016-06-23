@@ -1,6 +1,6 @@
 @import (reference) "~ui/styles/variables";
 
-filter-bar .confirm {
+.filter-bar-confirm {
   padding: 8px 10px 4px;
   background: @filter-bar-confirm-bg;
   border-bottom: 1px solid;
@@ -46,16 +46,10 @@ filter-bar .confirm {
   }
 }
 
-filter-bar .bar {
+.filter-bar {
   padding: 5px 6px 3px 6px;
   background: @filter-bar-bar-bg;
   border-bottom: 0;
-
-  &-condensed {
-    padding: 6px 6px 2px 6px !important;
-    font-size: 0.9em;
-    background: @filter-bar-bar-condensed-bg;
-  }
 
   .ace_editor {
     height: 175px;
@@ -159,3 +153,9 @@ filter-bar .bar {
     }
   }
 }
+
+  .filter-bar-condensed {
+    padding: 6px 6px 2px 6px !important;
+    font-size: 0.9em;
+    background: @filter-bar-bar-condensed-bg;
+  }
