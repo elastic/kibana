@@ -1,4 +1,4 @@
-<div class="confirm" ng-show="newFilters.length">
+<div class="filter-bar-confirm" ng-show="newFilters.length">
   <form ng-submit="applyFilters(newFilters)">
   <ul class="list-unstyled">
     <li>Apply these filters?</li>
@@ -9,7 +9,7 @@
   </form>
 </div>
 
-<div class="bar" ng-show="filters.length">
+<div class="filter-bar" ng-show="filters.length">
   <div class="filter" ng-class="{ negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
@@ -79,7 +79,7 @@
   </div>
 </div>
 
-<div class="bar bar-condensed" ng-show="filters.length && showFilterActions">
+<div class="filter-bar filter-bar-condensed" ng-show="filters.length && showFilterActions">
   <div class="filter-actions-all">
     <div class="filter-link">
       <div class="filter-description"><strong>All filters:</strong></div>

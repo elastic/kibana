@@ -438,7 +438,7 @@
 
 
 // /src/ui/public/filter_bar/filter_bar.less
-  filter-bar .confirm {
+  .filter-bar-confirm {
     background: @filter-bar-confirm-bg;
     border-bottom-color: @filter-bar-confirm-border;
 
@@ -448,13 +448,9 @@
     }
   }
 
-  filter-bar .bar {
+  .filter-bar {
     background: @filter-bar-bar-bg;
     border-bottom-color: @filter-bar-bar-border;
-
-    &-condensed {
-      background: @filter-bar-bar-condensed-bg;
-    }
 
     .filter {
       background-color: @filter-bar-bar-filter-bg;
@@ -469,6 +465,10 @@
       }
     }
   }
+
+    .filter-bar-condensed {
+      background: @filter-bar-bar-condensed-bg;
+    }
 
 
 // /src/ui/public/styles/config.less
