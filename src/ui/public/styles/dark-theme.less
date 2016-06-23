@@ -268,16 +268,13 @@
 
 
 // /src/ui/public/agg_table/agg_table.less
-  .agg-table {
+  .agg-table-paginated {
+    tr:hover td {
+      background-color: @table-row-hover-bg;
+    }
 
-    &-paginated {
-      tr:hover td {
-        background-color: @table-row-hover-bg;
-      }
-
-      .cell-hover:hover {
-        background-color: @table-cell-hover-hover-bg;
-      }
+    .cell-hover:hover {
+      background-color: @table-cell-hover-hover-bg;
     }
   }
 
