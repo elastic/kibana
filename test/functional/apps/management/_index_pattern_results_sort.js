@@ -127,7 +127,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
         });
       }, Promise.resolve());
 
-      return chain.catch(common.handleError(this));
+      return chain.catch(common.createErrorHandler(this));
     });
   }); // end describe pagination
 }); // end index result field sort

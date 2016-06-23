@@ -3,11 +3,14 @@ import { common, remote, defaultFindTimeout, headerPage } from '../';
 
 export default (function () {
   function SettingsPage() {
-    this.remote = remote;
   }
 
   SettingsPage.prototype = {
     constructor: SettingsPage,
+
+    init(remote) {
+      this.remote = remote;
+    },
 
     clickNavigation: function () {
       // TODO: find better way to target the element
