@@ -18,7 +18,7 @@ define(function (require) {
     });
 
     require([
-      'intern/dojo/node!../support/page_objects.js',
+      'intern/dojo/node!../support/page_objects',
       'intern/dojo/node!../support',
       'intern/dojo/node!./apps/discover',
       'intern/dojo/node!./status_page',
