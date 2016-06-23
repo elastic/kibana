@@ -8,13 +8,15 @@ export default (function (require) {
   var thisTime;
 
   function ConsolePage() {
-    this.remote = remote;
-    thisTime = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
   ConsolePage.prototype = {
     constructor: ConsolePage,
 
+    init(remote) {
+      this.remote = remote;
+      thisTime = this.remote.setFindTimeout(defaultFindTimeout);
+    },
 
     getServer: function getServer() {
       return thisTime

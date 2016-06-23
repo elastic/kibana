@@ -22,12 +22,18 @@ import {
   shieldPage
 } from '../index';
 
+import Log from '../log.js';
+import Try from '../try.js';
+
 const mkdirpAsync = promisify(mkdirp);
 const writeFileAsync = promisify(fs.writeFile);
 
 export default class Common {
 
   constructor() {
+  }
+
+  init(remote) {
     function injectTimestampQuery(func, url) {
       var formatted = modifyQueryString(url, function (parsed) {
         parsed.query._t = Date.now();
@@ -224,41 +230,19 @@ export default class Common {
   }
 
   tryForTime(timeout, block) {
-    var self = this;
-    var start = Date.now();
-    var retryDelay = 502;
-    var lastTry = 0;
-    var tempMessage;
-
-    function attempt() {
-      lastTry = Date.now();
-
-      if (lastTry - start > timeout) {
-        throw new Error('timeout ' + tempMessage);
-      }
-
-      return bluebird
-      .try(block)
-      .catch(function tryForTimeCatch(err) {
-        self.debug('tryForTime failure: ' + err.message);
-        tempMessage = err.message;
-        return bluebird.delay(retryDelay).then(attempt);
-      });
-    }
-
-    return bluebird.try(attempt);
+    return Try.tryForTime(timeout, block);
   }
 
   try(block) {
-    return this.tryForTime(defaultTryTimeout, block);
+    return Try.try(block);
   }
 
   log(...args) {
-    console.log(moment().format('HH:mm:ss.SSS') + ':', util.format(...args));
+    Log.log(...args);
   }
 
   debug(...args) {
-    if (config.debug) this.log(...args);
+    Log.debug(...args);
   }
 
   sleep(sleepMilliseconds) {
@@ -269,15 +253,15 @@ export default class Common {
     .then(function () { self.debug('... sleep(' + sleepMilliseconds + ') end'); });
   }
 
-  handleError(testObj) {
+  createErrorHandler(testObj) {
     const testName = (testObj.parent) ? [testObj.parent.name, testObj.name].join('_') : testObj.name;
-    return reason => {
+    return error => {
       const now = Date.now();
       const fileName = `failure_${now}_${testName}`;
 
       return this.saveScreenshot(fileName, true)
       .then(function () {
-        throw reason;
+        throw error;
       });
     };
   }
@@ -304,4 +288,4 @@ export default class Common {
       .findDisplayedByCssSelector(testSubjSelector(selector));
   }
 
-};
+}

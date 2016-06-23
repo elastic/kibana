@@ -1,6 +1,7 @@
+
 import { attempt } from 'bluebird';
 
-import { common } from './';
+import PageObjects from './page_objects';
 
 export default class BddWrapper {
   constructor(real) {
@@ -12,7 +13,8 @@ export default class BddWrapper {
     // by the test runner, so don't use an arrow
     return function () {
       const suiteOrTest = this;
-      return attempt(fn.bind(suiteOrTest)).catch(common.handleError(suiteOrTest));
+      const errorHandler = PageObjects.common.createErrorHandler(suiteOrTest);
+      return attempt(fn.bind(suiteOrTest)).catch(errorHandler);
     };
   }
 
