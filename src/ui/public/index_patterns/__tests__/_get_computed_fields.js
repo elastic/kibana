@@ -23,11 +23,11 @@ describe('get computed fields', function () {
   });
 
   it('should request all stored fields', function () {
-    expect(fn().fields).to.contain('*');
+    expect(fn().storedFields).to.contain('*');
   });
 
   it('should request _source seperately', function () {
-    expect(fn().fields).to.contain('_source');
+    expect(fn()._source).to.be(true);
   });
 
   it('should request date fields as fielddata_fields', function () {
