@@ -330,28 +330,26 @@
 
   }
 
-  .legend-value {
-     &-title {
-      padding: 3px;
+  .legend-value-title {
+    padding: 3px;
+
+    &:hover {
+      background-color: @sidebar-hover-bg;
+    }
+  }
+
+  .legend-value-full {
+    background-color: @gray3;
+  }
+
+  .legend-value-details {
+    border-bottom: 1px solid @sidebar-bg;
+
+    .filter-button {
+      background-color: @sidebar-bg;
 
       &:hover {
         background-color: @sidebar-hover-bg;
-      }
-    }
-
-    &-full {
-      background-color: @gray3;
-    }
-
-    &-details {
-      border-bottom: 1px solid @sidebar-bg;
-
-      .filter-button {
-        background-color: @sidebar-bg;
-
-        &:hover {
-          background-color: @sidebar-hover-bg;
-        }
       }
     }
   }
