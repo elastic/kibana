@@ -121,8 +121,6 @@ function getFileName(fullPath) {
 
 // Added this function because 'mkdirp' does not add more than 2 subdirectories
 function createDirectoriesRecursively(fullDir) {
-  process.exec('mkdir -p ' + fullDir, function (err,stdout,stderr) {
-    if (err) throw err;
-  });
+  process.execSync('mkdir -p ' + fullDir);
 }
 
