@@ -15,6 +15,8 @@ module.exports = {
     var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
 
     module.exports.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
+      if (err) return cb (err);
+
       var langSupported = false;
       for (var langIndx in languageList) {
         if (language === languageList[langIndx]) {
@@ -22,7 +24,11 @@ module.exports = {
           break;
         }
       }
-      if (langSupported) {
+      if (!langSupported) {
+        return cb(Error(language + ' language is not supported in ' + pluginName + ' plugin.'));
+      }
+
+      try {
         if (!fs.existsSync(translationStorePluginPath)) {
           createDirectoriesRecursively(translationStorePluginPath);
         }
@@ -35,6 +41,8 @@ module.exports = {
           var fileToWrite = translationStorePluginPath + '/' + translationFileName;
           saveTranslationToFile(fileToWrite, translationJson);
         }
+      } catch (err) {
+        return cb(err);
       }
     });
 
@@ -47,12 +55,22 @@ module.exports = {
     var translationFile = translationStorePluginPath + '/' + translationFileName;
     fs.readFile(translationFile, function (err, translationStr) {
       if (err) return callback(err);
-      return callback(null, JSON.parse(translationStr));
+      var translationJson = [];
+      try {
+        translationJson = JSON.parse(translationStr);
+      } catch (e) {
+        return callback('Bad ' + language + ' translation strings for plugin ' + pluginName + '. Error: ' + err);
+      }
+      return callback(null, translationJson);
     });
   },
 
   getPluginTranslationDetails: function (pluginTranslationPath, translationFiles, languageList, callback) {
-    getFilesRecursivelyFromTopDir(pluginTranslationPath, translationFiles, languageList);
+    try {
+      getFilesRecursivelyFromTopDir(pluginTranslationPath, translationFiles, languageList);
+    } catch (err) {
+      return callback(err);
+    }
     return callback(null);
   },
 

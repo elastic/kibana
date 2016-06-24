@@ -11,16 +11,21 @@ describe('Test plugin translations details for test_plugin_1', function () {
     var result = true;
     var expectedLanguages = ['en', 'de'];
     getPluginTranslationLanguages(pluginName, pluginTranslationPath, function (err, actualLanguages) {
-      if (actualLanguages.length !== expectedLanguages.length) {
+      if (err) {
+        console.log(err);
         result = false;
       } else {
-        var index = actualLanguages.length;
-        actualLanguages.sort();
-        expectedLanguages.sort();
-        while (index--) {
-          if (actualLanguages[index] !== expectedLanguages[index]) {
-            result = false;
-            break;
+        if (actualLanguages.length !== expectedLanguages.length) {
+          result = false;
+        } else {
+          var index = actualLanguages.length;
+          actualLanguages.sort();
+          expectedLanguages.sort();
+          while (index--) {
+            if (actualLanguages[index] !== expectedLanguages[index]) {
+              result = false;
+              break;
+            }
           }
         }
       }
@@ -33,16 +38,21 @@ describe('Test plugin translations details for test_plugin_1', function () {
     var result = true;
     var expectedLanguages = ['de'];
     getPluginTranslationLanguages(pluginName, pluginTranslationPath, function (err, actualLanguages) {
-      if (actualLanguages.length !== expectedLanguages.length) {
+      if (err) {
+        console.log(err);
         result = false;
       } else {
-        var index = actualLanguages.length;
-        actualLanguages.sort();
-        expectedLanguages.sort();
-        while (index--) {
-          if (actualLanguages[index] !== expectedLanguages[index]) {
-            result = false;
-            break;
+        if (actualLanguages.length !== expectedLanguages.length) {
+          result = false;
+        } else {
+          var index = actualLanguages.length;
+          actualLanguages.sort();
+          expectedLanguages.sort();
+          while (index--) {
+            if (actualLanguages[index] !== expectedLanguages[index]) {
+              result = false;
+              break;
+            }
           }
         }
       }
@@ -59,16 +69,21 @@ describe('Test plugin translations details for test_plugin_1', function () {
       pluginTranslationPath + '/view2/en.json'
     ];
     getPluginTranslationFiles(pluginName, pluginTranslationPath, function (err, actualFiles) {
-      if (actualFiles.length !== expectedFiles.length) {
+      if (err) {
+        console.log(err);
         result = false;
       } else {
-        var index = actualFiles.length;
-        actualFiles.sort();
-        expectedFiles.sort();
-        while (index--) {
-          if (actualFiles[index] !== expectedFiles[index]) {
-            result = false;
-            break;
+        if (actualFiles.length !== expectedFiles.length) {
+          result = false;
+        } else {
+          var index = actualFiles.length;
+          actualFiles.sort();
+          expectedFiles.sort();
+          while (index--) {
+            if (actualFiles[index] !== expectedFiles[index]) {
+              result = false;
+              break;
+            }
           }
         }
       }
@@ -87,15 +102,25 @@ describe('Test storing translations for test_plugin_1', function () {
     var language = 'en';
 
     i18n.storePluginLanguageTranslations(pluginName, pluginTranslationPath, language, function (err) {
-      var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
-      var expectedTranslationJson = require(expectedTranslationJsonFile);
-      expectedTranslationJson = JSON.stringify(expectedTranslationJson);
-      i18n.getPluginLanguageTranslation(pluginName, language, function (err, actualTranslationJson) {
-        actualTranslationJson = JSON.stringify(actualTranslationJson);
-        if (actualTranslationJson !== expectedTranslationJson) {
-          result = false;
-        }
-      });
+      if (err) {
+        console.log(err);
+        result = false;
+      } else {
+        var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
+        var expectedTranslationJson = require(expectedTranslationJsonFile);
+        expectedTranslationJson = JSON.stringify(expectedTranslationJson);
+        i18n.getPluginLanguageTranslation(pluginName, language, function (err, actualTranslationJson) {
+          if (err) {
+            console.log(err);
+            result = false;
+          } else {
+            actualTranslationJson = JSON.stringify(actualTranslationJson);
+            if (actualTranslationJson !== expectedTranslationJson) {
+              result = false;
+            }
+          }
+        });
+      }
       expect(result).to.be(true);
       done();
     });
@@ -103,10 +128,8 @@ describe('Test storing translations for test_plugin_1', function () {
 
   afterEach(function (done) {
     var translationPluginStorePath = i18n.getPluginTranslationStoragePath('test_plugin_1');
-    process.exec('rm -rf ' + translationPluginStorePath, function (err,stdout,stderr) {
-      if (err) throw err;
-      done();
-    });
+    process.execSync('rm -rf ' + translationPluginStorePath);
+    done();
   });
 });
 
@@ -114,6 +137,7 @@ function getPluginTranslationLanguages(pluginName, pluginTranslationPath, cb) {
   var translationFiles = [];
   var languageList = [];
   i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
+    if (err) return cb(err);
     return cb(null, languageList);
   });
 }
@@ -122,6 +146,7 @@ function getPluginTranslationFiles(pluginName, pluginTranslationPath, cb) {
   var translationFiles = [];
   var languageList = [];
   i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
+    if (err) return cb(err);
     return cb(null, translationFiles);
   });
 }
