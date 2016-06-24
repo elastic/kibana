@@ -4,7 +4,7 @@ export default function PointSeriesAddToSiri() {
 
     if (series.has(id)) {
       series.get(id).values.push(point);
-      series.get(id).onSecondaryYAxis = onSecondaryYAxis;
+      series.get(id).onSecondaryYAxis = onSecondaryYAxis || false;
       return;
     }
 

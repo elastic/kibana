@@ -123,7 +123,7 @@ describe('Vislib yAxis Class Test Suite', function () {
     });
 
     it('should append a g element to the svg', function () {
-      expect(el.selectAll('svg')[0].select('g').length).to.be(1);
+      expect(el.selectAll('svg').select('g')[0].length).to.be(1);
     });
 
     it('should append ticks with text', function () {

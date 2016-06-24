@@ -43,7 +43,7 @@ describe('Vis-Editor-Agg plugin directive', function () {
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($rootScope, $compile) {
+  beforeEach(function () {
     $parentScope.agg = {
       id: 1,
       params: {},
@@ -61,7 +61,8 @@ describe('Vis-Editor-Agg plugin directive', function () {
     $parentScope.vis = {
       type: { name: 'histogram' }
     };
-
+  });
+  beforeEach(ngMock.inject(function ($rootScope, $compile) {
     // share the scope
     _.defaults($parentScope, $rootScope, Object.getPrototypeOf($rootScope));
 
@@ -79,6 +80,11 @@ describe('Vis-Editor-Agg plugin directive', function () {
     // give us a scope to work with
     $scope = $elem.isolateScope();
   }));
+
+  // cleanup after test case
+  afterEach(function () {
+    $parentScope.$destroy();
+  });
 
   it('should only add the close button if there is more than the minimum', function () {
     expect($parentScope.canRemove($parentScope.agg)).to.be(false);

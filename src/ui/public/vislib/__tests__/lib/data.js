@@ -9,7 +9,7 @@ import dataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg'
 import dualAxisDataSeriesNeg from 'fixtures/vislib/mock_data/date_histogram/_dual_axis_series_neg';
 import dataStacked from 'fixtures/vislib/mock_data/stacked/_stacked';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibLibDualYAxisStrategy from 'ui/vislib/lib/_dual_y_axis_strategy';
+import VislibLibDualYAxisStrategy from 'ui/vislib/lib/dual_y_axis_strategy';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 let seriesData = {
@@ -157,7 +157,7 @@ describe('Vislib Data Class Test Suite', function () {
         ],
         'yAxisLabel': 'customLabel'
       };
-      let modifiedData = new Data(seriesDataWithoutLabelInSeries, {});
+      let modifiedData = new Data(seriesDataWithoutLabelInSeries, {}, persistedState);
       _.map(modifiedData.data.series[0].values, function (value) {
         expect(value.belongsToSecondaryYAxis).to.be(false);
       });
@@ -167,27 +167,12 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should decorate the values if it belongs to secondary Axis', function () {
-      let seriesDataWithoutLabelInSeries = {
-        'label': '',
-        'series': [
-          {
-            'label': '',
-            'onSecondaryYAxis': true,
-            'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
-          },
-          {
-            'onSecondaryYAxis': false,
-            'values': [{x:10, y:11}, {x:11, y:12}, {x:12, y:13}]
-          }
-        ],
-        'yAxisLabel': 'customLabel'
-      };
-      let modifiedData = new Data(seriesDataWithoutLabelInSeries, {});
+      let modifiedData = new Data(seriesDataWithDualAxis, {}, persistedState, new DualYAxisStrategy());
       _.map(modifiedData.data.series[0].values, function (value) {
-        expect(value.belongsToSecondaryYAxis).to.be(true);
+        expect(value.belongsToSecondaryYAxis).to.be(false);
       });
       _.map(modifiedData.data.series[1].values, function (value) {
-        expect(value.belongsToSecondaryYAxis).to.be(false);
+        expect(value.belongsToSecondaryYAxis).to.be(true);
       });
     });
 
@@ -346,9 +331,9 @@ describe('Vislib Data Class Test Suite', function () {
     let colOutSecondary;
 
     beforeEach(function () {
-      serIn = new Data(seriesData, {}, new DualYAxisStrategy());
-      rowIn = new Data(rowsData, {}, new DualYAxisStrategy());
-      colIn = new Data(colsData, {}, new DualYAxisStrategy());
+      serIn = new Data(seriesData, {}, persistedState, new DualYAxisStrategy());
+      rowIn = new Data(rowsData, {}, persistedState, new DualYAxisStrategy());
+      colIn = new Data(colsData, {}, persistedState, new DualYAxisStrategy());
       serOutPrimary = serIn._flatten(true);
       serOutSecondary = serIn._flatten(false);
       rowOutPrimary = rowIn._flatten(true);
@@ -367,7 +352,7 @@ describe('Vislib Data Class Test Suite', function () {
     });
 
     it('should return all points for specific graph in the series', function () {
-      let data = new Data(seriesDataWithDualAxis, {}, new DualYAxisStrategy());
+      let data = new Data(seriesDataWithDualAxis, {}, persistedState, new DualYAxisStrategy());
       let primaryChartLength = data.chartData()[0].series[0].values.length;
       let secondaryChartLength = data.chartData()[0].series[1].values.length;
 
@@ -423,8 +408,8 @@ describe('Vislib Data Class Test Suite', function () {
     let secondMinValueNeg = -4100;
 
     beforeEach(function () {
-      visData = new Data(dualAxisDataSeries, {}, new DualYAxisStrategy());
-      visDataNeg = new Data(dualAxisDataSeriesNeg, {}, new DualYAxisStrategy());
+      visData = new Data(dualAxisDataSeries, {}, persistedState, new DualYAxisStrategy());
+      visDataNeg = new Data(dualAxisDataSeriesNeg, {}, persistedState, new DualYAxisStrategy());
     });
 
     // The first value in the time series is less than the min date in the
@@ -486,8 +471,8 @@ describe('Vislib Data Class Test Suite', function () {
     let maxValueStacked = 115;
 
     beforeEach(function () {
-      visData = new Data(dualAxisDataSeries, {}, new DualYAxisStrategy());
-      visDataNeg = new Data(dualAxisDataSeriesNeg, {}, new DualYAxisStrategy());
+      visData = new Data(dualAxisDataSeries, {}, persistedState, new DualYAxisStrategy());
+      visDataNeg = new Data(dualAxisDataSeriesNeg, {}, persistedState, new DualYAxisStrategy());
     });
 
     // The first value in the time series is less than the min date in the

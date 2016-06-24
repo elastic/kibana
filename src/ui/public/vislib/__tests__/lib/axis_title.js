@@ -13,11 +13,11 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let Data;
   let SingleYAxisStrategy;
   let PersistedState;
-  let axisTitle;
   let el;
   let dataObj;
   let xTitle;
   let yTitle;
+  let axisTitle;
   let secondaryYTitle;
   let data = {
     hits: 621,
@@ -160,6 +160,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   describe('render Method for single y axis', function () {
     beforeEach(function () {
+      axisTitle = new AxisTitle($('.vis-wrapper')[0], xTitle, yTitle);
       axisTitle.render();
     });
 
