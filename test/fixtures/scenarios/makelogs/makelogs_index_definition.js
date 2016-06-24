@@ -33,9 +33,6 @@ module.exports = {
           'match': '*'
         }
       }],
-      '_timestamp': {
-        'enabled': true
-      },
       'properties': {
         '@timestamp': {
           'type': 'date'
