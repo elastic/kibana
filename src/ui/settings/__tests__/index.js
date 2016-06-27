@@ -13,16 +13,22 @@ describe('ui settings', function () {
       expect(typeof uiSettings.getRaw).to.be('function');
       expect(typeof uiSettings.getUserProvided).to.be('function');
       expect(typeof uiSettings.remove).to.be('function');
+      expect(typeof uiSettings.removeMany).to.be('function');
       expect(typeof uiSettings.set).to.be('function');
       expect(typeof uiSettings.setMany).to.be('function');
     });
   });
 
   describe('#setMany()', function () {
+    it('returns a promise', () => {
+      const { uiSettings } = instantiate();
+      const result = uiSettings.setMany({ a: 'b' });
+      expect(typeof result.then).to.be('function');
+    });
+
     it('updates a single value in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.setMany({ one: 'value' });
-      expect(typeof result.then).to.be('function');
       expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
       expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
         index: configGet('kibana.index'),
@@ -37,7 +43,6 @@ describe('ui settings', function () {
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.setMany({ one: 'value', another: 'val' });
-      expect(typeof result.then).to.be('function');
       expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
       expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
         index: configGet('kibana.index'),
@@ -51,10 +56,15 @@ describe('ui settings', function () {
   });
 
   describe('#set()', function () {
+    it('returns a promise', () => {
+      const { uiSettings } = instantiate();
+      const result = uiSettings.set('a', 'b');
+      expect(typeof result.then).to.be('function');
+    });
+
     it('updates single values by (key, value)', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.set('one', 'value');
-      expect(typeof result.then).to.be('function');
       expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
       expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
         index: configGet('kibana.index'),
@@ -68,10 +78,15 @@ describe('ui settings', function () {
   });
 
   describe('#remove()', function () {
+    it('returns a promise', () => {
+      const { uiSettings } = instantiate();
+      const result = uiSettings.remove('one');
+      expect(typeof result.then).to.be('function');
+    });
+
     it('removes single values by key', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.remove('one');
-      expect(typeof result.then).to.be('function');
       expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
       expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
         index: configGet('kibana.index'),
@@ -85,10 +100,15 @@ describe('ui settings', function () {
   });
 
   describe('#removeMany()', function () {
+    it('returns a promise', () => {
+      const { uiSettings } = instantiate();
+      const result = uiSettings.removeMany(['one']);
+      expect(typeof result.then).to.be('function');
+    });
+
     it('removes a single value', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.removeMany(['one']);
-      expect(typeof result.then).to.be('function');
       expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
       expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
         index: configGet('kibana.index'),
@@ -103,7 +123,6 @@ describe('ui settings', function () {
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.removeMany(['one', 'two', 'three']);
-      expect(typeof result.then).to.be('function');
       expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
       expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
         index: configGet('kibana.index'),
@@ -284,7 +303,6 @@ describe('ui settings', function () {
         id: configGet('pkg.version'),
         type: 'config'
       }]);
-      const defaults = defaultsProvider();
       expect(result).to.eql('value');
     });
 
@@ -298,7 +316,6 @@ describe('ui settings', function () {
         id: configGet('pkg.version'),
         type: 'config'
       }]);
-      const defaults = defaultsProvider();
       expect(result).to.eql('YYYY-MM-DD');
     });
   });
@@ -341,5 +358,5 @@ function instantiate({ getResult } = {}) {
   };
   const setupSettings = init(kbnServer, server, config);
   const uiSettings = server.uiSettings();
-  return { kbnServer, server, config, uiSettings, esStatus, settingsStatus, configGet };
+  return { server, uiSettings, configGet };
 }
