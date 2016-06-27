@@ -1,83 +1,82 @@
 var fs = require('fs');
+var kibanaPackage = require('../../../utils/package_json');
+var mkdirp = require('mkdirp');
+var os = require('os');
 var path = require('path');
 var process = require('child_process');
-var os = require('os');
-var kibanaPackage = require('../../../utils/package_json');
 
 const TRANSLATION_FILE_EXTENSION = 'json';
 const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/data/store_translations';
 
-module.exports = {
-  storePluginLanguageTranslations: function (pluginName, pluginTranslationPath, language, cb) {
-    var translationFiles = [];
-    var languageList = [];
-    var translationStorePluginPath = module.exports.getPluginTranslationStoragePath(pluginName);
-    var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
-
-    module.exports.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
-      if (err) return cb (err);
-
-      var langSupported = false;
-      for (var langIndx in languageList) {
-        if (language === languageList[langIndx]) {
-          langSupported = true;
-          break;
-        }
-      }
-      if (!langSupported) {
-        return cb(Error(language + ' language is not supported in ' + pluginName + ' plugin.'));
-      }
-
-      try {
-        if (!fs.existsSync(translationStorePluginPath)) {
-          createDirectoriesRecursively(translationStorePluginPath);
-        }
-        for (var fileIndx in translationFiles) {
-          if (!translationFiles.hasOwnProperty(fileIndx)) continue;
-          var translationFile = translationFiles[fileIndx];
-          var pluginTranslationFileName = getFileName(translationFile);
-          if (pluginTranslationFileName !== translationFileName) continue;
-          var translationJson = require(translationFile);
-          var fileToWrite = translationStorePluginPath + '/' + translationFileName;
-          saveTranslationToFile(fileToWrite, translationJson);
-        }
-      } catch (err) {
-        return cb(err);
-      }
-    });
-
-    return cb(null);
-  },
-
-  getPluginLanguageTranslation: function (pluginName, language, callback) {
-    var translationStorePluginPath = module.exports.getPluginTranslationStoragePath(pluginName);
-    var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
-    var translationFile = translationStorePluginPath + '/' + translationFileName;
-    fs.readFile(translationFile, function (err, translationStr) {
-      if (err) return callback(err);
-      var translationJson = [];
-      try {
-        translationJson = JSON.parse(translationStr);
-      } catch (e) {
-        return callback('Bad ' + language + ' translation strings for plugin ' + pluginName + '. Error: ' + err);
-      }
-      return callback(null, translationJson);
-    });
-  },
-
-  getPluginTranslationDetails: function (pluginTranslationPath, translationFiles, languageList, callback) {
-    try {
-      getFilesRecursivelyFromTopDir(pluginTranslationPath, translationFiles, languageList);
-    } catch (err) {
-      return callback(err);
-    }
-    return callback(null);
-  },
-
-  getPluginTranslationStoragePath: function (pluginName) {
-    return TRANSLATION_STORE_PATH + '/' + pluginName;
+var getPluginTranslationDetails = function (pluginTranslationPath, translationFiles, languageList, callback) {
+  try {
+    getFilesRecursivelyFromTopDir(pluginTranslationPath, translationFiles, languageList);
+  } catch (err) {
+    return callback(err);
   }
+  return callback(null);
+};
 
+var getPluginTranslationStoragePath = function (pluginName) {
+  return TRANSLATION_STORE_PATH + '/' + pluginName;
+};
+
+var storePluginLanguageTranslations = function (pluginName, pluginTranslationPath, language, cb) {
+  var translationFiles = [];
+  var languageList = [];
+  var translationStorePluginPath = module.exports.getPluginTranslationStoragePath(pluginName);
+  var translationstorePluginLanguageTranslationsFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
+  var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
+
+  getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
+    if (err) return cb (err);
+
+    var langSupported = false;
+    for (var langIndx in languageList) {
+      if (language === languageList[langIndx]) {
+        langSupported = true;
+        break;
+      }
+    }
+    if (!langSupported) {
+      return cb(Error(language + ' language is not supported in ' + pluginName + ' plugin.'));
+    }
+
+    try {
+      if (!fs.existsSync(translationStorePluginPath)) {
+        mkdirp.sync(translationStorePluginPath);
+      }
+      for (var fileIndx in translationFiles) {
+        if (!translationFiles.hasOwnProperty(fileIndx)) continue;
+        var translationFile = translationFiles[fileIndx];
+        var pluginTranslationFileName = getFileName(translationFile);
+        if (pluginTranslationFileName !== translationFileName) continue;
+        var translationJson = require(translationFile);
+        var fileToWrite = translationStorePluginPath + '/' + translationFileName;
+        saveTranslationToFile(fileToWrite, translationJson);
+      }
+    } catch (err) {
+      return cb(err);
+    }
+  });
+
+  return cb(null);
+};
+
+var getPluginLanguageTranslation = function (pluginName, language, callback) {
+  var translationStorePluginPath = getPluginTranslationStoragePath(pluginName);
+  var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
+  var translationFile = translationStorePluginPath + '/' + translationFileName;
+  fs.readFile(translationFile, function (err, translationStr) {
+    if (err) return callback(err);
+    var translationJson = [];
+    try {
+      translationJson = JSON.parse(translationStr);
+    } catch (e) {
+      return callback('Bad ' + language + ' translation strings for plugin ' + pluginName + '. Error: ' + err);
+    }
+    return callback(null, translationJson);
+  });
 };
 
 function saveTranslationToFile(translationFullFileName, translationJson) {
@@ -137,8 +136,7 @@ function getFileName(fullPath) {
   return fullPath.replace(/^.*[\\\/]/, '');
 }
 
-// Added this function because 'mkdirp' does not add more than 2 subdirectories
-function createDirectoriesRecursively(fullDir) {
-  process.execSync('mkdir -p ' + fullDir);
-}
-
+module.exports.storePluginLanguageTranslations = storePluginLanguageTranslations;
+module.exports.getPluginLanguageTranslation = getPluginLanguageTranslation;
+module.exports.getPluginTranslationDetails = getPluginTranslationDetails;
+module.exports.getPluginTranslationStoragePath = getPluginTranslationStoragePath;
