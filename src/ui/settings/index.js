@@ -11,7 +11,8 @@ export default function setupSettings(kbnServer, server, config) {
     getUserProvided,
     set,
     setMany,
-    remove
+    remove,
+    removeMany
   };
 
   server.decorate('server', 'uiSettings', () => uiSettings);
@@ -75,6 +76,14 @@ export default function setupSettings(kbnServer, server, config) {
 
   function remove(key) {
     return set(key, null);
+  }
+
+  function removeMany(keys) {
+    const changes = {};
+    keys.forEach(key => {
+      changes[key] = null;
+    });
+    return setMany(changes);
   }
 
   function mirrorEsStatus() {
