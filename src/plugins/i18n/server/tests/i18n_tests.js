@@ -93,7 +93,7 @@ describe('Test plugin translations details for test_plugin_1', function () {
   });
 });
 
-describe('Test storing translations for test_plugin_1', function () {
+describe('Test registering translations for test_plugin_1', function () {
   var pluginName = 'test_plugin_1';
   var pluginTranslationPath = __dirname + '/' + pluginName + '/translations';
 
@@ -101,7 +101,7 @@ describe('Test storing translations for test_plugin_1', function () {
     var result = true;
     var language = 'en';
 
-    i18n.storePluginLanguageTranslations(pluginName, pluginTranslationPath, language, function (err) {
+    i18n.registerPluginLanguageTranslations(pluginName, pluginTranslationPath, language, function (err) {
       if (err) {
         console.log(err);
         result = false;
@@ -109,7 +109,7 @@ describe('Test storing translations for test_plugin_1', function () {
         var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
         var expectedTranslationJson = require(expectedTranslationJsonFile);
         expectedTranslationJson = JSON.stringify(expectedTranslationJson);
-        i18n.getPluginLanguageTranslation(pluginName, language, function (err, actualTranslationJson) {
+        i18n.getRegisteredPluginLanguageTranslations(pluginName, language, function (err, actualTranslationJson) {
           if (err) {
             console.log(err);
             result = false;
@@ -126,8 +126,38 @@ describe('Test storing translations for test_plugin_1', function () {
     });
   });
 
-  afterEach(function (done) {
-    var translationPluginStorePath = i18n.getPluginTranslationStoragePath('test_plugin_1');
+  it('Languages are registered', function (done) {
+    var expectedLanguages = ['en'];
+    var result = true;
+
+    i18n.getRegisteredPluginLanguages(pluginName, function (err, actualLanguages) {
+      if (err) {
+        console.log(err);
+        result = false;
+      }
+
+      console.log('Expected langs: ' + expectedLanguages);
+      console.log('Actual langs: ' + actualLanguages);
+      if (actualLanguages.length !== expectedLanguages.length) {
+        result = false;
+      } else {
+        var index = actualLanguages.length;
+        actualLanguages.sort();
+        expectedLanguages.sort();
+        while (index--) {
+          if (actualLanguages[index] !== expectedLanguages[index]) {
+            result = false;
+            break;
+          }
+        }
+      }
+      expect(result).to.be(true);
+      done();
+    });
+  });
+
+  after(function (done) {
+    var translationPluginStorePath = i18n.getRegisteredPluginStoragePath('test_plugin_1');
     process.execSync('rm -rf ' + translationPluginStorePath);
     done();
   });

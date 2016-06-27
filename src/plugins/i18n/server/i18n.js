@@ -17,14 +17,26 @@ var getPluginTranslationDetails = function (pluginTranslationPath, translationFi
   return callback(null);
 };
 
-var getPluginTranslationStoragePath = function (pluginName) {
+var getRegisteredPluginStoragePath = function (pluginName) {
   return TRANSLATION_STORE_PATH + '/' + pluginName;
 };
 
-var storePluginLanguageTranslations = function (pluginName, pluginTranslationPath, language, cb) {
+var getRegisteredPluginLanguages = function (pluginName, cb) {
   var translationFiles = [];
   var languageList = [];
-  var translationStorePluginPath = module.exports.getPluginTranslationStoragePath(pluginName);
+  var translationStorePluginPath = getRegisteredPluginStoragePath(pluginName);
+  try {
+    getTranslationDetailsFromDirectory(translationStorePluginPath, translationFiles, languageList);
+  } catch (err) {
+    return cb(err);
+  }
+  return cb(null, languageList);
+};
+
+var registerPluginLanguageTranslations = function (pluginName, pluginTranslationPath, language, cb) {
+  var translationFiles = [];
+  var languageList = [];
+  var translationStorePluginPath = getRegisteredPluginStoragePath(pluginName);
   var translationstorePluginLanguageTranslationsFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
   var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
 
@@ -63,8 +75,8 @@ var storePluginLanguageTranslations = function (pluginName, pluginTranslationPat
   return cb(null);
 };
 
-var getPluginLanguageTranslation = function (pluginName, language, callback) {
-  var translationStorePluginPath = getPluginTranslationStoragePath(pluginName);
+var getRegisteredPluginLanguageTranslations = function (pluginName, language, callback) {
+  var translationStorePluginPath = getRegisteredPluginStoragePath(pluginName);
   var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
   var translationFile = translationStorePluginPath + '/' + translationFileName;
   fs.readFile(translationFile, function (err, translationStr) {
@@ -136,7 +148,8 @@ function getFileName(fullPath) {
   return fullPath.replace(/^.*[\\\/]/, '');
 }
 
-module.exports.storePluginLanguageTranslations = storePluginLanguageTranslations;
-module.exports.getPluginLanguageTranslation = getPluginLanguageTranslation;
+module.exports.registerPluginLanguageTranslations = registerPluginLanguageTranslations;
+module.exports.getRegisteredPluginLanguageTranslations = getRegisteredPluginLanguageTranslations;
 module.exports.getPluginTranslationDetails = getPluginTranslationDetails;
-module.exports.getPluginTranslationStoragePath = getPluginTranslationStoragePath;
+module.exports.getRegisteredPluginStoragePath = getRegisteredPluginStoragePath;
+module.exports.getRegisteredPluginLanguages = getRegisteredPluginLanguages;

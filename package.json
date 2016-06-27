@@ -169,6 +169,7 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.2.1",
+    "accept-language-parser": "1.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
     "babel-eslint": "6.1.2",
