@@ -29,29 +29,17 @@ describe('ui settings', function () {
     it('updates a single value in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.setMany({ one: 'value' });
-      expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config',
-        body: {
-          doc: { one: 'value' }
-        }
-      }]);
+      expectElasticsearchUpdateQuery(server, configGet, {
+        one: 'value'
+      });
     });
 
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.setMany({ one: 'value', another: 'val' });
-      expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config',
-        body: {
-          doc: { one: 'value', another: 'val' }
-        }
-      }]);
+      expectElasticsearchUpdateQuery(server, configGet, {
+        one: 'value', another: 'val'
+      });
     });
   });
 
@@ -65,15 +53,9 @@ describe('ui settings', function () {
     it('updates single values by (key, value)', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.set('one', 'value');
-      expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config',
-        body: {
-          doc: { one: 'value' }
-        }
-      }]);
+      expectElasticsearchUpdateQuery(server, configGet, {
+        one: 'value'
+      });
     });
   });
 
@@ -87,15 +69,9 @@ describe('ui settings', function () {
     it('removes single values by key', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.remove('one');
-      expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config',
-        body: {
-          doc: { one: null }
-        }
-      }]);
+      expectElasticsearchUpdateQuery(server, configGet, {
+        one: null
+      });
     });
   });
 
@@ -109,29 +85,17 @@ describe('ui settings', function () {
     it('removes a single value', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.removeMany(['one']);
-      expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config',
-        body: {
-          doc: { one: null }
-        }
-      }]);
+      expectElasticsearchUpdateQuery(server, configGet, {
+        one: null
+      });
     });
 
     it('updates several values in one operation', function () {
       const { server, uiSettings, configGet } = instantiate();
       const result = uiSettings.removeMany(['one', 'two', 'three']);
-      expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config',
-        body: {
-          doc: { one: null, two: null, three: null }
-        }
-      }]);
+      expectElasticsearchUpdateQuery(server, configGet, {
+        one: null, two: null, three: null
+      });
     });
   });
 
@@ -148,12 +112,13 @@ describe('ui settings', function () {
       const getResult = { user: 'customized' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
+      expectElasticsearchGetQuery(server, configGet);
+    });
+
+    it('returns user configuration', async function () {
+      const getResult = { user: 'customized' };
+      const { server, uiSettings, configGet } = instantiate({ getResult });
+      const result = await uiSettings.getUserProvided();
       expect(result).to.eql({
         user: { userValue: 'customized' }
       });
@@ -163,12 +128,6 @@ describe('ui settings', function () {
       const getResult = { user: 'customized', usingDefault: null, something: 'else' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       expect(result).to.eql({
         user: { userValue: 'customized' }, something: { userValue: 'else' }
       });
@@ -176,16 +135,17 @@ describe('ui settings', function () {
   });
 
   describe('#getRaw()', function () {
+    it('pulls user configuration from ES', async function () {
+      const getResult = {};
+      const { server, uiSettings, configGet } = instantiate({ getResult });
+      const result = await uiSettings.getRaw();
+      expectElasticsearchGetQuery(server, configGet);
+    });
+
     it(`without user configuration it's equal to the defaults`, async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       expect(result).to.eql(defaultsProvider());
     });
 
@@ -193,12 +153,6 @@ describe('ui settings', function () {
       const getResult = { foo: 'bar' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       const merged = defaultsProvider();
       merged.foo = { userValue: 'bar' };
       expect(result).to.eql(merged);
@@ -208,12 +162,6 @@ describe('ui settings', function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       const merged = defaultsProvider();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
       expect(result).to.eql(merged);
@@ -221,16 +169,17 @@ describe('ui settings', function () {
   });
 
   describe('#getAll()', function () {
+    it('pulls user configuration from ES', async function () {
+      const getResult = {};
+      const { server, uiSettings, configGet } = instantiate({ getResult });
+      const result = await uiSettings.getAll();
+      expectElasticsearchGetQuery(server, configGet);
+    });
+
     it(`returns key value pairs`, async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getAll();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       const defaults = defaultsProvider();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
@@ -243,12 +192,6 @@ describe('ui settings', function () {
       const getResult = { something: 'user-provided' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getAll();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       const defaults = defaultsProvider();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
@@ -262,12 +205,6 @@ describe('ui settings', function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getAll();
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       const defaults = defaultsProvider();
       const expectation = {};
       Object.keys(defaults).forEach(key => {
@@ -279,16 +216,17 @@ describe('ui settings', function () {
   });
 
   describe('#get()', function () {
+    it('pulls user configuration from ES', async function () {
+      const getResult = {};
+      const { server, uiSettings, configGet } = instantiate({ getResult });
+      const result = await uiSettings.get();
+      expectElasticsearchGetQuery(server, configGet);
+    });
+
     it(`returns the promised value for a key`, async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       const defaults = defaultsProvider();
       expect(result).to.eql(defaults.dateFormat.value);
     });
@@ -297,12 +235,6 @@ describe('ui settings', function () {
       const getResult = { custom: 'value' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('custom');
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       expect(result).to.eql('value');
     });
 
@@ -310,16 +242,29 @@ describe('ui settings', function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
-      expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-      expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
-        index: configGet('kibana.index'),
-        id: configGet('pkg.version'),
-        type: 'config'
-      }]);
       expect(result).to.eql('YYYY-MM-DD');
     });
   });
 });
+
+function expectElasticsearchGetQuery(server, configGet) {
+  expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
+  expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
+    index: configGet('kibana.index'),
+    id: configGet('pkg.version'),
+    type: 'config'
+  }]);
+}
+
+function expectElasticsearchUpdateQuery(server, configGet, doc) {
+  expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
+  expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
+    index: configGet('kibana.index'),
+    id: configGet('pkg.version'),
+    type: 'config',
+    body: { doc }
+  }]);
+}
 
 function instantiate({ getResult } = {}) {
   const esStatus = {
