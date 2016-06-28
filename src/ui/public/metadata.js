@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 
-const state = $('[kbn-initial-state]').attr('kbn-initial-state');
+const state = $('kbn-initial-state').attr('data');
 const kbn = window.__KBN__ = JSON.parse(state);
 
 export default deepFreeze(kbn);
