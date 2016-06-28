@@ -10,7 +10,7 @@ const CONFIG_PATHS = [
 
 const DATA_PATHS = [
   process.env.DATA_PATH,
-  fromRoot('plugins/.data'),
+  fromRoot('data'),
   '/var/lib/kibana'
 ].filter(Boolean);
 
