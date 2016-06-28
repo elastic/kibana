@@ -45,7 +45,7 @@ export default (grunt) => {
         //config folder is moved to path.conf, exclude {path.home}/config
         //uses relative path to --prefix, strip the leading /
         '--exclude', `${packages.path.home.slice(1)}/config`,
-        '--exclude', `${packages.path.home.slice(1)}/plugins/.data`
+        '--exclude', `${packages.path.home.slice(1)}/data`
       ];
       const debOptions = [
         '-t', 'deb',
@@ -60,7 +60,7 @@ export default (grunt) => {
       const args = [
         `${buildDir}/=${packages.path.home}/`,
         `${buildDir}/config/=${packages.path.conf}/`,
-        `${buildDir}/plugins/.data/=${packages.path.data}/`,
+        `${buildDir}/data/=${packages.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/lib/=/lib/`
       ];

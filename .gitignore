@@ -20,6 +20,7 @@ target
 .htpasswd
 .eslintcache
 plugins
+data
 disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
