@@ -1,50 +1,50 @@
 
-import Common from './common.js';
-import { defaultFindTimeout } from '../';
+import {
+  defaultFindTimeout
+} from '../';
 
-export default class HeaderPage extends Common {
+import PageObjects from './';
+
+export default class HeaderPage {
 
   constructor() {
-    super();
   }
 
   init(remote) {
-    super.init(remote);
+    this.remote = remote;
   }
 
   clickSelector(selector) {
-    var self = this;
-    return this.try(function () {
-      return self.remote.setFindTimeout(defaultFindTimeout)
+    return this.try(() => {
+      return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector(selector)
-      .then(function (tab) {
+      .then(tab => {
         return tab.click();
       });
     });
   }
 
   clickDiscover() {
-    this.debug('click Discover tab');
+    PageObjects.common.debug('click Discover tab');
     this.clickSelector('a[href*=\'discover\']');
   }
 
   clickVisualize() {
-    this.debug('click Visualize tab');
+    PageObjects.common.debug('click Visualize tab');
     this.clickSelector('a[href*=\'visualize\']');
   }
 
   clickDashboard() {
-    this.debug('click Dashboard tab');
+    PageObjects.common.debug('click Dashboard tab');
     this.clickSelector('a[href*=\'dashboard\']');
   }
 
   clickSettings() {
-    this.debug('click Settings tab');
+    PageObjects.common.debug('click Settings tab');
     this.clickSelector('a[href*=\'settings\']');
   }
 
   clickTimepicker() {
-    var self = this;
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findDisplayedByClassName('navbar-timepicker-time-desc').click();
   }
@@ -57,7 +57,6 @@ export default class HeaderPage extends Common {
   }
 
   clickAbsoluteButton() {
-    var self = this;
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByLinkText('Absolute').click();
   }
@@ -86,20 +85,19 @@ export default class HeaderPage extends Common {
     });
   }
 
-
   setAbsoluteRange(fromTime, toTime) {
-    this.debug('clickTimepicker');
+    PageObjects.common.debug('clickTimepicker');
     return this.clickTimepicker()
     .then(() => {
-      this.debug('--Clicking Absolute button');
+      PageObjects.common.debug('--Clicking Absolute button');
       return this.clickAbsoluteButton();
     })
     .then(() => {
-      this.debug('--Setting From Time : ' + fromTime);
+      PageObjects.common.debug('--Setting From Time : ' + fromTime);
       return this.setFromTime(fromTime);
     })
     .then(() => {
-      this.debug('--Setting To Time : ' + toTime);
+      PageObjects.common.debug('--Setting To Time : ' + toTime);
       return this.setToTime(toTime);
     })
     .then(() => {
@@ -114,7 +112,6 @@ export default class HeaderPage extends Common {
   }
 
   collapseTimepicker() {
-    var self = this;
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('.fa.fa-chevron-circle-up')
     .click();
@@ -127,22 +124,18 @@ export default class HeaderPage extends Common {
   }
 
   waitForToastMessageGone() {
-    var self = this;
-    return self.remote.setFindTimeout(defaultFindTimeout)
+    return this.remote.setFindTimeout(defaultFindTimeout)
       .waitForDeletedByCssSelector('kbn-truncated.toast-message');
   }
 
   clickToastOK() {
-    return this.remote
-    .setFindTimeout(defaultFindTimeout)
+    return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button[ng-if="notif.accept"]')
     .click();
   }
 
   getSpinnerDone() {
-    var self = this;
-    return this.remote
-    .setFindTimeout(defaultFindTimeout * 10)
+    return this.remote.setFindTimeout(defaultFindTimeout * 10)
     .findByCssSelector('.spinner.ng-hide');
   }
 
