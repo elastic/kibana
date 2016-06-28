@@ -9,9 +9,6 @@ import PageObjects from './';
 
 export default class SettingsPage {
 
-  constructor() {
-  }
-
   init(remote) {
     this.remote = remote;
   }

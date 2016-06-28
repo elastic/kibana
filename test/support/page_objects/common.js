@@ -33,9 +33,6 @@ const writeFileAsync = promisify(fs.writeFile);
 
 export default class Common {
 
-  constructor() {
-  }
-
   init(remote) {
     function injectTimestampQuery(func, url) {
       var formatted = modifyQueryString(url, function (parsed) {
