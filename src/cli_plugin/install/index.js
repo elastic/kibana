@@ -39,7 +39,7 @@ export default function pluginInstall(program) {
   .option(
     '-d, --plugin-dir <path>',
     'path to the directory where plugins are stored',
-    fromRoot('installedPlugins')
+    fromRoot('plugins')
   )
   .description('install a plugin',
 `Common examples:

@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
-  grunt.registerTask('_build:installedPlugins', function () {
-    grunt.file.mkdir('build/kibana/installedPlugins');
-    grunt.file.mkdir('build/kibana/installedPlugins/.data');
+  grunt.registerTask('_build:plugins', function () {
+    grunt.file.mkdir('build/kibana/plugins');
+    grunt.file.mkdir('build/kibana/plugins/.data');
   });
 };
