@@ -1,5 +1,11 @@
-- var j = function (o) { return JSON.stringify(o); }
-- var appName = 'kibana';
+-
+  var appName = 'kibana';
+
+  function encoded (data) {
+    var scriptend = /\<\s*\/\s*script\s*>/ig;
+    var concatend = '</" + "script>';
+    return JSON.stringify(data).replace(scriptend, concatend);
+  }
 
 block vars
 
@@ -12,5 +18,5 @@ html(lang='en')
     title Kibana
     block head
   body(kbn-chrome, id='#{appName}-body')
-    script window.__KBN__ = !{j(kibanaPayload)};
+    script window.__KBN__ = !{encoded(kibanaPayload)};
     block content
