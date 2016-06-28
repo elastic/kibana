@@ -19,7 +19,7 @@ target
 /esvm
 .htpasswd
 .eslintcache
-installedPlugins
+plugins
 disabledPlugins
 webpackstats.json
 config/kibana.dev.yml
