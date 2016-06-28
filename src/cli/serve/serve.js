@@ -93,7 +93,7 @@ module.exports = function (program) {
     pluginDirCollector,
     [
       fromRoot('plugins'),
-      fromRoot('src/plugins')
+      fromRoot('src/core_plugins')
     ]
   )
   .option(
