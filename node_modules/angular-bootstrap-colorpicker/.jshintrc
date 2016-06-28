@@ -1,0 +1,31 @@
+{
+  "curly": true,
+  "immed": true,
+  "newcap": true,
+  "noarg": true,
+  "sub": true,
+  "boss": true,
+  "eqnull": true,
+  "quotmark": "single",
+  "undef": true,
+  "indent": 2,
+  "strict": true,
+  "globalstrict": true,
+  "browser": true,
+  "globals": {
+    "angular": false,
+    "$": true,
+    // For Jasmine
+    "after"      : false,
+    "afterEach"  : false,
+    "before"     : false,
+    "beforeEach" : false,
+    "describe"   : false,
+    "expect"     : false,
+    "jasmine"    : false,
+    "module"     : false,
+    "spyOn"      : false,
+    "inject"     : false,
+    "it"         : false
+  }
+}

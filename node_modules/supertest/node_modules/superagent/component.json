@@ -1,0 +1,21 @@
+{
+  "name": "superagent",
+  "repo": "visionmedia/superagent",
+  "version": "1.8.3",
+  "description": "elegant & feature rich browser / node HTTP with a fluent API",
+  "keywords": [
+    "http",
+    "ajax",
+    "request",
+    "agent"
+  ],
+  "scripts": [
+    "lib/client.js"
+  ],
+  "main": "lib/client.js",
+  "dependencies": {
+    "component/emitter": "*",
+    "component/reduce": "*"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "numeral",
+  "repo": "adamwdraper/Numeral-js",
+  "version": "1.5.3",
+  "description": "Format and manipulate numbers.",
+  "keywords": [
+    "numeral",
+    "number",
+    "format",
+    "time",
+    "money",
+    "percentage"
+  ],
+  "scripts": [ "numeral.js" ],
+  "main": "numeral.js"
+}

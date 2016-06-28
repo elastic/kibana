@@ -1,0 +1,78 @@
+{
+  "name": "init-package-json",
+  "version": "1.6.0",
+  "main": "init-package-json.js",
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/isaacs/init-package-json"
+  },
+  "author": {
+    "name": "Isaac Z. Schlueter",
+    "email": "i@izs.me",
+    "url": "http://blog.izs.me/"
+  },
+  "license": "ISC",
+  "description": "A node module to get your node module started",
+  "dependencies": {
+    "glob": "^5.0.3",
+    "npm-package-arg": "^4.0.0",
+    "promzard": "^0.3.0",
+    "read": "~1.0.1",
+    "read-package-json": "1 || 2",
+    "semver": "2.x || 3.x || 4",
+    "validate-npm-package-license": "1.0.0-prerelease-2",
+    "validate-npm-package-name": "^2.0.1"
+  },
+  "devDependencies": {
+    "npm": "^2",
+    "rimraf": "^2.1.4",
+    "tap": "^0.7.1"
+  },
+  "keywords": [
+    "init",
+    "package.json",
+    "package",
+    "helper",
+    "wizard",
+    "wizerd",
+    "prompt",
+    "start"
+  ],
+  "gitHead": "b747e9f71eb65b22bb9139e5252bf8efb23571e1",
+  "bugs": {
+    "url": "https://github.com/isaacs/init-package-json/issues"
+  },
+  "homepage": "https://github.com/isaacs/init-package-json",
+  "_id": "init-package-json@1.6.0",
+  "_shasum": "8c4c2561abca1ad30d88f5594ddb4159211a36ff",
+  "_from": "init-package-json@1.6.0",
+  "_npmVersion": "2.7.6",
+  "_nodeVersion": "1.6.2",
+  "_npmUser": {
+    "name": "iarna",
+    "email": "me@re-becca.org"
+  },
+  "dist": {
+    "shasum": "8c4c2561abca1ad30d88f5594ddb4159211a36ff",
+    "tarball": "http://registry.npmjs.org/init-package-json/-/init-package-json-1.6.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "isaacs",
+      "email": "i@izs.me"
+    },
+    {
+      "name": "othiym23",
+      "email": "ogd@aoaioxxysz.net"
+    },
+    {
+      "name": "iarna",
+      "email": "me@re-becca.org"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/init-package-json/-/init-package-json-1.6.0.tgz"
+}

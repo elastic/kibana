@@ -1,0 +1,20 @@
+'use strict';
+
+var jju = require('jju');
+
+function parse(text, reviver) {
+  try {
+    return JSON.parse(text, reviver);
+  } catch(err) {
+    // we expect this throw with a more informative message
+    jju.parse(text, {
+      mode: 'json',
+      reviver: reviver
+    });
+
+    // if it didn't throw, re-throw the original error
+    throw err;
+  }
+}
+
+module.exports = parse;

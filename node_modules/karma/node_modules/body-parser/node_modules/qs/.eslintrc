@@ -1,0 +1,17 @@
+{
+	"root": true,
+
+	"extends": "@ljharb",
+
+	"rules": {
+		"complexity": [2, 19],
+		"consistent-return": [1],
+		"max-params": [2, 9],
+		"max-statements": [2, 33],
+		"no-extra-parens": [1],
+		"no-continue": [1],
+		"no-magic-numbers": 0,
+		"no-restricted-syntax": [2, "BreakStatement", "DebuggerStatement", "ForInStatement", "LabeledStatement", "WithStatement"],
+		"operator-linebreak": 1
+	}
+}

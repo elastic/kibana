@@ -1,0 +1,20 @@
+{
+  "name": "karma-coverage-coffee-example",
+  "version": "1.0.0",
+  "description": "Demonstrate the usage of karma-coverage with CoffeeScript",
+  "main": "",
+  "scripts": {
+    "test": "./node_modules/karma/bin/karma start"
+  },
+  "author": "Friedel Ziegelmayer <dignifiedquire@gmail.com>",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "karma": "latest",
+    "karma-mocha": "latest",
+    "karma-coffee-preprocessor": "latest",
+    "karma-firefox-launcher": "latest",
+    "coffee-script": "latest",
+    "ibrik": "^2.0.0"
+  }
+}

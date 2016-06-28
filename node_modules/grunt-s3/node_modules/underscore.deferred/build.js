@@ -1,0 +1,1 @@
+require('grunt').cli();

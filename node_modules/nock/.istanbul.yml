@@ -1,0 +1,3 @@
+check:
+    global:
+        lines: 90

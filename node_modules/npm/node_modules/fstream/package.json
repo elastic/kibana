@@ -1,0 +1,66 @@
+{
+  "author": {
+    "name": "Isaac Z. Schlueter",
+    "email": "i@izs.me",
+    "url": "http://blog.izs.me/"
+  },
+  "name": "fstream",
+  "description": "Advanced file system stream things",
+  "version": "1.0.6",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/isaacs/fstream.git"
+  },
+  "main": "fstream.js",
+  "engines": {
+    "node": ">=0.6"
+  },
+  "dependencies": {
+    "graceful-fs": "3",
+    "inherits": "~2.0.0",
+    "mkdirp": ">=0.5 0",
+    "rimraf": "2"
+  },
+  "devDependencies": {
+    "tap": "0",
+    "standard": "^2.3.2"
+  },
+  "scripts": {
+    "test": "standard && tap examples/*.js"
+  },
+  "license": "ISC",
+  "gitHead": "e0c0024379c5a94ca228d232e2794b6ffb0d3caf",
+  "bugs": {
+    "url": "https://github.com/isaacs/fstream/issues"
+  },
+  "homepage": "https://github.com/isaacs/fstream#readme",
+  "_id": "fstream@1.0.6",
+  "_shasum": "817e50312fb4ed90da865c8eb5ecd1d1d7aed0ec",
+  "_from": "fstream@>=1.0.6 <1.1.0",
+  "_npmVersion": "2.9.0",
+  "_nodeVersion": "2.0.0",
+  "_npmUser": {
+    "name": "iarna",
+    "email": "me@re-becca.org"
+  },
+  "maintainers": [
+    {
+      "name": "isaacs",
+      "email": "isaacs@npmjs.com"
+    },
+    {
+      "name": "othiym23",
+      "email": "ogd@aoaioxxysz.net"
+    },
+    {
+      "name": "iarna",
+      "email": "me@re-becca.org"
+    }
+  ],
+  "dist": {
+    "shasum": "817e50312fb4ed90da865c8eb5ecd1d1d7aed0ec",
+    "tarball": "http://registry.npmjs.org/fstream/-/fstream-1.0.6.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/fstream/-/fstream-1.0.6.tgz"
+}

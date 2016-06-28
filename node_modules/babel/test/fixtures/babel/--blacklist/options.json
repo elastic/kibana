@@ -1,0 +1,3 @@
+{
+  "args": ["--blacklist", "es6.arrowFunctions"]
+}

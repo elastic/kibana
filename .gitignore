@@ -3,7 +3,6 @@
 .ackrc
 .DS_Store
 .node_binaries
-node_modules
 trash
 bundles
 target
@@ -28,3 +27,20 @@ selenium
 .babelcache.json
 *.swp
 *.swo
+
+# platform dependent parts of node_modules
+node_modules/bunyan/node_modules/dtrace-provider/build/
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/libusdt.a
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/usdt.o
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/usdt_dof.o
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/usdt_dof_file.o
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/usdt_dof_sections.o
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/usdt_probe.o
+node_modules/bunyan/node_modules/dtrace-provider/libusdt/usdt_tracepoints.o
+node_modules/chokidar/node_modules/fsevents/lib/
+node_modules/karma/node_modules/socket.io/node_modules/engine.io/node_modules/ws/node_modules/bufferutil/build/
+node_modules/karma/node_modules/socket.io/node_modules/engine.io/node_modules/ws/node_modules/utf-8-validate/build/
+node_modules/karma/node_modules/socket.io/node_modules/socket.io-client/node_modules/engine.io-client/node_modules/ws/node_modules/bufferutil/build/
+node_modules/karma/node_modules/socket.io/node_modules/socket.io-client/node_modules/engine.io-client/node_modules/ws/node_modules/utf-8-validate/build/
+node_modules/npm/node_modules/request/node_modules/.bin/
+node_modules/npm/node_modules/request/node_modules/har-validator/node_modules/chalk/node_modules/.bin/

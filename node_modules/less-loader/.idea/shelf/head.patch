@@ -1,0 +1,170 @@
+Index: test/sourceMap/webpack.config.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/sourceMap/webpack.config.js	(revision )
++++ test/sourceMap/webpack.config.js	(revision )
+@@ -0,0 +1,29 @@
++"use strict";
++
++var path = require("path");
++var ExtractTextPlugin = require("extract-text-webpack-plugin");
++
++var pathToLessLoader = path.resolve(__dirname, "../../index.js");
++
++module.exports = {
++    entry: path.resolve(__dirname, "./entry.js"),
++    output: {
++        path: path.resolve(__dirname, "../output"),
++        filename: "bundle.sourcemap.js"
++    },
++    devtool: "inline-source-map",
++    module: {
++        loaders: [
++            {
++                test: /\.less/,
++                loader: ExtractTextPlugin.extract(
++                    "css-loader?sourceMap!" +
++                    pathToLessLoader + "?sourceMap"
++                )
++            }
++        ]
++    },
++    plugins: [
++        new ExtractTextPlugin("styles.css")
++    ]
++};
+Index: package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- package.json	(date 1425654699000)
++++ package.json	(revision )
+@@ -4,13 +4,16 @@
+   "author": "Tobias Koppers @sokra",
+   "description": "less loader module for webpack",
+   "scripts": {
+-    "test": "mocha -R spec"
++    "test": "mocha -R spec",
++    "test-source-map": "webpack --config test/sourceMap/webpack.config.js && open ./test/sourceMap/index.html"
+   },
+   "peerDependencies": {
+     "less": "^2.3.1"
+   },
+   "devDependencies": {
++    "css-loader": "^0.9.1",
+     "enhanced-require": "^0.5.0-beta6",
++    "extract-text-webpack-plugin": "^0.3.8",
+     "less": "^2.3.1",
+     "mocha": "^2.0.1",
+     "raw-loader": "^0.5.1",
+Index: test/less/imports-node.less
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/less/imports-node.less	(date 1425654699000)
++++ test/less/imports-node.less	(revision )
+@@ -1,3 +1,9 @@
++@import (reference) "~some/module";
++@import "~some/css.css";
++@import (css) "~some/css.css";
++@import (less) "~some/css.css";
++@import (inline) "~some/css.css";
++
+ // Add bootstrap as sufficient complex and popular example
+ @import "~bootstrap/less/bootstrap.less";
+ 
+Index: test/css/imports-node.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/css/imports-node.css	(date 1425654699000)
++++ test/css/imports-node.css	(revision )
+@@ -1,3 +1,14 @@
++@import "~some/css.css";
++@import "~some/css.css";
++#it-works,
++#it-works {
++  color: hotpink;
++}
++.modules-dir-some-module,
++#it-works,
++#it-works {
++  background: hotpink;
++}
+ /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+ html {
+   font-family: sans-serif;
+Index: test/sourceMap/entry.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/sourceMap/entry.js	(revision )
++++ test/sourceMap/entry.js	(revision )
+@@ -0,0 +1,3 @@
++"use strict";
++
++require("../less/source-map.less");
+Index: test/less/imports-bower.less
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/less/imports-bower.less	(date 1425654699000)
++++ test/less/imports-bower.less	(revision )
+@@ -1,3 +1,9 @@
++@import (reference) "~some/module";
++@import "~some/css.css";
++@import (css) "~some/css.css";
++@import (less) "~some/css.css";
++@import (inline) "~some/css.css";
++
+ // Add bootstrap as sufficient complex and popular example
+ @import "~bootstrap/less/bootstrap.less";
+ 
+Index: test/sourceMap/index.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/sourceMap/index.html	(revision )
++++ test/sourceMap/index.html	(revision )
+@@ -0,0 +1,11 @@
++<!DOCTYPE html>
++<html>
++<head>
++    <title></title>
++    <meta charset="utf-8"/>
++    <link href="../output/styles.css" type="text/css" rel="stylesheet">
++</head>
++<body>
++    <h1 id="it-works" class="box">Open the developer tools, dude!</h1>
++</body>
++</html>
+Index: test/css/imports-bower.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/css/imports-bower.css	(date 1425654699000)
++++ test/css/imports-bower.css	(revision )
+@@ -1,3 +1,14 @@
++@import "~some/css.css";
++@import "~some/css.css";
++#it-works,
++#it-works {
++  color: hotpink;
++}
++.modules-dir-some-module,
++#it-works,
++#it-works {
++  background: hotpink;
++}
+ /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+ html {
+   font-family: sans-serif;

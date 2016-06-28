@@ -1,0 +1,2 @@
+--require test/setup.js
+--reporter spec

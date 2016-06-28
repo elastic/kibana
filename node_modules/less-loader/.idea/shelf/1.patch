@@ -1,0 +1,56 @@
+Index: test/less/sourcemap.less
+===================================================================
+--- test/less/sourcemap.less	(date 1425654280000)
++++ test/less/source-map.less	(revision )
+@@ -1,3 +1,5 @@
++@import "basic";
++
+ #it-works {
+   margin: 10px;
+ }
+Index: test/index.test.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/index.test.js	(date 1425654280000)
++++ test/index.test.js	(revision )
+@@ -31,8 +31,8 @@
+ 	test("should transform urls", "url-path");
+ 	test("should transform urls to files above the current directory", "folder/url-path");
+ 	test("should transform urls to files above the sibling directory", "folder2/url-path");
+-	test("should generate source-map", "sourcemap", {
+-		devtool: "sourcemap"
++	test("should generate source-map", "source-map", {
++		devtool: "source-map"
+ 	});
+ 	it("should report error correctly", function(done) {
+ 		webpack({
+Index: test/css/sourcemap.css
+===================================================================
+--- test/css/sourcemap.css	(date 1425654280000)
++++ test/css/sourcemap.css	(date 1425654280000)
+@@ -1,3 +0,0 @@
+-#it-works {
+-  margin: 10px;
+-}
+Index: test/css/source-map.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- test/css/source-map.css	(revision )
++++ test/css/source-map.css	(revision )
+@@ -0,0 +1,12 @@
++.box {
++  color: #fe33ac;
++  border-color: #fdcdea;
++  background: url(box.png);
++}
++.box div {
++  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
++  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
++}
++#it-works {
++  margin: 10px;
++}

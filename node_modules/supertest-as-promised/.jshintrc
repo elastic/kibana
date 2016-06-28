@@ -1,0 +1,35 @@
+{
+  // Enforcing options
+  "curly":     true,
+  "camelcase": true,
+  "eqeqeq":    true,
+  "freeze":    true,
+  "latedef":   true,
+  "indent":    2,
+  "newcap":    true,
+  "noarg":     true,
+  "noempty":   true,
+  "nonbsp":    true,
+  "nonew":     true,
+  "quotmark":  "double",
+  "trailing":  true,
+  "undef":     true,
+  "unused":    "vars",
+
+  // Relaxing options
+  "laxcomma": true,
+
+  // Environments
+  "node": true,
+  "white": true,
+
+  "globals": {
+    "testRequire": false,
+    "describe": false,
+    "it": false,
+    "before": false,
+    "beforeEach": false,
+    "after": false,
+    "afterEach": false
+  }
+}

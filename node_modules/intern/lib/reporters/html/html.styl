@@ -1,0 +1,265 @@
+@import 'variables';
+
+html,
+body {
+	background: $bodyBackground;
+	color: $bodyTextColor;
+	font: 14px/normal 'Open Sans', Verdana, Helvetica, Arial, sans-serif;
+	margin: 0;
+	visibility: visible;
+	padding-bottom: 2em;
+	padding-top: 0;
+}
+
+.internReportContainer {
+	margin: 0 auto;
+	width: 75%;
+}
+
+.reportHeader {
+	background: #fff;
+	box-shadow: 0px 1px 2px 0px rgba(#000, 15%);
+	margin: 0 0 1em 0;
+	padding: 0.6em;
+	text-align: center;
+
+	.headerLogo {
+		height: 45px;
+		margin-right: 10px;
+		vertical-align: middle;
+		width: 45px;
+	}
+
+	.headerTitle {
+		color: $headingColor;
+		font-size: 1em;
+		font-weight: 300;
+		padding-top: 3px;
+		vertical-align: middle;
+	}
+}
+
+.summary {
+	border-collapse: collapse;
+	margin-bottom: 2.5em;
+	width: 100%;
+
+	td {
+		color: $summaryTextColor;
+		font-size: 1em;
+		font-weight: normal;
+		padding: 0;
+		text-align: center;
+		text-transform: uppercase;
+		vertical-align: top;
+		width: 20%;
+
+		.summaryContent {
+			background: $summaryTopBackground;
+			border: 1px solid $summaryBorderColor;
+			border-radius: 6px 6px 0 0;
+			box-shadow: 0px 1px 2px 0px rgba(#000, 15%);
+			margin: 0 1em 0 auto;
+
+			&.suites {
+				summaryIcon($suiteIcon);
+			}
+
+			&.tests {
+				summaryIcon($testIcon);
+			}
+
+			&.failed {
+				background: $failedColor;
+				color: #fff;
+
+				summaryIcon($failedIcon);
+
+				.summaryTitle {
+					border-color: darken($failedColor, 20%);
+					color: $summaryTextColor;
+				}
+
+				&.success {
+					margin-right: 1em;
+				}
+			}
+
+			&.success,
+			&.successRate {
+				background: darken($passedColor, 20%);
+				color: #fff;
+				margin-right: 0;
+
+				summaryIcon($passedIcon);
+
+				.summaryTitle {
+					border-color: darken($passedColor, 20%);
+					color: $summaryTextColor;
+				}
+			}
+
+			&.duration {
+				background: $summaryTopBackground;
+
+				summaryIcon($durationIcon);
+			}
+
+			.summaryTitle {
+				background: #fff;
+				border: 1px solid $summaryBorderColor;
+				border-radius: 14px;
+				display: inline-block;
+				padding: 0.2em 1em;
+				position: relative;
+				top: 10px;
+				z-index: 1;
+			}
+
+			.summaryData {
+				background: $summaryBottomBackground;
+				box-sizing: border-box;
+				color: $summaryTextColor;
+				font-size: 36px;
+				font-weight: 300;
+				height: 75px;
+				padding: 0.5em 0.25em;
+				text-align: center;
+			}
+		}
+	}
+}
+
+.failedFilter {
+	color: $reportTextColor;
+	padding: 0 0 1em;
+
+	input {
+		margin-right: 0.5em;
+	}
+}
+
+.report {
+	background-color: #fff;
+	border-collapse: collapse;
+	color: $reportTextColor;
+	width: 100%;
+
+	td {
+		padding: 0.7em;
+		border-left: 1px solid $cellBorderColor;
+		border-right: 1px solid $cellBorderColor;
+	}
+
+	.suite {
+		background: $sectionHeadingBackground;
+
+		testStatusIcon(darken($sectionHeadingBackground, 20%), darken($sectionHeadingBackground, 70%), $suiteIcon);
+
+		td {
+			border: 1px solid darken($sectionHeadingBackground, 20%);
+
+			&.title {
+				font-size: 15px;
+				font-weight: bold;
+			}
+
+			&.duration {
+				text-align:right;
+			}
+		}
+
+		.column-info {
+			span {
+				margin-right: 1em;
+			}
+
+			.success {
+				color: darken($passedColor, 30%);
+			}
+
+			.failed {
+				color: darken($failedColor, 30%);
+			}
+		}
+
+		&.indent {
+			background: lighten($sectionHeadingBackground, 60%);
+
+			td {
+				border-color: darken($sectionHeadingBackground, 20%);
+			}
+
+			.testStatus {
+				background: darken($sectionHeadingBackground, 10%);
+
+				&:before {
+					font-size: 17px;
+				}
+			}
+		}
+	}
+
+	.testResult {
+		transition: background 0.3s ease;
+
+		td {
+			border: 1px solid $cellBorderColor;
+
+			&.duration {
+				text-align: right;
+			}
+		}
+
+		&.passed {
+			testStatusIcon(lighten($passedColor, 70%), $passedColor, $passedIcon)
+
+			&:hover {
+				background: lighten($passedColor, 90%);
+			}
+		}
+
+		&.failed {
+			background: lighten($failedColor, 65%);
+
+			testStatusIcon(lighten($failedColor, 70%), $failedColor, $failedIcon);
+
+			&:hover {
+				background:lighten(@background, 20%);
+			}
+
+			td {
+				border-color:lighten($failedColor, 40%);
+				border-bottom:0;
+			}
+
+			.testStatus {
+				border-bottom:0;
+				border-color:lighten($failedColor, 40%);
+			}
+		}
+
+		&.lastTest {
+			td,
+			.testStatus {
+				border-bottom:0;
+			}
+		}
+	}
+
+	.indent1 { padding-left: 2em; }
+	.indent2 { padding-left: 4em; }
+	.indent3 { padding-left: 6em; }
+	.indent4 { padding-left: 8em; }
+	.indent5 { padding-left: 10em; }
+}
+
+.testStatus {
+	border-bottom: 0;
+	width: 20px;
+}
+
+.hidePassed .passed,
+.hidePassed .skipped {
+	display: none;
+}

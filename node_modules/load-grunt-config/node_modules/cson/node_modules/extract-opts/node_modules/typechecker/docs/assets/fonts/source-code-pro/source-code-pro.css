@@ -1,0 +1,15 @@
+@font-face{
+    font-family: 'Source Code Pro';
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+    src: url('WOFF/OTF/SourceCodePro-Regular.otf.woff') format('woff');
+}
+
+@font-face{
+    font-family: 'Source Code Pro';
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: normal;
+    src: url('WOFF/OTF/SourceCodePro-Medium.otf.woff') format('woff');
+}
