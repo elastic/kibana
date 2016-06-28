@@ -18,6 +18,7 @@ export default function (server) {
       getPluginLanguageTranslations(pluginName, languages, function (err, translations) {
         if (err) {
           reply(Boom.internal(err));
+          return;
         }
         reply(translations);
       });
@@ -31,10 +32,6 @@ function getPluginLanguageTranslations(pluginName, acceptLanguages, cb) {
   getPluginSupportedLanguage(pluginName, acceptLanguages, function (err, language) {
     if (err) {
       return cb (err);
-    }
-
-    if (!language) {
-      language = DEFAULT_LANGUAGE;
     }
 
     i18n.getRegisteredPluginLanguageTranslations(pluginName, language, function (err, translationJson) {
@@ -53,9 +50,48 @@ function getPluginSupportedLanguage(pluginName, acceptLanguages, cb) {
       return cb (err);
     }
 
-    //TODO: Algorithm which returns a languages based on the accept languages
-    //from the client and languages supported by the plugin
-    return cb (null, null);
+    var foundLang = false;
+    var langStr = '';
+    acceptLanguages.some(function exactMatch(language) {
+      if (language.region) {
+        langStr = language.code + '-' + language.region;
+      } else {
+        langStr = language.code;
+      }
+      if (languages.indexOf(langStr) > -1) {
+        foundLang = true;
+        return true;
+      } else {
+        return false;
+      }
+    });
+    if (foundLang) {
+      return cb (null, langStr);
+    }
+
+    acceptLanguages.some(function partialMatch(language) {
+      langStr = language.code;
+      languages.some(function (lang) {
+        if (lang.match('^' + langStr)) {
+          langStr = lang;
+          foundLang = true;
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (foundLang) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    if (foundLang) {
+      return cb (null, langStr);
+    }
+
+    return cb (null, DEFAULT_LANGUAGE);
   });
 
 }

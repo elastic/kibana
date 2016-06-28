@@ -17,6 +17,7 @@ var getPluginTranslationDetails = function (pluginTranslationPath, translationFi
   return callback(null);
 };
 
+//TODO(hickeyma): Update to use https://github.com/elastic/kibana/pull/7562
 var getRegisteredPluginStoragePath = function (pluginName) {
   return TRANSLATION_STORE_PATH + '/' + pluginName;
 };

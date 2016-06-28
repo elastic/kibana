@@ -14,6 +14,7 @@
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.0.2",
     "@elastic/plugin-helpers": "5.0.0-beta1",
+    "accept-language-parser": "^1.1.2",
     "babel-eslint": "4.1.8",
     "bluebird": "^3.4.0",
     "boom": "^3.2.1",
