@@ -1,11 +1,9 @@
+import $ from 'jquery';
 import _ from 'lodash';
-// singleton for immutable copy of window.__KBN__
 
-if (!_.has(window, '__KBN__')) {
-  throw new Error('window.__KBN__ must be set for metadata');
-}
+const state = $('[kbn-initial-state]').attr('kbn-initial-state');
+const kbn = window.__KBN__ = JSON.parse(state);
 
-const kbn = _.cloneDeep(window.__KBN__ || {});
 export default deepFreeze(kbn);
 
 function deepFreeze(object) {
