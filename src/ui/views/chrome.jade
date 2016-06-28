@@ -12,5 +12,5 @@ html(lang='en')
     title Kibana
     block head
   body(kbn-chrome, id='#{appName}-body')
-    meta(kbn-initial-state=JSON.stringify(kibanaPayload))
+    kbn-initial-state(data=JSON.stringify(kibanaPayload))
     block content
