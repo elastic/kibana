@@ -7,9 +7,6 @@ import PageObjects from './';
 
 export default class VisualizePage {
 
-  constructor() {
-  }
-
   init(remote) {
     this.remote = remote;
   }
@@ -153,19 +150,18 @@ export default class VisualizePage {
   }
 
   setValue(newValue) {
-    var self = this.remote;
     return this.remote
     .setFindTimeout(defaultFindTimeout * 2)
     .findByCssSelector('button[ng-click="numberListCntr.add()"]')
     .click()
-    .then(function () {
-      return self
+    .then(() => {
+      return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
       .clearValue();
     })
-    .then(function () {
-      return self
+    .then(() => {
+      return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
       .type(newValue);
@@ -199,13 +195,13 @@ export default class VisualizePage {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('li.list-group-item.list-group-menu-item.ng-binding.ng-scope')
-    .then(function (chartTypes) {
+    .then(chartTypes => {
       PageObjects.common.debug('found bucket types ' + chartTypes.length);
 
       function getChartType(chart) {
         return chart
         .getVisibleText()
-        .then(function (chartString) {
+        .then(chartString => {
           //PageObjects.common.debug(chartString);
           if (chartString === bucketName) {
             chart.click();
@@ -252,13 +248,12 @@ export default class VisualizePage {
   }
 
   getInterval() {
-    var self = this;
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findByCssSelector('select[ng-model="agg.params.interval"]')
     .getProperty('selectedIndex')
-    .then(function (selectedIndex) {
-      return self.remote
+    .then(selectedIndex => {
+      return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('select[ng-model="agg.params.interval"] option:nth-child(' + (selectedIndex + 1) + ')')
       .getProperty('label');
@@ -296,32 +291,32 @@ export default class VisualizePage {
 
 
   saveVisualization(vizName) {
-    var self = this;
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button[aria-label="Save Visualization"]')
     .click()
-    .then(function () {
+    .then(() => {
       return PageObjects.common.sleep(1000);
     })
-    .then(function () {
+    .then(() => {
       PageObjects.common.debug('saveButton button clicked');
-      return self.remote
+      return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByName('visTitle')
       .type(vizName);
     })
     //   // click save button
-    .then(function () {
+    .then(() => {
       PageObjects.common.debug('click submit button');
-      return self.remote
+      return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.config button[type="submit"]')
       .click();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
-    .then(function () {
+    .then(() => {
+      const self = this;
       return PageObjects.common.try(function tryingForTime() {
         return self.remote
         .setFindTimeout(defaultFindTimeout)
@@ -375,7 +370,7 @@ export default class VisualizePage {
   openSavedVisualization(vizName) {
     var self = this;
     return self.filterVisByName(vizName)
-    .then(function () {
+    .then(() => {
       return PageObjects.common.sleep(1000);
     })
     .then(function clickDashboardByLinkedText() {
@@ -387,7 +382,7 @@ export default class VisualizePage {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('.x > g')
-    .then(function (chartTypes) {
+    .then(chartTypes => {
       function getChartType(chart) {
         return chart
         .getVisibleText();
@@ -395,7 +390,7 @@ export default class VisualizePage {
       var getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
-    .then(function (texts) {
+    .then(texts => {
       // PageObjects.common.debug('returning types array ' + texts + ' array length =' + texts.length);
       return texts;
     });
@@ -406,7 +401,7 @@ export default class VisualizePage {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('.y > g')
-    .then(function (chartTypes) {
+    .then(chartTypes => {
       function getChartType(chart) {
         return chart
         .getVisibleText();
@@ -414,7 +409,7 @@ export default class VisualizePage {
       var getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
-    .then(function (texts) {
+    .then(texts => {
       // PageObjects.common.debug('returning types array ' + texts + ' array length =' + texts.length);
       return texts;
     });

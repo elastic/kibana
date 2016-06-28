@@ -7,9 +7,6 @@ import PageObjects from './';
 
 export default class DashboardPage {
 
-  constructor() {
-  }
-
   init(remote) {
     this.remote = remote;
     this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);

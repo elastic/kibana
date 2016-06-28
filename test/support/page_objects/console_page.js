@@ -5,9 +5,6 @@ import {
 
 export default class ConsolePage {
 
-  constructor() {
-  }
-
   init(remote) {
     this.remote = remote;
     this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);

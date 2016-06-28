@@ -5,9 +5,6 @@ import {
 
 export default class ShieldPage {
 
-  constructor() {
-  }
-
   init(remote) {
     this.remote = remote;
   }

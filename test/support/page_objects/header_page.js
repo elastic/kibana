@@ -7,9 +7,6 @@ import PageObjects from './';
 
 export default class HeaderPage {
 
-  constructor() {
-  }
-
   init(remote) {
     this.remote = remote;
   }
