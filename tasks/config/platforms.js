@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     'darwin-x64',
     'linux-x64',
     'linux-x86',
+    'linux-ppc64le',
     'windows'
   ].map(function (name) {
     let win = name === 'windows';
