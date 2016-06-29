@@ -76,17 +76,10 @@ describe('ManagementSection', () => {
       expect(section.items).to.have.length(0);
     });
 
-    it ('can only deregister a section once', () => {
-      let threwException = false;
+    it ('allows deregistering a section more than once', () => {
       section.deregister('about');
-
-      try {
-        section.deregister('about');
-      } catch (e) {
-        threwException = e.message.indexOf('is not registered') > -1;
-      }
-
-      expect(threwException).to.be(true);
+      section.deregister('about');
+      expect(section.items).to.have.length(0);
     });
 
   });
