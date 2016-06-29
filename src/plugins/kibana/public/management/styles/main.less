@@ -59,6 +59,15 @@ kbn-management-landing {
   .management-link {
     font-size: 17px;
     line-height: 32px;
+
+    &.is-management-link-disabled {
+      opacity: 0.5;
+      cursor: default;
+
+      &:hover, &:visited {
+        color: @kibanaBlue2;
+      }
+    }
   }
 
   .panel-heading-icon {
