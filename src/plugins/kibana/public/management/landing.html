@@ -26,9 +26,17 @@
               <ul class="management-section-items list-unstyled">
                 <li
                   class="col-xs-4 col-md-3"
-                  ng-repeat="item in section.items.inOrder">
-
-                  <a class="management-link" kbn-href="{{::item.url}}">
+                  ng-repeat="item in section.items.inOrder"
+                >
+                  <a
+                    class="management-link"
+                    ng-class="{ 'is-management-link-disabled': !item.url }"
+                    kbn-href="{{::item.url}}"
+                    tooltip="{{::item.tooltip}}"
+                    tooltip-placement="bottom"
+                    tooltip-popup-delay="400"
+                    tooltip-append-to-body="1"
+                  >
                     {{::item.display}}
                   </a>
                 </li>
