@@ -10,6 +10,5 @@ routes.when('/management/data/csv/', {
 management.getSection('data').register('csv', {
   display: 'Upload CSV',
   order: 10,
-  path: 'data/csv/'
+  url: '#/management/data/csv/'
 });
-

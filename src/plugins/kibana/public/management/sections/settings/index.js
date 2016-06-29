@@ -42,5 +42,5 @@ uiModules.get('apps/management')
 management.getSection('kibana').register('settings', {
   display: 'Advanced Settings',
   order: 20,
-  path: 'kibana/settings'
+  url: '#/management/kibana/settings'
 });

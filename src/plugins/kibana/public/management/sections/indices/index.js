@@ -56,11 +56,11 @@ uiModules.get('apps/management')
 management.getSection('data').register('indices', {
   display: 'Existing Data',
   order: 0,
-  path: 'data/index/'
+  url: '#/management/data/index/'
 });
 
 management.getSection('kibana').register('indices', {
   display: 'Index Patterns',
   order: 0,
-  path: 'kibana/indices/'
+  url: '#/management/kibana/indices/'
 });
