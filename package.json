@@ -178,14 +178,14 @@
     "marked-text-renderer": "0.1.0",
     "mocha": "2.3.0",
     "nock": "2.10.0",
-    "npm": "2.11.0",
+    "npm": "2.15.8",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
     "source-map": "0.4.4"
   },
   "engines": {
-    "node": "4.4.4",
-    "npm": "2.15.1"
+    "node": "4.4.7",
+    "npm": "2.15.8"
   }
 }
