@@ -15,11 +15,6 @@ describe('ManagementSection', () => {
       expect(section.items).to.be.empty();
     });
 
-    it('sets url based on path', () => {
-      const section = new ManagementSection('kibana', { path: 'foo' });
-      expect(section.url).to.be('#/management/foo');
-    });
-
     it('assigns all options', () => {
       const section = new ManagementSection('kibana', { description: 'test' });
       expect(section.description).to.be('test');
