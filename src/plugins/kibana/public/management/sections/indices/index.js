@@ -16,8 +16,7 @@ const indexPatternsResolutions = {
 // add a dependency to all of the subsection routes
 uiRoutes
 .defaults(/management\/kibana\/indices/, {
-  resolve: indexPatternsResolutions,
-  requireDefaultIndex: true
+  resolve: indexPatternsResolutions
 });
 
 uiRoutes
