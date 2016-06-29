@@ -8,8 +8,7 @@ export default class ManagementSection {
    * @param {object} options
    * @param {number|null} options.order
    * @param {string|null} options.display - defaults to id
-   * @param {string|null} options.url - defaults based on path
-   * @param {string|null} options.path - used to create url within management
+   * @param {string|null} options.url
    * @param {string|null} options.info
    * @returns {ManagementSection}
    */
@@ -21,10 +20,6 @@ export default class ManagementSection {
       index: ['id'],
       order: ['order']
     });
-
-    if (!options.url) {
-      options.url = '#/management/' + options.path || '';
-    }
 
     assign(this, options);
   }
