@@ -63,6 +63,34 @@ describe('ManagementSection', () => {
     });
   });
 
+  describe('deregister', () => {
+    let section;
+
+    beforeEach(() => {
+      section = new ManagementSection('kibana');
+      section.register('about');
+    });
+
+    it ('deregisters an existing section', () => {
+      section.deregister('about');
+      expect(section.items).to.have.length(0);
+    });
+
+    it ('can only deregister a section once', () => {
+      let threwException = false;
+      section.deregister('about');
+
+      try {
+        section.deregister('about');
+      } catch (e) {
+        threwException = e.message.indexOf('is not registered') > -1;
+      }
+
+      expect(threwException).to.be(true);
+    });
+
+  });
+
   describe('getSection', () => {
     let section;
 
