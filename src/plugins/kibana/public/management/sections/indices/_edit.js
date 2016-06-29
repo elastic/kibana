@@ -11,18 +11,29 @@ import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html'
 import IngestProvider from 'ui/ingest';
 
 uiRoutes
-.when('/management/kibana/indices/:indexPatternId?', {
+.when('/management/kibana/indices/:indexPatternId', {
   template: editTemplate,
   resolve: {
-    indexPattern: function ($route, config, courier) {
-      const params = $route.current.params;
+    indexPattern: function ($route, courier) {
+      return courier.indexPatterns
+        .get($route.current.params.indexPatternId)
+        .catch(courier.redirectWhenMissing('/management/data/index'));
+    }
+  }
+});
 
-      if (typeof params.indexPatternId === 'undefined') {
-        params.indexPatternId = config.get('defaultIndex');
+uiRoutes
+.when('/management/kibana/indices', {
+  resolve: {
+    redirect: function ($location, config) {
+      const defaultIndex = config.get('defaultIndex');
+      let path = '/management/data/index';
+
+      if (defaultIndex) {
+        path = `/management/kibana/indices/${defaultIndex}`;
       }
 
-      return courier.indexPatterns.get(params.indexPatternId)
-      .catch(courier.redirectWhenMissing('/management/data/index'));
+      $location.path(path).replace();
     }
   }
 });
