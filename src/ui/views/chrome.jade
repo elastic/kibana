@@ -1,5 +1,5 @@
-- var j = function (o) { return JSON.stringify(o); }
-- var appName = 'kibana';
+-
+  var appName = 'kibana';
 
 block vars
 
@@ -12,5 +12,5 @@ html(lang='en')
     title Kibana
     block head
   body(kbn-chrome, id='#{appName}-body')
-    script window.__KBN__ = !{j(kibanaPayload)};
+    kbn-initial-state(data=JSON.stringify(kibanaPayload))
     block content
