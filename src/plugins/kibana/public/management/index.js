@@ -42,16 +42,6 @@ uiModules
       if ($scope.section) {
         $scope.section.items.forEach(item => {
           item.class = `#${$location.path()}`.indexOf(item.url) > -1 ? 'active' : undefined;
-          // Disable link if path is not set
-          if (!item.path) {
-            delete item.url;
-          }
-          item.items.forEach(childItem => {
-            // Disable link if path is not set
-            if (!childItem.path) {
-              delete childItem.url;
-            }
-          });
         });
       }
 

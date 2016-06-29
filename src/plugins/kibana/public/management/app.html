@@ -11,14 +11,13 @@
         ng-if="sectionName"
         ng-repeat="item in section.items.inOrder"
         ng-class="item.class"
-        tooltip="{{::item.tooltip}}" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1"
       >
-
         <a
           class="navbar-link"
-          ng-class="{ 'is-navbar-nav-link-disabled': !item.path }"
+          ng-class="{ 'is-navbar-nav-link-disabled': !item.link }"
           kbn-href="{{::item.url}}"
           data-test-subj="{{::item.name}}"
+          tooltip="{{::item.tooltip}}" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1"
         >
           {{::item.display}}
         </a>
