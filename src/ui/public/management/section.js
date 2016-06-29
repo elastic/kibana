@@ -45,6 +45,15 @@ export default class ManagementSection {
   }
 
   /**
+  * Deregisters a section
+  *
+  * @param {string} id
+  */
+  deregister(id) {
+    this.items.remove(item => item.id === id);
+  }
+
+  /**
    * Determine if an id is already registered
    *
    * @param {string} id
