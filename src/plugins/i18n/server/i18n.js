@@ -1,3 +1,4 @@
+var async = require('async');
 var fs = require('fs');
 var kibanaPackage = require('../../../utils/package_json');
 var mkdirp = require('mkdirp');
@@ -92,6 +93,34 @@ var getRegisteredPluginLanguageTranslations = function (pluginName, language, ca
   });
 };
 
+var getAllRegisteredPluginsLanguageTranslations = function (language, callback) {
+  var registeredPlugins = [];
+  var allPluginsTranslationsJson = [];
+
+  try {
+    registeredPlugins = getAllRegisteredPlugins();
+  } catch (err) {
+    return callback(err);
+  }
+
+  async.each(registeredPlugins, function (pluginName, eachCB) {
+    getRegisteredPluginLanguageTranslations(pluginName, language, function (err, translationJson) {
+      if (err) {
+        return eachCB(err);
+      } else {
+        allPluginsTranslationsJson = allPluginsTranslationsJson.concat(translationJson);
+        return eachCB(null);
+      }
+    });
+  }, function (eachErr) {
+    if (eachErr) {
+      return callback(eachErr);
+    } else {
+      return callback(null, allPluginsTranslationsJson);
+    }
+  });
+};
+
 function saveTranslationToFile(translationFullFileName, translationJson) {
   var jsonToWrite = [];
   if (fs.existsSync(translationFullFileName)) {
@@ -149,8 +178,24 @@ function getFileName(fullPath) {
   return fullPath.replace(/^.*[\\\/]/, '');
 }
 
+function getAllRegisteredPlugins() {
+  var pluginNamesList = [];
+  var topDir = TRANSLATION_STORE_PATH;
+
+  var dirs = fs.readdirSync(topDir);
+  for (var i in dirs) {
+    if (!dirs.hasOwnProperty(i)) continue;
+    var name = topDir + '/' + dirs[i];
+    if (fs.statSync(name).isDirectory()) {
+      pluginNamesList.push(dirs[i]);
+    }
+  }
+  return pluginNamesList;
+}
+
 module.exports.registerPluginLanguageTranslations = registerPluginLanguageTranslations;
 module.exports.getRegisteredPluginLanguageTranslations = getRegisteredPluginLanguageTranslations;
+module.exports.getAllRegisteredPluginsLanguageTranslations = getAllRegisteredPluginsLanguageTranslations;
 module.exports.getPluginTranslationDetails = getPluginTranslationDetails;
 module.exports.getRegisteredPluginStoragePath = getRegisteredPluginStoragePath;
 module.exports.getRegisteredPluginLanguages = getRegisteredPluginLanguages;
