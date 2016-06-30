@@ -244,6 +244,9 @@ export default (function () {
       )
       .then(function (page) {
         return page.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
