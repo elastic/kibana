@@ -1,7 +1,7 @@
 [[dashboard]]
 == Dashboard
 
-A Kibana _dashboard_ displays a set of saved visualizations in groups that you can arrange freely. You can save a 
+A Kibana _dashboard_ displays a set of saved visualizations in groups that you can arrange freely. You can save a
 dashboard to share or reload at a later time.
 
 .Sample dashboard
@@ -21,7 +21,7 @@ The first time you click the *Dashboard* tab, Kibana displays an empty dashboard
 
 image:images/NewDashboard.png[New Dashboard screen]
 
-Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color 
+Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color
 theme instead, click the *Options* button and check the *Use dark theme* box.
 
 NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
@@ -34,37 +34,37 @@ include::autorefresh.asciidoc[]
 [[adding-visualizations-to-a-dashboard]]
 ==== Adding Visualizations to a Dashboard
 
-To add a visualization to the dashboard, click the *Add* button in the toolbar panel. Select a saved visualization 
-from the list. You can filter the list of visualizations by typing a filter string into the *Visualization Filter* 
+To add a visualization to the dashboard, click the *Add* button in the toolbar panel. Select a saved visualization
+from the list. You can filter the list of visualizations by typing a filter string into the *Visualization Filter*
 field.
 
 The visualization you select appears in a _container_ on your dashboard.
 
-NOTE: If you see a message about the container's height or width being too small, <<resizing-containers,resize the 
+NOTE: If you see a message about the container's height or width being too small, <<resizing-containers,resize the
 container>>.
 
 [float]
 [[saving-dashboards]]
 ==== Saving Dashboards
 
-To save the dashboard, click the *Save Dashboard* button in the toolbar panel, enter a name for the dashboard in the 
-*Save As* field, and click the *Save* button. By default, dashboards store the time period specified in the time filter 
-when you save a dashboard. To disable this behavior, clear the *Store time with dashboard* box before clicking the 
+To save the dashboard, click the *Save Dashboard* button in the toolbar panel, enter a name for the dashboard in the
+*Save As* field, and click the *Save* button. By default, dashboards store the time period specified in the time filter
+when you save a dashboard. To disable this behavior, clear the *Store time with dashboard* box before clicking the
 *Save* button.
 
 [float]
 [[loading-a-saved-dashboard]]
 ==== Loading a Saved Dashboard
 
-Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes 
-a text field to filter by dashboard name and a link to the Object Editor for managing your saved dashboards. You can 
+Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes
+a text field to filter by dashboard name and a link to the Object Editor for managing your saved dashboards. You can
 also access the Object Editor by clicking *Settings > Objects*.
 
 [float]
 [[sharing-dashboards]]
 ==== Sharing Dashboards
 
-You can share dashboards with other users. You can share a direct link to the Kibana dashboard or embed the dashboard 
+You can share dashboards with other users. You can share a direct link to the Kibana dashboard or embed the dashboard
 in your Web page.
 
 NOTE: A user must have Kibana access in order to view embedded dashboards.
@@ -72,7 +72,7 @@ NOTE: A user must have Kibana access in order to view embedded dashboards.
 To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
 
 Click the *Copy to Clipboard* button image:images/share-link.png[] to copy the native URL or embed HTML to the clipboard.
-Click the *Generate short URL* button image:images/share-short-link.png[] to create a shortened URL for sharing or 
+Click the *Generate short URL* button image:images/share-short-link.png[] to create a shortened URL for sharing or
 embedding.
 
 [float]
@@ -85,40 +85,40 @@ To embed a dashboard, copy the embed code from the _Share_ display into your ext
 [[customizing-your-dashboard]]
 === Customizing Dashboard Elements
 
-The visualizations in your dashboard are stored in resizable _containers_ that you can arrange on the dashboard. This 
+The visualizations in your dashboard are stored in resizable _containers_ that you can arrange on the dashboard. This
 section discusses customizing these containers.
 
 [float]
 [[moving-containers]]
 ==== Moving Containers
 
-Click and hold a container's header to move the container around the dashboard. Other containers will shift as needed 
+Click and hold a container's header to move the container around the dashboard. Other containers will shift as needed
 to make room for the moving container. Release the mouse button to confirm the container's new location.
 
 [float]
 [[resizing-containers]]
 ==== Resizing Containers
 
-Move the cursor to the bottom right corner of the container until the cursor changes to point at the corner. After the 
-cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to 
+Move the cursor to the bottom right corner of the container until the cursor changes to point at the corner. After the
+cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to
 confirm the new container size.
 
 [float]
 [[removing-containers]]
 ==== Removing Containers
 
-Click the *x* icon at the top right corner of a container to remove that container from the dashboard. Removing a 
+Click the *x* icon at the top right corner of a container to remove that container from the dashboard. Removing a
 container from a dashboard does not delete the saved visualization in that container.
 
 [float]
 [[viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed 
+To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
 information about the raw data replace the visualization, as in this example:
 
 .Table
-A representation of the underlying data, presented as a paginated data grid. You can sort the items 
+A representation of the underlying data, presented as a paginated data grid. You can sort the items
 in the table by clicking on the table headers at the top of each column.
 image:images/NYCTA-Table.jpg[]
 
@@ -131,20 +131,20 @@ The raw response from the server, presented in JSON format.
 image:images/NYCTA-Response.jpg[]
 
 .Statistics
-A summary of the statistics related to the request and the response, presented as a data grid. The data 
-grid includes the query duration, the request duration, the total number of records found on the server, and the 
+A summary of the statistics related to the request and the response, presented as a data grid. The data
+grid includes the query duration, the request duration, the total number of records found on the server, and the
 index pattern used to make the query.
 image:images/NYCTA-Statistics.jpg[]
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
-*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it 
+*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
 is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
 
 [float]
 [[changing-the-visualization]]
 === Changing the Visualization
 
-Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the 
+Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the
 visualization in the <<visualize,Visualize>> page.
 
 [float]
