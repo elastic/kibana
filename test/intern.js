@@ -1,8 +1,6 @@
 define(function (require) {
-  var serverConfig = require('intern/dojo/node!./server_config');
-  var _ = require('intern/dojo/node!lodash');
-
-  return _.assign({
+  const serverConfig = require('intern/dojo/node!./server_config');
+  return Object.assign({
     debug: true,
     capabilities: {
       'selenium-version': '2.53.0',
@@ -10,7 +8,7 @@ define(function (require) {
       'idle-timeout': 99
     },
     environments: [{
-      browserName: 'firefox'
+      browserName: 'chrome'
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [

@@ -4,19 +4,17 @@
   overflow-x: hidden;
 }
 
-.discover {
-
-  &-wrapper {
+  .discover-wrapper {
     padding-right: 0px !important;
     padding-left: @collapser-width;
   }
 
-  &-content {
+  .discover-content {
     padding-right: @padding-base-horizontal;
     clear: both;
   }
 
-  &-timechart {
+  .discover-timechart {
     display: block;
     position: relative;
 
@@ -56,7 +54,7 @@
     }
   }
 
-  &-overlay {
+  .discover-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -74,19 +72,18 @@
     }
   }
 
-  &-info {
+  .discover-info {
     line-height: 30px;
     padding: 0px 10px;
     border-bottom-left-radius: @border-radius-base;
+  }
 
-
-    &-title {
+    .discover-info-title {
       font-weight: bold;
       margin-right: 10px;
     }
-  }
 
-  &-table {
+  .discover-table {
     overflow-y: auto;
     overflow-x: auto;
     padding-left: 0px !important;
@@ -95,45 +92,41 @@
     tbody {
       font-family: "Lucida Console", Monaco, monospace;
     }
+  }
 
-    &-footer {
+    .discover-table-footer {
       background-color: @discover-table-footer-bg;
       padding: 5px 10px;
     }
 
-    &-details-toggle {
+    .discover-table-details-toggle {
       margin-bottom: 3px;
     }
 
-    &-timefield {
+    .discover-table-timefield {
       white-space: nowrap;
     }
 
-    &-open-icon {
+    .discover-table-open-icon {
       // when switching between open and closed, the toggle changes size
       // slightly which is a problem because it forces the entire table to
       // re-render which is SLOW
       width: 7px;
     }
-  }
 
-  &-field {
-    &-filter {
+    .discover-field-filter {
       background-color: @discover-field-filter-bg;
       margin-right: 10px;
 
       .form-group {
         margin-bottom: 0px;
       }
-
     }
 
-    &-toggle {
+    .discover-field-toggle {
       color: @discover-field-toggle-color;
       font-size: 9px;
     }
-  }
-}
 
 .shard-failures {
   color: @discover-shard-failures-color;
@@ -166,8 +159,9 @@
   padding: 5px 10px;
   background-color: @discover-field-details-bg;
   color: @discover-field-details-color;
+}
 
-  &-close {
+  .discover-field-details-close {
     text-align: center;
     border-top: 1px solid;
     border-color: @discover-field-details-close-border;
@@ -179,22 +173,26 @@
     }
   }
 
-  &-count {
+  .discover-field-details-count {
     white-space: nowrap;
   }
 
-  &-error {
+  .discover-field-details-error {
     margin-top: 5px;
   }
 
-  &-item {
+  .discover-field-details-item {
     margin-top: 5px;
   }
 
-  &-filter {
+  .discover-field-details-filter {
     cursor: pointer;
   }
 
+/**
+ * TODO: Refactor these selectors to be less specific.
+ */
+.discover-field-details {
   a {
     color: @discover-link-color !important;
   }
@@ -261,8 +259,9 @@ disc-field-chooser {
     margin: -20px 0 10px 0;
     text-align: center;
   }
+}
 
-  &-interval {
+  .results-interval {
     a {
       text-decoration: underline;
     }
@@ -272,4 +271,3 @@ disc-field-chooser {
       width: auto;
     }
   }
-}

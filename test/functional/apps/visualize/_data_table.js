@@ -49,14 +49,11 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function () {
       return headerPage.getSpinnerDone();
-    })
-    .catch(common.handleError(this));
+    });
   });
 
-
   bdd.describe('data table', function indexPatternCreation() {
-    var testSubName = 'DataTable';
-    var vizName1 = 'Visualization ' + testSubName;
+    var vizName1 = 'Visualization DataTable';
 
     bdd.it('should be able to save and load', function pageHeader() {
       return visualizePage.saveVisualization(vizName1)
@@ -72,10 +69,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function () {
         return visualizePage.waitForVisualization();
-      })
-      .catch(common.handleError(this));
+      });
     });
-
 
     bdd.it('should show correct data, take screenshot', function pageHeader() {
       var chartHeight = 0;
@@ -86,15 +81,10 @@ bdd.describe('visualize app', function describeIndexTests() {
       return visualizePage.getDataTableData()
       .then(function showData(data) {
         common.debug(data.split('\n'));
+        common.saveScreenshot('Visualize-data-table');
         expect(data.split('\n')).to.eql(expectedChartData);
-      })
-      .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
-
 
   });
 });

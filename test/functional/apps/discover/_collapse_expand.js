@@ -33,31 +33,30 @@ bdd.describe('discover tab', function describeIndexTests() {
     .then(function () {
       common.debug('setAbsoluteRange');
       return headerPage.setAbsoluteRange(fromTime, toTime);
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   bdd.describe('field data', function () {
     bdd.it('should initially be expanded', function () {
+      common.saveScreenshot('Discover-sidebar-expanded');
       return discoverPage.getSidebarWidth()
         .then(function (width) {
           common.debug('expanded sidebar width = ' + width);
           expect(width > 180).to.be(true);
-        })
-        .catch(common.handleError(this));
+        });
     });
 
     bdd.it('should collapse when clicked', function () {
       return discoverPage.toggleSidebarCollapse()
         .then(function () {
+          common.saveScreenshot('Discover-sidebar-collapsed');
           common.debug('discoverPage.getSidebarWidth()');
           return discoverPage.getSidebarWidth();
         })
         .then(function (width) {
           common.debug('collapsed sidebar width = ' + width);
           expect(width < 20).to.be(true);
-        })
-        .catch(common.handleError(this));
+        });
     });
 
     bdd.it('should expand when clicked', function () {
@@ -69,8 +68,7 @@ bdd.describe('discover tab', function describeIndexTests() {
         .then(function (width) {
           common.debug('expanded sidebar width = ' + width);
           expect(width > 180).to.be(true);
-        })
-        .catch(common.handleError(this));
+        });
     });
   });
 });

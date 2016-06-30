@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Kibana Visual Regression Gallery</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+
+  body {
+    padding: 40px;
+    background-color: #f6f6f6;
+    font-family: 'Helvetica', Arial, sans-serif;
+    min-width: 2000px;
+  }
+
+  .title {
+    margin-bottom: 6px;
+    font-size: 28px;
+  }
+
+  .meta {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .comparison {
+    padding: 20px;
+    margin-bottom: 40px;
+    background-color: #ffffff;
+  }
+
+    .comparison__title {
+      cursor: pointer;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      font-size: 32px;
+      color: #2d2d2d;
+      border-bottom: 2px solid #ecf0f1;
+    }
+
+    .comparison__title:hover {
+      background-color: #e9e9e9;
+    }
+
+      .comparison__percent {
+        opacity: 0.4;
+      }
+
+    .comparison__subTitle {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      padding-bottom: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #9c9c9c;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .comparison__body {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      padding-top: 20px;
+      max-height: 500px;
+      overflow: auto;
+    }
+
+  .comparison--collapsed .comparison__title {
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .comparison--collapsed .comparison__subTitle {
+    display: none;
+  }
+
+  .comparison--collapsed .comparison__body {
+    display: none;
+  }
+
+  .comparison--warning {
+  }
+
+  .comparisonScreenshot {
+  }
+
+  .comparisonScreenshot + .comparisonScreenshot {
+    margin-left: 20px;
+  }
+
+    .comparisonScreenshot__image {
+      cursor: pointer;
+      width: 900px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+  .comparisonScreenshotTitle {
+    width: 900px;
+    background-color: white;
+  }
+
+  .comparisonScreenshotTitle + .comparisonScreenshotTitle {
+    margin-left: 20px;
+  }
+
+  .comparisonScreenshotTitle--session,
+  .comparisonScreenshotTitle--baseline {
+    cursor: pointer;
+  }
+
+  .comparisonScreenshotTitle--session:hover,
+  .comparisonScreenshotTitle--baseline:hover {
+    background-color: #e9e9e9;
+  }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="title">
+    Kibana Visual Regression Gallery
+  </div>
+
+  <div class="meta">
+    {{branch}} - {{date}}
+  </div>
+
+  {{#each comparisons as |comparison|}}
+  <div class="comparison{{#lte comparison.change ../hiddenThreshold}} comparison--collapsed{{/lte}} {{#gte comparison.change ../warningThreshold }} comparison--warning{{/gte}}">
+
+    <div class="comparison__title">
+      <span class="comparison__percent">({{comparison.percentage}}%)</span> {{comparison.name}}
+    </div>
+
+    <div class="comparison__subTitle">
+      <div class="comparisonScreenshotTitle">Diff</div>
+      <div
+        class="comparisonScreenshotTitle comparisonScreenshotTitle--session"
+        style="display: none"
+      >
+        Session
+      </div>
+      <div
+        class="comparisonScreenshotTitle comparisonScreenshotTitle--baseline"
+      >
+        Baseline
+      </div>
+    </div>
+
+    <div class="comparison__body">
+      <!-- Diff first, so we can scan for regressions. -->
+      <div class="comparisonScreenshot">
+        <img
+          class="comparisonScreenshot__image"
+          src="data:image/png;base64,{{comparison.imageData.diff}}"
+        />
+      </div>
+
+      <!-- Session, see what happened during the test. -->
+      <div
+        class="comparisonScreenshot comparisonScreenshot--session"
+        style="display: none"
+      >
+        <img
+          class="comparisonScreenshot__image"
+          src="data:image/png;base64,{{comparison.imageData.session}}"
+        />
+      </div>
+
+      <!-- Baseline, see what it's supposed to be. -->
+      <div class="comparisonScreenshot comparisonScreenshot--baseline">
+        <img
+          class="comparisonScreenshot__image"
+          src="data:image/png;base64,{{comparison.imageData.baseline}}"
+        />
+      </div>
+    </div>
+  </div>
+  {{/each}}
+
+<script>
+
+function start() {
+
+  function addClass(el, className) {
+    el.className += ' ' + className;
+  }
+
+  function removeClass(el, className) {
+    var classes = el.className.split(' ');
+    var classIndex = classes.indexOf(className);
+    if (classIndex !== -1) {
+      classes.splice(classIndex, 1);
+    }
+    el.className = classes.join(' ');
+  }
+
+  function onClickComparisonTitle(comparison) {
+    return function() {
+      var collapsedClass = 'comparison--collapsed';
+      if (comparison.className.indexOf(collapsedClass) === -1) {
+        addClass(comparison, collapsedClass);
+      } else {
+        removeClass(comparison, collapsedClass);
+      }
+    };
+  }
+
+  function onClickBaselineTitle(
+    baselineImage,
+    baselineTitle,
+    sessionImage,
+    sessionTitle
+  ) {
+    return function() {
+      // Hide the baseline image.
+      baselineImage.setAttribute('style', 'display: none');
+      baselineTitle.setAttribute('style', 'display: none');
+
+      // Show the session image.
+      sessionImage.setAttribute('style', '');
+      sessionTitle.setAttribute('style', '');
+    }
+  }
+
+  function onClickSessionTitle(
+    baselineImage,
+    baselineTitle,
+    sessionImage,
+    sessionTitle
+  ) {
+    return function() {
+      // Show the baseline image.
+      baselineImage.setAttribute('style', '');
+      baselineTitle.setAttribute('style', '');
+
+      // Hide the session image.
+      sessionImage.setAttribute('style', 'display: none');
+      sessionTitle.setAttribute('style', 'display: none');
+    }
+  }
+
+  function onClickImage(image) {
+    return function() {
+      const url = image.getAttribute('src');
+      window.open(url, '_blank');
+    }
+  }
+
+  var comparisons = document.querySelectorAll('.comparison');
+
+  for (var i = 0; i < comparisons.length; i++) {
+    var comparison = comparisons[i];
+    var comparisonTitle = comparison.querySelector('.comparison__title');
+    comparisonTitle.onclick = onClickComparisonTitle(comparison);
+
+    var baselineScreenshot = comparison.querySelector('.comparisonScreenshot--baseline');
+    var baselineTitle = comparison.querySelector('.comparisonScreenshotTitle--baseline');
+    var sessionScreenshot = comparison.querySelector('.comparisonScreenshot--session');
+    var sessionTitle = comparison.querySelector('.comparisonScreenshotTitle--session');
+
+    baselineTitle.onclick = onClickBaselineTitle(
+      baselineScreenshot,
+      baselineTitle,
+      sessionScreenshot,
+      sessionTitle
+    );
+
+    sessionTitle.onclick = onClickSessionTitle(
+      baselineScreenshot,
+      baselineTitle,
+      sessionScreenshot,
+      sessionTitle
+    );
+
+    const baselineImage = baselineScreenshot.querySelector('img');
+    baselineImage.onclick = onClickImage(baselineImage);
+
+    const sessionImage = sessionScreenshot.querySelector('img');
+    sessionImage.onclick = onClickImage(sessionImage);
+  }
+}
+
+document.onreadystatechange = function () {
+  if (document.readyState === 'complete') {
+    start();
+  }
+};
+
+</script>
+
+</body>
+</html>

@@ -113,7 +113,7 @@ Once that is complete just run:
 
 ```
 sh
-npm run test && npm run build
+npm run test && npm run build -- --skip-os-packages
 ```
 
 #### Debugging unit tests
@@ -121,55 +121,41 @@ npm run test && npm run build
 The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
 
-`npm run test:quick`  
+`npm run test:quick`
 Runs both server and browser tests, but skips linting
 
-`npm run test:server`  
+`npm run test:server`
 Run only the server tests
 
-`npm run test:browser`  
+`npm run test:browser`
 Run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
-`npm run test:dev`  
-Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.  
+`npm run test:dev`
+Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 ![Browser test debugging](http://i.imgur.com/DwHxgfq.png)
 
-`npm run mocha [test file or dir]` or `npm run mocha:debug [test file or dir]`  
+`npm run mocha [test file or dir]` or `npm run mocha:debug [test file or dir]`
 Run a one off test with the local project version of mocha, babel compilation, and optional debugging. Great
 for development and fixing individual tests.
 
 #### Unit testing plugins
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
-`npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin`  
+`npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin`
 Run the tests for just your particular plugin. Assuming you plugin lives outside of the `installedPlugins directory`, which it should.
 
 #### Running browser automation tests:
 
-*The Selenium server that is started currently only runs the tests in a recent version of Firefox.*
-*You can use the `PATH` environment variable to specify which version of Firefox to use.*
+The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
-The following will start Kibana, Elasticsearch and Selenium for you. To run the functional UI tests use the following commands
-
-`npm run test:ui`  
+`npm run test:ui`
 Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.
 
-`npm run test:ui:server`  
+`npm run test:ui:server`
 Start the server required for the `test:ui:runner` tasks. Once the server is started `test:ui:runner` can be run multiple times without waiting for the server to start.
 
-`npm run test:ui:runner`  
-Execute the front-end selenium tests. This requires the server started by the `test:ui:server` task.
-
-##### If you already have ElasticSearch, Kibana, and Selenium Server running:
-
-Set your es and kibana ports in `test/intern.js` to 9220 and 5620, respectively. You can configure your Selenium server to run the tests on Chrome,IE, or other browsers here.
-
-Once you've got the services running, execute the following:
-
-```
-sh
-npm run test:ui:runner
-```
+`npm run test:ui:runner`
+Execute the front-end browser tests. This requires the server started by the `test:ui:server` task.
 
 #### Browser automation notes:
 
@@ -187,12 +173,12 @@ Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can b
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0 # required by pleaserun 0.0.16
 gem install pleaserun -v 0.0.16 # higher versions fail at the moment
-npm run build:ospackages
+npm run build -- --skip-archives
 ```
 
 To specify a package to build you can add `rpm` or `deb` as an argument.
 ```sh
-npm run build:ospackages -- --rpm
+npm run build -- --rpm
 ```
 
 Distributable packages can be found in `target/` after the build completes.

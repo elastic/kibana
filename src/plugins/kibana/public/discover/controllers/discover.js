@@ -36,6 +36,9 @@ const app = uiModules.get('apps/discover', [
 ]);
 
 uiRoutes
+.defaults(/discover/, {
+  requireDefaultIndex: true
+})
 .when('/discover/:id?', {
   template: indexTemplate,
   reloadOnSearch: false,
@@ -65,7 +68,7 @@ uiRoutes
       return savedSearches.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
         'search': '/discover',
-        'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
+        'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
       }));
     }
   }

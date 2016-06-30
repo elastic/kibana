@@ -50,7 +50,7 @@ describe('initDefaultFieldProps', function () {
   it('should make string fields analyzed', function () {
     const results = initDefaultFieldProps(fields);
     _.forEach(results, function (field) {
-      if (field.type === 'string' && !_.contains(field.name, 'raw')) {
+      if (field.type === 'string' && !_.contains(field.name, 'keyword')) {
         expect(field).to.have.property('indexed', true);
         expect(field).to.have.property('analyzed', true);
         expect(field).to.have.property('doc_values', false);
@@ -63,12 +63,38 @@ describe('initDefaultFieldProps', function () {
   it('should create an extra raw non-analyzed field for strings', function () {
     const results = initDefaultFieldProps(fields);
     const rawField = _.find(results, function (field) {
-      return _.contains(field.name, 'raw');
+      return _.contains(field.name, 'keyword');
     });
     expect(rawField).to.have.property('indexed', true);
     expect(rawField).to.have.property('analyzed', false);
     expect(rawField).to.have.property('doc_values', true);
     expect(rawField).to.have.property('scripted', false);
     expect(rawField).to.have.property('count', 0);
+  });
+
+  it('should apply some overrides to metafields', function () {
+    const results = initDefaultFieldProps([{name: '_source'}, {name: '_timestamp'}]);
+    const expected = [
+      {
+        name: '_source',
+        indexed: false,
+        analyzed: false,
+        doc_values: false,
+        count: 0,
+        scripted: false,
+        type: '_source'
+      },
+      {
+        name: '_timestamp',
+        indexed: true,
+        analyzed: false,
+        doc_values: false,
+        count: 0,
+        scripted: false,
+        type: 'date'
+      }
+    ];
+
+    expect(_.isEqual(expected, results)).to.be.ok();
   });
 });

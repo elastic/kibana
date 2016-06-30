@@ -60,12 +60,9 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
   bdd.describe('pie chart', function indexPatternCreation() {
-    var testSubName = 'PieChart';
-    var vizName1 = 'Visualization ' + testSubName;
-
+    var vizName1 = 'Visualization PieChart';
 
     bdd.it('should save and load', function pageHeader() {
-      common.debug('Start of test' + testSubName + 'Visualization');
       var remote = this.remote;
 
       return visualizePage.saveVisualization(vizName1)
@@ -85,8 +82,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       // sleep a bit before trying to get the pie chart data below
       .then(function sleep() {
         return common.sleep(2000);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show 10 slices in pie chart, take screenshot', function pageHeader() {
@@ -97,13 +93,9 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function (pieData) {
         var barHeightTolerance = 1;
         common.debug('pieData.length = ' + pieData.length);
+        common.saveScreenshot('Visualize-pie-chart');
         expect(pieData.length).to.be(expectedPieChartSliceCount);
-      })
-      .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show correct data', function pageHeader() {
@@ -122,10 +114,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedTableData);
-      })
-      .catch(common.handleError(this));
+      });
     });
-
-
   });
 });

@@ -1,4 +1,7 @@
-import { bdd, common } from '../../support';
+import {
+  bdd,
+  common
+} from '../../support';
 
 var expect = require('expect.js');
 
@@ -11,13 +14,13 @@ bdd.describe('status page', function () {
     var self = this;
 
     return common.tryForTime(6000, function () {
-      return self.remote
-      .findByCssSelector('.plugin_status_breakdown')
+      return common.findTestSubject('statusBreakdown')
       .getVisibleText()
       .then(function (text) {
-        expect(text.indexOf('kibana 1.0.0 Ready')).to.be.above(-1);
+        common.saveScreenshot('Status');
+        expect(text.indexOf('plugin:kibana')).to.be.above(-1);
       });
     })
-    .catch(common.handleError(self));
+    .catch(common.createErrorHandler(self));
   });
 });

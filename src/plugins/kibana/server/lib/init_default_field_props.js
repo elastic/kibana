@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import mappingOverrides from './mapping_overrides';
 
 module.exports = function initDefaultFieldProps(fields) {
   if (fields === undefined || !_.isArray(fields)) {
@@ -21,7 +22,7 @@ module.exports = function initDefaultFieldProps(fields) {
       });
 
       results.push({
-        name: newField.name + '.raw',
+        name: newField.name + '.keyword',
         type: 'string',
         indexed: true,
         analyzed: false,
@@ -38,6 +39,10 @@ module.exports = function initDefaultFieldProps(fields) {
         scripted: false,
         count: 0
       });
+    }
+
+    if (mappingOverrides[newField.name]) {
+      _.assign(newField, mappingOverrides[newField.name]);
     }
   });
 

@@ -47,8 +47,7 @@ bdd.describe('shared links', function describeIndexTests() {
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button
       return common.sleep(1000);
-    })
-    .catch(common.handleError(this));
+    });
   });
 
 
@@ -57,12 +56,12 @@ bdd.describe('shared links', function describeIndexTests() {
       var expectedCaption = 'Share a link';
       return discoverPage.clickShare()
       .then(function () {
+        common.saveScreenshot('Discover-share-link');
         return discoverPage.getShareCaption();
       })
       .then(function (actualCaption) {
         expect(actualCaption).to.be(expectedCaption);
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show the correct formatted URL', function () {
@@ -78,8 +77,7 @@ bdd.describe('shared links', function describeIndexTests() {
         // strip the timestamp out of each URL
         expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
           .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     bdd.it('should show toast message for copy to clipboard', function () {
@@ -88,12 +86,12 @@ bdd.describe('shared links', function describeIndexTests() {
         return headerPage.getToastMessage();
       })
       .then(function (toastMessage) {
+        common.saveScreenshot('Discover-copy-to-clipboard-toast');
         expect(toastMessage).to.match(expectedToastMessage);
       })
       .then(function () {
         return headerPage.waitForToastMessageGone();
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     // TODO: verify clipboard contents
@@ -102,13 +100,13 @@ bdd.describe('shared links', function describeIndexTests() {
       return discoverPage.clickShortenUrl()
       .then(function () {
         return common.try(function tryingForTime() {
+          common.saveScreenshot('Discover-shorten-url-button');
           return discoverPage.getShortenedUrl()
           .then(function (actualUrl) {
             expect(actualUrl).to.match(re);
           });
         });
-      })
-      .catch(common.handleError(this));
+      });
     });
 
     // NOTE: This test has to run immediately after the test above
@@ -122,8 +120,7 @@ bdd.describe('shared links', function describeIndexTests() {
       })
       .then(function () {
         return headerPage.waitForToastMessageGone();
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 });

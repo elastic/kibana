@@ -1,8 +1,8 @@
 export default (grunt) => {
-  const VERSION = grunt.config.get('pkg.version');
+  const VERSION = grunt.config.get('build.version');
 
   const FOLDER_STAGING = `kibana/staging/${VERSION.match(/\d\.\d\.\d/)[0]}-XXXXXXX/repos/${VERSION.match(/\d\./)[0]}x`;
-  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\.\d/)[0]}`;
+  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
 
   const FOLDERNAME_DEB = 'debian';
   const FOLDERNAME_RPM = 'centos';
@@ -13,8 +13,9 @@ export default (grunt) => {
   const PREFIX_PRODUCTION_RPM = `${FOLDER_PRODUCTION}/${FOLDERNAME_RPM}`;
 
   const FOLDER_CONFIG = '/etc/kibana';
-  const FOLDER_LOGS = '/var/log/kibana';
   const FOLDER_HOME = '/usr/share/kibana';
+  const FOLDER_DATA = '/var/lib/kibana';
+  const FOLDER_PLUGINS = `${FOLDER_HOME}/installedPlugins`;
 
   const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibana.yml`;
   const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/kibana`;
@@ -43,7 +44,8 @@ export default (grunt) => {
     version: VERSION,
     path: {
       conf: FOLDER_CONFIG,
-      logs: FOLDER_LOGS,
+      data: FOLDER_DATA,
+      plugins: FOLDER_PLUGINS,
       home: FOLDER_HOME,
       kibanaBin: FILE_KIBANA_BINARY,
       kibanaConfig: FILE_KIBANA_CONF

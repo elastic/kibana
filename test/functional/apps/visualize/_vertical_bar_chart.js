@@ -52,8 +52,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('vertical bar chart', function indexPatternCreation() {
-    var testSubName = 'VerticalBarChart';
-    var vizName1 = 'Visualization ' + testSubName;
+    var vizName1 = 'Visualization VerticalBarChart';
 
     bdd.it('should save and load', function pageHeader() {
       return visualizePage.saveVisualization(vizName1)
@@ -72,10 +71,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       })
       .then(function waitForVisualization() {
         return visualizePage.waitForVisualization();
-      })
-      .catch(common.handleError(this));
+      });
     });
-
 
     bdd.it('should show correct chart, take screenshot', function pageHeader() {
       var expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
@@ -92,18 +89,13 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug('data=' + data);
         common.debug('data.length=' + data.length);
+        common.saveScreenshot('Visualize-vertical-bar-chart');
         expect(data).to.eql(expectedChartValues);
-      })
-      .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
 
 
     bdd.it('should show correct data', function pageHeader() {
-      var testSubName = 'VerticalBarChart';
       // this is only the first page of the tabular data.
       var expectedChartData =  [ 'September 20th 2015, 00:00:00.000 37',
         'September 20th 2015, 03:00:00.000 202',
@@ -124,8 +116,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedChartData);
-      })
-      .catch(common.handleError(this));
+      });
     });
   });
 });

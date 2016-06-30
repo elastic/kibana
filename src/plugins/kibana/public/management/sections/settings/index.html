@@ -1,0 +1,28 @@
+<kbn-management-app section="kibana">
+  <kbn-management-advanced class="container-fluid">
+    <div class="bs-callout bs-callout-warning">
+      <h4>Caution: You can break stuff here</h4>
+      Be careful in here, these settings are for very advanced users only.
+      Tweaks you make here can break large portions of Kibana. Some of these
+      settings may be undocumented, unsupported or experimental. If a field has
+      a default value, blanking the field will reset it to its default which
+      may be unacceptable given other configuration directives. Deleting a
+      custom setting will permanently remove it from Kibana's config.
+    </div>
+    <form role="form">
+      <input aria-label="Filter" ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
+    </form>
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="col-xs-4 col-sm-4">Name</th>
+          <th class="col-xs-4 col-sm-5">Value</th>
+          <th class="col-xs-3 col-sm-2">Actions <kbn-info info="Edit or restore the default value."></kbn-info></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="conf in configs | filter:advancedFilter" advanced-row="conf" configs="configs"></tr>
+      </tbody>
+    </table>
+  </kbn-management-advanced>
+</kbn-management-app>

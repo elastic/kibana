@@ -57,18 +57,17 @@ bdd.describe('visualize app', function describeIndexTests() {
     .then(function getSpinnerDone() {
       common.debug('Waiting...');
       return headerPage.getSpinnerDone();
-    })
-    .catch(common.handleError(this));
+    });
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    var testSubName = 'AreaChart';
-    var vizName1 = 'Visualization ' + testSubName;
+    var vizName1 = 'Visualization AreaChart';
 
     bdd.it('should save and load', function pageHeader() {
       return visualizePage.saveVisualization(vizName1)
       .then(function (message) {
         common.debug('Saved viz message = ' + message);
+        common.saveScreenshot('Visualize-area-chart-save-toast');
         expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
       })
       .then(function testVisualizeWaitForToastMessageGone() {
@@ -85,10 +84,8 @@ bdd.describe('visualize app', function describeIndexTests() {
       // otherwise it hangs.
       .then(function sleep() {
         return common.sleep(2000);
-      })
-      .catch(common.handleError(this));
+      });
     });
-
 
     bdd.it('should show correct chart, take screenshot', function pageHeader() {
       var chartHeight = 0;
@@ -120,15 +117,10 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function (paths) {
         common.debug('expectedAreaChartData = ' + expectedAreaChartData);
         common.debug('actual chart data =     ' + paths);
+        common.saveScreenshot('Visualize-area-chart');
         expect(paths).to.eql(expectedAreaChartData);
-      })
-      .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('./screenshot-' + testSubName + '.png');
-      })
-      .catch(common.handleError(this));
+      });
     });
-
 
     bdd.it('should show correct data', function pageHeader() {
       var expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
@@ -167,11 +159,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function showData(data) {
         common.debug('getDataTableData = ' + data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedTableData);
-      })
-      .catch(common.handleError(this));
+      });
     });
-
-
-
   });
 });

@@ -1,8 +1,11 @@
 import { fromRoot } from '../../utils';
+import fs from 'fs';
 import install from './install';
 import Logger from '../lib/logger';
 import pkg from '../../utils/package_json';
+import { getConfig } from '../../server/path';
 import { parse, parseMilliseconds } from './settings';
+import { find } from 'lodash';
 
 function processCommand(command, options) {
   let settings;
@@ -26,7 +29,7 @@ export default function pluginInstall(program) {
   .option(
     '-c, --config <path>',
     'path to the config file',
-    fromRoot('config/kibana.yml')
+    getConfig()
   )
   .option(
     '-t, --timeout <duration>',

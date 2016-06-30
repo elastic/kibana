@@ -1,0 +1,14 @@
+import './append/directive';
+import './convert/directive';
+import './date/directive';
+import './geoip/directive';
+import './grok/directive';
+import './gsub/directive';
+import './join/directive';
+import './lowercase/directive';
+import './remove/directive';
+import './rename/directive';
+import './set/directive';
+import './split/directive';
+import './trim/directive';
+import './uppercase/directive';

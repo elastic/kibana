@@ -1,0 +1,5 @@
+<span ng-if="!isHtml">{{content}}</span>
+<span ng-if="isHtml" ng-bind-html="content | trustAsHtml"></span>
+<span ng-if="truncated">
+  <a ng-click="toggle()">{{action}}</a>
+</span>
