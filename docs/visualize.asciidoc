@@ -1,15 +1,15 @@
 [[visualize]]
 == Visualize
 
-You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use them 
-individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following 
+You can use the _Visualize_ page to design data visualizations. You can save these visualizations, use them
+individually, or combine visualizations into a _dashboard_. A visualization can be based on one of the following
 data source types:
 
 * A new interactive search
 * A saved search
 * An existing saved visualization
 
-Visualizations are based on the {ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x. 
+Visualizations are based on the {ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x.
 
 [float]
 [[createvis]]
@@ -27,22 +27,22 @@ Choose a visualization type when you start the New Visualization wizard:
 
 [horizontal]
 <<area-chart,Area chart>>:: Use area charts to visualize the total contribution of several different series.
-<<data-table,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data 
+<<data-table,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data
 table for several other visualizations by clicking at the bottom of the visualization.
 <<line-chart,Line chart>>:: Use line charts to compare different series.
-<<markdown-widget,Markdown widget>>:: Use the Markdown widget to display free-form information or instructions about your 
+<<markdown-widget,Markdown widget>>:: Use the Markdown widget to display free-form information or instructions about your
 dashboard.
 <<metric-chart,Metric>>:: Use the metric visualization to display a single number on your dashboard.
 <<pie-chart,Pie chart>>:: Use pie charts to display each source's contribution to a total.
 <<tilemap,Tile map>>:: Use tile maps to associate the results of an aggregation with geographic points.
 <<vertical-bar-chart,Vertical bar chart>>:: Use vertical bar charts as a general-purpose chart.
 
-You can also load a saved visualization that you created earlier. The saved visualization selector includes a text 
-field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Objects*, to 
+You can also load a saved visualization that you created earlier. The saved visualization selector includes a text
+field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Objects*, to
 manage your saved visualizations.
 
-If your new visualization is a Markdown widget, selecting that type takes you to a text entry field where you enter the 
-text to display in the widget. For all other types of visualization, selecting the type takes you to data source 
+If your new visualization is a Markdown widget, selecting that type takes you to a text entry field where you enter the
+text to display in the widget. For all other types of visualization, selecting the type takes you to data source
 selection.
 
 [float]
@@ -50,8 +50,8 @@ selection.
 ==== Step 2: Choose a Data Source
 
 You can choose a new or saved search to serve as the data source for your visualization. Searches are associated with
-an index or a set of indexes. When you select _new search_ on a system with multiple indices configured, select an 
-index pattern from the drop-down to bring up the visualization editor. 
+an index or a set of indexes. When you select _new search_ on a system with multiple indices configured, select an
+index pattern from the drop-down to bring up the visualization editor.
 
 When you create a visualization from a saved search and save the visualization, the search is tied to the visualization.
 When you make changes to the search that is linked to the visualization, the visualization updates automatically.
@@ -60,7 +60,7 @@ When you make changes to the search that is linked to the visualization, the vis
 [[visualization-editor]]
 ==== Step 3: The Visualization Editor
 
-The visualization editor enables you to configure and edit visualizations. The visualization editor has the following 
+The visualization editor enables you to configure and edit visualizations. The visualization editor has the following
 main elements:
 
 1. <<toolbar-panel,Toolbar>>
@@ -78,37 +78,37 @@ include::autorefresh.asciidoc[]
 ===== Toolbar
 
 The toolbar has a search field for interactive data searches, as well as controls to manage saving and loading
-visualizations. For visualizations based on saved searches, the search bar is grayed out. To edit the search, replacing 
+visualizations. For visualizations based on saved searches, the search bar is grayed out. To edit the search, replacing
 the saved search with the edited version, double-click the search field.
 
-The toolbar at the right of the search box has buttons for creating new visualizations, saving the current 
-visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for 
+The toolbar at the right of the search box has buttons for creating new visualizations, saving the current
+visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for
 the current visualization.
 
 [float]
 [[aggregation-builder]]
 ===== Aggregation Builder
 
-Use the aggregation builder on the left of the page to configure the {ref}search-aggregations-metrics.html[metric] and {ref}search-aggregations-bucket.html[bucket] aggregations used in your 
+Use the aggregation builder on the left of the page to configure the {ref}search-aggregations-metrics.html[metric] and {ref}search-aggregations-bucket.html[bucket] aggregations used in your
 visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
 {ref}search-aggregations.html[Elasticsearch aggregations reference].
 
-Bar, line, or area chart visualizations use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar 
-colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of 
+Bar, line, or area chart visualizations use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar
+colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of
 slices.
 
-Choose the metric aggregation for your visualization's Y axis, such as 
-{ref}/search-aggregations-metrics-valuecount-aggregation.html[count], 
-{ref}/search-aggregations-metrics-avg-aggregation.html[average], 
-{ref}/search-aggregations-metrics-sum-aggregation.html[sum], 
-{ref}/search-aggregations-metrics-min-aggregation.html[min], 
-{ref}/search-aggregations-metrics-max-aggregation.html[max], or 
-{ref}/search-aggregations-metrics-cardinality-aggregation.html[cardinality] 
-(unique count). Use bucket aggregations for the visualization's X axis, color slices, and row/column splits. Common 
+Choose the metric aggregation for your visualization's Y axis, such as
+{ref}/search-aggregations-metrics-valuecount-aggregation.html[count],
+{ref}/search-aggregations-metrics-avg-aggregation.html[average],
+{ref}/search-aggregations-metrics-sum-aggregation.html[sum],
+{ref}/search-aggregations-metrics-min-aggregation.html[min],
+{ref}/search-aggregations-metrics-max-aggregation.html[max], or
+{ref}/search-aggregations-metrics-cardinality-aggregation.html[cardinality]
+(unique count). Use bucket aggregations for the visualization's X axis, color slices, and row/column splits. Common
 bucket aggregations include date histogram, range, terms, filters, and significant terms.
 
-You can set the order in which buckets execute. In Elasticsearch, the first aggregation determines the data set 
-for any subsequent aggregations. The following example involves a date bar chart of Web page hits for the top 5 file 
+You can set the order in which buckets execute. In Elasticsearch, the first aggregation determines the data set
+for any subsequent aggregations. The following example involves a date bar chart of Web page hits for the top 5 file
 extensions.
 
 To use the same extension across all hits, set this order:
@@ -123,7 +123,7 @@ To chart the top 5 extensions for each hour, use the following order:
 1.  *X-Axis:* Date bar chart of `@timestamp` (with 1 hour interval)
 2.  *Color:* Terms aggregation of extensions
 
-For these requests, Elasticsearch creates a date bar chart from all the records, then groups the top five extensions 
+For these requests, Elasticsearch creates a date bar chart from all the records, then groups the top five extensions
 inside each bucket, which in this example is a one-hour interval.
 
 NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
@@ -131,8 +131,8 @@ NOTE: Remember, each subsequent bucket slices the data from the previous bucket.
 To render the visualization on the _preview canvas_, click the  *Apply Changes* button at the top right of the
 Aggregation Builder.
 
-You can learn more about aggregation and how altering the order of aggregations affects your visualizations 
-https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[here]. 
+You can learn more about aggregation and how altering the order of aggregations affects your visualizations
+https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[here].
 
 [float]
 [[visualize-filters]]
@@ -142,7 +142,7 @@ include::filter-pinning.asciidoc[]
 [[preview-canvas]]
 ===== Preview Canvas
 
-The preview canvas displays a preview of the visualization you've defined in the aggregation builder. To refresh the 
+The preview canvas displays a preview of the visualization you've defined in the aggregation builder. To refresh the
 visualization preview, clicking the *Apply Changes* image:images/apply-changes-button.png[] button on the toolbar.
 
 include::area.asciidoc[]

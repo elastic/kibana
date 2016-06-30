@@ -1,6 +1,6 @@
 === Working with Filters
 
-When you create a filter anywhere in Kibana, the filter conditions display in an oval under the search text 
+When you create a filter anywhere in Kibana, the filter conditions display in an oval under the search text
 entry box:
 
 image::images/filter-sample.png[]
@@ -9,16 +9,16 @@ Hovering on the filter oval displays the following icons:
 
 image::images/filter-allbuttons.png[]
 
-Enable Filter image:images/filter-enable.png[]:: Click this icon to disable the filter without removing it. You can 
-enable the filter again later by clicking the icon again. Disabled filters display a striped shaded color, grey for 
+Enable Filter image:images/filter-enable.png[]:: Click this icon to disable the filter without removing it. You can
+enable the filter again later by clicking the icon again. Disabled filters display a striped shaded color, grey for
 inclusion filters and red for exclusion filters.
 Pin Filter image:images/filter-pin.png[]:: Click this icon to _pin_ a filter. Pinned filters persist across Kibana tabs.
-You can pin filters from the _Visualize_ tab, click on the _Discover_ or _Dashboard_ tabs, and those filters remain in 
+You can pin filters from the _Visualize_ tab, click on the _Discover_ or _Dashboard_ tabs, and those filters remain in
 place.
-NOTE: If you have a pinned filter and you're not seeing any query results, that your current tab's index pattern is one 
-that the filter applies to. 
-Toggle Filter image:images/filter-toggle.png[]:: Click this icon to _toggle_ a filter. By default, filters are inclusion 
-filters, and display in grey. Only elements that match the filter are displayed. To change this to an exclusion 
+NOTE: If you have a pinned filter and you're not seeing any query results, that your current tab's index pattern is one
+that the filter applies to.
+Toggle Filter image:images/filter-toggle.png[]:: Click this icon to _toggle_ a filter. By default, filters are inclusion
+filters, and display in grey. Only elements that match the filter are displayed. To change this to an exclusion
 filters, displaying only elements that _don't_ match, toggle the filter. Exclusion filters display in red.
 Remove Filter image:images/filter-delete.png[]:: Click this icon to remove a filter entirely.
 Custom Filter image:images/filter-custom.png[]:: Click this icon to display a text field where you can customize the JSON
@@ -26,7 +26,7 @@ representation of the filter and specify an alias to use for the filter name:
 +
 image::images/filter-custom-json.png[]
 +
-You can use JSON filter representation to implement predicate logic, with `should` for OR, `must` for AND, and `must_not` 
+You can use JSON filter representation to implement predicate logic, with `should` for OR, `must` for AND, and `must_not`
 for NOT:
 +
 .OR Example
@@ -94,5 +94,5 @@ for NOT:
 ==========
 Click the *Done* button to update the filter with your changes.
 
-To apply any of the filter actions to all the filters currently in place, click the image:images/filter-actions.png[] 
+To apply any of the filter actions to all the filters currently in place, click the image:images/filter-actions.png[]
 *Global Filter Actions* button and select an action.

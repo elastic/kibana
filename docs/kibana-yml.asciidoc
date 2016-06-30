@@ -31,7 +31,8 @@ wait for Elasticsearch to respond to pings.
 Elasticsearch. This value must be a positive integer.
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List of Kibana client-side headers to send to Elasticsearch.
 To send *no* client-side headers, set this value to [] (an empty list).
-`elasticsearch.shardTimeout:`:: *Default: 0* Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
+`elasticsearch.shardTimeout:`:: *Default: 0* Time in milliseconds for Elasticsearch to wait for responses from shards. Set
+to 0 to disable.
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait for Elasticsearch at Kibana startup before
 retrying.
 `pid.file:`:: Specifies the path where Kibana creates the process ID file.
