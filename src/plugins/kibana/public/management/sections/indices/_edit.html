@@ -42,7 +42,7 @@
         <li class="kbn-management-tab" ng-class="{ active: state.tab === fieldType.index }" ng-repeat="fieldType in fieldTypes">
           <a ng-click="changeTab(fieldType)">
             {{ fieldType.title }}
-            <small ng-if="tab.count">({{ tab.count(indexPattern) }})</small>
+            <small ng-if="fieldType.count">({{ fieldType.count }})</small>
           </a>
         </li>
       </ul>
