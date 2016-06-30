@@ -25,11 +25,11 @@ Kibana users have to authenticate when your cluster has {scyld} enabled. You
 configure {scyld} roles for your Kibana users to control what data those users
 can access. Kibana runs a webserver that makes requests to Elasticsearch on the
 client's behalf, so you also need to configure credentials for the Kibana server
-so those requests can be authenticated. 
+so those requests can be authenticated.
 
-You must configure Kibana to encrypt communications between the browser and the 
-Kibana server to prevent user passwords from being sent in the clear. If are 
-using SSL/TLS to encrypt traffic to and from the nodes in your Elasticsearch 
+You must configure Kibana to encrypt communications between the browser and the
+Kibana server to prevent user passwords from being sent in the clear. If are
+using SSL/TLS to encrypt traffic to and from the nodes in your Elasticsearch
 cluster, you must also configure Kibana to connect to Elasticsearch via HTTPS.
 
 With {scyld} enabled, if you load a Kibana dashboard that accesses data in an

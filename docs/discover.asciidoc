@@ -1,17 +1,17 @@
 [[discover]]
 == Discover
-You can interactively explore your data from the Discover page. You have access to every document in every index that 
-matches the selected index pattern. You can submit search queries, filter the search results, and view document data. 
-You can also see the number of documents that match the search query and get field value statistics. If a time field is 
-configured for the selected index pattern, the distribution of documents over time is displayed in a histogram at the 
-top of the page. 
+You can interactively explore your data from the Discover page. You have access to every document in every index that
+matches the selected index pattern. You can submit search queries, filter the search results, and view document data.
+You can also see the number of documents that match the search query and get field value statistics. If a time field is
+configured for the selected index pattern, the distribution of documents over time is displayed in a histogram at the
+top of the page.
 
 image::images/Discover-Start-Annotated.jpg[Discover Page]
 
 [float]
 [[set-time-filter]]
 === Setting the Time Filter
-The Time Filter restricts the search results to a specific time period. You can set a time filter if your index 
+The Time Filter restricts the search results to a specific time period. You can set a time filter if your index
 contains time-based events and a time-field is configured for the selected index pattern.
 
 By default the time filter is set to the last 15 minutes. You can use the Time Picker to change the time filter
@@ -23,56 +23,56 @@ To set a time filter with the Time Picker:
 . To set a quick filter, simply click one of the shortcut links.
 . To specify a relative Time Filter, click *Relative* and enter the relative start time. You can specify
 the relative start time as any number of seconds, minutes, hours, days, months, or years ago.
-. To specify an absolute Time Filter, click *Absolute* and enter the start date in the *From* field and the end date in 
+. To specify an absolute Time Filter, click *Absolute* and enter the start date in the *From* field and the end date in
 the *To* field.
-. Click the caret at the bottom of the Time Picker to hide it. 
+. Click the caret at the bottom of the Time Picker to hide it.
 
 To set a Time Filter from the histogram, do one of the following:
 
 * Click the bar that represents the time interval you want to zoom in on.
-* Click and drag to view a specific timespan. You must start the selection with the cursor over the background of the 
-chart--the cursor changes to a plus sign when you hover over a valid start point. 
+* Click and drag to view a specific timespan. You must start the selection with the cursor over the background of the
+chart--the cursor changes to a plus sign when you hover over a valid start point.
 
-You can use the browser Back button to undo your changes. 
+You can use the browser Back button to undo your changes.
 
-The histogram lists the time range you're currently exploring, as well as the intervals that range is currently using. 
-To change the intervals, click the link and select an interval from the drop-down. The default behavior automatically 
+The histogram lists the time range you're currently exploring, as well as the intervals that range is currently using.
+To change the intervals, click the link and select an interval from the drop-down. The default behavior automatically
 sets an interval based on the time range.
 
 [float]
 [[search]]
 === Searching Your Data
 You can search the indices that match the current index pattern by submitting a search from the Discover page.
-You can enter simple query strings, use the 
-Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based 
-{ref}/query-dsl.html[Elasticsearch Query DSL]. 
+You can enter simple query strings, use the
+Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax], or use the full JSON-based
+{ref}/query-dsl.html[Elasticsearch Query DSL].
 
-When you submit a search, the histogram, Documents table, and Fields list are updated to reflect 
+When you submit a search, the histogram, Documents table, and Fields list are updated to reflect
 the search results. The total number of hits (matching documents) is shown in the upper right corner of the
-histogram. The Documents table shows the first five hundred hits. By default, the hits are listed in reverse 
-chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time 
-column header. You can also sort the table using the values in any indexed field. For more information, see 
+histogram. The Documents table shows the first five hundred hits. By default, the hits are listed in reverse
+chronological order, with the newest documents shown first. You can reverse the sort order by by clicking on the Time
+column header. You can also sort the table using the values in any indexed field. For more information, see
 <<sorting,Sorting the Documents Table>>.
 
 To search your data:
 
-. Enter a query string in the Search field: 
+. Enter a query string in the Search field:
 +
-* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you 
+* To perform a free text search, simply enter a text string. For example, if you're searching web server logs, you
 could enter `safari` to search all fields for the term `safari`.
 +
-* To search for a value in a specific field, you prefix the value with the name of the field. For example, you could 
+* To search for a value in a specific field, you prefix the value with the name of the field. For example, you could
 enter `status:200` to limit the results to entries that contain the value `200` in the `status` field.
 +
-* To search for a range of values, you can use the bracketed range syntax, `[START_VALUE TO END_VALUE]`. For example, 
+* To search for a range of values, you can use the bracketed range syntax, `[START_VALUE TO END_VALUE]`. For example,
 to find entries that have 4xx status codes, you could enter `status:[400 TO 499]`.
 +
 * To specify more complex search criteria, you can use the Boolean operators `AND`, `OR`, and `NOT`. For example,
-to find entries that have 4xx status codes and have an extension of `php` or `html`, you could enter `status:[400 TO 
+to find entries that have 4xx status codes and have an extension of `php` or `html`, you could enter `status:[400 TO
 499] AND (extension:php OR extension:html)`.
 +
-NOTE: These examples use the Lucene query syntax. You can also submit queries using the Elasticsearch Query DSL. For 
-examples, see {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax] in the Elasticsearch 
+NOTE: These examples use the Lucene query syntax. You can also submit queries using the Elasticsearch Query DSL. For
+examples, see {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax] in the Elasticsearch
 Reference.
 +
 . Press *Enter* or click the *Search* button to submit your search query.
@@ -90,7 +90,7 @@ Saving a search saves both the search query string and the currently selected in
 
 To save the current search:
 
-. Click the *Save* button in the Discover toolbar. 
+. Click the *Save* button in the Discover toolbar.
 . Enter a name for the search and click *Save*.
 
 [float]
@@ -101,13 +101,13 @@ To load a saved search:
 . Click the *Open* button in the Discover toolbar.
 . Select the search you want to open.
 
-If the saved search is associated with a different index pattern than is currently selected, opening the saved search 
+If the saved search is associated with a different index pattern than is currently selected, opening the saved search
 also changes the selected index pattern.
 
 [float]
 [[select-pattern]]
 ==== Changing Which Indices You're Searching
-When you submit a search request, the indices that match the currently-selected index pattern are searched. The current 
+When you submit a search request, the indices that match the currently-selected index pattern are searched. The current
 index pattern is shown below the search field. To change which indices you are searching, click the name of the current
 index pattern to display a list of the configured index patterns and select a different index pattern.
 
@@ -121,36 +121,36 @@ include::autorefresh.asciidoc[]
 [float]
 [[field-filter]]
 === Filtering by Field
-You can filter the search results to display only those documents that contain a particular value in a field. You can 
+You can filter the search results to display only those documents that contain a particular value in a field. You can
 also create negative filters that exclude documents that contain the specified field value.
 
-You can add filters from the Fields list or from the Documents table. When you add a filter, it is displayed in the 
-filter bar below the search query. From the filter bar, you can enable or disable a filter, invert the filter (change 
-it from a positive filter to a negative filter and vice-versa), toggle the filter on or off, or remove it entirely. 
+You can add filters from the Fields list or from the Documents table. When you add a filter, it is displayed in the
+filter bar below the search query. From the filter bar, you can enable or disable a filter, invert the filter (change
+it from a positive filter to a negative filter and vice-versa), toggle the filter on or off, or remove it entirely.
 Click the small left-facing arrow to the right of the index pattern selection drop-down to collapse the Fields list.
 
 To add a filter from the Fields list:
 
-. Click the name of the field you want to filter on. This displays the top five values for that field. To the right of 
-each value, there are two magnifying glass buttons--one for adding a regular (positive) filter, and 
-one for adding a negative filter. 
-. To add a positive filter, click the *Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. 
+. Click the name of the field you want to filter on. This displays the top five values for that field. To the right of
+each value, there are two magnifying glass buttons--one for adding a regular (positive) filter, and
+one for adding a negative filter.
+. To add a positive filter, click the *Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button].
 This filters out documents that don't contain that value in the field.
-. To add a negative filter, click the *Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. 
-This excludes documents that contain that value in the field. 
+. To add a negative filter, click the *Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button].
+This excludes documents that contain that value in the field.
 
 To add a filter from the Documents table:
 
-. Expand a document in the Documents table by clicking the *Expand* button image:images/ExpandButton.jpg[Expand Button] 
-to the left of the document's entry in the first column (the first column is usually Time). To the right of each field 
-name, there are two magnifying glass buttons--one for adding a regular (positive) filter, and one for adding a negative 
-filter. 
-. To add a positive filter  based on the document's value in a field, click the 
-*Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. This filters out documents that don't 
+. Expand a document in the Documents table by clicking the *Expand* button image:images/ExpandButton.jpg[Expand Button]
+to the left of the document's entry in the first column (the first column is usually Time). To the right of each field
+name, there are two magnifying glass buttons--one for adding a regular (positive) filter, and one for adding a negative
+filter.
+. To add a positive filter  based on the document's value in a field, click the
+*Positive Filter* button image:images/PositiveFilter.jpg[Positive Filter Button]. This filters out documents that don't
 contain the specified value in that field.
-. To add a negative filter based on the document's value in a field, click the 
-*Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. This excludes documents that contain 
-the specified value in that field. 
+. To add a negative filter based on the document's value in a field, click the
+*Negative Filter* button image:images/NegativeFilter.jpg[Negative Filter Button]. This excludes documents that contain
+the specified value in that field.
 
 [float]
 [[discover-filters]]
@@ -159,52 +159,52 @@ include::filter-pinning.asciidoc[]
 [float]
 [[document-data]]
 === Viewing Document Data
-When you submit a search query, the 500 most recent documents that match the query are listed in the Documents table. 
-You can configure the number of documents shown in the table by setting the `discover:sampleSize` property in 
-<<advanced-options,Advanced Settings>>. By default, the table shows the localized version of the time field specified 
-in the selected index pattern and the document `_source`. You can <<adding-columns, add fields to the Documents table>> 
+When you submit a search query, the 500 most recent documents that match the query are listed in the Documents table.
+You can configure the number of documents shown in the table by setting the `discover:sampleSize` property in
+<<advanced-options,Advanced Settings>>. By default, the table shows the localized version of the time field specified
+in the selected index pattern and the document `_source`. You can <<adding-columns, add fields to the Documents table>>
 from the Fields list. You can <<sorting, sort the listed documents>> by any indexed field that's included in the table.
 
-To view a document's field data, click the *Expand* button image:images/ExpandButton.jpg[Expand Button] to the left of 
-the document's entry in the first column (the first column is usually Time). Kibana reads the document data from 
-Elasticsearch and displays the document fields in a table. The table contains a row for each field that contains the 
+To view a document's field data, click the *Expand* button image:images/ExpandButton.jpg[Expand Button] to the left of
+the document's entry in the first column (the first column is usually Time). Kibana reads the document data from
+Elasticsearch and displays the document fields in a table. The table contains a row for each field that contains the
 name of the field, add filter buttons, and the field value.
 
 image::images/Expanded-Document.png[]
 
 . To view the original JSON document (pretty-printed), click the *JSON* tab.
-. To view the document data as a separate page, click the link. You can bookmark and share this link to provide direct 
+. To view the document data as a separate page, click the link. You can bookmark and share this link to provide direct
 access to a particular document.
 . To collapse the document details, click the *Collapse* button image:images/CollapseButton.jpg[Collapse Button].
-. To toggle a particular field's column in the Documents table, click the 
+. To toggle a particular field's column in the Documents table, click the
 image:images/add-column-button.png[Add Column] *Toggle column in table* button.
 
 [float]
 [[sorting]]
 ==== Sorting the Document List
-You can sort the documents in the Documents table by the values in any indexed field. Documents in index patterns that 
+You can sort the documents in the Documents table by the values in any indexed field. Documents in index patterns that
 are configured with time fields are sorted in reverse chronological order by default.
 
-To change the sort order, click the name of the field you want to sort by. The fields you can use for sorting have a 
+To change the sort order, click the name of the field you want to sort by. The fields you can use for sorting have a
 sort button to the right of the field name. Clicking the field name a second time reverses the sort order.
 
 [float]
 [[adding-columns]]
 ==== Adding Field Columns to the Documents Table
-By default, the Documents table shows the localized version of the time field specified in the selected index pattern 
+By default, the Documents table shows the localized version of the time field specified in the selected index pattern
 and the document `_source`. You can add fields to the table from the Fields list or from a document's expanded view.
 
 To add field columns to the Documents table:
 
-. Mouse over a field in the Fields list and click its  *add* button image:images/AddFieldButton.jpg[Add Field Button].  
+. Mouse over a field in the Fields list and click its  *add* button image:images/AddFieldButton.jpg[Add Field Button].
 . Repeat until you've added all the fields you want to display in the Documents table.
-. Alternately, add a field column directly from a document's expanded view by clicking the 
+. Alternately, add a field column directly from a document's expanded view by clicking the
 image:images/add-column-button.png[Add Column] *Toggle column in table* button.
 
 The added field columns replace the `_source` column in the Documents table. The added fields are also
-listed in the *Selected Fields* section at the top of the field list. 
+listed in the *Selected Fields* section at the top of the field list.
 
-To rearrange the field columns in the table, mouse over the header of the column you want to move and click the *Move* 
+To rearrange the field columns in the table, mouse over the header of the column you want to move and click the *Move*
 button.
 
 image:images/Discover-MoveColumn.jpg[Move Column]
@@ -214,18 +214,18 @@ image:images/Discover-MoveColumn.jpg[Move Column]
 ==== Removing Field Columns from the Documents Table
 To remove field columns from the Documents table:
 
-. Mouse over the field you want to remove in the *Selected Fields* section of the Fields list and click its *remove* 
+. Mouse over the field you want to remove in the *Selected Fields* section of the Fields list and click its *remove*
 button image:images/RemoveFieldButton.jpg[Remove Field Button].
 . Repeat until you've removed all the fields you want to drop from the Documents table.
 
 [float]
 [[viewing-field-stats]]
 === Viewing Field Data Statistics
-From the field list, you can see how many documents in the Documents table contain a particular field, what the top 5 
-values are, and what percentage of documents contain each value. 
+From the field list, you can see how many documents in the Documents table contain a particular field, what the top 5
+values are, and what percentage of documents contain each value.
 
-To view field data statistics, click the name of a field in the Fields list. The field can be anywhere in the Fields 
-list. 
+To view field data statistics, click the name of a field in the Fields list. The field can be anywhere in the Fields
+list.
 
 image:images/Discover-FieldStats.jpg[Field Statistics]
 

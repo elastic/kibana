@@ -1,5 +1,5 @@
 === Automatically Refreshing the Page
-You can configure a refresh interval to automatically refresh the page with the latest index data. This periodically 
+You can configure a refresh interval to automatically refresh the page with the latest index data. This periodically
 resubmits the search query.
 
 When a refresh interval is set, it is displayed to the left of the Time Filter in the menu bar.
@@ -10,10 +10,10 @@ To set the refresh interval:
 . Click the *Refresh Interval* tab.
 . Choose a refresh interval from the list.
 
-To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button when the time picker 
+To automatically refresh the data, click the image:images/autorefresh.png[] *Auto-refresh* button when the time picker
 is open and select an autorefresh interval:
 
 image::images/autorefresh-intervals.png[]
 
-When auto-refresh is enabled, Kibana's top bar displays a pause button and the auto-refresh interval: 
+When auto-refresh is enabled, Kibana's top bar displays a pause button and the auto-refresh interval:
 image:images/autorefresh-pause.png[]. Click the *Pause* button to pause auto-refresh.
