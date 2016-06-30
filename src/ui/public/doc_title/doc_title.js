@@ -8,7 +8,6 @@ uiModules.get('kibana')
   $rootScope.$on('$routeChangeStart', docTitle.reset);
   $rootScope.$on('$routeChangeError', docTitle.update);
   $rootScope.$on('$routeChangeSuccess', docTitle.update);
-  $rootScope.$watch(_.bindKey(chrome, 'getActiveTabTitle'), docTitle.update);
 })
 .service('docTitle', function ($rootScope) {
   let baseTitle = document.title;
@@ -20,9 +19,6 @@ uiModules.get('kibana')
     lastChange = lastChange || [];
 
     let parts = [lastChange[0]];
-    let activeTabTitle = chrome.getActiveTabTitle();
-
-    if (activeTabTitle) parts.push(activeTabTitle);
 
     if (!lastChange[1]) parts.push(baseTitle);
 
