@@ -2,6 +2,8 @@ var _ = require('lodash');
 var $ = require('jquery');
 var moment = require('moment-timezone');
 var observeResize = require('./observe_resize');
+var configFile = require('../../../timelion.json');
+var calculateInterval = require('../../lib/calculate_interval');
 
 require('flot');
 require('flotTime');
@@ -11,7 +13,6 @@ require('flotSelection');
 require('flotSymbol');
 require('flotStack');
 require('flotAxisLabels');
-
 
 require('./observe_resize');
 
@@ -187,9 +188,15 @@ app.directive('chart', function ($compile, $rootScope, timefilter, $timeout, Pri
 
         var options = _.cloneDeep(defaultOptions);
 
-
         // Get the X-axis tick format
-        var format = getxAxisFormatter($scope.interval);
+        var time = timefilter.getBounds();
+        var interval = calculateInterval(
+          time.min.valueOf(),
+          time.max.valueOf(),
+          configFile.target_buckets || 200,
+          $scope.interval
+        );
+        var format = getxAxisFormatter(interval);
 
         // Use moment to format ticks so we get timezone correction
         options.xaxis.tickFormatter = function (val) {

@@ -53,8 +53,8 @@
         <p>
           <h4>Intervals</h4>
           You might already have one nice chart, but I'm going to operate on the assumption you don't for educational purposes. The input bar at the top has two inputs. On the left, is your expression, leave that alone for now, we'll get to it. On the right is the <strong>interval selector</strong>, which is currently set to <code>{{state.interval}}</code>.
-          <span ng-show="state.interval == '1d'"><strong>Looks good!</strong></span>
-          <span ng-show="state.interval != '1d'">Set it to <code>1d</code>. That's pretty safe</span>
+          <span ng-show="state.interval == 'auto'"><strong>Looks good!</strong></span>
+          <span ng-show="state.interval != 'auto'">Set it to <code>auto</code></span>.
           If timelion thinks your combination of time range and interval will produce too many data points it will throw an error. You can configure that limit in <code>timelion.json</code>
         </p>
         <p>
@@ -190,7 +190,3 @@
     </tr>
   </table>
 </div>
-
-
-
-

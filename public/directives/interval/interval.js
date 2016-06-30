@@ -13,7 +13,7 @@ app.directive('timelionInterval', function ($compile, $timeout, timefilter) {
     },
     template: html,
     link: function ($scope, $elem) {
-      $scope.intervalOptions = ['1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other'];
+      $scope.intervalOptions = ['auto', '1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other'];
 
       $scope.$watch('model', function (newVal, oldVal) {
         // Only run this on initialization
@@ -34,7 +34,6 @@ app.directive('timelionInterval', function ($compile, $timeout, timefilter) {
         if (newVal === oldVal) return;
 
         if (newVal === 'other') {
-
           $scope.otherInterval = oldVal;
           $scope.model = $scope.otherInterval;
           $timeout(function () {

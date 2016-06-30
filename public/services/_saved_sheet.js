@@ -3,8 +3,6 @@ define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
   var configFile = require('../../timelion.json');
-  console.log(configFile);
-
 
   // Used only by the savedSheets service, usually no reason to change this
   module.factory('SavedSheet', function (courier) {
@@ -27,8 +25,7 @@ define(function (require) {
           hits: 0,
           description: '',
           timelion_sheet: ['.es(*)'],
-          timelion_interval: '1m',
-          timelion_other_interval: '1d',
+          timelion_interval: 'auto',
           timelion_chart_height: 275,
           timelion_columns: configFile.default_columns || 2,
           timelion_rows: configFile.default_rows || 2,

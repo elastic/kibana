@@ -9,8 +9,8 @@
   "graphite": {
     "url": "https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite"
   },
-  "default_interval": "1h",
   "default_rows": 2,
   "default_columns": 2,
-  "max_buckets": 2000
+  "max_buckets": 2000,
+  "target_buckets": 200
 }

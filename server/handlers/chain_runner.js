@@ -5,6 +5,8 @@ var Promise = require('bluebird');
 
 var parseSheet = require('./lib/parse_sheet.js');
 var parseDateMath = require('../lib/date_math.js');
+var calculateInterval = require('../../public/lib/calculate_interval.js');
+
 var loadFunctions = require('../lib/load_functions.js');
 var repositionArguments = require('./lib/reposition_arguments.js');
 var indexArguments = require('./lib/index_arguments.js');
@@ -169,6 +171,13 @@ module.exports = function (tlConfig) {
     tlConfig.time = request.time;
     tlConfig.time.to = parseDateMath(request.time.to, true).valueOf();
     tlConfig.time.from = parseDateMath(request.time.from).valueOf();
+    tlConfig.time.interval = calculateInterval(
+      tlConfig.time.from,
+      tlConfig.time.to,
+      tlConfig.file.target_buckets || 200,
+      tlConfig.time.interval
+    );
+
     tlConfig.setTargetSeries();
 
     stats.invokeTime = (new Date()).getTime();
