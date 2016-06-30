@@ -238,6 +238,7 @@ export default (function () {
     },
 
     goToPage: function (pageNum) {
+      common.debug('goToPage (' + pageNum + ')');
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
         (pageNum + 1) + ') a.ng-binding'
