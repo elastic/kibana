@@ -6,9 +6,7 @@ const toPath = require('lodash/internal/toPath');
 
 module.exports = (client) => {
   return (req, endpoint, params = {}) => {
-    if (req.headers.authorization) {
-      _.set(params, 'headers.authorization', req.headers.authorization);
-    }
+    _.set(params, 'headers', req.headers);
     const path = toPath(endpoint);
     const api = _.get(client, path);
     let apiContext = _.get(client, path.slice(0, -1));
