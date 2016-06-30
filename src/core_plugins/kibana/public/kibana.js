@@ -28,11 +28,6 @@ routes
 });
 
 chrome
-.setTabDefaults({
-  resetWhenActive: true,
-  lastUrlStore: window.sessionStorage,
-  activeIndicatorColor: '#656a76'
-})
 .setRootController('kibana', function ($scope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
