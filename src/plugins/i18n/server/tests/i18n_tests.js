@@ -254,6 +254,34 @@ describe('Test registering and retrieving all translations for test_plugin_1 and
     });
   });
 
+  it('Common supported plugin languages for test_plugin_1 and test_plugin_2' , function (done) {
+    var result = true;
+    var expectedCommonLanguages = ['en'];
+
+    i18n.getAllRegisteredPluginsCommonSupportedLanguages(function (err, actualCommonLanguages) {
+      if (err) {
+        console.log(err);
+        result = false;
+      }
+
+      if (actualCommonLanguages.length !== expectedCommonLanguages.length) {
+        result = false;
+      } else {
+        var index = actualCommonLanguages.length;
+        actualCommonLanguages.sort();
+        expectedCommonLanguages.sort();
+        while (index--) {
+          if (actualCommonLanguages[index] !== expectedCommonLanguages[index]) {
+            result = false;
+            break;
+          }
+        }
+      }
+      expect(result).to.be(true);
+      done();
+    });
+  });
+
   after(function (done) {
     var translationPluginStorePath = i18n.getRegisteredPluginStoragePath('test_plugin_1');
     process.execSync('rm -rf ' + translationPluginStorePath);

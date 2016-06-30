@@ -121,6 +121,49 @@ var getAllRegisteredPluginsLanguageTranslations = function (language, callback) 
   });
 };
 
+var getAllRegisteredPluginsCommonSupportedLanguages = function (callback) {
+  var registeredPlugins = [];
+  var allPluginsLanguages = [];
+  var firstRun = true;
+
+  try {
+    registeredPlugins = getAllRegisteredPlugins();
+  } catch (err) {
+    return callback(err);
+  }
+
+  async.each(registeredPlugins, function (pluginName, eachCB) {
+    getRegisteredPluginLanguages(pluginName, function (err, pluginLangs) {
+      if (err) {
+        return eachCB(err);
+      } else {
+        var tmpCommonLangs = [];
+        var tmpIndx = 0;
+        var allLangLength = allPluginsLanguages.length;
+        for (var i = 0; i < allLangLength; i++) {
+          if (pluginLangs.indexOf(allPluginsLanguages[i]) !== -1) {
+            tmpCommonLangs[tmpIndx++] = allPluginsLanguages[i];
+          }
+        }
+        if (firstRun)  {
+          allPluginsLanguages = pluginLangs;
+          firstRun = false;
+        } else {
+          allPluginsLanguages = tmpCommonLangs;
+        }
+        return eachCB(null);
+      }
+    });
+  }, function (eachErr) {
+    if (eachErr) {
+      return callback(eachErr);
+    } else {
+      return callback(null, allPluginsLanguages);
+    }
+  });
+};
+
+
 function saveTranslationToFile(translationFullFileName, translationJson) {
   var jsonToWrite = [];
   if (fs.existsSync(translationFullFileName)) {
@@ -199,3 +242,4 @@ module.exports.getAllRegisteredPluginsLanguageTranslations = getAllRegisteredPlu
 module.exports.getPluginTranslationDetails = getPluginTranslationDetails;
 module.exports.getRegisteredPluginStoragePath = getRegisteredPluginStoragePath;
 module.exports.getRegisteredPluginLanguages = getRegisteredPluginLanguages;
+module.exports.getAllRegisteredPluginsCommonSupportedLanguages = getAllRegisteredPluginsCommonSupportedLanguages;

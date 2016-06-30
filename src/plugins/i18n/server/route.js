@@ -8,14 +8,13 @@ const DEFAULT_LANGUAGE = 'en';
 export default function (server) {
 
   server.route({
-    path: '/api/i18n/translations/{plugin}',
+    path: '/api/i18n/translations',
     method: 'GET',
     handler(req, reply) {
-      var pluginName = req.params.plugin;
       var acceptLanguage = req.headers['accept-language'];
       var languages = langParser.parse(acceptLanguage);
 
-      getPluginLanguageTranslations(pluginName, languages, function (err, translations) {
+      getAllPluginsLanguageTranslations(languages, function (err, translations) {
         if (err) {
           reply(Boom.internal(err));
           return;
@@ -27,27 +26,29 @@ export default function (server) {
 
 };
 
-function getPluginLanguageTranslations(pluginName, acceptLanguages, cb) {
+function getAllPluginsLanguageTranslations(acceptLanguages, cb) {
 
-  getPluginSupportedLanguage(pluginName, acceptLanguages, function (err, language) {
+  getAllPluginsSupportedLanguage(acceptLanguages, function (err, language) {
     if (err) {
-      return cb (err);
+      return cb(err);
     }
 
-    i18n.getRegisteredPluginLanguageTranslations(pluginName, language, function (err, translationJson) {
+    i18n.getAllRegisteredPluginsLanguageTranslations(language, function (err, translationsJson) {
       if (err) {
-        return cb (err);
+        return cb(err);
       } else {
-        return cb (null, translationJson);
+        return cb(null, translationsJson);
       }
     });
   });
 }
 
-function getPluginSupportedLanguage(pluginName, acceptLanguages, cb) {
-  i18n.getRegisteredPluginLanguages(pluginName, function (err, languages) {
+function getAllPluginsSupportedLanguage(acceptLanguages, cb) {
+  var langStr = DEFAULT_LANGUAGE;
+
+  i18n.getAllRegisteredPluginsCommonSupportedLanguages(function (err, pluginCommonLanguages) {
     if (err) {
-      return cb (err);
+      return cb(err);
     }
 
     var foundLang = false;
@@ -58,7 +59,7 @@ function getPluginSupportedLanguage(pluginName, acceptLanguages, cb) {
       } else {
         langStr = language.code;
       }
-      if (languages.indexOf(langStr) > -1) {
+      if (pluginCommonLanguages.indexOf(langStr) > -1) {
         foundLang = true;
         return true;
       } else {
@@ -71,7 +72,7 @@ function getPluginSupportedLanguage(pluginName, acceptLanguages, cb) {
 
     acceptLanguages.some(function partialMatch(language) {
       langStr = language.code;
-      languages.some(function (lang) {
+      pluginCommonLanguages.some(function (lang) {
         if (lang.match('^' + langStr)) {
           langStr = lang;
           foundLang = true;
@@ -93,5 +94,4 @@ function getPluginSupportedLanguage(pluginName, acceptLanguages, cb) {
 
     return cb (null, DEFAULT_LANGUAGE);
   });
-
 }
