@@ -1,9 +1,9 @@
 The `Url` field formatter can take on the following types:
 
-* The *Link* type turn the contents of the field into an URL. 
+* The *Link* type turn the contents of the field into an URL.
 * The *Image* type can be used to specify an image directory where a specified image is located.
 
-You can customize either type of URL field formats with templates. A _URL template_ enables you to add specific values 
+You can customize either type of URL field formats with templates. A _URL template_ enables you to add specific values
 to a partial URL. Use the string `{{value}}` to add the contents of the field to a fixed URL.
 
 For example, when:
@@ -14,15 +14,15 @@ For example, when:
 
 The resulting URL replaces `{{value}}` with the user ID from the field.
 
-The `{{value}}` template string URL-encodes the contents of the field. When a field encoded into a URL contains 
-non-ASCII characters, these characters are replaced with a `%` character and the appropriate hexadecimal code. For 
+The `{{value}}` template string URL-encodes the contents of the field. When a field encoded into a URL contains
+non-ASCII characters, these characters are replaced with a `%` character and the appropriate hexadecimal code. For
 example, field contents `users/admin` result in the URL template adding `users%2Fadmin`.
 
-When the formatter type is set to *Image*, the `{{value}}` template string specifies the name of an image at the 
+When the formatter type is set to *Image*, the `{{value}}` template string specifies the name of an image at the
 specified URI.
 
 In order to pass unescaped values directly to the URL, use the `{{rawValue}}` string.
 
-A _Label Template_ enables you to specify a text string that displays instead of the raw URL. You can use the 
+A _Label Template_ enables you to specify a text string that displays instead of the raw URL. You can use the
 `{{value}}` template string normally in label templates. You can also use the `{{url}}` template string to display
 the formatted URL.
