@@ -18,9 +18,6 @@ app.directive('timelionFullscreen', function () {
       transient: '=',
       onSearch: '=',
     },
-    template: html,
-    link: function ($scope, $elem) {
-      console.log($scope);
-    }
+    template: html
   };
 });

@@ -1,11 +1,10 @@
 var moment = require('moment');
 
-module.exports = function xaxisFormatterProvider(config) {
+module.exports = function xaxisFormatterProvider(config, timefilter) {
 
   function getFormat(esInterval) {
-    // lol
     var parts = esInterval.match(/(\d+)(ms|s|m|h|d|w|M|y|)/);
-    if (parts[1] == null || parts[2] == null) throw new Error ('Unknown interval');
+    if (parts == null || parts[1] == null || parts[2] == null) throw new Error ('Unknown interval');
 
     var interval = moment.duration(Number(parts[1]), parts[2]);
 

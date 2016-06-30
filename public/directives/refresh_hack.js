@@ -7,7 +7,6 @@ app.directive('refreshHack', function ($rootScope) {
   return {
     restrict: 'A',
     link: function ($scope) {
-      console.log('BOUND');
       function broadcast() {
         $scope.$broadcast('fetch');
       }

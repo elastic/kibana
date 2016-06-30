@@ -20,10 +20,8 @@ app.directive('timelionCells', function () {
     },
     template: html,
     link: function ($scope, $elem) {
-      console.log($scope);
 
       $scope.removeCell = function (index) {
-        console.log('remove', index);
         _.pullAt($scope.state.sheet, index);
         $scope.onSearch();
       };
