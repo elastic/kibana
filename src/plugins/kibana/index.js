@@ -26,6 +26,7 @@ module.exports = function (kibana) {
           'fieldFormats',
           'navbarExtensions',
           'managementSections',
+          'devTools',
           'docViews'
         ],
 
@@ -67,6 +68,13 @@ module.exports = function (kibana) {
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
           linkToLastSubUrl: false
+        },
+        {
+          title: 'DevTools',
+          order: 1010,
+          url: '/app/kibana#/dev_tools',
+          description: 'development tools',
+          icon: 'plugins/kibana/assets/wrench.svg'
         }
       ],
       injectDefaultVars(server, options) {
