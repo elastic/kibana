@@ -57,6 +57,22 @@ describe('chrome nav apis', function () {
       expect(navLink).to.not.be(undefined);
       expect(navLink.title).to.be('Discover');
     });
+
+    it ('throws an error if the nav link with the given ID is not found', () => {
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        { id: 'kibana:discover', title: 'Discover' }
+      ];
+      const { chrome, internals } = init({ appUrlStore, nav });
+
+      let errorThrown = false;
+      try {
+        const navLink = chrome.getNavLinkById('nonexistent');
+      } catch (e) {
+        errorThrown = true;
+      }
+      expect(errorThrown).to.be(true);
+    });
   });
 
   describe('internals.trackPossibleSubUrl()', function () {
