@@ -3,6 +3,10 @@
     class="app-link"
     ng-repeat="link in switcher.shownNavLinks"
     ng-class="{ active: link.active, 'is-app-switcher-app-link-disabled': link.enable !== undefined && !link.enable}"
+    tooltip="{{link.tooltip}}"
+    tooltip-placement="right"
+    tooltip-popup-delay="400"
+    tooltip-append-to-body="1"
     >
 
     <a
