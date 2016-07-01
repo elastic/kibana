@@ -4,22 +4,8 @@
 
 ---
 
-## development
+The main goal is to manage translations for all views in Kibana. 
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment. Once you have completed that, use the following npm tasks.
+The i18n plugin provides an API for plugins to register translations. This API takes top level directory of where the plugin translations reside and then concatenates thes translations into a translation bundle per language. The translation files need to be a valid JSON object of key, value elements. The IDs need to be unique so it is recommended to use plugin name as a prefix.
 
-<dl>
-  <dt><code>npm start</code></dt>
-  <dd>Start kibana and have it include this plugin</dd>
-
-  <dt><code>npm run build</code></dt>
-  <dd>Build a distributable archive</dd>
-
-  <dt><code>npm run test:browser</code></dt>
-  <dd>Run the browser tests in a real web browser</dd>
-
-  <dt><code>npm run test:server</code></dt>
-  <dd>Run the server tests using mocha</dd>
-</dl>
-
-For more information about any of these commands run `npm run ${task} -- --help`.
+The i18n plugin provides an additional API to get registered translations for a language.  This return a JSON object of all the translations elements iregistered for that language.

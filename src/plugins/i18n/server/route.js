@@ -14,7 +14,7 @@ export default function (server) {
       var acceptLanguage = req.headers['accept-language'];
       var languages = langParser.parse(acceptLanguage);
 
-      getAllPluginsLanguageTranslations(languages, function (err, translations) {
+      getRegisteredLanguageTranslations(languages, function (err, translations) {
         if (err) {
           reply(Boom.internal(err));
           return;
@@ -26,14 +26,14 @@ export default function (server) {
 
 };
 
-function getAllPluginsLanguageTranslations(acceptLanguages, cb) {
+function getRegisteredLanguageTranslations(acceptLanguages, cb) {
 
-  getAllPluginsSupportedLanguage(acceptLanguages, function (err, language) {
+  getRegisteredTranslationLanguages(acceptLanguages, function (err, language) {
     if (err) {
       return cb(err);
     }
 
-    i18n.getAllRegisteredPluginsLanguageTranslations(language, function (err, translationsJson) {
+    i18n.getRegisteredLanguageTranslations(language, function (err, translationsJson) {
       if (err) {
         return cb(err);
       } else {
@@ -43,10 +43,10 @@ function getAllPluginsLanguageTranslations(acceptLanguages, cb) {
   });
 }
 
-function getAllPluginsSupportedLanguage(acceptLanguages, cb) {
+function getRegisteredTranslationLanguages(acceptLanguages, cb) {
   var langStr = DEFAULT_LANGUAGE;
 
-  i18n.getAllRegisteredPluginsCommonSupportedLanguages(function (err, pluginCommonLanguages) {
+  i18n.getRegisteredTranslationLanguages(function (err, registeredLanguages) {
     if (err) {
       return cb(err);
     }
@@ -59,7 +59,7 @@ function getAllPluginsSupportedLanguage(acceptLanguages, cb) {
       } else {
         langStr = language.code;
       }
-      if (pluginCommonLanguages.indexOf(langStr) > -1) {
+      if (registeredLanguages.indexOf(langStr) > -1) {
         foundLang = true;
         return true;
       } else {
@@ -72,7 +72,7 @@ function getAllPluginsSupportedLanguage(acceptLanguages, cb) {
 
     acceptLanguages.some(function partialMatch(language) {
       langStr = language.code;
-      pluginCommonLanguages.some(function (lang) {
+      registeredLanguages.some(function (lang) {
         if (lang.match('^' + langStr)) {
           langStr = lang;
           foundLang = true;

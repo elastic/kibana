@@ -5,9 +5,9 @@ var i18n = require('../i18n');
 
 describe('Test plugin translations details for test_plugin_1', function () {
   var pluginName = 'test_plugin_1';
-  var pluginTranslationPath = __dirname + '/' + pluginName + '/translations';
+  var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
 
-  it('2 translation languages exist', function (done) {
+  it('Translation languages exist', function (done) {
     var result = true;
     var expectedLanguages = ['en', 'de'];
     getPluginTranslationLanguages(pluginName, pluginTranslationPath, function (err, actualLanguages) {
@@ -30,33 +30,6 @@ describe('Test plugin translations details for test_plugin_1', function () {
         }
       }
       expect(result).to.be(true);
-      done();
-    });
-  });
-
-  it('2 translation languages exist and wrongly expecting 1', function (done) {
-    var result = true;
-    var expectedLanguages = ['de'];
-    getPluginTranslationLanguages(pluginName, pluginTranslationPath, function (err, actualLanguages) {
-      if (err) {
-        console.log(err);
-        result = false;
-      } else {
-        if (actualLanguages.length !== expectedLanguages.length) {
-          result = false;
-        } else {
-          var index = actualLanguages.length;
-          actualLanguages.sort();
-          expectedLanguages.sort();
-          while (index--) {
-            if (actualLanguages[index] !== expectedLanguages[index]) {
-              result = false;
-              break;
-            }
-          }
-        }
-      }
-      expect(result).to.be(false);
       done();
     });
   });
@@ -95,42 +68,65 @@ describe('Test plugin translations details for test_plugin_1', function () {
 
 describe('Test registering translations for test_plugin_1', function () {
   var pluginName = 'test_plugin_1';
-  var pluginTranslationPath = __dirname + '/' + pluginName + '/translations';
+  var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
 
-  it('Translation plugin bundle for English' , function (done) {
+  it('Register translations' , function (done) {
     var result = true;
-    var language = 'en';
-
-    i18n.registerPluginLanguageTranslations(pluginName, pluginTranslationPath, language, function (err) {
+    i18n.registerTranslations(pluginTranslationPath, function (err) {
       if (err) {
         console.log(err);
         result = false;
-      } else {
-        var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
-        var expectedTranslationJson = require(expectedTranslationJsonFile);
-        expectedTranslationJson = JSON.stringify(expectedTranslationJson);
-        i18n.getRegisteredPluginLanguageTranslations(pluginName, language, function (err, actualTranslationJson) {
-          if (err) {
-            console.log(err);
-            result = false;
-          } else {
-            actualTranslationJson = JSON.stringify(actualTranslationJson);
-            if (actualTranslationJson !== expectedTranslationJson) {
-              result = false;
-            }
-          }
-        });
       }
       expect(result).to.be(true);
       done();
     });
   });
 
-  it('Languages are registered', function (done) {
-    var expectedLanguages = ['en'];
+  it('EN translations are registered' , function (done) {
+    var result = true;
+    var language = 'en';
+    var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
+    var expectedTranslationJson = require(expectedTranslationJsonFile);
+
+    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
+      if (err) {
+        console.log(err);
+        result = false;
+      } else {
+        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
+          result = false;
+        }
+      }
+      expect(result).to.be(true);
+      done();
+    });
+  });
+
+  it('DE translations are registered' , function (done) {
+    var result = true;
+    var language = 'de';
+    var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
+    var expectedTranslationJson = require(expectedTranslationJsonFile);
+
+    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
+      if (err) {
+        console.log(err);
+        result = false;
+      } else {
+        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
+          result = false;
+        }
+      }
+      expect(result).to.be(true);
+      done();
+    });
+  });
+
+  it('Translation languages are registered', function (done) {
+    var expectedLanguages = ['en', 'de'];
     var result = true;
 
-    i18n.getRegisteredPluginLanguages(pluginName, function (err, actualLanguages) {
+    i18n.getRegisteredTranslationLanguages(function (err, actualLanguages) {
       if (err) {
         console.log(err);
         result = false;
@@ -155,97 +151,53 @@ describe('Test registering translations for test_plugin_1', function () {
   });
 
   after(function (done) {
-    var translationPluginStorePath = i18n.getRegisteredPluginStoragePath('test_plugin_1');
-    process.execSync('rm -rf ' + translationPluginStorePath);
+    var translationStorePath = i18n.getTranslationStoragePath();
+    process.execSync('rm -rf ' + translationStorePath);
     done();
   });
 });
 
-describe('Test registering and retrieving all translations for test_plugin_1 and test_plugin_2', function () {
-
-  it('Translation English bundle for test_plugin_1' , function (done) {
+describe('Test registering translations for test_plugin_1 and test_plugin_2', function () {
+  it('Register translations for test_plugin_1' , function (done) {
     var result = true;
-    var language = 'en';
     var pluginName = 'test_plugin_1';
-    var pluginTranslationPath = __dirname + '/' + pluginName + '/translations';
-
-    i18n.registerPluginLanguageTranslations(pluginName, pluginTranslationPath, language, function (err) {
+    var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
+    i18n.registerTranslations(pluginTranslationPath, function (err) {
       if (err) {
         console.log(err);
         result = false;
-      } else {
-        var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
-        var expectedTranslationJson = require(expectedTranslationJsonFile);
-        expectedTranslationJson = JSON.stringify(expectedTranslationJson);
-        i18n.getRegisteredPluginLanguageTranslations(pluginName, language, function (err, actualTranslationJson) {
-          if (err) {
-            console.log(err);
-            result = false;
-          } else {
-            actualTranslationJson = JSON.stringify(actualTranslationJson);
-            if (actualTranslationJson !== expectedTranslationJson) {
-              result = false;
-            }
-          }
-        });
       }
       expect(result).to.be(true);
       done();
     });
   });
 
-  it('Translation English bundle for test_plugin_2' , function (done) {
+  it('Register translations for test_plugin_2' , function (done) {
     var result = true;
-    var language = 'en';
     var pluginName = 'test_plugin_2';
-    var pluginTranslationPath = __dirname + '/' + pluginName + '/translations';
-
-    i18n.registerPluginLanguageTranslations(pluginName, pluginTranslationPath, language, function (err) {
+    var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
+    i18n.registerTranslations(pluginTranslationPath, function (err) {
       if (err) {
         console.log(err);
         result = false;
-      } else {
-        var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
-        var expectedTranslationJson = require(expectedTranslationJsonFile);
-        expectedTranslationJson = JSON.stringify(expectedTranslationJson);
-        i18n.getRegisteredPluginLanguageTranslations(pluginName, language, function (err, actualTranslationJson) {
-          if (err) {
-            console.log(err);
-            result = false;
-          } else {
-            actualTranslationJson = JSON.stringify(actualTranslationJson);
-            if (actualTranslationJson !== expectedTranslationJson) {
-              result = false;
-            }
-          }
-        });
       }
       expect(result).to.be(true);
       done();
     });
   });
 
-  it('Compare registerd translations for test_plugin_1 and test_plugin_2' , function (done) {
+  it('EN translations are registered' , function (done) {
     var result = true;
     var language = 'en';
-    var expectedTranslationJson = [
-      {'NO_SSL':'Dont run the dev server using HTTPS',
-        'DEV':'Run the server with development mode defaults'},
-      {'NO_RUN_SERVER':'Dont run the dev server',
-        'HOME':'Run along home now!'},
-      {'XXXXXX':'This is XXXXXX string',
-        'YYYY_PPPP':'This is YYYY_PPPP string'},
-      {'FFFFFFFFFFFF':'This is FFFFFFFFFFFF string',
-        'ZZZ':'This is ZZZ string'}];
+    var expectedTranslationJsonFile = __dirname + '/data/reference/' + language + '.json';
+    var expectedTranslationJson = require(expectedTranslationJsonFile);
 
-    i18n.getAllRegisteredPluginsLanguageTranslations(language, function (err, actualTranslationJson) {
+    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
       if (err) {
         console.log(err);
         result = false;
       } else {
-        actualTranslationJson = actualTranslationJson.sort(compareLists);
-        expectedTranslationJson = expectedTranslationJson.sort(compareLists);
-        if (JSON.stringify(actualTranslationJson) !== JSON.stringify(expectedTranslationJson)) {
+        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
           result = false;
         }
       }
@@ -254,24 +206,44 @@ describe('Test registering and retrieving all translations for test_plugin_1 and
     });
   });
 
-  it('Common supported plugin languages for test_plugin_1 and test_plugin_2' , function (done) {
+  it('DE translations are registered' , function (done) {
     var result = true;
-    var expectedCommonLanguages = ['en'];
+    var language = 'de';
+    var expectedTranslationJsonFile = __dirname + '/data/reference/' + language + '.json';
+    var expectedTranslationJson = require(expectedTranslationJsonFile);
 
-    i18n.getAllRegisteredPluginsCommonSupportedLanguages(function (err, actualCommonLanguages) {
+    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
+      if (err) {
+        console.log(err);
+        result = false;
+      } else {
+        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
+          result = false;
+        }
+      }
+      expect(result).to.be(true);
+      done();
+    });
+  });
+
+  it('Translation languages are registered', function (done) {
+    var expectedLanguages = ['en', 'de'];
+    var result = true;
+
+    i18n.getRegisteredTranslationLanguages(function (err, actualLanguages) {
       if (err) {
         console.log(err);
         result = false;
       }
 
-      if (actualCommonLanguages.length !== expectedCommonLanguages.length) {
+      if (actualLanguages.length !== expectedLanguages.length) {
         result = false;
       } else {
-        var index = actualCommonLanguages.length;
-        actualCommonLanguages.sort();
-        expectedCommonLanguages.sort();
+        var index = actualLanguages.length;
+        actualLanguages.sort();
+        expectedLanguages.sort();
         while (index--) {
-          if (actualCommonLanguages[index] !== expectedCommonLanguages[index]) {
+          if (actualLanguages[index] !== expectedLanguages[index]) {
             result = false;
             break;
           }
@@ -283,10 +255,8 @@ describe('Test registering and retrieving all translations for test_plugin_1 and
   });
 
   after(function (done) {
-    var translationPluginStorePath = i18n.getRegisteredPluginStoragePath('test_plugin_1');
-    process.execSync('rm -rf ' + translationPluginStorePath);
-    translationPluginStorePath = i18n.getRegisteredPluginStoragePath('test_plugin_2');
-    process.execSync('rm -rf ' + translationPluginStorePath);
+    var translationStorePath = i18n.getTranslationStoragePath();
+    process.execSync('rm -rf ' + translationStorePath);
     done();
   });
 });
@@ -309,12 +279,19 @@ function getPluginTranslationFiles(pluginName, pluginTranslationPath, cb) {
   });
 }
 
-function compareLists(a, b) {
-  if (Object.keys(a)[0] > Object.keys(b)[0]) {
-    return 1;
+function compareTranslations(actual, expected) {
+  var equal = true;
+
+  for (var key in expected) {
+    if (!actual.hasOwnProperty(key)) {
+      equal = false;
+      break;
+    }
+    if (actual[key] !== expected[key]) {
+      equal = false;
+      break;
+    }
   }
-  if (Object.keys(a)[0] < Object.keys(b)[0]) {
-    return -1;
-  }
-  return 0;
+
+  return equal;
 }

@@ -7,7 +7,7 @@ var path = require('path');
 var process = require('child_process');
 
 const TRANSLATION_FILE_EXTENSION = 'json';
-const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/data/store_translations';
+const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/data/translations';
 
 var getPluginTranslationDetails = function (pluginTranslationPath, translationFiles, languageList, callback) {
   try {
@@ -19,54 +19,40 @@ var getPluginTranslationDetails = function (pluginTranslationPath, translationFi
 };
 
 //TODO(hickeyma): Update to use https://github.com/elastic/kibana/pull/7562
-var getRegisteredPluginStoragePath = function (pluginName) {
-  return TRANSLATION_STORE_PATH + '/' + pluginName;
+var getTranslationStoragePath = function () {
+  return TRANSLATION_STORE_PATH;
 };
 
-var getRegisteredPluginLanguages = function (pluginName, cb) {
+var getRegisteredTranslationLanguages = function (cb) {
   var translationFiles = [];
   var languageList = [];
-  var translationStorePluginPath = getRegisteredPluginStoragePath(pluginName);
+  var translationStorePath = getTranslationStoragePath();
   try {
-    getTranslationDetailsFromDirectory(translationStorePluginPath, translationFiles, languageList);
+    getTranslationDetailsFromDirectory(translationStorePath, translationFiles, languageList);
   } catch (err) {
     return cb(err);
   }
   return cb(null, languageList);
 };
 
-var registerPluginLanguageTranslations = function (pluginName, pluginTranslationPath, language, cb) {
+var registerTranslations = function (pluginTranslationPath, cb) {
   var translationFiles = [];
   var languageList = [];
-  var translationStorePluginPath = getRegisteredPluginStoragePath(pluginName);
-  var translationstorePluginLanguageTranslationsFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
-  var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
+  var translationStorePath = getTranslationStoragePath();
 
   getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
-    if (err) return cb (err);
-
-    var langSupported = false;
-    for (var langIndx in languageList) {
-      if (language === languageList[langIndx]) {
-        langSupported = true;
-        break;
-      }
-    }
-    if (!langSupported) {
-      return cb(Error(language + ' language is not supported in ' + pluginName + ' plugin.'));
-    }
+    if (err) return cb(err);
 
     try {
-      if (!fs.existsSync(translationStorePluginPath)) {
-        mkdirp.sync(translationStorePluginPath);
+      if (!fs.existsSync(translationStorePath)) {
+        mkdirp.sync(translationStorePath);
       }
       for (var fileIndx in translationFiles) {
         if (!translationFiles.hasOwnProperty(fileIndx)) continue;
         var translationFile = translationFiles[fileIndx];
-        var pluginTranslationFileName = getFileName(translationFile);
-        if (pluginTranslationFileName !== translationFileName) continue;
+        var translationFileName = getFileName(translationFile);
         var translationJson = require(translationFile);
-        var fileToWrite = translationStorePluginPath + '/' + translationFileName;
+        var fileToWrite = translationStorePath + '/' + translationFileName;
         saveTranslationToFile(fileToWrite, translationJson);
       }
     } catch (err) {
@@ -77,102 +63,38 @@ var registerPluginLanguageTranslations = function (pluginName, pluginTranslation
   return cb(null);
 };
 
-var getRegisteredPluginLanguageTranslations = function (pluginName, language, callback) {
-  var translationStorePluginPath = getRegisteredPluginStoragePath(pluginName);
+var getRegisteredLanguageTranslations = function (language, callback) {
+  var translationStorePath = getTranslationStoragePath();
   var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
-  var translationFile = translationStorePluginPath + '/' + translationFileName;
+  var translationFile = translationStorePath + '/' + translationFileName;
   fs.readFile(translationFile, function (err, translationStr) {
     if (err) return callback(err);
     var translationJson = [];
     try {
       translationJson = JSON.parse(translationStr);
     } catch (e) {
-      return callback('Bad ' + language + ' translation strings for plugin ' + pluginName + '. Error: ' + err);
+      return callback('Bad ' + language + ' translation strings. Error: ' + err);
     }
     return callback(null, translationJson);
   });
 };
 
-var getAllRegisteredPluginsLanguageTranslations = function (language, callback) {
-  var registeredPlugins = [];
-  var allPluginsTranslationsJson = [];
-
-  try {
-    registeredPlugins = getAllRegisteredPlugins();
-  } catch (err) {
-    return callback(err);
-  }
-
-  async.each(registeredPlugins, function (pluginName, eachCB) {
-    getRegisteredPluginLanguageTranslations(pluginName, language, function (err, translationJson) {
-      if (err) {
-        return eachCB(err);
-      } else {
-        allPluginsTranslationsJson = allPluginsTranslationsJson.concat(translationJson);
-        return eachCB(null);
-      }
-    });
-  }, function (eachErr) {
-    if (eachErr) {
-      return callback(eachErr);
-    } else {
-      return callback(null, allPluginsTranslationsJson);
-    }
-  });
-};
-
-var getAllRegisteredPluginsCommonSupportedLanguages = function (callback) {
-  var registeredPlugins = [];
-  var allPluginsLanguages = [];
-  var firstRun = true;
-
-  try {
-    registeredPlugins = getAllRegisteredPlugins();
-  } catch (err) {
-    return callback(err);
-  }
-
-  async.each(registeredPlugins, function (pluginName, eachCB) {
-    getRegisteredPluginLanguages(pluginName, function (err, pluginLangs) {
-      if (err) {
-        return eachCB(err);
-      } else {
-        var tmpCommonLangs = [];
-        var tmpIndx = 0;
-        var allLangLength = allPluginsLanguages.length;
-        for (var i = 0; i < allLangLength; i++) {
-          if (pluginLangs.indexOf(allPluginsLanguages[i]) !== -1) {
-            tmpCommonLangs[tmpIndx++] = allPluginsLanguages[i];
-          }
-        }
-        if (firstRun)  {
-          allPluginsLanguages = pluginLangs;
-          firstRun = false;
-        } else {
-          allPluginsLanguages = tmpCommonLangs;
-        }
-        return eachCB(null);
-      }
-    });
-  }, function (eachErr) {
-    if (eachErr) {
-      return callback(eachErr);
-    } else {
-      return callback(null, allPluginsLanguages);
-    }
-  });
-};
-
-
-function saveTranslationToFile(translationFullFileName, translationJson) {
+function saveTranslationToFile(translationFullFileName, translationToAddJson) {
   var jsonToWrite = [];
   if (fs.existsSync(translationFullFileName)) {
-    var prevTranslationJson = require(translationFullFileName);
-    jsonToWrite = prevTranslationJson.concat(translationJson);
+    var currentTranslationJson = require(translationFullFileName);
+    jsonToWrite = currentTranslationJson;
+    for (var key in translationToAddJson) {
+      if (translationToAddJson.hasOwnProperty(key)) {
+        var attrName = key;
+        var attrValue = translationToAddJson[key];
+        jsonToWrite[attrName] = attrValue;
+      }
+    }
   } else {
-    jsonToWrite = translationJson;
+    jsonToWrite = translationToAddJson;
   }
-  fs.writeFileSync(translationFullFileName, JSON.stringify(jsonToWrite, null, 4));
+  fs.writeFileSync(translationFullFileName, JSON.stringify(jsonToWrite));
 }
 
 function getFilesRecursivelyFromTopDir(topDir, translationFiles, languageList) {
@@ -221,25 +143,8 @@ function getFileName(fullPath) {
   return fullPath.replace(/^.*[\\\/]/, '');
 }
 
-function getAllRegisteredPlugins() {
-  var pluginNamesList = [];
-  var topDir = TRANSLATION_STORE_PATH;
-
-  var dirs = fs.readdirSync(topDir);
-  for (var i in dirs) {
-    if (!dirs.hasOwnProperty(i)) continue;
-    var name = topDir + '/' + dirs[i];
-    if (fs.statSync(name).isDirectory()) {
-      pluginNamesList.push(dirs[i]);
-    }
-  }
-  return pluginNamesList;
-}
-
-module.exports.registerPluginLanguageTranslations = registerPluginLanguageTranslations;
-module.exports.getRegisteredPluginLanguageTranslations = getRegisteredPluginLanguageTranslations;
-module.exports.getAllRegisteredPluginsLanguageTranslations = getAllRegisteredPluginsLanguageTranslations;
+module.exports.registerTranslations = registerTranslations;
+module.exports.getRegisteredLanguageTranslations = getRegisteredLanguageTranslations;
+module.exports.getTranslationStoragePath = getTranslationStoragePath;
+module.exports.getRegisteredTranslationLanguages = getRegisteredTranslationLanguages;
 module.exports.getPluginTranslationDetails = getPluginTranslationDetails;
-module.exports.getRegisteredPluginStoragePath = getRegisteredPluginStoragePath;
-module.exports.getRegisteredPluginLanguages = getRegisteredPluginLanguages;
-module.exports.getAllRegisteredPluginsCommonSupportedLanguages = getAllRegisteredPluginsCommonSupportedLanguages;
