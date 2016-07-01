@@ -3,7 +3,7 @@ import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_ag
 import topEditor from 'ui/agg_types/controls/top.html';
 
 export default function AggTypeMetricTopProvider(Private) {
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
 
   return new MetricAggType({
     name: 'top_hits',
