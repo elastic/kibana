@@ -3,12 +3,12 @@ import { delimiter } from 'path';
 
 module.exports = function (grunt) {
   // TODO: remove after migration to new CI is complete
-  grunt.registerTask('jenkins', [
+  grunt.registerTask('jenkins', compact([
     'jenkins:env',
     'rejectRejFiles',
     'test',
     process.env.JOB_NAME === 'kibana_core' ? 'build' : null
-  ]);
+  ]));
 
   grunt.registerTask('jeknins:env', () => {
     // make sure JAVA_HOME points to JDK8
