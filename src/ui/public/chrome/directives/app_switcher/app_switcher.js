@@ -6,11 +6,11 @@ import uiModules from 'ui/modules';
 import appSwitcherTemplate from './app_switcher.html';
 
 function isNavLinkEnabled(link) {
-  return link.enable === undefined || link.enable;
+  return !link.disabled;
 }
 
 function isNavLinkShown(link) {
-  return link.show === undefined || link.show;
+  return !link.hidden;
 }
 
 uiModules
