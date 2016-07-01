@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     process.env.JOB_NAME === 'kibana_core' ? 'build' : null
   ]));
 
-  grunt.registerTask('jeknins:env', () => {
+  grunt.registerTask('jenkins:env', () => {
     // make sure JAVA_HOME points to JDK8
     const HOME = '/usr/lib/jvm/jdk8';
     process.env.JAVA_HOME = HOME;
