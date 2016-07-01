@@ -24,10 +24,8 @@ module.exports = function (grunt) {
       switch (require('os').platform()) {
         case 'win32':
           return 'IE';
-        case 'darwin':
-          return 'Chrome';
         default:
-          return 'Firefox';
+          return 'Chrome';
       }
     }()),
 
