@@ -67,7 +67,7 @@ uiModules
       this.isNavLinkEnabled = isNavLinkEnabled;
 
       const allNavLinks = $scope.chrome.getNavLinks();
-      this.shownNavLinks = filter(allNavLinks, isNavLinkShown);
+      this.shownNavLinks = allNavLinks.filter(isNavLinkShown);
 
       // links don't cause full-navigation events in certain scenarios
       // so we force them when needed
