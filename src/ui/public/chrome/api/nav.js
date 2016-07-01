@@ -7,7 +7,7 @@ export default function (chrome, internals) {
   };
 
   chrome.getNavLinkById = (id) => {
-    const navLink = find(internals.nav, link => link.id === id);
+    const navLink = internals.nav.find(link => link.id === id);
     if (navLink) {
       return navLink;
     } else {
