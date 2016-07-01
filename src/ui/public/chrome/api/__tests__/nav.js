@@ -45,16 +45,16 @@ describe('chrome nav apis', function () {
     });
   });
 
-  describe('#getNavLinkByTitle', () => {
-    it ('retrieves the correct nav link, given its title', () => {
+  describe('#getNavLinkById', () => {
+    it ('retrieves the correct nav link, given its ID', () => {
       const nav = [
-        { title: 'Discover', url: 'https://localhost:9200/app/kibana#discover' }
+        { id: 'kibana:discover', title: 'Discover' }
       ];
       const { chrome, internals } = init({ nav });
 
-      const navLink = chrome.getNavLinkByTitle('Discover');
+      const navLink = chrome.getNavLinkById('kibana:discover');
       expect(navLink).to.not.be(undefined);
-      expect(navLink.url).to.be('https://localhost:9200/app/kibana#discover');
+      expect(navLink.title).to.be('Discover');
     });
   });
 

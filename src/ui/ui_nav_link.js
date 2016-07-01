@@ -3,6 +3,7 @@ import { join } from 'path';
 
 export default class UiNavLink {
   constructor(uiExports, spec) {
+    this.id = spec.id;
     this.title = spec.title;
     this.order = spec.order || 0;
     this.url = `${uiExports.urlBasePath || ''}${spec.url}`;
@@ -12,6 +13,6 @@ export default class UiNavLink {
   }
 
   toJSON() {
-    return pick(this, ['title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl']);
+    return pick(this, ['id', 'title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl']);
   }
 }

@@ -40,6 +40,7 @@ module.exports = function (kibana) {
 
       links: [
         {
+          id: 'kibana:discover',
           title: 'Discover',
           order: -1003,
           url: '/app/kibana#/discover',
@@ -47,6 +48,7 @@ module.exports = function (kibana) {
           icon: 'plugins/kibana/assets/discover.svg',
         },
         {
+          id: 'kibana:visualize',
           title: 'Visualize',
           order: -1002,
           url: '/app/kibana#/visualize',
@@ -54,6 +56,7 @@ module.exports = function (kibana) {
           icon: 'plugins/kibana/assets/visualize.svg',
         },
         {
+          id: 'kibana:dashboard',
           title: 'Dashboard',
           order: -1001,
           url: '/app/kibana#/dashboard',
@@ -61,6 +64,7 @@ module.exports = function (kibana) {
           icon: 'plugins/kibana/assets/dashboard.svg',
         },
         {
+          id: 'kibana:management',
           title: 'Management',
           order: 1000,
           url: '/app/kibana#/management',

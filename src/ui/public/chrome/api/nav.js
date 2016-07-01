@@ -6,8 +6,8 @@ export default function (chrome, internals) {
     return internals.nav;
   };
 
-  chrome.getNavLinkByTitle = (title) => {
-    return find(internals.nav, link => link.title === title);
+  chrome.getNavLinkById = (id) => {
+    return find(internals.nav, link => link.id === id);
   };
 
   chrome.getBasePath = function () {
