@@ -5,6 +5,14 @@ import '../app_switcher/app_switcher.less';
 import uiModules from 'ui/modules';
 import appSwitcherTemplate from './app_switcher.html';
 
+function isNavLinkEnabled(link) {
+  return link.enable === undefined || link.enable;
+}
+
+function isNavLinkShown(link) {
+  return link.show === undefined || link.show;
+}
+
 uiModules
 .get('kibana')
 .provider('appSwitcherEnsureNavigation', function () {
@@ -18,8 +26,7 @@ uiModules
     const domLocation = Private(DomLocationProvider);
 
     return function (event, link) {
-      const isLinkEnabled = link.enable === undefined || link.enable;
-      if (!isLinkEnabled) {
+      if (!isNavLinkEnabled(link)) {
         event.preventDefault();
       }
 
@@ -57,8 +64,10 @@ uiModules
         throw new TypeError('appSwitcher directive requires the "chrome" config-object');
       }
 
+      this.isNavLinkEnabled = isNavLinkEnabled;
+
       const allNavLinks = $scope.chrome.getNavLinks();
-      this.shownNavLinks = filter(allNavLinks, link => link.show === undefined || link.show);
+      this.shownNavLinks = filter(allNavLinks, isNavLinkShown);
 
       // links don't cause full-navigation events in certain scenarios
       // so we force them when needed

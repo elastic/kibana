@@ -2,7 +2,7 @@
   <div
     class="app-link"
     ng-repeat="link in switcher.shownNavLinks"
-    ng-class="{ active: link.active, 'is-app-switcher-app-link-disabled': link.enable !== undefined && !link.enable}"
+    ng-class="{ active: link.active, 'is-app-switcher-app-link-disabled': !switcher.isNavLinkEnabled(link) }"
     tooltip="{{link.tooltip}}"
     tooltip-placement="right"
     tooltip-popup-delay="400"
