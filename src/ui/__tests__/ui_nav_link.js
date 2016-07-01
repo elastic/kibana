@@ -21,7 +21,7 @@ describe('UiNavLink', () => {
       expect(link.id).to.be(spec.id);
       expect(link.title).to.be(spec.title);
       expect(link.order).to.be(spec.order);
-      expect(link.url).to.be(uiExports.urlBasePath + spec.url);
+      expect(link.url).to.be(`${uiExports.urlBasePath}${spec.url}`);
       expect(link.description).to.be(spec.description);
       expect(link.icon).to.be(spec.icon);
 
