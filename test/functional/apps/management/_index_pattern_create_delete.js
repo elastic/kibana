@@ -1,41 +1,42 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
   remote,
   scenarioManager,
-  settingsPage,
   esClient
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('creating and deleting default index', function describeIndexTests() {
   bdd.before(function () {
     // delete .kibana index and then wait for Kibana to re-create it
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
-      return settingsPage.navigateTo();
+      return PageObjects.settings.navigateTo();
     })
     .then(function () {
-      return settingsPage.clickExistingData();
+      return PageObjects.settings.clickExistingData();
     });
   });
 
   bdd.describe('index pattern creation', function indexPatternCreation() {
     bdd.before(function () {
-      return settingsPage.createIndexPattern();
+      return PageObjects.settings.createIndexPattern();
     });
 
     bdd.it('should have index pattern in page header', function pageHeader() {
-      return settingsPage.getIndexPageHeading().getVisibleText()
+      return PageObjects.settings.getIndexPageHeading().getVisibleText()
       .then(function (patternName) {
-        common.saveScreenshot('Settings-indices-new-index-pattern');
+        PageObjects.common.saveScreenshot('Settings-indices-new-index-pattern');
         expect(patternName).to.be('logstash-*');
       });
     });
 
     bdd.it('should have index pattern in url', function url() {
-      return common.try(function tryingForTime() {
+      return PageObjects.common.try(function tryingForTime() {
         return remote.getCurrentUrl()
         .then(function (currentUrl) {
           expect(currentUrl).to.contain('logstash-*');
@@ -44,9 +45,9 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
     });
 
     bdd.it('should have expected table headers', function checkingHeader() {
-      return settingsPage.getTableHeader()
+      return PageObjects.settings.getTableHeader()
       .then(function (headers) {
-        common.debug('header.length = ' + headers.length);
+        PageObjects.common.debug('header.length = ' + headers.length);
         var expectedHeaders = [
           'name',
           'type',
@@ -74,25 +75,25 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
   bdd.describe('index pattern deletion', function indexDelete() {
     bdd.before(function () {
       var expectedAlertText = 'Are you sure you want to remove this index pattern?';
-      return settingsPage.removeIndexPattern()
+      return PageObjects.settings.removeIndexPattern()
       .then(function (alertText) {
-        common.saveScreenshot('Settings-indices-confirm-remove-index-pattern');
+        PageObjects.common.saveScreenshot('Settings-indices-confirm-remove-index-pattern');
         expect(alertText).to.be(expectedAlertText);
       });
     });
 
     bdd.it('should return to index pattern creation page', function returnToPage() {
-      return common.try(function tryingForTime() {
-        return settingsPage.getCreateButton();
+      return PageObjects.common.try(function tryingForTime() {
+        return PageObjects.settings.getCreateButton();
       });
     });
 
     bdd.it('should remove index pattern from url', function indexNotInUrl() {
       // give the url time to settle
-      return common.try(function tryingForTime() {
+      return PageObjects.common.try(function tryingForTime() {
         return remote.getCurrentUrl()
         .then(function (currentUrl) {
-          common.debug('currentUrl = ' + currentUrl);
+          PageObjects.common.debug('currentUrl = ' + currentUrl);
           expect(currentUrl).to.not.contain('logstash-*');
         });
       });

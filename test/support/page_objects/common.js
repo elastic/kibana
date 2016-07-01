@@ -1,3 +1,4 @@
+
 import bluebird, {
   promisify
 } from 'bluebird';
@@ -31,9 +32,6 @@ const mkdirpAsync = promisify(mkdirp);
 const writeFileAsync = promisify(fs.writeFile);
 
 export default class Common {
-
-  constructor() {
-  }
 
   init(remote) {
     function injectTimestampQuery(func, url) {

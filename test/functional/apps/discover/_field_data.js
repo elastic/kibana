@@ -1,15 +1,14 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  discoverPage,
-  headerPage,
   scenarioManager,
-  settingsPage,
   esClient,
   elasticDump
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('discover app', function describeIndexTests() {
   bdd.before(function () {
@@ -19,7 +18,7 @@ bdd.describe('discover app', function describeIndexTests() {
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
-      common.debug('load kibana index with default index pattern');
+      PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize','.kibana');
     })
     // and load a set of makelogs data
@@ -27,12 +26,12 @@ bdd.describe('discover app', function describeIndexTests() {
       return scenarioManager.loadIfEmpty('logstashFunctional');
     })
     .then(function () {
-      common.debug('discover');
-      return common.navigateToApp('discover');
+      PageObjects.common.debug('discover');
+      return PageObjects.common.navigateToApp('discover');
     })
     .then(function () {
-      common.debug('setAbsoluteRange');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('setAbsoluteRange');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
   });
 
@@ -44,12 +43,12 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('search php should show the correct hit count', function () {
       var expectedHitCount = '445';
-      return discoverPage.query('php')
+      return PageObjects.discover.query('php')
       .then(function () {
-        return common.try(function tryingForTime() {
-          return discoverPage.getHitCount()
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.discover.getHitCount()
           .then(function compareData(hitCount) {
-            common.saveScreenshot('Discover-field-data');
+            PageObjects.common.saveScreenshot('Discover-field-data');
             expect(hitCount).to.be(expectedHitCount);
           });
         });
@@ -58,7 +57,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('the search term should be highlighted in the field data', function () {
       // marks is the style that highlights the text in yellow
-      return discoverPage.getMarks()
+      return PageObjects.discover.getMarks()
       .then(function (marks) {
         expect(marks.length).to.be(50);
         expect(marks.indexOf('php')).to.be(0);
@@ -67,10 +66,10 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('search _type:apache should show the correct hit count', function () {
       var expectedHitCount = '11,156';
-      return discoverPage.query('_type:apache')
+      return PageObjects.discover.query('_type:apache')
       .then(function () {
-        return common.try(function tryingForTime() {
-          return discoverPage.getHitCount()
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.discover.getHitCount()
           .then(function compareData(hitCount) {
             expect(hitCount).to.be(expectedHitCount);
           });
@@ -80,7 +79,7 @@ bdd.describe('discover app', function describeIndexTests() {
 
     bdd.it('doc view should show Time and _source columns', function () {
       var expectedHeader = 'Time _source';
-      return discoverPage.getDocHeader()
+      return PageObjects.discover.getDocHeader()
       .then(function (header) {
         expect(header).to.be(expectedHeader);
       });
@@ -131,7 +130,7 @@ bdd.describe('discover app', function describeIndexTests() {
         + ' _type:apache _index:logstash-2015.09.22 _score: - relatedContent.article:modified_time:November 27th'
         + ' 2014, 16:00:51.000, November 27th 2014, 16:28:42.000 relatedContent.article:published_time:July 26th'
         + ' 2007, 19:42:30.000, December 13th 2007, 20:19:35.000';
-      return discoverPage.getDocTableIndex(1)
+      return PageObjects.discover.getDocTableIndex(1)
       .then(function (rowData) {
         expect(rowData).to.be(ExpectedDoc);
       });
@@ -211,18 +210,18 @@ bdd.describe('discover app', function describeIndexTests() {
         + ' 16:01:03.000 relatedContent.article:published_time:October 21st 2005, 01:10:25.000, March 5th 2006,'
         + ' 01:03:42.000, December 13th 2006, 20:12:04.000, April 4th 2008, 23:00:00.000, April 25th 2008,'
         + ' 14:26:41.000';
-      return discoverPage.clickDocSortDown()
+      return PageObjects.discover.clickDocSortDown()
       .then(function () {
         // we don't technically need this sleep here because the tryForTime will retry and the
         // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
         // case and it can be avoided with just a few seconds sleep.
-        return common.sleep(2000);
+        return PageObjects.common.sleep(2000);
       })
       .then(function () {
-        return common.try(function tryingForTime() {
-          return discoverPage.getDocTableIndex(1)
+        return PageObjects.common.try(function tryingForTime() {
+          return PageObjects.discover.getDocTableIndex(1)
           .then(function (rowData) {
-            common.saveScreenshot('Discover-sort-down');
+            PageObjects.common.saveScreenshot('Discover-sort-down');
             expect(rowData).to.be(ExpectedDoc);
           });
         });
@@ -233,16 +232,16 @@ bdd.describe('discover app', function describeIndexTests() {
     bdd.it('a bad syntax query should show an error message', function () {
       var expectedHitCount = '1011,156';
       var expectedError = 'Discover: Failed to parse query [xxx(yyy]';
-      return discoverPage.query('xxx(yyy')
+      return PageObjects.discover.query('xxx(yyy')
       .then(function () {
-        return headerPage.getToastMessage();
+        return PageObjects.header.getToastMessage();
       })
       .then(function (toastMessage) {
-        common.saveScreenshot('Discover-syntax-error-toast');
+        PageObjects.common.saveScreenshot('Discover-syntax-error-toast');
         expect(toastMessage).to.be(expectedError);
       })
       .then(function () {
-        return headerPage.clickToastOK();
+        return PageObjects.header.clickToastOK();
       });
     });
   });
