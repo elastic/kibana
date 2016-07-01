@@ -1,4 +1,4 @@
-import { common, defaultFindTimeout, remote } from '../';
+import { common, defaultFindTimeout, remote, headerPage } from '../';
 
 export default (function () {
   function VisualizePage() {
@@ -280,7 +280,10 @@ export default (function () {
       return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.btn-success')
-      .click();
+      .click()
+      .then(function () {
+        return headerPage.getSpinnerDone();
+      });
     },
 
 
@@ -354,6 +357,9 @@ export default (function () {
         .setFindTimeout(defaultFindTimeout)
         .findByLinkText(vizName)
         .click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 

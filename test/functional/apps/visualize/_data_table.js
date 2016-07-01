@@ -46,9 +46,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     })
     .then(function clickGo() {
       return visualizePage.clickGo();
-    })
-    .then(function () {
-      return headerPage.getSpinnerDone();
     });
   });
 
