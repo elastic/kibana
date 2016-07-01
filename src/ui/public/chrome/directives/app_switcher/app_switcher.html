@@ -1,8 +1,9 @@
 <div class="app-links">
   <div
     class="app-link"
-    ng-repeat="link in switcher.getNavLinks()"
-    ng-class="{ active: link.active }">
+    ng-repeat="link in switcher.shownNavLinks"
+    ng-class="{ active: link.active, 'is-app-switcher-app-link-disabled': link.enable !== undefined && !link.enable}"
+    >
 
     <a
       ng-click="switcher.ensureNavigation($event, link)"
