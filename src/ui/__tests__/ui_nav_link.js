@@ -15,6 +15,8 @@ describe('UiNavLink', () => {
         url: '/app/kibana#/discover',
         description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
+        hidden: true,
+        disabled: true
       };
       const link = new UiNavLink(uiExports, spec);
 
@@ -24,6 +26,8 @@ describe('UiNavLink', () => {
       expect(link.url).to.be(`${uiExports.urlBasePath}${spec.url}`);
       expect(link.description).to.be(spec.description);
       expect(link.icon).to.be(spec.icon);
+      expect(link.hidden).to.be(spec.hidden);
+      expect(link.disabled).to.be(spec.disabled);
     });
 
     it ('initializes the url property without a base path when one is not specified in the spec', () => {
@@ -85,6 +89,51 @@ describe('UiNavLink', () => {
 
       expect(link.linkToLastSubUrl).to.be(true);
     });
+
+    it ('initializes the hidden property to false by default', () => {
+      const uiExports = {};
+      const spec = {
+        id: 'kibana:discover',
+        title: 'Discover',
+        order: -1003,
+        url: '/app/kibana#/discover',
+        description: 'interactively explore your data',
+        icon: 'plugins/kibana/assets/discover.svg',
+      };
+      const link = new UiNavLink(uiExports, spec);
+
+      expect(link.hidden).to.be(false);
+    });
+
+    it ('initializes the disabled property to false by default', () => {
+      const uiExports = {};
+      const spec = {
+        id: 'kibana:discover',
+        title: 'Discover',
+        order: -1003,
+        url: '/app/kibana#/discover',
+        description: 'interactively explore your data',
+        icon: 'plugins/kibana/assets/discover.svg',
+      };
+      const link = new UiNavLink(uiExports, spec);
+
+      expect(link.disabled).to.be(false);
+    });
+
+    it ('initializes the tooltip property to an empty string by default', () => {
+      const uiExports = {};
+      const spec = {
+        id: 'kibana:discover',
+        title: 'Discover',
+        order: -1003,
+        url: '/app/kibana#/discover',
+        description: 'interactively explore your data',
+        icon: 'plugins/kibana/assets/discover.svg',
+      };
+      const link = new UiNavLink(uiExports, spec);
+
+      expect(link.tooltip).to.be('');
+    });
   });
 
   describe('#toJSON', () => {
@@ -103,9 +152,8 @@ describe('UiNavLink', () => {
       const link = new UiNavLink(uiExports, spec);
       const json = link.toJSON();
 
-      ['id', 'title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl'].forEach(expectedProperty => {
-        expect(json).to.have.property(expectedProperty);
-      });
+      ['id', 'title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl', 'hidden', 'disabled', 'tooltip']
+      .forEach(expectedProperty => expect(json).to.have.property(expectedProperty));
     });
   });
 });

@@ -10,9 +10,12 @@ export default class UiNavLink {
     this.description = spec.description;
     this.icon = spec.icon;
     this.linkToLastSubUrl = spec.linkToLastSubUrl === false ? false : true;
+    this.hidden = spec.hidden || false;
+    this.disabled = spec.disabled || false;
+    this.tooltip = spec.tooltip || '';
   }
 
   toJSON() {
-    return pick(this, ['id', 'title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl']);
+    return pick(this, ['id', 'title', 'url', 'order', 'description', 'icon', 'linkToLastSubUrl', 'hidden', 'disabled', 'tooltip']);
   }
 }
