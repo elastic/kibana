@@ -6,7 +6,7 @@ describe('UiNavLink', () => {
   describe('#toJSON', () => {
     it ('returns the expected properties', () => {
       const uiExports = {
-        urlBasePath: 'http://localhost:5601/rnd/'
+        urlBasePath: 'http://localhost:5601/rnd'
       };
       const spec = {
         id: 'kibana:discover',
