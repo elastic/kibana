@@ -2,6 +2,13 @@ import { compact } from 'lodash';
 import { delimiter } from 'path';
 
 module.exports = function (grunt) {
+  // TODO: remove after migration to new CI is complete
+  grunt.registerTask('jenkins', [
+    'rejectRejFiles',
+    'test',
+    process.env.JOB_NAME === 'kibana_core' ? 'build' : null
+  ]);
+
   grunt.registerTask('jeknins:env', () => {
     // make sure JAVA_HOME points to JDK8
     const HOME = '/usr/lib/jvm/jdk8';
