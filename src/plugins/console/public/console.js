@@ -1,3 +1,7 @@
+import devTools from 'ui/registry/dev_tools';
+import uiRoutes from 'ui/routes';
+import template from './index.html';
+
 require('ace');
 require('ui-bootstrap-custom');
 
@@ -13,6 +17,14 @@ require('./src/directives/sense_help');
 require('./src/directives/sense_welcome');
 require('./src/directives/sense_navbar');
 
-require('ui/chrome')
-.setRootTemplate(require('./index.html'))
-.setRootController('sense', 'SenseController');
+devTools.register(() => ({
+  order: 1,
+  name: 'console',
+  display: 'Console',
+  url: '#/dev_tools/console'
+}));
+
+uiRoutes.when('/dev_tools/console', {
+  controller: 'SenseController',
+  template
+});
