@@ -4,4 +4,4 @@ set -e
 
 "$(dirname $0)/jenkins_setup.sh"
 
-"$(npm bin)/grunt" jenkins:unit;
+"$(npm bin)/grunt" jenkins:selenium;

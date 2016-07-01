@@ -2,7 +2,7 @@ import { compact } from 'lodash';
 import { delimiter } from 'path';
 
 module.exports = function (grunt) {
-  grunt.registerTask('jenkins', 'Jenkins build script', function () {
+  grunt.registerTask('jeknins:env', () => {
     // make sure JAVA_HOME points to JDK8
     const HOME = '/usr/lib/jvm/jdk8';
     process.env.JAVA_HOME = HOME;
@@ -11,12 +11,23 @@ module.exports = function (grunt) {
     const path = process.env.PATH.split(delimiter);
     path.unshift(`${HOME}/bin`);
     process.env.PATH = path.join(delimiter);
-
-    grunt.task.run(compact([
-      'rejectRejFiles',
-      'test',
-      process.env.JOB_NAME === 'kibana_core' ? 'build' : null
-    ]));
   });
+
+  grunt.registerTask('jenkins:unit', [
+    'jenkins:env',
+    'rejectRejFiles',
+
+    'lint:source',
+    'test:server',
+    'test:browser',
+    'test:api',
+  ]);
+
+  grunt.registerTask('jenkins:selenium', [
+    'jenkins:env',
+    'rejectRejFiles',
+
+    'test:ui'
+  ]);
 
 };
