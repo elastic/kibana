@@ -47,10 +47,11 @@ describe('chrome nav apis', function () {
 
   describe('#getNavLinkById', () => {
     it ('retrieves the correct nav link, given its ID', () => {
+      const appUrlStore = new StubBrowserStorage();
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }
       ];
-      const { chrome, internals } = init({ nav });
+      const { chrome, internals } = init({ appUrlStore, nav });
 
       const navLink = chrome.getNavLinkById('kibana:discover');
       expect(navLink).to.not.be(undefined);
