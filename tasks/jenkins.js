@@ -4,6 +4,7 @@ import { delimiter } from 'path';
 module.exports = function (grunt) {
   // TODO: remove after migration to new CI is complete
   grunt.registerTask('jenkins', [
+    'jenkins:env',
     'rejectRejFiles',
     'test',
     process.env.JOB_NAME === 'kibana_core' ? 'build' : null
@@ -24,7 +25,7 @@ module.exports = function (grunt) {
     'jenkins:env',
     'rejectRejFiles',
 
-    'lint:source',
+    'eslint:source',
     'test:server',
     'test:browser',
     'test:api',
