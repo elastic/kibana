@@ -1,6 +1,6 @@
 import DomLocationProvider from 'ui/dom_location';
 import { parse } from 'url';
-import { bindKey } from 'lodash';
+import { bindKey, filter } from 'lodash';
 import '../app_switcher/app_switcher.less';
 import uiModules from 'ui/modules';
 import appSwitcherTemplate from './app_switcher.html';
@@ -17,7 +17,12 @@ uiModules
   this.$get = ['Private', function (Private) {
     const domLocation = Private(DomLocationProvider);
 
-    return function (event) {
+    return function (event, link) {
+      const isLinkEnabled = link.enable === undefined || link.enable;
+      if (!isLinkEnabled) {
+        event.preventDefault();
+      }
+
       if (!forceNavigation || event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
         return;
       }
@@ -52,7 +57,8 @@ uiModules
         throw new TypeError('appSwitcher directive requires the "chrome" config-object');
       }
 
-      this.getNavLinks = bindKey($scope.chrome, 'getNavLinks');
+      const allNavLinks = $scope.chrome.getNavLinks();
+      this.shownNavLinks = filter(allNavLinks, link => link.show === undefined || link.show);
 
       // links don't cause full-navigation events in certain scenarios
       // so we force them when needed

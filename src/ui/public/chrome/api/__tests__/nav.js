@@ -45,6 +45,19 @@ describe('chrome nav apis', function () {
     });
   });
 
+  describe('#getNavLinkByTitle', () => {
+    it ('retrieves the correct nav link, given its title', () => {
+      const nav = [
+        { title: 'Discover', url: 'https://localhost:9200/app/kibana#discover' }
+      ];
+      const { chrome, internals } = init({ nav });
+
+      const navLink = chrome.getNavLinkByTitle('Discover');
+      expect(navLink).to.not.be(undefined);
+      expect(navLink.url).to.be('https://localhost:9200/app/kibana#discover');
+    });
+  });
+
   describe('internals.trackPossibleSubUrl()', function () {
     it('injects the globalState of the current url to all links for the same app', function () {
       const appUrlStore = new StubBrowserStorage();

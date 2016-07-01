@@ -79,11 +79,18 @@ body { overflow-x: hidden; }
     height: @app-icon-height;
     line-height:  @app-line-height;
 
-
     > a {
       display: block;
       height: 100%;
       color: #ebf7fa;
+    }
+
+    &.is-app-switcher-app-link-disabled {
+      opacity: 0.5;
+
+      a {
+        cursor: default;
+      }
     }
 
     .app-icon {

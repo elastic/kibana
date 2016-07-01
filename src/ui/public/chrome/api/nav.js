@@ -6,6 +6,10 @@ export default function (chrome, internals) {
     return internals.nav;
   };
 
+  chrome.getNavLinkByTitle = (title) => {
+    return find(internals.nav, link => link.title === title);
+  };
+
   chrome.getBasePath = function () {
     return internals.basePath || '';
   };
