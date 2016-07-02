@@ -1,4 +1,4 @@
-import { defaults, capitalize, isArray } from 'lodash';
+import { defaults, capitalize, isArray, isFunction } from 'lodash';
 
 import uiModules from 'ui/modules';
 import filterTemplate from 'ui/chrome/config/filter.html';
@@ -29,7 +29,7 @@ export default function ($compile) {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
-        if (!opt.hideButton) this.menuItems.push(opt);
+        if (!opt.hideButton()) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
       });
     }
@@ -57,8 +57,10 @@ export default function ($compile) {
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        hideButton: !!opt.hideButton,
-        run: (item) => this.toggle(item.key)
+        hideButton: isFunction(opt.hideButton) ? opt.hideButton : () => false,
+        disableButton: isFunction(opt.disableButton) ? opt.disableButton : () => false,
+        tooltip: isFunction(opt.tooltip) ? opt.tooltip : () => '',
+        run: (item) => !item.disableButton() && this.toggle(item.key)
       });
     }
 

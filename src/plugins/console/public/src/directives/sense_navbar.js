@@ -24,7 +24,7 @@ require('ui/modules')
         this.menu = new KbnTopNavController([
           {
             key: 'welcome',
-            hideButton: true,
+            hideButton: () => true,
             template: `<sense-welcome></sense-welcome>`
           },
           {
