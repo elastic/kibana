@@ -54,8 +54,7 @@ describe('chrome nav apis', function () {
       const { chrome, internals } = init({ appUrlStore, nav });
 
       const navLink = chrome.getNavLinkById('kibana:discover');
-      expect(navLink).to.not.be(undefined);
-      expect(navLink.title).to.be('Discover');
+      expect(navLink).to.eql(nav[0]);
     });
 
     it ('throws an error if the nav link with the given ID is not found', () => {
