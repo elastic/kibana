@@ -5,13 +5,13 @@ import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern'
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
-import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import uiModules from 'ui/modules';
+import chrome from 'ui/chrome';
+
 let module = uiModules.get('kibana/index_patterns');
 
-function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
+function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex, $http) {
   let self = this;
 
   let IndexPattern = Private(IndexPatternsIndexPatternProvider);
@@ -41,6 +41,34 @@ function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
     });
   };
 
+  /**
+   * Gets an object containing all fields with their mappings
+   * @param {string} pattern
+   * @returns {Promise}
+   * @async
+   */
+  self.getFieldsForIndexPattern = function (pattern) {
+    $http.get(chrome.addBasePath(`/api/kibana/ingest/${pattern}/_fields`))
+    .then((response) => {
+      return response.data;
+    })
+    .catch(handleMissingIndexPattern);
+  };
+
+  /**
+   * Gets an object containing all fields with their mappings
+   * @param {string} pattern
+   * @returns {Promise}
+   * @async
+   */
+  self.getIndicesForIndexPattern = function (pattern) {
+    $http.get(chrome.addBasePath(`/api/kibana/ingest/${pattern}/_indices`))
+    .then((response) => {
+      return response.data;
+    })
+    .catch(handleMissingIndexPattern);
+  };
+
   self.errors = {
     MissingIndices: errors.IndexPatternMissingIndices
   };
@@ -48,10 +76,18 @@ function IndexPatternsProvider(es, Notifier, Private, Promise, kbnIndex) {
   self.cache = patternCache;
   self.getIds = Private(IndexPatternsGetIdsProvider);
   self.intervals = Private(IndexPatternsIntervalsProvider);
-  self.mapper = Private(IndexPatternsMapperProvider);
-  self.patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
   self.fieldFormats = Private(RegistryFieldFormatsProvider);
   self.IndexPattern = IndexPattern;
+
+  function handleMissingIndexPattern(err) {
+    if (err.status >= 400) {
+      // transform specific error type
+      return Promise.reject(new errors.IndexPatternMissingIndices());
+    } else {
+      // rethrow all others
+      throw err;
+    }
+  }
 }
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));

@@ -165,9 +165,7 @@ uiModules.get('apps/management')
       return Promise.resolve();
     }
 
-    const pattern = mockIndexPattern(index);
-
-    return indexPatterns.mapper.getIndicesForIndexPattern(pattern)
+    return indexPatterns.getIndicesForIndexPattern(index.name)
     .catch(function (err) {
       if (err instanceof IndexPatternMissingIndices) return;
       notify.error(err);
@@ -217,20 +215,15 @@ uiModules.get('apps/management')
       return;
     }
 
-    return indexPatterns.mapper.clearCache(index.name)
-    .then(function () {
-      const pattern = mockIndexPattern(index);
+    return indexPatterns.getFieldsForIndexPattern(index.name)
+    .catch(function (err) {
+      // TODO: we should probably display a message of some kind
+      if (err instanceof IndexPatternMissingIndices) {
+        fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
+        return [];
+      }
 
-      return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
-      .catch(function (err) {
-        // TODO: we should probably display a message of some kind
-        if (err instanceof IndexPatternMissingIndices) {
-          fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
-          return [];
-        }
-
-        throw err;
-      });
+      throw err;
     })
     .then(function (fields) {
       if (fields.length > 0) {
@@ -283,13 +276,5 @@ uiModules.get('apps/management')
       default:
         return 'logstash-*';
     }
-  }
-
-  function mockIndexPattern(index) {
-    // trick the mapper into thinking this is an indexPattern
-    return {
-      id: index.name,
-      intervalName: index.nameInterval
-    };
   }
 });
