@@ -1,8 +1,7 @@
 import expect from 'expect.js';
+import fn from '../pattern_to_wildcard';
+
 describe('Index pattern to wildcard', function () {
-
-  let fn = require('ui/index_patterns/_pattern_to_wildcard')();
-
 
   it('should be a function', function () {
     expect(fn).to.be.a(Function);

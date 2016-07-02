@@ -5,7 +5,6 @@ import getComputedFields from 'ui/index_patterns/_get_computed_fields';
 import formatHit from 'ui/index_patterns/_format_hit';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
-import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import DocSourceProvider from 'ui/courier/data_source/doc_source';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
@@ -14,10 +13,9 @@ import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 
-export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, safeConfirm) {
+export default function IndexPatternFactory(Private, Notifier, config, kbnIndex, Promise, safeConfirm, indexPatterns) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
-  const mapper = Private(IndexPatternsMapperProvider);
   const intervals = Private(IndexPatternsIntervalsProvider);
   const DocSource = Private(DocSourceProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
@@ -41,7 +39,24 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     timeFieldName: 'string',
     notExpandable: 'boolean',
     intervalName: 'string',
-    fields: 'json',
+    fields: {
+      type: 'string',
+      _serialize: function (fields) {
+        if (fields) {
+          return angular.toJson(_.map(fields, (field) => {
+            if (field.scripted) {
+              return field;
+            }
+            else {
+              return _.pick(field, ['name', 'count']);
+            }
+          }));
+        }
+      },
+      _deserialize: function (fields) {
+        if (fields != null) return JSON.parse(fields);
+      }
+    },
     fieldFormatMap: {
       type: 'string',
       _serialize(map = {}) {
@@ -89,16 +104,17 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     .get(indexPattern)
     .onUpdate()
     .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
+
+    return indexFields(indexPattern);
   }
 
   function indexFields(indexPattern) {
     if (!indexPattern.id) {
       return;
     }
-    if (!indexPattern.fields) {
-      return indexPattern.refreshFields();
-    }
-    initFields(indexPattern);
+    return indexPatterns.getIndicesForIndexPattern(indexPattern.id)
+    .then(_.partial(mergeFieldInfo, indexPattern.fields))
+    .then(_.partial(initFields, indexPattern));
   }
 
   function setId(indexPattern, id) {
@@ -132,13 +148,23 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     indexPattern.fields = new FieldList(indexPattern, newValue);
   }
 
-  function fetchFields(indexPattern) {
-    return mapper
-    .getFieldsForIndexPattern(indexPattern, true)
-    .then(fields => {
-      const scripted = indexPattern.getScriptedFields();
-      const all = fields.concat(scripted);
-      initFields(indexPattern, all);
+  function mergeFieldInfo(kibanaFields, indexFields) {
+    if (kibanaFields) {
+      kibanaFields.forEach((field) => {
+        if (field.scripted) {
+          indexFields[field.name] = field;
+        }
+        else {
+          if (indexFields[field.name]) {
+            indexFields[field.name].count = field.count;
+          }
+        }
+      });
+    }
+
+    return _.map(indexFields, (field, name) => {
+      field.name = name;
+      return field;
     });
   }
 
@@ -337,13 +363,6 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
       return docSources.get(this)
       .doIndex(body)
       .then(id => setId(this, id));
-    }
-
-    refreshFields() {
-      return mapper
-      .clearCache(this)
-      .then(() => fetchFields(this))
-      .then(() => this.save());
     }
 
     toJSON() {
