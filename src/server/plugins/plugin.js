@@ -61,6 +61,7 @@ module.exports = class Plugin {
     this.version = opts.version || pkg.version;
     this.externalPreInit = opts.preInit || _.noop;
     this.externalInit = opts.init || _.noop;
+    this.externalInstall = opts.install || _.noop;
     this.configPrefix = opts.configPrefix || this.id;
     this.getConfigSchema = opts.config || _.noop;
     this.preInit = _.once(this.preInit);
@@ -155,6 +156,10 @@ module.exports = class Plugin {
 
   extendInit(fn) {
     this[extendInitFns].push(fn);
+  }
+
+  async install(installContext) {
+    return await this.externalInstall(installContext);
   }
 
   toJSON() {

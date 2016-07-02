@@ -35,6 +35,7 @@ export async function rebuildCache(settings, logger) {
       },
       plugins: {
         initialize: false,
+        install: true,
         scanDirs: [settings.pluginDir, fromRoot('src/plugins')]
       }
     }
