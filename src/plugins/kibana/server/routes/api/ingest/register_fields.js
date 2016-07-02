@@ -6,7 +6,7 @@ import _ from 'lodash';
 import isWildcardPattern from '../../../lib/is_wildcard_pattern';
 import Promise from 'bluebird';
 
-module.exports = function registerFields(server) {
+export function registerFields(server) {
   server.route({
     path: '/api/kibana/ingest/{id}/_fields',
     method: 'GET',

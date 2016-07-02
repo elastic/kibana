@@ -5,7 +5,7 @@ import _ from 'lodash';
 // An endpoint specifically for use by the UI for creating time interval based index patterns.
 // The interval pattern UI needs a list of matching indices and indices that are close to matching
 // to help the user craft their date pattern.
-module.exports = function registerIndices(server) {
+export function registerIndices(server) {
   server.route({
     path: '/api/kibana/ingest/{id}/_indices',
     method: 'GET',
