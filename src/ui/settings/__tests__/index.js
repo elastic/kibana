@@ -23,7 +23,7 @@ describe('ui settings', function () {
     it('returns a promise', () => {
       const { uiSettings } = instantiate();
       const result = uiSettings.setMany({ a: 'b' });
-      expect(typeof result.then).to.be('function');
+      expect(result).to.be.a(Promise);
     });
 
     it('updates a single value in one operation', function () {
@@ -47,7 +47,7 @@ describe('ui settings', function () {
     it('returns a promise', () => {
       const { uiSettings } = instantiate();
       const result = uiSettings.set('a', 'b');
-      expect(typeof result.then).to.be('function');
+      expect(result).to.be.a(Promise);
     });
 
     it('updates single values by (key, value)', function () {
@@ -63,7 +63,7 @@ describe('ui settings', function () {
     it('returns a promise', () => {
       const { uiSettings } = instantiate();
       const result = uiSettings.remove('one');
-      expect(typeof result.then).to.be('function');
+      expect(result).to.be.a(Promise);
     });
 
     it('removes single values by key', function () {
@@ -79,7 +79,7 @@ describe('ui settings', function () {
     it('returns a promise', () => {
       const { uiSettings } = instantiate();
       const result = uiSettings.removeMany(['one']);
-      expect(typeof result.then).to.be('function');
+      expect(result).to.be.a(Promise);
     });
 
     it('removes a single value', function () {
