@@ -147,9 +147,6 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   class IndexPattern {
     constructor(id) {
       setId(this, id);
-      if (!this.fieldFilters) {
-        this.fieldFilters = [];
-      }
       docSources.set(this, new DocSource());
 
       this.metaFields = config.get('metaFields');
@@ -195,7 +192,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     // Get the source filtering configuration for that index.
     getSourceFiltering() {
       return {
-        exclude: this.fieldFilters.map(filter => filter.value)
+        exclude: this.fieldFilters && this.fieldFilters.map(filter => filter.value) || []
       };
     }
 

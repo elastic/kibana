@@ -31,15 +31,17 @@ uiModules.get('kibana')
         this.newValue = null;
 
         $scope.$watch('indexPattern.fieldFilters', (filters) => {
-          const values = filters.map(f => f.value);
-          const filter = fieldWildcardMatcher(values);
-          const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(filter).sort();
-          this.sampleMatches = size(matches) ? matches : null;
+          if (filters) {
+            const values = filters.map(f => f.value);
+            const filter = fieldWildcardMatcher(values);
+            const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(filter).sort();
+            this.sampleMatches = size(matches) ? matches : null;
+          }
         });
       }
 
       all() {
-        return this.$scope.indexPattern.fieldFilters;
+        return this.$scope.indexPattern.fieldFilters || [];
       }
 
       delete(filter) {
