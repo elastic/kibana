@@ -1,4 +1,4 @@
-# Kibana 4.5.1
+# Kibana 4.5.2
 
 [![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
 
@@ -45,7 +45,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |  |
 | --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.1-windows.zip) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-darwin-x64.zip) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-linux-x64.zip) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-linux-x86.zip) |
+| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.5.2-windows.zip) |
