@@ -206,6 +206,10 @@ define(function (require) {
       'dashboard:defaultDarkTheme': {
         value: false,
         description: 'New dashboards use dark theme by default',
+      },
+      'dashboard:defaultDashboard': {
+        value: '',
+        description: 'The default dashboard to load. ID can be found in the URL when the dashboard is loaded.'
       }
     };
   };
