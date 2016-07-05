@@ -4,4 +4,4 @@ set -e
 
 "$(dirname $0)/jenkins_setup.sh"
 
-xvfb-run "$GRUNT" jenkins:unit;
+xvfb-run "$(npm bin)/grunt" jenkins:selenium;

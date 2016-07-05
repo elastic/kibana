@@ -50,7 +50,8 @@ app.controller('doc', function ($scope, $route, es, timefilter) {
           values: [$route.current.params.id]
         }
       },
-      fields: computedFields.fields,
+      stored_fields: computedFields.storedFields,
+      _source: computedFields._source,
       script_fields: computedFields.scriptFields,
       fielddata_fields: computedFields.fielddataFields
     }

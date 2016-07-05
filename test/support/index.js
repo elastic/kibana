@@ -31,12 +31,4 @@ exports.esClient = new EsClient(url.format(config.servers.elasticsearch));
 // over, we can delete this facade code.
 exports.init = function init(remote) {
   exports.remote = remote;
-  exports.common = PageObjects.common;
-  exports.consolePage = PageObjects.console;
-  exports.dashboardPage = PageObjects.dashboard;
-  exports.discoverPage = PageObjects.discover;
-  exports.headerPage = PageObjects.header;
-  exports.settingsPage = PageObjects.settings;
-  exports.shieldPage = PageObjects.shield;
-  exports.visualizePage = PageObjects.visualize;
 };

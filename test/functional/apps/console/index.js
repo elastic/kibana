@@ -1,4 +1,10 @@
-import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
+
+import {
+  bdd,
+  remote,
+  scenarioManager,
+  defaultTimeout,
+} from '../../../support';
 
 bdd.describe('console app', function () {
   this.timeout = defaultTimeout;

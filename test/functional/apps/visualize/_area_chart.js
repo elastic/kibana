@@ -1,62 +1,61 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  headerPage,
   scenarioManager,
-  settingsPage,
-  visualizePage
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
     var fromTime = '2015-09-19 06:31:44.000';
     var toTime = '2015-09-23 18:31:44.000';
 
-    common.debug('navigateToApp visualize');
-    return common.navigateToApp('visualize')
+    PageObjects.common.debug('navigateToApp visualize');
+    return PageObjects.common.navigateToApp('visualize')
     .then(function () {
-      common.debug('clickAreaChart');
-      return visualizePage.clickAreaChart();
+      PageObjects.common.debug('clickAreaChart');
+      return PageObjects.visualize.clickAreaChart();
     })
     .then(function clickNewSearch() {
-      common.debug('clickNewSearch');
-      return visualizePage.clickNewSearch();
+      PageObjects.common.debug('clickNewSearch');
+      return PageObjects.visualize.clickNewSearch();
     })
     .then(function setAbsoluteRange() {
-      common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function clickBucket() {
-      common.debug('Click X-Axis');
-      return visualizePage.clickBucket('X-Axis');
+      PageObjects.common.debug('Click X-Axis');
+      return PageObjects.visualize.clickBucket('X-Axis');
     })
     .then(function selectAggregation() {
-      common.debug('Click Date Histogram');
-      return visualizePage.selectAggregation('Date Histogram');
+      PageObjects.common.debug('Click Date Histogram');
+      return PageObjects.visualize.selectAggregation('Date Histogram');
     })
     .then(function getField() {
-      common.debug('Check field value');
-      return visualizePage.getField();
+      PageObjects.common.debug('Check field value');
+      return PageObjects.visualize.getField();
     })
     .then(function (fieldValue) {
-      common.debug('fieldValue = ' + fieldValue);
+      PageObjects.common.debug('fieldValue = ' + fieldValue);
       expect(fieldValue).to.be('@timestamp');
     })
     .then(function getInterval() {
-      return visualizePage.getInterval();
+      return PageObjects.visualize.getInterval();
     })
     .then(function (intervalValue) {
-      common.debug('intervalValue = ' + intervalValue);
+      PageObjects.common.debug('intervalValue = ' + intervalValue);
       expect(intervalValue).to.be('Auto');
     })
     .then(function clickGo() {
-      return visualizePage.clickGo();
+      return PageObjects.visualize.clickGo();
     })
     .then(function getSpinnerDone() {
-      common.debug('Waiting...');
-      return headerPage.getSpinnerDone();
+      PageObjects.common.debug('Waiting...');
+      return PageObjects.header.getSpinnerDone();
     });
   });
 
@@ -64,26 +63,26 @@ bdd.describe('visualize app', function describeIndexTests() {
     var vizName1 = 'Visualization AreaChart';
 
     bdd.it('should save and load', function pageHeader() {
-      return visualizePage.saveVisualization(vizName1)
+      return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
-        common.debug('Saved viz message = ' + message);
-        common.saveScreenshot('Visualize-area-chart-save-toast');
+        PageObjects.common.debug('Saved viz message = ' + message);
+        PageObjects.common.saveScreenshot('Visualize-area-chart-save-toast');
         expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
       })
       .then(function testVisualizeWaitForToastMessageGone() {
-        return visualizePage.waitForToastMessageGone();
+        return PageObjects.visualize.waitForToastMessageGone();
       })
       .then(function loadSavedVisualization() {
-        return visualizePage.loadSavedVisualization(vizName1);
+        return PageObjects.visualize.loadSavedVisualization(vizName1);
       })
       .then(function () {
-        return visualizePage.waitForVisualization();
+        return PageObjects.visualize.waitForVisualization();
       })
       // We have to sleep sometime between loading the saved visTitle
       // and trying to access the chart below with getXAxisLabels
       // otherwise it hangs.
       .then(function sleep() {
-        return common.sleep(2000);
+        return PageObjects.common.sleep(2000);
       });
     });
 
@@ -97,27 +96,27 @@ bdd.describe('visualize app', function describeIndexTests() {
         683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
       ];
 
-      return common.try(function tryingForTime() {
-        return visualizePage.getXAxisLabels()
+      return PageObjects.common.try(function tryingForTime() {
+        return PageObjects.visualize.getXAxisLabels()
         .then(function compareLabels(labels) {
-          common.debug('X-Axis labels = ' + labels);
+          PageObjects.common.debug('X-Axis labels = ' + labels);
           expect(labels).to.eql(xAxisLabels);
         });
       })
       .then(function getYAxisLabels() {
-        return visualizePage.getYAxisLabels();
+        return PageObjects.visualize.getYAxisLabels();
       })
       .then(function (labels) {
-        common.debug('Y-Axis labels = ' + labels);
+        PageObjects.common.debug('Y-Axis labels = ' + labels);
         expect(labels).to.eql(yAxisLabels);
       })
       .then(function getAreaChartData() {
-        return visualizePage.getAreaChartData('Count');
+        return PageObjects.visualize.getAreaChartData('Count');
       })
       .then(function (paths) {
-        common.debug('expectedAreaChartData = ' + expectedAreaChartData);
-        common.debug('actual chart data =     ' + paths);
-        common.saveScreenshot('Visualize-area-chart');
+        PageObjects.common.debug('expectedAreaChartData = ' + expectedAreaChartData);
+        PageObjects.common.debug('actual chart data =     ' + paths);
+        PageObjects.common.saveScreenshot('Visualize-area-chart');
         expect(paths).to.eql(expectedAreaChartData);
       });
     });
@@ -149,15 +148,15 @@ bdd.describe('visualize app', function describeIndexTests() {
         'September 22nd 2015, 21:00:00.000 29'
       ];
 
-      return visualizePage.collapseChart()
+      return PageObjects.visualize.collapseChart()
       .then(function setPageSize() {
-        return settingsPage.setPageSize('All');
+        return PageObjects.settings.setPageSize('All');
       })
       .then(function getDataTableData() {
-        return visualizePage.getDataTableData();
+        return PageObjects.visualize.getDataTableData();
       })
       .then(function showData(data) {
-        common.debug('getDataTableData = ' + data.split('\n'));
+        PageObjects.common.debug('getDataTableData = ' + data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedTableData);
       });
     });
