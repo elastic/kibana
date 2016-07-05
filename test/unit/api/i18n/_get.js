@@ -1,6 +1,6 @@
 define(function (require) {
-  var Promise = require('bluebird');
   var expect = require('intern/dojo/node!expect.js');
+  var testData = require('intern/dojo/node!../../../unit/api/i18n/data');
 
   return function (bdd, scenarioManager, request) {
     bdd.describe('GET translations', function postIngest() {
@@ -9,13 +9,22 @@ define(function (require) {
         return scenarioManager.reload('emptyKibana');
       });
 
-      bdd.it('should return 200 for an valid payload', function validPayload() {
-        return Promise.all([
-          request.get('/i18n/translations').expect(200),
-        ]);
+      bdd.before(function () {
+        return testData.createTestTranslations();
       });
-      //TODO (hickeyma): Extend test cases once I have refactored the module and hapi APIs after feedback on removeing plugin namd and language from API
 
+      bdd.it('should return 200 and a valid response payload', function validPayload() {
+        return request.get('/i18n/translations')
+          .expect(200)
+          .then(function (res) {
+            var translationsReturned = JSON.parse(res.text);
+            expect(testData.checkReturnedTranslations(translationsReturned)).to.be(true);
+          });
+      });
+
+      bdd.after(function () {
+        return testData.deleteTestTranslations();
+      });
     });
-  };
+  }
 });
