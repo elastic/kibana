@@ -2,7 +2,6 @@ import _ from 'lodash';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'plugins/kibana/visualize/editor/sidebar';
 import 'plugins/kibana/visualize/editor/agg_filter';
-import 'ui/navbar_extensions';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
