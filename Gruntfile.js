@@ -44,6 +44,7 @@ module.exports = function (grunt) {
       '<%= root %>/tasks/**/*.js',
       '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
+      '!<%= src %>/ui/public/angular-bootstrap/**/*.js',
       '!<%= src %>/fixtures/**/*.js',
       '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ],
