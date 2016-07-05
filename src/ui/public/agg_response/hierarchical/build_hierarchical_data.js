@@ -5,6 +5,7 @@ import arrayToLinkedList from 'ui/agg_response/hierarchical/_array_to_linked_lis
 import AggConfigResult from 'ui/vis/agg_config_result';
 import AggResponseHierarchicalBuildSplitProvider from 'ui/agg_response/hierarchical/_build_split';
 import AggResponseHierarchicalHierarchicalTooltipFormatterProvider from 'ui/agg_response/hierarchical/_hierarchical_tooltip_formatter';
+import otherBucketCreator from 'ui/agg_response/hierarchical/_other_bucket_creator';
 export default function buildHierarchicalDataProvider(Private, Notifier) {
   let buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
   let tooltipFormatter = Private(AggResponseHierarchicalHierarchicalTooltipFormatterProvider);
@@ -55,6 +56,11 @@ export default function buildHierarchicalDataProvider(Private, Notifier) {
 
     if (!firstAgg._next && firstAgg.schema.name === 'split') {
       notify.error('Splitting charts without splitting slices is not supported. Pretending that we are just splitting slices.');
+    }
+
+    // create other buckets if requested
+    if (vis.params.showOthers && (vis.params.showOthers !== vis.type.params.othersTypes[0])) {
+      otherBucketCreator(metric, aggData, firstAgg, (vis.params.showOthers !== vis.type.params.othersTypes[1]));
     }
 
     // start with splitting slices

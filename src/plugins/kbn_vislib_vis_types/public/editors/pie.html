@@ -5,5 +5,15 @@
    Donut
   </label>
 </div>
+<div>
+  <label>
+   Show others
+   <select name="showOthers"
+   class="form-control"
+   ng-model="vis.params.showOthers"
+   ng-init="vis.params.showOthers || vis.type.params.othersTypes[0]"
+   ng-options="othersType as othersType for othersType in vis.type.params.othersTypes"
+   >
+  </label>
+</div>
 <vislib-basic-options></vislib-basic-options>
-
