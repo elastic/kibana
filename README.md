@@ -1,4 +1,4 @@
-# Kibana 4.1.8
+# Kibana 4.1.9
 
 [![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
 
@@ -39,7 +39,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |  |
 | --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.8-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.8-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.8-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.8-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.8-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.8-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.8-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.8-windows.zip) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-darwin-x64.zip) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x64.zip) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-linux-x86.zip) |
+| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.9-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.9-windows.zip) |
