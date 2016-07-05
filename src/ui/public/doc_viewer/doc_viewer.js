@@ -3,6 +3,7 @@ import $ from 'jquery';
 import uiModules from 'ui/modules';
 import DocViewsProvider from 'ui/registry/doc_views';
 
+import 'ui/render_directive';
 import 'ui/doc_viewer/doc_viewer.less';
 
 uiModules.get('kibana')
