@@ -31,6 +31,9 @@ module.exports = class KbnServer {
       // tell the config we are done loading plugins
       require('./config/complete'),
 
+      // run plugin install hooks
+      require('./plugins/install'),
+
       // setup this.uiExports and this.bundles
       require('../ui'),
 

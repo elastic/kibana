@@ -93,7 +93,8 @@ module.exports = () => Joi.object({
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
-    initialize: Joi.boolean().default(true)
+    initialize: Joi.boolean().default(true),
+    install: Joi.boolean().default(false)
   }).default(),
 
   path: Joi.object({
