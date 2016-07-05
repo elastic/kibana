@@ -92,8 +92,8 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('installedPlugins'),
-      fromRoot('src/plugins')
+      fromRoot('plugins'),
+      fromRoot('src/core_plugins')
     ]
   )
   .option(
