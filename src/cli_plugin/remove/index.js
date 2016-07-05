@@ -31,7 +31,7 @@ export default function pluginRemove(program) {
   .option(
     '-d, --plugin-dir <path>',
     'path to the directory where plugins are stored',
-    fromRoot('installedPlugins')
+    fromRoot('plugins')
   )
   .description('remove a plugin',
 `common examples:
