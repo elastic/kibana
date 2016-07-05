@@ -35,6 +35,32 @@
                ng-model="vis.params.yAxis.min"
                ng-required="vis.params.setYExtents">
       </label>
+      <div ng-if="vis.params.hasSecondaryYAxis">
+        <label>
+          secondary-y-max
+          <input name="secondaryYMax"
+          class="form-control"
+          type="number"
+          step="0.1"
+          greater-than="{{vis.params.secondaryYAxis.min}}"
+          ng-model="vis.params.secondaryYAxis.max"
+          ng-required="vis.params.setYExtents">
+        </label>
+        <div ng-show="vis.params.secondaryYAxis.min > vis.params.secondaryYAxis.max">
+          <span class="text-danger">Min must not exceed max</span>
+        </div>
+        <label>
+          secondary-y-min
+          <input name="secondaryYMin"
+          class="form-control"
+          type="number"
+          step="0.1"
+          less-than="{{vis.params.secondaryYAxis.max}}"
+          greater-than="{{vis.params.scale === 'log' ? 0 : ''}}"
+          ng-model="vis.params.secondaryYAxis.min"
+          ng-required="vis.params.setYExtents">
+        </label>
+      </div>
     </div>
     <div ng-show="vis.params.setYExtents && vis.params.scale === 'log' && vis.params.yAxis.min <= 0">
       <span class="text-danger">Min must exceed 0 when a log scale is selected</span>

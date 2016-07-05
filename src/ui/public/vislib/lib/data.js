@@ -5,12 +5,14 @@ import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/componen
 import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
 import VislibComponentsLabelsLabelsProvider from 'ui/vislib/components/labels/labels';
 import VislibComponentsColorColorProvider from 'ui/vislib/components/color/color';
+import VislibLibAxisStrategyProvider from 'ui/vislib/lib/single_y_axis_strategy';
 export default function DataFactory(Private) {
 
   let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
   let orderKeys = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
   let getLabels = Private(VislibComponentsLabelsLabelsProvider);
   let color = Private(VislibComponentsColorColorProvider);
+  let SingleAxisStrategy = Private(VislibLibAxisStrategyProvider);
 
   /**
    * Provides an API for pulling values off the data
@@ -20,13 +22,15 @@ export default function DataFactory(Private) {
    * @constructor
    * @param data {Object} Elasticsearch query results
    * @param attr {Object|*} Visualization options
+   * @param yAxisStrategy {Object} Optional; Strategy for single & dual y-axis
    */
-  function Data(data, attr, uiState) {
+  function Data(data, attr, uiState, yAxisStrategy) {
     if (!(this instanceof Data)) {
       return new Data(data, attr, uiState);
     }
 
     this.uiState = uiState;
+    this.yAxisStrategy = yAxisStrategy || new SingleAxisStrategy();
 
     let self = this;
     let offset;
@@ -41,7 +45,8 @@ export default function DataFactory(Private) {
       offset = attr.mode;
     }
 
-    this.data = data;
+    // updating each series point if it belongs to secondary axis
+    this.data = this.yAxisStrategy.decorate(data);
     this.type = this.getDataType();
 
     this.labels = this._getLabels(this.data);
@@ -93,6 +98,13 @@ export default function DataFactory(Private) {
       return getLabels(data);
     }
     return this.pieNames();
+  };
+
+  /**
+   * Exposing flatten functionality of the strategies for testing purposes
+   */
+  Data.prototype._flatten = function (isPrimary) {
+    return this.yAxisStrategy._flatten(this.chartData(), isPrimary);
   };
 
   /**
@@ -327,23 +339,6 @@ export default function DataFactory(Private) {
   };
 
   /**
-   * Return an array of all value objects
-   * Pluck the data.series array from each data object
-   * Create an array of all the value objects from the series array
-   *
-   * @method flatten
-   * @returns {Array} Value objects
-   */
-  Data.prototype.flatten = function () {
-    return _(this.chartData())
-    .pluck('series')
-    .flattenDeep()
-    .pluck('values')
-    .flattenDeep()
-    .value();
-  };
-
-  /**
    * Determines whether histogram charts should be stacked
    * TODO: need to make this more generic
    *
@@ -351,15 +346,7 @@ export default function DataFactory(Private) {
    * @returns {boolean}
    */
   Data.prototype.shouldBeStacked = function () {
-    let isHistogram = (this._attr.type === 'histogram');
-    let isArea = (this._attr.type === 'area');
-    let isOverlapping = (this._attr.mode === 'overlap');
-    let grouped = (this._attr.mode === 'grouped');
-
-    let stackedHisto = isHistogram && !grouped;
-    let stackedArea = isArea && !isOverlapping;
-
-    return stackedHisto || stackedArea;
+    return this.yAxisStrategy.shouldBeStacked(this._attr);
   };
 
   /**
@@ -387,33 +374,20 @@ export default function DataFactory(Private) {
    * @returns {Number} Min y axis value
    */
   Data.prototype.getYMin = function (getValue) {
-    let self = this;
-    let arr = [];
+    return this.yAxisStrategy.getYMin(getValue, this.chartData(), this._attr);
+  };
 
-    if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
-      this._attr.mode === 'silhouette') {
-      return 0;
-    }
-
-    let flat = this.flatten();
-    // if there is only one data point and its less than zero,
-    // return 0 as the yMax value.
-    if (!flat.length || flat.length === 1 && flat[0].y > 0) {
-      return 0;
-    }
-
-    let min = Infinity;
-
-    // for each object in the dataArray,
-    // push the calculated y value to the initialized array (arr)
-    _.each(this.chartData(), function (chart) {
-      let calculatedMin = self._getYExtent(chart, 'min', getValue);
-      if (!_.isUndefined(calculatedMin)) {
-        min = Math.min(min, calculatedMin);
-      }
-    });
-
-    return min;
+  /**
+   * Calculates the lowest Y value across charts for secondary axis.
+   *
+   * @method getSecondYMin
+   * @param {function} [getValue] - optional getter that will receive a
+   *                              point and should return the value that should
+   *                              be considered
+   * @returns {Number} Min y axis value
+   */
+  Data.prototype.getSecondYMin = function (getValue) {
+    return this.yAxisStrategy.getSecondYMin(getValue, this.chartData(), this._attr);
   };
 
   /**
@@ -427,32 +401,19 @@ export default function DataFactory(Private) {
    * @returns {Number} Max y axis value
    */
   Data.prototype.getYMax = function (getValue) {
-    let self = this;
-    let arr = [];
+    return this.yAxisStrategy.getYMax(getValue, this.chartData(), this._attr);
+  };
 
-    if (self._attr.mode === 'percentage') {
-      return 1;
-    }
-
-    let flat = this.flatten();
-    // if there is only one data point and its less than zero,
-    // return 0 as the yMax value.
-    if (!flat.length || flat.length === 1 && flat[0].y < 0) {
-      return 0;
-    }
-
-    let max = -Infinity;
-
-    // for each object in the dataArray,
-    // push the calculated y value to the initialized array (arr)
-    _.each(this.chartData(), function (chart) {
-      let calculatedMax = self._getYExtent(chart, 'max', getValue);
-      if (!_.isUndefined(calculatedMax)) {
-        max = Math.max(max, calculatedMax);
-      }
-    });
-
-    return max;
+  /**
+   * Return the highest Y value for the secondary Y Axis
+   *
+   * @method getSecondYMax
+   * @param {function} [getValue] - optional getter that will receive a
+   *                              point and should return the value that should
+   *                              be considered
+   */
+  Data.prototype.getSecondYMax = function (getValue) {
+    return this.yAxisStrategy.getSecondYMax(getValue, this.chartData(), this._attr);
   };
 
   /**

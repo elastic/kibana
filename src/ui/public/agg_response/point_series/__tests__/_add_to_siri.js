@@ -35,6 +35,7 @@ describe('addToSiri', function () {
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
     expect(series.get(id).label).to.be(id);
+    expect(series.get(id).onSecondaryYAxis).to.be(false);
     expect(series.get(id).values).to.have.length(2);
     expect(series.get(id).values[0]).to.be(point);
     expect(series.get(id).values[1]).to.be(point2);
@@ -45,11 +46,12 @@ describe('addToSiri', function () {
     let id = 'id';
     let label = 'label';
     let point = {};
-    addToSiri(series, point, id, label);
+    addToSiri(series, point, id, label, true);
 
     expect(series.has(id)).to.be(true);
     expect(series.get(id)).to.be.an('object');
     expect(series.get(id).label).to.be(label);
+    expect(series.get(id).onSecondaryYAxis).to.be(true);
     expect(series.get(id).values).to.have.length(1);
     expect(series.get(id).values[0]).to.be(point);
   });

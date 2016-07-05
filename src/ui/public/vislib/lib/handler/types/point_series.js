@@ -6,6 +6,8 @@ import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
 import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
+import VislibLibSingleAxisStrategy from 'ui/vislib/lib/single_y_axis_strategy';
+import VislibLibDualAxisStrategy from 'ui/vislib/lib/dual_y_axis_strategy';
 
 export default function ColumnHandler(Private) {
   let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
@@ -16,6 +18,8 @@ export default function ColumnHandler(Private) {
   let AxisTitle = Private(VislibLibAxisTitleProvider);
   let ChartTitle = Private(VislibLibChartTitleProvider);
   let Alerts = Private(VislibLibAlertsProvider);
+  let SingleYAxisStrategy = Private(VislibLibSingleAxisStrategy);
+  let DualYAxisStrategy = Private(VislibLibDualAxisStrategy);
 
   /*
    * Create handlers for Area, Column, and Line charts which
@@ -27,16 +31,35 @@ export default function ColumnHandler(Private) {
     return function (vis) {
       let isUserDefinedYAxis = vis._attr.setYExtents;
       let data;
+      let yAxisStrategy = vis.get('hasSecondaryYAxis') ? new DualYAxisStrategy() : new SingleYAxisStrategy();
+      let secondaryYAxis;
+      let axisTitle;
 
       if (opts.zeroFill) {
-        data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);
+        data = new Data(injectZeros(vis.data), vis._attr, vis.uiState, yAxisStrategy);
       } else {
-        data = new Data(vis.data, vis._attr, vis.uiState);
+        data = new Data(vis.data, vis._attr, vis.uiState, yAxisStrategy);
+      }
+
+      if (vis.get('hasSecondaryYAxis')) {
+        secondaryYAxis = new YAxis({
+          el    : vis.el,
+          yMin : isUserDefinedYAxis ? vis._attr.secondaryYAxis.min : data.getSecondYMin(),
+          yMax : isUserDefinedYAxis ? vis._attr.secondaryYAxis.max : data.getSecondYMax(),
+          yAxisFormatter: data.get('secondYAxisFormatter'),
+          _attr: vis._attr,
+          orientation: 'right',
+          yAxisDiv: 'secondary-y-axis-div'
+        });
+        axisTitle = new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel'), data.get('secondYAxisLabel'));
+      } else {
+        secondaryYAxis = new YAxis({});
+        axisTitle = new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel'));
       }
 
       return new Handler(vis, {
         data: data,
-        axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
+        axisTitle: axisTitle,
         chartTitle: new ChartTitle(vis.el),
         xAxis: new XAxis({
           el                : vis.el,
@@ -52,8 +75,11 @@ export default function ColumnHandler(Private) {
           yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
           yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
           yAxisFormatter: data.get('yAxisFormatter'),
-          _attr: vis._attr
-        })
+          _attr: vis._attr,
+          orientation: 'left',
+          yAxisDiv: 'y-axis-div'
+        }),
+        secondaryYAxis: secondaryYAxis
       });
 
     };

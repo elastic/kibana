@@ -72,6 +72,7 @@ export default function LineChartFactory(Private) {
     let color = this.handler.data.getColorFunc();
     let xScale = this.handler.xAxis.xScale;
     let yScale = this.handler.yAxis.yScale;
+    let secondaryYScale = this.handler.secondaryYAxis.yScale;
     let ordered = this.handler.data.get('ordered');
     let tooltip = this.tooltip;
     let isTooltip = this._attr.addTooltip;
@@ -118,7 +119,11 @@ export default function LineChartFactory(Private) {
     }
 
     function cy(d) {
-      return yScale(d.y);
+      if (d.belongsToSecondaryYAxis) {
+        return secondaryYScale(d.y);
+      } else {
+        return yScale(d.y);
+      }
     }
 
     function cColor(d) {
@@ -188,6 +193,7 @@ export default function LineChartFactory(Private) {
     let self = this;
     let xScale = this.handler.xAxis.xScale;
     let yScale = this.handler.yAxis.yScale;
+    let secondaryYScale = this.handler.secondaryYAxis.yScale;
     let xAxisFormatter = this.handler.data.get('xAxisFormatter');
     let color = this.handler.data.getColorFunc();
     let ordered = this.handler.data.get('ordered');
@@ -202,7 +208,11 @@ export default function LineChartFactory(Private) {
       return xScale(d.x) + xScale.rangeBand() / 2;
     })
     .y(function y(d) {
-      return yScale(d.y);
+      if (d.belongsToSecondaryYAxis) {
+        return secondaryYScale(d.y);
+      } else {
+        return yScale(d.y);
+      }
     });
     let lines;
 
@@ -296,7 +306,8 @@ export default function LineChartFactory(Private) {
               _input: e,
               label: label,
               x: self._attr.xValue.call(d.values, e, i),
-              y: self._attr.yValue.call(d.values, e, i)
+              y: self._attr.yValue.call(d.values, e, i),
+              belongsToSecondaryYAxis: e.belongsToSecondaryYAxis
             };
           });
         });

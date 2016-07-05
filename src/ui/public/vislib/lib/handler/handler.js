@@ -38,6 +38,7 @@ export default function HandlerBaseClass(Private) {
     this.chartTitle = opts.chartTitle;
     this.axisTitle = opts.axisTitle;
     this.alerts = opts.alerts;
+    this.secondaryYAxis = opts.secondaryYAxis;
 
     this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
     this.binder = new Binder();
@@ -48,6 +49,7 @@ export default function HandlerBaseClass(Private) {
       this.alerts,
       this.xAxis,
       this.yAxis,
+      this.secondaryYAxis
     ], Boolean);
 
     // memoize so that the same function is returned every time,

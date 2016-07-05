@@ -20,8 +20,13 @@ uiModules
     restrict: 'A',
     template: aggTemplate,
     require: 'form',
+    scope: false,
     link: function ($scope, $el, attrs, kbnForm) {
+      $scope.$bind('dual_y', 'attrs.dual_y');
       $scope.editorOpen = !!$scope.agg.brandNew;
+      if ($scope.agg.onSecondaryYAxis) {
+        $scope.dual_y = $scope.agg.id;
+      }
 
       $scope.$watch('editorOpen', function (open) {
         // make sure that all of the form inputs are "touched"
@@ -35,6 +40,26 @@ uiModules
       ], function () {
         $scope.aggIsTooLow = calcAggIsTooLow();
       });
+
+      // called if user selects/unselects the checkbox
+      // (Note: newValue is boolean)
+      $scope.$watch('dual_y', function updateAggs(newValue, oldValue) {
+        if (newValue !== undefined) {
+          let requiredAgg = _.findWhere($scope.vis.aggs, {'id': $scope.agg.id});
+
+          requiredAgg.onSecondaryYAxis = newValue;
+          $scope.vis.params.hasSecondaryYAxis = $scope.vis.params.hasSecondaryYAxis || newValue;
+        }
+      }, true);
+
+      $scope.canBeSecondaryYAxis = function () {
+        let schema = $scope.agg.schema;
+        let isYAxisMetric = schema.name === 'metric' && schema.title === 'Y-Axis';
+        let yAxisCount = $scope.stats.count;
+        let isLineGraph = $scope.vis.type.name === 'line';
+        let minYAxisCount = 2;
+        return isLineGraph && isYAxisMetric && yAxisCount >= minYAxisCount;
+      };
 
       /**
        * Describe the aggregation, for display in the collapsed agg header
@@ -59,6 +84,15 @@ uiModules
 
       $scope.remove = function (agg) {
         const aggs = $scope.vis.aggs;
+        const yAxisCount = $scope.stats.count;
+        const minYAxisCount = 2;
+        let schema = $scope.agg.schema;
+        let isYAxisMetric = schema.name === 'metric' && schema.title === 'Y-Axis';
+        let doesNotHaveMinimumYAxisAfterRemoval = isYAxisMetric && $scope.stats.count <= minYAxisCount;
+        if (doesNotHaveMinimumYAxisAfterRemoval || agg.onSecondaryYAxis) {
+          $scope.vis.params.hasSecondaryYAxis = false;
+          $scope.dual_y = '';
+        }
 
         const index = aggs.indexOf(agg);
         if (index === -1) return notify.log('already removed');

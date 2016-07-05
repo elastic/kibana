@@ -81,6 +81,8 @@ function createData(seriesData) {
       el: node,
       yMin: dataObj.getYMin(),
       yMax: dataObj.getYMax(),
+      yAxisDiv: 'y-axis-div',
+      orientation: 'right',
       _attr: {
         margin: { top: 0, right: 0, bottom: 0, left: 0 },
         defaultYMin: true,
@@ -117,15 +119,19 @@ describe('Vislib yAxis Class Test Suite', function () {
     });
 
     it('should append an svg to div', function () {
-      expect(el.selectAll('svg').length).to.be(1);
+      expect(el.selectAll('svg')[0].length).to.be(1);
     });
 
     it('should append a g element to the svg', function () {
-      expect(el.selectAll('svg').select('g').length).to.be(1);
+      expect(el.selectAll('svg').select('g')[0].length).to.be(1);
     });
 
     it('should append ticks with text', function () {
-      expect(!!el.selectAll('svg').selectAll('.tick text')).to.be(true);
+      expect(el.selectAll('svg').selectAll('.tick text').length).to.be(1);
+    });
+
+    it('should translate with a constant x component when on right orientation', function () {
+      expect(d3.transform(el.selectAll('svg').select('g').attr('transform')).translate[0]).to.be(4);
     });
   });
 

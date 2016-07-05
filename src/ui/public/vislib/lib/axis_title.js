@@ -16,7 +16,7 @@ export default function AxisTitleFactory(Private) {
    * @param yTitle {String} Y-axis title
    */
   _.class(AxisTitle).inherits(ErrorHandler);
-  function AxisTitle(el, xTitle, yTitle) {
+  function AxisTitle(el, xTitle, yTitle, secondaryYTitle) {
     if (!(this instanceof AxisTitle)) {
       return new AxisTitle(el, xTitle, yTitle);
     }
@@ -24,6 +24,7 @@ export default function AxisTitleFactory(Private) {
     this.el = el;
     this.xTitle = xTitle;
     this.yTitle = yTitle;
+    this.secondaryYTitle = secondaryYTitle;
   }
 
   /**
@@ -35,6 +36,9 @@ export default function AxisTitleFactory(Private) {
   AxisTitle.prototype.render = function () {
     d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
     d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
+    if (this.secondaryYTitle) {
+      d3.select(this.el).select('.secondary-y-axis-title').call(this.draw(this.secondaryYTitle));
+    }
   };
 
   /**
