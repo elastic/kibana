@@ -1,9 +1,9 @@
 <div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
   <div class="panel-heading">
-    <span class="panel-title" title="{{::savedObj.title}}">
-      {{::savedObj.title}}
+    <span class="panel-title" title="{{savedObj.title}}">
+      <div initial-val="{{savedObj.title}}" kbn-edit-field="dashboardPanelTitle"></div>
     </span>
-    <div class="btn-group">
+    <div class="btn-group action-items">
       <a aria-label="Edit" ng-show="chrome.getVisible() && editUrl" ng-href="{{::editUrl}}">
         <i aria-hidden="true" class="fa fa-pencil"></i>
       </a>

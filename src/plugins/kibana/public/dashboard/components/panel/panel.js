@@ -55,6 +55,12 @@ uiModules
           // create child ui state from the savedObj
           const uiState = panelConfig.uiState || {};
           $scope.uiState = $scope.parentUiState.createChild(getPanelId(panelConfig.panel), uiState, true);
+          $scope.dashboardPanelTitle = $scope.uiState.get('panel-title') || $scope.savedObj.title;
+
+          $scope.$watch('dashboardPanelTitle', (newVal, oldVal) => {
+            if (newVal === oldVal) { return false; }
+            $scope.uiState.set('panel-title', newVal);
+          });
           const panelSavedVis = _.get(panelConfig, 'savedObj.vis');  // Sometimes this will be a search, and undef
           if (panelSavedVis) {
             panelSavedVis.setUiState($scope.uiState);

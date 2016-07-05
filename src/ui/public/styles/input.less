@@ -1,4 +1,5 @@
 @import "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins.less";
 
 i.input-error {
   position: absolute;
@@ -11,4 +12,45 @@ i.input-error {
 select {
   color: @input-color;
   background-color: @input-bg;
+}
+
+.kbn-edit-field {
+  .real-flex-parent(row nowrap);
+  &.editing {
+    input {
+      border-color: @brand-warning !important;
+    }
+  }
+  input {
+    cursor: pointer;
+    border-color: transparent;
+    padding-left: 0;
+    display: inline-block;
+    flex: 1 1 auto;
+    margin-right: 5px;
+     &:focus {
+       outline: none;
+       border-color: #999;
+       + span {
+         opacity: 100;
+         + span {
+           opacity: 100;
+           + span { opacity: 100; }
+         }
+       }
+     }
+  }
+  span {
+    cursor: pointer;
+    flex: 0 1 auto;
+    line-height: 32px;
+    text-align: center;
+    width: 25px;
+    display: inline-block;
+    opacity: 0;
+    &:active,
+    &:hover {
+      opacity: 100;
+    }
+  }
 }

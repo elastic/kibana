@@ -7,6 +7,7 @@ import 'ui/config';
 import 'ui/notify';
 import 'ui/typeahead';
 import 'ui/share';
+import 'ui/directives/kbn_editable_field';
 import 'plugins/kibana/dashboard/directives/grid';
 import 'plugins/kibana/dashboard/components/panel/panel';
 import 'plugins/kibana/dashboard/services/saved_dashboards';
