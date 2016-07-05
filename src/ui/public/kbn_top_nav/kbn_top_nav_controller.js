@@ -53,15 +53,18 @@ export default function ($compile) {
 
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
-      return defaults({}, opt, {
+      const defaultedOpt = defaults({}, opt, {
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        hideButton: isFunction(opt.hideButton) ? opt.hideButton : () => (opt.hideButton || false),
-        disableButton: isFunction(opt.disableButton) ? opt.disableButton : () => (opt.disableButton || false),
-        tooltip: isFunction(opt.tooltip) ? opt.tooltip : () => (opt.tooltip || ''),
         run: (item) => !item.disableButton() && this.toggle(item.key)
       });
+
+      defaultedOpt.hideButton = isFunction(opt.hideButton) ? opt.hideButton : () => (opt.hideButton || false);
+      defaultedOpt.disableButton = isFunction(opt.disableButton) ? opt.disableButton : () => (opt.disableButton || false);
+      defaultedOpt.tooltip = isFunction(opt.tooltip) ? opt.tooltip : () => (opt.tooltip || '');
+
+      return defaultedOpt;
     }
 
     // enable actual rendering
