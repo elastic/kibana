@@ -1,0 +1,32 @@
+<div class="app-container">
+  <nav class="navbar navbar-default navbar-static-top subnav" data-test-subj="managementNav">
+    <bread-crumbs omit-current-page="true"></bread-crumbs>
+
+    <ul class="nav navbar-nav">
+      <li class="current-page" ng-hide="sectionName">
+        {{::section.display}}
+      </li>
+
+      <li
+        ng-if="sectionName"
+        ng-repeat="item in section.items.inOrder"
+        ng-class="item.class"
+      >
+        <a
+          class="navbar-link"
+          ng-class="{ 'is-navbar-nav-link-disabled': !item.url }"
+          kbn-href="{{::item.url}}"
+          data-test-subj="{{::item.name}}"
+          tooltip="{{::item.tooltip}}"
+          tooltip-placement="bottom"
+          tooltip-popup-delay="400"
+          tooltip-append-to-body="1"
+        >
+          {{::item.display}}
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div role="main" class="management-container" ng-transclude></div>
+</div>

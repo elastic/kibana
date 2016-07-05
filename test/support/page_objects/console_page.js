@@ -1,71 +1,59 @@
-import { remote, defaultFindTimeout } from '../';
 
-// in test/support/pages/shield_page.js
-export default (function (require) {
-  // the page object is created as a constructor
-  // so we can provide the remote Command object
-  // at runtime
-  var thisTime;
+import {
+  defaultFindTimeout,
+} from '../';
 
-  function ConsolePage() {
+export default class ConsolePage {
+
+  init(remote) {
+    this.remote = remote;
+    this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);
   }
 
-  ConsolePage.prototype = {
-    constructor: ConsolePage,
+  getServer() {
+    return this.findTimeout
+    .findByCssSelector('#kibana-body > div.content > div > div')
+    .getVisibleText();
+  }
 
-    init(remote) {
-      this.remote = remote;
-      thisTime = this.remote.setFindTimeout(defaultFindTimeout);
-    },
+  setServer(server) {
+    return this.findTimeout
+    .findByCssSelector('input[aria-label="Server Name"]')
+    .clearValue()
+    .type(server);
+  }
 
-    getServer: function getServer() {
-      return thisTime
-      .findByCssSelector('#kibana-body > div.content > div > div')
-      .getVisibleText();
-    },
+  getRequest() {
+    return this.findTimeout
+    .findAllByCssSelector('div.ace_line_group')
+    .then(function (editorData) {
 
-    setServer: function setServer(server) {
-      return thisTime
-      .findByCssSelector('input[aria-label="Server Name"]')
-      .clearValue()
-      .type(server);
-    },
+      function getEditorData(line) {
+        return line.getVisibleText();
+      }
 
-    getRequest: function getRequest() {
-      return thisTime
-      .findAllByCssSelector('div.ace_line_group')
-      .then(function (editorData) {
+      var getEditorDataPromises = editorData.map(getEditorData);
+      return Promise.all(getEditorDataPromises);
+    });
+  }
 
-        function getEditorData(line) {
-          return line.getVisibleText();
-        }
+  getResponse() {
+    return this.findTimeout
+    .findByCssSelector('#output > div.ace_scroller > div')
+    .getVisibleText();
+  }
 
-        var getEditorDataPromises = editorData.map(getEditorData);
-        return Promise.all(getEditorDataPromises);
-      });
-    },
+  clickPlay() {
+    return this.findTimeout
+    .findByCssSelector('#editor_actions > span.ng-scope > a > i')
+    .click();
+  }
 
-    getResponse: function getResponse() {
-      return thisTime
-      .findByCssSelector('#output > div.ace_scroller > div')
-      .getVisibleText();
-    },
+  collapseHelp() {
+    return this.findTimeout
+    .findByCssSelector('div.config-close.remove > i')
+    .click();
 
-    clickPlay: function clickPlay() {
-      return thisTime
-      .findByCssSelector('#editor_actions > span.ng-scope > a > i')
-      .click();
-    },
+  }
 
-    collapseHelp: function collapseHelp() {
-      return thisTime
-      .findByCssSelector('div.config-close.remove > i')
-      .click();
-
-    }
-
-
-  };
-
-  return ConsolePage;
-}());
+}

@@ -1,13 +1,12 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  headerPage,
   scenarioManager,
-  settingsPage,
-  visualizePage
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   var fromTime = '2015-09-19 06:31:44.000';
@@ -15,38 +14,38 @@ bdd.describe('visualize app', function describeIndexTests() {
 
   bdd.before(function () {
 
-    common.debug('navigateToApp visualize');
-    return common.navigateToApp('visualize')
+    PageObjects.common.debug('navigateToApp visualize');
+    return PageObjects.common.navigateToApp('visualize')
     .then(function () {
-      common.debug('clickTileMap');
-      return visualizePage.clickTileMap();
+      PageObjects.common.debug('clickTileMap');
+      return PageObjects.visualize.clickTileMap();
     })
     .then(function () {
-      return visualizePage.clickNewSearch();
+      return PageObjects.visualize.clickNewSearch();
     })
     .then(function () {
-      common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function () {
-      common.debug('select bucket Geo Coordinates');
-      return visualizePage.clickBucket('Geo Coordinates');
+      PageObjects.common.debug('select bucket Geo Coordinates');
+      return PageObjects.visualize.clickBucket('Geo Coordinates');
     })
     .then(function () {
-      common.debug('Click aggregation Geohash');
-      return visualizePage.selectAggregation('Geohash');
+      PageObjects.common.debug('Click aggregation Geohash');
+      return PageObjects.visualize.selectAggregation('Geohash');
     })
     .then(function () {
-      common.debug('Click field geo.coordinates');
-      return common.try(function tryingForTime() {
-        return visualizePage.selectField('geo.coordinates');
+      PageObjects.common.debug('Click field geo.coordinates');
+      return PageObjects.common.try(function tryingForTime() {
+        return PageObjects.visualize.selectField('geo.coordinates');
       });
     })
     .then(function () {
-      return visualizePage.clickGo();
+      return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return headerPage.getSpinnerDone();
+      return PageObjects.header.getSpinnerDone();
     });
   });
 
@@ -55,27 +54,27 @@ bdd.describe('visualize app', function describeIndexTests() {
     bdd.it('should save and load, take screenshot', function pageHeader() {
       var vizName1 = 'Visualization TileMap';
 
-      return visualizePage.saveVisualization(vizName1)
+      return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
-        common.debug('Saved viz message = ' + message);
+        PageObjects.common.debug('Saved viz message = ' + message);
         expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
       })
       .then(function testVisualizeWaitForToastMessageGone() {
-        return visualizePage.waitForToastMessageGone();
+        return PageObjects.visualize.waitForToastMessageGone();
       })
       .then(function () {
-        return visualizePage.loadSavedVisualization(vizName1);
+        return PageObjects.visualize.loadSavedVisualization(vizName1);
       })
       .then(function waitForVisualization() {
-        return visualizePage.waitForVisualization();
+        return PageObjects.visualize.waitForVisualization();
       })
       // sleep a bit before taking the screenshot or it won't show data
       .then(function sleep() {
-        return common.sleep(4000);
+        return PageObjects.common.sleep(4000);
       })
       .then(function takeScreenshot() {
-        common.debug('Take screenshot');
-        common.saveScreenshot('Visualize-site-map');
+        PageObjects.common.debug('Take screenshot');
+        PageObjects.common.saveScreenshot('Visualize-site-map');
       });
     });
 
@@ -88,14 +87,14 @@ bdd.describe('visualize app', function describeIndexTests() {
         '84 14', 'dx 9', 'bu 9', 'b1 9', 'b4 6', '9n 3', '8g 3'
       ];
 
-      return visualizePage.collapseChart()
+      return PageObjects.visualize.collapseChart()
       .then(function () {
-        return settingsPage.setPageSize('All');
+        return PageObjects.settings.setPageSize('All');
       })
       .then(function getDataTableData() {
-        return visualizePage.getDataTableData()
+        return PageObjects.visualize.getDataTableData()
         .then(function showData(data) {
-          common.debug(data.split('\n'));
+          PageObjects.common.debug(data.split('\n'));
           expect(data.trim().split('\n')).to.eql(expectedTableData);
         });
       });
