@@ -83,9 +83,9 @@ uiRoutes
         }
 
         return savedDashboards.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing({
-          'dashboard' : '/dashboard'
-        }));
+          .catch(courier.redirectWhenMissing({
+            'dashboard': '/dashboard'
+          }));
       }
     }
   });
@@ -96,7 +96,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
       const configDefaults = Private(DefaultSettingsProvider);
-      
+
       const notify = new Notifier({
         location: 'Dashboard'
       });
@@ -142,7 +142,9 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.topNavMenu = [{
         key: 'new',
         description: 'New Dashboard',
-        run: function () { kbnUrl.change('/dashboard', {}); },
+        run: function () {
+          kbnUrl.change('/dashboard', {});
+        },
       }, {
         key: 'add',
         description: 'Add a panel to the dashboard',
@@ -221,7 +223,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.removeApplicationClass(['theme-dark', 'theme-light']);
         chrome.addApplicationClass(theme);
       }
-      
+
       // Returns whether this dashboard is now default
       function toggleDefaultDashboard(isChecked) {
         if (isChecked) {
@@ -243,7 +245,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       function setDefaultDashboard(id) {
         config.set('dashboard:defaultDashboard', id);
       }
-      
+
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
         updateQueryOnRootSource();
@@ -275,16 +277,16 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         dash.optionsJSON = angular.toJson($state.options);
 
         dash.save()
-        .then(function (id) {
-          $scope.kbnTopNav.close('save');
-          if (id) {
-            notify.info('Saved Dashboard as "' + dash.title + '"');
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+          .then(function (id) {
+            $scope.kbnTopNav.close('save');
+            if (id) {
+              notify.info('Saved Dashboard as "' + dash.title + '"');
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
+              }
             }
-          }
-        })
-        .catch(notify.fatal);
+          })
+          .catch(notify.fatal);
       };
 
       let pendingVis = _.size($state.panels);
@@ -305,24 +307,24 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit) {
         pendingVis++;
-        $state.panels.push({ id: hit.id, type: 'visualization', panelIndex: getMaxPanelIndex() });
+        $state.panels.push({id: hit.id, type: 'visualization', panelIndex: getMaxPanelIndex()});
       };
 
       $scope.addSearch = function (hit) {
         pendingVis++;
-        $state.panels.push({ id: hit.id, type: 'search', panelIndex: getMaxPanelIndex() });
+        $state.panels.push({id: hit.id, type: 'search', panelIndex: getMaxPanelIndex()});
       };
 
-        // Setup configurable values for config directive, after objects are initialized
-        $scope.opts = {
-          dashboard: dash,
-          ui: $state.options,
-          isDefaultDashboard: configDefaultDashboard === dash.id,
-          save: $scope.save,
-          addVis: $scope.addVis,
-          addSearch: $scope.addSearch,
-          timefilter: $scope.timefilter
-        };
+      // Setup configurable values for config directive, after objects are initialized
+      $scope.opts = {
+        dashboard: dash,
+        ui: $state.options,
+        isDefaultDashboard: configDefaultDashboard === dash.id,
+        save: $scope.save,
+        addVis: $scope.addVis,
+        addSearch: $scope.addSearch,
+        timefilter: $scope.timefilter
+      };
 
       init();
     }
