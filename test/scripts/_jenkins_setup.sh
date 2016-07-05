@@ -37,5 +37,3 @@ if [ -z "$(npm bin)" ]; then
   echo "npm does not know where it stores executables..... huh??"
   exit 1
 fi
-
-export GRUNT="$(npm bin)/grunt"
