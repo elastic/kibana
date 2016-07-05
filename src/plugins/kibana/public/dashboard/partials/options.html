@@ -1,14 +1,22 @@
 <form role="form" class="options">
-  <p>
-    <div class="input-group">
+  <ul class="input-list">
+    <li>
       <label>
-        <input type="checkbox" ng-model="opts.ui.darkTheme" ng-checked="opts.ui.darkTheme">
-        Use dark theme
+        <input class="hidden" type="checkbox" ng-model="opts.ui.darkTheme" ng-checked="opts.ui.darkTheme">
+        <i class="fa fa-fw"
+           ng-class="{'fa-square': !opts.ui.darkTheme,
+                'fa-check-square': opts.ui.darkTheme}"></i>
+        Use dark theme for this dashboard
       </label>
+    </li>
+    <li>
       <label>
-        <input type="checkbox" ng-model="opts.isDefaultDashboard" ng-checked="opts.isDefaultDashboard">
+        <input class="hidden" type="checkbox" ng-model="opts.isDefaultDashboard" ng-checked="opts.isDefaultDashboard">
+        <i class="fa fa-fw"
+           ng-class="{'fa-square': !opts.isDefaultDashboard,
+                'fa-check-square': opts.isDefaultDashboard}"></i>
         Set this dashboard as default dashboard to load
       </label>
-    </div>
-  </p>
+    </li>
+  </ul>
 </form>
