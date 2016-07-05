@@ -4,15 +4,25 @@ import defaultsProvider from './defaults';
 export default function setupSettings(kbnServer, server, config) {
   const status = kbnServer.status.create('ui settings');
   const uiSettings = {
+    // returns a Promise for the value of the requested setting
     get,
+    // returns a Promise for a hash of setting key/value pairs
     getAll,
-    getRaw,
-    getDefaults,
-    getUserProvided,
+    // .set(key, value), returns a Promise for persisting the new value to ES
     set,
+    // takes a key/value hash, returns a Promise for persisting the new values to ES
     setMany,
+    // returns a Promise for removing the provided key from user-specific settings
     remove,
-    removeMany
+    // takes an array, returns a Promise for removing every provided key from user-specific settings
+    removeMany,
+
+    // returns a Promise for the default settings, follows metadata format (see ./defaults)
+    getDefaults,
+    // returns a Promise for user-specific settings stored in ES, follows metadata format
+    getUserProvided,
+    // returns a Promise merging results of getDefaults & getUserProvided, follows metadata format
+    getRaw
   };
 
   server.decorate('server', 'uiSettings', () => uiSettings);

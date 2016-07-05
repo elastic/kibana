@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import init from '..';
@@ -103,7 +104,7 @@ describe('ui settings', function () {
     it('is promised the default values', async function () {
       const { server, uiSettings, configGet } = instantiate();
       const defaults = await uiSettings.getDefaults();
-      expect(defaults).eql(defaultsProvider());
+      expect(isEqual(defaults, defaultsProvider()));
     });
   });
 
@@ -119,18 +120,18 @@ describe('ui settings', function () {
       const getResult = { user: 'customized' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided();
-      expect(result).to.eql({
+      expect(isEqual(result, {
         user: { userValue: 'customized' }
-      });
+      }));
     });
 
     it('ignores null user configuration (because default values)', async function () {
       const getResult = { user: 'customized', usingDefault: null, something: 'else' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getUserProvided();
-      expect(result).to.eql({
+      expect(isEqual(result, {
         user: { userValue: 'customized' }, something: { userValue: 'else' }
-      });
+      }));
     });
   });
 
@@ -146,7 +147,7 @@ describe('ui settings', function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
-      expect(result).to.eql(defaultsProvider());
+      expect(isEqual(result, defaultsProvider()));
     });
 
     it(`user configuration gets merged with defaults`, async function () {
@@ -155,7 +156,7 @@ describe('ui settings', function () {
       const result = await uiSettings.getRaw();
       const merged = defaultsProvider();
       merged.foo = { userValue: 'bar' };
-      expect(result).to.eql(merged);
+      expect(isEqual(result, merged));
     });
 
     it(`user configuration gets merged into defaults`, async function () {
@@ -164,7 +165,7 @@ describe('ui settings', function () {
       const result = await uiSettings.getRaw();
       const merged = defaultsProvider();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
-      expect(result).to.eql(merged);
+      expect(isEqual(result, merged));
     });
   });
 
@@ -185,7 +186,7 @@ describe('ui settings', function () {
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
       });
-      expect(result).to.eql(expectation);
+      expect(isEqual(result, expectation));
     });
 
     it(`returns key value pairs including user configuration`, async function () {
@@ -198,7 +199,7 @@ describe('ui settings', function () {
         expectation[key] = defaults[key].value;
       });
       expectation.something = 'user-provided';
-      expect(result).to.eql(expectation);
+      expect(isEqual(result, expectation));
     });
 
     it(`returns key value pairs including user configuration for existing settings`, async function () {
@@ -211,7 +212,7 @@ describe('ui settings', function () {
         expectation[key] = defaults[key].value;
       });
       expectation.dateFormat = 'YYYY-MM-DD';
-      expect(result).to.eql(expectation);
+      expect(isEqual(result, expectation));
     });
   });
 
@@ -228,42 +229,42 @@ describe('ui settings', function () {
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
       const defaults = defaultsProvider();
-      expect(result).to.eql(defaults.dateFormat.value);
+      expect(isEqual(result, defaults.dateFormat.value));
     });
 
     it(`returns the user-configured value for a custom key`, async function () {
       const getResult = { custom: 'value' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('custom');
-      expect(result).to.eql('value');
+      expect(isEqual(result, 'value'));
     });
 
     it(`returns the user-configured value for a modified key`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
-      expect(result).to.eql('YYYY-MM-DD');
+      expect(isEqual(result, 'YYYY-MM-DD'));
     });
   });
 });
 
 function expectElasticsearchGetQuery(server, configGet) {
-  expect(server.plugins.elasticsearch.client.get.callCount).to.eql(1);
-  expect(server.plugins.elasticsearch.client.get.firstCall.args).to.eql([{
+  expect(isEqual(server.plugins.elasticsearch.client.get.callCount, 1));
+  expect(isEqual(server.plugins.elasticsearch.client.get.firstCall.args, [{
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config'
-  }]);
+  }]));
 }
 
 function expectElasticsearchUpdateQuery(server, configGet, doc) {
-  expect(server.plugins.elasticsearch.client.update.callCount).to.eql(1);
-  expect(server.plugins.elasticsearch.client.update.firstCall.args).to.eql([{
+  expect(isEqual(server.plugins.elasticsearch.client.update.callCount, 1));
+  expect(isEqual(server.plugins.elasticsearch.client.update.firstCall.args, [{
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config',
     body: { doc }
-  }]);
+  }]));
 }
 
 function instantiate({ getResult } = {}) {
