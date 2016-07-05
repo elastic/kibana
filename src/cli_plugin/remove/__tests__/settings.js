@@ -16,7 +16,7 @@ describe('kibana cli', function () {
         let options = {};
         const kbnPackage = { version: 1234 };
         beforeEach(function () {
-          options = { pluginDir: fromRoot('installedPlugins') };
+          options = { pluginDir: fromRoot('plugins') };
         });
 
         describe('quiet option', function () {
@@ -72,10 +72,10 @@ describe('kibana cli', function () {
 
         describe('pluginDir option', function () {
 
-          it('should default to installedPlugins', function () {
+          it('should default to plugins', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.pluginDir).to.be(fromRoot('installedPlugins'));
+            expect(settings.pluginDir).to.be(fromRoot('plugins'));
           });
 
           it('should set settings.config property', function () {
