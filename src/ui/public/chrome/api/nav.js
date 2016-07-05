@@ -8,11 +8,10 @@ export default function (chrome, internals) {
 
   chrome.getNavLinkById = (id) => {
     const navLink = internals.nav.find(link => link.id === id);
-    if (navLink) {
-      return navLink;
-    } else {
+    if (!navLink) {
       throw new Error(`Nav link for id = ${id} not found`);
     }
+    return navLink;
   };
 
   chrome.getBasePath = function () {
