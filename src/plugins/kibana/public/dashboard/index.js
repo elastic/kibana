@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 import 'ui/courier';
@@ -13,7 +12,6 @@ import 'plugins/kibana/dashboard/components/panel/panel';
 import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-import DefaultSettingsProvider from 'ui/settings/defaults';
 import DocTitleProvider from 'ui/doc_title';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
@@ -92,10 +90,11 @@ uiRoutes
 
 app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
   return {
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config, uiSettings) {
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
-      const configDefaults = Private(DefaultSettingsProvider);
+      const configDefaults = uiSettings.defaults;
+      const configDefaultDashboard = config.get('dashboard:defaultDashboard', '');
 
       const notify = new Notifier({
         location: 'Dashboard'
@@ -109,8 +108,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       }
 
       $scope.$on('$destroy', dash.destroy);
-
-      const configDefaultDashboard = config.get('dashboard:defaultDashboard', '');
 
       const matchQueryFilter = function (filter) {
         return filter.query && filter.query.query_string && !filter.meta;
