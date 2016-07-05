@@ -17,7 +17,7 @@ describe('plugins/elasticsearch', function () {
       kbnServer = kbnTestServer.createServer({
         plugins: {
           scanDirs: [
-            fromRoot('src/plugins')
+            fromRoot('src/core_plugins')
           ]
         }
       });

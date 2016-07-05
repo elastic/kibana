@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
+source "$(dirname $0)/_jenkins_setup.sh"
 
-"$(dirname $0)/jenkins_setup.sh"
-
-xvfb-run "$GRUNT" jenkins:unit;
+xvfb-run "$(npm bin)/grunt" jenkins:unit;

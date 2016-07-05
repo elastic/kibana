@@ -142,7 +142,7 @@ for development and fixing individual tests.
 This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
 `npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin`
-Run the tests for just your particular plugin. Assuming you plugin lives outside of the `installedPlugins directory`, which it should.
+Run the tests for just your particular plugin. Assuming you plugin lives outside of the `plugins directory`, which it should.
 
 #### Running browser automation tests:
 
