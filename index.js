@@ -55,7 +55,8 @@ module.exports = {
     'no-undef': 2,
     'no-underscore-dangle': 0,
     'no-unused-expressions': 0,
-    'no-unused-vars': 0,
+    // Disallow declaration of variables that are not used in the code.
+    'no-unused-vars': [2, { vars: 'local' }],
     'no-use-before-define': [ 2, 'nofunc' ],
     'no-with': 2,
     'one-var': [ 2, 'never' ],
