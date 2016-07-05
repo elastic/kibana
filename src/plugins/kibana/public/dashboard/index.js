@@ -1,6 +1,5 @@
 define(function (require) {
   const _ = require('lodash');
-  const $ = require('jquery');
   const angular = require('angular');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
