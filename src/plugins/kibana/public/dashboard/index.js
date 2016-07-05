@@ -318,12 +318,12 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // Setup configurable values for config directive, after objects are initialized
       $scope.opts = {
         dashboard: dash,
-        ui: $state.options,
         isDefaultDashboard: configDefaultDashboard === dash.id,
+        isNewDashboard: $location.search().new === true,
+        ui: $state.options,
         save: $scope.save,
         addVis: $scope.addVis,
-        addSearch: $scope.addSearch,
-        timefilter: $scope.timefilter
+        addSearch: $scope.addSearch
       };
 
       init();

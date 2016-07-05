@@ -4,18 +4,19 @@
       <label>
         <input class="hidden" type="checkbox" ng-model="opts.ui.darkTheme" ng-checked="opts.ui.darkTheme">
         <i class="fa fa-fw"
-           ng-class="{'fa-square': !opts.ui.darkTheme,
-                'fa-check-square': opts.ui.darkTheme}"></i>
-        Use dark theme for this dashboard
+           ng-class="{ 'fa-square': !opts.ui.darkTheme,
+                       'fa-check-square': opts.ui.darkTheme }"></i>
+        <span>Use dark theme for this dashboard</span>
       </label>
     </li>
     <li>
-      <label>
-        <input class="hidden" type="checkbox" ng-model="opts.isDefaultDashboard" ng-checked="opts.isDefaultDashboard">
+      <label ng-class="{ 'text-muted': opts.isNewDashboard }">
+        <input class="hidden" type="checkbox" ng-model="opts.isDefaultDashboard" ng-checked="opts.isDefaultDashboard" ng-disabled="opts.isNewDashboard">
         <i class="fa fa-fw"
-           ng-class="{'fa-square': !opts.isDefaultDashboard,
-                'fa-check-square': opts.isDefaultDashboard}"></i>
-        Set this dashboard as default dashboard to load
+           ng-class="{ 'fa-square': !opts.isDefaultDashboard,
+                       'fa-check-square': opts.isDefaultDashboard }"></i>
+        <span>Set this dashboard as default dashboard to load<br>
+        <small ng-if="opts.isNewDashboard" class="text-danger">You have to save the dashboard first to be able to set it as default.</small></span>
       </label>
     </li>
   </ul>
