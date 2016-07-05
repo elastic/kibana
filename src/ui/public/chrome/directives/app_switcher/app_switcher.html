@@ -1,13 +1,20 @@
 <div class="app-links">
   <div
     class="app-link"
-    ng-repeat="link in switcher.getNavLinks()"
-    ng-class="{ active: link.active }">
+    ng-repeat="link in switcher.shownNavLinks"
+    ng-class="{ active: link.active, 'is-app-switcher-app-link-disabled': !switcher.isNavLinkEnabled(link) }"
+    tooltip="{{link.tooltip}}"
+    tooltip-placement="right"
+    tooltip-popup-delay="400"
+    tooltip-append-to-body="1"
+  >
 
     <a
       ng-click="switcher.ensureNavigation($event, link)"
       ng-href="{{ link.active ? link.url : (link.lastSubUrl || link.url) }}"
-      data-test-subj="appLink">
+      data-test-subj="appLink"
+      ng-class="{ 'app-link__anchor': !switcher.isNavLinkEnabled(link) }"
+    >
 
       <div ng-if="link.icon" class="app-icon"><img kbn-src="{{'/' + link.icon}}"></div>
       <div ng-if="!link.icon" class="app-icon-missing">{{ link.title[0] }}</div>
