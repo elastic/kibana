@@ -1,15 +1,14 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  discoverPage,
-  headerPage,
   scenarioManager,
-  settingsPage,
   esClient,
   elasticDump
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('discover tab', function describeIndexTests() {
   bdd.before(function () {
@@ -19,7 +18,7 @@ bdd.describe('discover tab', function describeIndexTests() {
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
-      common.debug('load kibana index with default index pattern');
+      PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize','.kibana');
     })
     // and load a set of makelogs data
@@ -27,46 +26,46 @@ bdd.describe('discover tab', function describeIndexTests() {
       return scenarioManager.loadIfEmpty('logstashFunctional');
     })
     .then(function () {
-      common.debug('discover');
-      return common.navigateToApp('discover');
+      PageObjects.common.debug('discover');
+      return PageObjects.common.navigateToApp('discover');
     })
     .then(function () {
-      common.debug('setAbsoluteRange');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('setAbsoluteRange');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
   });
 
   bdd.describe('field data', function () {
     bdd.it('should initially be expanded', function () {
-      common.saveScreenshot('Discover-sidebar-expanded');
-      return discoverPage.getSidebarWidth()
+      PageObjects.common.saveScreenshot('Discover-sidebar-expanded');
+      return PageObjects.discover.getSidebarWidth()
         .then(function (width) {
-          common.debug('expanded sidebar width = ' + width);
+          PageObjects.common.debug('expanded sidebar width = ' + width);
           expect(width > 180).to.be(true);
         });
     });
 
     bdd.it('should collapse when clicked', function () {
-      return discoverPage.toggleSidebarCollapse()
+      return PageObjects.discover.toggleSidebarCollapse()
         .then(function () {
-          common.saveScreenshot('Discover-sidebar-collapsed');
-          common.debug('discoverPage.getSidebarWidth()');
-          return discoverPage.getSidebarWidth();
+          PageObjects.common.saveScreenshot('Discover-sidebar-collapsed');
+          PageObjects.common.debug('PageObjects.discover.getSidebarWidth()');
+          return PageObjects.discover.getSidebarWidth();
         })
         .then(function (width) {
-          common.debug('collapsed sidebar width = ' + width);
+          PageObjects.common.debug('collapsed sidebar width = ' + width);
           expect(width < 20).to.be(true);
         });
     });
 
     bdd.it('should expand when clicked', function () {
-      return discoverPage.toggleSidebarCollapse()
+      return PageObjects.discover.toggleSidebarCollapse()
         .then(function () {
-          common.debug('discoverPage.getSidebarWidth()');
-          return discoverPage.getSidebarWidth();
+          PageObjects.common.debug('PageObjects.discover.getSidebarWidth()');
+          return PageObjects.discover.getSidebarWidth();
         })
         .then(function (width) {
-          common.debug('expanded sidebar width = ' + width);
+          PageObjects.common.debug('expanded sidebar width = ' + width);
           expect(width > 180).to.be(true);
         });
     });

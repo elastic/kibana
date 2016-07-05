@@ -1,60 +1,59 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  headerPage,
   scenarioManager,
-  settingsPage,
-  visualizePage
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
     var fromTime = '2015-09-19 06:31:44.000';
     var toTime = '2015-09-23 18:31:44.000';
 
-    common.debug('navigateToApp visualize');
-    return common.navigateToApp('visualize')
+    PageObjects.common.debug('navigateToApp visualize');
+    return PageObjects.common.navigateToApp('visualize')
     .then(function () {
-      common.debug('clickPieChart');
-      return visualizePage.clickPieChart();
+      PageObjects.common.debug('clickPieChart');
+      return PageObjects.visualize.clickPieChart();
     })
     .then(function clickNewSearch() {
-      return visualizePage.clickNewSearch();
+      return PageObjects.visualize.clickNewSearch();
     })
     .then(function setAbsoluteRange() {
-      common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function () {
-      common.debug('select bucket Split Slices');
-      return visualizePage.clickBucket('Split Slices');
+      PageObjects.common.debug('select bucket Split Slices');
+      return PageObjects.visualize.clickBucket('Split Slices');
     })
     .then(function () {
-      common.debug('Click aggregation Histogram');
-      return visualizePage.selectAggregation('Histogram');
+      PageObjects.common.debug('Click aggregation Histogram');
+      return PageObjects.visualize.selectAggregation('Histogram');
     })
     .then(function () {
-      common.debug('Click field memory');
-      return visualizePage.selectField('memory');
+      PageObjects.common.debug('Click field memory');
+      return PageObjects.visualize.selectField('memory');
     })
     .then(function () {
-      return headerPage.getSpinnerDone();
+      return PageObjects.header.getSpinnerDone();
     })
     .then(function sleep() {
-      return common.sleep(1003);
+      return PageObjects.common.sleep(1003);
     })
     .then(function () {
-      common.debug('setNumericInterval 4000');
-      return visualizePage.setNumericInterval('40000');
+      PageObjects.common.debug('setNumericInterval 4000');
+      return PageObjects.visualize.setNumericInterval('40000');
     })
     .then(function () {
-      common.debug('clickGo');
-      return visualizePage.clickGo();
+      PageObjects.common.debug('clickGo');
+      return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return headerPage.getSpinnerDone();
+      return PageObjects.header.getSpinnerDone();
     });
   });
 
@@ -65,23 +64,23 @@ bdd.describe('visualize app', function describeIndexTests() {
     bdd.it('should save and load', function pageHeader() {
       var remote = this.remote;
 
-      return visualizePage.saveVisualization(vizName1)
+      return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
-        common.debug('Saved viz message = ' + message);
+        PageObjects.common.debug('Saved viz message = ' + message);
         expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
       })
       .then(function testVisualizeWaitForToastMessageGone() {
-        return visualizePage.waitForToastMessageGone();
+        return PageObjects.visualize.waitForToastMessageGone();
       })
       .then(function () {
-        return visualizePage.loadSavedVisualization(vizName1);
+        return PageObjects.visualize.loadSavedVisualization(vizName1);
       })
       .then(function waitForVisualization() {
-        return visualizePage.waitForVisualization();
+        return PageObjects.visualize.waitForVisualization();
       })
       // sleep a bit before trying to get the pie chart data below
       .then(function sleep() {
-        return common.sleep(2000);
+        return PageObjects.common.sleep(2000);
       });
     });
 
@@ -89,11 +88,11 @@ bdd.describe('visualize app', function describeIndexTests() {
       var remote = this.remote;
       var expectedPieChartSliceCount = 10;
 
-      return visualizePage.getPieChartData()
+      return PageObjects.visualize.getPieChartData()
       .then(function (pieData) {
         var barHeightTolerance = 1;
-        common.debug('pieData.length = ' + pieData.length);
-        common.saveScreenshot('Visualize-pie-chart');
+        PageObjects.common.debug('pieData.length = ' + pieData.length);
+        PageObjects.common.saveScreenshot('Visualize-pie-chart');
         expect(pieData.length).to.be(expectedPieChartSliceCount);
       });
     });
@@ -104,15 +103,15 @@ bdd.describe('visualize app', function describeIndexTests() {
         '160,000 44', '200,000 40', '240,000 46', '280,000 39', '320,000 40', '360,000 47'
       ];
 
-      return visualizePage.collapseChart()
+      return PageObjects.visualize.collapseChart()
       .then(function () {
-        return settingsPage.setPageSize('All');
+        return PageObjects.settings.setPageSize('All');
       })
       .then(function getDataTableData() {
-        return visualizePage.getDataTableData();
+        return PageObjects.visualize.getDataTableData();
       })
       .then(function showData(data) {
-        common.debug(data.split('\n'));
+        PageObjects.common.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.eql(expectedTableData);
       });
     });

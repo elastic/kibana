@@ -16,7 +16,7 @@ export default function GetIndexPatternIdsFn(es, kbnIndex) {
     cachedPromise = es.search({
       index: kbnIndex,
       type: 'index-pattern',
-      fields: [],
+      storedFields: [],
       body: {
         query: { match_all: {} },
         size: 10000

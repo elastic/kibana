@@ -1,0 +1,254 @@
+@import (reference) "~ui/styles/theme";
+@import (reference) "~ui/styles/variables";
+
+kbn-management-app,
+kbn-management-landing,
+kbn-management-indices,
+kbn-management-indices-edit,
+kbn-management-indices-create,
+kbn-management-advanced,
+kbn-management-objects,
+kbn-management-objects-view {
+  display: block;
+}
+
+nav.navbar {
+  height: 70px;
+}
+
+.tab-management {
+  background-color: @kibanaGray6;
+}
+
+.settings-nav {
+  text-transform: capitalize;
+}
+
+li.kbn-management-tab:first-letter {
+  text-transform: capitalize;
+}
+
+kbn-management-app {
+  bread-crumbs ul {
+    height: 36px;
+  }
+
+  li.current-page {
+    font-size: 1.5em;
+    margin: 0 10px;
+  }
+}
+
+kbn-management-landing {
+  padding: 5px;
+
+  .management-panel-product {
+    margin-bottom: 10px;
+
+    .panel-body {
+      padding-bottom: 30px;
+      position: relative;
+    }
+  }
+
+  .management-section {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .management-link {
+    font-size: 17px;
+    line-height: 32px;
+
+    &.is-management-link-disabled {
+      opacity: 0.5;
+      cursor: default;
+
+      &:hover, &:visited {
+        color: @kibanaBlue2;
+      }
+    }
+  }
+
+  .panel-heading-icon {
+    font-size: 0.9em;
+    padding: 5px;
+  }
+
+  .product-overview {
+    color: @kibanaGray2;
+    padding: 5px 0 10px 10px;
+  }
+
+  .management-section-info {
+    bottom: 10px;
+    display: none;
+    color: @kibanaPink1;
+    font-size: 0.8em;
+    position: absolute;
+  }
+
+  .management-section-info-expanded {
+    .panel-heading-icon {
+      color: @black;
+    }
+
+    .management-section-info {
+      display: block;
+    }
+  }
+}
+
+kbn-management-objects {
+  form {
+    margin-bottom: @line-height-computed;
+  }
+  .list-unstyled {
+    li {
+      border-bottom: 1px solid;
+      border-bottom-color: @management-objects-list-border;
+      padding: 8px;
+    }
+  }
+  .empty {
+    color: @management-objects-empty-color;
+  }
+
+  .item {
+    padding: 12px;
+
+    .item-title {
+      margin-left: 30px;
+    }
+
+    .actions {
+      margin-top: -6px;
+    }
+  }
+
+  .action-bar {
+    margin-top: 10px;
+    background-color: @management-objects-action-bar-bg;
+    padding: 4px 12px;
+
+    label {
+      font-size: 10px;
+      font-weight: normal;
+    }
+
+    .btn {
+      font-size: 10px;
+      margin-left: 20px;
+    }
+  }
+
+  .header {
+    .title, .controls {
+      padding-right: 1em;
+      display: inline-block;
+    }
+  }
+}
+
+kbn-management-advanced {
+  // super specific rule to override bootstrap's equally specific rule
+  // https://github.com/twbs/bootstrap/blob/1f329f8f17aa989eabc6e94bdcab93e69ef0e463/less/tables.less#L35
+  .table {
+    table-layout: fixed;
+
+    tbody > tr > td {
+      vertical-align: middle;
+    }
+  }
+}
+
+kbn-management-objects-view {
+  label {
+    font-family: @font-family-monospace;
+  }
+  .ace_editor { height: 300px; }
+}
+
+.advanced-settings {
+  overflow-x: scroll;
+
+  table {
+    width: 100%;
+
+    tr.default td.value {
+      color: @management-advanced-table-default-color;
+    }
+
+    td {
+      font-family: @font-family-monospace;
+
+      &.actions {
+        width: 150px;
+      }
+    }
+  }
+}
+
+.indices-settings {
+  i.active {
+    color: @management-indices-active-color;
+  }
+
+  tr.field-settings {
+    .field-popularize {
+      margin-left: 5px;
+      display: none;
+    }
+    &:hover .field-popularize {
+      display: inline;
+    }
+  }
+
+  .index-pattern-name {
+    display: flex;
+    align-items: center;
+
+    .title {
+      flex: 1 1 auto;
+    }
+
+    .controls {
+      flex: 4 0 auto;
+    }
+  }
+}
+
+kbn-management-indices {
+  .fields {
+    table {
+      .table-striped()
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+  }
+
+  .indexed-fields {
+    th:first-child,
+    td:first-child {
+      width: 35%;
+    }
+  }
+
+  .scripted-fields header {
+    margin: 5px 0;
+    text-align: right;
+  }
+
+  p.text-center {
+    padding-top: 1em;
+  }
+}
+
+.kbn-settings-indices-create {
+  .time-and-pattern > div {}
+}
+
+@import "~ui/dragula/gu-dragula.less";

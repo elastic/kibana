@@ -53,6 +53,16 @@
         background-color: transparent;
         border-bottom: 2px solid @kibanaGray1;
       }
+
+      .is-navbar-nav-link-disabled {
+        opacity: 0.5;
+        cursor: default;
+
+        &:hover {
+          border-bottom-color: transparent;
+          color: @kibanaGray2;
+        }
+      }
     }
   }
 

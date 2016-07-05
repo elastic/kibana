@@ -1,15 +1,14 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  discoverPage,
-  headerPage,
-  settingsPage,
   scenarioManager,
   esClient,
   elasticDump
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('shared links', function describeIndexTests() {
   var baseUrl;
@@ -20,7 +19,7 @@ bdd.describe('shared links', function describeIndexTests() {
   var expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
   bdd.before(function () {
-    baseUrl = common.getHostPort();
+    baseUrl = PageObjects.common.getHostPort();
 
     var fromTime = '2015-09-19 06:31:44.000';
     var toTime = '2015-09-23 18:31:44.000';
@@ -28,7 +27,7 @@ bdd.describe('shared links', function describeIndexTests() {
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
-      common.debug('load kibana index with default index pattern');
+      PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize','.kibana');
     })
     // and load a set of makelogs data
@@ -36,17 +35,17 @@ bdd.describe('shared links', function describeIndexTests() {
       return scenarioManager.loadIfEmpty('logstashFunctional');
     })
     .then(function () {
-      common.debug('discover');
-      return common.navigateToApp('discover');
+      PageObjects.common.debug('discover');
+      return PageObjects.common.navigateToApp('discover');
     })
     .then(function () {
-      common.debug('setAbsoluteRange');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('setAbsoluteRange');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function () {
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button
-      return common.sleep(1000);
+      return PageObjects.common.sleep(1000);
     });
   });
 
@@ -54,10 +53,10 @@ bdd.describe('shared links', function describeIndexTests() {
   bdd.describe('shared link', function () {
     bdd.it('should show "Share a link" caption', function () {
       var expectedCaption = 'Share a link';
-      return discoverPage.clickShare()
+      return PageObjects.discover.clickShare()
       .then(function () {
-        common.saveScreenshot('Discover-share-link');
-        return discoverPage.getShareCaption();
+        PageObjects.common.saveScreenshot('Discover-share-link');
+        return PageObjects.discover.getShareCaption();
       })
       .then(function (actualCaption) {
         expect(actualCaption).to.be(expectedCaption);
@@ -72,7 +71,7 @@ bdd.describe('shared links', function describeIndexTests() {
         + '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-'
         + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
         + ':\'*\')),sort:!(\'@timestamp\',desc))';
-      return discoverPage.getSharedUrl()
+      return PageObjects.discover.getSharedUrl()
       .then(function (actualUrl) {
         // strip the timestamp out of each URL
         expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
@@ -81,27 +80,27 @@ bdd.describe('shared links', function describeIndexTests() {
     });
 
     bdd.it('should show toast message for copy to clipboard', function () {
-      return discoverPage.clickCopyToClipboard()
+      return PageObjects.discover.clickCopyToClipboard()
       .then(function () {
-        return headerPage.getToastMessage();
+        return PageObjects.header.getToastMessage();
       })
       .then(function (toastMessage) {
-        common.saveScreenshot('Discover-copy-to-clipboard-toast');
+        PageObjects.common.saveScreenshot('Discover-copy-to-clipboard-toast');
         expect(toastMessage).to.match(expectedToastMessage);
       })
       .then(function () {
-        return headerPage.waitForToastMessageGone();
+        return PageObjects.header.waitForToastMessageGone();
       });
     });
 
     // TODO: verify clipboard contents
     bdd.it('shorten URL button should produce a short URL', function () {
       var re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-      return discoverPage.clickShortenUrl()
+      return PageObjects.discover.clickShortenUrl()
       .then(function () {
-        return common.try(function tryingForTime() {
-          common.saveScreenshot('Discover-shorten-url-button');
-          return discoverPage.getShortenedUrl()
+        return PageObjects.common.try(function tryingForTime() {
+          PageObjects.common.saveScreenshot('Discover-shorten-url-button');
+          return PageObjects.discover.getShortenedUrl()
           .then(function (actualUrl) {
             expect(actualUrl).to.match(re);
           });
@@ -111,15 +110,15 @@ bdd.describe('shared links', function describeIndexTests() {
 
     // NOTE: This test has to run immediately after the test above
     bdd.it('should show toast message for copy to clipboard', function () {
-      return discoverPage.clickCopyToClipboard()
+      return PageObjects.discover.clickCopyToClipboard()
       .then(function () {
-        return headerPage.getToastMessage();
+        return PageObjects.header.getToastMessage();
       })
       .then(function (toastMessage) {
         expect(toastMessage).to.match(expectedToastMessage);
       })
       .then(function () {
-        return headerPage.waitForToastMessageGone();
+        return PageObjects.header.waitForToastMessageGone();
       });
     });
   });

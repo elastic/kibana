@@ -23,7 +23,7 @@ export default function pluginList(program) {
     .option(
       '-d, --plugin-dir <path>',
       'path to the directory where plugins are stored',
-      fromRoot('installedPlugins')
+      fromRoot('plugins')
     )
     .description('list installed plugins')
     .action(processCommand);

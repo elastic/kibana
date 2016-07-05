@@ -1,54 +1,53 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
-  headerPage,
   scenarioManager,
-  settingsPage,
-  visualizePage
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   var fromTime = '2015-09-19 06:31:44.000';
   var toTime = '2015-09-23 18:31:44.000';
 
   bdd.before(function () {
-    common.debug('navigateToApp visualize');
-    return common.navigateToApp('visualize')
+    PageObjects.common.debug('navigateToApp visualize');
+    return PageObjects.common.navigateToApp('visualize')
     .then(function () {
-      common.debug('clickDataTable');
-      return visualizePage.clickDataTable();
+      PageObjects.common.debug('clickDataTable');
+      return PageObjects.visualize.clickDataTable();
     })
     .then(function clickNewSearch() {
-      common.debug('clickNewSearch');
-      return visualizePage.clickNewSearch();
+      PageObjects.common.debug('clickNewSearch');
+      return PageObjects.visualize.clickNewSearch();
     })
     .then(function setAbsoluteRange() {
-      common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function clickBucket() {
-      common.debug('Bucket = Split Rows');
-      return visualizePage.clickBucket('Split Rows');
+      PageObjects.common.debug('Bucket = Split Rows');
+      return PageObjects.visualize.clickBucket('Split Rows');
     })
     .then(function selectAggregation() {
-      common.debug('Aggregation = Histogram');
-      return visualizePage.selectAggregation('Histogram');
+      PageObjects.common.debug('Aggregation = Histogram');
+      return PageObjects.visualize.selectAggregation('Histogram');
     })
     .then(function selectField() {
-      common.debug('Field = bytes');
-      return visualizePage.selectField('bytes');
+      PageObjects.common.debug('Field = bytes');
+      return PageObjects.visualize.selectField('bytes');
     })
     .then(function setInterval() {
-      common.debug('Interval = 2000');
-      return visualizePage.setNumericInterval('2000');
+      PageObjects.common.debug('Interval = 2000');
+      return PageObjects.visualize.setNumericInterval('2000');
     })
     .then(function clickGo() {
-      return visualizePage.clickGo();
+      return PageObjects.visualize.clickGo();
     })
     .then(function () {
-      return headerPage.getSpinnerDone();
+      return PageObjects.header.getSpinnerDone();
     });
   });
 
@@ -56,19 +55,19 @@ bdd.describe('visualize app', function describeIndexTests() {
     var vizName1 = 'Visualization DataTable';
 
     bdd.it('should be able to save and load', function pageHeader() {
-      return visualizePage.saveVisualization(vizName1)
+      return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
-        common.debug('Saved viz message = ' + message);
+        PageObjects.common.debug('Saved viz message = ' + message);
         expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
       })
       .then(function testVisualizeWaitForToastMessageGone() {
-        return visualizePage.waitForToastMessageGone();
+        return PageObjects.visualize.waitForToastMessageGone();
       })
       .then(function () {
-        return visualizePage.loadSavedVisualization(vizName1);
+        return PageObjects.visualize.loadSavedVisualization(vizName1);
       })
       .then(function () {
-        return visualizePage.waitForVisualization();
+        return PageObjects.visualize.waitForVisualization();
       });
     });
 
@@ -78,10 +77,10 @@ bdd.describe('visualize app', function describeIndexTests() {
       '8,000 2,863', '10,000 147', '12,000 148', '14,000 129', '16,000 161', '18,000 137'
       ];
 
-      return visualizePage.getDataTableData()
+      return PageObjects.visualize.getDataTableData()
       .then(function showData(data) {
-        common.debug(data.split('\n'));
-        common.saveScreenshot('Visualize-data-table');
+        PageObjects.common.debug(data.split('\n'));
+        PageObjects.common.saveScreenshot('Visualize-data-table');
         expect(data.split('\n')).to.eql(expectedChartData);
       });
     });
