@@ -297,6 +297,7 @@ define(function (require) {
         $scope.opts = {
           dashboard: dash,
           isDefaultDashboard: configDefaultDashboard === dash.id,
+          isNewDashboard: $location.search().new === true,
           ui: $state.options,
           save: $scope.save,
           addVis: $scope.addVis,
