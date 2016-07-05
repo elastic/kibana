@@ -13,15 +13,13 @@ import 'plugins/kibana/dashboard/components/panel/panel';
 import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import DefaultSettingsProvider from 'ui/settings/defaults';
 import DocTitleProvider from 'ui/doc_title';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
 
-
-
 require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
-
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -33,32 +31,72 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 uiRoutes
-.when('/dashboard', {
-  template: indexTemplate,
-  resolve: {
-    dash: function (savedDashboards, config) {
-      return savedDashboards.get();
+  .when('/dashboard', {
+    template: function ($location) {
+      if ($location.new === true) {
+        return indexTemplate;
+      }
+
+      return false;
+    },
+    resolve: {
+      dash: function (savedDashboards, config, kbnUrl, Notifier, $location, $route) {
+        let defaultDashboard = config.get('dashboard:defaultDashboard', '');
+
+        let notify = new Notifier({
+          location: 'Dashboard'
+        });
+
+        if ($location.search().new === true) {
+          return savedDashboards.get();
+        }
+
+        function forceNew() {
+          $location.search('new', true);
+          $route.reload();
+        }
+
+        if (defaultDashboard !== '') {
+          return savedDashboards.get(defaultDashboard)
+            .then(function (result) {
+              let dashboardUrl = savedDashboards.urlFor(result.id).substring(1);
+              kbnUrl.change(dashboardUrl);
+            })
+            .catch(function (error) {
+              notify.error(error);
+
+              forceNew();
+            });
+        }
+
+        forceNew();
+      }
     }
-  }
-})
-.when('/dashboard/:id', {
-  template: indexTemplate,
-  resolve: {
-    dash: function (savedDashboards, Notifier, $route, $location, courier) {
-      return savedDashboards.get($route.current.params.id)
-      .catch(courier.redirectWhenMissing({
-        'dashboard' : '/dashboard'
-      }));
+  })
+  .when('/dashboard/:id', {
+    template: indexTemplate,
+    resolve: {
+      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl) {
+        if ($location.search().new === true) {
+          kbnUrl.change('/dashboard');
+          $location.search('new', true);
+        }
+
+        return savedDashboards.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing({
+          'dashboard' : '/dashboard'
+        }));
+      }
     }
-  }
-});
+  });
 
 app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
   return {
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
-
+      const configDefaults = Private(DefaultSettingsProvider);
+      
       const notify = new Notifier({
         location: 'Dashboard'
       });
@@ -71,6 +109,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       }
 
       $scope.$on('$destroy', dash.destroy);
+
+      const configDefaultDashboard = config.get('dashboard:defaultDashboard', '');
 
       const matchQueryFilter = function (filter) {
         return filter.query && filter.query.query_string && !filter.meta;
@@ -97,6 +137,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         if (!angular.equals(newVal, oldVal)) $state.save();
       });
       $scope.$watch('state.options.darkTheme', setDarkTheme);
+      $scope.$watch('opts.isDefaultDashboard', toggleDefaultDashboard);
 
       $scope.topNavMenu = [{
         key: 'new',
@@ -180,7 +221,29 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         chrome.removeApplicationClass(['theme-dark', 'theme-light']);
         chrome.addApplicationClass(theme);
       }
+      
+      // Returns whether this dashboard is now default
+      function toggleDefaultDashboard(isChecked) {
+        if (isChecked) {
+          setDefaultDashboard(dash.id);
+          return true;
+        }
 
+        if (dash.id === configDefaultDashboard) {
+          /* If the default option is turned off and the previous default
+           dashboard was this dashboard set no default dashboard */
+          setDefaultDashboard(configDefaults['dashboard:defaultDashboard'].value);
+          return false;
+        }
+
+        setDefaultDashboard(configDefaultDashboard);
+        return false;
+      }
+
+      function setDefaultDashboard(id) {
+        config.set('dashboard:defaultDashboard', id);
+      }
+      
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
         updateQueryOnRootSource();
@@ -191,7 +254,8 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
       $scope.newDashboard = function () {
-        kbnUrl.change('/dashboard', {});
+        $location.search('new', true);
+        $route.reload();
       };
 
       $scope.filterResults = function () {
@@ -249,15 +313,16 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         $state.panels.push({ id: hit.id, type: 'search', panelIndex: getMaxPanelIndex() });
       };
 
-      // Setup configurable values for config directive, after objects are initialized
-      $scope.opts = {
-        dashboard: dash,
-        ui: $state.options,
-        save: $scope.save,
-        addVis: $scope.addVis,
-        addSearch: $scope.addSearch,
-        timefilter: $scope.timefilter
-      };
+        // Setup configurable values for config directive, after objects are initialized
+        $scope.opts = {
+          dashboard: dash,
+          ui: $state.options,
+          isDefaultDashboard: configDefaultDashboard === dash.id,
+          save: $scope.save,
+          addVis: $scope.addVis,
+          addSearch: $scope.addSearch,
+          timefilter: $scope.timefilter
+        };
 
       init();
     }
