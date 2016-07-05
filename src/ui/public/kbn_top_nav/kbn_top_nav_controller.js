@@ -57,9 +57,9 @@ export default function ($compile) {
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        hideButton: isFunction(opt.hideButton) ? opt.hideButton : () => false,
-        disableButton: isFunction(opt.disableButton) ? opt.disableButton : () => false,
-        tooltip: isFunction(opt.tooltip) ? opt.tooltip : () => '',
+        hideButton: isFunction(opt.hideButton) ? opt.hideButton : () => (opt.hideButton || false),
+        disableButton: isFunction(opt.disableButton) ? opt.disableButton : () => (opt.disableButton || false),
+        tooltip: isFunction(opt.tooltip) ? opt.tooltip : () => (opt.tooltip || ''),
         run: (item) => !item.disableButton() && this.toggle(item.key)
       });
     }
