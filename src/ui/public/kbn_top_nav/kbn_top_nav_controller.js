@@ -1,4 +1,4 @@
-import { defaults, capitalize, isArray, isFunction } from 'lodash';
+import { defaults, capitalize, isArray, isFunction, result } from 'lodash';
 
 import uiModules from 'ui/modules';
 import filterTemplate from 'ui/chrome/config/filter.html';
@@ -29,7 +29,7 @@ export default function ($compile) {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
-        if (!opt.hideButton()) this.menuItems.push(opt);
+        if (!opt.hideButton) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
       });
     }
@@ -57,12 +57,12 @@ export default function ($compile) {
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        run: (item) => !item.disableButton() && this.toggle(item.key)
+        run: (item) => !item.disableButton && this.toggle(item.key)
       });
 
-      defaultedOpt.hideButton = isFunction(opt.hideButton) ? opt.hideButton : () => (opt.hideButton || false);
-      defaultedOpt.disableButton = isFunction(opt.disableButton) ? opt.disableButton : () => (opt.disableButton || false);
-      defaultedOpt.tooltip = isFunction(opt.tooltip) ? opt.tooltip : () => (opt.tooltip || '');
+      defaultedOpt.hideButton = result(opt, 'hideButton', false);
+      defaultedOpt.disableButton = result(opt, 'disableButton', false);
+      defaultedOpt.tooltip = result(opt, 'tooltip', '');
 
       return defaultedOpt;
     }
