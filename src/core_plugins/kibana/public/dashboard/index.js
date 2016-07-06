@@ -56,7 +56,7 @@ uiRoutes
           $route.reload();
         }
 
-        if (defaultDashboard !== '') {
+        if (defaultDashboard !== '' && typeof defaultDashboard !== 'undefined') {
           return savedDashboards.get(defaultDashboard)
             .then(function (result) {
               let dashboardUrl = savedDashboards.urlFor(result.id).substring(1);
@@ -144,7 +144,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       $scope.topNavMenu = [{
         key: 'new',
         description: 'New Dashboard',
-        run: $scope.newDashboard
+        run: newDashboard
       }, {
         key: 'add',
         description: 'Add a panel to the dashboard',
@@ -246,6 +246,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         config.set('dashboard:defaultDashboard', id);
       }
 
+      function newDashboard() {
+        $location.search('new', true);
+        $route.reload();
+      }
+
       // update root source when filters update
       $scope.$listen(queryFilter, 'update', function () {
         updateQueryOnRootSource();
@@ -254,11 +259,6 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       // update data when filters fire fetch event
       $scope.$listen(queryFilter, 'fetch', $scope.refresh);
-
-      $scope.newDashboard = function () {
-        $location.search('new', true);
-        $route.reload();
-      };
 
       $scope.filterResults = function () {
         updateQueryOnRootSource();
@@ -320,7 +320,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
       // Setup configurable values for config directive, after objects are initialized
       $scope.opts = {
         dashboard: dash,
-        isDefaultDashboard: configDefaultDashboard === dash.id,
+        isDefaultDashboard: configDefaultDashboard === dash.id && dash.id !== '',
         isNewDashboard: $location.search().new === true,
         ui: $state.options,
         save: $scope.save,
