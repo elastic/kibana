@@ -157,6 +157,16 @@ a {
       .button-group > :last-child {
         border-radius: 0;
       }
+
+      button.is-kbn-top-nav-button-disabled {
+        opacity: 0.5;
+        cursor: default;
+
+        &:active {
+          color: @kibanaGray2;
+          background-color: transparent;
+        }
+      }
     }
 
     .kibana-nav-info {
