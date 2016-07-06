@@ -1,8 +1,8 @@
-To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed 
+To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
 information about the raw data replace the visualization:
 
 .Table
-A representation of the underlying data, presented as a paginated data grid. You can sort the items 
+A representation of the underlying data, presented as a paginated data grid. You can sort the items
 in the table by clicking on the table headers at the top of each column.
 
 .Request
@@ -12,11 +12,11 @@ The raw request used to query the server, presented in JSON format.
 The raw response from the server, presented in JSON format.
 
 .Statistics
-A summary of the statistics related to the request and the response, presented as a data grid. The data 
-grid includes the query duration, the request duration, the total number of records found on the server, and the 
+A summary of the statistics related to the request and the response, presented as a data grid. The data
+grid includes the query duration, the request duration, the total number of records found on the server, and the
 index pattern used to make the query.
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
-*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it 
-is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana 
+*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
+is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana
 <<managing-fields,field formatters>>.
