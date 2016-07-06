@@ -46,4 +46,4 @@ chrome
   }
 });
 
-modules.get('kibana').run(Notifier.run);
+modules.get('kibana').run(Notifier.pullMessageFromUrl);
