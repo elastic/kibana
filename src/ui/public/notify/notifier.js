@@ -188,7 +188,7 @@ Notifier.applyConfig = function (config) {
 // to be notified when the first fatal error occurs, push a function into this array.
 Notifier.fatalCallbacks = [];
 
-Notifier.run = ($location) => {
+Notifier.pullMessageFromUrl = ($location) => {
   const queryString = $location.search();
   if (queryString.notif_msg) {
     const message = queryString.notif_msg;
