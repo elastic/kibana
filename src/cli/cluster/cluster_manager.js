@@ -87,7 +87,7 @@ module.exports = class ClusterManager {
 
     const watchPaths = uniq(
       [
-        fromRoot('src/plugins'),
+        fromRoot('src/core_plugins'),
         fromRoot('src/server'),
         fromRoot('src/ui'),
         fromRoot('src/utils'),
