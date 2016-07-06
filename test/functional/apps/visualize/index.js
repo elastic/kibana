@@ -1,12 +1,16 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
   remote,
-  common,
   defaultTimeout,
   scenarioManager,
   esClient,
   elasticDump
  } from '../../../support';
+
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function () {
   this.timeout = defaultTimeout;
@@ -15,12 +19,12 @@ bdd.describe('visualize app', function () {
     var self = this;
     remote.setWindowSize(1200,800);
 
-    common.debug('Starting visualize before method');
+    PageObjects.common.debug('Starting visualize before method');
     var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
-      common.debug('load kibana index with default index pattern');
+      PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize','.kibana');
     })
     // wait for the logstash data load to finish if it hasn't already

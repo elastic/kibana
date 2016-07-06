@@ -1,16 +1,17 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  scenarioManager,
-  common,
-  consolePage
+  scenarioManager
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('console app', function describeIndexTests() {
   bdd.before(function () {
-    common.debug('navigateTo console');
-    return common.navigateToApp('console', false);
+    PageObjects.common.debug('navigateTo console');
+    return PageObjects.common.navigateToApp('console', false);
   });
 
   bdd.it('should show the default request', function () {
@@ -23,13 +24,13 @@ bdd.describe('console app', function describeIndexTests() {
       '}',
       ''
     ];
-    common.saveScreenshot('Console-help-expanded');
+    PageObjects.common.saveScreenshot('Console-help-expanded');
     // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
-    return consolePage.collapseHelp()
+    return PageObjects.console.collapseHelp()
     .then(function () {
-      common.saveScreenshot('Console-help-collapsed');
-      return common.try(function () {
-        return consolePage.getRequest()
+      PageObjects.common.saveScreenshot('Console-help-collapsed');
+      return PageObjects.common.try(function () {
+        return PageObjects.console.getRequest()
         .then(function (actualRequest) {
           expect(actualRequest).to.eql(expectedRequest);
         });
@@ -39,13 +40,13 @@ bdd.describe('console app', function describeIndexTests() {
 
   bdd.it('default request response should contain .kibana' , function () {
     var expectedResponseContains = '"_index": ".kibana",';
-    return consolePage.clickPlay()
+    return PageObjects.console.clickPlay()
     .then(function () {
-      common.saveScreenshot('Console-default-request');
-      return common.try(function () {
-        return consolePage.getResponse()
+      PageObjects.common.saveScreenshot('Console-default-request');
+      return PageObjects.common.try(function () {
+        return PageObjects.console.getResponse()
         .then(function (actualResponse) {
-          common.debug(actualResponse);
+          PageObjects.common.debug(actualResponse);
           expect(actualResponse).to.contain(expectedResponseContains);
         });
       });

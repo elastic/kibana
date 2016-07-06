@@ -6,7 +6,6 @@ import 'ui/courier';
 import 'ui/config';
 import 'ui/notify';
 import 'ui/typeahead';
-import 'ui/navbar_extensions';
 import 'ui/share';
 import 'plugins/kibana/dashboard/directives/grid';
 import 'plugins/kibana/dashboard/components/panel/panel';
