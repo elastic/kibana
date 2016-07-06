@@ -64,15 +64,13 @@ describe('KbnTopNavController', function () {
     });
 
     describe('hideButton:', function () {
-      it('defaults to function that returns false', function () {
+      it('defaults to false', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        pluck(controller.opts, 'hideButton').forEach(f => {
-          expect(f()).to.be(false);
-        });
+        expect(pluck(controller.opts, 'hideButton')).to.eql([false, false]);
       });
 
       it('excludes opts from opts when true', function () {
@@ -86,28 +84,24 @@ describe('KbnTopNavController', function () {
     });
 
     describe('disableButton:', function () {
-      it('defaults to function that returns false', function () {
+      it('defaults to false', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        pluck(controller.opts, 'disableButton').forEach(f => {
-          expect(f()).to.be(false);
-        });
+        expect(pluck(controller.opts, 'disableButton')).to.eql([false, false]);
       });
     });
 
     describe('tooltip:', function () {
-      it('defaults to function that returns empty string', function () {
+      it('defaults to empty string', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        pluck(controller.opts, 'tooltip').forEach(f => {
-          expect(f()).to.be('');
-        });
+        expect(pluck(controller.opts, 'tooltip')).to.eql(['', '']);
       });
     });
 
