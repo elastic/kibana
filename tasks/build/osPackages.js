@@ -14,7 +14,7 @@ module.exports = function (grunt) {
       // TODO(sissel): Check if `fpm` is available
       if (!(/linux-x(86|64)$/.test(name))) return;
 
-      const arch = /x64$/.test(name) ? 'x86_64' : 'i686';
+      const arch = /x64$/.test(name) ? 'x86_64' : 'i386';
       const fpm = args => exec('fpm', args);
 
       const args = [
