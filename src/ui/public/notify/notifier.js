@@ -188,6 +188,23 @@ Notifier.applyConfig = function (config) {
 // to be notified when the first fatal error occurs, push a function into this array.
 Notifier.fatalCallbacks = [];
 
+Notifier.pullMessageFromUrl = ($location) => {
+  const queryString = $location.search();
+  if (!queryString.notif_msg) {
+    return;
+  }
+  const message = queryString.notif_msg;
+  const config = queryString.notif_loc ? { location: queryString.notif_loc } : {};
+  const level = queryString.notif_lvl || 'info';
+
+  $location.search('notif_msg', null);
+  $location.search('notif_loc', null);
+  $location.search('notif_lvl', null);
+
+  const notifier = new Notifier(config);
+  notifier[level](message);
+};
+
 // simply a pointer to the global notif list
 Notifier.prototype._notifs = notifs;
 
