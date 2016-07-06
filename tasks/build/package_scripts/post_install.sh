@@ -15,3 +15,5 @@ if ! user_check "<%= user %>" ; then
   user_create "<%= user %>"
 fi
 chown -R <%= user %>:<%= group %> <%= optimizeDir %>
+chown <%= user %>:<%= group %> <%= dataDir %>
+chown <%= user %>:<%= group %> <%= pluginsDir %>

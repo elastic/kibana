@@ -1,0 +1,179 @@
+@import "~font-awesome/less/font-awesome";
+
+@status-bg: #eff0f2;
+@status-metric-bg: #fff;
+@status-metric-border: #aaa;
+@status-metric-title-color: #666;
+
+@status-statuses-bg: #fff;
+@status-statuses-border: #bbb;
+@status-statuses-headings-color: #666;
+
+@status-default: #7c7c7c;
+@status-green: #94c63d;
+@status-yellow: #edb800;
+@status-red: #da1e04;
+
+@icon-default: @fa-var-clock-o;
+@icon-green: @fa-var-check;
+@icon-yellow: @fa-var-exclamation-circle;
+@icon-red: @fa-var-exclamation-triangle;
+
+// background of main page
+.content {
+  background-color: @status-bg;
+}
+
+.section {
+  margin-bottom:15px;
+}
+
+// metrics section
+.metrics_wrapper {
+  margin-top: 25px;
+  .status_metric_wrapper {
+    padding: 10px;
+    border: 0;
+
+    .content {
+      text-align: right;
+      padding: 15px;
+      padding-right: 20px;
+      background-color: @status-metric-bg;
+      border-top: 2px solid;
+      border-top-color: @status-metric-border;
+
+      .title {
+        color: @status-metric-title-color;
+        margin: 0 0 5px 0;
+      }
+
+      .average {
+        font-size: 42px;
+        line-height:45px;
+        font-weight: normal;
+        margin:0;
+      }
+    }
+  }
+}
+
+// status status table section
+.statuses_wrapper {
+  margin-top: 25px;
+  margin-left: -5px;
+  margin-right: -5px;
+  border-top:2px solid;
+  background-color: @status-statuses-bg;
+  padding: 10px;
+
+  h3 {
+    margin-top: 3px;
+    margin-bottom: 3px;
+  }
+
+  .statuses_loading,
+  .statuses_missing {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .statuses {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 30px;
+
+    .status {
+      height:30px;
+      line-height:30px;
+      border-bottom:1px solid;
+      border-bottom-color: @status-statuses-border;
+    }
+
+    th {
+      color:@status-statuses-headings-color;
+      font-weight: normal;
+      height:25px;
+      line-height:25px;
+      border-bottom:1px solid;
+      border-bottom-color: @status-statuses-border;
+    }
+
+    .status_id {
+      padding:0px 5px;
+      border-left: 2px solid;
+    }
+
+    .status_message {
+      padding:0;
+      padding-left:15px;
+      border-right: 2px solid;
+    }
+  }
+}
+
+//status state
+.status_state(@color, @icon) {
+  .status_state_color {
+    color: @color;
+  }
+
+  .status_state_icon:before {
+    content: @icon;
+  }
+
+  .status_id {
+    border-left-color: @color !important;
+  }
+
+  .status_message {
+    border-right-color: @color !important;
+  }
+}
+
+.status_state_default {
+  .status_state(@status-default, @icon-default);
+}
+
+.status_state_green {
+  .status_state(@status-green, @icon-green);
+}
+
+.status_state_yellow {
+  .status_state(@status-yellow, @icon-yellow);
+}
+
+.status_state_red {
+  .status_state(@status-red, @icon-red);
+}
+
+//server state
+.state(@color, @icon) {
+  .overall_state_color {
+    color: @color;
+  }
+
+  .overall_state_icon:before {
+    content: @icon;
+  }
+
+  .statuses_wrapper {
+    border-top-color: @color;
+  }
+}
+
+.overall_state_default {
+  .state(@status-default, @icon-default);
+}
+
+.overall_state_green {
+  .state(@status-green, @icon-green);
+}
+
+.overall_state_yellow {
+  .state(@status-yellow, @icon-yellow);
+}
+
+.overall_state_red {
+  .state(@status-red, @icon-red);
+}

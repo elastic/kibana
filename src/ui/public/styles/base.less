@@ -1,7 +1,7 @@
 // generic mixins
 @import (reference) "./mixins";
 @import (reference) "./variables";
-@import (reference) "~bootstrap/less/bootstrap";
+@import (reference) "~ui/styles/bootstrap/bootstrap";
 
 html,
 body {
@@ -67,13 +67,13 @@ ul.navbar-inline li {
   font-size: 8pt;
   font-weight: normal;
   opacity: 90%;
+}
 
-  &-inner {
+  .tooltip-inner {
     word-break: normal;
     word-wrap: break-word;
     white-space: normal;
   }
-}
 
 .content {
   .real-flex-parent(@flow: row nowrap);
@@ -158,14 +158,16 @@ a {
         border-radius: 0;
       }
     }
+
     .kibana-nav-info {
       line-height: 30px;
       padding: 0 10px;
-      &-title {
+    }
+
+      .kibana-nav-info-title {
         font-weight: bold;
         margin-right: 10px;
       }
-    }
   }
 
   > config {
@@ -221,10 +223,6 @@ a {
     padding-right: 7px !important;
   }
 
-  &-time-desc > .fa-clock-o {
-    padding-right: 5px;
-  }
-
   .fa {
     font-size: 16px;
     vertical-align: middle;
@@ -235,6 +233,10 @@ a {
     border-radius: 0;
   }
 }
+
+  .navbar-timepicker-time-desc > .fa-clock-o {
+    padding-right: 5px;
+  }
 
 kbn-info i {
   cursor: help;
@@ -431,15 +433,15 @@ paginated-selectable-list {
     }
   }
 
-  div.finder-form {
+  .finder-form {
     position: relative;
+  }
 
-    &-options {
+    .finder-form-options {
       .flex-parent();
       flex-direction: row;
       justify-content: flex-end;
     }
-  }
 
   .finder-options {
     max-height: 300px;
@@ -560,11 +562,13 @@ style-compile {
 
 .cell-hover {
   background-color: @table-cell-hover-bg;
-  &-show {
+}
+
+  .cell-hover-show {
     // so that the cell doesn't change size on hover
     visibility: hidden;
   }
-}
+
 .cell-hover:hover {
   background-color: @table-cell-hover-hover-bg;
   cursor: cell;
@@ -605,6 +609,52 @@ fieldset {
       background-color: @list-group-menu-item-active-bg;
       cursor: default;
     }
+  }
+}
+
+.panel-product {
+  margin-bottom: 10px;
+
+  .panel-heading {
+    background-color: @kibanaBlue3;
+    border-radius: 0;
+    color: @white;
+    font-size: 17px;
+    padding: 7px 10px;
+  }
+
+  .panel-heading-elasticsearch,
+  .panel-heading-kibana,
+  .panel-heading-beats,
+  .panel-heading-logstash {
+    background-position: 4px 7px;
+    background-repeat: no-repeat;
+    background-size: 26px 26px;
+    padding-left: 32px;
+  }
+
+  .panel-heading-elasticsearch {
+    background-color: @product-elasticsearch;
+    background-image: url("~ui/icons/elasticsearch.svg");
+  }
+
+  .panel-heading-kibana {
+    background-color: @product-kibana;
+    background-image: url("~ui/icons/kibana.svg");
+  }
+
+  .panel-heading-beats {
+    background-color: @product-beats;
+    background-image: url("~ui/icons/beats.svg");
+  }
+
+  .panel-heading-logstash {
+    background-color: @product-logstash;
+    background-image: url("~ui/icons/logstash.svg");
+  }
+
+  .panel-body {
+    padding: 10px;
   }
 }
 

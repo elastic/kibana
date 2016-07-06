@@ -1,13 +1,17 @@
-import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
 
-(function () {
-  bdd.describe('console app', function () {
-    this.timeout = defaultTimeout;
+import {
+  bdd,
+  remote,
+  scenarioManager,
+  defaultTimeout,
+} from '../../../support';
 
-    bdd.before(function () {
-      return remote.setWindowSize(1200,800);
-    });
+bdd.describe('console app', function () {
+  this.timeout = defaultTimeout;
 
-    require('./_console');
+  bdd.before(function () {
+    return remote.setWindowSize(1200,800);
   });
-}());
+
+  require('./_console');
+});

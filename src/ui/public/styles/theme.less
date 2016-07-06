@@ -15,8 +15,9 @@
 
 .navbar {
   border-width: 0;
+}
 
-  &-static-top {
+  .navbar-static-top {
     background-color: @kibanaGray5;
     color: @kibanaGray2;
     .navbar-brand:hover,
@@ -30,7 +31,8 @@
     }
     .navbar-nav {
 
-      > li > a {
+      > li > a,
+      > span {
         color: @kibanaGray2;
         font-size: 1.5em;
         padding: 5px 0 6px 0;
@@ -51,9 +53,20 @@
         background-color: transparent;
         border-bottom: 2px solid @kibanaGray1;
       }
+
+      .is-navbar-nav-link-disabled {
+        opacity: 0.5;
+        cursor: default;
+
+        &:hover {
+          border-bottom-color: transparent;
+          color: @kibanaGray2;
+        }
+      }
     }
   }
-  &-btn-link {
+
+  .navbar-btn-link {
     margin: 0;
     border-radius: 0;
 
@@ -63,14 +76,14 @@
     }
   }
 
-  &-default {
+  .navbar-default {
     .badge {
       background-color: @navbar-default-badge-bg;
       color: @navbar-default-badge-color;
     }
   }
 
-  &-inverse {
+  .navbar-inverse {
     .logo {
       height: @navbar-height;
       width: 252px;
@@ -89,25 +102,24 @@
     }
   }
 
-  .navbar-nav > .active > a {
-    border-bottom-color: @kibanaGray2;
-    background-color: transparent;
-  }
-
-  &-brand {
+  .navbar-brand {
     cursor: default;
     font-size: 1.8em;
     user-select: none;
   }
 
-  &-nav {
+  .navbar-nav {
     font-size: @font-size-small;
+
+    & > .active > a {
+      border-bottom-color: @kibanaGray2;
+      background-color: transparent;
+    }
   }
 
-  &-toggle {
+  .navbar-toggle {
     margin-top: 4px;
   }
-}
 
 // Buttons ====================================================================
 
@@ -173,25 +185,16 @@ table,
       color: @table-special-color;
     }
   }
+}
 
-  // > thead > tr > th,
-  // > tbody > tr > th,
-  // > tfoot > tr > th,
-  // > thead > tr > td,
-  // > tbody > tr > td,
-  // > tfoot > tr > td {
-  //   border: none;
-  // }
-
-  &-bordered > thead > tr > th,
-  &-bordered > tbody > tr > th,
-  &-bordered > tfoot > tr > th,
-  &-bordered > thead > tr > td,
-  &-bordered > tbody > tr > td,
-  &-bordered > tfoot > tr > td {
+  .table-bordered > thead > tr > th,
+  .table-bordered > tbody > tr > th,
+  .table-bordered > tfoot > tr > th,
+  .table-bordered > thead > tr > td,
+  .table-bordered > tbody > tr > td,
+  .table-bordered > tfoot > tr > td {
     border: 1px solid @table-border-color;
   }
-}
 
 // Forms ======================================================================
 

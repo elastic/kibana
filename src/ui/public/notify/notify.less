@@ -45,14 +45,15 @@
         margin-right: 4px;
       }
     }
+  }
 
-    &-message {
+    .toast-message {
       flex: 1 1 auto;
       .ellipsis();
       line-height: normal;
     }
 
-    &-stack {
+    .toast-stack {
       padding-bottom: 10px;
 
       pre {
@@ -65,7 +66,7 @@
       }
     }
 
-    &-controls {
+    .toast-controls {
       display: flex;
 
       button {
@@ -75,7 +76,6 @@
         padding: 10px 15px;
       }
     }
-  }
 
   // add darkened background to the different badges
   .alert-success .badge {
@@ -89,5 +89,13 @@
   }
   .alert-danger .badge {
     background: darken(@alert-danger-bg, 25%);
+  }
+  .alert-banner {
+    background-color: #c0c0c0;
+    padding: 10px 15px;
+  }
+
+  .toast-message {
+    white-space: normal;
   }
 }

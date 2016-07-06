@@ -1,0 +1,22 @@
+<bread-crumbs></bread-crumbs>
+<div class="wizard">
+  <div class="wizard-column wizard-column--small">
+    <h3 class="wizard-sub-title">From a New Search, Select Index</h3>
+    <paginated-selectable-list
+      per-page="20"
+      list="indexPattern.list"
+      user-make-url="makeUrl"
+      class="wizard-row"
+    ></paginated-selectable-list>
+  </div>
+  <div class="wizard-column wizard-column--large">
+    <h3 class="wizard-sub-title">Or, From a Saved Search</h3>
+    <!-- Saved searches -->
+    <saved-object-finder
+        title="Saved Searches"
+        type="searches"
+        class="wizard-row"
+        make-url="step2WithSearchUrl"
+      ></saved-object-finder>
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<tr ng-class="conf.value === undefined ? 'default' : 'custom'" data-test-subj="advancedSetting {{conf.name}}" >
+  <td class="name">
+    <b>{{conf.name}}</b>
+    <span class="smaller" ng-show="!conf.isCustom && conf.value !== undefined">
+      (Default: <i>{{conf.defVal == undefined || conf.defVal === '' ? 'null' : conf.defVal}}</i>)
+    </span>
+    <span class="smaller" ng-show="conf.isCustom">
+      (Custom setting)
+    </span>
+    <br>
+    <span class="smaller" ng-bind-html="conf.description | trustAsHtml"></span>
+  </td>
+  <td class="value">
+
+
+    <!-- Settings editors -->
+    <form
+      name="forms.configEdit"
+      ng-if="conf.editing"
+      ng-submit="save(conf)"
+      role="form">
+
+      <input
+        ng-if="conf.normal"
+        ng-model="conf.unsavedValue"
+        ng-keyup="maybeCancel($event, conf)"
+        placeholder="{{conf.value || conf.defVal}}"
+        type="text"
+        class="form-control">
+
+        <textarea
+          ng-if="conf.markdown"
+          type="text"
+          class="form-control"
+          ng-model="conf.unsavedValue"
+          ng-keyup="maybeCancel($event, conf)"
+          elastic-textarea
+          ></textarea>
+
+      <textarea
+        ng-if="conf.json"
+        type="text"
+        class="form-control"
+        ng-model="conf.unsavedValue"
+        ng-keyup="maybeCancel($event, conf)"
+        elastic-textarea
+        validate-json
+        ></textarea>
+      <small ng-show="forms.configEdit.$error.jsonInput">Invalid JSON syntax</small>
+
+      <input
+        ng-if="conf.array"
+        ng-list=","
+        ng-model="conf.unsavedValue"
+        ng-keyup="maybeCancel($event, conf)"
+        placeholder="{{(conf.value || conf.defVal).join(', ')}}"
+        type="text"
+        class="form-control">
+
+      <input
+        ng-if="conf.bool"
+        ng-model="conf.unsavedValue"
+        type="checkbox"
+        class="form-control">
+
+      <select
+        ng-if="conf.select"
+        name="conf.name"
+        ng-model="conf.unsavedValue"
+        ng-options="option as option for option in conf.options"
+        class="form-control"
+        data-test-subj="selectInput">
+      </select>
+    </form>
+
+    <!-- Setting display formats -->
+    <span ng-if="!conf.editing" data-test-subj="currentValue">
+      <span ng-if="(conf.normal || conf.json || conf.select)">{{conf.value || conf.defVal}}</span>
+      <span ng-if="conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
+      <span ng-if="conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
+      <span ng-if="conf.markdown" ng-bind-html="conf.value | markdown"></span>
+    </span>
+
+  </td>
+  <td class="actions">
+    <button
+      ng-if="!conf.editing"
+      ng-click="edit(conf)"
+      class="btn btn-default"
+      ng-disabled="conf.tooComplex"
+      aria-label="Edit"
+      data-test-subj="editButton">
+      <span class="sr-only">Edit</span>
+      <i aria-hidden="true" class="fa fa-pencil"></i>
+    </button>
+
+    <button
+      ng-if="conf.editing"
+      ng-click="save(conf)"
+      class="btn btn-success"
+      ng-disabled="conf.loading || conf.tooComplex || forms.configEdit.$invalid"
+      aria-label="Save"
+      data-test-subj="saveButton">
+      <span class="sr-only">Save</span>
+      <i aria-hidden="true" ng-if="!conf.loading" class="fa fa-save"></i>
+      <i aria-hidden="true" ng-if="conf.loading" class="fa fa-spinner"></i>
+    </button>
+
+    <button
+      ng-if="!conf.editing"
+      ng-click="clear(conf)"
+      ng-hide="conf.value === undefined"
+      class="btn btn-danger"
+      aria-label="Clear"
+      data-test-subj="clearButton">
+      <span class="sr-only">Clear</span>
+      <i aria-hidden="true" class="fa fa-trash-o"></i>
+    </button>
+
+    <button
+      ng-if="conf.editing"
+      ng-click="cancelEdit(conf)"
+      class="btn btn-default"
+      aria-label="Cancel edit"
+      data-test-subj="cancelButton">
+      <span class="sr-only">Cancel Edit</span>
+      <i aria-hidden="true" class="fa fa-times"></i>
+    </button>
+  </td>
+</tr>

@@ -272,6 +272,27 @@ describe('kbnUrl', function () {
       expect($location.search()).to.eql({});
       expect($location.hash()).to.be('');
     });
+
+    it('should allow setting app state on the target url', function () {
+      let path = '/test/path';
+      let search = {search: 'test'};
+      let hash = 'hash';
+      let newPath = '/new/location';
+
+      $location.path(path).search(search).hash(hash);
+
+      // verify the starting state
+      expect($location.path()).to.be(path);
+      expect($location.search()).to.eql(search);
+      expect($location.hash()).to.be(hash);
+
+      kbnUrl.change(newPath, null, {foo: 'bar'});
+
+      // verify the ending state
+      expect($location.path()).to.be(newPath);
+      expect($location.search()).to.eql({_a: '(foo:bar)'});
+      expect($location.hash()).to.be('');
+    });
   });
 
   describe('changePath', function () {
@@ -316,6 +337,27 @@ describe('kbnUrl', function () {
       // verify the ending state
       expect($location.path()).to.be(newPath);
       expect($location.search()).to.eql({});
+      expect($location.hash()).to.be('');
+    });
+
+    it('should allow setting app state on the target url', function () {
+      let path = '/test/path';
+      let search = {search: 'test'};
+      let hash = 'hash';
+      let newPath = '/new/location';
+
+      $location.path(path).search(search).hash(hash);
+
+      // verify the starting state
+      expect($location.path()).to.be(path);
+      expect($location.search()).to.eql(search);
+      expect($location.hash()).to.be(hash);
+
+      kbnUrl.redirect(newPath, null, {foo: 'bar'});
+
+      // verify the ending state
+      expect($location.path()).to.be(newPath);
+      expect($location.search()).to.eql({_a: '(foo:bar)'});
       expect($location.hash()).to.be('');
     });
 

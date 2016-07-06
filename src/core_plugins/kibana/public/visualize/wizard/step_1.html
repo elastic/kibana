@@ -1,0 +1,31 @@
+<bread-crumbs></bread-crumbs>
+<div class="wizard">
+  <div class="wizard-column">
+    <h3 class="wizard-sub-title">Create New Visualization</h3>
+    <div class="wizard-row">
+      <a
+        class="wizard-type"
+        ng-repeat="type in visTypes.inTitleOrder"
+        ng-href="{{ visTypeUrl(type) }}"
+      >
+        <div class="wizard-type-heading">
+          <i
+            aria-hidden="true"
+            class="wizard-type-heading-icon fa fa-fw"
+            ng-class="type.icon"
+          ></i>
+          <h4 class="wizard-type-heading-text">{{type.title}}</h4>
+        </div>
+        <p class="wizard-type-description">{{type.description}}</p>
+      </a>
+    </div>
+  </div>
+  <div class="wizard-column">
+    <h3 class="wizard-sub-title">Or, Open a Saved Visualization</h3>
+    <saved-object-finder
+      title="Saved Visualizations"
+      type="visualizations"
+      class="wizard-row"
+    ></saved-object-finder>
+  </div>
+</div>

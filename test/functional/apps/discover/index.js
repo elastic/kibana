@@ -1,20 +1,26 @@
-import { bdd, remote, scenarioManager, defaultTimeout } from '../../../support';
 
-(function () {
-  bdd.describe('discover app', function () {
-    this.timeout = defaultTimeout;
+import {
+  bdd,
+  remote,
+  scenarioManager,
+  defaultTimeout
+} from '../../../support';
 
-    bdd.before(function () {
-      return remote.setWindowSize(1200,800);
-    });
+import PageObjects from '../../../support/page_objects';
 
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
-    });
+bdd.describe('discover app', function () {
+  this.timeout = defaultTimeout;
 
-    require('./_discover');
-    require('./_field_data');
-    require('./_shared_links');
-    require('./_collapse_expand');
+  bdd.before(function () {
+    return PageObjects.remote.setWindowSize(1200,800);
   });
-}());
+
+  bdd.after(function unloadMakelogs() {
+    return scenarioManager.unload('logstashFunctional');
+  });
+
+  require('./_discover');
+  require('./_field_data');
+  require('./_shared_links');
+  require('./_collapse_expand');
+});

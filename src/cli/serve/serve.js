@@ -3,6 +3,7 @@ import { statSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
 import { fromRoot } from '../../utils';
+import { getConfig } from '../../server/path';
 import readYamlConfig from './read_yaml_config';
 
 let canCluster;
@@ -77,7 +78,7 @@ module.exports = function (program) {
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
     'Use mulitple --config args to include multiple config files.',
     configPathCollector,
-    [ process.env.CONFIG_PATH || fromRoot('config/kibana.yml') ]
+    [ getConfig() ]
   )
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
@@ -91,8 +92,8 @@ module.exports = function (program) {
     'times to specify multiple directories',
     pluginDirCollector,
     [
-      fromRoot('installedPlugins'),
-      fromRoot('src/plugins')
+      fromRoot('plugins'),
+      fromRoot('src/core_plugins')
     ]
   )
   .option(

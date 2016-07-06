@@ -1,0 +1,389 @@
+
+@vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
+@vis-editor-sidebar-min-width: 350px;
+@vis-editor-nesting-width: 8px;
+@vis-editor-agg-editor-spacing: 5px;
+
+.vis-editor {
+  .flex-parent();
+
+  // For the vis-editor sidebar nav
+  .navbar-default .navbar-nav {
+    &> .active > a {
+      border-bottom: 2px solid @kibanaGray2;
+      color: @kibanaGray1;
+      &:before {
+        display: none;
+      }
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    > li {
+      > a {
+        padding: 4px 0;
+        margin: 0 10px;
+        color: @kibanaGray2;
+      }
+      > a:hover {
+        border-bottom: 2px solid @kibanaGray2;
+      }
+    }
+
+    .danger {
+      color: @vis-editor-navbar-error-state-color;
+      background-color: @vis-editor-navbar-error-state-bg;
+    }
+  }
+
+  .btn-xs {
+    line-height: 1.3;
+  }
+
+  navbar {
+    .bitty-modal-container {
+      position: relative;
+
+      .bitty-modal {
+        position: absolute;
+        cursor: pointer;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        z-index: 10;
+        background: fadeout(@vis-editor-navbar-modal-bg, 10%);
+        color: @vis-editor-navbar-modal-color;
+        text-align: center;
+        padding-top: 6px;
+
+        // Don't overflow container
+        padding-left: 20px;
+        padding-right: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        user-select: none;
+      }
+
+      a {
+        color: @vis-editor-navbar-modal-link-color;
+      }
+    }
+  }
+
+  .collapsible-sidebar {
+    .flex-parent(0, 0, auto);
+  }
+
+  .visualization-options {
+    padding: @vis-editor-agg-editor-spacing;
+
+    .form-group {
+      margin-bottom: @vis-editor-agg-editor-spacing;
+    }
+    .form-horizontal .control-label {
+      text-align: left;
+    }
+  }
+
+  nesting-indicator {
+    display: flex;
+    flex: 0 0 auto;
+
+    > span {
+      width: @vis-editor-nesting-width;
+      background-color: @vis-editor-nesting-indicator-bg;
+    }
+  }
+
+  vis-editor-agg-group {
+    .flex-parent(0, 1, auto);
+  }
+}
+
+  .vis-editor-info {
+    line-height: 30px;
+    padding: 0px 10px;
+    border-bottom-left-radius: @border-radius-base;
+  }
+
+    .vis-editor-info-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+  .vis-editor-content {
+    .flex-parent();
+    z-index: 0;
+
+    // overrides for tablet and desktop
+    @media (min-width: @screen-md-min) {
+      flex-direction: row;
+    }
+  }
+
+  .vis-editor-sidebar {
+    .flex-parent(1, 0, auto);
+
+    // overrided for tablet and desktop
+    @media (min-width: @screen-md-min) {
+      flex-basis: @vis-editor-sidebar-basis;
+      min-width: @vis-editor-sidebar-min-width;
+      max-width: @vis-editor-sidebar-min-width;
+    }
+
+    .index-pattern,
+    nav {
+      min-height: @app-icon-height;
+      border-radius: 0px;
+    }
+
+    .sidebar-item {
+      border-top: 0 !important;
+    }
+
+    .sidebar-container {
+      .flex-parent(1, 1, auto);
+      background-color: @vis-editor-sidebar-bg;
+
+      form {
+        .flex-parent(1, 1, auto);
+
+        > div.vis-editor-config {
+          @media (min-width: @screen-md-min) {
+            .flex-parent(1, 1, 1px);
+            overflow: auto;
+          }
+
+          @media (max-width: @screen-md-min) {
+            .flex-parent(1, 1, auto);
+          }
+        }
+
+        > .vis-edit-sidebar-buttons {
+          flex: 0 0 auto;
+        }
+
+        label {
+          margin-bottom: 0px;
+        }
+      }
+    }
+
+    .sidebar-item-title {
+      font-size: 14px;
+      font-weight: bold;
+      border: inherit !important;
+      margin-bottom: @vis-editor-agg-editor-spacing;
+      padding: 2px 5px !important;
+    }
+
+    .hintbox {
+      padding: @vis-editor-agg-editor-spacing;
+      margin-bottom: @vis-editor-agg-editor-spacing;
+    }
+
+    label {
+      flex: 2 0 0;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+  }
+
+  .vis-editor-agg {
+    .flex-parent();
+
+    //IE10/11 - prevent flex item from overflowing
+    flex-basis: 100%;
+    padding: @vis-editor-agg-editor-spacing;
+  }
+
+    // wraps the .vis-editor-agg and nesting-indicator ^^
+    .vis-editor-agg-wrapper {
+      display: flex;
+    }
+
+    .vis-editor-agg-group {
+      .flex-parent(0, 1, auto);
+      color: @kibanaGray2;
+    }
+
+    .vis-editor-agg-header {
+      display: flex;
+      align-items: center;
+      flex: 1 0 auto;
+      margin-bottom: @vis-editor-agg-editor-spacing;
+    }
+
+      .vis-editor-agg-header-toggle {
+        flex: 0 0 auto;
+        margin-right: @vis-editor-agg-editor-spacing;
+      }
+
+      .vis-editor-agg-header-subagg-icon {
+        flex: 0 1 auto;
+        padding-right: @padding-base-vertical;
+      }
+
+      .vis-editor-agg-header-title {
+        flex: 1 1 auto;
+        .ellipsis();
+        font-weight: bold;
+      }
+
+      .vis-editor-agg-header-description {
+        font-weight: normal;
+        padding-right: @vis-editor-agg-editor-spacing;
+
+        &.danger {
+          .text-danger();
+          font-weight: bold;
+        }
+      }
+
+      .vis-editor-agg-header-controls {
+        flex: 0 0 auto;
+      }
+
+    .vis-editor-agg-error {
+      margin: @vis-editor-agg-editor-spacing 0;
+      padding: @vis-editor-agg-editor-spacing;
+      text-align: center;
+      background: @vis-editor-agg-error-bg;
+      color: @vis-editor-agg-error-color;
+    }
+
+    .vis-editor-agg-editor-ranges {
+      td {
+        padding: 0 @vis-editor-agg-editor-spacing @vis-editor-agg-editor-spacing 0;
+        &:last-child {
+          padding-right: 0;
+        }
+      }
+    }
+
+    .vis-editor-agg-editor-advanced-toggle {
+      text-align: right;
+    }
+
+    .vis-editor-agg-form-row {
+      display: flex;
+
+      > * {
+        flex: 1 1 auto;
+        margin-right: @vis-editor-agg-editor-spacing;
+
+        &:last-child {
+          margin-right: 0px;
+        }
+      }
+
+      > .btn {
+        align-self: center;
+      }
+    }
+
+    .vis-editor-agg-form-value {
+      align-self: center;
+      margin: 0 0 0 @vis-editor-agg-editor-spacing;
+      font-size: 1.2em;
+    }
+
+    .vis-editor-agg-wide-btn {
+      text-align: center;
+    }
+
+      .vis-editor-agg-wide-btn-add {
+        width: 140px;
+        margin: -2px auto 5px auto;
+        text-align: center;
+        border: 2px solid;
+        border-color: @vis-editor-agg-wide-btn-border;
+        border-top: 0px;
+        padding: 3px;
+        border-bottom-right-radius: @border-radius-base;
+        border-bottom-left-radius: @border-radius-base;
+        background-color: @vis-editor-agg-wide-btn-bg;
+        font-weight: bold;
+
+        &:hover {
+          color: @vis-editor-agg-wide-btn-hover-color;
+          background-color: @vis-editor-agg-wide-btn-hover-bg;
+        }
+      }
+
+    .vis-editor-agg-add {
+      .flex-parent();
+    }
+
+      .vis-editor-agg-add-subagg {
+        margin-bottom: -@vis-editor-agg-editor-spacing - 1; // extra one pixel covers the aggs bottom border
+        margin-right: -@vis-editor-agg-editor-spacing;
+        margin-left: -@vis-editor-agg-editor-spacing;
+      }
+
+      .vis-editor-agg-add-schemas {
+        margin: @vis-editor-agg-editor-spacing * 3;
+      }
+
+    .vis-editor-agg-order-agg {
+      border: 2px solid;
+      border-color: @vis-editor-agg-editor-order-border;
+      border-radius: @border-radius-base;
+      background-color: @vis-editor-agg-editor-order-bg;
+      margin: @vis-editor-agg-editor-spacing;
+      padding: @vis-editor-agg-editor-spacing;
+    }
+
+  .vis-editor-canvas {
+    flex: 1 0 (@screen-md-min - @vis-editor-sidebar-basis);
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding-left: @collapser-width;
+
+    &.embedded {
+      flex-shrink: 1;
+      flex-basis: 100%;
+    }
+
+    // overrided for tablet and desktop
+    @media (min-width: @screen-md-min) {
+      flex-shrink: 1;
+      flex-basis: 100%;
+    }
+
+    visualize {
+      .flex-parent();
+      flex: 1 1 100%;
+    }
+
+    .visualize-chart {
+      position: relative;
+    }
+  }
+
+    .vis-editor-canvas-title {
+      text-align: center;
+      margin: 10px 0 0;
+    }
+
+vis-editor,
+vis-editor-agg-group,
+vis-editor-agg,
+vis-editor-agg-params,
+vis-editor-agg-param,
+vis-editor-vis-options,
+vis-editor-vis-options > * {
+  .flex-parent();
+}
+
+form.vis-share {
+  div.form-control {
+    height: inherit;
+  }
+}

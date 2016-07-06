@@ -1,0 +1,54 @@
+<kbn-management-app section="kibana">
+  <kbn-management-indices>
+    <div ng-controller="managementIndicesEdit" data-test-subj="editIndexPattern">
+      <div class="page-header">
+        <kbn-management-index-header
+          index-pattern="indexPattern"
+          set-default="setDefaultPattern()"
+          refresh-fields="indexPattern.refreshFields()"
+          delete="removePattern()">
+        </kbn-management-index-header>
+
+        <p>
+          This page lists every field in the <strong>{{::indexPattern.id}}</strong>
+          index and the field's associated core type as recorded by Elasticsearch.
+          While this list allows you to view the core type of each field, changing
+          field types must be done using Elasticsearch's
+          <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
+            Mapping API
+            <i aria-hidden="true" class="fa-link fa"></i>
+          </a>
+        </p>
+        <div ng-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
+          This index uses a <strong>Time-based index pattern</strong> which repeats <span ng-bind="::indexPattern.getInterval().display"></span>
+        </div>
+        <div ng-if="!indexPattern.canExpandIndices()" class="alert alert-info">
+          This index pattern is set to be queried directly rather than being
+          expanded into more performant searches against individual indices.
+        </div>
+        <div ng-if="conflictFields.length" class="alert alert-warning">
+          <strong>Mapping conflict!</strong> {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
+        </div>
+      </div>
+
+      <form role="form">
+        <input aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
+      </form>
+
+      <br />
+
+      <ul class="nav nav-tabs">
+        <li class="kbn-management-tab" ng-class="{ active: state.tab === fieldType.index }" ng-repeat="fieldType in fieldTypes">
+          <a ng-click="changeTab(fieldType)">
+            {{ fieldType.title }}
+            <small>({{ fieldType.count }})</small>
+          </a>
+        </li>
+      </ul>
+
+      <indexed-fields ng-show="state.tab == 'indexedFields'" class="fields indexed-fields"></indexed-fields>
+      <scripted-fields ng-show="state.tab == 'scriptedFields'" class="fields scripted-fields"></scripted-fields>
+
+    </div>
+  </kbn-management-indices>
+</kbn-management-app>

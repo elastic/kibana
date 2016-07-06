@@ -44,8 +44,8 @@ describe('kibana cli', function () {
             workingPath: testWorkingPath,
             tempArchiveFile: tempArchiveFilePath,
             plugin: 'test-plugin',
-            version: '5.0.0-snapshot',
-            plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo'), version: '5.0.0-snapshot' } ]
+            version: '5.0.0-SNAPSHOT',
+            plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo'), version: '5.0.0-SNAPSHOT' } ]
           };
           const errorStub = sinon.stub();
 

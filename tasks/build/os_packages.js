@@ -3,59 +3,64 @@ import { indexBy } from 'lodash';
 import exec from '../utils/exec';
 
 export default (grunt) => {
-  const targetDir = grunt.config.get('target');
+  const { config } = grunt;
+  const exec = require('../utils/exec');
+  const targetDir = config.get('target');
   const packageScriptsDir = grunt.config.get('packageScriptsDir');
-  const servicesByName = indexBy(grunt.config.get('services'), 'name');
-  const config = grunt.config.get('packages');
+  const servicesByName = indexBy(config.get('services'), 'name');
+  const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
 
   grunt.registerTask('_build:osPackages', function () {
-    grunt.config.get('platforms')
+    grunt.file.mkdir(targetDir);
+
+    config.get('platforms')
     .filter(({ name }) => /linux-x(86|64)$/.test(name))
-    .map(({ name, buildDir }) => {
-      const architecture = /x64$/.test(name) ? 'x86_64' : 'i386';
-      return {
-        buildDir,
-        architecture
-      };
-    })
-    .forEach(({ buildDir, architecture }) => {
+    .forEach(({ buildDir, debArch, rpmArch }) => {
       const baseOptions = [
         '--force',
-        '--package', targetDir,
+        // we force dashes in the version file name because otherwise fpm uses
+        // the filtered package version, which would have dashes replaced with
+        // underscores
+        '--package', `${targetDir}/NAME-${packages.version}-ARCH.TYPE`,
         '-s', 'dir', // input type
-        '--architecture', architecture,
-        '--name', config.name,
-        '--description', config.description,
-        '--version', config.version,
-        '--url', config.site,
-        '--vendor', config.vendor,
-        '--maintainer', config.maintainer,
-        '--license', config.license,
+        '--name', packages.name,
+        '--description', packages.description,
+        '--version', packages.version,
+        '--url', packages.site,
+        '--vendor', packages.vendor,
+        '--maintainer', packages.maintainer,
+        '--license', packages.license,
         '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
         '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
         '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
         '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
-        '--config-files', config.path.kibanaConfig,
-        '--template-value', `user=${config.user}`,
-        '--template-value', `group=${config.group}`,
-        '--template-value', `optimizeDir=${config.path.home}/optimize`,
-
+        '--config-files', packages.path.kibanaConfig,
+        '--template-value', `user=${packages.user}`,
+        '--template-value', `group=${packages.group}`,
+        '--template-value', `optimizeDir=${packages.path.home}/optimize`,
+        '--template-value', `configDir=${packages.path.conf}`,
+        '--template-value', `pluginsDir=${packages.path.plugins}`,
+        '--template-value', `dataDir=${packages.path.data}`,
         //config folder is moved to path.conf, exclude {path.home}/config
         //uses relative path to --prefix, strip the leading /
-        '--exclude', `${config.path.home.slice(1)}/config`
+        '--exclude', `${packages.path.home.slice(1)}/config`,
+        '--exclude', `${packages.path.home.slice(1)}/data`
       ];
       const debOptions = [
         '-t', 'deb',
+        '--architecture', debArch,
         '--deb-priority', 'optional'
       ];
       const rpmOptions = [
         '-t', 'rpm',
+        '--architecture', rpmArch,
         '--rpm-os', 'linux'
       ];
       const args = [
-        `${buildDir}/=${config.path.home}/`,
-        `${buildDir}/config/=${config.path.conf}/`,
+        `${buildDir}/=${packages.path.home}/`,
+        `${buildDir}/config/=${packages.path.conf}/`,
+        `${buildDir}/data/=${packages.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/lib/=/lib/`
       ];

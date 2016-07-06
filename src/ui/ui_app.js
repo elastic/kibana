@@ -22,6 +22,7 @@ class UiApp {
     if (!this.hidden) {
       // any non-hidden app has a url, so it gets a "navLink"
       this.navLink = this.uiExports.navLinks.new({
+        id: this.id,
         title: this.title,
         description: this.description,
         icon: this.icon,

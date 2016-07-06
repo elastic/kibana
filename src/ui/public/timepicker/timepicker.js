@@ -102,7 +102,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
 
             break;
           case 'absolute':
-            $scope.absolute.from = dateMath.parse($scope.from || moment().subtract('minutes', 15));
+            $scope.absolute.from = dateMath.parse($scope.from || moment().subtract(15, 'minutes'));
             $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
             break;
         }

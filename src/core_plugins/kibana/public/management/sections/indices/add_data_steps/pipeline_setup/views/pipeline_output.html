@@ -1,0 +1,18 @@
+<div class="header-line">
+  <label>
+    Pipeline Output
+    <a
+      aria-label="The pipeline output shows the result of the defined pipeline using the sample records supplied in the previous step."
+      tooltip="The pipeline output shows the result of the defined pipeline using the sample records supplied in the previous step."
+      tooltip-append-to-body="true"
+      target="_blank">
+      <i aria-hidden="true" class="fa fa-question-circle"></i>
+    </a>
+  </label>
+  <source-data
+    sample="sample"
+    samples="samples"
+    disabled="pipeline.hasCompileError">
+  </source-data>
+</div>
+<pre class="output">{{ pipeline.output | json }}</pre>

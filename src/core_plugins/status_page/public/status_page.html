@@ -1,0 +1,46 @@
+<div class="container overall_state_default overall_state_{{ui.serverState}}">
+  <header>
+    <h1>
+      Status: <span class="overall_state_color">{{ ui.serverStateMessage }}</span>
+      <i class="fa overall_state_color state_icon" />
+      <span class="pull-right">
+        {{ ui.name }}
+      </span>
+    </h1>
+  </header>
+
+  <div class="row metrics_wrapper">
+    <div ng-repeat="(name, data) in ui.metrics">
+      <status-page-metric name="{{name}}" data="data"></status-page-metric>
+    </div>
+  </div>
+
+  <div class="row statuses_wrapper">
+    <h3>Status Breakdown</h3>
+
+    <div ng-if="!ui.statuses && ui.loading" class="statuses_loading">
+      <span class="spinner"></span>
+    </div>
+
+    <h4 ng-if="!ui.statuses && !ui.loading" class="statuses_missing">
+      No status information available
+    </h4>
+
+    <table class="statuses" data-test-subj="statusBreakdown" ng-if="ui.statuses">
+      <tr class="row">
+        <th class="col-xs-4">ID</th>
+        <th class="col-xs-8">Status</th>
+      </tr>
+      <tr
+        ng-repeat="status in ui.statuses"
+        class="status status_state_default status_state_{{status.state}} row">
+
+        <td class="col-xs-4 status_id">{{status.id}}</td>
+        <td class="col-xs-8 status_message">
+          <i class="fa status_state_color status_state_icon" />
+          {{status.message}}
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

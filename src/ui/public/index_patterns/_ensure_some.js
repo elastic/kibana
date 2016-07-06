@@ -6,7 +6,7 @@ export default function EnsureSomeIndexPatternsFn(Private, Notifier, $location, 
     return function promiseHandler(patterns) {
       if (!patterns || patterns.length === 0) {
         // notify.warning(new errors.NoDefinedIndexPatterns());
-        kbnUrl.redirectPath('/settings/indices');
+        kbnUrl.redirectPath('/management/data/index');
       }
 
       return patterns;

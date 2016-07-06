@@ -1,0 +1,29 @@
+<div ng-if="!uploadStep.created && !uploadStep.displayErrors.length">
+  <h2><em>Sit back, relax, we'll take it from here.</em></h2>
+
+  <div class="loading-message well">
+    We're loading your data now. This may take some time if you selected a large file.
+  </div>
+</div>
+
+
+<div ng-if="uploadStep.created || !!uploadStep.displayErrors.length" class="bulk-results">
+  <h2><em>Upload complete.</em> Let's take a look:</h2>
+
+  <div ng-if="uploadStep.created" class="alert alert-success">
+    Created <strong>{{ uploadStep.created }}</strong> documents!<br/>
+  </div>
+  <div class="alert alert-warning" ng-if="!!uploadStep.displayErrors.length">
+    <div class="alert-title">
+      We encountered errors while indexing your data
+      <a
+        ng-if="uploadStep.displayErrors.length > uploadStep.defaultErrorLimit"
+        ng-click="uploadStep.showAllErrors = !uploadStep.showAllErrors">
+        {{uploadStep.showAllErrors ? "Show Less" : "Show More"}}
+      </a>
+    </div>
+    <ul class="errors">
+      <li ng-repeat="error in uploadStep.displayErrors">{{ error }}</li>
+    </ul>
+  </div>
+</div>
