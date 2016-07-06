@@ -1,4 +1,4 @@
-import { defaults, capitalize, isArray, isFunction, result } from 'lodash';
+import { capitalize, isArray, isFunction, result } from 'lodash';
 
 import uiModules from 'ui/modules';
 import filterTemplate from 'ui/chrome/config/filter.html';
@@ -53,12 +53,12 @@ export default function ($compile) {
 
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
-      const defaultedOpt = defaults({}, opt, {
+      const defaultedOpt = Object.assign({
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
         run: (item) => !item.disableButton && this.toggle(item.key)
-      });
+      }, opt);
 
       defaultedOpt.hideButton = result(opt, 'hideButton', false);
       defaultedOpt.disableButton = result(opt, 'disableButton', false);
