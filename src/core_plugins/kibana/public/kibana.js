@@ -46,20 +46,4 @@ chrome
   }
 });
 
-function showNotifier($location) {
-  const queryString = $location.search();
-  if (queryString.notif_msg) {
-    const message = queryString.notif_msg;
-    const config = queryString.notif_loc ? { location: queryString.notif_loc } : {};
-    const level = queryString.notif_lvl || 'info';
-
-    $location.search('notif_msg', null);
-    $location.search('notif_loc', null);
-    $location.search('notif_lvl', null);
-
-    const notifier = new Notifier(config);
-    notifier[level](message);
-  }
-}
-
-modules.get('kibana').run(showNotifier);
+modules.get('kibana').run(Notifier.run);
