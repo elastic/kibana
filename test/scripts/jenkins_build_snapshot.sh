@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-
-"$(dirname $0)/jenkins_setup.sh"
+source "$(dirname $0)/_jenkins_setup.sh"
 
 "$(npm bin)/grunt" build;

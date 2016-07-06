@@ -6,6 +6,14 @@ export default function (chrome, internals) {
     return internals.nav;
   };
 
+  chrome.getNavLinkById = (id) => {
+    const navLink = internals.nav.find(link => link.id === id);
+    if (!navLink) {
+      throw new Error(`Nav link for id = ${id} not found`);
+    }
+    return navLink;
+  };
+
   chrome.getBasePath = function () {
     return internals.basePath || '';
   };
