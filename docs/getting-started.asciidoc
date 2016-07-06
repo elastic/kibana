@@ -28,7 +28,7 @@ The tutorials in this section rely on the following data sets:
 * The complete works of William Shakespeare, suitably parsed into fields. Download this data set by clicking here:
   https://www.elastic.co/guide/en/kibana/3.0/snippets/shakespeare.json[shakespeare.json].
 * A set of fictitious accounts with randomly generated data, in CSV format. Download this data set by clicking here:
-  https://github.com/elastic/kibana/tree/master/docs/tutorial/accounts.csv[accounts.csv]
+  https://raw.githubusercontent.com/elastic/kibana/master/docs/tutorial/accounts.csv[accounts.csv]
 * A set of randomly generated log files. Download this data set by clicking here:
   https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[logs.jsonl.gz]
 
