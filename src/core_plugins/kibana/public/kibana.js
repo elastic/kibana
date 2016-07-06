@@ -17,6 +17,7 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
+import Notifier from 'ui/notify/notifier';
 import 'leaflet';
 
 routes.enable();
@@ -44,3 +45,17 @@ chrome
     moment.tz.setDefault(tz);
   }
 });
+
+function showNotifier($location) {
+  const queryString = $location.search();
+  if (queryString.notif_msg) {
+    const message = queryString.notif_msg;
+    const config = queryString.notif_loc ? { location: queryString.notif_loc } : {};
+    const level = queryString.notif_lvl || 'info';
+
+    const notifier = new Notifier(config);
+    notifier[level](message);
+  }
+}
+
+modules.get('kibana').run(showNotifier);
