@@ -280,7 +280,7 @@ export default class VisualizePage {
     .findByCssSelector('.btn-success')
     .click()
     .then(function () {
-      return PageObjects.headerPage.getSpinnerDone();
+      return PageObjects.header.getSpinnerDone();
     });
   }
 
@@ -317,7 +317,7 @@ export default class VisualizePage {
       .click();
     })
     .then(function () {
-      return PageObjects.headerPage.getSpinnerDone();
+      return PageObjects.header.getSpinnerDone();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
