@@ -53,6 +53,10 @@ function showNotifier($location) {
     const config = queryString.notif_loc ? { location: queryString.notif_loc } : {};
     const level = queryString.notif_lvl || 'info';
 
+    $location.search('notif_msg', null);
+    $location.search('notif_loc', null);
+    $location.search('notif_lvl', null);
+
     const notifier = new Notifier(config);
     notifier[level](message);
   }
