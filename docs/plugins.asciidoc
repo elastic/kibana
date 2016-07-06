@@ -1,9 +1,9 @@
 [[kibana-plugins]]
 == Kibana Plugins
 
-Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin` 
-command to manage these modules. You can also install a plugin manually by moving the plugin file to the 
-`installedPlugins` directory and unpacking the plugin files into a new directory.
+Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin`
+command to manage these modules. You can also install a plugin manually by moving the plugin file to the
+`plugins` directory and unpacking the plugin files into a new directory.
 
 A list of existing Kibana plugins is available on https://github.com/elastic/kibana/wiki/Known-Plugins[GitHub].
 
@@ -38,7 +38,7 @@ You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 [float]
 === Installing Plugins to an Arbitrary Directory
 
-Use the `-d` or `--plugin-dir` option after the `install` command to specify a directory for plugins, as in the following 
+Use the `-d` or `--plugin-dir` option after the `install` command to specify a directory for plugins, as in the following
 example:
 
 [source,shell]
@@ -63,7 +63,7 @@ Use the `remove` command to remove a plugin, including any configuration informa
 [source,shell]
 $ bin/kibana-plugin remove timelion
 
-You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins/` directory.
+You can also remove a plugin manually by deleting the plugin's subdirectory under the `plugins/` directory.
 
 [float]
 === Listing Installed Plugins
@@ -78,9 +78,9 @@ To update a plugin, remove the current version and reinstall the plugin.
 [float]
 === Configuring the Plugin Manager
 
-By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager 
-to perform. You can control the level of feedback for the `install` and `remove` commands with the `--quiet` and 
-`--silent` options. Use the `--quiet` option to suppress all non-error output. Use the `--silent` option to suppress all 
+By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager
+to perform. You can control the level of feedback for the `install` and `remove` commands with the `--quiet` and
+`--silent` options. Use the `--quiet` option to suppress all non-error output. Use the `--silent` option to suppress all
 output.
 
 By default, plugin manager installation requests do not time out. Use the `--timeout` option, followed by a time, to
@@ -88,18 +88,18 @@ change this behavior, as in the following examples:
 
 [source,shell]
 .Waits for 30 seconds before failing
-bin/kibana-plugin install --timeout 30s sample-plugin 
+bin/kibana-plugin install --timeout 30s sample-plugin
 
 [source,shell]
 .Waits for 1 minute before failing
-bin/kibana-plugin install --timeout 1m sample-plugin 
+bin/kibana-plugin install --timeout 1m sample-plugin
 
 [float]
 ==== Plugins and Custom Kibana Configurations
 
-Use the `-c` or `--config` options with the `install` and `remove` commands to specify the path to the configuration file 
-used to start Kibana. By default, Kibana uses the configuration file `config/kibana.yml`. When you change your installed 
-plugins, the `bin/kibana-plugin` command restarts the Kibana server. When you are using a customized configuration file, 
+Use the `-c` or `--config` options with the `install` and `remove` commands to specify the path to the configuration file
+used to start Kibana. By default, Kibana uses the configuration file `config/kibana.yml`. When you change your installed
+plugins, the `bin/kibana-plugin` command restarts the Kibana server. When you are using a customized configuration file,
 you must specify the path to that configuration file each time you use the `bin/kibana-plugin` command.
 
 [float]
@@ -115,7 +115,7 @@ you must specify the path to that configuration file each time you use the `bin/
 [[plugin-switcher]]
 == Switching Plugin Functionality
 
-The Kibana UI serves as a framework that can contain several different plugins. You can switch between these 
+The Kibana UI serves as a framework that can contain several different plugins. You can switch between these
 plugins by clicking the icons for your desired plugins in the left-hand navigation bar.
 
 [float]
