@@ -40,7 +40,7 @@ module.exports = function (grunt) {
     platform.downloadPromise = (async function () {
       grunt.file.mkdir(downloadDir);
 
-      if (platform.name === 'windows') {
+      if (platform.win) {
         await fromNode(cb => {
           resp
           .pipe(createWriteStream(resolve(downloadDir, 'node.exe')))
