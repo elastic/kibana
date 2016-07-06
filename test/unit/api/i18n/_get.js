@@ -26,5 +26,5 @@ define(function (require) {
         return testData.deleteTestTranslations();
       });
     });
-  }
+  };
 });
