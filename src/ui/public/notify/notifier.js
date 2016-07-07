@@ -91,7 +91,19 @@ function add(notif, cb) {
 
   if (notif.actions) {
     notif.actions.forEach(function (action) {
+      // Why is this done.
+      // Makes this notif object look like
+      // {
+      //   accept: closeNotif(notif, cb, 'accept'),
+      //   report: closeNotif(notif, cb, 'report'),
+      // }
       notif[action] = closeNotif(notif, cb, action);
+    });
+  } else if (notif.customActions) {
+    // wrap all of the custom functions in a close
+    notif.customActions = notif.customActions.map(action => {
+      action.callback = closeNotif(notif, action.callback, action.key);
+      return action;
     });
   }
 
@@ -345,6 +357,32 @@ Notifier.prototype.banner = function (msg, cb) {
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
+};
+
+/**
+ * Display a custom message
+ * @param  {Object} config
+ * config = {
+ *   customActions: [{
+ *     key: 'next',
+ *     callback: function() { foo(); }
+ *   }, {
+ *     key: 'prev',
+ *     callback: function() { bar(); }
+ *   }]
+ * }
+ */
+Notifier.prototype.custom = function (config) {
+  const customConfig = _.assign({}, {
+    type: 'banner',
+    title: 'Attention',
+    content: '',
+    // markdown: formatMsg(msg, this.from),
+    lifetime: Notifier.config.bannerLifetime,
+    // actions: ['report', 'accept']
+  }, config);
+
+  add(customConfig);
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
