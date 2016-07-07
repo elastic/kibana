@@ -16,7 +16,7 @@ module.exports = function (api) {
       _source: "",
       _source_include: "",
       _source_exclude: "",
-      fields: [],
+      stored_fields: [],
       sort: "",
       track_scores: "__flag__",
       timeout: 1,
@@ -120,8 +120,9 @@ module.exports = function (api) {
           }
         ]
       },
-      fields: ['{field}'],
+      stored_fields: ['{field}'],
       fielddata_fields: ["{field}"],
+      docvalue_fields: ["{field}"],
       script_fields: {
         __template: {
           'FIELD': {
