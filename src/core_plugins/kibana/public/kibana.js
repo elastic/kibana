@@ -18,6 +18,7 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
+import Notifier from 'ui/notify/notifier';
 import 'leaflet';
 
 routes.enable();
@@ -45,3 +46,5 @@ chrome
     moment.tz.setDefault(tz);
   }
 });
+
+modules.get('kibana').run(Notifier.pullMessageFromUrl);

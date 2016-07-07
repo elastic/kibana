@@ -278,7 +278,10 @@ export default class VisualizePage {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findByCssSelector('.btn-success')
-    .click();
+    .click()
+    .then(function () {
+      return PageObjects.header.getSpinnerDone();
+    });
   }
 
 
@@ -312,6 +315,9 @@ export default class VisualizePage {
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('.config button[type="submit"]')
       .click();
+    })
+    .then(function () {
+      return PageObjects.header.getSpinnerDone();
     })
     // verify that green message at the top of the page.
     // it's only there for about 5 seconds
