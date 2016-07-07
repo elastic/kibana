@@ -8,15 +8,15 @@ describe('ui settings', function () {
   describe('overview', function () {
     it('has expected api surface', function () {
       const { uiSettings } = instantiate();
-      expect(typeof uiSettings.get).to.be('function');
-      expect(typeof uiSettings.getAll).to.be('function');
-      expect(typeof uiSettings.getDefaults).to.be('function');
-      expect(typeof uiSettings.getRaw).to.be('function');
-      expect(typeof uiSettings.getUserProvided).to.be('function');
-      expect(typeof uiSettings.remove).to.be('function');
-      expect(typeof uiSettings.removeMany).to.be('function');
-      expect(typeof uiSettings.set).to.be('function');
-      expect(typeof uiSettings.setMany).to.be('function');
+      expect(typeof uiSettings.get).to.equal('function');
+      expect(typeof uiSettings.getAll).to.equal('function');
+      expect(typeof uiSettings.getDefaults).to.equal('function');
+      expect(typeof uiSettings.getRaw).to.equal('function');
+      expect(typeof uiSettings.getUserProvided).to.equal('function');
+      expect(typeof uiSettings.remove).to.equal('function');
+      expect(typeof uiSettings.removeMany).to.equal('function');
+      expect(typeof uiSettings.set).to.equal('function');
+      expect(typeof uiSettings.setMany).to.equal('function');
     });
   });
 
@@ -104,7 +104,7 @@ describe('ui settings', function () {
     it('is promised the default values', async function () {
       const { server, uiSettings, configGet } = instantiate();
       const defaults = await uiSettings.getDefaults();
-      expect(isEqual(defaults, defaultsProvider())).to.be.ok();
+      expect(isEqual(defaults, defaultsProvider())).to.be.true();
     });
   });
 
@@ -122,7 +122,7 @@ describe('ui settings', function () {
       const result = await uiSettings.getUserProvided();
       expect(isEqual(result, {
         user: { userValue: 'customized' }
-      })).to.be.ok();
+      })).to.be.true();
     });
 
     it('ignores null user configuration (because default values)', async function () {
@@ -131,7 +131,7 @@ describe('ui settings', function () {
       const result = await uiSettings.getUserProvided();
       expect(isEqual(result, {
         user: { userValue: 'customized' }, something: { userValue: 'else' }
-      })).to.be.ok();
+      })).to.be.true();
     });
   });
 
@@ -147,7 +147,7 @@ describe('ui settings', function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
-      expect(isEqual(result, defaultsProvider())).to.be.ok();
+      expect(isEqual(result, defaultsProvider())).to.be.true();
     });
 
     it(`user configuration gets merged with defaults`, async function () {
@@ -156,7 +156,7 @@ describe('ui settings', function () {
       const result = await uiSettings.getRaw();
       const merged = defaultsProvider();
       merged.foo = { userValue: 'bar' };
-      expect(isEqual(result, merged)).to.be.ok();
+      expect(isEqual(result, merged)).to.be.true();
     });
 
     it(`user configuration gets merged into defaults`, async function () {
@@ -165,7 +165,7 @@ describe('ui settings', function () {
       const result = await uiSettings.getRaw();
       const merged = defaultsProvider();
       merged.dateFormat.userValue = 'YYYY-MM-DD';
-      expect(isEqual(result, merged)).to.be.ok();
+      expect(isEqual(result, merged)).to.be.true();
     });
   });
 
@@ -186,7 +186,7 @@ describe('ui settings', function () {
       Object.keys(defaults).forEach(key => {
         expectation[key] = defaults[key].value;
       });
-      expect(isEqual(result, expectation)).to.be.ok();
+      expect(isEqual(result, expectation)).to.be.true();
     });
 
     it(`returns key value pairs including user configuration`, async function () {
@@ -199,7 +199,7 @@ describe('ui settings', function () {
         expectation[key] = defaults[key].value;
       });
       expectation.something = 'user-provided';
-      expect(isEqual(result, expectation)).to.be.ok();
+      expect(isEqual(result, expectation)).to.be.true();
     });
 
     it(`returns key value pairs including user configuration for existing settings`, async function () {
@@ -212,7 +212,7 @@ describe('ui settings', function () {
         expectation[key] = defaults[key].value;
       });
       expectation.dateFormat = 'YYYY-MM-DD';
-      expect(isEqual(result, expectation)).to.be.ok();
+      expect(isEqual(result, expectation)).to.be.true();
     });
   });
 
@@ -229,42 +229,42 @@ describe('ui settings', function () {
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
       const defaults = defaultsProvider();
-      expect(isEqual(result, defaults.dateFormat.value)).to.be.ok();
+      expect(result).to.equal(defaults.dateFormat.value);
     });
 
     it(`returns the user-configured value for a custom key`, async function () {
       const getResult = { custom: 'value' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('custom');
-      expect(isEqual(result, 'value')).to.be.ok();
+      expect(result).to.equal('value');
     });
 
     it(`returns the user-configured value for a modified key`, async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
-      expect(isEqual(result, 'YYYY-MM-DD')).to.be.ok();
+      expect(result).to.equal('YYYY-MM-DD');
     });
   });
 });
 
 function expectElasticsearchGetQuery(server, configGet) {
-  expect(isEqual(server.plugins.elasticsearch.client.get.callCount, 1)).to.be.ok();
+  expect(server.plugins.elasticsearch.client.get.callCount).to.equal(1);
   expect(isEqual(server.plugins.elasticsearch.client.get.firstCall.args, [{
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config'
-  }])).to.be.ok();
+  }])).to.be.true();
 }
 
 function expectElasticsearchUpdateQuery(server, configGet, doc) {
-  expect(isEqual(server.plugins.elasticsearch.client.update.callCount, 1)).to.be.ok();
+  expect(server.plugins.elasticsearch.client.update.callCount).to.equal(1);
   expect(isEqual(server.plugins.elasticsearch.client.update.firstCall.args, [{
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config',
     body: { doc }
-  }])).to.be.ok();
+  }])).to.be.true();
 }
 
 function instantiate({ getResult } = {}) {
