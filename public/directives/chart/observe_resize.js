@@ -4,8 +4,10 @@ module.exports = function ($elem, fn, frequency) {
   var currentHeight = $elem.height();
   var currentWidth = $elem.width();
 
+  var timeout;
+
   function checkLoop() {
-    setTimeout(function () {
+    timeout = setTimeout(function () {
       if (currentHeight !== $elem.height() || currentWidth !== $elem.width()) {
         currentHeight = $elem.height();
         currentWidth = $elem.width();
@@ -17,6 +19,10 @@ module.exports = function ($elem, fn, frequency) {
   }
 
   checkLoop();
+
+  return function () {
+    clearTimeout(timeout);
+  };
 
 
 };
