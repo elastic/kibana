@@ -37,7 +37,7 @@ The {version} release of Kibana requires Elasticsearch {esversion} or later.
 [[plugins-apis]]
 == Plugins, APIs, and Development Infrastructure
 
-NOTE: The items in this section are not a complete list of the internal changes relating to development in Kibana. Plugin 
+NOTE: The items in this section are not a complete list of the internal changes relating to development in Kibana. Plugin
 framework and APIs are not formally documented and not guaranteed to be backward compatible from release to release.
 
 * {k4pull}7069[Pull Request 7069]: Adds `preInit` functionality.

@@ -10,9 +10,9 @@ module.exports = function (grunt) {
     'darwin-x64',
     'linux-x64',
     'linux-x86',
-    'windows'
+    'windows-x86'
   ].map(function (name) {
-    let win = name === 'windows';
+    let win = name === 'windows-x86';
 
     let nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${name}.tar.gz`;
     let nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${name}`);

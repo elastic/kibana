@@ -1,55 +1,55 @@
 [[settings]]
 == Settings
 
-To use Kibana, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more 
+To use Kibana, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more
 index patterns. You can also:
 
-* Create scripted fields that are computed on the fly from your data. You can browse and visualize scripted fields, but 
+* Create scripted fields that are computed on the fly from your data. You can browse and visualize scripted fields, but
 you cannot search them.
-* Set advanced options such as the number of rows to show in a table and how many of the most popular fields to show. 
+* Set advanced options such as the number of rows to show in a table and how many of the most popular fields to show.
 Use caution when modifying advanced options, as it's possible to set values that are incompatible with one another.
 * Configure Kibana for a production environment
 
 [float]
 [[settings-create-pattern]]
 === Creating an Index Pattern to Connect to Elasticsearch
-An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibana. Kibana looks for 
+An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibana. Kibana looks for
 index names that match the specified pattern.
-An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all 
-indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`. 
+An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all
+indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
 
 An index pattern can also simply be the name of a single index.
 
 To create an index pattern to connect to Elasticsearch:
 
 . Go to the *Settings > Indices* tab.
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana 
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
 guesses that you're you're working with log data being fed into Elasticsearch by Logstash.
 +
-NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular 
-index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibana displays 
-the index pattern you last looked at. To get to the create pattern form, click the *Add* button in the Index Patterns 
+NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular
+index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibana displays
+the index pattern you last looked at. To get to the create pattern form, click the *Add* button in the Index Patterns
 list.
 
-. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index 
-contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index 
+. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index
+contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index
 mapping to list all of the fields that contain a timestamp.
 
-. By default, Kibana restricts wildcard expansion of time-based index patterns to indices with data within the currently 
+. By default, Kibana restricts wildcard expansion of time-based index patterns to indices with data within the currently
 selected time range. Click *Do not expand index pattern when search* to disable this behavior.
 
-. Click *Create* to add the index pattern. 
+. Click *Create* to add the index pattern.
 
-. To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite* 
-button. 
+. To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*
+button.
 
-NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must 
+NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must
 contain data.
 
-To use an event time in an index name, enclose the static text in the pattern and specify the date format using the 
+To use an event time in an index name, enclose the static text in the pattern and specify the date format using the
 tokens described in the following table.
 
-For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended 
+For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended
 to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
 
 [float]
@@ -108,32 +108,32 @@ to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-0
 [float]
 [[set-default-pattern]]
 === Setting the Default Index Pattern
-The default index pattern is loaded by automatically when you view the *Discover* tab. Kibana displays a star to the 
-left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern 
+The default index pattern is loaded by automatically when you view the *Discover* tab. Kibana displays a star to the
+left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern
 you create is automatically designated as the default pattern.
 
 To set a different pattern as the default index pattern:
 
 . Go to the *Settings > Indices* tab.
 . Select the pattern you want to set as the default in the Index Patterns list.
-. Click the pattern's *Favorite* button. 
+. Click the pattern's *Favorite* button.
 
-NOTE: You can also manually set the default index pattern in *Advanced > Settings*. 
+NOTE: You can also manually set the default index pattern in *Advanced > Settings*.
 
 [float]
 [[reload-fields]]
 === Reloading the Index Fields List
-When you add an index mapping, Kibana automatically scans the indices that match the pattern to display a list of the 
-index fields. You can reload the index fields list to pick up any newly-added fields. 
+When you add an index mapping, Kibana automatically scans the indices that match the pattern to display a list of the
+index fields. You can reload the index fields list to pick up any newly-added fields.
 
-Reloading the index fields list also resets Kibana's popularity counters for the fields. The popularity counters keep 
-track of the fields you've used most often within Kibana and are used to sort fields within lists. 
+Reloading the index fields list also resets Kibana's popularity counters for the fields. The popularity counters keep
+track of the fields you've used most often within Kibana and are used to sort fields within lists.
 
 To reload the index fields list:
 
 . Go to the *Settings > Indices* tab.
 . Select an index pattern from the Index Patterns list.
-. Click the pattern's *Reload* button. 
+. Click the pattern's *Reload* button.
 
 [float]
 [[delete-pattern]]
@@ -147,11 +147,11 @@ To delete an index pattern:
 
 [[managing-fields]]
 === Managing Fields
-The fields for the index pattern are listed in a table. Click a column header to sort the table by that column. Click 
-the *Controls* button in the rightmost column for a given field to edit the field's properties. You can manually set 
+The fields for the index pattern are listed in a table. Click a column header to sort the table by that column. Click
+the *Controls* button in the rightmost column for a given field to edit the field's properties. You can manually set
 the field's format from the *Format* drop-down. Format options vary based on the field's type.
 
-You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the 
+You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the
 *Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
 
 Kibana has https://www.elastic.co/blog/kibana-4-1-field-formatters[field formatters] for the following field types:
@@ -193,23 +193,23 @@ include::duration-formatter.asciidoc[]
 
 include::color-formatter.asciidoc[]
 
-The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using 
+The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
 the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
 
 [float]
 [[create-scripted-field]]
 === Creating a Scripted Field
-Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on 
+Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
 Scripted field values are computed at query time so they aren't indexed and cannot be searched.
 
 NOTE: Kibana cannot query scripted fields.
 
-WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on 
-Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are 
+WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
+Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-Scripted fields use the Lucene expression syntax. For more information, 
+Scripted fields use the Lucene expression syntax. For more information,
 see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[
 Lucene Expressions Scripts].
 
@@ -224,15 +224,15 @@ To create a scripted field:
 . Go to *Settings > Indices*
 . Select the index pattern you want to add a scripted field to.
 . Go to the pattern's *Scripted Fields* tab.
-. Click *Add Scripted Field*. 
+. Click *Add Scripted Field*.
 . Enter a name for the scripted field.
 . Enter the expression that you want to use to compute a value on the fly from your index data.
 . Click *Save Scripted Field*.
 
-For more information about scripted fields in Elasticsearch, see 
+For more information about scripted fields in Elasticsearch, see
 http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
 
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {ref}/modules-scripting.html[dynamic Groovy scripting].
 
 [float]
@@ -244,7 +244,7 @@ To modify a scripted field:
 . Click the *Edit* button for the scripted field you want to change.
 . Make your changes and then click *Save Scripted Field* to update the field.
 
-WARNING: Keep in mind that there's no built-in validation of a scripted field. If your scripts are buggy, you'll get 
+WARNING: Keep in mind that there's no built-in validation of a scripted field. If your scripts are buggy, you'll get
 exceptions whenever you try to view the dynamically generated data.
 
 [float]
@@ -258,15 +258,15 @@ To delete a scripted field:
 
 [[advanced-options]]
 === Setting Advanced Options
-The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application. 
-For example, you can change the format used to display dates, specify the default index pattern, and set the precision 
-for displayed decimal values. 
+The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application.
+For example, you can change the format used to display dates, specify the default index pattern, and set the precision
+for displayed decimal values.
 
 To set advanced options:
 
 . Go to *Settings > Advanced*.
 . Click the *Edit* button for the option you want to modify.
-. Enter a new value for the option. 
+. Enter a new value for the option.
 . Click the *Save* button.
 
 include::advanced-settings.asciidoc[]
@@ -274,8 +274,8 @@ include::advanced-settings.asciidoc[]
 [[kibana-server-properties]]
 === Setting Kibana Server Properties
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run 
-on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine, 
+The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run
+on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
 include::kibana-yml.asciidoc[]
@@ -288,7 +288,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 `server.port` added[4.2]:: The port that the Kibana server runs on.
 +
 *alias*: `port` deprecated[4.2]
-+ 
++
 *default*: `5601`
 
 `server.host` added[4.2]:: The host to bind the Kibana server to.
@@ -306,7 +306,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 `elasticsearch.preserveHost` added[4.2]:: By default, the host specified in the incoming request from the browser is specified as the host in the corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host specified in `elasticsearch_url`.
 +
 *alias*: `elasticsearch_preserve_host` deprecated[4.2]
-+ 
++
 *default*: `true`
 
 `elasticsearch.ssl.cert` added[4.2]:: This parameter specifies the path to the SSL certificate for Elasticsearch instances that require a client certificate.
@@ -328,25 +328,25 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 `elasticsearch.pingTimeout` added[4.2]:: This parameter specifies the maximum wait time in milliseconds for ping responses by Elasticsearch.
 +
 *alias*: `ping_timeout` deprecated[4.2]
-+ 
++
 *default*: `1500`
 
 `elasticsearch.startupTimeout` added[4.2]:: This parameter specifies the maximum wait time in milliseconds for Elasticsearch discovery at Kibana startup. Kibana repeats attempts to discover an Elasticsearch cluster after the specified time elapses.
 +
 *alias*: `startup_timeout` deprecated[4.2]
-+ 
++
 *default*: `5000`
 
 `kibana.index` added[4.2]:: The name of the index where saved searched, visualizations, and dashboards will be stored..
 +
 *alias*: `kibana_index` deprecated[4.2]
-+ 
++
 *default*: `.kibana`
 
 `kibana.defaultAppId` added[4.2]:: The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`.
 +
 *alias*: `default_app_id` deprecated[4.2]
-+ 
++
 *default*: `"discover"`
 
 `logging.silent` added[4.2]:: Set this value to `true` to suppress all logging output.
@@ -373,7 +373,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 `elasticsearch.requestTimeout` added[4.2]:: How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds.
 +
 *alias*: `request_timeout` deprecated[4.2]
-+ 
++
 *default*: `500000`
 
 `elasticsearch.requestHeadersWhitelist:` added[5.0]:: List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side headers, set this value to [] (an empty list).
@@ -383,16 +383,16 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 `elasticsearch.shardTimeout` added[4.2]:: How long Elasticsearch should wait for responses from shards. Set to 0 to disable.
 +
 *alias*: `shard_timeout` deprecated[4.2]
-+ 
++
 *default*: `0`
 
 `elasticsearch.ssl.verify` added[4.2]:: Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification.
 +
 *alias*: `verify_ssl` deprecated[4.2]
-+ 
++
 *default*: `true`
 
-`elasticsearch.ssl.ca`:: An array of paths to the CA certificates for your Elasticsearch instance. Specify if 
+`elasticsearch.ssl.ca`:: An array of paths to the CA certificates for your Elasticsearch instance. Specify if
 you are using a self-signed certificate so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise.
 +
 *alias*: `ca` deprecated[4.2]
@@ -417,36 +417,36 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 ////
 
 [[managing-saved-objects]]
-=== Managing Saved Searches, Visualizations, and Dashboards 
+=== Managing Saved Searches, Visualizations, and Dashboards
 
-You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also 
+You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also
 export or import sets of searches, visualizations, and dashboards.
 
-Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved 
+Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved
 object:
 
 . Go to *Settings > Objects*.
-. Select the object you want to view. 
+. Select the object you want to view.
 . Click the *View* button.
 
-Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add 
-a description, and modify the JSON that defines the object's properties. 
+Editing a saved object enables you to directly modify the object definition. You can change the name of the object, add
+a description, and modify the JSON that defines the object's properties.
 
 If you attempt to access an object whose index has been deleted, Kibana displays its Edit Object page. You can:
 
-* Recreate the index so you can continue using the object.  
+* Recreate the index so you can continue using the object.
 * Delete the object and recreate it using a different index.
-* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing 
-index pattern. This is useful if the index you were working with has been renamed. 
+* Change the index name referenced in the object's `kibanaSavedObjectMeta.searchSourceJSON` to point to an existing
+index pattern. This is useful if the index you were working with has been renamed.
 
-WARNING: No validation is performed for object properties. Submitting invalid changes will render the object unusable. 
-Generally, you should use the *Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of directly 
-editing existing ones. 
+WARNING: No validation is performed for object properties. Submitting invalid changes will render the object unusable.
+Generally, you should use the *Discover*, *Visualize*, or *Dashboard* pages to create new objects instead of directly
+editing existing ones.
 
 To edit a saved object:
 
 . Go to *Settings > Objects*.
-. Select the object you want to edit. 
+. Select the object you want to edit.
 . Click the *Edit* button.
 . Make your changes to the object definition.
 . Click the *Save Object* button.
@@ -454,18 +454,18 @@ To edit a saved object:
 To delete a saved object:
 
 . Go to *Settings > Objects*.
-. Select the object you want to delete. 
+. Select the object you want to delete.
 . Click the *Delete* button.
 . Confirm that you really want to delete the object.
 
 To export a set of objects:
 
 . Go to *Settings > Objects*.
-. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations. 
+. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations.
 . Click the selection box for the objects you want to export, or click the *Select All* box.
 . Click *Export* to select a location to write the exported JSON.
 
-WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before 
+WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before
 importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
 
 To import a set of objects:
