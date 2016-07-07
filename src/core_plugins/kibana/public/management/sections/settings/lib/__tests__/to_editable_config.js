@@ -30,7 +30,7 @@ describe('Settings', function () {
         });
 
         it('is not marked as custom', function () {
-          expect(invoke({ def }).isCustom).to.be.false;
+          expect(invoke({ def }).isCustom).to.be.false();
         });
 
         it('sets a default value', function () {
@@ -62,19 +62,19 @@ describe('Settings', function () {
 
       context('when not given a setting definition object', function () {
         it('is marked as custom', function () {
-          expect(invoke().isCustom).to.be.true;
+          expect(invoke().isCustom).to.be.true();
         });
 
         it('sets defVal to undefined', function () {
-          expect(invoke().defVal).to.be.undefined;
+          expect(invoke().defVal).to.be.undefined();
         });
 
         it('sets description to undefined', function () {
-          expect(invoke().description).to.be.undefined;
+          expect(invoke().description).to.be.undefined();
         });
 
         it('sets options to undefined', function () {
-          expect(invoke().options).to.be.undefined;
+          expect(invoke().options).to.be.undefined();
         });
       });
     });

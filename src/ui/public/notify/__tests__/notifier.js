@@ -116,7 +116,7 @@ describe('Notifier', function () {
     });
 
     it('includes stack', function () {
-      expect(notify('error').stack).to.be.defined;
+      expect(notify('error').stack).to.be.defined();
     });
 
     it('has css class helper functions', function () {
@@ -163,7 +163,7 @@ describe('Notifier', function () {
     });
 
     it('does not include stack', function () {
-      expect(notify('warning').stack).not.to.be.defined;
+      expect(notify('warning').stack).not.to.be.defined();
     });
 
     it('has css class helper functions', function () {
@@ -210,7 +210,7 @@ describe('Notifier', function () {
     });
 
     it('does not include stack', function () {
-      expect(notify('info').stack).not.to.be.defined;
+      expect(notify('info').stack).not.to.be.defined();
     });
 
     it('has css class helper functions', function () {
@@ -360,7 +360,7 @@ describe('Notifier', function () {
     testVersionInfo('banner');
 
     it('has no content', function () {
-      expect(notify('banner').content).not.to.be.defined;
+      expect(notify('banner').content).not.to.be.defined();
     });
 
     it('prepends location to message for markdown', function () {
@@ -394,7 +394,7 @@ describe('Notifier', function () {
     });
 
     it('does not include stack', function () {
-      expect(notify('banner').stack).not.to.be.defined;
+      expect(notify('banner').stack).not.to.be.defined();
     });
 
     it('has css class helper functions', function () {
