@@ -59,6 +59,14 @@ define(function (require) {
       notif.actions.forEach(function (action) {
         notif[action] = closeNotif(cb, action);
       });
+    } else if (notif.customActions) {
+      // wrap all of the custom functions in a close
+      notif.customActions = notif.customActions.map(action => {
+        return {
+          key: action.text,
+          callback: closeNotif(action.callback, action.text)
+        };
+      });
     }
 
     notif.count = (notif.count || 0) + 1;
@@ -249,6 +257,68 @@ define(function (require) {
       lifetime: 10000,
       actions: ['accept']
     }, cb);
+  };
+
+  /**
+   * Display a custom message
+   * @param  {String} msg - required
+   * @param  {Object} config - required
+   * @param  {Function} cb - optional
+   *
+   * config = {
+   *   title: 'Some Title here',
+   *   markdown: 'Some markdown content',
+   *   type: 'info',
+   *   actions: [{
+   *     text: 'next',
+   *     callback: function() { next(); }
+   *   }, {
+   *     text: 'prev',
+   *     callback: function() { prev(); }
+   *   }]
+   * }
+   */
+  Notifier.prototype.custom = function (msg, config, cb) {
+    // There is no helper condition that will allow for 2 parameters, as the
+    // other methods have. So check that config is an object
+    if (!_.isPlainObject(config)) {
+      throw new Error('config param is required, and must be an object');
+    }
+
+    // workaround to allow callers to send `config.type` as `error` instead of
+    // reveal internal implementation that error notifications use a `danger`
+    // style
+    if (config.type === 'error') {
+      config.type = 'danger';
+    }
+
+    const getLifetime = (type) => {
+      switch (type) {
+        case 'warning':
+          return Notifier.config.warningLifetime;
+        case 'danger':
+          return Notifier.config.errorLifetime;
+        default: // info
+          return Notifier.config.infoLifetime;
+      }
+    };
+
+    const mergedConfig = _.assign({
+      type: 'info',
+      title: 'Notification',
+      content: formatMsg(msg, this.from),
+      lifetime: getLifetime(config.type)
+    }, config);
+
+    const hasActions = _.get(mergedConfig, 'actions.length');
+    if (hasActions) {
+      mergedConfig.customActions = mergedConfig.actions;
+      delete mergedConfig.actions;
+    } else {
+      mergedConfig.actions = ['accept'];
+    }
+
+    return add(mergedConfig, cb);
   };
 
   /**

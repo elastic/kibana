@@ -30,6 +30,14 @@
             ng-class="'btn-' + notif.type"
             ng-click="notif.address()"
             >Fix it</button>
+          <button
+            type="button"
+            class="btn"
+            ng-repeat="action in notif.customActions"
+            ng-class="'btn-' + notif.type"
+            ng-click="action.callback()"
+            ng-bind="action.key"
+            ></button>
         </div>
       </div>
 
