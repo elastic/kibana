@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     root: __dirname,
     src: __dirname + '/src',
     buildDir: __dirname + '/build', // temporary build directory
-    plugins: __dirname + '/src/plugins',
+    plugins: __dirname + '/src/core_plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
     testUtilsDir: __dirname + '/src/test_utils',
@@ -44,6 +44,7 @@ module.exports = function (grunt) {
       '<%= root %>/tasks/**/*.js',
       '<%= root %>/test/**/*.js',
       '<%= src %>/**/*.js',
+      '!<%= src %>/ui/public/angular-bootstrap/**/*.js',
       '!<%= src %>/fixtures/**/*.js',
       '!<%= root %>/test/fixtures/scenarios/**/*.js'
     ],

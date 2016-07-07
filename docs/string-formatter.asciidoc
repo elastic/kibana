@@ -3,7 +3,7 @@ The `String` field formatter can apply the following transformations to the fiel
 * Convert to lowercase
 * Convert to uppercase
 * Convert to title case
-* Apply the short dots transformation, which replaces the content before a `.` character with the first character of 
+* Apply the short dots transformation, which replaces the content before a `.` character with the first character of
 that content, as in the following example:
 
 [horizontal]

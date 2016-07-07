@@ -1,38 +1,30 @@
-module.exports = function createPackages(grunt) {
-  let { config } = grunt;
-  let { resolve, relative } = require('path');
-  let { execFile } = require('child_process');
-  let { all, fromNode } = require('bluebird');
+import { execFile } from 'child_process';
+import { all, fromNode } from 'bluebird';
 
+export default (grunt) => {
+  const { config, log } = grunt;
+
+  const cwd = config.get('buildDir');
   const targetDir = config.get('target');
-  let buildPath = resolve(config.get('root'), 'build');
-  let exec = async (cmd, args) => {
-    grunt.log.writeln(` > ${cmd} ${args.join(' ')}`);
-    await fromNode(cb => execFile(cmd, args, { cwd: buildPath }, cb));
+
+  async function exec(cmd, args) {
+    log.writeln(` > ${cmd} ${args.join(' ')}`);
+    await fromNode(cb => execFile(cmd, args, { cwd }, cb));
   };
 
-
-  let archives = async (platform) => {
-    // kibana.tar.gz
-    await exec('tar', ['-zchf', relative(buildPath, platform.tarPath), platform.buildName]);
-
-    // kibana.zip
-    if (/windows/.test(platform.name)) {
-      await exec('zip', ['-rq', '-ll', relative(buildPath, platform.zipPath), platform.buildName]);
+  async function archives({ name, buildName, zipPath, tarPath }) {
+    if (/windows/.test(name)) {
+      await exec('zip', ['-rq', '-ll', zipPath, buildName]);
     } else {
-      await exec('zip', ['-rq', relative(buildPath, platform.zipPath), platform.buildName]);
+      await exec('tar', ['-zchf', tarPath, buildName]);
     }
   };
 
   grunt.registerTask('_build:archives', function () {
+    grunt.file.mkdir(targetDir);
 
     all(
-      grunt.config.get('platforms')
-      .map(async platform => {
-
-        grunt.file.mkdir(targetDir);
-        await archives(platform);
-      })
+      config.get('platforms').map(async platform => await archives(platform))
     )
     .nodeify(this.async());
 

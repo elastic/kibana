@@ -1,7 +1,7 @@
 [[kibana-apps]]
 == Kibana Apps
 
-The Kibana UI serves as a framework that can contain several different applications. You can switch between these 
+The Kibana UI serves as a framework that can contain several different applications. You can switch between these
 applications by clicking the image:images/app-button.png[App Picker] *App picker* button to display the app bar:
 
 image::images/app-picker.png[]
