@@ -59,7 +59,7 @@ export default (grunt) => {
         `${buildDir}/=${config.path.home}/`,
         `${buildDir}/installedPlugins/.data/=${config.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
-        `${servicesByName.systemd.outputDir}/lib/=/lib/`
+        `${servicesByName.systemd.outputDir}/etc/=/etc/`
       ];
 
       //Manually find flags, multiple args without assignment are not entirely parsed

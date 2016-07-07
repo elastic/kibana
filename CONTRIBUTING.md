@@ -137,8 +137,8 @@ The task above takes a little time to start the servers.  You can also start the
 Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
 ```sh
 apt-get install ruby-dev rpm
-gem install fpm -v 1.5.0 # required by pleaserun 0.0.16
-gem install pleaserun -v 0.0.16 # higher versions fail at the moment
+gem install fpm -v 1.5.0
+gem install pleaserun -v 0.0.24
 npm run build:ospackages
 ```
 
