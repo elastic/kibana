@@ -239,37 +239,30 @@ export default class SettingsPage {
   goToPage(pageNum) {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('ul.pagination-other-pages-list.pagination-sm.ng-scope li.ng-scope:nth-child(' +
-      (pageNum + 1) + ') a.ng-binding'
-    )
-    .then(page => {
-      return page.click();
+      (pageNum + 1) + ') a.ng-binding')
+    .click()
+    .then(function () {
+      return PageObjects.header.getSpinnerDone();
     });
   }
 
   openControlsRow(row) {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('table.table.table-condensed tbody tr:nth-child(' +
-      (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil'
-    )
-    .then(page => {
-      return page.click();
-    });
+      (row + 1) + ') td.ng-scope div.actions a.btn.btn-xs.btn-default i.fa.fa-pencil')
+    .click();
   }
 
   openControlsByName(name) {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('div.actions a.btn.btn-xs.btn-default[href$="/' + name + '"]')
-    .then(button => {
-      return button.click();
-    });
+    .click();
   }
 
   increasePopularity() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-default[aria-label="Plus"]')
-    .then(button => {
-      return button.click();
-    })
+    .click()
     .then(() => {
       return PageObjects.header.getSpinnerDone();
     });
@@ -286,9 +279,7 @@ export default class SettingsPage {
   controlChangeCancel() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-primary[aria-label="Cancel"]')
-    .then(button => {
-      return button.click();
-    })
+    .click()
     .then(() => {
       return PageObjects.header.getSpinnerDone();
     });
@@ -297,9 +288,7 @@ export default class SettingsPage {
   controlChangeSave() {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('button.btn.btn-success.ng-binding[aria-label="Update Field"]')
-    .then(button => {
-      return button.click();
-    })
+    .click()
     .then(() => {
       return PageObjects.header.getSpinnerDone();
     });
@@ -308,9 +297,7 @@ export default class SettingsPage {
   setPageSize(size) {
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('form.form-inline.pagination-size.ng-scope.ng-pristine.ng-valid div.form-group option[label="' + size + '"]')
-    .then(button => {
-      return button.click();
-    })
+    .click()
     .then(() => {
       return PageObjects.header.getSpinnerDone();
     });
@@ -352,14 +339,21 @@ export default class SettingsPage {
     var alertText;
 
     return PageObjects.common.try(() => {
-      return this.clickDeletePattern()
-      .then(() => {
+      PageObjects.common.debug('click delete index pattern button');
+      return this.clickDeletePattern();
+    })
+    .then(() => {
+      return PageObjects.common.try(() => {
+        PageObjects.common.debug('getAlertText');
         return this.remote.getAlertText();
-      })
-      .then(function (text) {
-        alertText = text;
-      })
-      .then(() => {
+      });
+    })
+    .then(function (text) {
+      alertText = text;
+    })
+    .then(() => {
+      return PageObjects.common.try(() => {
+        PageObjects.common.debug('acceptAlert');
         return this.remote.acceptAlert();
       });
     })
