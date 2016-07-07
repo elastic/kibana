@@ -34,12 +34,12 @@ case $1 in
 esac
 
 if [ "$REMOVE_USER_AND_GROUP" = "true" ]; then
-  if getent group "<%= group %>" >/dev/null; then
-    groupdel "<%= group %>"
-  fi
-
   if getent passwd "<%= user %>" >/dev/null; then
     userdel "<%= user %>"
+  fi
+
+  if getent group "<%= group %>" >/dev/null; then
+    groupdel "<%= group %>"
   fi
 fi
 
