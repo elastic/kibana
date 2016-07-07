@@ -28,7 +28,6 @@ module.exports = function (grunt) {
     'eslint:source',
     'test:server',
     'test:browser',
-    'test:api',
   ]);
 
   grunt.registerTask('jenkins:selenium', [
