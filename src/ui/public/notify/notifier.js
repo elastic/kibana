@@ -188,18 +188,23 @@ Notifier.applyConfig = function (config) {
 // to be notified when the first fatal error occurs, push a function into this array.
 Notifier.fatalCallbacks = [];
 
+// "Constants"
+Notifier.QS_PARAM_MESSAGE = 'notif_msg';
+Notifier.QS_PARAM_LEVEL = 'notif_lvl';
+Notifier.QS_PARAM_LOCATION = 'notif_loc';
+
 Notifier.pullMessageFromUrl = ($location) => {
   const queryString = $location.search();
   if (!queryString.notif_msg) {
     return;
   }
-  const message = queryString.notif_msg;
-  const config = queryString.notif_loc ? { location: queryString.notif_loc } : {};
-  const level = queryString.notif_lvl || 'info';
+  const message = queryString[Notifier.QS_PARAM_MESSAGE];
+  const config = queryString[Notifier.QS_PARAM_LOCATION] ? { location: queryString[Notifier.QS_PARAM_LOCATION] } : {};
+  const level = queryString[Notifier.QS_PARAM_LEVEL] || 'info';
 
-  $location.search('notif_msg', null);
-  $location.search('notif_loc', null);
-  $location.search('notif_lvl', null);
+  $location.search(Notifier.QS_PARAM_MESSAGE, null);
+  $location.search(Notifier.QS_PARAM_LOCATION, null);
+  $location.search(Notifier.QS_PARAM_LEVEL, null);
 
   const notifier = new Notifier(config);
   notifier[level](message);
