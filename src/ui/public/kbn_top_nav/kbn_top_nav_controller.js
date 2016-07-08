@@ -1,4 +1,4 @@
-import { defaults, capitalize } from 'lodash';
+import { capitalize, isArray, isFunction, result } from 'lodash';
 
 import uiModules from 'ui/modules';
 import filterTemplate from 'ui/chrome/config/filter.html';
@@ -19,7 +19,13 @@ export default function ($compile) {
         filter: filterTemplate,
       };
 
-      opts.forEach(rawOpt => {
+      this.addItems(opts);
+    }
+
+    addItems(rawOpts) {
+      if (!isArray(rawOpts)) rawOpts = [rawOpts];
+
+      rawOpts.forEach((rawOpt) => {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
@@ -29,7 +35,7 @@ export default function ($compile) {
     }
 
     // change the current key and rerender
-    set(key) {
+    setCurrent(key) {
       if (key && !this.templates.hasOwnProperty(key)) {
         throw new TypeError(`KbnTopNav: unknown template key "${key}"`);
       }
@@ -39,21 +45,26 @@ export default function ($compile) {
     }
 
     // little usability helpers
-    which() { return this.currentKey; }
-    is(key) { return this.which() === key; }
-    open(key) { this.set(key); }
-    close(key) { (!key || this.is(key)) && this.set(null); }
-    toggle(key) { this.set(this.is(key) ? null : key); }
+    getCurrent() { return this.currentKey; }
+    isCurrent(key) { return this.getCurrent() === key; }
+    open(key) { this.setCurrent(key); }
+    close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
+    toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
 
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
-      return defaults({}, opt, {
+      const defaultedOpt = Object.assign({
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        hideButton: !!opt.hideButton,
-        run: (item) => this.toggle(item.key)
-      });
+        run: (item) => !item.disableButton && this.toggle(item.key)
+      }, opt);
+
+      defaultedOpt.hideButton = result(opt, 'hideButton', false);
+      defaultedOpt.disableButton = result(opt, 'disableButton', false);
+      defaultedOpt.tooltip = result(opt, 'tooltip', '');
+
+      return defaultedOpt;
     }
 
     // enable actual rendering

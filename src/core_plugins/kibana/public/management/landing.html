@@ -1,0 +1,53 @@
+<kbn-management-app>
+  <kbn-management-landing>
+    <div class="product-overview">
+      <span class="kibana-version">Version: {{::kbnVersion}}</span>
+    </div>
+    <div class="management-sections">
+      <div
+        ng-if="section.items.length > 0"
+        ng-repeat="section in sections"
+        ng-class="{ 'management-section-info-expanded': section.showInfo }"
+        class="col-xs-12 management-section management-section-{{::section.id}}">
+
+        <div class="panel panel-product management-panel-product">
+          <div class="panel-heading panel-heading-{{::section.id}}">
+            {{::section.display}}
+
+            <i
+              class="fa fa-info-circle pull-right panel-heading-icon"
+              ng-click="section.showInfo = !!!section.showInfo"
+              ng-if="section.info">
+            </i>
+          </div>
+
+          <div class="panel-body">
+            <div class="row">
+              <ul class="management-section-items list-unstyled">
+                <li
+                  class="col-xs-4 col-md-3"
+                  ng-repeat="item in section.items.inOrder"
+                >
+                  <a
+                    class="management-link"
+                    ng-class="{ 'is-management-link-disabled': !item.url }"
+                    kbn-href="{{::item.url}}"
+                    tooltip="{{::item.tooltip}}"
+                    tooltip-placement="bottom"
+                    tooltip-popup-delay="400"
+                    tooltip-append-to-body="1"
+                  >
+                    {{::item.display}}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="management-section-info">
+              {{::section.info}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </kbn-management-landing>
+</kbn-management-app>

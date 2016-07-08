@@ -15,11 +15,6 @@ describe('ManagementSection', () => {
       expect(section.items).to.be.empty();
     });
 
-    it('sets url based on path', () => {
-      const section = new ManagementSection('kibana', { path: 'foo' });
-      expect(section.url).to.be('#/management/foo');
-    });
-
     it('assigns all options', () => {
       const section = new ManagementSection('kibana', { description: 'test' });
       expect(section.description).to.be('test');
@@ -61,6 +56,27 @@ describe('ManagementSection', () => {
 
       expect(threwException).to.be(true);
     });
+  });
+
+  describe('deregister', () => {
+    let section;
+
+    beforeEach(() => {
+      section = new ManagementSection('kibana');
+      section.register('about');
+    });
+
+    it ('deregisters an existing section', () => {
+      section.deregister('about');
+      expect(section.items).to.have.length(0);
+    });
+
+    it ('allows deregistering a section more than once', () => {
+      section.deregister('about');
+      section.deregister('about');
+      expect(section.items).to.have.length(0);
+    });
+
   });
 
   describe('getSection', () => {

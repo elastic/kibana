@@ -3,32 +3,32 @@
 
 This chart's Y axis is the _metrics_ axis. The following aggregations are available for this axis:
 
-*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of 
+*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
 the elements in the selected index pattern.
-*Average*:: This aggregation returns the {ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric 
+*Average*:: This aggregation returns the {ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
 field. Select a field from the drop-down.
-*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric 
+*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
 field. Select a field from the drop-down.
-*Min*:: The {ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a 
+*Min*:: The {ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
 numeric field. Select a field from the drop-down.
-*Max*:: The {ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a 
+*Max*:: The {ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
 numeric field. Select a field from the drop-down.
-*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns 
+*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
 the number of unique values in a field. Select a field from the drop-down.
-*Percentiles*:: The {ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the 
-values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one 
-or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a 
+*Percentiles*:: The {ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the
+values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one
+or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a
 percentile field.
-*Percentile Rank*:: The {ref}/search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_] 
-aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field 
+*Percentile Rank*:: The {ref}/search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_]
+aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field
 from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a
 values field. Click *+Add* to add a values field.
 
 You can add an aggregation by clicking the *+ Add Metrics* button.
 
 include::x-axis-aggs.asciidoc[]
-For example, a chart of dates with incident counts can display dates in chronological order, or you can raise the 
-priority of the incident-reporting aggregation to show the most active dates first. The chronological order might show 
+For example, a chart of dates with incident counts can display dates in chronological order, or you can raise the
+priority of the incident-reporting aggregation to show the most active dates first. The chronological order might show
 a time-dependent pattern in incident count, and sorting by active dates can reveal particular outliers in your data.
 
 include::color-picker.asciidoc[]
@@ -37,20 +37,20 @@ You can click the *Advanced* link to display more customization options for your
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
 *Include Pattern*:: Specify a pattern in this field to include in the results.
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation 
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
 definition, as in the following example:
 
 [source,shell]
 { "script" : "doc['grade'].value * 1.2" }
 
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {ref}/modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
 Select the *Options* tab to change the following aspects of the chart:
 
-*Chart Mode*:: When you have multiple Y-axis aggregations defined for your chart, you can use this drop-down to affect 
+*Chart Mode*:: When you have multiple Y-axis aggregations defined for your chart, you can use this drop-down to affect
 how the aggregations display on the chart:
 
 _stacked_:: Stacks the aggregations on top of each other.
@@ -62,12 +62,11 @@ _silhouette_:: Displays each aggregation as variance from a central line.
 Checkboxes are available to enable and disable the following behaviors:
 
 *Smooth Lines*:: Check this box to curve the top boundary of the area from point to point.
-*Set Y-Axis Extents*:: Check this box and enter values in the *y-max* and *y-min* fields to set the Y axis to specific 
-values. 
-*Scale Y-Axis to Data Bounds*:: The default Y axis bounds are zero and the maximum value returned in the data. Check 
+*Set Y-Axis Extents*:: Check this box and enter values in the *y-max* and *y-min* fields to set the Y axis to specific
+values.
+*Scale Y-Axis to Data Bounds*:: The default Y axis bounds are zero and the maximum value returned in the data. Check
 this box to change both upper and lower bounds to match the values returned in the data.
 *Show Tooltip*:: Check this box to enable the display of tooltips.
-*Show Legend*:: Check this box to enable the display of a legend next to the chart.
 
 [float]
 [[area-viewing-detailed-information]]

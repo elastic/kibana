@@ -62,7 +62,12 @@ visualize-legend {
 }
 
 .legend-value {
-  &-title {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+  .legend-value-title {
     padding: 3px;
 
     &:hover {
@@ -70,19 +75,19 @@ visualize-legend {
     }
   }
 
-  &-truncate {
+  .legend-value-truncate {
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
-  &-full {
+  .legend-value-full {
     white-space: normal;
     word-break: break-all;
     background-color: @sidebar-hover-bg;
   }
 
-  &-details {
+  .legend-value-details {
     border-bottom: 1px solid @sidebar-bg;
 
     .filter-button {
@@ -98,7 +103,7 @@ visualize-legend {
     }
   }
 
-  &-color-picker {
+  .legend-value-color-picker {
     width: 130px;
     margin: auto;
 
@@ -113,8 +118,3 @@ visualize-legend {
       font-size: 18px
     }
   }
-}
-
-.legend-value:hover {
-  cursor: pointer;
-}

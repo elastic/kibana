@@ -1,11 +1,11 @@
 @import "~ui/styles/dark-variables.less";
-@import "~bootstrap/less/mixins.less";
+@import "~ui/styles/bootstrap/mixins.less";
 
 .tab-dashboard.theme-dark {
   color: @text-color;
   background-color: @dashboard-bg;
 
-// /node_modules/bootstrap/less/scaffolding.less
+// /src/ui/public/styles/bootstrap/scaffolding.less
   a {
     color: @link-color;
 
@@ -16,7 +16,7 @@
   }
 
 
-// /node_modules/bootstrap/less/forms.less
+// /src/ui/public/styles/bootstrap/forms.less
   .form-control {
     color: @input-color;
     background-color: @input-bg;
@@ -29,13 +29,13 @@
   }
 
 
-// /node_modules/bootstrap/less/panels.less
+// /src/ui/public/styles/bootstrap/panels.less
   .panel {
     background-color: @panel-bg;
   }
 
 
-// /node_modules/bootstrap/less/tables.less
+// /src/ui/public/styles/bootstrap/tables.less
   .table {
     // Cells
     > thead,
@@ -82,7 +82,7 @@
   }
 
 
-// /node_modules/bootstrap/less/buttons.less
+// /src/ui/public/styles/bootstrap/buttons.less
   .btn {
     background-color: @dark-button-bg;
     color: @dark-button-font;
@@ -106,7 +106,7 @@
   }
 
 
-// /node_modules/bootstrap/less/list-group.less
+// /src/ui/public/styles/bootstrap/list-group.less
   .list-group-item {
     background-color: @list-group-bg;
     border: 0 none transparent;
@@ -179,7 +179,7 @@
   }
 
 
-// /node_modules/bootstrap/less/navs.less
+// /src/ui/public/styles/bootstrap/navs.less
   .nav {
     > li {
       > a {
@@ -192,7 +192,7 @@
   }
 
 
-// /node_modules/bootstrap/less/navs.less
+// /src/ui/public/styles/bootstrap/navs.less
   .nav-tabs {
     border-bottom: 1px solid @gray4;
     > li {
@@ -268,33 +268,28 @@
 
 
 // /src/ui/public/agg_table/agg_table.less
-  .agg-table {
+  .agg-table-paginated {
+    tr:hover td {
+      background-color: @table-row-hover-bg;
+    }
 
-    &-paginated {
-      tr:hover td {
-        background-color: @table-row-hover-bg;
-      }
-
-      .cell-hover:hover {
-        background-color: @table-cell-hover-hover-bg;
-      }
+    .cell-hover:hover {
+      background-color: @table-cell-hover-hover-bg;
     }
   }
 
 
 // /src/ui/public/visualize/visualize.less
-  visualize-spy {
-    .visualize-show-spy {
-      border-top-color: @visualize-show-spy-border;
+  .visualize-show-spy {
+    border-top-color: @visualize-show-spy-border;
+  }
 
-    }
-    .visualize-spy-container {
-      pre {
-        border-color: @visualize-show-spy-border;
-        color: @visualize-spy-container-pre-color;
-        opacity: 1;
-        background-color: @visualize-spy-container-pre-bg;
-      }
+  .visualize-spy-container {
+    pre {
+      border-color: @visualize-show-spy-border;
+      color: @visualize-spy-container-pre-color;
+      opacity: 1;
+      background-color: @visualize-spy-container-pre-bg;
     }
   }
 
@@ -330,28 +325,26 @@
 
   }
 
-  .legend-value {
-     &-title {
-      padding: 3px;
+  .legend-value-title {
+    padding: 3px;
+
+    &:hover {
+      background-color: @sidebar-hover-bg;
+    }
+  }
+
+  .legend-value-full {
+    background-color: @gray3;
+  }
+
+  .legend-value-details {
+    border-bottom: 1px solid @sidebar-bg;
+
+    .filter-button {
+      background-color: @sidebar-bg;
 
       &:hover {
         background-color: @sidebar-hover-bg;
-      }
-    }
-
-    &-full {
-      background-color: @gray3;
-    }
-
-    &-details {
-      border-bottom: 1px solid @sidebar-bg;
-
-      .filter-button {
-        background-color: @sidebar-bg;
-
-        &:hover {
-          background-color: @sidebar-hover-bg;
-        }
       }
     }
   }
@@ -441,7 +434,7 @@
 
 
 // /src/ui/public/filter_bar/filter_bar.less
-  filter-bar .confirm {
+  .filter-bar-confirm {
     background: @filter-bar-confirm-bg;
     border-bottom-color: @filter-bar-confirm-border;
 
@@ -451,13 +444,9 @@
     }
   }
 
-  filter-bar .bar {
+  .filter-bar {
     background: @filter-bar-bar-bg;
     border-bottom-color: @filter-bar-bar-border;
-
-    &-condensed {
-      background: @filter-bar-bar-condensed-bg;
-    }
 
     .filter {
       background-color: @filter-bar-bar-filter-bg;
@@ -472,6 +461,10 @@
       }
     }
   }
+
+    .filter-bar-condensed {
+      background: @filter-bar-bar-condensed-bg;
+    }
 
 
 // /src/ui/public/styles/config.less
@@ -520,16 +513,14 @@
 // /src/ui/public/styles/pagination.less
   paginate {
     paginate-controls {
-      .pagination-other-pages {
-        &-list {
-          > li {
-            a {
-              background-color: @dark-button-bg;
-              color: @white;
-            }
-            &.active a {
-              color: @paginate-page-link-active-color;
-            }
+      .pagination-other-pages-list {
+        > li {
+          a {
+            background-color: @dark-button-bg;
+            color: @white;
+          }
+          &.active a {
+            color: @paginate-page-link-active-color;
           }
         }
       }
@@ -537,7 +528,7 @@
   }
 
 
-// /src/plugins/kibana/public/dashboard/styles/main.less
+// /src/core_plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
     background-color: @dashboard-bg;
   }

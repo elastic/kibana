@@ -3,24 +3,24 @@
 
 This chart's Y axis is the _metrics_ axis. The following aggregations are available for this axis:
 
-*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of 
+*Count*:: The {ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
 the elements in the selected index pattern.
-*Average*:: This aggregation returns the {ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric 
+*Average*:: This aggregation returns the {ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
 field. Select a field from the drop-down.
-*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric 
+*Sum*:: The {ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
 field. Select a field from the drop-down.
-*Min*:: The {ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a 
+*Min*:: The {ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
 numeric field. Select a field from the drop-down.
-*Max*:: The {ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a 
+*Max*:: The {ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
 numeric field. Select a field from the drop-down.
-*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns 
+*Unique Count*:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
 the number of unique values in a field. Select a field from the drop-down.
-*Percentiles*:: The {ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the 
-values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one 
-or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a 
+*Percentiles*:: The {ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the
+values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one
+or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a
 percentile field.
-*Percentile Rank*:: The {ref}/search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_] 
-aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field 
+*Percentile Rank*:: The {ref}/search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_]
+aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field
 from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a
 values field. Click *+Add* to add a values field.
 
@@ -31,7 +31,7 @@ Enter a string in the *Custom Label* field to change the display label.
 The _buckets_ aggregations determine what information is being retrieved from your data set.
 
 Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
-multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change 
+multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
 if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
 
 include::x-axis-aggs.asciidoc[]
@@ -44,20 +44,20 @@ You can click the *Advanced* link to display more customization options for your
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
 *Include Pattern*:: Specify a pattern in this field to include in the results.
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation 
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
 definition, as in the following example:
 
 [source,shell]
 { "script" : "doc['grade'].value * 1.2" }
 
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {ref}/modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
 Select the *Options* to change the following aspects of the table:
 
-*Bar Mode*:: When you have multiple Y-axis aggregations defined for your chart, you can use this drop-down to affect 
+*Bar Mode*:: When you have multiple Y-axis aggregations defined for your chart, you can use this drop-down to affect
 how the aggregations display on the chart:
 
 _stacked_:: Stacks the aggregations on top of each other.
@@ -67,8 +67,7 @@ _grouped_:: Groups the results horizontally by the lowest-priority sub-aggregati
 Checkboxes are available to enable and disable the following behaviors:
 
 *Show Tooltip*:: Check this box to enable the display of tooltips.
-*Show Legend*:: Check this box to enable the display of a legend next to the chart.
-*Scale Y-Axis to Data Bounds*:: The default Y axis bounds are zero and the maximum value returned in the data. Check 
+*Scale Y-Axis to Data Bounds*:: The default Y axis bounds are zero and the maximum value returned in the data. Check
 this box to change both upper and lower bounds to match the values returned in the data.
 
 [float]

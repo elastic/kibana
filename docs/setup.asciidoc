@@ -83,8 +83,8 @@ simply be the name of a single index.
 reads the index mapping to list all of the fields that contain a timestamp. If your index doesn't have time-based data,
 disable the *Index contains time-based events* option.
 +
-WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Starting in the 2.1 
-release, Elasticsearch includes sophisticated date parsing APIs that Kibana uses to determine date information, 
+WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Starting in the 2.1
+release, Elasticsearch includes sophisticated date parsing APIs that Kibana uses to determine date information,
 removing the need to specify dates in the index pattern name.
 +
 . Click *Create* to add the index pattern. This first pattern is automatically configured as the default.

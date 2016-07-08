@@ -1,28 +1,29 @@
+
+import expect from 'expect.js';
+
 import {
   bdd,
-  common,
   scenarioManager,
-  settingsPage,
   esClient
 } from '../../../support';
 
-var expect = require('expect.js');
+import PageObjects from '../../../support/page_objects';
 
 bdd.describe('index result popularity', function describeIndexTests() {
   bdd.before(function () {
     // delete .kibana index and then wait for Kibana to re-create it
     return esClient.deleteAndUpdateConfigDoc()
     .then(function () {
-      return settingsPage.navigateTo();
+      return PageObjects.settings.navigateTo();
     });
   });
 
   bdd.beforeEach(function be() {
-    return settingsPage.createIndexPattern();
+    return PageObjects.settings.createIndexPattern();
   });
 
   bdd.afterEach(function ae() {
-    return settingsPage.removeIndexPattern();
+    return PageObjects.settings.removeIndexPattern();
   });
 
   bdd.describe('change popularity', function indexPatternCreation() {
@@ -31,78 +32,78 @@ bdd.describe('index result popularity', function describeIndexTests() {
     // set the page size to All again, https://github.com/elastic/kibana/issues/5030
     // TODO: remove this after issue #5030 is closed
     function fix5030() {
-      return settingsPage.setPageSize('All')
+      return PageObjects.settings.setPageSize('All')
       .then(function () {
-        return common.sleep(1000);
+        return PageObjects.common.sleep(1000);
       });
     }
 
     bdd.beforeEach(function () {
       // increase Popularity of geo.coordinates
-      return settingsPage.setPageSize('All')
+      return PageObjects.settings.setPageSize('All')
       .then(function () {
-        return common.sleep(1000);
+        return PageObjects.common.sleep(1000);
       })
       .then(function openControlsByName() {
-        common.debug('Starting openControlsByName (' + fieldName + ')');
-        return settingsPage.openControlsByName(fieldName);
+        PageObjects.common.debug('Starting openControlsByName (' + fieldName + ')');
+        return PageObjects.settings.openControlsByName(fieldName);
       })
       .then(function increasePopularity() {
-        common.debug('increasePopularity');
-        return settingsPage.increasePopularity();
+        PageObjects.common.debug('increasePopularity');
+        return PageObjects.settings.increasePopularity();
       });
     });
 
     bdd.afterEach(function () {
       // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
-      return settingsPage.controlChangeCancel();
+      return PageObjects.settings.controlChangeCancel();
     });
 
     bdd.it('should update the popularity input', function () {
-      return settingsPage.getPopularity()
+      return PageObjects.settings.getPopularity()
       .then(function (popularity) {
-        common.debug('popularity = ' + popularity);
+        PageObjects.common.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
-        common.saveScreenshot('Settings-indices-result-popularity-updated');
+        PageObjects.common.saveScreenshot('Settings-indices-result-popularity-updated');
       });
     });
 
     bdd.it('should be reset on cancel', function pageHeader() {
       // Cancel saving the popularity change
-      return settingsPage.controlChangeCancel()
+      return PageObjects.settings.controlChangeCancel()
       .then(function () {
         return fix5030();
       })
       .then(function openControlsByName() {
-        return settingsPage.openControlsByName(fieldName);
+        return PageObjects.settings.openControlsByName(fieldName);
       })
       // check that its 0 (previous increase was cancelled)
       .then(function getPopularity() {
-        return settingsPage.getPopularity();
+        return PageObjects.settings.getPopularity();
       })
       .then(function (popularity) {
-        common.debug('popularity = ' + popularity);
+        PageObjects.common.debug('popularity = ' + popularity);
         expect(popularity).to.be('0');
       });
     });
 
     bdd.it('can be saved', function pageHeader() {
       // Saving the popularity change
-      return settingsPage.controlChangeSave()
+      return PageObjects.settings.controlChangeSave()
       .then(function () {
         return fix5030();
       })
       .then(function openControlsByName() {
-        return settingsPage.openControlsByName(fieldName);
+        return PageObjects.settings.openControlsByName(fieldName);
       })
       // check that its 0 (previous increase was cancelled)
       .then(function getPopularity() {
-        return settingsPage.getPopularity();
+        return PageObjects.settings.getPopularity();
       })
       .then(function (popularity) {
-        common.debug('popularity = ' + popularity);
+        PageObjects.common.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
-        common.saveScreenshot('Settings-indices-result-popularity-saved');
+        PageObjects.common.saveScreenshot('Settings-indices-result-popularity-saved');
       });
     });
   }); // end 'change popularity'

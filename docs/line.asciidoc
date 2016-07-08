@@ -6,7 +6,7 @@ This chart's Y axis is the _metrics_ axis. The following aggregations are availa
 include::y-axis-aggs.asciidoc[]
 
 Before you choose a buckets aggregation, specify if you are splitting slices within a single chart or splitting into
-multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change 
+multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
 if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
 
 include::x-axis-aggs.asciidoc[]
@@ -19,38 +19,37 @@ You can click the *Advanced* link to display more customization options for your
 *Exclude Pattern Flags*:: A standard set of Java flags for the exclusion pattern.
 *Include Pattern*:: Specify a pattern in this field to include in the results.
 *Include Pattern Flags*:: A standard set of Java flags for the inclusion pattern.
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation 
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
 definition, as in the following example:
 
 [source,shell]
 { "script" : "doc['grade'].value * 1.2" }
 
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable 
+NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {ref}/modules-scripting.html[dynamic Groovy scripting].
 
 The availability of these options varies depending on the aggregation you choose.
 
 Select the *Options* tab to change the following aspects of the chart:
 
-*Y-Axis Scale*:: You can select *linear*, *log*, or *square root* scales for the chart's Y axis. You can use a log 
-scale to display data that varies exponentially, such as a compounding interest chart, or a square root scale to 
-regularize the display of data sets with variabilities that are themselves highly variable. This kind of data, where 
-the variability is itself variable over the domain being examined, is known as _heteroscedastic_ data. For example, if 
+*Y-Axis Scale*:: You can select *linear*, *log*, or *square root* scales for the chart's Y axis. You can use a log
+scale to display data that varies exponentially, such as a compounding interest chart, or a square root scale to
+regularize the display of data sets with variabilities that are themselves highly variable. This kind of data, where
+the variability is itself variable over the domain being examined, is known as _heteroscedastic_ data. For example, if
 a data set of height versus weight has a relatively narrow range of variability at the short end of height, but a wider
-range at the taller end, the data set is heteroscedastic. 
-*Smooth Lines*:: Check this box to curve the line from point to point. Bear in mind that smoothed lines necessarily 
+range at the taller end, the data set is heteroscedastic.
+*Smooth Lines*:: Check this box to curve the line from point to point. Bear in mind that smoothed lines necessarily
 affect the representation of your data and create a potential for ambiguity.
 *Show Connecting Lines*:: Check this box to draw lines between the points on the chart.
 *Show Circles*:: Check this box to draw each data point on the chart as a small circle.
 *Current time marker*:: For charts of time-series data, check this box to draw a red line on the current time.
-*Set Y-Axis Extents*:: Check this box and enter values in the *y-max* and *y-min* fields to set the Y axis to specific 
-values. 
+*Set Y-Axis Extents*:: Check this box and enter values in the *y-max* and *y-min* fields to set the Y axis to specific
+values.
 *Show Tooltip*:: Check this box to enable the display of tooltips.
-*Show Legend*:: Check this box to enable the display of a legend next to the chart.
-*Scale Y-Axis to Data Bounds*:: The default Y-axis bounds are zero and the maximum value returned in the data. Check 
+*Scale Y-Axis to Data Bounds*:: The default Y-axis bounds are zero and the maximum value returned in the data. Check
 this box to change both upper and lower bounds to match the values returned in the data.
 
-After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard
 changes* button to keep your visualization in its current state.
 
 [float]

@@ -15,7 +15,8 @@ export default (grunt) => {
   const FOLDER_CONFIG = '/etc/kibana';
   const FOLDER_HOME = '/usr/share/kibana';
   const FOLDER_DATA = '/var/lib/kibana';
-  const FOLDER_PLUGINS = `${FOLDER_HOME}/installedPlugins`;
+  const FOLDER_LOGS = '/var/log/kibana';
+  const FOLDER_PLUGINS = `${FOLDER_HOME}/plugins`;
 
   const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibana.yml`;
   const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/kibana`;
@@ -46,6 +47,7 @@ export default (grunt) => {
       conf: FOLDER_CONFIG,
       data: FOLDER_DATA,
       plugins: FOLDER_PLUGINS,
+      logs: FOLDER_LOGS,
       home: FOLDER_HOME,
       kibanaBin: FILE_KIBANA_BINARY,
       kibanaConfig: FILE_KIBANA_CONF

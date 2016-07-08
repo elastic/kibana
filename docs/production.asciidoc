@@ -20,8 +20,228 @@ and an Elasticsearch client node on the same machine. For more information, see
 [float]
 [[configuring-kibana-shield]]
 === Configuring Kibana to Work with {scyld}
+
+Kibana users have to authenticate when your cluster has {scyld} enabled. You
+configure {scyld} roles for your Kibana users to control what data those users
+can access. Kibana runs a webserver that makes requests to Elasticsearch on the
+client's behalf, so you also need to configure credentials for the Kibana server
+so those requests can be authenticated.
+
+You must configure Kibana to encrypt communications between the browser and the
+Kibana server to prevent user passwords from being sent in the clear. If are
+using SSL/TLS to encrypt traffic to and from the nodes in your Elasticsearch
+cluster, you must also configure Kibana to connect to Elasticsearch via HTTPS.
+
+With {scyld} enabled, if you load a Kibana dashboard that accesses data in an
+index that you are not authorized to view, you get an error that indicates the
+index does not exist. {scyld} does not currently provide a way to control which
+users can load which dashboards.
+
+To use Kibana with {scyld}:
+
+. Configure the password for the built-in `kibana` user. The Kibana server uses
+this user to gain access to the cluster monitoring APIs and the `.kibana` index.
+The server does _not_ need access to user indexes.
++
+By default, the `kibana` user password is set to `changeme`. Change this password
+through the reset password API:
++
+[source,shell]
+--------------------------------------------------------------------------------
+curl -XPUT 'localhost:9200/_security/user/kibana/_password' -d '{
+  "password" : "s0m3th1ngs3cr3t"
+}'
+--------------------------------------------------------------------------------
++
+Once reset, you need to add the following property to `kibana.yml`:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.password: "s0m3th1ngs3cr3t"
+--------------------------------------------------------------------------------
+
+[[kibana-roles]]
+. Derive Kibana user roles from the example <<kibana-user-role, `my_kibana_user`>>
+user role. Assign the roles to the Kibana users to control which indices they can
+access. Kibana users need access to the indices that they will be working with
+and the `.kibana` index where their saved searches, visualizations, and dashboards
+are stored. Users also need access to the `.kibana-devnull` index. The example
+`my_kibana_user` role grants read access to the indices that match the
+`logstash-*` pattern and full access to the `.kibana` index, which is required.
++
+TIP: You can define as many different roles for your Kibana users as you need.
++
+[[kibana-user-role]]
+For example, the following `my_kibana_user` role only allows users to discover
+and visualize data in the `logstash-*` indices.
++
+[source,js]
+--------------------------------------------------------------------------------
+{
+  "cluster" : [ "monitor" ],
+  "indices" : [
+    {
+      "names" : [ "logstash-*" ],
+      "privileges" : [ "view_index_metadata", "read" ]
+    },
+    {
+      "names" : [ ".kibana*" ], <1>
+      "privileges" : [ "manage", "read", "index" ]
+    }
+  ]
+}
+--------------------------------------------------------------------------------
+<1> All Kibana users need access to the `.kibana` and `.kibana-devnull` indices.
+
+. Assign the appropriate roles to your Kibana users or groups of users:
+
+** If you're using the `native` realm, you can assign roles using the
+{shield}/shield-rest.html#shield-users-rest[{scyld} User Management API]. For example, the following
+creates a user named `jacknich` and assigns it the `kibana_monitoring` role:
++
+[source,js]
+--------------------------------------------------------------------------------
+POST /_xpack/security/user/jacknich
+{
+  "password" : "t0pS3cr3t",
+  "roles" : [ "kibana_monitoring" ]
+}
+--------------------------------------------------------------------------------
+
+** If you are using an LDAP or Active Directory realm, you can either assign
+roles on a per user basis, or assign roles to groups of users. By default, role
+mappings are stored in {shield}/mapping-roles.html[`CONFIGDIR/x-pack/role_mapping.yml`].
+For example, the following snippet assigns the `kibana_monitoring` role to the
+group named `admins` and the user named Jack Nicholson:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana_monitoring:
+  - "cn=admins,dc=example,dc=com"
+  - "cn=Jack Nicholson,dc=example,dc=com"
+--------------------------------------------------------------------------------
+
+. If you have enabled SSL encryption in {scyld}, configure Kibana to connect
+to Elasticsearch via HTTPS. To do this:
+
+.. Specify the HTTPS protocol in the `elasticsearch.url` setting in the Kibana
+configuration file, `kibana.yml`:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.url: "https://<your_elasticsearch_host>.com:9200"
+--------------------------------------------------------------------------------
+
+.. If you are using your own CA to sign certificates for Elasticsearch, set the
+`elasticsearch.ssl.ca` setting in `kibana.yml` to specify the location of the PEM
+file.
++
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.ssl.ca: /path/to/your/cacert.pem
+--------------------------------------------------------------------------------
+
+. Configure Kibana to encrypt communications between the browser and the Kibana
+server. To do this, configure the `server.ssl.key` and `server.ssl.cert` properties
+in `kibana.yml`:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.key: /path/to/your/server.key
+server.ssl.cert: /path/to/your/server.crt
+--------------------------------------------------------------------------------
++
+Once you enable SSL encryption between the browser and the Kibana server, access
+Kibana via HTTPS. For example, `https://localhost:5601`.
++
+NOTE: Enabling browser encryption is required to prevent passing user credentials
+      in the clear.
+
+. Install X-Pack into Kibana. {scyld} secures user sessions and enables users
+to log in and out of Kibana. To install the X-Pack on Kibana:
+
+.. Run the following command in your Kibana installation directory.
++
+[source,console]
+--------------------------------------------------------------------------------
+bin/kibana-plugin install x-pack
+--------------------------------------------------------------------------------
++
+[NOTE]
+=============================================================================
+To perform an offline install, download X-Pack from
++http://download.elasticsearch.org/kibana/x-pack/xpack-{version}.zip+
+(http://download.elasticsearch.org/kibana/x-pack/xpack-{version}.zip.sha1.txt[sha1])
+and run:
+
+[source,shell]
+---------------------------------------------------------
+bin/kibana-plugin install file:///path/to/file/xpack-{version}.tar.gz.
+---------------------------------------------------------
+=============================================================================
+
+.. Set the `xpack.security.encryptionKey` property in the `kibana.yml` configuration file.
+You can use any text string as the encryption key.
++
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+.. To change the default session duration, set the `xpack.security.sessionTimeout` property
+in the `kibana.yml` configuration file. By default, sessions expire after 30 minutes.
+The timeout is specified in milliseconds. For example, set the timeout to 600000
+to expire sessions after 10 minutes:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.sessionTimeout: 600000
+--------------------------------------------------------------------------------
+
+. Restart Kibana and verify that you can sign in as a user. If you are running
+Kibana locally, go to `https://localhost:5601` and enter the credentials for a
+user you've assigned a Kibana user role. For example, you could log in as the
+`jacknich` user created above.
++
+kibana-login.jpg["Kibana Login",link="images/kibana-login.jpg"]
++
+NOTE: This must be a user who has been assigned a role derived from the example
+      <<kibana-user-role, `my_kibana_user` user role>>. Kibana server credentials
+      should only be used internally by the Kibana server. The Kibana server role
+      doesn't grant permission to access user indices.
+
+[float]
+[[security-ui-settings]]
+===== Kibana {scyld} UI Settings
+[options="header"]
+|======
+| Name                               | Default                  | Description
+| `xpack.security.encryptionKey`     | -                        | An arbitrary string used to encrypt credentials in a
+                                                                  cookie. It is crucial that this key is not exposed to
+                                                                  users of Kibana. Required.
+| `xpack.security.sessionTimeout`    | `1800000` (30 minutes)   | Sets the session duration (in milliseconds).
+| `xpack.security.cookieName`        | `"sid"`                  | Sets the name of the cookie used for the session.
+| `xpack.security.skipSslCheck`      | `false`                  | Advanced setting. Set to `true` to enable Kibana to
+                                                                  start if `server.ssl.cert` and `server.ssl.key` are
+                                                                  not specified in `kibana.yml`. This should only be
+                                                                  used if either SSL is configured outside of Kibana
+                                                                  (for example, you are routing requests through a load
+                                                                  balancer or proxy) or
+                                                                  `xpack.security.useUnsafeSessions` is also set to
+                                                                  `true`.
+| `xpack.security.useUnsafeSessions` | `false`                  | Advanced setting. Set to `true` to use insecure
+                                                                  cookies for sessions in Kibana. Requires
+                                                                  `xpack.security.skipSslCheck` to also be set to
+                                                                  `true`.
+|======
+
+////
+
+[float]
+[[configuring-kibana-shield]]
+=== Configuring Kibana to Work with {scyld}
 If you are using {scyld} to authenticate Elasticsearch users, you need to provide
-the Kibana server with credentials so it can access the `.kibana` index and monitor
+the Kibana server with credentials to enable access to the `.kibana` index and monitor
 the cluster.
 
 To configure credentials for the Kibana server:
@@ -45,6 +265,7 @@ dashboards. For more information, see {shield}/kibana.html[Using Kibana with {sc
 
 TIP: See <<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>> for important information on Kibana and
 the dynamic mapping feature in Elasticsearch.
+////
 
 [float]
 [[enabling-ssl]]
@@ -93,8 +314,7 @@ the query that populates a Kibana visualization, the user just sees an empty
 visualization.
 
 To configure access to Kibana using {scyld}, you create roles
-for Kibana using the `kibana4` default role as a starting point. For more
-information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana with {scyld}].
+for Kibana using the `my_kibana_user` default role as a starting point.
 
 [float]
 [[load-balancing]]

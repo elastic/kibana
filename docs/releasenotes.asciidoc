@@ -4,28 +4,40 @@
 The {version} release of Kibana requires Elasticsearch {esversion} or later.
 
 [float]
-[[breaking]]
-== Breaking Changes
-
-// * {k4issue}5591[Issue 5591]: The command-line plugin tool no longer supports Github.
-
-[float]
 [[enhancements]]
 == Enhancements
 
-// * {k4issue}6387[Issue 6387]: A new look for Kibana: new logo and UI, improved layout and navigation.
+* {k4pull}6682[Pull Request 6682]: Renames Sense to Console, and adds the project to Kibana core.
+* {k4issue}6913[Issue 6913]: Adds Console support for Elasticsearch 5.0 APIs.
+* {k4pull}6896[Pull Request 6896]: Adds a configurable whitelist of headers for Elasticsearch requests.
+* {k4pull}6796[Pull Request 6796]: Adds millisecond durations for intervals.
+* {k4issue}1855[Issue 1855]: Adds advanced setting to configure the starting day of the week.
+* {k4issue}6378[Issue 6378]: Adds persistent UUIDs to distinguish multiple instances within a cluster.
+* {k4issue}6531[Issue 6531]: Improved warning for URL lengths that approach browser limits.
+* {k4issue}6602[Issue 6602]: Improves dark theme support.
+* {k4issue}6791[Issue 6791]: Enables composition of custom user toast notifications in Advanced Settings.
 
 [float]
 [[bugfixes]]
 == Bug Fixes
 
-// * {k4issue}5914[Issue 5914]: Adds ability to aggregate on unindexed fields.
+* {k4pull}6953[Pull Request 6953]: The `defaultRoute` configuration parameter now honors the value of `basePath` and requires a leading slash (`/`).
+* {k4issue}6794[Issue 6794]: Fixes extraneous bounds when drawing a bounding box on a tilemap visualization.
+* {k4issue}6246[Issue 6246]: Custom labels display on percentile and median metrics.
+* {k4issue}6407[Issue 6407]: Custom labels display on standard deviation metrics.
+* {k4issue}7003[Issue 7003]: Median visualizations no longer only show `?` as the value.
+* {k4issue}7006[Issue 7006]: The URL shortener now honors custom configuration values for `kibana.index`.
+* {k4issue}6785[Issue 6785]: Fixes an intermittent issue that prevented installing plugins by name.
+* {k4issue}6714[Issue 6714]: Removes unsupported flag functionality.
+* {k4issue}6760[Issue 6760]: Removed directory listings for static assets.
+* {k4issue}6762[Issue 6762]: Stopped Kibana logo from randomly disappearing in some situations.
+* {k4issue}6735[Issue 6735]: Clearer error message when trying to start Kibana while it is already running.
 
 [float]
 [[plugins-apis]]
 == Plugins, APIs, and Development Infrastructure
 
-NOTE: The items in this section are not a complete list of the internal changes relating to development in Kibana. Plugin 
+NOTE: The items in this section are not a complete list of the internal changes relating to development in Kibana. Plugin
 framework and APIs are not formally documented and not guaranteed to be backward compatible from release to release.
 
-// * {k4issue}5198[Issue 5198]: Injects buttons from the plugin to the navigation bar.
+* {k4pull}7069[Pull Request 7069]: Adds `preInit` functionality.

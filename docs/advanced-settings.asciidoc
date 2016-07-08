@@ -14,9 +14,9 @@ compatible with other configuration settings. Deleting a custom setting removes 
 `dateFormat:dow`:: This property defines what day weeks should start on.
 adapt to the interval between measurements. Keys are http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
 `defaultIndex`:: Default is `null`. This property specifies the default index.
+`defaultColumns`:: Default is `_source`. Defines the columns that appear by default on the Discover page.
 `metaFields`:: An array of fields outside of `_source`. Kibana merges these fields into the document when displaying the
 document.
-`defaultColumns`:: Default is `_source`. Defines the columns that appear by default on the Discover page.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
 `doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighing makes request slow when
 working on big documents. Set this property to `false` to disable highlighting.
@@ -52,3 +52,10 @@ mentioned use "_default_".
 `timepicker:timeDefaults`:: The default time filter selection.
 `timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
 `dashboard:defaultDarkTheme`:: Set this property to `true` to make new dashboards use the dark theme by default.
+`filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
+`notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports
+Markdown.
+`notifications:lifetime:banner`:: Specifies the duration in milliseconds for banner notification displays. The default value is 3000000. Set this field to `Infinity` to disable banner notifications.
+`notifications:lifetime:error`:: Specifies the duration in milliseconds for error notification displays. The default value is 300000. Set this field to `Infinity` to disable error notifications.
+`notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
+`notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
