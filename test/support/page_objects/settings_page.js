@@ -87,6 +87,15 @@ export default class SettingsPage {
       .type(userObj.email);
     })
     .then(function () {
+      return PageObjects.common.sleep(4000);
+    })
+    .then(function () {
+      return self.selectRoles(userObj.role);
+    })
+    .then(function () {
+      return PageObjects.common.sleep(4000);
+    })
+    .then(function () {
       if (userObj.save === true) {
         return self.remote.setFindTimeout(defaultFindTimeout)
         .findByCssSelector('button[ng-click="saveUser(user)"]')
@@ -97,6 +106,15 @@ export default class SettingsPage {
         .click();
       }
     });
+  }
+
+  selectRoles(role) {
+    var self = this;
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[aria-label="Select box"]')
+    .click()
+    .type('kibana_user');
+    // .type(role);
   }
 
   deleteUser(username) {
