@@ -20,12 +20,14 @@ define(function (require) {
     require([
       'intern/dojo/node!../support/page_objects',
       'intern/dojo/node!../support',
-      'intern/dojo/node!./apps/discover',
-      'intern/dojo/node!./status_page',
-      'intern/dojo/node!./apps/management',
-      'intern/dojo/node!./apps/visualize',
-      'intern/dojo/node!./apps/console',
-      'intern/dojo/node!./apps/dashboard'
+      'intern/dojo/node!./apps/security'//,
+      // 'intern/dojo/node!./apps/monitoring'//,
+      // 'intern/dojo/node!./apps/discover',
+      // 'intern/dojo/node!./status_page',
+      // 'intern/dojo/node!./apps/management',
+      // 'intern/dojo/node!./apps/visualize',
+      // 'intern/dojo/node!./apps/console',
+      // 'intern/dojo/node!./apps/dashboard'
     ], (loadedPageObjects, loadedSupport) => {
       PageObjects = loadedPageObjects;
       support = loadedSupport;

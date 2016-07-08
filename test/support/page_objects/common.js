@@ -19,9 +19,10 @@ import {
   config,
   defaultTryTimeout,
   defaultFindTimeout,
-  remote,
-  shieldPage
+  remote
 } from '../index';
+
+import PageObjects from './index';
 
 import {
   Log,
@@ -84,6 +85,8 @@ export default class Common {
       return self.try(function () {
         // since we're using hash URLs, always reload first to force re-render
         self.debug('navigate to: ' + url);
+        self.debug('config.servers.kibana.shield.username=' + config.servers.kibana.shield.username);
+        self.debug('config.servers.kibana.shield.password=' + config.servers.kibana.shield.password);
         return self.remote.get(url)
         .then(function () {
           return self.sleep(700);
@@ -97,32 +100,23 @@ export default class Common {
           if (testStatusPage !== false) {
             self.debug('self.checkForKibanaApp()');
             return self.checkForKibanaApp()
-            .then(function (kibanaLoaded) {
-              self.debug('kibanaLoaded = ' + kibanaLoaded);
-              if (!kibanaLoaded) {
+            .then(function (appId) {
+
+              if (appId === 'login') {
+                self.debug('Found loginPage');
+                return PageObjects.shield.login(config.servers.kibana.shield.username,
+                  config.servers.kibana.shield.password);
+              } else if (appId !== 'kibana') {
                 var msg = 'Kibana is not loaded, retrying';
                 self.debug(msg);
                 throw new Error(msg);
               }
+
             });
           }
         })
         .then(function () {
           return self.remote.getCurrentUrl();
-        })
-        .then(function (currentUrl) {
-          var loginPage = new RegExp('login').test(currentUrl);
-          if (loginPage) {
-            self.debug('Found loginPage = ' + loginPage + ', username = '
-              + config.servers.kibana.shield.username);
-            return shieldPage.login(config.servers.kibana.shield.username,
-              config.servers.kibana.shield.password)
-            .then(function () {
-              return self.remote.getCurrentUrl();
-            });
-          } else {
-            return currentUrl;
-          }
         })
         .then(function (currentUrl) {
           currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
@@ -219,7 +213,7 @@ export default class Common {
     .then(function (app) {
       var appId = app.id;
       self.debug('current application: ' + appId);
-      return appId === 'kibana';
+      return appId;
     })
     .catch(function (err) {
       self.debug('kibana check failed');
