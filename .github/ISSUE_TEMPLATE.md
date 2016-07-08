@@ -13,7 +13,11 @@ request block and provide responses for all of the below items.
 
 **Kibana version**:
 
-**OS version**:
+**Server OS version**:
+
+**Browser version**:
+
+**Browser OS version**:
 
 **Original install method (e.g. download page, yum, from source, etc.)**:
 
