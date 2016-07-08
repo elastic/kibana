@@ -4,9 +4,11 @@ const Boom = require('boom');
 const getBasicAuthRealm = require('./get_basic_auth_realm');
 const toPath = require('lodash/internal/toPath');
 
+const PASSTHRU_HEADERS_BLACKLIST = [ 'content-length' ];
+
 module.exports = (client) => {
   return (req, endpoint, params = {}) => {
-    _.set(params, 'headers', req.headers);
+    _.set(params, 'headers', _.omit(req.headers, PASSTHRU_HEADERS_BLACKLIST));
     const path = toPath(endpoint);
     const api = _.get(client, path);
     let apiContext = _.get(client, path.slice(0, -1));
