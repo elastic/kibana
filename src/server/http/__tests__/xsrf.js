@@ -3,7 +3,7 @@ import { fromNode as fn } from 'bluebird';
 import { resolve } from 'path';
 import * as kbnTestServer from '../../../../test/utils/kbn_server';
 
-const nonDestructiveMethods = ['GET'];
+const nonDestructiveMethods = ['GET', 'HEAD'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
 const src = resolve.bind(null, __dirname, '../../../../src');
 
