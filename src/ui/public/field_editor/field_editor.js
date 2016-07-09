@@ -6,15 +6,22 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 import uiModules from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
-
+import chrome from 'ui/chrome';
+import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
+import { scriptedFields as docLinks } from '../documentation_links/documentation_links';
+import './field_editor.less';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
 .directive('fieldEditor', function (Private, $sce) {
   let fieldFormats = Private(RegistryFieldFormatsProvider);
   let Field = Private(IndexPatternsFieldProvider);
-  let scriptingInfo = $sce.trustAsHtml(require('ui/field_editor/scripting_info.html'));
-  let scriptingWarning = $sce.trustAsHtml(require('ui/field_editor/scripting_warning.html'));
+
+  const fieldTypesByLang = {
+    painless: ['number', 'string', 'date', 'boolean'],
+    expression: ['number'],
+    default: _.keys(Private(IndexPatternsCastMappingTypeProvider).types.byType)
+  };
 
   return {
     restrict: 'E',
@@ -24,13 +31,17 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl, es) {
+    controller: function ($scope, Notifier, kbnUrl, $http, $q) {
       let self = this;
       let notify = new Notifier({ location: 'Field Editor' });
 
-      self.scriptingInfo = scriptingInfo;
-      self.scriptingWarning = scriptingWarning;
-      getScriptingLangs();
+      self.docLinks = docLinks;
+      getScriptingLangs().then((langs) => {
+        self.scriptingLangs = langs;
+        if (!_.includes(self.scriptingLangs, self.field.lang)) {
+          self.field.lang = undefined;
+        }
+      });
 
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
@@ -40,7 +51,6 @@ uiModules
       self.creating = !self.indexPattern.fields.byName[self.field.name];
       self.selectedFormatId = _.get(self.indexPattern, ['fieldFormatMap', self.field.name, 'type', 'id']);
       self.defFormatType = initDefaultFormat();
-      self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[self.field.type] || []);
 
       self.cancel = redirectAway;
       self.save = function () {
@@ -92,6 +102,23 @@ uiModules
         self.field.format = new FieldFormat(self.formatParams);
       }, true);
 
+      $scope.$watch('editor.field.type', function (newValue) {
+        self.defFormatType = initDefaultFormat();
+        self.fieldFormatTypes = [self.defFormatType].concat(fieldFormats.byFieldType[newValue] || []);
+
+        if (_.isUndefined(_.find(self.fieldFormatTypes, {id: self.selectedFormatId}))) {
+          delete self.selectedFormatId;
+        }
+      });
+
+      $scope.$watch('editor.field.lang', function (newValue) {
+        self.fieldTypes = _.get(fieldTypesByLang, newValue, fieldTypesByLang.default);
+
+        if (!_.contains(self.fieldTypes, self.field.type)) {
+          self.field.type = _.first(self.fieldTypes);
+        }
+      });
+
       // copy the defined properties of the field to a plain object
       // which is mutable, and capture the changed seperately.
       function shadowCopy(field) {
@@ -131,14 +158,10 @@ uiModules
       }
 
       function getScriptingLangs() {
-        es.cluster.getSettings({
-          include_defaults : true,
-          filter_path : '**.script.engine.*.inline'
-        })
-        .then(function (d) {
-          self.scriptingLangs = _.keys(_.pick(d.defaults.script.engine, function (e) {
-            return !!e.inline.search && !!e.inline.aggs;
-          }));
+        return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
+        .then((res) => res.data)
+        .catch(() => {
+          return notify.error('Error getting available scripting languages from Elasticsearch');
         });
       }
 

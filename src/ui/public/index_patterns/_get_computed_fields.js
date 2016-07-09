@@ -6,7 +6,7 @@ export default function () {
   let scriptFields = {};
   let docvalueFields = [];
 
-  docvalueFields = _.pluck(self.fields.byType.date, 'name');
+  docvalueFields = _.map(_.reject(self.fields.byType.date, 'scripted'), 'name');
 
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
