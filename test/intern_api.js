@@ -1,7 +1,8 @@
 define({
   suites: [
     'test/unit/api/ingest/index',
-    'test/unit/api/search/index'
+    'test/unit/api/search/index',
+    'test/unit/api/scripts/index'
   ],
   excludeInstrumentation: /(fixtures|node_modules)\//,
   loaderOptions: {
