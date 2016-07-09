@@ -1,6 +1,7 @@
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
+import scripts from './server/routes/api/scripts';
 
 module.exports = function (kibana) {
   return new kibana.Plugin({
@@ -84,6 +85,7 @@ module.exports = function (kibana) {
       ingest(server);
       search(server);
       settings(server);
+      scripts(server);
     }
   });
 
