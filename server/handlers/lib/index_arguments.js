@@ -27,7 +27,6 @@ module.exports = function indexArguments(functionDef, unorderedArgs) {
     }());
 
     if (!isCorrectType) {
-      console.log(type);
       throw new Error (functionDef.name + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
     }
   });
