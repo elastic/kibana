@@ -30,6 +30,10 @@ module.exports = function (kibana) {
           };
         }
       },
+      hacks: [
+        'plugins/timelion/lib/panel_registry',
+        'plugins/timelion/panels/timechart'
+      ],
       visTypes: [
         'plugins/timelion/vis'
       ],
