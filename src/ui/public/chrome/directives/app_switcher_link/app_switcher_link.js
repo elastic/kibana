@@ -8,6 +8,7 @@ const module = uiModules.get('kibana');
 module.directive('appSwitcherLink', function () {
   return {
     restrict: 'E',
+    replace: true,
     scope: {
       isActive: '=appSwitcherLinkIsActive',
       isDisabled: '=appSwitcherLinkIsDisabled',
