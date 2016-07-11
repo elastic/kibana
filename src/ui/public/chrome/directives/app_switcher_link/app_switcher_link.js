@@ -1,5 +1,6 @@
 
 import appSwitcherLinkTemplate from './app_switcher_link.html';
+import './app_switcher_link.less';
 import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
