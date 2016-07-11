@@ -26,6 +26,8 @@ include::visualize.asciidoc[]
 
 include::dashboard.asciidoc[]
 
+include::console.asciidoc[]
+
 include::settings.asciidoc[]
 
 include::production.asciidoc[]
