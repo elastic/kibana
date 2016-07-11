@@ -1,0 +1,5 @@
+## Node command line options
+## See `node --help` and `node --v8-options` for available options
+
+## max size of old space in megabytes
+#--max-old-space-size=512
