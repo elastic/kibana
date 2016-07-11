@@ -1,7 +1,7 @@
 [[console-kibana]]
 == Console for Kibana
 
-The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*, 
+The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
 where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
 Enter the address of your Elasticsearch server in the text box on the top of screen. The default value of this address
 is `localhost:9200`.
@@ -67,6 +67,7 @@ image::images/introduction_server.png["Server",width=400,align="center"]
 Console is a development tool and is configured by default to run on a laptop. If you install it on a server please
 look at the <<securing_console>> for instructions on how make it secure.
 
+[float]
 [[console-ui]]
 == The Console UI
 

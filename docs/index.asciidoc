@@ -18,8 +18,6 @@ include::getting-started.asciidoc[]
 
 include::plugins.asciidoc[]
 
-include::console.asciidoc[]
-
 include::access.asciidoc[]
 
 include::discover.asciidoc[]
@@ -27,6 +25,8 @@ include::discover.asciidoc[]
 include::visualize.asciidoc[]
 
 include::dashboard.asciidoc[]
+
+include::console.asciidoc[]
 
 include::settings.asciidoc[]
 
