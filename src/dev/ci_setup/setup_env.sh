@@ -9,12 +9,10 @@ fi
 installNode=$1
 
 dir="$(pwd)"
-cacheDir="$HOME/.kibana"
+cacheDsir="$HOME/.kibana"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
-
-export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
@@ -52,6 +50,11 @@ export PARENT_DIR="$parentDir"
 
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
+
+###
+### Sets correct NODE_OPTIONS for CI
+###
+NODE_OPTIONS="$(grep -v ^# < ${KIBANA_DIR}/src/dev/ci_setup/node.ci.options | xargs) $NODE_OPTIONS"
 
 ###
 ### download node

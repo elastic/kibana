@@ -12,6 +12,15 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
+for /F "eol=# tokens=*" %%i in (%DIR%\config\node.options) do (
+  If [%NODE_OPTIONS%]==[] (
+    set NODE_OPTIONS="%%i"
+  )
+  else (
+    set NODE_OPTIONS="%%i %NODE_OPTIONS"
+  )
+)
+
 TITLE Kibana Keystore
 "%NODE%" "%DIR%\src\cli_keystore" %*
 
