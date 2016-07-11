@@ -84,7 +84,7 @@ series
  = series:series_type ','? space? { return series }
 
 function_name
- = (first:[a-zA-Z]+ rest:[a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
+ = (first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* ) { return first.join('') + rest.join('') }
 
 function "function"
  = '.' name:function_name '(' space? arg_list:arg_list? space? ')' {
