@@ -1,15 +1,16 @@
 import expect from 'expect.js';
+import process from 'child_process';
+import i18n from '../i18n/i18n';
 
-var process = require('child_process');
-var i18n = require('../i18n');
+const DATA_PATH = __dirname + '/fixtures';
 
 describe('Test plugin translations details for test_plugin_1', function () {
-  var pluginName = 'test_plugin_1';
-  var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
+  const pluginName = 'test_plugin_1';
+  const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
 
   it('Translation languages exist', function (done) {
-    var result = true;
-    var expectedLanguages = ['en', 'de'];
+    let result = true;
+    const expectedLanguages = ['en', 'de'];
     getPluginTranslationLanguages(pluginName, pluginTranslationPath, function (err, actualLanguages) {
       if (err) {
         console.log(err);
@@ -18,7 +19,7 @@ describe('Test plugin translations details for test_plugin_1', function () {
         if (actualLanguages.length !== expectedLanguages.length) {
           result = false;
         } else {
-          var index = actualLanguages.length;
+          let index = actualLanguages.length;
           actualLanguages.sort();
           expectedLanguages.sort();
           while (index--) {
@@ -35,8 +36,8 @@ describe('Test plugin translations details for test_plugin_1', function () {
   });
 
   it('Translation files exist', function (done) {
-    var result = true;
-    var expectedFiles = [
+    let result = true;
+    const expectedFiles = [
       pluginTranslationPath + '/view1/de.json',
       pluginTranslationPath + '/view1/en.json',
       pluginTranslationPath + '/view2/en.json'
@@ -49,7 +50,7 @@ describe('Test plugin translations details for test_plugin_1', function () {
         if (actualFiles.length !== expectedFiles.length) {
           result = false;
         } else {
-          var index = actualFiles.length;
+          let index = actualFiles.length;
           actualFiles.sort();
           expectedFiles.sort();
           while (index--) {
@@ -67,11 +68,11 @@ describe('Test plugin translations details for test_plugin_1', function () {
 });
 
 describe('Test registering translations for test_plugin_1', function () {
-  var pluginName = 'test_plugin_1';
-  var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
+  const pluginName = 'test_plugin_1';
+  const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
 
   it('Register translations' , function (done) {
-    var result = true;
+    let result = true;
     i18n.registerTranslations(pluginTranslationPath, function (err) {
       if (err) {
         console.log(err);
@@ -83,10 +84,10 @@ describe('Test registering translations for test_plugin_1', function () {
   });
 
   it('EN translations are registered' , function (done) {
-    var result = true;
-    var language = 'en';
-    var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
-    var expectedTranslationJson = require(expectedTranslationJsonFile);
+    let result = true;
+    const language = 'en';
+    const expectedTranslationJsonFile = DATA_PATH + '/reference/' + pluginName + '/' + language + '.json';
+    const expectedTranslationJson = require(expectedTranslationJsonFile);
 
     i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
       if (err) {
@@ -103,10 +104,10 @@ describe('Test registering translations for test_plugin_1', function () {
   });
 
   it('DE translations are registered' , function (done) {
-    var result = true;
-    var language = 'de';
-    var expectedTranslationJsonFile = __dirname + '/data/reference/' + pluginName + '/' + language + '.json';
-    var expectedTranslationJson = require(expectedTranslationJsonFile);
+    let result = true;
+    const language = 'de';
+    const expectedTranslationJsonFile = DATA_PATH + '/reference/' + pluginName + '/' + language + '.json';
+    const expectedTranslationJson = require(expectedTranslationJsonFile);
 
     i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
       if (err) {
@@ -123,8 +124,8 @@ describe('Test registering translations for test_plugin_1', function () {
   });
 
   it('Translation languages are registered', function (done) {
-    var expectedLanguages = ['en', 'de'];
-    var result = true;
+    const expectedLanguages = ['en', 'de'];
+    let result = true;
 
     i18n.getRegisteredTranslationLanguages(function (err, actualLanguages) {
       if (err) {
@@ -135,7 +136,7 @@ describe('Test registering translations for test_plugin_1', function () {
       if (actualLanguages.length !== expectedLanguages.length) {
         result = false;
       } else {
-        var index = actualLanguages.length;
+        let index = actualLanguages.length;
         actualLanguages.sort();
         expectedLanguages.sort();
         while (index--) {
@@ -151,7 +152,7 @@ describe('Test registering translations for test_plugin_1', function () {
   });
 
   after(function (done) {
-    var translationStorePath = i18n.getTranslationStoragePath();
+    const translationStorePath = i18n.getTranslationStoragePath();
     process.execSync('rm -rf ' + translationStorePath);
     done();
   });
@@ -159,9 +160,9 @@ describe('Test registering translations for test_plugin_1', function () {
 
 describe('Test registering translations for test_plugin_1 and test_plugin_2', function () {
   it('Register translations for test_plugin_1' , function (done) {
-    var result = true;
-    var pluginName = 'test_plugin_1';
-    var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
+    let result = true;
+    const pluginName = 'test_plugin_1';
+    const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
     i18n.registerTranslations(pluginTranslationPath, function (err) {
       if (err) {
         console.log(err);
@@ -173,9 +174,9 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 
   it('Register translations for test_plugin_2' , function (done) {
-    var result = true;
-    var pluginName = 'test_plugin_2';
-    var pluginTranslationPath = __dirname + '/data/translations/' + pluginName;
+    let result = true;
+    const pluginName = 'test_plugin_2';
+    const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
     i18n.registerTranslations(pluginTranslationPath, function (err) {
       if (err) {
         console.log(err);
@@ -187,10 +188,10 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 
   it('EN translations are registered' , function (done) {
-    var result = true;
-    var language = 'en';
-    var expectedTranslationJsonFile = __dirname + '/data/reference/' + language + '.json';
-    var expectedTranslationJson = require(expectedTranslationJsonFile);
+    let result = true;
+    const language = 'en';
+    const expectedTranslationJsonFile = DATA_PATH + '/reference/' + language + '.json';
+    const expectedTranslationJson = require(expectedTranslationJsonFile);
 
     i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
       if (err) {
@@ -207,10 +208,10 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 
   it('DE translations are registered' , function (done) {
-    var result = true;
-    var language = 'de';
-    var expectedTranslationJsonFile = __dirname + '/data/reference/' + language + '.json';
-    var expectedTranslationJson = require(expectedTranslationJsonFile);
+    let result = true;
+    const language = 'de';
+    const expectedTranslationJsonFile = DATA_PATH + '/reference/' + language + '.json';
+    const expectedTranslationJson = require(expectedTranslationJsonFile);
 
     i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
       if (err) {
@@ -227,8 +228,8 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 
   it('Translation languages are registered', function (done) {
-    var expectedLanguages = ['en', 'de'];
-    var result = true;
+    const expectedLanguages = ['en', 'de'];
+    let result = true;
 
     i18n.getRegisteredTranslationLanguages(function (err, actualLanguages) {
       if (err) {
@@ -239,7 +240,7 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
       if (actualLanguages.length !== expectedLanguages.length) {
         result = false;
       } else {
-        var index = actualLanguages.length;
+        let index = actualLanguages.length;
         actualLanguages.sort();
         expectedLanguages.sort();
         while (index--) {
@@ -255,15 +256,15 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 
   after(function (done) {
-    var translationStorePath = i18n.getTranslationStoragePath();
+    const translationStorePath = i18n.getTranslationStoragePath();
     process.execSync('rm -rf ' + translationStorePath);
     done();
   });
 });
 
 function getPluginTranslationLanguages(pluginName, pluginTranslationPath, cb) {
-  var translationFiles = [];
-  var languageList = [];
+  let translationFiles = [];
+  let languageList = [];
   i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
     if (err) return cb(err);
     return cb(null, languageList);
@@ -271,8 +272,8 @@ function getPluginTranslationLanguages(pluginName, pluginTranslationPath, cb) {
 }
 
 function getPluginTranslationFiles(pluginName, pluginTranslationPath, cb) {
-  var translationFiles = [];
-  var languageList = [];
+  let translationFiles = [];
+  let languageList = [];
   i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
     if (err) return cb(err);
     return cb(null, translationFiles);
@@ -280,9 +281,9 @@ function getPluginTranslationFiles(pluginName, pluginTranslationPath, cb) {
 }
 
 function compareTranslations(actual, expected) {
-  var equal = true;
+  let equal = true;
 
-  for (var key in expected) {
+  for (let key in expected) {
     if (!actual.hasOwnProperty(key)) {
       equal = false;
       break;

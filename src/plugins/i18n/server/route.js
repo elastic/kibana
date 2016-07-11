@@ -1,6 +1,6 @@
 import Boom from 'boom';
 
-var i18n = require('./i18n');
+var i18n = require('./i18n/index');
 var langParser = require('accept-language-parser');
 
 const DEFAULT_LANGUAGE = 'en';

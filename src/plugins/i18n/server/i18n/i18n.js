@@ -1,15 +1,14 @@
-var async = require('async');
-var fs = require('fs');
-var kibanaPackage = require('../../../utils/package_json');
-var mkdirp = require('mkdirp');
-var os = require('os');
-var path = require('path');
-var process = require('child_process');
+import fs from 'fs';
+import kibanaPackage from '../../../../utils/package_json';
+import mkdirp from 'mkdirp';
+import os from 'os';
+import path from 'path';
+import process from 'child_process';
 
 const TRANSLATION_FILE_EXTENSION = 'json';
-const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/data/translations';
+const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/fixtures/translations';
 
-var getPluginTranslationDetails = function (pluginTranslationPath, translationFiles, languageList, callback) {
+let getPluginTranslationDetails = function (pluginTranslationPath, translationFiles, languageList, callback) {
   try {
     getFilesRecursivelyFromTopDir(pluginTranslationPath, translationFiles, languageList);
   } catch (err) {
@@ -19,14 +18,14 @@ var getPluginTranslationDetails = function (pluginTranslationPath, translationFi
 };
 
 //TODO(hickeyma): Update to use https://github.com/elastic/kibana/pull/7562
-var getTranslationStoragePath = function () {
+let getTranslationStoragePath = function () {
   return TRANSLATION_STORE_PATH;
 };
 
-var getRegisteredTranslationLanguages = function (cb) {
-  var translationFiles = [];
-  var languageList = [];
-  var translationStorePath = getTranslationStoragePath();
+let getRegisteredTranslationLanguages = function (cb) {
+  let translationFiles = [];
+  let languageList = [];
+  const translationStorePath = getTranslationStoragePath();
   try {
     getTranslationDetailsFromDirectory(translationStorePath, translationFiles, languageList);
   } catch (err) {
@@ -35,10 +34,10 @@ var getRegisteredTranslationLanguages = function (cb) {
   return cb(null, languageList);
 };
 
-var registerTranslations = function (pluginTranslationPath, cb) {
-  var translationFiles = [];
-  var languageList = [];
-  var translationStorePath = getTranslationStoragePath();
+let registerTranslations = function (pluginTranslationPath, cb) {
+  let translationFiles = [];
+  let languageList = [];
+  const translationStorePath = getTranslationStoragePath();
 
   getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
     if (err) return cb(err);
@@ -47,12 +46,12 @@ var registerTranslations = function (pluginTranslationPath, cb) {
       if (!fs.existsSync(translationStorePath)) {
         mkdirp.sync(translationStorePath);
       }
-      for (var fileIndx in translationFiles) {
+      for (let fileIndx in translationFiles) {
         if (!translationFiles.hasOwnProperty(fileIndx)) continue;
-        var translationFile = translationFiles[fileIndx];
-        var translationFileName = getFileName(translationFile);
-        var translationJson = require(translationFile);
-        var fileToWrite = translationStorePath + '/' + translationFileName;
+        const translationFile = translationFiles[fileIndx];
+        const translationFileName = getFileName(translationFile);
+        const translationJson = require(translationFile);
+        const fileToWrite = translationStorePath + '/' + translationFileName;
         saveTranslationToFile(fileToWrite, translationJson);
       }
     } catch (err) {
@@ -63,13 +62,13 @@ var registerTranslations = function (pluginTranslationPath, cb) {
   return cb(null);
 };
 
-var getRegisteredLanguageTranslations = function (language, callback) {
-  var translationStorePath = getTranslationStoragePath();
-  var translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
-  var translationFile = translationStorePath + '/' + translationFileName;
+let getRegisteredLanguageTranslations = function (language, callback) {
+  const translationStorePath = getTranslationStoragePath();
+  const translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
+  const translationFile = translationStorePath + '/' + translationFileName;
   fs.readFile(translationFile, function (err, translationStr) {
     if (err) return callback(err);
-    var translationJson = [];
+    let translationJson = [];
     try {
       translationJson = JSON.parse(translationStr);
     } catch (e) {
@@ -80,14 +79,14 @@ var getRegisteredLanguageTranslations = function (language, callback) {
 };
 
 function saveTranslationToFile(translationFullFileName, translationToAddJson) {
-  var jsonToWrite = [];
+  let jsonToWrite = [];
   if (fs.existsSync(translationFullFileName)) {
-    var currentTranslationJson = require(translationFullFileName);
+    const currentTranslationJson = require(translationFullFileName);
     jsonToWrite = currentTranslationJson;
-    for (var key in translationToAddJson) {
+    for (let key in translationToAddJson) {
       if (translationToAddJson.hasOwnProperty(key)) {
-        var attrName = key;
-        var attrValue = translationToAddJson[key];
+        const attrName = key;
+        const attrValue = translationToAddJson[key];
         jsonToWrite[attrName] = attrValue;
       }
     }
@@ -99,8 +98,8 @@ function saveTranslationToFile(translationFullFileName, translationToAddJson) {
 
 function getFilesRecursivelyFromTopDir(topDir, translationFiles, languageList) {
   fs.readdirSync(topDir).forEach(function (name) {
-    var fullPath = path.join(topDir, name);
-    var stat = fs.statSync(fullPath);
+    const fullPath = path.join(topDir, name);
+    const stat = fs.statSync(fullPath);
     if (stat.isDirectory()) {
       getTranslationDetailsFromDirectory(fullPath, translationFiles, languageList);
     }
@@ -108,16 +107,16 @@ function getFilesRecursivelyFromTopDir(topDir, translationFiles, languageList) {
 }
 
 function getTranslationDetailsFromDirectory(fullPath, translationFiles, languageList) {
-  var files = getFilesFromDir(fullPath);
-  var fileLength = files.length;
-  for (var i = 0; i < fileLength; i++) {
-    var fullFilePath = files[i];
-    var fileName = getFileName(fullFilePath);
-    var fileExt = fileName.split('.').pop();
+  const files = getFilesFromDir(fullPath);
+  const fileLength = files.length;
+  for (let i = 0; i < fileLength; i++) {
+    const fullFilePath = files[i];
+    const fileName = getFileName(fullFilePath);
+    const fileExt = fileName.split('.').pop();
     if (fileName === fileExt) continue;
     if (fileExt !== TRANSLATION_FILE_EXTENSION) continue;
     translationFiles.push(fullFilePath);
-    var lang  = fileName.substr(0, fileName.lastIndexOf('.'));
+    const lang  = fileName.substr(0, fileName.lastIndexOf('.'));
     if (languageList.indexOf(lang) !== -1) {
       continue;
     }
@@ -126,12 +125,12 @@ function getTranslationDetailsFromDirectory(fullPath, translationFiles, language
 }
 
 function getFilesFromDir(dir) {
-  var fileList = [];
+  let fileList = [];
 
-  var files = fs.readdirSync(dir);
-  for (var i in files) {
+  const files = fs.readdirSync(dir);
+  for (let i in files) {
     if (!files.hasOwnProperty(i)) continue;
-    var name = dir + '/' + files[i];
+    const name = dir + '/' + files[i];
     if (!fs.statSync(name).isDirectory()) {
       fileList.push(name);
     }
