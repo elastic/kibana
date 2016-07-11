@@ -220,6 +220,11 @@ Argument | Accepts | Description
 --- | --- | ---
 precision | *number* | Number of digits to round each value to  
 
+#### .props()
+Use at your own risk, sets properties on objects.
+
+*This function does not accept any arguments.*
+
 #### .range()
 Changes the max and min of a series while keeping the same shape
 
