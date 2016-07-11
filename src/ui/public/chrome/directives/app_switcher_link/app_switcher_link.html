@@ -20,7 +20,11 @@
         kbn-src="{{ '/' + icon }}"
       >
 
-      <span ng-if="!icon" class="app-switcher-link__icon-placeholder">
+      <span
+        ng-if="!icon"
+        class="app-switcher-link__icon-placeholder"
+        data-test-subj="appLinkIconPlaceholder"
+      >
         {{ title[0] }}
       </span>
     </div>
