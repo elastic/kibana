@@ -1,0 +1,28 @@
+<div
+  class="app-link"
+  ng-class="{ active: isActive, 'is-app-switcher-app-link-disabled': isDisabled }"
+  tooltip="{{ tooltip }}"
+  tooltip-placement="right"
+  tooltip-popup-delay="400"
+  tooltip-append-to-body="1"
+>
+  <a
+    ng-click="onClick({ $event: $event })"
+    href="{{ href }}"
+    data-test-subj="appLink"
+    ng-class="{ 'app-link__anchor': isDisabled }"
+    title="{{ title }}"
+  >
+    <div ng-if="icon" class="app-icon">
+      <img kbn-src="{{ '/' + icon }}">
+    </div>
+
+    <div ng-if="!icon" class="app-icon-missing">
+      {{ title[0] }}
+    </div>
+
+    <div class="app-title">
+      {{ title }}
+    </div>
+  </a>
+</div>
