@@ -53,7 +53,8 @@ describe('xsrf request filter', function () {
         });
 
         expect(resp.statusCode).to.be(200);
-        expect(resp.payload).to.be('ok');
+        if (method === 'HEAD') expect(resp.payload).to.be.empty();
+        else expect(resp.payload).to.be('ok');
       });
 
       it('failes on invalid tokens', async function () {
@@ -67,7 +68,8 @@ describe('xsrf request filter', function () {
 
         expect(resp.statusCode).to.be(400);
         expect(resp.headers).to.have.property(xsrfHeader, version);
-        expect(resp.payload).to.match(/"Browser client is out of date/);
+        if (method === 'HEAD') expect(resp.payload).to.be.empty();
+        else expect(resp.payload).to.match(/"Browser client is out of date/);
       });
     });
   }
