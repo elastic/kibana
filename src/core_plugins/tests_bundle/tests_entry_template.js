@@ -27,7 +27,14 @@ window.__KBN__ = {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,
     esApiVersion: '2.0',
-    esRequestTimeout: '300000'
+    esRequestTimeout: '300000',
+    tilemap: {
+      url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+      subdomains: [],
+      minZoom: 1,
+      maxZoom: 8,
+      attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)'
+    }
   },
   uiSettings: {
     defaults: ${JSON.stringify(env.defaultUiSettings, null, 2).split('\n').join('\n    ')},

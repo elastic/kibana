@@ -130,6 +130,14 @@ module.exports = () => Joi.object({
 
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
-  }).default()
+  }).default(),
+
+  tilemap: Joi.object({
+    url: Joi.string().default('https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana'),
+    subdomains: Joi.array().items(Joi.string()).default([]),
+    minZoom: Joi.number().default(1),
+    maxZoom: Joi.number().default(8),
+    attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)')
+  }).default(),
 
 }).default();
