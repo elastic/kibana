@@ -64,7 +64,8 @@ export function registerPost(server) {
       }
     },
     handler: async function (req, reply) {
-      const config = await server.uiSettings().getAll();
+      const uiSettings = server.uiSettings();
+      const metaFields = await uiSettings.get('metaFields');
       const boundCallWithRequest = _.partial(server.plugins.elasticsearch.callWithRequest, req);
       const requestDocument = _.cloneDeep(req.payload);
       const indexPattern = keysToCamelCaseShallow(requestDocument.index_pattern);
@@ -74,8 +75,6 @@ export function registerPost(server) {
       delete indexPattern.id;
 
       const mappings = createMappingsFromPatternFields(indexPattern.fields);
-
-      const metaFields = _.get(config, 'metaFields.userValue', config.metaFields.value);
       const indexPatternMetaFields = _.map(metaFields, name => ({name}));
 
       indexPattern.fields = initDefaultFieldProps(indexPattern.fields.concat(indexPatternMetaFields));
