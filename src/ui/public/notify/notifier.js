@@ -91,12 +91,6 @@ function add(notif, cb) {
 
   if (notif.actions) {
     notif.actions.forEach(function (action) {
-      // Why is this done.
-      // Makes this notif object look like
-      // {
-      //   accept: closeNotif(notif, cb, 'accept'),
-      //   report: closeNotif(notif, cb, 'report'),
-      // }
       notif[action] = closeNotif(notif, cb, action);
     });
   } else if (notif.customActions) {
@@ -392,12 +386,15 @@ Notifier.prototype.banner = function (msg, cb) {
 Notifier.prototype.custom = function (config) {
   const customConfig = _.assign({}, {
     type: 'banner',
-    title: 'Attention',
-    content: '',
-    // markdown: formatMsg(msg, this.from),
+    markdown: '',
     lifetime: Notifier.config.bannerLifetime,
-    // actions: ['report', 'accept']
   }, config);
+
+  const hasActions = customConfig.customActions || customConfig.actions;
+  // Add an ok if there are no actions, so you don't end up with a orphan notification
+  if (!hasActions) {
+    customConfig.actions = ['accept'];
+  }
 
   add(customConfig);
 };
