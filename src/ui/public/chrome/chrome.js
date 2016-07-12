@@ -10,8 +10,10 @@ import 'ui/timefilter';
 import 'ui/notify';
 import 'ui/private';
 import 'ui/promises';
+import 'ui/storage';
 import 'ui/directives/kbn_src';
 import 'ui/watch_multi';
+import './services';
 
 let chrome = {};
 let internals = _.defaults(

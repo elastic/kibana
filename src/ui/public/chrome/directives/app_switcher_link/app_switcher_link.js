@@ -17,7 +17,8 @@ module.directive('appSwitcherLink', chrome => {
       href: '=appSwitcherLinkHref',
       kbnRoute: '=appSwitcherLinkKbnRoute',
       icon: '=appSwitcherLinkIcon',
-      title: '=appSwitcherLinkTitle'
+      title: '=appSwitcherLinkTitle',
+      classes: '=appSwitcherLinkClasses',
     },
     template: appSwitcherLinkTemplate,
     link: scope => {

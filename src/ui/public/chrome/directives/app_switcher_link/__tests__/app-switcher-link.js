@@ -28,6 +28,7 @@ describe('appSwitcherLink directive', () => {
         app-switcher-link-kbn-route="appSwitcherLinkKbnRoute"
         app-switcher-link-icon="appSwitcherLinkIcon"
         app-switcher-link-title="appSwitcherLinkTitle"
+        app-switcher-link-classes="appSwitcherLinkClasses"
       />
     `;
 
@@ -205,6 +206,16 @@ describe('appSwitcherLink directive', () => {
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
         expect(link.attr('title')).to.be(attrs.appSwitcherLinkTitle);
+      });
+    });
+
+    describe('appSwitcherLinkClasses attribute', () => {
+      it('is applied to the link', () => {
+        const attrs = {
+          appSwitcherLinkClasses: 'new classes',
+        };
+        const element = create(attrs);
+        expect(element.attr('class')).to.contain(attrs.appSwitcherLinkClasses);
       });
     });
   });

@@ -1,7 +1,8 @@
 @import (reference) "~ui/styles/variables";
 
 .app-switcher-link {
-  width: @as-open-width;
+  position: relative;
+  width: @as-closed-width;
   height: @app-icon-height;
   line-height: @app-line-height;
 
@@ -22,6 +23,10 @@
       text-decoration: none;
     }
   }
+
+  .is-app-links-wrapper-open & {
+    width: @as-open-width;
+  }
 }
 
   .app-switcher-link__anchor {
@@ -29,11 +34,8 @@
     height: 100%;
     color: #ebf7fa;
 
-    /**
-     * 1. TODO: Override anchor styles. Fix this by removing a tag styles.
-     */
     &:focus {
-      color: #ebf7fa; /* 1 */
+      color: @white;
     }
   }
 
@@ -66,12 +68,25 @@
     }
 
   .app-switcher-link__title {
+    display: none;
     width: calc(@as-open-width - @as-closed-width);
-    display: inline-block;
     float: right;
     font-size: 0.9em;
     text-align: left;
     padding-left: 3px;
     line-height: @app-icon-height;
     white-space: nowrap;
+
+    .is-app-links-wrapper-open & {
+      display: inline-block;
+    }
   }
+
+.app-switcher-link--close {
+  /**
+   * 1. Translation accounts for the icon image being slightly off-center.
+   */
+  .app-switcher-link__icon {
+    transform: translateX(1px) scaleX(-1); /* 1 */
+  }
+}
