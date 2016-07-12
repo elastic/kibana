@@ -1,23 +1,27 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import L from 'leaflet';
+import marked from 'marked';
+marked.setOptions({
+  gfm: true, // Github-flavored markdown
+  sanitize: true // Sanitize HTML tags
+});
+
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visualizations/marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
-export default function MapFactory(Private) {
+export default function MapFactory(Private, tilemap) {
 
   let defaultMapZoom = 2;
   let defaultMapCenter = [15, 5];
   let defaultMarkerType = 'Scaled Circle Markers';
 
   let mapTiles = {
-    url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
+    url: tilemap.url,
     options: {
-      attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-        'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-      subdomains: '1234'
+      attribution: marked(tilemap.attribution),
+      subdomains: tilemap.subdomains
     }
   };
 
@@ -52,8 +56,8 @@ export default function MapFactory(Private) {
     this._attr = params.attr || {};
 
     let mapOptions = {
-      minZoom: 1,
-      maxZoom: 18,
+      minZoom: tilemap.minZoom,
+      maxZoom: tilemap.maxZoom,
       noWrap: true,
       maxBounds: L.latLngBounds([-90, -220], [90, 220]),
       scrollWheelZoom: false,
