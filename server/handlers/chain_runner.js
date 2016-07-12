@@ -76,10 +76,12 @@ module.exports = function (tlConfig) {
     }
 
     args = repositionArguments(functionDef, args);
+    var extendedNames = args.extendedNames;
+
     args = _.map(args, resolveArgument);
 
     return Promise.all(args).then(function (args) {
-      args.byName = indexArguments(functionDef, args);
+      args.byName = indexArguments(functionDef, args, extendedNames);
       return functionDef.fn(args, tlConfig);
     });
   }

@@ -9,6 +9,7 @@ module.exports = class TimelionFunction {
     this.argsByName = _.indexBy(this.args, 'name');
     this.help = config.help || '';
     this.aliases = config.aliases || [];
+    this.extended = config.extended || false;
 
     // WTF is this? How could you not have a fn? Wtf would the thing be used for?
     var originalFunction = config.fn || function (input) { return input; };
