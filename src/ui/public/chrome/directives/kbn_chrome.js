@@ -6,7 +6,7 @@ export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', function ($rootScope) {
+  .directive('kbnChrome', function ($rootScope, appSwitcherState) {
     return {
       template($el) {
         const $content = $(require('ui/chrome/chrome.html'));
@@ -43,6 +43,29 @@ export default function (chrome, internals) {
         // and some local values
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
+
+        // App switcher functionality.
+        function updateAppSwitcher(isOpen) {
+          $scope.appSwitcherButton = {
+            classes: isOpen ? 'app-switcher-link--close' : undefined,
+            title: isOpen ? 'Collapse' : 'Expand',
+            tooltip: isOpen ? 'Collapse side bar' : 'Expand side bar',
+          };
+        }
+
+        $scope.isAppSwitcherOpen = appSwitcherState.isOpen();
+        updateAppSwitcher($scope.isAppSwitcherOpen);
+
+        $scope.toggleAppSwitcher = event => {
+          event.preventDefault();
+          $scope.isAppSwitcherOpen = !$scope.isAppSwitcherOpen;
+          appSwitcherState.setOpen($scope.isAppSwitcherOpen);
+          updateAppSwitcher($scope.isAppSwitcherOpen);
+
+          // Notify visualizations, e.g. the dashboard, that they should re-render.
+          $scope.$root.$broadcast('ready:vis');
+        };
+
         return chrome;
       }
     };

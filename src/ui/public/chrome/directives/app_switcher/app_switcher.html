@@ -3,7 +3,7 @@
   ng-repeat="link in switcher.shownNavLinks"
   app-switcher-link-is-active="link.active"
   app-switcher-link-is-disabled="!switcher.isNavLinkEnabled(link)"
-  app-switcher-link-tooltip="link.tooltip"
+  app-switcher-link-tooltip="getTooltip(link)"
   app-switcher-link-on-click="switcher.ensureNavigation($event, link)"
   app-switcher-link-href="link.active ? link.url : (link.lastSubUrl || link.url)"
   app-switcher-link-icon="link.icon"

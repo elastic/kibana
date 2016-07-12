@@ -57,7 +57,7 @@ uiModules
     restrict: 'E',
     template: appSwitcherTemplate,
     controllerAs: 'switcher',
-    controller($scope, appSwitcherEnsureNavigation) {
+    controller($scope, appSwitcherEnsureNavigation, appSwitcherState) {
       // since we render this in an isolate scope we can't "require: ^chrome", but
       // rather than remove all helpfull checks we can just check here.
       if (!$scope.chrome || !$scope.chrome.getNavLinks) {
@@ -72,6 +72,15 @@ uiModules
       // links don't cause full-navigation events in certain scenarios
       // so we force them when needed
       this.ensureNavigation = appSwitcherEnsureNavigation;
+
+      $scope.getTooltip = link => {
+        // If the sidebar is open then we don't need to show the title because
+        // it will already be visible.
+        if (appSwitcherState.isOpen()) {
+          return link.tooltip;
+        }
+        return link.tooltip ? link.title + ' - ' + link.tooltip : link.title;
+      };
     }
   };
 });

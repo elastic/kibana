@@ -4,7 +4,7 @@
 body { overflow-x: hidden; }
 
 .app-links-wrapper {
-  width: @as-open-width;
+  width: @as-closed-width;
   position: fixed;
   left: 0;
   top: 0;
@@ -12,15 +12,14 @@ body { overflow-x: hidden; }
   z-index: 0;
   background-color: @app-links-wrapper-background;
   overflow: hidden;
-  transition: width @transition-time;
-  transition-delay: @transition-delay;
 
-  &:hover {
+  &.is-app-links-wrapper-open {
+    width: @as-open-width;
     .app-title {
       display: inline-block;
     }
     + .app-wrapper {
-      transform: translateX(@as-open-width - @as-closed-width);
+      left: @as-open-width;
     }
   }
 
@@ -47,8 +46,6 @@ body { overflow-x: hidden; }
 .app-wrapper {
   .real-flex-parent();
   position: absolute;
-  transition: transform @transition-time;
-  transition-delay: @transition-delay;
   left: @as-closed-width;
   top: 0;
   right: 0;

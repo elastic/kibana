@@ -1,7 +1,10 @@
 <div class="content" chrome-context >
   <!-- TODO: These config dropdowns shouldn't be hard coded -->
-  <nav class="app-links-wrapper" ng-show="chrome.getVisible()">
-
+  <nav
+    class="app-links-wrapper"
+    ng-class="{'is-app-links-wrapper-open': isAppSwitcherOpen}"
+    ng-show="chrome.getVisible()"
+  >
     <li
       ng-if="!chrome.getBrand('logo') && !chrome.getBrand('smallLogo')"
       aria-label="{{ chrome.getAppTitle() }} Logo"
@@ -27,6 +30,15 @@
 
     <div class="bottom-apps">
       <div class="chrome-actions" kbn-chrome-append-nav-controls></div>
+
+      <!-- Open/close sidebar -->
+      <app-switcher-link
+        app-switcher-link-classes="appSwitcherButton.classes"
+        app-switcher-link-tooltip="appSwitcherButton.tooltip"
+        app-switcher-link-on-click="toggleAppSwitcher($event)"
+        app-switcher-link-icon="'/plugins/kibana/assets/play-circle.svg'"
+        app-switcher-link-title="appSwitcherButton.title"
+      ></app-switcher-link>
     </div>
 
   </nav>
