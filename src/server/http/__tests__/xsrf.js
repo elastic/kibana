@@ -28,9 +28,10 @@ describe('xsrf request filter', function () {
 
     await kbnServer.ready();
 
+    const routeMethods = nonDestructiveMethods.filter(method => method !== 'HEAD').concat(destructiveMethods);
     kbnServer.server.route({
       path: '/xsrf/test/route',
-      method: [...nonDestructiveMethods, ...destructiveMethods],
+      method: routeMethods,
       handler: function (req, reply) {
         reply(null, 'ok');
       }
