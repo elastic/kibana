@@ -60,7 +60,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    var vizName1 = 'Visualization AreaChart';
+    var vizName1 = 'Visualization % AreaChart';
 
     bdd.it('should save and load', function pageHeader() {
       return PageObjects.visualize.saveVisualization(vizName1)
