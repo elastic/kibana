@@ -51,7 +51,7 @@ export default function MapFactory(Private, tilemap) {
     this._valueFormatter = params.valueFormatter || _.identity;
     this._tooltipFormatter = params.tooltipFormatter || _.identity;
     this._geoJson = _.get(this._chartData, 'geoJson');
-    this._mapZoom = params.zoom || defaultMapZoom;
+    this._mapZoom =  Math.max(Math.min(params.zoom || defaultMapZoom, tilemapOptions.maxZoom), tilemapOptions.minZoom);
     this._mapCenter = params.center || defaultMapCenter;
     this._attr = params.attr || {};
 
