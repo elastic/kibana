@@ -1,8 +1,14 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private, config) {
+  return function TileMapFactory(d3, Private, configFile, kbnVersion) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    var marked = require('marked');
+    var queryString = require('utils/query_string');
+    marked.setOptions({
+      gfm: true,
+      sanitize: true
+    });
     require('leaflet-heat');
     require('leaflet-draw');
     require('css!components/vislib/styles/main');
@@ -15,6 +21,12 @@ define(function (require) {
     function cloneAndReverse(arr) {
       var l = arr.length;
       return arr.map(function (curr, idx) { return arr[l - (idx + 1)]; });
+    }
+
+    function addParamToUrl(url, key, value) {
+      var separator = _.contains(url, '?') ? '&' : '?';
+      var encodedParam = queryString.param(key, value);
+      return url + separator + encodedParam;
     }
 
     /**
@@ -75,11 +87,12 @@ define(function (require) {
           self.addLatLng(self.geoJson);
 
           var div = $(this).addClass('tilemap');
-          var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
-            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-              'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            subdomains: '1234'
+          var tileUrl = addParamToUrl(configFile.tilemap_url, 'kibana-version', kbnVersion);
+          var tileLayer = L.tileLayer(tileUrl, {
+            attribution: marked(configFile.tilemap_attribution),
+            subdomains: configFile.tilemap_subdomains,
+            minZoom: configFile.tilemap_min_zoom,
+            maxZoom: configFile.tilemap_max_zoom
           });
 
           var drawOptions = {draw: {}};
@@ -97,8 +110,6 @@ define(function (require) {
           });
 
           var mapOptions = {
-            minZoom: 1,
-            maxZoom: 18,
             layers: tileLayer,
             center: self._attr.mapCenter,
             zoom: self._attr.mapZoom,
