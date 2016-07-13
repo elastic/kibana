@@ -4,7 +4,6 @@ define(function (require) {
     var $ = require('jquery');
     var L = require('leaflet');
     var marked = require('marked');
-    var queryString = require('utils/query_string');
     marked.setOptions({
       gfm: true,
       sanitize: true
@@ -20,12 +19,6 @@ define(function (require) {
     function cloneAndReverse(arr) {
       var l = arr.length;
       return arr.map(function (curr, idx) { return arr[l - (idx + 1)]; });
-    }
-
-    function addParamToUrl(url, key, value) {
-      var separator = _.contains(url, '?') ? '&' : '?';
-      var encodedParam = queryString.param(key, value);
-      return url + separator + encodedParam;
     }
 
     /**
@@ -86,8 +79,7 @@ define(function (require) {
           self.addLatLng(self.geoJson);
 
           var div = $(this).addClass('tilemap');
-          var tileUrl = addParamToUrl(configFile.tilemap_url, 'kibana-version', kbnVersion);
-          var tileLayer = L.tileLayer(tileUrl, {
+          var tileLayer = L.tileLayer(configFile.tilemap_url, {
             attribution: marked(configFile.tilemap_attribution),
             subdomains: configFile.tilemap_subdomains,
             minZoom: configFile.tilemap_min_zoom,
