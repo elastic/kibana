@@ -1,8 +1,13 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private, config) {
+  return function TileMapFactory(d3, Private, configFile) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    var marked = require('marked');
+    marked.setOptions({
+      gfm: true,
+      sanitize: true
+    });
     require('leaflet-heat');
     require('leaflet-draw');
     require('css!components/vislib/styles/main');
@@ -75,11 +80,11 @@ define(function (require) {
           self.addLatLng(self.geoJson);
 
           var div = $(this).addClass('tilemap');
-          var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
-            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-              'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            subdomains: '1234'
+          var tileLayer = L.tileLayer(configFile.tilemap_url, {
+            attribution: marked(configFile.tilemap_attribution),
+            subdomains: configFile.tilemap_subdomains,
+            minZoom: configFile.tilemap_min_zoom,
+            maxZoom: configFile.tilemap_max_zoom
           });
 
           var drawOptions = {draw: {}};
@@ -97,8 +102,6 @@ define(function (require) {
           });
 
           var mapOptions = {
-            minZoom: 1,
-            maxZoom: 18,
             layers: tileLayer,
             center: self._attr.mapCenter,
             zoom: self._attr.mapZoom,
