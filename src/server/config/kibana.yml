@@ -68,16 +68,18 @@ verify_ssl: true
 # xsrf_token: ""
 
 # The url used for loading tilemaps
-tilemap_url: "https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"
+# If a custom url is not specified, then the Elastic Tile Service will be used.
+# tilemap_url: "https://{s}.example.com/{z}/{x}/{y}.png"
 
 # Minimum map zoom level
-tilemap_min_zoom: 0
+# tilemap_min_zoom: 0
 
 # Maximum map zoom level
-tilemap_max_zoom: 7
+# tilemap_max_zoom: 7
 
 # Displays attribution data in the bottom right corner of the map
-tilemap_attribution: "© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"
+# The attribution will appear in the bottom right of the map. You can use markdown for links.
+# tilemap_attribution: ""
 
 # A list of subdomains, denoted by {s} in tilemap_url
-tilemap_subdomains: []
+# tilemap_subdomains: []
