@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private, configFile, kbnVersion) {
+  return function TileMapFactory(d3, Private, configFile) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
