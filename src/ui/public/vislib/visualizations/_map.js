@@ -17,12 +17,13 @@ export default function MapFactory(Private, tilemap) {
   let defaultMapCenter = [15, 5];
   let defaultMarkerType = 'Scaled Circle Markers';
 
+  let tilemapOptions = tilemap.options;
+
+  tilemapOptions.attribution = marked(tilemapOptions.attribution);
+
   let mapTiles = {
     url: tilemap.url,
-    options: {
-      attribution: marked(tilemap.attribution),
-      subdomains: tilemap.subdomains
-    }
+    options: tilemapOptions 
   };
 
   let markerTypes = {
@@ -56,11 +57,10 @@ export default function MapFactory(Private, tilemap) {
     this._attr = params.attr || {};
 
     let mapOptions = {
-      minZoom: tilemap.minZoom,
-      maxZoom: tilemap.maxZoom,
+      minZoom: tilemapOptions.minZoom,
+      maxZoom: tilemapOptions.maxZoom,
       noWrap: true,
       maxBounds: L.latLngBounds([-90, -220], [90, 220]),
-      scrollWheelZoom: false,
       fadeAnimation: false,
     };
 

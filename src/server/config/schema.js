@@ -134,10 +134,35 @@ module.exports = () => Joi.object({
 
   tilemap: Joi.object({
     url: Joi.string().default('https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana'),
-    subdomains: Joi.array().items(Joi.string()).default([]),
-    minZoom: Joi.number().default(1),
-    maxZoom: Joi.number().default(8),
-    attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)')
+    options: Joi.object({
+      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)'),
+      minZoom: Joi.number().default(0),
+      maxZoom: Joi.number().default(8),
+      maxNativeZoom: Joi.number().optional(),
+      tileSize: Joi.number().optional(),
+      subdomains: Joi.array().items(Joi.string()).single().optional(),
+      errorTileUrl: Joi.string().uri().optional(),
+      tms: Joi.boolean().optional(),
+      continuousWorld: Joi.boolean().optional(),
+      noWrap: Joi.boolean().optional(),
+      zoomOffset: Joi.number().optional(),
+      zoomReverse: Joi.boolean().optional(),
+      opacity: Joi.number().optional(),
+      zIndex: Joi.number().optional(),
+      unloadInvisibleTiles: Joi.boolean().optional(),
+      detectRetina: Joi.boolean().optional(),
+      reuseTiles: Joi.boolean().optional(),
+      bounds: Joi.object({
+        southWest: Joi.object({
+          lat: Joi.number().required(),
+          lng: Joi.number().required()
+        }).required(),
+        northEast: Joi.object({
+          lat: Joi.number().required(),
+          lng: Joi.number().required()
+        }).required()
+      }).optional()
+    }).default()
   }).default(),
 
 }).default();
