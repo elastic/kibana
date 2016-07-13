@@ -1,9 +1,10 @@
 define(function (require) {
-  return function MapFactory(Private, tilemap) {
+  return function MapFactory(Private, tilemap, kbnVersion) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
     var marked = require('marked');
+    var queryString = require('ui/utils/query_string');
     marked.setOptions({
       gfm: true, // Github-flavored markdown
       sanitize: true // Sanitize HTML tags
@@ -16,8 +17,9 @@ define(function (require) {
     var tilemapOptions = tilemap.options;
     var attribution = marked(tilemapOptions.attribution);
 
+    var tileUrl = addParamToUrl(tilemap.url, 'kibana-version', kbnVersion);
     var mapTiles = {
-      url: tilemap.url,
+      url: tileUrl,
       options: _.assign({}, tilemapOptions, { attribution })
     };
 
@@ -27,6 +29,12 @@ define(function (require) {
       'Shaded Geohash Grid': Private(require('ui/vislib/visualizations/marker_types/geohash_grid')),
       'Heatmap': Private(require('ui/vislib/visualizations/marker_types/heatmap')),
     };
+
+    function addParamToUrl(url, key, value) {
+      var separator = _.contains(url, '?') ? '&' : '?';
+      var encodedParam = queryString.param(key, value);
+      return url + separator + encodedParam;
+    }
 
     /**
      * Tile Map Maps
