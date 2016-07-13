@@ -18,12 +18,11 @@ export default function MapFactory(Private, tilemap) {
   let defaultMarkerType = 'Scaled Circle Markers';
 
   let tilemapOptions = tilemap.options;
-
-  tilemapOptions.attribution = marked(tilemapOptions.attribution);
+  let attribution = marked(tilemapOptions.attribution);
 
   let mapTiles = {
     url: tilemap.url,
-    options: tilemapOptions
+    options: _.assign({}, tilemapOptions, { attribution })
   };
 
   let markerTypes = {
