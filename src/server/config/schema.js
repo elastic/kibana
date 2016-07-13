@@ -143,16 +143,7 @@ module.exports = () => Joi.object({
       errorTileUrl: Joi.string().uri().optional(),
       tms: Joi.boolean().optional(),
       reuseTiles: Joi.boolean().optional(),
-      bounds: Joi.object({
-        southWest: Joi.object({
-          lat: Joi.number().required(),
-          lng: Joi.number().required()
-        }).required(),
-        northEast: Joi.object({
-          lat: Joi.number().required(),
-          lng: Joi.number().required()
-        }).required()
-      }).optional()
+      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2).optional()
     }).default()
   }).default(),
 
