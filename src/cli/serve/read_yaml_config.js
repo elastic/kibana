@@ -33,10 +33,10 @@ let legacySettingMap = {
   shard_timeout: 'elasticsearch.shardTimeout',
   startup_timeout: 'elasticsearch.startupTimeout',
   tilemap_url: 'tilemap.url',
-  tilemap_min_zoom: 'tilemap.minZoom',
-  tilemap_max_zoom: 'tilemap.maxZoom',
-  tilemap_attribution: 'tilemap.attribution',
-  tilemap_subdomains: 'tilemap.subdomains',
+  tilemap_min_zoom: 'tilemap.options.minZoom',
+  tilemap_max_zoom: 'tilemap.options.maxZoom',
+  tilemap_attribution: 'tilemap.options.attribution',
+  tilemap_subdomains: 'tilemap.options.subdomains',
   verify_ssl: 'elasticsearch.ssl.verify',
 };
 
