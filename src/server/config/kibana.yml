@@ -71,8 +71,8 @@ verify_ssl: true
 # If a custom url is not specified, then the Elastic Tile Service will be used.
 # tilemap_url: "https://{s}.example.com/{z}/{x}/{y}.png"
 
-# Minimum map zoom level
-# tilemap_min_zoom: 0
+# Minimum map zoom level (must be 1 or greater)
+# tilemap_min_zoom: 1
 
 # Maximum map zoom level
 # tilemap_max_zoom: 7
