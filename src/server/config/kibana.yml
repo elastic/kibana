@@ -66,20 +66,3 @@ verify_ssl: true
 # A value to use as a XSRF token. This token is sent back to the server on each request
 # and required if you want to execute requests from other clients (like curl).
 # xsrf_token: ""
-
-# The url used for loading tilemaps
-# If a custom url is not specified, then the Elastic Tile Service will be used.
-# tilemap_url: "https://{s}.example.com/{z}/{x}/{y}.png"
-
-# Minimum map zoom level (must be 1 or greater)
-# tilemap_min_zoom: 1
-
-# Maximum map zoom level
-# tilemap_max_zoom: 7
-
-# Displays attribution data in the bottom right corner of the map
-# The attribution will appear in the bottom right of the map. You can use markdown for links.
-# tilemap_attribution: ""
-
-# A list of subdomains, denoted by {s} in tilemap_url
-# tilemap_subdomains: []
