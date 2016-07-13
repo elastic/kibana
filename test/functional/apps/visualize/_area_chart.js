@@ -60,7 +60,32 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('area charts', function indexPatternCreation() {
-    var vizName1 = 'Visualization % AreaChart';
+    var vizName1 = 'Visualization AreaChart';
+
+    bdd.it('should save and load with special characters', function pageHeader() {
+      let vizName2 = vizName1 + '/?&=%';
+      return PageObjects.visualize.saveVisualization(vizName2)
+        .then(function (message) {
+          PageObjects.common.debug('Saved viz message = ' + message);
+          PageObjects.common.saveScreenshot('Visualize-area-chart-save-toast');
+          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName2 + '\"');
+        })
+        .then(function testVisualizeWaitForToastMessageGone() {
+          return PageObjects.visualize.waitForToastMessageGone();
+        })
+        .then(function loadSavedVisualization() {
+          return PageObjects.visualize.loadSavedVisualization(vizName2);
+        })
+        .then(function () {
+          return PageObjects.visualize.waitForVisualization();
+        })
+        // We have to sleep sometime between loading the saved visTitle
+        // and trying to access the chart below with getXAxisLabels
+        // otherwise it hangs.
+        .then(function sleep() {
+          return PageObjects.common.sleep(2000);
+        });
+    });
 
     bdd.it('should save and load', function pageHeader() {
       return PageObjects.visualize.saveVisualization(vizName1)
