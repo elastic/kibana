@@ -18,13 +18,19 @@ require('ui/modules')
       function render(seriesList) {
         panelScope.$destroy();
 
-        console.log($scope.seriesList);
-
         if (!seriesList) return;
 
-        var renderer = 'timechart';
+        seriesList.render = seriesList.render || {
+          type: 'timechart'
+        };
 
-        var panelSchema = panelRegistry.byName[renderer];
+        var panelSchema = panelRegistry.byName[seriesList.render.type];
+
+        if (!panelSchema) {
+          $elem.text('No such panel type: ' + seriesList.render.type);
+          return;
+        }
+
         var panelConfig = {
           chart: seriesList.list,
           interval: $scope.interval,
