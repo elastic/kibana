@@ -1,21 +1,26 @@
 define(function (require) {
-  return function MapFactory(Private) {
+  return function MapFactory(Private, tilemap, kbnVersion) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
+    var marked = require('marked');
+    var queryString = require('ui/utils/query_string');
+    marked.setOptions({
+      gfm: true, // Github-flavored markdown
+      sanitize: true // Sanitize HTML tags
+    });
 
     var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];
     var defaultMarkerType = 'Scaled Circle Markers';
 
+    var tilemapOptions = tilemap.options;
+    var attribution = marked(tilemapOptions.attribution);
+
+    var tileUrl = addParamToUrl(tilemap.url, 'kibana-version', kbnVersion);
     var mapTiles = {
-      url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
-      options: {
-        attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-          'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-        subdomains: '1234'
-      }
+      url: tileUrl,
+      options: _.assign({}, tilemapOptions, { attribution })
     };
 
     var markerTypes = {
@@ -24,6 +29,12 @@ define(function (require) {
       'Shaded Geohash Grid': Private(require('ui/vislib/visualizations/marker_types/geohash_grid')),
       'Heatmap': Private(require('ui/vislib/visualizations/marker_types/heatmap')),
     };
+
+    function addParamToUrl(url, key, value) {
+      var separator = _.contains(url, '?') ? '&' : '?';
+      var encodedParam = queryString.param(key, value);
+      return url + separator + encodedParam;
+    }
 
     /**
      * Tile Map Maps
@@ -47,8 +58,8 @@ define(function (require) {
       this._attr = params.attr || {};
 
       var mapOptions = {
-        minZoom: 1,
-        maxZoom: 18,
+        minZoom: tilemapOptions.minZoom,
+        maxZoom: tilemapOptions.maxZoom,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
