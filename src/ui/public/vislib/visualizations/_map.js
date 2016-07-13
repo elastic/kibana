@@ -23,7 +23,7 @@ export default function MapFactory(Private, tilemap) {
 
   let mapTiles = {
     url: tilemap.url,
-    options: tilemapOptions 
+    options: tilemapOptions
   };
 
   let markerTypes = {
