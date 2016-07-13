@@ -19,7 +19,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.buttons',
-  'ui.bootstrap.carousel',
   'ui.bootstrap.dateparser',
   'ui.bootstrap.position',
   'ui.bootstrap.datepicker',
@@ -37,8 +36,6 @@ angular.module('ui.bootstrap', [
 
 angular.module('ui.bootstrap.tpls', [
   'template/alert/alert.html',
-  'template/carousel/carousel.html',
-  'template/carousel/slide.html',
   'template/datepicker/datepicker.html',
   'template/datepicker/day.html',
   'template/datepicker/month.html',
@@ -66,7 +63,6 @@ import './accordion';
 import './alert';
 import './bindHtml';
 import './buttons';
-import './carousel';
 import './collapse';
 import './dateparser';
 import './datepicker';
@@ -87,18 +83,6 @@ import alert from './alert/alert.html';
 
 angular.module('template/alert/alert.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/alert/alert.html', alert);
-}]);
-
-import carousel from './carousel/carousel.html';
-
-angular.module('template/carousel/carousel.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/carousel/carousel.html', carousel);
-}]);
-
-import slide from './carousel/slide.html';
-
-angular.module('template/carousel/slide.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/carousel/slide.html', slide);
 }]);
 
 import datepicker from './datepicker/datepicker.html';
