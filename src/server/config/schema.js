@@ -135,7 +135,7 @@ module.exports = () => Joi.object({
   tilemap: Joi.object({
     url: Joi.string().default('https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana'),
     options: Joi.object({
-      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)'),
+      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'),
       minZoom: Joi.number().default(0),
       maxZoom: Joi.number().default(8),
       tileSize: Joi.number().optional(),
