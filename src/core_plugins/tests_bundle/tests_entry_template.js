@@ -32,8 +32,8 @@ window.__KBN__ = {
       url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
       options: {
         minZoom: 0,
-        maxZoom: 8,
-        attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)'
+        maxZoom: 7,
+        attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
       }
     }
   },

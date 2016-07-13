@@ -145,6 +145,6 @@ module.exports = () => Joi.object({
       reuseTiles: Joi.boolean().optional(),
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2).optional()
     }).default()
-  }).default(),
+  }).default()
 
 }).default();
