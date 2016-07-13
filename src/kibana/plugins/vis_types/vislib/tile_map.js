@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapVisType(Private, getAppState, courier, config) {
+  return function TileMapVisType(Private, getAppState, courier, config, configFile) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var geoJsonConverter = Private(require('components/agg_response/geo_json/geo_json'));
@@ -16,7 +16,7 @@ define(function (require) {
         defaults: {
           mapType: 'Scaled Circle Markers',
           isDesaturated: true,
-          heatMaxZoom: 16,
+          heatMaxZoom: configFile.tilemap_max_zoom,
           heatMinOpacity: 0.1,
           heatRadius: 25,
           heatBlur: 15,
@@ -25,7 +25,8 @@ define(function (require) {
         },
         mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
         canDesaturate: !!supports.cssFilters,
-        editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
+        editor: require('text!plugins/vis_types/vislib/editors/tile_map.html'),
+        maxZoom: configFile.tilemap_max_zoom
       },
       listeners: {
         rectangle: function (event) {
