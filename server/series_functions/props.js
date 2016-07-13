@@ -36,7 +36,7 @@ module.exports = new Chainable('props', {
   },
   // extended means you can pass arguments that aren't listed. They just won't be in the ordered array
   // They will be passed as args._extended:{}
-  help: 'Use at your own risk, sets properties on objects.',
+  help: 'Use at your own risk, sets arbitrary properties on the series. For example .props(label=bears!)',
   fn: function firstFn(args) {
     //console.log(args.byName);
     return alter(args, function (eachSeries) {

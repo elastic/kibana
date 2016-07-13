@@ -221,7 +221,7 @@ Argument | Accepts | Description
 precision | *number* | Number of digits to round each value to  
 
 #### .props()
-Use at your own risk, sets properties on objects.
+Use at your own risk, sets arbitrary properties on the series. For example .props(label=bears!)
 
 *This function does not accept any arguments.*
 
