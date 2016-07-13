@@ -33,7 +33,9 @@ kibana.log_file = kibana.log_file || null;
 kibana.xsrf_token = kibana.xsrf_token || 'kibana';
 
 kibana.tilemap_url = kibana.tilemap_url || 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=' + pkg.version + '&elastic_tile_service_tos=agree'; // jscs:disable
-kibana.tilemap_min_zoom = kibana.tilemap_min_zoom || 0;
+// NOTE: For some reason the map will cycle you back to a mid-level zoom if you
+// zoom out to 0. This only occurs if there is a data later on the map.
+kibana.tilemap_min_zoom = kibana.tilemap_min_zoom || 1;
 kibana.tilemap_max_zoom = kibana.tilemap_max_zoom || 7;
 kibana.tilemap_attribution = kibana.tilemap_attribution || '© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)';
 kibana.tilemap_subdomains = kibana.tilemap_subdomains || [];

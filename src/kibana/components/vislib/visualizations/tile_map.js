@@ -14,7 +14,6 @@ define(function (require) {
     require('css!components/vislib/styles/main');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];
 
     // Convenience function to turn around the LngLat recieved from ES
@@ -53,7 +52,7 @@ define(function (require) {
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
 
-      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || configFile.tilemap_min_zoom || defaultMapZoom;
+      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || configFile.tilemap_min_zoom;
       this._attr.mapCenter = _.deepGet(this.geoJson, 'properties.center') || defaultMapCenter;
 
       // add allmin and allmax to geoJson
@@ -91,7 +90,7 @@ define(function (require) {
           var tileLayer = L.tileLayer(tileUrl, {
             attribution: marked(configFile.tilemap_attribution),
             subdomains: configFile.tilemap_subdomains,
-            minZoom: Math.max(1, configFile.tilemap_min_zoom),
+            minZoom: configFile.tilemap_min_zoom,
             maxZoom: configFile.tilemap_max_zoom
           });
 
