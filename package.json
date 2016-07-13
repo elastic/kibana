@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "4.1.9",
+  "version": "4.1.10",
   "main": "src/server/app.js",
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
