@@ -271,7 +271,7 @@ define(function (require) {
         });
       }
 
-      var savedZoom = _.get(this.geoJson, 'properties.zoom');
+      var savedZoom = _.get(this._geoJson, 'properties.zoom');
       var boundedZoom = savedZoom
         ? Math.max(Math.min(savedZoom, mapOptions.maxZoom), mapOptions.minZoom)
         : mapOptions.minZoom;
