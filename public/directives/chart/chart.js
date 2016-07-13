@@ -6,7 +6,7 @@ require('ui/modules')
   return {
     restrict: 'A',
     scope: {
-      chart: '=', // The flot object, data, config and all
+      seriesList: '=chart', // The flot object, data, config and all
       search: '=', // The function to execute to kick off a search
       interval: '=' // Required for formatting x-axis ticks
     },
@@ -15,17 +15,18 @@ require('ui/modules')
       var panelRegistry = Private(panelRegistryProvider);
       var panelScope = $scope.$new(true);
 
-      function render(chart) {
+      function render(seriesList) {
         panelScope.$destroy();
 
-        if (!chart) return;
-        chart.render = {
-          type: 'timechart'
-        };
+        console.log($scope.seriesList);
 
-        var panelSchema = panelRegistry.byName[chart.render.type];
+        if (!seriesList) return;
+
+        var renderer = 'timechart';
+
+        var panelSchema = panelRegistry.byName[renderer];
         var panelConfig = {
-          chart: chart,
+          chart: seriesList.list,
           interval: $scope.interval,
           search: $scope.search
         };
@@ -33,7 +34,7 @@ require('ui/modules')
         panelSchema.render(panelScope, $elem, panelConfig);
       }
 
-      $scope.$watch('chart', render);
+      $scope.$watch('seriesList', render);
     }
   };
 });
