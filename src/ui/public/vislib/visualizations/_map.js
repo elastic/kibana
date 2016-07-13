@@ -272,10 +272,22 @@ define(function (require) {
     TileMapMap.prototype._createMap = function (mapOptions) {
       if (this.map) this.destroy();
 
+
+      if (this._attr.wms.enabled) {
+        _.assign(mapOptions, {
+          minZoom: 1,
+          maxZoom: 18
+        });
+      }
+
+      var savedZoom = _.get(this.geoJson, 'properties.zoom');
+      var boundedZoom = savedZoom
+        ? Math.max(Math.min(savedZoom, mapOptions.maxZoom), mapOptions.minZoom)
+        : mapOptions.minZoom;
+
       // get center and zoom from mapdata, or use defaults
       this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-      this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
-
+      this._mapZoom = boundedZoom;
       // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
