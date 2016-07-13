@@ -137,7 +137,7 @@ module.exports = () => Joi.object({
     options: Joi.object({
       attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'),
       minZoom: Joi.number().default(0),
-      maxZoom: Joi.number().default(8),
+      maxZoom: Joi.number().default(7),
       tileSize: Joi.number().optional(),
       subdomains: Joi.array().items(Joi.string()).single().optional(),
       errorTileUrl: Joi.string().uri().optional(),
