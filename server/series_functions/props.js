@@ -1,6 +1,7 @@
 var alter = require('../lib/alter.js');
 var Chainable = require('../lib/classes/chainable');
 var _ = require('lodash');
+
 function unflatten(data) {
   if (Object(data) !== data || _.isArray(data)) return data;
 
@@ -20,12 +21,16 @@ function unflatten(data) {
   return result[''] || result;
 };
 
-
 module.exports = new Chainable('props', {
   args: [
     {
       name: 'inputSeries',
       types: ['seriesList']
+    },
+    {
+      name: 'global',
+      types: ['boolean', 'null'],
+      help: 'Set props on the seriesList vs on each series'
     }
   ],
   extended: {
@@ -38,12 +43,16 @@ module.exports = new Chainable('props', {
   // They will be passed as args._extended:{}
   help: 'Use at your own risk, sets arbitrary properties on the series. For example .props(label=bears!)',
   fn: function firstFn(args) {
-    //console.log(args.byName);
-    return alter(args, function (eachSeries) {
-      var properties = _.omit(args.byName, 'inputSeries');
-      _.assign(eachSeries, unflatten(properties));
-      console.log(eachSeries);
-      return eachSeries;
-    });
+    var properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
+
+    if (args.byName.global) {
+      _.assign(args.byName.inputSeries, properties);
+      return args.byName.inputSeries;
+    } else {
+      return alter(args, function (eachSeries) {
+        _.assign(eachSeries, properties);
+        return eachSeries;
+      });
+    }
   }
 });
