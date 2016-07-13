@@ -30,7 +30,7 @@
                   <i aria-hidden="true" class="fa fa-search-plus pull-right discover-field-details-filter"
                     ng-click="updateFilterInQuery(field, bucket.value, '+')"></i>
                 </span>
-                <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
+                <div css-truncate css-truncate-expandable="true" class="discover-field-details-value" title="{{::bucket.display}}">
                   {{::bucket.display}} <i ng-show="bucket.display === ''">Empty string</i>
                 </div>
               </div>
