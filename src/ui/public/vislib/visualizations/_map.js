@@ -9,7 +9,6 @@ define(function (require) {
       sanitize: true // Sanitize HTML tags
     });
 
-    var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];
     var defaultMarkerType = 'Scaled Circle Markers';
 
@@ -266,7 +265,7 @@ define(function (require) {
 
       // get center and zoom from mapdata, or use defaults
       this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-      this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
+      this._mapZoom = _.get(this._geoJson, 'properties.zoom') || mapOptions.minZoom;
 
       // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
