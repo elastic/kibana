@@ -116,7 +116,9 @@ module.exports = function (tlConfig) {
     });
     return Promise.all(seriesList).then(function (args) {
       var list = _.chain(args).pluck('list').flatten().value();
-      return {type: 'seriesList', list: list};
+      var seriesList = _.merge.apply(this, _.flatten([{}, args]));
+      seriesList.list = list;
+      return seriesList;
     });
   }
 
@@ -191,7 +193,7 @@ module.exports = function (tlConfig) {
       return _.map(sheet, function (chainList, i) {
         return resolveChainList(chainList).then(function (seriesList) {
           stats.sheetTime = (new Date()).getTime();
-          return seriesList.list;
+          return seriesList;
         }).catch(function (e) {
           throwWithCell(i, e);
         });
