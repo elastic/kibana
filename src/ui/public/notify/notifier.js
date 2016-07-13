@@ -374,29 +374,35 @@ Notifier.prototype.banner = function (msg, cb) {
  * Display a custom message
  * @param  {Object} config
  * config = {
+ *   title: 'Some Title here',
+ *   markdown: 'Some markdown content',
+ *   type: 'info',
  *   customActions: [{
  *     key: 'next',
- *     callback: function() { foo(); }
+ *     callback: function() { next(); }
  *   }, {
  *     key: 'prev',
- *     callback: function() { bar(); }
+ *     callback: function() { prev(); }
  *   }]
  * }
  */
 Notifier.prototype.custom = function (config) {
-  const customConfig = _.assign({}, {
+  const customActionMax = 2;
+  const mergedConfig = _.assign({}, {
     type: 'banner',
     markdown: '',
     lifetime: Notifier.config.bannerLifetime,
   }, config);
 
-  const hasActions = customConfig.customActions || customConfig.actions;
+  const hasActions = _.get(mergedConfig, 'customActions.length') && _.get(mergedConfig, 'actions.length');
   // Add an ok if there are no actions, so you don't end up with a orphan notification
   if (!hasActions) {
-    customConfig.actions = ['accept'];
+    mergedConfig.actions = ['accept'];
+  } else if (mergedConfig.customActions) {
+    mergedConfig.customActions = mergedConfig.customActions.slice(0, customActionMax);
   }
 
-  add(customConfig);
+  return add(mergedConfig);
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
