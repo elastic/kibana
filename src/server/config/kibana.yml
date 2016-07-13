@@ -77,7 +77,7 @@ tilemap_min_zoom: 0
 tilemap_max_zoom: 7
 
 # Displays attribution data in the bottom right corner of the map
-tilemap_attribution: "© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service_tos)"
+tilemap_attribution: "© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)"
 
 # A list of subdomains, denoted by {s} in tilemap_url
 tilemap_subdomains: []
