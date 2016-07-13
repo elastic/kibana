@@ -33,7 +33,7 @@ window.__KBN__ = {
       options: {
         minZoom: 0,
         maxZoom: 7,
-        attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
+        attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'
       }
     }
   }
