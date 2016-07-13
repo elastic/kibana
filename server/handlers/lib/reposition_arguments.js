@@ -3,21 +3,26 @@ var _ = require('lodash');
 // Applies to unresolved arguments in the AST
 module.exports = function repositionArguments(functionDef, unorderedArgs) {
   var args = [];
-  var extendedNames = [];
 
   _.each(unorderedArgs, function (unorderedArg, i) {
     var argDef;
     var targetIndex;
     var value;
+    var storeAsArray;
 
     if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       argDef = functionDef.argsByName[unorderedArg.name];
 
       if (!argDef) {
         if (functionDef.extended) {
+          var namesIndex = functionDef.args.length;
+          targetIndex = functionDef.args.length + 1;
+
+          args[namesIndex] = args[namesIndex] || [];
+          args[namesIndex].push(unorderedArg.name);
+
           argDef = functionDef.extended;
-          targetIndex = functionDef.args.length;
-          extendedNames.push(unorderedArg.name);
+          storeAsArray = true;
         }
       } else {
         targetIndex = _.findIndex(functionDef.args, function (orderedArg) {
@@ -28,13 +33,14 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
       value = unorderedArg.value;
     } else {
       argDef = functionDef.args[i];
+      storeAsArray = argDef.multi;
       targetIndex = i;
       value = unorderedArg;
     }
 
     if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || ('#' + i)));
 
-    if (argDef.multi) {
+    if (storeAsArray) {
       args[targetIndex] = args[targetIndex] || [];
       args[targetIndex].push(value);
     } else {
@@ -42,7 +48,6 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
     }
   });
 
-  if (functionDef.extended) args.extendedNames = extendedNames;
   return args;
 
 };
