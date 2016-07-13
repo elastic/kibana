@@ -44,8 +44,12 @@ define(function (require) {
       this.maps = [];
       this.originalConfig = chartData || {};
       _.assign(this, this.originalConfig);
+      var savedZoom = _.deepGet(this.geoJson, 'properties.zoom');
+      var boundedZoom = savedZoom
+        ? Math.max(Math.min(savedZoom, configFile.tilemap_max_zoom), configFile.tilemap_min_zoom)
+        : configFile.tilemap_min_zoom;
 
-      this._attr.mapZoom = _.deepGet(this.geoJson, 'properties.zoom') || configFile.tilemap_min_zoom;
+      this._attr.mapZoom = boundedZoom;
       this._attr.mapCenter = _.deepGet(this.geoJson, 'properties.center') || defaultMapCenter;
 
       // add allmin and allmax to geoJson
