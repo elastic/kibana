@@ -84,7 +84,7 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
       body = {
         query: {
           simple_query_string: {
-            query: searchString + '*',
+            query: searchString + (['/', '!', '?', '&', '=', '%'].indexOf(searchString[searchString.length - 1]) === -1 ? '' : ' ') + '*',
             fields: ['title^3', 'description'],
             default_operator: 'AND'
           }
