@@ -29,7 +29,7 @@ window.__KBN__ = {
     esApiVersion: '2.0',
     esRequestTimeout: '300000',
     tilemap: {
-      url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+      url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=1.2.3&elastic_tile_service_tos=agree',
       options: {
         minZoom: 0,
         maxZoom: 7,
