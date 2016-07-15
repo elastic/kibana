@@ -6,7 +6,7 @@ export default function (kbnServer, server, config) {
   const header = 'kbn-version';
 
   server.ext('onPostAuth', function (req, reply) {
-    const noHeaderGet = req.method === 'get' && !req.headers[header];
+    const noHeaderGet = (req.method === 'get' || req.method === 'head') && !req.headers[header];
     if (disabled || noHeaderGet) return reply.continue();
 
     const submission = req.headers[header];
