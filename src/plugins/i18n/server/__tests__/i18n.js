@@ -11,25 +11,26 @@ describe('Test plugin translations details for test_plugin_1', function () {
   it('Translation languages exist', function (done) {
     let result = true;
     const expectedLanguages = ['en', 'de'];
-    getPluginTranslationLanguages(pluginName, pluginTranslationPath, function (err, actualLanguages) {
-      if (err) {
-        console.log(err);
+    let actualLanguages = [];
+    getPluginTranslationLanguages(pluginTranslationPath, actualLanguages).then(function () {
+      if (actualLanguages.length !== expectedLanguages.length) {
         result = false;
       } else {
-        if (actualLanguages.length !== expectedLanguages.length) {
-          result = false;
-        } else {
-          let index = actualLanguages.length;
-          actualLanguages.sort();
-          expectedLanguages.sort();
-          while (index--) {
-            if (actualLanguages[index] !== expectedLanguages[index]) {
-              result = false;
-              break;
-            }
+        let index = actualLanguages.length;
+        actualLanguages.sort();
+        expectedLanguages.sort();
+        while (index--) {
+          if (actualLanguages[index] !== expectedLanguages[index]) {
+            result = false;
+            break;
           }
         }
       }
+      expect(result).to.be(true);
+      done();
+    }).catch(function (e) {
+      console.log(e);
+      result = false;
       expect(result).to.be(true);
       done();
     });
@@ -37,30 +38,29 @@ describe('Test plugin translations details for test_plugin_1', function () {
 
   it('Translation files exist', function (done) {
     let result = true;
+    let actualFiles = [];
     const expectedFiles = [
-      pluginTranslationPath + '/view1/de.json',
-      pluginTranslationPath + '/view1/en.json',
-      pluginTranslationPath + '/view2/en.json'
+      pluginTranslationPath + '/de.json',
+      pluginTranslationPath + '/en.json'
     ];
-    getPluginTranslationFiles(pluginName, pluginTranslationPath, function (err, actualFiles) {
-      if (err) {
-        console.log(err);
+    getPluginTranslationFiles(pluginTranslationPath, actualFiles).then(function () {
+      if (actualFiles.length !== expectedFiles.length) {
         result = false;
       } else {
-        if (actualFiles.length !== expectedFiles.length) {
-          result = false;
-        } else {
-          let index = actualFiles.length;
-          actualFiles.sort();
-          expectedFiles.sort();
-          while (index--) {
-            if (actualFiles[index] !== expectedFiles[index]) {
-              result = false;
-              break;
-            }
+        let index = actualFiles.length;
+        actualFiles.sort();
+        expectedFiles.sort();
+        while (index--) {
+          if (actualFiles[index] !== expectedFiles[index]) {
+            result = false;
+            break;
           }
         }
       }
+      expect(result).to.be(true);
+      done();
+    }).catch(function (e) {
+      console.log(e);
       expect(result).to.be(true);
       done();
     });
@@ -72,83 +72,26 @@ describe('Test registering translations for test_plugin_1', function () {
   const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
 
   it('Register translations' , function (done) {
-    let result = true;
-    i18n.registerTranslations(pluginTranslationPath, function (err) {
-      if (err) {
-        console.log(err);
-        result = false;
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    registerTranslations(pluginTranslationPath, done);
   });
 
   it('EN translations are registered' , function (done) {
-    let result = true;
     const language = 'en';
     const expectedTranslationJsonFile = DATA_PATH + '/reference/' + pluginName + '/' + language + '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-
-    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
-      if (err) {
-        console.log(err);
-        result = false;
-      } else {
-        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
-          result = false;
-        }
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    checkTranslations(language, expectedTranslationJson, done);
   });
 
   it('DE translations are registered' , function (done) {
-    let result = true;
     const language = 'de';
     const expectedTranslationJsonFile = DATA_PATH + '/reference/' + pluginName + '/' + language + '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-
-    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
-      if (err) {
-        console.log(err);
-        result = false;
-      } else {
-        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
-          result = false;
-        }
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    checkTranslations(language, expectedTranslationJson, done);
   });
 
   it('Translation languages are registered', function (done) {
     const expectedLanguages = ['en', 'de'];
-    let result = true;
-
-    i18n.getRegisteredTranslationLanguages(function (err, actualLanguages) {
-      if (err) {
-        console.log(err);
-        result = false;
-      }
-
-      if (actualLanguages.length !== expectedLanguages.length) {
-        result = false;
-      } else {
-        let index = actualLanguages.length;
-        actualLanguages.sort();
-        expectedLanguages.sort();
-        while (index--) {
-          if (actualLanguages[index] !== expectedLanguages[index]) {
-            result = false;
-            break;
-          }
-        }
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    checkRegisteredLanguages(expectedLanguages, done);
   });
 
   after(function (done) {
@@ -160,99 +103,34 @@ describe('Test registering translations for test_plugin_1', function () {
 
 describe('Test registering translations for test_plugin_1 and test_plugin_2', function () {
   it('Register translations for test_plugin_1' , function (done) {
-    let result = true;
     const pluginName = 'test_plugin_1';
     const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
-    i18n.registerTranslations(pluginTranslationPath, function (err) {
-      if (err) {
-        console.log(err);
-        result = false;
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    registerTranslations(pluginTranslationPath, done);
   });
 
   it('Register translations for test_plugin_2' , function (done) {
-    let result = true;
     const pluginName = 'test_plugin_2';
     const pluginTranslationPath = DATA_PATH + '/translations/' + pluginName;
-    i18n.registerTranslations(pluginTranslationPath, function (err) {
-      if (err) {
-        console.log(err);
-        result = false;
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    registerTranslations(pluginTranslationPath, done);
   });
 
   it('EN translations are registered' , function (done) {
-    let result = true;
     const language = 'en';
     const expectedTranslationJsonFile = DATA_PATH + '/reference/' + language + '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-
-    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
-      if (err) {
-        console.log(err);
-        result = false;
-      } else {
-        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
-          result = false;
-        }
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    checkTranslations(language, expectedTranslationJson, done);
   });
 
   it('DE translations are registered' , function (done) {
-    let result = true;
     const language = 'de';
     const expectedTranslationJsonFile = DATA_PATH + '/reference/' + language + '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-
-    i18n.getRegisteredLanguageTranslations(language, function (err, actualTranslationJson) {
-      if (err) {
-        console.log(err);
-        result = false;
-      } else {
-        if (!compareTranslations(actualTranslationJson, expectedTranslationJson)) {
-          result = false;
-        }
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    checkTranslations(language, expectedTranslationJson, done);
   });
 
   it('Translation languages are registered', function (done) {
     const expectedLanguages = ['en', 'de'];
-    let result = true;
-
-    i18n.getRegisteredTranslationLanguages(function (err, actualLanguages) {
-      if (err) {
-        console.log(err);
-        result = false;
-      }
-
-      if (actualLanguages.length !== expectedLanguages.length) {
-        result = false;
-      } else {
-        let index = actualLanguages.length;
-        actualLanguages.sort();
-        expectedLanguages.sort();
-        while (index--) {
-          if (actualLanguages[index] !== expectedLanguages[index]) {
-            result = false;
-            break;
-          }
-        }
-      }
-      expect(result).to.be(true);
-      done();
-    });
+    checkRegisteredLanguages(expectedLanguages, done);
   });
 
   after(function (done) {
@@ -262,22 +140,14 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 });
 
-function getPluginTranslationLanguages(pluginName, pluginTranslationPath, cb) {
+function getPluginTranslationLanguages(pluginTranslationPath, languageList) {
   let translationFiles = [];
-  let languageList = [];
-  i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
-    if (err) return cb(err);
-    return cb(null, languageList);
-  });
+  return i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList);
 }
 
-function getPluginTranslationFiles(pluginName, pluginTranslationPath, cb) {
-  let translationFiles = [];
+function getPluginTranslationFiles(pluginTranslationPath, translationFiles) {
   let languageList = [];
-  i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList, function (err) {
-    if (err) return cb(err);
-    return cb(null, translationFiles);
-  });
+  return i18n.getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList);
 }
 
 function compareTranslations(actual, expected) {
@@ -295,4 +165,62 @@ function compareTranslations(actual, expected) {
   }
 
   return equal;
+}
+
+function checkTranslations(language, expectedTranslations, done) {
+  let result = true;
+
+  i18n.getRegisteredLanguageTranslations(language).then(function (actualTranslationJson) {
+    if (!compareTranslations(actualTranslationJson, expectedTranslations)) {
+      result = false;
+    }
+    expect(result).to.be(true);
+    done();
+  }).catch(function (err) {
+    console.log(err);
+    result = false;
+    expect(result).to.be(true);
+    done();
+  });
+}
+
+function registerTranslations(pluginTranslationPath, done) {
+  let result = true;
+
+  i18n.registerTranslations(pluginTranslationPath).then(function () {
+    expect(result).to.be(true);
+    done();
+  }).catch(function (err) {
+    console.log(err);
+    result = false;
+    expect(result).to.be(true);
+    done();
+  });
+}
+
+function checkRegisteredLanguages(expectedLanguages, done) {
+  let result = true;
+
+  i18n.getRegisteredTranslationLanguages().then(function (actualLanguages) {
+    if (actualLanguages.length !== expectedLanguages.length) {
+      result = false;
+    } else {
+      let index = actualLanguages.length;
+      actualLanguages.sort();
+      expectedLanguages.sort();
+      while (index--) {
+        if (actualLanguages[index] !== expectedLanguages[index]) {
+          result = false;
+          break;
+        }
+      }
+    }
+    expect(result).to.be(true);
+    done();
+  }).catch(function (err) {
+    console.log(err);
+    result = false;
+    expect(result).to.be(true);
+    done();
+  });
 }
