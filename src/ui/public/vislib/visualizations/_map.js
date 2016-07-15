@@ -278,7 +278,7 @@ export default function MapFactory(Private, tilemap) {
   TileMapMap.prototype._createMap = function (mapOptions) {
     if (this.map) this.destroy();
 
-    if (this._attr.wms.enabled) {
+    if (this._attr.wms && this._attr.wms.enabled) {
       _.assign(mapOptions, {
         minZoom: 1,
         maxZoom: 18
