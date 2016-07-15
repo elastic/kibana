@@ -13,7 +13,7 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
   return new Panel('timechart', {
     help: 'Draw a timeseries chart',
     render: function ($scope, $elem, panelConfig) {
-      var template = '<div class="chart-title"></div><div class="chart-canvas"></div>';
+      var template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
       var timezone = Private(require('plugins/timelion/services/timezone'))();
       var getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
 
@@ -172,7 +172,7 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
         var canvasElem = $('.chart-canvas', $elem);
 
         var title = _(plotConfig).map('_title').compact().last();
-        $('.chart-title', $elem).text(title == null ? '' : title);
+        $('.chart-top-title', $elem).text(title == null ? '' : title);
 
         var options = _.cloneDeep(defaultOptions);
 
