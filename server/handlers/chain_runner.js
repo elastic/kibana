@@ -7,17 +7,16 @@ var parseSheet = require('./lib/parse_sheet.js');
 var parseDateMath = require('../lib/date_math.js');
 var calculateInterval = require('../../public/lib/calculate_interval.js');
 
-var loadFunctions = require('../lib/load_functions.js');
 var repositionArguments = require('./lib/reposition_arguments.js');
 var indexArguments = require('./lib/index_arguments.js');
-var getFunctionByName = require('./lib/get_function_by_name.js');
-var preprocessChain = require('./lib/preprocess_chain');
 var validateTime = require('./lib/validate_time.js');
 
-var functions  = loadFunctions('series_functions');
+var loadFunctions = require('../lib/load_functions.js');
 var fitFunctions  = loadFunctions('fit_functions');
 
 module.exports = function (tlConfig) {
+  var preprocessChain = require('./lib/preprocess_chain')(tlConfig);
+
   var queryCache = {};
   var stats = {};
   var sheet;
@@ -32,7 +31,7 @@ module.exports = function (tlConfig) {
 
   // Invokes a modifier function, resolving arguments into series as needed
   function invoke(fnName, args) {
-    var functionDef = getFunctionByName(fnName);
+    var functionDef = tlConfig.server.plugins.timelion.getFunction(fnName);
 
     function resolveArgument(item) {
       if (_.isArray(item)) {
@@ -42,7 +41,7 @@ module.exports = function (tlConfig) {
       if (_.isObject(item)) {
         switch (item.type) {
           case 'function':
-            var itemFunctionDef = getFunctionByName(item.function);
+            var itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
@@ -147,7 +146,7 @@ module.exports = function (tlConfig) {
       stats.queryTime = (new Date()).getTime();
 
       _.each(queries, function (query, i) {
-        var functionDef = getFunctionByName(query.function);
+        var functionDef = tlConfig.server.plugins.timelion.getFunction(query.function);
         var resolvedDatasource = resolvedDatasources[i];
 
         if (resolvedDatasource.isRejected()) {

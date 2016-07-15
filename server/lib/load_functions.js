@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var glob = require('glob');
 var path = require('path');
+var processFunctionDefinition = require('./process_function_definition');
 
 module.exports = function (directory) {
 
@@ -28,14 +29,8 @@ module.exports = function (directory) {
 
   var functions = _.zipObject(files.concat(directories));
 
-  _.each(functions, function (func, name) {
-    if (func.aliases) {
-      _.each(func.aliases, function (alias) {
-        var aliasFn = _.clone(func);
-        aliasFn.isAlias = true;
-        functions[alias] = aliasFn;
-      });
-    }
+  _.each(functions, function (func) {
+    _.assign(functions, processFunctionDefinition(func));
   });
 
   return functions;
