@@ -28,8 +28,9 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
         targetIndex = _.findIndex(functionDef.args, function (orderedArg) {
           return unorderedArg.name === orderedArg.name;
         });
-      }
+        storeAsArray = argDef.multi;
 
+      }
       value = unorderedArg.value;
     } else {
       argDef = functionDef.args[i];
