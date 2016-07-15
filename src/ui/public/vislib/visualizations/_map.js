@@ -278,15 +278,12 @@ export default function MapFactory(Private, tilemap) {
   TileMapMap.prototype._createMap = function (mapOptions) {
     if (this.map) this.destroy();
 
+    // add map tiles layer, using the mapTiles object settings
     if (this._attr.wms && this._attr.wms.enabled) {
       _.assign(mapOptions, {
         minZoom: 1,
         maxZoom: 18
       });
-    }
-
-    // add map tiles layer, using the mapTiles object settings
-    if (this._attr.wms && this._attr.wms.enabled) {
       this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
     } else {
       this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
