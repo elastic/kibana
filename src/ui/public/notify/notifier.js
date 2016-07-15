@@ -394,7 +394,7 @@ Notifier.prototype.custom = function (config) {
     lifetime: Notifier.config.bannerLifetime,
   }, config);
 
-  const hasActions = _.get(mergedConfig, 'customActions.length') && _.get(mergedConfig, 'actions.length');
+  const hasActions = _.get(mergedConfig, 'customActions.length') || _.get(mergedConfig, 'actions.length');
   // Add an ok if there are no actions, so you don't end up with a orphan notification
   if (!hasActions) {
     mergedConfig.actions = ['accept'];
