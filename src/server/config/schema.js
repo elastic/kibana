@@ -88,7 +88,7 @@ module.exports = () => Joi.object({
 
   ops: Joi.object({
     interval: Joi.number().default(5000),
-  }),
+  }).default(),
 
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
