@@ -124,6 +124,8 @@ plugins by clicking the icons for your desired plugins in the left-hand navigati
 Use the following command to disable a plugin:
 
 [source,shell]
-./bin/kibana --<plugin ID>.enabled=false
+-----------
+./bin/kibana --<plugin ID>.enabled=false <1>
+-----------
 
-You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
+<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
