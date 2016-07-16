@@ -38,6 +38,15 @@ export default function (chrome, internals) {
     });
   };
 
+  chrome.removeBasePath = function (url) {
+    if (!internals.basePath) {
+      return url;
+    }
+
+    const basePathRegExp = new RegExp(`^${internals.basePath}`);
+    return url.replace(basePathRegExp, '');
+  };
+
   function lastSubUrlKey(link) {
     return `lastSubUrl:${link.url}`;
   }
