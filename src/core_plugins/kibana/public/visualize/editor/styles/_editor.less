@@ -7,35 +7,6 @@
 .vis-editor {
   .flex-parent();
 
-  // For the vis-editor sidebar nav
-  .navbar-default .navbar-nav {
-    &> .active > a {
-      border-bottom: 2px solid @kibanaGray2;
-      color: @kibanaGray1;
-      &:before {
-        display: none;
-      }
-      &:hover {
-        background-color: transparent;
-      }
-    }
-
-    > li {
-      > a {
-        padding: 4px 10px 5px 10px;
-        color: @kibanaGray2;
-      }
-    }
-
-    .danger {
-      color: @vis-editor-navbar-error-state-color;
-      background-color: @vis-editor-navbar-error-state-bg;
-      &:hover {
-        background-color: darken(@vis-editor-navbar-error-state-bg, 12%);
-      }
-    }
-  }
-
   .btn-xs {
     line-height: 1.3;
   }
@@ -379,6 +350,37 @@ vis-editor-agg-param,
 vis-editor-vis-options,
 vis-editor-vis-options > * {
   .flex-parent();
+}
+
+.vis-editor-subnav-link {
+  padding: 4px 10px 5px 10px !important; /* 1 */
+  color: @kibanaGray2 !important; /* 1 */
+
+  &.is-vis-editor-sub-nav-link-selected {
+    border-bottom: 2px solid @kibanaGray2;
+    color: @kibanaGray1;
+    background-color: #f6f6f6;
+
+    &:before {
+      display: none;
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}
+
+/**
+ * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
+ */
+.vis-editor-subnav-link--danger {
+  color: @vis-editor-navbar-error-state-color !important; /* 1 */
+  background-color: @vis-editor-navbar-error-state-bg;
+
+  &:hover {
+    background-color: darken(@vis-editor-navbar-error-state-bg, 12%) !important; /* 1 */
+  }
 }
 
 form.vis-share {

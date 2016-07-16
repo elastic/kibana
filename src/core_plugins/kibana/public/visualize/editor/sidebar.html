@@ -14,10 +14,14 @@
         <!-- tabs -->
         <ul class="nav navbar-nav">
           <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
-            <a class="navbar-link active" ng-click="sidebar.section='data'">Data</a>
+            <a class="vis-editor-subnav-link"
+               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
+               ng-click="sidebar.section='data'">Data</a>
           </li>
           <li ng-class="{active: sidebar.section == 'options'}">
-            <a class="navbar-link" ng-click="sidebar.section='options'">Options</a>
+            <a class="vis-editor-subnav-link"
+               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'options'}"
+               ng-click="sidebar.section='options'">Options</a>
           </li>
         </ul>
 
@@ -26,7 +30,7 @@
           <li ng-if="visualizeEditor.softErrorCount() > 0"
             disabled
             tooltip="{{ visualizeEditor.describeErrors() }}" tooltip-placement="bottom" tooltip-popup-delay="400" tooltip-append-to-body="1">
-            <a class="danger navbar-link">
+            <a class="vis-editor-subnav-link vis-editor-subnav-link--danger">
               <i class="fa fa-warning"></i>
             </a>
           </li>
