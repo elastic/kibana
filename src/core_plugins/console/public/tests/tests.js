@@ -1,10 +1,6 @@
 require('ace');
 
 require('ui/chrome')
-  .setTabs([{
-    id: '',
-    title: 'Sense Tests'
-  }])
   .setRootTemplate(require('./index.html'))
   .setRootController(function () {
     window.QUnit = require('qunit-1.10.0');
