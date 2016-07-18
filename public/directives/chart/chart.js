@@ -33,6 +33,7 @@ require('ui/modules')
 
         var panelConfig = {
           chart: seriesList.list,
+          render: seriesList.render,
           interval: $scope.interval,
           search: $scope.search
         };
