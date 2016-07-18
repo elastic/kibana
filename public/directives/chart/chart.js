@@ -31,14 +31,12 @@ require('ui/modules')
           return;
         }
 
-        var panelConfig = {
-          chart: seriesList.list,
-          render: seriesList.render,
-          interval: $scope.interval,
-          search: $scope.search
-        };
         panelScope = $scope.$new(true);
-        panelSchema.render(panelScope, $elem, panelConfig);
+        panelScope.seriesList = seriesList;
+        panelScope.interval = $scope.interval;
+        panelScope.search = $scope.search;
+
+        panelSchema.render(panelScope, $elem);
       }
 
       $scope.$watch('seriesList', render);

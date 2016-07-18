@@ -12,7 +12,7 @@ var panelRegistry = require('plugins/timelion/lib/panel_registry');
 panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilter, Private, config) {
   return new Panel('timechart', {
     help: 'Draw a timeseries chart',
-    render: function ($scope, $elem, panelConfig) {
+    render: function ($scope, $elem) {
       var template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
       var timezone = Private(require('plugins/timelion/services/timezone'))();
       var getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
@@ -21,9 +21,9 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
       // could just use angular's injection to provide a moment service?
       moment.tz.setDefault(config.get('dateFormat:tz'));
 
-      $scope.chart = panelConfig.chart;
-      $scope.interval = panelConfig.interval;
-      $scope.search = panelConfig.search || _.noop;
+      $scope.chart = $scope.seriesList.list;
+      $scope.interval = $scope.interval;
+      $scope.search = $scope.search || _.noop;
 
       var legendValueNumbers;
       var debouncedSetLegendNumbers;
@@ -65,13 +65,13 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
 
 
       $scope.toggleSeries = function (id) {
-        var series = panelConfig.chart[id];
+        var series = $scope.chart[id];
         series._hide = !series._hide;
-        drawPlot(panelConfig.chart);
+        drawPlot($scope.chart);
       };
 
       var cancelResize = observeResize($elem, function () {
-        drawPlot(panelConfig.chart);
+        drawPlot($scope.chart);
       });
 
       $scope.$on('$destroy', function () {
