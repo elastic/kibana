@@ -12,13 +12,14 @@ module.exports = {
     kibana: {
       protocol: process.env.TEST_UI_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_KIBANA_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_UI_KIBANA_PORT, 10) || 5620,
-      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password
+      port: parseInt(process.env.TEST_UI_KIBANA_PORT, 10) || 5601,
+      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password,
+      shield: shield.kibanaUser
     },
     elasticsearch: {
       protocol: process.env.TEST_UI_ES_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_ES_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_UI_ES_PORT, 10) || 9220,
+      port: parseInt(process.env.TEST_UI_ES_PORT, 10) || 9200,
       auth: shield.admin.username + ':' + shield.admin.password
     }
   },
@@ -44,6 +45,9 @@ module.exports = {
     },
     console: {
       pathname: 'app/console',
+    },
+    monitoring: {
+      pathname: 'app/monitoring',
     }
   }
 };

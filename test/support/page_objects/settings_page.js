@@ -34,6 +34,115 @@ export default class SettingsPage {
     return this.clickLinkText('Existing Data');
   }
 
+  clickElasticsearchUsers() {
+    return this.clickLinkText('Users');
+  }
+
+  clickElasticsearchRoles() {
+    return this.clickLinkText('Roles');
+  }
+
+  getElasticsearchUsers() {
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findAllByCssSelector('tr')
+    .then(function (rows) {
+
+      function returnUsers(chart) {
+        return chart.getVisibleText();
+      }
+
+      var getUsers = rows.map(returnUsers);
+      return Bluebird.all(getUsers);
+    });
+  }
+
+  clickNewUser() {
+    return this.clickLinkText('New User');
+  }
+
+  addUser(userObj) {
+    var self = this;
+    // {username: 'Lee', password: 'LeePwd', confirmPassword, fullname: 'LeeFirst LeeLast', email: 'lee@myEmail.com'}
+    return this.clickLinkText('New User')
+    .then(function () {
+      return self.remote.setFindTimeout(defaultFindTimeout).findById('username')
+      .type(userObj.username);
+    })
+    .then(function () {
+      return self.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[ng-model="user.password"]')
+      .type(userObj.password);
+    })
+    .then(function () {
+      return self.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[ng-model="view.confirmPassword"]')
+      .type(userObj.confirmPassword);
+    })
+    .then(function () {
+      return self.remote.setFindTimeout(defaultFindTimeout).findById('fullname')
+      .type(userObj.fullname);
+    })
+    .then(function () {
+      return self.remote.setFindTimeout(defaultFindTimeout).findById('email')
+      .type(userObj.email);
+    })
+    .then(function () {
+      return PageObjects.common.sleep(4000);
+    })
+    .then(function () {
+      return self.selectRoles(userObj.role);
+    })
+    .then(function () {
+      return PageObjects.common.sleep(4000);
+    })
+    .then(function () {
+      if (userObj.save === true) {
+        return self.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('button[ng-click="saveUser(user)"]')
+        .click();
+      } else {
+        return self.remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('.btn-default')
+        .click();
+      }
+    });
+  }
+
+  selectRoles(role) {
+    var self = this;
+    return this.remote.setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('input[aria-label="Select box"]')
+    .click()
+    .type('kibana_user');
+    // .type(role);
+  }
+
+  deleteUser(username) {
+    var alertText;
+    PageObjects.common.debug('Delete user ' + username);
+    return this.clickLinkText(username)
+    .then(() => {
+      return PageObjects.header.getSpinnerDone();
+    })
+    .then(() => {
+      return this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('.btn-danger')
+      .click();
+    })
+    .then(() => {
+      return this.remote.getAlertText();
+    })
+    .then((text) => {
+      alertText = text;
+      PageObjects.common.debug('acceptAlert');
+      return this.remote.acceptAlert();
+    });
+  }
+
+  getElasticsearchUser(username) {
+
+  }
+
   getAdvancedSettings(propertyName) {
     PageObjects.common.debug('in setAdvancedSettings');
     return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
