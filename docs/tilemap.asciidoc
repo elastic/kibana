@@ -3,6 +3,10 @@
 
 A tile map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
+NOTE: By default, Kibana uses the https://www.elastic.co/elastic-tile-service[Elastic Tile Service] 
+to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>> 
+in `kibana.yml`. 
+
 The default _metrics_ aggregation for a tile map is the *Count* aggregation. You can select any of the following 
 aggregations as the metrics aggregation:
 

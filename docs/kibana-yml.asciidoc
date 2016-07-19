@@ -13,6 +13,14 @@ to this Kibana instance.
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to store saved searches, visualizations and 
 dashboards. Kibana creates a new index if the index doesn’t already exist.
 `kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
+[[tilemap-settings]]`tilemap.url:`:: *Default: `"https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`* The URL to the tile 
+service that Kibana uses to display map tiles in tilemap visualizations.
+added[4.5.3]
+`tilemap.options.min_zoom:`:: *Default: 1* The minimum zoom level. added[4.5.3]
+`tilemap.options.max_zoom:`:: *Default: 7* The maximum zoom level. added[4.5.3]
+`tilemap.options.attribution:`:: *Default: `"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"`* The map attribution string. added[4.5.3]
+`tilemap.options.subdomains:`:: An array of subdomains used by the tile service. 
+Specify the position of the subdomain the URL with the token `{s}`.added[4.5.3]
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication, 
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at 
 startup. Your Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
