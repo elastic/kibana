@@ -7,7 +7,8 @@ module.exports = function (grunt) {
       runType: 'runner',
       config: 'test/intern',
       bail: true,
-      reporters: ['Console']
+      reporters: ['Console'],
+      grep: grunt.option('grep')
     },
     dev: {},
     api: {
