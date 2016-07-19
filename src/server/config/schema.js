@@ -140,12 +140,12 @@ module.exports = () => Joi.object({
       attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
       minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
       maxZoom: Joi.number().default(7),
-      tileSize: Joi.number().optional(),
-      subdomains: Joi.array().items(Joi.string()).single().optional(),
-      errorTileUrl: Joi.string().uri().optional(),
-      tms: Joi.boolean().optional(),
-      reuseTiles: Joi.boolean().optional(),
-      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2).optional()
+      tileSize: Joi.number(),
+      subdomains: Joi.array().items(Joi.string()).single(),
+      errorTileUrl: Joi.string().uri(),
+      tms: Joi.boolean(),
+      reuseTiles: Joi.boolean(),
+      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
   }).default()
 
