@@ -44,7 +44,6 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
           lineWidth: 2
         },
         grid: {
-          backgroundColor: '#FFF',
           borderWidth: 0,
           borderColor: null,
           margin: 10,
