@@ -25,7 +25,7 @@ define(function (require) {
       const option = arg.split('=');
       const key = option[0];
       const value = option[1];
-      if (key === 'apps' && value) return value.split(',');
+      if (key === 'appSuites' && value) return value.split(',');
     });
 
     const apps = [

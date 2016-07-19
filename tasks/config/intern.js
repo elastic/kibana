@@ -10,7 +10,7 @@ module.exports = function (grunt) {
       reporters: ['Console'],
       grep: grunt.option('grep'),
       functionalSuites: grunt.option('functionalSuites'),
-      apps: grunt.option('apps')
+      appSuites: grunt.option('appSuites')
     },
     dev: {},
     api: {
