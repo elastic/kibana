@@ -6,9 +6,12 @@ import path from 'path';
 import process from 'child_process';
 import Promise from 'bluebird';
 
+const join = Promise.join;
 const readdir = Promise.promisify(fs.readdir);
 const readFile = Promise.promisify(fs.readFile);
 const stat = Promise.promisify(fs.stat);
+const writeFile = Promise.promisify(fs.writeFile);
+const mkdirpAsync = Promise.promisify(mkdirp);
 
 const TRANSLATION_FILE_EXTENSION = 'json';
 const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/fixtures/translations';
@@ -37,24 +40,18 @@ const registerTranslations = function (pluginTranslationPath) {
   let languageList = [];
   const translationStorePath = getTranslationStoragePath();
 
-  return getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList).then(function () {
-    try {
-      if (!fs.existsSync(translationStorePath)) {
-        mkdirp.sync(translationStorePath);
-      }
-      for (let fileIndx in translationFiles) {
-        if (!translationFiles.hasOwnProperty(fileIndx)) continue;
-        const translationFile = translationFiles[fileIndx];
+  return join(createTranslationDirectory(translationStorePath),
+    getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList),
+    function () {
+      return Promise.map(translationFiles, (translationFile) => {
         const translationFileName = getFileName(translationFile);
         const translationJson = require(translationFile);
         const fileToWrite = translationStorePath + '/' + translationFileName;
-        saveTranslationToFile(fileToWrite, translationJson);
-      }
-    } catch (err) {
-      throw err;
-    }
-  });
-
+        return getTranslationJsonToWrite(fileToWrite, translationJson).then((jsonToWrite) => {
+          return writeFile(fileToWrite, JSON.stringify(jsonToWrite));
+        });
+      });
+    });
 };
 
 const getRegisteredLanguageTranslations = function (language) {
@@ -76,8 +73,14 @@ const getRegisteredLanguageTranslations = function (language) {
 };
 
 function saveTranslationToFile(translationFullFileName, translationToAddJson) {
-  let jsonToWrite = [];
-  if (fs.existsSync(translationFullFileName)) {
+  return getTranslationJsonToWrite(translationFullFileName).then(function (jsonToWrite) {
+    return writeFile(translationFullFileName, JSON.stringify(jsonToWrite));
+  });
+}
+
+function getTranslationJsonToWrite(translationFullFileName, translationToAddJson) {
+  return stat(translationFullFileName).then((stats) => {
+    let jsonToWrite = [];
     const currentTranslationJson = require(translationFullFileName);
     jsonToWrite = currentTranslationJson;
     for (let key in translationToAddJson) {
@@ -87,10 +90,17 @@ function saveTranslationToFile(translationFullFileName, translationToAddJson) {
         jsonToWrite[attrName] = attrValue;
       }
     }
-  } else {
-    jsonToWrite = translationToAddJson;
-  }
-  fs.writeFileSync(translationFullFileName, JSON.stringify(jsonToWrite));
+    return jsonToWrite;
+  }).catch(function (e) {
+    return translationToAddJson;
+  });
+}
+
+function createTranslationDirectory(translationStorePath) {
+  return stat(translationStorePath).then((stats) => {
+  }).catch(function (e) {
+    return mkdirpAsync(translationStorePath);
+  });
 }
 
 function getFilesRecursivelyFromTopDir(topDir, translationFiles, languageList) {
@@ -124,6 +134,7 @@ function getTranslationDetailsFromDirectory(dir, translationFiles, languageList)
 function getTranslationDetailsFromFile(fullFileName, translationFiles, languageList) {
   const fileName = getFileName(fullFileName);
   const fileExt = fileName.split('.').pop();
+
   if (fileName === fileExt) return;
   if (fileExt !== TRANSLATION_FILE_EXTENSION) return;
   translationFiles.push(fullFileName);
