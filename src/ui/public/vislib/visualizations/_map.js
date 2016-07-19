@@ -60,6 +60,7 @@ export default function MapFactory(Private, tilemap) {
       maxZoom: tilemapOptions.maxZoom,
       noWrap: true,
       maxBounds: L.latLngBounds([-90, -220], [90, 220]),
+      scrollWheelZoom: false,
       fadeAnimation: false,
     };
 
