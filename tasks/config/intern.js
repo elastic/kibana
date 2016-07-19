@@ -8,7 +8,8 @@ module.exports = function (grunt) {
       config: 'test/intern',
       bail: true,
       reporters: ['Console'],
-      grep: grunt.option('grep')
+      grep: grunt.option('grep') || '.*',
+      apps: grunt.option('apps')
     },
     dev: {},
     api: {
