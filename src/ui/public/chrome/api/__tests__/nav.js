@@ -45,6 +45,19 @@ describe('chrome nav apis', function () {
     });
   });
 
+  describe('#removeBasePath', () => {
+    it ('returns the given URL as-is when no basepath is set', () => {
+      const basePath = '';
+      const { chrome } = init({ basePath });
+      expect(chrome.removeBasePath('/app/kibana?a=b')).to.be('/app/kibana?a=b');
+    });
+
+    it ('returns the given URL with the basepath stripped out when basepath is set', () => {
+      const { chrome } = init();
+      expect(chrome.removeBasePath(`${basePath}/app/kibana?a=b`)).to.be('/app/kibana?a=b');
+    });
+  });
+
   describe('#getNavLinkById', () => {
     it ('retrieves the correct nav link, given its ID', () => {
       const appUrlStore = new StubBrowserStorage();
