@@ -90,7 +90,7 @@ export default (grunt) => {
             bucket: publishConfig[environment].bucket,
             prefix: publishConfig[environment].debPrefix.replace('XXXXXXX', trimmedHash),
             signatureKeyId: signature.id,
-            arch: platform.name.match('x64') ? 'amd64' : 'i386',
+            arch: platform.debArch,
             awsKey: aws.key,
             awsSecret: aws.secret
           });
