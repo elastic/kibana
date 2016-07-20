@@ -6,11 +6,23 @@ import Notifier from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
-  let message = 'Oh, the humanity!';
   let notifier;
   let params;
-  let version = window.__KBN__.version;
-  let buildNum = window.__KBN__.buildNum;
+  const version = window.__KBN__.version;
+  const buildNum = window.__KBN__.buildNum;
+  const message = 'Oh, the humanity!';
+  const customParams = {
+    title: 'fooTitle',
+    markdown: 'fooMardown',
+    lifetime: 10000,
+    customActions:[{
+      key: 'Cancel',
+      callback: sinon.spy()
+    }, {
+      key: 'OK',
+      callback: sinon.spy()
+    }]
+  };
 
   beforeEach(function () {
     ngMock.module('kibana');
@@ -182,6 +194,33 @@ describe('Notifier', function () {
 
     it('does not include stack', function () {
       expect(notify('info').stack).not.to.be.defined;
+    });
+  });
+
+  describe('#custom', function () {
+    it('has a custom function to make notifications', function () {
+      expect(notifier.custom).to.be.defined;
+    });
+    it('properly merges options', function () {
+      const customNotif = notifier.custom(customParams);
+      expect(customNotif.title).to.equal(customParams.title);
+      expect(customNotif.markdown).to.equal(customParams.markdown);
+      expect(customNotif.lifetime).to.equal(customParams.lifetime);
+    });
+    it('gives a default action if none are provided', function () {
+      const noActionParams = _.assign({}, customParams, { customActions: []});
+      const customNotif = notifier.custom(noActionParams);
+      expect(customNotif.actions.length).to.equal(1);
+    });
+    it('should wrap the callback functions in a close function', function () {
+      const customNotif = notifier.custom(customParams);
+      customNotif.customActions.forEach((action, idx) => {
+        expect(action.callback).not.to.equal(customParams.customActions[idx]);
+        action.callback();
+      });
+      customParams.customActions.forEach(action => {
+        expect(action.callback.called).to.true;
+      });
     });
   });
 

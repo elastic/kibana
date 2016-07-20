@@ -93,6 +93,12 @@ function add(notif, cb) {
     notif.actions.forEach(function (action) {
       notif[action] = closeNotif(notif, cb, action);
     });
+  } else if (notif.customActions) {
+    // wrap all of the custom functions in a close
+    notif.customActions = notif.customActions.map(action => {
+      action.callback = closeNotif(notif, action.callback, action.key);
+      return action;
+    });
   }
 
   notif.count = (notif.count || 0) + 1;
@@ -367,6 +373,41 @@ Notifier.prototype.banner = function (msg, cb) {
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
+};
+
+/**
+ * Display a custom message
+ * @param  {Object} config
+ * config = {
+ *   title: 'Some Title here',
+ *   markdown: 'Some markdown content',
+ *   type: 'info',
+ *   customActions: [{
+ *     key: 'next',
+ *     callback: function() { next(); }
+ *   }, {
+ *     key: 'prev',
+ *     callback: function() { prev(); }
+ *   }]
+ * }
+ */
+Notifier.prototype.custom = function (config) {
+  const customActionMax = 3;
+  const mergedConfig = _.assign({}, {
+    type: 'banner',
+    markdown: '',
+    lifetime: Notifier.config.bannerLifetime,
+  }, config);
+
+  const hasActions = _.get(mergedConfig, 'customActions.length') || _.get(mergedConfig, 'actions.length');
+  // Add an ok if there are no actions, so you don't end up with a orphan notification
+  if (!hasActions) {
+    mergedConfig.actions = ['accept'];
+  } else if (mergedConfig.customActions) {
+    mergedConfig.customActions = mergedConfig.customActions.slice(0, customActionMax);
+  }
+
+  return add(mergedConfig);
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
