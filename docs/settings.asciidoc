@@ -408,10 +408,6 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 +
 *alias*: `log_file` deprecated[4.2]
 
-`status.allowAnonymous`:: If authentication is enabled, setting this to `true` allows unauthenticated users to access the Kibana server status API and status page.
-+
-*default*: `false`
-
 [[managing-saved-objects]]
 === Managing Saved Searches, Visualizations, and Dashboards 
 
