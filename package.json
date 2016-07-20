@@ -49,6 +49,7 @@
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
     "test:visualRegression": "grunt test:visualRegression",
+    "ci:unit": "xvfb-run grunt rejectRejFiles eslint:source test:server test:browser test:api",
     "build": "grunt build",
     "release": "grunt release",
     "start": "sh ./bin/kibana --dev",
