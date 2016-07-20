@@ -96,8 +96,10 @@ function add(notif, cb) {
   } else if (notif.customActions) {
     // wrap all of the custom functions in a close
     notif.customActions = notif.customActions.map(action => {
-      action.callback = closeNotif(notif, action.callback, action.key);
-      return action;
+      return {
+        key: action.text,
+        callback: closeNotif(notif, action.callback, action.text)
+      };
     });
   }
 
@@ -383,10 +385,10 @@ Notifier.prototype.banner = function (msg, cb) {
  *   markdown: 'Some markdown content',
  *   type: 'info',
  *   customActions: [{
- *     key: 'next',
+ *     text: 'next',
  *     callback: function() { next(); }
  *   }, {
- *     key: 'prev',
+ *     text: 'prev',
  *     callback: function() { prev(); }
  *   }]
  * }
