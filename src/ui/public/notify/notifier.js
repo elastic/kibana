@@ -387,7 +387,7 @@ Notifier.prototype.banner = function (msg, cb) {
  * }
  */
 Notifier.prototype.custom = function (config) {
-  const customActionMax = 2;
+  const customActionMax = 3;
   const mergedConfig = _.assign({}, {
     type: 'banner',
     markdown: '',
