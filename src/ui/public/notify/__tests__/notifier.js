@@ -16,10 +16,10 @@ describe('Notifier', function () {
     markdown: 'fooMardown',
     lifetime: 10000,
     customActions:[{
-      key: 'Cancel',
+      text: 'Cancel',
       callback: sinon.spy()
     }, {
-      key: 'OK',
+      text: 'OK',
       callback: sinon.spy()
     }]
   };
