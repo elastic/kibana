@@ -9,8 +9,8 @@ module.exports = class ServerStatus {
     this._created = {};
   }
 
-  create(plugin) {
-    return (this._created[plugin.id] = new Status(plugin, this.server));
+  create(name) {
+    return (this._created[name] = new Status(name, this.server));
   }
 
   each(fn) {

@@ -61,7 +61,7 @@ module.exports = class Plugin {
       }
 
       server.log(['plugins', 'debug'], {
-        tmpl: 'Initializing plugin <%= plugin.toString() %>',
+        tmpl: 'Initializing plugin <%= plugin.id %>',
         plugin: this
       });
 
@@ -69,7 +69,7 @@ module.exports = class Plugin {
         server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
       }
 
-      this.status = kbnServer.status.create(this);
+      this.status = kbnServer.status.create(`plugin:${this.id}`);
       server.expose('status', this.status);
 
       attempt(this.externalInit, [server, options], this).nodeify(next);

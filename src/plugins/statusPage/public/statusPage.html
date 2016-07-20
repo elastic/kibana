@@ -22,16 +22,14 @@
       No plugin status information available
     </h4>
 
-    <table class="plugin_status_breakdown" ng-if="ui.statuses">
-      <tr class="row">
-        <th class="col-xs-2">Name</th>
-        <th class="col-xs-2">Version</th>
-        <th class="col-xs-8">Status</th>
+    <table class="plugin_status_breakdown row" ng-if="ui.statuses">
+      <tr>
+        <th class="col-xs-1">Name</th>
+        <th class="col-xs-11">Status</th>
       </tr>
-      <tr ng-repeat="status in ui.statuses" class="status_row plugin_state_default plugin_state_{{status.state}} row">
-        <td class="col-xs-2 status_name">{{status.name}}</td>
-        <td class="col-xs-2 status_version">{{status.version}}</td>
-        <td class="col-xs-8 status_message">
+      <tr ng-repeat="status in ui.statuses" class="status_row plugin_state_default plugin_state_{{status.state}}">
+        <td class="col-xs-1 status_name">{{status.name}}</td>
+        <td class="col-xs-11 status_message">
           <i class="fa plugin_state_color plugin_state_icon" />
           {{status.message}}
         </td>

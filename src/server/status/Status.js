@@ -3,21 +3,22 @@ let EventEmitter = require('events').EventEmitter;
 let states = require('./states');
 
 class Status extends EventEmitter {
-  constructor(plugin, server) {
+  constructor(name, server) {
     super();
 
-    this.plugin = plugin;
+    this.name = name;
     this.since = new Date();
     this.state = 'uninitialized';
     this.message = 'uninitialized';
 
     this.on('change', function (previous, previousMsg) {
       this.since = new Date();
-      let tags = ['status', `plugin:${this.plugin.toString()}`];
+      let tags = ['status', name];
       tags.push(this.state === 'red' ? 'error' : 'info');
 
       server.log(tags, {
         tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
+        name: name,
         state: this.state,
         message: this.message,
         prevState: previous,
@@ -28,8 +29,7 @@ class Status extends EventEmitter {
 
   toJSON() {
     return {
-      name: this.plugin.id,
-      version: this.plugin.version,
+      name: this.name,
       state: this.state,
       icon: states.get(this.state).icon,
       message: this.message,
