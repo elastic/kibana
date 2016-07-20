@@ -43,7 +43,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |
 | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-darwin-x64.tar.gz) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-linux-x64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-x86_64.rpm) |
+| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-darwin-x86_64.tar.gz) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-x86_64.rpm) |
 | Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-linux-x86.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-i386.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-i686.rpm) |
 | Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-5.0.0-alpha5-SNAPSHOT-windows-x86.zip) |
