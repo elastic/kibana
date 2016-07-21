@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "version": "4.1.10",
+  "version": "4.1.11-snapshot",
   "dependencies": {
     "ansicolors": {
       "version": "0.3.2",
