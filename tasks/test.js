@@ -18,19 +18,17 @@ module.exports = function (grunt) {
   grunt.registerTask('test:ui', [
     'esvm:ui',
     'run:testUIServer',
-    'downloadSelenium',
-    'run:seleniumServer',
+    'run:chromeDriver',
     'intern:dev',
     'esvm_shutdown:ui',
-    'stop:seleniumServer',
+    'stop:chromeDriver',
     'stop:testUIServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'esvm:ui',
     'run:testUIServer',
-    'downloadSelenium',
-    'run:devSeleniumServer:keepalive'
+    'run:devChromeDriver:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [
