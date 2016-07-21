@@ -75,7 +75,7 @@
     "grunt-contrib-less": "^0.10.0",
     "grunt-contrib-requirejs": "^0.4.4",
     "grunt-contrib-watch": "^0.5.3",
-    "grunt-esvm": "^1.0.1",
+    "grunt-esvm": "^3.2.3",
     "grunt-jscs": "^1.8.0",
     "grunt-mocha": "^0.4.10",
     "grunt-replace": "^0.7.9",
