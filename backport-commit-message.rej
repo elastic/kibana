@@ -1,0 +1,21 @@
+Backport PR #7317
+---------
+
+**Commit 1:**
+Apply -snapshot suffix during build task
+
+The default behavior of the build task is to now apply the -snapshot
+suffix dynamically rather than us manually hardcoding and managing it
+within the source code itself. The `--release` flag will drop the
+-snapshot suffix on a build, which should be used for any release
+candidate.
+
+The default behavior of the build task has also changed to create
+rpm/deb packages as well. Since we've only confirmed that this works on
+linux, you can override that behavior by passing `skip-os-packages`.
+
+If you do not want to create any zip or tar.gz archives, you can pass
+`--skip-archives`.
+
+* Original sha: 834f56392ed08b14e1c7bde43320f88633087de9
+* Authored by Court Ewing <court@epixa.com> on 2016-05-27T20:40:57Z
