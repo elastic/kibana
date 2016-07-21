@@ -1,9 +1,9 @@
 
 describe('buildHierarchicalData()', function () {
   describe('transformAggregation()', function () {
-    let _ = require('lodash');
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
+    var _ = require('lodash');
+    var expect = require('expect.js');
+    var ngMock = require('ngMock');
     let transform;
     let fixture;
 
@@ -41,17 +41,17 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('relies on metricAgg#getValue() for the size of the children', function () {
-      let aggData = {
+      var aggData = {
         buckets: [
           { key: 'foo' },
           { key: 'bar' }
         ]
       };
 
-      let football = {};
+      var football = {};
       fixture.metric.getValue = _.constant(football);
 
-      let children = transform(fixture.agg, fixture.metric, aggData);
+      var children = transform(fixture.agg, fixture.metric, aggData);
       expect(children).to.be.an(Array);
       expect(children).to.have.length(2);
       expect(children[0]).to.have.property('size', football);
@@ -59,7 +59,7 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('should create two levels of metrics', function () {
-      let children = transform(fixture.agg, fixture.metric, fixture.aggData);
+      var children = transform(fixture.agg, fixture.metric, fixture.aggData);
       fixture.metric.getValue = function (b) { return b.doc_count; };
 
       expect(children).to.be.an(Array);

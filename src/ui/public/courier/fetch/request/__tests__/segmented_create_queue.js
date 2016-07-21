@@ -28,7 +28,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     const req = new SegmentedReq(new MockSource());
     req._queueCreated = null;
 
-    let promise = req._createQueue();
+    var promise = req._createQueue();
     expect(req._queueCreated).to.be(false);
     await promise;
     expect(req._queueCreated).to.be(true);

@@ -1,21 +1,21 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
-let $ = require('jquery');
-let fixtures = require('fixtures/fake_hierarchical_data');
-let series = require('fixtures/vislib/mock_data/date_histogram/_series');
-let terms = require('fixtures/vislib/mock_data/terms/_columns');
+var d3 = require('d3');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var _ = require('lodash');
+var $ = require('jquery');
+var fixtures = require('fixtures/fake_hierarchical_data');
+var series = require('fixtures/vislib/mock_data/date_histogram/_series');
+var terms = require('fixtures/vislib/mock_data/terms/_columns');
 
 describe('Vislib Time Marker Test Suite', function () {
-  let height = 50;
-  let color = '#ff0000';
-  let opacity = 0.5;
-  let width = 3;
-  let customClass = 'custom-time-marker';
-  let dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
-  let myTimes = dateMathTimes.map(function (dateMathString) {
+  var height = 50;
+  var color = '#ff0000';
+  var opacity = 0.5;
+  var width = 3;
+  var customClass = 'custom-time-marker';
+  var dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
+  var myTimes = dateMathTimes.map(function (dateMathString) {
     return {
       time: dateMathString,
       class: customClass,
@@ -24,14 +24,14 @@ describe('Vislib Time Marker Test Suite', function () {
       width: width
     };
   });
-  let getExtent = function (dataArray, func) {
+  var getExtent = function (dataArray, func) {
     return func(dataArray, function (obj) {
       return func(obj.values, function (d) {
         return d.x;
       });
     });
   };
-  let times = [];
+  var times = [];
   let TimeMarker;
   let defaultMarker;
   let customMarker;

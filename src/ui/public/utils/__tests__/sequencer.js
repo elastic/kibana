@@ -1,9 +1,9 @@
 describe('sequencer util', function () {
-  let _ = require('lodash');
-  let sequencer = require('ui/utils/sequencer');
-  let expect = require('expect.js');
+  var _ = require('lodash');
+  var sequencer = require('ui/utils/sequencer');
+  var expect = require('expect.js');
 
-  let opts = [
+  var opts = [
     { min: 500, max: 7500, length: 1500 },
     { min: 50, max: 500, length: 1000 },
     { min: 5, max: 50, length: 100 }

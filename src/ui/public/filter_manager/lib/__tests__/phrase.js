@@ -1,8 +1,8 @@
 
-let fn = require('ui/filter_manager/lib/phrase');
-let expect = require('expect.js');
-let _ = require('lodash');
-let ngMock = require('ngMock');
+var fn = require('ui/filter_manager/lib/phrase');
+var expect = require('expect.js');
+var _ = require('lodash');
+var ngMock = require('ngMock');
 let indexPattern;
 let expected;
 describe('Filter Manager', function () {

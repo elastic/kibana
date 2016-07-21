@@ -1,7 +1,7 @@
 describe('String Format', function () {
   let fieldFormats;
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -9,8 +9,8 @@ describe('String Format', function () {
   }));
 
   it('decode a base64 string', function () {
-    let StringFormat = fieldFormats.getType('string');
-    let string = new StringFormat({
+    var StringFormat = fieldFormats.getType('string');
+    var string = new StringFormat({
       transform: 'base64'
     });
     expect(string.convert('Zm9vYmFy')).to.be('foobar');

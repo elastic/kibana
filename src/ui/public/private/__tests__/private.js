@@ -2,8 +2,8 @@
 describe('Private module loader', function () {
 
   let Private;
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -11,12 +11,12 @@ describe('Private module loader', function () {
   }));
 
   it('accepts a provider that will be called to init a module', function () {
-    let football = {};
+    var football = {};
     function Provider() {
       return football;
     }
 
-    let instance = Private(Provider);
+    var instance = Private(Provider);
     expect(instance).to.be(football);
   });
 
@@ -25,25 +25,25 @@ describe('Private module loader', function () {
       return Private;
     }
 
-    let instance = Private(Provider);
+    var instance = Private(Provider);
     expect(instance).to.be(Private);
   });
 
   it('detects circular dependencies', function () {
     expect(function () {
       function Provider1() {
-        let p3 = Private(Provider3);
+        var p3 = Private(Provider3);
       }
 
       function Provider2() {
-        let p3 = Private(Provider3);
+        var p3 = Private(Provider3);
       }
 
       function Provider3() {
-        let p1 = Private(Provider3);
+        var p1 = Private(Provider3);
       }
 
-      let p1 = Private(Provider1);
+      var p1 = Private(Provider1);
     }).to.throwException(/circular/i);
   });
 
@@ -57,24 +57,24 @@ describe('Private module loader', function () {
 
   describe('#stub', function () {
     it('accepts a replacement instance for a Provider', function () {
-      let replaced = {};
-      let replacement = {};
+      var replaced = {};
+      var replacement = {};
 
       function Provider() {
         return replaced;
       }
 
-      let instance = Private(Provider);
+      var instance = Private(Provider);
       expect(instance).to.be(replaced);
 
       Private.stub(Provider, replacement);
 
-      let instance2 = Private(Provider);
+      var instance2 = Private(Provider);
       expect(instance2).to.be(replacement);
 
       Private.stub(Provider, replaced);
 
-      let instance3 = Private(Provider);
+      var instance3 = Private(Provider);
       expect(instance3).to.be(replaced);
     });
   });
@@ -89,18 +89,18 @@ describe('Private module loader', function () {
         return {};
       }
 
-      let instance1 = Private(Provider1);
+      var instance1 = Private(Provider1);
       expect(instance1).to.be.an('object');
 
       Private.swap(Provider1, Provider2);
 
-      let instance2 = Private(Provider1);
+      var instance2 = Private(Provider1);
       expect(instance2).to.be.an('object');
       expect(instance2).to.not.be(instance1);
 
       Private.swap(Provider1, Provider1);
 
-      let instance3 = Private(Provider1);
+      var instance3 = Private(Provider1);
       expect(instance3).to.be(instance1);
     });
   });

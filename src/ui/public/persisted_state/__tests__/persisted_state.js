@@ -1,9 +1,9 @@
-let _ = require('lodash');
-let sinon = require('auto-release-sinon');
-let noDigestPromises = require('testUtils/noDigestPromises');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
-let errors = require('ui/errors');
+var _ = require('lodash');
+var sinon = require('auto-release-sinon');
+var noDigestPromises = require('testUtils/noDigestPromises');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
+var errors = require('ui/errors');
 
 let PersistedState;
 let Events;
@@ -34,7 +34,7 @@ describe('Persisted State', function () {
     });
 
     it('should create a state instance with data', function () {
-      let val = { red: 'blue' };
+      var val = { red: 'blue' };
       persistedState = new PersistedState(val);
 
       expect(persistedState.get()).to.eql(val);
@@ -43,7 +43,7 @@ describe('Persisted State', function () {
     });
 
     it('should create a copy of the state passed in', function () {
-      let val = { red: 'blue' };
+      var val = { red: 'blue' };
       persistedState = new PersistedState(val);
 
       expect(persistedState.get()).to.eql(val);
@@ -51,10 +51,10 @@ describe('Persisted State', function () {
     });
 
     it('should not throw if creating valid child object', function () {
-      let run = function () {
-        let val = { red: 'blue' };
-        let path = ['test.path'];
-        let parent = new PersistedState();
+      var run = function () {
+        var val = { red: 'blue' };
+        var path = ['test.path'];
+        var parent = new PersistedState();
         new PersistedState(val, path, parent);
       };
 
@@ -62,8 +62,8 @@ describe('Persisted State', function () {
     });
 
     it('should throw if given an invalid value', function () {
-      let run = function () {
-        let val = 'bananas';
+      var run = function () {
+        var val = 'bananas';
         new PersistedState(val);
       };
 
@@ -73,10 +73,10 @@ describe('Persisted State', function () {
     });
 
     it('should not throw if given primitive to child', function () {
-      let run = function () {
-        let val = 'bananas';
-        let path = ['test.path'];
-        let parent = new PersistedState();
+      var run = function () {
+        var val = 'bananas';
+        var path = ['test.path'];
+        var parent = new PersistedState();
         new PersistedState(val, path, parent);
       };
 
@@ -84,10 +84,10 @@ describe('Persisted State', function () {
     });
 
     it('should throw if given an invalid parent object', function () {
-      let run = function () {
-        let val = { red: 'blue' };
-        let path = ['test.path'];
-        let parent = {};
+      var run = function () {
+        var val = { red: 'blue' };
+        var path = ['test.path'];
+        var parent = {};
         new PersistedState(val, path, parent);
       };
 
@@ -97,10 +97,10 @@ describe('Persisted State', function () {
     });
 
     it('should throw if given a parent without a path', function () {
-      let run = function () {
-        let val = { red: 'blue' };
+      var run = function () {
+        var val = { red: 'blue' };
         let path;
-        let parent = new PersistedState();
+        var parent = new PersistedState();
 
         new PersistedState(val, path, parent);
       };
@@ -115,8 +115,8 @@ describe('Persisted State', function () {
     let childState;
 
     it('should not append the child state to the parent, without parent value', function () {
-      let childIndex = 'i can haz child';
-      let persistedState = new PersistedState();
+      var childIndex = 'i can haz child';
+      var persistedState = new PersistedState();
       childState = persistedState.createChild(childIndex);
 
       // parent state should not contain the child state
@@ -125,9 +125,9 @@ describe('Persisted State', function () {
     });
 
     it('should not append the child state to the parent, with parent value', function () {
-      let childIndex = 'i can haz child';
-      let persistedStateValue = { original: true };
-      let persistedState = new PersistedState(persistedStateValue);
+      var childIndex = 'i can haz child';
+      var persistedStateValue = { original: true };
+      var persistedState = new PersistedState(persistedStateValue);
       childState = persistedState.createChild(childIndex);
 
       // child state should be empty, we didn't give it any default data
@@ -139,14 +139,14 @@ describe('Persisted State', function () {
     });
 
     it('should append the child state to the parent, with parent and child values', function () {
-      let childIndex = 'i can haz child';
-      let childStateValue = { tacos: 'yes please' };
-      let persistedStateValue = { original: true };
-      let persistedState = new PersistedState(persistedStateValue);
+      var childIndex = 'i can haz child';
+      var childStateValue = { tacos: 'yes please' };
+      var persistedStateValue = { original: true };
+      var persistedState = new PersistedState(persistedStateValue);
       childState = persistedState.createChild(childIndex, childStateValue);
 
       // parent state should contain the child and its original state value
-      let parentState = persistedState.get();
+      var parentState = persistedState.get();
       expect(parentState).to.have.property('original', true);
       expect(parentState).to.have.property(childIndex);
       expect(parentState[childIndex]).to.eql(childStateValue);
@@ -155,15 +155,15 @@ describe('Persisted State', function () {
 
   describe('deep child state creation', function () {
     it('should delegate get/set calls to parent state', function () {
-      let children = [{
+      var children = [{
         path: 'first*child',
         value: { first: true, second: false }
       }, {
         path: 'second child',
         value: { first: false, second: true }
       }];
-      let persistedStateValue = { original: true };
-      let persistedState = new PersistedState(persistedStateValue);
+      var persistedStateValue = { original: true };
+      var persistedState = new PersistedState(persistedStateValue);
 
       // first child is a child of the parent persistedState
       children[0].instance = persistedState.createChild(children[0].path, children[0].value);
@@ -174,7 +174,7 @@ describe('Persisted State', function () {
       expect(children[1].instance.get()).to.eql(children[1].value);
 
       // parent should contain original props and first child path, but not the second child path
-      let parentState = persistedState.get();
+      var parentState = persistedState.get();
       _.keys(persistedStateValue).forEach(function (key) {
         expect(parentState).to.have.property(key);
       });
@@ -182,28 +182,28 @@ describe('Persisted State', function () {
       expect(parentState).to.not.have.property(children[1].path);
 
       // second child path should be inside the first child
-      let firstChildState = children[0].instance.get();
+      var firstChildState = children[0].instance.get();
       expect(firstChildState).to.have.property(children[1].path);
       expect(firstChildState[children[1].path]).to.eql(children[1].value);
 
       // check that the second child is still accessible from the parent instance
-      let firstChild = persistedState.get(children[0].path);
+      var firstChild = persistedState.get(children[0].path);
       expect(firstChild).to.have.property(children[1].path);
     });
   });
 
   describe('child state removal', function () {
     it('should clear path from parent state', function () {
-      let persistedState = new PersistedState();
-      let childState = persistedState.createChild('child', { userId: 1234 });
+      var persistedState = new PersistedState();
+      var childState = persistedState.createChild('child', { userId: 1234 });
       expect(persistedState.get()).to.eql({ child: { userId: 1234 }});
       persistedState.removeChild('child');
       expect(persistedState.get()).to.eql({});
     });
 
     it('should reset original parent value at path', function () {
-      let persistedState = new PersistedState({ user: 1234 });
-      let childState = persistedState.createChild('user', { id: 5678 });
+      var persistedState = new PersistedState({ user: 1234 });
+      var childState = persistedState.createChild('user', { id: 5678 });
       expect(persistedState.get()).to.eql({ user: { id: 5678 }});
 
       persistedState.removeChild('user');
@@ -211,8 +211,8 @@ describe('Persisted State', function () {
     });
 
     it('should clear changedState', function () {
-      let persistedState = new PersistedState({ user: 1234 });
-      let childState = persistedState.createChild('user');
+      var persistedState = new PersistedState({ user: 1234 });
+      var childState = persistedState.createChild('user');
       childState.set('name', 'user name');
       expect(persistedState.getChanges()).to.eql({ user: { name: 'user name' }});
 
@@ -223,16 +223,16 @@ describe('Persisted State', function () {
 
   describe('deep child state removal', function () {
     it('should clear path from parent state', function () {
-      let persistedState = new PersistedState();
-      let childState = persistedState.createChild('child.state', { userId: 1234 });
+      var persistedState = new PersistedState();
+      var childState = persistedState.createChild('child.state', { userId: 1234 });
       expect(persistedState.get()).to.eql({ child: { state: { userId: 1234 }}});
       persistedState.removeChild('child.state');
       expect(persistedState.get()).to.eql({});
     });
 
     it('should reset original parent value at path', function () {
-      let persistedState = new PersistedState({ user: { id: 1234 }});
-      let childState = persistedState.createChild('user.id', 5678);
+      var persistedState = new PersistedState({ user: { id: 1234 }});
+      var childState = persistedState.createChild('user.id', 5678);
       expect(persistedState.get()).to.eql({ user: { id: 5678 }});
 
       persistedState.removeChild('user.id');
@@ -240,8 +240,8 @@ describe('Persisted State', function () {
     });
 
     it('should reset original parent other values at path', function () {
-      let persistedState = new PersistedState({ user: { name: 'user' }});
-      let childState = persistedState.createChild('user.id', 5678);
+      var persistedState = new PersistedState({ user: { name: 'user' }});
+      var childState = persistedState.createChild('user.id', 5678);
       expect(persistedState.get()).to.eql({ user: { name: 'user', id: 5678 }});
 
       persistedState.removeChild('user.id');
@@ -249,8 +249,8 @@ describe('Persisted State', function () {
     });
 
     it('should clear the changed state', function () {
-      let persistedState = new PersistedState({ user: { id: 1234 }});
-      let childState = persistedState.createChild('user.name');
+      var persistedState = new PersistedState({ user: { id: 1234 }});
+      var childState = persistedState.createChild('user.name');
       childState.set('user name');
       expect(persistedState.getChanges()).to.eql({ user: { name: 'user name' }});
 
@@ -262,8 +262,8 @@ describe('Persisted State', function () {
 
   describe('child state conditions', function () {
     it('should be merged with the parent state', function () {
-      let parent = new PersistedState({ name: 'test' });
-      let child = parent.createChild('child', 'value');
+      var parent = new PersistedState({ name: 'test' });
+      var child = parent.createChild('child', 'value');
       expect(parent.get()).to.eql({
         name: 'test',
         child: 'value'
@@ -283,8 +283,8 @@ describe('Persisted State', function () {
     });
 
     it('should give child state precedence', function () {
-      let parent = new PersistedState({ user: { id: 1234, name: 'test' }});
-      let child = parent.createChild('user', { name: 'child test' });
+      var parent = new PersistedState({ user: { id: 1234, name: 'test' }});
+      var child = parent.createChild('user', { name: 'child test' });
       expect(parent.get()).to.eql({
         user: {
           id: 1234,
@@ -297,8 +297,8 @@ describe('Persisted State', function () {
     });
 
     it('should be cleaned up with removeChild', function () {
-      let parent = new PersistedState({ name: 'test' });
-      let child = parent.createChild('child', 'value');
+      var parent = new PersistedState({ name: 'test' });
+      var child = parent.createChild('child', 'value');
       expect(parent.get()).to.eql({
         name: 'test',
         child: 'value'
@@ -313,16 +313,16 @@ describe('Persisted State', function () {
 
   describe('colliding child paths and parent state values', function () {
     it('should not change the child path value by default', function () {
-      let childIndex = 'childTest';
-      let persistedStateValue = {};
+      var childIndex = 'childTest';
+      var persistedStateValue = {};
       persistedStateValue[childIndex] = { overlapping_index: true };
 
-      let persistedState = new PersistedState(persistedStateValue);
-      let state = persistedState.get();
+      var persistedState = new PersistedState(persistedStateValue);
+      var state = persistedState.get();
       expect(state).to.have.property(childIndex);
       expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
 
-      let childState = persistedState.createChild(childIndex);
+      var childState = persistedState.createChild(childIndex);
       expect(childState.get()).to.eql(persistedStateValue[childIndex]);
 
       // make sure the parent state is still the same
@@ -332,21 +332,21 @@ describe('Persisted State', function () {
     });
 
     it('should merge default child state', function () {
-      let childIndex = 'childTest';
-      let childStateValue = { child_index: false };
-      let persistedStateValue = {};
+      var childIndex = 'childTest';
+      var childStateValue = { child_index: false };
+      var persistedStateValue = {};
       persistedStateValue[childIndex] = { parent_index: true };
 
-      let persistedState = new PersistedState(persistedStateValue);
-      let state = persistedState.get();
+      var persistedState = new PersistedState(persistedStateValue);
+      var state = persistedState.get();
       expect(state).to.have.property(childIndex);
       expect(state[childIndex]).to.eql(persistedStateValue[childIndex]);
 
       // pass in child state value
-      let childState = persistedState.createChild(childIndex, childStateValue);
+      var childState = persistedState.createChild(childIndex, childStateValue);
 
       // parent's default state is merged with child state
-      let compare = _.merge({}, childStateValue, persistedStateValue[childIndex]);
+      var compare = _.merge({}, childStateValue, persistedStateValue[childIndex]);
       expect(childState.get()).to.eql(compare);
       state = persistedState.get();
       expect(state).to.have.property(childIndex);
@@ -356,11 +356,11 @@ describe('Persisted State', function () {
 
   describe('mutation', function () {
     it('should not mutate the internal object', function () {
-      let persistedStateValue = { hello: 'world' };
-      let insertedObj = { farewell: 'cruel world' };
-      let persistedState = new PersistedState(persistedStateValue);
+      var persistedStateValue = { hello: 'world' };
+      var insertedObj = { farewell: 'cruel world' };
+      var persistedState = new PersistedState(persistedStateValue);
 
-      let obj = persistedState.get();
+      var obj = persistedState.get();
       _.assign(obj, insertedObj);
 
       expect(obj).to.have.property('farewell');
@@ -377,38 +377,38 @@ describe('Persisted State', function () {
 
     describe('exporting state to JSON', function () {
       it('should return the full JSON representation', function () {
-        let persistedState = new PersistedState(persistedStateValue);
+        var persistedState = new PersistedState(persistedStateValue);
 
-        let json = persistedState.toJSON();
+        var json = persistedState.toJSON();
         expect(json).to.eql(persistedStateValue);
       });
 
       it('should return the JSON representation of the child state', function () {
-        let persistedState = new PersistedState(persistedStateValue);
-        let childState = persistedState.createChild('awesome', { pants: false });
+        var persistedState = new PersistedState(persistedStateValue);
+        var childState = persistedState.createChild('awesome', { pants: false });
 
         expect(childState.toJSON()).to.eql({ pants: false });
         // verify JSON output of the parent state
-        let parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
+        var parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
         expect(persistedState.toJSON()).to.eql(parentCompare);
       });
 
       it('should export stringified version of state', function () {
-        let persistedState = new PersistedState(persistedStateValue);
-        let childState = persistedState.createChild('awesome', { pants: false });
+        var persistedState = new PersistedState(persistedStateValue);
+        var childState = persistedState.createChild('awesome', { pants: false });
 
-        let data = childState.toString();
+        var data = childState.toString();
         expect(JSON.parse(data)).to.eql({ pants: false });
         // verify JSON output of the parent state
-        let parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
+        var parentCompare = _.assign({ awesome: { pants: false }}, persistedStateValue);
         expect(JSON.parse(persistedState.toString())).to.eql(parentCompare);
       });
     });
 
     describe('importing state from JSON string (hydration)', function () {
       it('should set the state from JSON string input', function () {
-        let stateJSON = JSON.stringify(persistedStateValue);
-        let persistedState = new PersistedState();
+        var stateJSON = JSON.stringify(persistedStateValue);
+        var persistedState = new PersistedState();
         expect(persistedState.get()).to.eql({});
 
         persistedState.fromString(stateJSON);
@@ -419,7 +419,7 @@ describe('Persisted State', function () {
 
   describe('get state', function () {
     it('should perform deep gets with various formats', function () {
-      let obj = {
+      var obj = {
         red: {
           green: {
             blue: 'yellow'
@@ -430,7 +430,7 @@ describe('Persisted State', function () {
           violet: ''
         }
       };
-      let persistedState = new PersistedState(obj);
+      var persistedState = new PersistedState(obj);
       expect(persistedState.get()).to.eql(obj);
 
       expect(persistedState.get('red')).to.eql({ green: { blue: 'yellow' } });
@@ -449,7 +449,7 @@ describe('Persisted State', function () {
     });
 
     it('should perform deep gets with arrays', function () {
-      let persistedState = new PersistedState({ hello: { nouns: ['world', 'humans', 'everyone'] } });
+      var persistedState = new PersistedState({ hello: { nouns: ['world', 'humans', 'everyone'] } });
 
       expect(persistedState.get()).to.eql({ hello: { nouns: ['world', 'humans', 'everyone'] } });
       expect(persistedState.get('hello')).to.eql({ nouns: ['world', 'humans', 'everyone'] });
@@ -457,9 +457,9 @@ describe('Persisted State', function () {
     });
 
     it('should pass defaults to parent delegation', function () {
-      let persistedState = new PersistedState({ parent: true });
-      let childState = persistedState.createChild('child', { account: { name: 'first child' }});
-      let defaultValue = 'i have no data';
+      var persistedState = new PersistedState({ parent: true });
+      var childState = persistedState.createChild('child', { account: { name: 'first child' }});
+      var defaultValue = 'i have no data';
 
       expect(childState.get('account.name', defaultValue)).to.eql('first child');
       expect(childState.get('account.age', defaultValue)).to.eql(defaultValue);
@@ -469,25 +469,25 @@ describe('Persisted State', function () {
   describe('set state', function () {
     describe('path format support', function () {
       it('should create deep objects from dot notation', function () {
-        let persistedState = new PersistedState();
+        var persistedState = new PersistedState();
         persistedState.set('one.two.three', 4);
         expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
       });
 
       it('should create deep objects from array notation', function () {
-        let persistedState = new PersistedState();
+        var persistedState = new PersistedState();
         persistedState.set('one[two][three]', 4);
         expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
       });
 
       it('should create deep objects from arrays', function () {
-        let persistedState = new PersistedState();
+        var persistedState = new PersistedState();
         persistedState.set(['one', 'two', 'three'], 4);
         expect(persistedState.get()).to.eql({ one: { two: { three: 4 } } });
       });
 
       it('should create deep objects with an existing path', function () {
-        let persistedState = new PersistedState({}, 'deep.path');
+        var persistedState = new PersistedState({}, 'deep.path');
         persistedState.set('green[red].blue', 4);
         expect(persistedState.get()).to.eql({ green: { red: { blue: 4 } }});
       });
@@ -553,19 +553,19 @@ describe('Persisted State', function () {
 
   describe('internal state tracking', function () {
     it('should be an empty object', function () {
-      let persistedState = new PersistedState();
+      var persistedState = new PersistedState();
       expect(persistedState._defaultState).to.eql({});
     });
 
     it('should store the default state value', function () {
-      let val = { one: 1, two: 2 };
-      let persistedState = new PersistedState(val);
+      var val = { one: 1, two: 2 };
+      var persistedState = new PersistedState(val);
       expect(persistedState._defaultState).to.eql(val);
     });
 
     it('should keep track of changes', function () {
-      let val = { one: 1, two: 2 };
-      let persistedState = new PersistedState(val);
+      var val = { one: 1, two: 2 };
+      var persistedState = new PersistedState(val);
 
       persistedState.set('two', 22);
       expect(persistedState._defaultState).to.eql(val);
@@ -577,14 +577,14 @@ describe('Persisted State', function () {
     let persistedState;
     let emitter;
 
-    let getByType = function (type, spy) {
+    var getByType = function (type, spy) {
       spy = spy || emitter;
       return spy.getCalls().filter(function (call) {
         return call.args[0] === type;
       });
     };
 
-    let watchEmitter = function (state) {
+    var watchEmitter = function (state) {
       return sinon.spy(state, 'emit');
     };
 
@@ -665,7 +665,7 @@ describe('Persisted State', function () {
     });
 
     it('should emit on parent and child instances', function (done) {
-      let child = persistedState.createChild('checker');
+      var child = persistedState.createChild('checker');
       expect(getByType('change')).to.have.length(0);
 
       // parent and child should emit, set up listener to test

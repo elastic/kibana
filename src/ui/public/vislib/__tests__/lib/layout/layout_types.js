@@ -1,7 +1,7 @@
-let angular = require('angular');
-let _ = require('lodash');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+var angular = require('angular');
+var _ = require('lodash');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
 
 describe('Vislib Layout Types Test Suite', function () {
   let layoutType;

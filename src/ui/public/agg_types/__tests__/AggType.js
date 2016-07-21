@@ -1,8 +1,8 @@
 describe('AggType Class', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
-  let sinon = require('auto-release-sinon');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
+  var sinon = require('auto-release-sinon');
   let AggType;
   let AggParams;
   let AggConfig;
@@ -14,7 +14,7 @@ describe('AggType Class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    let AggParamsPM = require('ui/agg_types/AggParams');
+    var AggParamsPM = require('ui/agg_types/AggParams');
     AggParams = sinon.spy(Private(AggParamsPM));
     Private.stub(AggParamsPM, AggParams);
 
@@ -34,7 +34,7 @@ describe('AggType Class', function () {
     });
 
     describe('application of config properties', function () {
-      let copiedConfigProps = [
+      var copiedConfigProps = [
         'name',
         'title',
         'makeLabel',
@@ -43,11 +43,11 @@ describe('AggType Class', function () {
 
       describe('"' + copiedConfigProps.join('", "') + '"', function () {
         it('assigns the config value to itself', function () {
-          let config = _.transform(copiedConfigProps, function (config, prop) {
+          var config = _.transform(copiedConfigProps, function (config, prop) {
             config[prop] = {};
           }, {});
 
-          let aggType = new AggType(config);
+          var aggType = new AggType(config);
 
           copiedConfigProps.forEach(function (prop) {
             expect(aggType[prop]).to.be(config[prop]);
@@ -57,9 +57,9 @@ describe('AggType Class', function () {
 
       describe('makeLabel', function () {
         it('makes a function when the makeLabel config is not specified', function () {
-          let someGetter = function () {};
+          var someGetter = function () {};
 
-          let aggType = new AggType({
+          var aggType = new AggType({
             makeLabel: someGetter
           });
 
@@ -76,9 +76,9 @@ describe('AggType Class', function () {
 
       describe('getFormat', function () {
         it('returns the formatter for the aggConfig', function () {
-          let aggType = new AggType({});
+          var aggType = new AggType({});
 
-          let vis = new Vis(indexPattern, {
+          var vis = new Vis(indexPattern, {
             type: 'histogram',
             aggs: [
               {
@@ -88,7 +88,7 @@ describe('AggType Class', function () {
             ]
           });
 
-          let aggConfig = vis.aggs.byTypeName.date_histogram[0];
+          var aggConfig = vis.aggs.byTypeName.date_histogram[0];
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('date'));
 
@@ -107,9 +107,9 @@ describe('AggType Class', function () {
         });
 
         it('can be overridden via config', function () {
-          let someGetter = function () {};
+          var someGetter = function () {};
 
-          let aggType = new AggType({
+          var aggType = new AggType({
             getFormat: someGetter
           });
 
@@ -123,7 +123,7 @@ describe('AggType Class', function () {
         });
 
         it('defaults to AggParams object with JSON param', function () {
-          let aggType = new AggType({
+          var aggType = new AggType({
             name: 'smart agg'
           });
 
@@ -134,7 +134,7 @@ describe('AggType Class', function () {
         });
 
         it('can disable customLabel', function () {
-          let aggType = new AggType({
+          var aggType = new AggType({
             name: 'smart agg',
             customLabels: false
           });
@@ -144,13 +144,13 @@ describe('AggType Class', function () {
         });
 
         it('passes the params arg directly to the AggParams constructor', function () {
-          let params = [
+          var params = [
             {name: 'one'},
             {name: 'two'}
           ];
-          let paramLength = params.length + 2; // json and custom label are always appended
+          var paramLength = params.length + 2; // json and custom label are always appended
 
-          let aggType = new AggType({
+          var aggType = new AggType({
             name: 'bucketeer',
             params: params
           });
@@ -164,8 +164,8 @@ describe('AggType Class', function () {
 
       describe('getResponseAggs', function () {
         it('copies the value', function () {
-          let football = {};
-          let aggType = new AggType({
+          var football = {};
+          var aggType = new AggType({
             getResponseAggs: football
           });
 
@@ -173,7 +173,7 @@ describe('AggType Class', function () {
         });
 
         it('defaults to _.noop', function () {
-          let aggType = new AggType({});
+          var aggType = new AggType({});
 
           expect(aggType.getResponseAggs).to.be(_.noop);
         });

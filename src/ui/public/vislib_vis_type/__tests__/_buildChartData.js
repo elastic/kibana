@@ -1,8 +1,8 @@
 describe('renderbot#buildChartData', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let sinon = require('auto-release-sinon');
+  var _ = require('lodash');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var sinon = require('auto-release-sinon');
 
   let buildChartData;
   let aggResponse;
@@ -19,14 +19,14 @@ describe('renderbot#buildChartData', function () {
 
   describe('for hierarchical vis', function () {
     it('defers to hierarchical aggResponse converter', function () {
-      let football = {};
-      let renderbot = {
+      var football = {};
+      var renderbot = {
         vis: {
           isHierarchical: _.constant(true)
         }
       };
 
-      let stub = sinon.stub(aggResponse, 'hierarchical').returns(football);
+      var stub = sinon.stub(aggResponse, 'hierarchical').returns(football);
       expect(buildChartData.call(renderbot, football)).to.be(football);
       expect(stub).to.have.property('callCount', 1);
       expect(stub.firstCall.args[0]).to.be(renderbot.vis);
@@ -36,14 +36,14 @@ describe('renderbot#buildChartData', function () {
 
   describe('for point plot', function () {
     it('calls tabify to simplify the data into a table', function () {
-      let renderbot = {
+      var renderbot = {
         vis: {
           isHierarchical: _.constant(false)
         }
       };
-      let football = { tables: [], hits: { total: 1 } };
+      var football = { tables: [], hits: { total: 1 } };
 
-      let stub = sinon.stub(aggResponse, 'tabify').returns(football);
+      var stub = sinon.stub(aggResponse, 'tabify').returns(football);
       expect(buildChartData.call(renderbot, football)).to.eql({ rows: [], hits: 1 });
       expect(stub).to.have.property('callCount', 1);
       expect(stub.firstCall.args[0]).to.be(renderbot.vis);
@@ -51,8 +51,8 @@ describe('renderbot#buildChartData', function () {
     });
 
     it('returns a single chart if the tabify response contains only a single table', function () {
-      let chart = { hits: 1, rows: [], columns: [] };
-      let renderbot = {
+      var chart = { hits: 1, rows: [], columns: [] };
+      var renderbot = {
         vis: {
           isHierarchical: _.constant(false),
           type: {
@@ -60,20 +60,20 @@ describe('renderbot#buildChartData', function () {
           }
         }
       };
-      let esResp = { hits: { total: 1 } };
-      let tabbed = { tables: [ new Table() ] };
+      var esResp = { hits: { total: 1 } };
+      var tabbed = { tables: [ new Table() ] };
 
       sinon.stub(aggResponse, 'tabify').returns(tabbed);
       expect(buildChartData.call(renderbot, esResp)).to.eql(chart);
     });
 
     it('converts table groups into rows/columns wrappers for charts', function () {
-      let chart = { hits: 1, rows: [], columns: [] };
-      let converter = sinon.stub().returns('chart');
-      let esResp = { hits: { total: 1 } };
-      let tables = [new Table(), new Table(), new Table(), new Table()];
+      var chart = { hits: 1, rows: [], columns: [] };
+      var converter = sinon.stub().returns('chart');
+      var esResp = { hits: { total: 1 } };
+      var tables = [new Table(), new Table(), new Table(), new Table()];
 
-      let renderbot = {
+      var renderbot = {
         vis: {
           isHierarchical: _.constant(false),
           type: {
@@ -82,7 +82,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
 
-      let tabify = sinon.stub(aggResponse, 'tabify').returns({
+      var tabify = sinon.stub(aggResponse, 'tabify').returns({
         tables: [
           {
             aggConfig: { params: { row: true } },
@@ -113,7 +113,7 @@ describe('renderbot#buildChartData', function () {
         ]
       });
 
-      let chartData = buildChartData.call(renderbot, esResp);
+      var chartData = buildChartData.call(renderbot, esResp);
 
       // verify tables were converted
       expect(converter).to.have.property('callCount', 4);

@@ -1,7 +1,7 @@
 describe('Optioned', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let BaseAggParam;
   let OptionedAggParam;
@@ -15,7 +15,7 @@ describe('Optioned', function () {
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      let aggParam = new OptionedAggParam({
+      var aggParam = new OptionedAggParam({
         name: 'some_param',
         type: 'optioned'
       });

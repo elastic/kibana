@@ -1,10 +1,10 @@
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var sinon = require('sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 let storage;
 let $window;
-let payload = { first: 'john', last: 'smith' };
+var payload = { first: 'john', last: 'smith' };
 
 require('ui/storage');
 
@@ -69,21 +69,21 @@ describe('StorageService', function () {
 
   describe('json data', function () {
     it('should parse JSON when reading from the store', function () {
-      let getItem = $window.localStorage.getItem;
+      var getItem = $window.localStorage.getItem;
       getItem.returns(JSON.stringify(payload));
 
-      let data = storage.get('name');
+      var data = storage.get('name');
       expect(data).to.eql(payload);
     });
 
     it('should write JSON string to the store', function () {
-      let setItem = $window.localStorage.setItem;
-      let key = 'name';
-      let value = payload;
+      var setItem = $window.localStorage.setItem;
+      var key = 'name';
+      var value = payload;
 
       storage.set(key, value);
 
-      let call = setItem.getCall(0);
+      var call = setItem.getCall(0);
       expect(call.args[0]).to.equal(key);
       expect(call.args[1]).to.equal(JSON.stringify(value));
     });
@@ -91,15 +91,15 @@ describe('StorageService', function () {
 
   describe('expected responses', function () {
     it('should return null when not exists', function () {
-      let data = storage.get('notexists');
+      var data = storage.get('notexists');
       expect(data).to.equal(null);
     });
 
     it('should return null when invalid JSON', function () {
-      let getItem = $window.localStorage.getItem;
+      var getItem = $window.localStorage.getItem;
       getItem.returns('not: json');
 
-      let data = storage.get('name');
+      var data = storage.get('name');
       expect(data).to.equal(null);
     });
   });

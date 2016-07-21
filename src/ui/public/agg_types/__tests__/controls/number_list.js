@@ -1,9 +1,9 @@
 describe('NumberList directive', function () {
-  let $ = require('jquery');
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let simulateKeys = require('testUtils/simulateKeys');
-  let ngMock = require('ngMock');
+  var $ = require('jquery');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var simulateKeys = require('testUtils/simulateKeys');
+  var ngMock = require('ngMock');
 
   require('ui/number_list');
 
@@ -13,15 +13,15 @@ describe('NumberList directive', function () {
 
   function onlyValidValues() {
     return $el.find('[ng-model]').toArray().map(function (el) {
-      let ngModel = $(el).controller('ngModel');
+      var ngModel = $(el).controller('ngModel');
       return ngModel.$valid ? ngModel.$modelValue : undefined;
     });
   }
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
-    let $compile = $injector.get('$compile');
-    let $rootScope = $injector.get('$rootScope');
+    var $compile = $injector.get('$compile');
+    var $rootScope = $injector.get('$rootScope');
 
     $scope = $rootScope.$new();
     $el = $('<kbn-number-list ng-model="vals">');
@@ -75,7 +75,7 @@ describe('NumberList directive', function () {
     it('shift-up increases by 0.1', function () {
       compile([4.8]);
 
-      let seq = [
+      var seq = [
         {
           type: 'press',
           key: 'shift',
@@ -111,7 +111,7 @@ describe('NumberList directive', function () {
     it('shift-down decreases by 0.1', function () {
       compile([5.1]);
 
-      let seq = [
+      var seq = [
         {
           type: 'press',
           key: 'shift',
@@ -135,12 +135,12 @@ describe('NumberList directive', function () {
     it('maintains valid number', function () {
       compile([9, 11, 13]);
 
-      let seq = [
+      var seq = [
         'down', // 10 (11 - 1)
         'down'  // 10 (limited by 9)
       ];
 
-      let getEl = function () { return $el.find('input').eq(1); };
+      var getEl = function () { return $el.find('input').eq(1); };
 
       return simulateKeys(getEl, seq)
       .then(function () {

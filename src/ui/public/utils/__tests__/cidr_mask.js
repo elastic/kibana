@@ -1,6 +1,6 @@
 
-let CidrMask = require('ui/utils/CidrMask');
-let expect = require('expect.js');
+var CidrMask = require('ui/utils/CidrMask');
+var expect = require('expect.js');
 
 describe('CidrMask', function () {
   it('should throw errors with invalid CIDR masks', function () {
@@ -42,7 +42,7 @@ describe('CidrMask', function () {
   });
 
   it('should correctly grab IP address and prefix length', function () {
-    let mask = new CidrMask('0.0.0.0/1');
+    var mask = new CidrMask('0.0.0.0/1');
     expect(mask.initialAddress.toString()).to.be('0.0.0.0');
     expect(mask.prefixLength).to.be(1);
 
@@ -52,8 +52,8 @@ describe('CidrMask', function () {
   });
 
   it('should calculate a range of IP addresses', function () {
-    let mask = new CidrMask('0.0.0.0/1');
-    let range = mask.getRange();
+    var mask = new CidrMask('0.0.0.0/1');
+    var range = mask.getRange();
     expect(range.from.toString()).to.be('0.0.0.0');
     expect(range.to.toString()).to.be('127.255.255.255');
 
@@ -69,7 +69,7 @@ describe('CidrMask', function () {
   });
 
   it('toString()', function () {
-    let mask = new CidrMask('.../1');
+    var mask = new CidrMask('.../1');
     expect(mask.toString()).to.be('0.0.0.0/1');
 
     mask = new CidrMask('128.0.0.1/31');

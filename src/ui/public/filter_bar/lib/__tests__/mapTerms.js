@@ -1,9 +1,9 @@
 
 describe('Filter Bar Directive', function () {
   describe('mapTerms()', function () {
-    let sinon = require('auto-release-sinon');
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
+    var sinon = require('auto-release-sinon');
+    var expect = require('expect.js');
+    var ngMock = require('ngMock');
     let mapTerms;
     let $rootScope;
 
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      let filter = { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } };
+      var filter = { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } };
       mapTerms(filter).then(function (result) {
         expect(result).to.have.property('key', '_type');
         expect(result).to.have.property('value', 'apache');
@@ -31,7 +31,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      let filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
+      var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
       mapTerms(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

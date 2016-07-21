@@ -1,8 +1,8 @@
 describe('params', function () {
-  let _ = require('lodash');
-  let moment = require('moment');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var moment = require('moment');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let paramWriter;
   let writeInterval;
@@ -14,9 +14,9 @@ describe('params', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    let AggParamWriter = Private(require('../../AggParamWriter'));
-    let indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    let timefilter = $injector.get('timefilter');
+    var AggParamWriter = Private(require('../../AggParamWriter'));
+    var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    var timefilter = $injector.get('timefilter');
 
     timeField = indexPattern.timeFieldName;
     aggTypes = Private(require('ui/agg_types/index'));
@@ -27,7 +27,7 @@ describe('params', function () {
       return paramWriter.write({ interval: interval, field: timeField });
     };
 
-    let now = moment();
+    var now = moment();
     setTimeBounds = function (n, units) {
       timefilter.enabled = true;
       timefilter.getBounds = _.constant({
@@ -39,24 +39,24 @@ describe('params', function () {
 
   describe('interval', function () {
     it('accepts a valid interval', function () {
-      let output = writeInterval('d');
+      var output = writeInterval('d');
       expect(output.params).to.have.property('interval', '1d');
     });
 
     it('ignores invalid intervals', function () {
-      let output = writeInterval('foo');
+      var output = writeInterval('foo');
       expect(output.params).to.have.property('interval', '0ms');
     });
 
     it('automatically picks an interval', function () {
       setTimeBounds(15, 'm');
-      let output = writeInterval('auto');
+      var output = writeInterval('auto');
       expect(output.params.interval).to.be('30s');
     });
 
     it('scales up the interval if it will make too many buckets', function () {
       setTimeBounds(30, 'm');
-      let output = writeInterval('s');
+      var output = writeInterval('s');
       expect(output.params.interval).to.be('10s');
       expect(output.metricScaleText).to.be('second');
       expect(output.metricScale).to.be(0.1);
@@ -64,30 +64,30 @@ describe('params', function () {
 
     it('does not scale down the interval', function () {
       setTimeBounds(1, 'm');
-      let output = writeInterval('h');
+      var output = writeInterval('h');
       expect(output.params.interval).to.be('1h');
       expect(output.metricScaleText).to.be(undefined);
       expect(output.metricScale).to.be(undefined);
     });
 
     describe('only scales when all metrics are sum or count', function () {
-      let tests = [
+      var tests = [
         [ false, 'avg', 'count', 'sum' ],
         [ true, 'count', 'sum' ],
         [ false, 'count', 'cardinality' ]
       ];
 
       tests.forEach(function (test) {
-        let should = test.shift();
-        let typeNames = test.slice();
+        var should = test.shift();
+        var typeNames = test.slice();
 
         it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
           setTimeBounds(1, 'y');
 
-          let vis = paramWriter.vis;
+          var vis = paramWriter.vis;
           vis.aggs.splice(0);
 
-          let histoConfig = new AggConfig(vis, {
+          var histoConfig = new AggConfig(vis, {
             type: aggTypes.byName.date_histogram,
             schema: 'segment',
             params: { interval: 's', field: timeField }
@@ -102,7 +102,7 @@ describe('params', function () {
             }));
           });
 
-          let output = histoConfig.write();
+          var output = histoConfig.write();
           expect(_.has(output, 'metricScale')).to.be(should);
         });
       });
@@ -111,9 +111,9 @@ describe('params', function () {
 
   describe('extended_bounds', function () {
     it('should write a long value if a moment passed in', function () {
-      let then = moment(0);
-      let now = moment(500);
-      let output = paramWriter.write({
+      var then = moment(0);
+      var now = moment(500);
+      var output = paramWriter.write({
         extended_bounds: {
           min: then,
           max: now
@@ -129,9 +129,9 @@ describe('params', function () {
     });
 
     it('should write a long if a long is passed', function () {
-      let then = 0;
-      let now = 500;
-      let output = paramWriter.write({
+      var then = 0;
+      var now = 500;
+      var output = paramWriter.write({
         extended_bounds: {
           min: then,
           max: now

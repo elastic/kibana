@@ -1,9 +1,9 @@
-let d3 = require('d3');
-let angular = require('angular');
-let _ = require('lodash');
-let $ = require('jquery');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+var d3 = require('d3');
+var angular = require('angular');
+var _ = require('lodash');
+var $ = require('jquery');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
 
 describe('Vislib AxisTitle Class Test Suite', function () {
   let AxisTitle;
@@ -14,7 +14,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let dataObj;
   let xTitle;
   let yTitle;
-  let data = {
+  var data = {
     hits: 621,
     label: '',
     ordered: {

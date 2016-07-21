@@ -1,7 +1,7 @@
 describe('FieldEditor directive', function () {
-  let $ = require('jquery');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
+  var $ = require('jquery');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
 
   let Field;
   let StringFormat;
@@ -38,7 +38,7 @@ describe('FieldEditor directive', function () {
 
     it('exposes $scope.editor, a controller for the editor', function () {
       compile();
-      let editor = $scope.editor;
+      var editor = $scope.editor;
       expect(editor).to.be.an('object');
     });
   });
@@ -78,8 +78,8 @@ describe('FieldEditor directive', function () {
       });
 
       it('reflects changes to the index patterns field', function () {
-        let a = {};
-        let b = {};
+        var a = {};
+        var b = {};
 
         actual.script = a;
         expect(field.script).to.be(a);
@@ -89,7 +89,7 @@ describe('FieldEditor directive', function () {
       });
 
       it('is fully mutable, unlike the index patterns field', function () {
-        let origName = actual.name;
+        var origName = actual.name;
         actual.name = 'john';
         expect(actual.name).to.not.be('john');
         expect(actual.name).to.be(origName);

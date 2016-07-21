@@ -1,7 +1,7 @@
 describe('Index pattern to wildcard', function () {
 
-  let fn = require('ui/index_patterns/_pattern_to_wildcard')();
-  let expect = require('expect.js');
+  var fn = require('ui/index_patterns/_pattern_to_wildcard')();
+  var expect = require('expect.js');
 
 
   it('should be a function', function () {

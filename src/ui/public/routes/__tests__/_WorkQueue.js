@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let WorkQueue = require('ui/routes/WorkQueue');
-let sinon = require('auto-release-sinon');
+var _ = require('lodash');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var WorkQueue = require('ui/routes/WorkQueue');
+var sinon = require('auto-release-sinon');
 require('ui/promises');
 
 describe('work queue', function () {
@@ -25,10 +25,10 @@ describe('work queue', function () {
 
   describe('#resolveWhenFull', function () {
     it('resolves requests waiting for the queue to fill when appropriate', function () {
-      let size = _.random(5, 50);
+      var size = _.random(5, 50);
       queue.limit = size;
 
-      let whenFull = Promise.defer();
+      var whenFull = Promise.defer();
       sinon.stub(whenFull, 'resolve');
       queue.resolveWhenFull(whenFull);
 
@@ -53,11 +53,11 @@ describe('work queue', function () {
    *                         can manipulate the filled queue
    */
   function fillWithStubs(then) {
-    let size = _.random(5, 50);
-    let stub = sinon.stub();
+    var size = _.random(5, 50);
+    var stub = sinon.stub();
 
     _.times(size, function () {
-      let d = Promise.defer();
+      var d = Promise.defer();
       // overwrite the defer methods with the stub
       d.resolve = stub;
       d.reject = stub;

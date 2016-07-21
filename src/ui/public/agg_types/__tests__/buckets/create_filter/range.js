@@ -1,6 +1,6 @@
 describe('AggConfig Filters', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('range', function () {
     let AggConfig;
@@ -17,7 +17,7 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a range filter for range agg', function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -33,8 +33,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      let aggConfig = vis.aggs.byTypeName.range[0];
-      let filter = createFilter(aggConfig, { gte: 1024, lt: 2048.0 });
+      var aggConfig = vis.aggs.byTypeName.range[0];
+      var filter = createFilter(aggConfig, { gte: 1024, lt: 2048.0 });
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);

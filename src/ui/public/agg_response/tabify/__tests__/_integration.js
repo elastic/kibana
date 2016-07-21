@@ -1,8 +1,8 @@
 describe('tabifyAggResponse Integration', function () {
-  let _ = require('lodash');
-  let fixtures = require('fixtures/fake_hierarchical_data');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var fixtures = require('fixtures/fake_hierarchical_data');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let Vis;
   let Buckets;
@@ -23,13 +23,13 @@ describe('tabifyAggResponse Integration', function () {
   }
 
   it('transforms a simple response properly', function () {
-    let vis = new Vis(indexPattern, {
+    var vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: []
     });
     normalizeIds(vis);
 
-    let resp = tabifyAggResponse(vis, fixtures.metricOnly, { canSplit: false });
+    var resp = tabifyAggResponse(vis, fixtures.metricOnly, { canSplit: false });
 
     expect(resp).to.not.have.property('tables');
     expect(resp).to.have.property('rows').and.property('columns');
@@ -78,7 +78,7 @@ describe('tabifyAggResponse Integration', function () {
     function expectRootGroup(rootTableGroup, expectInnerTables) {
       expect(rootTableGroup).to.have.property('tables');
 
-      let tables = rootTableGroup.tables;
+      var tables = rootTableGroup.tables;
       expect(tables).to.be.an('array').and.have.length(3);
       expectExtensionSplit(tables[0], 'png', expectInnerTables);
       expectExtensionSplit(tables[1], 'css', expectInnerTables);
@@ -152,7 +152,7 @@ describe('tabifyAggResponse Integration', function () {
       // only complete rows, and only put the metrics at the end.
 
       vis.isHierarchical = _.constant(false);
-      let tabbed = tabifyAggResponse(vis, esResp);
+      var tabbed = tabifyAggResponse(vis, esResp);
 
       expectRootGroup(tabbed, function expectTable(table, splitKey) {
         expectColumns(table, [src, os, avg]);
@@ -178,7 +178,7 @@ describe('tabifyAggResponse Integration', function () {
       // the existing bucket and it's metric
 
       vis.isHierarchical = _.constant(true);
-      let tabbed = tabifyAggResponse(vis, esResp, {
+      var tabbed = tabifyAggResponse(vis, esResp, {
         partialRows: true
       });
 
@@ -212,7 +212,7 @@ describe('tabifyAggResponse Integration', function () {
       // the end
 
       vis.isHierarchical = _.constant(true);
-      let tabbed = tabifyAggResponse(vis, esResp, {
+      var tabbed = tabifyAggResponse(vis, esResp, {
         partialRows: true,
         minimalColumns: true
       });
@@ -244,7 +244,7 @@ describe('tabifyAggResponse Integration', function () {
       // create metric columns after each bucket
 
       vis.isHierarchical = _.constant(false);
-      let tabbed = tabifyAggResponse(vis, esResp, {
+      var tabbed = tabifyAggResponse(vis, esResp, {
         minimalColumns: false
       });
 

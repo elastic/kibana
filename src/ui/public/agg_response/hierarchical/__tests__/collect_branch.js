@@ -1,10 +1,10 @@
 
-let _ = require('lodash');
-let collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
-let expect = require('expect.js');
+var _ = require('lodash');
+var collectBranch = require('ui/agg_response/hierarchical/_collect_branch');
+var expect = require('expect.js');
 describe('collectBranch()', function () {
   let results;
-  let convert = function (name) {
+  var convert = function (name) {
     return 'converted:' + name;
   };
 

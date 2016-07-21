@@ -1,6 +1,6 @@
 describe('addToSiri', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
   let addToSiri;
 
   beforeEach(ngMock.module('kibana'));
@@ -9,9 +9,9 @@ describe('addToSiri', function () {
   }));
 
   it('creates a new series the first time it sees an id', function () {
-    let series = new Map();
-    let point = {};
-    let id = 'id';
+    var series = new Map();
+    var point = {};
+    var id = 'id';
     addToSiri(series, point, id);
 
     expect(series.has(id)).to.be(true);
@@ -22,13 +22,13 @@ describe('addToSiri', function () {
   });
 
   it('adds points to existing series if id has been seen', function () {
-    let series = new Map();
-    let id = 'id';
+    var series = new Map();
+    var id = 'id';
 
-    let point = {};
+    var point = {};
     addToSiri(series, point, id);
 
-    let point2 = {};
+    var point2 = {};
     addToSiri(series, point2, id);
 
     expect(series.has(id)).to.be(true);
@@ -40,10 +40,10 @@ describe('addToSiri', function () {
   });
 
   it('allows overriding the series label', function () {
-    let series = new Map();
-    let id = 'id';
-    let label = 'label';
-    let point = {};
+    var series = new Map();
+    var id = 'id';
+    var label = 'label';
+    var point = {};
     addToSiri(series, point, id, label);
 
     expect(series.has(id)).to.be(true);

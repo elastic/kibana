@@ -1,15 +1,15 @@
 describe('Vis Class', function () {
 
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
+  var _ = require('lodash');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
 
   let indexPattern;
   let Vis;
   let visTypes;
 
   let vis;
-  let stateFixture = {
+  var stateFixture = {
     type: 'pie',
     aggs: [
       { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -31,7 +31,7 @@ describe('Vis Class', function () {
     vis = new Vis(indexPattern, stateFixture);
   });
 
-  let verifyVis = function (vis) {
+  var verifyVis = function (vis) {
     expect(vis).to.have.property('aggs');
     expect(vis.aggs).to.have.length(3);
 
@@ -55,7 +55,7 @@ describe('Vis Class', function () {
 
   describe('getState()', function () {
     it('should get a state that represents the... er... state', function () {
-      let state = vis.getState();
+      var state = vis.getState();
       expect(state).to.have.property('type', 'pie');
 
       expect(state).to.have.property('params');
@@ -72,14 +72,14 @@ describe('Vis Class', function () {
 
   describe('clone()', function () {
     it('should make clone of itself', function () {
-      let clone = vis.clone();
+      var clone = vis.clone();
       verifyVis(clone);
     });
   });
 
   describe('setState()', function () {
     it('should set the state to defualts', function () {
-      let vis = new Vis(indexPattern);
+      var vis = new Vis(indexPattern);
       expect(vis).to.have.property('type');
       expect(vis.type).to.eql(visTypes.byName.histogram);
       expect(vis).to.have.property('aggs');
@@ -99,7 +99,7 @@ describe('Vis Class', function () {
       expect(vis.isHierarchical()).to.be(true);
     });
     it('should return false for non-hierarchical vis (like histogram)', function () {
-      let vis = new Vis(indexPattern);
+      var vis = new Vis(indexPattern);
       expect(vis.isHierarchical()).to.be(false);
     });
   });

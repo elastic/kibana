@@ -1,7 +1,7 @@
 describe('initXAxis', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let initXAxis;
 
@@ -10,7 +10,7 @@ describe('initXAxis', function () {
     initXAxis = Private(require('ui/agg_response/point_series/_init_x_axis'));
   }));
 
-  let baseChart = {
+  var baseChart = {
     aspects: {
       x: {
         agg: {
@@ -26,7 +26,7 @@ describe('initXAxis', function () {
   };
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
-    let chart = _.cloneDeep(baseChart);
+    var chart = _.cloneDeep(baseChart);
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
@@ -34,7 +34,7 @@ describe('initXAxis', function () {
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
-    let chart = _.cloneDeep(baseChart);
+    var chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
 
     initXAxis(chart);
@@ -49,7 +49,7 @@ describe('initXAxis', function () {
   });
 
   it('reads the interval param from the x agg', function () {
-    let chart = _.cloneDeep(baseChart);
+    var chart = _.cloneDeep(baseChart);
     chart.aspects.x.agg.type.ordered = true;
     chart.aspects.x.agg.write = _.constant({ params: { interval: 10 } });
 

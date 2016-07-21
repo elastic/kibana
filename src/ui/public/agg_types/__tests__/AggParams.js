@@ -1,7 +1,7 @@
 describe('AggParams class', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
+  var _ = require('lodash');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
 
   let AggParams;
   let BaseAggParam;
@@ -23,11 +23,11 @@ describe('AggParams class', function () {
 
   describe('constructor args', function () {
     it('accepts an array of param defs', function () {
-      let params = [
+      var params = [
         { name: 'one' },
         { name: 'two' }
       ];
-      let aggParams = new AggParams(params);
+      var aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams).to.be.an(Array);
@@ -37,43 +37,43 @@ describe('AggParams class', function () {
 
   describe('AggParam creation', function () {
     it('Uses the FieldAggParam class for params with the name "field"', function () {
-      let params = [
+      var params = [
         { name: 'field' }
       ];
-      let aggParams = new AggParams(params);
+      var aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(FieldAggParam);
     });
 
     it('Uses the OptionedAggParam class for params of type "optioned"', function () {
-      let params = [
+      var params = [
         {
           name: 'interval',
           type: 'optioned'
         }
       ];
-      let aggParams = new AggParams(params);
+      var aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(OptionedAggParam);
     });
 
     it('Uses the RegexAggParam class for params of type "regex"', function () {
-      let params = [
+      var params = [
         {
           name: 'exclude',
           type: 'regex'
         }
       ];
-      let aggParams = new AggParams(params);
+      var aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(RegexAggParam);
     });
 
     it('Always converts the params to a BaseAggParam', function () {
-      let params = [
+      var params = [
         {
           name: 'height',
           editor: '<blink>high</blink>'
@@ -87,7 +87,7 @@ describe('AggParams class', function () {
           editor: '<blink>small</blink>'
         }
       ];
-      let aggParams = new AggParams(params);
+      var aggParams = new AggParams(params);
 
       expect(BaseAggParam).to.have.property('callCount', params.length);
       expect(FieldAggParam).to.have.property('callCount', 0);

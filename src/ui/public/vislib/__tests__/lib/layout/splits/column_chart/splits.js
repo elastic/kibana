@@ -1,8 +1,8 @@
-let d3 = require('d3');
-let angular = require('angular');
-let $ = require('jquery');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+var d3 = require('d3');
+var angular = require('angular');
+var $ = require('jquery');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
 
 describe('Vislib Split Function Test Suite', function () {
   describe('Column Chart', function () {
@@ -11,7 +11,7 @@ describe('Vislib Split Function Test Suite', function () {
     let xAxisSplit;
     let yAxisSplit;
     let el;
-    let data = {
+    var data = {
       rows: [
         {
           hits      : 621,

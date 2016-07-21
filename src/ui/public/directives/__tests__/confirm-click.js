@@ -1,8 +1,8 @@
-let angular = require('angular');
-let $ = require('jquery');
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var $ = require('jquery');
+var sinon = require('sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 require('ui/directives/confirm_click');
 require('plugins/kibana/discover/index');
@@ -13,7 +13,7 @@ let $scope;
 
 let $elem;
 
-let init = function (text) {
+var init = function (text) {
   // Load the application
   ngMock.module('kibana');
 

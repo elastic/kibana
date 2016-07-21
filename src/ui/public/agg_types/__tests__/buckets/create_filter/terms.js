@@ -1,6 +1,6 @@
 describe('AggConfig Filters', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('terms', function () {
     let AggConfig;
@@ -17,12 +17,12 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a match filter for terms', function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      let aggConfig = vis.aggs.byTypeName.terms[0];
-      let filter = createFilter(aggConfig, 'apache');
+      var aggConfig = vis.aggs.byTypeName.terms[0];
+      var filter = createFilter(aggConfig, 'apache');
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('match');
       expect(filter.query.match).to.have.property('_type');

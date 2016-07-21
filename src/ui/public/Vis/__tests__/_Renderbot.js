@@ -1,7 +1,7 @@
 describe('renderbot', function () {
   let Renderbot;
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   function init() {
     ngMock.module('kibana');

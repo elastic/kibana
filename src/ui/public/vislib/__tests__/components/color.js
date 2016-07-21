@@ -1,6 +1,6 @@
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 const _ = require('lodash');
 const d3 = require('d3');
 
@@ -12,14 +12,14 @@ describe('Vislib Color Module Test Suite', function () {
   describe('Color (main)', function () {
     let previousConfig;
     let getColors;
-    let arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
-    let arrayOfNumbers = [1, 2, 3, 4, 5];
-    let arrayOfUndefinedValues = [undefined, undefined, undefined];
-    let arrayOfObjects = [{}, {}, {}];
-    let arrayOfBooleans = [true, false, true];
-    let arrayOfNullValues = [null, null, null];
-    let emptyObject = {};
-    let nullValue = null;
+    var arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
+    var arrayOfNumbers = [1, 2, 3, 4, 5];
+    var arrayOfUndefinedValues = [undefined, undefined, undefined];
+    var arrayOfObjects = [{}, {}, {}];
+    var arrayOfBooleans = [true, false, true];
+    var arrayOfNullValues = [null, null, null];
+    var emptyObject = {};
+    var nullValue = null;
     let notAValue;
     let color;
 
@@ -239,14 +239,14 @@ describe('Vislib Color Module Test Suite', function () {
   });
 
   describe('Color Palette', function () {
-    let num1 = 45;
-    let num2 = 72;
-    let num3 = 90;
-    let string = 'Welcome';
-    let bool = true;
-    let nullValue = null;
-    let emptyArr = [];
-    let emptyObject = {};
+    var num1 = 45;
+    var num2 = 72;
+    var num3 = 90;
+    var string = 'Welcome';
+    var bool = true;
+    var nullValue = null;
+    var emptyArr = [];
+    var emptyObject = {};
     let notAValue;
     let createColorPalette;
     let colorPalette;

@@ -1,9 +1,9 @@
 
-let angular = require('angular');
-let _ = require('lodash');
-let sinon = require('auto-release-sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var _ = require('lodash');
+var sinon = require('auto-release-sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 require('ui/private');
 
 describe('Events', function () {
@@ -23,8 +23,8 @@ describe('Events', function () {
   }));
 
   it('should handle on events', function () {
-    let obj = new Events();
-    let prom = obj.on('test', function (message) {
+    var obj = new Events();
+    var prom = obj.on('test', function (message) {
       expect(message).to.equal('Hello World');
     });
 
@@ -38,9 +38,9 @@ describe('Events', function () {
     function MyEventedObject() {
       MyEventedObject.Super.call(this);
     }
-    let obj = new MyEventedObject();
+    var obj = new MyEventedObject();
 
-    let prom = obj.on('test', function (message) {
+    var prom = obj.on('test', function (message) {
       expect(message).to.equal('Hello World');
     });
 
@@ -50,7 +50,7 @@ describe('Events', function () {
   });
 
   it('should clear events when off is called', function () {
-    let obj = new Events();
+    var obj = new Events();
     obj.on('test', _.noop);
     expect(obj._listeners).to.have.property('test');
     expect(obj._listeners.test).to.have.length(1);
@@ -59,9 +59,9 @@ describe('Events', function () {
   });
 
   it('should clear a specific handler when off is called for an event', function () {
-    let obj = new Events();
-    let handler1 = sinon.stub();
-    let handler2 = sinon.stub();
+    var obj = new Events();
+    var handler1 = sinon.stub();
+    var handler2 = sinon.stub();
     obj.on('test', handler1);
     obj.on('test', handler2);
     expect(obj._listeners).to.have.property('test');
@@ -75,8 +75,8 @@ describe('Events', function () {
   });
 
   it('should clear a all handlers when off is called for an event', function () {
-    let obj = new Events();
-    let handler1 = sinon.stub();
+    var obj = new Events();
+    var handler1 = sinon.stub();
     obj.on('test', handler1);
     expect(obj._listeners).to.have.property('test');
     obj.off('test');
@@ -89,11 +89,11 @@ describe('Events', function () {
   });
 
   it('should handle mulitple identical emits in the same tick', function () {
-    let obj = new Events();
-    let handler1 = sinon.stub();
+    var obj = new Events();
+    var handler1 = sinon.stub();
 
     obj.on('test', handler1);
-    let emits = [
+    var emits = [
       obj.emit('test', 'one'),
       obj.emit('test', 'two'),
       obj.emit('test', 'three')
@@ -110,9 +110,9 @@ describe('Events', function () {
   });
 
   it('should handle emits from the handler', function () {
-    let obj = new Events();
-    let secondEmit = Promise.defer();
-    let handler1 = sinon.spy(function () {
+    var obj = new Events();
+    var secondEmit = Promise.defer();
+    var handler1 = sinon.spy(function () {
       if (handler1.calledTwice) {
         return;
       }
@@ -132,12 +132,12 @@ describe('Events', function () {
   });
 
   it('should only emit to handlers registered before emit is called', function () {
-    let obj = new Events();
-    let handler1 = sinon.stub();
-    let handler2 = sinon.stub();
+    var obj = new Events();
+    var handler1 = sinon.stub();
+    var handler2 = sinon.stub();
 
     obj.on('test', handler1);
-    let emits = [
+    var emits = [
       obj.emit('test', 'one'),
       obj.emit('test', 'two'),
       obj.emit('test', 'three')
@@ -149,7 +149,7 @@ describe('Events', function () {
 
       obj.on('test', handler2);
 
-      let emits2 = [
+      var emits2 = [
         obj.emit('test', 'four'),
         obj.emit('test', 'five'),
         obj.emit('test', 'six')
@@ -164,9 +164,9 @@ describe('Events', function () {
   });
 
   it('should pass multiple arguments from the emitter', function () {
-    let obj = new Events();
-    let handler = sinon.stub();
-    let payload = [
+    var obj = new Events();
+    var handler = sinon.stub();
+    var payload = [
       'one',
       { hello: 'tests' },
       null
@@ -182,8 +182,8 @@ describe('Events', function () {
   });
 
   it('should preserve the scope of the handler', function () {
-    let obj = new Events();
-    let expected = 'some value';
+    var obj = new Events();
+    var expected = 'some value';
     let testValue;
 
     function handler(arg1, arg2) {
@@ -199,9 +199,9 @@ describe('Events', function () {
   });
 
   it('should always emit in the same order', function () {
-    let handler = sinon.stub();
+    var handler = sinon.stub();
 
-    let obj = new Events();
+    var obj = new Events();
     obj.on('block', _.partial(handler, 'block'));
     obj.on('last', _.partial(handler, 'last'));
 

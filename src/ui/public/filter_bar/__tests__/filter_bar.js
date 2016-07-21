@@ -1,12 +1,12 @@
-let angular = require('angular');
-let _ = require('lodash');
-let $ = require('jquery');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
-let sinon = require('sinon');
+var angular = require('angular');
+var _ = require('lodash');
+var $ = require('jquery');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
+var sinon = require('sinon');
 
 require('ui/filter_bar');
-let MockState = require('fixtures/mock_state');
+var MockState = require('fixtures/mock_state');
 
 describe('Filter Bar Directive', function () {
   let $rootScope;
@@ -41,7 +41,7 @@ describe('Filter Bar Directive', function () {
       Promise = $injector.get('Promise');
       mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
 
-      let queryFilter = Private(require('ui/filter_bar/query_filter'));
+      var queryFilter = Private(require('ui/filter_bar/query_filter'));
       queryFilter.getFilters = function () {
         return appState.filters;
       };
@@ -50,7 +50,7 @@ describe('Filter Bar Directive', function () {
 
   describe('Element rendering', function () {
     beforeEach(function (done) {
-      let filters = [
+      var filters = [
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
         { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
@@ -64,7 +64,7 @@ describe('Filter Bar Directive', function () {
         $scope = $el.isolateScope();
       });
 
-      let off = $rootScope.$on('filterbar:updated', function () {
+      var off = $rootScope.$on('filterbar:updated', function () {
         off();
         // force a nextTick so it continues *after* the $digest loop completes
         setTimeout(done, 0);
@@ -75,7 +75,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should render all the filters in state', function () {
-      let filters = $el.find('.filter');
+      var filters = $el.find('.filter');
       expect(filters).to.have.length(5);
       expect($(filters[0]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
@@ -88,7 +88,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should be able to set an alias', function () {
-      let filter = $el.find('.filter')[4];
+      var filter = $el.find('.filter')[4];
       expect($(filter).find('span')[0].innerHTML).to.equal('foo');
     });
 

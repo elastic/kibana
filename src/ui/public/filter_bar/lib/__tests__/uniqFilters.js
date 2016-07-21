@@ -1,19 +1,19 @@
-let uniqFilters = require('ui/filter_bar/lib/uniqFilters');
-let expect = require('expect.js');
+var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
+var expect = require('expect.js');
 describe('Filter Bar Directive', function () {
   describe('uniqFilter', function () {
 
     it('should filter out dups', function () {
-      let before = [
+      var before = [
         { query: { _type: { match: { query: 'apache', type: 'phrase' } } } },
         { query: { _type: { match: { query: 'apache', type: 'phrase' } } } }
       ];
-      let results = uniqFilters(before);
+      var results = uniqFilters(before);
       expect(results).to.have.length(1);
     });
 
     it('should filter out duplicates, ignoring meta attributes', function () {
-      let before = [
+      var before = [
         {
           meta: { negate: true },
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
@@ -23,12 +23,12 @@ describe('Filter Bar Directive', function () {
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
         }
       ];
-      let results = uniqFilters(before);
+      var results = uniqFilters(before);
       expect(results).to.have.length(1);
     });
 
     it('should filter out duplicates, ignoring $state attributes', function () {
-      let before = [
+      var before = [
         {
           $state: { store: 'appState' },
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
@@ -38,7 +38,7 @@ describe('Filter Bar Directive', function () {
           query: { _type: { match: { query: 'apache', type: 'phrase' } } }
         }
       ];
-      let results = uniqFilters(before);
+      var results = uniqFilters(before);
       expect(results).to.have.length(1);
     });
   });

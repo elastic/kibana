@@ -1,7 +1,7 @@
 describe('Buckets wrapper', function () {
   let Buckets;
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -11,13 +11,13 @@ describe('Buckets wrapper', function () {
 
   function test(aggResp, count, keys) {
     it('reads the length', function () {
-      let buckets = new Buckets(aggResp);
+      var buckets = new Buckets(aggResp);
       expect(buckets).to.have.length(count);
     });
 
     it('itterates properly, passing in the key', function () {
-      let buckets = new Buckets(aggResp);
-      let keysSent = [];
+      var buckets = new Buckets(aggResp);
+      var keysSent = [];
       buckets.forEach(function (bucket, key) {
         keysSent.push(key);
       });
@@ -28,7 +28,7 @@ describe('Buckets wrapper', function () {
   }
 
   describe('with object style buckets', function () {
-    let aggResp = {
+    var aggResp = {
       buckets: {
         '0-100': {},
         '100-200': {},
@@ -36,14 +36,14 @@ describe('Buckets wrapper', function () {
       }
     };
 
-    let count = 3;
-    let keys = ['0-100', '100-200', '200-300'];
+    var count = 3;
+    var keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
   });
 
   describe('with array style buckets', function () {
-    let aggResp = {
+    var aggResp = {
       buckets: [
         { key: '0-100', value: {} },
         { key: '100-200', value: {} },
@@ -51,8 +51,8 @@ describe('Buckets wrapper', function () {
       ]
     };
 
-    let count = 3;
-    let keys = ['0-100', '100-200', '200-300'];
+    var count = 3;
+    var keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
   });

@@ -1,9 +1,9 @@
 describe('AggTableGroup Directive', function () {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let fixtures = require('fixtures/fake_hierarchical_data');
+  var _ = require('lodash');
+  var $ = require('jquery');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var fixtures = require('fixtures/fake_hierarchical_data');
 
   let $rootScope;
   let $compile;
@@ -31,9 +31,9 @@ describe('AggTableGroup Directive', function () {
 
 
   it('renders a simple split response properly', function () {
-    let vis = new Vis(indexPattern, 'table');
+    var vis = new Vis(indexPattern, 'table');
     $scope.group = tabifyAggResponse(vis, fixtures.metricOnly);
-    let $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
 
     $compile($el)($scope);
     $scope.$digest();
@@ -43,7 +43,7 @@ describe('AggTableGroup Directive', function () {
   });
 
   it('renders nothing if the table list is empty', function () {
-    let $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
 
     $scope.group = {
       tables: []
@@ -52,12 +52,12 @@ describe('AggTableGroup Directive', function () {
     $compile($el)($scope);
     $scope.$digest();
 
-    let $subTables = $el.find('kbn-agg-table');
+    var $subTables = $el.find('kbn-agg-table');
     expect($subTables.size()).to.be(0);
   });
 
   it('renders a complex response properly', function () {
-    let vis = new Vis(indexPattern, {
+    var vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -70,15 +70,15 @@ describe('AggTableGroup Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    let group = $scope.group = tabifyAggResponse(vis, fixtures.threeTermBuckets);
-    let $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    var group = $scope.group = tabifyAggResponse(vis, fixtures.threeTermBuckets);
+    var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();
 
-    let $subTables = $el.find('kbn-agg-table');
+    var $subTables = $el.find('kbn-agg-table');
     expect($subTables.size()).to.be(3);
 
-    let $subTableHeaders = $el.find('.agg-table-group-header');
+    var $subTableHeaders = $el.find('.agg-table-group-header');
     expect($subTableHeaders.size()).to.be(3);
 
     $subTableHeaders.each(function (i) {

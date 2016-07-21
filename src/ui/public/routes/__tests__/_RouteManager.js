@@ -1,11 +1,11 @@
-let _ = require('lodash');
-let ngMock = require('ngMock');
-let sinon = require('auto-release-sinon');
-let RouteManager = require('ui/routes/RouteManager');
-let expect = require('expect.js');
+var _ = require('lodash');
+var ngMock = require('ngMock');
+var sinon = require('auto-release-sinon');
+var RouteManager = require('ui/routes/RouteManager');
+var expect = require('expect.js');
 
 let routes; // will contain an new instance of RouteManager for each test
-let chainableMethods = [
+var chainableMethods = [
   { name: 'when', args: ['', {}] },
   { name: 'otherwise', args: [{}] },
   { name: 'defaults', args: [/regexp/, {}] }
@@ -31,7 +31,7 @@ describe('routes/RouteManager', function () {
 
   describe('#otherwise', function () {
     it('should forward the last otherwise route', function () {
-      let otherRoute = {};
+      var otherRoute = {};
       routes.otherwise({});
       routes.otherwise(otherRoute);
 
@@ -68,7 +68,7 @@ describe('routes/RouteManager', function () {
 
   describe('#config', function () {
     it('should add defined routes to the global $routeProvider service in order', function () {
-      let args = [
+      var args = [
         ['/one', {}],
         ['/two', {}]
       ];
@@ -81,8 +81,8 @@ describe('routes/RouteManager', function () {
 
       expect($rp.when.callCount).to.be(args.length);
       _.times(args.length, function (i) {
-        let call = $rp.when.getCall(i);
-        let a = args.shift();
+        var call = $rp.when.getCall(i);
+        var a = args.shift();
 
         expect(call.args[0]).to.be(a[0]);
         expect(call.args[1]).to.be(a[1]);

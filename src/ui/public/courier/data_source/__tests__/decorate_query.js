@@ -1,10 +1,10 @@
-let moment = require('moment');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var moment = require('moment');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 describe('Query decorator', function () {
 
-  let _ = require('lodash');
+  var _ = require('lodash');
   let config;
 
   let indexPattern;
@@ -17,7 +17,7 @@ describe('Query decorator', function () {
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        let keys = {};
+        var keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }

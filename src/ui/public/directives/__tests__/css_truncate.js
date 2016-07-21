@@ -1,7 +1,7 @@
-let angular = require('angular');
-let $ = require('jquery');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var $ = require('jquery');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 require('plugins/kibana/discover/index');
 
 let $parentScope;
@@ -10,7 +10,7 @@ let $scope;
 
 let $elem;
 
-let init = function (expandable) {
+var init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

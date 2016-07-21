@@ -1,7 +1,7 @@
 
-let expect = require('expect.js');
-let angular = require('angular');
-let ngMock = require('ngMock');
+var expect = require('expect.js');
+var angular = require('angular');
+var ngMock = require('ngMock');
 
 describe('Vislib ErrorHandler Test Suite', function () {
   let ErrorHandler;

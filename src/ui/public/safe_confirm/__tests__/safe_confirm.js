@@ -1,7 +1,7 @@
 describe('ui/safe_confirm', function () {
-  let sinon = require('sinon');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var sinon = require('sinon');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let $rootScope;
   let $window;
@@ -34,7 +34,7 @@ describe('ui/safe_confirm', function () {
       expect($window.confirm.called).to.be(false);
     });
     it('returned promise is not resolved', function () {
-      let isResolved = false;
+      var isResolved = false;
       function markAsResolved() {
         isResolved = true;
       }

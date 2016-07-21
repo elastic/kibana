@@ -1,6 +1,6 @@
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var _ = require('lodash');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 let queryFilter;
 let EventEmitter;
 let $rootScope;

@@ -1,8 +1,8 @@
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {
 
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
+    var expect = require('expect.js');
+    var ngMock = require('ngMock');
     let mapDefault;
     let $rootScope;
     beforeEach(ngMock.module('kibana'));
@@ -12,7 +12,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      let filter = { query: { match_all: {} } };
+      var filter = { query: { match_all: {} } };
       mapDefault(filter).then(function (result) {
         expect(result).to.have.property('key', 'query');
         expect(result).to.have.property('value', '{"match_all":{}}');
@@ -22,7 +22,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should work with undefined filter types', function (done) {
-      let filter = {
+      var filter = {
         'bool': {
           'must': {
             'term': {
@@ -40,7 +40,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined if there is no valid key', function (done) {
-      let filter = { meta: {} };
+      var filter = { meta: {} };
       mapDefault(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

@@ -1,16 +1,16 @@
 describe('Reflow watcher', function () {
   require('angular');
-  let $ = require('jquery');
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let sinon = require('auto-release-sinon');
-  let ngMock = require('ngMock');
+  var $ = require('jquery');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var sinon = require('auto-release-sinon');
+  var ngMock = require('ngMock');
 
-  let $body = $(document.body);
-  let $window = $(window);
-  let expectStubbedEventAndEl = function (stub, event, $el) {
+  var $body = $(document.body);
+  var $window = $(window);
+  var expectStubbedEventAndEl = function (stub, event, $el) {
     expect(stub.getCalls().some(function (call) {
-      let events = call.args[0].split(' ');
+      var events = call.args[0].split(' ');
       return _.contains(events, event) && $el.is(call.thisValue);
     })).to.be(true);
   };
@@ -67,7 +67,7 @@ describe('Reflow watcher', function () {
   });
 
   it('triggers the "reflow" event within a new angular tick', function () {
-    let stub = sinon.stub();
+    var stub = sinon.stub();
     reflowWatcher.on('reflow', stub);
     reflowWatcher.trigger();
 

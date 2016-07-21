@@ -1,9 +1,9 @@
-let parseInterval = require('ui/utils/parse_interval');
-let expect = require('expect.js');
+var parseInterval = require('ui/utils/parse_interval');
+var expect = require('expect.js');
 
 describe('parseInterval', function () {
   it('should correctly parse an interval containing unit and value', function () {
-    let duration = parseInterval('1d');
+    var duration = parseInterval('1d');
     expect(duration.as('d')).to.be(1);
 
     duration = parseInterval('2y');
@@ -26,7 +26,7 @@ describe('parseInterval', function () {
   });
 
   it('should correctly parse fractional intervals containing unit and value', function () {
-    let duration = parseInterval('1.5w');
+    var duration = parseInterval('1.5w');
     expect(duration.as('w')).to.be(1.5);
 
     duration = parseInterval('2.35y');
@@ -34,7 +34,7 @@ describe('parseInterval', function () {
   });
 
   it('should correctly bubble up intervals which are less than 1', function () {
-    let duration = parseInterval('0.5y');
+    var duration = parseInterval('0.5y');
     expect(duration.as('d')).to.be(183);
 
     duration = parseInterval('0.5d');
@@ -42,7 +42,7 @@ describe('parseInterval', function () {
   });
 
   it('should correctly parse a unit in an interval only', function () {
-    let duration = parseInterval('d');
+    var duration = parseInterval('d');
     expect(duration.as('d')).to.be(1);
 
     duration = parseInterval('m');
@@ -56,7 +56,7 @@ describe('parseInterval', function () {
   });
 
   it('should return null for an invalid interval', function () {
-    let duration = parseInterval('');
+    var duration = parseInterval('');
     expect(duration).to.not.be.ok();
 
     duration = parseInterval(null);

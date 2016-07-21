@@ -1,7 +1,7 @@
 describe('Regex', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let BaseAggParam;
   let RegexAggParam;
@@ -19,7 +19,7 @@ describe('Regex', function () {
 
   describe('constructor', function () {
     it('should be an instance of BaseAggParam', function () {
-      let aggParam = new RegexAggParam({
+      var aggParam = new RegexAggParam({
         name: 'some_param',
         type: 'regex'
       });
@@ -32,11 +32,11 @@ describe('Regex', function () {
   describe('write results', function () {
     let aggParam;
     let aggConfig;
-    let output = { params: {} };
-    let paramName = 'exclude';
+    var output = { params: {} };
+    var paramName = 'exclude';
 
     beforeEach(function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'terms', schema: 'split', params: { field: 'extension' }},

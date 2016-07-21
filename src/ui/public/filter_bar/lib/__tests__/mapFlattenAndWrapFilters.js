@@ -1,10 +1,10 @@
 
-let _ = require('lodash');
+var _ = require('lodash');
 describe('Filter Bar Directive', function () {
   describe('mapFlattenAndWrapFilters()', function () {
-    let sinon = require('auto-release-sinon');
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
+    var sinon = require('auto-release-sinon');
+    var expect = require('expect.js');
+    var ngMock = require('ngMock');
     let mapFlattenAndWrapFilters;
     let $rootScope;
 
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
     }));
 
-    let filters = [
+    var filters = [
       null,
       [
         { meta: { index: 'logstash-*' }, exists: { field: '_type' } },

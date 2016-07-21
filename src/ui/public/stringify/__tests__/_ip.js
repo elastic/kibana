@@ -1,6 +1,6 @@
 describe('IP Address Format', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let ip;
   beforeEach(ngMock.module('kibana'));

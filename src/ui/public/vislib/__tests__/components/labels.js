@@ -1,7 +1,7 @@
-let angular = require('angular');
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var _ = require('lodash');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 let getLabels;
 let seriesLabels;
@@ -11,7 +11,7 @@ let rowsArr;
 let uniqLabels;
 let error;
 
-let seriesData = {
+var seriesData = {
   'label': '',
   'series': [
     {
@@ -21,7 +21,7 @@ let seriesData = {
   ]
 };
 
-let rowsData = {
+var rowsData = {
   'rows': [
     {
       'label': 'a',
@@ -62,7 +62,7 @@ let rowsData = {
   ]
 };
 
-let columnsData = {
+var columnsData = {
   'columns': [
     {
       'label': 'a',
@@ -148,23 +148,23 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Data array', function () {
-    let childrenObject = {
+    var childrenObject = {
       children: []
     };
-    let seriesObject = {
+    var seriesObject = {
       series: []
     };
-    let rowsObject = {
+    var rowsObject = {
       rows: []
     };
-    let columnsObject = {
+    var columnsObject = {
       columns: []
     };
-    let string = 'string';
-    let number = 23;
-    let boolean = false;
-    let emptyArray = [];
-    let nullValue = null;
+    var string = 'string';
+    var number = 23;
+    var boolean = false;
+    var emptyArray = [];
+    var nullValue = null;
     let notAValue;
     let dataArray;
     let testSeries;
@@ -263,7 +263,7 @@ describe('Vislib Labels Module Test Suite', function () {
 
   describe('Unique labels', function () {
     let uniqLabels;
-    let arrObj = [
+    var arrObj = [
       {'label': 'a'},
       {'label': 'b'},
       {'label': 'b'},
@@ -272,12 +272,12 @@ describe('Vislib Labels Module Test Suite', function () {
       {'label': 'd'},
       {'label': 'f'}
     ];
-    let string = 'string';
-    let number = 24;
-    let boolean = false;
-    let nullValue = null;
-    let emptyObject = {};
-    let emptyArray = [];
+    var string = 'string';
+    var number = 24;
+    var boolean = false;
+    var nullValue = null;
+    var emptyObject = {};
+    var emptyArray = [];
     let notAValue;
     let uniq;
     let testArr;
@@ -336,18 +336,18 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Get series', function () {
-    let string = 'string';
-    let number = 24;
-    let boolean = false;
-    let nullValue = null;
-    let rowsObject = {
+    var string = 'string';
+    var number = 24;
+    var boolean = false;
+    var nullValue = null;
+    var rowsObject = {
       rows: []
     };
-    let columnsObject = {
+    var columnsObject = {
       columns: []
     };
-    let emptyObject = {};
-    let emptyArray = [];
+    var emptyObject = {};
+    var emptyArray = [];
     let notAValue;
     let getSeries;
     let columnsLabels;

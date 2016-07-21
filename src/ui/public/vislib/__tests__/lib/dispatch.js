@@ -1,12 +1,12 @@
-let angular = require('angular');
-let _ = require('lodash');
-let $ = require('jquery');
-let d3 = require('d3');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+var angular = require('angular');
+var _ = require('lodash');
+var $ = require('jquery');
+var d3 = require('d3');
+var ngMock = require('ngMock');
+var expect = require('expect.js');
 
 // Data
-let data = require('fixtures/vislib/mock_data/date_histogram/_series');
+var data = require('fixtures/vislib/mock_data/date_histogram/_series');
 
 describe('Vislib Dispatch Class Test Suite', function () {
 
@@ -37,7 +37,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('extends the SimpleEmitter class', function () {
-      let events = _.pluck(vis.handler.charts, 'events');
+      var events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function (dispatch) {
         expect(dispatch).to.be.a(SimpleEmitter);
@@ -63,11 +63,11 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
     describe('addEvent method', function () {
       it('returns a function that binds the passed event to a selection', function () {
-        let chart = _.first(vis.handler.charts);
-        let apply = chart.events.addEvent('event', _.noop);
+        var chart = _.first(vis.handler.charts);
+        var apply = chart.events.addEvent('event', _.noop);
         expect(apply).to.be.a('function');
 
-        let els = getEls(vis.el, 3, 'div');
+        var els = getEls(vis.el, 3, 'div');
         apply(els);
         els.each(function () {
           expect(d3.select(this).on('event')).to.be(_.noop);
@@ -86,11 +86,11 @@ describe('Vislib Dispatch Class Test Suite', function () {
         });
 
         it('returns a function that binds ' + event + ' events to a selection', function () {
-          let chart = _.first(vis.handler.charts);
-          let apply = chart.events[name](d3.select(document.createElement('svg')));
+          var chart = _.first(vis.handler.charts);
+          var apply = chart.events[name](d3.select(document.createElement('svg')));
           expect(apply).to.be.a('function');
 
-          let els = getEls(vis.el, 3, 'div');
+          var els = getEls(vis.el, 3, 'div');
           apply(els);
           els.each(function () {
             expect(d3.select(this).on(event)).to.be.a('function');
@@ -107,7 +107,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
     describe('addMousePointer method', function () {
       it('should be a function', function () {
         vis.handler.charts.forEach(function (chart) {
-          let pointer = chart.events.addMousePointer;
+          var pointer = chart.events.addMousePointer;
 
           expect(_.isFunction(pointer)).to.be(true);
         });

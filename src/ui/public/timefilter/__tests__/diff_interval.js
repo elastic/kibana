@@ -1,6 +1,6 @@
-let sinon = require('auto-release-sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var sinon = require('auto-release-sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 describe('Timefilter service', function () {
   describe('Refresh interval diff watcher', function () {

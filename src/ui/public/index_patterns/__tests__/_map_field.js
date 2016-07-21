@@ -1,7 +1,7 @@
 describe('field mapping normalizer (mapField)', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let fn;
   let fields;
@@ -17,31 +17,31 @@ describe('field mapping normalizer (mapField)', function () {
   });
 
   it('should return a modified copy of the object, not modify the original', function () {
-    let pristine = _.cloneDeep(fields['foo.bar']);
-    let mapped = fn(fields['foo.bar'], 'foo.bar');
+    var pristine = _.cloneDeep(fields['foo.bar']);
+    var mapped = fn(fields['foo.bar'], 'foo.bar');
 
     expect(fields['foo.bar']).to.not.eql(mapped);
     expect(fields['foo.bar']).to.eql(pristine);
   });
 
   it('should not consider _id indexed unless it is', function () {
-    let mapped = fn(fields._id, '_id');
+    var mapped = fn(fields._id, '_id');
     expect(mapped.indexed).to.be(false);
 
-    let mapping = _.cloneDeep(fields._id);
+    var mapping = _.cloneDeep(fields._id);
     mapping.mapping._id.index = 'not_analyzed';
-    let mapped2 = fn(mapping, '_id');
+    var mapped2 = fn(mapping, '_id');
     expect(mapped2.indexed).to.be(true);
   });
 
   it('should always consider _timestamp to be an indexed date', function () {
-    let mapped = fn(fields._timestamp, '_timestamp');
+    var mapped = fn(fields._timestamp, '_timestamp');
     expect(mapped.indexed).to.be(true);
     expect(mapped.type).to.be('date');
   });
 
   it('should treat falsy and no as false for index', function () {
-    let mapped = fn(fields.index_no_field, 'index_no_field');
+    var mapped = fn(fields.index_no_field, 'index_no_field');
     expect(mapped.indexed).to.be(false);
 
     fields.index_no_field.index = false;
@@ -50,7 +50,7 @@ describe('field mapping normalizer (mapField)', function () {
   });
 
   it('should treat other values for index as true', function () {
-    let mapped = fn(fields.not_analyzed_field, 'not_analyzed_field');
+    var mapped = fn(fields.not_analyzed_field, 'not_analyzed_field');
     expect(mapped.indexed).to.be(true);
   });
 

@@ -1,7 +1,7 @@
 
-let moment = require('moment');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var moment = require('moment');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {
@@ -19,7 +19,7 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a range filter for date_range agg', function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -34,8 +34,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      let aggConfig = vis.aggs.byTypeName.date_range[0];
-      let filter = createFilter(aggConfig, 'February 1st, 2015 to February 7th, 2015');
+      var aggConfig = vis.aggs.byTypeName.date_range[0];
+      var filter = createFilter(aggConfig, 'February 1st, 2015 to February 7th, 2015');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);

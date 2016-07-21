@@ -1,9 +1,9 @@
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoBoundingBox()', function () {
-    let sinon = require('auto-release-sinon');
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
+    var sinon = require('auto-release-sinon');
+    var expect = require('expect.js');
+    var ngMock = require('ngMock');
     let mapGeoBoundingBox;
     let $rootScope;
 
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters with bounds', function (done) {
-      let filter = {
+      var filter = {
         meta: {
           index: 'logstash-*'
         },
@@ -49,7 +49,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      let filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
+      var filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
       mapGeoBoundingBox(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

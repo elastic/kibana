@@ -1,10 +1,10 @@
-let angular = require('angular');
-let $ = require('jquery');
-let _ = require('lodash');
-let sinon = require('auto-release-sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let hit = {
+var angular = require('angular');
+var $ = require('jquery');
+var _ = require('lodash');
+var sinon = require('auto-release-sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var hit = {
   '_index': 'logstash-2014.09.09',
   '_type': 'apache',
   '_id': '61',
@@ -35,7 +35,7 @@ let indexPattern;
 
 let flattened;
 
-let init = function ($elem, props) {
+var init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile) {
     $parentScope = $rootScope;
     _.assign($parentScope, props);
@@ -45,7 +45,7 @@ let init = function ($elem, props) {
   });
 };
 
-let destroy = function () {
+var destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };
@@ -73,7 +73,7 @@ describe('docViewer', function () {
 
   describe('Table mode', function () {
     it('should have a row for each field', function () {
-      let rows = $elem.find('tr');
+      var rows = $elem.find('tr');
       expect($elem.find('tr').length).to.be(_.keys(flattened).length);
     });
 
@@ -85,7 +85,7 @@ describe('docViewer', function () {
 
     it('should have the a value for each field', function () {
       _.each(_.keys(flattened), function (field) {
-        let cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.doc-viewer-value').text();
+        var cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.doc-viewer-value').text();
 
         // This sucks, but testing the filter chain is too hairy ATM
         expect(cellValue.length).to.be.greaterThan(0);
@@ -95,7 +95,7 @@ describe('docViewer', function () {
 
     describe('filtering', function () {
       it('should apply a filter when clicking filterable fields', function () {
-        let cell = $elem.find('td[title="bytes"]').next();
+        var cell = $elem.find('td[title="bytes"]').next();
 
         cell.find('.fa-search-plus').first().click();
         expect($scope.filter.calledOnce).to.be(true);
@@ -104,7 +104,7 @@ describe('docViewer', function () {
       });
 
       it('should NOT apply a filter when clicking non-filterable fields', function () {
-        let cell = $elem.find('td[title="area"]').next();
+        var cell = $elem.find('td[title="area"]').next();
 
         cell.find('.fa-search-plus').first().click();
         expect($scope.filter.calledOnce).to.be(false);
@@ -115,21 +115,21 @@ describe('docViewer', function () {
 
     describe('warnings', function () {
       it('displays a warning about field name starting with underscore', function () {
-        let cells = $elem.find('td[title="_underscore"]').siblings();
+        var cells = $elem.find('td[title="_underscore"]').siblings();
         expect(cells.find('.doc-viewer-underscore').length).to.be(1);
         expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
         expect(cells.find('.doc-viewer-object-array').length).to.be(0);
       });
 
       it('displays a warning about missing mappings', function () {
-        let cells = $elem.find('td[title="noMapping"]').siblings();
+        var cells = $elem.find('td[title="noMapping"]').siblings();
         expect(cells.find('.doc-viewer-underscore').length).to.be(0);
         expect(cells.find('.doc-viewer-no-mapping').length).to.be(1);
         expect(cells.find('.doc-viewer-object-array').length).to.be(0);
       });
 
       it('displays a warning about objects in arrays', function () {
-        let cells = $elem.find('td[title="objectArray"]').siblings();
+        var cells = $elem.find('td[title="objectArray"]').siblings();
         expect(cells.find('.doc-viewer-underscore').length).to.be(0);
         expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
         expect(cells.find('.doc-viewer-object-array').length).to.be(1);
@@ -152,8 +152,8 @@ describe('docViewer', function () {
     });
 
     it('should contain the same code as hitJson', function () {
-      let editor = window.ace.edit($elem.find('div[id="json-ace"]')[0]);
-      let code = editor.getSession().getValue();
+      var editor = window.ace.edit($elem.find('div[id="json-ace"]')[0]);
+      var code = editor.getSession().getValue();
       expect(code).to.equal($scope.hitJson);
     });
   });

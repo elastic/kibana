@@ -1,14 +1,14 @@
-let ngMock = require('ngMock');
-let $ = require('jquery');
-let assign = require('lodash').assign;
-let expect = require('expect.js');
+var ngMock = require('ngMock');
+var $ = require('jquery');
+var assign = require('lodash').assign;
+var expect = require('expect.js');
 
 describe('Config Directive', function () {
 
-  let build = function () {};
+  var build = function () {};
 
   beforeEach(ngMock.module('kibana', function ($compileProvider) {
-    let renderCount = 0;
+    var renderCount = 0;
     $compileProvider.directive('renderCounter', function () {
       return {
         link: function ($scope, $el) {
@@ -21,8 +21,8 @@ describe('Config Directive', function () {
   beforeEach(ngMock.inject(function ($compile, $rootScope) {
 
     build = function (attrs, scopeVars) {
-      let $el = $('<config>').attr(attrs);
-      let $scope = $rootScope.$new();
+      var $el = $('<config>').attr(attrs);
+      var $scope = $rootScope.$new();
       assign($scope, scopeVars || {});
       $compile($el)($scope);
       $scope.$digest();
@@ -32,12 +32,12 @@ describe('Config Directive', function () {
   }));
 
   it('renders it\'s config template', function () {
-    let $config = build({ 'config-template': '"<uniqel></uniqel>"' });
+    var $config = build({ 'config-template': '"<uniqel></uniqel>"' });
     expect($config.find('uniqel').size()).to.be(1);
   });
 
   it('exposes an object a config object using it\'s name', function () {
-    let $config = build(
+    var $config = build(
       {
         'config-template': '"<uniqel>{{ controller.name }}</uniqel>"',
         'config-object': 'controller',
@@ -53,7 +53,7 @@ describe('Config Directive', function () {
   });
 
   it('only renders the config-template once', function () {
-    let $config = build({ 'config-template': '"<div render-counter></div>"' });
+    var $config = build({ 'config-template': '"<div render-counter></div>"' });
     expect($config.find('[render-counter]').text()).to.be('1');
   });
 });

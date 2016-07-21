@@ -1,10 +1,10 @@
 describe('remove filters', function () {
-  let _ = require('lodash');
-  let sinon = require('auto-release-sinon');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
-  let MockState = require('fixtures/mock_state');
-  let storeNames = {
+  var _ = require('lodash');
+  var sinon = require('auto-release-sinon');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
+  var MockState = require('fixtures/mock_state');
+  var storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -68,7 +68,7 @@ describe('remove filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      let emitSpy = sinon.spy(queryFilter, 'emit');
+      var emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
       $rootScope.$digest();
 
@@ -115,7 +115,7 @@ describe('remove filters', function () {
       appState.filters.push(filters[2]);
       $rootScope.$digest();
 
-      let missedFilter = _.cloneDeep(filters[0]);
+      var missedFilter = _.cloneDeep(filters[0]);
       missedFilter.meta = {
         negate: !filters[0].meta.negate
       };

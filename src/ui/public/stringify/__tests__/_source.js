@@ -1,8 +1,8 @@
 describe('_source formatting', function () {
-  let $ = require('jquery');
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var $ = require('jquery');
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let fieldFormats;
 
@@ -25,8 +25,8 @@ describe('_source formatting', function () {
     }));
 
     it('uses the _source, field, and hit to create a <dl>', function () {
-      let hit = _.first(hits);
-      let $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
+      var hit = _.first(hits);
+      var $dl = $(convertHtml(hit._source, indexPattern.fields.byName._source, hit));
       expect($dl.is('dl')).to.be.ok();
       expect($dl.find('dt')).to.have.length(_.keys(indexPattern.flattenHit(hit)).length);
     });

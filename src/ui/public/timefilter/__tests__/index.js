@@ -1,4 +1,4 @@
-let modules = require('ui/modules');
+var modules = require('ui/modules');
 
 modules.get('kibana').config(function ($provide) {
   $provide.decorator('timefilter', function ($delegate) {

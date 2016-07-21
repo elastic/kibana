@@ -1,14 +1,14 @@
 describe('Notifier', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let Notifier = require('ui/notify/notifier');
+  var _ = require('lodash');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var Notifier = require('ui/notify/notifier');
 
-  let message = 'Oh, the humanity!';
+  var message = 'Oh, the humanity!';
   let notifier;
   let params;
-  let version = window.__KBN__.version;
-  let buildNum = window.__KBN__.buildNum;
+  var version = window.__KBN__.version;
+  var buildNum = window.__KBN__.buildNum;
 
   beforeEach(ngMock.module('kibana'));
 
@@ -48,12 +48,12 @@ describe('Notifier', function () {
     });
 
     it('allows reporting', function () {
-      let includesReport = _.includes(notify('error').actions, 'report');
+      var includesReport = _.includes(notify('error').actions, 'report');
       expect(includesReport).to.true;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('error').actions, 'accept');
+      var includesAccept = _.includes(notify('error').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -86,12 +86,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      let includesReport = _.includes(notify('warning').actions, 'report');
+      var includesReport = _.includes(notify('warning').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('warning').actions, 'accept');
+      var includesAccept = _.includes(notify('warning').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -124,12 +124,12 @@ describe('Notifier', function () {
     });
 
     it('does not allow reporting', function () {
-      let includesReport = _.includes(notify('info').actions, 'report');
+      var includesReport = _.includes(notify('info').actions, 'report');
       expect(includesReport).to.false;
     });
 
     it('allows accepting', function () {
-      let includesAccept = _.includes(notify('info').actions, 'accept');
+      var includesAccept = _.includes(notify('info').actions, 'accept');
       expect(includesAccept).to.true;
     });
 
@@ -150,13 +150,13 @@ describe('Notifier', function () {
   function testVersionInfo(fnName) {
     context('when version is configured', function () {
       it('adds version to notification', function () {
-        let notification = notify(fnName);
+        var notification = notify(fnName);
         expect(notification.info.version).to.equal(version);
       });
     });
     context('when build number is configured', function () {
       it('adds buildNum to notification', function () {
-        let notification = notify(fnName);
+        var notification = notify(fnName);
         expect(notification.info.buildNum).to.equal(buildNum);
       });
     });

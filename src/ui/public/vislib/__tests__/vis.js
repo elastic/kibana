@@ -1,22 +1,22 @@
-let _ = require('lodash');
-let $ = require('jquery');
-let d3 = require('d3');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var _ = require('lodash');
+var $ = require('jquery');
+var d3 = require('d3');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
-let series = require('fixtures/vislib/mock_data/date_histogram/_series');
-let columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-let rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-let stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+var series = require('fixtures/vislib/mock_data/date_histogram/_series');
+var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
+var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
+var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
 
-let dataArray = [
+var dataArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
 
-let names = [
+var names = [
   'series',
   'columns',
   'rows',
@@ -26,8 +26,8 @@ let names = [
 
 dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
-    let beforeEvent = 'click';
-    let afterEvent = 'brush';
+    var beforeEvent = 'click';
+    var afterEvent = 'brush';
     let vis;
     let persistedState;
     let secondVis;
@@ -127,7 +127,7 @@ dataArray.forEach(function (data, i) {
     });
 
     describe('on Method', function () {
-      let events = [
+      var events = [
         beforeEvent,
         afterEvent
       ];
@@ -171,7 +171,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should cause a listener for each event to be attached to each chart', function () {
-        let charts = vis.handler.charts;
+        var charts = vis.handler.charts;
 
         charts.forEach(function (chart, i) {
           expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
@@ -218,7 +218,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove a listener', function () {
-        let charts = vis.handler.charts;
+        var charts = vis.handler.charts;
 
         expect(vis.listeners(beforeEvent)).to.not.contain(listener1);
         expect(vis.listeners(beforeEvent)).to.contain(listener2);
@@ -234,7 +234,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove the event and all listeners when only event passed an argument', function () {
-        let charts = vis.handler.charts;
+        var charts = vis.handler.charts;
         vis.off(afterEvent);
 
         // should remove 'brush' event
@@ -249,7 +249,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove the event from the chart when the last listener is removed', function () {
-        let charts = vis.handler.charts;
+        var charts = vis.handler.charts;
         vis.off(afterEvent, listener2);
 
         expect(vis.listenerCount(afterEvent)).to.be(0);

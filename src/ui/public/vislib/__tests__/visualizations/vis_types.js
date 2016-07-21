@@ -1,7 +1,7 @@
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var _ = require('lodash');
 
 describe('Vislib Vis Types Test Suite', function () {
   let visTypes;

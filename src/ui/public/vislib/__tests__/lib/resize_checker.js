@@ -1,19 +1,19 @@
 
 describe('Vislib Resize Checker', function () {
-  let $ = require('jquery');
-  let _ = require('lodash');
-  let Promise = require('bluebird');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
+  var $ = require('jquery');
+  var _ = require('lodash');
+  var Promise = require('bluebird');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
 
-  let sinon = require('auto-release-sinon');
+  var sinon = require('auto-release-sinon');
   require('testUtils/noDigestPromises').activateForSuite();
 
   let ResizeChecker;
   let EventEmitter;
   let checker;
   let reflowWatcher;
-  let reflowSpies = {};
+  var reflowSpies = {};
 
   beforeEach(ngMock.module('kibana'));
 
@@ -24,7 +24,7 @@ describe('Vislib Resize Checker', function () {
     reflowSpies.on = sinon.spy(reflowWatcher, 'on');
     reflowSpies.off = sinon.spy(reflowWatcher, 'off');
 
-    let $el = $(document.createElement('div'))
+    var $el = $(document.createElement('div'))
     .appendTo('body')
     .css('visibility', 'hidden')
     .get(0);
@@ -44,7 +44,7 @@ describe('Vislib Resize Checker', function () {
 
     it('listens for the "reflow" event of the reflowWatchers', function () {
       expect(reflowSpies.on).to.have.property('callCount', 1);
-      let call = reflowSpies.on.getCall(0);
+      var call = reflowSpies.on.getCall(0);
       expect(call.args[0]).to.be('reflow');
     });
 
@@ -60,8 +60,8 @@ describe('Vislib Resize Checker', function () {
 
   describe('#read', function () {
     it('gets the proper dimensions for the element', function () {
-      let dimensions = checker.read();
-      let windowWidth = document.documentElement.clientWidth;
+      var dimensions = checker.read();
+      var windowWidth = document.documentElement.clientWidth;
 
       expect(dimensions.w).to.equal(windowWidth);
       expect(dimensions.h).to.equal(0);
@@ -70,7 +70,7 @@ describe('Vislib Resize Checker', function () {
 
   describe('#saveSize', function () {
     it('calls #read() when no arg is passed', function () {
-      let stub = sinon.stub(checker, 'read').returns({});
+      var stub = sinon.stub(checker, 'read').returns({});
 
       checker.saveSize();
 
@@ -78,7 +78,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('saves the size of the element', function () {
-      let football = {};
+      var football = {};
       checker.saveSize(football);
       expect(checker).to.have.property('_savedSize', football);
     });
@@ -120,12 +120,12 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('emits "resize" based on MS_MAX_RESIZE_DELAY, even if el\'s constantly changing size', function () {
-      let steps = _.random(5, 10);
+      var steps = _.random(5, 10);
       this.slow(steps * 10);
 
       // we are going to fake the delay using the fake clock
-      let msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
-      let clock = sinon.useFakeTimers();
+      var msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
+      var clock = sinon.useFakeTimers();
 
       _.times(steps, function step(i) {
         checker.$el.css('height', 100 + i);
@@ -142,8 +142,8 @@ describe('Vislib Resize Checker', function () {
 
   describe('#destroy()', function () {
     it('removes the "reflow" event from the reflowWatcher', function () {
-      let onCall = reflowSpies.on.getCall(0);
-      let handler = onCall.args[1];
+      var onCall = reflowSpies.on.getCall(0);
+      var handler = onCall.args[1];
 
       checker.destroy();
       expect(reflowSpies.off).to.have.property('callCount', 1);
@@ -151,7 +151,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('clears the timeout', function () {
-      let spy = sinon.spy(window, 'clearTimeout');
+      var spy = sinon.spy(window, 'clearTimeout');
       checker.destroy();
       expect(spy).to.have.property('callCount', 1);
     });
@@ -173,26 +173,26 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('walks the schedule, using each value as it\'s next timeout', function () {
-      let timerId = checker.startSchedule(schedule);
+      var timerId = checker.startSchedule(schedule);
 
       // start at 0 even though "start" used the first slot, we will still check it
-      for (let i = 0; i < schedule.length; i++) {
+      for (var i = 0; i < schedule.length; i++) {
         expect(clock.timers[timerId]).to.have.property('callAt', schedule[i]);
         timerId = checker.continueSchedule();
       }
     });
 
     it('repeats the last value in the schedule', function () {
-      let timerId = checker.startSchedule(schedule);
+      var timerId = checker.startSchedule(schedule);
 
       // start at 1, and go until there is one left
-      for (let i = 1; i < schedule.length - 1; i++) {
+      for (var i = 1; i < schedule.length - 1; i++) {
         timerId = checker.continueSchedule();
       }
 
-      let last = _.last(schedule);
+      var last = _.last(schedule);
       _.times(5, function () {
-        let timer = clock.timers[checker.continueSchedule()];
+        var timer = clock.timers[checker.continueSchedule()];
         expect(timer).to.have.property('callAt', last);
       });
     });

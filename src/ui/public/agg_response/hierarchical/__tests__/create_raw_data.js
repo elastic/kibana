@@ -1,10 +1,10 @@
 
-let _ = require('lodash');
-let fixtures = require('fixtures/fake_hierarchical_data');
-let createRawData = require('ui/agg_response/hierarchical/_create_raw_data');
-let arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var _ = require('lodash');
+var fixtures = require('fixtures/fake_hierarchical_data');
+var createRawData = require('ui/agg_response/hierarchical/_create_raw_data');
+var arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 
 let AggConfigs;
 let Vis;
@@ -24,7 +24,7 @@ describe('buildHierarchicalData()', function () {
     }));
 
     beforeEach(function () {
-      let id = 1;
+      var id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -34,7 +34,7 @@ describe('buildHierarchicalData()', function () {
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
         ]
       });
-      let buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
+      var buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
       results = createRawData(vis, fixtures.threeTermBuckets);
@@ -45,7 +45,7 @@ describe('buildHierarchicalData()', function () {
       expect(results.columns).to.have.length(6);
       _.each(results.columns, function (column) {
         expect(column).to.have.property('aggConfig');
-        let agg = column.aggConfig;
+        var agg = column.aggConfig;
         expect(column).to.have.property('categoryName', agg.schema.name);
         expect(column).to.have.property('id', agg.id);
         expect(column).to.have.property('aggType', agg.type);

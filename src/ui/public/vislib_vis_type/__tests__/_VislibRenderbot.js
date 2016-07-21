@@ -1,16 +1,16 @@
 describe('renderbot', function exportWrapper() {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let sinon = require('auto-release-sinon');
+  var _ = require('lodash');
+  var $ = require('jquery');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var sinon = require('auto-release-sinon');
   let vislib;
   let Vis;
   let Renderbot;
   let VislibRenderbot;
   let persistedState;
   let normalizeChartData;
-  let mockVisType = {
+  var mockVisType = {
     name: 'test'
   };
 
@@ -30,8 +30,8 @@ describe('renderbot', function exportWrapper() {
   beforeEach(init);
 
   describe('creation', function () {
-    let vis = { type: mockVisType };
-    let $el = 'element';
+    var vis = { type: mockVisType };
+    var $el = 'element';
     let createVisStub;
     let renderbot;
 
@@ -50,7 +50,7 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('_createVis', function () {
-    let vis = {
+    var vis = {
       type: mockVisType,
       listeners: {
         'test': _.noop,
@@ -58,7 +58,7 @@ describe('renderbot', function exportWrapper() {
         'test3': _.noop
       }
     };
-    let $el = $('<div>testing</div>');
+    var $el = $('<div>testing</div>');
     let listenerSpy;
     let renderbot;
 
@@ -76,15 +76,15 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('param update', function () {
-    let params = { one: 'fish', two: 'fish' };
-    let vis = {
+    var params = { one: 'fish', two: 'fish' };
+    var vis = {
       type: _.defaults({
         params: {
           defaults: params
         }
       }, mockVisType)
     };
-    let $el = $('<div>testing</div>');
+    var $el = $('<div>testing</div>');
     let createVisSpy;
     let getParamsStub;
     let renderbot;
@@ -113,20 +113,20 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('render', function () {
-    let vis = { type: mockVisType, isHierarchical: _.constant(false) };
-    let $el = $('<div>testing</div>');
-    let stubs = {};
+    var vis = { type: mockVisType, isHierarchical: _.constant(false) };
+    var $el = $('<div>testing</div>');
+    var stubs = {};
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
     });
 
     it('should use #buildChartData', function () {
-      let renderbot = new VislibRenderbot(vis, $el, persistedState);
+      var renderbot = new VislibRenderbot(vis, $el, persistedState);
 
-      let football = {};
-      let buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
-      let renderStub = sinon.stub(renderbot.vislibVis, 'render');
+      var football = {};
+      var buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
+      var renderStub = sinon.stub(renderbot.vislibVis, 'render');
 
       renderbot.render('flat data', persistedState);
       expect(renderStub.callCount).to.be(1);
@@ -136,7 +136,7 @@ describe('renderbot', function exportWrapper() {
   });
 
   describe('destroy', function () {
-    let vis = {
+    var vis = {
       type: mockVisType,
       listeners: {
         'test': _.noop,
@@ -144,7 +144,7 @@ describe('renderbot', function exportWrapper() {
         'test3': _.noop
       }
     };
-    let $el = $('<div>testing</div>');
+    var $el = $('<div>testing</div>');
     let listenerSpy;
     let renderbot;
 
@@ -161,7 +161,7 @@ describe('renderbot', function exportWrapper() {
     });
 
     it('should destroy the vis', function () {
-      let spy = sinon.spy(renderbot.vislibVis, 'destroy');
+      var spy = sinon.spy(renderbot.vislibVis, 'destroy');
       renderbot.destroy();
       expect(spy.callCount).to.be(1);
     });

@@ -1,11 +1,11 @@
 describe('Range Agg', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let values = require('lodash').values;
+  var _ = require('lodash');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var values = require('lodash').values;
 
-  let resp = require('fixtures/agg_resp/range');
-  let buckets = values(resp.aggregations[1].buckets);
+  var resp = require('fixtures/agg_resp/range');
+  var buckets = values(resp.aggregations[1].buckets);
 
   let range;
   let Vis;
@@ -17,7 +17,7 @@ describe('Range Agg', function () {
     Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-    let BytesFormat = Private(require('ui/registry/field_formats')).byId.bytes;
+    var BytesFormat = Private(require('ui/registry/field_formats')).byId.bytes;
 
     indexPattern.fieldFormatMap.bytes = new BytesFormat({
       pattern: '0,0.[000] b'
@@ -28,7 +28,7 @@ describe('Range Agg', function () {
 
   describe('formating', function () {
     it('formats bucket keys properly', function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -45,8 +45,8 @@ describe('Range Agg', function () {
         ]
       });
 
-      let agg = vis.aggs.byTypeName.range[0];
-      let format = function (val) {
+      var agg = vis.aggs.byTypeName.range[0];
+      var format = function (val) {
         return agg.fieldFormatter()(agg.getKey(val));
       };
       expect(format(buckets[0])).to.be('-∞ to 1 KB');

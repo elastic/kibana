@@ -1,11 +1,11 @@
 describe('pointSeriesChartDataFromTable', function () {
   this.slow(1000);
 
-  let _ = require('lodash');
-  let moment = require('moment');
-  let AggConfigResult = require('ui/Vis/AggConfigResult');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var moment = require('moment');
+  var AggConfigResult = require('ui/Vis/AggConfigResult');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let pointSeriesChartDataFromTable;
   let indexPattern;
@@ -21,20 +21,20 @@ describe('pointSeriesChartDataFromTable', function () {
   }));
 
   it('handles a table with just a count', function () {
-    let vis = new Vis(indexPattern, { type: 'histogram' });
-    let agg = vis.aggs[0];
-    let result = new AggConfigResult(vis.aggs[0], void 0, 100, 100);
+    var vis = new Vis(indexPattern, { type: 'histogram' });
+    var agg = vis.aggs[0];
+    var result = new AggConfigResult(vis.aggs[0], void 0, 100, 100);
 
-    let table = new Table();
+    var table = new Table();
     table.columns = [ { aggConfig: agg } ];
     table.rows.push([ result ]);
 
-    let chartData = pointSeriesChartDataFromTable(vis, table);
+    var chartData = pointSeriesChartDataFromTable(vis, table);
 
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(1);
-    let series = chartData.series[0];
+    var series = chartData.series[0];
     expect(series.values).to.have.length(1);
     expect(series.values[0])
       .to.have.property('x', '_all')
@@ -43,7 +43,7 @@ describe('pointSeriesChartDataFromTable', function () {
   });
 
   it('handles a table with x and y column', function () {
-    let vis = new Vis(indexPattern, {
+    var vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         { type: 'count', schema: 'metric' },
@@ -51,32 +51,32 @@ describe('pointSeriesChartDataFromTable', function () {
       ]
     });
 
-    let y = {
+    var y = {
       agg: vis.aggs[0],
       col: { aggConfig: vis.aggs[0] },
       at: function (i) { return 100 * i; }
     };
 
-    let x = {
+    var x = {
       agg: vis.aggs[1],
       col: { aggConfig: vis.aggs[1] },
       at: function (i) { return moment().startOf('day').add(i, 'day').valueOf(); }
     };
 
-    let rowCount = 3;
-    let table = new Table();
+    var rowCount = 3;
+    var table = new Table();
     table.columns = [ x.col, y.col ];
     _.times(rowCount, function (i) {
-      let date = new AggConfigResult(x.agg, void 0, x.at(i));
+      var date = new AggConfigResult(x.agg, void 0, x.at(i));
       table.rows.push([date, new AggConfigResult(y.agg, date, y.at(i))]);
     });
 
-    let chartData = pointSeriesChartDataFromTable(vis, table);
+    var chartData = pointSeriesChartDataFromTable(vis, table);
 
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(1);
-    let series = chartData.series[0];
+    var series = chartData.series[0];
     expect(series.values).to.have.length(rowCount);
     series.values.forEach(function (point, i) {
       expect(point)
@@ -96,7 +96,7 @@ describe('pointSeriesChartDataFromTable', function () {
   });
 
   it('handles a table with an x and two y aspects', function () {
-    let vis = new Vis(indexPattern, {
+    var vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -105,40 +105,40 @@ describe('pointSeriesChartDataFromTable', function () {
       ]
     });
 
-    let avg = {
+    var avg = {
       agg: vis.aggs[0],
       col: { title: 'average', aggConfig: vis.aggs[0] },
       at: function (i) { return 75.444 * (i + 1); }
     };
 
-    let date = {
+    var date = {
       agg: vis.aggs[1],
       col: { title: 'date', aggConfig: vis.aggs[1] },
       at: function (i) { return moment().startOf('day').add(i, 'day').valueOf(); }
     };
 
-    let max = {
+    var max = {
       agg: vis.aggs[2],
       col: { title: 'maximum', aggConfig: vis.aggs[2] },
       at: function (i) { return 100 * (i + 1); }
     };
 
-    let rowCount = 3;
-    let table = new Table();
+    var rowCount = 3;
+    var table = new Table();
     table.columns = [ date.col, avg.col, max.col ];
     _.times(rowCount, function (i) {
-      let dateResult = new AggConfigResult(date.agg, void 0, date.at(i));
-      let avgResult = new AggConfigResult(avg.agg, dateResult, avg.at(i));
-      let maxResult = new AggConfigResult(max.agg, dateResult, max.at(i));
+      var dateResult = new AggConfigResult(date.agg, void 0, date.at(i));
+      var avgResult = new AggConfigResult(avg.agg, dateResult, avg.at(i));
+      var maxResult = new AggConfigResult(max.agg, dateResult, max.at(i));
       table.rows.push([dateResult, avgResult, maxResult]);
     });
 
-    let chartData = pointSeriesChartDataFromTable(vis, table);
+    var chartData = pointSeriesChartDataFromTable(vis, table);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(2);
     chartData.series.forEach(function (siri, i) {
-      let metric = i === 0 ? avg : max;
+      var metric = i === 0 ? avg : max;
 
       expect(siri).to.have.property('label', metric.col.label);
       expect(siri.values).to.have.length(rowCount);
@@ -166,7 +166,7 @@ describe('pointSeriesChartDataFromTable', function () {
   });
 
   it('handles a table with an x, a series, and two y aspects', function () {
-    let vis = new Vis(indexPattern, {
+    var vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
         { type: 'terms', schema: 'group', params: { field: 'extension' } },
@@ -176,53 +176,53 @@ describe('pointSeriesChartDataFromTable', function () {
       ]
     });
 
-    let extensions = ['php', 'jpg', 'gif', 'css'];
-    let term = {
+    var extensions = ['php', 'jpg', 'gif', 'css'];
+    var term = {
       agg: vis.aggs[0],
       col: { title: 'extensions', aggConfig: vis.aggs[0] },
       at: function (i) { return extensions[i % extensions.length]; }
     };
 
-    let avg = {
+    var avg = {
       agg: vis.aggs[1],
       col: { title: 'average', aggConfig: vis.aggs[1] },
       at: function (i) { return 75.444 * (i + 1); }
     };
 
-    let date = {
+    var date = {
       agg: vis.aggs[2],
       col: { title: 'date', aggConfig: vis.aggs[2] },
       at: function (i) { return moment().startOf('day').add(i, 'day').valueOf(); }
     };
 
-    let max = {
+    var max = {
       agg: vis.aggs[3],
       col: { title: 'maximum', aggConfig: vis.aggs[3] },
       at: function (i) { return 100 * (i + 1); }
     };
 
-    let metricCount = 2;
-    let rowsPerSegment = 2;
-    let rowCount = extensions.length * rowsPerSegment;
-    let table = new Table();
+    var metricCount = 2;
+    var rowsPerSegment = 2;
+    var rowCount = extensions.length * rowsPerSegment;
+    var table = new Table();
     table.columns = [ date.col, term.col, avg.col, max.col ];
     _.times(rowCount, function (i) {
-      let dateResult = new AggConfigResult(date.agg, void 0, date.at(i));
-      let termResult = new AggConfigResult(term.agg, dateResult, term.at(i));
-      let avgResult = new AggConfigResult(avg.agg, termResult, avg.at(i));
-      let maxResult = new AggConfigResult(max.agg, termResult, max.at(i));
+      var dateResult = new AggConfigResult(date.agg, void 0, date.at(i));
+      var termResult = new AggConfigResult(term.agg, dateResult, term.at(i));
+      var avgResult = new AggConfigResult(avg.agg, termResult, avg.at(i));
+      var maxResult = new AggConfigResult(max.agg, termResult, max.at(i));
       table.rows.push([dateResult, termResult, avgResult, maxResult]);
     });
 
-    let chartData = pointSeriesChartDataFromTable(vis, table);
+    var chartData = pointSeriesChartDataFromTable(vis, table);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     // one series for each extension, and then one for each metric inside
     expect(chartData.series).to.have.length(extensions.length * metricCount);
     chartData.series.forEach(function (siri, i) {
       // figure out the metric used to create this series
-      let metricAgg = siri.values[0].aggConfigResult.aggConfig;
-      let metric = avg.agg === metricAgg ? avg : max;
+      var metricAgg = siri.values[0].aggConfigResult.aggConfig;
+      var metric = avg.agg === metricAgg ? avg : max;
 
       expect(siri.values).to.have.length(rowsPerSegment);
       siri.values.forEach(function (point) {

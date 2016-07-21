@@ -1,19 +1,19 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
-let $ = require('jquery');
+var d3 = require('d3');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var _ = require('lodash');
+var $ = require('jquery');
 
 // Data
-let seriesPos = require('fixtures/vislib/mock_data/date_histogram/_series');
-let seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-let seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-let histogramColumns = require('fixtures/vislib/mock_data/histogram/_columns');
-let rangeRows = require('fixtures/vislib/mock_data/range/_rows');
-let termSeries = require('fixtures/vislib/mock_data/terms/_series');
+var seriesPos = require('fixtures/vislib/mock_data/date_histogram/_series');
+var seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
+var seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
+var histogramColumns = require('fixtures/vislib/mock_data/histogram/_columns');
+var rangeRows = require('fixtures/vislib/mock_data/range/_rows');
+var termSeries = require('fixtures/vislib/mock_data/terms/_series');
 
-let dataTypes = [
+var dataTypes = [
   ['series pos', seriesPos],
   ['series pos neg', seriesPosNeg],
   ['series neg', seriesNeg],
@@ -24,8 +24,8 @@ let dataTypes = [
 
 describe('Vislib Line Chart', function () {
   dataTypes.forEach(function (type, i) {
-    let name = type[0];
-    let data = type[1];
+    var name = type[0];
+    var data = type[1];
 
     describe(name + ' Data', function () {
       let vis;
@@ -33,7 +33,7 @@ describe('Vislib Line Chart', function () {
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
-        let visLibParams = {
+        var visLibParams = {
           type: 'line',
           addLegend: true,
           addTooltip: true,
@@ -131,7 +131,7 @@ describe('Vislib Line Chart', function () {
 
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
+            var yAxis = chart.handler.yAxis;
 
             expect(yAxis.domain[0]).to.not.be(undefined);
             expect(yAxis.domain[1]).to.not.be(undefined);
@@ -140,7 +140,7 @@ describe('Vislib Line Chart', function () {
 
         it('should render a zero axis line', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
+            var yAxis = chart.handler.yAxis;
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -172,8 +172,8 @@ describe('Vislib Line Chart', function () {
 
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
-            let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+            var yAxis = chart.handler.yAxis;
+            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
             expect(yAxis.domain[0]).to.equal(yVals[0]);
             expect(yAxis.domain[1]).to.equal(yVals[1]);

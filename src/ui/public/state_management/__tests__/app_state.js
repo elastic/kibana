@@ -1,6 +1,6 @@
-let sinon = require('auto-release-sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var sinon = require('auto-release-sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 require('ui/state_management/app_state');
 
 describe('State Management', function () {
@@ -26,7 +26,7 @@ describe('State Management', function () {
     });
 
     it('should use passed in params', function () {
-      let params = {
+      var params = {
         test: true,
         mock: false
       };
@@ -45,8 +45,8 @@ describe('State Management', function () {
     });
 
     it('should be destroyed on $routeChangeStart', function () {
-      let destroySpy = sinon.spy(appState, 'destroy');
-      let url = '/test/path';
+      var destroySpy = sinon.spy(appState, 'destroy');
+      var url = '/test/path';
 
       $rootScope.$emit('$routeChangeStart');
 

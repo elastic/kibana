@@ -1,7 +1,7 @@
-let getSort = require('ui/doc_table/lib/get_sort');
-let defaultSort = {time: 'desc'};
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var getSort = require('ui/doc_table/lib/get_sort');
+var defaultSort = {time: 'desc'};
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 let indexPattern;
 
 describe('docTable', function () {

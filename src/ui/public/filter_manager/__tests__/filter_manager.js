@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let sinon = require('auto-release-sinon');
-let MockState = require('fixtures/mock_state');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var _ = require('lodash');
+var sinon = require('auto-release-sinon');
+var MockState = require('fixtures/mock_state');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 let $rootScope;
 let queryFilter;
 let filterManager;
@@ -10,7 +10,7 @@ let appState;
 
 function checkAddFilters(length, comps, idx) {
   idx = idx || 0;
-  let filters = queryFilter.addFilters.getCall(idx).args[0];
+  var filters = queryFilter.addFilters.getCall(idx).args[0];
 
   expect(filters.length).to.be(length);
   if (!_.isArray(comps)) return;
@@ -112,7 +112,7 @@ describe('Filter Manager', function () {
     checkAddFilters(0, null, 3);
     expect(appState.filters).to.have.length(2);
 
-    let scriptedField = {name: 'scriptedField', scripted: true, script: 1};
+    var scriptedField = {name: 'scriptedField', scripted: true, script: 1};
     filterManager.add(scriptedField, 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: {index: 'myIndex', negate: false, field: 'scriptedField'},

@@ -2,8 +2,8 @@
 describe('SearchSource#normalizeSortRequest', function () {
   require('ui/private');
 
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
 
   let normalizeSortRequest;
   let indexPattern;
@@ -23,8 +23,8 @@ describe('SearchSource#normalizeSortRequest', function () {
   }));
 
   it('should return an array', function () {
-    let sortable = { someField: 'desc'};
-    let result = normalizeSortRequest(sortable, indexPattern);
+    var sortable = { someField: 'desc'};
+    var result = normalizeSortRequest(sortable, indexPattern);
     expect(result).to.be.an(Array);
     expect(result).to.eql(normalizedSort);
     // ensure object passed in is not mutated
@@ -33,27 +33,27 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should make plain string sort into the more verbose format', function () {
-    let result = normalizeSortRequest([{ someField: 'desc'}], indexPattern);
+    var result = normalizeSortRequest([{ someField: 'desc'}], indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
   it('should append default sort options', function () {
-    let sortState = [{
+    var sortState = [{
       someField: {
         order: 'desc',
         unmapped_type: 'boolean'
       }
     }];
-    let result = normalizeSortRequest(sortState, indexPattern);
+    var result = normalizeSortRequest(sortState, indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
   it('should enable script based sorting', function () {
-    let fieldName = 'script string';
-    let direction = 'desc';
-    let indexField = indexPattern.fields.byName[fieldName];
+    var fieldName = 'script string';
+    var direction = 'desc';
+    var indexField = indexPattern.fields.byName[fieldName];
 
-    let sortState = {};
+    var sortState = {};
     sortState[fieldName] = direction;
     normalizedSort = {
       _script: {
@@ -63,7 +63,7 @@ describe('SearchSource#normalizeSortRequest', function () {
       }
     };
 
-    let result = normalizeSortRequest(sortState, indexPattern);
+    var result = normalizeSortRequest(sortState, indexPattern);
     expect(result).to.eql([normalizedSort]);
 
     sortState[fieldName] = { order: direction };
@@ -72,18 +72,18 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should use script based sorting only on sortable types', function () {
-    let fieldName = 'script murmur3';
-    let direction = 'asc';
-    let indexField = indexPattern.fields.byName[fieldName];
+    var fieldName = 'script murmur3';
+    var direction = 'asc';
+    var indexField = indexPattern.fields.byName[fieldName];
 
-    let sortState = {};
+    var sortState = {};
     sortState[fieldName] = direction;
     normalizedSort = {};
     normalizedSort[fieldName] = {
       order: direction,
       unmapped_type: 'boolean'
     };
-    let result = normalizeSortRequest([sortState], indexPattern);
+    var result = normalizeSortRequest([sortState], indexPattern);
 
     expect(result).to.eql([normalizedSort]);
   });

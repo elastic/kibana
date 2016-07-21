@@ -1,6 +1,6 @@
 describe('AggConfig Filters', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   describe('IP range', function () {
     let AggConfig;
@@ -17,7 +17,7 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a range filter for ip_range agg', function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -36,8 +36,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      let aggConfig = vis.aggs.byTypeName.ip_range[0];
-      let filter = createFilter(aggConfig, '0.0.0.0-1.1.1.1');
+      var aggConfig = vis.aggs.byTypeName.ip_range[0];
+      var filter = createFilter(aggConfig, '0.0.0.0-1.1.1.1');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
@@ -47,7 +47,7 @@ describe('AggConfig Filters', function () {
     });
 
     it('should return a range filter for ip_range agg using a CIDR mask', function () {
-      let vis = new Vis(indexPattern, {
+      var vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -66,8 +66,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      let aggConfig = vis.aggs.byTypeName.ip_range[0];
-      let filter = createFilter(aggConfig, '67.129.65.201/27');
+      var aggConfig = vis.aggs.byTypeName.ip_range[0];
+      var filter = createFilter(aggConfig, '67.129.65.201/27');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);

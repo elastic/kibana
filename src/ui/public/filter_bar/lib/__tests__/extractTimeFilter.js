@@ -1,9 +1,9 @@
 
 describe('Filter Bar Directive', function () {
   describe('extractTimeFilter()', function () {
-    let sinon = require('auto-release-sinon');
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
+    var sinon = require('auto-release-sinon');
+    var expect = require('expect.js');
+    var ngMock = require('ngMock');
     let extractTimeFilter;
     let $rootScope;
 
@@ -21,7 +21,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the matching filter for the defualt time field', function (done) {
-      let filters = [
+      var filters = [
         { meta: { index: 'logstash-*' }, query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
         { meta: { index: 'logstash-*' }, range: { 'time': { gt: 1388559600000, lt: 1388646000000 } } }
       ];
@@ -33,7 +33,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should not return the non-matching filter for the defualt time field', function (done) {
-      let filters = [
+      var filters = [
         { meta: { index: 'logstash-*' }, query: { match: { _type:  { query: 'apache', type: 'phrase' } } } },
         { meta: { index: 'logstash-*' }, range: { '@timestamp': { gt: 1388559600000, lt: 1388646000000 } } }
       ];

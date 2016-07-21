@@ -1,11 +1,11 @@
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
-    let _ = require('lodash');
-    let moment = require('moment');
-    let sinon = require('auto-release-sinon');
-    let aggResp = require('fixtures/agg_resp/date_histogram');
-    let ngMock = require('ngMock');
-    let expect = require('expect.js');
+    var _ = require('lodash');
+    var moment = require('moment');
+    var sinon = require('auto-release-sinon');
+    var aggResp = require('fixtures/agg_resp/date_histogram');
+    var ngMock = require('ngMock');
+    var expect = require('expect.js');
 
     let vis;
     let agg;
@@ -20,10 +20,10 @@ describe('AggConfig Filters', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      let Vis = Private(require('ui/Vis'));
-      let indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      let createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-      let TimeBuckets = Private(require('ui/time_buckets'));
+      var Vis = Private(require('ui/Vis'));
+      var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
+      var TimeBuckets = Private(require('ui/time_buckets'));
       intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
 
       init = function (interval, duration) {
@@ -46,7 +46,7 @@ describe('AggConfig Filters', function () {
         bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
         bucketStart = moment(bucketKey);
 
-        let timePad = moment.duration(duration / 2);
+        var timePad = moment.duration(duration / 2);
         agg.buckets.setBounds({
           min: bucketStart.clone().subtract(timePad),
           max: bucketStart.clone().add(timePad),
@@ -63,7 +63,7 @@ describe('AggConfig Filters', function () {
       expect(filter).to.have.property('range');
       expect(filter.range).to.have.property(field.name);
 
-      let fieldParams = filter.range[field.name];
+      var fieldParams = filter.range[field.name];
       expect(fieldParams).to.have.property('gte');
       expect(fieldParams.gte).to.be.a('number');
 
@@ -90,8 +90,8 @@ describe('AggConfig Filters', function () {
 
         init(option.val, duration);
 
-        let interval = agg.buckets.getInterval();
-        let params = filter.range[field.name];
+        var interval = agg.buckets.getInterval();
+        var params = filter.range[field.name];
 
         expect(params.gte).to.be(+bucketStart);
         expect(params.lte).to.be(+bucketStart.clone().add(interval).subtract(1, 'ms'));

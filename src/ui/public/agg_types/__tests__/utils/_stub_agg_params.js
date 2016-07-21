@@ -1,8 +1,8 @@
-let _ = require('lodash');
-let sinon = require('auto-release-sinon');
+var _ = require('lodash');
+var sinon = require('auto-release-sinon');
 
 function ParamClassStub(parent, body) {
-  let stub = sinon.spy(body || function () {
+  var stub = sinon.spy(body || function () {
     stub.Super && stub.Super.call(this);
   });
   if (parent) _.class(stub).inherits(parent);
@@ -14,7 +14,7 @@ function ParamClassStub(parent, body) {
  * This method should be passed directly to ngMock.inject();
  *
  * ```js
- * let stubParamClasses = require('./utils/_stub_agg_params');
+ * var stubParamClasses = require('./utils/_stub_agg_params');
  * describe('something', function () {
  *   beforeEach(ngMock.inject(stubParamClasses));
  * })
@@ -24,7 +24,7 @@ function ParamClassStub(parent, body) {
  * @return {undefined}
  */
 module.exports = function stubParamClasses(Private) {
-  let BaseAggParam = Private.stub(
+  var BaseAggParam = Private.stub(
     require('ui/agg_types/param_types/base'),
     new ParamClassStub(null, function (config) {
       _.assign(this, config);

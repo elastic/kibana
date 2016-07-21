@@ -1,9 +1,9 @@
 describe('get filters', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let MockState = require('fixtures/mock_state');
-  let storeNames = {
+  var _ = require('lodash');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
+  var MockState = require('fixtures/mock_state');
+  var storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -49,12 +49,12 @@ describe('get filters', function () {
       globalState.filters = [filters[1]];
 
       // global filters should be listed first
-      let res = queryFilter.getFilters();
+      var res = queryFilter.getFilters();
       expect(res[0]).to.eql(filters[1]);
       expect(res[1]).to.eql(filters[0]);
 
       // should return updated version of filters
-      let newFilter = { query: { match: { '_type': { query: 'nginx', type: 'phrase' } } } };
+      var newFilter = { query: { match: { '_type': { query: 'nginx', type: 'phrase' } } } };
       appState.filters.push(newFilter);
 
       res = queryFilter.getFilters();
@@ -65,13 +65,13 @@ describe('get filters', function () {
       appState.filters = [filters[0]];
       globalState.filters = [filters[1]];
 
-      let res = queryFilter.getFilters();
+      var res = queryFilter.getFilters();
       expect(res[0].$state.store).to.be(storeNames.global);
       expect(res[1].$state.store).to.be(storeNames.app);
     });
 
     it('should return non-null filters from specific states', function () {
-      let states = [
+      var states = [
         [ globalState, queryFilter.getGlobalFilters ],
         [ appState, queryFilter.getAppFilters ],
       ];
@@ -80,14 +80,14 @@ describe('get filters', function () {
         state[0].filters = filters.slice(0);
         expect(state[0].filters).to.contain(null);
 
-        let res = state[1]();
+        var res = state[1]();
         expect(res.length).to.be(state[0].filters.length);
         expect(state[0].filters).to.not.contain(null);
       });
     });
 
     it('should replace the state, not save it', function () {
-      let states = [
+      var states = [
         [ globalState, queryFilter.getGlobalFilters ],
         [ appState, queryFilter.getAppFilters ],
       ];
@@ -101,7 +101,7 @@ describe('get filters', function () {
         expect(state[0].replace.called).to.be(false);
 
         state[0].filters = filters.slice(0);
-        let res = state[1]();
+        var res = state[1]();
         expect(state[0].save.called).to.be(false);
         expect(state[0].replace.called).to.be(true);
       });
@@ -130,11 +130,11 @@ describe('get filters', function () {
 
     it('should skip appState filters that match globalState filters', function () {
       globalState.filters = filters;
-      let appFilter = _.cloneDeep(filters[1]);
+      var appFilter = _.cloneDeep(filters[1]);
       appState.filters.push(appFilter);
 
       // global filters should be listed first
-      let res = queryFilter.getFilters();
+      var res = queryFilter.getFilters();
       expect(res).to.have.length(3);
       _.each(res, function (filter) {
         expect(filter.$state.store).to.be('globalState');
@@ -143,12 +143,12 @@ describe('get filters', function () {
 
     it('should append conflicting appState filters', function () {
       globalState.filters = filters;
-      let appFilter = _.cloneDeep(filters[1]);
+      var appFilter = _.cloneDeep(filters[1]);
       appFilter.meta.negate = true;
       appState.filters.push(appFilter);
 
       // global filters should be listed first
-      let res = queryFilter.getFilters();
+      var res = queryFilter.getFilters();
       expect(res).to.have.length(4);
       expect(res.filter(function (filter) {
         return filter.$state.store === storeNames.global;
@@ -161,17 +161,17 @@ describe('get filters', function () {
     it('should not affect disabled filters', function () {
       // test adding to globalState
       globalState.filters = _.map(filters, function (filter) {
-        let f = _.cloneDeep(filter);
+        var f = _.cloneDeep(filter);
         f.meta.disabled = true;
         return f;
       });
       _.each(filters, function (filter) { globalState.filters.push(filter); });
-      let res = queryFilter.getFilters();
+      var res = queryFilter.getFilters();
       expect(res).to.have.length(6);
 
       // test adding to appState
       globalState.filters = _.map(filters, function (filter) {
-        let f = _.cloneDeep(filter);
+        var f = _.cloneDeep(filter);
         f.meta.disabled = true;
         return f;
       });

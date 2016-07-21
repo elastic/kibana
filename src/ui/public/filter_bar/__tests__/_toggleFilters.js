@@ -1,10 +1,10 @@
 describe('toggle filters', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
-  let sinon = require('auto-release-sinon');
-  let MockState = require('fixtures/mock_state');
-  let storeNames = {
+  var _ = require('lodash');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
+  var sinon = require('auto-release-sinon');
+  var MockState = require('fixtures/mock_state');
+  var storeNames = {
     app: 'appState',
     global: 'globalState'
   };
@@ -74,7 +74,7 @@ describe('toggle filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      let emitSpy = sinon.spy(queryFilter, 'emit');
+      var emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
       $rootScope.$digest();
 

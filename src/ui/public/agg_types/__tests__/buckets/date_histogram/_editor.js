@@ -1,8 +1,8 @@
 describe('editor', function () {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
+  var _ = require('lodash');
+  var $ = require('jquery');
+  var ngMock = require('ngMock');
+  var expect = require('expect.js');
 
   let indexPattern;
   let vis;
@@ -14,7 +14,7 @@ describe('editor', function () {
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
-    let Vis = Private(require('ui/Vis'));
+    var Vis = Private(require('ui/Vis'));
 
     /**
      * Render the AggParams editor for the date histogram aggregation
@@ -35,8 +35,8 @@ describe('editor', function () {
         ]
       });
 
-      let $el = $('<vis-editor-agg-params agg="agg" group-name="groupName"></vis-editor-agg-params>');
-      let $parentScope = $injector.get('$rootScope').$new();
+      var $el = $('<vis-editor-agg-params agg="agg" group-name="groupName"></vis-editor-agg-params>');
+      var $parentScope = $injector.get('$rootScope').$new();
 
       agg = $parentScope.agg = vis.aggs.bySchemaName.segment[0];
       $parentScope.groupName = 'buckets';
@@ -45,10 +45,10 @@ describe('editor', function () {
       $scope = $el.scope();
       $scope.$digest();
 
-      let $inputs = $('vis-agg-param-editor', $el);
+      var $inputs = $('vis-agg-param-editor', $el);
       return _.transform($inputs.toArray(), function (inputs, e) {
-        let $el = $(e);
-        let $scope = $el.scope();
+        var $el = $(e);
+        var $scope = $el.scope();
 
         inputs[$scope.aggParam.name] = {
           $el: $el,
@@ -104,7 +104,7 @@ describe('editor', function () {
       expect(params.interval.modelValue().val).to.be('auto');
       expect(params.field.modelValue().name).to.be(indexPattern.timeFieldName);
 
-      let field = _.find(indexPattern.fields, function (f) {
+      var field = _.find(indexPattern.fields, function (f) {
         return f.type === 'date' && f.name !== indexPattern.timeFieldName;
       });
 

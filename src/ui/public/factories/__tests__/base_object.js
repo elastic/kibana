@@ -1,8 +1,8 @@
-let angular = require('angular');
-let _ = require('lodash');
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var _ = require('lodash');
+var sinon = require('sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 require('ui/private');
 
 describe('Base Object', function () {
@@ -16,31 +16,31 @@ describe('Base Object', function () {
   }));
 
   it('should take an inital set of values', function () {
-    let baseObject = new BaseObject({ message: 'test' });
+    var baseObject = new BaseObject({ message: 'test' });
     expect(baseObject).to.have.property('message', 'test');
   });
 
   it('should serialize _attributes to RISON', function () {
-    let baseObject = new BaseObject();
+    var baseObject = new BaseObject();
     baseObject.message = 'Testing... 1234';
-    let rison = baseObject.toRISON();
+    var rison = baseObject.toRISON();
     expect(rison).to.equal('(message:\'Testing... 1234\')');
   });
 
   it('should not serialize $$attributes to RISON', function () {
-    let baseObject = new BaseObject();
+    var baseObject = new BaseObject();
     baseObject.$$attributes = { foo: 'bar' };
     baseObject.message = 'Testing... 1234';
-    let rison = baseObject.toRISON();
+    var rison = baseObject.toRISON();
     expect(rison).to.equal('(message:\'Testing... 1234\')');
   });
 
   it('should serialize _attributes for JSON', function () {
-    let baseObject = new BaseObject();
+    var baseObject = new BaseObject();
     baseObject.message = 'Testing... 1234';
     baseObject._private = 'foo';
     baseObject.$private = 'stuff';
-    let json = JSON.stringify(baseObject);
+    var json = JSON.stringify(baseObject);
     expect(json).to.equal('{"message":"Testing... 1234"}');
   });
 

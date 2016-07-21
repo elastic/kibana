@@ -1,14 +1,14 @@
-let angular = require('angular');
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+var angular = require('angular');
+var sinon = require('sinon');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
 require('ui/typeahead');
 
 // TODO: This should not be needed, timefilter is only included here, it should move
 require('plugins/kibana/discover/index');
 
-let typeaheadHistoryCount = 10;
-let typeaheadName = 'unittest';
+var typeaheadHistoryCount = 10;
+var typeaheadName = 'unittest';
 let $parentScope;
 let $typeaheadScope;
 let $elem;
@@ -16,13 +16,13 @@ let $typeaheadInputScope;
 let typeaheadCtrl;
 let PersistedLog;
 
-let markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
+var markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
   '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
   '<kbn-typeahead-items></kbn-typeahead-items>' +
   '</div>';
-let typeaheadItems = ['abc', 'def', 'ghi'];
+var typeaheadItems = ['abc', 'def', 'ghi'];
 
-let init = function () {
+var init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -64,7 +64,7 @@ let init = function () {
 describe('typeahead directive', function () {
   describe('typeahead requirements', function () {
     describe('missing input', function () {
-      let goodMarkup = markup;
+      var goodMarkup = markup;
 
       before(function () {
         markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
@@ -99,9 +99,9 @@ describe('typeahead directive', function () {
       });
 
       it('should not save empty entries', function () {
-        let entries = typeaheadItems.slice(0);
+        var entries = typeaheadItems.slice(0);
         entries.push('', 'jkl');
-        for (let i = 0; i < entries.length; i++) {
+        for (var i = 0; i < entries.length; i++) {
           $typeaheadScope.inputModel.$setViewValue(entries[i]);
           typeaheadCtrl.persistEntry();
         }
@@ -129,14 +129,14 @@ describe('typeahead directive', function () {
       });
 
       it('should order fitlered results', function () {
-        let entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
-        let allEntries = typeaheadItems.concat(entries);
-        let startMatches = allEntries.filter(function (item) {
+        var entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
+        var allEntries = typeaheadItems.concat(entries);
+        var startMatches = allEntries.filter(function (item) {
           return /^a/.test(item);
         });
         typeaheadCtrl.history.add.returns(allEntries);
 
-        for (let i = 0; i < entries.length; i++) {
+        for (var i = 0; i < entries.length; i++) {
           $typeaheadScope.inputModel.$setViewValue(entries[i]);
           typeaheadCtrl.persistEntry();
         }
@@ -144,7 +144,7 @@ describe('typeahead directive', function () {
         typeaheadCtrl.filterItemsByQuery('a');
 
         expect($typeaheadScope.filteredItems).to.contain('phantogram');
-        let nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
+        var nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
 
         startMatches.forEach(function (item) {
           expect($typeaheadScope.filteredItems).to.contain(item);

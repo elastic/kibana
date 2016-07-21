@@ -1,10 +1,10 @@
-let _ = require('lodash');
-let expect = require('expect.js');
-let addWordBreaks = require('ui/utils/add_word_breaks');
+var _ = require('lodash');
+var expect = require('expect.js');
+var addWordBreaks = require('ui/utils/add_word_breaks');
 
 describe('addWordBreaks', function () {
 
-  let fixtures = [
+  var fixtures = [
     ['aaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaa<wbr>aaaaaaaaa'],
     ['aaaa aaaaaaaaaaaaaaa', 'aaaa aaaaaaaaaaa<wbr>aaaa'],
     ['aaaa;aaaaaaaaaaaaaaa', 'aaaa;aaaaaaaaaaa<wbr>aaaa'],
@@ -16,9 +16,9 @@ describe('addWordBreaks', function () {
   ];
 
   _.each(fixtures, function (fixture) {
-    let msg = 'should convert ' + fixture[0] + ' to ' + fixture[1];
+    var msg = 'should convert ' + fixture[0] + ' to ' + fixture[1];
     it(msg, function () {
-      let results = addWordBreaks(fixture[0], 10);
+      var results = addWordBreaks(fixture[0], 10);
       expect(results).to.be(fixture[1]);
     });
   });

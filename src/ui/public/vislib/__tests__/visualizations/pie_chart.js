@@ -1,44 +1,44 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
-let $ = require('jquery');
-let fixtures = require('fixtures/fake_hierarchical_data');
+var d3 = require('d3');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var _ = require('lodash');
+var $ = require('jquery');
+var fixtures = require('fixtures/fake_hierarchical_data');
 
-let rowAgg = [
+var rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-let colAgg = [
+var colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-let sliceAgg = [
+var sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-let aggArray = [
+var aggArray = [
   rowAgg,
   colAgg,
   sliceAgg
 ];
 
-let names = [
+var names = [
   'rows',
   'columns',
   'slices'
 ];
 
-let sizes = [
+var sizes = [
   0,
   5,
   15,
@@ -48,13 +48,13 @@ let sizes = [
 ];
 
 describe('No global chart settings', function () {
-  let visLibParams1 = {
+  var visLibParams1 = {
     el: '<div class=chart1></div>',
     type: 'pie',
     addLegend: true,
     addTooltip: true
   };
-  let visLibParams2 = {
+  var visLibParams2 = {
     el: '<div class=chart2></div>',
     type: 'pie',
     addLegend: true,
@@ -78,13 +78,13 @@ describe('No global chart settings', function () {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
 
-    let id1 = 1;
-    let id2 = 1;
-    let stubVis1 = new Vis(indexPattern, {
+    var id1 = 1;
+    var id2 = 1;
+    var stubVis1 = new Vis(indexPattern, {
       type: 'pie',
       aggs: rowAgg
     });
-    let stubVis2 = new Vis(indexPattern, {
+    var stubVis2 = new Vis(indexPattern, {
       type: 'pie',
       aggs: colAgg
     });
@@ -115,19 +115,19 @@ describe('No global chart settings', function () {
   });
 
   describe('_validatePieData method', function () {
-    let allZeros = [
+    var allZeros = [
       { slices: { children: [] } },
       { slices: { children: [] } },
       { slices: { children: [] } }
     ];
 
-    let someZeros = [
+    var someZeros = [
       { slices: { children: [{}] } },
       { slices: { children: [{}] } },
       { slices: { children: [] } }
     ];
 
-    let noZeros = [
+    var noZeros = [
       { slices: { children: [{}] } },
       { slices: { children: [{}] } },
       { slices: { children: [{}] } }
@@ -152,7 +152,7 @@ describe('No global chart settings', function () {
 
 aggArray.forEach(function (dataAgg, i) {
   describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
-    let visLibParams = {
+    var visLibParams = {
       type: 'pie',
       addLegend: true,
       addTooltip: true
@@ -172,8 +172,8 @@ aggArray.forEach(function (dataAgg, i) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
 
-      let id = 1;
-      let stubVis = new Vis(indexPattern, {
+      var id = 1;
+      var stubVis = new Vis(indexPattern, {
         type: 'pie',
         aggs: dataAgg
       });

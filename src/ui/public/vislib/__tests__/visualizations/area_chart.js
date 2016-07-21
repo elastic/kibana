@@ -1,13 +1,13 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
-let $ = require('jquery');
+var d3 = require('d3');
+var angular = require('angular');
+var expect = require('expect.js');
+var ngMock = require('ngMock');
+var _ = require('lodash');
+var $ = require('jquery');
 
-let woahLotsOfVariables = require('fixtures/vislib/mock_data/date_histogram/_series');
-let notQuiteEnoughVariables = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
-let someOtherVariables = {
+var woahLotsOfVariables = require('fixtures/vislib/mock_data/date_histogram/_series');
+var notQuiteEnoughVariables = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
+var someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
   'series neg': require('fixtures/vislib/mock_data/date_histogram/_series_neg'),
@@ -16,7 +16,7 @@ let someOtherVariables = {
   'stackedSeries': require('fixtures/vislib/mock_data/date_histogram/_stacked_series')
 };
 
-let visLibParams = {
+var visLibParams = {
   type: 'area',
   addLegend: true,
   addTooltip: true
@@ -156,12 +156,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should not draw circles where d.y === 0', function () {
         vis.handler.charts.forEach(function (chart) {
-          let series = chart.chartData.series;
-          let isZero = series.some(function (d) {
+          var series = chart.chartData.series;
+          var isZero = series.some(function (d) {
             return d.y === 0;
           });
-          let circles = $.makeArray($(chart.chartEl).find('circle'));
-          let isNotDrawn = circles.some(function (d) {
+          var circles = $.makeArray($(chart.chartEl).find('circle'));
+          var isNotDrawn = circles.some(function (d) {
             return d.__data__.y === 0;
           });
 
@@ -181,7 +181,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          let yAxis = chart.handler.yAxis;
+          var yAxis = chart.handler.yAxis;
 
           expect(yAxis.domain[0]).to.not.be(undefined);
           expect(yAxis.domain[1]).to.not.be(undefined);
@@ -190,7 +190,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          let yAxis = chart.handler.yAxis;
+          var yAxis = chart.handler.yAxis;
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -222,8 +222,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          let yAxis = chart.handler.yAxis;
-          let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+          var yAxis = chart.handler.yAxis;
+          var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
           expect(yAxis.domain[0]).to.equal(yVals[0]);
           expect(yAxis.domain[1]).to.equal(yVals[1]);

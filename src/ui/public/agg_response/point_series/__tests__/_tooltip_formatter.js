@@ -1,8 +1,8 @@
 describe('tooltipFormatter', function () {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
+  var _ = require('lodash');
+  var $ = require('jquery');
+  var expect = require('expect.js');
+  var ngMock = require('ngMock');
 
   let tooltipFormatter;
 
@@ -22,7 +22,7 @@ describe('tooltipFormatter', function () {
     return $row.eq(i).text().trim();
   }
 
-  let baseEvent = {
+  var baseEvent = {
     datum: {
       aggConfigResult: {
         aggConfig: agg('inner'),
@@ -41,20 +41,20 @@ describe('tooltipFormatter', function () {
   };
 
   it('returns html based on the mouse event', function () {
-    let event = _.cloneDeep(baseEvent);
-    let $el = $(tooltipFormatter(event));
-    let $rows = $el.find('tr');
+    var event = _.cloneDeep(baseEvent);
+    var $el = $(tooltipFormatter(event));
+    var $rows = $el.find('tr');
     expect($rows.size()).to.be(3);
 
-    let $row1 = $rows.eq(0).find('td');
+    var $row1 = $rows.eq(0).find('td');
     expect(cell($row1, 0)).to.be('inner');
     expect(cell($row1, 1)).to.be('(3)');
 
-    let $row2 = $rows.eq(1).find('td');
+    var $row2 = $rows.eq(1).find('td');
     expect(cell($row2, 0)).to.be('middle');
     expect(cell($row2, 1)).to.be('(2)');
 
-    let $row3 = $rows.eq(2).find('td');
+    var $row3 = $rows.eq(2).find('td');
     expect(cell($row3, 0)).to.be('top');
     expect(cell($row3, 1)).to.be('(1)');
   });
