@@ -1,6 +1,6 @@
 define(function (require) {
   return function BoundToConfigObjProvider($rootScope, config) {
-    const _ = require('lodash');
+    var _ = require('lodash');
 
     /**
      * Create an object with properties that may be bound to config values.
@@ -17,7 +17,7 @@ define(function (require) {
      * @return {Object}
      */
     function BoundToConfigObj(input) {
-      const self = this;
+      var self = this;
 
       _.forOwn(input, function (val, prop) {
         if (!_.isString(val) || val.charAt(0) !== '=') {
@@ -25,7 +25,7 @@ define(function (require) {
           return;
         }
 
-        const configKey = val.substr(1);
+        var configKey = val.substr(1);
 
         update();
         $rootScope.$on('init:config', update);

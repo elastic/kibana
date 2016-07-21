@@ -1,8 +1,8 @@
 define(function (require) {
-  const angular = require('angular');
-  const existingModules = {};
-  const _ = require('lodash');
-  const links = [];
+  var angular = require('angular');
+  var existingModules = {};
+  var _ = require('lodash');
+  var links = [];
 
   function link(module) {
     // as modules are defined they will be set as requirements for this app
@@ -13,7 +13,7 @@ define(function (require) {
   }
 
   function get(moduleName, requires) {
-    let module = existingModules[moduleName];
+    var module = existingModules[moduleName];
 
     if (module === void 0) {
       // create the module
@@ -36,13 +36,13 @@ define(function (require) {
   }
 
   function close(moduleName) {
-    const module = existingModules[moduleName];
+    var module = existingModules[moduleName];
 
     // already closed
     if (!module) return;
 
     // if the module is currently linked, unlink it
-    const i = links.indexOf(module);
+    var i = links.indexOf(module);
     if (i > -1) links.splice(i, 1);
 
     // remove from linked modules list of required modules

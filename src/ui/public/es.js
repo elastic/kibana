@@ -1,6 +1,6 @@
 define(function (require) {
   require('elasticsearch-browser/elasticsearch.angular.js');
-  const _ = require('lodash');
+  var _ = require('lodash');
 
   let es; // share the client amoungst all apps
   require('ui/modules')

@@ -1,5 +1,5 @@
 define(function (require) {
-  const _ = require('lodash');
+  var _ = require('lodash');
 
   /**
    * Angular can't render directives that render themselves recursively:
@@ -25,7 +25,7 @@ define(function (require) {
         }
 
         // Break the recursion loop by removing the contents
-        const contents = element.contents().remove();
+        var contents = element.contents().remove();
         let compiledContents;
         return {
           pre: (link && link.pre) ? link.pre : null,
