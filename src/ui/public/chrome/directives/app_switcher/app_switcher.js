@@ -1,8 +1,8 @@
-let parse = require('url').parse;
-let bindKey = require('lodash').bindKey;
+var parse = require('url').parse;
+var bindKey = require('lodash').bindKey;
 
 require('../app_switcher/app_switcher.less');
-let DomLocationProvider = require('ui/domLocation');
+var DomLocationProvider = require('ui/domLocation');
 
 require('ui/modules')
 .get('kibana')
@@ -12,7 +12,7 @@ require('ui/modules')
     template: require('./app_switcher.html'),
     controllerAs: 'switcher',
     controller: function ($scope, Private) {
-      let domLocation = Private(DomLocationProvider);
+      var domLocation = Private(DomLocationProvider);
 
       // since we render this in an isolate scope we can't "require: ^chrome", but
       // rather than remove all helpfull checks we can just check here.
@@ -29,11 +29,11 @@ require('ui/modules')
           return;
         }
 
-        let toParsed = parse(event.delegateTarget.href);
-        let fromParsed = parse(domLocation.href);
-        let sameProto = toParsed.protocol === fromParsed.protocol;
-        let sameHost = toParsed.host === fromParsed.host;
-        let samePath = toParsed.path === fromParsed.path;
+        var toParsed = parse(event.delegateTarget.href);
+        var fromParsed = parse(domLocation.href);
+        var sameProto = toParsed.protocol === fromParsed.protocol;
+        var sameHost = toParsed.host === fromParsed.host;
+        var samePath = toParsed.path === fromParsed.path;
 
         if (sameProto && sameHost && samePath) {
           toParsed.hash && domLocation.reload();

@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
-  let PER_PAGE_DEFAULT = 10;
+  var PER_PAGE_DEFAULT = 10;
 
   require('ui/modules').get('kibana')
   .directive('paginate', function ($parse, $compile) {
@@ -21,7 +21,7 @@ define(function (require) {
             $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
           }
 
-          let paginate = $scope.paginate;
+          var paginate = $scope.paginate;
 
           // add some getters to the controller powered by attributes
           paginate.getList = $parse(attrs.list);
@@ -41,8 +41,8 @@ define(function (require) {
       },
       controllerAs: 'paginate',
       controller: function ($scope) {
-        let self = this;
-        let ALL = 0;
+        var self = this;
+        var ALL = 0;
 
         self.sizeOptions = [
           { title: '10', value: 10 },
@@ -61,8 +61,8 @@ define(function (require) {
             self.perPageProp,
             self.otherWidthGetter
           ], function (vals, oldVals) {
-            let intChanges = vals[0] !== oldVals[0];
-            let extChanges = vals[1] !== oldVals[1];
+            var intChanges = vals[0] !== oldVals[0];
+            var extChanges = vals[1] !== oldVals[1];
 
             if (intChanges) {
               if (!setPerPage(self.perPage)) {
@@ -101,14 +101,14 @@ define(function (require) {
           $scope.pages = [];
           if (!$scope.list) return;
 
-          let perPage = _.parseInt(self.perPage);
-          let count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
+          var perPage = _.parseInt(self.perPage);
+          var count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
           _.times(count, function (i) {
             let page;
 
             if (perPage) {
-              let start = perPage * i;
+              var start = perPage * i;
               page = $scope.list.slice(start, start + perPage);
             } else {
               page = $scope.list.slice(0);
@@ -143,9 +143,9 @@ define(function (require) {
 
           // setup the list of the other pages to link to
           $scope.otherPages = [];
-          let width = +self.otherWidthGetter($scope) || 5;
-          let left = page.i - Math.round((width - 1) / 2);
-          let right = left + width - 1;
+          var width = +self.otherWidthGetter($scope) || 5;
+          var left = page.i - Math.round((width - 1) / 2);
+          var right = left + width - 1;
 
           // shift neg count from left to right
           if (left < 0) {
@@ -154,14 +154,14 @@ define(function (require) {
           }
 
           // shift extra right nums to left
-          let lastI = page.count - 1;
+          var lastI = page.count - 1;
           if (right > lastI) {
             right = lastI;
             left = right - width + 1;
           }
 
-          for (let i = left; i <= right; i++) {
-            let other = $scope.pages[i];
+          for (var i = left; i <= right; i++) {
+            var other = $scope.pages[i];
 
             if (!other) continue;
 
@@ -172,7 +172,7 @@ define(function (require) {
         };
 
         function setPerPage(val) {
-          let $ppParent = $scope;
+          var $ppParent = $scope;
 
           while ($ppParent && !_.has($ppParent, self.perPageProp)) {
             $ppParent = $ppParent.$parent;

@@ -1,8 +1,8 @@
 define(function (require) {
   return function MetricAggTypeProvider(Private) {
-    let _ = require('lodash');
-    let AggType = Private(require('ui/agg_types/AggType'));
-    let fieldFormats = Private(require('ui/registry/field_formats'));
+    var _ = require('lodash');
+    var AggType = Private(require('ui/agg_types/AggType'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
     _.class(MetricAggType).inherits(AggType);
     function MetricAggType(config) {
@@ -23,7 +23,7 @@ define(function (require) {
      */
     MetricAggType.prototype.getValue = function (agg, bucket) {
       // Metric types where an empty set equals `zero`
-      let isSettableToZero = ['cardinality', 'sum'].indexOf(agg.__type.name) !== -1;
+      var isSettableToZero = ['cardinality', 'sum'].indexOf(agg.__type.name) !== -1;
 
       // Return proper values when no buckets are present
       // `Count` handles empty sets properly
@@ -41,7 +41,7 @@ define(function (require) {
      * @return {FieldFromat}
      */
     MetricAggType.prototype.getFormat = function (agg) {
-      let field = agg.field();
+      var field = agg.field();
       return field ? field.format : fieldFormats.getDefaultInstance('number');
     };
 

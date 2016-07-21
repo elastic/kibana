@@ -1,15 +1,15 @@
 define(function (require) {
   return function fetchService(Private, Promise) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let requestQueue = Private(require('ui/courier/_request_queue'));
-    let fetchThese = Private(require('ui/courier/fetch/_fetch_these'));
+    var requestQueue = Private(require('ui/courier/_request_queue'));
+    var fetchThese = Private(require('ui/courier/fetch/_fetch_these'));
 
-    let callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
-    let INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+    var callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
+    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
 
     function fetchQueued(strategy) {
-      let requests = requestQueue.getStartable(strategy);
+      var requests = requestQueue.getStartable(strategy);
       if (!requests.length) return Promise.resolve();
       else return fetchThese(requests);
     }
@@ -17,7 +17,7 @@ define(function (require) {
     this.fetchQueued = fetchQueued;
 
     function fetchASource(source, strategy) {
-      let defer = Promise.defer();
+      var defer = Promise.defer();
 
       fetchThese([
         source._createRequest(defer)

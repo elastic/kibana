@@ -6,9 +6,9 @@ define(function (require) {
       restrict: 'A',
       link: function ($scope, $elem, attrs) {
         $elem.bind('click', function () {
-          let message = attrs.confirmation || 'Are you sure?';
+          var message = attrs.confirmation || 'Are you sure?';
           if (window.confirm(message)) { // eslint-disable-line no-alert
-            let action = attrs.confirmClick;
+            var action = attrs.confirmClick;
             if (action) {
               $scope.$apply($scope.$eval(action));
             }

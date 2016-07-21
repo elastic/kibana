@@ -1,8 +1,8 @@
 define(function (require) {
   return function FetchStrategyForSearch(Private, Promise, timefilter) {
-    let _ = require('lodash');
-    let angular = require('angular');
-    let toJson = require('ui/utils/aggressive_parse').toJson;
+    var _ = require('lodash');
+    var angular = require('angular');
+    var toJson = require('ui/utils/aggressive_parse').toJson;
 
     return {
       clientMethod: 'msearch',
@@ -21,7 +21,7 @@ define(function (require) {
               return indexList;
             }
 
-            let timeBounds = timefilter.getBounds();
+            var timeBounds = timefilter.getBounds();
             return indexList.toIndexList(timeBounds.min, timeBounds.max);
           })
           .then(function (indexList) {

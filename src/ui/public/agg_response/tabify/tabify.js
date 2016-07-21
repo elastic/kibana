@@ -1,16 +1,16 @@
 define(function (require) {
   return function tabifyAggResponseProvider(Private, Notifier) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let AggConfig = Private(require('ui/Vis/AggConfig'));
-    let TabbedAggResponseWriter = Private(require('ui/agg_response/tabify/_response_writer'));
-    let Buckets = Private(require('ui/agg_response/tabify/_buckets'));
-    let notify = new Notifier({ location: 'agg_response/tabify'});
+    var AggConfig = Private(require('ui/Vis/AggConfig'));
+    var TabbedAggResponseWriter = Private(require('ui/agg_response/tabify/_response_writer'));
+    var Buckets = Private(require('ui/agg_response/tabify/_buckets'));
+    var notify = new Notifier({ location: 'agg_response/tabify'});
 
     function tabifyAggResponse(vis, esResponse, respOpts) {
-      let write = new TabbedAggResponseWriter(vis, respOpts);
+      var write = new TabbedAggResponseWriter(vis, respOpts);
 
-      let topLevelBucket = _.assign({}, esResponse.aggregations, {
+      var topLevelBucket = _.assign({}, esResponse.aggregations, {
         doc_count: esResponse.hits.total
       });
 
@@ -29,13 +29,13 @@ define(function (require) {
      * @returns {undefined}
      */
     function collectBucket(write, bucket, key) {
-      let agg = write.aggStack.shift();
+      var agg = write.aggStack.shift();
 
       switch (agg.schema.group) {
         case 'buckets':
-          let buckets = new Buckets(bucket[agg.id]);
+          var buckets = new Buckets(bucket[agg.id]);
           if (buckets.length) {
-            let splitting = write.canSplit && agg.schema.name === 'split';
+            var splitting = write.canSplit && agg.schema.name === 'split';
             if (splitting) {
               write.split(agg, buckets, function forEachBucket(subBucket, key) {
                 collectBucket(write, subBucket, agg.getKey(subBucket), key);
@@ -61,7 +61,7 @@ define(function (require) {
           }
           break;
         case 'metrics':
-          let value = agg.getValue(bucket);
+          var value = agg.getValue(bucket);
           write.cell(agg, value, function () {
             if (!write.aggStack.length) {
               // row complete
@@ -80,7 +80,7 @@ define(function (require) {
     // write empty values for each bucket agg, then write
     // the metrics from the initial bucket using collectBucket()
     function passEmptyBuckets(write, bucket, key) {
-      let agg = write.aggStack.shift();
+      var agg = write.aggStack.shift();
 
       switch (agg.schema.group) {
         case 'metrics':

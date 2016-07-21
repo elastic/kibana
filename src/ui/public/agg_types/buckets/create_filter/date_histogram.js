@@ -1,11 +1,11 @@
 define(function (require) {
   return function createDateHistogramFilterProvider(Private) {
-    let moment = require('moment');
-    let buildRangeFilter = require('ui/filter_manager/lib/range');
+    var moment = require('moment');
+    var buildRangeFilter = require('ui/filter_manager/lib/range');
 
     return function (agg, key) {
-      let start = moment(key);
-      let interval = agg.buckets.getInterval();
+      var start = moment(key);
+      var interval = agg.buckets.getInterval();
 
       return buildRangeFilter(agg.params.field, {
         gte: start.valueOf(),

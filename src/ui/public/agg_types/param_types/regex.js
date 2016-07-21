@@ -1,14 +1,14 @@
 define(function (require) {
   return function RegexAggParamFactory(Private) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    let editorHtml = require('ui/agg_types/controls/regular_expression.html');
+    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    var editorHtml = require('ui/agg_types/controls/regular_expression.html');
 
     _.class(RegexAggParam).inherits(BaseAggParam);
     function RegexAggParam(config) {
       // Java RegExp flags
-      let flags = [
+      var flags = [
         'CANON_EQ',
         'CASE_INSENSITIVE',
         'COMMENTS',
@@ -46,15 +46,15 @@ define(function (require) {
      * @return {undefined}
      */
     RegexAggParam.prototype.write = function (aggConfig, output) {
-      let param = aggConfig.params[this.name];
-      let paramType = aggConfig.type.params.byName[this.name];
+      var param = aggConfig.params[this.name];
+      var paramType = aggConfig.type.params.byName[this.name];
 
       // clear aggParam if pattern is not set or is disabled
       if (!param || !param.pattern || !param.pattern.length || paramType.disabled(aggConfig)) {
         return;
       }
 
-      let obj = {
+      var obj = {
         pattern: param.pattern
       };
 

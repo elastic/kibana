@@ -1,11 +1,11 @@
 define(function (require) {
   return function PointSeriesOrderedDateAxis(timefilter) {
-    let moment = require('moment');
+    var moment = require('moment');
 
     return function orderedDateAxis(vis, chart) {
-      let xAgg = chart.aspects.x.agg;
-      let buckets = xAgg.buckets;
-      let format = buckets.getScaledDateFormat();
+      var xAgg = chart.aspects.x.agg;
+      var buckets = xAgg.buckets;
+      var format = buckets.getScaledDateFormat();
 
       chart.xAxisFormatter = function (val) {
         return moment(val).format(format);
@@ -16,8 +16,8 @@ define(function (require) {
         interval: buckets.getInterval(),
       };
 
-      let axisOnTimeField = xAgg.fieldIsTimeField();
-      let bounds = buckets.getBounds();
+      var axisOnTimeField = xAgg.fieldIsTimeField();
+      var bounds = buckets.getBounds();
       if (bounds && axisOnTimeField) {
         chart.ordered.min = bounds.min;
         chart.ordered.max = bounds.max;

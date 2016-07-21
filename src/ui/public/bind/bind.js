@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let angular = require('angular');
+  var _ = require('lodash');
+  var angular = require('angular');
 
   require('ui/modules').get('kibana')
   .config(function ($provide) {
@@ -27,26 +27,26 @@ define(function (require) {
        * @return {undefined}
        */
       $delegate.constructor.prototype.$bind = function (to, from, $sourceScope) {
-        let $source = $sourceScope || this.$parent;
-        let $target = this;
+        var $source = $sourceScope || this.$parent;
+        var $target = this;
 
         // parse expressions
-        let $to = $parse(to);
+        var $to = $parse(to);
         if (!$to.assign) errorNotAssignable(to, from);
-        let $from = $parse(from);
+        var $from = $parse(from);
 
         // bind scopes to expressions
-        let getTarget = function () { return $to($target); };
-        let setTarget = function (v) { return $to.assign($target, v); };
-        let getSource = function () { return $from($source); };
-        let setSource = function (v) { return $from.assignOrFail($source, v); };
+        var getTarget = function () { return $to($target); };
+        var setTarget = function (v) { return $to.assign($target, v); };
+        var getSource = function () { return $from($source); };
+        var setSource = function (v) { return $from.assignOrFail($source, v); };
 
         // to support writing from the child to the parent we need to know
         // which source has changed. Track the source value and anytime it
         // changes (even if the target value changed too) push from source
         // to target. If the source hasn't changed then the change is from
         // the target and push accordingly
-        let lastSourceVal = getSource();
+        var lastSourceVal = getSource();
 
         $from.assignOrFail = $from.assign || function () {
           // revert the change and throw an error, child writes aren't supported
@@ -55,19 +55,19 @@ define(function (require) {
         };
 
         // if we are syncing down a literal, then we use loose equality check
-        let strict = !$from.literal;
-        let compare = strict ? strictEquality : angular.equals;
+        var strict = !$from.literal;
+        var compare = strict ? strictEquality : angular.equals;
 
 
         // push the initial value down, start off in sync
         setTarget(lastSourceVal);
 
         $target.$watch(function () {
-          let sourceVal = getSource();
-          let targetVal = getTarget();
+          var sourceVal = getSource();
+          var targetVal = getTarget();
 
-          let outOfSync = !compare(sourceVal, targetVal);
-          let sourceChanged = outOfSync && !compare(sourceVal, lastSourceVal);
+          var outOfSync = !compare(sourceVal, targetVal);
+          var sourceChanged = outOfSync && !compare(sourceVal, lastSourceVal);
 
           if (sourceChanged) setTarget(sourceVal);
           else if (outOfSync) setSource(targetVal);

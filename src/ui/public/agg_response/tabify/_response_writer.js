@@ -1,11 +1,11 @@
 define(function (require) {
   return function TabbedAggResponseWriterProvider(Private) {
-    let _ = require('lodash');
-    let Table = Private(require('ui/agg_response/tabify/_table'));
-    let TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-    let getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
+    var _ = require('lodash');
+    var Table = Private(require('ui/agg_response/tabify/_table'));
+    var TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
+    var getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
 
-    let AggConfigResult = require('ui/Vis/AggConfigResult');
+    var AggConfigResult = require('ui/Vis/AggConfigResult');
 
     _.class(SplitAcr).inherits(AggConfigResult);
     function SplitAcr(agg, parent, key) {
@@ -23,7 +23,7 @@ define(function (require) {
       this.opts = opts || {};
       this.rowBuffer = [];
 
-      let visIsHier = vis.isHierarchical();
+      var visIsHier = vis.isHierarchical();
 
       // do the options allow for splitting? we will only split if true and
       // tabify calls the split method.
@@ -65,9 +65,9 @@ define(function (require) {
      * @return {Table/TableGroup} table - the created table
      */
     TabbedAggResponseWriter.prototype._table = function (group, agg, key) {
-      let Class = (group) ? TableGroup : Table;
-      let table = new Class();
-      let parent = this.splitStack[0];
+      var Class = (group) ? TableGroup : Table;
+      var table = new Class();
+      var parent = this.splitStack[0];
 
       if (group) {
         table.aggConfig = agg;
@@ -93,7 +93,7 @@ define(function (require) {
      * @param  {function} block - a function to execute for each sub bucket
      */
     TabbedAggResponseWriter.prototype.split = function (agg, buckets, block) {
-      let self = this;
+      var self = this;
 
       if (!self.canSplit) {
         throw new Error('attempted to split when splitting is disabled');
@@ -103,11 +103,11 @@ define(function (require) {
 
       buckets.forEach(function (bucket, key) {
         // find the existing split that we should extend
-        let tableGroup = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
+        var tableGroup = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
         // create the split if it doesn't exist yet
         if (!tableGroup) tableGroup = self._table(true, agg, key);
 
-        let splitAcr = false;
+        var splitAcr = false;
         if (self.asAggConfigResults) {
           splitAcr = self._injectParentSplit(agg, key);
         }
@@ -125,7 +125,7 @@ define(function (require) {
     };
 
     TabbedAggResponseWriter.prototype._removeAggFromColumns = function (agg) {
-      let i = _.findIndex(this.columns, function (col) {
+      var i = _.findIndex(this.columns, function (col) {
         return col.aggConfig === agg;
       });
 
@@ -138,8 +138,8 @@ define(function (require) {
 
       // hierarchical vis creats additional columns for each bucket
       // we will remove those too
-      let mCol = this.columns.splice(i, 1).pop();
-      let mI = _.findIndex(this.aggStack, function (agg) {
+      var mCol = this.columns.splice(i, 1).pop();
+      var mI = _.findIndex(this.aggStack, function (agg) {
         return agg === mCol.aggConfig;
       });
 
@@ -158,12 +158,12 @@ define(function (require) {
      * @return {SplitAcr} - the AggConfigResult created for the split bucket
      */
     TabbedAggResponseWriter.prototype._injectParentSplit = function (agg, key) {
-      let oldList = this.acrStack;
-      let newList = this.acrStack = [];
+      var oldList = this.acrStack;
+      var newList = this.acrStack = [];
 
       // walk from right to left through the old stack
       // and move things to the new stack
-      let injected = false;
+      var injected = false;
 
       if (!oldList.length) {
         injected = new SplitAcr(agg, null, key);
@@ -173,7 +173,7 @@ define(function (require) {
 
       // walk from right to left, emptying the previous list
       while (oldList.length) {
-        let acr = oldList.pop();
+        var acr = oldList.pop();
 
         // ignore other splits
         if (acr instanceof SplitAcr) {
@@ -187,11 +187,11 @@ define(function (require) {
           newList.unshift(injected);
         }
 
-        let newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
+        var newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
         newList.unshift(newAcr);
 
         // and replace the acr in the row buffer if its there
-        let rowI = this.rowBuffer.indexOf(acr);
+        var rowI = this.rowBuffer.indexOf(acr);
         if (rowI > -1) {
           this.rowBuffer[rowI] = newAcr;
         }
@@ -213,7 +213,7 @@ define(function (require) {
         value = new AggConfigResult(agg, this.acrStack[0], value, value);
       }
 
-      let staskResult = this.asAggConfigResults && value.type === 'bucket';
+      var staskResult = this.asAggConfigResults && value.type === 'bucket';
 
       this.rowBuffer.push(value);
       if (staskResult) this.acrStack.unshift(value);
@@ -235,14 +235,14 @@ define(function (require) {
      * @return {undefined}
      */
     TabbedAggResponseWriter.prototype.row = function (buffer) {
-      let cells = buffer || this.rowBuffer.slice(0);
+      var cells = buffer || this.rowBuffer.slice(0);
 
       if (!this.partialRows && cells.length < this.columns.length) {
         return;
       }
 
-      let split = this.splitStack[0];
-      let table = split.tables[0] || this._table(false);
+      var split = this.splitStack[0];
+      var table = split.tables[0] || this._table(false);
 
       while (cells.length < this.columns.length) cells.push('');
       table.rows.push(cells);
@@ -255,7 +255,7 @@ define(function (require) {
      * @return {object} - the final table-tree
      */
     TabbedAggResponseWriter.prototype.response = function () {
-      let columns = this.columns;
+      var columns = this.columns;
 
       // give the columns some metadata
       columns.map(function (col) {
@@ -270,7 +270,7 @@ define(function (require) {
 
       if (this.canSplit) return this.root;
 
-      let table = this.root.tables[0];
+      var table = this.root.tables[0];
       if (!table) return;
 
       delete table.$parent;

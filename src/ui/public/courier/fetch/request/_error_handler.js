@@ -1,13 +1,13 @@
 define(function (require) {
   return function RequestErrorHandlerFactory(Private, Notifier) {
-    let errHandlers = Private(require('ui/courier/_error_handlers'));
+    var errHandlers = Private(require('ui/courier/_error_handlers'));
 
-    let notify = new Notifier({
+    var notify = new Notifier({
       location: 'Courier Fetch Error'
     });
 
     function handleError(req, error) {
-      let myHandlers = [];
+      var myHandlers = [];
 
       errHandlers.splice(0).forEach(function (handler) {
         (handler.source === req.source ? myHandlers : errHandlers).push(handler);

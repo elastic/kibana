@@ -1,12 +1,12 @@
 define(function (require) {
   return function GeoHashAggDefinition(Private, config) {
-    let _ = require('lodash');
-    let moment = require('moment');
-    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    let defaultPrecision = 2;
+    var _ = require('lodash');
+    var moment = require('moment');
+    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var defaultPrecision = 2;
 
     function getPrecision(precision) {
-      let maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
+      var maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
 
       precision = parseInt(precision, 10);
 

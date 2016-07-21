@@ -1,10 +1,10 @@
 define(function (require) {
   return function RootSearchSource(Private, $rootScope, timefilter, Notifier) {
-    let SearchSource = Private(require('ui/courier/data_source/search_source'));
+    var SearchSource = Private(require('ui/courier/data_source/search_source'));
 
-    let notify = new Notifier({ location: 'Root Search Source' });
+    var notify = new Notifier({ location: 'Root Search Source' });
 
-    let globalSource = new SearchSource();
+    var globalSource = new SearchSource();
     globalSource.inherits(false); // this is the final source, it has no parents
     globalSource.filter(function (globalSource) {
       // dynamic time filter will be called in the _flatten phase of things
@@ -34,7 +34,7 @@ define(function (require) {
 
       // walk the parent chain until we get to the global source or nothing
       // that's where we will attach to the globalSource
-      let literalRoot = source;
+      var literalRoot = source;
       while (literalRoot._parent && literalRoot._parent !== globalSource) {
         literalRoot = literalRoot._parent;
       }

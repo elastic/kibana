@@ -1,7 +1,7 @@
 define(function (require) {
-  let module = require('ui/modules').get('kibana');
-  let $ = require('jquery');
-  let _ = require('lodash');
+  var module = require('ui/modules').get('kibana');
+  var $ = require('jquery');
+  var _ = require('lodash');
 
   module.directive('cssTruncate', function ($timeout) {
     return {

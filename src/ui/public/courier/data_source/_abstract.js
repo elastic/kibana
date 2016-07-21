@@ -1,14 +1,14 @@
 define(function (require) {
-  let _ = require('lodash');
-  let angular = require('angular');
+  var _ = require('lodash');
+  var angular = require('angular');
 
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter) {
-    let requestQueue = Private(require('ui/courier/_request_queue'));
-    let errorHandlers = Private(require('ui/courier/_error_handlers'));
-    let courierFetch = Private(require('ui/courier/fetch/fetch'));
+    var requestQueue = Private(require('ui/courier/_request_queue'));
+    var errorHandlers = Private(require('ui/courier/_error_handlers'));
+    var courierFetch = Private(require('ui/courier/fetch/fetch'));
 
     function SourceAbstract(initialState, strategy) {
-      let self = this;
+      var self = this;
       self._instanceid = _.uniqueId('data_source');
 
       self._state = (function () {
@@ -51,7 +51,7 @@ define(function (require) {
      * @return {any} - the value found
      */
     SourceAbstract.prototype.get = function (name) {
-      let self = this;
+      var self = this;
       while (self) {
         if (self._state[name] !== void 0) return self._state[name];
         self = self.getParent();
@@ -73,7 +73,7 @@ define(function (require) {
      *   string of the state value to set
      */
     SourceAbstract.prototype.set = function (state, val) {
-      let self = this;
+      var self = this;
 
       if (typeof state === 'string') {
         // the getter and setter methods check for undefined explicitly
@@ -119,7 +119,7 @@ define(function (require) {
      * @return {Promise}
      */
     SourceAbstract.prototype.onResults = function (handler) {
-      let self = this;
+      var self = this;
 
       return new PromiseEmitter(function (resolve, reject) {
         const defer = Promise.defer();
@@ -143,7 +143,7 @@ define(function (require) {
      * @return {Promise}
      */
     SourceAbstract.prototype.onError = function (handler) {
-      let self = this;
+      var self = this;
 
       return new PromiseEmitter(function (resolve, reject) {
         const defer = Promise.defer();
@@ -166,8 +166,8 @@ define(function (require) {
      * @async
      */
     SourceAbstract.prototype.fetch = function () {
-      let self = this;
-      let req = _.first(self._myStartableQueued());
+      var self = this;
+      var req = _.first(self._myStartableQueued());
 
       if (!req) {
         req = self._createRequest();
@@ -226,16 +226,16 @@ define(function (require) {
      * @resolved {Object|null} - the flat state of the SourceAbstract
      */
     SourceAbstract.prototype._flatten = function () {
-      let type = this._getType();
+      var type = this._getType();
 
       // the merged state of this dataSource and it's ancestors
-      let flatState = {};
+      var flatState = {};
 
       // function used to write each property from each state object in the chain to flat state
-      let root = this;
+      var root = this;
 
       // start the chain at this source
-      let current = this;
+      var current = this;
 
       // call the ittr and return it's promise
       return (function ittr() {
@@ -249,12 +249,12 @@ define(function (require) {
             });
           }
 
-          let prom = root._mergeProp(flatState, value, key);
+          var prom = root._mergeProp(flatState, value, key);
           return Promise.is(prom) ? prom : null;
         }))
         .then(function () {
           // move to this sources parent
-          let parent = current.getParent();
+          var parent = current.getParent();
           // keep calling until we reach the top parent
           if (parent) {
             current = parent;
@@ -265,7 +265,7 @@ define(function (require) {
       .then(function () {
         if (type === 'search') {
           // This is down here to prevent the circular dependency
-          let decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
+          var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 
           flatState.body = flatState.body || {};
 
@@ -279,7 +279,7 @@ define(function (require) {
           if (flatState.body.size === 0) {
             flatState.search_type = 'count';
           } else {
-            let computedFields = flatState.index.getComputedFields();
+            var computedFields = flatState.index.getComputedFields();
             flatState.body.fields = computedFields.fields;
             flatState.body.script_fields = flatState.body.script_fields || {};
             flatState.body.fielddata_fields = flatState.body.fielddata_fields || [];
@@ -297,7 +297,7 @@ define(function (require) {
            *                          through otherwise it will filter out
            * @returns {function}
            */
-          let filterNegate = function (reverse) {
+          var filterNegate = function (reverse) {
             return function (filter) {
               if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
               return filter.meta && filter.meta.negate === reverse;
@@ -309,7 +309,7 @@ define(function (require) {
            * @param {object} filter The filter to clean
            * @returns {object}
            */
-          let cleanFilter = function (filter) {
+          var cleanFilter = function (filter) {
             return _.omit(filter, ['meta']);
           };
 

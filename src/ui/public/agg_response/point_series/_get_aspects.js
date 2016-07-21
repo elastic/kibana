@@ -1,9 +1,9 @@
 define(function (require) {
   return function PointSeriesGetAspects(Private) {
-    let _ = require('lodash');
-    let fakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
+    var _ = require('lodash');
+    var fakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
 
-    let map = {
+    var map = {
       segment: 'x',
       metric: 'y',
       radius: 'z',
@@ -12,12 +12,12 @@ define(function (require) {
     };
 
     function columnToAspect(aspects, col, i) {
-      let schema = col.aggConfig.schema.name;
+      var schema = col.aggConfig.schema.name;
 
-      let name = map[schema];
+      var name = map[schema];
       if (!name) throw new TypeError('unknown schema name "' + schema + '"');
 
-      let aspect = {
+      var aspect = {
         i: i,
         col: col,
         agg: col.aggConfig
@@ -36,7 +36,7 @@ define(function (require) {
      *                    may be undefined, a single aspect, or an array of aspects.
      */
     return function getAspects(vis, table) {
-      let aspects = _(table.columns)
+      var aspects = _(table.columns)
       // write each column into the aspects under it's group
       .transform(columnToAspect, {})
       // unwrap groups that only have one value, and validate groups that have more

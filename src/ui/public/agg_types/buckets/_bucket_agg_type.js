@@ -1,7 +1,7 @@
 define(function (require) {
   return function BucketAggTypeProvider(Private) {
-    let _ = require('lodash');
-    let AggType = Private(require('ui/agg_types/AggType'));
+    var _ = require('lodash');
+    var AggType = Private(require('ui/agg_types/AggType'));
 
     _.class(BucketAggType).inherits(AggType);
     function BucketAggType(config) {

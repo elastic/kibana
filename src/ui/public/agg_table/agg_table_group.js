@@ -24,10 +24,10 @@ define(function (require) {
 
               if (!group || !group.tables.length) return;
 
-              let firstTable = group.tables[0];
-              let params = firstTable.aggConfig && firstTable.aggConfig.params;
+              var firstTable = group.tables[0];
+              var params = firstTable.aggConfig && firstTable.aggConfig.params;
               // render groups that have Table children as if they were rows, because iteration is cleaner
-              let childLayout = (params && !params.row) ? 'columns' : 'rows';
+              var childLayout = (params && !params.row) ? 'columns' : 'rows';
 
               $scope[childLayout] = group.tables;
             });

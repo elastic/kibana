@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let angular = require('angular');
+  var _ = require('lodash');
+  var angular = require('angular');
 
   require('ui/modules')
   .get('kibana')
@@ -15,7 +15,7 @@ define(function (require) {
         function fromJSON(value) {
           try {
             value = JSON.parse(value);
-            let validity = !scope.$eval(attrs.requireKeys) ? true : _.keys(value).length > 0;
+            var validity = !scope.$eval(attrs.requireKeys) ? true : _.keys(value).length > 0;
             ngModelCntrl.$setValidity('json', validity);
           } catch (e) {
             ngModelCntrl.$setValidity('json', false);

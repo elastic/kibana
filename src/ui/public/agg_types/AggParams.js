@@ -2,10 +2,10 @@ define(function (require) {
   return function AggParamsFactory(Private) {
     require('ui/filters/label');
 
-    let _ = require('lodash');
-    let IndexedArray = require('ui/IndexedArray');
+    var _ = require('lodash');
+    var IndexedArray = require('ui/IndexedArray');
 
-    let paramTypeMap = {
+    var paramTypeMap = {
       field: Private(require('ui/agg_types/param_types/field')),
       optioned: Private(require('ui/agg_types/param_types/optioned')),
       regex: Private(require('ui/agg_types/param_types/regex')),
@@ -32,8 +32,8 @@ define(function (require) {
       AggParams.Super.call(this, {
         index: ['name'],
         initialSet: params.map(function (config) {
-          let type = config.name === 'field' ? config.name : config.type;
-          let Class = paramTypeMap[type] || paramTypeMap._default;
+          var type = config.name === 'field' ? config.name : config.type;
+          var Class = paramTypeMap[type] || paramTypeMap._default;
           return new Class(config);
         })
       });
@@ -54,7 +54,7 @@ define(function (require) {
      *         are dependent on the AggParam#write methods which should be studied for each AggType.
      */
     AggParams.prototype.write = function (aggConfig, locals) {
-      let output = { params: {} };
+      var output = { params: {} };
       locals = locals || {};
 
       this.forEach(function (param) {

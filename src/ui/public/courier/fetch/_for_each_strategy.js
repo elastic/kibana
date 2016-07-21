@@ -1,14 +1,14 @@
 define(function (require) {
   return function FetchForEachRequestStrategy(Private, Promise) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
     function forEachStrategy(requests, block) {
       block = Promise.method(block);
-      let sets = [];
+      var sets = [];
 
       requests.forEach(function (req) {
-        let strategy = req.strategy;
-        let set = _.find(sets, { 0: strategy });
+        var strategy = req.strategy;
+        var set = _.find(sets, { 0: strategy });
         if (set) set[1].push(req);
         else sets.push([strategy, [req]]);
       });

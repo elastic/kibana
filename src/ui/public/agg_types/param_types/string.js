@@ -1,9 +1,9 @@
 define(function (require) {
   return function FieldAggParamFactory(Private) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let editorHtml = require('ui/agg_types/controls/string.html');
-    let BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    var editorHtml = require('ui/agg_types/controls/string.html');
+    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
 
     _.class(ScriptAggParam).inherits(BaseAggParam);
     function ScriptAggParam(config) {

@@ -1,16 +1,16 @@
 define(function (require) {
   return function FetchTheseProvider(Private, Promise) {
-    let notify = Private(require('ui/courier/fetch/_notifier'));
-    let forEachStrategy = Private(require('ui/courier/fetch/_for_each_strategy'));
+    var notify = Private(require('ui/courier/fetch/_notifier'));
+    var forEachStrategy = Private(require('ui/courier/fetch/_for_each_strategy'));
 
     // core tasks
-    let callClient = Private(require('ui/courier/fetch/_call_client'));
-    let callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
-    let continueIncomplete = Private(require('ui/courier/fetch/_continue_incomplete'));
+    var callClient = Private(require('ui/courier/fetch/_call_client'));
+    var callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
+    var continueIncomplete = Private(require('ui/courier/fetch/_continue_incomplete'));
 
-    let ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
-    let DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
-    let INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+    var ABORTED = Private(require('ui/courier/fetch/_req_status')).ABORTED;
+    var DUPLICATE = Private(require('ui/courier/fetch/_req_status')).DUPLICATE;
+    var INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
 
     function fetchThese(requests) {
       return forEachStrategy(requests, function (strategy, reqsForStrategy) {
@@ -64,7 +64,7 @@ define(function (require) {
         }
 
         return new Promise(function (resolve) {
-          let action = req.started ? req.continue : req.start;
+          var action = req.started ? req.continue : req.start;
           resolve(action.call(req));
         })
         .catch(err => req.handleFailure(err));

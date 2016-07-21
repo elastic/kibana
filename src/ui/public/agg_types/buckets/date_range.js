@@ -1,12 +1,12 @@
 define(function (require) {
-  let moment = require('moment');
-  let dateRange = require('ui/utils/date_range');
+  var moment = require('moment');
+  var dateRange = require('ui/utils/date_range');
   require('ui/directives/validate_date_math');
 
   return function DateRangeAggDefinition(Private, config) {
-    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    let createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
-    let fieldFormats = Private(require('ui/registry/field_formats'));
+    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_range'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
 
     return new BucketAggType({
@@ -14,7 +14,7 @@ define(function (require) {
       title: 'Date Range',
       createFilter: createFilter,
       getKey: function (bucket, key, agg) {
-        let formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
+        var formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
         return dateRange.toString(bucket, formatter);
       },
       getFormat: function () {

@@ -1,10 +1,10 @@
 define(function (require) {
-  let errors = require('ui/errors');
+  var errors = require('ui/errors');
 
   return function RedirectWhenMissingFn($location, kbnUrl, Notifier, Promise) {
-    let SavedObjectNotFound = errors.SavedObjectNotFound;
+    var SavedObjectNotFound = errors.SavedObjectNotFound;
 
-    let notify = new Notifier();
+    var notify = new Notifier();
 
     /**
      * Creates an error handler that will redirect to a url when a SavedObjectNotFound
@@ -23,7 +23,7 @@ define(function (require) {
         // if this error is not "404", rethrow
         if (!(err instanceof SavedObjectNotFound)) throw err;
 
-        let url = mapping[err.savedObjectType] || mapping['*'];
+        var url = mapping[err.savedObjectType] || mapping['*'];
         if (!url) url = '/';
 
         url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${err.savedObjectType}`;

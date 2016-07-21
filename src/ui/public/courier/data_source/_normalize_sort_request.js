@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
   return function normalizeSortRequest(config) {
-    let defaultSortOptions = config.get('sort:options');
+    var defaultSortOptions = config.get('sort:options');
 
     /**
      * Decorate queries with default parameters
@@ -9,7 +9,7 @@ define(function (require) {
      * @returns {object}
      */
     return function (sortObject, indexPattern) {
-      let normalizedSort = [];
+      var normalizedSort = [];
 
       // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
       return [].concat(sortObject).map(function (sortable) {
@@ -22,10 +22,10 @@ define(function (require) {
       { someField: "desc" } into { someField: { "order": "desc"}}
     */
     function normalize(sortable, indexPattern) {
-      let normalized = {};
-      let sortField = _.keys(sortable)[0];
-      let sortValue = sortable[sortField];
-      let indexField = indexPattern.fields.byName[sortField];
+      var normalized = {};
+      var sortField = _.keys(sortable)[0];
+      var sortValue = sortable[sortField];
+      var indexField = indexPattern.fields.byName[sortField];
 
       if (indexField && indexField.scripted && indexField.sortable) {
         let direction;

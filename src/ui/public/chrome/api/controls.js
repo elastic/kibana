@@ -1,4 +1,4 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
 module.exports = function (chrome, internals) {
   /**
@@ -10,7 +10,7 @@ module.exports = function (chrome, internals) {
    *     determines if the Kibana chrome should be displayed
    */
 
-  let def = true;
+  var def = true;
   internals.setVisibleDefault = (_def) => def = Boolean(_def);
 
   /**

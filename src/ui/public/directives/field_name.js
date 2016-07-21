@@ -1,5 +1,5 @@
 define(function (require) {
-  let module = require('ui/modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
   require('ui/filters/short_dots');
 
   module.directive('fieldName', function ($compile, $rootScope, $filter) {
@@ -12,7 +12,7 @@ define(function (require) {
       },
       link: function ($scope, $el) {
 
-        let typeIcon = function (fieldType) {
+        var typeIcon = function (fieldType) {
           switch (fieldType) {
             case 'source':
               return '<i class="fa fa-file-text-o "></i>';
@@ -44,12 +44,12 @@ define(function (require) {
           'field.rowCount'
         ], function () {
 
-          let type = $scope.field ? $scope.field.type : $scope.fieldType;
-          let name = $scope.field ? $scope.field.name : $scope.fieldName;
-          let results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
-          let scripted = $scope.field ? $scope.field.scripted : false;
+          var type = $scope.field ? $scope.field.type : $scope.fieldType;
+          var name = $scope.field ? $scope.field.name : $scope.fieldName;
+          var results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
+          var scripted = $scope.field ? $scope.field.scripted : false;
 
-          let displayName = $filter('shortDots')(name);
+          var displayName = $filter('shortDots')(name);
 
           $el
             .text(displayName)

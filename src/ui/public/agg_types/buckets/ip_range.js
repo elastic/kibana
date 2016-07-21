@@ -1,11 +1,11 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
   require('ui/directives/validate_ip');
   require('ui/directives/validate_cidr_mask');
 
   return function RangeAggDefinition(Private) {
-    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    let createFilter = Private(require('ui/agg_types/buckets/create_filter/ip_range'));
+    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var createFilter = Private(require('ui/agg_types/buckets/create_filter/ip_range'));
 
     return new BucketAggType({
       name: 'ip_range',
@@ -36,7 +36,7 @@ define(function (require) {
           },
           editor: require('ui/agg_types/controls/ip_ranges.html'),
           write: function (aggConfig, output) {
-            let ipRangeType = aggConfig.params.ipRangeType;
+            var ipRangeType = aggConfig.params.ipRangeType;
             output.params.ranges = aggConfig.params.ranges[ipRangeType];
           }
         }

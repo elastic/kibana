@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggResponseBucketsProvider() {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
     function Buckets(aggResp) {
       aggResp = aggResp || false;
@@ -16,7 +16,7 @@ define(function (require) {
     }
 
     Buckets.prototype.forEach = function (fn) {
-      let buckets = this.buckets;
+      var buckets = this.buckets;
 
       if (this.objectMode) {
         this._keys.forEach(function (key) {

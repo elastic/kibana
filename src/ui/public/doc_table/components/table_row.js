@@ -1,8 +1,8 @@
 define(function (require) {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let addWordBreaks = require('ui/utils/add_word_breaks');
-  let module = require('ui/modules').get('app/discover');
+  var _ = require('lodash');
+  var $ = require('jquery');
+  var addWordBreaks = require('ui/utils/add_word_breaks');
+  var module = require('ui/modules').get('app/discover');
 
   require('ui/highlight');
   require('ui/highlight/highlight_tags');
@@ -12,7 +12,7 @@ define(function (require) {
 
 
   // guesstimate at the minimum number of chars wide cells in the table should be
-  let MIN_LINE_LENGTH = 20;
+  var MIN_LINE_LENGTH = 20;
 
   /**
    * kbnTableRow directive
@@ -23,11 +23,11 @@ define(function (require) {
    * ```
    */
   module.directive('kbnTableRow', function ($compile) {
-    let noWhiteSpace = require('ui/utils/no_white_space');
-    let openRowHtml = require('ui/doc_table/components/table_row/open.html');
-    let detailsHtml = require('ui/doc_table/components/table_row/details.html');
-    let cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
-    let truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+    var noWhiteSpace = require('ui/utils/no_white_space');
+    var openRowHtml = require('ui/doc_table/components/table_row/open.html');
+    var detailsHtml = require('ui/doc_table/components/table_row/details.html');
+    var cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
+    var truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
     return {
       restrict: 'A',
@@ -41,7 +41,7 @@ define(function (require) {
         $el.after('<tr>');
         $el.empty();
 
-        let init = function () {
+        var init = function () {
           createSummaryRow($scope.row, $scope.row._id);
         };
 
@@ -53,7 +53,7 @@ define(function (require) {
 
         // toggle display of the rows details, a full list of the fields from each row
         $scope.toggleRow = function () {
-          let $detailsTr = $el.next();
+          var $detailsTr = $el.next();
 
           $scope.open = !$scope.open;
 
@@ -90,10 +90,10 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {
-          let indexPattern = $scope.indexPattern;
+          var indexPattern = $scope.indexPattern;
 
           // We just create a string here because its faster.
-          let newHtmls = [
+          var newHtmls = [
             openRowHtml
           ];
 
@@ -112,18 +112,18 @@ define(function (require) {
             }));
           });
 
-          let $cells = $el.children();
+          var $cells = $el.children();
           newHtmls.forEach(function (html, i) {
-            let $cell = $cells.eq(i);
+            var $cell = $cells.eq(i);
             if ($cell.data('discover:html') === html) return;
 
-            let reuse = _.find($cells.slice(i + 1), function (cell) {
+            var reuse = _.find($cells.slice(i + 1), function (cell) {
               return $.data(cell, 'discover:html') === html;
             });
 
-            let $target = reuse ? $(reuse).detach() : $(html);
+            var $target = reuse ? $(reuse).detach() : $(html);
             $target.data('discover:html', html);
-            let $before = $cells.eq(i - 1);
+            var $before = $cells.eq(i - 1);
             if ($before.size()) {
               $before.after($target);
             } else {
@@ -151,8 +151,8 @@ define(function (require) {
          * Fill an element with the value of a field
          */
         function _displayField(row, fieldName, breakWords) {
-          let indexPattern = $scope.indexPattern;
-          let text = indexPattern.formatField(row, fieldName);
+          var indexPattern = $scope.indexPattern;
+          var text = indexPattern.formatField(row, fieldName);
 
           if (breakWords) {
             text = addWordBreaks(text, MIN_LINE_LENGTH);

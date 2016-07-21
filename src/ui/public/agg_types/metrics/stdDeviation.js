@@ -1,16 +1,16 @@
 define(function (require) {
   return function AggTypeMetricStandardDeviationProvider(Private) {
-    let _ = require('lodash');
-    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    let getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
+    var _ = require('lodash');
+    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
 
-    let responseAggConfigProps = {
+    var responseAggConfigProps = {
       valProp: function () {
-        let details = this.keyedDetails[this.key];
+        var details = this.keyedDetails[this.key];
         return details.valProp;
       },
       makeLabel: function () {
-        let details = this.keyedDetails[this.key];
+        var details = this.keyedDetails[this.key];
         return details.title + ' of ' + this.fieldDisplayName();
       },
       keyedDetails: {
@@ -44,7 +44,7 @@ define(function (require) {
       ],
 
       getResponseAggs: function (agg) {
-        let ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
+        var ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
 
         return [
           new ValueAggConfig('std_lower'),

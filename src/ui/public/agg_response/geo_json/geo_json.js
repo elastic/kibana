@@ -1,9 +1,9 @@
 define(function (require) {
   return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let rowsToFeatures = require('ui/agg_response/geo_json/rowsToFeatures');
-    let tooltipFormatter = Private(require('ui/agg_response/geo_json/_tooltip_formatter'));
+    var rowsToFeatures = require('ui/agg_response/geo_json/rowsToFeatures');
+    var tooltipFormatter = Private(require('ui/agg_response/geo_json/_tooltip_formatter'));
 
     return function (vis, table) {
 
@@ -13,13 +13,13 @@ define(function (require) {
         });
       }
 
-      let geoI = columnIndex('segment');
-      let metricI = columnIndex('metric');
-      let geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
-      let metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
+      var geoI = columnIndex('segment');
+      var metricI = columnIndex('metric');
+      var geoAgg = _.get(table.columns, [geoI, 'aggConfig']);
+      var metricAgg = _.get(table.columns, [metricI, 'aggConfig']);
 
-      let features = rowsToFeatures(table, geoI, metricI);
-      let values = features.map(function (feature) {
+      var features = rowsToFeatures(table, geoI, metricI);
+      var values = features.map(function (feature) {
         return feature.properties.value;
       });
 

@@ -1,13 +1,13 @@
 define(function (require) {
-  let _ = require('lodash');
-  let ConfigTemplate = require('ui/ConfigTemplate');
+  var _ = require('lodash');
+  var ConfigTemplate = require('ui/ConfigTemplate');
 
   require('ui/modules')
   .get('kibana')
   // TODO: all of this really belongs in the timepicker
   .directive('chromeContext', function (timefilter, globalState) {
 
-    let listenForUpdates = _.once(function ($scope) {
+    var listenForUpdates = _.once(function ($scope) {
       $scope.$listen(timefilter, 'update', function (newVal, oldVal) {
         globalState.time = _.clone(timefilter.time);
         globalState.refreshInterval = _.clone(timefilter.refreshInterval);

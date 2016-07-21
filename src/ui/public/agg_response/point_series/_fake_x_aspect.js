@@ -1,9 +1,9 @@
 define(function (require) {
   return function PointSeriesFakeXAxis(Private) {
-    let AggConfig = Private(require('ui/Vis/AggConfig'));
-    let AggType = Private(require('ui/agg_types/AggType'));
+    var AggConfig = Private(require('ui/Vis/AggConfig'));
+    var AggType = Private(require('ui/agg_types/AggType'));
 
-    let allAgg = new AggType({
+    var allAgg = new AggType({
       name: 'all',
       title: 'All docs',
       ordered: false,
@@ -11,7 +11,7 @@ define(function (require) {
     });
 
     return function makeFakeXAxis(vis) {
-      let fake = new AggConfig(vis, {
+      var fake = new AggConfig(vis, {
         type: allAgg,
         schema: vis.type.schemas.all.byName.segment
       });

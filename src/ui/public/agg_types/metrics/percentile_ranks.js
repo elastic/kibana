@@ -1,19 +1,19 @@
 define(function (require) {
   return function AggTypeMetricPercentileRanksProvider(Private) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    let getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
-    let fieldFormats = Private(require('ui/registry/field_formats'));
+    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
 
-    let valuesEditor = require('ui/agg_types/controls/percentile_ranks.html');
+    var valuesEditor = require('ui/agg_types/controls/percentile_ranks.html');
     // required by the values editor
     require('ui/number_list');
 
-    let valueProps = {
+    var valueProps = {
       makeLabel: function () {
-        let field = this.field();
-        let format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+        var field = this.field();
+        var format = (field && field.format) || fieldFormats.getDefaultInstance('number');
 
         return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + this.fieldDisplayName() + '"';
       }
@@ -37,7 +37,7 @@ define(function (require) {
         }
       ],
       getResponseAggs: function (agg) {
-        let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+        var ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
         return agg.params.values.map(function (value) {
           return new ValueAggConfig(value);

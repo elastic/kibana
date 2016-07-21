@@ -1,11 +1,11 @@
 define(function (require) {
   return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
-    let _ = require('lodash');
-    let isNumber = require('lodash').isNumber;
-    let SearchReq = Private(require('ui/courier/fetch/request/search'));
-    let SegmentedHandle = Private(require('ui/courier/fetch/request/_segmented_handle'));
+    var _ = require('lodash');
+    var isNumber = require('lodash').isNumber;
+    var SearchReq = Private(require('ui/courier/fetch/request/search'));
+    var SegmentedHandle = Private(require('ui/courier/fetch/request/_segmented_handle'));
 
-    let notify = new Notifier({
+    var notify = new Notifier({
       location: 'Segmented Fetch'
     });
 
@@ -37,7 +37,7 @@ define(function (require) {
      *********/
 
     SegmentedReq.prototype.start = function () {
-      let self = this;
+      var self = this;
 
       SearchReq.prototype.start.call(this);
 
@@ -74,20 +74,20 @@ define(function (require) {
     };
 
     SegmentedReq.prototype.getFetchParams = function () {
-      let self = this;
+      var self = this;
 
       return self._getFlattenedSource().then(function (flatSource) {
-        let params = _.cloneDeep(flatSource);
+        var params = _.cloneDeep(flatSource);
 
         // calculate the number of indices to fetch in this request in order to prevent
         // more than self._maxSegments requests. We use Math.max(1, n) to ensure that each request
         // has at least one index pattern, and Math.floor() to make sure that if the
         // number of indices does not round out evenly the extra index is tacked onto the last
         // request, making sure the first request returns faster.
-        let remainingSegments = self._maxSegments - self._segments.length;
-        let indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
+        var remainingSegments = self._maxSegments - self._segments.length;
+        var indexCount = Math.max(1, Math.floor(self._queue.length / remainingSegments));
 
-        let indices = self._active = self._queue.splice(0, indexCount);
+        var indices = self._active = self._queue.splice(0, indexCount);
         params.index = _.pluck(indices, 'index');
 
         if (isNumber(self._desiredSize)) {
@@ -112,8 +112,8 @@ define(function (require) {
     };
 
     SegmentedReq.prototype.isIncomplete = function () {
-      let queueNotCreated = !this._queueCreated;
-      let queueNotEmpty = this._queue.length > 0;
+      var queueNotCreated = !this._queueCreated;
+      var queueNotEmpty = this._queue.length > 0;
       return queueNotCreated || queueNotEmpty;
     };
 
@@ -181,9 +181,9 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._createQueue = function () {
-      let self = this;
-      let timeBounds = timefilter.getBounds();
-      let indexPattern = self.source.get('index');
+      var self = this;
+      var timeBounds = timefilter.getBounds();
+      var indexPattern = self.source.get('index');
       self._queueCreated = false;
 
       return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, self._direction)
@@ -211,14 +211,14 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._consumeSegment = function (seg) {
-      let index = this._active;
+      var index = this._active;
       this._complete.push(index);
       if (!seg) return; // segment was ignored/filtered, don't store it
 
-      let hadHits = _.get(this._mergedResp, 'hits.hits.length') > 0;
-      let gotHits = _.get(seg, 'hits.hits.length') > 0;
-      let firstHits = !hadHits && gotHits;
-      let haveHits = hadHits || gotHits;
+      var hadHits = _.get(this._mergedResp, 'hits.hits.length') > 0;
+      var gotHits = _.get(seg, 'hits.hits.length') > 0;
+      var firstHits = !hadHits && gotHits;
+      var haveHits = hadHits || gotHits;
 
       this._mergeSegment(seg);
       this.resp = _.omit(this._mergedResp, '_bucketIndex');
@@ -229,9 +229,9 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._mergeHits = function (hits) {
-      let mergedHits = this._mergedResp.hits.hits;
-      let desiredSize = this._desiredSize;
-      let sortFn = this._sortFn;
+      var mergedHits = this._mergedResp.hits.hits;
+      var desiredSize = this._desiredSize;
+      var sortFn = this._sortFn;
 
       _.pushAll(hits, mergedHits);
 
@@ -247,7 +247,7 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._mergeSegment = notify.timed('merge response segment', function (seg) {
-      let merged = this._mergedResp;
+      var merged = this._mergedResp;
 
       this._segments.push(seg);
 
@@ -277,7 +277,7 @@ define(function (require) {
         }
 
         seg.aggregations[aggKey].buckets.forEach(function (bucket) {
-          let mbucket = merged._bucketIndex[bucket.key];
+          var mbucket = merged._bucketIndex[bucket.key];
           if (mbucket) {
             mbucket.doc_count += bucket.doc_count;
             return;
@@ -291,10 +291,10 @@ define(function (require) {
 
     SegmentedReq.prototype._detectHitsWindow = function (hits) {
       hits = hits || [];
-      let indexPattern = this.source.get('index');
-      let desiredSize = this._desiredSize;
+      var indexPattern = this.source.get('index');
+      var desiredSize = this._desiredSize;
 
-      let size = _.size(hits);
+      var size = _.size(hits);
       if (!isNumber(desiredSize) || size < desiredSize) {
         this._hitWindow = {
           size: size,
@@ -308,8 +308,8 @@ define(function (require) {
       let max;
 
       hits.forEach(function (deepHit) {
-        let hit = indexPattern.flattenHit(deepHit);
-        let time = hit[indexPattern.timeFieldName];
+        var hit = indexPattern.flattenHit(deepHit);
+        var time = hit[indexPattern.timeFieldName];
         if (min == null || time < min) min = time;
         if (max == null || time > max) max = time;
       });
@@ -318,8 +318,8 @@ define(function (require) {
     };
 
     SegmentedReq.prototype._pickSizeForIndices = function (indices) {
-      let hitWindow = this._hitWindow;
-      let desiredSize = this._desiredSize;
+      var hitWindow = this._hitWindow;
+      var desiredSize = this._desiredSize;
 
       if (!isNumber(desiredSize)) return null;
       // we don't have any hits yet, get us more info!
@@ -327,7 +327,7 @@ define(function (require) {
       // the order of documents isn't important, just get us more
       if (!this._sortFn) return Math.max(desiredSize - hitWindow.size, 0);
       // if all of the documents in every index fall outside of our current doc set, we can ignore them.
-      let someOverlap = indices.some(function (index) {
+      var someOverlap = indices.some(function (index) {
         return index.min <= hitWindow.max && hitWindow.min <= index.max;
       });
 

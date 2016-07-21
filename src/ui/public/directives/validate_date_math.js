@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let dateMath = require('ui/utils/dateMath');
+  var _ = require('lodash');
+  var dateMath = require('ui/utils/dateMath');
 
   require('ui/modules').get('kibana').directive('validateDateMath', function () {
     return {
@@ -19,7 +19,7 @@ define(function (require) {
             return null;
           }
 
-          let moment = dateMath.parse(input);
+          var moment = dateMath.parse(input);
           ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
           return input;
         }

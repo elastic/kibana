@@ -1,8 +1,8 @@
 define(function (require) {
   return function SignificantTermsAggDefinition(Private) {
-    let _ = require('lodash');
-    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    let createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    var _ = require('lodash');
+    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
 
     return new BucketAggType({
       name: 'significant_terms',

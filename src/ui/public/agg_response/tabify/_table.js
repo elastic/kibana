@@ -1,6 +1,6 @@
 define(function (require) {
   return function TableProvider() {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
     /**
      * Simple table class that is used to contain the rows and columns that create

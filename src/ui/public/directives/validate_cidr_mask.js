@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let CidrMask = require('ui/utils/CidrMask');
+  var _ = require('lodash');
+  var CidrMask = require('ui/utils/CidrMask');
 
   require('ui/modules').get('kibana').directive('validateCidrMask', function () {
     return {

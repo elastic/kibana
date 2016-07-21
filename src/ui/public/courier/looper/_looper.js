@@ -1,7 +1,7 @@
 define(function (require) {
   return function LooperFactory($timeout, Notifier, Promise) {
-    let _ = require('lodash');
-    let notify = new Notifier();
+    var _ = require('lodash');
+    var notify = new Notifier();
 
     function Looper(ms, fn) {
       this._fn = fn;
@@ -127,7 +127,7 @@ define(function (require) {
      * @return {undefined}
      */
     Looper.prototype._loopTheLoop = function () {
-      let self = this;
+      var self = this;
 
       if (self.active) {
         self.onHastyLoop();

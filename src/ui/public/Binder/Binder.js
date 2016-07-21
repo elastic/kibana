@@ -1,8 +1,8 @@
-let $ = require('jquery');
-let d3 = require('d3');
-let callEach = require('lodash').callEach;
-let bindKey = require('lodash').bindKey;
-let rest = require('lodash').rest;
+var $ = require('jquery');
+var d3 = require('d3');
+var callEach = require('lodash').callEach;
+var bindKey = require('lodash').bindKey;
+var rest = require('lodash').rest;
 
 function Binder($scope) {
   this.disposal = [];
@@ -23,14 +23,14 @@ Binder.prototype.on = function (emitter/*, ...args */) {
 };
 
 Binder.prototype.jqOn = function (el/*, ...args */) {
-  let $el = $(el);
+  var $el = $(el);
   this._bind($el.on, $el.off, $el, rest(arguments));
 };
 
 Binder.prototype.fakeD3Bind = function (el, event, handler) {
   this.jqOn(el, event, function (e) {
     // mimick https://github.com/mbostock/d3/blob/3abb00113662463e5c19eb87cd33f6d0ddc23bc0/src/selection/on.js#L87-L94
-    let o = d3.event; // Events can be reentrant (e.g., focus).
+    var o = d3.event; // Events can be reentrant (e.g., focus).
     d3.event = e;
     try {
       handler.apply(this, [this.__data__]);
@@ -41,7 +41,7 @@ Binder.prototype.fakeD3Bind = function (el, event, handler) {
 };
 
 Binder.prototype.destroy = function () {
-  let destroyers = this.disposal;
+  var destroyers = this.disposal;
   this.disposal = [];
   callEach(destroyers);
 };

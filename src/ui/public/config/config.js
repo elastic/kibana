@@ -1,5 +1,5 @@
 define(function (require) {
-  let module = require('ui/modules').get('kibana/config', [
+  var module = require('ui/modules').get('kibana/config', [
     'kibana/notify'
   ]);
 
@@ -9,15 +9,15 @@ define(function (require) {
 
   // service for delivering config variables to everywhere else
   module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
-    let config = this;
+    var config = this;
 
-    let angular = require('angular');
-    let _ = require('lodash');
-    let defaults = Private(require('ui/config/defaults'));
-    let DelayedUpdater = Private(require('ui/config/_delayed_updater'));
-    let vals = Private(require('ui/config/_vals'));
+    var angular = require('angular');
+    var _ = require('lodash');
+    var defaults = Private(require('ui/config/defaults'));
+    var DelayedUpdater = Private(require('ui/config/_delayed_updater'));
+    var vals = Private(require('ui/config/_vals'));
 
-    let notify = new Notifier({
+    var notify = new Notifier({
       location: 'Config'
     });
 
@@ -25,8 +25,8 @@ define(function (require) {
     // update once it is requested by calling #set() or #clear().
     let updater;
 
-    let DocSource = Private(require('ui/courier/data_source/doc_source'));
-    let doc = (new DocSource())
+    var DocSource = Private(require('ui/courier/data_source/doc_source'));
+    var doc = (new DocSource())
       .index(kbnIndex)
       .type('config')
       .id(kbnVersion);
@@ -42,13 +42,13 @@ define(function (require) {
      * @return {Promise} - Resolved when the config loads initially
      */
     config.init = _.once(function () {
-      let complete = notify.lifecycle('config init');
+      var complete = notify.lifecycle('config init');
 
       return (function getDoc() {
 
         // used to apply an entire es response to the vals, silentAndLocal will prevent
         // event/notifications/writes from occuring.
-        let applyMassUpdate = function (resp, silentAndLocal) {
+        var applyMassUpdate = function (resp, silentAndLocal) {
           _.union(_.keys(resp._source), _.keys(vals)).forEach(function (key) {
             change(key, resp._source[key], silentAndLocal);
           });
@@ -127,7 +127,7 @@ define(function (require) {
     config.$bind = function ($scope, key, property) {
       if (!property) property = key;
 
-      let update = function () {
+      var update = function () {
         $scope[property] = config.get(key);
       };
 

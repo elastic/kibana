@@ -1,13 +1,13 @@
-let _ = require('lodash');
+var _ = require('lodash');
 var { startsWith, get, set, omit, wrap, pick } = require('lodash');
-let Tab = require('ui/chrome/Tab');
+var Tab = require('ui/chrome/Tab');
 var { parse } = require('url');
 
 function TabCollection(opts = {}) {
-  let tabs = [];
-  let specs = null;
-  let defaults = opts.defaults || {};
-  let activeTab = null;
+  var tabs = [];
+  var specs = null;
+  var defaults = opts.defaults || {};
+  var activeTab = null;
 
   this.set = function (_specs) {
     specs = _.cloneDeep([].concat(_specs || []));

@@ -1,9 +1,9 @@
 define(function (require) {
   return function HistogramAggDefinition(Private) {
-    let _ = require('lodash');
-    let moment = require('moment');
-    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    let createFilter = Private(require('ui/agg_types/buckets/create_filter/histogram'));
+    var _ = require('lodash');
+    var moment = require('moment');
+    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var createFilter = Private(require('ui/agg_types/buckets/create_filter/histogram'));
 
     require('ui/validateDateInterval');
 
@@ -45,7 +45,7 @@ define(function (require) {
           default: {},
           editor: require('ui/agg_types/controls/extended_bounds.html'),
           write: function (aggConfig, output) {
-            let val = aggConfig.params.extended_bounds;
+            var val = aggConfig.params.extended_bounds;
 
             if (val.min != null || val.max != null) {
               output.params.extended_bounds = {
@@ -57,7 +57,7 @@ define(function (require) {
 
           // called from the editor
           shouldShow: function (aggConfig) {
-            let field = aggConfig.params.field;
+            var field = aggConfig.params.field;
             if (
               field
               && (field.type === 'number' || field.type === 'date')

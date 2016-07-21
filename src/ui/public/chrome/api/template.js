@@ -1,4 +1,4 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
 module.exports = function (chrome, internals) {
 

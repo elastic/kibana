@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let chrome = require('ui/chrome');
+  var _ = require('lodash');
+  var chrome = require('ui/chrome');
 
   require('ui/modules').get('kibana')
   .run(function ($rootScope, docTitle) {
@@ -11,16 +11,16 @@ define(function (require) {
     $rootScope.$watch(_.bindKey(chrome, 'getActiveTabTitle'), docTitle.update);
   })
   .service('docTitle', function ($rootScope) {
-    let baseTitle = document.title;
-    let self = this;
+    var baseTitle = document.title;
+    var self = this;
 
     let lastChange;
 
     function render() {
       lastChange = lastChange || [];
 
-      let parts = [lastChange[0]];
-      let activeTabTitle = chrome.getActiveTabTitle();
+      var parts = [lastChange[0]];
+      var activeTabTitle = chrome.getActiveTabTitle();
 
       if (activeTabTitle) parts.push(activeTabTitle);
 

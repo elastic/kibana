@@ -1,10 +1,10 @@
 define(function (require) {
-  let _ = require('lodash');
-  let errors = require('ui/errors');
+  var _ = require('lodash');
+  var errors = require('ui/errors');
 
   return function (Promise, Private, es) {
-    let requestQueue = Private(require('ui/courier/_request_queue'));
-    let courierFetch = Private(require('ui/courier/fetch/fetch'));
+    var requestQueue = Private(require('ui/courier/_request_queue'));
+    var courierFetch = Private(require('ui/courier/fetch/fetch'));
 
     /**
      * Backend for doUpdate and doIndex
@@ -14,9 +14,9 @@ define(function (require) {
      * @param  {String} body - HTTP request body
      */
     return function (method, validateVersion, body, ignore) {
-      let doc = this;
+      var doc = this;
       // straight assignment will causes undefined values
-      let params = _.pick(this._state, ['id', 'type', 'index']);
+      var params = _.pick(this._state, ['id', 'type', 'index']);
       params.body = body;
       params.ignore = ignore || [409];
 
@@ -49,13 +49,13 @@ define(function (require) {
         // notify pending request for this same document that we have updates
         docFetchProm.then(function (fetchResp) {
           // use the key to compair sources
-          let key = doc._versionKey();
+          var key = doc._versionKey();
 
           // clear the queue and filter out the removed items, pushing the
           // unmatched ones back in.
-          let respondTo = requestQueue.splice(0).filter(function (req) {
-            let isDoc = req.source._getType() === 'doc';
-            let keyMatches = isDoc && req.source._versionKey() === key;
+          var respondTo = requestQueue.splice(0).filter(function (req) {
+            var isDoc = req.source._getType() === 'doc';
+            var keyMatches = isDoc && req.source._versionKey() === key;
 
             // put some request back into the queue
             if (!keyMatches) {

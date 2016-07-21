@@ -1,19 +1,19 @@
 define(function (require) {
   return function DateHistogramAggType(timefilter, config, Private) {
-    let _ = require('lodash');
-    let moment = require('moment');
-    let tzDetect = require('jstimezonedetect').jstz;
-    let BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    let TimeBuckets = Private(require('ui/time_buckets'));
-    let createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
-    let intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
-    let configDefaults = Private(require('ui/config/defaults'));
+    var _ = require('lodash');
+    var moment = require('moment');
+    var tzDetect = require('jstimezonedetect').jstz;
+    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    var TimeBuckets = Private(require('ui/time_buckets'));
+    var createFilter = Private(require('ui/agg_types/buckets/create_filter/date_histogram'));
+    var intervalOptions = Private(require('ui/agg_types/buckets/_interval_options'));
+    var configDefaults = Private(require('ui/config/defaults'));
 
-    let detectedTimezone = tzDetect.determine().name();
-    let tzOffset = moment().format('Z');
+    var detectedTimezone = tzDetect.determine().name();
+    var tzOffset = moment().format('Z');
 
     function getInterval(agg) {
-      let interval = _.get(agg, ['params', 'interval']);
+      var interval = _.get(agg, ['params', 'interval']);
       if (interval && interval.val === 'custom') interval = _.get(agg, ['params', 'customInterval']);
       return interval;
     }
@@ -34,8 +34,8 @@ define(function (require) {
         date: true
       },
       makeLabel: function (agg) {
-        let output = this.params.write(agg);
-        let params = output.params;
+        var output = this.params.write(agg);
+        var params = output.params;
         return params.field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
       },
       createFilter: createFilter,
@@ -76,7 +76,7 @@ define(function (require) {
           name: 'interval',
           type: 'optioned',
           deserialize: function (state) {
-            let interval = _.find(intervalOptions, {val: state});
+            var interval = _.find(intervalOptions, {val: state});
             return interval || _.find(intervalOptions, function (option) {
               // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
               // but this maps the old values to the new values
@@ -93,16 +93,16 @@ define(function (require) {
             setBounds(agg);
             agg.buckets.setInterval(getInterval(agg));
 
-            let interval = agg.buckets.getInterval();
+            var interval = agg.buckets.getInterval();
             output.bucketInterval = interval;
             output.params.interval = interval.expression;
 
-            let isDefaultTimezone = config.get('dateFormat:tz') === configDefaults['dateFormat:tz'].value;
+            var isDefaultTimezone = config.get('dateFormat:tz') === configDefaults['dateFormat:tz'].value;
             output.params.time_zone = isDefaultTimezone ?
               (detectedTimezone || tzOffset) :
               config.get('dateFormat:tz');
 
-            let scaleMetrics = interval.scaled && interval.scale < 1;
+            var scaleMetrics = interval.scaled && interval.scale < 1;
             if (scaleMetrics) {
               scaleMetrics = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
                 return agg.type && (agg.type.name === 'count' || agg.type.name === 'sum');
@@ -135,7 +135,7 @@ define(function (require) {
           name: 'extended_bounds',
           default: {},
           write: function (agg, output) {
-            let val = agg.params.extended_bounds;
+            var val = agg.params.extended_bounds;
 
             if (val.min != null || val.max != null) {
               output.params.extended_bounds = {
@@ -146,7 +146,7 @@ define(function (require) {
               return;
             }
 
-            let bounds = timefilter.getActiveBounds();
+            var bounds = timefilter.getActiveBounds();
             if (bounds) {
               output.params.extended_bounds = {
                 min: moment(bounds.min).valueOf(),

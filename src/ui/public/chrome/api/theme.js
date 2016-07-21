@@ -1,4 +1,4 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
 module.exports = function (chrome, internals) {
   /**
@@ -66,7 +66,7 @@ module.exports = function (chrome, internals) {
    * @return {chrome}
    */
   chrome.addApplicationClass = function (val) {
-    let classes = internals.applicationClasses || [];
+    var classes = internals.applicationClasses || [];
     classes.push(val);
     classes = _.uniq(classes);
 
@@ -81,8 +81,8 @@ module.exports = function (chrome, internals) {
    * @return {chrome}
    */
   chrome.removeApplicationClass = function (val) {
-    let classesToRemove = [].concat(val || []);
-    let classes = internals.applicationClasses || [];
+    var classesToRemove = [].concat(val || []);
+    var classes = internals.applicationClasses || [];
     _.pull(classes, ...classesToRemove);
 
     internals.applicationClasses = classes;

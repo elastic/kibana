@@ -1,12 +1,12 @@
 define(function (require) {
-  let module = require('ui/modules').get('kibana');
-  let _ = require('lodash');
-  let rison = require('ui/utils/rison');
-  let keymap = require('ui/utils/key_map');
+  var module = require('ui/modules').get('kibana');
+  var _ = require('lodash');
+  var rison = require('ui/utils/rison');
+  var keymap = require('ui/utils/key_map');
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
 
-    let services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
+    var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
 
     return {
       restrict: 'E',
@@ -21,19 +21,19 @@ define(function (require) {
       template: require('ui/partials/saved_object_finder.html'),
       controllerAs: 'finder',
       controller: function ($scope, $element, $timeout) {
-        let self = this;
+        var self = this;
 
         // The number of items to show in the list
         $scope.perPage = config.get('savedObjects:perPage');
 
         // the text input element
-        let $input = $element.find('input[ng-model=filter]');
+        var $input = $element.find('input[ng-model=filter]');
 
         // the list that will hold the suggestions
-        let $list = $element.find('ul');
+        var $list = $element.find('ul');
 
         // the current filter string, used to check that returned results are still useful
-        let currentFilter = $scope.filter;
+        var currentFilter = $scope.filter;
 
         // the most recently entered search/filter
         let prevSearch;
@@ -76,7 +76,7 @@ define(function (require) {
             $scope.userOnChoose(hit, $event);
           }
 
-          let url = self.makeUrl(hit);
+          var url = self.makeUrl(hit);
           if (!url || url === '#' || url.charAt(0) !== '#') return;
 
           $event.preventDefault();
@@ -114,7 +114,7 @@ define(function (require) {
             case 'enter':
               if (self.hitCount !== 1) return;
 
-              let hit = self.hits[0];
+              var hit = self.hits[0];
               if (!hit) return;
 
               self.onChoose(hit, $event);
@@ -187,8 +187,8 @@ define(function (require) {
             case 'enter':
               if (!self.selector.enabled) break;
 
-              let hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
-              let hit = self.hits[hitIndex];
+              var hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
+              var hit = self.hits[hitIndex];
               if (!hit) break;
 
               self.onChoose(hit, $event);
@@ -230,7 +230,7 @@ define(function (require) {
           // but ensure that we don't search for the same
           // thing twice. This is called from multiple places
           // and needs to be smart about when it actually searches
-          let filter = currentFilter;
+          var filter = currentFilter;
           if (prevSearch === filter) return;
 
           prevSearch = filter;
@@ -246,7 +246,7 @@ define(function (require) {
         }
 
         function scrollIntoView($element, snapTop) {
-          let el = $element[0];
+          var el = $element[0];
 
           if (!el) return;
 

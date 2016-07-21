@@ -1,10 +1,10 @@
 define(function (require) {
   return function FieldAggParamFactory(Private) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let editorHtml = require('ui/agg_types/controls/field.html');
-    let BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    let SavedObjectNotFound = require('ui/errors').SavedObjectNotFound;
+    var editorHtml = require('ui/agg_types/controls/field.html');
+    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    var SavedObjectNotFound = require('ui/errors').SavedObjectNotFound;
 
     _.class(FieldAggParam).inherits(BaseAggParam);
     function FieldAggParam(config) {
@@ -33,7 +33,7 @@ define(function (require) {
      * @return {field}
      */
     FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
-      let field = aggConfig.vis.indexPattern.fields.byName[fieldName];
+      var field = aggConfig.vis.indexPattern.fields.byName[fieldName];
 
       if (!field) {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);
@@ -53,7 +53,7 @@ define(function (require) {
      * @return {undefined}
      */
     FieldAggParam.prototype.write = function (aggConfig, output) {
-      let field = aggConfig.params.field;
+      var field = aggConfig.params.field;
 
       if (field.scripted) {
         output.params.script = field.script;

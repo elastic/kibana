@@ -1,6 +1,6 @@
 define(function (require) {
-  let moment = require('moment-timezone');
-  let _ = require('lodash');
+  var moment = require('moment-timezone');
+  var _ = require('lodash');
 
   return function configDefaultsProvider() {
     // wraped in provider so that a new instance is given to each app/test

@@ -1,9 +1,9 @@
 define(function (require) {
   return function OptionedAggParamFactory(Private) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let IndexedArray = require('ui/IndexedArray');
-    let BaseAggParam = Private(require('ui/agg_types/param_types/base'));
+    var IndexedArray = require('ui/IndexedArray');
+    var BaseAggParam = Private(require('ui/agg_types/param_types/base'));
 
     _.class(OptionedAggParam).inherits(BaseAggParam);
     function OptionedAggParam(config) {

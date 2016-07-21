@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeMetricAvgProvider(Private) {
-    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
 
     return new MetricAggType({
       name: 'avg',
