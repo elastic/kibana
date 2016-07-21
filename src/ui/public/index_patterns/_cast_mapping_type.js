@@ -12,6 +12,8 @@ export default function CastMappingTypeFn() {
       { name: 'date',         type: 'date',       group: 'base'   },
       { name: 'boolean',      type: 'boolean',    group: 'base'   },
       { name: 'float',        type: 'number',     group: 'number' },
+      { name: 'half_float',   type: 'number',     group: 'number' },
+      { name: 'scaled_float', type: 'number',     group: 'number' },
       { name: 'double',       type: 'number',     group: 'number' },
       { name: 'integer',      type: 'number',     group: 'number' },
       { name: 'long',         type: 'number',     group: 'number' },
