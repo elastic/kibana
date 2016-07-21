@@ -57,11 +57,8 @@ define(function (require) {
 
     navigateToApp: function (appName, testStatusPage) {
       var self = this;
-      // navUrl includes user:password@ for use with Shield
-      // appUrl excludes user:password@ to match what getCurrentUrl returns
-      var navUrl = getUrl(config.servers.kibana, config.apps[appName]);
       var appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
-      self.debug('navigating to ' + appName + ' url: ' + navUrl);
+      self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       var doNavigation = function (url) {
         return self.tryForTime(defaultTimeout, function () {
@@ -106,7 +103,7 @@ define(function (require) {
         });
       };
 
-      return doNavigation(navUrl)
+      return doNavigation(appUrl)
       .then(function (currentUrl) {
         var lastUrl = currentUrl;
         return self.tryForTime(defaultTimeout, function () {
@@ -229,24 +226,26 @@ define(function (require) {
 
       return function (reason) {
         var now = Date.now();
-        var filename = ['failure', now, testName].join('_') + '.png';
+        var fileName = ['failure', now, testName].join('_') + '.png';
 
-        return self.saveScreenshot(filename)
+        return self.saveScreenshot(fileName, true)
         .finally(function () {
           throw new Error(reason);
         });
       };
     },
 
-    saveScreenshot: function saveScreenshot(filename) {
+    saveScreenshot: function saveScreenshot(fileName, isFailure) {
       var self = this;
-      var outDir = path.resolve('test', 'output');
+      var outDir = path.resolve('test', 'screenshots');
+      var directoryName = isFailure ? 'failure' : 'session';
+      var directoryPath = path.resolve('test', 'screenshots', directoryName);
+      var filePath = path.resolve(directoryPath, fileName);
+      self.debug('Taking screenshot "' + filePath + '"');
 
       return self.remote.takeScreenshot()
       .then(function writeScreenshot(data) {
-        var filepath = path.resolve(outDir, filename);
-        self.debug('Taking screenshot "' + filepath + '"');
-        fs.writeFileSync(filepath, data);
+        fs.writeFileSync(filePath, data);
       })
       .catch(function (err) {
         self.log('SCREENSHOT FAILED: ' + err);
