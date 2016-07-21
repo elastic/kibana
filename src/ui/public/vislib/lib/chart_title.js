@@ -1,11 +1,11 @@
 define(function (require) {
   return function ChartTitleFactory(Private) {
-    let d3 = require('d3');
-    let $ = require('jquery');
-    let _ = require('lodash');
+    var d3 = require('d3');
+    var $ = require('jquery');
+    var _ = require('lodash');
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
-    let Tooltip = Private(require('ui/vislib/components/Tooltip'));
+    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
 
     /**
      * Appends chart titles to the visualization
@@ -33,9 +33,9 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
     ChartTitle.prototype.render = function () {
-      let el = d3.select(this.el).select('.chart-title').node();
-      let width = el ? el.clientWidth : 0;
-      let height = el ? el.clientHeight : 0;
+      var el = d3.select(this.el).select('.chart-title').node();
+      var width = el ? el.clientWidth : 0;
+      var height = el ? el.clientHeight : 0;
 
       return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
     };
@@ -48,14 +48,14 @@ define(function (require) {
      * @returns {Function} Truncates text
      */
     ChartTitle.prototype.truncate = function (size) {
-      let self = this;
+      var self = this;
 
       return function (selection) {
         selection.each(function () {
-          let text = d3.select(this);
-          let n = text[0].length;
-          let maxWidth = size / n * 0.9;
-          let length = this.getComputedTextLength();
+          var text = d3.select(this);
+          var n = text[0].length;
+          var maxWidth = size / n * 0.9;
+          var length = this.getComputedTextLength();
           let str;
           let avg;
           let end;
@@ -95,14 +95,14 @@ define(function (require) {
      * @returns {Function} Appends chart titles to a D3 selection
      */
     ChartTitle.prototype.draw = function (width, height) {
-      let self = this;
+      var self = this;
 
       return function (selection) {
         selection.each(function () {
-          let div = d3.select(this);
-          let dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
-          let size = dataType === 'rows' ? height : width;
-          let txtHtOffset = 11;
+          var div = d3.select(this);
+          var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
+          var size = dataType === 'rows' ? height : width;
+          var txtHtOffset = 11;
 
           self.validateWidthandHeight(width, height);
 

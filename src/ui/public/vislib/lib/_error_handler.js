@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let errors = require('ui/errors');
+  var _ = require('lodash');
+  var errors = require('ui/errors');
 
   return function ErrorHandlerFactory() {
 
@@ -22,8 +22,8 @@ define(function (require) {
      * @returns {HTMLElement} HTML div with an error message
      */
     ErrorHandler.prototype.validateWidthandHeight = function (width, height) {
-      let badWidth = _.isNaN(width) || width <= 0;
-      let badHeight = _.isNaN(height) || height <= 0;
+      var badWidth = _.isNaN(width) || width <= 0;
+      var badHeight = _.isNaN(height) || height <= 0;
 
       if (badWidth || badHeight) {
         throw new errors.ContainerTooSmall();

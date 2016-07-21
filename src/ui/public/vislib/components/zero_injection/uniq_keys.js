@@ -1,8 +1,8 @@
 define(function (require) {
   return function UniqueXValuesUtilService(Private) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let flattenDataArray = Private(require('ui/vislib/components/zero_injection/flatten_data'));
+    var flattenDataArray = Private(require('ui/vislib/components/zero_injection/flatten_data'));
 
     /*
      * Accepts a Kibana data object.
@@ -16,8 +16,8 @@ define(function (require) {
         throw new TypeError('UniqueXValuesUtilService expects an object');
       }
 
-      let flattenedData = flattenDataArray(obj);
-      let uniqueXValues = new Map();
+      var flattenedData = flattenDataArray(obj);
+      var uniqueXValues = new Map();
 
       let charts;
       if (!obj.series) {
@@ -26,17 +26,17 @@ define(function (require) {
         charts = [obj];
       }
 
-      let isDate = charts.every(function (chart) {
+      var isDate = charts.every(function (chart) {
         return chart.ordered && chart.ordered.date;
       });
 
-      let isOrdered = charts.every(function (chart) {
+      var isOrdered = charts.every(function (chart) {
         return chart.ordered;
       });
 
       flattenedData.forEach(function (d, i) {
-        let key = d.x;
-        let prev = uniqueXValues.get(key);
+        var key = d.x;
+        var prev = uniqueXValues.get(key);
 
         if (d.xi != null) {
           i = d.xi;

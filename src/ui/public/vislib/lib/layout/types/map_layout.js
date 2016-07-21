@@ -1,7 +1,7 @@
 define(function (require) {
   return function ColumnLayoutFactory(Private) {
-    let d3 = require('d3');
-    let mapSplit = Private(require('ui/vislib/lib/layout/splits/tile_map/map_split'));
+    var d3 = require('d3');
+    var mapSplit = Private(require('ui/vislib/lib/layout/splits/tile_map/map_split'));
 
     /*
      * Specifies the visualization layout for tile maps.

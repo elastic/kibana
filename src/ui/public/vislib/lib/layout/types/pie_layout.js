@@ -1,8 +1,8 @@
 define(function (require) {
   return function ColumnLayoutFactory(Private) {
-    let d3 = require('d3');
-    let chartSplit = Private(require('ui/vislib/lib/layout/splits/pie_chart/chart_split'));
-    let chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/pie_chart/chart_title_split'));
+    var d3 = require('d3');
+    var chartSplit = Private(require('ui/vislib/lib/layout/splits/pie_chart/chart_split'));
+    var chartTitleSplit = Private(require('ui/vislib/lib/layout/splits/pie_chart/chart_title_split'));
 
     /**
      * Specifies the visualization layout for column charts.

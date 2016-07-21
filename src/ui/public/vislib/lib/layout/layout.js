@@ -1,9 +1,9 @@
 define(function (require) {
   return function LayoutFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
+    var d3 = require('d3');
+    var _ = require('lodash');
 
-    let layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
+    var layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
 
     /**
      * Builds the visualization DOM layout
@@ -53,7 +53,7 @@ define(function (require) {
      * @returns {*} Creates the visualization layout
      */
     Layout.prototype.createLayout = function (arr) {
-      let self = this;
+      var self = this;
 
       return _.each(arr, function (obj) {
         self.layout(obj);
@@ -86,7 +86,7 @@ define(function (require) {
         obj.parent = '.' + obj.parent;
       }
 
-      let childEl = this.appendElem(obj.parent, obj.type, obj.class);
+      var childEl = this.appendElem(obj.parent, obj.type, obj.class);
 
       if (obj.datum) {
         childEl.datum(obj.datum);
@@ -97,7 +97,7 @@ define(function (require) {
       }
 
       if (obj.children) {
-        let newParent = childEl[0][0];
+        var newParent = childEl[0][0];
 
         _.forEach(obj.children, function (obj) {
           if (!obj.parent) {

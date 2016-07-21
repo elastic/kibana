@@ -1,6 +1,6 @@
 define(function () {
   return function YAxisSplitFactory() {
-    let d3 = require('d3');
+    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to the `.y-axis-div-wrapper` element based on the data layout.
@@ -10,10 +10,10 @@ define(function () {
 
     // render and get bounding box width
     return function (selection, parent, opts) {
-      let yAxis = opts && opts.yAxis;
+      var yAxis = opts && opts.yAxis;
 
       selection.each(function () {
-        let div = d3.select(this);
+        var div = d3.select(this);
 
         div.call(setWidth, yAxis);
 
@@ -31,14 +31,14 @@ define(function () {
     function setWidth(el, yAxis) {
       if (!yAxis) return;
 
-      let padding = 5;
-      let height = parseInt(el.node().clientHeight, 10);
+      var padding = 5;
+      var height = parseInt(el.node().clientHeight, 10);
 
       // render svg and get the width of the bounding box
-      let svg = d3.select('body')
+      var svg = d3.select('body')
       .append('svg')
       .attr('style', 'position:absolute; top:-10000; left:-10000');
-      let width = svg.append('g')
+      var width = svg.append('g')
       .call(yAxis.getYAxis(height)).node().getBBox().width + padding;
       svg.remove();
 

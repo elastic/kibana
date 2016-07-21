@@ -1,7 +1,7 @@
 define(function (require) {
   return function ColorUtilService(Private) {
-    let _ = require('lodash');
-    let mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
+    var _ = require('lodash');
+    var mappedColors = Private(require('ui/vislib/components/color/mapped_colors'));
 
     /*
      * Accepts an array of strings or numbers that are used to create a

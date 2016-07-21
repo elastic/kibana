@@ -1,11 +1,11 @@
 define(function (require) {
   return function YAxisFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let errors = require('ui/errors');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var $ = require('jquery');
+    var errors = require('ui/errors');
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
 
     /**
      * Appends y axis to the visualization
@@ -46,7 +46,7 @@ define(function (require) {
     };
 
     YAxis.prototype._validateUserExtents = function (domain) {
-      let self = this;
+      var self = this;
 
       return domain.map(function (val) {
         val = parseInt(val, 10);
@@ -58,8 +58,8 @@ define(function (require) {
     };
 
     YAxis.prototype._getExtents = function (domain) {
-      let min = domain[0];
-      let max = domain[1];
+      var min = domain[0];
+      var max = domain[1];
 
       if (this._isUserDefined()) return this._validateUserExtents(domain);
       if (this._isYExtents()) return domain;
@@ -113,8 +113,8 @@ define(function (require) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
      */
     YAxis.prototype.getYScale = function (height) {
-      let scale = this._getScaleType(this._attr.scale);
-      let domain = this._getExtents(this.domain);
+      var scale = this._getScaleType(this._attr.scale);
+      var domain = this._getExtents(this.domain);
 
       this.yScale = scale
       .domain(domain)
@@ -131,7 +131,7 @@ define(function (require) {
     };
 
     YAxis.prototype.tickFormat = function () {
-      let isPercentage = this._attr.mode === 'percentage';
+      var isPercentage = this._attr.mode === 'percentage';
       if (isPercentage) return d3.format('%');
       if (this.yAxisFormatter) return this.yAxisFormatter;
       return d3.format('n');
@@ -149,7 +149,7 @@ define(function (require) {
      * @returns {D3.Svg.Axis|*} D3 yAxis function
      */
     YAxis.prototype.getYAxis = function (height) {
-      let yScale = this.getYScale(height);
+      var yScale = this.getYScale(height);
       this._validateYScale(yScale);
 
       // Create the d3 yAxis function
@@ -173,7 +173,7 @@ define(function (require) {
      * @returns {number} Number of y axis ticks
      */
     YAxis.prototype.tickScale = function (height) {
-      let yTickScale = d3.scale.linear()
+      var yTickScale = d3.scale.linear()
       .clamp(true)
       .domain([20, 40, 1000])
       .range([0, 3, 11]);
@@ -188,29 +188,29 @@ define(function (require) {
      * @returns {Function} Renders y axis to visualization
      */
     YAxis.prototype.draw = function () {
-      let self = this;
-      let margin = this._attr.margin;
-      let mode = this._attr.mode;
-      let isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
+      var self = this;
+      var margin = this._attr.margin;
+      var mode = this._attr.mode;
+      var isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
 
       return function (selection) {
         selection.each(function () {
-          let el = this;
+          var el = this;
 
-          let div = d3.select(el);
-          let width = $(el).parent().width();
-          let height = $(el).height();
-          let adjustedHeight = height - margin.top - margin.bottom;
+          var div = d3.select(el);
+          var width = $(el).parent().width();
+          var height = $(el).height();
+          var adjustedHeight = height - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, adjustedHeight);
 
-          let yAxis = self.getYAxis(adjustedHeight);
+          var yAxis = self.getYAxis(adjustedHeight);
 
           // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
           if (!isWiggleOrSilhouette) {
             // Append svg and y axis
-            let svg = div.append('svg')
+            var svg = div.append('svg')
             .attr('width', width)
             .attr('height', height);
 
@@ -219,9 +219,9 @@ define(function (require) {
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(yAxis);
 
-            let container = svg.select('g.y.axis').node();
+            var container = svg.select('g.y.axis').node();
             if (container) {
-              let cWidth = Math.max(width, container.getBBox().width);
+              var cWidth = Math.max(width, container.getBBox().width);
               svg.attr('width', cWidth);
               svg.select('g')
               .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');

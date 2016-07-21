@@ -1,12 +1,12 @@
 define(function (require) {
   return function LineChartFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let errors = require('ui/errors');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var $ = require('jquery');
+    var errors = require('ui/errors');
 
-    let PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
-    let TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
+    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
 
     /**
      * Line Chart Visualization
@@ -42,13 +42,13 @@ define(function (require) {
      * @returns {D3.Selection} SVG circles with event listeners attached
      */
     LineChart.prototype.addCircleEvents = function (element, svg) {
-      let events = this.events;
-      let isBrushable = events.isBrushable();
-      let brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      let hover = events.addHoverEvent();
-      let mouseout = events.addMouseoutEvent();
-      let click = events.addClickEvent();
-      let attachedEvents = element.call(hover).call(mouseout).call(click);
+      var events = this.events;
+      var isBrushable = events.isBrushable();
+      var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
+      var click = events.addClickEvent();
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -66,16 +66,16 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with circles added
      */
     LineChart.prototype.addCircles = function (svg, data) {
-      let self = this;
-      let showCircles = this._attr.showCircles;
-      let color = this.handler.data.getColorFunc();
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let ordered = this.handler.data.get('ordered');
-      let tooltip = this.tooltip;
-      let isTooltip = this._attr.addTooltip;
+      var self = this;
+      var showCircles = this._attr.showCircles;
+      var color = this.handler.data.getColorFunc();
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var ordered = this.handler.data.get('ordered');
+      var tooltip = this.tooltip;
+      var isTooltip = this._attr.addTooltip;
 
-      let radii = _(data)
+      var radii = _(data)
       .map(function (series) {
         return _.pluck(series, '_input.z');
       })
@@ -89,15 +89,15 @@ define(function (require) {
         max: -Infinity
       });
 
-      let radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
-      let layer = svg.selectAll('.points')
+      var layer = svg.selectAll('.points')
       .data(data)
       .enter()
         .append('g')
         .attr('class', 'points line');
 
-      let circles = layer
+      var circles = layer
       .selectAll('circle')
       .data(function appendData(data) {
         return data.filter(function (d) {
@@ -125,9 +125,9 @@ define(function (require) {
       }
 
       function colorCircle(d) {
-        let parent = d3.select(this).node().parentNode;
-        let lengthOfParent = d3.select(parent).data()[0].length;
-        let isVisible = (lengthOfParent === 1);
+        var parent = d3.select(this).node().parentNode;
+        var lengthOfParent = d3.select(parent).data()[0].length;
+        var isVisible = (lengthOfParent === 1);
 
         // If only 1 point exists, show circle
         if (!showCircles && !isVisible) return 'none';
@@ -135,10 +135,10 @@ define(function (require) {
       }
       function getCircleRadiusFn(modifier) {
         return function getCircleRadius(d) {
-          let margin = self._attr.margin;
-          let width = self._attr.width - margin.left - margin.right;
-          let height = self._attr.height - margin.top - margin.bottom;
-          let circleRadius = (d._input.z - radii.min) / radiusStep;
+          var margin = self._attr.margin;
+          var width = self._attr.width - margin.left - margin.right;
+          var height = self._attr.height - margin.top - margin.bottom;
+          var circleRadius = (d._input.z - radii.min) / radiusStep;
 
           return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
         };
@@ -184,14 +184,14 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with paths added
      */
     LineChart.prototype.addLines = function (svg, data) {
-      let self = this;
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let xAxisFormatter = this.handler.data.get('xAxisFormatter');
-      let color = this.handler.data.getColorFunc();
-      let ordered = this.handler.data.get('ordered');
-      let interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
-      let line = d3.svg.line()
+      var self = this;
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var xAxisFormatter = this.handler.data.get('xAxisFormatter');
+      var color = this.handler.data.getColorFunc();
+      var ordered = this.handler.data.get('ordered');
+      var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
+      var line = d3.svg.line()
       .defined(function (d) { return !_.isNull(d.y); })
       .interpolate(interpolate)
       .x(function x(d) {
@@ -236,10 +236,10 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with clipPath added
      */
     LineChart.prototype.addClipPath = function (svg, width, height) {
-      let clipPathBuffer = 5;
-      let startX = 0;
-      let startY = 0 - clipPathBuffer;
-      let id = 'chart-area' + _.uniqueId();
+      var clipPathBuffer = 5;
+      var startX = 0;
+      var startY = 0 - clipPathBuffer;
+      var id = 'chart-area' + _.uniqueId();
 
       return svg
       .attr('clip-path', 'url(#' + id + ')')
@@ -261,21 +261,21 @@ define(function (require) {
      * @returns {Function} Creates the line chart
      */
     LineChart.prototype.draw = function () {
-      let self = this;
-      let $elem = $(this.chartEl);
-      let margin = this._attr.margin;
-      let elWidth = this._attr.width = $elem.width();
-      let elHeight = this._attr.height = $elem.height();
-      let scaleType = this.handler.yAxis.getScaleType();
-      let yMin = this.handler.yAxis.yMin;
-      let yScale = this.handler.yAxis.yScale;
-      let xScale = this.handler.xAxis.xScale;
-      let minWidth = 20;
-      let minHeight = 20;
-      let startLineX = 0;
-      let lineStrokeWidth = 1;
-      let addTimeMarker = this._attr.addTimeMarker;
-      let times = this._attr.times || [];
+      var self = this;
+      var $elem = $(this.chartEl);
+      var margin = this._attr.margin;
+      var elWidth = this._attr.width = $elem.width();
+      var elHeight = this._attr.height = $elem.height();
+      var scaleType = this.handler.yAxis.getScaleType();
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
+      var xScale = this.handler.xAxis.xScale;
+      var minWidth = 20;
+      var minHeight = 20;
+      var startLineX = 0;
+      var lineStrokeWidth = 1;
+      var addTimeMarker = this._attr.addTimeMarker;
+      var times = this._attr.times || [];
       let timeMarker;
       let div;
       let svg;
@@ -286,10 +286,10 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-          let el = this;
+          var el = this;
 
-          let layers = data.series.map(function mapSeries(d) {
-            let label = d.label;
+          var layers = data.series.map(function mapSeries(d) {
+            var label = d.label;
             return d.values.map(function mapValues(e, i) {
               return {
                 _input: e,
@@ -331,7 +331,7 @@ define(function (require) {
           self.addCircleEvents(circles, svg);
           self.createEndZones(svg);
 
-          let scale = (scaleType === 'log') ? yScale(1) : yScale(0);
+          var scale = (scaleType === 'log') ? yScale(1) : yScale(0);
           if (scale) {
             svg.append('line')
             .attr('class', 'base-line')

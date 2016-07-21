@@ -1,12 +1,12 @@
 define(function (require) {
   return function ChartBaseClass(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let errors = require('ui/errors');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var errors = require('ui/errors');
 
-    let Dispatch = Private(require('ui/vislib/lib/dispatch'));
-    let Tooltip = Private(require('ui/vislib/components/Tooltip'));
-    let dataLabel = require('ui/vislib/lib/_data_label');
+    var Dispatch = Private(require('ui/vislib/lib/dispatch'));
+    var Tooltip = Private(require('ui/vislib/components/Tooltip'));
+    var dataLabel = require('ui/vislib/lib/_data_label');
 
     /**
      * The Base Class for all visualizations.
@@ -27,11 +27,11 @@ define(function (require) {
       this.chartData = chartData;
       this.tooltips = [];
 
-      let events = this.events = new Dispatch(handler);
+      var events = this.events = new Dispatch(handler);
 
       if (_.get(this.handler, '_attr.addTooltip')) {
-        let $el = this.handler.el;
-        let formatter = this.handler.data.get('tooltipFormatter');
+        var $el = this.handler.el;
+        var formatter = this.handler.data.get('tooltipFormatter');
 
         // Add tooltip
         this.tooltip = new Tooltip('chart', $el, formatter, events);
@@ -49,7 +49,7 @@ define(function (require) {
      * @returns {HTMLElement} Contains the D3 chart
      */
     Chart.prototype.render = function () {
-      let selection = d3.select(this.chartEl);
+      var selection = d3.select(this.chartEl);
 
       selection.selectAll('*').remove();
       selection.call(this.draw());
@@ -63,7 +63,7 @@ define(function (require) {
      */
     Chart.prototype._addIdentifier = function (selection, labelProp) {
       labelProp = labelProp || 'label';
-      let labels = this.handler.data.labels;
+      var labels = this.handler.data.labels;
 
       function resolveLabel(datum) {
         if (labels.length === 1) return labels[0];
@@ -72,7 +72,7 @@ define(function (require) {
       }
 
       selection.each(function (datum) {
-        let label = resolveLabel(datum);
+        var label = resolveLabel(datum);
         if (label != null) dataLabel(this, label);
       });
     };
@@ -83,7 +83,7 @@ define(function (require) {
      * @method destroy
      */
     Chart.prototype.destroy = function () {
-      let selection = d3.select(this.chartEl);
+      var selection = d3.select(this.chartEl);
       this.events.removeAllListeners();
       this.tooltips.forEach(function (tooltip) {
         tooltip.destroy();

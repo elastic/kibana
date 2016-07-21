@@ -1,6 +1,6 @@
 define(function () {
   return function ChartTitleSplitFactory() {
-    let d3 = require('d3');
+    var d3 = require('d3');
 
     /*
      * Adds div DOM elements to either the `.y-axis-chart-title` element or the
@@ -12,7 +12,7 @@ define(function () {
 
     return function (selection, parent) {
       selection.each(function (data) {
-        let div = d3.select(this);
+        var div = d3.select(this);
 
         if (!data.slices) {
           div.selectAll('.chart-title')

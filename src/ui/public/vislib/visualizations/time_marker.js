@@ -1,14 +1,14 @@
 define(function (require) {
   return function TimeMarkerFactory() {
-    let d3 = require('d3');
-    let dateMath = require('ui/utils/dateMath');
+    var d3 = require('d3');
+    var dateMath = require('ui/utils/dateMath');
 
     function TimeMarker(times, xScale, height) {
       if (!(this instanceof TimeMarker)) {
         return new TimeMarker(times, xScale, height);
       }
 
-      let currentTimeArr = [{
+      var currentTimeArr = [{
         'time': new Date().getTime(),
         'class': 'time-marker',
         'color': '#c80000',
@@ -30,14 +30,14 @@ define(function (require) {
     }
 
     TimeMarker.prototype._isTimeBasedChart = function (selection) {
-      let data = selection.data();
+      var data = selection.data();
       return data.every(function (datum) {
         return (datum.ordered && datum.ordered.date);
       });
     };
 
     TimeMarker.prototype.render = function (selection) {
-      let self = this;
+      var self = this;
 
       // return if not time based chart
       if (!self._isTimeBasedChart(selection)) return;

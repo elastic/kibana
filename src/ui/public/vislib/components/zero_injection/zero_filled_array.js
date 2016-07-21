@@ -1,6 +1,6 @@
 define(function () {
   return function ZeroFilledArrayUtilService() {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
     /*
      * Accepts an array of x axis values (strings or numbers).
@@ -12,7 +12,7 @@ define(function () {
         throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
       }
 
-      let zeroFilledArray = [];
+      var zeroFilledArray = [];
 
       arr.forEach(function (val) {
         zeroFilledArray.push({

@@ -1,15 +1,15 @@
 define(function (require) {
   return function VisFactory(Private) {
-    let _ = require('lodash');
-    let d3 = require('d3');
+    var _ = require('lodash');
+    var d3 = require('d3');
 
-    let Binder = require('ui/Binder');
+    var Binder = require('ui/Binder');
 
-    let ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
-    let Events = Private(require('ui/events'));
-    let handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
-    let chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
-    let errors = require('ui/errors');
+    var ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
+    var Events = Private(require('ui/events'));
+    var handlerTypes = Private(require('ui/vislib/lib/handler/handler_types'));
+    var chartTypes = Private(require('ui/vislib/visualizations/vis_types'));
+    var errors = require('ui/errors');
     require('ui/vislib/styles/main.less');
 
     /**
@@ -46,7 +46,7 @@ define(function (require) {
      * @param data {Object} Elasticsearch query results
      */
     Vis.prototype.render = function (data, uiState) {
-      let chartType = this._attr.type;
+      var chartType = this._attr.type;
 
       if (!data) {
         throw new Error('No valid data!');
@@ -115,7 +115,7 @@ define(function (require) {
      * @method destroy
      */
     Vis.prototype.destroy = function () {
-      let selection = d3.select(this.el).select('.vis-wrapper');
+      var selection = d3.select(this.el).select('.vis-wrapper');
 
       this.binder.destroy();
       this.resizeChecker.destroy();
@@ -157,9 +157,9 @@ define(function (require) {
      * @returns {*}
      */
     Vis.prototype.on = function (event, listener) {
-      let first = this.listenerCount(event) === 0;
-      let ret = Events.prototype.on.call(this, event, listener);
-      let added = this.listenerCount(event) > 0;
+      var first = this.listenerCount(event) === 0;
+      var ret = Events.prototype.on.call(this, event, listener);
+      var added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
       // enable the event in the handler
@@ -176,9 +176,9 @@ define(function (require) {
      * @returns {*}
      */
     Vis.prototype.off = function (event, listener) {
-      let last = this.listenerCount(event) === 1;
-      let ret = Events.prototype.off.call(this, event, listener);
-      let removed = this.listenerCount(event) === 0;
+      var last = this.listenerCount(event) === 1;
+      var ret = Events.prototype.off.call(this, event, listener);
+      var removed = this.listenerCount(event) === 0;
 
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);

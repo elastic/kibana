@@ -1,5 +1,5 @@
 define(function (require) {
-  let d3 = require('d3');
+  var d3 = require('d3');
   /**
    * Creates a string based on the hex color passed in
    *

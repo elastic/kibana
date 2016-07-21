@@ -1,11 +1,11 @@
 define(function (require) {
   return function TileMapFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var $ = require('jquery');
 
-    let Chart = Private(require('ui/vislib/visualizations/_chart'));
-    let TileMapMap = Private(require('ui/vislib/visualizations/_map'));
+    var Chart = Private(require('ui/vislib/visualizations/_chart'));
+    var TileMapMap = Private(require('ui/vislib/visualizations/_map'));
 
     /**
      * Tile Map Visualization: renders maps
@@ -40,7 +40,7 @@ define(function (require) {
      * @return {Function} - function to add a map to a selection
      */
     TileMap.prototype.draw = function () {
-      let self = this;
+      var self = this;
 
       // clean up old maps
       self.destroy();
@@ -85,7 +85,7 @@ define(function (require) {
      */
     TileMap.prototype._appendGeoExtents = function () {
       // add allmin and allmax to geoJson
-      let geoMinMax = this.handler.data.getGeoExtents();
+      var geoMinMax = this.handler.data.getGeoExtents();
       this.geoJson.properties.allmin = geoMinMax.min;
       this.geoJson.properties.allmax = geoMinMax.max;
     };
@@ -97,9 +97,9 @@ define(function (require) {
      * @param selection {Object} d3 selection
      */
     TileMap.prototype._appendMap = function (selection) {
-      let container = $(selection).addClass('tilemap');
+      var container = $(selection).addClass('tilemap');
 
-      let map = new TileMapMap(container, this._chartData, {
+      var map = new TileMapMap(container, this._chartData, {
         // center: this._attr.mapCenter,
         // zoom: this._attr.mapZoom,
         events: this.events,

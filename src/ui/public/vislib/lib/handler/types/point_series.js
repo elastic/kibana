@@ -1,13 +1,13 @@
 define(function (require) {
   return function ColumnHandler(Private) {
-    let injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
-    let Handler = Private(require('ui/vislib/lib/handler/handler'));
-    let Data = Private(require('ui/vislib/lib/data'));
-    let XAxis = Private(require('ui/vislib/lib/x_axis'));
-    let YAxis = Private(require('ui/vislib/lib/y_axis'));
-    let AxisTitle = Private(require('ui/vislib/lib/axis_title'));
-    let ChartTitle = Private(require('ui/vislib/lib/chart_title'));
-    let Alerts = Private(require('ui/vislib/lib/alerts'));
+    var injectZeros = Private(require('ui/vislib/components/zero_injection/inject_zeros'));
+    var Handler = Private(require('ui/vislib/lib/handler/handler'));
+    var Data = Private(require('ui/vislib/lib/data'));
+    var XAxis = Private(require('ui/vislib/lib/x_axis'));
+    var YAxis = Private(require('ui/vislib/lib/y_axis'));
+    var AxisTitle = Private(require('ui/vislib/lib/axis_title'));
+    var ChartTitle = Private(require('ui/vislib/lib/chart_title'));
+    var Alerts = Private(require('ui/vislib/lib/alerts'));
 
     /*
      * Create handlers for Area, Column, and Line charts which
@@ -17,7 +17,7 @@ define(function (require) {
       opts = opts || {};
 
       return function (vis) {
-        let isUserDefinedYAxis = vis._attr.setYExtents;
+        var isUserDefinedYAxis = vis._attr.setYExtents;
         let data;
 
         if (opts.zeroFill) {
@@ -70,8 +70,8 @@ define(function (require) {
             test: function (vis, data) {
               if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
 
-              let hasPos = data.getYMax(data._getY) > 0;
-              let hasNeg = data.getYMin(data._getY) < 0;
+              var hasPos = data.getYMax(data._getY) > 0;
+              var hasNeg = data.getYMin(data._getY) < 0;
               return (hasPos && hasNeg);
             }
           },

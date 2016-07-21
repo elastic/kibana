@@ -1,11 +1,11 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   return function GetPieNames(Private) {
-    let returnNames = Private(require('ui/vislib/components/labels/pie/return_pie_names'));
+    var returnNames = Private(require('ui/vislib/components/labels/pie/return_pie_names'));
 
     return function (data, columns) {
-      let slices = data.slices;
+      var slices = data.slices;
 
       if (slices.children) {
         return _(returnNames(slices.children, 0, columns))

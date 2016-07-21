@@ -1,12 +1,12 @@
 define(function (require) {
   return function AreaChartFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var $ = require('jquery');
 
-    let PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
-    let TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
-    let errors = require('ui/errors');
+    var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
+    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    var errors = require('ui/errors');
 
     /**
      * Area chart visualization
@@ -32,14 +32,14 @@ define(function (require) {
       if (this.isOverlapping) {
 
         // Default opacity should return to 0.6 on mouseout
-        let defaultOpacity = 0.6;
+        var defaultOpacity = 0.6;
         handler._attr.defaultOpacity = defaultOpacity;
         handler.highlight = function (element) {
-          let label = this.getAttribute('data-label');
+          var label = this.getAttribute('data-label');
           if (!label) return;
 
-          let highlightOpacity = 0.8;
-          let highlightElements = $('[data-label]', element.parentNode).filter(
+          var highlightOpacity = 0.8;
+          var highlightElements = $('[data-label]', element.parentNode).filter(
             function (els, el) {
               return `${$(el).data('label')}` === label;
             });
@@ -71,15 +71,15 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with path added
      */
     AreaChart.prototype.addPath = function (svg, layers) {
-      let self = this;
-      let ordered = this.handler.data.get('ordered');
-      let isTimeSeries = (ordered && ordered.date);
-      let isOverlapping = this.isOverlapping;
-      let color = this.handler.data.getColorFunc();
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
-      let area = d3.svg.area()
+      var self = this;
+      var ordered = this.handler.data.get('ordered');
+      var isTimeSeries = (ordered && ordered.date);
+      var isOverlapping = this.isOverlapping;
+      var color = this.handler.data.getColorFunc();
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
+      var area = d3.svg.area()
       .x(function (d) {
         if (isTimeSeries) {
           return xScale(d.x);
@@ -104,7 +104,7 @@ define(function (require) {
       .interpolate(interpolate);
 
       // Data layers
-      let layer = svg.selectAll('.layer')
+      var layer = svg.selectAll('.layer')
       .data(layers)
       .enter()
       .append('g')
@@ -113,7 +113,7 @@ define(function (require) {
       });
 
       // Append path
-      let path = layer.append('path')
+      var path = layer.append('path')
       .call(this._addIdentifier)
       .style('fill', function (d) {
         return color(d[0].label);
@@ -138,13 +138,13 @@ define(function (require) {
      * @returns {D3.Selection} circles with event listeners attached
      */
     AreaChart.prototype.addCircleEvents = function (element, svg) {
-      let events = this.events;
-      let isBrushable = events.isBrushable();
-      let brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      let hover = events.addHoverEvent();
-      let mouseout = events.addMouseoutEvent();
-      let click = events.addClickEvent();
-      let attachedEvents = element.call(hover).call(mouseout).call(click);
+      var events = this.events;
+      var isBrushable = events.isBrushable();
+      var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
+      var click = events.addClickEvent();
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -162,16 +162,16 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with circles added
      */
     AreaChart.prototype.addCircles = function (svg, data) {
-      let self = this;
-      let color = this.handler.data.getColorFunc();
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let ordered = this.handler.data.get('ordered');
-      let circleRadius = 12;
-      let circleStrokeWidth = 0;
-      let tooltip = this.tooltip;
-      let isTooltip = this._attr.addTooltip;
-      let isOverlapping = this.isOverlapping;
+      var self = this;
+      var color = this.handler.data.getColorFunc();
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var ordered = this.handler.data.get('ordered');
+      var circleRadius = 12;
+      var circleStrokeWidth = 0;
+      var tooltip = this.tooltip;
+      var isTooltip = this._attr.addTooltip;
+      var isOverlapping = this.isOverlapping;
       let layer;
       let circles;
 
@@ -239,9 +239,9 @@ define(function (require) {
      */
     AreaChart.prototype.addClipPath = function (svg, width, height) {
       // Prevents circles from being clipped at the top of the chart
-      let startX = 0;
-      let startY = 0;
-      let id = 'chart-area' + _.uniqueId();
+      var startX = 0;
+      var startY = 0;
+      var id = 'chart-area' + _.uniqueId();
 
       // Creating clipPath
       return svg
@@ -256,11 +256,11 @@ define(function (require) {
     };
 
     AreaChart.prototype.checkIfEnoughData = function () {
-      let series = this.chartData.series;
-      let message = 'Area charts require more than one data point. Try adding ' +
+      var series = this.chartData.series;
+      var message = 'Area charts require more than one data point. Try adding ' +
         'an X-Axis Aggregation';
 
-      let notEnoughData = series.some(function (obj) {
+      var notEnoughData = series.some(function (obj) {
         return obj.values.length < 2;
       });
 
@@ -270,8 +270,8 @@ define(function (require) {
     };
 
     AreaChart.prototype.validateWiggleSelection = function () {
-      let isWiggle = this._attr.mode === 'wiggle';
-      let ordered = this.handler.data.get('ordered');
+      var isWiggle = this._attr.mode === 'wiggle';
+      var ordered = this.handler.data.get('ordered');
 
       if (isWiggle && !ordered) throw new errors.InvalidWiggleSelection();
     };
@@ -284,18 +284,18 @@ define(function (require) {
      */
     AreaChart.prototype.draw = function () {
       // Attributes
-      let self = this;
-      let xScale = this.handler.xAxis.xScale;
-      let $elem = $(this.chartEl);
-      let margin = this._attr.margin;
-      let elWidth = this._attr.width = $elem.width();
-      let elHeight = this._attr.height = $elem.height();
-      let yMin = this.handler.yAxis.yMin;
-      let yScale = this.handler.yAxis.yScale;
-      let minWidth = 20;
-      let minHeight = 20;
-      let addTimeMarker = this._attr.addTimeMarker;
-      let times = this._attr.times || [];
+      var self = this;
+      var xScale = this.handler.xAxis.xScale;
+      var $elem = $(this.chartEl);
+      var margin = this._attr.margin;
+      var elWidth = this._attr.width = $elem.width();
+      var elHeight = this._attr.height = $elem.height();
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
+      var minWidth = 20;
+      var minHeight = 20;
+      var addTimeMarker = this._attr.addTimeMarker;
+      var times = this._attr.times || [];
       let timeMarker;
       let div;
       let svg;
@@ -360,7 +360,7 @@ define(function (require) {
           self.addCircleEvents(circles, svg);
 
           // chart base line
-          let line = svg.append('line')
+          var line = svg.append('line')
           .attr('class', 'base-line')
           .attr('x1', 0)
           .attr('y1', yScale(0))

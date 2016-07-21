@@ -1,11 +1,11 @@
 define(function (require) {
   return function PieChartFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var $ = require('jquery');
 
-    let Chart = Private(require('ui/vislib/visualizations/_chart'));
-    let errors = require('ui/errors');
+    var Chart = Private(require('ui/vislib/visualizations/_chart'));
+    var errors = require('ui/errors');
 
     /**
      * Pie Chart Visualization
@@ -24,7 +24,7 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
-      let charts = this.handler.data.getVisData();
+      var charts = this.handler.data.getVisData();
       this._validatePieData(charts);
 
       this._attr = _.defaults(handler._attr || {}, {
@@ -37,7 +37,7 @@ define(function (require) {
      * If so, an error is thrown.
      */
     PieChart.prototype._validatePieData = function (charts) {
-      let isAllZeros = charts.every(function (chart) {
+      var isAllZeros = charts.every(function (chart) {
         return chart.slices.children.length === 0;
       });
 
@@ -52,7 +52,7 @@ define(function (require) {
      * @returns {D3.Selection} SVG path with event listeners attached
      */
     PieChart.prototype.addPathEvents = function (element) {
-      let events = this.events;
+      var events = this.events;
 
       return element
         .call(events.addHoverEvent())
@@ -64,11 +64,11 @@ define(function (require) {
       (function assignPercentages(slices) {
         if (slices.sumOfChildren != null) return;
 
-        let parent = slices;
-        let children = parent.children;
-        let parentPercent = parent.percentOfParent;
+        var parent = slices;
+        var children = parent.children;
+        var parentPercent = parent.percentOfParent;
 
-        let sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
+        var sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
           return sum + Math.abs(child.size);
         }, 0));
 
@@ -98,24 +98,24 @@ define(function (require) {
      * @returns {D3.Selection} SVG with paths attached
      */
     PieChart.prototype.addPath = function (width, height, svg, slices) {
-      let self = this;
-      let marginFactor = 0.95;
-      let isDonut = self._attr.isDonut;
-      let radius = (Math.min(width, height) / 2) * marginFactor;
-      let color = self.handler.data.getPieColorFunc();
-      let tooltip = self.tooltip;
-      let isTooltip = self._attr.addTooltip;
+      var self = this;
+      var marginFactor = 0.95;
+      var isDonut = self._attr.isDonut;
+      var radius = (Math.min(width, height) / 2) * marginFactor;
+      var color = self.handler.data.getPieColorFunc();
+      var tooltip = self.tooltip;
+      var isTooltip = self._attr.addTooltip;
 
-      let partition = d3.layout.partition()
+      var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
         return d.percentOfParent * 100;
       });
-      let x = d3.scale.linear()
+      var x = d3.scale.linear()
       .range([0, 2 * Math.PI]);
-      let y = d3.scale.sqrt()
+      var y = d3.scale.sqrt()
       .range([0, radius]);
-      let arc = d3.svg.arc()
+      var arc = d3.svg.arc()
       .startAngle(function (d) {
         return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
       })
@@ -135,7 +135,7 @@ define(function (require) {
         return Math.max(0, y(d.y + d.dy));
       });
 
-      let path = svg
+      var path = svg
       .datum(slices)
       .selectAll('path')
       .data(partition.nodes)
@@ -161,8 +161,8 @@ define(function (require) {
     };
 
     PieChart.prototype._validateContainerSize = function (width, height) {
-      let minWidth = 20;
-      let minHeight = 20;
+      var minWidth = 20;
+      var minHeight = 20;
 
       if (width <= minWidth || height <= minHeight) {
         throw new errors.ContainerTooSmall();
@@ -176,14 +176,14 @@ define(function (require) {
      * @returns {Function} Creates the pie chart
      */
     PieChart.prototype.draw = function () {
-      let self = this;
+      var self = this;
 
       return function (selection) {
         selection.each(function (data) {
-          let slices = data.slices;
-          let div = d3.select(this);
-          let width = $(this).width();
-          let height = $(this).height();
+          var slices = data.slices;
+          var div = d3.select(this);
+          var width = $(this).width();
+          var height = $(this).height();
           let path;
 
           if (!slices.children.length) return;
@@ -191,7 +191,7 @@ define(function (require) {
           self.convertToPercentage(slices);
           self._validateContainerSize(width, height);
 
-          let svg = div.append('svg')
+          var svg = div.append('svg')
           .attr('width', width)
           .attr('height', height)
           .append('g')

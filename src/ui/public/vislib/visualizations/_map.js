@@ -1,14 +1,14 @@
 define(function (require) {
   return function MapFactory(Private) {
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let L = require('leaflet');
+    var _ = require('lodash');
+    var $ = require('jquery');
+    var L = require('leaflet');
 
-    let defaultMapZoom = 2;
-    let defaultMapCenter = [15, 5];
-    let defaultMarkerType = 'Scaled Circle Markers';
+    var defaultMapZoom = 2;
+    var defaultMapCenter = [15, 5];
+    var defaultMarkerType = 'Scaled Circle Markers';
 
-    let mapTiles = {
+    var mapTiles = {
       url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
       options: {
         attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
@@ -18,7 +18,7 @@ define(function (require) {
       }
     };
 
-    let markerTypes = {
+    var markerTypes = {
       'Scaled Circle Markers': Private(require('ui/vislib/visualizations/marker_types/scaled_circles')),
       'Shaded Circle Markers': Private(require('ui/vislib/visualizations/marker_types/shaded_circles')),
       'Shaded Geohash Grid': Private(require('ui/vislib/visualizations/marker_types/geohash_grid')),
@@ -46,7 +46,7 @@ define(function (require) {
       this._geoJson = _.get(this._chartData, 'geoJson');
       this._attr = params.attr || {};
 
-      let mapOptions = {
+      var mapOptions = {
         minZoom: 1,
         maxZoom: 18,
         noWrap: true,
@@ -61,8 +61,8 @@ define(function (require) {
     TileMapMap.prototype.addBoundingControl = function () {
       if (this._boundingControl) return;
 
-      let self = this;
-      let drawOptions = { draw: {} };
+      var self = this;
+      var drawOptions = { draw: {} };
 
       _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
         if (self._events && !self._events.listenerCount(drawShape)) {
@@ -84,11 +84,11 @@ define(function (require) {
     TileMapMap.prototype.addFitControl = function () {
       if (this._fitControl) return;
 
-      let self = this;
-      let fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
+      var self = this;
+      var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
 
       // Add button to fit container to points
-      let FitControl = L.Control.extend({
+      var FitControl = L.Control.extend({
         options: {
           position: 'topleft'
         },
@@ -120,7 +120,7 @@ define(function (require) {
     TileMapMap.prototype.addTitle = function (mapLabel) {
       if (this._label) return;
 
-      let label = this._label = L.control();
+      var label = this._label = L.control();
 
       label.onAdd = function () {
         this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
@@ -191,13 +191,13 @@ define(function (require) {
      * @return {Object} marker layer
      */
     TileMapMap.prototype._createMarkers = function (options) {
-      let MarkerType = markerTypes[this._markerType];
+      var MarkerType = markerTypes[this._markerType];
       return new MarkerType(this.map, this._geoJson, options);
     };
 
     TileMapMap.prototype._attachEvents = function () {
-      let self = this;
-      let saturateTiles = self.saturateTiles.bind(self);
+      var self = this;
+      var saturateTiles = self.saturateTiles.bind(self);
 
       this._tileLayer.on('tileload', saturateTiles);
 
@@ -223,11 +223,11 @@ define(function (require) {
       });
 
       this.map.on('draw:created', function (e) {
-        let drawType = e.layerType;
+        var drawType = e.layerType;
         if (!self._events || !self._events.listenerCount(drawType)) return;
 
         // TODO: Different drawTypes need differ info. Need a switch on the object creation
-        let bounds = e.layer.getBounds();
+        var bounds = e.layer.getBounds();
 
         self._events.emit(drawType, {
           e: e,

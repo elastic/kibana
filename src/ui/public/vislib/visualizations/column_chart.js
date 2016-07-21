@@ -1,15 +1,15 @@
 define(function (require) {
   return function ColumnChartFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
-    let $ = require('jquery');
-    let moment = require('moment');
+    var d3 = require('d3');
+    var _ = require('lodash');
+    var $ = require('jquery');
+    var moment = require('moment');
 
-    let DataClass = Private(require('ui/vislib/lib/data'));
+    var DataClass = Private(require('ui/vislib/lib/data'));
 
-    let PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
-    let TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
-    let errors = require('ui/errors');
+    var PointSeriesChart = Private(require('ui/vislib/visualizations/_point_series_chart'));
+    var TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    var errors = require('ui/errors');
 
     /**
      * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
@@ -45,10 +45,10 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with rect added
      */
     ColumnChart.prototype.addBars = function (svg, layers) {
-      let self = this;
-      let color = this.handler.data.getColorFunc();
-      let tooltip = this.tooltip;
-      let isTooltip = this._attr.addTooltip;
+      var self = this;
+      var color = this.handler.data.getColorFunc();
+      var tooltip = this.tooltip;
+      var isTooltip = this._attr.addTooltip;
       let layer;
       let bars;
 
@@ -95,7 +95,7 @@ define(function (require) {
      * @returns {D3.UpdateSelection}
      */
     ColumnChart.prototype.updateBars = function (bars) {
-      let offset = this._attr.mode;
+      var offset = this._attr.mode;
 
       if (offset === 'grouped') {
         return this.addGroupedBars(bars);
@@ -111,17 +111,17 @@ define(function (require) {
      * @returns {D3.UpdateSelection}
      */
     ColumnChart.prototype.addStackedBars = function (bars) {
-      let data = this.chartData;
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let height = yScale.range()[0];
-      let yMin = this.handler.yAxis.yScale.domain()[0];
-      let self = this;
+      var data = this.chartData;
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var height = yScale.range()[0];
+      var yMin = this.handler.yAxis.yScale.domain()[0];
+      var self = this;
 
       let barWidth;
       if (data.ordered && data.ordered.date) {
-        let start = data.ordered.min;
-        let end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+        var start = data.ordered.min;
+        var end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);
@@ -174,24 +174,24 @@ define(function (require) {
      * @returns {D3.UpdateSelection}
      */
     ColumnChart.prototype.addGroupedBars = function (bars) {
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let yMin = this.handler.yAxis.yMin;
-      let data = this.chartData;
-      let n = data.series.length;
-      let height = yScale.range()[0];
-      let groupSpacingPercentage = 0.15;
-      let isTimeScale = (data.ordered && data.ordered.date);
-      let minWidth = 1;
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var yMin = this.handler.yAxis.yMin;
+      var data = this.chartData;
+      var n = data.series.length;
+      var height = yScale.range()[0];
+      var groupSpacingPercentage = 0.15;
+      var isTimeScale = (data.ordered && data.ordered.date);
+      var minWidth = 1;
       let barWidth;
 
       // update
       bars
       .attr('x', function (d, i, j) {
         if (isTimeScale) {
-          let groupWidth = xScale(data.ordered.min + data.ordered.interval) -
+          var groupWidth = xScale(data.ordered.min + data.ordered.interval) -
             xScale(data.ordered.min);
-          let groupSpacing = groupWidth * groupSpacingPercentage;
+          var groupSpacing = groupWidth * groupSpacingPercentage;
 
           barWidth = (groupWidth - groupSpacing) / n;
 
@@ -234,13 +234,13 @@ define(function (require) {
      * @returns {D3.Selection} rect with event listeners attached
      */
     ColumnChart.prototype.addBarEvents = function (element, svg) {
-      let events = this.events;
-      let isBrushable = events.isBrushable();
-      let brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      let hover = events.addHoverEvent();
-      let mouseout = events.addMouseoutEvent();
-      let click = events.addClickEvent();
-      let attachedEvents = element.call(hover).call(mouseout).call(click);
+      var events = this.events;
+      var isBrushable = events.isBrushable();
+      var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      var hover = events.addHoverEvent();
+      var mouseout = events.addMouseoutEvent();
+      var click = events.addClickEvent();
+      var attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -256,18 +256,18 @@ define(function (require) {
      * @returns {Function} Creates the vertical bar chart
      */
     ColumnChart.prototype.draw = function () {
-      let self = this;
-      let $elem = $(this.chartEl);
-      let margin = this._attr.margin;
-      let elWidth = this._attr.width = $elem.width();
-      let elHeight = this._attr.height = $elem.height();
-      let yMin = this.handler.yAxis.yMin;
-      let yScale = this.handler.yAxis.yScale;
-      let xScale = this.handler.xAxis.xScale;
-      let minWidth = 20;
-      let minHeight = 20;
-      let addTimeMarker = this._attr.addTimeMarker;
-      let times = this._attr.times || [];
+      var self = this;
+      var $elem = $(this.chartEl);
+      var margin = this._attr.margin;
+      var elWidth = this._attr.width = $elem.width();
+      var elHeight = this._attr.height = $elem.height();
+      var yMin = this.handler.yAxis.yMin;
+      var yScale = this.handler.yAxis.yScale;
+      var xScale = this.handler.xAxis.xScale;
+      var minWidth = 20;
+      var minHeight = 20;
+      var addTimeMarker = this._attr.addTimeMarker;
+      var times = this._attr.times || [];
       let timeMarker;
       let div;
       let svg;
@@ -305,7 +305,7 @@ define(function (require) {
           // Adds event listeners
           self.addBarEvents(bars, svg);
 
-          let line = svg.append('line')
+          var line = svg.append('line')
           .attr('class', 'base-line')
           .attr('x1', 0)
           .attr('y1', yScale(0))

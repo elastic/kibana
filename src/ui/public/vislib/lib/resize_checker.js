@@ -1,13 +1,13 @@
 define(function (require) {
   return function ResizeCheckerFactory(Private, Notifier, $rootScope) {
-    let $ = require('jquery');
-    let _ = require('lodash');
+    var $ = require('jquery');
+    var _ = require('lodash');
 
-    let EventEmitter = Private(require('ui/events'));
-    let reflowWatcher = Private(require('ui/reflow_watcher'));
-    let sequencer = require('ui/utils/sequencer');
+    var EventEmitter = Private(require('ui/events'));
+    var reflowWatcher = Private(require('ui/reflow_watcher'));
+    var sequencer = require('ui/utils/sequencer');
 
-    let SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
+    var SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
       100,      // shortest delay
       10000,  // longest delay
       50     // tick count
@@ -15,7 +15,7 @@ define(function (require) {
 
     // maximum ms that we can delay emitting 'resize'. This is only used
     // to debounce resizes when the size of the element is constantly changing
-    let MS_MAX_RESIZE_DELAY = ResizeChecker.MS_MAX_RESIZE_DELAY = 500;
+    var MS_MAX_RESIZE_DELAY = ResizeChecker.MS_MAX_RESIZE_DELAY = 500;
 
     /**
      * Checks the size of an element on a regular basis. Provides
@@ -87,7 +87,7 @@ define(function (require) {
      * @return {boolean} - true if the passed in value matches the saved size
      */
     ResizeChecker.prototype._equalsSavedSize = function (a) {
-      let b = this._savedSize || {};
+      var b = this._savedSize || {};
       return a.w === b.w && a.h === b.h;
     };
 
@@ -128,12 +128,12 @@ define(function (require) {
      * @return {void}
      */
     ResizeChecker.prototype.check = function () {
-      let newSize = this.read();
-      let dirty = this.saveSize(newSize);
-      let dirtyChanged = this.saveDirty(dirty);
+      var newSize = this.read();
+      var dirty = this.saveSize(newSize);
+      var dirtyChanged = this.saveDirty(dirty);
 
-      let doneDirty = !dirty && dirtyChanged;
-      let muchDirty = dirty && (this.lastDirtyChange() - Date.now() > MS_MAX_RESIZE_DELAY);
+      var doneDirty = !dirty && dirtyChanged;
+      var muchDirty = dirty && (this.lastDirtyChange() - Date.now() > MS_MAX_RESIZE_DELAY);
       if (doneDirty || muchDirty) {
         this.emit('resize', newSize);
       }
@@ -174,10 +174,10 @@ define(function (require) {
         this._tick += 1;
       }
 
-      let check = this.check; // already bound
-      let tick = this._tick;
-      let notify = this.notify;
-      let ms = this._currentSchedule[this._tick];
+      var check = this.check; // already bound
+      var tick = this._tick;
+      var notify = this.notify;
+      var ms = this._currentSchedule[this._tick];
       return (this._timerId = setTimeout(function () {
         check();
       }, ms));

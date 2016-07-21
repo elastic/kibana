@@ -1,9 +1,9 @@
 define(function (require) {
   return function AlertsFactory(Private) {
-    let d3 = require('d3');
-    let $ = require('jquery');
-    let _ = require('lodash');
-    let Binder = require('ui/Binder');
+    var d3 = require('d3');
+    var $ = require('jquery');
+    var _ = require('lodash');
+    var Binder = require('ui/Binder');
 
     /**
      * Adds allerts that float in front of a visualization
@@ -23,7 +23,7 @@ define(function (require) {
       this.alertDefs = alertDefs || [];
 
       this.binder.jqOn(vis.el, 'mouseenter', '.vis-alerts-tray', function () {
-        let $tray = $(this);
+        var $tray = $(this);
         hide();
         $(vis.el).on('mousemove', checkForExit);
 
@@ -43,13 +43,13 @@ define(function (require) {
         }
 
         function checkForExit(event) {
-          let pos = $tray.offset();
+          var pos = $tray.offset();
           if (pos.top > event.clientY || pos.left > event.clientX) return show();
 
-          let bottom = pos.top + $tray.height();
+          var bottom = pos.top + $tray.height();
           if (event.clientY > bottom) return show();
 
-          let right = pos.left + $tray.width();
+          var right = pos.left + $tray.width();
           if (event.clientX > right) return show();
         }
       });
@@ -62,21 +62,21 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
     Alerts.prototype.render = function () {
-      let vis = this.vis;
-      let data = this.data;
+      var vis = this.vis;
+      var data = this.data;
 
-      let alerts = _(this.alertDefs)
+      var alerts = _(this.alertDefs)
       .map(function (alertDef) {
         if (!alertDef) return;
         if (alertDef.test && !alertDef.test(vis, data)) return;
 
-        let type = alertDef.type || 'info';
-        let icon = alertDef.icon || type;
-        let msg = alertDef.msg;
+        var type = alertDef.type || 'info';
+        var icon = alertDef.icon || type;
+        var msg = alertDef.msg;
 
         // alert container
-        let $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
-        let $text = $('<p>').addClass('vis-alerts-text').text(msg);
+        var $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
+        var $text = $('<p>').addClass('vis-alerts-text').text(msg);
 
         return $('<div>').addClass('vis-alert vis-alert-' + type).append([$icon, $text]);
       })

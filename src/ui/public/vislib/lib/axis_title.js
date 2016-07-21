@@ -1,10 +1,10 @@
 define(function (require) {
   return function AxisTitleFactory(Private) {
-    let d3 = require('d3');
-    let $ = require('jquery');
-    let _ = require('lodash');
+    var d3 = require('d3');
+    var $ = require('jquery');
+    var _ = require('lodash');
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
+    var ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
 
     /**
      * Appends axis title(s) to the visualization
@@ -45,14 +45,14 @@ define(function (require) {
      * @returns {Function} Appends axis title to a D3 selection
      */
     AxisTitle.prototype.draw = function (title) {
-      let self = this;
+      var self = this;
 
       return function (selection) {
         selection.each(function () {
-          let el = this;
-          let div = d3.select(el);
-          let width = $(el).width();
-          let height = $(el).height();
+          var el = this;
+          var div = d3.select(el);
+          var width = $(el).width();
+          var height = $(el).height();
 
           self.validateWidthandHeight(width, height);
 
