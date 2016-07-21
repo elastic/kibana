@@ -1,21 +1,24 @@
 define(function (require) {
-  return function MapFactory(Private) {
+  return function MapFactory(Private, tilemap) {
     let _ = require('lodash');
     let $ = require('jquery');
     let L = require('leaflet');
+    let marked = require('marked');
+    marked.setOptions({
+      gfm: true, // Github-flavored markdown
+      sanitize: true // Sanitize HTML tags
+    });
 
     let defaultMapZoom = 2;
     let defaultMapCenter = [15, 5];
     let defaultMarkerType = 'Scaled Circle Markers';
 
+    let tilemapOptions = tilemap.options;
+    let attribution = marked(tilemapOptions.attribution);
+
     let mapTiles = {
-      url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
-      options: {
-        attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-          'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-        subdomains: '1234'
-      }
+      url: tilemap.url,
+      options: _.assign({}, tilemapOptions, { attribution })
     };
 
     let markerTypes = {
@@ -47,8 +50,8 @@ define(function (require) {
       this._attr = params.attr || {};
 
       let mapOptions = {
-        minZoom: 1,
-        maxZoom: 18,
+        minZoom: tilemapOptions.minZoom,
+        maxZoom: tilemapOptions.maxZoom,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
@@ -261,9 +264,18 @@ define(function (require) {
     TileMapMap.prototype._createMap = function (mapOptions) {
       if (this.map) this.destroy();
 
+      if (this._attr.wms && this._attr.wms.enabled) {
+        _.assign(mapOptions, {
+          minZoom: 1,
+          maxZoom: 18
+        });
+      }
+
+      const savedZoom = _.get(this._geoJson, 'properties.zoom');
+
       // get center and zoom from mapdata, or use defaults
       this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-      this._mapZoom = _.get(this._geoJson, 'properties.zoom') || defaultMapZoom;
+      this._mapZoom = Math.max(Math.min(savedZoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
 
       // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
