@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let longString = Array(200).join('_');
+  var _ = require('lodash');
+  var longString = Array(200).join('_');
 
   return function (id, mapping) {
     function fakeVals(type) {

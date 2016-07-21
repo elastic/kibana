@@ -39,7 +39,7 @@ describe('kibana cli', function () {
           pluginPath: testWorkingPath
         };
 
-        let errorStub = sinon.stub();
+        var errorStub = sinon.stub();
         return pluginInstaller.install(settings, logger)
         .catch(errorStub)
         .then(function (data) {

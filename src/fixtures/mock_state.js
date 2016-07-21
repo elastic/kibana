@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let sinon = require('auto-release-sinon');
+  var _ = require('lodash');
+  var sinon = require('auto-release-sinon');
 
   function MockState(defaults) {
     this.on = _.noop;

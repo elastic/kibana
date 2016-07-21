@@ -1,4 +1,4 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
 module.exports = function (command, spaces) {
   if (!_.size(command.commands)) {
@@ -69,6 +69,6 @@ ${indent(cmd.optionHelp(), 2)}
 }
 
 function humanReadableArgName(arg) {
-  let nameOutput = arg.name + (arg.variadic === true ? '...' : '');
+  var nameOutput = arg.name + (arg.variadic === true ? '...' : '');
   return arg.required ? '<' + nameOutput + '>' : '[' + nameOutput + ']';
 }

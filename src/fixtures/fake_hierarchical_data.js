@@ -1,5 +1,5 @@
 define(function (require) {
-  let data = {  };
+  var data = {  };
 
   data.metricOnly = {
     hits: { total: 1000, hits: [], max_score: 0 },

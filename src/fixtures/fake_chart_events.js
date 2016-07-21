@@ -1,5 +1,5 @@
 define(function (require) {
-  let results = {};
+  var results = {};
 
   results.timeSeries = {
     data: {

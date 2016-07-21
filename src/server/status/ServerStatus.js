@@ -31,15 +31,15 @@ module.exports = class ServerStatus {
   }
 
   overall() {
-    let state = _(this._created)
+    var state = _(this._created)
     .map(function (status) {
       return states.get(status.state);
     })
     .sortBy('severity')
     .pop();
 
-    let statuses = _.where(this._created, { state: state.id });
-    let since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
+    var statuses = _.where(this._created, { state: state.id });
+    var since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
       state: state.id,
@@ -59,7 +59,7 @@ module.exports = class ServerStatus {
   }
 
   toString() {
-    let overall = this.overall();
+    var overall = this.overall();
     return `${overall.title} – ${overall.nickname}`;
   }
 

@@ -41,13 +41,13 @@ module.exports = class TransformObjStream extends Stream.Transform {
   }
 
   _transform(event, enc, next) {
-    let data = this.filter(this.readEvent(event));
+    var data = this.filter(this.readEvent(event));
     this.push(this.format(data) + '\n');
     next();
   }
 
   readEvent(event) {
-    let data = {
+    var data = {
       type: event.event,
       '@timestamp': moment.utc(event.timestamp).format(),
       tags: [].concat(event.tags || []),
@@ -69,7 +69,7 @@ module.exports = class TransformObjStream extends Stream.Transform {
         referer: event.source.referer
       };
 
-      let contentLength = 0;
+      var contentLength = 0;
       if (typeof event.responsePayload === 'object') {
         contentLength = stringify(event.responsePayload).length;
       } else {
@@ -82,7 +82,7 @@ module.exports = class TransformObjStream extends Stream.Transform {
         contentLength: contentLength
       };
 
-      let query = querystring.stringify(event.query);
+      var query = querystring.stringify(event.query);
       if (query) data.req.url += '?' + query;
 
 

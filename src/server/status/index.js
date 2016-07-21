@@ -1,6 +1,6 @@
 module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let ServerStatus = require('./ServerStatus');
+  var _ = require('lodash');
+  var ServerStatus = require('./ServerStatus');
   var { join } = require('path');
 
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -21,8 +21,8 @@ module.exports = function (kbnServer, server, config) {
   });
 
   server.decorate('reply', 'renderStatusPage', function () {
-    let app = kbnServer.uiExports.getHiddenApp('statusPage');
-    let resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
+    var app = kbnServer.uiExports.getHiddenApp('statusPage');
+    var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
     resp.code(kbnServer.status.isGreen() ? 200 : 503);
     return resp;
   });

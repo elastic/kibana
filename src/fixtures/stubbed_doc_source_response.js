@@ -1,6 +1,6 @@
 define(function (require) {
   function stubbedDocSourceResponse(Private) {
-    let mockLogstashFields = Private(require('fixtures/logstash_fields'));
+    var mockLogstashFields = Private(require('fixtures/logstash_fields'));
 
     return function (id, index) {
       index = index || '.kibana';

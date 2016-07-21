@@ -1,10 +1,10 @@
-let explodeBy = require('../explodeBy');
-let expect = require('expect.js');
+var explodeBy = require('../explodeBy');
+var expect = require('expect.js');
 
 describe('explode_by(dot, flatObject)', function () {
 
   it('should explode a flatten object with dots', function () {
-    let flatObject = {
+    var flatObject = {
       'test.enable': true,
       'test.hosts': ['host-01', 'host-02']
     };
@@ -17,7 +17,7 @@ describe('explode_by(dot, flatObject)', function () {
   });
 
   it('should explode a flatten object with slashes', function () {
-    let flatObject = {
+    var flatObject = {
       'test/enable': true,
       'test/hosts': ['host-01', 'host-02']
     };

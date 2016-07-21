@@ -1,10 +1,10 @@
-let flattenWith = require('../flattenWith');
-let expect = require('expect.js');
+var flattenWith = require('../flattenWith');
+var expect = require('expect.js');
 
 describe('flatten_with(dot, nestedObj)', function () {
 
   it('should flatten object with dot', function () {
-    let nestedObj = {
+    var nestedObj = {
       test: {
         enable: true,
         hosts: ['host-01', 'host-02'],

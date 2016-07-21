@@ -1,7 +1,7 @@
-let Config = require('../config');
-let expect = require('expect.js');
-let _ = require('lodash');
-let Joi = require('joi');
+var Config = require('../config');
+var expect = require('expect.js');
+var _ = require('lodash');
+var Joi = require('joi');
 
 /**
  * Plugins should defined a config method that takes a joi object. By default
@@ -9,12 +9,12 @@ let Joi = require('joi');
  *
  * Config should be newed up with a joi schema (containing defaults via joi)
  *
- * let schema = { ... }
+ * var schema = { ... }
  * new Config(schema);
  *
  */
 
-let data = {
+var data = {
   test: {
     hosts: ['host-01', 'host-02'],
     client: {
@@ -25,7 +25,7 @@ let data = {
   }
 };
 
-let schema = Joi.object({
+var schema = Joi.object({
   test: Joi.object({
     enable: Joi.boolean().default(true),
     hosts: Joi.array().items(Joi.string()),
@@ -44,8 +44,8 @@ describe('lib/config/config', function () {
     describe('constructor', function () {
 
       it('should not allow any config if the schema is not passed', function (done) {
-        let config = new Config();
-        let run = function () {
+        var config = new Config();
+        var run = function () {
           config.set('something.enable', true);
         };
         expect(run).to.throwException();
@@ -53,7 +53,7 @@ describe('lib/config/config', function () {
       });
 
       it('should set defaults', function () {
-        let config = new Config(schema);
+        var config = new Config(schema);
         expect(config.get('test.enable')).to.be(true);
         expect(config.get('test.client.type')).to.be('datastore');
       });
@@ -69,7 +69,7 @@ describe('lib/config/config', function () {
 
       it('should reset the config object with new values', function () {
         config.set(data);
-        let newData = config.get();
+        var newData = config.get();
         newData.test.enable = false;
         config.resetTo(newData);
         expect(config.get()).to.eql(newData);
@@ -111,21 +111,21 @@ describe('lib/config/config', function () {
       });
 
       it('should use an object to set config values', function () {
-        let hosts = ['host-01', 'host-02'];
+        var hosts = ['host-01', 'host-02'];
         config.set({ test: { enable: false, hosts: hosts } });
         expect(config.get('test.enable')).to.be(false);
         expect(config.get('test.hosts')).to.eql(hosts);
       });
 
       it('should use a flatten object to set config values', function () {
-        let hosts = ['host-01', 'host-02'];
+        var hosts = ['host-01', 'host-02'];
         config.set({ 'test.enable': false, 'test.hosts': hosts });
         expect(config.get('test.enable')).to.be(false);
         expect(config.get('test.hosts')).to.eql(hosts);
       });
 
       it('should override values with just the values present', function () {
-        let newData = _.cloneDeep(data);
+        var newData = _.cloneDeep(data);
         config.set(data);
         newData.test.enable = false;
         config.set({ test: { enable: false } });
@@ -133,7 +133,7 @@ describe('lib/config/config', function () {
       });
 
       it('should thow an exception when setting a value with the wrong type', function (done) {
-        let run = function () {
+        var run = function () {
           config.set('test.enable', 'something');
         };
         expect(run).to.throwException(function (err) {
@@ -156,7 +156,7 @@ describe('lib/config/config', function () {
       });
 
       it('should return the whole config object when called without a key', function () {
-        let newData = _.cloneDeep(data);
+        var newData = _.cloneDeep(data);
         newData.test.enable = true;
         expect(config.get()).to.eql(newData);
       });
@@ -171,14 +171,14 @@ describe('lib/config/config', function () {
       });
 
       it('should throw exception for unknown config values', function () {
-        let run = function () {
+        var run = function () {
           config.get('test.does.not.exist');
         };
         expect(run).to.throwException(/Unknown config key: test.does.not.exist/);
       });
 
       it('should not throw exception for undefined known config values', function () {
-        let run = function getUndefValue() {
+        var run = function getUndefValue() {
           config.get('test.undefValue');
         };
         expect(run).to.not.throwException();
@@ -193,14 +193,14 @@ describe('lib/config/config', function () {
       });
 
       it('should allow you to extend the schema at the top level', function () {
-        let newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
         config.extendSchema('myTest', newSchema);
         expect(config.get('myTest.test')).to.be(true);
       });
 
       it('should NOT allow you to extend the schema if somethign else is there', function () {
-        let newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
-        let run = function () {
+        var newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
+        var run = function () {
           config.extendSchema('test', newSchema);
         };
         expect(run).to.throwException();
@@ -210,7 +210,7 @@ describe('lib/config/config', function () {
 
     describe('#removeSchema(key)', function () {
       it('should completely remove the key', function () {
-        let config = new Config(Joi.object().keys({
+        var config = new Config(Joi.object().keys({
           a: Joi.number().default(1)
         }));
 
@@ -220,7 +220,7 @@ describe('lib/config/config', function () {
       });
 
       it('only removes existing keys', function () {
-        let config = new Config(Joi.object());
+        var config = new Config(Joi.object());
 
         expect(() => config.removeSchema('b')).to.throwException('Unknown schema');
       });

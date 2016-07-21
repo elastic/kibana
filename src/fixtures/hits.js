@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
   return function fitsFixture() {
     return _.map([
       {_source: {'@timestamp': 0, ssl: true, ip: '192.168.0.1', extension: 'php', 'machine.os': 'Linux', bytes: 10, request: 'foo'}},

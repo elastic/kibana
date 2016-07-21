@@ -1,5 +1,5 @@
-let cloneDeep = require('lodash').cloneDeep;
-let fromRoot = require('path').resolve.bind(null, __dirname, '../../');
+var cloneDeep = require('lodash').cloneDeep;
+var fromRoot = require('path').resolve.bind(null, __dirname, '../../');
 
 if (!process.env.BABEL_CACHE_PATH) {
   process.env.BABEL_CACHE_PATH = fromRoot('optimize/.babelcache.json');

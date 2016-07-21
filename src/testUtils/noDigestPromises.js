@@ -1,4 +1,4 @@
-let Bluebird = require('bluebird');
+var Bluebird = require('bluebird');
 require('ui/promises');
 
 Bluebird.longStackTraces();
@@ -7,7 +7,7 @@ Bluebird.longStackTraces();
  * replace the Promise service with Bluebird so that tests
  * can use promises without having to call $rootScope.apply()
  *
- * let noDigestPromises = require('testUtils/noDigestPromises');
+ * var noDigestPromises = require('testUtils/noDigestPromises');
  *
  * describe('some module that does complex shit with promises', function () {
  *   beforeEach(noDigestPromises.activate);
@@ -15,7 +15,7 @@ Bluebird.longStackTraces();
  * });
  */
 
-let active = false;
+var active = false;
 
 require('ui/modules')
 .get('kibana')

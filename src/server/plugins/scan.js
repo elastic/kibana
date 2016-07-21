@@ -5,8 +5,8 @@ module.exports = async (kbnServer, server, config) => {
   let { resolve } = require('path');
   let { each } = require('bluebird');
 
-  let PluginCollection = require('./PluginCollection');
-  let plugins = kbnServer.plugins = new PluginCollection(kbnServer);
+  var PluginCollection = require('./PluginCollection');
+  var plugins = kbnServer.plugins = new PluginCollection(kbnServer);
 
   let scanDirs = [].concat(config.get('plugins.scanDirs') || []);
   let pluginPaths = [].concat(config.get('plugins.paths') || []);

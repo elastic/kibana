@@ -1,16 +1,16 @@
 define(function (require) {
   return function (Private) {
-    let _ = require('lodash');
-    let sinon = require('sinon');
-    let Promise = require('bluebird');
-    let IndexedArray = require('ui/IndexedArray');
-    let IndexPattern = require('ui/index_patterns/_index_pattern');
-    let fieldFormats = Private(require('ui/registry/field_formats'));
-    let flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    let formatHit = require('ui/index_patterns/_format_hit');
-    let getComputedFields = require('ui/index_patterns/_get_computed_fields');
+    var _ = require('lodash');
+    var sinon = require('sinon');
+    var Promise = require('bluebird');
+    var IndexedArray = require('ui/IndexedArray');
+    var IndexPattern = require('ui/index_patterns/_index_pattern');
+    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
+    var formatHit = require('ui/index_patterns/_format_hit');
+    var getComputedFields = require('ui/index_patterns/_get_computed_fields');
 
-    let Field = Private(require('ui/index_patterns/_field'));
+    var Field = Private(require('ui/index_patterns/_field'));
 
     function StubIndexPattern(pattern, timeField, fields) {
       this.id = pattern;

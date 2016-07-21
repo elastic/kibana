@@ -1,7 +1,7 @@
 define(function (require) {
   return function GeoHashGridAggResponseFixture() {
 
-    let _ = require('lodash');
+    var _ = require('lodash');
 
     // for vis:
     //
@@ -18,23 +18,23 @@ define(function (require) {
     //   },
     // });
 
-    let geoHashCharts = _.union(
+    var geoHashCharts = _.union(
       _.range(48, 57), // 0-9
       _.range(65, 90), // A-Z
       _.range(97, 122) // a-z
     );
 
-    let totalDocCount = 0;
+    var totalDocCount = 0;
 
-    let tags = _.times(_.random(4, 20), function (i) {
+    var tags = _.times(_.random(4, 20), function (i) {
       // random number of tags
-      let docCount = 0;
-      let buckets = _.times(_.random(40, 200), function () {
+      var docCount = 0;
+      var buckets = _.times(_.random(40, 200), function () {
         return _.sample(geoHashCharts, 3).join('');
       })
       .sort()
       .map(function (geoHash) {
-        let count = _.random(1, 5000);
+        var count = _.random(1, 5000);
 
         totalDocCount += count;
         docCount += count;

@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
   // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
   const module = require('ui/modules').get('kibana/metric_vis', ['kibana']);

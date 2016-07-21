@@ -1,9 +1,9 @@
-let path = require('path');
-let expect = require('expect.js');
+var path = require('path');
+var expect = require('expect.js');
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
-let settingParser = require('../setting_parser');
+var utils = require('requirefrom')('src/utils');
+var fromRoot = utils('fromRoot');
+var settingParser = require('../setting_parser');
 
 describe('kibana cli', function () {
 
@@ -13,23 +13,23 @@ describe('kibana cli', function () {
 
       describe('parseMilliseconds function', function () {
 
-        let parser = settingParser();
+        var parser = settingParser();
 
         it('should return 0 for an empty string', function () {
-          let value = '';
+          var value = '';
 
-          let result = parser.parseMilliseconds(value);
+          var result = parser.parseMilliseconds(value);
 
           expect(result).to.be(0);
         });
 
         it('should return 0 for a number with an invalid unit of measure', function () {
-          let result = parser.parseMilliseconds('1gigablasts');
+          var result = parser.parseMilliseconds('1gigablasts');
           expect(result).to.be(0);
         });
 
         it('should assume a number with no unit of measure is specified as milliseconds', function () {
-          let result = parser.parseMilliseconds(1);
+          var result = parser.parseMilliseconds(1);
           expect(result).to.be(1);
 
           result = parser.parseMilliseconds('1');
@@ -37,32 +37,32 @@ describe('kibana cli', function () {
         });
 
         it('should interpret a number with "s" as the unit of measure as seconds', function () {
-          let result = parser.parseMilliseconds('5s');
+          var result = parser.parseMilliseconds('5s');
           expect(result).to.be(5 * 1000);
         });
 
         it('should interpret a number with "second" as the unit of measure as seconds', function () {
-          let result = parser.parseMilliseconds('5second');
+          var result = parser.parseMilliseconds('5second');
           expect(result).to.be(5 * 1000);
         });
 
         it('should interpret a number with "seconds" as the unit of measure as seconds', function () {
-          let result = parser.parseMilliseconds('5seconds');
+          var result = parser.parseMilliseconds('5seconds');
           expect(result).to.be(5 * 1000);
         });
 
         it('should interpret a number with "m" as the unit of measure as minutes', function () {
-          let result = parser.parseMilliseconds('9m');
+          var result = parser.parseMilliseconds('9m');
           expect(result).to.be(9 * 1000 * 60);
         });
 
         it('should interpret a number with "minute" as the unit of measure as minutes', function () {
-          let result = parser.parseMilliseconds('9minute');
+          var result = parser.parseMilliseconds('9minute');
           expect(result).to.be(9 * 1000 * 60);
         });
 
         it('should interpret a number with "minutes" as the unit of measure as minutes', function () {
-          let result = parser.parseMilliseconds('9minutes');
+          var result = parser.parseMilliseconds('9minutes');
           expect(result).to.be(9 * 1000 * 60);
         });
 
@@ -120,7 +120,7 @@ describe('kibana cli', function () {
 
           it('should default to false', function () {
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings.quiet).to.be(false);
           });
@@ -128,7 +128,7 @@ describe('kibana cli', function () {
           it('should set settings.quiet property to true', function () {
             options.parent = { quiet: true };
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings.quiet).to.be(true);
           });
@@ -139,7 +139,7 @@ describe('kibana cli', function () {
 
           it('should default to false', function () {
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('silent', false);
           });
@@ -147,7 +147,7 @@ describe('kibana cli', function () {
           it('should set settings.silent property to true', function () {
             options.silent = true;
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('silent', true);
           });
@@ -159,7 +159,7 @@ describe('kibana cli', function () {
 
           it('should default to 0 (milliseconds)', function () {
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('timeout', 0);
           });
@@ -167,7 +167,7 @@ describe('kibana cli', function () {
           it('should set settings.timeout property to specified value', function () {
             options.timeout = 1234;
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('timeout', 1234);
           });
@@ -179,7 +179,7 @@ describe('kibana cli', function () {
           it('should set settings.action property to "install"', function () {
             options.install = 'org/package/version';
             parser = settingParser(options);
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('action', 'install');
           });
@@ -190,7 +190,7 @@ describe('kibana cli', function () {
 
             expect(parser.parse).withArgs().to.not.throwError();
 
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('organization', 'kibana');
             expect(settings).to.have.property('package', 'test-plugin');
@@ -203,7 +203,7 @@ describe('kibana cli', function () {
 
             expect(parser.parse).withArgs().to.not.throwError();
 
-            let settings = parser.parse(options);
+            var settings = parser.parse(options);
 
             expect(settings).to.have.property('organization', 'kibana');
             expect(settings).to.have.property('package', 'test-plugin');
@@ -228,7 +228,7 @@ describe('kibana cli', function () {
             options.install = 'kibana/test-plugin';
             parser = settingParser(options);
 
-            let settings = parser.parse();
+            var settings = parser.parse();
 
             expect(settings.urls).to.have.property('length', 1);
             expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-latest.tar.gz');
@@ -238,7 +238,7 @@ describe('kibana cli', function () {
             options.install = 'kibana/test-plugin/v1.1.1';
             parser = settingParser(options);
 
-            let settings = parser.parse();
+            var settings = parser.parse();
 
             expect(settings.urls).to.have.property('length', 1);
             expect(settings.urls).to.contain('https://download.elastic.co/kibana/test-plugin/test-plugin-v1.1.1.tar.gz');
@@ -248,8 +248,8 @@ describe('kibana cli', function () {
             options.install = 'kibana/test-plugin';
             parser = settingParser(options);
 
-            let settings = parser.parse();
-            let expected = fromRoot('installedPlugins/test-plugin');
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
           });
@@ -258,8 +258,8 @@ describe('kibana cli', function () {
             options.install = 'kibana/test-plugin';
             parser = settingParser(options);
 
-            let settings = parser.parse();
-            let expected = fromRoot('installedPlugins/.plugin.installing');
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing');
 
             expect(settings).to.have.property('workingPath', expected);
           });
@@ -268,8 +268,8 @@ describe('kibana cli', function () {
             options.install = 'kibana/test-plugin';
             parser = settingParser(options);
 
-            let settings = parser.parse();
-            let expected = fromRoot('installedPlugins/.plugin.installing/archive.part');
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/.plugin.installing/archive.part');
 
             expect(settings).to.have.property('tempArchiveFile', expected);
           });
@@ -283,7 +283,7 @@ describe('kibana cli', function () {
 
               expect(parser.parse).withArgs().to.not.throwError();
 
-              let settings = parser.parse();
+              var settings = parser.parse();
 
               expect(settings).to.have.property('package', 'test-plugin');
             });
@@ -298,12 +298,12 @@ describe('kibana cli', function () {
             });
 
             it('should result in only the specified url in urls collection', function () {
-              let url = 'http://www.google.com/plugin.tar.gz';
+              var url = 'http://www.google.com/plugin.tar.gz';
               options.install = 'test-plugin';
               options.url = url;
               parser = settingParser(options);
 
-              let settings = parser.parse();
+              var settings = parser.parse();
 
               expect(settings).to.have.property('urls');
               expect(settings.urls).to.be.an('array');
@@ -322,7 +322,7 @@ describe('kibana cli', function () {
             options.remove = 'package';
             parser = settingParser(options);
 
-            let settings = parser.parse();
+            var settings = parser.parse();
 
             expect(settings).to.have.property('action', 'remove');
           });
@@ -332,7 +332,7 @@ describe('kibana cli', function () {
             options.remove = 'test-plugin';
             parser = settingParser(options);
 
-            let settings = parser.parse();
+            var settings = parser.parse();
 
             expect(settings).to.have.property('package', 'test-plugin');
           });
@@ -351,8 +351,8 @@ describe('kibana cli', function () {
             options.remove = 'test-plugin';
             parser = settingParser(options);
 
-            let settings = parser.parse();
-            let expected = fromRoot('installedPlugins/test-plugin');
+            var settings = parser.parse();
+            var expected = fromRoot('installedPlugins/test-plugin');
 
             expect(settings).to.have.property('pluginPath', expected);
           });
@@ -367,7 +367,7 @@ describe('kibana cli', function () {
             options.list = true;
             parser = settingParser(options);
 
-            let settings = parser.parse();
+            var settings = parser.parse();
 
             expect(settings).to.have.property('action', 'list');
           });

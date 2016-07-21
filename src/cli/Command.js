@@ -82,7 +82,7 @@ Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function
 
 Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn) {
   return action.call(this, function (...args) {
-    let ret = fn.apply(this, args);
+    var ret = fn.apply(this, args);
     if (ret && typeof ret.then === 'function') {
       ret.then(null, function (e) {
         console.log('FATAL CLI ERROR', e.stack);

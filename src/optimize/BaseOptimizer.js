@@ -3,10 +3,10 @@ let { defaults } = require('lodash');
 let { resolve } = require('path');
 let { writeFile } = require('fs');
 let webpack = require('webpack');
-let Boom = require('boom');
+var Boom = require('boom');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
-let CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
