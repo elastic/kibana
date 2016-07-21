@@ -1,7 +1,7 @@
 define(function (require) {
   return function (_) {
 
-    const DOT_PREFIX_RE = /(.).+?\./g;
+    var DOT_PREFIX_RE = /(.).+?\./g;
 
     _.mixin({
 
@@ -40,10 +40,10 @@ define(function (require) {
       commaSeperatedList: function (input) {
         if (_.isArray(input)) return input;
 
-        const source = String(input || '').split(',');
-        const list = [];
+        var source = String(input || '').split(',');
+        var list = [];
         while (source.length) {
-          const item = source.shift().trim();
+          var item = source.shift().trim();
           if (item) list.push(item);
         }
 
