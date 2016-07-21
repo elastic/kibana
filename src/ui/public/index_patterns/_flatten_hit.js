@@ -2,18 +2,18 @@
 // returns a flattened version
 define(function (require) {
   return function FlattenHitProvider(config, $rootScope) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let metaFields = config.get('metaFields');
+    var metaFields = config.get('metaFields');
     $rootScope.$on('change:config.metaFields', function () {
       metaFields = config.get('metaFields');
     });
 
     function flattenHit(indexPattern, hit) {
-      let flat = {};
+      var flat = {};
 
       // recursively merge _source
-      let fields = indexPattern.fields.byName;
+      var fields = indexPattern.fields.byName;
       (function flatten(obj, keyPrefix) {
         keyPrefix = keyPrefix ? keyPrefix + '.' : '';
         _.forOwn(obj, function (val, key) {
@@ -21,8 +21,8 @@ define(function (require) {
 
           if (flat[key] !== void 0) return;
 
-          let hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
-          let isValue = !_.isPlainObject(val);
+          var hasValidMapping = (fields[key] && fields[key].type !== 'conflict');
+          var isValue = !_.isPlainObject(val);
 
           if (hasValidMapping || isValue) {
             flat[key] = val;

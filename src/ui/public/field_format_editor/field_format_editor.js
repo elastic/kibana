@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let $ = require('jquery');
+  var _ = require('lodash');
+  var $ = require('jquery');
 
   require('ui/modules')
   .get('app/settings')
@@ -13,7 +13,7 @@ define(function (require) {
       },
       controllerAs: 'editor',
       controller: function ($scope) {
-        let self = this;
+        var self = this;
 
         // bind the scope values to the controller, down with $scope.values
         $scope.editor = this;
@@ -40,7 +40,7 @@ define(function (require) {
          * @return {undefined}
          */
         $scope.$watch('editor.field.format.type', function (FieldFormat) {
-          let opts = FieldFormat && FieldFormat.editor;
+          var opts = FieldFormat && FieldFormat.editor;
 
           if (!opts) {
             delete self.$$pseudoDirective;
@@ -67,14 +67,14 @@ define(function (require) {
 
       },
       link: function ($scope, $el) {
-        let scopesToTeardown = [];
+        var scopesToTeardown = [];
 
         function setupScope(opts) {
           if (typeof opts !== 'object') {
             return scopesToTeardown[scopesToTeardown.push($scope.$new()) - 1];
           }
 
-          let isolate = scopesToTeardown[scopesToTeardown.push($scope.$new(true)) - 1];
+          var isolate = scopesToTeardown[scopesToTeardown.push($scope.$new(true)) - 1];
           _.forOwn(opts, function (from, to) {
             isolate.$bind(to, from, $scope);
           });
@@ -88,21 +88,21 @@ define(function (require) {
           if (!directive) return $el.hide();
           else $el.show();
 
-          let askedForChild = !!directive.scope;
-          let reuseScope = !askedForChild && !directive.controller;
+          var askedForChild = !!directive.scope;
+          var reuseScope = !askedForChild && !directive.controller;
 
-          let $formatEditor = $('<div>').html(directive.template);
-          let $formatEditorScope = reuseScope ? $scope : setupScope(directive.scope);
+          var $formatEditor = $('<div>').html(directive.template);
+          var $formatEditorScope = reuseScope ? $scope : setupScope(directive.scope);
 
           if (directive.controller) {
             // bind the controller to the injected element
-            let cntrlAs = (directive.controllerAs ? ' as ' + directive.controllerAs : '');
+            var cntrlAs = (directive.controllerAs ? ' as ' + directive.controllerAs : '');
             $formatEditorScope.Controller = directive.controller;
             $formatEditor.attr('ng-controller', 'Controller' + cntrlAs);
           }
 
-          let attrs = {};
-          let linkFns = directive.compile && directive.compile($el, attrs);
+          var attrs = {};
+          var linkFns = directive.compile && directive.compile($el, attrs);
           if (!linkFns || _.isFunction(linkFns)) {
             linkFns = {
               pre: _.noop,

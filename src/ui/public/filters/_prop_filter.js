@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   /**
    * Filters out a list by a given filter. This is currently used to impelment:
@@ -24,9 +24,9 @@ define(function (require) {
       if (!_.isArray(filters)) filters = filters.split(',');
       if (_.contains(filters, '*')) return list;
 
-      let options = filters.reduce(function (options, filter) {
-        let type = 'include';
-        let value = filter;
+      var options = filters.reduce(function (options, filter) {
+        var type = 'include';
+        var value = filter;
 
         if (filter.charAt(0) === '!') {
           type = 'exclude';
@@ -39,12 +39,12 @@ define(function (require) {
       }, {});
 
       return list.filter(function (item) {
-        let value = item[prop];
+        var value = item[prop];
 
-        let excluded = options.exclude && _.contains(options.exclude, value);
+        var excluded = options.exclude && _.contains(options.exclude, value);
         if (excluded) return false;
 
-        let included = !options.include || _.contains(options.include, value);
+        var included = !options.include || _.contains(options.include, value);
         if (included) return true;
 
         return false;

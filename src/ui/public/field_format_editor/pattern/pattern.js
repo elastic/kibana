@@ -10,7 +10,7 @@ define(function (require) {
       require: ['ngModel', '^fieldEditor'],
       scope: true,
       link: function ($scope, $el, attrs, cntrls) {
-        let ngModelCntrl = cntrls[0];
+        var ngModelCntrl = cntrls[0];
 
         $scope.$bind('inputs', attrs.inputs);
         $scope.$bind('placeholder', attrs.placeholder);

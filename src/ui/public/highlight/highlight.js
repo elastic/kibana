@@ -1,9 +1,9 @@
 define(function (require) {
   require('ui/highlight/highlight_tags');
 
-  let _ = require('lodash');
-  let angular = require('angular');
-  let module = require('ui/modules').get('kibana');
+  var _ = require('lodash');
+  var angular = require('angular');
+  var module = require('ui/modules').get('kibana');
 
   module.filter('highlight', function (highlightTags) {
     return function (formatted, highlight) {
@@ -13,12 +13,12 @@ define(function (require) {
         section = _.escape(section);
 
         // Strip out the highlight tags to compare against the formatted string
-        let untagged = section
+        var untagged = section
           .split(highlightTags.pre).join('')
           .split(highlightTags.post).join('');
 
         // Replace all highlight tags with proper html tags
-        let tagged = section
+        var tagged = section
           .split(highlightTags.pre).join('<mark>')
           .split(highlightTags.post).join('</mark>');
 

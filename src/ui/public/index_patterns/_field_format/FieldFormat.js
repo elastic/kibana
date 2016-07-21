@@ -1,10 +1,10 @@
 define(function (require) {
   return function FieldFormatClassProvider(config, $rootScope, Private) {
-    let _ = require('lodash');
-    let contentTypes = Private(require('ui/index_patterns/_field_format/contentTypes'));
+    var _ = require('lodash');
+    var contentTypes = Private(require('ui/index_patterns/_field_format/contentTypes'));
 
     function FieldFormat(params) {
-      let self = this;
+      var self = this;
 
       // give the constructor a more appropriate name
       self.type = self.constructor;
@@ -59,7 +59,7 @@ define(function (require) {
      * @return {any}
      */
     FieldFormat.prototype.param = function (name) {
-      let val = this._params[name];
+      var val = this._params[name];
       if (val || val === false || val === 0) {
         // truthy, false, or 0 are fine
         // '', NaN, null, undefined, etc are not
@@ -84,10 +84,10 @@ define(function (require) {
      * @return {object}
      */
     FieldFormat.prototype.toJSON = function () {
-      let type = this.type;
-      let defaults = this._paramDefaults;
+      var type = this.type;
+      var defaults = this._paramDefaults;
 
-      let params = _.transform(this._params, function (uniqParams, val, param) {
+      var params = _.transform(this._params, function (uniqParams, val, param) {
         if (val !== defaults[param]) {
           uniqParams[param] = val;
         }

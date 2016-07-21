@@ -2,7 +2,7 @@
 // eg: foo.bar.baz becomes f.b.baz
 // 'foo.bar.baz'.replace(/(.+?\.)/g,function(v) {return v[0]+'.';});
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   require('ui/modules')
     .get('kibana')

@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
-  let compareFilters = require('ui/filter_bar/lib/compareFilters');
-  let compareOptions = { disabled: true, negate: true };
+  var _ = require('lodash');
+  var compareFilters = require('ui/filter_bar/lib/compareFilters');
+  var compareOptions = { disabled: true, negate: true };
 
   /**
    * Checks to see if only disabled filters have been changed
@@ -9,7 +9,7 @@ define(function (require) {
    */
   return function (newFilters, oldFilters) {
     return _.every(newFilters, function (newFilter, i) {
-      let match = _.find(oldFilters, function (oldFilter) {
+      var match = _.find(oldFilters, function (oldFilter) {
         return compareFilters(newFilter, oldFilter, compareOptions);
       });
       return !!match;

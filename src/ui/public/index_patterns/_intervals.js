@@ -1,10 +1,10 @@
 define(function (require) {
   return function IndexNameIntervalsService(timefilter) {
-    let _ = require('lodash');
-    let moment = require('moment');
-    let IndexedArray = require('ui/IndexedArray');
+    var _ = require('lodash');
+    var moment = require('moment');
+    var IndexedArray = require('ui/IndexedArray');
 
-    let intervals = new IndexedArray({
+    var intervals = new IndexedArray({
       index: ['name'],
       initialSet: [
         {
@@ -41,10 +41,10 @@ define(function (require) {
       // setup the range that the list will span, return two moment objects that
       // are in proper order. a and b can be numbers to specify to go before or after now (respectively)
       // a certain number of times, based on the interval
-      let range = [[a, 'min', 'startOf'], [b, 'max', 'startOf']].map(function (v) {
-        let val = v[0];
-        let bound = v[1];
-        let extend = v[2];
+      var range = [[a, 'min', 'startOf'], [b, 'max', 'startOf']].map(function (v) {
+        var val = v[0];
+        var bound = v[1];
+        var extend = v[2];
 
         // grab a bound from the time filter
         if (val == null) {
@@ -65,12 +65,12 @@ define(function (require) {
         if (!interval) throw new Error('Interval must be one of ' + _.pluck(intervals, 'name'));
       }
 
-      let indexList = [];
-      let start = range.shift();
+      var indexList = [];
+      var start = range.shift();
       // turn stop into milliseconds to that it's not constantly converted by the while condition
-      let stop = range.shift().valueOf();
+      var stop = range.shift().valueOf();
 
-      let add = sortDirection === 'desc' ? 'unshift' : 'push';
+      var add = sortDirection === 'desc' ? 'unshift' : 'push';
 
       while (start <= stop) {
         const index = start.format(format);

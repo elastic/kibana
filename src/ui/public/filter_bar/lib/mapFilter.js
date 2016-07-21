@@ -1,8 +1,8 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
   return function mapFilterProvider(Promise, Private) {
 
-    let generateMappingChain = Private(require('./generateMappingChain'));
+    var generateMappingChain = Private(require('./generateMappingChain'));
 
     /** Mappers **/
 
@@ -20,7 +20,7 @@ define(function (require) {
     // To create a new mapper you just need to create a function
     // that either handles the mapping operation or not
     // and add it here. ProTip: These are executed in order listed
-    let mappers = [
+    var mappers = [
       Private(require('./mapMatchAll')),
       Private(require('./mapTerms')),
       Private(require('./mapRange')),
@@ -32,14 +32,14 @@ define(function (require) {
       Private(require('./mapDefault'))
     ];
 
-    let noop = function () {
+    var noop = function () {
       return Promise.reject(new Error('No mappings have been found for filter.'));
     };
 
     // Create a chain of responsibility by reducing all the
     // mappers down into one function.
-    let mapFn = _.reduceRight(mappers, function (memo, map) {
-      let filterChainFn = generateMappingChain(map);
+    var mapFn = _.reduceRight(mappers, function (memo, map) {
+      var filterChainFn = generateMappingChain(map);
       return filterChainFn(memo);
     }, noop);
 

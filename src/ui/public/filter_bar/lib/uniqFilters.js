@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let dedupFilters = require('ui/filter_bar/lib/dedupFilters');
+  var _ = require('lodash');
+  var dedupFilters = require('ui/filter_bar/lib/dedupFilters');
 
   /**
    * Remove duplicate filters from an array of filters
@@ -8,7 +8,7 @@ define(function (require) {
    * @returns {object} The original filters array with duplicates removed
    */
   return function (filters, comparatorOptions) {
-    let results = [];
+    var results = [];
     _.each(filters, function (filter) {
       results = _.union(results, dedupFilters(results, [filter], comparatorOptions));
     });

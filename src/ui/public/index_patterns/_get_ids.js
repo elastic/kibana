@@ -1,12 +1,12 @@
 define(function (require) {
   return function GetIndexPatternIdsFn(es, kbnIndex) {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
     // many places may require the id list, so we will cache it seperately
     // didn't incorportate with the indexPattern cache to prevent id collisions.
     let cachedPromise;
 
-    let getIds = function () {
+    var getIds = function () {
       if (cachedPromise) {
         // retrun a clone of the cached response
         return cachedPromise.then(function (cachedResp) {

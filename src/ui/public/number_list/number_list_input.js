@@ -1,13 +1,13 @@
 define(function (require) {
-  let $ = require('jquery');
-  let _ = require('lodash');
-  let keyMap = require('ui/utils/key_map');
+  var $ = require('jquery');
+  var _ = require('lodash');
+  var keyMap = require('ui/utils/key_map');
 
-  let INVALID = {}; // invalid flag
-  let FLOATABLE = /^[\d\.e\-\+]+$/i;
+  var INVALID = {}; // invalid flag
+  var FLOATABLE = /^[\d\.e\-\+]+$/i;
 
-  let VALIDATION_ERROR = 'numberListRangeAndOrder';
-  let DIRECTIVE_ATTR = 'kbn-number-list-input';
+  var VALIDATION_ERROR = 'numberListRangeAndOrder';
+  var DIRECTIVE_ATTR = 'kbn-number-list-input';
 
   require('ui/modules')
   .get('kibana')
@@ -16,13 +16,13 @@ define(function (require) {
       restrict: 'A',
       require: ['ngModel', '^kbnNumberList'],
       link: function ($scope, $el, attrs, controllers) {
-        let ngModelCntr = controllers[0];
-        let numberListCntr = controllers[1];
+        var ngModelCntr = controllers[0];
+        var numberListCntr = controllers[1];
 
-        let $setModel = $parse(attrs.ngModel).assign;
-        let $repeater = $el.closest('[ng-repeat]');
+        var $setModel = $parse(attrs.ngModel).assign;
+        var $repeater = $el.closest('[ng-repeat]');
 
-        let handlers = {
+        var handlers = {
           up: change(add, 1),
           'shift-up': change(addTenth, 1),
 
@@ -54,14 +54,14 @@ define(function (require) {
 
         function go(dir) {
           return function () {
-            let $to = $get(dir);
+            var $to = $get(dir);
             if ($to.size()) $to.focus();
             else return false;
           };
         }
 
         function idKey(event) {
-          let id = [];
+          var id = [];
           if (event.ctrlKey) id.push('ctrl');
           if (event.shiftKey) id.push('shift');
           if (event.metaKey) id.push('meta');
@@ -75,8 +75,8 @@ define(function (require) {
         }
 
         function addTenth(n, val, str) {
-          let int = Math.floor(val);
-          let dec = parseInt(str.split('.')[1] || 0, 10);
+          var int = Math.floor(val);
+          var dec = parseInt(str.split('.')[1] || 0, 10);
           dec = dec + parseInt(n, 10);
 
           if (dec < 0 || dec > 9) {
@@ -93,11 +93,11 @@ define(function (require) {
 
         function change(using, mod) {
           return function () {
-            let str = String(ngModelCntr.$viewValue);
-            let val = parse(str);
+            var str = String(ngModelCntr.$viewValue);
+            var val = parse(str);
             if (val === INVALID) return;
 
-            let next = using(mod, val, str);
+            var next = using(mod, val, str);
             if (next === INVALID) return;
 
             $el.val(next);
@@ -106,7 +106,7 @@ define(function (require) {
         }
 
         function onKeydown(event) {
-          let handler = handlers[idKey(event)];
+          var handler = handlers[idKey(event)];
           if (!handler) return;
 
           if (handler(event) !== false) {
@@ -122,7 +122,7 @@ define(function (require) {
         });
 
         function parse(viewValue) {
-          let num = viewValue;
+          var num = viewValue;
 
           if (typeof num !== 'number' || isNaN(num)) {
             // parse non-numbers
@@ -133,13 +133,13 @@ define(function (require) {
             if (isNaN(num)) return INVALID;
           }
 
-          let range = numberListCntr.range;
+          var range = numberListCntr.range;
           if (!range.within(num)) return INVALID;
 
           if ($scope.$index > 0) {
-            let i = $scope.$index - 1;
-            let list = numberListCntr.getList();
-            let prev = list[i];
+            var i = $scope.$index - 1;
+            var list = numberListCntr.getList();
+            var prev = list[i];
             if (num <= prev) return INVALID;
           }
 
@@ -155,14 +155,14 @@ define(function (require) {
             }
           }
         ], function () {
-          let valid = parse(ngModelCntr.$viewValue) !== INVALID;
+          var valid = parse(ngModelCntr.$viewValue) !== INVALID;
           ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
         });
 
         function validate(then) {
           return function (input) {
-            let value = parse(input);
-            let valid = value !== INVALID;
+            var value = parse(input);
+            var valid = value !== INVALID;
             value = valid ? value : input;
             ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
             then && then(input, value);

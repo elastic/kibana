@@ -1,12 +1,12 @@
 define(function (require) {
   return function PatternToWildcardFn() {
     return function (format) {
-      let wildcard = '';
-      let inEscape = false;
-      let inPattern = false;
+      var wildcard = '';
+      var inEscape = false;
+      var inPattern = false;
 
-      for (let i = 0; i < format.length; i++) {
-        let ch = format.charAt(i);
+      for (var i = 0; i < format.length; i++) {
+        var ch = format.charAt(i);
         switch (ch) {
           case '[':
             inPattern = false;

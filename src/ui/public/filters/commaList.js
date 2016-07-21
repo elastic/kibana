@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   require('ui/modules')
   .get('kibana')
@@ -13,12 +13,12 @@ define(function (require) {
      * @return {String}
      */
     return function (input, inclusive) {
-      let list = _.commaSeperatedList(input);
+      var list = _.commaSeperatedList(input);
       if (list.length < 2) {
         return list.join('');
       }
 
-      let conj = inclusive ? ' and ' : ' or ';
+      var conj = inclusive ? ' and ' : ' or ';
       return list.slice(0, -1).join(', ') + conj + _.last(list);
 
     };

@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
-  let pluckDisabled = function (filter) {
+  var pluckDisabled = function (filter) {
     return _.get(filter, 'meta.disabled');
   };
 

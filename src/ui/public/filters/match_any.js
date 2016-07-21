@@ -2,7 +2,7 @@
 // You may also pass "*" to get all types
 // Or an array of types to get all fields of that type
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   require('ui/modules')
   .get('kibana')
@@ -13,7 +13,7 @@ define(function (require) {
       }
 
       return _.filter(items, function (item) {
-        for (let i = 0; i < rules.length; i++) {
+        for (var i = 0; i < rules.length; i++) {
           if (_.some([item], rules[i])) {
             return true;
           }

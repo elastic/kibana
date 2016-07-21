@@ -1,10 +1,10 @@
 define(function (require) {
   return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
-    let notify = new Notifier({ location: 'IndexPattern Field' });
-    let FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
-    let fieldTypes = Private(require('ui/index_patterns/_field_types'));
-    let fieldFormats = Private(require('ui/registry/field_formats'));
-    let ObjDefine = require('ui/utils/ObjDefine');
+    var notify = new Notifier({ location: 'IndexPattern Field' });
+    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+    var fieldTypes = Private(require('ui/index_patterns/_field_types'));
+    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var ObjDefine = require('ui/utils/ObjDefine');
 
     function Field(indexPattern, spec) {
       // unwrap old instances of Field
@@ -13,14 +13,14 @@ define(function (require) {
       // constuct this object using ObjDefine class, which
       // extends the Field.prototype but gets it's properties
       // defined using the logic below
-      let obj = new ObjDefine(spec, Field.prototype);
+      var obj = new ObjDefine(spec, Field.prototype);
 
       if (spec.name === '_source') {
         spec.type = '_source';
       }
 
       // find the type for this field, fallback to unknown type
-      let type = fieldTypes.byName[spec.type];
+      var type = fieldTypes.byName[spec.type];
       if (spec.type && !type) {
         notify.error(
           'Unknown field type "' + spec.type + '"' +
@@ -31,16 +31,16 @@ define(function (require) {
 
       if (!type) type = fieldTypes.byName.unknown;
 
-      let format = spec.format;
+      var format = spec.format;
       if (!format || !(format instanceof FieldFormat)) {
         format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
       }
 
-      let indexed = !!spec.indexed;
-      let scripted = !!spec.scripted;
-      let sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
-      let bucketable = indexed || scripted;
-      let filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
+      var indexed = !!spec.indexed;
+      var scripted = !!spec.scripted;
+      var sortable = spec.name === '_score' || ((indexed || scripted) && type.sortable);
+      var bucketable = indexed || scripted;
+      var filterable = spec.name === '_id' || scripted || (indexed && type.filterable);
 
       obj.fact('name');
       obj.fact('type');

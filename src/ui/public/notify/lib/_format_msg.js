@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
-  let has = _.has;
-  let formatESMsg = require('ui/notify/lib/_format_es_msg');
+  var _ = require('lodash');
+  var has = _.has;
+  var formatESMsg = require('ui/notify/lib/_format_es_msg');
 
   /**
    * Formats the error message from an error object, extended elasticsearch
@@ -11,12 +11,12 @@ define(function (require) {
    * @returns {string}
    */
   function formatMsg(err, from) {
-    let rtn = '';
+    var rtn = '';
     if (from) {
       rtn += from + ': ';
     }
 
-    let esMsg = formatESMsg(err);
+    var esMsg = formatESMsg(err);
 
     if (typeof err === 'string') {
       rtn += err;

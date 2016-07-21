@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   /**
    * Utilize the extended error information returned from elasticsearch
@@ -7,12 +7,12 @@ define(function (require) {
    * @returns {string}
    */
   return function formatESMsg(err) {
-    let rootCause = _.get(err, 'resp.error.root_cause');
+    var rootCause = _.get(err, 'resp.error.root_cause');
     if (!rootCause) {
       return; //undefined
     }
 
-    let result = _.pluck(rootCause, 'reason').join('\n');
+    var result = _.pluck(rootCause, 'reason').join('\n');
     return result;
   };
 });

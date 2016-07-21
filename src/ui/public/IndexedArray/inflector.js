@@ -9,7 +9,7 @@ define(function (require) {
   }
 
   function endsWith(str, test) {
-    let tooShort = str.length < test.length;
+    var tooShort = str.length < test.length;
     if (tooShort) return;
 
     return str.substr(str.length - test.length).toLowerCase() === test.toLowerCase();

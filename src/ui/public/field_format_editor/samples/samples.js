@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   require('ui/modules')
   .get('kibana')
@@ -10,7 +10,7 @@ define(function (require) {
       require: ['?^ngModel', '^fieldEditor'],
       scope: true,
       link: function ($scope, $el, attrs, cntrls) {
-        let ngModelCntrl = cntrls[0];
+        var ngModelCntrl = cntrls[0];
 
         $scope.samples = null;
         $scope.$bind('inputs', attrs.inputs);
@@ -20,14 +20,14 @@ define(function (require) {
           '[]inputs'
         ], function () {
           $scope.samples = null;
-          let field = $scope.editor.field;
+          var field = $scope.editor.field;
 
           if (!field || !field.format) {
             return;
           }
 
           Promise.try(function () {
-            let converter = field.format.getConverterFor('html');
+            var converter = field.format.getConverterFor('html');
             $scope.samples = _.map($scope.inputs, function (input) {
               return [input, $sce.trustAsHtml(converter(input))];
             });

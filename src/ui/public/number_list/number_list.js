@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let parseRange = require('ui/utils/range');
+  var _ = require('lodash');
+  var parseRange = require('ui/utils/range');
 
   require('ui/number_list/number_list_input');
   require('ui/modules')
@@ -12,7 +12,7 @@ define(function (require) {
       controllerAs: 'numberListCntr',
       require: 'ngModel',
       controller: function ($scope, $attrs, $parse) {
-        let self = this;
+        var self = this;
 
         // Called from the pre-link function once we have the controllers
         self.init = function (modelCntr) {
@@ -24,7 +24,7 @@ define(function (require) {
 
           self.getUnitName = _.partial($parse($attrs.unit), $scope);
 
-          let defaultRange = self.range = parseRange('[0,Infinity)');
+          var defaultRange = self.range = parseRange('[0,Infinity)');
 
           $scope.$watch(function () {
             return $attrs.range;
@@ -47,7 +47,7 @@ define(function (require) {
            * @return {undefined}
            */
           self.remove = function (index) {
-            let list = self.getList();
+            var list = self.getList();
             if (!list) return;
 
             list.splice(index, 1);
@@ -58,7 +58,7 @@ define(function (require) {
            * @return {undefined}
            */
           self.add = function () {
-            let list = self.getList();
+            var list = self.getList();
             if (!list) return;
 
             list.push(_.last(list) + 1);

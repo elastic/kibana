@@ -1,14 +1,14 @@
 define(function (require) {
 
-  let _ = require('lodash');
+  var _ = require('lodash');
 
-  let inflector = require('ui/IndexedArray/inflector');
-  let pathGetter = _(_.get).rearg(1, 0).ary(2);
-  let inflectIndex = inflector('by');
-  let inflectOrder = inflector('in', 'Order');
+  var inflector = require('ui/IndexedArray/inflector');
+  var pathGetter = _(_.get).rearg(1, 0).ary(2);
+  var inflectIndex = inflector('by');
+  var inflectOrder = inflector('in', 'Order');
 
-  let CLEAR_CACHE = {};
-  let OPT_NAMES = IndexedArray.OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
+  var CLEAR_CACHE = {};
+  var OPT_NAMES = IndexedArray.OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
 
   /**
    * Generic extension of Array class, which will index (and reindex) the
@@ -70,11 +70,11 @@ define(function (require) {
     // shortcut for empty props
     if (!props || props.length === 0) return;
 
-    let self = this;
+    var self = this;
     return props.map(function (prop) {
 
-      let from = pathGetter.partial(prop).value();
-      let to = inflect(prop);
+      var from = pathGetter.partial(prop).value();
+      var to = inflect(prop);
       let cache;
 
       Object.defineProperty(self, to, {
@@ -106,7 +106,7 @@ define(function (require) {
    * @return {undefined}
    */
   IndexedArray.prototype._clearIndices = function () {
-    let self = this;
+    var self = this;
     self._indexNames.forEach(function (name) {
       self[name] = CLEAR_CACHE;
     });
@@ -121,7 +121,7 @@ define(function (require) {
    * @return {[type]}        [description]
    */
   'pop push shift splice unshift reverse'.split(' ').forEach(function (method) {
-    let orig = Array.prototype[method];
+    var orig = Array.prototype[method];
 
     IndexedArray.prototype[method] = function (/* args... */) {
       // call the original method with this context
@@ -142,7 +142,7 @@ define(function (require) {
   * @return {array} - the removed data
   */
   IndexedArray.prototype.remove = function (predicate, context) {
-    let out = _.remove(this, predicate, context);
+    var out = _.remove(this, predicate, context);
     _.remove(this.raw, predicate, context);
     this._clearIndices();
     return out;

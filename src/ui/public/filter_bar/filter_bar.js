@@ -1,21 +1,21 @@
 define(function (require) {
-  let _ = require('lodash');
-  let module = require('ui/modules').get('kibana');
-  let template = require('ui/filter_bar/filter_bar.html');
-  let moment = require('moment');
-  let angular = require('angular');
+  var _ = require('lodash');
+  var module = require('ui/modules').get('kibana');
+  var template = require('ui/filter_bar/filter_bar.html');
+  var moment = require('moment');
+  var angular = require('angular');
 
   require('ui/directives/json_input');
 
   module.directive('filterBar', function (Private, Promise, getAppState) {
-    let mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
-    let mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
-    let extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
-    let filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
-    let filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
-    let changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
-    let queryFilter = Private(require('ui/filter_bar/query_filter'));
-    let privateFilterFieldRegex = /(^\$|meta)/;
+    var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+    var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
+    var extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
+    var filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
+    var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
+    var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
+    var queryFilter = Private(require('ui/filter_bar/query_filter'));
+    var privateFilterFieldRegex = /(^\$|meta)/;
 
     return {
       restrict: 'E',
@@ -42,7 +42,7 @@ define(function (require) {
 
         $scope.aceLoaded = function (editor) {
           editor.$blockScrolling = Infinity;
-          let session = editor.getSession();
+          var session = editor.getSession();
           session.setTabSize(2);
           session.setUseSoftTabs(true);
         };
@@ -135,7 +135,7 @@ define(function (require) {
         }
 
         function updateFilters() {
-          let filters = queryFilter.getFilters();
+          var filters = queryFilter.getFilters();
           mapAndFlattenFilters(filters).then(function (results) {
             // used to display the current filters in the state
             $scope.filters = _.sortBy(results, function (filter) {

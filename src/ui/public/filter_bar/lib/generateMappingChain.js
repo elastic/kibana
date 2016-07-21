@@ -1,8 +1,8 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
   return function generateMappingChainProvider(Promise) {
 
-    let noop = function () {
+    var noop = function () {
       return Promise.reject(new Error('No mappings have been found for filter.'));
     };
 

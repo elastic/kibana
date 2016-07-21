@@ -1,10 +1,10 @@
 define(function (require) {
   return function PatternCache() {
-    let _ = require('lodash');
+    var _ = require('lodash');
 
-    let vals = {};
+    var vals = {};
 
-    let validId = function (id) {
+    var validId = function (id) {
       return typeof id !== 'object';
     };
 

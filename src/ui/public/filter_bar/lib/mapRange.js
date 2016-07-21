@@ -8,14 +8,14 @@ define(function (require) {
       .indexPatterns
       .get(filter.meta.index)
       .then(function (indexPattern) {
-        let key = Object.keys(filter.range)[0];
-        let convert = indexPattern.fields.byName[key].format.getConverterFor('text');
-        let range = filter.range[key];
+        var key = Object.keys(filter.range)[0];
+        var convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+        var range = filter.range[key];
 
-        let left = has(range, 'gte') ? range.gte : range.gt;
+        var left = has(range, 'gte') ? range.gte : range.gt;
         if (left == null) left = -Infinity;
 
-        let right = has(range, 'lte') ? range.lte : range.lt;
+        var right = has(range, 'lte') ? range.lte : range.lt;
         if (right == null) right = Infinity;
 
         return {

@@ -7,11 +7,11 @@ define(function (require) {
   require('ui/modules')
   .get('kibana', ['colorpicker.module'])
   .directive('fieldEditor', function (Private, $sce) {
-    let _ = require('lodash');
-    let fieldFormats = Private(require('ui/registry/field_formats'));
-    let Field = Private(require('ui/index_patterns/_field'));
-    let scriptingInfo = $sce.trustAsHtml(require('ui/field_editor/scripting_info.html'));
-    let scriptingWarning = $sce.trustAsHtml(require('ui/field_editor/scripting_warning.html'));
+    var _ = require('lodash');
+    var fieldFormats = Private(require('ui/registry/field_formats'));
+    var Field = Private(require('ui/index_patterns/_field'));
+    var scriptingInfo = $sce.trustAsHtml(require('ui/field_editor/scripting_info.html'));
+    var scriptingWarning = $sce.trustAsHtml(require('ui/field_editor/scripting_warning.html'));
 
     return {
       restrict: 'E',
@@ -22,8 +22,8 @@ define(function (require) {
       },
       controllerAs: 'editor',
       controller: function ($scope, Notifier, kbnUrl) {
-        let self = this;
-        let notify = new Notifier({ location: 'Field Editor' });
+        var self = this;
+        var notify = new Notifier({ location: 'Field Editor' });
 
         self.scriptingInfo = scriptingInfo;
         self.scriptingWarning = scriptingWarning;
@@ -40,9 +40,9 @@ define(function (require) {
 
         self.cancel = redirectAway;
         self.save = function () {
-          let indexPattern = self.indexPattern;
-          let fields = indexPattern.fields;
-          let field = self.field.toActualField();
+          var indexPattern = self.indexPattern;
+          var fields = indexPattern.fields;
+          var field = self.field.toActualField();
 
           fields.remove({ name: field.name });
           fields.push(field);
@@ -61,8 +61,8 @@ define(function (require) {
         };
 
         self.delete = function () {
-          let indexPattern = self.indexPattern;
-          let field = self.field;
+          var indexPattern = self.indexPattern;
+          var field = self.field;
 
           indexPattern.fields.remove({ name: field.name });
           return indexPattern.save()
@@ -73,9 +73,9 @@ define(function (require) {
         };
 
         $scope.$watch('editor.selectedFormatId', function (cur, prev) {
-          let format = self.field.format;
-          let changedFormat = cur !== prev;
-          let missingFormat = cur && (!format || format.type.id !== cur);
+          var format = self.field.format;
+          var changedFormat = cur !== prev;
+          var missingFormat = cur && (!format || format.type.id !== cur);
 
           if (!changedFormat || !missingFormat) return;
 
@@ -84,15 +84,15 @@ define(function (require) {
         });
 
         $scope.$watch('editor.formatParams', function () {
-          let FieldFormat = getFieldFormatType();
+          var FieldFormat = getFieldFormatType();
           self.field.format = new FieldFormat(self.formatParams);
         }, true);
 
         // copy the defined properties of the field to a plain object
         // which is mutable, and capture the changed seperately.
         function shadowCopy(field) {
-          let changes = {};
-          let shadowProps = {
+          var changes = {};
+          var shadowProps = {
             toActualField: {
               // bring the shadow copy out of the shadows
               value: function toActualField() {
@@ -102,7 +102,7 @@ define(function (require) {
           };
 
           Object.getOwnPropertyNames(field).forEach(function (prop) {
-            let desc = Object.getOwnPropertyDescriptor(field, prop);
+            var desc = Object.getOwnPropertyDescriptor(field, prop);
             shadowProps[prop] = {
               enumerable: desc.enumerable,
               get: function () {
@@ -127,7 +127,7 @@ define(function (require) {
         }
 
         function initDefaultFormat() {
-          let def = Object.create(fieldFormats.getDefaultType(self.field.type));
+          var def = Object.create(fieldFormats.getDefaultType(self.field.type));
 
           // explicitly set to undefined to prevent inheritting the prototypes id
           def.id = undefined;

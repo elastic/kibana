@@ -1,13 +1,13 @@
 define(function (require) {
-  let _ = require('lodash');
-  let dedupFilters = require('./lib/dedupFilters');
-  let uniqFilters = require('./lib/uniqFilters');
-  let findByParam = require('ui/utils/find_by_param');
+  var _ = require('lodash');
+  var dedupFilters = require('./lib/dedupFilters');
+  var uniqFilters = require('./lib/uniqFilters');
+  var findByParam = require('ui/utils/find_by_param');
 
   return function (Notifier) {
     return function ($state) {
       return function (event, simulate) {
-        let notify = new Notifier({
+        var notify = new Notifier({
           location: 'Filter bar'
         });
         let aggConfigResult;
@@ -24,18 +24,18 @@ define(function (require) {
         }
 
         if (aggConfigResult) {
-          let isLegendLabel = !!event.point.values;
-          let aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
+          var isLegendLabel = !!event.point.values;
+          var aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 
           // For legend clicks, use the last bucket in the path
           if (isLegendLabel) {
             // series data has multiple values, use aggConfig on the first
             // hierarchical data values is an object with the addConfig
-            let aggConfig = findByParam(event.point.values, 'aggConfig');
+            var aggConfig = findByParam(event.point.values, 'aggConfig');
             aggBuckets = aggBuckets.filter((result) => result.aggConfig && result.aggConfig === aggConfig);
           }
 
-          let filters = _(aggBuckets)
+          var filters = _(aggBuckets)
           .map(function (result) {
             try {
               return result.createFilter();

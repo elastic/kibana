@@ -1,7 +1,7 @@
 define(function (require) {
   return function transformMappingIntoFields(Private, kbnIndex, config) {
-    let _ = require('lodash');
-    let mapField = Private(require('ui/index_patterns/_map_field'));
+    var _ = require('lodash');
+    var mapField = Private(require('ui/index_patterns/_map_field'));
 
 
     /**
@@ -14,15 +14,15 @@ define(function (require) {
      *                    use-cases
      */
     return function (response) {
-      let fields = {};
+      var fields = {};
       _.each(response, function (index, indexName) {
         if (indexName === kbnIndex) return;
         _.each(index.mappings, function (mappings) {
           _.each(mappings, function (field, name) {
-            let keys = Object.keys(field.mapping);
+            var keys = Object.keys(field.mapping);
             if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-            let mapping = mapField(field, name);
+            var mapping = mapField(field, name);
 
             if (fields[name]) {
               if (fields[name].type !== mapping.type) {
@@ -39,7 +39,7 @@ define(function (require) {
       config.get('metaFields').forEach(function (meta) {
         if (fields[meta]) return;
 
-        let field = { mapping: {} };
+        var field = { mapping: {} };
         field.mapping[meta] = {};
         fields[meta] = mapField(field, meta);
       });

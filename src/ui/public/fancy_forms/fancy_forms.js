@@ -1,8 +1,8 @@
 define(function (require) {
-  let _ = require('lodash');
-  let $ = require('jquery');
+  var _ = require('lodash');
+  var $ = require('jquery');
 
-  let KbnFormController = require('ui/fancy_forms/KbnFormController');
+  var KbnFormController = require('ui/fancy_forms/KbnFormController');
 
   require('ui/modules')
   .get('kibana')
@@ -12,16 +12,16 @@ define(function (require) {
         // directive providers are arrays
         $delegate.forEach(function (directive) {
           // get metadata about all init fns
-          let chain = [directive.controller, DecorativeController].map(function (fn) {
-            let deps = $injector.annotate(fn);
+          var chain = [directive.controller, DecorativeController].map(function (fn) {
+            var deps = $injector.annotate(fn);
             return { deps: deps, fn: _.isArray(fn) ? _.last(fn) : fn };
           });
 
           // replace the controller with one that will setup the actual controller
           directive.controller = function stub() {
-            let allDeps = _.toArray(arguments);
+            var allDeps = _.toArray(arguments);
             return chain.reduce(function (controller, link, i) {
-              let deps = allDeps.splice(0, link.deps.length);
+              var deps = allDeps.splice(0, link.deps.length);
               return link.fn.apply(controller, deps) || controller;
             }, this);
           };

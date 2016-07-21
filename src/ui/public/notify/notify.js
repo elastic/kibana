@@ -1,11 +1,11 @@
 define(function (require) {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let modules = require('ui/modules');
-  let module = modules.get('kibana/notify');
-  let errors = require('ui/notify/errors');
-  let Notifier = require('ui/notify/notifier');
-  let rootNotifier = new Notifier();
+  var _ = require('lodash');
+  var $ = require('jquery');
+  var modules = require('ui/modules');
+  var module = modules.get('kibana/notify');
+  var errors = require('ui/notify/errors');
+  var Notifier = require('ui/notify/notifier');
+  var rootNotifier = new Notifier();
 
   require('ui/notify/directives');
 

@@ -1,6 +1,6 @@
 define(function (require) {
   return function CastMappingTypeFn() {
-    let IndexedArray = require('ui/IndexedArray');
+    var IndexedArray = require('ui/IndexedArray');
 
     castMappingType.types = new IndexedArray({
       index: ['name'],
@@ -33,7 +33,7 @@ define(function (require) {
     function castMappingType(name) {
       if (!name) return 'unknown';
 
-      let match = castMappingType.types.byName[name];
+      var match = castMappingType.types.byName[name];
       return match ? match.type : 'string';
     }
 

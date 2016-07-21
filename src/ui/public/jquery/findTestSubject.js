@@ -1,4 +1,4 @@
-let testSubjSelector = require('@spalger/test-subj-selector');
+var testSubjSelector = require('@spalger/test-subj-selector');
 
 module.exports = function bindToJquery($) {
 
@@ -7,28 +7,28 @@ module.exports = function bindToJquery($) {
    *
    * ```js
    * // this
-   * let $button = $('[data-test-subj~="saveButton"]');
+   * var $button = $('[data-test-subj~="saveButton"]');
    *
    * // becomes this
-   * let $button = $.findTestSubject('saveButton');
+   * var $button = $.findTestSubject('saveButton');
    * ```
    *
    * Supports multiple subjects
    * ```js
    * // find any saveButton or cancelButton
-   * let $buttons = $.findTestSubject('saveButton', 'cancelButton');
+   * var $buttons = $.findTestSubject('saveButton', 'cancelButton');
    * ```
    *
    * Supports subject "selectors"
    * ```js
    * // find any saveButton inside a savedObjectForm
-   * let $button = $.findTestSubject('savedObjectForm saveButton');
+   * var $button = $.findTestSubject('savedObjectForm saveButton');
    * ```
    *
    * Supports selecting compound subjects
    * ```js
    * // find any smallButton that is also a saveButton inside a savedObjectForm
-   * let $input = $.findTestSubject('savedObjectForm smallButton&saveButton');
+   * var $input = $.findTestSubject('savedObjectForm smallButton&saveButton');
    * ```
    *
    * @return {jQueryCollection}
@@ -44,8 +44,8 @@ module.exports = function bindToJquery($) {
   $.fn.findTestSubject = findTestSubject;
 
   function findTestSubject(...subjectSelectors) {
-    let $els = $();
-    let $context = this;
+    var $els = $();
+    var $context = this;
 
     subjectSelectors.forEach(function (selector) {
       $els = $els.add($context.find(testSubjSelector(selector)));

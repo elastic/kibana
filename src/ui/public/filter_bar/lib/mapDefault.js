@@ -1,17 +1,17 @@
 define(function (require) {
   return function mapDefaultProvider(Promise) {
-    let angular = require('angular');
-    let _ = require('lodash');
+    var angular = require('angular');
+    var _ = require('lodash');
 
-    let metaProperty = /(^\$|meta)/;
+    var metaProperty = /(^\$|meta)/;
 
     return function (filter) {
-      let key = _.find(_.keys(filter), function (key) {
+      var key = _.find(_.keys(filter), function (key) {
         return !key.match(metaProperty);
       });
 
       if (key) {
-        let value = angular.toJson(filter[key]);
+        var value = angular.toJson(filter[key]);
         return Promise.resolve({ key: key, value: value });
       }
       return Promise.reject(filter);

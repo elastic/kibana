@@ -1,8 +1,8 @@
 define(function (require) {
   return function FieldListProvider(Private) {
-    let Field = Private(require('ui/index_patterns/_field'));
-    let IndexedArray = require('ui/IndexedArray');
-    let _ = require('lodash');
+    var Field = Private(require('ui/index_patterns/_field'));
+    var IndexedArray = require('ui/IndexedArray');
+    var _ = require('lodash');
 
     _.class(FieldList).inherits(IndexedArray);
     function FieldList(indexPattern, specs) {

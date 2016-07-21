@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   /**
    * Extension of Angular's FormController class
@@ -8,7 +8,7 @@ define(function (require) {
    * @param {$scope} $scope
    */
   function KbnFormController($scope, $element) {
-    let self = this;
+    var self = this;
 
     self.errorCount = function (predicate) {
       return self.$$invalidModels().length;
@@ -22,14 +22,14 @@ define(function (require) {
     };
 
     self.describeErrors = function () {
-      let count = self.softErrorCount();
+      var count = self.softErrorCount();
       return count + ' Error' + (count === 1 ? '' : 's');
     };
 
     self.$$invalidModels = function (predicate) {
       predicate = _.callback(predicate);
 
-      let invalid = [];
+      var invalid = [];
 
       _.forOwn(self.$error, function collect(models) {
         if (!models) return;
@@ -41,7 +41,7 @@ define(function (require) {
           } else {
             if (predicate(model)) {
               // prevent dups
-              let len = invalid.length;
+              var len = invalid.length;
               while (len--) if (invalid[len] === model) return;
 
               invalid.push(model);

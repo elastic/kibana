@@ -1,22 +1,22 @@
 define(function (require) {
   return function MapperService(Private, Promise, es, config, kbnIndex) {
-    let _ = require('lodash');
-    let moment = require('moment');
+    var _ = require('lodash');
+    var moment = require('moment');
 
-    let IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
-    let transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
-    let intervals = Private(require('ui/index_patterns/_intervals'));
-    let patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
+    var IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
+    var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
+    var intervals = Private(require('ui/index_patterns/_intervals'));
+    var patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
 
-    let LocalCache = Private(require('ui/index_patterns/_local_cache'));
+    var LocalCache = Private(require('ui/index_patterns/_local_cache'));
 
     function Mapper() {
 
       // Save a reference to mapper
-      let self = this;
+      var self = this;
 
       // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-      let fieldCache = self.cache = new LocalCache();
+      var fieldCache = self.cache = new LocalCache();
 
       /**
        * Gets an object containing all fields with their mappings
@@ -26,9 +26,9 @@ define(function (require) {
        * @async
        */
       self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-        let id = indexPattern.id;
+        var id = indexPattern.id;
 
-        let cache = fieldCache.get(id);
+        var cache = fieldCache.get(id);
         if (cache) return Promise.resolve(cache);
 
         if (!skipIndexPatternCache) {
@@ -46,7 +46,7 @@ define(function (require) {
           });
         }
 
-        let promise = Promise.resolve(id);
+        var promise = Promise.resolve(id);
         if (indexPattern.intervalName) {
           promise = self.getIndicesForIndexPattern(indexPattern)
           .then(function (existing) {
@@ -77,8 +77,8 @@ define(function (require) {
           index: patternToWildcard(indexPattern.id)
         })
         .then(function (resp) {
-          // let all = Object.keys(resp).sort();
-          let all = _(resp)
+          // var all = Object.keys(resp).sort();
+          var all = _(resp)
           .map(function (index, key) {
             if (index.aliases) {
               return [Object.keys(index.aliases), key];
@@ -91,8 +91,8 @@ define(function (require) {
           .uniq(true)
           .value();
 
-          let matches = all.filter(function (existingIndex) {
-            let parsed = moment(existingIndex, indexPattern.id);
+          var matches = all.filter(function (existingIndex) {
+            var parsed = moment(existingIndex, indexPattern.id);
             return existingIndex === parsed.format(indexPattern.id);
           });
 

@@ -1,9 +1,9 @@
 define(function (require) {
-  let errors = {};
-  let _ = require('lodash');
+  var errors = {};
+  var _ = require('lodash');
 
-  let canStack = (function () {
-    let err = new Error();
+  var canStack = (function () {
+    var err = new Error();
     return !!err.stack;
   }());
 
