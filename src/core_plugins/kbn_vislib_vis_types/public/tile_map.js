@@ -48,11 +48,17 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
 
         pushFilter(filter, false, indexPatternName);
       },
-      mapMoveEnd: function (event, uiState) {
-        uiState.set('mapCenter', event.center);
+      mapMoveEnd: function (event) {
+        const vis = _.get(event, 'chart.geohashGridAgg.vis');
+        if (vis && vis.hasUiState()) {
+          vis.getUiState().set('mapCenter', event.center);
+        }
       },
-      mapZoomEnd: function (event, uiState) {
-        uiState.set('mapZoom', event.zoom);
+      mapZoomEnd: function (event) {
+        const vis = _.get(event, 'chart.geohashGridAgg.vis');
+        if (vis && vis.hasUiState()) {
+          vis.getUiState().set('mapZoom', event.zoom);
+        }
 
         const autoPrecision = _.get(event, 'chart.geohashGridAgg.params.autoPrecision');
         if (autoPrecision) {
