@@ -1,5 +1,5 @@
 define(function (require) {
-  let moment = require('moment');
+  var moment = require('moment');
 
   return {
     toString: function (range, format) {
@@ -12,7 +12,7 @@ define(function (require) {
       }
     },
     parse: function (rangeString, format) {
-      let chunks = rangeString.split(' to ');
+      var chunks = rangeString.split(' to ');
       if (chunks.length === 2) return {from: moment(chunks[0], format), to: moment(chunks[1], format)};
 
       chunks = rangeString.split('Before ');

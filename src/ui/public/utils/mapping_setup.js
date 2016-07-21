@@ -1,10 +1,10 @@
 define(function () {
   return function MappingSetupService(kbnIndex, es) {
-    let angular = require('angular');
-    let _ = require('lodash');
-    let mappingSetup = this;
+    var angular = require('angular');
+    var _ = require('lodash');
+    var mappingSetup = this;
 
-    let json = {
+    var json = {
       _serialize: function (val) {
         if (val != null) return angular.toJson(val);
       },
@@ -16,14 +16,14 @@ define(function () {
     /**
      * Use to create the mappings, but that should only happen one at a time
      */
-    let activeTypeCreations = {};
+    var activeTypeCreations = {};
 
     /**
      * Get the list of type's mapped in elasticsearch
      * @return {[type]} [description]
      */
-    let getKnownKibanaTypes = _.once(function () {
-      let indexName = kbnIndex;
+    var getKnownKibanaTypes = _.once(function () {
+      var indexName = kbnIndex;
       return es.indices.getFieldMapping({
         // only concerned with types in this kibana index
         index: indexName,
@@ -70,13 +70,13 @@ define(function () {
         });
       }
 
-      let prom = getKnownKibanaTypes()
+      var prom = getKnownKibanaTypes()
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already
         if (~knownTypes.indexOf(type)) return false;
 
         // we need to create the mapping
-        let body = {};
+        var body = {};
         body[type] = {
           properties: mapping
         };

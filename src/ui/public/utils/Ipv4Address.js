@@ -1,6 +1,6 @@
 define(function () {
-  let NUM_BYTES = 4;
-  let BYTE_SIZE = 256;
+  var NUM_BYTES = 4;
+  var BYTE_SIZE = 256;
 
   function throwError(ipAddress) {
     throw Error('Invalid IPv4 address: ' + ipAddress);
@@ -19,11 +19,11 @@ define(function () {
     if (typeof ipAddress === 'string') {
       this.value = 0;
 
-      let bytes = ipAddress.split('.');
+      var bytes = ipAddress.split('.');
       if (bytes.length !== NUM_BYTES) throwError(ipAddress);
 
-      for (let i = 0; i < bytes.length; i++) {
-        let byte = Number(bytes[i]);
+      for (var i = 0; i < bytes.length; i++) {
+        var byte = Number(bytes[i]);
         if (!isIntegerInRange(byte, 0, BYTE_SIZE)) throwError(ipAddress);
         this.value += Math.pow(BYTE_SIZE, NUM_BYTES - 1 - i) * byte;
       }
@@ -33,9 +33,9 @@ define(function () {
   }
 
   Ipv4Address.prototype.toString = function () {
-    let value = this.value;
-    let bytes = [];
-    for (let i = 0; i < NUM_BYTES; i++) {
+    var value = this.value;
+    var bytes = [];
+    for (var i = 0; i < NUM_BYTES; i++) {
       bytes.unshift(value % 256);
       value = Math.floor(value / 256);
     }

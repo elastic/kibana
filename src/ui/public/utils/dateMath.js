@@ -1,12 +1,12 @@
 define(function (require) {
-  let _ = require('lodash');
-  let moment = require('moment');
+  var _ = require('lodash');
+  var moment = require('moment');
 
-  let units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
-  let unitsAsc = _.sortBy(units, function (unit) {
+  var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+  var unitsAsc = _.sortBy(units, function (unit) {
     return moment.duration(1, unit).valueOf();
   });
-  let unitsDesc = unitsAsc.reverse();
+  var unitsDesc = unitsAsc.reverse();
 
   /* This is a simplified version of elasticsearch's date parser */
   function parse(text, roundUp) {
@@ -15,7 +15,7 @@ define(function (require) {
     if (_.isDate(text)) return moment(text);
 
     let time;
-    let mathString = '';
+    var mathString = '';
     let index;
     let parseString;
 
@@ -43,12 +43,12 @@ define(function (require) {
   }
 
   function parseDateMath(mathString, time, roundUp) {
-    let dateTime = time;
-    let i = 0;
-    let len = mathString.length;
+    var dateTime = time;
+    var i = 0;
+    var len = mathString.length;
 
     while (i < len) {
-      let c = mathString.charAt(i++);
+      var c = mathString.charAt(i++);
       let type;
       let num;
       let unit;
@@ -68,7 +68,7 @@ define(function (require) {
       } else if (mathString.length === 2) {
         num = mathString.charAt(i);
       } else {
-        let numFrom = i;
+        var numFrom = i;
         while (!isNaN(mathString.charAt(i))) {
           i++;
           if (i > 10) return undefined;

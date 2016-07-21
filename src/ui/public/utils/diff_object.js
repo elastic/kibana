@@ -1,17 +1,17 @@
 define(function (require) {
-  let _ = require('lodash');
-  let angular = require('angular');
+  var _ = require('lodash');
+  var angular = require('angular');
 
   return function (target, source) {
 
-    let diff = {};
+    var diff = {};
 
     /**
      * Filter the private vars
      * @param {string} key The keys
      * @returns {boolean}
      */
-    let filterPrivateAndMethods = function (obj) {
+    var filterPrivateAndMethods = function (obj) {
       return function (key) {
         if (_.isFunction(obj[key])) return false;
         if (key.charAt(0) === '$') return false;
@@ -19,8 +19,8 @@ define(function (require) {
       };
     };
 
-    let targetKeys = _.keys(target).filter(filterPrivateAndMethods(target));
-    let sourceKeys = _.keys(source).filter(filterPrivateAndMethods(source));
+    var targetKeys = _.keys(target).filter(filterPrivateAndMethods(target));
+    var sourceKeys = _.keys(source).filter(filterPrivateAndMethods(source));
 
     // Find the keys to be removed
     diff.removed = _.difference(targetKeys, sourceKeys);

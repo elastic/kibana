@@ -1,5 +1,5 @@
 define(function (require) {
-  let TAGS_WITH_WS = />\s+</g;
+  var TAGS_WITH_WS = />\s+</g;
 
   /**
    * Remove all of the whitespace between html tags

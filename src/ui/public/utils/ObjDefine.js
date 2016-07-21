@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   function ObjDefine(defaults, prototype) {
     this.obj; // created by this.create()
@@ -10,7 +10,7 @@ define(function (require) {
   }
 
   ObjDefine.REDEFINE_SUPPORTED = (function () {
-    let a = Object.create(Object.prototype, {
+    var a = Object.create(Object.prototype, {
       prop: {
         configurable: true,
         value: 1
@@ -67,7 +67,7 @@ define(function (require) {
    * @return {object} - created object
    */
   ObjDefine.prototype.create = function () {
-    let self = this;
+    var self = this;
     self.obj = Object.create(this.prototype, self.descs);
 
     if (!ObjDefine.REDEFINE_SUPPORTED && !self.prototype.toJSON) {
@@ -77,7 +77,7 @@ define(function (require) {
       // due to https://github.com/ariya/phantomjs/issues/11856
       self.obj.toJSON = function () {
         return _.transform(self.obj, function (json, val, key) {
-          let desc = self.descs[key];
+          var desc = self.descs[key];
           if (desc && desc.enumerable && val == null) return;
           json[key] = val;
         }, {});
@@ -98,8 +98,8 @@ define(function (require) {
   };
 
   ObjDefine.prototype._describe = function (name, val, exported, changeable) {
-    let self = this;
-    let exists = val != null;
+    var self = this;
+    var exists = val != null;
 
     if (exported && ObjDefine.REDEFINE_SUPPORTED) {
       return {

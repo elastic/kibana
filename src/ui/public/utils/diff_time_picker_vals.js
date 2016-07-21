@@ -1,9 +1,9 @@
 define(function (require) {
   return function DiffTimePickerValuesFn() {
-    let _ = require('lodash');
-    let angular = require('angular');
+    var _ = require('lodash');
+    var angular = require('angular');
 
-    let valueOf = function (o) {
+    var valueOf = function (o) {
       if (o) return o.valueOf();
     };
 

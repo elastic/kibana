@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
-  let rison = require('ui/utils/rison');
-  let angular = require('angular');
+  var _ = require('lodash');
+  var rison = require('ui/utils/rison');
+  var angular = require('angular');
 
   function BaseObject(attributes) {
     // Set the attributes or default to an empty object

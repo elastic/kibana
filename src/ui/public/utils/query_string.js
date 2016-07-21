@@ -1,5 +1,5 @@
 define(function (require) {
-  let qs = {};
+  var qs = {};
 
   /*****
   /*** orignally copied from angular, modified our purposes
@@ -38,7 +38,7 @@ define(function (require) {
    * @returns {Object.<string,boolean|Array>}
    */
   qs.decode = function (keyValue) {
-    let obj = {};
+    var obj = {};
     let keyValueParts;
     let key;
 
@@ -47,7 +47,7 @@ define(function (require) {
         keyValueParts = keyValue.split('=');
         key = tryDecodeURIComponent(keyValueParts[0]);
         if (key !== void 0) {
-          let val = keyValueParts[1] !== void 0 ? tryDecodeURIComponent(keyValueParts[1]) : true;
+          var val = keyValueParts[1] !== void 0 ? tryDecodeURIComponent(keyValueParts[1]) : true;
           if (!obj[key]) {
             obj[key] = val;
           } else if (Array.isArray(obj[key])) {
@@ -67,10 +67,10 @@ define(function (require) {
    * @return {String}
    */
   qs.encode = function (obj) {
-    let parts = [];
-    let keys = Object.keys(obj).sort();
+    var parts = [];
+    var keys = Object.keys(obj).sort();
     keys.forEach(function (key) {
-      let value = obj[key];
+      var value = obj[key];
       if (Array.isArray(value)) {
         value.forEach(function (arrayValue) {
           parts.push(qs.param(key, arrayValue));
@@ -93,8 +93,8 @@ define(function (require) {
    *                    the same if the url does not have a query string
    */
   qs.findInUrl = function (url) {
-    let qsStart = url.indexOf('?');
-    let hashStart = url.lastIndexOf('#');
+    var qsStart = url.indexOf('?');
+    var hashStart = url.lastIndexOf('#');
 
     if (hashStart === -1) {
       // out of bounds
@@ -112,8 +112,8 @@ define(function (require) {
   };
 
   qs.replaceParamInUrl = function (url, param, newVal) {
-    let loc = qs.findInUrl(url);
-    let parsed = qs.decode(url.substring(loc.start + 1, loc.end));
+    var loc = qs.findInUrl(url);
+    var parsed = qs.decode(url.substring(loc.start + 1, loc.end));
 
     if (newVal != null) {
       parsed[param] = newVal;
@@ -121,7 +121,7 @@ define(function (require) {
       delete parsed[param];
     }
 
-    let chars = url.split('');
+    var chars = url.split('');
     chars.splice(loc.start, loc.end - loc.start, '?' + qs.encode(parsed));
     return chars.join('');
   };
