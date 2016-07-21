@@ -7,9 +7,9 @@ describe('Range Agg', function () {
   var resp = require('fixtures/agg_resp/range');
   var buckets = values(resp.aggregations[1].buckets);
 
-  let range;
-  let Vis;
-  let indexPattern;
+  var range;
+  var Vis;
+  var indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

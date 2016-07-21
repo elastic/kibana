@@ -7,9 +7,9 @@ describe('NumberList directive', function () {
 
   require('ui/number_list');
 
-  let $el;
-  let $scope;
-  let compile;
+  var $el;
+  var $scope;
+  var compile;
 
   function onlyValidValues() {
     return $el.find('[ng-model]').toArray().map(function (el) {

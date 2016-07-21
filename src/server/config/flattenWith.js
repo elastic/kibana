@@ -1,6 +1,6 @@
 var _ = require('lodash');
 module.exports = function (dot, nestedObj, flattenArrays) {
-  let key; // original key
+  var key; // original key
   var stack = []; // track key stack
   var flatObj = {};
   (function flattenObj(obj) {

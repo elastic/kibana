@@ -2,11 +2,11 @@ define(function (require) {
   var _ = require('lodash');
   return function mapGeoBoundBoxProvider(Promise, courier) {
     return function (filter) {
-      let key;
-      let value;
-      let topLeft;
-      let bottomRight;
-      let field;
+      var key;
+      var value;
+      var topLeft;
+      var bottomRight;
+      var field;
       if (filter.geo_bounding_box) {
         return courier
         .indexPatterns

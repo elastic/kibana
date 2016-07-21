@@ -6,18 +6,18 @@ describe('index pattern', function () {
   var Promise = require('bluebird');
   var errors = require('ui/errors');
   var IndexedArray = require('ui/IndexedArray');
-  let IndexPattern;
-  let mapper;
-  let mappingSetup;
-  let mockLogstashFields;
-  let DocSource;
-  let config;
-  let docSourceResponse;
+  var IndexPattern;
+  var mapper;
+  var mappingSetup;
+  var mockLogstashFields;
+  var DocSource;
+  var config;
+  var docSourceResponse;
   var indexPatternId = 'test-pattern';
-  let indexPattern;
-  let calculateIndices;
-  let $rootScope;
-  let intervals;
+  var indexPattern;
+  var calculateIndices;
+  var $rootScope;
+  var intervals;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
@@ -142,9 +142,9 @@ describe('index pattern', function () {
     // override the default indexPattern, with a truncated field list
     require('testUtils/noDigestPromises').activateForSuite();
     var indexPatternId = 'test-pattern';
-    let indexPattern;
-    let fieldLength;
-    let truncatedFields;
+    var indexPattern;
+    var fieldLength;
+    var truncatedFields;
 
     beforeEach(function () {
       fieldLength = mockLogstashFields.length;
@@ -297,7 +297,7 @@ describe('index pattern', function () {
   describe('#toDetailedIndexList', function () {
     require('testUtils/noDigestPromises').activateForSuite();
     context('when index pattern is an interval', function () {
-      let interval;
+      var interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
@@ -376,7 +376,7 @@ describe('index pattern', function () {
     context('when index pattern is an interval', function () {
       require('testUtils/noDigestPromises').activateForSuite();
 
-      let interval;
+      var interval;
       beforeEach(function () {
         interval = 'result:getInterval';
         sinon.stub(indexPattern, 'getInterval').returns(interval);
@@ -447,7 +447,7 @@ describe('index pattern', function () {
       });
 
       it('is fulfilled by id', function () {
-        let indexList;
+        var indexList;
         indexPattern.toIndexList().then(function (val) {
           indexList = val;
         });

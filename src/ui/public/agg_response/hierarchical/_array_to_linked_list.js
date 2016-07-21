@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   return function (buckets) {
-    let previous;
+    var previous;
     _.each(buckets, function (bucket) {
       if (previous) {
         bucket._previous = previous;

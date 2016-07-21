@@ -60,14 +60,14 @@ describe('No global chart settings', function () {
     addLegend: true,
     addTooltip: true
   };
-  let chart1;
-  let chart2;
-  let Vis;
-  let persistedState;
-  let indexPattern;
-  let buildHierarchicalData;
-  let data1;
-  let data2;
+  var chart1;
+  var chart2;
+  var Vis;
+  var persistedState;
+  var indexPattern;
+  var buildHierarchicalData;
+  var data1;
+  var data2;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -157,12 +157,12 @@ aggArray.forEach(function (dataAgg, i) {
       addLegend: true,
       addTooltip: true
     };
-    let vis;
-    let Vis;
-    let persistedState;
-    let indexPattern;
-    let buildHierarchicalData;
-    let data;
+    var vis;
+    var Vis;
+    var persistedState;
+    var indexPattern;
+    var buildHierarchicalData;
+    var data;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -192,10 +192,10 @@ aggArray.forEach(function (dataAgg, i) {
     });
 
     describe('addPathEvents method', function () {
-      let path;
-      let d3selectedPath;
-      let onClick;
-      let onMouseOver;
+      var path;
+      var d3selectedPath;
+      var onClick;
+      var onMouseOver;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -222,10 +222,10 @@ aggArray.forEach(function (dataAgg, i) {
     });
 
     describe('addPath method', function () {
-      let width;
-      let height;
-      let svg;
-      let slices;
+      var width;
+      var height;
+      var svg;
+      var slices;
 
       beforeEach(ngMock.inject(function () {
         vis.handler.charts.forEach(function (chart) {

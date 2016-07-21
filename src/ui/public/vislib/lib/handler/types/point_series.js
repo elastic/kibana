@@ -18,7 +18,7 @@ define(function (require) {
 
       return function (vis) {
         var isUserDefinedYAxis = vis._attr.setYExtents;
-        let data;
+        var data;
 
         if (opts.zeroFill) {
           data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);

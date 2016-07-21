@@ -5,8 +5,8 @@ var ServerStatus = require('../ServerStatus');
 
 describe('Status class', function () {
 
-  let server;
-  let serverStatus;
+  var server;
+  var serverStatus;
 
   beforeEach(function () {
     server = { expose: sinon.stub(), log: sinon.stub() };

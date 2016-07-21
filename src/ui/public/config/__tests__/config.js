@@ -1,7 +1,7 @@
 describe('config component', function () {
-  let $scope;
-  let config;
-  let defaults;
+  var $scope;
+  var config;
+  var defaults;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

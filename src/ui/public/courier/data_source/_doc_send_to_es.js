@@ -31,7 +31,7 @@ define(function (require) {
         doc._storeVersion(resp._version);
         doc.id(resp._id);
 
-        let docFetchProm;
+        var docFetchProm;
         if (method !== 'index') {
           docFetchProm = doc.fetch();
         } else {

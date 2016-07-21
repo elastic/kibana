@@ -10,7 +10,7 @@ define(function (require) {
         var notify = new Notifier({
           location: 'Filter bar'
         });
-        let aggConfigResult;
+        var aggConfigResult;
 
         // Hierarchical and tabular data set their aggConfigResult parameter
         // differently because of how the point is rewritten between the two. So

@@ -2,9 +2,9 @@ var _ = require('lodash');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-let fieldFormats;
-let FieldFormat;
-let config;
+var fieldFormats;
+var FieldFormat;
+var config;
 
 var formatIds = [
   'bytes',
@@ -28,8 +28,8 @@ module.exports = describe('conformance', function () {
   }));
 
   formatIds.forEach(function (id) {
-    let instance;
-    let Type;
+    var instance;
+    var Type;
 
     beforeEach(function () {
       Type = fieldFormats.getType(id);

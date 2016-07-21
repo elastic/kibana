@@ -4,7 +4,7 @@ describe('_source formatting', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let fieldFormats;
+  var fieldFormats;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -12,10 +12,10 @@ describe('_source formatting', function () {
   }));
 
   describe('Source format', function () {
-    let indexPattern;
-    let hits;
-    let format;
-    let convertHtml;
+    var indexPattern;
+    var hits;
+    var format;
+    var convertHtml;
 
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

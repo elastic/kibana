@@ -5,9 +5,9 @@ describe('Highlight', function () {
   var ngMock = require('ngMock');
   require('ui/highlight');
 
-  let filter;
+  var filter;
 
-  let tags;
+  var tags;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (highlightFilter, highlightTags) {

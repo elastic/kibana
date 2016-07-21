@@ -5,10 +5,10 @@ var ngMock = require('ngMock');
 
 describe('AggConfig Filters', function () {
   describe('histogram', function () {
-    let AggConfig;
-    let indexPattern;
-    let Vis;
-    let createFilter;
+    var AggConfig;
+    var indexPattern;
+    var Vis;
+    var createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

@@ -12,7 +12,7 @@ define(function (require) {
         restrict: 'E',
         template: require('ui/visualize/spy.html'),
         link: function ($scope, $el) {
-          let currentSpy;
+          var currentSpy;
           var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = _.get($scope.spy, 'mode.fill', false);
           $scope.modes = spyModes;

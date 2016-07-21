@@ -4,10 +4,10 @@ describe('tabifyAggResponse Integration', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let Vis;
-  let Buckets;
-  let indexPattern;
-  let tabifyAggResponse;
+  var Vis;
+  var Buckets;
+  var indexPattern;
+  var tabifyAggResponse;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -43,12 +43,12 @@ describe('tabifyAggResponse Integration', function () {
   describe('transforms a complex response', function () {
     this.slow(1000);
 
-    let vis;
-    let avg;
-    let ext;
-    let src;
-    let os;
-    let esResp;
+    var vis;
+    var avg;
+    var ext;
+    var src;
+    var os;
+    var esResp;
 
     beforeEach(function () {
       vis = new Vis(indexPattern, {

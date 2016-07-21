@@ -203,7 +203,7 @@ define(function (require) {
       .y(function y(d) {
         return yScale(d.y);
       });
-      let lines;
+      var lines;
 
       lines = svg
       .selectAll('.lines')
@@ -276,13 +276,13 @@ define(function (require) {
       var lineStrokeWidth = 1;
       var addTimeMarker = this._attr.addTimeMarker;
       var times = this._attr.times || [];
-      let timeMarker;
-      let div;
-      let svg;
-      let width;
-      let height;
-      let lines;
-      let circles;
+      var timeMarker;
+      var div;
+      var svg;
+      var width;
+      var height;
+      var lines;
+      var circles;
 
       return function (selection) {
         selection.each(function (data) {

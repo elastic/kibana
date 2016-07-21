@@ -4,7 +4,7 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 describe('Diff Time Picker Values', function () {
-  let diffTimePickerValues;
+  var diffTimePickerValues;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -2,7 +2,7 @@ var _ = require('lodash');
 var $ = require('jquery');
 
 var OFFSET = 10;
-let $clone;
+var $clone;
 
 // translate css properties into their basic direction
 var propDirs = {
@@ -95,8 +95,8 @@ function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
   // list of directions in order of preference
   var dirs = _.unique([prev[stash], pref, fallback].filter(Boolean));
 
-  let dir;
-  let value;
+  var dir;
+  var value;
 
   // find the first direction that doesn't overflow
   for (var i = 0; i < dirs.length; i++) {

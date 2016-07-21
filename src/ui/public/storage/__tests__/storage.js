@@ -2,8 +2,8 @@ var sinon = require('sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-let storage;
-let $window;
+var storage;
+var $window;
 var payload = { first: 'john', last: 'smith' };
 
 require('ui/storage');

@@ -39,8 +39,8 @@ define(function (require) {
    */
   qs.decode = function (keyValue) {
     var obj = {};
-    let keyValueParts;
-    let key;
+    var keyValueParts;
+    var key;
 
     (keyValue || '').split('&').forEach(function (keyValue) {
       if (keyValue) {

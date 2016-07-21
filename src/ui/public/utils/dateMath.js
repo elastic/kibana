@@ -14,10 +14,10 @@ define(function (require) {
     if (moment.isMoment(text)) return text;
     if (_.isDate(text)) return moment(text);
 
-    let time;
+    var time;
     var mathString = '';
-    let index;
-    let parseString;
+    var index;
+    var parseString;
 
     if (text.substring(0, 3) === 'now') {
       time = moment();
@@ -49,9 +49,9 @@ define(function (require) {
 
     while (i < len) {
       var c = mathString.charAt(i++);
-      let type;
-      let num;
-      let unit;
+      var type;
+      var num;
+      var unit;
 
       if (c === '/') {
         type = 0;

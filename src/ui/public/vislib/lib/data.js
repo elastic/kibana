@@ -26,7 +26,7 @@ define(function (require) {
       this.uiState = uiState;
 
       var self = this;
-      let offset;
+      var offset;
 
       if (attr.mode === 'stacked') {
         offset = 'zero';
@@ -212,7 +212,7 @@ define(function (require) {
 
     Data.prototype.getDataType = function () {
       var data = this.getVisData();
-      let type;
+      var type;
 
       data.forEach(function (obj) {
         if (obj.series) {
@@ -249,7 +249,7 @@ define(function (require) {
      * @returns {*} Array of chart data objects
      */
     Data.prototype.getVisData = function () {
-      let visData;
+      var visData;
 
       if (this.data.rows) {
         visData = this.data.rows;
@@ -698,7 +698,7 @@ define(function (require) {
      * @returns {Array} min and max values
      */
     Data.prototype.mapDataExtents = function (series) {
-      let values;
+      var values;
       values = _.map(series.rows, function (row) {
         return row[row.length - 1];
       });

@@ -4,10 +4,10 @@ describe('renderbot#buildChartData', function () {
   var expect = require('expect.js');
   var sinon = require('auto-release-sinon');
 
-  let buildChartData;
-  let aggResponse;
-  let TableGroup;
-  let Table;
+  var buildChartData;
+  var aggResponse;
+  var TableGroup;
+  var Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

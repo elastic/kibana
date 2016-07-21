@@ -4,13 +4,13 @@ describe('AggConfigs', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let Vis;
-  let IndexedArray;
-  let AggConfig;
-  let AggConfigs;
-  let SpiedAggConfig;
-  let indexPattern;
-  let Schemas;
+  var Vis;
+  var IndexedArray;
+  var AggConfig;
+  var AggConfigs;
+  var SpiedAggConfig;
+  var indexPattern;
+  var Schemas;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -95,7 +95,7 @@ describe('AggConfigs', function () {
     });
 
     describe('defaults', function () {
-      let vis;
+      var vis;
       beforeEach(function () {
         vis = {
           indexPattern: indexPattern,

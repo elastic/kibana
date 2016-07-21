@@ -4,13 +4,13 @@ var $ = require('jquery');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 
-let YAxis;
-let Data;
-let persistedState;
-let el;
-let buildYAxis;
-let yAxis;
-let yAxisDiv;
+var YAxis;
+var Data;
+var persistedState;
+var el;
+var buildYAxis;
+var yAxis;
+var yAxisDiv;
 
 var timeSeries = [
   1408734060000,
@@ -127,9 +127,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getYScale Method', function () {
-    let yScale;
-    let graphData;
-    let domain;
+    var yScale;
+    var graphData;
+    var domain;
     var height = 50;
 
     function checkDomain(min, max) {
@@ -156,8 +156,8 @@ describe('Vislib yAxis Class Test Suite', function () {
     });
 
     describe('should return log values', function () {
-      let domain;
-      let extents;
+      var domain;
+      var extents;
 
       it('should return 1', function () {
         yAxis._attr.scale = 'log';
@@ -322,9 +322,9 @@ describe('Vislib yAxis Class Test Suite', function () {
   });
 
   describe('getYAxis method', function () {
-    let mode;
-    let yMax;
-    let yScale;
+    var mode;
+    var yMax;
+    var yScale;
     beforeEach(function () {
       createData(defaultGraphData);
       mode = yAxis._attr.mode;

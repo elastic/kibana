@@ -4,14 +4,14 @@ describe('ResponseWriter class', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let Vis;
-  let Table;
-  let Buckets;
-  let Private;
-  let TableGroup;
-  let getColumns;
-  let indexPattern;
-  let ResponseWriter;
+  var Vis;
+  var Table;
+  var Buckets;
+  var Private;
+  var TableGroup;
+  var getColumns;
+  var indexPattern;
+  var ResponseWriter;
 
   function defineSetup(stubGetColumns) {
     beforeEach(ngMock.module('kibana'));

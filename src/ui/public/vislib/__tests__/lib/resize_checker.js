@@ -9,10 +9,10 @@ describe('Vislib Resize Checker', function () {
   var sinon = require('auto-release-sinon');
   require('testUtils/noDigestPromises').activateForSuite();
 
-  let ResizeChecker;
-  let EventEmitter;
-  let checker;
-  let reflowWatcher;
+  var ResizeChecker;
+  var EventEmitter;
+  var checker;
+  var reflowWatcher;
   var reflowSpies = {};
 
   beforeEach(ngMock.module('kibana'));
@@ -93,7 +93,7 @@ describe('Vislib Resize Checker', function () {
   });
 
   describe('#check()', function () {
-    let emit;
+    var emit;
 
     beforeEach(function () {
       emit = sinon.stub(checker, 'emit');
@@ -158,8 +158,8 @@ describe('Vislib Resize Checker', function () {
   });
 
   describe('scheduling', function () {
-    let clock;
-    let schedule;
+    var clock;
+    var schedule;
 
     beforeEach(function () {
       // prevent the checker from running automatically

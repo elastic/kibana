@@ -9,10 +9,10 @@ require('ui/private');
 describe('Events', function () {
   require('testUtils/noDigestPromises').activateForSuite();
 
-  let $rootScope;
-  let Events;
-  let Notifier;
-  let Promise;
+  var $rootScope;
+  var Events;
+  var Notifier;
+  var Promise;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
@@ -184,7 +184,7 @@ describe('Events', function () {
   it('should preserve the scope of the handler', function () {
     var obj = new Events();
     var expected = 'some value';
-    let testValue;
+    var testValue;
 
     function handler(arg1, arg2) {
       testValue = this.getVal();

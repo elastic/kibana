@@ -25,7 +25,7 @@ define(function (require) {
      * @return {undefined}
      */
     RawJSONAggParam.prototype.write = function (aggConfig, output) {
-      let paramJSON;
+      var paramJSON;
       var param = aggConfig.params[this.name];
 
       if (!param) {

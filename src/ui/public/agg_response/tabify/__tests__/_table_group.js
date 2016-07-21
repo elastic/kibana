@@ -1,5 +1,5 @@
 describe('Table Group class', function () {
-  let TableGroup;
+  var TableGroup;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

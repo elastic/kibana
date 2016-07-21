@@ -15,10 +15,10 @@ describe('Reflow watcher', function () {
     })).to.be(true);
   };
 
-  let EventEmitter;
-  let reflowWatcher;
-  let $rootScope;
-  let $onStub;
+  var EventEmitter;
+  var reflowWatcher;
+  var $rootScope;
+  var $onStub;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -49,7 +49,7 @@ describe('Reflow watcher', function () {
   });
 
   describe('un-listens in #destroy()', function () {
-    let $offStub;
+    var $offStub;
 
     beforeEach(function () {
       $offStub = sinon.stub($.fn, 'off');

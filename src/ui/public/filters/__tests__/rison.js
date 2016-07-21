@@ -5,8 +5,8 @@ var ngMock = require('ngMock');
 // Load kibana and its applications
 require('plugins/kibana/discover/index');
 
-let rison;
-let risonDecode;
+var rison;
+var risonDecode;
 
 var init = function (expandable) {
   // Load the application

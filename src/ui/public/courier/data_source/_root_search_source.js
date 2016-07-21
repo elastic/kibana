@@ -11,7 +11,7 @@ define(function (require) {
       return timefilter.get(globalSource.get('index'));
     });
 
-    let appSource; // set in setAppSource()
+    var appSource; // set in setAppSource()
     resetAppSource();
 
     // when the route changes, clear the appSource

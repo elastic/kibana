@@ -3,8 +3,8 @@ describe('styleCompile directive', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let config;
-  let $rootScope;
+  var config;
+  var $rootScope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {

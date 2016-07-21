@@ -28,7 +28,7 @@ define(function (require) {
       var indexField = indexPattern.fields.byName[sortField];
 
       if (indexField && indexField.scripted && indexField.sortable) {
-        let direction;
+        var direction;
         if (_.isString(sortValue)) direction = sortValue;
         if (_.isObject(sortValue) && sortValue.order) direction = sortValue.order;
 

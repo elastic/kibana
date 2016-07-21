@@ -9,8 +9,8 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 var MockMap = require('fixtures/tilemap_map');
 var mockChartEl = $('<div>');
 
-let TileMap;
-let extentsStub;
+var TileMap;
+var extentsStub;
 
 function createTileMap(handler, chartEl, chartData) {
   handler = handler || {};
@@ -22,7 +22,7 @@ function createTileMap(handler, chartEl, chartData) {
 }
 
 describe('TileMap Tests', function () {
-  let tilemap;
+  var tilemap;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -58,7 +58,7 @@ describe('TileMap Tests', function () {
   });
 
   describe('appendMap', function () {
-    let $selection;
+    var $selection;
 
     beforeEach(function () {
       $selection = $('<div>');

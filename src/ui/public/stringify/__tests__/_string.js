@@ -1,5 +1,5 @@
 describe('String Format', function () {
-  let fieldFormats;
+  var fieldFormats;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

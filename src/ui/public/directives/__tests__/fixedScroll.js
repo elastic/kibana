@@ -8,7 +8,7 @@ describe('FixedScroll directive', function () {
   var sinon = require('auto-release-sinon');
   var Promise = require('bluebird');
 
-  let compile;
+  var compile;
   var trash = [];
 
   beforeEach(ngMock.module('kibana'));
@@ -112,10 +112,10 @@ describe('FixedScroll directive', function () {
       { from: '$scroller', to: '$container' }
     ].forEach(function (names) {
       describe('scroll events ' + JSON.stringify(names), function () {
-        let spy;
-        let els;
-        let $from;
-        let $to;
+        var spy;
+        var els;
+        var $from;
+        var $to;
 
         beforeEach(function () {
           spy = sinon.spy($.fn, 'scrollLeft');

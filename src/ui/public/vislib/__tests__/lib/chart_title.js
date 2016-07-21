@@ -6,12 +6,12 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 describe('Vislib ChartTitle Class Test Suite', function () {
-  let ChartTitle;
-  let Data;
-  let persistedState;
-  let chartTitle;
-  let el;
-  let dataObj;
+  var ChartTitle;
+  var Data;
+  var persistedState;
+  var chartTitle;
+  var el;
+  var dataObj;
   var data = {
     hits: 621,
     label: '',

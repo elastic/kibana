@@ -4,8 +4,8 @@ describe('buildHierarchicalData()', function () {
     var _ = require('lodash');
     var expect = require('expect.js');
     var ngMock = require('ngMock');
-    let transform;
-    let fixture;
+    var transform;
+    var fixture;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {

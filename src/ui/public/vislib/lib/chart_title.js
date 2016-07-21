@@ -56,9 +56,9 @@ define(function (require) {
           var n = text[0].length;
           var maxWidth = size / n * 0.9;
           var length = this.getComputedTextLength();
-          let str;
-          let avg;
-          let end;
+          var str;
+          var avg;
+          var end;
 
           if (length > maxWidth) {
             str = text.text();

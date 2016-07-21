@@ -3,12 +3,12 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 describe('fancy forms', function () {
-  let $el;
-  let $scope;
-  let $compile;
-  let $rootScope;
-  let ngForm;
-  let ngModel;
+  var $el;
+  var $scope;
+  var $compile;
+  var $rootScope;
+  var ngForm;
+  var ngModel;
 
   function generateEl() {
     return $('<form>').html(

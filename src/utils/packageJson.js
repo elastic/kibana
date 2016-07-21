@@ -1,8 +1,8 @@
 var { join } = require('path');
 var existsSync = require('fs').existsSync;
 
-let packageDir;
-let packagePath;
+var packageDir;
+var packagePath;
 
 while (!packagePath || !existsSync(packagePath)) {
   var prev = packageDir;

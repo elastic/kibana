@@ -6,7 +6,7 @@ var ngMock = require('ngMock');
 var Binder = require('ui/Binder');
 
 describe('Binder class', function () {
-  let $scope;
+  var $scope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($rootScope) {

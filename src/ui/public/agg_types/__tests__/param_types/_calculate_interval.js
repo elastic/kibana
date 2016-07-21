@@ -3,11 +3,11 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 
 describe('calculateInterval()', function () {
-  let AggConfig;
-  let indexPattern;
-  let Vis;
-  let createFilter;
-  let calculateInterval;
+  var AggConfig;
+  var indexPattern;
+  var Vis;
+  var createFilter;
+  var calculateInterval;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

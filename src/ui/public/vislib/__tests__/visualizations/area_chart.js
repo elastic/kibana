@@ -25,8 +25,8 @@ var visLibParams = {
 
 _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
   describe('Vislib Area Chart Test Suite for ' + imaVariable + ' Data', function () {
-    let vis;
-    let persistedState;
+    var vis;
+    var persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -74,8 +74,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     });
 
     describe('stackData method', function () {
-      let stackedData;
-      let isStacked;
+      var stackedData;
+      var isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -103,12 +103,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     });
 
     describe('addCircleEvents method', function () {
-      let circle;
-      let brush;
-      let d3selectedCircle;
-      let onBrush;
-      let onClick;
-      let onMouseOver;
+      var circle;
+      var brush;
+      var d3selectedCircle;
+      var onBrush;
+      var onClick;
+      var onMouseOver;
 
       beforeEach(ngMock.inject(function () {
         vis.handler.charts.forEach(function (chart) {

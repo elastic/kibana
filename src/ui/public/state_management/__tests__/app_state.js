@@ -4,8 +4,8 @@ var ngMock = require('ngMock');
 require('ui/state_management/app_state');
 
 describe('State Management', function () {
-  let $rootScope;
-  let AppState;
+  var $rootScope;
+  var AppState;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {
@@ -14,7 +14,7 @@ describe('State Management', function () {
   }));
 
   describe('App State', function () {
-    let appState;
+    var appState;
 
     beforeEach(function () {
       appState = new AppState();

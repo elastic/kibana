@@ -5,10 +5,10 @@ var ngMock = require('ngMock');
 describe('Filter Bar Directive', function () {
   describe('generateMappingChain()', function () {
 
-    let generateMappingChain;
+    var generateMappingChain;
 
-    let $rootScope;
-    let Promise;
+    var $rootScope;
+    var Promise;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, _$rootScope_, _Promise_) {
       $rootScope = _$rootScope_;

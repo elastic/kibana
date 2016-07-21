@@ -3,12 +3,12 @@ describe('AggType Class', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
   var sinon = require('auto-release-sinon');
-  let AggType;
-  let AggParams;
-  let AggConfig;
-  let indexPattern;
-  let fieldFormat;
-  let Vis;
+  var AggType;
+  var AggParams;
+  var AggConfig;
+  var indexPattern;
+  var fieldFormat;
+  var Vis;
 
   require('ui/private');
 

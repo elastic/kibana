@@ -48,8 +48,8 @@ define(function (require) {
 
     AggConfigs.prototype.toDsl = function () {
       var dslTopLvl = {};
-      let dslLvlCursor;
-      let nestedMetrics;
+      var dslLvlCursor;
+      var nestedMetrics;
 
       if (this.vis.isHierarchical()) {
         // collect all metrics, and filter out the ones that we won't be copying
@@ -85,7 +85,7 @@ define(function (require) {
         }
 
         var dsl = dslLvlCursor[config.id] = config.toDsl();
-        let subAggs;
+        var subAggs;
 
         if (config.schema.group === 'buckets' && i < list.length - 1) {
           // buckets that are not the last item in the list accept sub-aggs

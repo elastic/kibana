@@ -3,8 +3,8 @@ describe('Field', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let BaseAggParam;
-  let FieldAggParam;
+  var BaseAggParam;
+  var FieldAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps

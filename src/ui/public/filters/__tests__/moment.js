@@ -6,11 +6,11 @@ var ngMock = require('ngMock');
 
 require('ui/filters/moment');
 
-let filter;
+var filter;
 
-let config;
+var config;
 var anchor = '2014-01-01T06:06:06.666';
-let clock;
+var clock;
 
 var init = function (expandable) {
   // Load the application

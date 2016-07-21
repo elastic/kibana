@@ -14,7 +14,7 @@ define(function (require) {
     var baseTitle = document.title;
     var self = this;
 
-    let lastChange;
+    var lastChange;
 
     function render() {
       lastChange = lastChange || [];

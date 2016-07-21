@@ -4,11 +4,11 @@ describe('getAspects', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let Vis;
-  let Table;
-  let AggConfig;
-  let indexPattern;
-  let getAspects;
+  var Vis;
+  var Table;
+  var AggConfig;
+  var indexPattern;
+  var getAspects;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -19,8 +19,8 @@ describe('getAspects', function () {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));
 
-  let vis;
-  let table;
+  var vis;
+  var table;
 
   var date = _.memoize(function (n) {
     return moment().startOf('day').add(n, 'hour').valueOf();

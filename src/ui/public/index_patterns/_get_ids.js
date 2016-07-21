@@ -4,7 +4,7 @@ define(function (require) {
 
     // many places may require the id list, so we will cache it seperately
     // didn't incorportate with the indexPattern cache to prevent id collisions.
-    let cachedPromise;
+    var cachedPromise;
 
     var getIds = function () {
       if (cachedPromise) {

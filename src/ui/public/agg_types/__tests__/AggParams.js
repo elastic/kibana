@@ -3,11 +3,11 @@ describe('AggParams class', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  let AggParams;
-  let BaseAggParam;
-  let FieldAggParam;
-  let OptionedAggParam;
-  let RegexAggParam;
+  var AggParams;
+  var BaseAggParam;
+  var FieldAggParam;
+  var OptionedAggParam;
+  var RegexAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // stub out the param classes before we get the AggParams

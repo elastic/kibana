@@ -21,7 +21,7 @@ users.inIdOrder = _.sortBy(users, 'id');
 
 describe('IndexedArray', function () {
   describe('Basics', function () {
-    let reg;
+    var reg;
 
     beforeEach(function () {
       reg = new IndexedArray();

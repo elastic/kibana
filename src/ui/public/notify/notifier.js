@@ -21,7 +21,7 @@ define(function (require) {
   var firstFatal = true;
 
   var fatalToastTemplate = (function lazyTemplate(tmpl) {
-    let compiled;
+    var compiled;
     return function (vars) {
       return (compiled || (compiled = _.template(tmpl)))(vars);
     };
@@ -285,9 +285,9 @@ define(function (require) {
     var groups = window[type + 'Groups'] = {};
 
     return function logger(name, success) {
-      let status; // status of the timer
-      let exec; // function to execute and wrap
-      let ret; // return value
+      var status; // status of the timer
+      var exec; // function to execute and wrap
+      var ret; // return value
 
       var complete = function (val) { logger(name, true); return val; };
       var failure = function (err) { logger(name, false); throw err; };

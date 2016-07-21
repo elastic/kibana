@@ -6,18 +6,18 @@ var ngMock = require('ngMock');
 // Load the kibana app dependencies.
 require('ui/parse_query');
 
-let $rootScope;
-let $timeout;
-let $compile;
-let Promise;
-let Private;
-let config;
-let $elemScope;
-let $elem;
+var $rootScope;
+var $timeout;
+var $compile;
+var Promise;
+var Private;
+var config;
+var $elemScope;
+var $elem;
 
 var cycleIndex = 0;
 var markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
-let fromUser;
+var fromUser;
 var toUser = require('ui/parse_query/lib/to_user');
 
 var init = function () {
@@ -101,7 +101,7 @@ describe('parse-query directive', function () {
 
   describe('model presentation formatter', function () {
     it('should present undefined as empty string', function () {
-      let notDefined;
+      var notDefined;
       expect(toUser(notDefined)).to.be('');
     });
 

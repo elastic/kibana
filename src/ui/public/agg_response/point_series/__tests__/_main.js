@@ -7,10 +7,10 @@ describe('pointSeriesChartDataFromTable', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let pointSeriesChartDataFromTable;
-  let indexPattern;
-  let Table;
-  let Vis;
+  var pointSeriesChartDataFromTable;
+  var indexPattern;
+  var Table;
+  var Vis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

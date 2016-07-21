@@ -4,8 +4,8 @@ var ngMock = require('ngMock');
 var _ = require('lodash');
 
 describe('Vislib Vis Types Test Suite', function () {
-  let visTypes;
-  let visFunc;
+  var visTypes;
+  var visFunc;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

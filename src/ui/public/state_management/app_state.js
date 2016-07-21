@@ -6,8 +6,8 @@ define(function (require) {
   function AppStateProvider(Private, $rootScope, getAppState) {
     var State = Private(require('ui/state_management/state'));
     var PersistedState = Private(require('ui/persisted_state/persisted_state'));
-    let persistedStates;
-    let eventUnsubscribers;
+    var persistedStates;
+    var eventUnsubscribers;
 
     _.class(AppState).inherits(State);
     function AppState(defaults) {
@@ -71,7 +71,7 @@ define(function (require) {
     return Private(AppStateProvider);
   })
   .service('getAppState', function ($location) {
-    let currentAppState;
+    var currentAppState;
 
     function get() {
       return currentAppState;

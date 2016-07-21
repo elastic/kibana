@@ -3,8 +3,8 @@ describe('type normalizer (castMappingType)', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  let fn;
-  let fields;
+  var fn;
+  var fields;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     fn = Private(require('ui/index_patterns/_cast_mapping_type'));

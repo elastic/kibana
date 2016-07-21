@@ -4,8 +4,8 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 describe('Vislib Layout Types Test Suite', function () {
-  let layoutType;
-  let layoutFunc;
+  var layoutType;
+  var layoutFunc;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

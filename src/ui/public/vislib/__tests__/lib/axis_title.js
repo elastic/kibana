@@ -6,14 +6,14 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 describe('Vislib AxisTitle Class Test Suite', function () {
-  let AxisTitle;
-  let Data;
-  let PersistedState;
-  let axisTitle;
-  let el;
-  let dataObj;
-  let xTitle;
-  let yTitle;
+  var AxisTitle;
+  var Data;
+  var PersistedState;
+  var axisTitle;
+  var el;
+  var dataObj;
+  var xTitle;
+  var yTitle;
   var data = {
     hits: 621,
     label: '',

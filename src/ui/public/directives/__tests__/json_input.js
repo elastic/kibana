@@ -5,10 +5,10 @@ var ngMock = require('ngMock');
 require('ui/directives/json_input');
 
 describe('JSON input validation', function () {
-  let $compile;
-  let $rootScope;
+  var $compile;
+  var $rootScope;
   var html = '<input ng-model="value" json-input require-keys=true />';
-  let element;
+  var element;
 
   beforeEach(ngMock.module('kibana'));
 

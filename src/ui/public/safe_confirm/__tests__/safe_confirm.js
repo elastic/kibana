@@ -3,12 +3,12 @@ describe('ui/safe_confirm', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let $rootScope;
-  let $window;
-  let $timeout;
-  let message;
-  let safeConfirm;
-  let promise;
+  var $rootScope;
+  var $window;
+  var $timeout;
+  var message;
+  var safeConfirm;
+  var promise;
 
   beforeEach(function () {
     ngMock.module('kibana', function ($provide) {
@@ -54,7 +54,7 @@ describe('ui/safe_confirm', function () {
       it('promise is fulfilled with true', function () {
         $timeout.flush();
 
-        let value;
+        var value;
         promise.then(function (v) {
           value = v;
         });
@@ -69,7 +69,7 @@ describe('ui/safe_confirm', function () {
         $window.confirm.returns(false); // must be set before $timeout.flush()
         $timeout.flush();
 
-        let value;
+        var value;
         promise.then(null, function (v) {
           value = v;
         });

@@ -172,8 +172,8 @@ define(function (require) {
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var isOverlapping = this.isOverlapping;
-      let layer;
-      let circles;
+      var layer;
+      var circles;
 
       layer = svg.selectAll('.points')
       .data(data)
@@ -296,14 +296,14 @@ define(function (require) {
       var minHeight = 20;
       var addTimeMarker = this._attr.addTimeMarker;
       var times = this._attr.times || [];
-      let timeMarker;
-      let div;
-      let svg;
-      let width;
-      let height;
-      let layers;
-      let circles;
-      let path;
+      var timeMarker;
+      var div;
+      var svg;
+      var width;
+      var height;
+      var layers;
+      var circles;
+      var path;
 
       return function (selection) {
         selection.each(function (data) {

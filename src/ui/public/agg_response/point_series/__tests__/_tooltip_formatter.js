@@ -4,7 +4,7 @@ describe('tooltipFormatter', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let tooltipFormatter;
+  var tooltipFormatter;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

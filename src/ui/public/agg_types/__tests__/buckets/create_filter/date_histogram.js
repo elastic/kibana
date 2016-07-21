@@ -7,16 +7,16 @@ describe('AggConfig Filters', function () {
     var ngMock = require('ngMock');
     var expect = require('expect.js');
 
-    let vis;
-    let agg;
-    let field;
-    let filter;
-    let bucketKey;
-    let bucketStart;
-    let getIntervalStub;
-    let intervalOptions;
+    var vis;
+    var agg;
+    var field;
+    var filter;
+    var bucketKey;
+    var bucketStart;
+    var getIntervalStub;
+    var intervalOptions;
 
-    let init;
+    var init;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
@@ -79,7 +79,7 @@ describe('AggConfig Filters', function () {
 
     it('extends the filter edge to 1ms before the next bucket for all interval options', function () {
       intervalOptions.forEach(function (option) {
-        let duration;
+        var duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {
           duration = moment.duration(10, option.val);
 

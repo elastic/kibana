@@ -100,8 +100,8 @@ var colsData = {
 };
 
 describe('Vislib Data Class Test Suite', function () {
-  let Data;
-  let persistedState;
+  var Data;
+  var persistedState;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -200,7 +200,7 @@ describe('Vislib Data Class Test Suite', function () {
 
 
   describe('_removeZeroSlices', function () {
-    let data;
+    var data;
     var pieData = {
       slices: {
         children: [
@@ -222,12 +222,12 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('Data.flatten', function () {
-    let serIn;
-    let rowIn;
-    let colIn;
-    let serOut;
-    let rowOut;
-    let colOut;
+    var serIn;
+    var rowIn;
+    var colIn;
+    var serOut;
+    var rowOut;
+    var colOut;
 
     beforeEach(function () {
       serIn = new Data(seriesData, {}, persistedState);
@@ -261,9 +261,9 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('getYMin method', function () {
-    let visData;
-    let visDataNeg;
-    let visDataStacked;
+    var visData;
+    var visDataNeg;
+    var visDataStacked;
     var minValue = 4;
     var minValueNeg = -41;
     var minValueStacked = 15;
@@ -298,9 +298,9 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('getYMax method', function () {
-    let visData;
-    let visDataNeg;
-    let visDataStacked;
+    var visData;
+    var visDataNeg;
+    var visDataStacked;
     var maxValue = 41;
     var maxValueNeg = -4;
     var maxValueStacked = 115;
@@ -335,7 +335,7 @@ describe('Vislib Data Class Test Suite', function () {
   });
 
   describe('geohashGrid methods', function () {
-    let data;
+    var data;
     var geohashGridData = {
       hits: 3954,
       rows: [{

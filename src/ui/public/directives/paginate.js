@@ -105,7 +105,7 @@ define(function (require) {
           var count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
           _.times(count, function (i) {
-            let page;
+            var page;
 
             if (perPage) {
               var start = perPage * i;

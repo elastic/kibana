@@ -32,14 +32,14 @@ describe('Vislib Time Marker Test Suite', function () {
     });
   };
   var times = [];
-  let TimeMarker;
-  let defaultMarker;
-  let customMarker;
-  let selection;
-  let xScale;
-  let minDomain;
-  let maxDomain;
-  let domain;
+  var TimeMarker;
+  var defaultMarker;
+  var customMarker;
+  var selection;
+  var xScale;
+  var minDomain;
+  var maxDomain;
+  var domain;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -62,8 +62,8 @@ describe('Vislib Time Marker Test Suite', function () {
   });
 
   describe('_isTimeBaseChart method', function () {
-    let boolean;
-    let newSelection;
+    var boolean;
+    var newSelection;
 
     it('should return true when data is time based', function () {
       boolean = defaultMarker._isTimeBasedChart(selection);
@@ -78,7 +78,7 @@ describe('Vislib Time Marker Test Suite', function () {
   });
 
   describe('render method', function () {
-    let lineArray;
+    var lineArray;
 
     beforeEach(function () {
       defaultMarker.render(selection);

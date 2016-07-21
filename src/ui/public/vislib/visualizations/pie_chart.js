@@ -184,7 +184,7 @@ define(function (require) {
           var div = d3.select(this);
           var width = $(this).width();
           var height = $(this).height();
-          let path;
+          var path;
 
           if (!slices.children.length) return;
 

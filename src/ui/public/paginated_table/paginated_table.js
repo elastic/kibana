@@ -30,7 +30,7 @@ define(function (require) {
           if (!col) return;
           if (col.sortable === false) return;
 
-          let sortDirection;
+          var sortDirection;
 
           if (self.sort.columnIndex !== colIndex) {
             sortDirection = 'asc';

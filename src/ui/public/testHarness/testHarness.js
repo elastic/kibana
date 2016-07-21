@@ -37,7 +37,7 @@ before(function () {
   // before the tests start, load the sourcemap and hook into error generation for the mocha reporter
   this.timeout(30000);
 
-  let mapper;
+  var mapper;
   var Runner = window.Mocha.Runner;
 
   Runner.prototype.emit = _.wrap(Runner.prototype.emit, function (emit, event, test, err) {

@@ -12,13 +12,13 @@ require('plugins/kibana/dashboard/index');
 // TODO: This should not be needed, timefilter is only included here, it should move
 require('plugins/kibana/discover/index');
 
-let $parentScope;
+var $parentScope;
 
-let $scope;
+var $scope;
 
-let $elem;
+var $elem;
 var anchor = '2014-01-01T06:06:06.666Z';
-let clock;
+var clock;
 
 var init = function () {
   // Load the application
@@ -85,7 +85,7 @@ describe('timepicker directive', function () {
   });
 
   describe('refresh interval', function () {
-    let $courier;
+    var $courier;
     beforeEach(function () {
       init();
       ngMock.inject(function (courier, $rootScope) {
@@ -232,7 +232,7 @@ describe('timepicker directive', function () {
     });
 
     it('disables the submit button if the form is invalid', function (done) {
-      let button;
+      var button;
       button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
@@ -359,7 +359,7 @@ describe('timepicker directive', function () {
 
   describe('absolute mode', function () {
 
-    let inputs;
+    var inputs;
 
     beforeEach(function () {
       init();

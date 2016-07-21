@@ -4,7 +4,7 @@ describe('getPoint', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let getPoint;
+  var getPoint;
 
   var truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
   var identFormatted = { fieldFormatter: _.constant(_.identity) };
@@ -15,10 +15,10 @@ describe('getPoint', function () {
   }));
 
   describe('Without series aspect', function () {
-    let seriesAspect;
-    let xAspect;
-    let yAspect;
-    let yScale;
+    var seriesAspect;
+    var xAspect;
+    var yAspect;
+    var yScale;
 
     beforeEach(function () {
       seriesAspect = null;
@@ -48,10 +48,10 @@ describe('getPoint', function () {
   });
 
   describe('With series aspect', function () {
-    let row;
-    let xAspect;
-    let yAspect;
-    let yScale;
+    var row;
+    var xAspect;
+    var yAspect;
+    var yScale;
 
     beforeEach(function () {
       row = [ { value: 1 }, { value: 2 }, { value: 3 }];

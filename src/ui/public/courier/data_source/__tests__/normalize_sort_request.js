@@ -5,9 +5,9 @@ describe('SearchSource#normalizeSortRequest', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  let normalizeSortRequest;
-  let indexPattern;
-  let normalizedSort;
+  var normalizeSortRequest;
+  var indexPattern;
+  var normalizedSort;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

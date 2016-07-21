@@ -113,7 +113,7 @@ define(function (require) {
      */
     HeatmapMarker.prototype._nearestFeature = function (latLng) {
       var self = this;
-      let nearest;
+      var nearest;
 
       if (latLng.lng < -180 || latLng.lng > 180) {
         return;
@@ -192,7 +192,7 @@ define(function (require) {
       return this.geoJson.features.map(function (feature) {
         var lat = feature.properties.center[0];
         var lng = feature.properties.center[1];
-        let heatIntensity;
+        var heatIntensity;
 
         if (!self._attr.heatNormalizeData) {
           // show bucket value on heatmap

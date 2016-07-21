@@ -5,11 +5,11 @@ var sinon = require('auto-release-sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-let Vis;
-let Notifier;
-let AggConfigs;
-let indexPattern;
-let buildHierarchicalData;
+var Vis;
+var Notifier;
+var AggConfigs;
+var indexPattern;
+var buildHierarchicalData;
 
 describe('buildHierarchicalData', function () {
 
@@ -27,8 +27,8 @@ describe('buildHierarchicalData', function () {
 
 
   describe('metric only', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(function () {
       var id = 1;
@@ -99,8 +99,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('threeTermBuckets', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(function () {
       var id = 1;
@@ -141,8 +141,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneHistogramBucket', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(function () {
       var id = 1;
@@ -173,8 +173,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneRangeBucket', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(function () {
       var id = 1;
@@ -214,8 +214,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(function () {
       var id = 1;
@@ -250,8 +250,8 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket that is a split', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(function () {
       var id = 1;

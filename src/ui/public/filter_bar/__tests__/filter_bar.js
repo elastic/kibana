@@ -9,15 +9,15 @@ require('ui/filter_bar');
 var MockState = require('fixtures/mock_state');
 
 describe('Filter Bar Directive', function () {
-  let $rootScope;
-  let $compile;
-  let $timeout;
-  let Promise;
-  let appState;
-  let queryFilter;
-  let mapFilter;
-  let $el;
-  let $scope;
+  var $rootScope;
+  var $compile;
+  var $timeout;
+  var Promise;
+  var appState;
+  var queryFilter;
+  var mapFilter;
+  var $el;
+  var $scope;
   // require('testUtils/noDigestPromises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {

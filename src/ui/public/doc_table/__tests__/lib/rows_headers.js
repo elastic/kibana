@@ -9,14 +9,14 @@ var getFakeRow = require('fixtures/fake_row');
 describe('Doc Table', function () {
   require('plugins/kibana/discover/index');
 
-  let $parentScope;
+  var $parentScope;
 
-  let $scope;
+  var $scope;
 
-  let config;
+  var config;
 
   // Stub out a minimal mapping of 4 fields
-  let mapping;
+  var mapping;
 
   beforeEach(ngMock.module('kibana', 'apps/discover'));
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
@@ -52,7 +52,7 @@ describe('Doc Table', function () {
     });
 
     it('should be able to add and remove columns', function (done) {
-      let childElems;
+      var childElems;
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
@@ -244,7 +244,7 @@ describe('Doc Table', function () {
       });
 
       describe('expanded', function () {
-        let $details;
+        var $details;
         beforeEach(function () {
           // Open the row
           $scope.toggleRow();
@@ -277,7 +277,7 @@ describe('Doc Table', function () {
         'index-pattern="indexPattern"' +
         '></tr>'
     );
-    let $details;
+    var $details;
 
     beforeEach(function () {
       var row = getFakeRow(0, mapping);
@@ -311,10 +311,10 @@ describe('Doc Table', function () {
   });
 
   describe('row diffing', function () {
-    let $row;
-    let $scope;
-    let $root;
-    let $before;
+    var $row;
+    var $scope;
+    var $root;
+    var $before;
 
     beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
       $root = $rootScope;

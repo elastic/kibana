@@ -28,7 +28,7 @@ define(function (require) {
     function find(rules, check, last) {
       function pick(buckets, duration) {
         var target = duration / buckets;
-        let lastResp;
+        var lastResp;
 
         for (var i = 0; i < rules.length; i++) {
           var rule = rules[i];

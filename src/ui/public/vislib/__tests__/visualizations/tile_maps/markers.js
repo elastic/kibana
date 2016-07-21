@@ -11,8 +11,8 @@ var geoJsonData = require('fixtures/vislib/mock_data/geohash/_geo_json');
 var defaultSWCoords = [13.496, -143.789];
 var defaultNECoords = [55.526, -57.919];
 var bounds = {};
-let MarkerType;
-let map;
+var MarkerType;
+var map;
 
 angular.module('MarkerFactory', ['kibana']);
 
@@ -35,8 +35,8 @@ var mockMap = {
 };
 
 describe('Marker Tests', function () {
-  let mapData;
-  let markerLayer;
+  var mapData;
+  var markerLayer;
 
   function createMarker(MarkerClass, geoJson) {
     mapData = _.assign({}, geoJsonData.geoJson, geoJson || {});
@@ -60,7 +60,7 @@ describe('Marker Tests', function () {
   });
 
   describe('Base Methods', function () {
-    let MarkerClass;
+    var MarkerClass;
 
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
@@ -139,7 +139,7 @@ describe('Marker Tests', function () {
 
     describe('showTooltip', function () {
       it('should use the tooltip formatter', function () {
-        let content;
+        var content;
         var sample = _.sample(mapData.features);
 
         var stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
@@ -154,8 +154,8 @@ describe('Marker Tests', function () {
     });
 
     describe('addLegend', function () {
-      let addToSpy;
-      let leafletControlStub;
+      var addToSpy;
+      var leafletControlStub;
 
       beforeEach(function () {
         addToSpy = sinon.spy();
@@ -214,7 +214,7 @@ describe('Marker Tests', function () {
   });
 
   describe('Scaled Circles', function () {
-    let zoom;
+    var zoom;
 
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
@@ -270,7 +270,7 @@ describe('Marker Tests', function () {
     }));
 
     describe('dataToHeatArray', function () {
-      let max;
+      var max;
 
       beforeEach(function () {
         max = mapData.properties.allmax;

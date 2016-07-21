@@ -75,7 +75,7 @@ define(function (require) {
 
       var from = pathGetter.partial(prop).value();
       var to = inflect(prop);
-      let cache;
+      var cache;
 
       Object.defineProperty(self, to, {
         enumerable: false,

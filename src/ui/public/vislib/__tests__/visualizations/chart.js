@@ -4,16 +4,16 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 
 describe('Vislib _chart Test Suite', function () {
-  let ColumnChart;
-  let Chart;
-  let Data;
-  let persistedState;
-  let Vis;
+  var ColumnChart;
+  var Chart;
+  var Data;
+  var persistedState;
+  var Vis;
   var chartData = {};
-  let vis;
-  let el;
-  let myChart;
-  let config;
+  var vis;
+  var el;
+  var myChart;
+  var config;
   var data = {
     hits      : 621,
     label     : '',

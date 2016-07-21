@@ -4,7 +4,7 @@ var expect = require('expect.js');
 describe('buildHierarchicalData()', function () {
   describe('arrayToLinkedList', function () {
 
-    let results;
+    var results;
     beforeEach(function () {
       results = arrayToLinkedList([
         { id: 1 },

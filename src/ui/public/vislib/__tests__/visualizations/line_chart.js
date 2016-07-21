@@ -28,8 +28,8 @@ describe('Vislib Line Chart', function () {
     var data = type[1];
 
     describe(name + ' Data', function () {
-      let vis;
-      let persistedState;
+      var vis;
+      var persistedState;
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
@@ -52,12 +52,12 @@ describe('Vislib Line Chart', function () {
       });
 
       describe('addCircleEvents method', function () {
-        let circle;
-        let brush;
-        let d3selectedCircle;
-        let onBrush;
-        let onClick;
-        let onMouseOver;
+        var circle;
+        var brush;
+        var d3selectedCircle;
+        var onBrush;
+        var onClick;
+        var onMouseOver;
 
         beforeEach(ngMock.inject(function () {
           vis.handler.charts.forEach(function (chart) {

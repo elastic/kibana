@@ -3,10 +3,10 @@ var sinon = require('auto-release-sinon');
 var MockState = require('fixtures/mock_state');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
-let $rootScope;
-let queryFilter;
-let filterManager;
-let appState;
+var $rootScope;
+var queryFilter;
+var filterManager;
+var appState;
 
 function checkAddFilters(length, comps, idx) {
   idx = idx || 0;

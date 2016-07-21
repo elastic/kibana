@@ -46,10 +46,10 @@ define(function (require) {
         };
 
         // when we compile the details, we use this $scope
-        let $detailsScope;
+        var $detailsScope;
 
         // when we compile the toggle button in the summary, we use this $scope
-        let $toggleScope;
+        var $toggleScope;
 
         // toggle display of the rows details, a full list of the fields from each row
         $scope.toggleRow = function () {

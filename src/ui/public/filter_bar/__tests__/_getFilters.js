@@ -7,10 +7,10 @@ describe('get filters', function () {
     app: 'appState',
     global: 'globalState'
   };
-  let queryFilter;
-  let $rootScope;
-  let appState;
-  let globalState;
+  var queryFilter;
+  var $rootScope;
+  var appState;
+  var globalState;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -34,7 +34,7 @@ describe('get filters', function () {
   }));
 
   describe('getFilters method', function () {
-    let filters;
+    var filters;
 
     beforeEach(function () {
       filters = [
@@ -109,7 +109,7 @@ describe('get filters', function () {
   });
 
   describe('filter reconciliation', function () {
-    let filters;
+    var filters;
 
     beforeEach(function () {
       filters = [

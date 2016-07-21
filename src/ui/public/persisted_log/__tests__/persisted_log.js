@@ -3,9 +3,9 @@ var sinon = require('sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-let storage;
-let config;
-let PersistedLog;
+var storage;
+var config;
+var PersistedLog;
 
 var historyName = 'testHistory';
 var historyLimit = 10;

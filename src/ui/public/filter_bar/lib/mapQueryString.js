@@ -1,8 +1,8 @@
 define(function (require) {
   return function mapQueryStringProvider(Promise) {
     return function (filter) {
-      let key;
-      let value;
+      var key;
+      var value;
       if (filter.query && filter.query.query_string) {
         key = 'query';
         value = filter.query.query_string.query;

@@ -6,7 +6,7 @@ describe('Index Patterns', function () {
     var expect = require('expect.js');
     var ngMock = require('ngMock');
 
-    let intervals;
+    var intervals;
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       intervals = Private(require('ui/index_patterns/_intervals'));

@@ -3,8 +3,8 @@ var fn = require('ui/filter_manager/lib/phrase');
 var expect = require('expect.js');
 var _ = require('lodash');
 var ngMock = require('ngMock');
-let indexPattern;
-let expected;
+var indexPattern;
+var expected;
 describe('Filter Manager', function () {
   describe('Phrase filter builder', function () {
     beforeEach(ngMock.module('kibana'));

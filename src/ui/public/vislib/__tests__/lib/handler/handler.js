@@ -24,9 +24,9 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
-    let Handler;
-    let vis;
-    let persistedState;
+    var Handler;
+    var vis;
+    var persistedState;
     var events = [
       'click',
       'brush'
@@ -55,7 +55,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('enable Method', function () {
-      let charts;
+      var charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;
@@ -77,7 +77,7 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('disable Method', function () {
-      let charts;
+      var charts;
 
       beforeEach(function () {
         charts = vis.handler.charts;

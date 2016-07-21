@@ -23,7 +23,7 @@ define(function (require) {
         });
 
         function stringify() {
-          let text;
+          var text;
           // If both parts are date math, try to look up a reasonable string
           if ($scope.from && $scope.to && !moment.isMoment($scope.from) && !moment.isMoment($scope.to)) {
             var tryLookup = lookupByRange[$scope.from.toString() + ' to ' + $scope.to.toString()];

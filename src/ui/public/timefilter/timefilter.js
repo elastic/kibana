@@ -77,7 +77,7 @@ define(function (require) {
     }
 
     Timefilter.prototype.get = function (indexPattern) {
-      let filter;
+      var filter;
       var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
 
       if (timefield) {

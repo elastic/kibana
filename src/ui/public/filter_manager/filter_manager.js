@@ -15,7 +15,7 @@ define(function (require) {
 
       // TODO: On array fields, negating does not negate the combination, rather all terms
       _.each(values, function (value) {
-        let filter;
+        var filter;
         var existing = _.find(filters, function (filter) {
           if (!filter) return;
 

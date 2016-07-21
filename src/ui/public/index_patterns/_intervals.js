@@ -36,7 +36,7 @@ define(function (require) {
     });
 
     intervals.toIndexList = function (format, interval, a, b, sortDirection) {
-      let bounds;
+      var bounds;
 
       // setup the range that the list will span, return two moment objects that
       // are in proper order. a and b can be numbers to specify to go before or after now (respectively)

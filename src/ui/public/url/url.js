@@ -140,7 +140,7 @@ define(function (require) {
     /////
     // private api
     /////
-    let reloading;
+    var reloading;
 
     self._changeLocation = function (type, url, paramObj, replace) {
       var prev = {

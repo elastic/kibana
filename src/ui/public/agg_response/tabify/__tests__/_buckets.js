@@ -1,5 +1,5 @@
 describe('Buckets wrapper', function () {
-  let Buckets;
+  var Buckets;
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 

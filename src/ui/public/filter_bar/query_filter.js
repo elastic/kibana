@@ -72,8 +72,8 @@ define(function (require) {
     queryFilter.removeFilter = function (matchFilter) {
       var appState = getAppState();
       var filter = _.omit(matchFilter, ['$$hashKey']);
-      let state;
-      let index;
+      var state;
+      var index;
 
       // check for filter in appState
       if (appState) {
@@ -288,7 +288,7 @@ define(function (require) {
      * @returns {void}
      */
     function initWatchers() {
-      let removeAppStateWatchers;
+      var removeAppStateWatchers;
 
       $rootScope.$watch(getAppState, function () {
         removeAppStateWatchers && removeAppStateWatchers();

@@ -20,7 +20,7 @@ define(function () {
             return 'chart-wrapper';
           }
         });
-        let divClass;
+        var divClass;
 
         var charts = div.selectAll('charts')
         .append('div')

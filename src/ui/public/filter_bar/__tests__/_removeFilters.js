@@ -8,11 +8,11 @@ describe('remove filters', function () {
     app: 'appState',
     global: 'globalState'
   };
-  let filters;
-  let queryFilter;
-  let $rootScope;
-  let appState;
-  let globalState;
+  var filters;
+  var queryFilter;
+  var $rootScope;
+  var appState;
+  var globalState;
 
   beforeEach(ngMock.module(
     'kibana',

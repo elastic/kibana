@@ -7,12 +7,12 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 
 describe('paginated table', function () {
-  let $el;
-  let $rootScope;
-  let $compile;
-  let $scope;
-  let $elScope;
-  let $orderBy;
+  var $el;
+  var $rootScope;
+  var $compile;
+  var $scope;
+  var $elScope;
+  var $orderBy;
   var defaultPerPage = 10;
 
   var makeData = function (colCount, rowCount) {
@@ -109,9 +109,9 @@ describe('paginated table', function () {
   });
 
   describe('sorting', function () {
-    let data;
-    let lastRowIndex;
-    let paginatedTable;
+    var data;
+    var lastRowIndex;
+    var paginatedTable;
 
     beforeEach(function () {
       data = makeData(3, [
@@ -210,8 +210,8 @@ describe('paginated table', function () {
   });
 
   describe('sorting duplicate columns', function () {
-    let data;
-    let paginatedTable;
+    var data;
+    var paginatedTable;
     var colText = 'test row';
 
     beforeEach(function () {
@@ -290,9 +290,9 @@ describe('paginated table', function () {
   });
 
   describe('custom sorting', function () {
-    let data;
-    let paginatedTable;
-    let sortHandler;
+    var data;
+    var paginatedTable;
+    var sortHandler;
 
     beforeEach(function () {
       sortHandler = sinon.spy();
@@ -320,9 +320,9 @@ describe('paginated table', function () {
   });
 
   describe('object rows', function () {
-    let cols;
-    let rows;
-    let paginatedTable;
+    var cols;
+    var rows;
+    var paginatedTable;
 
     beforeEach(function () {
       cols = [{

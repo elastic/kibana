@@ -19,7 +19,7 @@ define(function (require) {
       var flattenedData = flattenDataArray(obj);
       var uniqueXValues = new Map();
 
-      let charts;
+      var charts;
       if (!obj.series) {
         charts = obj.rows ? obj.rows : obj.columns;
       } else {

@@ -2,11 +2,11 @@ describe('Date Format', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
   var moment = require('moment-timezone');
-  let fieldFormats;
-  let settings;
-  let convert;
-  let $scope;
-  let off;
+  var fieldFormats;
+  var settings;
+  var convert;
+  var $scope;
+  var off;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, config, $rootScope) {

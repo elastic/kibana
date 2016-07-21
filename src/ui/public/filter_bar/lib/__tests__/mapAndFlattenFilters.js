@@ -4,8 +4,8 @@ describe('Filter Bar Directive', function () {
     var expect = require('expect.js');
     var ngMock = require('ngMock');
     var sinon = require('auto-release-sinon');
-    let mapAndFlattenFilters;
-    let $rootScope;
+    var mapAndFlattenFilters;
+    var $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',

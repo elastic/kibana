@@ -5,8 +5,8 @@ describe('Notifier', function () {
   var Notifier = require('ui/notify/notifier');
 
   var message = 'Oh, the humanity!';
-  let notifier;
-  let params;
+  var notifier;
+  var params;
   var version = window.__KBN__.version;
   var buildNum = window.__KBN__.buildNum;
 

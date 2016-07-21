@@ -9,12 +9,12 @@ require('plugins/kibana/discover/index');
 
 var typeaheadHistoryCount = 10;
 var typeaheadName = 'unittest';
-let $parentScope;
-let $typeaheadScope;
-let $elem;
-let $typeaheadInputScope;
-let typeaheadCtrl;
-let PersistedLog;
+var $parentScope;
+var $typeaheadScope;
+var $elem;
+var $typeaheadInputScope;
+var typeaheadCtrl;
+var PersistedLog;
 
 var markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
   '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +

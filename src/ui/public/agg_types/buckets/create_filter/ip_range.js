@@ -3,7 +3,7 @@ define(function (require) {
   var buildRangeFilter = require('ui/filter_manager/lib/range');
   return function createIpRangeFilterProvider() {
     return function (aggConfig, key) {
-      let range;
+      var range;
       if (aggConfig.params.ipRangeType === 'mask') {
         range = new CidrMask(key).getRange();
       } else {

@@ -74,7 +74,7 @@ define(function (require) {
         return Promise.reject(new TypeError('fn must be a function'));
       }
 
-      let value;
+      var value;
 
       if (_.isArray(args)) {
         try { value = fn.apply(ctx, args); }

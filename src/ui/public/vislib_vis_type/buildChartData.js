@@ -43,7 +43,7 @@ define(function (require) {
 
       if (!tables.length) return;
       var out = {};
-      let outList;
+      var outList;
 
       tables.forEach(function (table) {
         if (!outList) {
@@ -52,7 +52,7 @@ define(function (require) {
           outList = out[direction] = [];
         }
 
-        let output;
+        var output;
         if (output = convertTableGroup(vis, table)) {
           outList.push(output);
         }

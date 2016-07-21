@@ -3,7 +3,7 @@ describe('Table class', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let Table;
+  var Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

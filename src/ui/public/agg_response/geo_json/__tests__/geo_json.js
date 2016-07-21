@@ -4,11 +4,11 @@ var expect = require('expect.js');
 var ngMock = require('ngMock');
 
 describe('GeoJson Agg Response Converter', function () {
-  let vis;
-  let tabify;
-  let convert;
-  let esResponse;
-  let aggs;
+  var vis;
+  var tabify;
+  var convert;
+  var esResponse;
+  var aggs;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -103,10 +103,10 @@ describe('GeoJson Agg Response Converter', function () {
         describe('includes one feature per row in the table', function () {
           this.timeout(60000);
 
-          let table;
-          let chart;
-          let geoColI;
-          let metricColI;
+          var table;
+          var chart;
+          var geoColI;
+          var metricColI;
 
           before(function () {
             table = makeTable();

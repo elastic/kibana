@@ -236,12 +236,12 @@ define(function (require) {
      */
     XAxis.prototype.draw = function () {
       var self = this;
-      let div;
-      let width;
-      let height;
-      let svg;
-      let parentWidth;
-      let n;
+      var div;
+      var width;
+      var height;
+      var svg;
+      var parentWidth;
+      var n;
       this._attr.isRotated = false;
 
       return function (selection) {
@@ -285,8 +285,8 @@ define(function (require) {
     XAxis.prototype.filterOrRotate = function () {
       var self = this;
       var ordered = self.ordered;
-      let axis;
-      let labels;
+      var axis;
+      var labels;
 
       return function (selection) {
         selection.each(function () {
@@ -313,13 +313,13 @@ define(function (require) {
      */
     XAxis.prototype.rotateAxisLabels = function () {
       var self = this;
-      let text;
+      var text;
       var barWidth = self.xScale.rangeBand();
       var maxRotatedLength = 180;
       var xAxisPadding = 15;
-      let svg;
+      var svg;
       var lengths = [];
-      let length;
+      var length;
       self._attr.isRotated = false;
 
       return function (selection) {
@@ -398,11 +398,11 @@ define(function (require) {
     XAxis.prototype.filterAxisLabels = function () {
       var self = this;
       var startX = 0;
-      let maxW;
-      let par;
-      let myX;
-      let myWidth;
-      let halfWidth;
+      var maxW;
+      var par;
+      var myX;
+      var myWidth;
+      var halfWidth;
       var padding = 1.1;
 
       return function (selection) {
@@ -436,10 +436,10 @@ define(function (require) {
      */
     XAxis.prototype.fitTitles = function () {
       var visEls = $('.vis-wrapper');
-      let xAxisChartTitle;
-      let yAxisChartTitle;
-      let text;
-      let titles;
+      var xAxisChartTitle;
+      var yAxisChartTitle;
+      var text;
+      var titles;
 
       return function () {
 

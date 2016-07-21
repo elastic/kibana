@@ -4,13 +4,13 @@ describe('params', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let paramWriter;
-  let writeInterval;
+  var paramWriter;
+  var writeInterval;
 
-  let aggTypes;
-  let AggConfig;
-  let setTimeBounds;
-  let timeField;
+  var aggTypes;
+  var AggConfig;
+  var setTimeBounds;
+  var timeField;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {

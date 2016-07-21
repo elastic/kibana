@@ -20,9 +20,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
   }
 
   describe('', function () {
-    let vis;
-    let persistedState;
-    let SimpleEmitter;
+    var vis;
+    var persistedState;
+    var SimpleEmitter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -46,8 +46,8 @@ describe('Vislib Dispatch Class Test Suite', function () {
   });
 
   describe('Stock event handlers', function () {
-    let vis;
-    let persistedState;
+    var vis;
+    var persistedState;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
@@ -117,9 +117,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
   describe('Custom event handlers', function () {
     it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
-      let vis;
-      let persistedState;
-      let chart;
+      var vis;
+      var persistedState;
+      var chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(require('fixtures/vislib/_vis_fixture'))();
@@ -137,9 +137,9 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     it('can be added after rendering', function () {
-      let vis;
-      let persistedState;
-      let chart;
+      var vis;
+      var persistedState;
+      var chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(require('fixtures/vislib/_vis_fixture'))();

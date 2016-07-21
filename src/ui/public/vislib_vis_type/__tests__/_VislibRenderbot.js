@@ -4,12 +4,12 @@ describe('renderbot', function exportWrapper() {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
   var sinon = require('auto-release-sinon');
-  let vislib;
-  let Vis;
-  let Renderbot;
-  let VislibRenderbot;
-  let persistedState;
-  let normalizeChartData;
+  var vislib;
+  var Vis;
+  var Renderbot;
+  var VislibRenderbot;
+  var persistedState;
+  var normalizeChartData;
   var mockVisType = {
     name: 'test'
   };
@@ -32,8 +32,8 @@ describe('renderbot', function exportWrapper() {
   describe('creation', function () {
     var vis = { type: mockVisType };
     var $el = 'element';
-    let createVisStub;
-    let renderbot;
+    var createVisStub;
+    var renderbot;
 
     beforeEach(function () {
       createVisStub = sinon.stub(VislibRenderbot.prototype, '_createVis', _.noop);
@@ -59,8 +59,8 @@ describe('renderbot', function exportWrapper() {
       }
     };
     var $el = $('<div>testing</div>');
-    let listenerSpy;
-    let renderbot;
+    var listenerSpy;
+    var renderbot;
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
@@ -85,9 +85,9 @@ describe('renderbot', function exportWrapper() {
       }, mockVisType)
     };
     var $el = $('<div>testing</div>');
-    let createVisSpy;
-    let getParamsStub;
-    let renderbot;
+    var createVisSpy;
+    var getParamsStub;
+    var renderbot;
 
     beforeEach(function () {
       createVisSpy = sinon.spy(VislibRenderbot.prototype, '_createVis');
@@ -145,8 +145,8 @@ describe('renderbot', function exportWrapper() {
       }
     };
     var $el = $('<div>testing</div>');
-    let listenerSpy;
-    let renderbot;
+    var listenerSpy;
+    var renderbot;
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));

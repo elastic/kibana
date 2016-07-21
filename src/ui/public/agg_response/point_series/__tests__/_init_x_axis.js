@@ -3,7 +3,7 @@ describe('initXAxis', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  let initXAxis;
+  var initXAxis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

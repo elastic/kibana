@@ -5,13 +5,13 @@ var ngMock = require('ngMock');
 describe('Query decorator', function () {
 
   var _ = require('lodash');
-  let config;
+  var config;
 
-  let indexPattern;
+  var indexPattern;
 
-  let getComputedFields;
+  var getComputedFields;
 
-  let fn;
+  var fn;
   beforeEach(ngMock.module(
     'kibana',
     function ($provide) {

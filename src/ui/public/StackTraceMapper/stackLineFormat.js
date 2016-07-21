@@ -5,7 +5,7 @@ var opts = [
   /(?: \(|at )((?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+\.js)\:(\d+)(?:\:(\d+)|())/ig
 ];
 
-let sample;
+var sample;
 try { throw new Error('msg'); } catch (e) { sample = e.stack; }
 
 var format = _.find(opts, function (format) {

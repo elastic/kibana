@@ -4,11 +4,11 @@ var ngMock = require('ngMock');
 
 module.exports = describe('String', function () {
   var paramName = 'json_test';
-  let BaseAggParam;
-  let StringAggParam;
-  let aggParam;
-  let aggConfig;
-  let output;
+  var BaseAggParam;
+  var StringAggParam;
+  var aggParam;
+  var aggConfig;
+  var output;
 
   function initAggParam(config) {
     config = config || {};

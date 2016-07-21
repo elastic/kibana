@@ -8,7 +8,7 @@ define(function (require) {
      */
 
     return function (obj) {
-      let charts;
+      var charts;
 
       if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
         throw new TypeError('FlattenDataObjUtilService expects an object with a series, rows, or columns key');

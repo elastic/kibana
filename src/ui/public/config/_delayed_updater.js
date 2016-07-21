@@ -10,7 +10,7 @@ define(function (require) {
       var updater = this;
       var queue = [];
       var log = {};
-      let timer;
+      var timer;
 
       updater.fire = function () {
         clearTimeout(timer);
@@ -19,8 +19,8 @@ define(function (require) {
         if (updater.fired) return;
         updater.fired = true;
 
-        let method;
-        let body;
+        var method;
+        var body;
         var updated = [];
         var deleted = [];
 

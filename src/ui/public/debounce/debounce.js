@@ -7,10 +7,10 @@ define(function (require) {
 
   module.service('debounce', ['$timeout', function ($timeout) {
     return function (func, wait, options) {
-      let timeout;
-      let args;
-      let self;
-      let result;
+      var timeout;
+      var args;
+      var self;
+      var result;
       options = _.defaults(options || {}, {
         leading: false,
         trailing: true

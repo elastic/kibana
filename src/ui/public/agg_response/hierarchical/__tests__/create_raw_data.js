@@ -6,14 +6,14 @@ var arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_l
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-let AggConfigs;
-let Vis;
-let indexPattern;
+var AggConfigs;
+var Vis;
+var indexPattern;
 
 describe('buildHierarchicalData()', function () {
   describe('createRawData()', function () {
-    let vis;
-    let results;
+    var vis;
+    var results;
 
     beforeEach(ngMock.module('kibana'));
 

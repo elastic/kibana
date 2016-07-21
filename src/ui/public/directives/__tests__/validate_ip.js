@@ -5,8 +5,8 @@ var ngMock = require('ngMock');
 require('ui/directives/validate_ip');
 
 describe('Validate IP directive', function () {
-  let $compile;
-  let $rootScope;
+  var $compile;
+  var $rootScope;
   var html = '<input type="text" ng-model="value" validate-ip />';
 
   beforeEach(ngMock.module('kibana'));

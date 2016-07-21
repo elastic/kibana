@@ -36,7 +36,7 @@ define(function (require) {
         var currentFilter = $scope.filter;
 
         // the most recently entered search/filter
-        let prevSearch;
+        var prevSearch;
 
         // the list of hits, used to render display
         self.hits = [];
