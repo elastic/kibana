@@ -57,7 +57,7 @@ export default function FieldAggParamFactory(Private) {
 
     if (field.scripted) {
       output.params.script = {
-        script: field.script,
+        inline: field.script,
         lang: field.lang,
       };
     } else {

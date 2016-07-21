@@ -24,7 +24,7 @@ describe('Filter Bar Directive', function () {
     it('should return the key and value for matching filters', function (done) {
       let filter = {
         meta: { index: 'logstash-*', field: 'script number' },
-        script: { script: 'doc["script number"].value * 5', params: { value: 35}}
+        script: {script: { inline: 'doc["script number"].value * 5', params: { value: 35}}}
       };
       mapScript(filter).then(function (result) {
         expect(result).to.have.property('key', 'script number');
@@ -51,10 +51,12 @@ describe('Filter Bar Directive', function () {
           field: 'script number'
         },
         script: {
-          params: {
-            gte: 1000,
-            lt: 2000,
-            value: '>=1,000.00 <2,000.00'
+          script: {
+            params: {
+              gte: 1000,
+              lt: 2000,
+              value: '>=1,000.00 <2,000.00'
+            }
           }
         }
       };
