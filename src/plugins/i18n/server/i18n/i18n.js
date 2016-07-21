@@ -1,24 +1,18 @@
 import fs from 'fs';
 import kibanaPackage from '../../../../utils/package_json';
 import mkdirp from 'mkdirp';
-import os from 'os';
 import path from 'path';
-import process from 'child_process';
 import Promise from 'bluebird';
 
-const join = Promise.join;
 const readdir = Promise.promisify(fs.readdir);
 const readFile = Promise.promisify(fs.readFile);
 const stat = Promise.promisify(fs.stat);
 const writeFile = Promise.promisify(fs.writeFile);
 const mkdirpAsync = Promise.promisify(mkdirp);
 
+const PATH_SEPARATOR = path.sep;
 const TRANSLATION_FILE_EXTENSION = 'json';
-const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + '/fixtures/translations';
-
-const getPluginTranslationDetails = function (pluginTranslationPath, translationFiles, languageList) {
-  return getFilesRecursivelyFromTopDir(pluginTranslationPath, translationFiles, languageList);
-};
+const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + PATH_SEPARATOR + 'fixtures' + PATH_SEPARATOR + 'translations';
 
 //TODO(hickeyma): Update to use https://github.com/elastic/kibana/pull/7562
 const getTranslationStoragePath = function () {
@@ -35,29 +29,18 @@ const getRegisteredTranslationLanguages = function () {
   });
 };
 
-const registerTranslations = function (pluginTranslationPath) {
-  let translationFiles = [];
-  let languageList = [];
+const registerTranslations = function (absolutePluginTranslationFilePath) {
   const translationStorePath = getTranslationStoragePath();
 
-  return join(createTranslationDirectory(translationStorePath),
-    getPluginTranslationDetails(pluginTranslationPath, translationFiles, languageList),
-    function () {
-      return Promise.map(translationFiles, (translationFile) => {
-        const translationFileName = getFileName(translationFile);
-        const translationJson = require(translationFile);
-        const fileToWrite = translationStorePath + '/' + translationFileName;
-        return getTranslationJsonToWrite(fileToWrite, translationJson).then((jsonToWrite) => {
-          return writeFile(fileToWrite, JSON.stringify(jsonToWrite));
-        });
-      });
-    });
+  return createTranslationDirectory(translationStorePath).then(() => {
+    return storeTranslations(absolutePluginTranslationFilePath, translationStorePath);
+  });
 };
 
 const getRegisteredLanguageTranslations = function (language) {
   const translationStorePath = getTranslationStoragePath();
   const translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
-  const translationFile = translationStorePath + '/' + translationFileName;
+  const translationFile = translationStorePath + PATH_SEPARATOR + translationFileName;
 
   return readFile(translationFile, 'utf8').then(function (translationStr) {
     let translationJson = [];
@@ -72,9 +55,12 @@ const getRegisteredLanguageTranslations = function (language) {
   });
 };
 
-function saveTranslationToFile(translationFullFileName, translationToAddJson) {
-  return getTranslationJsonToWrite(translationFullFileName).then(function (jsonToWrite) {
-    return writeFile(translationFullFileName, JSON.stringify(jsonToWrite));
+function storeTranslations(absolutePluginTranslationFilePath, translationStorePath) {
+  const translationFileName = getFileName(absolutePluginTranslationFilePath);
+  const translationJson = require(absolutePluginTranslationFilePath);
+  const fileToWrite = translationStorePath + PATH_SEPARATOR + translationFileName;
+  return getTranslationJsonToWrite(fileToWrite, translationJson).then((jsonToWrite) => {
+    return writeFile(fileToWrite, JSON.stringify(jsonToWrite));
   });
 }
 
@@ -100,21 +86,6 @@ function createTranslationDirectory(translationStorePath) {
   return stat(translationStorePath).then((stats) => {
   }).catch(function (e) {
     return mkdirpAsync(translationStorePath);
-  });
-}
-
-function getFilesRecursivelyFromTopDir(topDir, translationFiles, languageList) {
-  return readdir(topDir).then((topDirectoryListing) => {
-    return Promise.map(topDirectoryListing, (listing) => {
-      const fullPath = path.join(topDir, listing);
-      return stat(fullPath).then((stats) => {
-        if (stats.isDirectory()) {
-          getTranslationDetailsFromDirectory(fullPath, translationFiles, languageList);
-        } else {
-          getTranslationDetailsFromFile(fullPath, translationFiles, languageList);
-        }
-      });
-    });
   });
 }
 
@@ -152,4 +123,3 @@ module.exports.registerTranslations = registerTranslations;
 module.exports.getRegisteredLanguageTranslations = getRegisteredLanguageTranslations;
 module.exports.getTranslationStoragePath = getTranslationStoragePath;
 module.exports.getRegisteredTranslationLanguages = getRegisteredTranslationLanguages;
-module.exports.getPluginTranslationDetails = getPluginTranslationDetails;

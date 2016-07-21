@@ -6,8 +6,8 @@ import { i18n } from './i18n';
 API:
 
 Register translations:
-  registerTranslations(<path_to_where_translations_are>)
-  The path specified and its sub-directories will be traversed and all translations files will be bundled into one translation file per language and stored in the Kibana data directory. Returns a Promise object.
+  registerTranslations(<absolute_path_to_translation_file>)
+  The translation file will be bundled into one translation file per language and stored in the Kibana data directory. Returns a Promise object.
 
 Fetch the list of currently supported languages:
   Promise getRegisteredTranslationLanguages()
@@ -18,8 +18,8 @@ Fetch a specific language translated content bundle:
   Returns a Promise object which will contain on resolve a JSON object of all registered translations for the language code specified
 */
 
-let registerTranslations = function (pluginTranslationPath) {
-  return i18n.registerTranslations(pluginTranslationPath);
+let registerTranslations = function (absolutePluginTranslationFilePath) {
+  return i18n.registerTranslations(absolutePluginTranslationFilePath);
 };
 
 let getRegisteredLanguageTranslations = function (language) {
