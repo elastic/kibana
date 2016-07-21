@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   require('ui/filters/uriescape');
   require('ui/filters/rison');
@@ -8,7 +8,7 @@ define(function (require) {
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
   function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {
-    let self = this;
+    var self = this;
 
     /**
      * Navigate to a url
@@ -70,10 +70,10 @@ define(function (require) {
 
       return template.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
         // remove filters
-        let key = expr.split('|')[0].trim();
+        var key = expr.split('|')[0].trim();
 
         // verify that the expression can be evaluated
-        let p = $parse(key)(paramObj);
+        var p = $parse(key)(paramObj);
 
         // if evaluation can't be made, throw
         if (_.isUndefined(p)) {
@@ -109,7 +109,7 @@ define(function (require) {
      * @return {string} - the computed url
      */
     self.getRouteUrl = function (obj, route) {
-      let template = obj && obj.routes && obj.routes[route];
+      var template = obj && obj.routes && obj.routes[route];
       if (template) return self.eval(template, obj);
     };
 
@@ -143,7 +143,7 @@ define(function (require) {
     let reloading;
 
     self._changeLocation = function (type, url, paramObj, replace) {
-      let prev = {
+      var prev = {
         path: $location.path(),
         search: $location.search()
       };
@@ -152,13 +152,13 @@ define(function (require) {
       $location[type](url);
       if (replace) $location.replace();
 
-      let next = {
+      var next = {
         path: $location.path(),
         search: $location.search()
       };
 
       if (self._shouldAutoReload(next, prev)) {
-        let appState = getAppState();
+        var appState = getAppState();
         if (appState) appState.destroy();
 
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
@@ -174,13 +174,13 @@ define(function (require) {
     self._shouldAutoReload = function (next, prev) {
       if (reloading) return false;
 
-      let route = $route.current && $route.current.$$route;
+      var route = $route.current && $route.current.$$route;
       if (!route) return false;
 
       if (next.path !== prev.path) return false;
 
-      let reloadOnSearch = route.reloadOnSearch;
-      let searchSame = _.isEqual(next.search, prev.search);
+      var reloadOnSearch = route.reloadOnSearch;
+      var searchSame = _.isEqual(next.search, prev.search);
 
       return (reloadOnSearch && searchSame) || !reloadOnSearch;
     };

@@ -1,8 +1,8 @@
 module.exports = function VislibRenderbotFactory(Private) {
-  let _ = require('lodash');
-  let vislib = Private(require('ui/vislib'));
-  let Renderbot = Private(require('ui/Vis/Renderbot'));
-  let buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));
+  var _ = require('lodash');
+  var vislib = Private(require('ui/vislib'));
+  var Renderbot = Private(require('ui/Vis/Renderbot'));
+  var buildChartData = Private(require('ui/vislib_vis_type/buildChartData'));
 
   _.class(VislibRenderbot).inherits(Renderbot);
   function VislibRenderbot(vis, $el, uiState) {
@@ -11,7 +11,7 @@ module.exports = function VislibRenderbotFactory(Private) {
   }
 
   VislibRenderbot.prototype._createVis = function () {
-    let self = this;
+    var self = this;
 
     if (self.vislibVis) self.destroy();
 
@@ -26,7 +26,7 @@ module.exports = function VislibRenderbotFactory(Private) {
   };
 
   VislibRenderbot.prototype._getVislibParams = function () {
-    let self = this;
+    var self = this;
 
     return _.assign(
       {},
@@ -47,9 +47,9 @@ module.exports = function VislibRenderbotFactory(Private) {
   };
 
   VislibRenderbot.prototype.destroy = function () {
-    let self = this;
+    var self = this;
 
-    let vislibVis = self.vislibVis;
+    var vislibVis = self.vislibVis;
 
     _.forOwn(self.vis.listeners, function (listener, event) {
       vislibVis.off(event, listener);
@@ -59,10 +59,10 @@ module.exports = function VislibRenderbotFactory(Private) {
   };
 
   VislibRenderbot.prototype.updateParams = function () {
-    let self = this;
+    var self = this;
 
     // get full vislib params object
-    let newParams = self._getVislibParams();
+    var newParams = self._getVislibParams();
 
     // if there's been a change, replace the vis
     if (!_.isEqual(newParams, self.vislibParams)) self._createVis();

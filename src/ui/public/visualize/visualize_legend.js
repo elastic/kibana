@@ -1,23 +1,23 @@
 define(function (require) {
-  let _ = require('lodash');
-  let html = require('ui/visualize/visualize_legend.html');
+  var _ = require('lodash');
+  var html = require('ui/visualize/visualize_legend.html');
 
-  let $ = require('jquery');
-  let d3 = require('d3');
-  let findByParam = require('ui/utils/find_by_param');
+  var $ = require('jquery');
+  var d3 = require('d3');
+  var findByParam = require('ui/utils/find_by_param');
 
   require('ui/modules').get('kibana')
   .directive('visualizeLegend', function (Private, getAppState) {
-    let Data = Private(require('ui/vislib/lib/data'));
-    let colorPalette = Private(require('ui/vislib/components/color/color'));
-    let filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    var Data = Private(require('ui/vislib/lib/data'));
+    var colorPalette = Private(require('ui/vislib/components/color/color'));
+    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
 
     return {
       restrict: 'E',
       template: html,
       link: function ($scope, $elem) {
-        let $state = getAppState();
-        let clickHandler = filterBarClickHandler($state);
+        var $state = getAppState();
+        var clickHandler = filterBarClickHandler($state);
         $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
         $scope.$watch('renderbot.chartData', function (data) {
@@ -27,29 +27,29 @@ define(function (require) {
         });
 
         $scope.highlight = function (event) {
-          let el = event.currentTarget;
-          let handler = $scope.renderbot.vislibVis.handler;
+          var el = event.currentTarget;
+          var handler = $scope.renderbot.vislibVis.handler;
           if (!handler) return;
           handler.highlight.call(el, handler.el);
         };
 
         $scope.unhighlight = function (event) {
-          let el = event.currentTarget;
-          let handler = $scope.renderbot.vislibVis.handler;
+          var el = event.currentTarget;
+          var handler = $scope.renderbot.vislibVis.handler;
           if (!handler) return;
           handler.unHighlight.call(el, handler.el);
         };
 
         $scope.setColor = function (label, color) {
-          let colors = $scope.uiState.get('vis.colors') || {};
+          var colors = $scope.uiState.get('vis.colors') || {};
           colors[label] = color;
           $scope.uiState.set('vis.colors', colors);
           refresh();
         };
 
         $scope.toggleLegend = function () {
-          let bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
-          let bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
+          var bwcAddLegend = $scope.renderbot.vislibVis._attr.addLegend;
+          var bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
           $scope.open = !$scope.uiState.get('vis.legendOpen', bwcLegendStateDefault);
           $scope.uiState.set('vis.legendOpen', $scope.open);
         };
@@ -59,7 +59,7 @@ define(function (require) {
         };
 
         $scope.canFilter = function (legendData) {
-          let filters = clickHandler({point: legendData}, true) || [];
+          var filters = clickHandler({point: legendData}, true) || [];
           return filters.length;
         };
 
@@ -74,7 +74,7 @@ define(function (require) {
         ];
 
         function refresh() {
-          let vislibVis = $scope.renderbot.vislibVis;
+          var vislibVis = $scope.renderbot.vislibVis;
 
           if ($scope.uiState.get('vis.legendOpen') == null && vislibVis._attr.addLegend != null) {
             $scope.open = vislibVis._attr.addLegend;
@@ -87,13 +87,13 @@ define(function (require) {
         // Most of these functions were moved directly from the old Legend class. Not a fan of this.
         function getLabels(data, type) {
           if (!data) return [];
-          data = data.columns || data.rows || [data];
+          var data = data.columns || data.rows || [data];
           if (type === 'pie') return Data.prototype.pieNames(data);
           return getSeriesLabels(data);
         };
 
         function getSeriesLabels(data) {
-          let values = data.map(function (chart) {
+          var values = data.map(function (chart) {
             return chart.series;
           })
           .reduce(function (a, b) {

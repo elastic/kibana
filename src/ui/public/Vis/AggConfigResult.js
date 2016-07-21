@@ -1,5 +1,5 @@
 define(function () {
-  let i = 0;
+  var i = 0;
 
   function AggConfigResult(aggConfig, parent, value, key) {
     this.key = key;

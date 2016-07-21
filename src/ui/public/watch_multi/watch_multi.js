@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   require('ui/modules').get('kibana')
   .config(function ($provide) {
@@ -37,15 +37,15 @@ define(function (require) {
         if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
         if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
 
-        let $scope = this;
-        let vals = new Array(expressions.length);
-        let prev = new Array(expressions.length);
-        let fire = false;
-        let init = 0;
-        let neededInits = expressions.length;
+        var $scope = this;
+        var vals = new Array(expressions.length);
+        var prev = new Array(expressions.length);
+        var fire = false;
+        var init = 0;
+        var neededInits = expressions.length;
 
         // first, register all of the multi-watchers
-        let unwatchers = expressions.map(function (expr, i) {
+        var unwatchers = expressions.map(function (expr, i) {
           expr = normalizeExpression($scope, expr);
           if (!expr) return;
 
@@ -62,7 +62,7 @@ define(function (require) {
 
         // then, the watcher that checks to see if any of
         // the other watchers triggered this cycle
-        let flip = false;
+        var flip = false;
         unwatchers.push($scope.$watch(function () {
           if (init < neededInits) return init;
 
@@ -85,7 +85,7 @@ define(function (require) {
 
       function normalizeExpression($scope, expr) {
         if (!expr) return;
-        let norm = {
+        var norm = {
           fn: $scope.$watch,
           deep: false
         };

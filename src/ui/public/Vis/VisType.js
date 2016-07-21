@@ -1,6 +1,6 @@
 define(function (require) {
   return function VisTypeFactory(Private) {
-    let VisTypeSchemas = Private(require('ui/Vis/Schemas'));
+    var VisTypeSchemas = Private(require('ui/Vis/Schemas'));
 
     function VisType(opts) {
       opts = opts || {};
