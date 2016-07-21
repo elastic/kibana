@@ -1,7 +1,7 @@
 require('flot');
 require('flotTime');
 require('flotCrosshair');
-require('flotCanvas');
+//require('flotCanvas');
 require('flotSelection');
 require('flotSymbol');
 require('flotStack');

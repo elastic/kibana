@@ -1,4 +1,5 @@
 require('./flot');
+require('plugins/timelion/panels/timechart/timechart.less');
 var _ = require('lodash');
 var $ = require('jquery');
 var moment = require('moment-timezone');
@@ -21,6 +22,8 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
       // could just use angular's injection to provide a moment service?
       moment.tz.setDefault(config.get('dateFormat:tz'));
 
+      var render = $scope.seriesList.render || {};
+
       $scope.chart = $scope.seriesList.list;
       $scope.interval = $scope.interval;
       $scope.search = $scope.search || _.noop;
@@ -28,11 +31,11 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
       var legendValueNumbers;
       var debouncedSetLegendNumbers;
       var defaultOptions = {
-        canvas: true,
+        //canvas: false,
         xaxis: {
           mode: 'time',
           tickLength: 5,
-          timezone: 'browser'
+          timezone: 'browser',
         },
         selection: {
           mode: 'x',
@@ -44,6 +47,7 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
           lineWidth: 2
         },
         grid: {
+          color: render.grid === false ? 'transparent' : (render.grid || '#000'),
           borderWidth: 0,
           borderColor: null,
           margin: 10,

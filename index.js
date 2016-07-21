@@ -32,7 +32,7 @@ module.exports = function (kibana) {
       },
       hacks: [
         'plugins/timelion/lib/panel_registry',
-        'plugins/timelion/panels/timechart'
+        'plugins/timelion/panels/timechart/timechart'
       ],
       visTypes: [
         'plugins/timelion/vis'
@@ -46,10 +46,10 @@ module.exports = function (kibana) {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.time'),
           imports: 'flot'
         },
-        flotCanvas$: {
+        /*flotCanvas$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.canvas'),
           imports: 'flot'
-        },
+        },*/
         flotSymbol$: {
           path: path.resolve(__dirname, 'bower_components/flot/jquery.flot.symbol'),
           imports: 'flot'
