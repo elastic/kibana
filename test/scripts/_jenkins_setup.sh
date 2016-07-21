@@ -32,6 +32,9 @@ nvm install "$(cat .node-version)"
 ###*****###
 npm install
 
+# clean up some test fixtures that trip up jenkins
+find node_modules -path '**/isbinaryfile/tests/fixtures/*' -type f | xargs rm -rfv
+
 
 if [ -z "$(npm bin)" ]; then
   echo "npm does not know where it stores executables..... huh??"
