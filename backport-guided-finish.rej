@@ -1,0 +1,10 @@
+#!/bin/sh
+
+BRANCH="jasper/backport/7724/7790/4.3"
+WORKING_BRANCH="tmp/$BRANCH"
+
+git checkout $BRANCH
+git reset --hard $WORKING_BRANCH
+git branch -D $WORKING_BRANCH
+
+sh backport-wrangle-into-commit.rej
