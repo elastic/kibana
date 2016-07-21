@@ -1,6 +1,6 @@
-const _ = require('lodash');
+var _ = require('lodash');
 var { join } = require('path');
-const autoload = require('./autoload');
+var autoload = require('./autoload');
 
 class UiApp {
   constructor(uiExports, spec) {

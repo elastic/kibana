@@ -1,12 +1,12 @@
 let { includes, flow, escapeRegExp } = require('lodash');
 let { isString, isArray, isPlainObject, get } = require('lodash');
 let { keys } = require('lodash');
-const fromRoot = require('../utils/fromRoot');
+let fromRoot = require('../utils/fromRoot');
 
-const asRegExp = flow(
+let asRegExp = flow(
   escapeRegExp,
   function (path) {
-    const last = path.slice(-1);
+    let last = path.slice(-1);
     if (last === '/' || last === '\\') {
       // match a directory explicitly
       return path + '.*';
@@ -18,7 +18,7 @@ const asRegExp = flow(
   RegExp
 );
 
-const arr = v => [].concat(v || []);
+let arr = v => [].concat(v || []);
 
 module.exports = class UiBundlerEnv {
   constructor(workingDir) {
@@ -58,7 +58,7 @@ module.exports = class UiBundlerEnv {
   }
 
   consumePlugin(plugin) {
-    const tag = `${plugin.id}@${plugin.version}`;
+    let tag = `${plugin.id}@${plugin.version}`;
     if (includes(this.pluginInfo, tag)) return;
 
     if (plugin.publicDir) {
@@ -141,7 +141,7 @@ module.exports = class UiBundlerEnv {
 
     this.aliases[id] = path;
 
-    const loader = [];
+    let loader = [];
     if (imports) {
       loader.push(`imports?${imports}`);
     }
@@ -153,10 +153,10 @@ module.exports = class UiBundlerEnv {
   }
 
   claim(id, pluginId) {
-    const owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
+    let owner = pluginId ? `Plugin ${pluginId}` : 'Kibana Server';
 
     // TODO(spalger): we could do a lot more to detect colliding module defs
-    const existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
+    var existingOwner = this.aliasOwners[id] || this.aliasOwners[`${id}$`];
 
     if (existingOwner) {
       throw new TypeError(`${owner} attempted to override export "${id}" from ${existingOwner}`);

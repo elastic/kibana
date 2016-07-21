@@ -1,7 +1,7 @@
-const _ = require('lodash');
-const minimatch = require('minimatch');
+var _ = require('lodash');
+var minimatch = require('minimatch');
 
-const UiAppCollection = require('./UiAppCollection');
+var UiAppCollection = require('./UiAppCollection');
 
 class UiExports {
   constructor({ urlBasePath }) {
@@ -16,10 +16,10 @@ class UiExports {
   consumePlugin(plugin) {
     plugin.apps = new UiAppCollection(this);
 
-    const types = _.keys(plugin.uiExportsSpecs);
+    var types = _.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
-    const unkown = _.reject(types, this.exportConsumer, this);
+    var unkown = _.reject(types, this.exportConsumer, this);
     if (unkown.length) {
       throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
     }
@@ -40,7 +40,7 @@ class UiExports {
   exportConsumer(type) {
     for (let consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
-      const fn = consumer.exportConsumer(type);
+      let fn = consumer.exportConsumer(type);
       if (fn) return fn;
     }
 
@@ -49,7 +49,7 @@ class UiExports {
       case 'apps':
         return (plugin, specs) => {
           for (let spec of [].concat(specs || [])) {
-            const app = this.apps.new(_.defaults({}, spec, {
+            let app = this.apps.new(_.defaults({}, spec, {
               id: plugin.id,
               urlBasePath: this.urlBasePath
             }));
@@ -80,9 +80,9 @@ class UiExports {
   }
 
   find(patterns) {
-    const aliases = this.aliases;
-    const names = _.keys(aliases);
-    const matcher = _.partialRight(minimatch.filter, { matchBase: true });
+    var aliases = this.aliases;
+    var names = _.keys(aliases);
+    var matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)
     .map(function (pattern) {

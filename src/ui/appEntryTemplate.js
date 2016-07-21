@@ -1,10 +1,10 @@
 module.exports = function ({env, bundle}) {
 
-  const pluginSlug = env.pluginInfo.sort()
+  let pluginSlug = env.pluginInfo.sort()
   .map(p => ' *  - ' + p)
   .join('\n');
 
-  const requires = bundle.modules
+  let requires = bundle.modules
   .map(m => `require('${m}');`)
   .join('\n');
 

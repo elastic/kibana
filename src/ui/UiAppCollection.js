@@ -1,8 +1,8 @@
-const _ = require('lodash');
-const UiApp = require('./UiApp');
-const Collection = require('requirefrom')('src')('utils/Collection');
+let _ = require('lodash');
+let UiApp = require('./UiApp');
+let Collection = require('requirefrom')('src')('utils/Collection');
 
-const byIdCache = Symbol('byId');
+let byIdCache = Symbol('byId');
 
 module.exports = class UiAppCollection extends Collection {
 
@@ -25,7 +25,7 @@ module.exports = class UiAppCollection extends Collection {
       return this.hidden.new(spec);
     }
 
-    const app = new UiApp(this.uiExports, spec);
+    let app = new UiApp(this.uiExports, spec);
 
     if (_.includes(this.claimedIds, app.id)) {
       throw new Error('Unable to create two apps with the id ' + app.id + '.');

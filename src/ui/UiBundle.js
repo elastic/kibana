@@ -1,10 +1,10 @@
 
 let { join } = require('path');
 let { promisify } = require('bluebird');
-const read = promisify(require('fs').readFile);
-const write = promisify(require('fs').writeFile);
-const unlink = promisify(require('fs').unlink);
-const stat = promisify(require('fs').stat);
+let read = promisify(require('fs').readFile);
+let write = promisify(require('fs').writeFile);
+let unlink = promisify(require('fs').unlink);
+let stat = promisify(require('fs').stat);
 
 module.exports = class UiBundle {
   constructor(opts) {
@@ -15,7 +15,7 @@ module.exports = class UiBundle {
     this.template = opts.template;
     this.env = opts.env;
 
-    const pathBase = join(this.env.workingDir, this.id);
+    let pathBase = join(this.env.workingDir, this.id);
     this.entryPath = `${pathBase}.entry.js`;
     this.outputPath = `${pathBase}.bundle.js`;
 
@@ -30,7 +30,7 @@ module.exports = class UiBundle {
 
   async readEntryFile() {
     try {
-      const content = await read(this.entryPath);
+      let content = await read(this.entryPath);
       return content.toString('utf8');
     }
     catch (e) {

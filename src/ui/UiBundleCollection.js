@@ -2,14 +2,14 @@ let { pull, transform, pluck } = require('lodash');
 let { join } = require('path');
 let { resolve, promisify } = require('bluebird');
 let { makeRe } = require('minimatch');
-const rimraf = promisify(require('rimraf'));
-const mkdirp = promisify(require('mkdirp'));
-const unlink = promisify(require('fs').unlink);
-const readdir = promisify(require('fs').readdir);
-const readSync = require('fs').readFileSync;
+let rimraf = promisify(require('rimraf'));
+let mkdirp = promisify(require('mkdirp'));
+let unlink = promisify(require('fs').unlink);
+let readdir = promisify(require('fs').readdir);
+let readSync = require('fs').readFileSync;
 
-const UiBundle = require('./UiBundle');
-const appEntryTemplate = require('./appEntryTemplate');
+let UiBundle = require('./UiBundle');
+let appEntryTemplate = require('./appEntryTemplate');
 
 class UiBundleCollection {
   constructor(bundlerEnv, filter) {
@@ -48,9 +48,9 @@ class UiBundleCollection {
       case 1:
         return `bundle for ${this.each[0].id}`;
       default:
-        const ids = this.getIds();
-        const last = ids.pop();
-        const commas = ids.join(', ');
+        var ids = this.getIds();
+        var last = ids.pop();
+        var commas = ids.join(', ');
         return `bundles for ${commas} and ${last}`;
     }
   }
@@ -63,8 +63,8 @@ class UiBundleCollection {
     await this.ensureDir();
 
     for (let bundle of this.each) {
-      const existing = await bundle.readEntryFile();
-      const expected = bundle.renderContent();
+      let existing = await bundle.readEntryFile();
+      let expected = bundle.renderContent();
 
       if (existing !== expected) {
         await bundle.writeEntryFile();
@@ -74,10 +74,10 @@ class UiBundleCollection {
   }
 
   async getInvalidBundles() {
-    const invalids = new UiBundleCollection(this.env);
+    let invalids = new UiBundleCollection(this.env);
 
     for (let bundle of this.each) {
-      const exists = await bundle.checkForExistingOutput();
+      let exists = await bundle.checkForExistingOutput();
       if (!exists) {
         invalids.add(bundle);
       }
