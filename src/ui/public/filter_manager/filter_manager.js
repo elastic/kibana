@@ -28,7 +28,7 @@ export default function (Private) {
         }
 
         if (filter.script) {
-          return filter.meta.field === fieldName && filter.script.params.value === value;
+          return filter.meta.field === fieldName && filter.script.script.params.value === value;
         }
       });
 
@@ -57,10 +57,12 @@ export default function (Private) {
             filter = {
               meta: { negate: negate, index: index, field: fieldName },
               script: {
-                script: '(' + field.script + ') == value',
-                lang: field.lang,
-                params: {
-                  value: value
+                script: {
+                  inline: '(' + field.script + ') == value',
+                  lang: field.lang,
+                  params: {
+                    value: value
+                  }
                 }
               }
             };

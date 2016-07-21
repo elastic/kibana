@@ -58,7 +58,10 @@ describe('SearchSource#normalizeSortRequest', function () {
     sortState[fieldName] = direction;
     normalizedSort = {
       _script: {
-        script: indexField.script,
+        script: {
+          inline: indexField.script,
+          lang: indexField.lang
+        },
         type: indexField.type,
         order: direction
       }

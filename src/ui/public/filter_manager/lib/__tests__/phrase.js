@@ -32,13 +32,13 @@ describe('Filter Manager', function () {
 
     it('should return a script filter when passed a scripted field', function () {
       expected.meta.field = 'script number';
-      expected.script = {
-        script: '(' + indexPattern.fields.byName['script number'].script + ') == value',
+      _.set(expected, 'script.script', {
+        inline: '(' + indexPattern.fields.byName['script number'].script + ') == value',
         lang: 'expression',
         params: {
           value: 5,
         }
-      };
+      });
       expect(fn(indexPattern.fields.byName['script number'], 5, indexPattern)).to.eql(expected);
     });
   });
