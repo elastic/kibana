@@ -1,5 +1,5 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   return require('ui/registry/_registry')({
     name: 'fieldFormats',
@@ -7,7 +7,7 @@ define(function (require) {
     group: ['fieldType'],
 
     constructor: function (config, $rootScope) {
-      let self = this;
+      var self = this;
       let defaultMap;
 
       function init() {
@@ -56,7 +56,7 @@ define(function (require) {
        * @return {FieldFormat}
        */
       self.getInstance = _.memoize(function (formatId) {
-        let FieldFormat = self.byId[formatId];
+        var FieldFormat = self.byId[formatId];
         return new FieldFormat();
       });
 
@@ -67,8 +67,8 @@ define(function (require) {
        * @return {FieldFormat}
        */
       self.getDefaultInstance = _.memoize(function (fieldType) {
-        let conf = self.getDefaultConfig(fieldType);
-        let FieldFormat = self.byId[conf.id];
+        var conf = self.getDefaultConfig(fieldType);
+        var FieldFormat = self.byId[conf.id];
         return new FieldFormat(conf.params);
       });
 

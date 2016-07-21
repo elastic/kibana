@@ -1,6 +1,6 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
-let err = new Error();
+var err = new Error();
 try { setByAssignment(err, 'john'); } catch (e) {} // eslint-disable-line
 
 // err.stack is not always writeable, so we
@@ -13,7 +13,7 @@ if (err.stack === 'john') module.exports = setByAssignment;
 else module.exports = setByShadowing;
 
 function setByShadowing(err, stack) {
-  let props = _.mapValues(err, function (val) {
+  var props = _.mapValues(err, function (val) {
     return {
       enumerable: true,
       value: val

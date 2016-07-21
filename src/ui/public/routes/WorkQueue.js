@@ -1,11 +1,11 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
   function WorkQueue() {
-    let q = this;
+    var q = this;
 
-    let work = [];
-    let fullDefers = [];
+    var work = [];
+    var fullDefers = [];
 
     q.limit = 0;
     Object.defineProperty(q, 'length', {
@@ -14,13 +14,13 @@ define(function (require) {
       }
     });
 
-    let resolve = function (defers) {
+    var resolve = function (defers) {
       return defers.splice(0).map(function (defer) {
         return defer.resolve();
       });
     };
 
-    let checkIfFull = function () {
+    var checkIfFull = function () {
       if (work.length >= q.limit && fullDefers.length) {
         resolve(fullDefers);
       }
@@ -32,7 +32,7 @@ define(function (require) {
     };
 
     q.doWork = function () {
-      let resps = resolve(work);
+      var resps = resolve(work);
       checkIfFull();
       return resps;
     };

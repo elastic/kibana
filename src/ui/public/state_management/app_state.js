@@ -1,11 +1,11 @@
 define(function (require) {
-  let _ = require('lodash');
-  let modules = require('ui/modules');
-  let urlParam = '_a';
+  var _ = require('lodash');
+  var modules = require('ui/modules');
+  var urlParam = '_a';
 
   function AppStateProvider(Private, $rootScope, getAppState) {
-    let State = Private(require('ui/state_management/state'));
-    let PersistedState = Private(require('ui/persisted_state/persisted_state'));
+    var State = Private(require('ui/state_management/state'));
+    var PersistedState = Private(require('ui/persisted_state/persisted_state'));
     let persistedStates;
     let eventUnsubscribers;
 
@@ -29,31 +29,31 @@ define(function (require) {
 
     AppState.prototype.makeStateful = function (prop) {
       if (persistedStates[prop]) return persistedStates[prop];
-      let self = this;
+      var self = this;
 
       // set up the ui state
       persistedStates[prop] = new PersistedState();
 
       // update the app state when the stateful instance changes
-      let updateOnChange = function () {
-        let replaceState = false; // TODO: debouncing logic
+      var updateOnChange = function () {
+        var replaceState = false; // TODO: debouncing logic
 
         self[prop] = persistedStates[prop].getChanges();
         self.save(replaceState);
       };
-      let handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
+      var handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
       handlerOnChange('on');
       eventUnsubscribers.push(() => handlerOnChange('off'));
 
       // update the stateful object when the app state changes
-      let persistOnChange = function (changes) {
+      var persistOnChange = function (changes) {
         if (!changes) return;
 
         if (changes.indexOf(prop) !== -1) {
           persistedStates[prop].set(self[prop]);
         }
       };
-      let handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
+      var handlePersist = (method) => this[method]('fetch_with_changes', persistOnChange);
       handlePersist('on');
       eventUnsubscribers.push(() => handlePersist('off'));
 
@@ -79,7 +79,7 @@ define(function (require) {
 
     // Checks to see if the appState might already exist, even if it hasn't been newed up
     get.previouslyStored = function () {
-      let search = $location.search();
+      var search = $location.search();
       return search[urlParam] ? true : false;
     };
 

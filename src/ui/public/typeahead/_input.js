@@ -1,6 +1,6 @@
 define(function (require) {
-  let _ = require('lodash');
-  let typeahead = require('ui/modules').get('kibana/typeahead');
+  var _ = require('lodash');
+  var typeahead = require('ui/modules').get('kibana/typeahead');
 
   require('ui/notify/directives');
 
@@ -11,8 +11,8 @@ define(function (require) {
       require: ['^ngModel', '^kbnTypeahead'],
 
       link: function ($scope, $el, $attr, deps) {
-        let model = deps[0];
-        let typeaheadCtrl = deps[1];
+        var model = deps[0];
+        var typeaheadCtrl = deps[1];
 
         typeaheadCtrl.setInputModel(model);
 

@@ -1,7 +1,7 @@
 define(function (require) {
-  let _ = require('lodash');
+  var _ = require('lodash');
 
-  let module = require('ui/modules').get('kibana');
+  var module = require('ui/modules').get('kibana');
 
   // Provides a tiny subset of the excelent API from
   // bluebird, reimplemented using the $q service
@@ -9,7 +9,7 @@ define(function (require) {
     function Promise(fn) {
       if (typeof this === 'undefined') throw new Error('Promise constructor must be called with "new"');
 
-      let defer = $q.defer();
+      var defer = $q.defer();
       try {
         fn(defer.resolve, defer.reject);
       } catch (e) {
@@ -20,12 +20,12 @@ define(function (require) {
 
     Promise.all = Promise.props = $q.all;
     Promise.resolve = function (val) {
-      let defer = $q.defer();
+      var defer = $q.defer();
       defer.resolve(val);
       return defer.promise;
     };
     Promise.reject = function (reason) {
-      let defer = $q.defer();
+      var defer = $q.defer();
       defer.reject(reason);
       return defer.promise;
     };
@@ -36,7 +36,7 @@ define(function (require) {
     };
     Promise.method = function (fn) {
       return function () {
-        let args = Array.prototype.slice.call(arguments);
+        var args = Array.prototype.slice.call(arguments);
         return Promise.try(fn, args, this);
       };
     };
@@ -64,7 +64,7 @@ define(function (require) {
       return obj && typeof obj.then === 'function';
     };
     Promise.halt = _.once(function () {
-      let promise = new Promise();
+      var promise = new Promise();
       promise.then = _.constant(promise);
       promise.catch = _.constant(promise);
       return promise;
@@ -155,7 +155,7 @@ define(function (require) {
      * @return {Promise}
      */
     function PromiseEmitter(fn, handler) {
-      let prom = new Promise(fn);
+      var prom = new Promise(fn);
 
       if (!handler) return prom;
 

@@ -1,19 +1,19 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
-let wrapRouteWithPrep = require('./wrapRouteWithPrep');
-let RouteSetupManager = require('./RouteSetupManager');
+var wrapRouteWithPrep = require('./wrapRouteWithPrep');
+var RouteSetupManager = require('./RouteSetupManager');
 
 function RouteManager() {
-  let self = this;
-  let setup = new RouteSetupManager();
-  let when = [];
-  let defaults = [];
+  var self = this;
+  var setup = new RouteSetupManager();
+  var when = [];
+  var defaults = [];
   let otherwise;
 
   self.config = function ($routeProvider) {
     when.forEach(function (args) {
-      let path = args[0];
-      let route = args[1] || {};
+      var path = args[0];
+      var route = args[1] || {};
 
       // merge in any defaults
       defaults.forEach(function (args) {

@@ -1,9 +1,9 @@
 define(function (require) {
-  let modules = require('ui/modules');
-  let angular = require('angular');
+  var modules = require('ui/modules');
+  var angular = require('angular');
 
   function Storage(store) {
-    let self = this;
+    var self = this;
     self.store = store;
 
     self.get = function (key) {
@@ -31,7 +31,7 @@ define(function (require) {
     };
   }
 
-  let createService = function (type) {
+  var createService = function (type) {
     return function ($window) {
       return new Storage($window[type]);
     };

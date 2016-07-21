@@ -1,8 +1,8 @@
 define(function (require) {
   return function NumberFormatProvider(Private) {
-    let _ = require('lodash');
-    let BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
-    let Numeral = Private(require('ui/stringify/types/_Numeral'));
+    var _ = require('lodash');
+    var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
+    var Numeral = Private(require('ui/stringify/types/_Numeral'));
 
     return Numeral.factory({
       id: 'percent',

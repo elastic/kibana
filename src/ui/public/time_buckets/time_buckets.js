@@ -1,13 +1,13 @@
 define(function (require) {
   return function IntervalHelperProvider(Private, timefilter, config) {
-    let _ = require('lodash');
-    let moment = require('moment');
+    var _ = require('lodash');
+    var moment = require('moment');
 
-    let dateMath = require('ui/utils/dateMath');
-    let parseInterval = require('ui/utils/parse_interval');
-    let calcAuto = Private(require('ui/time_buckets/calc_auto_interval'));
-    let calcEsInterval = Private(require('ui/time_buckets/calc_es_interval'));
-    let tzOffset = moment().format('Z');
+    var dateMath = require('ui/utils/dateMath');
+    var parseInterval = require('ui/utils/parse_interval');
+    var calcAuto = Private(require('ui/time_buckets/calc_auto_interval'));
+    var calcEsInterval = Private(require('ui/time_buckets/calc_es_interval'));
+    var tzOffset = moment().format('Z');
 
     function isValidMoment(m) {
       return m && ('isValid' in m) && m.isValid();
@@ -50,11 +50,11 @@ define(function (require) {
         bounds = _.isArray(input) ? input : [];
       }
 
-      let moments = _(bounds)
+      var moments = _(bounds)
       .map(_.ary(moment, 1))
       .sortBy(Number);
 
-      let valid = moments.size() === 2 && moments.every(isValidMoment);
+      var valid = moments.size() === 2 && moments.every(isValidMoment);
       if (!valid) {
         this.clearBounds();
         throw new Error('invalid bounds set: ' + input);
@@ -132,7 +132,7 @@ define(function (require) {
      * @param {object|string|moment.duration} input - see desc
      */
     TimeBuckets.prototype.setInterval = function (input) {
-      let interval = input;
+      var interval = input;
 
       // selection object -> val
       if (_.isObject(input)) {
@@ -196,13 +196,13 @@ define(function (require) {
      * @return {[type]} [description]
      */
     TimeBuckets.prototype.getInterval = function () {
-      let self = this;
-      let duration = self.getDuration();
+      var self = this;
+      var duration = self.getDuration();
       return decorateInterval(maybeScaleInterval(readInterval()));
 
       // either pull the interval from state or calculate the auto-interval
       function readInterval() {
-        let interval = self._i;
+        var interval = self._i;
         if (moment.isDuration(interval)) return interval;
         return calcAuto.near(config.get('histogram:barTarget'), duration);
       }
@@ -211,8 +211,8 @@ define(function (require) {
       function maybeScaleInterval(interval) {
         if (!self.hasBounds()) return interval;
 
-        let maxLength = config.get('histogram:maxBars');
-        let approxLen = duration / interval;
+        var maxLength = config.get('histogram:maxBars');
+        var approxLen = duration / interval;
         let scaled;
 
         if (approxLen > maxLength) {
@@ -233,13 +233,13 @@ define(function (require) {
 
       // append some TimeBuckets specific props to the interval
       function decorateInterval(interval) {
-        let esInterval = calcEsInterval(interval);
+        var esInterval = calcEsInterval(interval);
         interval.esValue = esInterval.value;
         interval.esUnit = esInterval.unit;
         interval.expression = esInterval.expression;
         interval.overflow = duration > interval ? moment.duration(interval - duration) : false;
 
-        let prettyUnits = moment.normalizeUnits(esInterval.unit);
+        var prettyUnits = moment.normalizeUnits(esInterval.unit);
         if (esInterval.value === 1) {
           interval.description = prettyUnits;
         } else {
@@ -262,11 +262,11 @@ define(function (require) {
      * @return {string}
      */
     TimeBuckets.prototype.getScaledDateFormat = function () {
-      let interval = this.getInterval();
-      let rules = config.get('dateFormat:scaled');
+      var interval = this.getInterval();
+      var rules = config.get('dateFormat:scaled');
 
-      for (let i = rules.length - 1; i >= 0; i--) {
-        let rule = rules[i];
+      for (var i = rules.length - 1; i >= 0; i--) {
+        var rule = rules[i];
         if (!rule[0] || interval >= moment.duration(rule[0])) {
           return rule[1];
         }
@@ -277,23 +277,23 @@ define(function (require) {
 
 
     TimeBuckets.__cached__ = function (self) {
-      let cache = {};
-      let sameMoment = same(moment.isMoment);
-      let sameDuration = same(moment.isDuration);
+      var cache = {};
+      var sameMoment = same(moment.isMoment);
+      var sameDuration = same(moment.isDuration);
 
-      let desc = {
+      var desc = {
         __cached__: {
           value: self
         },
       };
 
-      let breakers = {
+      var breakers = {
         setBounds: 'bounds',
         clearBounds: 'bounds',
         setInterval: 'interval'
       };
 
-      let resources = {
+      var resources = {
         bounds: {
           setup: function () {
             return [self._lb, self._ub];
@@ -325,16 +325,16 @@ define(function (require) {
       }
 
       function cacheBreaker(prop) {
-        let resource = resources[breakers[prop]];
-        let setup = resource.setup;
-        let changes = resource.changes;
-        let deps = resource.deps;
-        let fn = self[prop];
+        var resource = resources[breakers[prop]];
+        var setup = resource.setup;
+        var changes = resource.changes;
+        var deps = resource.deps;
+        var fn = self[prop];
 
         return {
           value: function cacheBreaker(input) {
-            let prev = setup.call(self);
-            let ret = fn.apply(self, arguments);
+            var prev = setup.call(self);
+            var ret = fn.apply(self, arguments);
 
             if (changes.call(self, prev)) {
               cache = {};

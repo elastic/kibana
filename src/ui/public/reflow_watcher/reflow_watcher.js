@@ -1,15 +1,15 @@
 define(function (require) {
   return function ReflowWatcherService(Private, $rootScope, $http) {
-    let angular = require('angular');
-    let $ = require('jquery');
-    let _ = require('lodash');
+    var angular = require('angular');
+    var $ = require('jquery');
+    var _ = require('lodash');
 
-    let EventEmitter = Private(require('ui/events'));
-    let $body = $(document.body);
-    let $window = $(window);
+    var EventEmitter = Private(require('ui/events'));
+    var $body = $(document.body);
+    var $window = $(window);
 
-    let MOUSE_EVENTS = 'mouseup';
-    let WINDOW_EVENTS = 'resize';
+    var MOUSE_EVENTS = 'mouseup';
+    var WINDOW_EVENTS = 'resize';
 
     _.class(ReflowWatcher).inherits(EventEmitter);
     /**

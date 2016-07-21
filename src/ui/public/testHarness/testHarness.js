@@ -1,15 +1,15 @@
 /* global mocha */
 
 // chrome expects to be loaded first, let it get its way
-let chrome = require('ui/chrome');
+var chrome = require('ui/chrome');
 
-let Nonsense = require('Nonsense');
-let sinon = require('sinon');
-let $ = require('jquery');
-let _ = require('lodash');
-let parse = require('url').parse;
+var Nonsense = require('Nonsense');
+var sinon = require('sinon');
+var $ = require('jquery');
+var _ = require('lodash');
+var parse = require('url').parse;
 
-let StackTraceMapper = require('ui/StackTraceMapper');
+var StackTraceMapper = require('ui/StackTraceMapper');
 
 /*** the vislib tests have certain style requirements, so lets make sure they are met ***/
 $('body').attr('id', 'test-harness-body'); // so we can make high priority selectors
@@ -17,8 +17,8 @@ require('./testHarness.less');
 
 
 /*** Setup seeded random ***/
-let seedInput = parse(window.location.href, true).query.seed;
-let seed = _.add(seedInput, 0) || Date.now();
+var seedInput = parse(window.location.href, true).query.seed;
+var seed = _.add(seedInput, 0) || Date.now();
 Math.random = _.bindKey(new Nonsense(seed), 'frac');
 Math.random.nonsense = new Nonsense(seed);
 console.log('Random-ness seed: ' + seed);
@@ -38,7 +38,7 @@ before(function () {
   this.timeout(30000);
 
   let mapper;
-  let Runner = window.Mocha.Runner;
+  var Runner = window.Mocha.Runner;
 
   Runner.prototype.emit = _.wrap(Runner.prototype.emit, function (emit, event, test, err) {
     if (err && mapper) err = mapper.mapError(err);

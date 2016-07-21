@@ -8,17 +8,17 @@ define(function (require) {
   .get('kibana')
   .service('timefilter', function (Private, globalState, $rootScope, config) {
 
-    let _ = require('lodash');
-    let angular = require('angular');
-    let moment = require('moment');
-    let dateMath = require('ui/utils/dateMath');
-    let Events = Private(require('ui/events'));
-    let diff = Private(require('ui/utils/diff_time_picker_vals'));
+    var _ = require('lodash');
+    var angular = require('angular');
+    var moment = require('moment');
+    var dateMath = require('ui/utils/dateMath');
+    var Events = Private(require('ui/events'));
+    var diff = Private(require('ui/utils/diff_time_picker_vals'));
 
     require('ui/state_management/global_state');
 
     function convertISO8601(stringTime) {
-      let obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
+      var obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
       return obj.isValid() ? obj : stringTime;
     }
 
@@ -26,9 +26,9 @@ define(function (require) {
     function Timefilter() {
       Timefilter.Super.call(this);
 
-      let self = this;
-      let diffTime = Private(require('ui/timefilter/lib/diff_time'))(self);
-      let diffInterval = Private(require('ui/timefilter/lib/diff_interval'))(self);
+      var self = this;
+      var diffTime = Private(require('ui/timefilter/lib/diff_time'))(self);
+      var diffInterval = Private(require('ui/timefilter/lib/diff_interval'))(self);
 
       self.enabled = false;
 
@@ -38,8 +38,8 @@ define(function (require) {
       });
 
       self.consumeDefaults = _.once(function () {
-        let timeDefaults = config.get('timepicker:timeDefaults');
-        let refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
+        var timeDefaults = config.get('timepicker:timeDefaults');
+        var refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 
         // These can be date math strings or moments.
         self.time = _.defaults(globalState.time || {}, timeDefaults);
@@ -47,8 +47,8 @@ define(function (require) {
 
         globalState.on('fetch_with_changes', function () {
           // clone and default to {} in one
-          let newTime = _.defaults({}, globalState.time, timeDefaults);
-          let newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
+          var newTime = _.defaults({}, globalState.time, timeDefaults);
+          var newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
 
           if (newTime) {
             if (newTime.to) newTime.to = convertISO8601(newTime.to);
@@ -78,10 +78,10 @@ define(function (require) {
 
     Timefilter.prototype.get = function (indexPattern) {
       let filter;
-      let timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
+      var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
 
       if (timefield) {
-        let bounds = this.getBounds();
+        var bounds = this.getBounds();
         filter = {range : {}};
         filter.range[timefield.name] = {
           gte: bounds.min.valueOf(),

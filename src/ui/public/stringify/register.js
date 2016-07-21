@@ -1,5 +1,5 @@
 define(function (require) {
-  let fieldFormats = require('ui/registry/field_formats');
+  var fieldFormats = require('ui/registry/field_formats');
   fieldFormats.register(require('ui/stringify/types/Url'));
   fieldFormats.register(require('ui/stringify/types/Bytes'));
   fieldFormats.register(require('ui/stringify/types/Date'));

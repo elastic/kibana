@@ -1,9 +1,9 @@
 define(function (require) {
   return function DateTimeFormatProvider(Private) {
-    let _ = require('lodash');
-    let FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
-    let BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
-    let moment = require('moment');
+    var _ = require('lodash');
+    var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
+    var BoundToConfigObj = Private(require('ui/bound_to_config_obj'));
+    var moment = require('moment');
 
     require('ui/field_format_editor/pattern/pattern');
 
@@ -25,7 +25,7 @@ define(function (require) {
       template: require('ui/stringify/editors/date.html'),
       controllerAs: 'cntrl',
       controller: function ($interval, $scope) {
-        let self = this;
+        var self = this;
         self.sampleInputs = [
           Date.now(),
           +moment().startOf('year'),
@@ -41,11 +41,11 @@ define(function (require) {
     DateTime.prototype._convert = function (val) {
       // don't give away our ref to converter so
       // we can hot-swap when config changes
-      let pattern = this.param('pattern');
-      let timezone = this.param('timezone');
+      var pattern = this.param('pattern');
+      var timezone = this.param('timezone');
 
-      let timezoneChanged = this._timeZone !== timezone;
-      let datePatternChanged = this._memoizedPattern !== pattern;
+      var timezoneChanged = this._timeZone !== timezone;
+      var datePatternChanged = this._memoizedPattern !== pattern;
       if (timezoneChanged || datePatternChanged) {
         this._timeZone = timezone;
         this._memoizedPattern = pattern;

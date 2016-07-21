@@ -1,18 +1,18 @@
 define(function (require) {
-  let _ = require('lodash');
-  let rison = require('ui/utils/rison');
+  var _ = require('lodash');
+  var rison = require('ui/utils/rison');
 
-  let applyDiff = require('ui/utils/diff_object');
-  let qs = require('ui/utils/query_string');
+  var applyDiff = require('ui/utils/diff_object');
+  var qs = require('ui/utils/query_string');
 
   return function StateProvider(Notifier, Private, $rootScope, $location) {
-    let Events = Private(require('ui/events'));
+    var Events = Private(require('ui/events'));
 
     _.class(State).inherits(Events);
     function State(urlParam, defaults) {
       State.Super.call(this);
 
-      let self = this;
+      var self = this;
       self.setDefaults(defaults);
       self._urlParam = urlParam || '_s';
 
@@ -39,11 +39,11 @@ define(function (require) {
     }
 
     State.prototype._readFromURL = function () {
-      let search = $location.search();
+      var search = $location.search();
       try {
         return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
       } catch (e) {
-        let notify = new Notifier();
+        var notify = new Notifier();
         notify.error('Unable to parse URL');
         search[this._urlParam] = rison.encode(this._defaults);
         $location.search(search).replace();
@@ -56,7 +56,7 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.fetch = function () {
-      let stash = this._readFromURL();
+      var stash = this._readFromURL();
 
       // nothing to read from the url? save if ordered to persist
       if (stash === null) {
@@ -69,7 +69,7 @@ define(function (require) {
 
       _.defaults(stash, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
-      let diffResults = applyDiff(this, stash);
+      var diffResults = applyDiff(this, stash);
 
       if (diffResults.keys.length) {
         this.emit('fetch_with_changes', diffResults.keys);
@@ -81,8 +81,8 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.save = function (replace) {
-      let stash = this._readFromURL();
-      let state = this.toObject();
+      var stash = this._readFromURL();
+      var state = this.toObject();
       replace = replace || false;
 
       if (!stash) {
@@ -92,14 +92,14 @@ define(function (require) {
 
       _.defaults(state, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
-      let diffResults = applyDiff(stash, state);
+      var diffResults = applyDiff(stash, state);
 
       if (diffResults.keys.length) {
         this.emit('save_with_changes', diffResults.keys);
       }
 
       // persist the state in the URL
-      let search = $location.search();
+      var search = $location.search();
       search[this._urlParam] = this.toRISON();
       if (replace) {
         $location.search(search).replace();
@@ -124,7 +124,7 @@ define(function (require) {
     State.prototype.reset = function () {
       // apply diff to _attributes from defaults, this is side effecting so
       // it will change the state in place.
-      let diffResults = applyDiff(this, this._defaults);
+      var diffResults = applyDiff(this, this._defaults);
       if (diffResults.keys.length) {
         this.emit('reset_with_changes', diffResults.keys);
       }

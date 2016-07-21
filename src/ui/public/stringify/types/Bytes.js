@@ -1,6 +1,6 @@
 define(function (require) {
   return function BytesFormatProvider(Private) {
-    let Numeral = Private(require('ui/stringify/types/_Numeral'));
+    var Numeral = Private(require('ui/stringify/types/_Numeral'));
     return Numeral.factory({
       id: 'bytes',
       title: 'Bytes',

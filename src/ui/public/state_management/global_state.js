@@ -1,13 +1,13 @@
 define(function (require) {
-  let _ = require('lodash');
-  let angular = require('angular');
-  let qs = require('ui/utils/query_string');
-  let rison = require('ui/utils/rison');
+  var _ = require('lodash');
+  var angular = require('angular');
+  var qs = require('ui/utils/query_string');
+  var rison = require('ui/utils/rison');
 
-  let module = require('ui/modules').get('kibana/global_state');
+  var module = require('ui/modules').get('kibana/global_state');
 
   module.service('globalState', function (Private, $rootScope, $location) {
-    let State = Private(require('ui/state_management/state'));
+    var State = Private(require('ui/state_management/state'));
 
     _.class(GlobalState).inherits(State);
     function GlobalState(defaults) {

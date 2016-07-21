@@ -1,9 +1,9 @@
 define(function (require) {
-  let html = require('ui/timepicker/timepicker.html');
-  let module = require('ui/modules').get('ui/timepicker');
-  let _ = require('lodash');
-  let dateMath = require('ui/utils/dateMath');
-  let moment = require('moment');
+  var html = require('ui/timepicker/timepicker.html');
+  var module = require('ui/modules').get('ui/timepicker');
+  var _ = require('lodash');
+  var dateMath = require('ui/utils/dateMath');
+  var moment = require('moment');
 
   require('ui/directives/input_datetime');
   require('ui/directives/inequality');
@@ -24,7 +24,7 @@ define(function (require) {
       },
       template: html,
       controller: function ($scope) {
-        let init = function () {
+        var init = function () {
           $scope.setMode($scope.mode);
         };
 
@@ -74,8 +74,8 @@ define(function (require) {
             case 'quick':
               break;
             case 'relative':
-              let fromParts = $scope.from.toString().split('-');
-              let relativeParts = [];
+              var fromParts = $scope.from.toString().split('-');
+              var relativeParts = [];
 
               // Try to parse the relative time, if we can't use moment duration to guestimate
               if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
@@ -85,11 +85,11 @@ define(function (require) {
                 $scope.relative.count = parseInt(relativeParts[1], 10);
                 $scope.relative.unit = relativeParts[2];
               } else {
-                let duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
-                let units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
+                var duration = moment.duration(moment().diff(dateMath.parse($scope.from)));
+                var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
                 if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
-                for (let i = 0; i < units.length; i++) {
-                  let as = duration.as(units[i]);
+                for (var i = 0; i < units.length; i++) {
+                  var as = duration.as(units[i]);
                   if (as > 1) {
                     $scope.relative.count = Math.round(as);
                     $scope.relative.unit = units[i];
@@ -121,7 +121,7 @@ define(function (require) {
         };
 
         $scope.formatRelative = function () {
-          let parsed = dateMath.parse(getRelativeString());
+          var parsed = dateMath.parse(getRelativeString());
           $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
           return parsed;
         };

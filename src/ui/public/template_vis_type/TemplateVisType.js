@@ -1,8 +1,8 @@
 define(function (require) {
   return function TemplateVisTypeFactory(Private) {
-    let _ = require('lodash');
-    let VisType = Private(require('ui/Vis/VisType'));
-    let TemplateRenderbot = Private(require('ui/template_vis_type/TemplateRenderbot'));
+    var _ = require('lodash');
+    var VisType = Private(require('ui/Vis/VisType'));
+    var TemplateRenderbot = Private(require('ui/template_vis_type/TemplateRenderbot'));
 
     _.class(TemplateVisType).inherits(VisType);
     function TemplateVisType(opts) {

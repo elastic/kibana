@@ -1,6 +1,6 @@
 define(function (require) {
-  let modules = require('ui/modules');
-  let _ = require('lodash');
+  var modules = require('ui/modules');
+  var _ = require('lodash');
 
   modules.get('kibana/persisted_log')
   .factory('PersistedLog', function ($window, localStorage) {

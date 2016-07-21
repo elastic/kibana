@@ -2,8 +2,8 @@ define(function (require) {
   require('ui/modules')
   .get('kibana')
   .directive('paginatedTable', function ($filter) {
-    let _ = require('lodash');
-    let orderBy = $filter('orderBy');
+    var _ = require('lodash');
+    var orderBy = $filter('orderBy');
 
     return {
       restrict: 'E',
@@ -18,14 +18,14 @@ define(function (require) {
       },
       controllerAs: 'paginatedTable',
       controller: function ($scope) {
-        let self = this;
+        var self = this;
         self.sort = {
           columnIndex: null,
           direction: null
         };
 
         self.sortColumn = function (colIndex) {
-          let col = $scope.columns[colIndex];
+          var col = $scope.columns[colIndex];
 
           if (!col) return;
           if (col.sortable === false) return;
@@ -35,7 +35,7 @@ define(function (require) {
           if (self.sort.columnIndex !== colIndex) {
             sortDirection = 'asc';
           } else {
-            let directions = {
+            var directions = {
               null: 'asc',
               'asc': 'desc',
               'desc': null
@@ -55,7 +55,7 @@ define(function (require) {
           } else {
             // use generic sort handler
             self.sort.getter = function (row) {
-              let value = row[index];
+              var value = row[index];
               if (value && value.value != null) return value.value;
               return value;
             };
@@ -73,7 +73,7 @@ define(function (require) {
             return;
           }
 
-          let sort = self.sort;
+          var sort = self.sort;
           if (sort.direction == null) {
             $scope.sortedRows = $scope.rows.slice(0);
           } else {

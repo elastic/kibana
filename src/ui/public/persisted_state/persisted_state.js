@@ -1,11 +1,11 @@
 define(function (require) {
-  let _ = require('lodash');
-  let toPath = require('lodash/internal/toPath');
-  let errors = require('ui/errors');
+  var _ = require('lodash');
+  var toPath = require('lodash/internal/toPath');
+  var errors = require('ui/errors');
 
   return function (Private) {
-    let Events = Private(require('ui/events'));
-    let SimpleEmitter = require('ui/utils/SimpleEmitter');
+    var Events = Private(require('ui/events'));
+    var SimpleEmitter = require('ui/utils/SimpleEmitter');
 
     function validateParent(parent, path) {
       if (path.length <= 0) {
@@ -17,7 +17,7 @@ define(function (require) {
     }
 
     function validateValue(value) {
-      let msg = 'State value must be a plain object';
+      var msg = 'State value must be a plain object';
       if (!value) return;
       if (!_.isPlainObject(value)) throw new errors.PersistedStateError(msg);
     }
@@ -73,21 +73,21 @@ define(function (require) {
     };
 
     PersistedState.prototype.set = function (key, value) {
-      let params = prepSetParams(key, value, this._path);
-      let val = this._set(params.key, params.value);
+      var params = prepSetParams(key, value, this._path);
+      var val = this._set(params.key, params.value);
       this.emit('set');
       return val;
     };
 
     PersistedState.prototype.setSilent = function (key, value) {
-      let params = prepSetParams(key, value, this._path);
+      var params = prepSetParams(key, value, this._path);
       return this._set(params.key, params.value, true);
     };
 
     PersistedState.prototype.reset = function (path) {
-      let keyPath = this._getIndex(path);
-      let origValue = _.get(this._defaultState, keyPath);
-      let currentValue = _.get(this._mergedState, keyPath);
+      var keyPath = this._getIndex(path);
+      var origValue = _.get(this._defaultState, keyPath);
+      var currentValue = _.get(this._mergedState, keyPath);
 
       if (_.isUndefined(origValue)) {
         this._cleanPath(path, this._mergedState);
@@ -108,7 +108,7 @@ define(function (require) {
     };
 
     PersistedState.prototype.removeChild = function (path) {
-      let origValue = _.get(this._defaultState, this._getIndex(path));
+      var origValue = _.get(this._defaultState, this._getIndex(path));
 
       if (_.isUndefined(origValue)) {
         this.reset(path);
@@ -139,19 +139,19 @@ define(function (require) {
     };
 
     PersistedState.prototype._getPartialIndex = function (key) {
-      let keyPath = this._getIndex(key);
+      var keyPath = this._getIndex(key);
       return keyPath.slice(this._path.length);
     };
 
     PersistedState.prototype._cleanPath = function (path, stateTree) {
-      let partialPath = this._getPartialIndex(path);
-      let remove = true;
+      var partialPath = this._getPartialIndex(path);
+      var remove = true;
 
       // recursively delete value tree, when no other keys exist
       while (partialPath.length > 0) {
-        let lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
-        let statePath = this._path.concat(partialPath);
-        let stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
+        var lastKey = partialPath.splice(partialPath.length - 1, 1)[0];
+        var statePath = this._path.concat(partialPath);
+        var stateVal = statePath.length > 0 ? _.get(stateTree, statePath) : stateTree;
 
         // if stateVal isn't an object, do nothing
         if (!_.isPlainObject(stateVal)) return;
@@ -162,13 +162,13 @@ define(function (require) {
     };
 
     PersistedState.prototype._getDefault = function () {
-      let def = (this._hasPath()) ? undefined : {};
+      var def = (this._hasPath()) ? undefined : {};
       return (this._parent ? this.get() : def);
     };
 
     PersistedState.prototype._setPath = function (path) {
-      let isString = _.isString(path);
-      let isArray = _.isArray(path);
+      var isString = _.isString(path);
+      var isArray = _.isArray(path);
 
       if (!isString && !isArray) return [];
       return (isString) ? [this._getIndex(path)] : path;
@@ -196,11 +196,11 @@ define(function (require) {
     };
 
     PersistedState.prototype._set = function (key, value, silent, initialChildState) {
-      let self = this;
-      let stateChanged = false;
-      let initialState = !this._initialized;
-      let keyPath = this._getIndex(key);
-      let hasKeyPath = keyPath.length > 0;
+      var self = this;
+      var stateChanged = false;
+      var initialState = !this._initialized;
+      var keyPath = this._getIndex(key);
+      var hasKeyPath = keyPath.length > 0;
 
       // if this is the initial state value, save value as the default
       if (initialState) {
@@ -226,7 +226,7 @@ define(function (require) {
           }
         } else {
           // check for changes at path, emit an event when different
-          let curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
+          var curVal = hasKeyPath ? this.get(keyPath) : this._mergedState;
           stateChanged = !_.isEqual(curVal, value);
 
           if (!initialChildState) {
@@ -243,11 +243,11 @@ define(function (require) {
       }
 
       // update the merged state value
-      let targetObj = this._mergedState || _.cloneDeep(this._defaultState);
-      let sourceObj = _.merge({}, this._defaultChildState, this._changedState);
+      var targetObj = this._mergedState || _.cloneDeep(this._defaultState);
+      var sourceObj = _.merge({}, this._defaultChildState, this._changedState);
 
       // handler arguments are (targetValue, sourceValue, key, target, source)
-      let mergeMethod = function (targetValue, sourceValue, mergeKey) {
+      var mergeMethod = function (targetValue, sourceValue, mergeKey) {
         // if not initial state, skip default merge method (ie. return value, see note below)
         if (!initialState && !initialChildState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
           // use the sourceValue or fall back to targetValue

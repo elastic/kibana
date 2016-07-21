@@ -1,19 +1,19 @@
-let _ = require('lodash');
+var _ = require('lodash');
 
 module.exports = function (map, match, filename, line, col) {
   if (!map) return match;
 
-  let position = {
+  var position = {
     line: parseFloat(line) || 0,
     column: parseFloat(col) || 0
   };
 
-  let srcPosition = map.smc.originalPositionFor(position);
+  var srcPosition = map.smc.originalPositionFor(position);
   if (!srcPosition || !srcPosition.source) return match;
 
-  let srcFilename = srcPosition.source;
-  let srcLine = srcPosition.line;
-  let srcCol = srcPosition.column;
+  var srcFilename = srcPosition.source;
+  var srcLine = srcPosition.line;
+  var srcCol = srcPosition.column;
 
   if (srcCol === 0 && position.column) {
     // TODO: teach sourcemaps correct column
@@ -26,10 +26,10 @@ module.exports = function (map, match, filename, line, col) {
   // fold the components into the original match, so that supporting
   // characters (parens, periods, etc) from the format are kept, and so
   // we don't accidentally replace the wrong part we use splitting and consumption
-  let resp = '';
-  let remainingResp = match;
-  let fold = function (replace, replacement) {
-    let wrappingContent = remainingResp.split(replace);
+  var resp = '';
+  var remainingResp = match;
+  var fold = function (replace, replacement) {
+    var wrappingContent = remainingResp.split(replace);
     resp += wrappingContent.shift() + replacement;
     remainingResp = wrappingContent.join(replace);
   };

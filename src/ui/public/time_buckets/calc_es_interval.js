@@ -1,10 +1,10 @@
 define(function (require) {
   return function () {
-    let moment = require('moment');
-    let dateMath = require('ui/utils/dateMath');
+    var moment = require('moment');
+    var dateMath = require('ui/utils/dateMath');
 
-    let unitsDesc = dateMath.unitsDesc;
-    let largeMax = unitsDesc.indexOf('M');
+    var unitsDesc = dateMath.unitsDesc;
+    var largeMax = unitsDesc.indexOf('M');
 
     /**
      * Convert a moment.duration into an es
@@ -15,9 +15,9 @@ define(function (require) {
      * @return {object}
      */
     function esDuration(duration) {
-      for (let i = 0; i < unitsDesc.length; i++) {
-        let unit = unitsDesc[i];
-        let val = duration.as(unit);
+      for (var i = 0; i < unitsDesc.length; i++) {
+        var unit = unitsDesc[i];
+        var val = duration.as(unit);
         // find a unit that rounds neatly
         if (val >= 1 && Math.floor(val) === val) {
 
@@ -36,7 +36,7 @@ define(function (require) {
         }
       }
 
-      let ms = duration.as('ms');
+      var ms = duration.as('ms');
       return {
         value: ms,
         unit: 'ms',

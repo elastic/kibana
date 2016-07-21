@@ -1,13 +1,13 @@
 define(function (require) {
-  let _ = require('lodash');
-  let typeahead = require('ui/modules').get('kibana/typeahead');
+  var _ = require('lodash');
+  var typeahead = require('ui/modules').get('kibana/typeahead');
 
   require('ui/typeahead/typeahead.less');
   require('ui/typeahead/_input');
   require('ui/typeahead/_items');
 
   typeahead.directive('kbnTypeahead', function () {
-    let keyMap = {
+    var keyMap = {
       ESC: 27,
       UP: 38,
       DOWN: 40,
@@ -23,7 +23,7 @@ define(function (require) {
       controllerAs: 'typeahead',
 
       controller: function ($scope, $element, $timeout, PersistedLog, config) {
-        let self = this;
+        var self = this;
         self.form = $element.closest('form');
         self.query = '';
         self.hidden = true;
@@ -76,7 +76,7 @@ define(function (require) {
         };
 
         self.activateNext = function () {
-          let index = self.getActiveIndex();
+          var index = self.getActiveIndex();
           if (index == null) {
             index = 0;
           } else if (index < $scope.filteredItems.length - 1) {
@@ -87,7 +87,7 @@ define(function (require) {
         };
 
         self.activatePrev = function () {
-          let index = self.getActiveIndex();
+          var index = self.getActiveIndex();
 
           if (index > 0 && index != null) {
             --index;
@@ -138,7 +138,7 @@ define(function (require) {
         };
 
         self.keypressHandler = function (ev) {
-          let keyCode = ev.which || ev.keyCode;
+          var keyCode = ev.which || ev.keyCode;
 
           if (self.focused) {
             self.hidden = false;
@@ -194,11 +194,11 @@ define(function (require) {
           }
 
           // update the filteredItems using the query
-          let beginningMatches = $scope.items.filter(function (item) {
+          var beginningMatches = $scope.items.filter(function (item) {
             return item.indexOf(query) === 0;
           });
 
-          let otherMatches = $scope.items.filter(function (item) {
+          var otherMatches = $scope.items.filter(function (item) {
             return item.indexOf(query) > 0;
           });
 

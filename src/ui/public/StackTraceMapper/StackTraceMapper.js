@@ -1,12 +1,12 @@
-let _ = require('lodash');
-let $ = require('jquery');
-let resolve = require('bluebird').resolve;
-let fetch = require('exports?window.fetch!imports?Promise=bluebird!whatwg-fetch');
+var _ = require('lodash');
+var $ = require('jquery');
+var resolve = require('bluebird').resolve;
+var fetch = require('exports?window.fetch!imports?Promise=bluebird!whatwg-fetch');
 
-let setErrorStack = require('./setErrorStack');
-let translateStackLine = require('./translateStackLine');
-let stackLineFormat = require('./stackLineFormat');
-let SourceMapReader = require('./SourceMapReader');
+var setErrorStack = require('./setErrorStack');
+var translateStackLine = require('./translateStackLine');
+var stackLineFormat = require('./stackLineFormat');
+var SourceMapReader = require('./SourceMapReader');
 
 function StackTraceMapper() {
   this.maps = [];
@@ -22,7 +22,7 @@ StackTraceMapper.prototype.init = function (mapUrls) {
 StackTraceMapper.prototype.mapError = function (err) {
   if (!stackLineFormat || !err.stack) return err;
 
-  let stack = err.stack.replace(stackLineFormat, this.mapLine);
+  var stack = err.stack.replace(stackLineFormat, this.mapLine);
   return setErrorStack(err, stack);
 };
 
@@ -39,10 +39,10 @@ StackTraceMapper.prototype.getMapFor = function (url) {
 StackTraceMapper.prototype.loadMaps = function (mapUrls) {
   mapUrls = _.clone(mapUrls || {});
 
-  let maps = this.maps;
+  var maps = this.maps;
 
   $('script[src][src-map]').each(function () {
-    let $el = $(this);
+    var $el = $(this);
     mapUrls[$el.attr('src')] = $el.attr('src-map');
   });
 

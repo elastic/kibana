@@ -22,10 +22,10 @@ define(function (require) {
    * ```js
    * define(function (require) {
    *   return function ServerHealthProvider(Private, Promise) {
-   *     let ping = Private(require('ui/ping'));
+   *     var ping = Private(require('ui/ping'));
    *     return {
    *       check: Promise.method(function () {
-   *         let attempts = 0;
+   *         var attempts = 0;
    *         return (function attempt() {
    *           attempts += 1;
    *           return ping.ping()
@@ -86,8 +86,8 @@ define(function (require) {
    */
 
 
-  let _ = require('lodash');
-  let nextId = _.partial(_.uniqueId, 'privateProvider#');
+  var _ = require('lodash');
+  var nextId = _.partial(_.uniqueId, 'privateProvider#');
 
   function name(fn) {
     return fn.name || fn.toString().split('\n').shift();
@@ -95,11 +95,11 @@ define(function (require) {
 
   require('ui/modules').get('kibana')
   .provider('Private', function () {
-    let provider = this;
+    var provider = this;
 
     // one cache/swaps per Provider
-    let cache = {};
-    let swaps = {};
+    var cache = {};
+    var swaps = {};
 
     // return the uniq id for this function
     function identify(fn) {
@@ -117,15 +117,15 @@ define(function (require) {
     };
 
     provider.swap = function (fn, prov) {
-      let id = identify(fn);
+      var id = identify(fn);
       swaps[id] = prov;
     };
 
     provider.$get = ['$injector', function PrivateFactory($injector) {
 
       // prevent circular deps by tracking where we came from
-      let privPath = [];
-      let pathToString = function () {
+      var privPath = [];
+      var pathToString = function () {
         return privPath.map(name).join(' -> ');
       };
 
@@ -140,8 +140,8 @@ define(function (require) {
 
         privPath.push(prov);
 
-        let context = {};
-        let instance = $injector.invoke(prov, context, locals);
+        var context = {};
+        var instance = $injector.invoke(prov, context, locals);
         if (!_.isObject(instance)) instance = context;
 
         privPath.pop();
@@ -167,7 +167,7 @@ define(function (require) {
 
       // main api, get the appropriate instance for a provider
       function Private(prov) {
-        let id = identify(prov);
+        var id = identify(prov);
         let $delegateId;
         let $delegateProv;
 

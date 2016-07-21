@@ -1,5 +1,5 @@
 define(function (require) {
-  let html = require('ui/tooltip/tooltip.html');
+  var html = require('ui/tooltip/tooltip.html');
 
   require('ui-bootstrap')
   .config(function ($tooltipProvider) {
