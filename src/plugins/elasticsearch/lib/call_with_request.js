@@ -3,19 +3,21 @@ const Promise = require('bluebird');
 const Boom = require('boom');
 const getBasicAuthRealm = require('./get_basic_auth_realm');
 const toPath = require('lodash/internal/toPath');
+const filterHeaders = require('./filter_headers');
 
-module.exports = (client) => {
+module.exports = (server, client) => {
   return (req, endpoint, params = {}) => {
-    if (req.headers.authorization) {
-      _.set(params, 'headers.authorization', req.headers.authorization);
-    }
+    const filteredHeaders = filterHeaders(req.headers, server.config().get('elasticsearch.requestHeadersWhitelist'));
+    _.set(params, 'headers', filteredHeaders);
     const path = toPath(endpoint);
     const api = _.get(client, path);
     let apiContext = _.get(client, path.slice(0, -1));
     if (_.isEmpty(apiContext)) {
       apiContext = client;
     }
+
     if (!api) throw new Error(`callWithRequest called with an invalid endpoint: ${endpoint}`);
+
     return api.call(apiContext, params)
       .catch((err) => {
         if (err.status === 401) {
