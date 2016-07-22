@@ -49,6 +49,7 @@
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
     "build": "grunt build",
+    "release": "grunt release",
     "start": "./bin/kibana --dev",
     "precommit": "grunt precommit",
     "karma": "karma start",
