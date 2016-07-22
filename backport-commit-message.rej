@@ -1,0 +1,21 @@
+Backport PR #7495
+---------
+
+**Commit 1:**
+Consistent build archives
+
+We do not release zip archives for any operating system except windows,
+and we do not release tar.gz archives for windows. For consistency and
+clarity sake, we'll explicitly list the architecture (x86) of the
+windows build as well.
+
+* Original sha: 2f2742e11b0a9ab4cae4dc2db796b58aa6fca22f
+* Authored by Court Ewing <court@epixa.com> on 2016-06-17T13:20:44Z
+
+**Commit 2:**
+internal: Cleanup code in _build:archives task
+
+This just a code cleanup - there are no functional changes to this task.
+
+* Original sha: c00e49dd062bc89796c241a56151d65e3f97b18b
+* Authored by Court Ewing <court@epixa.com> on 2016-06-17T13:39:14Z
