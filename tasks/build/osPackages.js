@@ -16,19 +16,14 @@ export default (grunt) => {
 
     config.get('platforms')
     .filter(({ name }) => /linux-x(86|64)$/.test(name))
-    .map(({ name, buildDir }) => {
-      const architecture = /x64$/.test(name) ? 'x86_64' : 'i386';
-      return {
-        buildDir,
-        architecture
-      };
-    })
-    .forEach(({ buildDir, architecture }) => {
+    .forEach(({ buildDir, debArch, rpmArch }) => {
       const baseOptions = [
         '--force',
-        '--package', targetDir,
+        // we force dashes in the version file name because otherwise fpm uses
+        // the filtered package version, which would have dashes replaced with
+        // underscores
+        '--package', `${targetDir}/NAME-${packages.version}-ARCH.TYPE`,
         '-s', 'dir', // input type
-        '--architecture', architecture,
         '--name', packages.name,
         '--description', packages.description,
         '--version', packages.version,
@@ -51,10 +46,12 @@ export default (grunt) => {
       ];
       const debOptions = [
         '-t', 'deb',
+        '--architecture', debArch,
         '--deb-priority', 'optional'
       ];
       const rpmOptions = [
         '-t', 'rpm',
+        '--architecture', rpmArch,
         '--rpm-os', 'linux'
       ];
       const args = [

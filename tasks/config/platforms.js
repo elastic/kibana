@@ -30,13 +30,15 @@ module.exports = function (grunt) {
     let debPath;
     let rpmName;
     let rpmPath;
+    let debArch;
+    let rpmArch;
     if (name.match('linux')) {
-      let debArch = name.match('x64') ? 'amd64' : 'i386';
-      debName = `kibana_${version}_${debArch}.deb`;
+      debArch = name.match('x64') ? 'amd64' : 'i386';
+      debName = `kibana-${version}-${debArch}.deb`;
       debPath = resolve(rootPath, `target/${debName}`);
 
-      let rpmArch = name.match('x64') ? 'x86_64' : 'i386';
-      rpmName = `kibana-${version.replace('-', '_')}-1.${rpmArch}.rpm`;
+      rpmArch = name.match('x64') ? 'x86_64' : 'i686';
+      rpmName = `kibana-${version}-${rpmArch}.rpm`;
       rpmPath = resolve(rootPath, `target/${rpmName}`);
     }
     return {
@@ -45,8 +47,8 @@ module.exports = function (grunt) {
       buildName, buildDir,
       tarName, tarPath,
       zipName, zipPath,
-      debName, debPath,
-      rpmName, rpmPath
+      debName, debPath, debArch,
+      rpmName, rpmPath, rpmArch
     };
   });
 };

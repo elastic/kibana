@@ -1,7 +1,5 @@
 # Kibana 4.6.0
 
-[![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
-
 Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/blob/master/LICENSE.md)), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
 
 ## Requirements
@@ -43,9 +41,9 @@ Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for
 
 For the daring, snapshot builds are available. These builds are created after each commit to the master branch, and therefore are not something you should run in production.
 
-| platform |  |  |  |  |
-| --- | --- | --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-darwin-x64.zip) |  |  |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-linux-x64.zip) | [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana_4.6.0-snapshot_amd64.deb)| [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0_snapshot-1.x86_64.rpm) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-linux-x86.zip) | [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana_4.6.0-snapshot_i386.deb) | [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0_snapshot-1.i386.rpm) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-snapshot-windows.zip) |  |  |
+| platform |  |
+| --- | --- |
+| OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-darwin-x64.tar.gz) |
+| Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-linux-x64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-x86_64.rpm) |
+| Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-linux-x86.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-i386.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-i686.rpm) |
+| Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-windows.zip) |
