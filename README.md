@@ -46,4 +46,4 @@ For the daring, snapshot builds are available. These builds are created after ea
 | OSX | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-darwin-x64.tar.gz) |
 | Linux x64 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-linux-x64.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-amd64.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-x86_64.rpm) |
 | Linux x86 | [tar](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-linux-x86.tar.gz) [deb](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-i386.deb) [rpm](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-i686.rpm) |
-| Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-windows.zip) |
+| Windows | [zip](http://download.elastic.co/kibana/kibana-snapshot/kibana-4.6.0-SNAPSHOT-windows-x86.zip) |
