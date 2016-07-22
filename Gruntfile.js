@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
     src: __dirname + '/src',
-    build: __dirname + '/build', // temporary build directory
+    buildDir: __dirname + '/build', // temporary build directory
     plugins: __dirname + '/src/plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
@@ -64,6 +64,9 @@ module.exports = function (grunt) {
   };
 
   grunt.config.merge(config);
+
+  // must run before even services/platforms
+  grunt.config.set('build', require('./tasks/config/build')(grunt));
 
   config.packageScriptsDir = __dirname + '/tasks/build/package_scripts';
   // ensure that these run first, other configs need them

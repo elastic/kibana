@@ -3,16 +3,18 @@ import { indexBy } from 'lodash';
 import exec from '../utils/exec';
 
 export default (grunt) => {
-  const targetDir = grunt.config.get('target');
+  const { config } = grunt;
+  const exec = require('../utils/exec');
+  const targetDir = config.get('target');
   const packageScriptsDir = grunt.config.get('packageScriptsDir');
-  const servicesByName = indexBy(grunt.config.get('services'), 'name');
-  const config = grunt.config.get('packages');
+  const servicesByName = indexBy(config.get('services'), 'name');
+  const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
 
   grunt.registerTask('_build:osPackages', function () {
     grunt.file.mkdir(targetDir);
 
-    grunt.config.get('platforms')
+    config.get('platforms')
     .filter(({ name }) => /linux-x(86|64)$/.test(name))
     .map(({ name, buildDir }) => {
       const architecture = /x64$/.test(name) ? 'x86_64' : 'i386';
@@ -27,25 +29,25 @@ export default (grunt) => {
         '--package', targetDir,
         '-s', 'dir', // input type
         '--architecture', architecture,
-        '--name', config.name,
-        '--description', config.description,
-        '--version', config.version,
-        '--url', config.site,
-        '--vendor', config.vendor,
-        '--maintainer', config.maintainer,
-        '--license', config.license,
+        '--name', packages.name,
+        '--description', packages.description,
+        '--version', packages.version,
+        '--url', packages.site,
+        '--vendor', packages.vendor,
+        '--maintainer', packages.maintainer,
+        '--license', packages.license,
         '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
         '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
         '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
         '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
-        '--config-files', config.path.kibanaConfig,
-        '--template-value', `user=${config.user}`,
-        '--template-value', `group=${config.group}`,
-        '--template-value', `optimizeDir=${config.path.home}/optimize`,
-        '--template-value', `pluginsDir=${config.path.plugins}`,
-        '--template-value', `dataDir=${config.path.data}`,
+        '--config-files', packages.path.kibanaConfig,
+        '--template-value', `user=${packages.user}`,
+        '--template-value', `group=${packages.group}`,
+        '--template-value', `optimizeDir=${packages.path.home}/optimize`,
+        '--template-value', `pluginsDir=${packages.path.plugins}`,
+        '--template-value', `dataDir=${packages.path.data}`,
         //uses relative path to --prefix, strip the leading /
-        '--exclude', `${config.path.home.slice(1)}/data`
+        '--exclude', `${packages.path.home.slice(1)}/data`
       ];
       const debOptions = [
         '-t', 'deb',
@@ -56,8 +58,8 @@ export default (grunt) => {
         '--rpm-os', 'linux'
       ];
       const args = [
-        `${buildDir}/=${config.path.home}/`,
-        `${buildDir}/data/=${config.path.data}/`,
+        `${buildDir}/=${packages.path.home}/`,
+        `${buildDir}/data/=${packages.path.data}/`,
         `${servicesByName.sysv.outputDir}/etc/=/etc/`,
         `${servicesByName.systemd.outputDir}/etc/=/etc/`
       ];

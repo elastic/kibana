@@ -139,12 +139,12 @@ Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can b
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
 gem install pleaserun -v 0.0.24
-npm run build:ospackages
+npm run build -- --skip-archives
 ```
 
 To specify a package to build you can add `rpm` or `deb` as an argument.
 ```sh
-npm run build:ospackages -- --rpm
+npm run build -- --rpm
 ```
 
 Distributable packages can be found in `target/` after the build completes.

@@ -6,6 +6,9 @@ module.exports = function (grunt) {
   grunt.registerTask('_build:shasums', function () {
     var targetDir = grunt.config.get('target');
 
+    // for when shasums is run but archives and ospackages was not
+    grunt.file.mkdir(targetDir);
+
     readdir(targetDir)
     .map(function (archive) {
       // only sha the archives and packages

@@ -12,10 +12,7 @@ module.exports = function (grunt) {
       return resolve(rootPath, file);
     });
 
-    //We don't want to build os packages with symlinks
-    let transferFiles = (source, link) => grunt.option('os-packages')
-      ? exec('cp', ['-r', source, link])
-      : exec('ln', ['-s', source, link]);
+    let transferFiles = (source, link) => exec('cp', ['-r', source, link]);
 
     grunt.config.get('platforms').forEach(function (platform) {
       grunt.file.mkdir(platform.buildDir);
