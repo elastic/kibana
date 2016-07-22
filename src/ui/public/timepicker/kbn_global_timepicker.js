@@ -22,7 +22,7 @@ UiModules
       config.bindToScope($scope, 'dateFormat:dow', 'dateFormat_dow');
       $scope.$watch('dateFormat_dow', function (day) {
         const dow = moment.weekdays().indexOf(day);
-        moment.locale(moment.locale(), { week: { dow } });
+        moment.updateLocale(moment.locale(), { week: { dow } });
       });
 
       listenForUpdates($rootScope);
