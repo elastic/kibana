@@ -92,7 +92,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('should resolve with undefined if the nothing is upgradeable', function () {
-      const response = { hits: { hits: [ { _id: '4.0.1-beta1' }, { _id: '4.0.0-snapshot1' } ] } };
+      const response = { hits: { hits: [ { _id: '4.0.1-beta1' }, { _id: '4.0.0-SNAPSHOT1' } ] } };
       return upgrade(response).then(function (resp) {
         expect(resp).to.be(undefined);
       });
