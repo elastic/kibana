@@ -38,6 +38,8 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('_release:setS3Uploads', function () {
+    const { sha, version } = grunt.config.get('build');
+
     var uploads = grunt.config.get('platforms')
     .reduce(function (files, platform) {
       return files.concat(
@@ -61,10 +63,12 @@ module.exports = function (grunt) {
       }
     })
     .map(function (filename) {
-      return {
-        src: 'target/' + filename,
-        dest: 'kibana/kibana/' + filename
-      };
+      const src = `target/${filename}`;
+
+      const shortSha = sha.substr(0, 7);
+      const dest = `kibana/staging/${version}-${shortSha}/kibana/${filename}`;
+
+      return { src, dest };
     });
     grunt.config.set('s3.release.upload', uploads);
   });
