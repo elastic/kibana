@@ -31,7 +31,6 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
       var legendValueNumbers;
       var debouncedSetLegendNumbers;
       var defaultOptions = {
-        //canvas: false,
         xaxis: {
           mode: 'time',
           tickLength: 5,
@@ -173,6 +172,11 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
 
         if (!$('.chart-canvas', $elem).length) $elem.html(template);
         var canvasElem = $('.chart-canvas', $elem);
+
+        canvasElem.attr('style', '').css({
+          'font-size': _.get(render, 'font.size'),
+          color: _.get(render, 'font.color') || '#000'
+        });
 
         var title = _(plotConfig).map('_title').compact().last();
         $('.chart-top-title', $elem).text(title == null ? '' : title);
