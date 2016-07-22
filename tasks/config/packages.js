@@ -1,5 +1,5 @@
 export default (grunt) => {
-  const VERSION = grunt.config.get('pkg.version');
+  const VERSION = grunt.config.get('build.version');
 
   const FOLDER_STAGING = `kibana/staging/${VERSION.match(/\d\.\d\.\d/)[0]}-XXXXXXX/repos/${VERSION.match(/\d\./)[0]}x`;
   const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
