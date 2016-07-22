@@ -34,7 +34,10 @@ export default function normalizeSortRequest(config) {
 
       sortField = '_script';
       sortValue = {
-        script: indexField.script,
+        script: {
+          inline: indexField.script,
+          lang: indexField.lang
+        },
         type: indexField.type,
         order: direction
       };

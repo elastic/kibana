@@ -11,7 +11,7 @@ export default function () {
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
       script: {
-        script: field.script,
+        inline: field.script,
         lang: field.lang
       }
     };
