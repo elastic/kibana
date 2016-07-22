@@ -46,7 +46,7 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
           lineWidth: 2
         },
         grid: {
-          color: render.grid === false ? 'transparent' : (render.grid || '#000'),
+          show: render.grid,
           borderWidth: 0,
           borderColor: null,
           margin: 10,
@@ -54,6 +54,7 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
           autoHighlight: false
         },
         legend: {
+          backgroundColor: null,
           position: 'nw',
           labelBoxBorderColor: 'rgb(255,255,255,0)',
           labelFormatter: function (label, series) {
@@ -172,11 +173,6 @@ panelRegistry.register(function timeChartProvider($compile, $rootScope, timefilt
 
         if (!$('.chart-canvas', $elem).length) $elem.html(template);
         var canvasElem = $('.chart-canvas', $elem);
-
-        canvasElem.attr('style', '').css({
-          'font-size': _.get(render, 'font.size'),
-          color: _.get(render, 'font.color') || '#000'
-        });
 
         var title = _(plotConfig).map('_title').compact().last();
         $('.chart-top-title', $elem).text(title == null ? '' : title);
