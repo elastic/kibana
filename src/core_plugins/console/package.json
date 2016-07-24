@@ -3,6 +3,5 @@
   "contributors": [
     "Spencer Alger <spencer.alger@elastic.co>"
   ],
-  "name": "console",
-  "version": "5.0.0-alpha5"
+  "name": "console"
 }
