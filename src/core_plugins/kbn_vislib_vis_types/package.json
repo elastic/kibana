@@ -1,3 +1,4 @@
 {
-  "name": "kbn_vislib_vis_types"
+  "name": "kbn_vislib_vis_types",
+  "version": "kibana"
 }

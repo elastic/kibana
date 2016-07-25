@@ -3,5 +3,6 @@
   "contributors": [
     "Spencer Alger <spencer.alger@elastic.co>"
   ],
-  "name": "console"
+  "name": "console",
+  "version": "kibana"
 }
