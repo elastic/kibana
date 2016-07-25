@@ -70,7 +70,7 @@ function startNotifTimer(notif, cb) {
   notif.timerId = Notifier.config.setInterval(function () {
     notif.timeRemaining -= 1;
 
-    if (notif.timeRemaining === 0) {
+    if (notif.timeRemaining <= 0) {
       closeNotif(notif, cb, 'ignore')();
     }
   }, interval, notif.timeRemaining);
