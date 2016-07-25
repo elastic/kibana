@@ -320,8 +320,14 @@ Notifier.prototype._showFatal = function (err) {
  * @param  {Error|String} err
  * @param  {Function} cb
  */
-Notifier.prototype.error = function (err, cb) {
-  return add({
+Notifier.prototype.error = function (err, opts, cb) {
+  const overrideable = ['lifetime', 'icon'];
+  if (_.isFunction(opts)) {
+    cb = opts;
+    opts = {};
+  }
+
+  const config = _.assign({
     type: 'danger',
     content: formatMsg(err, this.from),
     icon: 'warning',
@@ -329,7 +335,8 @@ Notifier.prototype.error = function (err, cb) {
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
-  }, cb);
+  }, _.pick(opts, overrideable));
+  return add(config, cb);
 };
 
 /**
@@ -337,15 +344,22 @@ Notifier.prototype.error = function (err, cb) {
  * @param  {String} msg
  * @param  {Function} cb
  */
-Notifier.prototype.warning = function (msg, cb) {
-  return add({
+Notifier.prototype.warning = function (msg, opts, cb) {
+  const overrideable = ['lifetime', 'icon'];
+  if (_.isFunction(opts)) {
+    cb = opts;
+    opts = {};
+  }
+
+  const config = _.assign({
     type: 'warning',
     content: formatMsg(msg, this.from),
     icon: 'warning',
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
     actions: ['accept']
-  }, cb);
+  }, _.pick(opts, overrideable));
+  return add(config, cb);
 };
 
 /**
@@ -353,15 +367,22 @@ Notifier.prototype.warning = function (msg, cb) {
  * @param  {String} msg
  * @param  {Function} cb
  */
-Notifier.prototype.info = function (msg, cb) {
-  return add({
+Notifier.prototype.info = function (msg, opts, cb) {
+  const overrideable = ['lifetime', 'icon'];
+  if (_.isFunction(opts)) {
+    cb = opts;
+    opts = {};
+  }
+
+  const config = _.assign({
     type: 'info',
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
     title: 'Debug',
     lifetime: Notifier.config.infoLifetime,
     actions: ['accept']
-  }, cb);
+  }, _.pick(opts, overrideable));
+  return add(config, cb);
 };
 
 /**
