@@ -19,12 +19,6 @@ UiModules
   return {
     template: toggleHtml,
     link: ($scope, $el, attrs) => {
-      config.bindToScope($scope, 'dateFormat:dow', 'dateFormat_dow');
-      $scope.$watch('dateFormat_dow', function (day) {
-        const dow = moment.weekdays().indexOf(day);
-        moment.locale(moment.locale(), { week: { dow } });
-      });
-
       listenForUpdates($rootScope);
 
       $rootScope.timefilter = timefilter;
