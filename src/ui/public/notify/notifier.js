@@ -130,12 +130,14 @@ function add(notif, cb) {
 }
 
 function set(opts, cb) {
+  if (!opts.content) {
+    return null;
+  }
+
   if (this._sovereignNotif) {
     this._sovereignNotif.clear();
   }
-  if (!opts.content && !opts.markdown) {
-    return null;
-  }
+
   this._sovereignNotif = add(opts, cb);
   return this._sovereignNotif;
 }
@@ -371,7 +373,7 @@ Notifier.prototype.banner = function (msg, cb) {
   return this.set({
     type: 'banner',
     title: 'Attention',
-    markdown: formatMsg(msg, this.from),
+    content: formatMsg(msg, this.from),
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
@@ -382,7 +384,7 @@ Notifier.prototype.banner = function (msg, cb) {
  * @param  {Object} config
  * config = {
  *   title: 'Some Title here',
- *   markdown: 'Some markdown content',
+ *   content: 'Some markdown content',
  *   type: 'info',
  *   customActions: [{
  *     text: 'next',
@@ -397,7 +399,7 @@ Notifier.prototype.custom = function (config) {
   const customActionMax = 3;
   const mergedConfig = _.assign({}, {
     type: 'banner',
-    markdown: '',
+    content: '',
     lifetime: Notifier.config.bannerLifetime,
   }, config);
 
