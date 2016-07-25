@@ -30,7 +30,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
 
     let responseAggs = aggTypeMetricStandardDeviation.getResponseAggs(aggConfig);
     let lowerStdDevLabel = responseAggs[0].makeLabel();
-    let upperStdDevLabel = responseAggs[2].makeLabel();
+    let upperStdDevLabel = responseAggs[1].makeLabel();
 
     expect(lowerStdDevLabel).to.be('Lower custom label');
     expect(upperStdDevLabel).to.be('Upper custom label');
@@ -48,7 +48,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
 
     let responseAggs = aggTypeMetricStandardDeviation.getResponseAggs(aggConfig);
     let lowerStdDevLabel = responseAggs[0].makeLabel();
-    let upperStdDevLabel = responseAggs[2].makeLabel();
+    let upperStdDevLabel = responseAggs[1].makeLabel();
 
     expect(lowerStdDevLabel).to.be('Lower Standard Deviation of memory');
     expect(upperStdDevLabel).to.be('Upper Standard Deviation of memory');
