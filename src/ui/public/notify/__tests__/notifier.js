@@ -11,11 +11,11 @@ describe('Notifier', function () {
   const version = window.__KBN__.version;
   const buildNum = window.__KBN__.buildNum;
   const message = 'Oh, the humanity!';
+  const customText = 'fooMarkup';
   const customParams = {
     title: 'fooTitle',
-    markdown: 'fooMardown',
     lifetime: 10000,
-    customActions:[{
+    actions:[{
       text: 'Cancel',
       callback: sinon.spy()
     }, {
@@ -202,23 +202,23 @@ describe('Notifier', function () {
       expect(notifier.custom).to.be.defined;
     });
     it('properly merges options', function () {
-      const customNotif = notifier.custom(customParams);
+      const customNotif = notifier.custom(customText, customParams);
       expect(customNotif.title).to.equal(customParams.title);
       expect(customNotif.markdown).to.equal(customParams.markdown);
       expect(customNotif.lifetime).to.equal(customParams.lifetime);
     });
     it('gives a default action if none are provided', function () {
-      const noActionParams = _.assign({}, customParams, { customActions: []});
-      const customNotif = notifier.custom(noActionParams);
+      const noActionParams = _.assign({}, customParams, { actions: []});
+      const customNotif = notifier.custom(customText, noActionParams);
       expect(customNotif.actions.length).to.equal(1);
     });
     it('should wrap the callback functions in a close function', function () {
-      const customNotif = notifier.custom(customParams);
-      customNotif.customActions.forEach((action, idx) => {
-        expect(action.callback).not.to.equal(customParams.customActions[idx]);
+      const customNotif = notifier.custom(customText, customParams);
+      customNotif.actions.forEach((action, idx) => {
+        expect(action.callback).not.to.equal(customParams.actions[idx]);
         action.callback();
       });
-      customParams.customActions.forEach(action => {
+      customParams.actions.forEach(action => {
         expect(action.callback.called).to.true;
       });
     });
