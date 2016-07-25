@@ -333,14 +333,18 @@ define(function (require) {
       var alertText;
 
       return common.tryForTime(defaultTimeout, function () {
-        return self.clickDeletePattern()
-        .then(function () {
+        return self.clickDeletePattern();
+      })
+      .then(function () {
+        return common.tryForTime(defaultTimeout, function () {
           return self.remote.getAlertText();
-        })
-        .then(function (text) {
-          alertText = text;
-        })
-        .then(function () {
+        });
+      })
+      .then(function (text) {
+        alertText = text;
+      })
+      .then(function () {
+        return common.tryForTime(defaultTimeout, function () {
           return self.remote.acceptAlert();
         });
       })
