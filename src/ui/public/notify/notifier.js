@@ -407,7 +407,7 @@ Notifier.prototype.banner = function (msg, cb) {
  *   title: 'Some Title here',
  *   content: 'Some markdown content',
  *   type: 'info',
- *   customActions: [{
+ *   actions: [{
  *     text: 'next',
  *     callback: function() { next(); }
  *   }, {
@@ -416,23 +416,19 @@ Notifier.prototype.banner = function (msg, cb) {
  *   }]
  * }
  */
-Notifier.prototype.custom = function (config) {
+Notifier.prototype.custom = function (msg, config, cb) {
   const customActionMax = 3;
-  const mergedConfig = _.assign({}, {
-    type: 'banner',
-    content: '',
-    lifetime: Notifier.config.bannerLifetime,
+  const mergedConfig = _.assign({
+    type: 'custom',
+    title: 'Notification',
+    content: formatMsg(msg, this.from),
+    lifetime: Notifier.config.infoLifetime,
   }, config);
 
-  const hasActions = _.get(mergedConfig, 'customActions.length') || _.get(mergedConfig, 'actions.length');
-  // Add an ok if there are no actions, so you don't end up with a orphan notification
-  if (!hasActions) {
-    mergedConfig.actions = ['accept'];
-  } else if (mergedConfig.customActions) {
-    mergedConfig.customActions = mergedConfig.customActions.slice(0, customActionMax);
-  }
+  const hasActions = _.get(mergedConfig, 'actions.length');
+  mergedConfig.actions = (!hasActions) ? ['accept'] : mergedConfig.actions.slice(0, customActionMax);
 
-  return add(mergedConfig);
+  return add(mergedConfig, cb);
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
