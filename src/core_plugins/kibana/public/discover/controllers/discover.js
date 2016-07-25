@@ -27,12 +27,11 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 
-
-
 const app = uiModules.get('apps/discover', [
-  'kibana/notify',
   'kibana/courier',
-  'kibana/index_patterns'
+  'kibana/index_patterns',
+  'kibana/notify',
+  'kibana/sharing_ui'
 ]);
 
 uiRoutes
@@ -75,7 +74,7 @@ uiRoutes
 });
 
 app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
-  AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
+  AppState, timefilter, Promise, Private, kbnUrl, highlightTags, kbnShare) {
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -110,13 +109,19 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     key: 'open',
     description: 'Load Saved Search',
     template: require('plugins/kibana/discover/partials/load_search.html')
-  }, {
-    key: 'share',
-    description: 'Share Search',
-    template: require('plugins/kibana/discover/partials/share_search.html')
-  }];
-  $scope.timefilter = timefilter;
+  },
+  require('ui/kbn_share/kbn_share_nav')];
 
+  kbnShare.register('discover.link', {
+    $scope,
+    icon: {
+      title: 'Share',
+      classes: 'fa fa-link'
+    },
+    template: require('plugins/kibana/discover/partials/share_search.html')
+  });
+
+  $scope.timefilter = timefilter;
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
