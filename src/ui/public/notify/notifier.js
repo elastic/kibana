@@ -61,7 +61,7 @@ function timerCanceler(notif, cb = _.noop, key) {
 function startNotifTimer(notif, cb) {
   const interval = 1000;
 
-  if (notif.lifetime === Infinity) {
+  if (notif.lifetime === Infinity || notif.lifetime === 0) {
     return;
   }
 
