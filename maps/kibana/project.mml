@@ -26,7 +26,7 @@
       "srs": "",
       "class": "",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/physical/10m-land.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/physical/10m-land.zip"
       },
       "geometry": "polygon"
     },
@@ -36,7 +36,7 @@
       "srs": "",
       "class": "water-poly",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/physical/10m-lakes.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/physical/10m-lakes.zip"
       },
       "geometry": "polygon"
     },
@@ -46,7 +46,7 @@
       "srs": "",
       "class": "",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/cultural/10m-admin-0-boundary-lines-land.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-0-boundary-lines-land.zip"
       },
       "geometry": "linestring"
     },
@@ -56,7 +56,7 @@
       "srs": "",
       "class": "",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/cultural/10m-admin-0-boundary-lines-map-units.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-0-boundary-lines-map-units.zip"
       },
       "geometry": "polygon"
     },
@@ -66,7 +66,7 @@
       "srs": "",
       "class": "",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/cultural/10m-admin-1-states-provinces-lines.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-1-states-provinces-lines.zip"
       },
       "geometry": "linestring"
     },
@@ -77,7 +77,7 @@
       "class": "",
       "geometry": "point",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/cultural/10m-admin-0-country-points.zip"
+        "file": "https://s3.eu-central-1.amazonaws1.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-admin-0-country-points.zip"
       }
     },
     {
@@ -86,7 +86,7 @@
       "srs": "",
       "class": "",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/cultural/10m-populated-places-simple.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/cultural/10m-populated-places-simple.zip"
       },
       "geometry": "point"
     },
@@ -101,7 +101,7 @@
       "id": "10mriverslakecenterl",
       "class": "",
       "Datasource": {
-        "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/physical/10m-rivers-lake-centerlines.zip"
+        "file": "https://s3.eu-central-1.amazonaws.com/tiles.elastic.co/natural-earth-1.4.0/physical/10m-rivers-lake-centerlines.zip"
       },
       "layer": null,
       "srs-name": "autodetect",
