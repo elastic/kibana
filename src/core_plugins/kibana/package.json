@@ -1,3 +1,4 @@
 {
-  "name": "kibana"
+  "name": "kibana",
+  "version": "kibana"
 }

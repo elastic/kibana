@@ -17,7 +17,7 @@ module.exports = class ServerStatus {
   }
 
   createForPlugin(plugin) {
-    plugin.version = plugin.version || version;
+    if (plugin.version === 'kibana') plugin.version = version;
     const status = this.create(`plugin:${plugin.id}@${plugin.version}`);
     status.plugin = plugin;
     return status;
