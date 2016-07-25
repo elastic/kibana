@@ -1,0 +1,44 @@
+Backport PR #7598
+---------
+
+**Commit 1:**
+Add getSpinnerDone after clicking a new page in index pattern field list
+
+* Original sha: cfe85639fcb7c5295aa4aec80aca7b62460d1147
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-06-30T19:44:57Z
+
+**Commit 2:**
+Add a debug log so we can tell what page we're going to if we fail
+
+* Original sha: 583c89012c45a3610b41a36f2f46cedbdf79ed5c
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-06-30T20:13:56Z
+
+**Commit 3:**
+Try to fix another staleElementReference in data table test
+
+* Original sha: a8c1b4e8049cc22ba3dda9a79006bfb1a9455548
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-01T22:40:01Z
+
+**Commit 4:**
+Changes to fix settings page failure
+
+* Original sha: 7f5590aa5b496c506405b22aa7eb31c8a25cd485
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-06T20:46:00Z
+
+**Commit 5:**
+Merge branch 'master' into fixGoToPageTiming
+
+* Original sha: 39bcb7f07317db14740b039af96f3b2e5e22a6a4
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-06T20:47:16Z
+
+**Commit 6:**
+Fix a headerPage typo, un-nest some promises.
+
+* Original sha: 2945d75df6c056dfb33d3629a7aab672b3e6f1f8
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-06T21:44:44Z
+
+**Commit 7:**
+change other headerPage to header
+
+* Original sha: 2953d84c6f280ea403e04bc120443f9214e982b8
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-06T22:14:12Z
