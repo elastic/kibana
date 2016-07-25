@@ -1,4 +1,4 @@
-import { i18n } from './i18n';
+import  i18n from './i18n';
 
 /*
  Manages the language translations for Kibana. Responsible for loading translated content per language.

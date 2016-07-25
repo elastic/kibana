@@ -125,7 +125,7 @@ block content
           err.style['text-align'] = 'center';
           err.style['background'] = '#F44336';
           err.style['padding'] = '25px';
-          err.innerText = 'Kibana did not load properly. Check the server output for more information.';
+          err.innerText = '#{welcomeError}';
 
           document.body.innerHTML = err.outerHTML;
         }

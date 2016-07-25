@@ -10,6 +10,13 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
+import i18nPlugin from '../plugins/i18n/server/i18n/index';
+import langParser from 'accept-language-parser';
+
+let kibanaTranslations = [];
+let acceptLanguages = '';
+
+const DEFAULT_LANGUAGE = 'en';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -50,6 +57,9 @@ export default async (kbnServer, server, config) => {
       const app = uiExports.apps.byId[id];
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
+      const acceptLanguageStr = req.headers['accept-language'];
+      acceptLanguages = langParser.parse(acceptLanguageStr);
+
       try {
         if (kbnServer.status.isGreen()) {
           await reply.renderApp(app);
@@ -88,6 +98,10 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
     try {
+      if (kibanaTranslations.length <= 0) {
+        const language = await getTranslationLanguage(acceptLanguages);
+        kibanaTranslations = await i18nPlugin.getRegisteredLanguageTranslations(language);
+      }
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
@@ -96,6 +110,8 @@ export default async (kbnServer, server, config) => {
           includeUserProvidedConfig
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
+        welcomeMessage: translate('CORE-WELCOME_MESSAGE'),
+        welcomeError: translate('CORE-WELCOME_ERROR'),
       });
     } catch (err) {
       reply(err);
@@ -118,3 +134,55 @@ export default async (kbnServer, server, config) => {
     });
   });
 };
+
+function translate(key) {
+  if (!(key in kibanaTranslations)) {
+    return null;
+  }
+  return kibanaTranslations[key];
+}
+
+async function getTranslationLanguage(acceptLanguages) {
+  let langStr = '';
+  let foundLang = false;
+  const acceptLangsLen = acceptLanguages.length;
+  const registeredLanguages = await i18nPlugin.getRegisteredTranslationLanguages();
+
+  for (let indx = 0; indx < acceptLangsLen; indx++) {
+    const language = acceptLanguages[indx];
+    if (language.region) {
+      langStr = language.code + '-' + language.region;
+    } else {
+      langStr = language.code;
+    }
+    if (registeredLanguages.indexOf(langStr) > -1) {
+      foundLang = true;
+      break;
+    }
+  }
+  if (foundLang) {
+    return langStr;
+  }
+
+  const regLangsLen = registeredLanguages.length;
+  for (let indx = 0; indx < acceptLangsLen; indx++) {
+    const language = acceptLanguages[indx];
+    langStr = language.code;
+    for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
+      const lang = registeredLanguages[regIndx];
+      if (lang.match('^' + langStr)) {
+        langStr = lang;
+        foundLang = true;
+        break;
+      }
+    }
+    if (foundLang) {
+      break;
+    }
+  }
+  if (foundLang) {
+    return langStr;
+  }
+
+  return DEFAULT_LANGUAGE;
+}
