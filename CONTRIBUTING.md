@@ -76,18 +76,18 @@ optimize:
 
 #### SSL
 
-When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the cert. You can deal with this in a few ways:
+When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the cert.
 
-  1. Supply your own cert using the `config/kibana.dev.yml` file.
-    - You can point at the development certificate found in `test/dev_certs` 
-  1. Configure your OS to trust the cert:
+You can fix this issue in one of the following ways:
+
+  - Supply your own cert using the `config/kibana.dev.yml` file.
+  - Configure your OS to trust the cert:
     - OSX: https://www.accuweaver.com/2014/09/19/make-chrome-accept-a-self-signed-certificate-on-osx/
     - Window: http://stackoverflow.com/a/1412118
     - Linux: http://unix.stackexchange.com/a/90607
-  1. Click through the warning and accept future warnings.
-  1. Disable SSL with the `--no-ssl` flag:
+  - Click through the warning and accept future warnings.
+  - Disable SSL with the `--no-ssl` flag:
     - `npm start -- --no-ssl`
-
 
 #### Linting
 
