@@ -19,7 +19,7 @@ export default function () {
 
   return {
     storedFields: ['*'],
-    _source: true,
+    _source: self.getSourceFiltering(),
     scriptFields: scriptFields,
     fielddataFields: fielddataFields
   };
