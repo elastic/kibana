@@ -402,10 +402,12 @@ Notifier.prototype.banner = function (msg, cb) {
 
 /**
  * Display a custom message
+ * @param  {String} msg
  * @param  {Object} config
+ * @param  {Function} cb
+ *
  * config = {
  *   title: 'Some Title here',
- *   content: 'Some markdown content',
  *   type: 'info',
  *   actions: [{
  *     text: 'next',
