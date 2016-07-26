@@ -483,7 +483,6 @@ function createGroupLogger(type, opts) {
 
     if (consoleGroups) {
       if (status) {
-        console.log(status);
         console.groupEnd();
       } else {
         if (opts.open) {
