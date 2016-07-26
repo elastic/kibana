@@ -18,8 +18,8 @@
           <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
             <a
               class="vis-editor-subnav-link"
-              g-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
-              g-click="sidebar.section='data'"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
+              ng-click="sidebar.section='data'"
             >
               Data
             </a>
@@ -27,8 +27,8 @@
           <li ng-class="{active: sidebar.section == 'options'}">
             <a
               class="vis-editor-subnav-link"
-              g-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'options'}"
-              g-click="sidebar.section='options'"
+              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'options'}"
+              ng-click="sidebar.section='options'"
             >
               Options
             </a>
