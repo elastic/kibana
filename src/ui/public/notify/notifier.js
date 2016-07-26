@@ -426,7 +426,12 @@ Notifier.prototype.custom = function (msg, config, cb) {
   }, config);
 
   const hasActions = _.get(mergedConfig, 'actions.length');
-  mergedConfig.actions = (!hasActions) ? ['accept'] : mergedConfig.actions.slice(0, customActionMax);
+  if (!hasActions) {
+    mergedConfig.actions = ['accept'];
+  } else {
+    mergedConfig.customActions = mergedConfig.actions.slice(0, customActionMax);
+    delete mergedConfig.actions;
+  }
 
   return add(mergedConfig, cb);
 };
