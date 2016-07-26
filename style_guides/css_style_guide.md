@@ -25,14 +25,14 @@ Here are some examples of how to structure your styles. The
 rules that underly these examples are below.
 
 ```less
-.kbButton {
+.localNavButton {
   padding: 5px;
   border: 1px solid black;
   
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.is-button-pressed {
+  &.localNavButton-is-pressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }
@@ -40,36 +40,36 @@ rules that underly these examples are below.
   /**
    * 1. Center icon and text vertically.
    */
-  .kbButton__icon,
-  .kbButton__text {
+  .localNavButton__icon,
+  .localNavButton__text {
     display: inline-block; /* 1 */
     vertical-align: middle; /* 1 */
   }
 
-  .kbButton__icon {
+  .localNavButton__icon {
     color: gray;
     opacity: 0.5;
   }
 
-  .kbButton__text {
+  .localNavButton__text {
     color: black;
   }
 
-.kbButton--primary {
+.localNavButton--primary {
   border-color: blue;
 
   // Introduce specificity to color the descendant component.
-  .kbButton__icon,
-  .kbButton__text {
+  .localNavButton__icon,
+  .localNavButton__text {
     color: blue;
   }
 }
 ```
 
 ```html
-<button class="kbButton kbButton--primary">
-  <div class="kbButton__icon">Submit</div>
-  <div class="kbButton__text">Submit</div>
+<button class="localNavButton localNavButton--primary">
+  <div class="localNavButton__icon fa fa-check"></div>
+  <div class="localNavButton__text">Submit</div>
 </button>
 ```
 
@@ -83,7 +83,7 @@ This component will be represented in the styles as a **base class**:
 // We can use a namespace like "kb" to make sure we don't affect
 // other styles accidentally, especially when we're using a generic
 // name like "button".
-.kbButton {
+.localNavButton {
   background-color: gray;
   color: black;
   border-radius: 4px;
@@ -99,16 +99,16 @@ can indicate this parent-child relationship with a double-underscore and by
 indenting the **descendant classes**.
 
 ```less
-.kbButton {
+.localNavButton {
   /* ... */
 }
 
-  .kbButton__icon {
+  .localNavButton__icon {
     display: inline-block;
     vertical-align: middle;
   }
 
-  .kbButton__text {
+  .localNavButton__text {
     display: inline-block;
     vertical-align: middle;
     font-weight: 300;
@@ -116,9 +116,9 @@ indenting the **descendant classes**.
 ```
 
 ```html
-<button class="kbButton">
-  <div class="kbButton__icon fa fa-trophy"></div>
-  <div class="kbButton__text">Winner</div>
+<button class="localNavButton">
+  <div class="localNavButton__icon fa fa-trophy"></div>
+  <div class="localNavButton__text">Winner</div>
 </button>
 ```
 
@@ -187,16 +187,16 @@ If a user interacts with a component, or a change in application state needs to
 be surfaced in the UI, then create **state classes**. These classes will be applied
 to components in response to these changes.
 
-Notice that all states begin with a boolean keyword, typically "is-".
+Notice that all states contain a boolean keyword, typically "is".
 
 ```less
-.kbButton {
+.localNavButton {
   /* ... */
 
   /**
    * 1. This button can appear in a "pressed" aka "pinned" state.
    */
-  &.is-button-pressed {
+  &.localNavButton-is-pressed {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2); /* 1 */
   }
 }
@@ -210,23 +210,23 @@ in that they will not be applied to a component as a result of user interaction
 or a change in application state.
 
 ```less
-.kbButton {
+.localNavButton {
   /* ... */
 }
 
-.kbButton--primary {
+.localNavButton--primary {
   color: white;
   background-color: blue;
 }
 
-.kbButton--danger {
+.localNavButton--danger {
   color: white;
   background-color: red;
 }
 ```
 
 ```html
-<button class="kbButton kbButton--danger">
+<button class="localNavButton localNavButton--danger">
   Delete everything
 <button>
 ```
@@ -252,20 +252,20 @@ It might be tempting to create modifiers that can be combined, like this:
 
 ```less
 // ======================== Bad! ========================
-.kbButton--large {
+.localNavButton--large {
   padding: 20px;
 }
 
-.kbButton--loud {
+.localNavButton--loud {
   text-transform: uppercase;
 }
 ```
 
 ```html
-<button class="kbButton kbButton--large">
+<button class="localNavButton localNavButton--large">
   Button
 </button>
-<button class="kbButton kbButton--large kbButton--loud">
+<button class="localNavButton localNavButton--large localNavButton--loud">
   Button
 </button>
 ```
@@ -295,31 +295,31 @@ the component is a good way to approach this conversation.
 ```less
 // This button is used for calls-to-action, e.g. "Sign up for our newsletter".
 // Generally, no more than one will ever appear on a given page.
-.kbCallOutButton {
+.localNavCallOutButton {
   background-color: gray;
   color: black;
   border-radius: 4px;
   padding: 20px;
 }
 
-.kbCallOutButton--primary {
+.localNavCallOutButton--primary {
   text-transform: uppercase;
 }
 ```
 
 ```html
-<button class="kbCallOutButton">
+<button class="localNavCallOutButton">
   Call-out button
 </button>
-<button class="kbCallOutButton kbCallOutButton--primary">
+<button class="localNavCallOutButton localNavCallOutButton--primary">
   Primary call-out button
 </button>
 ```
 
 ### How to apply DRY
 
-The above example might look counter-DRY to you, since the kbButton and
-kbCallOutButton have so many common properties.
+The above example might look WET to you, since the localNavButton and
+localNavCallOutButton have so many common properties.
 
 In general, it's more important to keep styles tightly-scoped to clearly-defined
 components (which increases readability and maintainabilty) than it is to keep
@@ -330,18 +330,18 @@ try using a mixin.
 
 ```less
 // Use the suffix "mixin" to avoid confusing this with a base class.
-.kbButtonMixin {
+.localNavButtonMixin {
   background-color: gray;
   color: black;
   border-radius: 4px;
 }
 
-.kbButton {
-  &:extend(.kbButtonMixin all);
+.localNavButton {
+  &:extend(.localNavButtonMixin all);
 }
 
-.kbCallOutButton {
-  &:extend(.kbButtonMixin all);
+.localNavCallOutButton {
+  &:extend(.localNavButtonMixin all);
 }
 ```
 
@@ -353,7 +353,7 @@ likely that any change made to one of them will have to made to the rest, too
 (it might be a good idea to double-check this with the designer).
 
 In this case, a mixin can be very useful because then you only need to make the
-change in one place. Consider the above `kbButtonMixin` example. Now if the
+change in one place. Consider the above `localNavButtonMixin` example. Now if the
 border-radius changes for all buttons, you only need to change it there. Or if
 the designers anticipate that all new types of buttons should have the same
 border-radius, then you can just extend this mixin when you create a new button
