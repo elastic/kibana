@@ -1,7 +1,8 @@
 export default (grunt) => {
   const VERSION = grunt.config.get('build.version');
+  const SHORT_SHA = grunt.config.get('build.sha').substr(0, 7);
 
-  const FOLDER_STAGING = `kibana/staging/${VERSION.match(/\d\.\d\.\d/)[0]}-XXXXXXX/repos/${VERSION.match(/\d\./)[0]}x`;
+  const FOLDER_STAGING = `kibana/staging/${VERSION}-${SHORT_SHA}/repos/${VERSION.match(/\d\./)[0]}x`;
   const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
 
   const FOLDERNAME_DEB = 'debian';
@@ -30,8 +31,8 @@ export default (grunt) => {
       },
       production: {
         bucket: 'packages.elasticsearch.org',
-        debPrefix: PREFIX_STAGING_DEB,
-        rpmPrefix: PREFIX_STAGING_RPM
+        debPrefix: PREFIX_PRODUCTION_DEB,
+        rpmPrefix: PREFIX_PRODUCTION_RPM
       }
     },
     user: 'kibana',
