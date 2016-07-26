@@ -1,0 +1,8 @@
+Backport PR #7848
+---------
+
+**Commit 1:**
+Docs for tilemap and tile service configurability
+
+* Original sha: e1fe7005f370113aa8737c26eb90f0e19575a63c
+* Authored by Court Ewing <court@epixa.com> on 2016-07-26T18:36:49Z

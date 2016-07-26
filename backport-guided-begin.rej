@@ -1,0 +1,12 @@
+#!/bin/sh
+
+REMOTE="upstream"
+BRANCH="jasper/backport/7848/4.x"
+WORKING_BRANCH="tmp/$BRANCH"
+STARTING_SHA="e1fe7005f370113aa8737c26eb90f0e19575a63c"
+ENDING_SHA="e1fe7005f370113aa8737c26eb90f0e19575a63c"
+
+git fetch $REMOTE
+
+git checkout -b $WORKING_BRANCH $ENDING_SHA
+git rebase $STARTING_SHA^ --onto $BRANCH
