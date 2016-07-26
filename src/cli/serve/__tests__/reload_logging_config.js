@@ -25,7 +25,9 @@ function setLoggingJson(enabled) {
 describe(`Server logging configuration`, function () {
 
   const isWindows = /^win/.test(process.platform);
-  if (!isWindows) {
+  if (isWindows) {
+    it('SIGHUP is not a feature of Windows.');
+  } else {
     it(`should be reloadable via SIGHUP process signaling`, function (done) {
       this.timeout(60000);
 
@@ -89,7 +91,5 @@ describe(`Server logging configuration`, function () {
         child.kill();
       }
     });
-  }/*else {
-    This test has no equivalent in Windows. The SIGHUP signal - which should trigger a reload of the configuration - is only present in UNIX.
-   }*/
+  }
 });
