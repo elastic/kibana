@@ -5,7 +5,7 @@ import uiModules from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('appSwitcherLink', function () {
+module.directive('appSwitcherLink', chrome => {
   return {
     restrict: 'E',
     replace: true,
@@ -15,9 +15,21 @@ module.directive('appSwitcherLink', function () {
       tooltip: '=appSwitcherLinkTooltip',
       onClick: '&appSwitcherLinkOnClick',
       href: '=appSwitcherLinkHref',
+      kbnRoute: '=appSwitcherLinkKbnRoute',
       icon: '=appSwitcherLinkIcon',
       title: '=appSwitcherLinkTitle'
     },
-    template: appSwitcherLinkTemplate
+    template: appSwitcherLinkTemplate,
+    link: scope => {
+      scope.getHref = () => {
+        if (scope.href) {
+          return scope.href;
+        }
+
+        if (scope.kbnRoute) {
+          return chrome.addBasePath(scope.kbnRoute);
+        }
+      };
+    }
   };
 });

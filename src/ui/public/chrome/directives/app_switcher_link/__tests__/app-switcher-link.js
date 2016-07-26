@@ -25,6 +25,7 @@ describe('appSwitcherLink directive', () => {
         app-switcher-link-tooltip="appSwitcherLinkTooltip"
         app-switcher-link-on-click="appSwitcherLinkOnClick()"
         app-switcher-link-href="appSwitcherLinkHref"
+        app-switcher-link-kbn-route="appSwitcherLinkKbnRoute"
         app-switcher-link-icon="appSwitcherLinkIcon"
         app-switcher-link-title="appSwitcherLinkTitle"
       />
@@ -102,6 +103,27 @@ describe('appSwitcherLink directive', () => {
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
         expect(link.attr('href')).to.be(attrs.appSwitcherLinkHref);
+      });
+    });
+
+    describe('appSwitcherLinkKbnRoute attribute', () => {
+      it(`is applied to the link when href isn't defined`, () => {
+        const attrs = {
+          appSwitcherLinkKbnRoute: '#test',
+        };
+        const element = create(attrs);
+        const link = element.find('[data-test-subj=appLink]');
+        expect(link.attr('href')).to.be(attrs.appSwitcherLinkKbnRoute);
+      });
+
+      it(`isn't applied to the link when href is defined`, () => {
+        const attrs = {
+          appSwitcherLinkHref: 'link to a website',
+          appSwitcherLinkKbnRoute: '#test',
+        };
+        const element = create(attrs);
+        const link = element.find('[data-test-subj=appLink]');
+        expect(link.attr('href')).not.to.be(attrs.appSwitcherLinkKbnRoute);
       });
     });
 
