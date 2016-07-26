@@ -93,11 +93,21 @@ module.exports = function (api) {
     ],
     url_params: {
       "analyzer": "",
-      "char_filters": [],
+      "char_filter": [],
       "field": "",
-      "filters": [],
+      "filter": [],
       "text": "",
       "tokenizer": ""
+    },
+    data_autocomplete_rules: {
+      text: [],
+      field: "{field}",
+      analyzer: "",
+      tokenizer: "",
+      char_filter: [],
+      filter: [],
+      explain: {__one_of: [false, true]},
+      attributes: []
     }
   });
 
