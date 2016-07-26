@@ -67,7 +67,6 @@ bdd.describe('visualize app', function describeIndexTests() {
       return PageObjects.visualize.saveVisualization(vizNamewithSpecialChars)
       .then(function (message) {
         PageObjects.common.debug(`Saved viz message = ${message}`);
-        PageObjects.common.saveScreenshot('Visualize-area-chart-save-toast');
         expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
       });
     });
