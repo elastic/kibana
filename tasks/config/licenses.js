@@ -29,6 +29,7 @@ module.exports = function (grunt) {
         'ISC',
         'WTFPL',
         'Public-Domain',
+        'Public domain',
         'UNLICENSE'
       ],
       overrides: {
@@ -60,7 +61,6 @@ module.exports = function (grunt) {
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
-        'tweetnacl@0.14.3': ['Public-Domain'],
       }
     }
   };

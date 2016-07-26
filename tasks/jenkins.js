@@ -26,6 +26,7 @@ module.exports = function (grunt) {
     'rejectRejFiles',
 
     'eslint:source',
+    'licenses',
     'test:server',
     'test:browser',
     'test:api',
