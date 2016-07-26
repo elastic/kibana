@@ -3,6 +3,13 @@
 
 A tile map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
+IMPORTANT: To use the tile map visualization in Kibana {version}, you must 
+configure a http://mapserver.org/ogc/wms_server.html[WMS map server]. Select the
+Options tab, enable the *WMS compliant map server* option, and specify the URL 
+of the WMS map server you want to use. To use the 
+https://www.elastic.co/elastic-tile-service[Elastic Tile Service], 
+upgrade to Kibana 4.5.3+. 
+
 The default _metrics_ aggregation for a tile map is the *Count* aggregation. You can select any of the following 
 aggregations as the metrics aggregation:
 
