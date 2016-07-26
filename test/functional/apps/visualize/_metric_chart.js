@@ -156,7 +156,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     bdd.it('should show Standard Deviation', function pageHeader() {
       var standardDeviationBytes = [
         '-1,435.138', 'Lower Standard Deviation of bytes',
-        '5,727.314', 'Average of bytes',
         '12,889.766', 'Upper Standard Deviation of bytes'
       ];
       PageObjects.common.debug('Aggregation = Standard Deviation');
