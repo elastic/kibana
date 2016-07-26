@@ -134,5 +134,27 @@ dateHistogramArray.forEach(function (data, i) {
         expect(vis.handler.charts.length).to.be(0);
       });
     });
+
+    describe('event proxying', function () {
+
+      it('should only pass the original event object to downstream handlers', function (done) {
+        const event = {};
+        const chart = vis.handler.charts[0];
+
+        const mockEmitter = function () {
+          const args = Array.from(arguments);
+          expect(args.length).to.be(2);
+          expect(args[0]).to.be('click');
+          expect(args[1]).to.be(event);
+          done();
+        };
+
+        vis.emit = mockEmitter;
+        vis.handler.enable('click', chart);
+        chart.events.emit('click', event);
+      });
+
+    });
+
   });
 });

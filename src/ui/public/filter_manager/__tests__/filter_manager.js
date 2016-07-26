@@ -119,9 +119,11 @@ describe('Filter Manager', function () {
     checkAddFilters(1, [{
       meta: {index: 'myIndex', negate: false, field: 'scriptedField'},
       script: {
-        script: '(' + scriptedField.script + ') == value',
-        lang: scriptedField.lang,
-        params: {value: 1}
+        script: {
+          inline: '(' + scriptedField.script + ') == value',
+          lang: scriptedField.lang,
+          params: {value: 1}
+        }
       }
     }], 4);
     expect(appState.filters).to.have.length(3);

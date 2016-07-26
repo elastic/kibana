@@ -136,7 +136,7 @@ export default class SettingsPage {
 
   clickDefaultIndexButton() {
     return this.remote.setFindTimeout(defaultFindTimeout)
-    .findByCssSelector('button.btn.btn-warning.ng-scope').click()
+    .findByCssSelector('button.btn.btn-success.ng-scope').click()
     .then(() => {
       return PageObjects.header.getSpinnerDone();
     });

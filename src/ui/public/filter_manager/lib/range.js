@@ -41,8 +41,8 @@ export default function buildRangeFilter(field, params, indexPattern, formattedV
       return operators[key] + field.format.convert(val);
     }).join(' ');
 
-    filter.script = { script: script, params: params, lang: field.lang };
-    filter.script.params.value = value;
+    _.set(filter, 'script.script', { inline: script, params: params, lang: field.lang });
+    filter.script.script.params.value = value;
     filter.meta.field = field.name;
   } else {
     filter.range = {};
