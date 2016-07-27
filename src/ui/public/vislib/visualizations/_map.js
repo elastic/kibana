@@ -1,5 +1,5 @@
 define(function (require) {
-  return function MapFactory(Private, tilemap) {
+  return function MapFactory(Private, tilemap, $sanitize) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -14,7 +14,7 @@ define(function (require) {
     var defaultMarkerType = 'Scaled Circle Markers';
 
     var tilemapOptions = tilemap.options;
-    var attribution = marked(tilemapOptions.attribution);
+    var attribution = $sanitize(marked(tilemapOptions.attribution));
 
     var mapTiles = {
       url: tilemap.url,
