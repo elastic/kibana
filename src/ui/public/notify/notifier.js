@@ -433,11 +433,11 @@ Notifier.prototype.custom = function (msg, config, cb) {
   }, config);
 
   const hasActions = _.get(mergedConfig, 'actions.length');
-  if (!hasActions) {
-    mergedConfig.actions = ['accept'];
-  } else {
+  if (hasActions) {
     mergedConfig.customActions = mergedConfig.actions.slice(0, customActionMax);
     delete mergedConfig.actions;
+  } else {
+    mergedConfig.actions = ['accept'];
   }
 
   return add(mergedConfig, cb);
