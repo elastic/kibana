@@ -17,7 +17,7 @@ dashboards. Kibana creates a new index if the index doesn’t already exist.
 [[tilemap-settings]]`tilemap.url:`:: *Default: `"https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`* The URL to the tile
 service that Kibana uses to display map tiles in tilemap visualizations.
 `tilemap.options.minZoom:`:: *Default: 1* The minimum zoom level.
-`tilemap.options.maxZoom:`:: *Default: 7* The maximum zoom level.
+`tilemap.options.maxZoom:`:: *Default: 9* The maximum zoom level.
 `tilemap.options.attribution:`:: *Default: `"© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)"`* The map attribution string.
 `tilemap.options.subdomains:`:: An array of subdomains used by the tile service.
 Specify the position of the subdomain the URL with the token `{s}`.
