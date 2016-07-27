@@ -424,7 +424,6 @@ Notifier.prototype.custom = function (msg, config, cb) {
     throw new Error('config param is required, and must be an object');
   }
 
-  const customActionMax = 3;
   const mergedConfig = _.assign({
     type: 'custom',
     title: 'Notification',
@@ -434,7 +433,7 @@ Notifier.prototype.custom = function (msg, config, cb) {
 
   const hasActions = _.get(mergedConfig, 'actions.length');
   if (hasActions) {
-    mergedConfig.customActions = mergedConfig.actions.slice(0, customActionMax);
+    mergedConfig.customActions = mergedConfig.actions;
     delete mergedConfig.actions;
   } else {
     mergedConfig.actions = ['accept'];
