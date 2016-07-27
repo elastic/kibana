@@ -11,14 +11,14 @@ import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visu
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visualizations/marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
-export default function MapFactory(Private, tilemap) {
+export default function MapFactory(Private, tilemap, $sanitize) {
 
   let defaultMapZoom = 2;
   let defaultMapCenter = [15, 5];
   let defaultMarkerType = 'Scaled Circle Markers';
 
   let tilemapOptions = tilemap.options;
-  let attribution = marked(tilemapOptions.attribution);
+  let attribution = $sanitize(marked(tilemapOptions.attribution));
 
   let mapTiles = {
     url: tilemap.url,

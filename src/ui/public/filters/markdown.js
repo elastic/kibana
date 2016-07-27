@@ -1,5 +1,6 @@
 import marked from 'marked';
 import uiModules from 'ui/modules';
+import 'angular-sanitize';
 
 marked.setOptions({
   gfm: true, // GitHub-flavored markdown
@@ -7,7 +8,7 @@ marked.setOptions({
 });
 
 uiModules
-  .get('kibana')
-  .filter('markdown', function ($sce) {
-    return md => md ? $sce.trustAsHtml(marked(md)) : '';
+  .get('kibana', ['ngSanitize'])
+  .filter('markdown', function ($sanitize) {
+    return md => md ? $sanitize(marked(md)) : '';
   });
