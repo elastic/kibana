@@ -6,8 +6,10 @@ import _ from 'lodash';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeTemplate from 'ui/visualize/visualize.html';
+import 'angular-sanitize';
+
 uiModules
-.get('kibana/directive')
+.get('kibana/directive', ['ngSanitize'])
 .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
 
 
