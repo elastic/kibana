@@ -29,11 +29,6 @@ routes
 });
 
 chrome
-.setTabDefaults({
-  resetWhenActive: true,
-  lastUrlStore: window.sessionStorage,
-  activeIndicatorColor: '#656a76'
-})
 .setRootController('kibana', function ($scope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
@@ -41,9 +36,15 @@ chrome
   });
 
   config.watch('dateFormat:tz', setDefaultTimezone, $scope);
+  config.watch('dateFormat:dow', setStartDayOfWeek, $scope);
 
   function setDefaultTimezone(tz) {
     moment.tz.setDefault(tz);
+  }
+
+  function setStartDayOfWeek(day) {
+    const dow = moment.weekdays().indexOf(day);
+    moment.updateLocale(moment.locale(), { week: { dow } });
   }
 });
 

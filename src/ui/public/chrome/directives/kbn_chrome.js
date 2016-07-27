@@ -33,8 +33,6 @@ export default function (chrome, internals) {
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
           let { href } = window.location;
-          let persist = chrome.getVisible();
-          internals.tabs.consumeRouteUpdate(href, persist);
           internals.trackPossibleSubUrl(href);
         };
 

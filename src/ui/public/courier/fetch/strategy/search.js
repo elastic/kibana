@@ -3,7 +3,7 @@ import angular from 'angular';
 
 import { toJson } from 'ui/utils/aggressive_parse';
 
-export default function FetchStrategyForSearch(Private, Promise, timefilter) {
+export default function FetchStrategyForSearch(Private, Promise, timefilter, kbnIndex) {
 
   return {
     clientMethod: 'msearch',
@@ -26,6 +26,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
           return indexList.toIndexList(timeBounds.min, timeBounds.max);
         })
         .then(function (indexList) {
+          let body = fetchParams.body || {};
           // If we've reached this point and there are no indexes in the
           // index list at all, it means that we shouldn't expect any indexes
           // to contain the documents we're looking for, so we instead
@@ -35,7 +36,8 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
           // handle that request by querying *all* indexes, which is the
           // opposite of what we want in this case.
           if (_.isArray(indexList) && indexList.length === 0) {
-            indexList.push('.kibana-devnull');
+            indexList.push(kbnIndex);
+            body = emptySearch();
           }
           return angular.toJson({
             index: indexList,
@@ -44,7 +46,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
             ignore_unavailable: true
           })
           + '\n'
-          + toJson(fetchParams.body || {}, angular.toJson);
+          + toJson(body, angular.toJson);
         });
       })
       .then(function (requests) {
@@ -62,3 +64,15 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter) {
     }
   };
 };
+
+function emptySearch() {
+  return {
+    query: {
+      bool: {
+        must_not: [
+          { match_all: {} }
+        ]
+      }
+    }
+  };
+}

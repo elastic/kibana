@@ -55,11 +55,21 @@ describe('ui/courier/fetch/strategy/search', () => {
     context('when indexList is empty', () => {
       beforeEach(() => reqsFetchParams[0].index = []);
 
-      it('queries .kibana-devnull instead', () => {
+      it('queries the kibana index (.kibana) with a must_not match_all boolean', () => {
+        const query = JSON.stringify({
+          query: {
+            bool: {
+              must_not: [
+                { match_all: {} }
+              ]
+            }
+          }
+        });
         let value;
         search.reqsFetchParamsToBody(reqsFetchParams).then(val => value = val);
         $rootScope.$apply();
-        expect(_.includes(value, '"index":[".kibana-devnull"]')).to.be(true);
+        expect(_.includes(value, '"index":[".kibana"]')).to.be(true);
+        expect(_.includes(value, query)).to.be(true);
       });
     });
   });

@@ -1,3 +1,5 @@
+import { endsWith } from 'lodash';
+
 module.exports = function (grunt) {
   let { resolve } = require('path');
 
@@ -11,11 +13,15 @@ module.exports = function (grunt) {
     'linux-x64',
     'linux-x86',
     'windows-x86'
-  ].map(function (name) {
-    let win = name === 'windows-x86';
+  ].map(function (baseName) {
+    let win = baseName === 'windows-x86';
 
-    let nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${name}.tar.gz`;
-    let nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${name}`);
+    let nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
+    let nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${baseName}`);
+
+    const name = endsWith(baseName, '-x64')
+      ? baseName.replace('-x64', '-x86_64')
+      : baseName;
 
     let buildName = `kibana-${version}-${name}`;
     let buildDir = resolve(rootPath, `build/${buildName}`);
@@ -33,11 +39,11 @@ module.exports = function (grunt) {
     let debArch;
     let rpmArch;
     if (name.match('linux')) {
-      debArch = name.match('x64') ? 'amd64' : 'i386';
+      debArch = name.match('x86_64') ? 'amd64' : 'i386';
       debName = `kibana-${version}-${debArch}.deb`;
       debPath = resolve(rootPath, `target/${debName}`);
 
-      rpmArch = name.match('x64') ? 'x86_64' : 'i686';
+      rpmArch = name.match('x86_64') ? 'x86_64' : 'i686';
       rpmName = `kibana-${version}-${rpmArch}.rpm`;
       rpmPath = resolve(rootPath, `target/${rpmName}`);
     }
