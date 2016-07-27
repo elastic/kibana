@@ -1,23 +1,6 @@
-var marked = require('marked');
 var Promise = require('bluebird');
 var join = require('path').join;
-var TextRenderer = require('marked-text-renderer');
 var _ = require('lodash');
-var fs = require('fs');
-var entities = new (require('html-entities').AllHtmlEntities)();
-
-var readFile = Promise.promisify(fs.readFile);
-var writeFile = Promise.promisify(fs.writeFile);
-
-TextRenderer.prototype.heading = function (text, level, raw) {
-  return '\n\n' + text + '\n' + _.map(text, function () { return '='; }).join('') + '\n';
-};
-
-var process = function (input) {
-  var output = input.replace(/<\!\-\- [^\-]+ \-\->/g, '\n');
-  output = marked(output);
-  return entities.decode(output);
-};
 
 module.exports = function (grunt) {
 
@@ -32,29 +15,12 @@ module.exports = function (grunt) {
     var srcLicense =  join(root, 'LICENSE.md');
     var distLicense = join(build, 'dist', 'kibana', 'LICENSE.txt');
 
-    marked.setOptions({
-      renderer: new TextRenderer(),
-      tables: true,
-      breaks: false,
-      pedantic: false,
-      sanitize: false,
-      smartLists: true,
-      smartypants: false
-    });
+    function transformReadme(readme) {
+      return readme.replace(/\s##\sSnapshot\sBuilds[\s\S]*/, '');
+    }
 
-    readFile(srcReadme, 'utf-8')
-    .then(function (data) {
-      return writeFile(distReadme, process(data.toString()));
-    })
-    .then(function () {
-      return readFile(srcLicense, 'utf-8');
-    })
-    .then(function (data) {
-      return writeFile(distLicense, process(data.toString()));
-    })
-    .then(done)
-    .catch(done);
-
+    grunt.file.copy(srcLicense, distLicense);
+    grunt.file.write(distReadme, transformReadme(grunt.file.read(srcReadme)));
   });
 
 };

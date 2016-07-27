@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private, configFile) {
+  return function TileMapFactory(d3, Private, configFile, $sanitize) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -84,7 +84,7 @@ define(function (require) {
 
           var div = $(this).addClass('tilemap');
           var tileLayer = L.tileLayer(configFile.tilemap_url, {
-            attribution: marked(configFile.tilemap_attribution),
+            attribution: $sanitize(marked(configFile.tilemap_attribution)),
             subdomains: configFile.tilemap_subdomains,
             minZoom: configFile.tilemap_min_zoom,
             maxZoom: configFile.tilemap_max_zoom
