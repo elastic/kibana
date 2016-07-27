@@ -83,7 +83,7 @@ You can fix this issue in one of the following ways:
   - Supply your own cert using the `config/kibana.dev.yml` file.
   - Configure your OS to trust the cert:
     - OSX: https://www.accuweaver.com/2014/09/19/make-chrome-accept-a-self-signed-certificate-on-osx/
-    - Window: http://stackoverflow.com/a/1412118
+    - Windows: http://stackoverflow.com/a/1412118
     - Linux: http://unix.stackexchange.com/a/90607
   - Click through the warning and accept future warnings.
   - Disable SSL with the `--no-ssl` flag:
