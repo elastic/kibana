@@ -424,11 +424,24 @@ Notifier.prototype.custom = function (msg, config, cb) {
     throw new Error('config param is required, and must be an object');
   }
 
+  const getLifetime = (type) => {
+    switch (type) {
+      case 'banner':
+        return Notifier.config.bannerLifetime;
+      case 'warning':
+        return Notifier.config.warningLifetime;
+      case 'danger':
+        return Notifier.config.errorLifetime;
+      default: // info
+        return Notifier.config.infoLifetime;
+    }
+  };
+
   const mergedConfig = _.assign({
-    type: 'custom',
+    type: 'info',
     title: 'Notification',
     content: formatMsg(msg, this.from),
-    lifetime: Notifier.config.infoLifetime,
+    lifetime: getLifetime(config.type)
   }, config);
 
   const hasActions = _.get(mergedConfig, 'actions.length');
