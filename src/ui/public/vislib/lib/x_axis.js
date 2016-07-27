@@ -352,10 +352,10 @@ export default function XAxisFactory(Private) {
         .attr('transform', function rotate() {
           return 'rotate(-90)';
         })
-          .append('title')
-          .text(function () {
-            return this.__data__;
-          });
+        .append('title')
+        .text(function (text) {
+          return text;
+        });
         selection.select('svg')
         .attr('height', self._attr.xAxisLabelHt);
       }
