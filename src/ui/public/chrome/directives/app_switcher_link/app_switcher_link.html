@@ -1,0 +1,36 @@
+<div
+  class="app-switcher-link"
+  ng-class="{ active: isActive, 'is-app-switcher-link-disabled': isDisabled }"
+  tooltip="{{ tooltip }}"
+  tooltip-placement="right"
+  tooltip-popup-delay="400"
+  tooltip-append-to-body="1"
+>
+  <a
+    class="app-switcher-link__anchor"
+    href="{{ getHref() }}"
+    ng-click="onClick({ $event: $event })"
+    data-test-subj="appLink"
+    title="{{ title }}"
+  >
+    <div class="app-switcher-link__icon">
+      <img
+        ng-if="icon"
+        class="app-switcher-link__icon-image"
+        kbn-src="{{ '/' + icon }}"
+      >
+
+      <span
+        ng-if="!icon"
+        class="app-switcher-link__icon-placeholder"
+        data-test-subj="appLinkIconPlaceholder"
+      >
+        {{ title[0] }}
+      </span>
+    </div>
+
+    <div class="app-switcher-link__title">
+      {{ title }}
+    </div>
+  </a>
+</div>
