@@ -38,6 +38,15 @@ export default function (chrome, internals) {
     });
   };
 
+  chrome.removeBasePath = function (url) {
+    if (!internals.basePath) {
+      return url;
+    }
+
+    const basePathRegExp = new RegExp(`^${internals.basePath}`);
+    return url.replace(basePathRegExp, '');
+  };
+
   function lastSubUrlKey(link) {
     return `lastSubUrl:${link.url}`;
   }
@@ -101,19 +110,13 @@ export default function (chrome, internals) {
     const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
 
     for (const link of internals.nav) {
-      const matchingTab = find(internals.tabs, { rootUrl: link.url });
-
       link.active = startsWith(url, link.url);
       if (link.active) {
         setLastUrl(link, url);
         continue;
       }
 
-      if (matchingTab) {
-        setLastUrl(link, matchingTab.getLastUrl());
-      } else {
-        refreshLastUrl(link);
-      }
+      refreshLastUrl(link);
 
       if (newGlobalState) {
         injectNewGlobalState(link, appId, newGlobalState);

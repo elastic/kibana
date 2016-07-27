@@ -22,10 +22,6 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
           valProp: ['std_deviation_bounds', 'lower'],
           title: 'Lower ' + label
         },
-        avg: {
-          valProp: 'avg',
-          title: 'Average of ' + fieldDisplayName
-        },
         std_upper: {
           valProp: ['std_deviation_bounds', 'upper'],
           title: 'Upper ' + label
@@ -53,7 +49,6 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
 
       return [
         new ValueAggConfig('std_lower'),
-        new ValueAggConfig('avg'),
         new ValueAggConfig('std_upper')
       ];
     },

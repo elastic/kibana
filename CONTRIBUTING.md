@@ -10,7 +10,7 @@ At any given time the Kibana team at Elastic is working on dozens of features an
 - **P5**: Highly niche or in opposition to our core goals. Should usually be closed. This doesn't mean we wouldn't take a pull for it, but if someone really wanted this they would be better off working on a plugin. The Kibana team will usually not work on P5 issues but may be willing to assist plugin developers on IRC.
 
 #### How to express the importance of an issue
-Let's just get this out there: **Feel free to +1 an issue**. That said, a +1 isn't a vote. We keep up on highly commented issues, but comments are but one of many reasons we might, or might not, work on an issue. A solid write up of your use case is more likely to make your case than a comment that says *+10000*.
+Let's just get this out there: **Feel free to +1 an issue**. That said, a +1 isn't a vote. While we keep up on highly +1'd issues, a solid write up of your use case is more likely to make your case than a comment that says *+10000*.
 
 #### My issue isn't getting enough attention
 First of all, sorry about that, we want you to have a great time with Kibana! You should join us on IRC ([#kibana](https://kiwiirc.com/client/irc.freenode.net/?#kibana) on freenode) and chat about it. Github is terrible for conversations. With that out of the way, there are a number of variables that go into deciding what to work on. These include priority, impact, difficulty, applicability to use cases, and last, and importantly: What we feel like working on.
@@ -76,17 +76,18 @@ optimize:
 
 #### SSL
 
-When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the cert. You can deal with this in a few ways:
+When Kibana runs in development mode it will automatically use bundled SSL certificates. These certificates won't be trusted by your OS by default which will likely cause your browser to complain about the cert.
 
-  1. Supply your own cert using the `config/kibana.dev.yml` file.
-  1. Configure your OS to trust the cert:
+You can fix this issue in one of the following ways:
+
+  - Supply your own cert using the `config/kibana.dev.yml` file.
+  - Configure your OS to trust the cert:
     - OSX: https://www.accuweaver.com/2014/09/19/make-chrome-accept-a-self-signed-certificate-on-osx/
     - Window: http://stackoverflow.com/a/1412118
     - Linux: http://unix.stackexchange.com/a/90607
-  1. Click through the warning and accept future warnings.
-  1. Disable SSL with the `--no-ssl` flag:
+  - Click through the warning and accept future warnings.
+  - Disable SSL with the `--no-ssl` flag:
     - `npm start -- --no-ssl`
-
 
 #### Linting
 
@@ -149,7 +150,7 @@ Run the tests for just your particular plugin. Assuming you plugin lives outside
 The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
 `npm run test:ui`
-Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.
+Run the functional UI tests one time and exit. This is used by the CI systems and is great for quickly checking that things pass. It is essentially a combination of the next two tasks.  This supports options `--grep=foo` for only running tests that match a regular expression, and `--appSuites=management` for running tests for a specific application.
 
 `npm run test:ui:server`
 Start the server required for the `test:ui:runner` tasks. Once the server is started `test:ui:runner` can be run multiple times without waiting for the server to start.
