@@ -13,6 +13,7 @@ require.config({
     'angular-bootstrap': 'bower_components/angular-bootstrap/ui-bootstrap-tpls',
     'angular-elastic': 'bower_components/angular-elastic/elastic',
     'angular-route': 'bower_components/angular-route/angular-route',
+    'angular-sanitize': 'bower_components/angular-sanitize/angular-sanitize',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     'ace-json': 'bower_components/ace-builds/src-noconflict/mode-json',

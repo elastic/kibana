@@ -1,6 +1,7 @@
 define(function (require) {
+  require('angular-sanitize');
   require('modules')
-  .get('kibana/directive')
+  .get('kibana/directive', ['ngSanitize'])
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
 
     require('components/visualize/spy/spy');
