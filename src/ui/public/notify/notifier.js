@@ -402,9 +402,9 @@ Notifier.prototype.banner = function (msg, cb) {
 
 /**
  * Display a custom message
- * @param  {String} msg
- * @param  {Object} config
- * @param  {Function} cb
+ * @param  {String} msg - required
+ * @param  {Object} config - required
+ * @param  {Function} cb - optional
  *
  * config = {
  *   title: 'Some Title here',
@@ -419,6 +419,12 @@ Notifier.prototype.banner = function (msg, cb) {
  * }
  */
 Notifier.prototype.custom = function (msg, config, cb) {
+  // There is no helper condition that will allow for 2 parameters, as the
+  // other methods have. So check that config is an object
+  if (!_.isPlainObject(config)) {
+    throw new Error('config param is required, and must be an object');
+  }
+
   const customActionMax = 3;
   const mergedConfig = _.assign({
     type: 'custom',
