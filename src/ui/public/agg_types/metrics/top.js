@@ -1,9 +1,9 @@
 import { noop, get } from 'lodash';
-import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import topEditor from 'ui/agg_types/controls/top.html';
 
 export default function AggTypeMetricTopProvider(Private) {
-  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const MetricAggType = Private(MetricAggTypeProvider);
 
   return new MetricAggType({
     name: 'top_hits',
