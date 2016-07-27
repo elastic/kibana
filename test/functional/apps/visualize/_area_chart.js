@@ -68,6 +68,9 @@ bdd.describe('visualize app', function describeIndexTests() {
       .then(function (message) {
         PageObjects.common.debug(`Saved viz message = ${message}`);
         expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
+      })
+      .then(function testVisualizeWaitForToastMessageGone() {
+        return PageObjects.visualize.waitForToastMessageGone();
       });
     });
 
