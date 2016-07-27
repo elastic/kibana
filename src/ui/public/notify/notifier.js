@@ -315,13 +315,14 @@ Notifier.prototype._showFatal = function (err) {
   console.error(err.stack);
 };
 
+const overrideableOptions = ['lifetime', 'icon'];
+
 /**
  * Alert the user of an error that occured
  * @param  {Error|String} err
  * @param  {Function} cb
  */
 Notifier.prototype.error = function (err, opts, cb) {
-  const overrideable = ['lifetime', 'icon'];
   if (_.isFunction(opts)) {
     cb = opts;
     opts = {};
@@ -335,7 +336,7 @@ Notifier.prototype.error = function (err, opts, cb) {
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
-  }, _.pick(opts, overrideable));
+  }, _.pick(opts, overrideableOptions));
   return add(config, cb);
 };
 
@@ -345,7 +346,6 @@ Notifier.prototype.error = function (err, opts, cb) {
  * @param  {Function} cb
  */
 Notifier.prototype.warning = function (msg, opts, cb) {
-  const overrideable = ['lifetime', 'icon'];
   if (_.isFunction(opts)) {
     cb = opts;
     opts = {};
@@ -358,7 +358,7 @@ Notifier.prototype.warning = function (msg, opts, cb) {
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
     actions: ['accept']
-  }, _.pick(opts, overrideable));
+  }, _.pick(opts, overrideableOptions));
   return add(config, cb);
 };
 
@@ -368,7 +368,6 @@ Notifier.prototype.warning = function (msg, opts, cb) {
  * @param  {Function} cb
  */
 Notifier.prototype.info = function (msg, opts, cb) {
-  const overrideable = ['lifetime', 'icon'];
   if (_.isFunction(opts)) {
     cb = opts;
     opts = {};
@@ -381,7 +380,7 @@ Notifier.prototype.info = function (msg, opts, cb) {
     title: 'Debug',
     lifetime: Notifier.config.infoLifetime,
     actions: ['accept']
-  }, _.pick(opts, overrideable));
+  }, _.pick(opts, overrideableOptions));
   return add(config, cb);
 };
 
