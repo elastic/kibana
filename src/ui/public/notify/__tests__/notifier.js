@@ -198,50 +198,50 @@ describe('Notifier', function () {
   });
 
   describe('#custom', function () {
-    let customNotif;
+    let customNotification;
 
     beforeEach(() => {
-      customNotif = notifier.custom(customText, customParams);
+      customNotification = notifier.custom(customText, customParams);
     });
 
     afterEach(() => {
-      customNotif.clear();
+      customNotification.clear();
     });
 
     it('has a custom function to make notifications', function () {
-      expect(notifier.custom).to.be.defined;
+      expect(notifier.custom).to.be.a('function');
     });
 
     it('properly merges options', function () {
-      expect(customNotif).to.have.property('title', customParams.title);
-      expect(customNotif).to.have.property('lifetime', customParams.lifetime);
+      expect(customNotification).to.have.property('title', customParams.title);
+      expect(customNotification).to.have.property('lifetime', customParams.lifetime);
 
       expect(customParams.title).to.be.a('string');
       expect(customParams.lifetime).to.be.a('number');
     });
 
     it('sets the content', function () {
-      expect(customNotif).to.have.property('content', `${params.location}: ${customText}`);
-      expect(customNotif.content).to.be.a('string');
+      expect(customNotification).to.have.property('content', `${params.location}: ${customText}`);
+      expect(customNotification.content).to.be.a('string');
     });
 
     it('uses custom actions', function () {
-      expect(customNotif).to.have.property('customActions');
-      expect(customNotif.customActions).to.have.length(customParams.actions.length);
+      expect(customNotification).to.have.property('customActions');
+      expect(customNotification.customActions).to.have.length(customParams.actions.length);
     });
 
     it('gives a default action if none are provided', function () {
       // destroy the default custom notification, avoid duplicate handling
-      customNotif.clear();
+      customNotification.clear();
 
       const noActionParams = _.defaults({ actions: [] }, customParams);
-      customNotif = notifier.custom(customText, noActionParams);
-      expect(customNotif).to.have.property('actions');
-      expect(customNotif.actions).to.have.length(1);
+      customNotification = notifier.custom(customText, noActionParams);
+      expect(customNotification).to.have.property('actions');
+      expect(customNotification.actions).to.have.length(1);
     });
 
     it('should wrap the callback functions in a close function', function () {
-      customNotif.customActions.forEach((action, idx) => {
+      customNotification.customActions.forEach((action, idx) => {
         expect(action.callback).not.to.equal(customParams.actions[idx]);
         action.callback();
       });
@@ -259,7 +259,7 @@ describe('Notifier', function () {
     });
 
     it('prepends location to message for markdown', function () {
-      expect(notify('banner').content).to.equal(params.location + ': ' + message);
+      expect(notify('banner').content).to.equal(`${params.location}: ${message}`);
     });
 
     it('sets type to "banner"', function () {
