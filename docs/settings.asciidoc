@@ -375,7 +375,7 @@ enable SSL and set a variety of other options.
 | The minimum zoom level. Defaults to 1.
 
 |`tilemap_max_zoom` added[4.1.10]
-| The maximum zoom level. Defaults to 7.
+| The maximum zoom level. Defaults to 10.
 
 |`tilemap_attribution` added[4.1.10]
 | The map attribution string. Defaults to `© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)`
