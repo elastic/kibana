@@ -424,6 +424,13 @@ Notifier.prototype.custom = function (msg, config, cb) {
     throw new Error('config param is required, and must be an object');
   }
 
+  // workaround to allow callers to send `config.type` as `error` instead of
+  // reveal internal implementation that error notifications use a `danger`
+  // style
+  if (config.type === 'error') {
+    config.type = 'danger';
+  }
+
   const getLifetime = (type) => {
     switch (type) {
       case 'banner':
