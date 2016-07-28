@@ -1,4 +1,4 @@
-# Kibana 4.1.11-snapshot
+# Kibana 4.1.11
 
 [![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
 
@@ -39,7 +39,7 @@ For the daring, snapshot builds are available. These builds are created after ea
 
 | platform |  |  |
 | --- | --- | --- |
-| OSX | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-darwin-x64.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-darwin-x64.zip) |
-| Linux x64 | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-linux-x64.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-linux-x64.zip) |
-| Linux x86 | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-linux-x86.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-linux-x86.zip) |
-| Windows | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-windows.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-snapshot-windows.zip) |
+| OSX | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-darwin-x64.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-darwin-x64.zip) |
+| Linux x64 | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-linux-x64.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-linux-x64.zip) |
+| Linux x86 | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-linux-x86.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-linux-x86.zip) |
+| Windows | [tar](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-windows.tar.gz) | [zip](https://download.elastic.co/kibana/kibana-snapshot/kibana-4.1.11-windows.zip) |
