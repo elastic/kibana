@@ -40,6 +40,9 @@ kibana.tilemap_max_zoom = kibana.tilemap_max_zoom || 10;
 kibana.tilemap_attribution = kibana.tilemap_attribution || '© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)';
 kibana.tilemap_subdomains = kibana.tilemap_subdomains || [];
 
+kibana.logging_filter_cookie = kibana.logging_filter_cookie || 'remove';
+kibana.logging_filter_authorization = kibana.logging_filter_authorization || 'remove';
+
 kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
 kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;

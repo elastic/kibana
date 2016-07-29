@@ -20,7 +20,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('x-powered-by', false);
 
-app.use(requestLogger());
+app.use(requestLogger({
+  cookie: config.kibana.logging_filter_cookie,
+  authorization: config.kibana.logging_filter_authorization
+}));
 app.use(auth());
 app.use(xsrf(config.kibana.xsrf_token));
 app.use(appHeaders());
