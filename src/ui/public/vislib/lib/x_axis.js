@@ -353,9 +353,7 @@ export default function XAxisFactory(Private) {
           return 'rotate(-90)';
         })
         .append('title')
-        .text(function (text) {
-          return text;
-        });
+        .text(text => text);
         selection.select('svg')
         .attr('height', self._attr.xAxisLabelHt);
       }
