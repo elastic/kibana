@@ -5,6 +5,8 @@ import healthCheck from './lib/health_check';
 import exposeClient from './lib/expose_client';
 import createProxy, { createPath } from './lib/create_proxy';
 
+const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+
 module.exports = function ({ Plugin }) {
   return new Plugin({
     require: ['kibana'],
@@ -20,6 +22,7 @@ module.exports = function ({ Plugin }) {
         password: string(),
         shardTimeout: number().default(0),
         requestTimeout: number().default(30000),
+        requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
         pingTimeout: number().default(30000),
         startupTimeout: number().default(5000),
         ssl: object({

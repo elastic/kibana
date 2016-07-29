@@ -1,5 +1,7 @@
 const querystring = require('querystring');
 const resolve = require('url').resolve;
+const filterHeaders = require('./filter_headers');
+
 module.exports = function mapUri(server, prefix) {
   const config = server.config();
   return function (request, done) {
@@ -11,6 +13,7 @@ module.exports = function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    done(null, url);
+    const filteredHeaders = filterHeaders(request.headers, server.config().get('elasticsearch.requestHeadersWhitelist'));
+    done(null, url, filteredHeaders);
   };
 };
