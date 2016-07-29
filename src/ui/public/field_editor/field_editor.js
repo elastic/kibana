@@ -24,12 +24,13 @@ uiModules
       getField: '&field'
     },
     controllerAs: 'editor',
-    controller: function ($scope, Notifier, kbnUrl) {
+    controller: function ($scope, Notifier, kbnUrl, es) {
       let self = this;
       let notify = new Notifier({ location: 'Field Editor' });
 
       self.scriptingInfo = scriptingInfo;
       self.scriptingWarning = scriptingWarning;
+      getScriptingLangs();
 
       self.indexPattern = $scope.getIndexPattern();
       self.field = shadowCopy($scope.getField());
@@ -127,6 +128,18 @@ uiModules
       function getFieldFormatType() {
         if (self.selectedFormatId) return fieldFormats.getType(self.selectedFormatId);
         else return fieldFormats.getDefaultType(self.field.type);
+      }
+
+      function getScriptingLangs() {
+        es.cluster.getSettings({
+          include_defaults : true,
+          filter_path : '**.script.engine.*.inline'
+        })
+        .then(function (d) {
+          self.scriptingLangs = _.keys(_.pick(d.defaults.script.engine, function (e) {
+            return !!e.inline.search && !!e.inline.aggs;
+          }));
+        });
       }
 
       function initDefaultFormat() {
