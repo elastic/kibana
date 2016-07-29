@@ -145,6 +145,11 @@ function translate(key) {
 async function getTranslationLanguage(acceptLanguages) {
   let langStr = '';
   let foundLang = false;
+
+  if (acceptLanguages === null || acceptLanguages.length <= 0) {
+    return DEFAULT_LANGUAGE;
+  }
+
   const acceptLangsLen = acceptLanguages.length;
   const registeredLanguages = await i18nPlugin.getRegisteredTranslationLanguages();
 
