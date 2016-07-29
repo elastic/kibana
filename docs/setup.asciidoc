@@ -18,9 +18,9 @@ Your existing Kibana version is generally compatible with the next minor version
 This means you should upgrade your Elasticsearch cluster(s) before or at the same time as Kibana.
 We cannot guarantee compatibility between major version releases so in those cases both Elasticsearch and Kibana must be upgraded together.
 
-. Create a https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot] of the existing .kibana index.
+. Create a https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot] of the existing `.kibana` index.
 . Back up the `kibana.yml` configuration file.
-. Take note of the Kibana plugins that are installed;
+. Take note of the Kibana plugins that are installed:
  * `bin/kibana plugin --list` on 4.x versions of Kibana.
  * `bin/kibana-plugin list` on 5.x versions of Kibana.
 . To upgrade from an Archive File:
@@ -30,12 +30,12 @@ We cannot guarantee compatibility between major version releases so in those cas
  * Once the new version is fully configured and working with required plugins, remove the previous version of Kibana
 . To upgrade using a Linux Package Manager:
  * Uninstall the existing Kibana package `apt-get remove kibana` or `yum remove kibana`
- * Install the new Kibana package.  See steps below.   (There have been some installer issues between various version of Kibana so the uninstall and install process is safer than an upgrade.)
+ * Install the new Kibana package.   There have been some installer issues between various version of Kibana so the uninstall and install process is safer than an upgrade.
 
 
 [float]
 [[install]]
-=== Install and Start Kibana from Archive File
+=== Install and Start Kibana from an Archive File
 
 To get Kibana up and running:
 
