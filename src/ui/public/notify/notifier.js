@@ -61,7 +61,7 @@ function timerCanceler(notif, cb = _.noop, key) {
 function startNotifTimer(notif, cb) {
   const interval = 1000;
 
-  if (notif.lifetime === Infinity) {
+  if (notif.lifetime === Infinity || notif.lifetime === 0) {
     return;
   }
 
@@ -70,7 +70,7 @@ function startNotifTimer(notif, cb) {
   notif.timerId = Notifier.config.setInterval(function () {
     notif.timeRemaining -= 1;
 
-    if (notif.timeRemaining === 0) {
+    if (notif.timeRemaining <= 0) {
       closeNotif(notif, cb, 'ignore')();
     }
   }, interval, notif.timeRemaining);
@@ -92,6 +92,14 @@ function add(notif, cb) {
   if (notif.actions) {
     notif.actions.forEach(function (action) {
       notif[action] = closeNotif(notif, cb, action);
+    });
+  } else if (notif.customActions) {
+    // wrap all of the custom functions in a close
+    notif.customActions = notif.customActions.map(action => {
+      return {
+        key: action.text,
+        callback: closeNotif(notif, action.callback, action.text)
+      };
     });
   }
 
@@ -122,12 +130,14 @@ function add(notif, cb) {
 }
 
 function set(opts, cb) {
+  if (!opts.content) {
+    return null;
+  }
+
   if (this._sovereignNotif) {
     this._sovereignNotif.clear();
   }
-  if (!opts.content && !opts.markdown) {
-    return null;
-  }
+
   this._sovereignNotif = add(opts, cb);
   return this._sovereignNotif;
 }
@@ -305,13 +315,20 @@ Notifier.prototype._showFatal = function (err) {
   console.error(err.stack);
 };
 
+const overrideableOptions = ['lifetime', 'icon'];
+
 /**
  * Alert the user of an error that occured
  * @param  {Error|String} err
  * @param  {Function} cb
  */
-Notifier.prototype.error = function (err, cb) {
-  return add({
+Notifier.prototype.error = function (err, opts, cb) {
+  if (_.isFunction(opts)) {
+    cb = opts;
+    opts = {};
+  }
+
+  const config = _.assign({
     type: 'danger',
     content: formatMsg(err, this.from),
     icon: 'warning',
@@ -319,7 +336,8 @@ Notifier.prototype.error = function (err, cb) {
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
-  }, cb);
+  }, _.pick(opts, overrideableOptions));
+  return add(config, cb);
 };
 
 /**
@@ -327,15 +345,21 @@ Notifier.prototype.error = function (err, cb) {
  * @param  {String} msg
  * @param  {Function} cb
  */
-Notifier.prototype.warning = function (msg, cb) {
-  return add({
+Notifier.prototype.warning = function (msg, opts, cb) {
+  if (_.isFunction(opts)) {
+    cb = opts;
+    opts = {};
+  }
+
+  const config = _.assign({
     type: 'warning',
     content: formatMsg(msg, this.from),
     icon: 'warning',
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
     actions: ['accept']
-  }, cb);
+  }, _.pick(opts, overrideableOptions));
+  return add(config, cb);
 };
 
 /**
@@ -343,15 +367,21 @@ Notifier.prototype.warning = function (msg, cb) {
  * @param  {String} msg
  * @param  {Function} cb
  */
-Notifier.prototype.info = function (msg, cb) {
-  return add({
+Notifier.prototype.info = function (msg, opts, cb) {
+  if (_.isFunction(opts)) {
+    cb = opts;
+    opts = {};
+  }
+
+  const config = _.assign({
     type: 'info',
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
     title: 'Debug',
     lifetime: Notifier.config.infoLifetime,
     actions: ['accept']
-  }, cb);
+  }, _.pick(opts, overrideableOptions));
+  return add(config, cb);
 };
 
 /**
@@ -363,10 +393,73 @@ Notifier.prototype.banner = function (msg, cb) {
   return this.set({
     type: 'banner',
     title: 'Attention',
-    markdown: formatMsg(msg, this.from),
+    content: formatMsg(msg, this.from),
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
+};
+
+/**
+ * Display a custom message
+ * @param  {String} msg - required
+ * @param  {Object} config - required
+ * @param  {Function} cb - optional
+ *
+ * config = {
+ *   title: 'Some Title here',
+ *   type: 'info',
+ *   actions: [{
+ *     text: 'next',
+ *     callback: function() { next(); }
+ *   }, {
+ *     text: 'prev',
+ *     callback: function() { prev(); }
+ *   }]
+ * }
+ */
+Notifier.prototype.custom = function (msg, config, cb) {
+  // There is no helper condition that will allow for 2 parameters, as the
+  // other methods have. So check that config is an object
+  if (!_.isPlainObject(config)) {
+    throw new Error('config param is required, and must be an object');
+  }
+
+  // workaround to allow callers to send `config.type` as `error` instead of
+  // reveal internal implementation that error notifications use a `danger`
+  // style
+  if (config.type === 'error') {
+    config.type = 'danger';
+  }
+
+  const getLifetime = (type) => {
+    switch (type) {
+      case 'banner':
+        return Notifier.config.bannerLifetime;
+      case 'warning':
+        return Notifier.config.warningLifetime;
+      case 'danger':
+        return Notifier.config.errorLifetime;
+      default: // info
+        return Notifier.config.infoLifetime;
+    }
+  };
+
+  const mergedConfig = _.assign({
+    type: 'info',
+    title: 'Notification',
+    content: formatMsg(msg, this.from),
+    lifetime: getLifetime(config.type)
+  }, config);
+
+  const hasActions = _.get(mergedConfig, 'actions.length');
+  if (hasActions) {
+    mergedConfig.customActions = mergedConfig.actions;
+    delete mergedConfig.actions;
+  } else {
+    mergedConfig.actions = ['accept'];
+  }
+
+  return add(mergedConfig, cb);
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
@@ -421,7 +514,6 @@ function createGroupLogger(type, opts) {
 
     if (consoleGroups) {
       if (status) {
-        console.log(status);
         console.groupEnd();
       } else {
         if (opts.open) {

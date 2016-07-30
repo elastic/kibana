@@ -6,11 +6,22 @@ import Notifier from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
-  let message = 'Oh, the humanity!';
   let notifier;
   let params;
-  let version = window.__KBN__.version;
-  let buildNum = window.__KBN__.buildNum;
+  const version = window.__KBN__.version;
+  const buildNum = window.__KBN__.buildNum;
+  const message = 'Oh, the humanity!';
+  const customText = 'fooMarkup';
+  const customParams = {
+    title: 'fooTitle',
+    actions:[{
+      text: 'Cancel',
+      callback: sinon.spy()
+    }, {
+      text: 'OK',
+      callback: sinon.spy()
+    }]
+  };
 
   beforeEach(function () {
     ngMock.module('kibana');
@@ -185,6 +196,127 @@ describe('Notifier', function () {
     });
   });
 
+  describe('#custom', function () {
+    let customNotification;
+
+    beforeEach(() => {
+      customNotification = notifier.custom(customText, customParams);
+    });
+
+    afterEach(() => {
+      customNotification.clear();
+    });
+
+    it('throws if second param is not an object', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      function callCustomIncorrectly() {
+        const badParam = null;
+        customNotification = notifier.custom(customText, badParam);
+      }
+      expect(callCustomIncorrectly).to.throwException(function (e) {
+        expect(e.message).to.be('config param is required, and must be an object');
+      });
+
+    });
+
+    it('has a custom function to make notifications', function () {
+      expect(notifier.custom).to.be.a('function');
+    });
+
+    it('properly merges options', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const explicitLifetimeParams = _.defaults({ lifetime: 20000 }, customParams);
+      customNotification = notifier.custom(customText, explicitLifetimeParams);
+
+      expect(customNotification).to.have.property('type', 'info'); // default
+      expect(customNotification).to.have.property('title', explicitLifetimeParams.title); // passed in
+      expect(customNotification).to.have.property('lifetime', explicitLifetimeParams.lifetime); // passed in
+
+      expect(explicitLifetimeParams.type).to.be(undefined);
+      expect(explicitLifetimeParams.title).to.be.a('string');
+      expect(explicitLifetimeParams.lifetime).to.be.a('number');
+    });
+
+    it('sets the content', function () {
+      expect(customNotification).to.have.property('content', `${params.location}: ${customText}`);
+      expect(customNotification.content).to.be.a('string');
+    });
+
+    it('uses custom actions', function () {
+      expect(customNotification).to.have.property('customActions');
+      expect(customNotification.customActions).to.have.length(customParams.actions.length);
+    });
+
+    it('gives a default action if none are provided', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const noActionParams = _.defaults({ actions: [] }, customParams);
+      customNotification = notifier.custom(customText, noActionParams);
+      expect(customNotification).to.have.property('actions');
+      expect(customNotification.actions).to.have.length(1);
+    });
+
+    it('defaults type and lifetime for "info" config', function () {
+      expect(customNotification.type).to.be('info');
+      expect(customNotification.lifetime).to.be(5000);
+    });
+
+    it('dynamic lifetime for "banner" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'banner' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('banner');
+      expect(customNotification.lifetime).to.be(3000000);
+    });
+
+    it('dynamic lifetime for "warning" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'warning' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('warning');
+      expect(customNotification.lifetime).to.be(10000);
+    });
+
+    it('dynamic type and lifetime for "error" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'error' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('danger');
+      expect(customNotification.lifetime).to.be(300000);
+    });
+
+    it('dynamic type and lifetime for "danger" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'danger' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('danger');
+      expect(customNotification.lifetime).to.be(300000);
+    });
+
+    it('should wrap the callback functions in a close function', function () {
+      customNotification.customActions.forEach((action, idx) => {
+        expect(action.callback).not.to.equal(customParams.actions[idx]);
+        action.callback();
+      });
+      customParams.actions.forEach(action => {
+        expect(action.callback.called).to.true;
+      });
+    });
+  });
+
   describe('#banner', function () {
     testVersionInfo('banner');
 
@@ -193,7 +325,7 @@ describe('Notifier', function () {
     });
 
     it('prepends location to message for markdown', function () {
-      expect(notify('banner').markdown).to.equal(params.location + ': ' + message);
+      expect(notify('banner').content).to.equal(`${params.location}: ${message}`);
     });
 
     it('sets type to "banner"', function () {

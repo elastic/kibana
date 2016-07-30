@@ -7,9 +7,7 @@
 
         <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i>
 
-        <kbn-truncated ng-if="notif.content" source="{{notif.content}}" length="250" class="toast-message" /></kbn-truncated>
-
-        <kbn-truncated ng-if="notif.markdown" source="{{notif.markdown | markdown}}" is-html="true" length="250" class="toast-message" /></kbn-truncated>
+        <kbn-truncated source="{{notif.content | markdown}}" is-html="true" length="250" class="toast-message" /></kbn-truncated>
 
         <div class="btn-group pull-right toast-controls">
           <button
@@ -48,6 +46,14 @@
             ng-class="'btn-' + notif.type"
             ng-click="notif.address()"
             >Fix it</button>
+          <button
+            type="button"
+            class="btn"
+            ng-repeat="action in notif.customActions"
+            ng-class="'btn-' + notif.type"
+            ng-click="action.callback()"
+            ng-bind="action.key"
+            ></button>
         </div>
       </div>
 
