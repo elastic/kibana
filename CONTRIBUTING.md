@@ -308,6 +308,6 @@ Remember, someone is blocked by a pull awaiting review, make it count. Be thorou
 1. **Suggest improvements** If there are changes needed, be explicit, comment on the lines in the code that you'd like changed. You might consider suggesting fixes. If you can't identify the problem, animated screenshots can help the review understand what's going on.
 1. **Hand it back** If you found issues, re-assign the submitter to the pull to address them. Repeat until mergable.
 1. **Hand it off** If you're the first reviewer and everything looks good but the changes are more than a few lines, hand the pull to someone else to take a second look. Again, try to find the right person to assign it to.
-1. **Merge the code** When everything looks good, put in a `LGTM` (looks good to me) or `Courté` (looks sophisticated to me) comment. Merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
+1. **Merge the code** When everything looks good, put in a `LGTM` (looks good to me) comment. Merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
 
 Thank you so much for reading our guidelines! :tada:
