@@ -118,6 +118,15 @@ describe('Notifier', function () {
     it('includes stack', function () {
       expect(notify('error').stack).to.be.defined;
     });
+
+    it('has css class helper functions', function () {
+      expect(notify('error').getIconClass()).to.equal('fa fa-warning');
+      expect(notify('error').getButtonClass()).to.equal('btn-danger');
+      expect(notify('error').getAlertClassStack()).to.equal('toast-stack alert alert-danger');
+      expect(notify('error').getAlertClass()).to.equal('toast alert alert-danger');
+      expect(notify('error').getButtonGroupClass()).to.equal('toast-controls');
+      expect(notify('error').getToastMessageClass()).to.equal('toast-message');
+    });
   });
 
   describe('#warning', function () {
@@ -156,6 +165,15 @@ describe('Notifier', function () {
     it('does not include stack', function () {
       expect(notify('warning').stack).not.to.be.defined;
     });
+
+    it('has css class helper functions', function () {
+      expect(notify('warning').getIconClass()).to.equal('fa fa-warning');
+      expect(notify('warning').getButtonClass()).to.equal('btn-warning');
+      expect(notify('warning').getAlertClassStack()).to.equal('toast-stack alert alert-warning');
+      expect(notify('warning').getAlertClass()).to.equal('toast alert alert-warning');
+      expect(notify('warning').getButtonGroupClass()).to.equal('toast-controls');
+      expect(notify('warning').getToastMessageClass()).to.equal('toast-message');
+    });
   });
 
   describe('#info', function () {
@@ -193,6 +211,15 @@ describe('Notifier', function () {
 
     it('does not include stack', function () {
       expect(notify('info').stack).not.to.be.defined;
+    });
+
+    it('has css class helper functions', function () {
+      expect(notify('info').getIconClass()).to.equal('fa fa-info-circle');
+      expect(notify('info').getButtonClass()).to.equal('btn-info');
+      expect(notify('info').getAlertClassStack()).to.equal('toast-stack alert alert-info');
+      expect(notify('info').getAlertClass()).to.equal('toast alert alert-info');
+      expect(notify('info').getButtonGroupClass()).to.equal('toast-controls');
+      expect(notify('info').getToastMessageClass()).to.equal('toast-message');
     });
   });
 
@@ -249,6 +276,18 @@ describe('Notifier', function () {
     it('uses custom actions', function () {
       expect(customNotification).to.have.property('customActions');
       expect(customNotification.customActions).to.have.length(customParams.actions.length);
+    });
+
+    it('custom actions have getButtonClass method', function () {
+      customNotification.customActions.forEach((action, idx) => {
+        expect(action).to.have.property('getButtonClass');
+        expect(action.getButtonClass).to.be.a('function');
+        if (idx === 0) {
+          expect(action.getButtonClass()).to.be('btn-primary btn-info');
+        } else {
+          expect(action.getButtonClass()).to.be('btn-default btn-info');
+        }
+      });
     });
 
     it('gives a default action if none are provided', function () {
@@ -356,6 +395,15 @@ describe('Notifier', function () {
 
     it('does not include stack', function () {
       expect(notify('banner').stack).not.to.be.defined;
+    });
+
+    it('has css class helper functions', function () {
+      expect(notify('banner').getIconClass()).to.equal('');
+      expect(notify('banner').getButtonClass()).to.equal('btn-banner');
+      expect(notify('banner').getAlertClassStack()).to.equal('toast-stack alert alert-banner');
+      expect(notify('banner').getAlertClass()).to.equal('toast-banner alert alert-banner');
+      expect(notify('banner').getButtonGroupClass()).to.equal('toast-controls-banner');
+      expect(notify('banner').getToastMessageClass()).to.equal('toast-message-banner');
     });
   });
 

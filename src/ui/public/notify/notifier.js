@@ -97,10 +97,14 @@ function add(notif, cb) {
     });
   } else if (notif.customActions) {
     // wrap all of the custom functions in a close
-    notif.customActions = notif.customActions.map(action => {
+    notif.customActions = notif.customActions.map((action, idx) => {
       return {
         key: action.text,
-        callback: closeNotif(notif, action.callback, action.text)
+        callback: closeNotif(notif, action.callback, action.text),
+        getButtonClass() {
+          if (idx === 0) return `btn-primary btn-${notif.type}`;
+          return `btn-default btn-${notif.type}`;
+        }
       };
     });
   }
@@ -110,6 +114,18 @@ function add(notif, cb) {
   notif.isTimed = function isTimed() {
     return notif.timerId ? true : false;
   };
+
+  // decorate the notification with helper functions for the template
+  notif.getButtonClass = () => `btn-${notif.type}`;
+  notif.getAlertClassStack = () => `toast-stack alert alert-${notif.type}`;
+  notif.getIconClass = () => (notif.type === 'banner') ?  '' : `fa fa-${notif.icon}`;
+  notif.getToastMessageClass = ()  => (notif.type === 'banner') ?  'toast-message-banner' : 'toast-message';
+  notif.getAlertClass = () => (notif.type === 'banner') ?
+    `toast-banner alert alert-banner` :
+    `toast alert alert-${notif.type}`;
+  notif.getButtonGroupClass = () => (notif.type === 'banner') ?
+    'toast-controls-banner' :
+    'toast-controls';
 
   let dup = null;
   if (notif.content) {
