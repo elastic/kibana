@@ -66,6 +66,10 @@ describe('Notifier', function () {
       expect(notify('error').lifetime).to.equal(300000);
     });
 
+    it('sets truncation length to 250', function () {
+      expect(notify('error').truncationLength).to.equal(250);
+    });
+
     it('sets timeRemaining and decrements', function () {
       let notif = notify('error');
 
@@ -143,6 +147,10 @@ describe('Notifier', function () {
       expect(notify('warning').lifetime).to.equal(10000);
     });
 
+    it('sets truncation length to 250', function () {
+      expect(notify('warning').truncationLength).to.equal(250);
+    });
+
     it('does not allow reporting', function () {
       let includesReport = _.includes(notify('warning').actions, 'report');
       expect(includesReport).to.false;
@@ -179,6 +187,10 @@ describe('Notifier', function () {
 
     it('sets lifetime to 5000', function () {
       expect(notify('info').lifetime).to.equal(5000);
+    });
+
+    it('sets truncation length to 250', function () {
+      expect(notify('info').truncationLength).to.equal(250);
     });
 
     it('does not allow reporting', function () {
@@ -229,16 +241,17 @@ describe('Notifier', function () {
       // destroy the default custom notification, avoid duplicate handling
       customNotification.clear();
 
-      const explicitLifetimeParams = _.defaults({ lifetime: 20000 }, customParams);
-      customNotification = notifier.custom(customText, explicitLifetimeParams);
+      const overrideParams = _.defaults({ lifetime: 20000, truncationLength: 1000 }, customParams);
+      customNotification = notifier.custom(customText, overrideParams);
 
       expect(customNotification).to.have.property('type', 'info'); // default
-      expect(customNotification).to.have.property('title', explicitLifetimeParams.title); // passed in
-      expect(customNotification).to.have.property('lifetime', explicitLifetimeParams.lifetime); // passed in
+      expect(customNotification).to.have.property('title', overrideParams.title); // passed in thru customParams
+      expect(customNotification).to.have.property('truncationLength', 1000); // passed in thru overrideParams
+      expect(customNotification).to.have.property('lifetime', overrideParams.lifetime); // passed in thru overrideParams
 
-      expect(explicitLifetimeParams.type).to.be(undefined);
-      expect(explicitLifetimeParams.title).to.be.a('string');
-      expect(explicitLifetimeParams.lifetime).to.be.a('number');
+      expect(overrideParams.type).to.be(undefined);
+      expect(overrideParams.title).to.be.a('string');
+      expect(overrideParams.lifetime).to.be.a('number');
     });
 
     it('sets the content', function () {
@@ -338,6 +351,10 @@ describe('Notifier', function () {
 
     it('sets title to "Attention"', function () {
       expect(notify('banner').title).to.equal('Attention');
+    });
+
+    it('sets truncation length to 250', function () {
+      expect(notify('banner').truncationLength).to.equal(250);
     });
 
     it('sets lifetime to 3000000 by default', function () {
