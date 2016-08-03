@@ -6,7 +6,8 @@ export default function (id) {
     '/' : '-slash-',
     '\\?' : '-questionmark-',
     '\\&' : '-ampersand-',
-    '=' : '-equal-'
+    '=' : '-equal-',
+    '%' : '-percent-'
   };
   _.each(trans, function (val, key) {
     let regex = new RegExp(key, 'g');
