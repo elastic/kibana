@@ -426,6 +426,12 @@ var rules = {
       script: {
         // populated by a global rule
       }
+    },
+    "matrix_stats": {
+      __template: {
+        fields: []
+      },
+      fields: ["{field}"]
     }
   }
 };
