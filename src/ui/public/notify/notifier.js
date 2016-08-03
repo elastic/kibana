@@ -267,7 +267,6 @@ define(function (require) {
    *
    * config = {
    *   title: 'Some Title here',
-   *   markdown: 'Some markdown content',
    *   type: 'info',
    *   actions: [{
    *     text: 'next',
@@ -295,11 +294,11 @@ define(function (require) {
     const getLifetime = (type) => {
       switch (type) {
         case 'warning':
-          return Notifier.config.warningLifetime;
+          return 10000;
         case 'danger':
-          return Notifier.config.errorLifetime;
+          return 300000;
         default: // info
-          return Notifier.config.infoLifetime;
+          return 5000;
       }
     };
 
