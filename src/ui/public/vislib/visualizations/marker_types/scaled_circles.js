@@ -22,7 +22,6 @@ export default function ScaledCircleMarkerFactory(Private) {
     for (let i = 0; i < geoJson.features.length; i += 1) {//in practice, these are all the same.
       maxGeohashPrecision = Math.max(geoJson.features[i].properties.geohash.length, maxGeohashPrecision);
     }
-    
     const worldInPixels = 256 * Math.pow(2, this.map.getZoom());//map is 256 pixels wide at zoom level 0
     const geoHashWidthInPixels = worldInPixels / Math.pow(8, maxGeohashPrecision);//Eight geohash cells per parent cell
     const maxRadius = geoHashWidthInPixels / 2;
