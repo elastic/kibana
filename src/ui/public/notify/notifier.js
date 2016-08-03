@@ -34,10 +34,10 @@ define(function (require) {
     return Date.now();
   }
 
-  function closeNotif(cb, key) {
+  function closeNotif(notif, cb, key) {
     return function () {
       // this === notif
-      let i = notifs.indexOf(this);
+      let i = notifs.indexOf(notif);
       if (i !== -1) notifs.splice(i, 1);
       if (this.timerId) this.timerId = clearTO(this.timerId);
       if (typeof cb === 'function') cb(key);
@@ -50,21 +50,21 @@ define(function (require) {
 
     if (notif.lifetime !== Infinity) {
       notif.timerId = setTO(function () {
-        closeNotif(cb, 'ignore').call(notif);
+        closeNotif(notif, cb, 'ignore').call(notif);
       }, notif.lifetime);
     }
 
-    notif.clear = closeNotif();
+    notif.clear = closeNotif(notif);
     if (notif.actions) {
       notif.actions.forEach(function (action) {
-        notif[action] = closeNotif(cb, action);
+        notif[action] = closeNotif(notif, cb, action);
       });
     } else if (notif.customActions) {
       // wrap all of the custom functions in a close
       notif.customActions = notif.customActions.map(action => {
         return {
           key: action.text,
-          callback: closeNotif(action.callback, action.text)
+          callback: closeNotif(notif, action.callback, action.text)
         };
       });
     }
