@@ -231,9 +231,9 @@ describe('Marker Tests', function () {
     describe('value to circle size', function () {
 
       let testValues = [//scaled according to area.
-        {value: 1, expected: 21},//smallest
-        {value: 304, expected: 48},//somewhere halfway
-        {value: 608, expected: 64}//biggest
+        {value: 1, expected: 43},//smallest
+        {value: 304, expected: 95},//somewhere halfway
+        {value: 608, expected: 128}//biggest
       ];
 
       _.each(testValues, function (testValue) {

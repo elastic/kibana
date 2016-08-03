@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import L from 'leaflet';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+import {geohashCells} from 'ui/utils/decode_geo_hash';
+
+
 export default function ScaledCircleMarkerFactory(Private) {
 
   let BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
@@ -19,12 +22,13 @@ export default function ScaledCircleMarkerFactory(Private) {
     ScaledCircleMarker.Super.apply(this, arguments);
 
     let maxGeohashPrecision = 1;
-    for (let i = 0; i < geoJson.features.length; i += 1) {//in practice, these are all the same.
+    for (let i = 0; i < geoJson.features.length; i += 1) {
       maxGeohashPrecision = Math.max(geoJson.features[i].properties.geohash.length, maxGeohashPrecision);
     }
     const worldInPixels = 256 * Math.pow(2, this.map.getZoom());//map is 256 pixels wide at zoom level 0
-    const geoHashWidthInPixels = worldInPixels / Math.pow(8, maxGeohashPrecision);//Eight geohash cells per parent cell
-    const maxRadius = geoHashWidthInPixels / 2;
+    const geoHashWidthInPixels = worldInPixels / geohashCells(maxGeohashPrecision, 0);
+    const geoHashHeightInPixels = worldInPixels / geohashCells(maxGeohashPrecision, 1);
+    const maxRadius = Math.max(geoHashWidthInPixels, geoHashHeightInPixels) / 2;//bias the largest dimension, so we get some overlap
     const minRadius = maxRadius / 3;//magic number to make sure smallest circle is not too small.
 
     this._valueRange = this.geoJson.properties.allmax - this.geoJson.properties.allmin;
@@ -42,6 +46,7 @@ export default function ScaledCircleMarkerFactory(Private) {
     const circleArea = this._minCircleArea + ratioFeatureToDataset * (this._maxCircleArea - this._minCircleArea);
     return Math.round(Math.sqrt(circleArea / Math.PI));
   };
+
 
   return ScaledCircleMarker;
 };
