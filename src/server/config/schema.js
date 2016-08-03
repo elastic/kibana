@@ -1,6 +1,4 @@
 import Joi from 'joi';
-import fs from 'fs';
-import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
 import os from 'os';

@@ -62,6 +62,18 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('area charts', function indexPatternCreation() {
     var vizName1 = 'Visualization AreaChart';
 
+    bdd.it('should save and load with special characters', function pageHeader() {
+      const vizNamewithSpecialChars = vizName1 + '/?&=%';
+      return PageObjects.visualize.saveVisualization(vizNamewithSpecialChars)
+      .then(function (message) {
+        PageObjects.common.debug(`Saved viz message = ${message}`);
+        expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
+      })
+      .then(function testVisualizeWaitForToastMessageGone() {
+        return PageObjects.visualize.waitForToastMessageGone();
+      });
+    });
+
     bdd.it('should save and load', function pageHeader() {
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
