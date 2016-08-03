@@ -18,29 +18,31 @@ export default function ScaledCircleMarkerFactory(Private) {
 
     ScaledCircleMarker.Super.apply(this, arguments);
 
-    let maxGeohashPrecision = -Infinity;
-    for (let i = 0; i < geoJson.features.length; i += 1) {
-      maxGeohashPrecision = geoJson.features[i].properties.geohash.length;
+    let maxGeohashPrecision = 1;
+    for (let i = 0; i < geoJson.features.length; i += 1) {//in practice, these are all the same.
+      maxGeohashPrecision = Math.max(geoJson.features[i].properties.geohash.length, maxGeohashPrecision);
     }
-
+    
     const worldInPixels = 256 * Math.pow(2, this.map.getZoom());//map is 256 pixels wide at zoom level 0
-    const geoHashWidthInPixels = worldInPixels / Math.pow(8, maxGeohashPrecision);//Eight geohash cells per precision
-
+    const geoHashWidthInPixels = worldInPixels / Math.pow(8, maxGeohashPrecision);//Eight geohash cells per parent cell
     const maxRadius = geoHashWidthInPixels / 2;
-    const minRadius = maxRadius / 3;//magic number. make sure smallest circle is not too small
-    const maxCircleArea = Math.PI * Math.pow(maxRadius, 2);
-    const minCircleArea = Math.PI * Math.pow(minRadius, 2);
-    const valueRange = (this.geoJson.properties.allmax - this.geoJson.properties.allmin);
+    const minRadius = maxRadius / 3;//magic number to make sure smallest circle is not too small.
+
+    this._valueRange = this.geoJson.properties.allmax - this.geoJson.properties.allmin;
+    this._maxCircleArea = Math.PI * Math.pow(maxRadius, 2);
+    this._minCircleArea = Math.PI * Math.pow(minRadius, 2);
 
     this._createMarkerGroup({
-      pointToLayer: (feature, latlng) => {
-        const ratioFeatureToDataset = valueRange ? (feature.properties.value - this.geoJson.properties.allmin) / valueRange : 1;
-        const circleArea = minCircleArea + ratioFeatureToDataset * (maxCircleArea - minCircleArea);
-        return L.circleMarker(latlng).setRadius(Math.sqrt(circleArea / Math.PI));
-      }
+      pointToLayer: (feature, latlng) => L.circleMarker(latlng).setRadius(this._radiusScale(feature.properties.value))
     });
 
   }
+
+  ScaledCircleMarker.prototype._radiusScale = function (value) {
+    const ratioFeatureToDataset = this._valueRange ? (value - this.geoJson.properties.allmin) / this._valueRange : 1;
+    const circleArea = this._minCircleArea + ratioFeatureToDataset * (this._maxCircleArea - this._minCircleArea);
+    return Math.round(Math.sqrt(circleArea / Math.PI));
+  };
 
   return ScaledCircleMarker;
 };

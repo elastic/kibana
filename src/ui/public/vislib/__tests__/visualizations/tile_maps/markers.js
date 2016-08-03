@@ -1,4 +1,3 @@
-
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -105,7 +104,7 @@ describe('Marker Tests', function () {
       });
 
       it('should return a color with 1 color', function () {
-        let geoJson = { properties: { min: 1, max: 1 } };
+        let geoJson = {properties: {min: 1, max: 1}};
         markerLayer = createMarker(MarkerClass, geoJson);
 
         // ensure the quantizer domain is correct
@@ -171,7 +170,7 @@ describe('Marker Tests', function () {
       });
 
       it('should do nothing if there is already a legend', function () {
-        markerLayer._legend = { legend: 'exists' }; // anything truthy
+        markerLayer._legend = {legend: 'exists'}; // anything truthy
 
         markerLayer.addLegend();
         expect(leafletControlStub.callCount).to.equal(0);
@@ -207,6 +206,7 @@ describe('Marker Tests', function () {
     }));
 
     describe('geohashMinDistance method', function () {
+
       it('should return a finite number', function () {
         let sample = _.sample(mapData.features);
         let distance = markerLayer._geohashMinDistance(sample);
@@ -218,51 +218,31 @@ describe('Marker Tests', function () {
   });
 
   describe('Scaled Circles', function () {
+
     let zoom;
 
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
-      zoom = _.random(1, 18);
-      sinon.stub(mockMap, 'getZoom', _.constant(zoom));
+      sinon.stub(mockMap, 'getZoom', _.constant(2));//make deterministic
       let MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
-    describe('radiusScale method', function () {
-      let valueArray = [10, 20, 30, 40, 50, 60];
-      let max = _.max(valueArray);
-      let prev = -1;
+    describe('value to circle size', function () {
 
-      it('should return 0 for value of 0', function () {
-        expect(markerLayer._radiusScale(0)).to.equal(0);
-      });
+      let testValues = [//scaled according to area.
+        {value: 1, expected: 21},//smallest
+        {value: 304, expected: 48},//somewhere halfway
+        {value: 608, expected: 64}//biggest
+      ];
 
-      it('should return a scaled value for negative and positive numbers', function () {
-        let upperBound = markerLayer._radiusScale(max);
-        let results = [];
-
-        function roundValue(value) {
-          // round number to 6 decimal places
-          let r = Math.pow(10, 6);
-          return Math.round(value * r) / r;
-        }
-
-        _.each(valueArray, function (value, i) {
-          let ratio = Math.pow(value / max, 0.5);
-          let comparison = ratio * upperBound;
-          let radius = markerLayer._radiusScale(value);
-          let negRadius = markerLayer._radiusScale(value * -1);
-          results.push(radius);
-
-          expect(negRadius).to.equal(radius);
-          expect(roundValue(radius)).to.equal(roundValue(comparison));
-
-          // check that the radius is getting larger
-          if (i > 0) {
-            expect(radius).to.be.above(results[i - 1]);
-          }
+      _.each(testValues, function (testValue) {
+        it(`should scale correctly for ${testValue.value}`, function () {
+          let actual = markerLayer._radiusScale(testValue.value);
+          expect(actual).to.equal(testValue.expected);
         });
       });
+
     });
   });
 
