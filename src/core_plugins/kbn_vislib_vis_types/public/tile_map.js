@@ -29,7 +29,8 @@ export default function TileMapVisType(Private, getAppState, courier, config) {
         heatNormalizeData: true,
         mapZoom: 2,
         mapCenter: [15, 5],
-        wms: config.get('visualization:tileMap:WMSdefaults')
+        wms: config.get('visualization:tileMap:WMSdefaults'),
+        tms: config.get('visualization:tileMap:TMSdefaults')
       },
       mapTypes: ['Scaled Circle Markers', 'Shaded Circle Markers', 'Shaded Geohash Grid', 'Heatmap'],
       canDesaturate: !!supports.cssFilters,

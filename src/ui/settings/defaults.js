@@ -117,6 +117,24 @@ export default function defaultSettingsProvider() {
       type: 'json',
       description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
     },
+    'visualization:tileMap:TMSdefaults': {
+      value: JSON.stringify({
+        url: 'https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+        options: {
+          attribution: '© <a href="https://www.elastic.co/elastic_tile_service_tos">[Elastic Tile Service]</a> ',
+          subdomains: '1234',
+          minZoom: 1,
+          maxZoom: 7,
+          tileSize: 256,
+          errorTileUrl: '',
+          tms: false,
+          reuseTiles: false,
+          bounds: null
+        }
+      }, null, '  '),
+      type: 'json',
+      description: 'Default properties for the map tiles service to use in the tile map visualizations'
+    },
     'visualization:colorMapping': {
       type: 'json',
       value: JSON.stringify({
