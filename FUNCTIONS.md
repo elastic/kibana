@@ -284,7 +284,7 @@ label | *string* | Label for axis
 color | *string* | Color of axis label  
 
 #### .trend()
-Fills null values using a defined fit function
+Draws a trend line using a specified regression algorithm
 
 Argument | Accepts | Description
 --- | --- | ---

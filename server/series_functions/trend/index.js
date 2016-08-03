@@ -1,10 +1,6 @@
-var alter = require('../../lib/alter.js');
 var _ = require('lodash');
 var Chainable = require('../../lib/classes/chainable');
 import * as regress from './lib/regress';
-
-var loadFunctions = require('../../lib/load_functions.js');
-var fitFunctions  = loadFunctions('fit_functions');
 
 var validRegressions = {
   linear: 'linear',
@@ -35,7 +31,7 @@ module.exports = new Chainable('trend', {
       ' the end, +15 would stop 15 points from the beginning. Default: 0',
     },
   ],
-  help: 'Fills null values using a defined fit function',
+  help: 'Draws a trend line using a specified regression algorithm',
   fn: function absFn(args) {
     let newSeries = _.cloneDeep(args.byName.inputSeries);
 
