@@ -45,25 +45,28 @@ export default function (chrome, internals) {
         $scope.notifList = require('ui/notify')._notifs;
 
         // App switcher functionality.
-        function updateAppSwitcher(isOpen) {
+        function updateAppSwitcher() {
+          const isOpen = appSwitcherState.isOpen();
+          $scope.isAppSwitcherOpen = isOpen;
           $scope.appSwitcherButton = {
             classes: isOpen ? 'app-switcher-link--close' : undefined,
             title: isOpen ? 'Collapse' : 'Expand',
             tooltip: isOpen ? 'Collapse side bar' : 'Expand side bar',
           };
-        }
-
-        $scope.isAppSwitcherOpen = appSwitcherState.isOpen();
-        updateAppSwitcher($scope.isAppSwitcherOpen);
-
-        $scope.toggleAppSwitcher = event => {
-          event.preventDefault();
-          $scope.isAppSwitcherOpen = !$scope.isAppSwitcherOpen;
-          appSwitcherState.setOpen($scope.isAppSwitcherOpen);
-          updateAppSwitcher($scope.isAppSwitcherOpen);
 
           // Notify visualizations, e.g. the dashboard, that they should re-render.
           $scope.$root.$broadcast('ready:vis');
+        }
+
+        updateAppSwitcher();
+
+        $scope.$root.$on('appSwitcherState:change', () => {
+          updateAppSwitcher();
+        });
+
+        $scope.toggleAppSwitcher = event => {
+          event.preventDefault();
+          appSwitcherState.setOpen(!appSwitcherState.isOpen());
         };
 
         return chrome;
