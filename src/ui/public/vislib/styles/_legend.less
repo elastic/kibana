@@ -20,6 +20,21 @@ visualize-legend {
   flex-direction: row;
   padding-top: 5px;
 
+  .vis-container--legend-left & {
+    flex-direction: row-reverse;
+  }
+  .vis-container--legend-right & {
+    flex-direction: row;
+  }
+  .vis-container--legend-top & {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+  .vis-container--legend-bottom & {
+    flex-direction: column;
+    width: 100%;
+  }
+
   .header {
     cursor: pointer;
     width: 15px;
@@ -54,6 +69,15 @@ visualize-legend {
     text-align: left;
 
     flex-direction: column;
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      width: auto;
+
+      li {
+        display: inline-block;
+      }
+    }
   }
 
   .legend-ul.hidden {

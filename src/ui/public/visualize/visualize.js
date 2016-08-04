@@ -56,6 +56,14 @@ uiModules
         return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
       };
 
+      $scope.showLegendTopOrLeft = function () {
+        return $scope.vis.params.legendPosition === 'top' || $scope.vis.params.legendPosition === 'left';
+      };
+
+      $scope.showLegendBottomOrRight = function () {
+        return $scope.vis.params.legendPosition === 'bottom' || $scope.vis.params.legendPosition === 'right';
+      };
+
       $scope.spy = {};
       $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
