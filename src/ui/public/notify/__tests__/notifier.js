@@ -246,11 +246,12 @@ describe('Notifier', function () {
 
       expect(customNotification).to.have.property('type', 'info'); // default
       expect(customNotification).to.have.property('title', overrideParams.title); // passed in thru customParams
-      expect(customNotification).to.have.property('truncationLength', 1000); // passed in thru overrideParams
+      expect(customNotification).to.have.property('truncationLength', overrideParams.truncationLength); // passed in thru overrideParams
       expect(customNotification).to.have.property('lifetime', overrideParams.lifetime); // passed in thru overrideParams
 
       expect(overrideParams.type).to.be(undefined);
       expect(overrideParams.title).to.be.a('string');
+      expect(overrideParams.truncationLength).to.be.a('number');
       expect(overrideParams.lifetime).to.be.a('number');
     });
 
@@ -353,7 +354,7 @@ describe('Notifier', function () {
       expect(notify('banner').title).to.equal('Attention');
     });
 
-    it('sets truncation length to 250', function () {
+    it('sets truncation length to 250 by default', function () {
       expect(notify('banner').truncationLength).to.equal(250);
     });
 
