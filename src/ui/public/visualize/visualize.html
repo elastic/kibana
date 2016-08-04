@@ -6,7 +6,7 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div div ng-hide="showNoResultsMessage()" class="vis-container">
+<div div ng-hide="showNoResultsMessage()" class="vis-container vis-container--legend-{{vis.params.legendPosition}}">
   <div
     ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
