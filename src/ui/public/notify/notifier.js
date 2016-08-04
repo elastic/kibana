@@ -188,7 +188,8 @@ Notifier.config = {
   warningLifetime: 10000,
   infoLifetime: 5000,
   setInterval: window.setInterval,
-  clearInterval: window.clearInterval
+  clearInterval: window.clearInterval,
+  defaultTruncationLength: 250
 };
 
 Notifier.applyConfig = function (config) {
@@ -316,7 +317,6 @@ Notifier.prototype._showFatal = function (err) {
 };
 
 const overrideableOptions = ['lifetime', 'icon'];
-const defaultTruncationLength = 250;
 
 /**
  * Alert the user of an error that occured
@@ -332,7 +332,7 @@ Notifier.prototype.error = function (err, opts, cb) {
   const config = _.assign({
     type: 'danger',
     content: formatMsg(err, this.from),
-    truncationLength: defaultTruncationLength,
+    truncationLength: Notifier.config.defaultTruncationLength,
     icon: 'warning',
     title: 'Error',
     lifetime: Notifier.config.errorLifetime,
@@ -356,7 +356,7 @@ Notifier.prototype.warning = function (msg, opts, cb) {
   const config = _.assign({
     type: 'warning',
     content: formatMsg(msg, this.from),
-    truncationLength: defaultTruncationLength,
+    truncationLength: Notifier.config.defaultTruncationLength,
     icon: 'warning',
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
@@ -379,7 +379,7 @@ Notifier.prototype.info = function (msg, opts, cb) {
   const config = _.assign({
     type: 'info',
     content: formatMsg(msg, this.from),
-    truncationLength: defaultTruncationLength,
+    truncationLength: Notifier.config.defaultTruncationLength,
     icon: 'info-circle',
     title: 'Debug',
     lifetime: Notifier.config.infoLifetime,
@@ -398,7 +398,7 @@ Notifier.prototype.banner = function (msg, cb) {
     type: 'banner',
     title: 'Attention',
     content: formatMsg(msg, this.from),
-    truncationLength: defaultTruncationLength,
+    truncationLength: Notifier.config.defaultTruncationLength,
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
@@ -453,7 +453,7 @@ Notifier.prototype.custom = function (msg, config, cb) {
     type: 'info',
     title: 'Notification',
     content: formatMsg(msg, this.from),
-    truncationLength: config.truncationLength || defaultTruncationLength,
+    truncationLength: config.truncationLength || Notifier.config.defaultTruncationLength,
     lifetime: getLifetime(config.type)
   }, config);
 
