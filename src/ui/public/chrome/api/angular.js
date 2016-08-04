@@ -34,7 +34,9 @@ module.exports = function (chrome, internals) {
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
     .config(['$compileProvider', function ($compileProvider) {
-      if (!internals.devMode) $compileProvider.debugInfoEnabled(false);
+      if (internals.envName === 'production') {
+        $compileProvider.debugInfoEnabled(false);
+      }
     }])
     .run(($location, $rootScope, Private) => {
       chrome.getFirstPathSegment = () => {

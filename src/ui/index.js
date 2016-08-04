@@ -69,7 +69,7 @@ export default async (kbnServer, server, config) => {
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),
       serverName: config.get('server.name'),
-      devMode: config.get('env.dev'),
+      envName: config.get('env.name'),
       uiSettings: {
         defaults: await server.uiSettings().getDefaults(),
         user: {}
