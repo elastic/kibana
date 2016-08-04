@@ -48,7 +48,7 @@ define(function (require) {
     _.set(notif, 'info.version', version);
     _.set(notif, 'info.buildNum', buildNum);
 
-    if (notif.lifetime !== Infinity) {
+    if (notif.lifetime !== Infinity && notif.lifetime > 0) {
       notif.timerId = setTO(function () {
         closeNotif(notif, cb, 'ignore').call(notif);
       }, notif.lifetime);
