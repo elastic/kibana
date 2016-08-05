@@ -55,7 +55,7 @@ export default function (chrome, internals) {
           };
 
           // Notify visualizations, e.g. the dashboard, that they should re-render.
-          $scope.$root.$broadcast('ready:vis');
+          $scope.$root.$broadcast('appSwitcher:update');
         }
 
         updateAppSwitcher();
