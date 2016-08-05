@@ -84,5 +84,6 @@ module.exports = function (grunt) {
       return `${t}${link}\n`;
     }, '');
     grunt.log.write(links);
+    grunt.log.write('Builds finished');
   });
 };
