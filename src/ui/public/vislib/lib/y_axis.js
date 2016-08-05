@@ -95,10 +95,9 @@ export default function YAxisFactory(Private) {
    * Return the domain for log scale, i.e. the extent of the log scale.
    * Log scales must begin at 1 since the log(0) = -Infinity
    *
-   * @param scale
-   * @param yMin
-   * @param yMax
-   * @returns {*[]}
+   * @param {Number} min
+   * @param {Number} max
+   * @returns {Array}
    */
   YAxis.prototype._logDomain = function (min, max) {
     if (min < 0 || max < 0) return this._throwLogScaleValuesError();
