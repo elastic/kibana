@@ -1,5 +1,5 @@
 [[setup-repositories]]
-=== Kibana Repositories
+=== Install Kibana using a Linux Package Manager
 
 Binary packages for Kibana are available for Unix distributions that support the `apt` and `yum` tools. We also have
 repositories available for APT and YUM based distributions.
