@@ -11,6 +11,11 @@ export default function TruncateFormatProvider(Private) {
     }
 
     _convert(value) {
+
+      if (typeof value === 'string') {
+        value = value.trim().toLowerCase();
+      }
+
       switch (value) {
         case false:
         case 0:

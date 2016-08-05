@@ -15,39 +15,39 @@ describe('Boolean Format', function () {
   [
     {
       input: 0,
-      expected: false
+      expected: 'false'
     },
     {
       input: 'no',
-      expected: false
+      expected: 'false'
     },
     {
       input: false,
-      expected: false
+      expected: 'false'
     },
     {
       input: 'false',
-      expected: false
+      expected: 'false'
     },
     {
       input: 1,
-      expected: true
+      expected: 'true'
     },
     {
       input: 'yes',
-      expected: true
+      expected: 'true'
     },
     {
       input: true,
-      expected: true
+      expected: 'true'
     },
     {
       input: 'true',
-      expected: true
+      expected: 'true'
     },
     {
       input: ' True  ',//should handle trailing and mixed case
-      expected: true
+      expected: 'true'
     }
   ].forEach((test)=> {
     it(`convert ${test.input} to boolean`, ()=> {
