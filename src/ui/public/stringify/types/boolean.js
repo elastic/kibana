@@ -36,7 +36,7 @@ export default function TruncateFormatProvider(Private) {
 
   Bool.id = 'boolean';
   Bool.title = 'Boolean';
-  Bool.fieldType = ['boolean'];
+  Bool.fieldType = ['boolean', 'number', 'string'];
 
   return Bool;
 };
