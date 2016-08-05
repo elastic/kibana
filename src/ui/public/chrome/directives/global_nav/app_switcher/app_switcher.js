@@ -1,7 +1,6 @@
 import DomLocationProvider from 'ui/dom_location';
 import { parse } from 'url';
 import { bindKey } from 'lodash';
-import './app_switcher.less';
 import uiModules from 'ui/modules';
 import appSwitcherTemplate from './app_switcher.html';
 
@@ -55,11 +54,12 @@ uiModules
 .directive('appSwitcher', function () {
   return {
     restrict: 'E',
+    scope: {
+      chrome: '=',
+    },
     template: appSwitcherTemplate,
     controllerAs: 'switcher',
-    controller($scope, appSwitcherEnsureNavigation, appSwitcherState) {
-      // since we render this in an isolate scope we can't "require: ^chrome", but
-      // rather than remove all helpfull checks we can just check here.
+    controller($scope, appSwitcherEnsureNavigation, globalNavState) {
       if (!$scope.chrome || !$scope.chrome.getNavLinks) {
         throw new TypeError('appSwitcher directive requires the "chrome" config-object');
       }
@@ -76,7 +76,7 @@ uiModules
       $scope.getTooltip = link => {
         // If the sidebar is open then we don't need to show the title because
         // it will already be visible.
-        if (appSwitcherState.isOpen()) {
+        if (globalNavState.isOpen()) {
           return link.tooltip;
         }
         return link.tooltip ? link.title + ' - ' + link.tooltip : link.title;
