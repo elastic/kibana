@@ -54,8 +54,12 @@ body { overflow-x: hidden; }
   margin: 0 auto;
   background-color: #fff;
 
+  /**
+   * 1. Dirty, but we need to override the .is-app-links-wrapper-open state
+   *    when we're looking at the log-in screen.
+   */
   &.hidden-chrome {
-    left: 0;
+    left: 0 !important; /* 1 */
   }
 
   .navbar-right {
