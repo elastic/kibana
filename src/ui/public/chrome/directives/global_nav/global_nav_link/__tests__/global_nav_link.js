@@ -2,9 +2,9 @@ import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import '../app_switcher_link';
+import '../global_nav_link';
 
-describe('appSwitcherLink directive', () => {
+describe('globalNavLink directive', () => {
   let scope;
   let $compile;
 
@@ -19,15 +19,15 @@ describe('appSwitcherLink directive', () => {
 
   function create(attrs) {
     const template = `
-      <app-switcher-link
-        app-switcher-link-is-active="appSwitcherLinkIsActive"
-        app-switcher-link-is-disabled="appSwitcherLinkIsDisabled"
-        app-switcher-link-tooltip="appSwitcherLinkTooltip"
-        app-switcher-link-on-click="appSwitcherLinkOnClick()"
-        app-switcher-link-href="appSwitcherLinkHref"
-        app-switcher-link-kbn-route="appSwitcherLinkKbnRoute"
-        app-switcher-link-icon="appSwitcherLinkIcon"
-        app-switcher-link-title="appSwitcherLinkTitle"
+      <global-nav-link
+        is-active="isActive"
+        is-disabled="isDisabled"
+        tooltip-content="tooltipContent"
+        on-click="onClick()"
+        href="href"
+        kbn-route="kbnRoute"
+        icon="icon"
+        title="title"
       />
     `;
 
@@ -42,96 +42,96 @@ describe('appSwitcherLink directive', () => {
 
   describe('interface', () => {
 
-    describe('appSwitcherLinkIsActive attribute', () => {
+    describe('isActive attribute', () => {
       it(`doesn't apply the active class when false`, () => {
         const element = create({
-          appSwitcherLinkIsActive: false,
+          isActive: false,
         });
         expect(element.hasClass('active')).to.be(false);
       });
 
       it('applies the active class when true', () => {
         const element = create({
-          appSwitcherLinkIsActive: true,
+          isActive: true,
         });
         expect(element.hasClass('active')).to.be(true);
       });
     });
 
-    describe('appSwitcherLinkIsDisabled attribute', () => {
-      it(`doesn't apply the is-app-switcher-link-disabled class when false`, () => {
+    describe('isDisabled attribute', () => {
+      it(`doesn't apply the is-global-nav-link-disabled class when false`, () => {
         const element = create({
-          appSwitcherLinkIsDisabled: false,
+          isDisabled: false,
         });
-        expect(element.hasClass('is-app-switcher-link-disabled')).to.be(false);
+        expect(element.hasClass('is-global-nav-link-disabled')).to.be(false);
       });
 
-      it('applies the is-app-switcher-link-disabled class when true', () => {
+      it('applies the is-global-nav-link-disabled class when true', () => {
         const element = create({
-          appSwitcherLinkIsDisabled: true,
+          isDisabled: true,
         });
-        expect(element.hasClass('is-app-switcher-link-disabled')).to.be(true);
+        expect(element.hasClass('is-global-nav-link-disabled')).to.be(true);
       });
     });
 
-    describe('appSwitcherLinkTooltip attribute', () => {
+    describe('tooltipContent attribute', () => {
       it('is applied to the tooltip directive', () => {
         const attrs = {
-          appSwitcherLinkTooltip: 'hello i am a tooltip',
+          tooltipContent: 'hello i am a tooltip',
         };
         const element = create(attrs);
-        expect(element.attr('tooltip')).to.be(attrs.appSwitcherLinkTooltip);
+        expect(element.attr('tooltip')).to.be(attrs.tooltipContent);
       });
     });
 
-    describe('appSwitcherLinkOnClick attribute', () => {
+    describe('onClick attribute', () => {
       it('is called when the link is clicked', () => {
         const attrs = {
-          appSwitcherLinkOnClick: sinon.spy(),
+          onClick: sinon.spy(),
         };
         const element = create(attrs);
         element.find('[data-test-subj=appLink]').click();
-        sinon.assert.called(attrs.appSwitcherLinkOnClick);
+        sinon.assert.called(attrs.onClick);
       });
     });
 
-    describe('appSwitcherLinkHref attribute', () => {
+    describe('href attribute', () => {
       it('is applied to the link', () => {
         const attrs = {
-          appSwitcherLinkHref: 'link to a website',
+          href: 'link to a website',
         };
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('href')).to.be(attrs.appSwitcherLinkHref);
+        expect(link.attr('href')).to.be(attrs.href);
       });
     });
 
-    describe('appSwitcherLinkKbnRoute attribute', () => {
+    describe('kbnRoute attribute', () => {
       it(`is applied to the link when href isn't defined`, () => {
         const attrs = {
-          appSwitcherLinkKbnRoute: '#test',
+          kbnRoute: '#test',
         };
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('href')).to.be(attrs.appSwitcherLinkKbnRoute);
+        expect(link.attr('href')).to.be(attrs.kbnRoute);
       });
 
       it(`isn't applied to the link when href is defined`, () => {
         const attrs = {
-          appSwitcherLinkHref: 'link to a website',
-          appSwitcherLinkKbnRoute: '#test',
+          href: 'link to a website',
+          kbnRoute: '#test',
         };
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('href')).not.to.be(attrs.appSwitcherLinkKbnRoute);
+        expect(link.attr('href')).not.to.be(attrs.kbnRoute);
       });
     });
 
-    describe('appSwitcherLinkIcon attribute', () => {
+    describe('icon attribute', () => {
       describe('when present', () => {
         it('displays the img element', () => {
           const attrs = {
-            appSwitcherLinkIcon: 'icon url',
+            icon: 'icon url',
           };
           const element = create(attrs);
           const img = element.find('img');
@@ -140,7 +140,7 @@ describe('appSwitcherLink directive', () => {
 
         it('hides the placeholder', () => {
           const attrs = {
-            appSwitcherLinkIcon: 'icon url',
+            icon: 'icon url',
           };
           const element = create(attrs);
           const placeholder = element.find('[data-test-subj=appLinkIconPlaceholder]');
@@ -149,18 +149,18 @@ describe('appSwitcherLink directive', () => {
 
         it(`is set as the img src`, () => {
           const attrs = {
-            appSwitcherLinkIcon: 'icon url',
+            icon: 'icon url',
           };
           const element = create(attrs);
           const img = element.find('img');
-          expect(img.attr('src')).to.contain(encodeURI(attrs.appSwitcherLinkIcon));
+          expect(img.attr('src')).to.contain(encodeURI(attrs.icon));
         });
       });
 
       describe('when not present', () => {
         it('hides the img element', () => {
           const attrs = {
-            appSwitcherLinkIcon: undefined,
+            icon: undefined,
           };
           const element = create(attrs);
           const img = element.find('img');
@@ -169,7 +169,7 @@ describe('appSwitcherLink directive', () => {
 
         it('displays the placeholder', () => {
           const attrs = {
-            appSwitcherLinkIcon: undefined,
+            icon: undefined,
           };
           const element = create(attrs);
           const placeholder = element.find('[data-test-subj=appLinkIconPlaceholder]');
@@ -178,33 +178,33 @@ describe('appSwitcherLink directive', () => {
 
         it(`uses the title's first letter as the placeholder`, () => {
           const attrs = {
-            appSwitcherLinkIcon: undefined,
-            appSwitcherLinkTitle: 'Xyz',
+            icon: undefined,
+            title: 'Xyz',
           };
           const element = create(attrs);
           const placeholder = element.find('[data-test-subj=appLinkIconPlaceholder]');
-          expect(placeholder.text()).to.contain(attrs.appSwitcherLinkTitle[0]);
+          expect(placeholder.text()).to.contain(attrs.title[0]);
         });
       });
     });
 
-    describe('appSwitcherLinkTitle attribute', () => {
+    describe('title attribute', () => {
       it('is displayed', () => {
         const attrs = {
-          appSwitcherLinkTitle: 'demo title',
+          title: 'demo title',
         };
         const element = create(attrs);
-        const title = element.find('.app-switcher-link__title');
-        expect(title.text().trim()).to.be(attrs.appSwitcherLinkTitle);
+        const title = element.find('.global-nav-link__title');
+        expect(title.text().trim()).to.be(attrs.title);
       });
 
       it('is set as a title attribute on the anchor tag', () => {
         const attrs = {
-          appSwitcherLinkTitle: 'demo title',
+          title: 'demo title',
         };
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('title')).to.be(attrs.appSwitcherLinkTitle);
+        expect(link.attr('title')).to.be(attrs.title);
       });
     });
   });

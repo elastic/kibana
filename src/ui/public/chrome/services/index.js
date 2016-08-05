@@ -1,1 +1,1 @@
-import './app_switcher_state';
+import './global_nav_state';

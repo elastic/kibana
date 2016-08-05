@@ -26,7 +26,7 @@ describe('appSwitcher directive', function () {
 
       env = {
         $scope: $rootScope,
-        $el: $compile($('<app-switcher>'))($rootScope),
+        $el: $compile($('<app-switcher chrome="chrome">'))($rootScope),
         currentHref: href,
         location: domLocation
       };
