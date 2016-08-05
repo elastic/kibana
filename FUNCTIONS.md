@@ -283,6 +283,14 @@ position | *string* | left or right
 label | *string* | Label for axis  
 color | *string* | Color of axis label  
 
+#### .expsmooth()
+Sample the beginning of a series and use it to predict what should happen
+
+Argument | Accepts | Description
+--- | --- | ---
+alpha | *number* | The weight of the the smoothing component (between 0 and 1)  
+beta | *number* | The weight of the trending component (between 0 and 1)  
+
 #### .trend()
 Draws a trend line using a specified regression algorithm
 
