@@ -1,4 +1,5 @@
 import IndexPatternsFieldFormatProvider from 'ui/index_patterns/_field_format/field_format';
+import _ from 'lodash';
 
 export default function TruncateFormatProvider(Private) {
 
@@ -28,7 +29,7 @@ export default function TruncateFormatProvider(Private) {
         case 'yes':
           return 'true';
         default:
-          return value.toString();
+          return _.asPrettyString(value);
       }
     }
   }
