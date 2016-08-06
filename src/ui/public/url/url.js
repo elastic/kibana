@@ -166,7 +166,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
       const $route = $injector.get('$route');
 
       if (self._shouldAutoReload(next, prev, $route)) {
-        const appState = Private(AppStateProvider);
+        const appState = Private(AppStateProvider).getAppState();
         if (appState) appState.destroy();
 
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
