@@ -3,12 +3,12 @@ import 'ui/filters/uriescape';
 import 'ui/filters/rison';
 import uiModules from 'ui/modules';
 import rison from 'rison-node';
-
+import AppStateProvider from 'ui/state_management/app_state';
 
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-function KbnUrlProvider($route, $location, $rootScope, $parse, getAppState) {
+function KbnUrlProvider($route, $location, $rootScope, $parse, Private) {
   let self = this;
 
   /**
@@ -163,7 +163,7 @@ function KbnUrlProvider($route, $location, $rootScope, $parse, getAppState) {
     };
 
     if (self._shouldAutoReload(next, prev)) {
-      let appState = getAppState();
+      const appState = Private(AppStateProvider);
       if (appState) appState.destroy();
 
       reloading = $rootScope.$on('$locationChangeSuccess', function () {
