@@ -8,7 +8,7 @@ import rison from 'rison-node';
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-function KbnUrlProvider($route, $location, $rootScope, globalState, $parse, getAppState) {
+function KbnUrlProvider($route, $location, $rootScope, $parse, getAppState) {
   let self = this;
 
   /**
