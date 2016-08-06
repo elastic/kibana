@@ -450,7 +450,7 @@ describe('kbnUrl', function () {
 
           describe('and the search params are the same', function () {
             it('returns false', function () {
-              expect(kbnUrl._shouldAutoReload(next, prev)).to.be(false);
+              expect(kbnUrl._shouldAutoReload(next, prev, $route)).to.be(false);
             });
           });
           describe('but the search params are different', function () {
