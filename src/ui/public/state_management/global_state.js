@@ -7,7 +7,7 @@ import uiModules from 'ui/modules';
 
 let module = uiModules.get('kibana/global_state');
 
-module.service('globalState', function (Private, $rootScope, $location) {
+function GlobalStateProvider(Private, $rootScope, $location) {
   let State = Private(StateManagementStateProvider);
 
   _.class(GlobalState).inherits(State);
@@ -23,4 +23,9 @@ module.service('globalState', function (Private, $rootScope, $location) {
   };
 
   return new GlobalState();
+}
+
+module.service('globalState', function (Private) {
+  return Private(GlobalStateProvider);
 });
+export default GlobalStateProvider;
