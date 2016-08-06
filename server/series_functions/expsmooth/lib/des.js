@@ -7,7 +7,6 @@ module.exports = function des(series, alpha, beta) {
   var prevTrend;
   var value;
   var origin;
-  var lastKnownPoint;
   var unknownCount = 0;
 
   if (series.length < 2) {
@@ -17,10 +16,9 @@ module.exports = function des(series, alpha, beta) {
   var times = _.map(series, 0);
   var points = _.map(series, 1);
 
-  var smoothedPoints = _.reduce(points, (result, point, i) => {
+  var smoothedPoints = _.map(points, (point, i) => {
     if (i === 0) {
-      result.push(point);
-      return result;
+      return point;
     }
 
     if (i === 1) {
@@ -38,12 +36,12 @@ module.exports = function des(series, alpha, beta) {
     }
 
     value = point;
+    // These 2 variables are not required, but are used for clarity.
     prevLevel = level;
     prevTrend = trend;
     level = (alpha * origin) + (1 - alpha) * (prevLevel + prevTrend);
     trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
-    result.push(level + (unknownCount * trend));
-    return result;
+    return (level + (unknownCount * trend));
   }, []);
 
   return _.zip(times, smoothedPoints);
