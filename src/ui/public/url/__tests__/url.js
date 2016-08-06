@@ -12,7 +12,6 @@ let kbnUrl;
 let $route;
 let $location;
 let $rootScope;
-let globalStateMock;
 let appState;
 
 
@@ -29,15 +28,6 @@ function init() {
       return function () {
         return appState;
       };
-    });
-
-    $provide.service('globalState', function () {
-      globalStateMock = new MockState();
-      globalStateMock.removeFromUrl = function (url) {
-        return url;
-      };
-
-      return globalStateMock;
     });
   });
 
