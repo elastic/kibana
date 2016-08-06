@@ -8,7 +8,7 @@ import AppStateProvider from 'ui/state_management/app_state';
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-function KbnUrlProvider($route, $location, $rootScope, $parse, Private) {
+function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   let self = this;
 
   /**
@@ -162,21 +162,25 @@ function KbnUrlProvider($route, $location, $rootScope, $parse, Private) {
       search: $location.search()
     };
 
-    if (self._shouldAutoReload(next, prev)) {
-      const appState = Private(AppStateProvider);
-      if (appState) appState.destroy();
+    if ($injector.has('$route')) {
+      const $route = $injector.get('$route');
 
-      reloading = $rootScope.$on('$locationChangeSuccess', function () {
-        // call the "unlisten" function returned by $on
-        reloading();
-        reloading = false;
+      if (self._shouldAutoReload(next, prev, $route)) {
+        const appState = Private(AppStateProvider);
+        if (appState) appState.destroy();
 
-        $route.reload();
-      });
+        reloading = $rootScope.$on('$locationChangeSuccess', function () {
+          // call the "unlisten" function returned by $on
+          reloading();
+          reloading = false;
+
+          $route.reload();
+        });
+      }
     }
   };
 
-  self._shouldAutoReload = function (next, prev) {
+  self._shouldAutoReload = function (next, prev, $route) {
     if (reloading) return false;
 
     let route = $route.current && $route.current.$$route;
