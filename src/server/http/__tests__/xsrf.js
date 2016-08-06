@@ -5,7 +5,7 @@ import { resolve } from 'path';
 const requireFromTest = require('requirefrom')('test');
 const kbnTestServer = requireFromTest('utils/kbn_server');
 
-const nonDestructiveMethods = ['GET'];
+const nonDestructiveMethods = ['GET', 'HEAD'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
 const src = resolve.bind(null, __dirname, '../../../../src');
 
@@ -30,9 +30,10 @@ describe('xsrf request filter', function () {
 
     await kbnServer.ready();
 
+    const routeMethods = nonDestructiveMethods.filter(method => method !== 'HEAD').concat(destructiveMethods);
     kbnServer.server.route({
       path: '/xsrf/test/route',
-      method: [...nonDestructiveMethods, ...destructiveMethods],
+      method: routeMethods,
       handler: function (req, reply) {
         reply(null, 'ok');
       }
@@ -54,7 +55,8 @@ describe('xsrf request filter', function () {
         });
 
         expect(resp.statusCode).to.be(200);
-        expect(resp.payload).to.be('ok');
+        if (method === 'HEAD') expect(resp.payload).to.be.empty();
+        else expect(resp.payload).to.be('ok');
       });
 
       it('failes on invalid tokens', async function () {
@@ -68,7 +70,8 @@ describe('xsrf request filter', function () {
 
         expect(resp.statusCode).to.be(400);
         expect(resp.headers).to.have.property(xsrfHeader, version);
-        expect(resp.payload).to.match(/"Browser client is out of date/);
+        if (method === 'HEAD') expect(resp.payload).to.be.empty();
+        else expect(resp.payload).to.match(/"Browser client is out of date/);
       });
     });
   }
