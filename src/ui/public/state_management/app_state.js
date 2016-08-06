@@ -64,7 +64,7 @@ function AppStateProvider(Private, $rootScope, $location) {
     return persistedStates[prop];
   };
 
-  AppState.getAppState = function () {
+  AppState.getAppState = (function () {
     let currentAppState;
 
     function get() {
@@ -82,7 +82,7 @@ function AppStateProvider(Private, $rootScope, $location) {
     };
 
     return get;
-  };
+  }());
 
   return AppState;
 }
