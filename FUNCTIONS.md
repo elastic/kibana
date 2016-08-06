@@ -284,12 +284,15 @@ label | *string* | Label for axis
 color | *string* | Color of axis label  
 
 #### .expsmooth()
-Sample the beginning of a series and use it to predict what should happen
+Sample the beginning of a series and use it to forecast what should happen via several optional parameters
 
 Argument | Accepts | Description
 --- | --- | ---
 alpha | *number* | The weight of the the smoothing component (between 0 and 1)  
 beta | *number* | The weight of the trending component (between 0 and 1)  
+gamma | *number* | The weight of the seasonal component (between 0 and 1)  
+season | *number* | The number of points in a season (eg, 24 if a season is a day and your interval is 1h) (Only useful with gamma)  
+sample | *number* | The number of seasons to sample before starting to smooth in a series with seasonality. (Only useful with gamma)  
 
 #### .trend()
 Draws a trend line using a specified regression algorithm
