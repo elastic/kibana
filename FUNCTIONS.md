@@ -291,7 +291,7 @@ Argument | Accepts | Description
 alpha | *number* | The weight of the the smoothing component (between 0 and 1)  
 beta | *number* | The weight of the trending component (between 0 and 1)  
 gamma | *number* | The weight of the seasonal component (between 0 and 1)  
-season | *number* | The number of points in a season (eg, 24 if a season is a day and your interval is 1h) (Only useful with gamma)  
+season | *string* | How long is the season, eg, 1w if you pattern repeats weekly. (Only useful with gamma)  
 sample | *number* | The number of seasons to sample before starting to smooth in a series with seasonality. (Only useful with gamma)  
 
 #### .trend()
