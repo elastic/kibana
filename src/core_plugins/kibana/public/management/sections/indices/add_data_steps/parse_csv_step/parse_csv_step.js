@@ -58,6 +58,7 @@ modules.get('apps/management')
             {
               header: true,
               dynamicTyping: true,
+              skipEmptyLines: true,
               step: (results, parser) => {
                 if (row > maxSampleRows) {
                   parser.abort();
