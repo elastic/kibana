@@ -29,10 +29,12 @@ visualize-legend {
   .vis-container--legend-top & {
     flex-direction: column-reverse;
     width: 100%;
+    padding-left: 25px;
   }
   .vis-container--legend-bottom & {
     flex-direction: column;
     width: 100%;
+    padding-left: 25px;
   }
 
   .header {
@@ -43,6 +45,11 @@ visualize-legend {
   .legend-toggle {
     &:hover {
       color: @sidebar-hover-color;
+    }
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      text-align: center;
     }
 
     padding-right: 5px;
