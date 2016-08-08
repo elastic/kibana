@@ -1,6 +1,6 @@
 {
   "name": "timelion",
-  "version": "0.1.400",
+  "version": "0.1.401",
   "kibanas": [
     "5.0.0-alpha4",
     "5.0.0-alpha5",

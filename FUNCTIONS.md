@@ -289,13 +289,22 @@ color | *string* | Color of axis label
     via several optional parameters. In general, like everything, this is crappy at predicting the
     future. You're much better off using it to predict what should be happening right now, for the
     purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.
-  
 
 Argument | Accepts | Description
 --- | --- | ---
-alpha | *number* | The weight of the the smoothing component (between 0 and 1)  
-beta | *number* | The weight of the trending component (between 0 and 1)  
-gamma | *number* | The weight of the seasonal component (between 0 and 1)  
+alpha | *number* | 
+        Smoothing weight from 0 to 1.
+        Increasing alpha will make the new series more closely follow the original.
+        Lowering it will make the series smoother  
+beta | *number* | 
+        Trending weight from 0 to 1.
+        Increasing beta will make rising/falling lines continue to rise/fall longer.
+        Lowering it will make the function learn the new trend faster  
+gamma | *number* | 
+        Seasonal weight from 0 to 1. Does your data look like a wave?
+        Increasing this will give recent seasons more importance, thus changing the wave form faster.
+        Lowering it will reduce the importance of new seasons, making history more important.
+          
 season | *string* | How long is the season, eg, 1w if you pattern repeats weekly. (Only useful with gamma)  
 sample | *number* | 
       The number of seasons to sample before starting to "predict" in a seasonal series.
