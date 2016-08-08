@@ -97,7 +97,9 @@ module.exports = function (api) {
       "field": "",
       "filter": [],
       "text": "",
-      "tokenizer": ""
+      "tokenizer": "",
+      "explain": "__flag__",
+      "attributes": []
     },
     data_autocomplete_rules: {
       text: [],
