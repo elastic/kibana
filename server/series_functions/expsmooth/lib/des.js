@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-module.exports = function des(series, alpha, beta) {
+module.exports = function des(points, alpha, beta) {
   var level;
   var prevLevel;
   var trend;
@@ -9,12 +9,9 @@ module.exports = function des(series, alpha, beta) {
   var origin;
   var unknownCount = 0;
 
-  if (series.length < 2) {
+  if (points.length < 2) {
     throw new Error ('You need at least 2 points to use double exponential smoothing');
   }
-
-  var times = _.map(series, 0);
-  var points = _.map(series, 1);
 
   var smoothedPoints = _.map(points, (point, i) => {
     if (i === 0) {
@@ -24,7 +21,7 @@ module.exports = function des(series, alpha, beta) {
     if (i === 1) {
       // Establish initial values for level and trend;
       level = points[0];
-      trend = points[1] - points[0];
+      trend = points[1] - points[0]; // This is sort of a lame way to do this
     }
 
     if (point == null) {
@@ -41,6 +38,6 @@ module.exports = function des(series, alpha, beta) {
     return (level + (unknownCount * trend));
   }, []);
 
-  return _.zip(times, smoothedPoints);
+  return smoothedPoints;
 
 };

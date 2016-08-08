@@ -54,12 +54,15 @@ module.exports = new Chainable('expsmooth', {
       // points exponentially degrade relative to the alpha, eg:
       // 0.8^1, 0.8^2, 0.8^3, etc
 
+      var times = _.map(series.data, 0);
+      var points = _.map(series.data, 1);
+
       if (alpha != null && beta == null && gamma == null) {
-        _.assign(series.data, ses(series.data, alpha));
+        points = ses(points, alpha);
       }
 
       if (alpha != null && beta != null && gamma == null) {
-        _.assign(series.data, des(series.data, alpha, beta));
+        points = des(points, alpha, beta);
       }
 
       if (alpha != null && beta != null && gamma != null) {
@@ -67,9 +70,10 @@ module.exports = new Chainable('expsmooth', {
           throw new Error('Must specificy a season length and a sample size >= 2');
         }
         const season = Math.round(toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval));
-        _.assign(series.data, tes(series.data, alpha, beta, gamma, season, sample));
+        points = tes(points, alpha, beta, gamma, season, sample);
       }
 
+      _.assign(series.data, _.zip(times, points));
     });
 
     return newSeries;

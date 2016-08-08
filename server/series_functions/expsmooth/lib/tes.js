@@ -10,6 +10,7 @@ Hourly data might have:
 
 var _ = require('lodash');
 
+// Uh, I don't think this will work when you have nulls in the initial seasonal components
 function initSeasonalComponents(samplePoints, seasonLength) {
   var sampledSeasonCount = samplePoints.length / seasonLength;
   var currentSeason = [];
@@ -46,10 +47,8 @@ function initTrend(samplePoints, seasonLength) {
   return sum / seasonLength;
 }
 
-module.exports = function tes(series, alpha, beta, gamma, seasonLength, seasonsToSample) {
+module.exports = function tes(points, alpha, beta, gamma, seasonLength, seasonsToSample) {
 
-  var times = _.map(series, 0);
-  var points = _.map(series, 1);
   var samplePoints = points.slice(0, seasonLength * seasonsToSample);
   var seasonals = initSeasonalComponents(samplePoints, seasonLength);
   var level;
@@ -86,5 +85,5 @@ module.exports = function tes(series, alpha, beta, gamma, seasonLength, seasonsT
 
   });
 
-  return _.zip(times, result);
+  return result;
 };

@@ -4,12 +4,9 @@
 
 const _ = require('lodash');
 
-module.exports = function ses(series, alpha) {
+module.exports = function ses(points, alpha) {
   let origin;
   let level;
-
-  var times = _.map(series, 0);
-  var points = _.map(series, 1);
 
   var smoothedPoints = _.reduce(points, (result, point, i) => {
     if (i === 0) {
@@ -17,7 +14,7 @@ module.exports = function ses(series, alpha) {
       level = point;
     } else {
       // In the case that point[1] is null, we keep origin the same
-      // and forecast the point
+      // and forecast the point based on the previous smoothed point
       if (point != null) {
         origin = point;
       }
@@ -33,5 +30,5 @@ module.exports = function ses(series, alpha) {
     return result;
   }, []);
 
-  return _.zip(times, smoothedPoints);
+  return smoothedPoints;
 };
