@@ -53,11 +53,13 @@ module.exports = function tes(series, alpha, beta, gamma, seasonLength, seasonsT
   var samplePoints = points.slice(0, seasonLength * seasonsToSample);
   var seasonals = initSeasonalComponents(samplePoints, seasonLength);
   var level;
+  var prevLevel;
   var trend;
+  var prevTrend;
+  var unknownCount = 0;
 
   var result = _.map(points, (point, i) => {
     const seasonalPosition = i % seasonLength;
-    let lastLevel;
     // For the first samplePoints.length we use the actual points
     // After that we switch to the forecast
     if (i === 0) {
@@ -68,17 +70,16 @@ module.exports = function tes(series, alpha, beta, gamma, seasonLength, seasonsT
 
     // Beta isn't actually used once we're forecasting?
     if (point == null || i >= samplePoints.length) {
+      unknownCount++;
       // Don't know this point, make it up!
-      const m = i - samplePoints.length + 1;
-      console.log(m);
-      return (level + (m * trend)) + seasonals[seasonalPosition];
+      return (level + (unknownCount * trend)) + seasonals[seasonalPosition];
     } else {
-      // Not forecasting yet, still have context from sample seasons
-
-      // Basically we're just smoothing here.
-      lastLevel = level;
-      level = alpha * (point - seasonals[seasonalPosition]) + (1 - alpha) * (level + trend);
-      trend = beta * (level - lastLevel) + (1 - beta) * trend;
+      unknownCount = 0;
+      // These 2 variables are not required, but are used for clarity.
+      prevLevel = level;
+      prevTrend = trend;
+      level = alpha * (point - seasonals[seasonalPosition]) + (1 - alpha) * (prevLevel + prevTrend);
+      trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
       seasonals[seasonalPosition] = gamma * (point - level) + (1 - gamma) * seasonals[seasonalPosition];
       return level + trend + seasonals[seasonalPosition];
     }
