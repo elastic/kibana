@@ -5,6 +5,7 @@ import ngMock from 'ng_mock';
 import faker from 'faker';
 import _ from 'lodash';
 import MockState from 'fixtures/mock_state';
+import AppStateProvider from 'ui/state_management/app_state';
 import 'ui/url';
 
 // global vars, injected and mocked in init()
@@ -16,7 +17,7 @@ let appState;
 
 
 function init() {
-  ngMock.module('kibana/url', 'kibana', function ($provide) {
+  ngMock.module('kibana/url', 'kibana', function ($provide, PrivateProvider) {
     $provide.service('$route', function () {
       return {
         reload: _.noop
@@ -24,10 +25,10 @@ function init() {
     });
 
     appState = { destroy: sinon.stub() };
-    $provide.service('getAppState', function () {
-      return function () {
-        return appState;
-      };
+    PrivateProvider.swap(AppStateProvider, $decorate => {
+      const AppState = $decorate();
+      AppState.getAppState = () => appState;
+      return AppState;
     });
   });
 
