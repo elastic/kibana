@@ -76,6 +76,7 @@ variable_set
 
 series_type
  = variable_set
+ / variable_get
  / group
  / chain
  / reference
