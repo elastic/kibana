@@ -25,22 +25,19 @@ module.exports = function des(series, alpha, beta) {
       // Establish initial values for level and trend;
       level = points[0];
       trend = points[1] - points[0];
-      origin = point;
     }
 
     if (point == null) {
       unknownCount++;
     } else {
-      origin = point;
       unknownCount = 0;
+      // These 2 variables are not required, but are used for clarity.
+      prevLevel = level;
+      prevTrend = trend;
+      level = (alpha * point) + (1 - alpha) * (prevLevel + prevTrend);
+      trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
     }
 
-    value = point;
-    // These 2 variables are not required, but are used for clarity.
-    prevLevel = level;
-    prevTrend = trend;
-    level = (alpha * origin) + (1 - alpha) * (prevLevel + prevTrend);
-    trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
     return (level + (unknownCount * trend));
   }, []);
 
