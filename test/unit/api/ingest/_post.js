@@ -175,7 +175,7 @@ define(function (require) {
               method: 'GET'
             })
             .then(function (body) {
-              expect(body.pipelines[0].id).to.be('kibana-logstash-*');
+              expect(body).to.have.property('kibana-logstash-*');
             });
           });
       });
