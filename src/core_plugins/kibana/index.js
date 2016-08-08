@@ -1,13 +1,18 @@
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
+import fs from 'fs';
+import i18nPlugin from '../../plugins/i18n/server/i18n/index';
 import ingest from './server/routes/api/ingest';
+import kibanaPackage from '../../utils/package_json';
+import Promise from 'bluebird';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
 
 const mkdirp = Promise.promisify(mkdirpNode);
+const readdir = Promise.promisify(fs.readdir);
 
 module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -113,9 +118,26 @@ module.exports = function (kibana) {
       search(server);
       settings(server);
       scripts(server);
-
       server.expose('systemApi', systemApi);
+      registerCoreTranslations();
     }
   });
 
 };
+
+function registerCoreTranslations()
+{
+  const rootDir = kibanaPackage.__dirname;
+
+  //Add translation dirs for the core plugins here
+  const corePluginTranslationDirs = [rootDir + '/src/ui/i18n'];
+
+  return Promise.map(corePluginTranslationDirs, (dir) => {
+    readdir(dir).then((dirListing) => {
+      Promise.map(dirListing, (listing) => {
+        const fullFilePath = dir + '/' + listing;
+        i18nPlugin.registerTranslations(fullFilePath);
+      });
+    });
+  });
+}

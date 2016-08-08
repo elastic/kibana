@@ -1,4 +1,5 @@
 import expect from 'expect.js';
+import fs from 'fs';
 import fse from 'fs-extra';
 import i18n from '../i18n/i18n';
 import path from 'path';
@@ -10,6 +11,7 @@ const DATA_PATH = __dirname + PATH_SEPARATOR + 'fixtures';
 const TRANSLATION_BACKUP_PATH = DATA_PATH + '/translations_backup';
 
 const translationStorePath = i18n.getTranslationStoragePath();
+const stat = Promise.promisify(fs.stat);
 
 describe('Test registering translations for test_plugin_1', function () {
   const pluginName = 'test_plugin_1';
@@ -205,18 +207,22 @@ function checkRegisteredLanguages(expectedLanguages, done) {
 
 function backupTranslations(done) {
   const translationStorePath = i18n.getTranslationStoragePath();
-  fse.copy(translationStorePath, TRANSLATION_BACKUP_PATH, function (err) {
-    if (err) {
-      console.error(err);
-      done();
-      return;
-    }
-    fse.emptyDir(translationStorePath, function (err) {
+  return stat(translationStorePath).then((stats) => {
+    fse.copy(translationStorePath, TRANSLATION_BACKUP_PATH, function (err) {
       if (err) {
         console.error(err);
+        done();
+        return;
       }
-      done();
+      fse.emptyDir(translationStorePath, function (err) {
+        if (err) {
+          console.error(err);
+        }
+        done();
+      });
     });
+  }).catch(function (e) {
+    done();
   });
 }
 
@@ -228,18 +234,22 @@ function restoreTranslations(done) {
       done();
       return;
     }
-    fse.copy(TRANSLATION_BACKUP_PATH, translationStorePath, function (err) {
-      if (err) {
-        console.error(err);
-        done();
-        return;
-      }
-      fse.remove(TRANSLATION_BACKUP_PATH, function (err) {
+    return stat(TRANSLATION_BACKUP_PATH).then((stats) => {
+      fse.copy(TRANSLATION_BACKUP_PATH, translationStorePath, function (err) {
         if (err) {
           console.error(err);
+          done();
+          return;
         }
-        done();
+        fse.remove(TRANSLATION_BACKUP_PATH, function (err) {
+          if (err) {
+            console.error(err);
+          }
+          done();
+        });
       });
+    }).catch(function (e) {
+      done();
     });
   });
 }

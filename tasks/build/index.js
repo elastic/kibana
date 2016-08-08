@@ -10,9 +10,7 @@ module.exports = function (grunt) {
       'copy:devSource',
       'babel:build',
       '_build:babelOptions',
-      '_build:plugins',
-      '_build:data',
-      '_build:register_translations',
+      '_build:installedPlugins',
       '_build:packageJson',
       '_build:readme',
       '_build:babelCache',
@@ -23,7 +21,6 @@ module.exports = function (grunt) {
       'stop:optimizeBuild',
       '_build:versionedLinks',
       '_build:osShellScripts',
-      '_build:copy_translations',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
       grunt.option('skip-os-packages') ? [] : [
         '_build:pleaseRun',
