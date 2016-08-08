@@ -10,42 +10,43 @@ Hourly data might have:
 
 var _ = require('lodash');
 
+function initSeasonalComponents(samplePoints, seasonLength) {
+  var sampledSeasonCount = samplePoints.length / seasonLength;
+  var currentSeason = [];
+  var seasonalAverages = _.reduce(samplePoints, (result, point, i) => {
+    currentSeason.push(point);
+      // If this is the end of the season, add it to the result;
+    if (i % seasonLength === seasonLength - 1) {
+      result.push(_.sum(currentSeason) / seasonLength);
+      currentSeason = [];
+    }
+
+    return result;
+  }, []);
+
+  var seasonals = _.times(seasonLength, (i) => {
+    var sumOfValsOverAvg = 0;
+    _.times(sampledSeasonCount, (j) => {
+      sumOfValsOverAvg += samplePoints[seasonLength * j + i] - seasonalAverages[j];
+    });
+
+    return sumOfValsOverAvg / sampledSeasonCount;
+  });
+
+  return seasonals;
+};
+
+// This is different from the DES method of establishing trend because it looks for
+// the difference in points between seasons
+function initTrend(samplePoints, seasonLength) {
+  var sum = 0;
+  _.times(seasonLength, (i) => {
+    sum += (samplePoints[i + seasonLength] - samplePoints[i]) / seasonLength;
+  });
+  return sum / seasonLength;
+}
+
 module.exports = function tes(series, alpha, beta, gamma, seasonLength, seasonsToSample) {
-  function initSeasonalComponents(samplePoints, seasonLength) {
-    var sampledSeasonCount = samplePoints.length / seasonLength;
-    var currentSeason = [];
-    var seasonalAverages = _.reduce(samplePoints, (result, point, i) => {
-      currentSeason.push(point);
-        // If this is the end of the season, add it to the result;
-      if (i % seasonLength === seasonLength - 1) {
-        result.push(_.sum(currentSeason) / seasonLength);
-        currentSeason = [];
-      }
-
-      return result;
-    }, []);
-
-    var seasonals = _.times(seasonLength, (i) => {
-      var sumOfValsOverAvg = 0;
-      _.times(sampledSeasonCount, (j) => {
-        sumOfValsOverAvg += samplePoints[seasonLength * j + i] - seasonalAverages[j];
-      });
-
-      return sumOfValsOverAvg / sampledSeasonCount;
-    });
-
-    return seasonals;
-  };
-
-  // This is different from the DES method of establishing trend because it looks for
-  // the difference in points between seasons
-  function initTrend(samplePoints, seasonLength) {
-    var sum = 0;
-    _.times(seasonLength, (i) => {
-      sum += (samplePoints[i + seasonLength] - samplePoints[i]) / seasonLength;
-    });
-    return sum / seasonLength;
-  }
 
   var times = _.map(series, 0);
   var points = _.map(series, 1);
@@ -65,13 +66,16 @@ module.exports = function tes(series, alpha, beta, gamma, seasonLength, seasonsT
       return points[0];
     }
 
-    if (point == null || i > samplePoints.length + 1) {
+    // Beta isn't actually used once we're forecasting?
+    if (point == null || i >= samplePoints.length) {
       // Don't know this point, make it up!
       const m = i - samplePoints.length + 1;
-      return (level + m * trend) + seasonals[seasonalPosition];
+      console.log(m);
+      return (level + (m * trend)) + seasonals[seasonalPosition];
     } else {
       // Not forecasting yet, still have context from sample seasons
-      // That said, we need handling for null values
+
+      // Basically we're just smoothing here.
       lastLevel = level;
       level = alpha * (point - seasonals[seasonalPosition]) + (1 - alpha) * (level + trend);
       trend = beta * (level - lastLevel) + (1 - beta) * trend;
