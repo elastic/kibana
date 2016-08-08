@@ -5,7 +5,7 @@ var des = require('./lib/des');
 var tes = require('./lib/tes');
 var toMilliseconds = require('../../lib/to_milliseconds');
 
-module.exports = new Chainable('expsmooth', {
+module.exports = new Chainable('holt', {
   args: [
     {
       name: 'inputSeries',
@@ -33,11 +33,18 @@ module.exports = new Chainable('expsmooth', {
     },
     {
       name: 'sample',
-      types: ['number'],
-      help: 'The number of seasons to sample before starting to smooth in a series with seasonality. (Only useful with gamma)'
+      types: ['number', 'null'],
+      help: `
+      The number of seasons to sample before starting to "predict" in a seasonal series.
+      (Only useful with gamma, Default: all)`
     }
   ],
-  help: 'Sample the beginning of a series and use it to forecast what should happen via several optional parameters',
+  help: `
+    Sample the beginning of a series and use it to forecast what should happen
+    via several optional parameters. In general, like everything, this is crappy at predicting the
+    future. You're much better off using it to predict what should be happening right now, for the
+    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.
+  `,
   fn: function expsmoothFn(args, tlConfig) {
 
     let newSeries = _.cloneDeep(args.byName.inputSeries);
@@ -45,9 +52,10 @@ module.exports = new Chainable('expsmooth', {
     const alpha = args.byName.alpha;
     const beta = args.byName.beta;
     const gamma = args.byName.gamma;
-    const sample = args.byName.sample;
 
     _.each(newSeries.list, function (series) {
+      const sample = args.byName.sample || series.data.length; // If we use length it should simply never predict
+
 
       // Single exponential smoothing
       // This is basically a weighted moving average in which the older

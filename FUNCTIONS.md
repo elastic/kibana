@@ -284,7 +284,12 @@ label | *string* | Label for axis
 color | *string* | Color of axis label  
 
 #### .expsmooth()
-Sample the beginning of a series and use it to forecast what should happen via several optional parameters
+
+    Sample the beginning of a series and use it to forecast what should happen
+    via several optional parameters. In general, like everything, this is crappy at predicting the
+    future. You're much better off using it to predict what should be happening right now, for the
+    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.
+  
 
 Argument | Accepts | Description
 --- | --- | ---
@@ -292,7 +297,9 @@ alpha | *number* | The weight of the the smoothing component (between 0 and 1)
 beta | *number* | The weight of the trending component (between 0 and 1)  
 gamma | *number* | The weight of the seasonal component (between 0 and 1)  
 season | *string* | How long is the season, eg, 1w if you pattern repeats weekly. (Only useful with gamma)  
-sample | *number* | The number of seasons to sample before starting to smooth in a series with seasonality. (Only useful with gamma)  
+sample | *number* | 
+      The number of seasons to sample before starting to "predict" in a seasonal series.
+      (Only useful with gamma, Default: all)  
 
 #### .trend()
 Draws a trend line using a specified regression algorithm
@@ -302,4 +309,22 @@ Argument | Accepts | Description
 mode | *string* | The algorithm to use for generating the trend line. One of: linear, log  
 start | *number* | Where to start calculating from the beginning or end. For example -10 would start calculating 10 points from the end, +15 would start 15 points from the beginning. Default: 0  
 end | *number* | Where to stop calculating from the beginning or end. For example -10 would stop calculating 10 points from the end, +15 would stop 15 points from the beginning. Default: 0  
+
+#### .holt()
+
+    Sample the beginning of a series and use it to forecast what should happen
+    via several optional parameters. In general, like everything, this is crappy at predicting the
+    future. You're much better off using it to predict what should be happening right now, for the
+    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.
+  
+
+Argument | Accepts | Description
+--- | --- | ---
+alpha | *number* | The weight of the the smoothing component (between 0 and 1)  
+beta | *number* | The weight of the trending component (between 0 and 1)  
+gamma | *number* | The weight of the seasonal component (between 0 and 1)  
+season | *string* | How long is the season, eg, 1w if you pattern repeats weekly. (Only useful with gamma)  
+sample | *number* | 
+      The number of seasons to sample before starting to "predict" in a seasonal series.
+      (Only useful with gamma, Default: all)  
 
