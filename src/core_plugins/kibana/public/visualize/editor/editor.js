@@ -5,6 +5,7 @@ import 'plugins/kibana/visualize/editor/agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
+import getVisLibOptions from 'ui/utils/get_vislib_options';
 import angular from 'angular';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
@@ -293,14 +294,21 @@ uiModules
 
   function transferVisState(fromVis, toVis, stage) {
     return function () {
+
+      const fromVisLib = getVisLibOptions(fromVis);
+      const toVisLib = getVisLibOptions(toVis);
+
       const view = fromVis.getEnabledState();
       const full = fromVis.getState();
       toVis.setState(view);
       editableVis.dirty = false;
       $state.vis = full;
-      $state.save();
 
-      if (stage) $scope.fetch();
+      if (stage && _.isEqual(toVisLib, fromVisLib)) {//only requery ES when the query changed. vislib params are irrelevant
+        $scope.fetch();
+      } else {
+        $state.save();
+      }
     };
   }
 
