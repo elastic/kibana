@@ -21,6 +21,7 @@ module.exports.send = function (method, path, data, server, disable_auth_alert) 
   var options = {
     url: '../api/console/proxy?uri=' + encodeURIComponent(path),
     data: method == "GET" ? null : data,
+    contentType: 'application/json',
     cache: false,
     crossDomain: true,
     type: method,
