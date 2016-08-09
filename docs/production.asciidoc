@@ -235,37 +235,6 @@ NOTE: This must be a user who has been assigned a role derived from the example
                                                                   `true`.
 |======
 
-////
-
-[float]
-[[configuring-kibana-shield]]
-=== Configuring Kibana to Work with {scyld}
-If you are using {scyld} to authenticate Elasticsearch users, you need to provide
-the Kibana server with credentials to enable access to the `.kibana` index and monitor
-the cluster.
-
-To configure credentials for the Kibana server:
-
-. Assign the `kibana4_server` role to a user in {scyld}. For more information, see
-{shield}/kibana.html#kibana4-server-role[Configuring a Role for the Kibana Server]
-in the {scyld} documentation.
-
- . Set the `kibana_elasticsearch_username` and
-`kibana_elasticsearch_password` properties in `kibana.yml` to specify the credentials
-of the user you assigned the `kibana4_server` role:
-+
-[source,text]
-----
-kibana_elasticsearch_username: kibana-user
-kibana_elasticsearch_password: kibana-password
-----
-
-Users on release 4.0 and later of Kibana also need access to the `.kibana` index so they can save and load searches, visualizations, and
-dashboards. For more information, see {shield}/kibana.html[Using Kibana with {scyld}].
-
-TIP: See <<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>> for important information on Kibana and
-the dynamic mapping feature in Elasticsearch.
-////
 
 [float]
 [[enabling-ssl]]
@@ -314,7 +283,8 @@ the query that populates a Kibana visualization, the user just sees an empty
 visualization.
 
 To configure access to Kibana using {scyld}, you create roles
-for Kibana using the `my_kibana_user` default role as a starting point.
+for Kibana using the `my_kibana_user` default role as a starting point. For more
+information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana with {scyld}].
 
 [float]
 [[load-balancing]]

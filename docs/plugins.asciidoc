@@ -23,8 +23,8 @@ When you specify a plugin name without a URL, the plugin tool attempts to downlo
 You can specify a URL to a specific plugin, as in the following example:
 
 [source,shell]
-$ bin/kibana-plugin install https://download.elastic.co/kibana/x-pack/x-pack-5.0.0-snapshot.zip
-Attempting to transfer from https://download.elastic.co/kibana/x-pack//x-pack-5.0.0-snapshot.zip
+$ bin/kibana-plugin install https://download.elastic.co/kibana/x-pack/x-pack-5.0.0-alpha5.zip
+Attempting to transfer from https://download.elastic.co/kibana/x-pack/x-pack-5.0.0-alpha5.zip
 Transferring <some number> bytes....................
 Transfer complete
 Retrieving metadata from plugin archive
