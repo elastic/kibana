@@ -1,3 +1,5 @@
+import d3 from 'd3';
+import _ from 'lodash';
 import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
@@ -25,7 +27,7 @@ export default function ColumnHandler(Private) {
     opts = opts || {};
 
     return function (vis) {
-      let isUserDefinedYAxis = vis._attr.setYExtents;
+      const isUserDefinedYAxis = vis._attr.setYExtents;
       let data;
 
       if (opts.zeroFill) {
@@ -33,6 +35,30 @@ export default function ColumnHandler(Private) {
       } else {
         data = new Data(vis.data, vis._attr, vis.uiState);
       }
+
+      const yAxis = (() => {
+        if (vis._attr.splitYAxis) {
+          return _.map(data.data.series, (serie) => {
+            const yMin = isUserDefinedYAxis ? vis._attr.yAxis.min : d3.min(_.map(serie.values, d => { return d.y; }));
+            const yMax  = isUserDefinedYAxis ? vis._attr.yAxis.max : d3.max(_.map(serie.values, d=> { return d.y; }));
+            return new YAxis({
+              el   : vis.el,
+              yMin : yMin,
+              yMax : yMax,
+              yAxisFormatter: data.get('yAxisFormatter'),
+              _attr: vis._attr
+            });
+          });
+        } else {
+          return [new YAxis({
+            el   : vis.el,
+            yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
+            yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
+            yAxisFormatter: data.get('yAxisFormatter'),
+            _attr: vis._attr
+          })];
+        }
+      })();
 
       return new Handler(vis, {
         data: data,
@@ -47,13 +73,7 @@ export default function ColumnHandler(Private) {
           _attr             : vis._attr
         }),
         alerts: new Alerts(vis, data, opts.alerts),
-        yAxis: new YAxis({
-          el   : vis.el,
-          yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
-          yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
-          yAxisFormatter: data.get('yAxisFormatter'),
-          _attr: vis._attr
-        })
+        yAxis:  yAxis
       });
 
     };

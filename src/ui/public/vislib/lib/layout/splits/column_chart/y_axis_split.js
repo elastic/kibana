@@ -1,4 +1,6 @@
 import d3 from 'd3';
+import _ from 'lodash';
+
 define(function () {
   return function YAxisSplitFactory() {
 
@@ -39,7 +41,11 @@ define(function () {
       .append('svg')
       .attr('style', 'position:absolute; top:-10000; left:-10000');
       let width = svg.append('g')
-      .call(yAxis.getYAxis(height)).node().getBBox().width + padding;
+      .call(() => {
+        _.map(yAxis, (axis) => {
+          axis.getYAxis(height);
+        });
+      }).node().getBBox().width + padding;
       svg.remove();
 
       el.style('width', (width + padding) + 'px');

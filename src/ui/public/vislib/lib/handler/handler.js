@@ -46,9 +46,8 @@ export default function HandlerBaseClass(Private) {
       this.axisTitle,
       this.chartTitle,
       this.alerts,
-      this.xAxis,
-      this.yAxis,
-    ], Boolean);
+      this.xAxis
+    ].concat(this.yAxis), Boolean);
 
     // memoize so that the same function is returned every time,
     // allowing us to remove/re-add the same function
