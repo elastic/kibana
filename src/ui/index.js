@@ -10,7 +10,7 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-import i18nPlugin from '../plugins/i18n/server/i18n/index';
+import i18nPlugin from '../core_plugins/i18n/server/i18n/index';
 import langParser from 'accept-language-parser';
 
 let kibanaTranslations = [];

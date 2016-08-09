@@ -7,7 +7,7 @@ import process from 'child_process';
 import Promise from 'bluebird';
 
 const PATH_SEPARATOR = path.sep;
-const DATA_PATH = __dirname + PATH_SEPARATOR + 'fixtures';
+const DATA_PATH = __dirname + PATH_SEPARATOR + 'data';
 const TRANSLATION_BACKUP_PATH = DATA_PATH + '/translations_backup';
 
 const translationStorePath = i18n.getTranslationStoragePath();

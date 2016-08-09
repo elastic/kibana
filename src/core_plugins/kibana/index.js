@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
 import fs from 'fs';
-import i18nPlugin from '../../plugins/i18n/server/i18n/index';
+import i18nPlugin from '../i18n/server/i18n/index';
 import ingest from './server/routes/api/ingest';
 import kibanaPackage from '../../utils/package_json';
 import Promise from 'bluebird';

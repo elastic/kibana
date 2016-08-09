@@ -12,9 +12,8 @@ const mkdirpAsync = Promise.promisify(mkdirp);
 
 const PATH_SEPARATOR = path.sep;
 const TRANSLATION_FILE_EXTENSION = 'json';
-const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + PATH_SEPARATOR + 'fixtures' + PATH_SEPARATOR + 'translations';
+const TRANSLATION_STORE_PATH = kibanaPackage.__dirname + PATH_SEPARATOR + 'data' + PATH_SEPARATOR + 'translations';
 
-//TODO(hickeyma): Update to use https://github.com/elastic/kibana/pull/7562
 const getTranslationStoragePath = function () {
   return TRANSLATION_STORE_PATH;
 };
