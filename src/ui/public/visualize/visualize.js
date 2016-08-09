@@ -56,8 +56,15 @@ uiModules
         return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
       };
 
+      const legendPositionToVisContainerClassMap = {
+        top: 'vis-container--legend-top',
+        bottom: 'vis-container--legend-bottom',
+        left: 'vis-container--legend-left',
+        right: 'vis-container--legend-right',
+      };
+
       $scope.getVisContainerClasses = function () {
-        return `vis-container--legend-${$scope.vis.params.legendPosition}`;
+        return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
       };
 
       $scope.spy = {};
