@@ -41,14 +41,32 @@ describe('Marker Tests', function () {
   let mapData;
   let markerLayer;
 
-  function createMarker(MarkerClass, geoJson) {
-    mapData = _.assign({}, geoJsonData.geoJson, geoJson || {});
-    mapData.properties.allmin = mapData.properties.min;
-    mapData.properties.allmax = mapData.properties.max;
+  function makeSampleGeoJson(geoJson) {
+    const geojson = _.assign({}, geoJsonData.geoJson, geoJson || {});
+    geojson.properties.allmin = geojson.properties.min;
+    geojson.properties.allmax = geojson.properties.max;
+    return geojson;
+  }
 
-    return new MarkerClass(mockMap, mapData, {
-      valueFormatter: geoJsonData.valueFormatter
-    });
+  function makeMarkerClass(MarkerClass, data) {
+    mapData = data;
+    return new MarkerClass(mockMap, data, {valueFormatter: geoJsonData.valueFormatter});
+  }
+
+  function createMarker(MarkerClass, geoJson) {
+    return makeMarkerClass(MarkerClass, makeSampleGeoJson(geoJson));
+  }
+
+  function shiftRange(x) {
+    return x - 400;//this shifts some values to negative and others remain positive
+  }
+
+  function createMarkerWithNegativeValues(MarkerClass) {
+    const geojson = JSON.parse(JSON.stringify(makeSampleGeoJson()));
+    geojson.properties.allmin = geojson.properties.min = shiftRange(geojson.properties.min);
+    geojson.properties.allmax = geojson.properties.max = shiftRange(geojson.properties.max);
+    geojson.features.forEach(feature => feature.properties.value = shiftRange(feature.properties.value));
+    return makeMarkerClass(MarkerClass, geojson);
   }
 
   beforeEach(function () {
@@ -219,8 +237,6 @@ describe('Marker Tests', function () {
 
   describe('Scaled Circles', function () {
 
-    let zoom;
-
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
       sinon.stub(mockMap, 'getZoom', _.constant(2));//make deterministic
@@ -243,6 +259,32 @@ describe('Marker Tests', function () {
         });
       });
 
+    });
+  });
+
+  describe('Scaled Circles (shifted)', function () {
+
+    beforeEach(ngMock.module('MarkerFactory'));
+    beforeEach(ngMock.inject(function (Private) {
+      sinon.stub(mockMap, 'getZoom', _.constant(2));//make deterministic
+      let MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
+      markerLayer = createMarkerWithNegativeValues(MarkerClass);
+    }));
+
+    describe('value to circle size (shifted)', function () {
+
+      let testValues = [//scaled according to area.
+        {value: shiftRange(1), expected: 43},//smallest
+        {value: shiftRange(304), expected: 95},//somewhere halfway
+        {value: shiftRange(608), expected: 128}//biggest
+      ];
+
+      _.each(testValues, function (testValue) {
+        it(`should scale correctly for ${testValue.value}`, function () {
+          let actual = markerLayer._radiusScale(testValue.value);
+          expect(actual).to.equal(testValue.expected);
+        });
+      });
     });
   });
 

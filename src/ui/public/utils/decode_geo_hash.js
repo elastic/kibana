@@ -58,15 +58,23 @@ function refine_interval(interval, cd, mask) {
 export default decodeGeoHash;
 
 /**
+ * Get the number of geohash cells for a given precision
  *
  * @param {number} precision the geohash precision (1<=precision<=12).
  * @param {number} axis constant for the axis 0=lengthwise (ie. columns, along longitude), 1=heightwise (ie. rows, along latitude)
  * @returns {number} Number of geohash cells at that precision
  */
-export function geohashCells(precision, axis) {
+function geohashCells(precision, axis) {
   let cells = 1;
   for (let i = 1; i <= precision; i += 1) {
     cells *= (i % 2 === axis) ? 4 : 8;
   }
   return cells;
 }
+export function geohashColumns(precision){
+  return geohashCells(precision, 0);
+}
+export function geohashRows(precision){
+  return geohashCells(precision, 1);
+}
+
