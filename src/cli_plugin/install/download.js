@@ -10,7 +10,7 @@ export function _downloadSingle(settings, logger, sourceUrl) {
   if (/^file/.test(urlInfo.protocol)) {
     downloadPromise = downloadLocalFile(logger, decodeURI(urlInfo.path), settings.tempArchiveFile);
   } else if (/^https?/.test(urlInfo.protocol)) {
-    downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
+    downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout, settings.proxy);
   } else {
     downloadPromise = Promise.reject(new UnsupportedProtocolError());
   }
