@@ -34,10 +34,10 @@ define(function (require) {
     return Date.now();
   }
 
-  function closeNotif(cb, key) {
+  function closeNotif(notif, cb, key) {
     return function () {
       // this === notif
-      let i = notifs.indexOf(this);
+      let i = notifs.indexOf(notif);
       if (i !== -1) notifs.splice(i, 1);
       if (this.timerId) this.timerId = clearTO(this.timerId);
       if (typeof cb === 'function') cb(key);
@@ -48,16 +48,24 @@ define(function (require) {
     _.set(notif, 'info.version', version);
     _.set(notif, 'info.buildNum', buildNum);
 
-    if (notif.lifetime !== Infinity) {
+    if (notif.lifetime !== Infinity && notif.lifetime > 0) {
       notif.timerId = setTO(function () {
-        closeNotif(cb, 'ignore').call(notif);
+        closeNotif(notif, cb, 'ignore').call(notif);
       }, notif.lifetime);
     }
 
-    notif.clear = closeNotif();
+    notif.clear = closeNotif(notif);
     if (notif.actions) {
       notif.actions.forEach(function (action) {
-        notif[action] = closeNotif(cb, action);
+        notif[action] = closeNotif(notif, cb, action);
+      });
+    } else if (notif.customActions) {
+      // wrap all of the custom functions in a close
+      notif.customActions = notif.customActions.map(action => {
+        return {
+          key: action.text,
+          callback: closeNotif(notif, action.callback, action.text)
+        };
       });
     }
 
@@ -249,6 +257,67 @@ define(function (require) {
       lifetime: 10000,
       actions: ['accept']
     }, cb);
+  };
+
+  /**
+   * Display a custom message
+   * @param  {String} msg - required
+   * @param  {Object} config - required
+   * @param  {Function} cb - optional
+   *
+   * config = {
+   *   title: 'Some Title here',
+   *   type: 'info',
+   *   actions: [{
+   *     text: 'next',
+   *     callback: function() { next(); }
+   *   }, {
+   *     text: 'prev',
+   *     callback: function() { prev(); }
+   *   }]
+   * }
+   */
+  Notifier.prototype.custom = function (msg, config, cb) {
+    // There is no helper condition that will allow for 2 parameters, as the
+    // other methods have. So check that config is an object
+    if (!_.isPlainObject(config)) {
+      throw new Error('config param is required, and must be an object');
+    }
+
+    // workaround to allow callers to send `config.type` as `error` instead of
+    // reveal internal implementation that error notifications use a `danger`
+    // style
+    if (config.type === 'error') {
+      config.type = 'danger';
+    }
+
+    const getLifetime = (type) => {
+      switch (type) {
+        case 'warning':
+          return 10000;
+        case 'danger':
+          return 300000;
+        default: // info
+          return 5000;
+      }
+    };
+
+    const mergedConfig = _.assign({
+      type: 'info',
+      title: 'Notification',
+      content: formatMsg(msg, this.from),
+      lifetime: getLifetime(config.type)
+    }, config);
+
+    const hasActions = _.get(mergedConfig, 'actions.length');
+    if (hasActions) {
+      mergedConfig.customActions = mergedConfig.actions;
+      delete mergedConfig.actions;
+    } else {
+      mergedConfig.actions = ['accept'];
+    }
+
+    return add(mergedConfig, cb);
   };
 
   /**
