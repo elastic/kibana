@@ -19,13 +19,13 @@ const getTranslationStoragePath = function () {
   return TRANSLATION_STORE_PATH;
 };
 
-const getRegisteredTranslationLanguages = function () {
+const getRegisteredTranslationLocales = function () {
   let translationFiles = [];
-  let languageList = [];
+  let localeList = [];
   const translationStorePath = getTranslationStoragePath();
 
-  return getTranslationDetailsFromDirectory(translationStorePath, translationFiles, languageList).then(function () {
-    return languageList;
+  return getTranslationDetailsFromDirectory(translationStorePath, translationFiles, localeList).then(function () {
+    return localeList;
   });
 };
 
@@ -37,9 +37,9 @@ const registerTranslations = function (absolutePluginTranslationFilePath) {
   });
 };
 
-const getRegisteredLanguageTranslations = function (language) {
+const getRegisteredLocaleTranslations = function (locale) {
   const translationStorePath = getTranslationStoragePath();
-  const translationFileName = language + '.' + TRANSLATION_FILE_EXTENSION;
+  const translationFileName = locale + '.' + TRANSLATION_FILE_EXTENSION;
   const translationFile = translationStorePath + PATH_SEPARATOR + translationFileName;
 
   return readFile(translationFile, 'utf8').then(function (translationStr) {
@@ -47,7 +47,7 @@ const getRegisteredLanguageTranslations = function (language) {
     try {
       translationJson = JSON.parse(translationStr);
     } catch (err) {
-      throw new Error('Bad ' + language + ' translation strings. Reason: ' + err);
+      throw new Error('Bad ' + locale + ' translation strings. Reason: ' + err);
     }
     return translationJson;
   }).catch(function (e) {
@@ -89,29 +89,29 @@ function createTranslationDirectory(translationStorePath) {
   });
 }
 
-function getTranslationDetailsFromDirectory(dir, translationFiles, languageList) {
+function getTranslationDetailsFromDirectory(dir, translationFiles, localeList) {
   return readdir(dir).then((dirListing) => {
     return Promise.map(dirListing, (listing) => {
       const fullPath = path.join(dir, listing);
       return stat(fullPath).then((stats) => {
         if (!stats.isDirectory()) {
-          getTranslationDetailsFromFile(fullPath, translationFiles, languageList);
+          getTranslationDetailsFromFile(fullPath, translationFiles, localeList);
         }
       });
     });
   });
 }
 
-function getTranslationDetailsFromFile(fullFileName, translationFiles, languageList) {
+function getTranslationDetailsFromFile(fullFileName, translationFiles, localeList) {
   const fileName = getFileName(fullFileName);
   const fileExt = fileName.split('.').pop();
 
   if (fileName === fileExt) return;
   if (fileExt !== TRANSLATION_FILE_EXTENSION) return;
   translationFiles.push(fullFileName);
-  const lang  = fileName.substr(0, fileName.lastIndexOf('.'));
-  if (languageList.indexOf(lang) === -1) {
-    languageList.push(lang);
+  const locale  = fileName.substr(0, fileName.lastIndexOf('.'));
+  if (localeList.indexOf(locale) === -1) {
+    localeList.push(locale);
   }
 }
 
@@ -120,6 +120,6 @@ function getFileName(fullPath) {
 }
 
 module.exports.registerTranslations = registerTranslations;
-module.exports.getRegisteredLanguageTranslations = getRegisteredLanguageTranslations;
+module.exports.getRegisteredLocaleTranslations = getRegisteredLocaleTranslations;
 module.exports.getTranslationStoragePath = getTranslationStoragePath;
-module.exports.getRegisteredTranslationLanguages = getRegisteredTranslationLanguages;
+module.exports.getRegisteredTranslationLocales = getRegisteredTranslationLocales;

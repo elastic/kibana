@@ -16,7 +16,7 @@ import langParser from 'accept-language-parser';
 let kibanaTranslations = [];
 let acceptLanguages = '';
 
-const DEFAULT_LANGUAGE = 'en';
+const DEFAULT_LOCALE = 'en';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -142,41 +142,41 @@ function translate(key) {
   return kibanaTranslations[key];
 }
 
-async function getTranslationLanguage(acceptLanguages) {
-  let langStr = '';
+async function getTranslationLocale(acceptLanguages) {
+  let localeStr = '';
   let foundLang = false;
 
   if (acceptLanguages === null || acceptLanguages.length <= 0) {
-    return DEFAULT_LANGUAGE;
+    return DEFAULT_LOCALE;
   }
 
   const acceptLangsLen = acceptLanguages.length;
-  const registeredLanguages = await i18nPlugin.getRegisteredTranslationLanguages();
+  const registeredLocales = await i18nPlugin.getRegisteredTranslationLocales();
 
   for (let indx = 0; indx < acceptLangsLen; indx++) {
     const language = acceptLanguages[indx];
     if (language.region) {
-      langStr = language.code + '-' + language.region;
+      localeStr = language.code + '-' + language.region;
     } else {
-      langStr = language.code;
+      localeStr = language.code;
     }
-    if (registeredLanguages.indexOf(langStr) > -1) {
+    if (registeredLocales.indexOf(localeStr) > -1) {
       foundLang = true;
       break;
     }
   }
   if (foundLang) {
-    return langStr;
+    return localeStr;
   }
 
-  const regLangsLen = registeredLanguages.length;
+  const regLangsLen = registeredLocales.length;
   for (let indx = 0; indx < acceptLangsLen; indx++) {
     const language = acceptLanguages[indx];
-    langStr = language.code;
+    localeStr = language.code;
     for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
-      const lang = registeredLanguages[regIndx];
-      if (lang.match('^' + langStr)) {
-        langStr = lang;
+      const locale = registeredLocales[regIndx];
+      if (locale.match('^' + locale)) {
+        localeStr = locale;
         foundLang = true;
         break;
       }
@@ -186,8 +186,8 @@ async function getTranslationLanguage(acceptLanguages) {
     }
   }
   if (foundLang) {
-    return langStr;
+    return localeStr;
   }
 
-  return DEFAULT_LANGUAGE;
+  return DEFAULT_LOCALE;
 }

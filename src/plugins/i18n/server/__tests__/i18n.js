@@ -41,26 +41,26 @@ describe('Test registering translations for test_plugin_1', function () {
   });
 
   it('EN translations are registered' , function (done) {
-    const language = 'en';
+    const locale = 'en';
     const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR +
-      'reference' + PATH_SEPARATOR + pluginName + PATH_SEPARATOR + language +
+      'reference' + PATH_SEPARATOR + pluginName + PATH_SEPARATOR + locale +
       '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(language, expectedTranslationJson, done);
+    checkTranslations(locale, expectedTranslationJson, done);
   });
 
   it('DE translations are registered' , function (done) {
-    const language = 'de';
+    const locale = 'de';
     const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR +
-      'reference' + PATH_SEPARATOR + pluginName + PATH_SEPARATOR + language +
+      'reference' + PATH_SEPARATOR + pluginName + PATH_SEPARATOR + locale +
       '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(language, expectedTranslationJson, done);
+    checkTranslations(locale, expectedTranslationJson, done);
   });
 
-  it('Translation languages are registered', function (done) {
-    const expectedLanguages = ['en', 'de'];
-    checkRegisteredLanguages(expectedLanguages, done);
+  it('Translation locales are registered', function (done) {
+    const expectedLocales = ['en', 'de'];
+    checkRegisteredLocales(expectedLocales, done);
   });
 
   after(function (done) {
@@ -114,22 +114,22 @@ describe('Test registering translations for test_plugin_1 and test_plugin_2', fu
   });
 
   it('EN translations are registered' , function (done) {
-    const language = 'en';
-    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR + 'reference' + PATH_SEPARATOR + language + '.json';
+    const locale = 'en';
+    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR + 'reference' + PATH_SEPARATOR + locale + '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(language, expectedTranslationJson, done);
+    checkTranslations(locale, expectedTranslationJson, done);
   });
 
   it('DE translations are registered' , function (done) {
-    const language = 'de';
-    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR + 'reference' + PATH_SEPARATOR + language + '.json';
+    const locale = 'de';
+    const expectedTranslationJsonFile = DATA_PATH + PATH_SEPARATOR + 'reference' + PATH_SEPARATOR + locale + '.json';
     const expectedTranslationJson = require(expectedTranslationJsonFile);
-    checkTranslations(language, expectedTranslationJson, done);
+    checkTranslations(locale, expectedTranslationJson, done);
   });
 
-  it('Translation languages are registered', function (done) {
-    const expectedLanguages = ['en', 'de'];
-    checkRegisteredLanguages(expectedLanguages, done);
+  it('Translation locales are registered', function (done) {
+    const expectedLocales = ['en', 'de'];
+    checkRegisteredLocales(expectedLocales, done);
   });
 
   after(function (done) {
@@ -154,10 +154,10 @@ function compareTranslations(actual, expected) {
   return equal;
 }
 
-function checkTranslations(language, expectedTranslations, done) {
+function checkTranslations(locale, expectedTranslations, done) {
   let result = true;
 
-  i18n.getRegisteredLanguageTranslations(language).then(function (actualTranslationJson) {
+  i18n.getRegisteredLocaleTranslations(locale).then(function (actualTranslationJson) {
     if (!compareTranslations(actualTranslationJson, expectedTranslations)) {
       result = false;
     }
@@ -178,18 +178,18 @@ function registerTranslations(pluginTranslationFiles) {
   });
 }
 
-function checkRegisteredLanguages(expectedLanguages, done) {
+function checkRegisteredLocales(expectedLocales, done) {
   let result = true;
 
-  i18n.getRegisteredTranslationLanguages().then(function (actualLanguages) {
-    if (actualLanguages.length !== expectedLanguages.length) {
+  i18n.getRegisteredTranslationLocales().then(function (actualLocales) {
+    if (actualLocales.length !== expectedLocales.length) {
       result = false;
     } else {
-      let index = actualLanguages.length;
-      actualLanguages.sort();
-      expectedLanguages.sort();
+      let index = actualLocales.length;
+      actualLocales.sort();
+      expectedLocales.sort();
       while (index--) {
-        if (actualLanguages[index] !== expectedLanguages[index]) {
+        if (actualLocales[index] !== expectedLocales[index]) {
           result = false;
           break;
         }
