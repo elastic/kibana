@@ -278,13 +278,22 @@ export default function ColumnChartFactory(Private) {
 
         width = elWidth;
         height = elHeight - margin.top - margin.bottom;
+        if (width < minWidth || height < minHeight) {
+          throw new errors.ContainerTooSmall();
+        }
+        self.validateDataCompliesWithScalingMethod(data);
 
         if (addTimeMarker) {
           timeMarker = new TimeMarker(times, xScale, height);
         }
 
-        if (width < minWidth || height < minHeight) {
-          throw new errors.ContainerTooSmall();
+        if (
+          data.series.length > 1 &&
+          (self._attr.scale === 'log' || self._attr.scale === 'square root') &&
+          (self._attr.mode === 'stacked' || self._attr.mode === 'percentage')
+        ) {
+          throw new errors.StackedBarChartConfig(`Cannot display ${self._attr.mode} bar charts for multiple data series \
+          with a ${self._attr.scale} scaling method. Try 'linear' scaling instead.`);
         }
 
         div = d3.select(this);
