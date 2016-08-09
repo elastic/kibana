@@ -72,16 +72,14 @@ export default function PointSeriesChartProvider(Private) {
 
 
   PointSeriesChart.prototype.validateDataCompliesWithScalingMethod = function (data) {
-    const invalidLogScale = data.series && data.series.some(function (d) {
-        return d.values && d.values.some(function (e) {
-            return e.y < 1;
-          });
-      });
-
+    const invalidLogScale = data.series && data.series.some(valuesSmallerThanOne);
     if (this._attr.scale === 'log' && invalidLogScale) {
       throw new errors.InvalidLogScaleValues();
     }
   };
+  function valuesSmallerThanOne(d) {
+    return d.values && d.values.some(e => e.y < 1);
+  }
 
 
 
