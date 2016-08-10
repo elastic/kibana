@@ -86,7 +86,7 @@ uiModules.get('kibana')
       $scope.showLegendCount = legendData => {
         if (!$scope.vis.params.addLegendCount) return false;
         if (!$scope.vis.type.params.isLegendCountSupported) return false;
-        return  $scope.getLegendCount(legendData);
+        return  !!$scope.getLegendCount(legendData);
       };
 
       $scope.getLegendCount = legendData => {
