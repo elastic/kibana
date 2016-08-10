@@ -1,3 +1,10 @@
+
+/**
+ * @name AggConfig
+ *
+ * @description This class represents an aggregation.
+ */
+
 import _ from 'lodash';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 export default function AggConfigFactory(Private, fieldTypeFilter) {
@@ -177,7 +184,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
 
   /**
    * Hook into param onRequest handling, and tell the aggConfig that it
-   * is being sent to elasticsearc.
+   * is being sent to elasticsearch.
    *
    * @return {[type]} [description]
    */
@@ -189,7 +196,7 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
   };
 
   /**
-   * Convert this aggConfig to it's dsl syntax.
+   * Convert this aggConfig to its dsl syntax.
    *
    * Adds params and adhoc subaggs to a pojo, then returns it
    *

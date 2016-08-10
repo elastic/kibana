@@ -66,16 +66,27 @@ uiModules
     location: 'Visualization Editor'
   });
 
+  // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
 
+  // Instance of vis.js.
   const vis = savedVis.vis;
+
+  // Clone the _vis instance.
   const editableVis = vis.createEditableVis();
+
+  // NOTE: Why is this instance method being overwritten?
   vis.requesting = function () {
     const requesting = editableVis.requesting;
+    // Invoking requesting() calls onRequest on each agg's type param.
+    // NOTE: What is the structure of an agg_config, and the role of type
+    // and type.params?
     requesting.call(vis);
     requesting.call(editableVis);
   };
 
+  // Boolean by default, but then something else later
+  // NOTE: What is the role of searchSource? Why does it default to a boolean?
   const searchSource = savedVis.searchSource;
 
   $scope.topNavMenu = [{
@@ -104,8 +115,12 @@ uiModules
     docTitle.change(savedVis.title);
   }
 
+  // Instance of app_state.js.
   let $state = $scope.$state = (function initState() {
+    // Extract visualization state with filtered aggs.
+    // Consists of: aggs, params, listeners, title, and type.
     const savedVisState = vis.getState();
+
     const stateDefaults = {
       uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
       linked: !!savedVis.savedSearchId,
@@ -114,11 +129,14 @@ uiModules
       vis: savedVisState
     };
 
-    $state = new AppState(stateDefaults);
+    // This is used to generate a 'uiState' PersistedState instance, and
+    // implictly add 'change' and 'fetch_with_changes' event handlers.
+    const appState = new AppState(stateDefaults);
 
-    if (!angular.equals($state.vis, savedVisState)) {
+    // NOTE: Why would appState.vis not equal the savedVisState?
+    if (!angular.equals(appState.vis, savedVisState)) {
       Promise.try(function () {
-        editableVis.setState($state.vis);
+        editableVis.setState(appState.vis);
         vis.setState(editableVis.getEnabledState());
       })
       .catch(courier.redirectWhenMissing({
@@ -126,7 +144,7 @@ uiModules
       }));
     }
 
-    return $state;
+    return appState;
   }());
 
   function init() {
@@ -137,8 +155,14 @@ uiModules
     $scope.indexPattern = vis.indexPattern;
     $scope.editableVis = editableVis;
     $scope.state = $state;
+
+    // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
+    // Associate PersistedState instance with the Vis instance, so that
+    // `uiStateVal` can be called on it. Currently this is only used to extract
+    // map-specific information (e.g. mapZoom, mapCenter).
     vis.setUiState($scope.uiState);
+
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 
@@ -239,6 +263,9 @@ uiModules
     kbnUrl.change('/visualize', {});
   };
 
+  /**
+   * Called when the user clicks "Save" button.
+   */
   $scope.doSave = function () {
     savedVis.id = savedVis.title;
     // vis.title was not bound and it's needed to reflect title into visState

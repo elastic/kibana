@@ -1,3 +1,12 @@
+
+/**
+ * @name State
+ *
+ * @extends Events
+ *
+ * @description Persists generic "state" to and reads it from the URL.
+ */
+
 import _ from 'lodash';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';

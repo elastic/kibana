@@ -1,3 +1,10 @@
+
+/**
+ * @name PersistedState
+ *
+ * @extends Events
+ */
+
 import _ from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import errors from 'ui/errors';

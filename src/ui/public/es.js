@@ -2,6 +2,12 @@ import 'elasticsearch-browser';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
 
+/**
+ * @name es
+ * @description This is the result of calling esFactory. Where is esFactory
+ * defined?
+ */
+
 let es; // share the client amongst all apps
 uiModules
   .get('kibana', ['elasticsearch', 'kibana/config'])

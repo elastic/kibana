@@ -1,3 +1,14 @@
+
+/**
+ * @name AppState
+ *
+ * @extends State
+ *
+ * @description Inherits State, which inherits Events. This class seems to be
+ * concerned with mapping "props" to PersistedState instances, and surfacing the
+ * ability to destroy those mappings.
+ */
+
 import _ from 'lodash';
 import modules from 'ui/modules';
 import StateManagementStateProvider from 'ui/state_management/state';
@@ -12,7 +23,13 @@ function AppStateProvider(Private, $rootScope, $location) {
 
   _.class(AppState).inherits(State);
   function AppState(defaults) {
+    // Initialize persistedStates. This object maps "prop" names to
+    // PersistedState instances. These are used to make properties "stateful".
     persistedStates = {};
+
+    // Initialize eventUnsubscribers. These will be called in `destroy`, to
+    // remove handlers for the 'change' and 'fetch_with_changes' events which
+    // are dispatched via the rootScope.
     eventUnsubscribers = [];
 
     AppState.Super.call(this, urlParam, defaults);
@@ -28,6 +45,9 @@ function AppStateProvider(Private, $rootScope, $location) {
     _.callEach(eventUnsubscribers);
   };
 
+  /**
+   * @returns PersistedState instance.
+   */
   AppState.prototype.makeStateful = function (prop) {
     if (persistedStates[prop]) return persistedStates[prop];
     let self = this;
@@ -38,8 +58,8 @@ function AppStateProvider(Private, $rootScope, $location) {
     // update the app state when the stateful instance changes
     let updateOnChange = function () {
       let replaceState = false; // TODO: debouncing logic
-
       self[prop] = persistedStates[prop].getChanges();
+      // Save state to the URL.
       self.save(replaceState);
     };
     let handlerOnChange = (method) => persistedStates[prop][method]('change', updateOnChange);
