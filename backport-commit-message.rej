@@ -1,0 +1,35 @@
+Backport PR #7807
+---------
+
+**Commit 1:**
+Added 'Upgrading Kibana' section
+
+* Original sha: 32ed1ceb4daa4e82e70be738969360cfb95c61be
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-22T18:25:11Z
+
+**Commit 2:**
+Updated from review comments, re-commented-out repository part for master
+
+* Original sha: 50d540df4c80ad4a069f4477df296c9015550d75
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-07-25T15:52:16Z
+
+**Commit 3:**
+Change some indented numbered items to bullets
+
+* Original sha: ee42c473a926553849661ae421cc7140cceba1a3
+* Authored by Lee Drengenberg <lee.drengenberg@elastic.co> on 2016-07-28T21:44:16Z
+* Committed by GitHub <noreply@github.com> on 2016-07-28T21:44:16Z
+
+**Commit 4:**
+Update setup.asciidoc
+
+* Original sha: 9ccf1df7842a519154b9ebdb139ed90fccf63f7a
+* Authored by Lee Drengenberg <lee.drengenberg@elastic.co> on 2016-07-29T13:40:39Z
+* Committed by GitHub <noreply@github.com> on 2016-07-29T13:40:39Z
+
+**Commit 5:**
+Update setup.asciidoc
+
+* Original sha: 48371a432d185f7f44f7e962810dac518d7a9130
+* Authored by Lee Drengenberg <lee.drengenberg@elastic.co> on 2016-08-03T16:27:32Z
+* Committed by GitHub <noreply@github.com> on 2016-08-03T16:27:32Z
