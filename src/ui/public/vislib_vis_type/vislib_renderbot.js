@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import getVislibOptions from 'ui/utils/get_vislib_options';
 import VislibProvider from 'ui/vislib';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeBuildChartDataProvider from 'ui/vislib_vis_type/build_chart_data';
@@ -30,7 +29,18 @@ module.exports = function VislibRenderbotFactory(Private) {
   };
 
   VislibRenderbot.prototype._getVislibParams = function () {
-    return getVislibOptions(this.vis);
+    let self = this;
+
+    return _.assign(
+      {},
+      self.vis.type.params.defaults,
+      {
+        type: self.vis.type.name,
+        // Add attribute which determines whether an index is time based or not.
+        hasTimeField: self.vis.indexPattern && self.vis.indexPattern.hasTimeField()
+      },
+      self.vis.params
+    );
   };
 
   VislibRenderbot.prototype.buildChartData = buildChartData;
