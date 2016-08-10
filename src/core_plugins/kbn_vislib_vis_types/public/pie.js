@@ -22,6 +22,7 @@ export default function HistogramVisType(Private) {
       },
       editor: pieTemplate
     },
+    isLegendCountSupported: true,
     responseConverter: false,
     hierarchicalData: true,
     schemas: new Schemas([

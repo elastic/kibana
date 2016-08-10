@@ -83,15 +83,13 @@ uiModules.get('kibana')
         return filters.length;
       };
 
-      $scope.showLabelCount = legendData => {
+      $scope.showLegendCount = legendData => {
         if (!$scope.vis.params.addLegendCount) return false;
-
-        const isBarChart = $scope.vis.type.name === 'histogram';
-        const isPieChart = $scope.vis.type.name === 'pie';
-        return  (isBarChart || isPieChart) && $scope.getLabelCount(legendData);
+        if (!$scope.vis.type.isLegendCountSupported) return false;
+        return  $scope.getLegendCount(legendData);
       };
 
-      $scope.getLabelCount = legendData => {
+      $scope.getLegendCount = legendData => {
         return legendData.values.size || legendData.values[0].y;
       };
 

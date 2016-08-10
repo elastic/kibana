@@ -30,6 +30,7 @@ export default function HistogramVisType(Private) {
       modes: ['stacked', 'percentage', 'grouped'],
       editor: histogramTemplate
     },
+    isLegendCountSupported: true,
     schemas: new Schemas([
       {
         group: 'metrics',
