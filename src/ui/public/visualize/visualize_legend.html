@@ -20,6 +20,7 @@
           tooltip="{{legendData.label}}"
         >
           <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
+          <span ng-show="showLabelCount(legendData)">({{getLabelCount(legendData)}})</span>
         </div>
 
         <div ng-if="showDetails" class="legend-value-details">

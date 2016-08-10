@@ -83,6 +83,18 @@ uiModules.get('kibana')
         return filters.length;
       };
 
+      $scope.showLabelCount = legendData => {
+        if (!$scope.vis.params.addLegendCount) return false;
+
+        const isBarChart = $scope.vis.type.name === 'histogram';
+        const isPieChart = $scope.vis.type.name === 'pie';
+        return  (isBarChart || isPieChart) && $scope.getLabelCount(legendData);
+      };
+
+      $scope.getLabelCount = legendData => {
+        return legendData.values.size || legendData.values[0].y;
+      };
+
       $scope.colors = [
         '#3F6833', '#967302', '#2F575E', '#99440A', '#58140C', '#052B51', '#511749', '#3F2B5B', //6
         '#508642', '#CCA300', '#447EBC', '#C15C17', '#890F02', '#0A437C', '#6D1F62', '#584477', //2
@@ -120,9 +132,7 @@ uiModules.get('kibana')
           return a.concat(b);
         }, []);
         return _.compact(_.uniq(values, 'label'));
-      }
-
-
+      };
     }
   };
 });
