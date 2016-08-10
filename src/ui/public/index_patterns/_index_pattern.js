@@ -34,7 +34,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     addField: '/management/kibana/indices/{{id}}/create-field',
     indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
     scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
-    fieldFilters: '/management/kibana/indices/{{id}}?_a=(tab:fieldFilters)'
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
   });
 
   const mapping = mappingSetup.expandShorthand({

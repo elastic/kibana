@@ -23,8 +23,8 @@ export default function GetFieldTypes() {
         count: fieldCount.scripted
       },
       {
-        title: 'field filters',
-        index: 'fieldFilters'
+        title: 'source filters',
+        index: 'sourceFilters'
       }
     ];
   };

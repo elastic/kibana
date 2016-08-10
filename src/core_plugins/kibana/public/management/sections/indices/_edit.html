@@ -32,7 +32,7 @@
       </div>
 
       <form role="form">
-        <input ng-disabled="state.tab == 'fieldFilters'" aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
+        <input ng-disabled="state.tab == 'sourceFilters'" aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
       </form>
 
       <br />
@@ -57,7 +57,7 @@
         class="fields scripted-fields">
       </scripted-fields>
       <field-filters
-        ng-show="state.tab == 'fieldFilters'"
+        ng-show="state.tab == 'sourceFilters'"
         index-pattern="indexPattern"
         class="fields field-filters">
       </field-filters>

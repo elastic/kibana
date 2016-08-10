@@ -1,7 +1,7 @@
-<h3>Field Filters</h3>
+<h3>Source Filters</h3>
 
 <p>
-  Field filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.
+  Source filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.
 </p>
 
 <div ng-class="{ saving: fieldFilters.saving }" class="field-filters-container">
@@ -30,7 +30,7 @@
 
             <div class="controls">
               <button
-                aria-label="Edit field filter"
+                aria-label="Edit source filter"
                 ng-if="fieldFilters.editting !== filter"
                 ng-click="fieldFilters.editting = filter"
                 type="button"
@@ -38,14 +38,14 @@
                 <i aria-hidden="true" class="fa fa-pencil"></i>
               </button>
               <button
-                aria-label="Save field filter"
+                aria-label="Save source filter"
                 ng-if="fieldFilters.editting === filter"
                 type="submit"
                 class="btn btn-primary">
                 <i aria-hidden="true" class="fa fa-save"></i>
               </button>
               <button
-                aria-label="Delete field filter"
+                aria-label="Delete source filter"
                 ng-click="fieldFilters.delete(filter)"
                 type="button"
                 class="btn btn-danger">
@@ -67,7 +67,7 @@
                 type="text"
                 class="form-control">
 
-              <div class="input-group-btn" role="group" aria-label="Field Filter Editor Controls">
+              <div class="input-group-btn" role="group" aria-label="Source Filter Editor Controls">
                 <button
                   type="submit"
                   class="btn btn-primary"
@@ -85,10 +85,10 @@
   <div ng-if="fieldFilters.all().length" class="known-matches">
     <h4>Known Matches</h4>
     <p ng-if="!fieldFilters.sampleMatches">
-      <em>The selected field filters don't match any known fields.</em>
+      <em>The selected source filters don't match any known fields.</em>
     </p>
     <p ng-if="fieldFilters.sampleMatches">
-      Based on the chosen field filters, these are the known fields that would be excluded from document sources.
+      Based on the chosen source filters, these are the known fields that would be excluded from document sources.
     </p>
     <ul>
       <li ng-repeat="match in fieldFilters.sampleMatches">{{match}}</li>
