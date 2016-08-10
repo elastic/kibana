@@ -20,12 +20,13 @@ module.factory('Notifier', function () {
 });
 
 // teach Notifier how to use angular interval services
-module.run(function (config, $interval) {
+module.run(function (config, $interval, $compile) {
   Notifier.applyConfig({
     setInterval: $interval,
     clearInterval: $interval.cancel
   });
   applyConfig(config);
+  Notifier.$compile = $compile;
 });
 
 // if kibana is not included then the notify service can't

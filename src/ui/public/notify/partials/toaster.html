@@ -7,7 +7,9 @@
 
         <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i>
 
-        <kbn-truncated source="{{notif.content | markdown}}" is-html="true" length="{{notif.truncationLength}}" class="toast-message" /></kbn-truncated>
+        <kbn-truncated ng-if="notif.content" source="{{notif.content | markdown}}" is-html="true" length="{{notif.truncationLength}}" class="toast-message" /></kbn-truncated>
+
+        <render-directive ng-if="notif.directive" definition="notif.directive" notif="notif" class="toast-message"></render-directive>
 
         <div class="btn-group pull-right toast-controls">
           <button
