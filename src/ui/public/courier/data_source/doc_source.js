@@ -1,3 +1,13 @@
+/**
+ * @name DocSource
+ *
+ * NOTE: This class is tightly coupled with _doc_send_to_es. Its primary
+ * methods (`doUpdate`, `doIndex`, `doCreate`) are all proxies for methods
+ * exposed by _doc_send_to_es (`update`, `index`, `create`). These methods are
+ * called with DocSource as the context. When called, they depend on “private”
+ * DocSource methods within their execution.
+ */
+
 import _ from 'lodash';
 
 import 'ui/es';
