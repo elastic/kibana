@@ -4,7 +4,7 @@ You can set up Kibana and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
 * Elasticsearch 2.2 or later
-* A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
+* A modern web browser - https://www.elastic.co/support/matrix#show_browsers[Supported Browsers].
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
 ** Which Elasticsearch indices you want to search.
@@ -12,23 +12,48 @@ All you need is:
 NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[Shield] see
 {shield}/kibana.html#using-kibana4-with-shield[Shield with Kibana 4] for additional setup instructions.
 
+=== Upgrading Kibana
+
+Your existing Kibana version is generally compatible with the next minor version release of Elasticsearch.
+This means you should upgrade your Elasticsearch cluster(s) before or at the same time as Kibana.
+We cannot guarantee compatibility between major version releases so in those cases both Elasticsearch and Kibana must be upgraded together.
+
+To upgrade Kibana:
+
+. Create a https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot] of the existing `.kibana` index.
+. Back up the `kibana.yml` configuration file.
+. Take note of the Kibana plugins that are installed:
+ * `bin/kibana plugin --list` on 4.x versions of Kibana.
+ * `bin/kibana-plugin list` on 5.x versions of Kibana.
+. To upgrade from an Archive File:
+.. Extract the new version of Kibana into a different directory.  See steps below.
+.. Migrate any custom configuration from your old kibana.yml to your new one
+.. Follow other steps below to complete the new installation.
+.. Once the new version is fully configured and working with required plugins, remove the previous version of Kibana
+. To upgrade using a Linux Package Manager:
+.. Uninstall the existing Kibana package: `apt-get remove kibana` or `yum remove kibana`
+.. Install the new Kibana package.   There have been some installer issues between various version of Kibana so the uninstall and install process is safer than an upgrade.
+
+
 [float]
 [[install]]
-=== Install and Start Kibana
+=== Install and Start Kibana from an Archive File
 
 To get Kibana up and running:
 
 . Download the https://www.elastic.co/downloads/kibana[Kibana 4 binary package] for your platform.
 . Extract the `.zip` or `tar.gz` archive file.
+. If you're upgrading, migrate any configuration changes from the previous `kibana.yml` to the new version.
+. Install Kibana plugins (optional).
+. Run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
+
+That's it! Kibana is now running on port 5601.
 
 On Unix, you can instead run the package manager suited for your distribution.
 
 [float]
 include::kibana-repositories.asciidoc[]
 
-After installing, run Kibana from the install directory: `bin/kibana` (Linux/MacOSX) or `bin\kibana.bat` (Windows).
-
-That's it! Kibana is now running on port 5601.
 
 [float]
 [[kibana-dynamic-mapping]]
