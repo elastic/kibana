@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import angular from 'angular';
 import $ from 'jquery';
 import metadata from 'ui/metadata';
 import formatMsg from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
+import 'ui/render_directive';
 /* eslint no-console: 0 */
 
 let notifs = [];
@@ -109,9 +111,12 @@ function add(notif, cb) {
     return notif.timerId ? true : false;
   };
 
-  let dup = _.find(notifs, function (item) {
-    return item.content === notif.content && item.lifetime === notif.lifetime;
-  });
+  let dup = null;
+  if (notif.content) {
+    dup = _.find(notifs, function (item) {
+      return item.content === notif.content && item.lifetime === notif.lifetime;
+    });
+  }
 
   if (dup) {
     dup.count += 1;
@@ -405,24 +410,9 @@ Notifier.prototype.banner = function (msg, cb) {
 };
 
 /**
- * Display a custom message
- * @param  {String} msg - required
- * @param  {Object} config - required
- * @param  {Function} cb - optional
- *
- * config = {
- *   title: 'Some Title here',
- *   type: 'info',
- *   actions: [{
- *     text: 'next',
- *     callback: function() { next(); }
- *   }, {
- *     text: 'prev',
- *     callback: function() { prev(); }
- *   }]
- * }
+ * Helper for common behavior in custom and directive types
  */
-Notifier.prototype.custom = function (msg, config, cb) {
+function customConfigHelper(config) {
   // There is no helper condition that will allow for 2 parameters, as the
   // other methods have. So check that config is an object
   if (!_.isPlainObject(config)) {
@@ -449,23 +439,101 @@ Notifier.prototype.custom = function (msg, config, cb) {
     }
   };
 
-  const mergedConfig = _.assign({
+  const customConfig = _.assign({
     type: 'info',
     title: 'Notification',
-    content: formatMsg(msg, this.from),
     truncationLength: config.truncationLength || Notifier.config.defaultTruncationLength,
     lifetime: getLifetime(config.type)
   }, config);
 
-  const hasActions = _.get(mergedConfig, 'actions.length');
+  const hasActions = _.get(customConfig, 'actions.length');
   if (hasActions) {
-    mergedConfig.customActions = mergedConfig.actions;
-    delete mergedConfig.actions;
+    customConfig.customActions = customConfig.actions;
+    delete customConfig.actions;
   } else {
-    mergedConfig.actions = ['accept'];
+    customConfig.actions = ['accept'];
   }
 
-  return add(mergedConfig, cb);
+  return customConfig;
+}
+
+/**
+ * Display a custom message
+ * @param  {String} msg - required
+ * @param  {Object} config - required
+ * @param  {Function} cb - optional
+ *
+ * config = {
+ *   title: 'Some Title here',
+ *   type: 'info',
+ *   actions: [{
+ *     text: 'next',
+ *     callback: function() { next(); }
+ *   }, {
+ *     text: 'prev',
+ *     callback: function() { prev(); }
+ *   }]
+ * }
+ */
+Notifier.prototype.custom = function (msg, config, cb) {
+  const customConfig = customConfigHelper(config);
+  customConfig.content = formatMsg(msg, this.from);
+  return add(customConfig, cb);
+};
+
+/**
+ * Display a scope-bound directive using template rendering in the message area
+ * @param  {Object} directive - required
+ * @param  {Object} config - required
+ * @param  {Function} cb - optional
+ *
+ * directive = {
+ *  template: `<p>Hello World! <a ng-click="example.clickHandler()">Click me</a>.`,
+ *  controllerAs: 'example',
+ *  controller() {
+ *    this.clickHandler = () {
+ *      // do something
+ *    };
+ *  }
+ * }
+ *
+ * config = {
+ *   title: 'Some Title here',
+ *   type: 'info',
+ *   actions: [{
+ *     text: 'next',
+ *     callback: function() { next(); }
+ *   }, {
+ *     text: 'prev',
+ *     callback: function() { prev(); }
+ *   }]
+ * }
+ */
+Notifier.prototype.directive = function (directive, config, cb) {
+  if (!_.isPlainObject(directive)) {
+    throw new Error('directive param is required, and must be an object');
+  }
+  if (!Notifier.$compile) {
+    throw new Error('Unable to use the directive notification until Angular has initialized.');
+  }
+  if (directive.scope) {
+    throw new Error('Directive should not have a scope definition. Notifier has an internal implementation.');
+  }
+  if (directive.link) {
+    throw new Error('Directive should not have a link function. Notifier has an internal link function helper.');
+  }
+
+  directive.scope = { notif: '=' };
+  directive.link = function link($scope, $el) {
+    const $template = angular.element($scope.notif.directive.template);
+    const postLinkFunction = Notifier.$compile($template);
+    $el.html($template);
+    postLinkFunction($scope);
+  };
+
+  const customConfig = customConfigHelper(config);
+  customConfig.directive = directive;
+  return add(customConfig, cb);
 };
 
 Notifier.prototype.describeError = formatMsg.describeError;
