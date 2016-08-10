@@ -1,3 +1,10 @@
+/**
+ * @name _doc_send_to_es
+ *
+ * NOTE: Depends upon the es object to make ES requests, and also interacts
+ * with courier objects.
+ */
+
 import _ from 'lodash';
 
 import errors from 'ui/errors';
