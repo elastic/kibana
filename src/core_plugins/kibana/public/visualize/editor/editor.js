@@ -5,7 +5,6 @@ import 'plugins/kibana/visualize/editor/agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
-import getVisLibOptions from 'ui/utils/get_vislib_options';
 import angular from 'angular';
 import Notifier from 'ui/notify/notifier';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
@@ -295,8 +294,8 @@ uiModules
   function transferVisState(fromVis, toVis, stage) {
     return function () {
 
-      const fromVisLib = getVisLibOptions(fromVis);
-      const toVisLib = getVisLibOptions(toVis);
+      //verify this before we copy the "new" state
+      const aggregationChanges = !fromVis.aggs.jsonDataEquals(toVis.aggs);
 
       const view = fromVis.getEnabledState();
       const full = fromVis.getState();
@@ -304,7 +303,11 @@ uiModules
       editableVis.dirty = false;
       $state.vis = full;
 
-      if (stage && _.isEqual(toVisLib, fromVisLib)) {//only requery ES when the query changed. vislib params are irrelevant
+      /**
+       * Only fetch (full ES round trip), if the play-button has been pressed (ie. 'stage' variable) and if there
+       * has been changes in the Data-tab.
+       */
+      if (stage && aggregationChanges) {
         $scope.fetch();
       } else {
         $state.save();
