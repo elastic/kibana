@@ -20,9 +20,9 @@ export default function HistogramVisType(Private) {
         legendPosition: 'right',
         isDonut: false
       },
-      editor: pieTemplate
+      editor: pieTemplate,
+      isLegendCountSupported: true
     },
-    isLegendCountSupported: true,
     responseConverter: false,
     hierarchicalData: true,
     schemas: new Schemas([
