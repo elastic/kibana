@@ -160,6 +160,7 @@ export default function defaultSettingsProvider() {
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
   "number": { "id": "number", "params": {} },
+  "boolean": { "id": "boolean", "params": {} },
   "_source": { "id": "_source", "params": {} },
   "_default_": { "id": "string", "params": {} }
 }`,
