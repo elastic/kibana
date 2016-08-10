@@ -19,7 +19,7 @@ require('ui/chrome')
 .setBrand({
   'logo': 'url(' + timelionLogo + ') left no-repeat #e8488b',
   'smallLogo': 'url(' + timelionLogo + ') left no-repeat #e8488b'
-}).setTabs([]);
+});
 
 var app = require('ui/modules').get('apps/timelion', []);
 
