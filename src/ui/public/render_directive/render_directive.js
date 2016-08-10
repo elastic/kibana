@@ -38,7 +38,7 @@ uiModules
     template: function ($el, $attrs) {
       return $el.html();
     },
-    controller: function ($scope, $element, $attrs, $transclude) {
+    controller: function ($scope, $element, $attrs, $transclude, $injector) {
       if (!$scope.definition) throw new Error('render-directive must have a definition attribute');
 
       const { controller, controllerAs, scope } = $scope.definition;
@@ -46,8 +46,16 @@ uiModules
       applyScopeBindings(scope, $scope, $attrs);
 
       if (controller) {
-        if (controllerAs) $scope[controllerAs] = this;
-        $scope.$eval(controller, { $scope, $element, $attrs, $transclude });
+        if (controllerAs) {
+          $scope[controllerAs] = this;
+        }
+
+        const locals = { $scope, $element, $attrs, $transclude };
+        const controllerInstance = $injector.invoke(controller, this, locals) || this;
+
+        if (controllerAs) {
+          $scope[controllerAs] = controllerInstance;
+        }
       }
     },
     link: {
