@@ -18,9 +18,20 @@ module.exports.send = function (method, path, data, server, disable_auth_alert) 
   // delayed loading for circular references
   var settings = require("./settings");
 
+  let contentType;
+  if (data) {
+    try {
+      JSON.parse(data);
+      contentType = 'application/json';
+    } catch (e) {
+      contentType = 'text/plain';
+    }
+  }
+
   var options = {
     url: '../api/console/proxy?uri=' + encodeURIComponent(path),
     data: method == "GET" ? null : data,
+    contentType,
     cache: false,
     crossDomain: true,
     type: method,

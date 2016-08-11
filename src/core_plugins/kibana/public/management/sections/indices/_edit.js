@@ -83,6 +83,7 @@ uiModules.get('apps/management')
 
     ingest.delete($scope.indexPattern.id)
     .then($scope.indexPattern.destroy.bind($scope.indexPattern))
+    .then(refreshKibanaIndex)
     .then(function () {
       $location.url('/management/data/index');
     })

@@ -4,7 +4,7 @@ import StateManagementStateProvider from 'ui/state_management/state';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 let urlParam = '_a';
 
-function AppStateProvider(Private, $rootScope, getAppState) {
+function AppStateProvider(Private, $rootScope, $location) {
   let State = Private(StateManagementStateProvider);
   let PersistedState = Private(PersistedStatePersistedStateProvider);
   let persistedStates;
@@ -16,7 +16,7 @@ function AppStateProvider(Private, $rootScope, getAppState) {
     eventUnsubscribers = [];
 
     AppState.Super.call(this, urlParam, defaults);
-    getAppState._set(this);
+    AppState.getAppState._set(this);
   }
 
   // if the url param is missing, write it back
@@ -24,7 +24,7 @@ function AppStateProvider(Private, $rootScope, getAppState) {
 
   AppState.prototype.destroy = function () {
     AppState.Super.prototype.destroy.call(this);
-    getAppState._set(null);
+    AppState.getAppState._set(null);
     _.callEach(eventUnsubscribers);
   };
 
@@ -64,6 +64,26 @@ function AppStateProvider(Private, $rootScope, getAppState) {
     return persistedStates[prop];
   };
 
+  AppState.getAppState = (function () {
+    let currentAppState;
+
+    function get() {
+      return currentAppState;
+    }
+
+    // Checks to see if the appState might already exist, even if it hasn't been newed up
+    get.previouslyStored = function () {
+      let search = $location.search();
+      return search[urlParam] ? true : false;
+    };
+
+    get._set = function (current) {
+      currentAppState = current;
+    };
+
+    return get;
+  }());
+
   return AppState;
 }
 
@@ -71,24 +91,8 @@ modules.get('kibana/global_state')
 .factory('AppState', function (Private) {
   return Private(AppStateProvider);
 })
-.service('getAppState', function ($location) {
-  let currentAppState;
-
-  function get() {
-    return currentAppState;
-  }
-
-  // Checks to see if the appState might already exist, even if it hasn't been newed up
-  get.previouslyStored = function () {
-    let search = $location.search();
-    return search[urlParam] ? true : false;
-  };
-
-  get._set = function (current) {
-    currentAppState = current;
-  };
-
-  return get;
+.service('getAppState', function (Private) {
+  return Private(AppStateProvider).getAppState;
 });
 
 export default AppStateProvider;
