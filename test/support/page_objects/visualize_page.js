@@ -692,13 +692,6 @@ export default class VisualizePage {
     .findByCssSelector('visualize-legend');
   }
 
-  getMapZoomLevel() {
-    return this.remote.getCurrentUrl()
-    .then((urlString) => {
-      return urlString.toString().replace(/.*mapZoom:(\d+).*params:.*/,'$1');
-    });
-  }
-
   clickMapButton(zoomSelector) {
     return this.remote
     .setFindTimeout(defaultFindTimeout)
@@ -709,9 +702,6 @@ export default class VisualizePage {
     })
     .then(() => {
       return PageObjects.header.getSpinnerDone();
-    })
-    .then(() => {
-      return this.getMapZoomLevel();
     });
   }
 
