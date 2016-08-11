@@ -57,7 +57,7 @@ export default function AggConfigsFactory(Private) {
       return false;
     }
     for (let i = 0; i < this.length; i += 1) {
-      if (!_.isEqual(aggConfigs[i].toJSON(),this[i].toJSON())) {
+      if (!_.isEqual(aggConfigs[i].toJSON(), this[i].toJSON())) {
         return false;
       }
     }
