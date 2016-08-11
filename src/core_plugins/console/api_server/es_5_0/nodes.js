@@ -25,6 +25,7 @@ module.exports = function (api) {
         "transport",
         "http",
         "plugins",
+        "ingest",
         "_all"
       ]
     }
