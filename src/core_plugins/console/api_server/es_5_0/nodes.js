@@ -51,6 +51,7 @@ module.exports = function (api) {
         "indices",
         "process",
         "breaker",
+        "ingest",
         "_all"
       ],
       "index_metric": [
