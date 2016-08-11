@@ -127,8 +127,13 @@ module.exports = class Plugin {
         server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
       }
 
-      this.status = kbnServer.status.createForPlugin(this);
-      server.expose('status', this.status);
+      // Many of the plugins are simply adding static assets to the server and we don't need
+      // to track their "status". Since plugins must have an init() function to even set its status
+      // we shouldn't even create a status unless the plugin can use it.
+      if (this.externalInit !== _.noop) {
+        this.status = kbnServer.status.createForPlugin(this);
+        server.expose('status', this.status);
+      }
 
       return await attempt(this.externalInit, [server, options], this);
     };
@@ -148,7 +153,7 @@ module.exports = class Plugin {
 
     // Only change the plugin status to green if the
     // intial status has not been changed
-    if (this.status.state === 'uninitialized') {
+    if (this.status && this.status.state === 'uninitialized') {
       this.status.green('Ready');
     }
   }
