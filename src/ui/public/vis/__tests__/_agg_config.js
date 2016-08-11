@@ -189,6 +189,143 @@ describe('AggConfig', function () {
     });
   });
 
+  describe('#toJsonDataEquals', function () {
+
+    const testsIdentical = [{
+      type: 'metric',
+      aggs: [
+        {
+          type: 'count',
+          schema: 'metric',
+          params: {field: '@timestamp'}
+        }
+      ]
+    }, {
+      type: 'histogram',
+      aggs: [
+        {
+          type: 'avg',
+          schema: 'metric'
+        },
+        {
+          type: 'date_histogram',
+          schema: 'segment'
+        }
+      ]
+    }];
+
+    testsIdentical.forEach((visConfig, index) => {
+      it(`identical aggregations (${index})`, function () {
+        const vis1 = new Vis(indexPattern, visConfig);
+        const vis2 = new Vis(indexPattern, visConfig);
+        expect(vis1.aggs.jsonDataEquals(vis2.aggs)).to.be(true);
+      });
+    });
+
+    const testsIdenticalDifferentOrder = [{
+      config1: {
+        type: 'histogram',
+        aggs: [
+          {
+            type: 'avg',
+            schema: 'metric'
+          },
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          }
+        ]
+      },
+      config2: {
+        type: 'histogram',
+        aggs: [
+          {
+            schema: 'metric',
+            type: 'avg'
+
+          },
+          {
+            schema: 'segment',
+            type: 'date_histogram'
+          }
+        ]
+      }
+    }];
+
+    testsIdenticalDifferentOrder.forEach((test, index) => {
+      it(`identical aggregations (${index}) - init json is in different order`, function () {
+        const vis1 = new Vis(indexPattern, test.config1);
+        const vis2 = new Vis(indexPattern, test.config2);
+        expect(vis1.aggs.jsonDataEquals(vis2.aggs)).to.be(true);
+      });
+    });
+
+    const testsDifferent = [{
+      config1: {
+        type: 'histogram',
+        aggs: [
+          {
+            type: 'avg',
+            schema: 'metric'
+          },
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          }
+        ]
+      },
+      config2: {
+        type: 'histogram',
+        aggs: [
+          {
+            type: 'max',
+            schema: 'metric'
+
+          },
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          }
+        ]
+      }
+    },{
+      config1: {
+        type: 'metric',
+        aggs: [
+          {
+            type: 'count',
+            schema: 'metric',
+            params: {field: '@timestamp'}
+          }
+        ]
+      },
+      config2: {
+        type: 'metric',
+        aggs: [
+          {
+            type: 'count',
+            schema: 'metric',
+            params: {field: '@timestamp'}
+          },
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          }
+        ]
+      }
+    }];
+
+    testsDifferent.forEach((test, index) => {
+      it(`different aggregations (${index})`, function () {
+        const vis1 = new Vis(indexPattern, test.config1);
+        const vis2 = new Vis(indexPattern, test.config2);
+        expect(vis1.aggs.jsonDataEquals(vis2.aggs)).to.be(false);
+      });
+    });
+
+
+  });
+
   describe('#toJSON', function () {
     it('includes the aggs id, params, type and schema', function () {
       let vis = new Vis(indexPattern, {
@@ -213,6 +350,37 @@ describe('AggConfig', function () {
       expect(state).to.have.property('type', 'date_histogram');
       expect(state).to.have.property('schema', 'segment');
     });
+
+
+
+    it('test serialization  order is identical (for visual consistency)', function () {
+      let vis1 = new Vis(indexPattern, {
+        type: 'histogram',
+        aggs: [
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          }
+        ]
+      });
+      let vis2 = new Vis(indexPattern, {
+        type: 'histogram',
+        aggs: [
+          {
+            schema: 'segment',
+            type: 'date_histogram'
+
+          }
+        ]
+      });
+
+      //this relies on the assumption that js-engines consistently loop over properties in insertion order.
+      //most likely the case, but strictly speaking not guaranteed by the JS and JSON specifications.
+      expect(JSON.stringify(vis1.aggs.toJSON()) === JSON.stringify(vis2.aggs.toJSON())).to.be(true);
+
+    });
+
+
   });
 
   describe('#makeLabel', function () {
