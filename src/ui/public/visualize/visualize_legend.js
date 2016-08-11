@@ -90,7 +90,7 @@ uiModules.get('kibana')
       };
 
       $scope.getLegendCount = legendData => {
-        return legendData.values.size || legendData.values[0].y;
+        return legendData.values.size || legendData.values.reduce((prev, curr) => prev + curr.y, 0);
       };
 
       $scope.colors = [

@@ -8,6 +8,11 @@ module.directive('vislibBasicOptions', function ($parse, $compile) {
   return {
     restrict: 'E',
     template: vislibBasicOptionsTemplate,
-    replace: true
+    replace: true,
+    link: function ($scope, $el) {
+      $scope.showLegendCount = legendData => {
+        return $scope.vis.type.params.isLegendCountSupported;
+      };
+    }
   };
 });

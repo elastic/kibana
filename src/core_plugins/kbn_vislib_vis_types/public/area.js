@@ -32,7 +32,8 @@ export default function HistogramVisType(Private) {
       },
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
-      editor: areaTemplate
+      editor: areaTemplate,
+      isLegendCountSupported: true
     },
     schemas: new Schemas([
       {
