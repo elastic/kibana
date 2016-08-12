@@ -23,15 +23,18 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
           if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
           let mapping = mapField(field, name);
+          const indexType = 'Index: ' + indexName + ', Type: ' + mapping.type + ';';
+          mapping.indicesTypes = indexType;
 
           if (fields[name]) {
+            mapping.indicesTypes = fields[name].indicesTypes + mapping.indicesTypes;
             if (fields[name].type !== mapping.type) {
               // conflict fields are not available for much except showing in the discover table
               mapping.type = 'conflict';
               mapping.indexed = false;
             }
           }
-          fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values');
+          fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values', 'indicesTypes');
         });
       });
     });
