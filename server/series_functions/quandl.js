@@ -35,7 +35,7 @@ module.exports = new Datasource ('quandl', {
       code: 'WIKI/AAPL',
       position: 1,
       interval: intervalMap[tlConfig.time.interval],
-      apikey: tlConfig.file.quandl.key
+      apikey: tlConfig.settings['timelion:quandl.key']
     });
 
     if (!config.interval) {

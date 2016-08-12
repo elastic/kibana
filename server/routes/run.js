@@ -7,49 +7,58 @@ function replyWithError(e, reply) {
 }
 
 
-module.exports = function (server) {
+module.exports = (server) => {
 
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
-    handler: function (request, reply) {
-      var tlConfig = require('../handlers/lib/tl_config.js')({
-        server: server,
-        request: request
-      });
-      var chainRunner = chainRunnerFn(tlConfig);
+    handler: (request, reply) => {
 
-      var sheet;
-      try {
-        sheet = chainRunner.processRequest(request.payload || {
-          sheet: [request.query.expression],
-          time: {
-            from: request.query.from,
-            to: request.query.to,
-            interval: request.query.interval,
-            timezone: request.query.timezone
+      // I don't really like this, but we need to get all of the settings
+      // before every request. This just sucks because its going to slow things
+      // down. Meh.
+      return server.uiSettings().getAll().then((uiSettings) => {
+
+        var sheet;
+        var tlConfig = require('../handlers/lib/tl_config.js')({
+          server: server,
+          request: request,
+          settings: uiSettings
+        });
+        var chainRunner = chainRunnerFn(tlConfig);
+
+        try {
+          sheet = chainRunner.processRequest(request.payload || {
+            sheet: [request.query.expression],
+            time: {
+              from: request.query.from,
+              to: request.query.to,
+              interval: request.query.interval,
+              timezone: request.query.timezone
+            }
+          });
+        } catch (e) {
+          replyWithError(e, reply);
+          return;
+        }
+
+        return Promise.all(sheet).then((sheet) => {
+          var response = {
+            sheet: sheet,
+            stats: chainRunner.getStats()
+          };
+          reply(response);
+        }).catch((e) => {
+          // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
+          if (e.isBoom) {
+            reply(e);
+          } else {
+            replyWithError(e, reply);
           }
         });
-      } catch (e) {
-        replyWithError(e, reply);
-        return;
-      }
-
-      return Promise.all(sheet).then(function (sheet) {
-        // TODO: Consider supporting returning either the sheet, or a flot png image?
-        var response = {
-          sheet: sheet,
-          stats: chainRunner.getStats()
-        };
-        reply(response);
-      }).catch(function (e) {
-        // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
-        if (e.isBoom) {
-          reply(e);
-        } else {
-          replyWithError(e, reply);
-        }
       });
+
+
     }
   });
 

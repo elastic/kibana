@@ -22,7 +22,7 @@ module.exports = new Datasource ('graphite', {
       max:  moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD')
     };
 
-    var URL = tlConfig.file.graphite.url + '/render/' +
+    var URL = tlConfig.settings['timelion:graphite.url'] + '/render/' +
       '?format=json' +
       '&from=' + time.min +
       '&until=' + time.max +

@@ -54,8 +54,8 @@ module.exports = new Datasource('es', {
     var config = _.defaults(_.clone(args.byName), {
       q: '*',
       metric: ['count'],
-      index: tlConfig.file.es.default_index,
-      timefield: tlConfig.file.es.timefield,
+      index: tlConfig.settings['timelion:es.default_index'],
+      timefield: tlConfig.settings['timelion:es.timefield'],
       interval: tlConfig.time.interval,
       kibana: true,
       fit: 'nearest'

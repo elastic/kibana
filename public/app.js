@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var logoUrl = require('./logo.png');
-var configFile = require('../timelion.json');
 var moment = require('moment-timezone');
 
 require('plugins/timelion/directives/cells/cells');

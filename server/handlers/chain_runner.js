@@ -176,7 +176,7 @@ module.exports = function (tlConfig) {
     tlConfig.time.interval = calculateInterval(
       tlConfig.time.from,
       tlConfig.time.to,
-      tlConfig.file.target_buckets || 200,
+      tlConfig.settings['timelion:target_buckets'] || 200,
       tlConfig.time.interval
     );
 
