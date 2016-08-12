@@ -2,7 +2,6 @@
   "name": "timelion",
   "version": "0.0.0",
   "dependencies": {
-    "pegjs": "~0.8.0",
     "flot": "~0.8.3",
     "angular-sortable-view": "~0.0.13"
   }
