@@ -1,6 +1,6 @@
 module.exports = function ($elem, fn, frequency) {
 
-  var frequency = frequency || 500;
+  frequency = frequency || 500;
   var currentHeight = $elem.height();
   var currentWidth = $elem.width();
 
