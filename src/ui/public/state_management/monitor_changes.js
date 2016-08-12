@@ -19,4 +19,4 @@ function monitorStateChanges(state, handlerFn, cleanupFn) {
   cleanupFn(unlisten);
 }
 
-module.exports = monitorStateChanges;
+export default monitorStateChanges;
