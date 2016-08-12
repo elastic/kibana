@@ -4,6 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
+  const monitorStateChanges = require('ui/state_management/monitor_changes');
   require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');
@@ -67,6 +68,8 @@ define(function (require) {
       location: 'Visualization Editor'
     });
 
+    const $appStatus = this.appStatus = {};
+
     const savedVis = $route.current.locals.savedVis;
 
     const vis = savedVis.vis;
@@ -90,16 +93,16 @@ define(function (require) {
       docTitle.change(savedVis.title);
     }
 
-    let $state = $scope.$state = (function initState() {
-      const savedVisState = vis.getState();
-      const stateDefaults = {
-        uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
-        linked: !!savedVis.savedSearchId,
-        query: searchSource.getOwn('query') || {query_string: {query: '*'}},
-        filters: searchSource.getOwn('filter') || [],
-        vis: savedVisState
-      };
+    const savedVisState = vis.getState();
+    const stateDefaults = {
+      uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
+      linked: !!savedVis.savedSearchId,
+      query: searchSource.getOwn('query') || {query_string: {query: '*'}},
+      filters: searchSource.getOwn('filter') || [],
+      vis: savedVisState
+    };
 
+    let $state = $scope.$state = (function initState() {
       $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
@@ -124,6 +127,7 @@ define(function (require) {
       $scope.editableVis = editableVis;
       $scope.state = $state;
       $scope.uiState = $state.makeStateful('uiState');
+      $scope.appStatus = $appStatus;
 
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
@@ -131,13 +135,25 @@ define(function (require) {
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
 
+      function dirtyChecker(forceDirty) {
+        if (forceDirty) return $appStatus.dirty = true;
+
+        const appState = $state.toJSON();
+        const dirty = !_.isEqual(appState, stateDefaults);
+        $appStatus.dirty = dirty;
+      };
+
+      monitorStateChanges($state, () => dirtyChecker(), (cleanup) => { $scope.$on('$destroy', cleanup); });
+      dirtyChecker();
+
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
       $scope.resetEditableVis = transferVisState(vis, editableVis);
       $scope.$watch(function () {
         return editableVis.getState();
       }, function (newState) {
-        editableVis.dirty = !angular.equals(newState, vis.getState());
+        $scope.appStatus.dirty = editableVis.dirty = !angular.equals(newState, vis.getState());
+        dirtyChecker($scope.appStatus.dirty);
 
         $scope.responseValueAggs = null;
         try {
