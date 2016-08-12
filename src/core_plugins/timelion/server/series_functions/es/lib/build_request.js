@@ -29,7 +29,7 @@ module.exports =  function buildRequest(config, tlConfig) {
   var aggCursor = aggs.q.aggs;
 
   _.each(config.split, function (clause, i) {
-    var clause = clause.split(':');
+    clause = clause.split(':');
     if (clause[0] && clause[1]) {
       aggCursor[clause[0]] = {
         meta: {type: 'split'},
