@@ -205,23 +205,3 @@ module.exports = function (tlConfig) {
     getStats: function () { return stats; }
   };
 };
-
-
-/*
-function logObj(obj, thing) {
-  return JSON.stringify(obj, null, thing ? ' ' : undefined);
-}
-
-function debugSheet(sheet) {
-  sheet = processRequest(sheet);
-  Promise.all(sheet).then(function (sheet) {
-    console.log(logObj(sheet, 1));
-    console.log(logObj({done:true}));
-    return sheet;
-  });
-}
-
-debugSheet(
-  {sheet:['es(q=-*)'], time: tlConfig.time}
-);
-*/
