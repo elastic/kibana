@@ -1,4 +1,4 @@
-<div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
+<div visualize-app class="vis-editor vis-type-{{ vis.type.name }}">
   <navbar ng-if="chrome.getVisible()" name="visualize">
     <div class="fill bitty-modal-container">
       <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
@@ -147,5 +147,4 @@
       </visualize>
     </div>
   </div>
-
 </div>

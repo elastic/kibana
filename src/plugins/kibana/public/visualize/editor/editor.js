@@ -47,8 +47,14 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
+  .directive('visualizeApp', function () {
+    return {
+      controllerAs: 'visualizeApp',
+      controller: VisEditor,
+    };
+  });
 
+  function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
     const Notifier = require('ui/notify/notifier');
@@ -281,5 +287,5 @@ define(function (require) {
     }
 
     init();
-  });
+  }
 });

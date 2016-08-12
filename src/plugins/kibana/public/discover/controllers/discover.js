@@ -63,7 +63,15 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
+  app
+  .directive('discoverApp', function () {
+    return {
+      controllerAs: 'discoverApp',
+      controller: discoverController,
+    };
+  });
+
+  function discoverController($scope, config, courier, $route, $window, Notifier,
     AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     const Vis = Private(require('ui/Vis'));
@@ -545,5 +553,5 @@ define(function (require) {
     }
 
     init();
-  });
+  }
 });
