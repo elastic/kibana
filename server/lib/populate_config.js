@@ -1,15 +1,10 @@
 var _ = require('lodash');
-var configFile = require('../../timelion.json');
-var flattenWith = require('../../../../src/server/config/flatten_with');
+var getNamespacedSettings = require('./get_namespaced_settings');
 
 module.exports = function (server) {
-  var timelionDefaults = flattenWith('.', configFile);
 
   // Namespace everything in timelion.json
-  timelionDefaults = _.reduce(timelionDefaults, (result, value, key) => {
-    result['timelion:' + key] = value;
-    return result;
-  }, {});
+  var timelionDefaults = getNamespacedSettings();
 
   // Get all existing "advanced settings"
   server.uiSettings().getAll().then((existingSettings) => {

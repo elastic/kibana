@@ -75,7 +75,7 @@ describe(filename, function () {
   });
 
   it('should use the configured API key when talking to quandl', function () {
-    return invoke(fn, [], {file:{quandl:{key: 'bEeR'}}}).then(function () {
+    return invoke(fn, [], {settings:{'timelion:quandl.key': 'bEeR'}}).then(function () {
       expect(calledWith.params.auth_token).to.eql('bEeR');
     });
   });
