@@ -1,6 +1,8 @@
 var Promise = require('bluebird');
+var _ = require('lodash');
 var Boom = require('boom');
 var chainRunnerFn = require('../handlers/chain_runner.js');
+var timelionDefaults = require('../lib/get_namespaced_settings')();
 
 function replyWithError(e, reply) {
   reply({title: e.toString(), message: e.toString(), stack: e.stack}).code(400);
@@ -18,12 +20,11 @@ module.exports = (server) => {
       // before every request. This just sucks because its going to slow things
       // down. Meh.
       return server.uiSettings().getAll().then((uiSettings) => {
-
         var sheet;
         var tlConfig = require('../handlers/lib/tl_config.js')({
           server: server,
           request: request,
-          settings: uiSettings
+          settings: _.defaults(uiSettings, timelionDefaults) // Just in case they delete some setting.
         });
         var chainRunner = chainRunnerFn(tlConfig);
 
