@@ -4,43 +4,40 @@ import Request from 'request';
 import { createWriteStream, unlinkSync } from 'fs';
 
 function sendRequest({ sourceUrl, reqOptions }) {
-  return fn(cb => {
-    const req =  Request.head(sourceUrl, reqOptions, (err, resp) => {
-      if (err) {
-        if (err.code === 'ECONNREFUSED') {
-          err = new Error('ENOTFOUND');
-        }
-        return cb(err);
-      }
+  return new Promise((resolve, reject) => {
+    const req = Request.get(sourceUrl, reqOptions);
 
+    req.on('response', (resp) => {
       if (resp.statusCode >= 400) {
-        return cb(new Error('ENOTFOUND'));
+        return reject(new Error('ENOTFOUND'));
       }
-      cb(null, { req, resp });
+      return resolve({ req, resp });
+    });
+
+    req.on('error', (err) => {
+      if (err.code === 'ECONNREFUSED') {
+        err = new Error('ENOTFOUND');
+      }
+      return reject(err);
     });
   });
 }
 
-function downloadResponse({ sourceUrl, reqOptions, targetPath, progress }) {
+function downloadResponse({ resp, targetPath, progress }) {
   return new Promise((resolve, reject) => {
     const writeStream = createWriteStream(targetPath);
 
     // if either stream errors, fail quickly
+    resp.on('error', reject);
     writeStream.on('error', reject);
 
-    Request
-      // Get the plugin
-      .get(sourceUrl, reqOptions)
+    // report progress as we download
+    resp.on('data', (chunk) => {
+      progress.progress(chunk.length);
+    });
 
-      // if either stream errors, fail quickly
-      .on('error', reject)
-
-      // report progress as we download
-      .on('data', (chunk) => {
-        progress.progress(chunk.length);
-      })
-      // write the download to the file system
-      .pipe(writeStream);
+    // write the download to the file system
+    resp.pipe(writeStream);
 
     // when the write is done, we are done
     writeStream.on('finish', resolve);
@@ -70,7 +67,7 @@ export default async function downloadUrl(logger, sourceUrl, targetPath, timeout
       const progress = new Progress(logger);
       progress.init(totalSize);
 
-      await downloadResponse({ sourceUrl, reqOptions, targetPath, progress });
+      await downloadResponse({ resp, targetPath, progress });
 
       progress.complete();
     } catch (err) {
