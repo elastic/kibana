@@ -5,7 +5,6 @@ var $ = require('jquery');
 var moment = require('moment-timezone');
 var observeResize = require('plugins/timelion/lib/observe_resize');
 var calculateInterval = require('plugins/timelion/lib/calculate_interval');
-var configFile = require('../../../timelion.json');
 
 module.exports = function timechartFn(Private, config, $rootScope, timefilter, $compile) {
   return function () {
@@ -182,7 +181,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           var interval = calculateInterval(
             time.min.valueOf(),
             time.max.valueOf(),
-            configFile.target_buckets || 200,
+            config.get('timelion:target_buckets') || 200,
             $scope.interval
           );
           var format = getxAxisFormatter(interval);

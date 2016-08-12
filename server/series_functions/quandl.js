@@ -22,7 +22,9 @@ module.exports = new Datasource ('quandl', {
       help: 'Some quandl sources return multiple series, which one should I use? 1 based index.'
     }
   ],
-  help: 'Pull data from quandl.com using the quandl code. Stick your free API key in timelion.json. API is rate limited without a key',
+  help: `
+    Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana\'s Advanced Settings.
+    The API has a really low rate limit without a key`,
   fn: function quandlFn(args, tlConfig) {
     var intervalMap = {
       '1d': 'daily',

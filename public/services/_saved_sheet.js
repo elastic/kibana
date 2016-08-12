@@ -2,10 +2,9 @@ define(function (require) {
   var module = require('ui/modules').get('app/timelion');
   var _ = require('lodash');
   var moment = require('moment');
-  var configFile = require('../../timelion.json');
 
   // Used only by the savedSheets service, usually no reason to change this
-  module.factory('SavedSheet', function (courier) {
+  module.factory('SavedSheet', function (courier, config) {
 
     // SavedSheet constructor. Usually you'd interact with an instance of this.
     // ID is option, without it one will be generated on save.
@@ -27,8 +26,8 @@ define(function (require) {
           timelion_sheet: ['.es(*)'],
           timelion_interval: 'auto',
           timelion_chart_height: 275,
-          timelion_columns: configFile.default_columns || 2,
-          timelion_rows: configFile.default_rows || 2,
+          timelion_columns: config.get('timelion:default_columns') || 2,
+          timelion_rows: config.get('timelion:default_rows') || 2,
           version: 1,
         }
       });

@@ -22,24 +22,18 @@
 
         <h2>First time configuration</h2>
         <p>
-          First you'll need to edit your <code>timelion.json</code> to tell timelion where to fetch data. If you're using logstash (and the default <code>logstash-*</code> pattern), you're already done. Otherwise, update the <code>timefield</code> and <code>default_index</code> parameters to match your environment. Look for this section:
-
-          <pre>
-    "es": {
-      "timefield": "@timestamp",
-      "default_index": "logstash-*",
-      "allow_url_parameter": false
-    },</pre>
+          If you're using logstash you're already done. Otherwise,
+					pop over to Kibana's "Advanced Settigns" and update <code>timelion:es.timefield</code> and <code>timelion:es.default_index</code> parameters to match your environment.
         </p>
 
         <p>
-        You'll see some other parameters in there too, we won't be messing with them for now, but this file can be used to configure much of timelion's default behavior. That said, almost everything in this file can also be specified on-the-fly with the timelion expression syntax. More on that in a bit.
+        You'll see some other timelion parameters in there too, we won't be messing with them for now, but you can probably guess what they do. And frankly, most can be specified on-the-fly with the timelion expression syntax. More on that in a bit.
         </p>
       </div>
       <div class="doc-container-buttons">
         <button ng-click="page = page-1" class="btn btn-primary btn-doc-prev">Previous</button>
         <span ng-show="es.invalidCount > 0 && !es.valid">
-          Could not validate elasticsearch config: <strong>{{es.invalidReason}}.</strong> Check <code>timelion.json</code>, restart Kibana, and try again. ({{es.invalidCount}})
+          Could not validate elasticsearch settings: <strong>{{es.invalidReason}}.</strong> Check your Advanced Settings and try again. ({{es.invalidCount}})
         </span>
         <button ng-click="recheckElasticsearch()" class="btn btn-success btn-doc-next">Validate Config</button>
       </div>
@@ -48,14 +42,14 @@
       <div class="doc-container-content">
         <h2>Good news <small>Elasticsearch is configured correctly!</small></h2>
         <p>
-          Or at least, things look ok. I validated the elasticsearch url, default index and time field in your <code>timelion.json</code> and everything looks ok. Given your settings I found data between <strong>{{es.stats.min}}</strong> and <strong>{{es.stats.max}}</strong>. You're probably all set. If this doesn't look right, <a ng-click="es.valid = false">Click here for instructions on configuring the elasticsearch data source</a>.
+          Or at least, things look ok. I validated your default index and your timefield and everything looks ok. Given your settings I found data between <strong>{{es.stats.min}}</strong> and <strong>{{es.stats.max}}</strong>. You're probably all set. If this doesn't look right, <a ng-click="es.valid = false">Click here for instructions on configuring the elasticsearch data source</a>.
         </p>
         <p>
           <h4>Intervals</h4>
           You might already have one nice chart, but I'm going to operate on the assumption you don't for educational purposes. The input bar at the top has two inputs. On the left, is your expression, leave that alone for now, we'll get to it. On the right is the <strong>interval selector</strong>, which is currently set to <code>{{state.interval}}</code>.
           <span ng-show="state.interval == 'auto'"><strong>Looks good!</strong></span>
           <span ng-show="state.interval != 'auto'">Set it to <code>auto</code></span>.
-          If timelion thinks your combination of time range and interval will produce too many data points it will throw an error. You can configure that limit in <code>timelion.json</code>
+          If timelion thinks your combination of time range and interval will produce too many data points it will throw an error. You can configure that limit in Advanced Settings
         </p>
         <p>
           <h4>Time range</h4>

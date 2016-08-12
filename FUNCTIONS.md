@@ -5,7 +5,7 @@ This document is auto generated from the timelion code. Do not submit pulls agai
 Data sources can start a chain, they don't need to be attached to anything, but they still need to start with a `.` (dot). Data retreived from a data source can be passed into the chainable functions in the next section.
 
 #### .graphite()
-Pull data from graphite. Configure your graphite server in timelion.json
+Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings
 
 Argument | Accepts | Description
 --- | --- | ---
@@ -14,7 +14,9 @@ offset | *string* | Offset the series retrieval by a date expression. Eg -1M to 
 fit | *string* | Algorithm to use for fitting series to the target time span and interval. Available: average, carry, nearest, none, scale,   
 
 #### .quandl()
-Pull data from quandl.com using the quandl code. Stick your free API key in timelion.json. API is rate limited without a key
+
+    Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana's Advanced Settings.
+    The API has a really low rate limit without a key
 
 Argument | Accepts | Description
 --- | --- | ---
