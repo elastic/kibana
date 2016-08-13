@@ -67,13 +67,24 @@ modules.get('apps/management')
                   return;
                 }
                 if (row === 1) {
+                  // Convert column names with spaces in them to camel case
+                  const columnNames = results.meta.fields.map((column) => {
+                    return /\s/g.test(column) ? _.camelCase(column) : column;
+                  });
+
                   // Collect general information on the first pass
-                  if (results.meta.fields.length > _.uniq(results.meta.fields).length) {
-                    this.formattedErrors.push('Column names must be unique');
+                  if (columnNames.length > _.uniq(columnNames).length) {
+                    let errorMsg = 'Column names must be unique';
+                    if (results.meta.fields.length === _.unique(results.meta.fields).length) {
+                      // If the original names (not the camel cased ones) would have been unique
+                      // add a hin about the camel casing to the error.
+                      errorMsg += ' (be aware that column names with spaces were converted to camel case)';
+                    }
+                    this.formattedErrors.push(errorMsg);
                   }
 
                   let hasEmptyHeader = false;
-                  _.forEach(results.meta.fields, (field) => {
+                  _.forEach(columnNames, (field) => {
                     if (_.isEmpty(field)) {
                       hasEmptyHeader = true;
                     }
@@ -82,11 +93,11 @@ modules.get('apps/management')
                     this.formattedErrors.push('Column names must not be blank');
                   }
 
-                  if (results.meta.fields.length > maxSampleColumns) {
+                  if (columnNames.length > maxSampleColumns) {
                     this.formattedWarnings.push(`Preview truncated to ${maxSampleColumns} columns`);
                   }
 
-                  this.columns = results.meta.fields.slice(0, maxSampleColumns);
+                  this.columns = columnNames.slice(0, maxSampleColumns);
                   this.parseOptions = _.defaults({}, this.parseOptions, {delimiter: results.meta.delimiter});
                 }
 
