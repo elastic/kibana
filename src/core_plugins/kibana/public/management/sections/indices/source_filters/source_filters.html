@@ -16,13 +16,13 @@
             name="form">
 
             <div class="value">
-              <span ng-if="sourceFilters.editting !== filter">{{ filter.value }}</span>
+              <span ng-if="sourceFilters.editing !== filter">{{ filter.value }}</span>
 
               <input
                 ng-model="filter.value"
                 input-focus
-                ng-if="sourceFilters.editting === filter"
-                placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
+                ng-if="sourceFilters.editing === filter"
+                placeholder="sourceFilters.placeHolder"
                 type="text"
                 required
                 class="form-control">
@@ -31,15 +31,15 @@
             <div class="controls">
               <button
                 aria-label="Edit source filter"
-                ng-if="sourceFilters.editting !== filter"
-                ng-click="sourceFilters.editting = filter"
+                ng-if="sourceFilters.editing !== filter"
+                ng-click="sourceFilters.editing = filter"
                 type="button"
                 class="btn btn-default">
                 <i aria-hidden="true" class="fa fa-pencil"></i>
               </button>
               <button
                 aria-label="Save source filter"
-                ng-if="sourceFilters.editting === filter"
+                ng-if="sourceFilters.editing === filter"
                 type="submit"
                 class="btn btn-primary">
                 <i aria-hidden="true" class="fa fa-save"></i>
@@ -63,7 +63,7 @@
             <div class="input-group">
               <input
                 ng-model="sourceFilters.newValue"
-                placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
+                placeholder="sourceFilters.placeHolder"
                 type="text"
                 class="form-control">
 

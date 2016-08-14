@@ -27,7 +27,7 @@ uiModules.get('apps/management')
         { title: 'format' },
         { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
         { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-        { title: 'exclude', info: 'Fields that are excluded from _source when it is fetched' },
+        { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
         { title: 'controls', sortable: false }
       ];
 
@@ -39,7 +39,7 @@ uiModules.get('apps/management')
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
         const sourceFilters = $scope.indexPattern.sourceFilters && $scope.indexPattern.sourceFilters.map(f => f.value) || [];
         const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
-        _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
+        _.find($scope.editSections, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
           const childScope = _.assign($scope.$new(), { field: field });

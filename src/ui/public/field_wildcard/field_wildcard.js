@@ -14,7 +14,7 @@ export default function fieldWildcard(config) {
   }
 
   function fieldWildcardFilter(globs) {
-    const matcher = fieldWildcardMatcher(globs, config);
+    const matcher = fieldWildcardMatcher(globs);
     return function filter(val) {
       return !matcher(val);
     };

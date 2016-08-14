@@ -27,8 +27,9 @@ uiModules.get('kibana')
 
         this.$scope = $scope;
         this.saving = false;
-        this.editting = null;
+        this.editing = null;
         this.newValue = null;
+        this.placeHolder = 'field name filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')';
 
         $scope.$watch('indexPattern.sourceFilters', (filters) => {
           if (filters) {
@@ -45,8 +46,8 @@ uiModules.get('kibana')
       }
 
       delete(filter) {
-        if (this.editting === filter) {
-          this.editting = null;
+        if (this.editing === filter) {
+          this.editing = null;
         }
 
         this.$scope.indexPattern.sourceFilters = without(this.all(), filter);
@@ -63,7 +64,7 @@ uiModules.get('kibana')
       save() {
         this.saving = true;
         this.$scope.indexPattern.save()
-        .then(() => this.editting = null)
+        .then(() => this.editing = null)
         .catch(notify.error)
         .finally(() => this.saving = false);
       }
