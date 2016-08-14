@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import 'plugins/kibana/management/sections/indices/_indexed_fields';
 import 'plugins/kibana/management/sections/indices/_scripted_fields';
-import 'plugins/kibana/management/sections/indices/field_filters/field_filters';
+import 'plugins/kibana/management/sections/indices/source_filters/source_filters';
 import 'plugins/kibana/management/sections/indices/_index_header';
 import RefreshKibanaIndex from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import UrlProvider from 'ui/url';

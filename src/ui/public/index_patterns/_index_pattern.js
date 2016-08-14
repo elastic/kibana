@@ -43,7 +43,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     notExpandable: 'boolean',
     intervalName: 'string',
     fields: 'json',
-    fieldFilters: 'json',
+    sourceFilters: 'json',
     fieldFormatMap: {
       type: 'string',
       _serialize(map = {}) {
@@ -192,7 +192,7 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
     // Get the source filtering configuration for that index.
     getSourceFiltering() {
       return {
-        exclude: this.fieldFilters && this.fieldFilters.map(filter => filter.value) || []
+        exclude: this.sourceFilters && this.sourceFilters.map(filter => filter.value) || []
       };
     }
 

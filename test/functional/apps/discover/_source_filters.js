@@ -11,7 +11,7 @@ import {
 
 var expect = require('expect.js');
 
-bdd.describe('field filters', function describeIndexTests() {
+bdd.describe('source filters', function describeIndexTests() {
   bdd.before(function () {
 
     var fromTime = '2015-09-19 06:31:44.000';
@@ -21,7 +21,7 @@ bdd.describe('field filters', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
       common.debug('load kibana index with default index pattern');
-      return elasticDump.elasticLoad('visualize_field-filters','.kibana');
+      return elasticDump.elasticLoad('visualize_source-filters','.kibana');
     })
     // and load a set of makelogs data
     .then(function loadIfEmptyMakelogs() {
@@ -43,16 +43,11 @@ bdd.describe('field filters', function describeIndexTests() {
     .catch(common.handleError(this));
   });
 
-
-  bdd.describe('field filters', function () {
-
-    bdd.it('should not get the field referer', function () {
-      return discoverPage.getAllFieldNames()
-      .then(function (fieldNames) {
-        expect(fieldNames).to.not.contain('referer');
-      })
-      .catch(common.handleError(this));
-    });
-
+  bdd.it('should not get the field referer', function () {
+    return discoverPage.getAllFieldNames()
+    .then(function (fieldNames) {
+      expect(fieldNames).to.not.contain('referer');
+    })
+    .catch(common.handleError(this));
   });
 });

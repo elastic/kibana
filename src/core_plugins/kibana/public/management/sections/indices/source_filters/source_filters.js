@@ -4,13 +4,13 @@ import uiModules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import FieldWildcardProvider from 'ui/field_wildcard';
 
-import template from './field_filters.html';
-import './field_filters.less';
+import template from './source_filters.html';
+import './source_filters.less';
 
 const notify = new Notifier();
 
 uiModules.get('kibana')
-.directive('fieldFilters', function (Private) {
+.directive('sourceFilters', function (Private) {
   const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
   return {
     restrict: 'E',
@@ -18,7 +18,7 @@ uiModules.get('kibana')
       indexPattern: '='
     },
     template,
-    controllerAs: 'fieldFilters',
+    controllerAs: 'sourceFilters',
     controller: class FieldFiltersController {
       constructor($scope) {
         if (!$scope.indexPattern) {
@@ -30,7 +30,7 @@ uiModules.get('kibana')
         this.editting = null;
         this.newValue = null;
 
-        $scope.$watch('indexPattern.fieldFilters', (filters) => {
+        $scope.$watch('indexPattern.sourceFilters', (filters) => {
           if (filters) {
             const values = filters.map(f => f.value);
             const filter = fieldWildcardMatcher(values);
@@ -41,7 +41,7 @@ uiModules.get('kibana')
       }
 
       all() {
-        return this.$scope.indexPattern.fieldFilters || [];
+        return this.$scope.indexPattern.sourceFilters || [];
       }
 
       delete(filter) {
@@ -49,14 +49,14 @@ uiModules.get('kibana')
           this.editting = null;
         }
 
-        this.$scope.indexPattern.fieldFilters = without(this.all(), filter);
+        this.$scope.indexPattern.sourceFilters = without(this.all(), filter);
         return this.save();
       }
 
       create() {
         const value = this.newValue;
         this.newValue = null;
-        this.$scope.indexPattern.fieldFilters = [...this.all(), { value }];
+        this.$scope.indexPattern.sourceFilters = [...this.all(), { value }];
         return this.save();
       }
 

@@ -4,25 +4,25 @@
   Source filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.
 </p>
 
-<div ng-class="{ saving: fieldFilters.saving }" class="field-filters-container">
+<div ng-class="{ saving: sourceFilters.saving }" class="source-filters-container">
 
   <table class="table table-hover">
     <tbody>
-      <tr ng-repeat="filter in fieldFilters.all()">
+      <tr ng-repeat="filter in sourceFilters.all()">
         <td>
           <form
-            ng-submit="fieldFilters.save(filter)"
+            ng-submit="sourceFilters.save(filter)"
             class="field-filter"
             name="form">
 
             <div class="value">
-              <span ng-if="fieldFilters.editting !== filter">{{ filter.value }}</span>
+              <span ng-if="sourceFilters.editting !== filter">{{ filter.value }}</span>
 
               <input
                 ng-model="filter.value"
                 input-focus
-                ng-if="fieldFilters.editting === filter"
-                placeholder="field name filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
+                ng-if="sourceFilters.editting === filter"
+                placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
                 type="text"
                 required
                 class="form-control">
@@ -31,22 +31,22 @@
             <div class="controls">
               <button
                 aria-label="Edit source filter"
-                ng-if="fieldFilters.editting !== filter"
-                ng-click="fieldFilters.editting = filter"
+                ng-if="sourceFilters.editting !== filter"
+                ng-click="sourceFilters.editting = filter"
                 type="button"
                 class="btn btn-default">
                 <i aria-hidden="true" class="fa fa-pencil"></i>
               </button>
               <button
                 aria-label="Save source filter"
-                ng-if="fieldFilters.editting === filter"
+                ng-if="sourceFilters.editting === filter"
                 type="submit"
                 class="btn btn-primary">
                 <i aria-hidden="true" class="fa fa-save"></i>
               </button>
               <button
                 aria-label="Delete source filter"
-                ng-click="fieldFilters.delete(filter)"
+                ng-click="sourceFilters.delete(filter)"
                 type="button"
                 class="btn btn-danger">
                 <i aria-hidden="true" class="fa fa-trash"></i>
@@ -59,11 +59,11 @@
     <tfoot>
       <tr>
         <td>
-          <form name="form" ng-submit="fieldFilters.create()">
+          <form name="form" ng-submit="sourceFilters.create()">
             <div class="input-group">
               <input
-                ng-model="fieldFilters.newValue"
-                placeholder="field name filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
+                ng-model="sourceFilters.newValue"
+                placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
                 type="text"
                 class="form-control">
 
@@ -71,7 +71,7 @@
                 <button
                   type="submit"
                   class="btn btn-primary"
-                  ng-disabled="!fieldFilters.newValue">
+                  ng-disabled="!sourceFilters.newValue">
                   Add
                 </button>
               </div>
@@ -82,16 +82,16 @@
     </tfoot>
   </table>
 
-  <div ng-if="fieldFilters.all().length" class="known-matches">
+  <div ng-if="sourceFilters.all().length" class="known-matches">
     <h4>Known Matches</h4>
-    <p ng-if="!fieldFilters.sampleMatches">
+    <p ng-if="!sourceFilters.sampleMatches">
       <em>The selected source filters don't match any known fields.</em>
     </p>
-    <p ng-if="fieldFilters.sampleMatches">
+    <p ng-if="sourceFilters.sampleMatches">
       Based on the chosen source filters, these are the known fields that would be excluded from document sources.
     </p>
     <ul>
-      <li ng-repeat="match in fieldFilters.sampleMatches">{{match}}</li>
+      <li ng-repeat="match in sourceFilters.sampleMatches">{{match}}</li>
     </ul>
   </div>
 </div>

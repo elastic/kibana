@@ -37,8 +37,8 @@ uiModules.get('apps/management')
         // clear and destroy row scopes
         _.invoke(rowScopes.splice(0), '$destroy');
         const fields = filter($scope.indexPattern.getNonScriptedFields(), $scope.fieldFilter);
-        const fieldFilters = $scope.indexPattern.fieldFilters && $scope.indexPattern.fieldFilters.map(f => f.value) || [];
-        const fieldWildcardMatch = fieldWildcardMatcher(fieldFilters);
+        const sourceFilters = $scope.indexPattern.sourceFilters && $scope.indexPattern.sourceFilters.map(f => f.value) || [];
+        const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters);
         _.find($scope.fieldTypes, {index: 'indexedFields'}).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
