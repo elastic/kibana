@@ -1,13 +1,11 @@
 import {
   bdd,
-  common,
-  discoverPage,
-  headerPage,
-  settingsPage,
   scenarioManager,
   esClient,
   elasticDump
 } from '../../../support';
+
+import PageObjects from '../../../support/page_objects';
 
 var expect = require('expect.js');
 
@@ -20,7 +18,7 @@ bdd.describe('source filters', function describeIndexTests() {
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {
-      common.debug('load kibana index with default index pattern');
+      PageObjects.common.debug('load kibana index with default index pattern');
       return elasticDump.elasticLoad('visualize_source-filters','.kibana');
     })
     // and load a set of makelogs data
@@ -28,26 +26,28 @@ bdd.describe('source filters', function describeIndexTests() {
       return scenarioManager.loadIfEmpty('logstashFunctional');
     })
     .then(function () {
-      common.debug('discover');
-      return common.navigateToApp('discover');
+      PageObjects.common.debug('discover');
+      return PageObjects.common.navigateToApp('discover');
     })
     .then(function () {
-      common.debug('setAbsoluteRange');
-      return headerPage.setAbsoluteRange(fromTime, toTime);
+      PageObjects.common.debug('setAbsoluteRange');
+      return PageObjects.header.setAbsoluteRange(fromTime, toTime);
     })
     .then(function () {
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button
-      return common.sleep(1000);
+      return PageObjects.common.sleep(1000);
     })
-    .catch(common.handleError(this));
+    .catch(PageObjects.common.createErrorHandler(this));
   });
 
   bdd.it('should not get the field referer', function () {
-    return discoverPage.getAllFieldNames()
+    return PageObjects.discover.getAllFieldNames()
     .then(function (fieldNames) {
       expect(fieldNames).to.not.contain('referer');
+      const relatedContentFields = fieldNames.filter((fieldName) => fieldName.indexOf('relatedContent') === 0);
+      expect(relatedContentFields).to.have.length(0);
     })
-    .catch(common.handleError(this));
+    .catch(PageObjects.common.createErrorHandler(this));
   });
 });

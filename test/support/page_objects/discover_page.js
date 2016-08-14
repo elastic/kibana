@@ -220,6 +220,14 @@ export default class DiscoverPage {
       .click();
   }
 
+  getAllFieldNames() {
+    return this.findTimeout
+    .findAllByClassName('sidebar-item')
+    .then((items) => {
+      return Promise.all(items.map((item) => item.getVisibleText()));
+    });
+  }
+
   getSidebarWidth() {
     return this.findTimeout
       .findByClassName('sidebar-list')
