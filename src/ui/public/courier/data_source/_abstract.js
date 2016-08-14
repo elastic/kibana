@@ -287,7 +287,6 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
         if (flatState.body.size > 0) {
           let computedFields = flatState.index.getComputedFields();
           flatState.body.stored_fields = computedFields.storedFields;
-          flatState.body._source = computedFields._source;
           flatState.body.script_fields = flatState.body.script_fields || {};
           flatState.body.fielddata_fields = flatState.body.fielddata_fields || [];
 
