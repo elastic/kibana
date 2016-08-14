@@ -7,12 +7,17 @@
 <div ng-class="{ saving: sourceFilters.saving }" class="source-filters-container">
 
   <table class="table table-hover">
+    <thead ng-if="sourceFilters.all().length">
+      <tr>
+        <td></td><td><h4 class="header">Known Matches</h4></td>
+      </tr>
+    </thead>
     <tbody>
       <tr ng-repeat="filter in sourceFilters.all()">
         <td>
           <form
             ng-submit="sourceFilters.save(filter)"
-            class="field-filter"
+            class="source-filter"
             name="form">
 
             <div class="value">
@@ -54,6 +59,16 @@
             </div>
           </form>
         </td>
+        <td>
+          <div class="known-matches">
+            <p ng-if="!sourceFilters.sampleMatches[$index]">
+              <em>The source filter doesn't match any known fields.</em>
+            </p>
+            <ul>
+              <li ng-repeat="match in sourceFilters.sampleMatches[$index]">{{match}}</li>
+            </ul>
+          </div>
+        </td>
       </tr>
     </tbody>
     <tfoot>
@@ -81,17 +96,4 @@
       </tr>
     </tfoot>
   </table>
-
-  <div ng-if="sourceFilters.all().length" class="known-matches">
-    <h4>Known Matches</h4>
-    <p ng-if="!sourceFilters.sampleMatches">
-      <em>The selected source filters don't match any known fields.</em>
-    </p>
-    <p ng-if="sourceFilters.sampleMatches">
-      Based on the chosen source filters, these are the known fields that would be excluded from document sources.
-    </p>
-    <ul>
-      <li ng-repeat="match in sourceFilters.sampleMatches">{{match}}</li>
-    </ul>
-  </div>
 </div>

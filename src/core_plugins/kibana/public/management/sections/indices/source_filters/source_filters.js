@@ -29,14 +29,16 @@ uiModules.get('kibana')
         this.saving = false;
         this.editing = null;
         this.newValue = null;
-        this.placeHolder = 'field name filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')';
+        this.placeHolder = 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')';
 
         $scope.$watch('indexPattern.sourceFilters', (filters) => {
           if (filters) {
-            const values = filters.map(f => f.value);
-            const filter = fieldWildcardMatcher(values);
-            const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(filter).sort();
-            this.sampleMatches = size(matches) ? matches : null;
+            this.sampleMatches = [];
+            for (let i = 0; i < filters.length; i++) {
+              const filter = fieldWildcardMatcher([ filters[i].value ]);
+              const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(filter).sort();
+              this.sampleMatches[i] = size(matches) ? matches : null;
+            }
           }
         });
       }
