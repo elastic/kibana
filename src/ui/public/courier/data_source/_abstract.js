@@ -292,6 +292,12 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
 
           _.extend(flatState.body.script_fields, computedFields.scriptFields);
           flatState.body.fielddata_fields = _.union(flatState.body.fielddata_fields, computedFields.fielddataFields);
+
+          if (flatState.body._source) {
+            // exclude source fields for this index pattern specified by the user
+            const filter = fieldWildcardFilter(flatState.body._source.exclude);
+            flatState.body.fielddata_fields = flatState.body.fielddata_fields.filter(filter);
+          }
         }
 
         decorateQuery(flatState.body.query);
@@ -383,11 +389,6 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
             recurse(agg.aggs || agg.aggregations);
           });
         }(flatState.body.aggs || flatState.body.aggregations));
-
-        if (flatState.body._source && flatState.body.fielddata_fields) {
-          const filter = fieldWildcardFilter(flatState.body._source.exclude);
-          flatState.body.fielddata_fields = flatState.body.fielddata_fields.filter(filter);
-        }
       }
 
       return flatState;
