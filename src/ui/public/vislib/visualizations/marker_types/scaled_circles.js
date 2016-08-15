@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import L from 'leaflet';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
+import {geohashColumns, geohashRows} from 'ui/utils/decode_geo_hash';
+
+
 export default function ScaledCircleMarkerFactory(Private) {
 
   let BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
@@ -13,45 +16,38 @@ export default function ScaledCircleMarkerFactory(Private) {
    * @param params {Object}
    */
   _.class(ScaledCircleMarker).inherits(BaseMarker);
+
   function ScaledCircleMarker(map, geoJson, params) {
-    let self = this;
+
     ScaledCircleMarker.Super.apply(this, arguments);
 
-    // multiplier to reduce size of all circles
-    let scaleFactor = 0.6;
+    let maxGeohashPrecision = 1;
+    for (let i = 0; i < geoJson.features.length; i += 1) {
+      maxGeohashPrecision = Math.max(geoJson.features[i].properties.geohash.length, maxGeohashPrecision);
+    }
+    const worldInPixels = 256 * Math.pow(2, this.map.getZoom());//map is 256 pixels wide at zoom level 0
+    const geohashColCount = geohashColumns(maxGeohashPrecision);
+    const geohashRowCount = geohashRows(maxGeohashPrecision);
+    const geoHashWidthInPixels = worldInPixels / geohashColCount;
+    const geoHashHeightInPixels = worldInPixels / geohashRowCount;
+    const maxRadius = Math.min(geoHashWidthInPixels, geoHashHeightInPixels) / 2;
+    const biasTerm = 1 / 3;//ensure smallest circle is never smaller than this
+    const minRadius = maxRadius * biasTerm;
+
+    this._valueRange = this.geoJson.properties.allmax - this.geoJson.properties.allmin;
+    this._maxCircleArea = Math.PI * Math.pow(maxRadius, 2);
+    this._minCircleArea = Math.PI * Math.pow(minRadius, 2);
 
     this._createMarkerGroup({
-      pointToLayer: function (feature, latlng) {
-        let value = feature.properties.value;
-        let scaledRadius = self._radiusScale(value) * scaleFactor;
-        return L.circleMarker(latlng).setRadius(scaledRadius);
-      }
+      pointToLayer: (feature, latlng) => L.circleMarker(latlng).setRadius(this._radiusScale(feature.properties.value))
     });
+
   }
 
-  /**
-   * radiusScale returns a number for scaled circle markers
-   * for relative sizing of markers
-   *
-   * @method _radiusScale
-   * @param value {Number}
-   * @return {Number}
-   */
   ScaledCircleMarker.prototype._radiusScale = function (value) {
-    let precisionBiasBase = 5;
-    let precisionBiasNumerator = 200;
-    let zoom = this.map.getZoom();
-    let maxValue = this.geoJson.properties.allmax;
-    let precision = _.max(this.geoJson.features.map(function (feature) {
-      return String(feature.properties.geohash).length;
-    }));
-
-    let pct = Math.abs(value) / Math.abs(maxValue);
-    let zoomRadius = 0.5 * Math.pow(2, zoom);
-    let precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
-
-    // square root value percentage
-    return Math.pow(pct, 0.5) * zoomRadius * precisionScale;
+    const ratioFeatureToDataset = this._valueRange ? (value - this.geoJson.properties.allmin) / this._valueRange : 1;
+    const circleArea = this._minCircleArea + ratioFeatureToDataset * (this._maxCircleArea - this._minCircleArea);
+    return Math.round(Math.sqrt(circleArea / Math.PI));
   };
 
 

@@ -1,34 +1,33 @@
 import _ from 'lodash';
-import moment from 'moment';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import precisionTemplate from 'ui/agg_types/controls/precision.html';
+import {geohashColumns, geohashRows} from 'ui/utils/decode_geo_hash';
+
 export default function GeoHashAggDefinition(Private, config) {
   let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   let defaultPrecision = 2;
 
-  // zoomPrecision maps event.zoom to a geohash precision value
-  // event.limit is the configurable max geohash precision
-  // default max precision is 7, configurable up to 12
-  const zoomPrecision = {
-    1: 2,
-    2: 2,
-    3: 2,
-    4: 3,
-    5: 3,
-    6: 4,
-    7: 4,
-    8: 5,
-    9: 5,
-    10: 6,
-    11: 6,
-    12: 7,
-    13: 7,
-    14: 8,
-    15: 9,
-    16: 10,
-    17: 11,
-    18: 12
-  };
+
+  /**
+   * Map Leaflet zoom levels to geohash precision levels.
+   * The size of a geohash grid on the map should be at least `minGeohashSizeInPixels` pixels wide.
+   */
+  let zoomPrecision = {};
+  const minGeohashPixels = 16;
+  for (let zoom = 0; zoom <= 21; zoom += 1) {
+    const worldPixels = 256 * Math.pow(2, zoom);
+    zoomPrecision[zoom] = 1;
+    for (let precision = 2; precision <= 12; precision += 1) {
+      const cellsHorizontally = geohashColumns(precision, 0);
+      const cellsVertically = geohashRows(precision, 1);
+      const min = Math.min(worldPixels / cellsHorizontally, worldPixels / cellsVertically);
+      if (min >= minGeohashPixels) {
+        zoomPrecision[zoom] = precision;
+      } else {
+        break;
+      }
+    }
+  }
 
   function getPrecision(precision) {
     let maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
