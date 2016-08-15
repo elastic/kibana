@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  const monitorStateChanges = require('ui/state_management/monitor_changes');
+  const monitorStateChanges = require('ui/state_management/monitor_state_changes');
   require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');

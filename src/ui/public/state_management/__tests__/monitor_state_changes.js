@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import monitorStateChanges from 'ui/state_management/monitor_changes';
+import monitorStateChanges from 'ui/state_management/monitor_state_changes';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
 
 describe('monitorStateChanges', function () {

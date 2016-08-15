@@ -5,7 +5,7 @@ define(function (require) {
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
 
-  const monitorStateChanges = require('ui/state_management/monitor_changes');
+  const monitorStateChanges = require('ui/state_management/monitor_state_changes');
   require('ui/directives/config');
   require('ui/courier');
   require('ui/config');
