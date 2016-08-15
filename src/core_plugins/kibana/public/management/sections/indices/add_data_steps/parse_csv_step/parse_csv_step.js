@@ -73,7 +73,7 @@ modules.get('apps/management')
                   }
 
                   if (results.meta.fields.some(name => /\s/.test(name))) {
-                    this.formattedWarnings.push('Field names with spaces are dificult to search for in Kibana');
+                    this.formattedWarnings.push('Field names with spaces are difficult to search for in Kibana');
                   }
 
                   let hasEmptyHeader = false;
