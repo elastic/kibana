@@ -72,6 +72,10 @@ modules.get('apps/management')
                     this.formattedErrors.push('Column names must be unique');
                   }
 
+                  if (results.meta.fields.some(name => /\s/.test(name))) {
+                    this.formattedWarnings.push('Field names with spaces are difficult to search for in Kibana');
+                  }
+
                   let hasEmptyHeader = false;
                   _.forEach(results.meta.fields, (field) => {
                     if (_.isEmpty(field)) {
