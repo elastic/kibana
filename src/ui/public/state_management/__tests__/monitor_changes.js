@@ -16,19 +16,17 @@ describe('monitorStateChanges', function () {
     mockState = new SimpleEmitter();
   });
 
-  describe('sanity checks', function () {
-    it('should throw if not given a handler function', function () {
-      const fn = () => monitorStateChanges(mockState, 'not a function');
-      expect(fn).to.throwException(/must be a listener function/);
-    });
-
-    it('should throw if not given a valid cleanup function', function () {
-      const fn = () => monitorStateChanges(mockState, noop, 'not a function');
-      expect(fn).to.throwException(/must be a cleanup function/);
-    });
+  it('should throw if not given a handler function', function () {
+    const fn = () => monitorStateChanges(mockState, 'not a function');
+    expect(fn).to.throwException(/must be a listener function/);
   });
 
-  describe('calling the event handler', function () {
+  it('should throw if not given a valid cleanup function', function () {
+    const fn = () => monitorStateChanges(mockState, noop, 'not a function');
+    expect(fn).to.throwException(/must be a cleanup function/);
+  });
+
+  describe('the event handler', function () {
     eventTypes.forEach((eventType) => {
       describe(eventType, function () {
         let handlerFn;
@@ -69,18 +67,16 @@ describe('monitorStateChanges', function () {
       cleanFn = sinon.stub();
     });
 
-    describe('handler function', function () {
-      it('should be called immediately', function () {
-        sinon.assert.notCalled(cleanFn);
-        monitorStateChanges(mockState, noop, cleanFn);
-        sinon.assert.calledOnce(cleanFn);
-      });
+    it('should be called immediately', function () {
+      sinon.assert.notCalled(cleanFn);
+      monitorStateChanges(mockState, noop, cleanFn);
+      sinon.assert.calledOnce(cleanFn);
+    });
 
-      it('should be given a cleanup function', function () {
-        monitorStateChanges(mockState, noop, cleanFn);
-        const arg = cleanFn.firstCall.args[0];
-        expect(arg).to.be.a('function');
-      });
+    it('should be given a cleanup function', function () {
+      monitorStateChanges(mockState, noop, cleanFn);
+      const arg = cleanFn.firstCall.args[0];
+      expect(arg).to.be.a('function');
     });
 
     describe('passed method', function () {
