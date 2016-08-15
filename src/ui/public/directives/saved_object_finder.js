@@ -18,7 +18,9 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       // optional make-url attr, sets the userMakeUrl in our scope
       userMakeUrl: '=?makeUrl',
       // optional on-choose attr, sets the userOnChoose in our scope
-      userOnChoose: '=?onChoose'
+      userOnChoose: '=?onChoose',
+      // optional useLocalManagement attr,  removes link to management section
+      useLocalManagement: '=?useLocalManagement'
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
