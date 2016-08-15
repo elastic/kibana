@@ -73,7 +73,7 @@ uiModules
       // so we force them when needed
       this.ensureNavigation = appSwitcherEnsureNavigation;
 
-      $scope.getTooltip = link => {
+      this.getTooltip = link => {
         // If the sidebar is open then we don't need to show the title because
         // it will already be visible.
         if (globalNavState.isOpen()) {
