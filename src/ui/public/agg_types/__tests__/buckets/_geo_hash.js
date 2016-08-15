@@ -10,9 +10,13 @@ describe('Geohash Agg', function () {
       return function BucketMock(geohashProvider) {
         return geohashProvider.params[4];
       };
-    }, {});
+    }, {
+      get: function () {
+        return 7;//"visualization:tileMap:maxPrecision"
+      }
+    });
 
-    describe('interval', function () {
+    describe('geohash', function () {
 
       const zoomToGeoHashPrecision = {
         0: 1,
@@ -31,12 +35,12 @@ describe('Geohash Agg', function () {
         13: 6,
         14: 7,
         15: 7,
-        16: 8,
-        17: 8,
-        18: 8,
-        19: 9,
-        20: 9,
-        21: 10
+        16: 7,
+        17: 7,
+        18: 7,
+        19: 7,
+        20: 7,
+        21: 7
       };
 
       Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel) => {

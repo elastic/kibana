@@ -12,13 +12,14 @@ export default function GeoHashAggDefinition(Private, config) {
    * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
    */
   let zoomPrecision = {};
+  const maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision')) || 12;
   const minGeohashPixels = 16;
   for (let zoom = 0; zoom <= 21; zoom += 1) {
     const worldPixels = 256 * Math.pow(2, zoom);
     zoomPrecision[zoom] = 1;
-    for (let precision = 2; precision <= 12; precision += 1) {
-      const columns = geohashColumns(precision, 0);
-      if (worldPixels / columns >= minGeohashPixels) {
+    for (let precision = 2; precision <= maxPrecision; precision += 1) {
+      const columns = geohashColumns(precision);
+      if ((worldPixels / columns) >= minGeohashPixels) {
         zoomPrecision[zoom] = precision;
       } else {
         break;
