@@ -206,7 +206,7 @@ define(function (require) {
       'dashboard:defaultDarkTheme': {
         value: false,
         description: 'New dashboards use dark theme by default',
-      }
+      },
     };
   };
 });
