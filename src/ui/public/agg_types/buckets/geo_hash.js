@@ -4,15 +4,14 @@ import precisionTemplate from 'ui/agg_types/controls/precision.html';
 import {geohashColumns} from 'ui/utils/decode_geo_hash';
 
 export default function GeoHashAggDefinition(Private, config) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let defaultPrecision = 2;
-
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const defaultPrecision = 2;
+  const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
   /**
    * Map Leaflet zoom levels to geohash precision levels.
    * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
    */
   let zoomPrecision = {};
-  const maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision')) || 12;
   const minGeohashPixels = 16;
   for (let zoom = 0; zoom <= 21; zoom += 1) {
     const worldPixels = 256 * Math.pow(2, zoom);
@@ -28,7 +27,6 @@ export default function GeoHashAggDefinition(Private, config) {
   }
 
   function getPrecision(precision) {
-    let maxPrecision = _.parseInt(config.get('visualization:tileMap:maxPrecision'));
 
     precision = parseInt(precision, 10);
 
@@ -74,7 +72,7 @@ export default function GeoHashAggDefinition(Private, config) {
           const vis = aggConfig.vis;
           let currZoom;
           if (vis.hasUiState()) {
-            currZoom = parseInt(vis.uiStateVal('mapZoom'));
+            currZoom = parseInt(vis.uiStateVal('mapZoom'), 10);
           }
           const autoPrecisionVal = zoomPrecision[currZoom >= 0 ? currZoom : parseInt(vis.params.mapZoom)];
           output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
