@@ -91,8 +91,6 @@ describe('stateMonitor', function () {
             mockState.emit(eventType);
             const args = handlerFn.firstCall.args;
             expect(args[0]).to.be.an('object');
-            expect(args[0]).to.have.property('clean', true);
-            expect(args[0]).to.have.property('dirty', false);
           });
 
           it('should be given the event type', function () {
@@ -108,6 +106,56 @@ describe('stateMonitor', function () {
             expect(args[2]).to.equal(keys);
           });
         });
+      });
+    });
+
+    describe('status object', function () {
+      let handlerFn;
+
+      beforeEach(() => {
+        handlerFn = sinon.stub();
+        monitor.onChange(handlerFn);
+      });
+
+      it('should be clean by default', function () {
+        mockState.emit(eventTypes[0]);
+        const status = handlerFn.firstCall.args[0];
+        expect(status).to.have.property('clean', true);
+        expect(status).to.have.property('dirty', false);
+      });
+
+      it('should be dirty when state changes', function () {
+        setState(mockState, { message: 'i am dirty now' });
+        const status = handlerFn.firstCall.args[0];
+        expect(status).to.have.property('clean', false);
+        expect(status).to.have.property('dirty', true);
+      });
+
+      it('should be clean when state is reset', function () {
+        const defaultState = { message: 'i am the original state' };
+        const handlerFn = sinon.stub();
+
+        let status;
+
+        // initial state and monitor setup
+        const mockState = createMockState(defaultState);
+        const monitor = stateMonitor.create(mockState);
+        monitor.onChange(handlerFn);
+        sinon.assert.notCalled(handlerFn);
+
+        // change the state and emit an event
+        setState(mockState, { message: 'i am dirty now' });
+        sinon.assert.calledOnce(handlerFn);
+        status = handlerFn.firstCall.args[0];
+        expect(status).to.have.property('clean', false);
+        expect(status).to.have.property('dirty', true);
+
+        // reset the state and emit an event
+        setState(mockState, defaultState);
+        sinon.assert.calledTwice(handlerFn);
+        status = handlerFn.secondCall.args[0];
+        expect(status).to.have.property('clean', true);
+        expect(status).to.have.property('dirty', false);
       });
     });
 
