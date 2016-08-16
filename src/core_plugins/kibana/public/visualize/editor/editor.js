@@ -293,14 +293,25 @@ uiModules
 
   function transferVisState(fromVis, toVis, stage) {
     return function () {
+
+      //verify this before we copy the "new" state
+      const isAggregationsChanged = !fromVis.aggs.jsonDataEquals(toVis.aggs);
+
       const view = fromVis.getEnabledState();
       const full = fromVis.getState();
       toVis.setState(view);
       editableVis.dirty = false;
       $state.vis = full;
-      $state.save();
 
-      if (stage) $scope.fetch();
+      /**
+       * Only fetch (full ES round trip), if the play-button has been pressed (ie. 'stage' variable) and if there
+       * has been changes in the Data-tab.
+       */
+      if (stage && isAggregationsChanged) {
+        $scope.fetch();
+      } else {
+        $state.save();
+      }
     };
   }
 

@@ -1,6 +1,5 @@
 import _ from 'lodash';
 module.exports = function (dot, nestedObj, flattenArrays) {
-  let key; // original key
   let stack = []; // track key stack
   let flatObj = {};
   (function flattenObj(obj) {

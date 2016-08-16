@@ -86,7 +86,8 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
           simple_query_string: {
             query: searchString + '*',
             fields: ['title^3', 'description'],
-            default_operator: 'AND'
+            default_operator: 'AND',
+            analyze_wildcard: true
           }
         }
       };

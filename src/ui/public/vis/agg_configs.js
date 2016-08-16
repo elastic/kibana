@@ -47,6 +47,23 @@ export default function AggConfigsFactory(Private) {
     }
   }
 
+  /**
+   * Data-by-data comparison of this Aggregation
+   * Ignores the non-array indexes
+   * @param aggConfigs an AggConfigs instance
+   */
+  AggConfigs.prototype.jsonDataEquals = function (aggConfigs) {
+    if (aggConfigs.length !== this.length) {
+      return false;
+    }
+    for (let i = 0; i < this.length; i += 1) {
+      if (!_.isEqual(aggConfigs[i].toJSON(), this[i].toJSON())) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   AggConfigs.prototype.toDsl = function () {
     let dslTopLvl = {};
     let dslLvlCursor;

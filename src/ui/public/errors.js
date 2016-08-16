@@ -25,6 +25,14 @@ errors.KbnError = KbnError;
 _.class(KbnError).inherits(Error);
 
 /**
+ * If the error permits, propagate the error to be rendered on screen
+ * @param handler the handlers that can render the error message to the screen.
+ */
+KbnError.prototype.displayToScreen = function (handler) {
+  throw this;
+};
+
+/**
  * HastyRefresh error class
  * @param {String} [msg] - An error message that will probably end up in a log.
  */
@@ -204,71 +212,81 @@ errors.NoDefaultIndexPattern = function NoDefaultIndexPattern(type) {
 _.class(errors.NoDefaultIndexPattern).inherits(KbnError);
 
 
-/**
- * used by the vislib, when the container is too small
- * @param {String} message - the message to provide with the error
- */
-errors.ContainerTooSmall = function ContainerTooSmall() {
+errors.PersistedStateError = function PersistedStateError(msg) {
   KbnError.call(this,
   'This container is too small to render the visualization',
   errors.ContainerTooSmall);
 };
-_.class(errors.ContainerTooSmall).inherits(KbnError);
+_.class(errors.PersistedStateError).inherits(KbnError);
+
+
+/**
+ * UI Errors
+ */
+errors.VislibError = class VislibError extends KbnError {
+  constructor(message) {
+    super(message);
+  }
+
+  displayToScreen(handler) {
+    handler.error(this.message);
+  }
+};
+
+
+errors.ContainerTooSmall = class ContainerTooSmall extends errors.VislibError {
+  constructor() {
+    super('This container is too small to render the visualization');
+  }
+};
+
+errors.InvalidWiggleSelection = class InvalidWiggleSelection extends errors.VislibError {
+  constructor() {
+    super('In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.');
+  }
+};
+
+
+errors.PieContainsAllZeros = class PieContainsAllZeros extends errors.VislibError {
+  constructor() {
+    super('No results displayed because all values equal 0.');
+  }
+};
+
+
+errors.InvalidLogScaleValues = class InvalidLogScaleValues extends errors.VislibError {
+  constructor() {
+    super('Values less than 1 cannot be displayed on a log scale');
+  }
+};
+
+
+errors.StackedBarChartConfig = class StackedBarChartConfig extends errors.VislibError {
+  constructor(message) {
+    super(message);
+  }
+};
 
 /**
  * error thrown when user tries to render an chart with less
  * than the required number of data points
  * @param {String} message - the message to provide with the error
  */
-errors.NotEnoughData = function NotEnoughData(message) {
-  KbnError.call(this, message, errors.NotEnoughData);
+errors.NotEnoughData = class NotEnoughData extends errors.VislibError {
+  constructor(message) {
+    super(message);
+  }
 };
-_.class(errors.NotEnoughData).inherits(KbnError);
 
-/**
- * error thrown when no results are returned from an elasticsearch query
- */
-errors.NoResults = function NoResults() {
-  KbnError.call(this,
-  'No results found',
-  errors.NoResults);
+errors.NoResults = class NoResults extends errors.VislibError {
+  constructor() {
+    super('No results found');
+  }
 };
-_.class(errors.NoResults).inherits(KbnError);
 
-/**
- * error thrown when no results are returned from an elasticsearch query
- */
-errors.PieContainsAllZeros = function PieContainsAllZeros() {
-  KbnError.call(this,
-    'No results displayed because all values equal 0',
-    errors.PieContainsAllZeros);
-};
-_.class(errors.PieContainsAllZeros).inherits(KbnError);
 
-/**
- * error thrown when no results are returned from an elasticsearch query
- */
-errors.InvalidLogScaleValues = function InvalidLogScaleValues() {
-  KbnError.call(this,
-    'Values less than 1 cannot be displayed on a log scale',
-    errors.InvalidLogScaleValues);
-};
-_.class(errors.InvalidLogScaleValues).inherits(KbnError);
 
-/** error thrown when wiggle chart is selected for non linear data */
-errors.InvalidWiggleSelection = function InvalidWiggleSelection() {
-  KbnError.call(this,
-    'In wiggle mode the area chart requires ordered values on the x-axis. Try using a Histogram or Date Histogram aggregation.',
-    errors.InvalidWiggleSelection);
-};
-_.class(errors.InvalidWiggleSelection).inherits(KbnError);
 
-errors.PersistedStateError = function PersistedStateError(msg) {
-  KbnError.call(this,
-    msg || 'PersistedState Error',
-    errors.PersistedStateError);
-};
-_.class(errors.PersistedStateError).inherits(KbnError);
 
 
 export default errors;

@@ -2,6 +2,8 @@ import d3 from 'd3';
 import _ from 'lodash';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
+import errors from 'ui/errors';
+
 export default function PointSeriesChartProvider(Private) {
 
   let Chart = Private(VislibVisualizationsChartProvider);
@@ -68,13 +70,18 @@ export default function PointSeriesChartProvider(Private) {
     }));
   };
 
-  PointSeriesChart.prototype._invalidLogScaleValues = function (data) {
-    return data.series && data.series.some(function (d) {
-      return d.values && d.values.some(function (e) {
-        return e.y < 1;
-      });
-    });
+
+  PointSeriesChart.prototype.validateDataCompliesWithScalingMethod = function (data) {
+    const invalidLogScale = data.series && data.series.some(valuesSmallerThanOne);
+    if (this._attr.scale === 'log' && invalidLogScale) {
+      throw new errors.InvalidLogScaleValues();
+    }
   };
+  function valuesSmallerThanOne(d) {
+    return d.values && d.values.some(e => e.y < 1);
+  }
+
+
 
   /**
    * Creates rects to show buckets outside of the ordered.min and max, returns rects
