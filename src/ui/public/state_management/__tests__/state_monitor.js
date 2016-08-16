@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { cloneDeep } from 'lodash';
 import stateMonitor from 'ui/state_management/state_monitor';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
 
@@ -12,9 +13,22 @@ describe('stateMonitor', function () {
   ];
 
   let mockState;
+  let stateJSON;
+
+  function setState(mockState, obj, emit = true) {
+    mockState.toJSON = () => cloneDeep(obj);
+    stateJSON = cloneDeep(obj);
+    if (emit) mockState.emit(eventTypes[0]);
+  }
+
+  function createMockState(state = {}) {
+    const mockState = new SimpleEmitter();
+    setState(mockState, state, false);
+    return mockState;
+  }
 
   beforeEach(() => {
-    mockState = new SimpleEmitter();
+    mockState = createMockState({});
   });
 
   it('should have a create method', function () {
@@ -22,8 +36,32 @@ describe('stateMonitor', function () {
     expect(stateMonitor.create).to.be.a('function');
   });
 
+  describe('factory creation', function () {
+    it('should not call onChange with only the state', function () {
+      const monitor = stateMonitor.create(mockState);
+      const changeStub = sinon.stub();
+      monitor.onChange(changeStub);
+      sinon.assert.notCalled(changeStub);
+    });
+
+    it('should not call onChange with matching defaultState', function () {
+      const monitor = stateMonitor.create(mockState, {});
+      const changeStub = sinon.stub();
+      monitor.onChange(changeStub);
+      sinon.assert.notCalled(changeStub);
+    });
+
+    it('should call onChange with differing defaultState', function () {
+      const monitor = stateMonitor.create(mockState, { test: true });
+      const changeStub = sinon.stub();
+      monitor.onChange(changeStub);
+      sinon.assert.calledOnce(changeStub);
+    });
+  });
+
   describe('instance', function () {
     let monitor;
+
     beforeEach(() => {
       monitor = stateMonitor.create(mockState);
     });
