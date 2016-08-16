@@ -1,8 +1,8 @@
 import { cloneDeep, isEqual } from 'lodash';
 
-function stateMonitor(state) {
+function stateMonitor(state, defaultState) {
   let destroyed = false;
-  const originalState = cloneDeep(state.toJSON());
+  const originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
 
   const listeners = {
     fetch: [],
@@ -10,13 +10,16 @@ function stateMonitor(state) {
     reset: [],
   };
 
-  function changeHandler(type, keys, handlerFn) {
+  function getStatus() {
     const isClean = isEqual(state.toJSON(), originalState);
-    const status = {
+    return {
       clean: isClean,
       dirty: !isClean,
     };
+  }
 
+  function changeHandler(type, keys, handlerFn) {
+    const status = getStatus();
     return handlerFn(status, type, keys);
   };
 
@@ -36,6 +39,12 @@ function stateMonitor(state) {
       state.on('fetch_with_changes', fetchHandler);
       state.on('save_with_changes', saveHandler);
       state.on('reset_with_changes', resetHandler);
+
+      // if the state is already dirty, fire the change handler immediately
+      const status = getStatus();
+      if (status.dirty) {
+        handlerFn(status, null, []);
+      }
 
       return this;
     },
@@ -59,5 +68,5 @@ function stateMonitor(state) {
 }
 
 export default {
-  create: (state) => stateMonitor(state)
+  create: (state, defaultState) => stateMonitor(state, defaultState)
 };
