@@ -416,7 +416,7 @@ function customConfigHelper(config) {
   // There is no helper condition that will allow for 2 parameters, as the
   // other methods have. So check that config is an object
   if (!_.isPlainObject(config)) {
-    throw new Error('config param is required, and must be an object');
+    throw new Error('Config param is required, and must be an object');
   }
 
   // workaround to allow callers to send `config.type` as `error` instead of
@@ -511,7 +511,7 @@ Notifier.prototype.custom = function (msg, config, cb) {
  */
 Notifier.prototype.directive = function (directive, config, cb) {
   if (!_.isPlainObject(directive)) {
-    throw new Error('directive param is required, and must be an object');
+    throw new Error('Directive param is required, and must be an object');
   }
   if (!Notifier.$compile) {
     throw new Error('Unable to use the directive notification until Angular has initialized.');
@@ -523,8 +523,11 @@ Notifier.prototype.directive = function (directive, config, cb) {
     throw new Error('Directive should not have a link function. Notifier has an internal link function helper.');
   }
 
-  directive.scope = { notif: '=' };
-  directive.link = function link($scope, $el) {
+  // make a local copy of the directive param (helps unit tests)
+  const localDirective = _.clone(directive, true);
+
+  localDirective.scope = { notif: '=' };
+  localDirective.link = function link($scope, $el) {
     const $template = angular.element($scope.notif.directive.template);
     const postLinkFunction = Notifier.$compile($template);
     $el.html($template);
@@ -532,7 +535,7 @@ Notifier.prototype.directive = function (directive, config, cb) {
   };
 
   const customConfig = customConfigHelper(config);
-  customConfig.directive = directive;
+  customConfig.directive = localDirective;
   return add(customConfig, cb);
 };
 
