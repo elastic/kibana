@@ -7,7 +7,7 @@ define(function (require) {
   const rison = require('ui/utils/rison');
 
   const dateMath = require('ui/utils/dateMath');
-  const monitorStateChanges = require('ui/state_management/monitor_state_changes');
+  const stateMonitor = require('ui/state_management/state_monitor');
 
   require('ui/doc_table');
   require('ui/visualize');
@@ -119,6 +119,7 @@ define(function (require) {
       docTitle.change(savedSearch.title);
     }
 
+    const $appStatus = $scope.appStatus = this.appStatus = {};
     const $state = $scope.state = new AppState(getStateDefaults());
     $scope.uiState = $state.makeStateful('uiState');
 
@@ -132,19 +133,6 @@ define(function (require) {
         filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
       };
     }
-
-    let dirtyChecker;
-    const $appStatus = $scope.appStatus = this.appStatus = {};
-    (function (defaultAppState) {
-      const defaultStateClone = _.cloneDeep(defaultAppState);
-      dirtyChecker = () => {
-        const appState = $state.toJSON();
-        const diffState = !_.isEqual(appState, defaultStateClone);
-        $appStatus.dirty = diffState;
-      };
-    }(getStateDefaults()));
-
-    monitorStateChanges($state, dirtyChecker, (cleanup) => { $scope.$on('$destroy', cleanup); });
 
     $state.index = $scope.indexPattern.id;
     $state.sort = getSort.array($state.sort, $scope.indexPattern);
@@ -173,7 +161,11 @@ define(function (require) {
         $scope.failuresShown = showTotal;
       };
 
-      dirtyChecker();
+      const monitor = stateMonitor.create($state, getStateDefaults());
+      monitor.onChange((status) => {
+        $appStatus.dirty = status.dirty;
+      });
+      $scope.$on('$destroy', () => monitor.destroy());
 
       $scope.updateDataSource()
       .then(function () {

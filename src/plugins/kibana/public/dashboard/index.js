@@ -4,8 +4,8 @@ define(function (require) {
   const angular = require('angular');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
+  const stateMonitor = require('ui/state_management/state_monitor');
 
-  const monitorStateChanges = require('ui/state_management/monitor_state_changes');
   require('ui/directives/config');
   require('ui/courier');
   require('ui/config');
@@ -94,20 +94,6 @@ define(function (require) {
         const $uiState = $scope.uiState = $state.makeStateful('uiState');
         const $appStatus = this.appStatus = $scope.appStatus = {};
 
-        // watch for state changes and update the appStatus.dirty value
-        const removeLoadListener = $scope.$on('application.load', () => {
-          const defaultStateClone = _.cloneDeep(stateDefaults);
-          function dirtyChecker() {
-            const appState = $state.toJSON();
-            const dirty = !_.isEqual(appState, defaultStateClone);
-            $appStatus.dirty = dirty;
-          };
-
-          monitorStateChanges($state, dirtyChecker, (cleanup) => { $scope.$on('$destroy', cleanup); });
-          dirtyChecker();
-          removeLoadListener();
-        });
-
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
           if (!angular.equals(newVal, oldVal)) $state.save();
         });
@@ -138,6 +124,14 @@ define(function (require) {
           }
 
           initPanelIndices();
+
+          // watch for state changes and update the appStatus.dirty value
+          const monitor = stateMonitor.create($state, stateDefaults);
+          monitor.onChange((status) => {
+            $appStatus.dirty = status.dirty;
+          });
+          $scope.$on('$destroy', () => monitor.destroy());
+
           $scope.$emit('application.load');
         }
 

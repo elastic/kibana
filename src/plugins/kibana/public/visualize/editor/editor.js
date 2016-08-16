@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  const monitorStateChanges = require('ui/state_management/monitor_state_changes');
+  const stateMonitor = require('ui/state_management/state_monitor');
   require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');
@@ -132,20 +132,14 @@ define(function (require) {
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
 
+      const monitor = stateMonitor.create($state, stateDefaults);
+      monitor.onChange((status) => {
+        $appStatus.dirty = status.dirty;
+      });
+      $scope.$on('$destroy', () => monitor.destroy());
+
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
-
-      const defaultStateClone = _.cloneDeep(stateDefaults);
-      function dirtyChecker(forceDirty) {
-        if (forceDirty) return $appStatus.dirty = true;
-
-        const appState = $state.toJSON();
-        const dirty = !_.isEqual(appState, defaultStateClone);
-        $appStatus.dirty = dirty;
-      };
-
-      monitorStateChanges($state, () => dirtyChecker(), (cleanup) => { $scope.$on('$destroy', cleanup); });
-      dirtyChecker();
 
       // track state of editable vis vs. "actual" vis
       $scope.stageEditableVis = transferVisState(editableVis, vis, true);
@@ -153,8 +147,7 @@ define(function (require) {
       $scope.$watch(function () {
         return editableVis.getState();
       }, function (newState) {
-        $scope.appStatus.dirty = editableVis.dirty = !angular.equals(newState, vis.getState());
-        dirtyChecker($scope.appStatus.dirty);
+        editableVis.dirty = !angular.equals(newState, vis.getState());
 
         $scope.responseValueAggs = null;
         try {
