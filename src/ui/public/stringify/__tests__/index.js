@@ -7,5 +7,6 @@ import './_color';
 import './_date';
 import './_duration';
 import './_truncate';
+import './_boolean';
 describe('Stringify Component', function () {
 });

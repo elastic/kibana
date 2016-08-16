@@ -25,6 +25,7 @@ module.exports = function (api) {
         "transport",
         "http",
         "plugins",
+        "ingest",
         "_all"
       ]
     }
@@ -50,6 +51,7 @@ module.exports = function (api) {
         "indices",
         "process",
         "breaker",
+        "ingest",
         "_all"
       ],
       "index_metric": [

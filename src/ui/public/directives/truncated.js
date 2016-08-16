@@ -3,8 +3,9 @@ import truncText from 'trunc-text';
 import truncHTML from 'trunc-html';
 import uiModules from 'ui/modules';
 import truncatedTemplate from 'ui/directives/partials/truncated.html';
-import 'ui/filters/trust_as_html';
-const module = uiModules.get('kibana');
+import 'angular-sanitize';
+
+const module = uiModules.get('kibana', ['ngSanitize']);
 
 module.directive('kbnTruncated', function ($compile) {
   return {

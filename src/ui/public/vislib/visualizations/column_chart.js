@@ -3,12 +3,9 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment';
 import errors from 'ui/errors';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizations/_point_series_chart';
 import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 export default function ColumnChartFactory(Private) {
-
-  let DataClass = Private(VislibLibDataProvider);
 
   let PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
   let TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
@@ -118,7 +115,6 @@ export default function ColumnChartFactory(Private) {
     let yScale = this.handler.yAxis.yScale;
     let height = yScale.range()[0];
     let yMin = this.handler.yAxis.yScale.domain()[0];
-    let self = this;
 
     let barWidth;
     if (data.ordered && data.ordered.date) {
@@ -178,7 +174,6 @@ export default function ColumnChartFactory(Private) {
   ColumnChart.prototype.addGroupedBars = function (bars) {
     let xScale = this.handler.xAxis.xScale;
     let yScale = this.handler.yAxis.yScale;
-    let yMin = this.handler.yAxis.yMin;
     let data = this.chartData;
     let n = data.series.length;
     let height = yScale.range()[0];
@@ -263,7 +258,6 @@ export default function ColumnChartFactory(Private) {
     let margin = this._attr.margin;
     let elWidth = this._attr.width = $elem.width();
     let elHeight = this._attr.height = $elem.height();
-    let yMin = this.handler.yAxis.yMin;
     let yScale = this.handler.yAxis.yScale;
     let xScale = this.handler.xAxis.xScale;
     let minWidth = 20;
@@ -284,13 +278,22 @@ export default function ColumnChartFactory(Private) {
 
         width = elWidth;
         height = elHeight - margin.top - margin.bottom;
+        if (width < minWidth || height < minHeight) {
+          throw new errors.ContainerTooSmall();
+        }
+        self.validateDataCompliesWithScalingMethod(data);
 
         if (addTimeMarker) {
           timeMarker = new TimeMarker(times, xScale, height);
         }
 
-        if (width < minWidth || height < minHeight) {
-          throw new errors.ContainerTooSmall();
+        if (
+          data.series.length > 1 &&
+          (self._attr.scale === 'log' || self._attr.scale === 'square root') &&
+          (self._attr.mode === 'stacked' || self._attr.mode === 'percentage')
+        ) {
+          throw new errors.StackedBarChartConfig(`Cannot display ${self._attr.mode} bar charts for multiple data series \
+          with a ${self._attr.scale} scaling method. Try 'linear' scaling instead.`);
         }
 
         div = d3.select(this);

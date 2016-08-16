@@ -102,9 +102,32 @@ describe('ui settings', function () {
 
   describe('#getDefaults()', function () {
     it('is promised the default values', async function () {
-      const { server, uiSettings, configGet } = instantiate();
+      const {server, uiSettings, configGet} = instantiate();
       const defaults = await uiSettings.getDefaults();
       expect(isEqual(defaults, defaultsProvider())).to.equal(true);
+    });
+
+
+    describe('defaults for formatters', async function () {
+
+      const defaults = defaultsProvider();
+      const mapping = JSON.parse(defaults['format:defaultTypeMap'].value);
+      const expected = {
+        ip: {id: 'ip', params: {}},
+        date: {id: 'date', params: {}},
+        number: {id: 'number', params: {}},
+        boolean: {id: 'boolean', params: {}},
+        _source: {id: '_source', params: {}},
+        _default_: {id: 'string', params: {}}
+      };
+
+      Object.keys(mapping).forEach(function (dataType) {
+        it(`should configure ${dataType}`, function () {
+          expect(expected.hasOwnProperty(dataType)).to.equal(true);
+          expect(mapping[dataType].id).to.equal(expected[dataType].id);
+          expect(JSON.stringify(mapping[dataType].params)).to.equal(JSON.stringify(expected[dataType].params));
+        });
+      });
     });
   });
 

@@ -19,10 +19,12 @@ const formatIds = [
   'string',
   'url',
   '_source',
-  'truncate'
+  'truncate',
+  'boolean'
 ];
 
 module.exports = describe('conformance', function () {
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     fieldFormats = Private(RegistryFieldFormatsProvider);
