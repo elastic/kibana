@@ -135,11 +135,12 @@ define(function (require) {
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
 
+      const defaultStateClone = _.cloneDeep(stateDefaults);
       function dirtyChecker(forceDirty) {
         if (forceDirty) return $appStatus.dirty = true;
 
         const appState = $state.toJSON();
-        const dirty = !_.isEqual(appState, stateDefaults);
+        const dirty = !_.isEqual(appState, defaultStateClone);
         $appStatus.dirty = dirty;
       };
 

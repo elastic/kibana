@@ -96,9 +96,10 @@ define(function (require) {
 
         // watch for state changes and update the appStatus.dirty value
         const removeLoadListener = $scope.$on('application.load', () => {
+          const defaultStateClone = _.cloneDeep(stateDefaults);
           function dirtyChecker() {
             const appState = $state.toJSON();
-            const dirty = !_.isEqual(appState, stateDefaults);
+            const dirty = !_.isEqual(appState, defaultStateClone);
             $appStatus.dirty = dirty;
           };
 
