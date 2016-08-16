@@ -133,7 +133,7 @@ define(function (require) {
       $scope.configTemplate = configTemplate;
 
       const monitor = stateMonitor.create($state, stateDefaults);
-      monitor.onChange((status) => {
+      monitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
         $appStatus.dirty = status.dirty;
       });
       $scope.$on('$destroy', () => monitor.destroy());
