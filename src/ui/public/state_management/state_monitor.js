@@ -1,7 +1,13 @@
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual, set } from 'lodash';
+
+export default {
+  create: (state, defaultState) => stateMonitor(state, defaultState)
+};
 
 function stateMonitor(state, defaultState) {
   let destroyed = false;
+  let ignoredProps = [];
+
   const originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
 
   const listeners = {
@@ -10,8 +16,17 @@ function stateMonitor(state, defaultState) {
     reset: [],
   };
 
+  function filterState(state) {
+    ignoredProps.forEach(path => {
+      set(state, path, true);
+    });
+    return state;
+  }
+
   function getStatus() {
-    const isClean = isEqual(state.toJSON(), originalState);
+    const currentState = filterState(state.toJSON());
+    const isClean = isEqual(currentState, originalState);
+
     return {
       clean: isClean,
       dirty: !isClean,
@@ -24,6 +39,12 @@ function stateMonitor(state, defaultState) {
   };
 
   return {
+    ignoreProps(props) {
+      ignoredProps = ignoredProps.concat(props);
+      filterState(originalState);
+      return this;
+    },
+
     onChange(handlerFn) {
       if (destroyed) throw new Error('Monitor has been destroyed');
       if (typeof handlerFn !== 'function') throw new Error('onChange handler must be a function');
@@ -66,7 +87,3 @@ function stateMonitor(state, defaultState) {
     }
   };
 }
-
-export default {
-  create: (state, defaultState) => stateMonitor(state, defaultState)
-};

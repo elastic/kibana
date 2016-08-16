@@ -109,6 +109,32 @@ describe('stateMonitor', function () {
       });
     });
 
+    describe('ignoreProps', function () {
+      it('should not set status to dirty when ignored properties change', function () {
+        let status;
+        const mockState = createMockState({ messages: { world: 'hello', foo: 'bar' } });
+        const monitor = stateMonitor.create(mockState);
+        const changeStub = sinon.stub();
+        monitor.ignoreProps('messages.world');
+        monitor.onChange(changeStub);
+        sinon.assert.notCalled(changeStub);
+
+        // update the ignored state prop
+        setState(mockState, { messages: { world: 'howdy', foo: 'bar' } });
+        sinon.assert.calledOnce(changeStub);
+        status = changeStub.firstCall.args[0];
+        expect(status).to.have.property('clean', true);
+        expect(status).to.have.property('dirty', false);
+
+        // update a prop that is not ignored
+        setState(mockState, { messages: { world: 'howdy', foo: 'baz' } });
+        sinon.assert.calledTwice(changeStub);
+        status = changeStub.secondCall.args[0];
+        expect(status).to.have.property('clean', false);
+        expect(status).to.have.property('dirty', true);
+      });
+    });
+
     describe('status object', function () {
       let handlerFn;
 
