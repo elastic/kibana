@@ -136,10 +136,11 @@ define(function (require) {
     let dirtyChecker;
     const $appStatus = $scope.appStatus = this.appStatus = {};
     (function (defaultAppState) {
+      const defaultStateClone = _.cloneDeep(defaultAppState);
       dirtyChecker = () => {
         const appState = $state.toJSON();
-        const dirty = !_.isEqual(appState, defaultAppState);
-        $appStatus.dirty = dirty;
+        const diffState = !_.isEqual(appState, defaultStateClone);
+        $appStatus.dirty = diffState;
       };
     }(getStateDefaults()));
 
