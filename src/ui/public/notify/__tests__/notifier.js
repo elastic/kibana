@@ -1,4 +1,3 @@
-/*eslint no-unused-vars: 1*/
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -332,155 +331,6 @@ describe('Notifier', function () {
     });
   });
 
-  describe('#directive', function () {
-    let directiveNotification;
-    let directiveParam = {};
-
-    beforeEach(() => {
-      directiveNotification = notifier.directive(directiveParam, customParams);
-    });
-
-    afterEach(() => {
-      directiveNotification.clear();
-    });
-
-    it('throws if first param is not an object', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      directiveNotification.clear();
-
-      function callDirectiveIncorrectly() {
-        const badDirectiveParam = null;
-        directiveNotification = notifier.directive(badDirectiveParam, {});
-      }
-      expect(callDirectiveIncorrectly).to.throwException(function (e) {
-        expect(e.message).to.be('Directive param is required, and must be an object');
-      });
-    });
-
-    it('throws if second param is not an object', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      directiveNotification.clear();
-
-      function callDirectiveIncorrectly() {
-        const badConfigParam = null;
-        directiveNotification = notifier.directive(directiveParam, badConfigParam);
-      }
-      expect(callDirectiveIncorrectly).to.throwException(function (e) {
-        expect(e.message).to.be('Config param is required, and must be an object');
-      });
-    });
-
-    it('throws if directive param has scope definition instead of allow the helper to do its work', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      directiveNotification.clear();
-
-      function callDirectiveIncorrectly() {
-        const badDirectiveParam = {
-          scope: {
-            garbage: '='
-          }
-        };
-        directiveNotification = notifier.directive(badDirectiveParam, customParams);
-      }
-      expect(callDirectiveIncorrectly).to.throwException(function (e) {
-        expect(e.message).to.be('Directive should not have a scope definition. Notifier has an internal implementation.');
-      });
-    });
-
-    it('throws if directive param has link function instead of allow the helper to do its work', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      directiveNotification.clear();
-
-      function callDirectiveIncorrectly() {
-        const badDirectiveParam = {
-          link: ($scope) => {
-            /*eslint-disable no-console*/
-            console.log($scope.nothing);
-            /*eslint-enable*/
-          }
-        };
-        directiveNotification = notifier.directive(badDirectiveParam, customParams);
-      }
-      expect(callDirectiveIncorrectly).to.throwException(function (e) {
-        expect(e.message).to.be('Directive should not have a link function. Notifier has an internal link function helper.');
-      });
-    });
-
-    it('has a directive function to make notifications with template and scope', function () {
-      expect(notifier.directive).to.be.a('function');
-    });
-
-    it('sets the scope property and link function', function () {
-      expect(directiveNotification).to.have.property('directive');
-      expect(directiveNotification.directive).to.be.an('object');
-
-      expect(directiveNotification.directive).to.have.property('scope');
-      expect(directiveNotification.directive.scope).to.be.an('object');
-
-      expect(directiveNotification.directive).to.have.property('link');
-      expect(directiveNotification.directive.link).to.be.an('function');
-    });
-
-    // TODO
-    it.skip('renders the directive template', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      directiveNotification.clear();
-
-      let compile;
-      let scope;
-
-      ngMock.module('kibana');
-      ngMock.inject(function ($compile, $rootScope) {
-        const $scope = $rootScope.new();
-        compile = $compile;
-        scope = $scope;
-      });
-
-      directiveParam = {
-        template: '<h1>Hello world {{ unit.message }}</h1>',
-        controllerAs: 'unit',
-        controller() {
-          this.message = '🎉';
-        }
-      };
-
-      directiveNotification = notifier.directive(directiveParam, customParams);
-      compile(directiveNotification.directive.template)(scope);
-      directiveNotification.directive.template.scope().$digest();
-    });
-
-    /* below copied from custom notification tests */
-    it('uses custom actions', function () {
-      expect(directiveNotification).to.have.property('customActions');
-      expect(directiveNotification.customActions).to.have.length(customParams.actions.length);
-    });
-
-    it('gives a default action if none are provided', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      directiveNotification.clear();
-
-      const noActionParams = _.defaults({ actions: [] }, customParams);
-      directiveNotification = notifier.directive(directiveParam, noActionParams);
-      expect(directiveNotification).to.have.property('actions');
-      expect(directiveNotification.actions).to.have.length(1);
-    });
-
-    it('defaults type and lifetime for "info" config', function () {
-      expect(directiveNotification.type).to.be('info');
-      expect(directiveNotification.lifetime).to.be(5000);
-    });
-
-    it('should wrap the callback functions in a close function', function () {
-      directiveNotification.customActions.forEach((action, idx) => {
-        expect(action.callback).not.to.equal(customParams.actions[idx]);
-        action.callback();
-      });
-      customParams.actions.forEach(action => {
-        expect(action.callback.called).to.true;
-      });
-    });
-  });
-
   describe('#banner', function () {
     testVersionInfo('banner');
 
@@ -550,4 +400,160 @@ describe('Notifier', function () {
       });
     });
   }
+});
+
+describe('Directive Notification', function () {
+  let notifier;
+  let compile;
+  let scope;
+
+  const directiveParam = {
+    template: '<h1>Hello world {{ unit.message }}</h1>',
+    controllerAs: 'unit',
+    controller() {
+      this.message = '🎉';
+    }
+  };
+  const customParams = {
+    title: 'fooTitle',
+    actions:[{
+      text: 'Cancel',
+      callback: sinon.spy()
+    }, {
+      text: 'OK',
+      callback: sinon.spy()
+    }]
+  };
+  let directiveNotification;
+
+  beforeEach(() => {
+    ngMock.module('kibana');
+    ngMock.inject(function ($rootScope, $compile) {
+      scope = $rootScope;
+      compile = $compile;
+      compile;
+      scope;
+    });
+
+    while (Notifier.prototype._notifs.pop()); // clear global notifications
+
+    notifier = new Notifier({ location: 'directiveFoo' });
+    directiveNotification = notifier.directive(directiveParam, customParams);
+  });
+
+  afterEach(() => {
+    directiveNotification.clear();
+  });
+
+  it('renders the directive template', () => {
+    // do something cool here
+  });
+
+  it('throws if first param is not an object', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badDirectiveParam = null;
+      directiveNotification = notifier.directive(badDirectiveParam, {});
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Directive param is required, and must be an object');
+    });
+  });
+
+  it('throws if second param is not an object', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badConfigParam = null;
+      directiveNotification = notifier.directive(directiveParam, badConfigParam);
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Config param is required, and must be an object');
+    });
+  });
+
+  it('throws if directive param has scope definition instead of allow the helper to do its work', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badDirectiveParam = {
+        scope: {
+          garbage: '='
+        }
+      };
+      directiveNotification = notifier.directive(badDirectiveParam, customParams);
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Directive should not have a scope definition. Notifier has an internal implementation.');
+    });
+  });
+
+  it('throws if directive param has link function instead of allow the helper to do its work', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badDirectiveParam = {
+        link: ($scope) => {
+          /*eslint-disable no-console*/
+          console.log($scope.nothing);
+          /*eslint-enable*/
+        }
+      };
+      directiveNotification = notifier.directive(badDirectiveParam, customParams);
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Directive should not have a link function. Notifier has an internal link function helper.');
+    });
+  });
+
+  it('has a directive function to make notifications with template and scope', () => {
+    expect(notifier.directive).to.be.a('function');
+  });
+
+  it('sets the scope property and link function', () => {
+    expect(directiveNotification).to.have.property('directive');
+    expect(directiveNotification.directive).to.be.an('object');
+
+    expect(directiveNotification.directive).to.have.property('scope');
+    expect(directiveNotification.directive.scope).to.be.an('object');
+
+    expect(directiveNotification.directive).to.have.property('link');
+    expect(directiveNotification.directive.link).to.be.an('function');
+  });
+
+  /* below copied from custom notification tests */
+  it('uses custom actions', () => {
+    expect(directiveNotification).to.have.property('customActions');
+    expect(directiveNotification.customActions).to.have.length(customParams.actions.length);
+  });
+
+  it('gives a default action if none are provided', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    const noActionParams = _.defaults({ actions: [] }, customParams);
+    directiveNotification = notifier.directive(directiveParam, noActionParams);
+    expect(directiveNotification).to.have.property('actions');
+    expect(directiveNotification.actions).to.have.length(1);
+  });
+
+  it('defaults type and lifetime for "info" config', () => {
+    expect(directiveNotification.type).to.be('info');
+    expect(directiveNotification.lifetime).to.be(5000);
+  });
+
+  it('should wrap the callback functions in a close function', () => {
+    directiveNotification.customActions.forEach((action, idx) => {
+      expect(action.callback).not.to.equal(customParams.actions[idx]);
+      action.callback();
+    });
+    customParams.actions.forEach(action => {
+      expect(action.callback.called).to.true;
+    });
+  });
 });
