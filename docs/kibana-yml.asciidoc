@@ -1,7 +1,7 @@
 .Kibana Configuration Settings
 [horizontal]
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This setting specifies the port to use.
-`server.host:`:: *Default: "0.0.0.0"* This setting specifies the IP address of the back end server.
+`server.host:`:: *Default: "localhost"* This setting specifies the host of the back end server.
 `server.basePath:`:: Enables you to specify a path to mount Kibana at if you are running behind a proxy. This setting
 cannot end in a slash (`/`).
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes for incoming server requests.
