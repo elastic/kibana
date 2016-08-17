@@ -7,9 +7,20 @@
 
         <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i>
 
-        <kbn-truncated ng-if="notif.content" source="{{notif.content | markdown}}" is-html="true" length="{{notif.truncationLength}}" class="toast-message" /></kbn-truncated>
+        <kbn-truncated
+          ng-if="notif.content"
+          source="{{notif.content | markdown}}"
+          is-html="true"
+          length="{{notif.truncationLength}}"
+          class="toast-message"
+        ></kbn-truncated>
 
-        <render-directive ng-if="notif.directive" definition="notif.directive" notif="notif" class="toast-message"></render-directive>
+        <render-directive
+          ng-if="notif.directive"
+          definition="notif.directive"
+          notif="notif"
+          class="toast-message"
+        ></render-directive>
 
         <div class="btn-group pull-right toast-controls">
           <button
@@ -18,36 +29,35 @@
             class="btn toaster-countdown"
             ng-class="'btn-' + notif.type"
             ng-click="notif.cancelTimer()"
-
-            ><span class="badge" hover-text="stop">{{notif.timeRemaining}}s</span></button>
+          ><span class="badge" hover-text="stop">{{notif.timeRemaining}}s</span></button>
           <button
             type="button"
             ng-if="notif.stack && !notif.showStack"
             class="btn"
             ng-class="'btn-' + notif.type"
             ng-click="notif.cancelTimer(); notif.showStack = true"
-            >More Info</button>
+          >More Info</button>
           <button
             type="button"
             ng-if="notif.stack && notif.showStack"
             class="btn"
             ng-class="'btn-' + notif.type"
             ng-click="notif.showStack = false"
-            >Less Info</button>
+          >Less Info</button>
           <button
             type="button"
             ng-if="notif.accept"
             class="btn"
             ng-class="'btn-' + notif.type"
             ng-click="notif.accept()"
-            >OK</button>
+          >OK</button>
           <button
             type="button"
             ng-if="notif.address"
             class="btn"
             ng-class="'btn-' + notif.type"
             ng-click="notif.address()"
-            >Fix it</button>
+          >Fix it</button>
           <button
             type="button"
             class="btn"
@@ -55,7 +65,7 @@
             ng-class="'btn-' + notif.type"
             ng-click="action.callback()"
             ng-bind="action.key"
-            ></button>
+          ></button>
         </div>
       </div>
 
