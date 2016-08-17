@@ -412,7 +412,7 @@ Notifier.prototype.banner = function (msg, cb) {
 /**
  * Helper for common behavior in custom and directive types
  */
-function customConfigHelper(config) {
+function getDecoratedCustomConfig(config) {
   // There is no helper condition that will allow for 2 parameters, as the
   // other methods have. So check that config is an object
   if (!_.isPlainObject(config)) {
@@ -476,7 +476,7 @@ function customConfigHelper(config) {
  * }
  */
 Notifier.prototype.custom = function (msg, config, cb) {
-  const customConfig = customConfigHelper(config);
+  const customConfig = getDecoratedCustomConfig(config);
   customConfig.content = formatMsg(msg, this.from);
   return add(customConfig, cb);
 };
@@ -534,7 +534,7 @@ Notifier.prototype.directive = function (directive, config, cb) {
     postLinkFunction($scope);
   };
 
-  const customConfig = customConfigHelper(config);
+  const customConfig = getDecoratedCustomConfig(config);
   customConfig.directive = localDirective;
   return add(customConfig, cb);
 };
