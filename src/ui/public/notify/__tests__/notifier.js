@@ -429,7 +429,7 @@ describe('Directive Notification', function () {
   beforeEach(() => {
     ngMock.module('kibana');
     ngMock.inject(function ($rootScope, $compile) {
-      scope = $rootScope;
+      scope = $rootScope.$new();
       compile = $compile;
       compile;
       scope;
@@ -443,10 +443,30 @@ describe('Directive Notification', function () {
 
   afterEach(() => {
     directiveNotification.clear();
+    scope.$destroy();
   });
 
-  it('renders the directive template', () => {
-    // do something cool here
+  describe('returns a renderable notification', () => {
+    let element;
+
+    beforeEach(() => {
+      scope.notif = notifier.directive(directiveParam, customParams);
+      const template = `
+        <render-directive
+          definition="notif.directive"
+          notif="notif"
+        ></render-directive>`;
+      element = compile(template)(scope);
+      scope.$apply();
+    });
+
+    it('that renders with the provided template', () => {
+      expect(element.find('h1').text()).to.contain('Hello world');
+    });
+
+    it('that renders with the provided controller', () => {
+      expect(element.text()).to.contain('🎉');
+    });
   });
 
   it('throws if first param is not an object', () => {
