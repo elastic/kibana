@@ -53,7 +53,7 @@ app.controller('doc', function ($scope, $route, es, timefilter) {
       stored_fields: computedFields.storedFields,
       _source: computedFields._source,
       script_fields: computedFields.scriptFields,
-      fielddata_fields: computedFields.fielddataFields
+      docvalue_fields: computedFields.docvalueFields
     }
   }).then(function (resp) {
     if (resp.hits) {

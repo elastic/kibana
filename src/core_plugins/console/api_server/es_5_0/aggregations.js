@@ -332,7 +332,7 @@ var rules = {
       script_fields: {
         __scope_link: "_search.script_fields"
       },
-      fielddata_fields: ["{field}"],
+      docvalue_fields: ["{field}"],
       version: {__one_of: [true, false]}
     },
     "percentile_ranks": {
