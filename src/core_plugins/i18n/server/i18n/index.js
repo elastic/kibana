@@ -7,11 +7,11 @@ API:
 
 Register translations:
   registerTranslations(<absolute_path_to_translation_file>)
-  The translation file will be bundled into one translation file per locale and stored in the Kibana data directory. Returns a Promise object.
+  The translation file is registered with i18n plugin. The plugin contains a list of registered translation file paths per language.
 
 Fetch the list of currently supported locales:
-  Promise getRegisteredTranslationLocales()
-  Returns a Promise object which will contain on resolve a list of all locales as locale codes for which translations are registered
+  List getRegisteredTranslationLocales()
+  Returns a list of all locales as locale codes for which translations are registered
 
 Fetch a specific locale translated content bundle:
   Promise getRegisteredLocaleTranslations(<locale_code>)

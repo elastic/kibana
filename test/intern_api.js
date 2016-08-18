@@ -3,7 +3,6 @@ define({
     'test/unit/api/ingest/index',
     'test/unit/api/search/index',
     'test/unit/api/scripts/index'
-    'test/unit/api/i18n/index'
   ],
   excludeInstrumentation: /(fixtures|node_modules)\//,
   loaderOptions: {

@@ -142,7 +142,7 @@ function translate(key) {
   return kibanaTranslations[key];
 }
 
-async function getTranslationLocale(acceptLanguages) {
+function getTranslationLocale(acceptLanguages) {
   let localeStr = '';
   let foundLang = false;
 
@@ -151,7 +151,7 @@ async function getTranslationLocale(acceptLanguages) {
   }
 
   const acceptLangsLen = acceptLanguages.length;
-  const registeredLocales = await i18nPlugin.getRegisteredTranslationLocales();
+  const registeredLocales = i18nPlugin.getRegisteredTranslationLocales();
 
   for (let indx = 0; indx < acceptLangsLen; indx++) {
     const language = acceptLanguages[indx];

@@ -19,13 +19,11 @@ module.exports = async (kbnServer, server, config) => {
   server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);
   await bundles.writeEntryFiles();
 
-  // in prod, only bundle what looks invalid or missing
-  if (config.get('optimize.useBundleCache')) {
-    bundles = await bundles.getInvalidBundles();
-  }
+  // in prod, only bundle when someing is missing or invalid
+  let invalidBundles = config.get('optimize.useBundleCache') ? await bundles.getInvalidBundles() : bundles;
 
   // we might not have any work to do
-  if (!bundles.getIds().length) {
+  if (!invalidBundles.getIds().length) {
     server.log(
       ['debug', 'optimize'],
       `All bundles are cached and ready to go!`

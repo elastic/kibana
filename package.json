@@ -186,7 +186,6 @@
     "event-stream": "3.3.2",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
-    "fs-extra": "0.30.0",
     "grunt": "1.0.1",
     "grunt-aws-s3": "0.14.5",
     "grunt-babel": "5.0.1",
