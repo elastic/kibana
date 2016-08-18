@@ -149,11 +149,11 @@ describe('Chrome API :: apps', function () {
         const chrome = {};
         const store = new StubBrowserStorage();
         setup(chrome, { appUrlStore: store });
-        expect(chrome.getLastUrlFor('app')).to.equal(undefined);
+        expect(chrome.getLastUrlFor('app')).to.equal(null);
         chrome.setLastUrlFor('app', 'url');
         expect(chrome.getLastUrlFor('app')).to.equal('url');
-        expect(store.getKeys().length).to.equal(1);
-        expect(store.getValues().shift()).to.equal('url');
+        expect(store._getKeys().length).to.equal(1);
+        expect(store._getValues().shift()).to.equal('url');
       });
     });
   });
