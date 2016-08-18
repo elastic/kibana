@@ -35,7 +35,7 @@ export default async function manageUuid(server) {
   // detect if uuid exists already from before a restart
   const logToServer = (msg) => server.log(['server', 'uuid', fileName], msg);
   const dataFileUuid = await detectUuid();
-  let serverConfigUuid = config.get('uuid'); // check if already set in config
+  let serverConfigUuid = config.get('server.uuid'); // check if already set in config
 
   if (dataFileUuid) {
     // data uuid found
@@ -49,7 +49,7 @@ export default async function manageUuid(server) {
       // config uuid missing, data uuid exists
       serverConfigUuid = dataFileUuid;
       logToServer(`Resuming persistent Kibana instance UUID: ${serverConfigUuid}`);
-      config.set('uuid', serverConfigUuid);
+      config.set('server.uuid', serverConfigUuid);
       return;
     }
 
@@ -65,7 +65,7 @@ export default async function manageUuid(server) {
   if (!serverConfigUuid) {
     // config uuid missing
     serverConfigUuid = uuid.v4();
-    config.set('uuid', serverConfigUuid);
+    config.set('server.uuid', serverConfigUuid);
   }
 
   logToServer(`Setting new Kibana instance UUID: ${serverConfigUuid}`);
