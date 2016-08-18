@@ -1,14 +1,15 @@
 @import (reference) "~ui/styles/variables";
 
-.app-switcher-link {
-  width: @as-open-width;
+.global-nav-link {
+  position: relative;
+  width: @as-closed-width;
   height: @app-icon-height;
   line-height: @app-line-height;
 
-  &.is-app-switcher-link-disabled {
+  &.is-global-nav-link-disabled {
     opacity: 0.5;
 
-    .app-switcher-link__anchor {
+    .global-nav-link__anchor {
       cursor: default;
     }
   }
@@ -17,27 +18,30 @@
   &.active {
     background-color: @app-links-active-background;
 
-    .app-switcher-link__anchor {
+    .global-nav-link__anchor {
       color: @white;
       text-decoration: none;
     }
   }
 }
 
-  .app-switcher-link__anchor {
+.is-global-nav-open {
+  .global-nav-link {
+    width: @as-open-width;
+  }
+}
+
+  .global-nav-link__anchor {
     display: block;
     height: 100%;
     color: #ebf7fa;
 
-    /**
-     * 1. TODO: Override anchor styles. Fix this by removing a tag styles.
-     */
     &:focus {
-      color: #ebf7fa; /* 1 */
+      color: @white;
     }
   }
 
-  .app-switcher-link__icon {
+  .global-nav-link__icon {
     display: inline-block;
     width: @as-closed-width;
     height: @app-icon-height;
@@ -49,7 +53,7 @@
     /**
      * This imgae is used to display the icon.
      */
-    .app-switcher-link__icon-image {
+    .global-nav-link__icon-image {
       height: 18px;
       margin-top: 8px;
       filter: invert(100%);
@@ -58,20 +62,33 @@
     /**
      * This placeholder text gets shown if there is no specified icon.
      */
-    .app-switcher-link__icon-placeholder {
+    .global-nav-link__icon-placeholder {
       line-height: @app-icon-height;
       background-position: center;
       background-size: contain;
       background-repeat: no-repeat;
     }
 
-  .app-switcher-link__title {
+  .global-nav-link__title {
+    display: none;
     width: calc(@as-open-width - @as-closed-width);
-    display: inline-block;
     float: right;
     font-size: 0.9em;
     text-align: left;
     padding-left: 3px;
     line-height: @app-icon-height;
     white-space: nowrap;
+
+    .is-global-nav-open & {
+      display: inline-block;
+    }
   }
+
+.global-nav-link--close {
+  /**
+   * 1. Translation accounts for the icon image being slightly off-center.
+   */
+  .global-nav-link__icon {
+    transform: translateX(1px) scaleX(-1); /* 1 */
+  }
+}
