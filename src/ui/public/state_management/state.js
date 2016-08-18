@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import angular from 'angular';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
 import qs from 'ui/utils/query_string';
@@ -42,6 +43,9 @@ export default function StateProvider(Private, $rootScope, $location) {
 
     // Initialize the State with fetch
     self.fetch();
+
+    // External actors in the system can request the current url params to be re-broadcast.
+    $rootScope.$on('state:triggerQueryParamChange', this.broadcastQueryParams.bind(this));
   }
 
   State.prototype._readFromURL = function () {
@@ -73,6 +77,22 @@ export default function StateProvider(Private, $rootScope, $location) {
     }
 
     _.defaults(stash, this._defaults);
+
+    // Internalize vis state on `this`. Once the vis state is initially read from the URL, it will
+    // never be read from it again.
+    // TODO: Allow properties such as vis to be dynamically specified via a public method,
+    // e.g. `internalizeParam()`.
+    if (this.toObject().vis) {
+      stash.vis = this.toObject().vis;
+    }
+
+    // TODO: Because we are removing the vis prop from the URL, it's also removed from the history.
+    // This means that navigating to a different part of the app and then hitting the browser back
+    // button will take you to an empty visualization. One possible solution is to store the current
+    // vis in the history with replaceState and pass it in as the state arg. Then, when the user
+    // navigates away and then back to this route, we need to listen for onpopstate and use the state
+    // to build the visualization.
+
     // apply diff to state from stash, will change state in place via side effect
     let diffResults = applyDiff(this, stash);
 
@@ -103,14 +123,25 @@ export default function StateProvider(Private, $rootScope, $location) {
       this.emit('save_with_changes', diffResults.keys);
     }
 
+    // Prevent vis state from being persisted to the URL. It's now represented internally on `this`.
+    delete state.vis;
+
     // persist the state in the URL
     let search = $location.search();
-    search[this._urlParam] = this.toRISON();
+    // RISON-encode state instead of `this`, because we only want to persist certain properties to
+    // the URL, e.g. *not* vis state.
+    search[this._urlParam] = rison.encode(JSON.parse(angular.toJson(state)));
     if (replace) {
       $location.search(search).replace();
     } else {
       $location.search(search);
     }
+
+    this.broadcastQueryParams();
+  };
+
+  State.prototype.broadcastQueryParams = function () {
+    $rootScope.$broadcast('state:queryParamChange', this._urlParam, this.toRISON());
   };
 
   /**

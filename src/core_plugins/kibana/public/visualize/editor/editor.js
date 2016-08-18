@@ -55,7 +55,19 @@ uiModules
   'kibana/notify',
   'kibana/courier'
 ])
-.controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
+.controller('VisEditor', function (
+  $location,
+  $rootScope,
+  $route,
+  $scope,
+  $timeout,
+  AppState,
+  courier,
+  kbnUrl,
+  Private,
+  Promise,
+  timefilter,
+) {
 
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -70,6 +82,40 @@ uiModules
 
   const vis = savedVis.vis;
   const editableVis = vis.createEditableVis();
+
+  // Store history of visualization state.
+  const pastStateHistory = [];
+  let futureStateHistory = [];
+
+  function resetFutureStateHistory() {
+    futureStateHistory = [];
+  }
+
+  $scope.undoStateHistory = () => {
+    // Move present state into future.
+    futureStateHistory.push(vis.getState());
+
+    // Set past state to present.
+    const lastState = pastStateHistory.pop();
+    vis.setState(lastState);
+    editableVis.setState(lastState);
+    $scope.fetch();
+  };
+
+  $scope.redoStateHistory = () => {
+    // Move present state into the past.
+    pastStateHistory.push(vis.getState());
+
+    // Set future state to present.
+    const nextState = futureStateHistory.pop();
+    vis.setState(nextState);
+    editableVis.setState(nextState);
+    $scope.fetch();
+  };
+
+  // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
+  // vis should call it on both. However, it's not clear what is the benefit of calling
+  // `editableVis.requesting()`.
   vis.requesting = function () {
     const requesting = editableVis.requesting;
     requesting.call(vis);
@@ -146,7 +192,12 @@ uiModules
     editableVis.listeners.brush = vis.listeners.brush = brushEvent;
 
     // track state of editable vis vs. "actual" vis
-    $scope.stageEditableVis = transferVisState(editableVis, vis, true);
+    $scope.stageEditableVis = () => {
+      resetFutureStateHistory();
+      pastStateHistory.push(vis.getState());
+      transferVisState(editableVis, vis, true)();
+    };
+
     $scope.resetEditableVis = transferVisState(vis, editableVis);
     $scope.$watch(function () {
       return editableVis.getEnabledState();

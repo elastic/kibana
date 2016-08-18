@@ -35,6 +35,12 @@
           </li>
         </ul>
 
+        <!-- Undo/redo -->
+        <div>
+          <span ng-if="undoStateHistory" ng-click="undoStateHistory()">Undo</span>
+          <span ng-if="redoStateHistory" ng-click="redoStateHistory()">Redo</span>
+        </div>
+
         <!-- controls -->
         <ul class="nav navbar-nav navbar-right">
           <li

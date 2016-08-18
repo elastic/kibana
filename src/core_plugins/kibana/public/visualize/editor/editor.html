@@ -78,7 +78,11 @@
   <div class="vis-editor-content">
 
     <div class="collapsible-sidebar" ng-if="chrome.getVisible()">
-        <vis-editor-sidebar class="vis-editor-sidebar"></vis-editor-sidebar>
+      <vis-editor-sidebar
+        class="vis-editor-sidebar"
+        undo-state-history="undoStateHistory()"
+        redo-state-history="redoStateHistory()"
+      ></vis-editor-sidebar>
     </div>
 
     <div class="vis-editor-canvas" ng-class="{ embedded: !chrome.getVisible() }">

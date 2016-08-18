@@ -6,8 +6,6 @@ import sidebarTemplate from 'plugins/kibana/visualize/editor/sidebar.html';
 uiModules
 .get('app/visualize')
 .directive('visEditorSidebar', function () {
-
-
   return {
     restrict: 'E',
     template: sidebarTemplate,
