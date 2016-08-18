@@ -90,7 +90,7 @@ export default function defaultSettingsProvider() {
       description: 'Attempt to generate around this many bar when using "auto" interval in date histograms',
     },
     'histogram:maxBars': {
-      value: 100,
+      value: 86400,
       description: 'Never show more than this many bar in date histograms, scale values if needed',
     },
     'visualization:tileMap:maxPrecision': {

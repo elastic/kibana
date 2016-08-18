@@ -8,6 +8,7 @@ import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
 import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
+import VislibAxis from 'ui/vislib/lib/axis';
 
 export default function ColumnHandler(Private) {
   let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
@@ -18,6 +19,7 @@ export default function ColumnHandler(Private) {
   let AxisTitle = Private(VislibLibAxisTitleProvider);
   let ChartTitle = Private(VislibLibChartTitleProvider);
   let Alerts = Private(VislibLibAlertsProvider);
+  const Axis = Private(VislibAxis);
 
   /*
    * Create handlers for Area, Column, and Line charts which
@@ -36,30 +38,6 @@ export default function ColumnHandler(Private) {
         data = new Data(vis.data, vis._attr, vis.uiState);
       }
 
-      const yAxis = (() => {
-        if (vis._attr.splitYAxis) {
-          return _.map(data.data.series, (serie) => {
-            const yMin = isUserDefinedYAxis ? vis._attr.yAxis.min : d3.min(_.map(serie.values, d => { return d.y; }));
-            const yMax  = isUserDefinedYAxis ? vis._attr.yAxis.max : d3.max(_.map(serie.values, d=> { return d.y; }));
-            return new YAxis({
-              el   : vis.el,
-              yMin : yMin,
-              yMax : yMax,
-              yAxisFormatter: data.get('yAxisFormatter'),
-              _attr: vis._attr
-            });
-          });
-        } else {
-          return [new YAxis({
-            el   : vis.el,
-            yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
-            yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
-            yAxisFormatter: data.get('yAxisFormatter'),
-            _attr: vis._attr
-          })];
-        }
-      })();
-
       return new Handler(vis, {
         data: data,
         axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
@@ -73,7 +51,17 @@ export default function ColumnHandler(Private) {
           _attr             : vis._attr
         }),
         alerts: new Alerts(vis, data, opts.alerts),
-        yAxis:  yAxis
+        valueAxes:  {
+          'ValueAxis-1': new Axis({
+            id: 'ValueAxis-1',
+            vis: vis,
+            data: data,
+            elSelector: '.y-axis-div',
+            min : isUserDefinedYAxis ? vis._attr.yAxis.min : 0,
+            max : isUserDefinedYAxis ? vis._attr.yAxis.max : 0,
+            axisFormatter: data.get('yAxisFormatter')
+          })
+        }
       });
 
     };

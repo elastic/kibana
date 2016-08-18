@@ -117,7 +117,8 @@ export default function LineChartFactory(Private) {
     }
 
     function cy(d, i, j) {
-      return self.handler.yAxis[self._attr.splitYAxis ? j : 0].yScale(d.y);
+      const valueAxis = data[j].valueAxis || _.keys(self.handler.valueAxes)[0];
+      return self.handler.valueAxes[valueAxis].scale(d.y);
     }
 
     function cColor(d) {
@@ -212,11 +213,8 @@ export default function LineChartFactory(Private) {
         return xScale(d.x) + xScale.rangeBand() / 2;
       })
       .y(function y(d) {
-        if (self._attr.splitYAxis) {
-          return self.handler.yAxis[i].yScale(d.y);
-        } else {
-          return self.handler.yAxis[0].yScale(d.y);
-        }
+        const valueAxis = data[i].valueAxis || _.keys(self.handler.valueAxes)[0];
+        return self.handler.valueAxes[valueAxis].scale(d.y);
       });
       return line(d.values);
     })
@@ -269,8 +267,8 @@ export default function LineChartFactory(Private) {
     let margin = this._attr.margin;
     let elWidth = this._attr.width = $elem.width();
     let elHeight = this._attr.height = $elem.height();
-    let scaleType = this.handler.yAxis[0].getScaleType();
-    let yScale = this.handler.yAxis[0].yScale;
+    let scaleType = _.values(this.handler.valueAxes)[0].getScaleType();
+    let yScale = _.values(this.handler.valueAxes)[0].scale;
     let xScale = this.handler.xAxis.xScale;
     let minWidth = 20;
     let minHeight = 20;
