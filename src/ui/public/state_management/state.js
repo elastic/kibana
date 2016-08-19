@@ -1,3 +1,5 @@
+import KbnUrlProvider from 'ui/url';
+
 define(function (require) {
   let _ = require('lodash');
   let rison = require('ui/utils/rison');
@@ -6,7 +8,8 @@ define(function (require) {
   let qs = require('ui/utils/query_string');
 
   return function StateProvider(Notifier, Private, $rootScope, $location) {
-    let Events = Private(require('ui/events'));
+    const notify = new Notifier();
+    const Events = Private(require('ui/events'));
 
     _.class(State).inherits(Events);
     function State(urlParam, defaults) {
@@ -43,7 +46,6 @@ define(function (require) {
       try {
         return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
       } catch (e) {
-        let notify = new Notifier();
         notify.error('Unable to parse URL');
         search[this._urlParam] = rison.encode(this._defaults);
         $location.search(search).replace();

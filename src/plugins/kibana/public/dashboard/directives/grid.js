@@ -83,14 +83,15 @@ define(function (require) {
           });
 
           $scope.$on('$destroy', function () {
+            safeLayout.cancel();
             $window.off('resize', safeLayout);
 
             if (!gridster) return;
             gridster.$widgets.each(function (i, el) {
               const panel = getPanelFor(el);
-              removePanel(panel);
               // stop any animations
               panel.$el.stop();
+              removePanel(panel, true);
               // not that we will, but lets be safe
               makePanelSerializeable(panel);
             });
@@ -125,9 +126,9 @@ define(function (require) {
         }
 
         // tell gridster to remove the panel, and cleanup our metadata
-        function removePanel(panel) {
+        function removePanel(panel, silent) {
           // remove from grister 'silently' (don't reorganize after)
-          gridster.remove_widget(panel.$el);
+          gridster.remove_widget(panel.$el, silent);
 
           // destroy the scope
           panel.$scope.$destroy();
