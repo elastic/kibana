@@ -26,3 +26,7 @@ $ plugin-helpers help
     -V, --version  output the version number
 
 ```
+
+# License
+
+Apache-2.0
