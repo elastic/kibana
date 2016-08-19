@@ -1,7 +1,6 @@
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
-import i18nPlugin from '../i18n/server/i18n/i18n';
 import ingest from './server/routes/api/ingest';
 import fromRoot from '../../utils/from_root';
 import search from './server/routes/api/search';
@@ -16,6 +15,8 @@ module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
+    require: [ 'i18n' ],
+
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -117,14 +118,14 @@ module.exports = function (kibana) {
       settings(server);
       scripts(server);
       server.expose('systemApi', systemApi);
-      registerCoreTranslations();
+      registerCoreTranslations(server);
     }
   });
 
 };
 
-function registerCoreTranslations()
+function registerCoreTranslations(server)
 {
   const corePluginTranslationFile = fromRoot('/src/core_plugins/kibana/i18n/en.json');
-  i18nPlugin.registerTranslations(corePluginTranslationFile);
+  server.plugins.i18n.registerTranslations(corePluginTranslationFile);
 }

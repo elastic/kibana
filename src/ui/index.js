@@ -10,7 +10,6 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-import i18nPlugin from '../core_plugins/i18n/server/i18n/i18n';
 import langParser from 'accept-language-parser';
 
 let kibanaTranslations = [];
@@ -142,25 +141,24 @@ function translate(key) {
   return kibanaTranslations[key];
 }
 
-function getTranslationLocale(acceptLanguages) {
+function getTranslationLocale(acceptLanguages, server) {
   let localeStr = '';
 
   if (acceptLanguages === null || acceptLanguages.length <= 0) {
     return DEFAULT_LOCALE;
   }
-  localeStr = getTranslationLocaleExactMatch(acceptLanguages);
+  const registeredLocales = server.plugins.i18n.getRegisteredTranslationLocales();
+  localeStr = getTranslationLocaleExactMatch(acceptLanguages, registeredLocales);
   if (localeStr != null) {
     return localeStr;
   }
-  localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages);
+  localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales);
 }
 
-function getTranslationLocaleExactMatch(acceptLanguages) {
+function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
   let localeStr = '';
 
   const acceptLangsLen = acceptLanguages.length;
-  const registeredLocales = i18nPlugin.getRegisteredTranslationLocales();
-
   for (let indx = 0; indx < acceptLangsLen; indx++) {
     const language = acceptLanguages[indx];
     if (language.region) {
