@@ -60,6 +60,19 @@ function getLocaleFromFileName(fullFileName) {
   return locale;
 }
 
+/**
+ * The translation file is registered with i18n plugin. The plugin contains a list of registered translation file paths per language.
+ * @param {string} absolutePluginTranslationFilePath - Absolute path to the translation file to register.
+ */
 module.exports.registerTranslations = registerTranslations;
+/**
+ * Return all translations registered for a particular locale. If a translation is unavailable for the locale then default locale is used.
+ * @param {string} locale - Translation locale to be returned
+ * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
+ */
 module.exports.getRegisteredLocaleTranslations = getRegisteredLocaleTranslations;
+/**
+ * Returns list of all registered locales.
+ * @return {list} - Registered locales
+ */
 module.exports.getRegisteredTranslationLocales = getRegisteredTranslationLocales;

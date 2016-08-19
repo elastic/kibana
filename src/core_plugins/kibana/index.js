@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
-import i18nPlugin from '../i18n/server/i18n/index';
+import i18nPlugin from '../i18n/server/i18n/i18n';
 import ingest from './server/routes/api/ingest';
 import fromRoot from '../../utils/from_root';
 import search from './server/routes/api/search';
@@ -126,6 +126,5 @@ module.exports = function (kibana) {
 function registerCoreTranslations()
 {
   const corePluginTranslationFile = fromRoot('/src/core_plugins/kibana/i18n/en.json');
-  console.log('!! Regsiter file: ', corePluginTranslationFile);
   i18nPlugin.registerTranslations(corePluginTranslationFile);
 }

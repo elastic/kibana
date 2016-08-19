@@ -10,7 +10,7 @@ import UiExports from './ui_exports';
 import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
-import i18nPlugin from '../core_plugins/i18n/server/i18n/index';
+import i18nPlugin from '../core_plugins/i18n/server/i18n/i18n';
 import langParser from 'accept-language-parser';
 
 let kibanaTranslations = [];
@@ -144,11 +144,19 @@ function translate(key) {
 
 function getTranslationLocale(acceptLanguages) {
   let localeStr = '';
-  let foundLang = false;
 
   if (acceptLanguages === null || acceptLanguages.length <= 0) {
     return DEFAULT_LOCALE;
   }
+  localeStr = getTranslationLocaleExactMatch(acceptLanguages);
+  if (localeStr != null) {
+    return localeStr;
+  }
+  localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages);
+}
+
+function getTranslationLocaleExactMatch(acceptLanguages) {
+  let localeStr = '';
 
   const acceptLangsLen = acceptLanguages.length;
   const registeredLocales = i18nPlugin.getRegisteredTranslationLocales();
@@ -161,14 +169,16 @@ function getTranslationLocale(acceptLanguages) {
       localeStr = language.code;
     }
     if (registeredLocales.indexOf(localeStr) > -1) {
-      foundLang = true;
-      break;
+      return localeStr;
     }
   }
-  if (foundLang) {
-    return localeStr;
-  }
+  return null;
+}
 
+function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales) {
+  let localeStr = '';
+
+  const acceptLangsLen = acceptLanguages.length;
   const regLangsLen = registeredLocales.length;
   for (let indx = 0; indx < acceptLangsLen; indx++) {
     const language = acceptLanguages[indx];
@@ -176,18 +186,9 @@ function getTranslationLocale(acceptLanguages) {
     for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
       const locale = registeredLocales[regIndx];
       if (locale.match('^' + locale)) {
-        localeStr = locale;
-        foundLang = true;
-        break;
+        return locale;
       }
     }
-    if (foundLang) {
-      break;
-    }
   }
-  if (foundLang) {
-    return localeStr;
-  }
-
   return DEFAULT_LOCALE;
 }
