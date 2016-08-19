@@ -9,11 +9,15 @@
   </span>
   <div class="hintbox" ng-show="showAnalyzedFieldWarning && agg.params.field.analyzed">
     <p>
-    <strong>Careful!</strong> The field selected contains analyzed strings. Analyzed strings are highly unique and can use a lot of memory to visualize. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html" target="_blank">Mapping Types</a> for more information on setting this field as <i>not_analyzed</i>
+    <strong>Careful!</strong> The field selected contains analyzed strings. Analyzed strings are highly unique and can use a lot of memory to visualize. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html" target="_blank">Mapping Types</a> for more information on setting this field as <i>keyword</i> (not analyzed).
+    </p>
+
+    <p ng-show="indexedFields.byName[agg.params.field.name + '.keyword'].analyzed == false">
+      <strong>Tip:</strong> <i>{{agg.params.field.name + '.keyword'}}</i> may be a non analyzed version of this field.
     </p>
 
     <p ng-show="indexedFields.byName[agg.params.field.name + '.raw'].analyzed == false">
-      <strong>Tip:</strong> <i>{{agg.params.field.name + '.raw'}}</i> may be a <i>not_analyzed</i> version of this field.
+      <strong>Tip:</strong> <i>{{agg.params.field.name + '.raw'}}</i> may be a non analyzed version of this field.
     </p>
   </div>
 
