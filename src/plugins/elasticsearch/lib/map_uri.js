@@ -1,6 +1,9 @@
-const querystring = require('querystring');
-const resolve = require('url').resolve;
-module.exports = function mapUri(server, prefix) {
+import querystring from 'querystring';
+import { resolve } from 'url';
+import setHeaders from './set_headers';
+
+export default function mapUri(server, prefix) {
+
   const config = server.config();
   return function (request, done) {
     const path = request.path.replace('/elasticsearch', '');
@@ -11,6 +14,7 @@ module.exports = function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    done(null, url);
+    const customHeaders = setHeaders(request.headers, config.get('elasticsearch.customHeaders'));
+    done(null, url, customHeaders);
   };
 };

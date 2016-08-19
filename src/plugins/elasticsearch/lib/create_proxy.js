@@ -16,10 +16,12 @@ function createProxy(server, method, route, config) {
     handler: {
       proxy: {
         mapUri: mapUri(server),
-        passThrough: true,
         agent: createAgent(server),
         xforward: true,
-        timeout: server.config().get('elasticsearch.requestTimeout')
+        timeout: server.config().get('elasticsearch.requestTimeout'),
+        onResponse: function (err, responseFromUpstream, request, reply) {
+          reply(err, responseFromUpstream);
+        }
       }
     },
   };
