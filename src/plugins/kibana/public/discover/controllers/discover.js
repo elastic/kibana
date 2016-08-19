@@ -7,6 +7,7 @@ define(function (require) {
   const rison = require('ui/utils/rison');
 
   const dateMath = require('ui/utils/dateMath');
+  const stateMonitor = require('ui/state_management/state_monitor');
 
   require('ui/doc_table');
   require('ui/visualize');
@@ -63,7 +64,15 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
+  app
+  .directive('discoverApp', function () {
+    return {
+      controllerAs: 'discoverApp',
+      controller: discoverController,
+    };
+  });
+
+  function discoverController($scope, config, courier, $route, $window, Notifier,
     AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     const Vis = Private(require('ui/Vis'));
@@ -110,6 +119,7 @@ define(function (require) {
       docTitle.change(savedSearch.title);
     }
 
+    const $appStatus = $scope.appStatus = this.appStatus = {};
     const $state = $scope.state = new AppState(getStateDefaults());
     $scope.uiState = $state.makeStateful('uiState');
 
@@ -150,6 +160,12 @@ define(function (require) {
       $scope.showLessFailures = function () {
         $scope.failuresShown = showTotal;
       };
+
+      const monitor = stateMonitor.create($state, getStateDefaults());
+      monitor.onChange((status) => {
+        $appStatus.dirty = status.dirty;
+      });
+      $scope.$on('$destroy', () => monitor.destroy());
 
       $scope.updateDataSource()
       .then(function () {
@@ -545,5 +561,5 @@ define(function (require) {
     }
 
     init();
-  });
+  }
 });

@@ -4,6 +4,7 @@ define(function (require) {
   const angular = require('angular');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
+  const stateMonitor = require('ui/state_management/state_monitor');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -53,6 +54,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
     return {
+      controllerAs: 'dashboardApp',
       controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -90,6 +92,7 @@ define(function (require) {
 
         const $state = $scope.state = new AppState(stateDefaults);
         const $uiState = $scope.uiState = $state.makeStateful('uiState');
+        const $appStatus = this.appStatus = $scope.appStatus = {};
 
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
           if (!angular.equals(newVal, oldVal)) $state.save();
@@ -121,6 +124,14 @@ define(function (require) {
           }
 
           initPanelIndices();
+
+          // watch for state changes and update the appStatus.dirty value
+          const monitor = stateMonitor.create($state, stateDefaults);
+          monitor.onChange((status) => {
+            $appStatus.dirty = status.dirty;
+          });
+          $scope.$on('$destroy', () => monitor.destroy());
+
           $scope.$emit('application.load');
         }
 

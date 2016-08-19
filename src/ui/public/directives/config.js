@@ -52,20 +52,23 @@ define(function (require) {
           tmpScope.$destroy();
           tmpScope = $scope.$new();
 
-          let html = '';
-          if (tmpl) {
-            html = $compile('' +
-              '<div class="config" ng-show="configTemplate">' +
-                wrapTmpl(tmpl) +
-              '  <div class="config-close remove" ng-click="close()">' +
-              '    <i class="fa fa-chevron-up"></i>' +
-              '  </div>' +
-              '</div>' +
-              ''
-            )(tmpScope);
+          if (!tmpl) {
+            element.html('');
+            return;
           }
 
-          element.html(html);
+          const $el = angular.element(`
+            <div class="config" ng-show="configTemplate">
+              ${wrapTmpl(tmpl)}
+              <div class="config-close remove" ng-click="close()">
+                <i class="fa fa-chevron-up"></i>
+              </div>
+            </div>
+          `);
+
+          const postLink = $compile($el);
+          element.html($el);
+          postLink(tmpScope);
         });
 
 
