@@ -65,6 +65,10 @@
 # headers, set this value to [] (an empty list).
 # elasticsearch.requestHeadersWhitelist: [ authorization ]
 
+# Header names and values that are sent to Elasticsearch. Any custom headers cannot be overwritten
+# by client-side headers, regardless of the elasticsearch.requestHeadersWhitelist configuration.
+# elasticsearch.customHeaders: {}
+
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 # elasticsearch.shardTimeout: 0
 
