@@ -20,8 +20,10 @@ A high level overview of our contributing guidelines.
   - [Testing and Building](#testing-and-building)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
-  - [Running Browser Automation Tests](#running-browser-automation-tests)
-    - [Browser Automation Notes](#browser-automation-notes)
+  - [Cross-browser compatibility](#cross-browser-compatibility)
+    - [Testing compatibility locally](#testing-compatibility-locally)
+    - [Running Browser Automation Tests](#running-browser-automation-tests)
+      - [Browser Automation Notes](#browser-automation-notes)
   - [Building OS packages](#building-os-packages)
 - [Signing the contributor license agreement](#signing-the-contributor-license-agreement)
 - [Submitting a Pull Request](#submitting-a-pull-request)
@@ -219,7 +221,21 @@ To run the tests for just your particular plugin, assuming you plugin lives outs
 npm run test:dev -- --kbnServer.testsBundle.pluginId=some_special_plugin --kbnServer.plugin-path=../some_special_plugin
 ```
 
-### Running Browser Automation Tests
+### Cross-browser Compatibility
+
+#### Testing Compatibility Locally
+
+##### Testing IE on OS X
+
+* [Download VMWare Fusion](http://www.vmware.com/products/fusion/fusion-evaluation.html).
+* [Download IE virtual machines](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads) for VMWare.
+* Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
+* Right-click on the virtual machine you just added to your library and select "Snapshots...", and then click the "Take" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
+* In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
+* Run Kibana with `npm start -- --no-ssl --host=computer.local` (subtituting your computer name).
+* Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
+
+#### Running Browser Automation Tests
 
 The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
 
@@ -242,7 +258,7 @@ To execute the front-end browser tests, enter the following. This requires the s
 npm run test:ui:runner
 ```
 
-#### Browser Automation Notes
+##### Browser Automation Notes
 
 - Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
 - At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
