@@ -7,14 +7,9 @@ export default {
 function stateMonitor(state, defaultState) {
   let destroyed = false;
   let ignoredProps = [];
+  let changeHandlers = [];
 
   const originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
-
-  const listeners = {
-    fetch: [],
-    save: [],
-    reset: [],
-  };
 
   function filterState(state) {
     ignoredProps.forEach(path => {
@@ -33,9 +28,23 @@ function stateMonitor(state, defaultState) {
     };
   }
 
-  function changeHandler(type, keys, handlerFn) {
+  function dispatchChange(type = null, keys = []) {
     const status = getStatus();
-    return handlerFn(status, type, keys);
+    changeHandlers.forEach(changeHandler => {
+      changeHandler(status, type, keys);
+    });
+  }
+
+  function dispatchFetch(keys) {
+    dispatchChange('fetch_with_changes', keys);
+  };
+
+  function dispatchSave(keys) {
+    dispatchChange('save_with_changes', keys);
+  };
+
+  function dispatchReset(keys) {
+    dispatchChange('reset_with_changes', keys);
   };
 
   return {
@@ -45,26 +54,21 @@ function stateMonitor(state, defaultState) {
       return this;
     },
 
-    onChange(handlerFn) {
+    onChange(callback) {
       if (destroyed) throw new Error('Monitor has been destroyed');
-      if (typeof handlerFn !== 'function') throw new Error('onChange handler must be a function');
+      if (typeof callback !== 'function') throw new Error('onChange handler must be a function');
 
-      const fetchHandler = (keys) => changeHandler('fetch_with_changes', keys, handlerFn);
-      const saveHandler = (keys) => changeHandler('save_with_changes', keys, handlerFn);
-      const resetHandler = (keys) => changeHandler('reset_with_changes', keys, handlerFn);
+      changeHandlers.push(callback);
 
-      listeners.fetch.push(fetchHandler);
-      listeners.save.push(saveHandler);
-      listeners.reset.push(resetHandler);
-
-      state.on('fetch_with_changes', fetchHandler);
-      state.on('save_with_changes', saveHandler);
-      state.on('reset_with_changes', resetHandler);
+      // Listen for state events.
+      state.on('fetch_with_changes', dispatchFetch);
+      state.on('save_with_changes', dispatchSave);
+      state.on('reset_with_changes', dispatchReset);
 
       // if the state is already dirty, fire the change handler immediately
       const status = getStatus();
       if (status.dirty) {
-        handlerFn(status, null, []);
+        dispatchChange();
       }
 
       return this;
@@ -72,18 +76,10 @@ function stateMonitor(state, defaultState) {
 
     destroy() {
       destroyed = true;
-      listeners.fetch = listeners.fetch.filter(listener => {
-        state.off('fetch_with_changes', listener);
-        return false;
-      });
-      listeners.save = listeners.save.filter(listener => {
-        state.off('save_with_changes', listener);
-        return false;
-      });
-      listeners.reset = listeners.reset.filter(listener => {
-        state.off('reset_with_changes', listener);
-        return false;
-      });
+      changeHandlers = undefined;
+      state.off('fetch_with_changes', dispatchFetch);
+      state.off('save_with_changes', dispatchSave);
+      state.off('reset_with_changes', dispatchReset);
     }
   };
 }
