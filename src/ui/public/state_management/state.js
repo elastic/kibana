@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import angular from 'angular';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
 import qs from 'ui/utils/query_string';
@@ -6,17 +7,29 @@ import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
 import KbnUrlProvider from 'ui/url';
 
-const notify = new Notifier();
-export default function StateProvider(Private, $rootScope, $location) {
+import { HashingStore } from './hashing_store';
+import { LazyLruStore } from './lazy_lru_store';
+
+const MAX_BROWSER_HISTORY = 50;
+
+export default function StateProvider(Private, $rootScope, $location, config) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
-  function State(urlParam, defaults) {
+  function State(urlParam, defaults, { hashingStore, notify } = {}) {
     State.Super.call(this);
 
     let self = this;
     self.setDefaults(defaults);
     self._urlParam = urlParam || '_s';
+    this._notify = notify || new Notifier();
+    self._hasher = hashingStore || new HashingStore({
+      store: new LazyLruStore({
+        id: `${this._urlParam}:state`,
+        store: window.sessionStorage,
+        maxItems: MAX_BROWSER_HISTORY
+      })
+    });
 
     // When the URL updates we need to fetch the values from the URL
     self._cleanUpListeners = _.partial(_.callEach, [
@@ -45,15 +58,38 @@ export default function StateProvider(Private, $rootScope, $location) {
   }
 
   State.prototype._readFromURL = function () {
-    let search = $location.search();
-    try {
-      return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
-    } catch (e) {
-      notify.error('Unable to parse URL');
-      search[this._urlParam] = rison.encode(this._defaults);
-      $location.search(search).replace();
+    const search = $location.search();
+    const urlVal = search[this._urlParam];
+
+    if (!urlVal) {
       return null;
     }
+
+    if (this._hasher.isHash(urlVal)) {
+      return this._parseQueryParamValue(urlVal);
+    }
+
+    let risonEncoded;
+    let unableToParse;
+    try {
+      risonEncoded = rison.decode(urlVal);
+    } catch (e) {
+      unableToParse = true;
+    }
+
+    if (unableToParse) {
+      this._notify.error('Unable to parse URL');
+      search[this._urlParam] = this.toQueryParam(this._defaults);
+      $location.search(search).replace();
+    }
+
+    if (risonEncoded) {
+      search[this._urlParam] = this.toQueryParam(risonEncoded);
+      $location.search(search).replace();
+      return risonEncoded;
+    }
+
+    return null;
   };
 
   /**
@@ -95,9 +131,8 @@ export default function StateProvider(Private, $rootScope, $location) {
       stash = {};
     }
 
-    _.defaults(state, this._defaults);
     // apply diff to state from stash, will change state in place via side effect
-    let diffResults = applyDiff(stash, state);
+    let diffResults = applyDiff(stash, _.defaults({}, state, this._defaults));
 
     if (diffResults.keys.length) {
       this.emit('save_with_changes', diffResults.keys);
@@ -105,7 +140,7 @@ export default function StateProvider(Private, $rootScope, $location) {
 
     // persist the state in the URL
     let search = $location.search();
-    search[this._urlParam] = this.toRISON();
+    search[this._urlParam] = this.toQueryParam(state);
     if (replace) {
       $location.search(search).replace();
     } else {
@@ -147,6 +182,73 @@ export default function StateProvider(Private, $rootScope, $location) {
 
   State.prototype.setDefaults = function (defaults) {
     this._defaults = defaults || {};
+  };
+
+  /**
+   *  Parse the query param value to it's unserialized
+   *  value. Hashes are restored to their pre-hashed state.
+   *
+   *  @param  {string} queryParam - value from the query string
+   *  @return {any} - the stored value, or null if hash does not resolve
+   */
+  State.prototype._parseQueryParamValue = function (queryParam) {
+    if (!this._hasher.isHash(queryParam)) {
+      return rison.decode(queryParam);
+    }
+
+    const stored = this._hasher.lookup(queryParam);
+    if (stored === null) {
+      this._notify.error('Unable to completely restore the URL, be sure to use the share functionality.');
+    }
+
+    return stored;
+  };
+
+  /**
+   *  Lookup the value for a hash and return it's value
+   *  in rison format
+   *
+   *  @param  {string} hash
+   *  @return {string} rison
+   */
+  State.prototype.translateHashToRison = function (hash) {
+    return rison.encode(this._parseQueryParamValue(hash));
+  };
+
+  /**
+   *  Produce the hash version of the state in it's current position
+   *
+   *  @return {string}
+   */
+  State.prototype.toQueryParam = function (state = this.toObject()) {
+    if (!config.get('state:storeInSessionStorage')) {
+      return rison.encode(state);
+    }
+
+    try {
+      return this._hasher.add(state);
+    } catch (err) {
+      this._notify.log('Unable to create hash of State due to error: ' + (state.stack || state.message));
+      this._notify.fatal(
+        new Error(
+          'Kibana is unable to store history items in your session ' +
+          'because it is full and there don\'t seem to be items any items safe ' +
+          'to delete.\n' +
+          '\n' +
+          'This can usually be fixed by moving to a fresh tab, but could ' +
+          'be caused by a larger issue. If you are seeing this message regularly, ' +
+          'please file an issue at https://github.com/elastic/kibana/issues.'
+        )
+      );
+    }
+  };
+
+  /**
+   *  Get the query string parameter name where this state writes and reads
+   *  @return {string}
+   */
+  State.prototype.getQueryParamName = function () {
+    return this._urlParam;
   };
 
   return State;
