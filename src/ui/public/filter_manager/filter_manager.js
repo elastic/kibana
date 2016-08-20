@@ -23,7 +23,7 @@ export default function (Private) {
           return filter.exists.field === value;
         }
 
-        if (filter.query) {
+        if (filter.query && filter.query.match) {
           return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
         }
 
