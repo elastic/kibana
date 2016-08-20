@@ -80,6 +80,68 @@ describe('kibana cli', function () {
 
     describe('extractFiles', function () {
 
+      describe('strip files parameter', function () {
+
+        it('strips specified number of directories', function () {
+
+          return copyReplyFile('strip_test.zip')
+          .then(() => {
+            return extractFiles(settings.tempArchiveFile, settings.workingPath, 1);
+          })
+          .then(() => {
+            const files = glob.sync('**/*', { cwd: testWorkingPath });
+            const expected = [
+              '1 level deep.txt',
+              'test-plugin',
+              'test-plugin/2 levels deep.txt',
+              'test-plugin/public',
+              'test-plugin/public/3 levels deep.txt',
+              'archive.part'
+            ];
+            expect(files.sort()).to.eql(expected.sort());
+          });
+
+        });
+
+        it('throws an exception if it tries to strip too many directories', function () {
+
+          return copyReplyFile('strip_test.zip')
+          .then(() => {
+            return extractFiles(settings.tempArchiveFile, settings.workingPath, 2);
+          })
+          .then(shouldReject, (err) => {
+            expect(err.message).to.match(/You cannot strip more levels than there are directories/i);
+          });
+
+        });
+
+        it('applies the filter before applying the strip directories logic', function () {
+
+          return copyReplyFile('strip_test.zip')
+          .then(() => {
+            const filter = {
+              paths: [
+                'test-plugin'
+              ]
+            };
+
+            return extractFiles(settings.tempArchiveFile, settings.workingPath, 2, filter);
+          })
+          .then(() => {
+            const files = glob.sync('**/*', { cwd: testWorkingPath });
+            const expected = [
+              '2 levels deep.txt',
+              'public',
+              'public/3 levels deep.txt',
+              'archive.part'
+            ];
+            expect(files.sort()).to.eql(expected.sort());
+          });
+
+        });
+
+      });
+
       it('extracts files using the files filter', function () {
         return copyReplyFile('test_plugin_many.zip')
         .then(() => {
