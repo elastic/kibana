@@ -2,6 +2,7 @@ import $ from 'jquery';
 
 import './kbn_chrome.less';
 import UiModules from 'ui/modules';
+import { UnhashStatesProvider } from 'ui/state_management/unhash_states';
 
 export default function (chrome, internals) {
 
@@ -26,7 +27,8 @@ export default function (chrome, internals) {
       },
 
       controllerAs: 'chrome',
-      controller($scope, $rootScope, $location, $http) {
+      controller($scope, $rootScope, $location, $http, Private) {
+        const unhashStates = Private(UnhashStatesProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
@@ -34,7 +36,7 @@ export default function (chrome, internals) {
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
           let { href } = window.location;
-          internals.trackPossibleSubUrl(href);
+          internals.trackPossibleSubUrl(unhashStates.inAbsUrl(href));
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
