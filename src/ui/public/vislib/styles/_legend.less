@@ -20,6 +20,23 @@ visualize-legend {
   flex-direction: row;
   padding-top: 5px;
 
+  .vis-container--legend-left & {
+    flex-direction: row-reverse;
+  }
+  .vis-container--legend-right & {
+    flex-direction: row;
+  }
+  .vis-container--legend-top & {
+    flex-direction: column-reverse;
+    width: 100%;
+    padding-left: 25px;
+  }
+  .vis-container--legend-bottom & {
+    flex-direction: column;
+    width: 100%;
+    padding-left: 25px;
+  }
+
   .header {
     cursor: pointer;
     width: 15px;
@@ -28,6 +45,11 @@ visualize-legend {
   .legend-toggle {
     &:hover {
       color: @sidebar-hover-color;
+    }
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      text-align: center;
     }
 
     padding-right: 5px;
@@ -54,6 +76,15 @@ visualize-legend {
     text-align: left;
 
     flex-direction: column;
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      width: auto;
+
+      .legend-value {
+        display: inline-block;
+      }
+    }
   }
 
   .legend-ul.hidden {
