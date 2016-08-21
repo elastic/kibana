@@ -21,6 +21,19 @@ visualize {
     -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
 
+    &.vis-container--legend-left {
+      flex-direction: row-reverse;
+    }
+    &.vis-container--legend-right {
+      flex-direction: row;
+    }
+    &.vis-container--legend-top {
+      flex-direction: column-reverse;
+    }
+    &.vis-container--legend-bottom {
+      flex-direction: column;
+    }
+
     &.spy-only {
       display: none;
     }
