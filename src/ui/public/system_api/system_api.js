@@ -11,7 +11,10 @@ export default function SystemApisProvider() {
     const systemApiHeaders = {
       [SYSTEM_API_HEADER_NAME]: true
     };
-    return Object.assign({}, originalHeaders, systemApiHeaders);
+    return {
+      ...originalHeaders,
+      ...systemApiHeaders
+    };
   }
 
   /**
