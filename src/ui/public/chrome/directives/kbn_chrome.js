@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { remove } from 'lodash';
 
 import UiModules from 'ui/modules';
 import ConfigTemplate from 'ui/ConfigTemplate';
@@ -45,9 +46,10 @@ export default function (chrome, internals) {
         onRouteChange();
 
         // and some local values
-        $scope.$watch(() => $http.pendingRequests, (pendingHttpRequests) => {
-          chrome.httpActive = pendingHttpRequests.filter(request => !isSystemApiRequest(request));
-        }, true);
+        $scope.$watchCollection(() => $http.pendingRequests, (pendingHttpRequests = []) => {
+          remove(pendingHttpRequests, isSystemApiRequest);
+        });
+        chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
         $scope.appSwitcherTemplate = new ConfigTemplate({
           switcher: '<app-switcher></app-switcher>'
