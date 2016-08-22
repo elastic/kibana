@@ -193,8 +193,7 @@ Notifier.config = {
   warningLifetime: 10000,
   infoLifetime: 5000,
   setInterval: window.setInterval,
-  clearInterval: window.clearInterval,
-  defaultTruncationLength: 250
+  clearInterval: window.clearInterval
 };
 
 Notifier.applyConfig = function (config) {
@@ -337,7 +336,6 @@ Notifier.prototype.error = function (err, opts, cb) {
   const config = _.assign({
     type: 'danger',
     content: formatMsg(err, this.from),
-    truncationLength: Notifier.config.defaultTruncationLength,
     icon: 'warning',
     title: 'Error',
     lifetime: Notifier.config.errorLifetime,
@@ -361,7 +359,6 @@ Notifier.prototype.warning = function (msg, opts, cb) {
   const config = _.assign({
     type: 'warning',
     content: formatMsg(msg, this.from),
-    truncationLength: Notifier.config.defaultTruncationLength,
     icon: 'warning',
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
@@ -384,7 +381,6 @@ Notifier.prototype.info = function (msg, opts, cb) {
   const config = _.assign({
     type: 'info',
     content: formatMsg(msg, this.from),
-    truncationLength: Notifier.config.defaultTruncationLength,
     icon: 'info-circle',
     title: 'Debug',
     lifetime: Notifier.config.infoLifetime,
@@ -403,7 +399,6 @@ Notifier.prototype.banner = function (msg, cb) {
     type: 'banner',
     title: 'Attention',
     content: formatMsg(msg, this.from),
-    truncationLength: Notifier.config.defaultTruncationLength,
     lifetime: Notifier.config.bannerLifetime,
     actions: ['accept']
   }, cb);
@@ -442,7 +437,6 @@ function getDecoratedCustomConfig(config) {
   const customConfig = _.assign({
     type: 'info',
     title: 'Notification',
-    truncationLength: config.truncationLength || Notifier.config.defaultTruncationLength,
     lifetime: getLifetime(config.type)
   }, config);
 
