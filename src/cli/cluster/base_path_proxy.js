@@ -1,6 +1,6 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { merge, sample, has } from 'lodash';
+import { merge, sample } from 'lodash';
 import { format as formatUrl } from 'url';
 import { map, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
 import setupLogging from '../../server/logging';
+import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -25,7 +26,7 @@ export default class BasePathProxy {
     const { cert } = config.get('server.ssl');
     if (cert) {
       const httpsAgentConfig = {};
-      if (has(userSettings, 'server.host') && !has(userSettings, 'server.ssl')) {
+      if (cert === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
         httpsAgentConfig.rejectUnauthorized = false;
       } else {
         httpsAgentConfig.ca = readFileSync(cert);
