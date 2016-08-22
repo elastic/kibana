@@ -15,7 +15,8 @@ export default (grunt) => {
       '--sign', deb.signatureKeyId,
       '--arch', deb.arch,
       `--access-key-id=${deb.awsKey}`,
-      `--secret-access-key=${deb.awsSecret}`
+      `--secret-access-key=${deb.awsSecret}`,
+      '--gpg-options=--digest-algo SHA512'
     ]);
   }
 
