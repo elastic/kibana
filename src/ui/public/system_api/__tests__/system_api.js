@@ -14,8 +14,12 @@ describe('SystemApiProvider', () => {
         'kbn-version': '4.6.0'
       };
       const newHeaders = systemApi.addSystemApiHeader(headers);
+
       expect(newHeaders).to.have.property('kbn-system-api');
       expect(newHeaders['kbn-system-api']).to.be(true);
+
+      expect(newHeaders).to.have.property('kbn-version');
+      expect(newHeaders['kbn-version']).to.be('4.6.0');
     });
   });
 
