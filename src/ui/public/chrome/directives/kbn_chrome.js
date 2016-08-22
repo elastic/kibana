@@ -2,7 +2,7 @@ import $ from 'jquery';
 
 import UiModules from 'ui/modules';
 import ConfigTemplate from 'ui/ConfigTemplate';
-import { isSystemApiRequest } from '../system_api';
+import { isSystemApiRequest } from 'ui/system_api';
 
 export default function (chrome, internals) {
 
