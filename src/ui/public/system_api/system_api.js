@@ -4,13 +4,14 @@ export default function SystemApisProvider() {
 
   /**
    * Adds a custom header designating request as system API
-   * @param headers Object representing set of headers
+   * @param originalHeaders Object representing set of headers
    * @return Object representing set of headers, with system API header added in
    */
-  function addSystemApiHeader(headers) {
-    const newHeaders = headers;
-    newHeaders[SYSTEM_API_HEADER_NAME] = true;
-    return newHeaders;
+  function addSystemApiHeader(originalHeaders) {
+    const systemApiHeaders = {
+      [SYSTEM_API_HEADER_NAME]: true
+    };
+    return Object.assign({}, originalHeaders, systemApiHeaders);
   }
 
   /**
