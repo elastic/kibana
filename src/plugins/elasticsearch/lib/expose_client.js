@@ -40,9 +40,19 @@ module.exports = function (server) {
       ssl.ca = options.ca.map(readFile);
     }
 
+    const host = {
+      host: uri.hostname,
+      port: uri.port,
+      protocol: uri.protocol,
+      path: uri.pathname,
+      auth: uri.auth,
+      query: uri.query,
+      headers: config.get('elasticsearch.customHeaders')
+    };
+
     return new elasticsearch.Client({
-      host: url.format(uri),
-      ssl: ssl,
+      host,
+      ssl,
       plugins: options.plugins,
       apiVersion: options.apiVersion,
       keepAlive: options.keepAlive,
