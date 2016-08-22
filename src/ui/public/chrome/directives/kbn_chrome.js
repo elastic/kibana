@@ -2,6 +2,7 @@ import $ from 'jquery';
 
 import UiModules from 'ui/modules';
 import ConfigTemplate from 'ui/ConfigTemplate';
+import SystemApiProvider from 'ui/system_api';
 
 export default function (chrome, internals) {
 
@@ -26,7 +27,9 @@ export default function (chrome, internals) {
       },
 
       controllerAs: 'chrome',
-      controller($scope, $rootScope, $location, $http) {
+      controller($scope, $rootScope, $location, $http, Private) {
+
+        const systemApi = Private(SystemApiProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
@@ -44,7 +47,9 @@ export default function (chrome, internals) {
         onRouteChange();
 
         // and some local values
-        chrome.httpActive = $http.pendingRequests;
+        $scope.$watch(() => $http.pendingRequests, (pendingHttpRequests) => {
+          chrome.httpActive = pendingHttpRequests.filter(request => systemApi.isSystemApiRequest(request));
+        }, true);
         $scope.notifList = require('ui/notify')._notifs;
         $scope.appSwitcherTemplate = new ConfigTemplate({
           switcher: '<app-switcher></app-switcher>'
