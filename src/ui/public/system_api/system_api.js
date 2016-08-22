@@ -8,8 +8,9 @@ export default function SystemApisProvider() {
    * @return Object representing set of headers, with system API header added in
    */
   function addSystemApiHeader(headers) {
-    headers[SYSTEM_API_HEADER_NAME] = true;
-    return headers;
+    const newHeaders = headers;
+    newHeaders[SYSTEM_API_HEADER_NAME] = true;
+    return newHeaders;
   }
 
   /**
