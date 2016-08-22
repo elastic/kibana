@@ -6,6 +6,8 @@ import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
 import readYamlConfig from './read_yaml_config';
 
+import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
+
 let canCluster;
 try {
   require.resolve('../cluster/cluster_manager');
@@ -38,8 +40,8 @@ function readServerSettings(opts, extraCliOptions) {
     set('optimize.lazy', true);
     if (opts.ssl && !has('server.ssl.cert') && !has('server.ssl.key')) {
       set('server.host', 'localhost');
-      set('server.ssl.cert', fromRoot('test/dev_certs/server.crt'));
-      set('server.ssl.key', fromRoot('test/dev_certs/server.key'));
+      set('server.ssl.cert', DEV_SSL_CERT_PATH);
+      set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
   }
 
