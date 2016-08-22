@@ -11,7 +11,7 @@
           ng-if="notif.content"
           source="{{notif.content | markdown}}"
           is-html="true"
-          length="{{notif.truncationLength}}"
+          length="250"
           class="toast-message"
         ></kbn-truncated>
 
