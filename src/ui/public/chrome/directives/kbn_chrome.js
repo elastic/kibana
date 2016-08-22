@@ -48,7 +48,7 @@ export default function (chrome, internals) {
 
         // and some local values
         $scope.$watch(() => $http.pendingRequests, (pendingHttpRequests) => {
-          chrome.httpActive = pendingHttpRequests.filter(request => systemApi.isSystemApiRequest(request));
+          chrome.httpActive = pendingHttpRequests.filter(request => !systemApi.isSystemApiRequest(request));
         }, true);
         $scope.notifList = require('ui/notify')._notifs;
         $scope.appSwitcherTemplate = new ConfigTemplate({
