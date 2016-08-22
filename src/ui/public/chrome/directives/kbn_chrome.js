@@ -45,10 +45,12 @@ export default function (chrome, internals) {
         $rootScope.$on('$routeUpdate', onRouteChange);
         onRouteChange();
 
+        // Remove system API HTTP requests from pending HTTP requests
+        const allPendingHttpRequests = () => $http.pendingRequests;
+        const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);
+        $scope.$watchCollection(allPendingHttpRequests, removeSystemApiRequests);
+
         // and some local values
-        $scope.$watchCollection(() => $http.pendingRequests, (pendingHttpRequests = []) => {
-          remove(pendingHttpRequests, isSystemApiRequest);
-        });
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
         $scope.appSwitcherTemplate = new ConfigTemplate({
