@@ -1,7 +1,9 @@
 import $ from 'jquery';
+import { remove } from 'lodash';
 
 import UiModules from 'ui/modules';
 import ConfigTemplate from 'ui/ConfigTemplate';
+import { isSystemApiRequest } from 'ui/system_api';
 
 export default function (chrome, internals) {
 
@@ -42,6 +44,10 @@ export default function (chrome, internals) {
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
         onRouteChange();
+
+        const allPendingHttpRequests = () => $http.pendingRequests;
+        const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);
+        $scope.$watchCollection(allPendingHttpRequests, removeSystemApiRequests);
 
         // and some local values
         chrome.httpActive = $http.pendingRequests;
