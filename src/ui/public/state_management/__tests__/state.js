@@ -7,8 +7,8 @@ import { encode as encodeRison } from 'rison-node';
 import 'ui/private';
 import Notifier from 'ui/notify/notifier';
 import StateManagementStateProvider from 'ui/state_management/state';
-import { UnhashStatesProvider } from 'ui/state_management/unhash_states';
-import { HashingStore } from 'ui/state_management/hashing_store';
+import { unhashQueryString } from 'ui/state_management/state_hashing';
+import { HashingStore } from 'ui/state_management/state_storage';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import EventsProvider from 'ui/events';
 
@@ -35,9 +35,8 @@ describe('State Management', function () {
       const hashingStore = new HashingStore({ store });
       const state = new State(param, initial, { hashingStore, notify });
 
-      const getUnhashedSearch = (state) => {
-        const unhashStates = Private(UnhashStatesProvider);
-        return unhashStates.inParsedQueryString($location.search(), [ state ]);
+      const getUnhashedSearch = state => {
+        return unhashQueryString($location.search(), [ state ]);
       };
 
       return { notify, store, hashingStore, state, getUnhashedSearch };

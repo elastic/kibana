@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { encode as encodeRison } from 'rison-node';
 
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import { HashingStore } from 'ui/state_management/hashing_store';
+import { HashingStore } from 'ui/state_management/state_storage';
 
 const setup = ({ createHash } = {}) => {
   const store = new StubBrowserStorage();
