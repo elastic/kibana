@@ -1,15 +1,14 @@
 import uuid from 'node-uuid';
 import Promise from 'bluebird';
-import { hostname } from 'os';
 import { join as pathJoin } from 'path';
 import { readFile as readFileCallback, writeFile as writeFileCallback } from 'fs';
 
-const serverHostname = hostname();
 const FILE_ENCODING = 'utf8';
 
 export default async function manageUuid(server) {
   const config = server.config();
   const serverPort = server.info.port;
+  const serverHostname = config.get('server.host');
   const fileName = `${serverHostname}:${serverPort}`;
   const uuidFile = pathJoin(config.get('path.data'), fileName);
 
