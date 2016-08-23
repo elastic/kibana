@@ -176,7 +176,7 @@
     "load-grunt-config": "0.7.2",
     "makelogs": "2.0.0",
     "mocha": "2.3.4",
-    "nock": "2.10.0",
+    "nock": "8.0.0",
     "npm": "2.15.8",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
