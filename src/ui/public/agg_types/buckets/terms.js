@@ -140,11 +140,6 @@ define(function (require) {
 
             let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
 
-            const orderBy = orderAgg.type.name;
-            if (orderBy === 'count' && dir === 'asc') {
-              notify.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
-            }
-
             // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
             // thus causing issues with filtering. This probably causes other issues since float might not
             // be able to contain the number on the elasticsearch side
