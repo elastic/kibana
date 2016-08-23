@@ -7,8 +7,8 @@ import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
 import KbnUrlProvider from 'ui/url';
 
-import { HashingStore } from './hashing_store';
-import { LazyLruStore } from './lazy_lru_store';
+import { HashingStore } from './state_storage/hashing_store';
+import { LazyLruStore } from './state_storage/lazy_lru_store';
 
 const MAX_BROWSER_HISTORY = 50;
 
