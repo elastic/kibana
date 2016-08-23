@@ -1,3 +1,5 @@
+import Notifier from 'ui/notify/notifier';
+
 define(function (require) {
   return function TermsAggDefinition(Private) {
     let _ = require('lodash');
@@ -6,6 +8,7 @@ define(function (require) {
     let AggConfig = Private(require('ui/Vis/AggConfig'));
     let Schemas = Private(require('ui/Vis/Schemas'));
     let createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    const notify = new Notifier();
 
     let orderAggSchema = (new Schemas([
       {
@@ -129,6 +132,11 @@ define(function (require) {
             let order = output.params.order = {};
 
             let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
+
+            const orderBy = orderAgg.type.name;
+            if (orderBy === 'count' && dir === 'asc') {
+              notify.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
+            }
 
             // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
             // thus causing issues with filtering. This probably causes other issues since float might not
