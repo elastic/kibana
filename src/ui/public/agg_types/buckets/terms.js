@@ -133,8 +133,7 @@ define(function (require) {
             let orderAgg = agg.params.orderAgg || vis.aggs.getResponseAggById(agg.params.orderBy);
 
             const orderBy = orderAgg.type.name;
-            const sortOrder = agg.params.order.val;
-            if (orderBy === 'count' && sortOrder === 'asc') {
+            if (orderBy === 'count' && dir === 'asc') {
               const notify = new Notifier();
               notify.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
             }
