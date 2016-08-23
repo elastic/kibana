@@ -4,7 +4,10 @@ import '../styles/index.less';
 import LibUrlShortenerProvider from '../lib/url_shortener';
 import uiModules from 'ui/modules';
 import shareObjectUrlTemplate from 'ui/share/views/share_object_url.html';
-import { UnhashStatesProvider } from 'ui/state_management/unhash_states';
+import {
+  getUnhashableStatesProvider,
+  unhashUrl,
+} from 'ui/state_management/state_hashing';
 import { memoize } from 'lodash';
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
@@ -71,12 +74,15 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       // since getUrl() is called within a watcher we cache the unhashing step
-      const unhashStatesInAbsUrl = memoize((absUrl) => {
-        return Private(UnhashStatesProvider).inAbsUrl(absUrl);
+      const unhashAndCacheUrl = memoize((urlWithHashes, unhashableStates) => {
+        const urlWithStates = unhashUrl(urlWithHashes, unhashableStates);
+        return urlWithStates;
       });
 
       $scope.getUrl = function () {
-        let url = unhashStatesInAbsUrl($location.absUrl());
+        const urlWithHashes = $location.absUrl();
+        const getUnhashableStates = Private(getUnhashableStatesProvider);
+        let url = unhashAndCacheUrl(urlWithHashes, getUnhashableStates());
 
         if ($scope.shareAsEmbed) {
           url = url.replace('?', '?embed=true&');
