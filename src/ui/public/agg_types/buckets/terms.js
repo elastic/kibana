@@ -1,4 +1,4 @@
-import Notifier from 'ui/notify/notifier';
+import routeBasedNotifierProvider from 'ui/route_based_notifier';
 
 define(function (require) {
   return function TermsAggDefinition(Private) {
@@ -8,7 +8,7 @@ define(function (require) {
     let AggConfig = Private(require('ui/Vis/AggConfig'));
     let Schemas = Private(require('ui/Vis/Schemas'));
     let createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
-    const notify = new Notifier();
+    const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
     let orderAggSchema = (new Schemas([
       {
@@ -135,7 +135,7 @@ define(function (require) {
 
             const orderBy = orderAgg.type.name;
             if (orderBy === 'count' && dir === 'asc') {
-              notify.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
+              routeBasedNotifier.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
             }
 
             // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
