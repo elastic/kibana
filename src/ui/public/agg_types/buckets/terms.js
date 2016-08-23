@@ -8,6 +8,7 @@ define(function (require) {
     let AggConfig = Private(require('ui/Vis/AggConfig'));
     let Schemas = Private(require('ui/Vis/Schemas'));
     let createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    const notify = new Notifier();
 
     let orderAggSchema = (new Schemas([
       {
@@ -134,7 +135,6 @@ define(function (require) {
 
             const orderBy = orderAgg.type.name;
             if (orderBy === 'count' && dir === 'asc') {
-              const notify = new Notifier();
               notify.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
             }
 
