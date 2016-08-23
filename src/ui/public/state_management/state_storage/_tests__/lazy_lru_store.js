@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { times, sum, padLeft } from 'lodash';
 
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import { LazyLruStore } from '../lazy_lru_store';
+import { LazyLruStore } from '..';
 
 const setup = (opts = {}) => {
   const {

@@ -31,7 +31,7 @@ const DEFAULT_IDEAL_CLEAR_RATIO = 100;
  */
 const DEFAULT_MAX_IDEAL_CLEAR_PERCENT = 0.3;
 
-export class LazyLruStore {
+export default class LazyLruStore {
   constructor(opts = {}) {
     const {
       id,

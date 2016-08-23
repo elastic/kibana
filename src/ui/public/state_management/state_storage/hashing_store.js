@@ -13,7 +13,7 @@ const TAG = 'h@';
  *  hash. This hash is then returned so that the item can be received
  *  at a later time.
  */
-export class HashingStore {
+export default class HashingStore {
   constructor({ store, createHash, maxItems } = {}) {
     this._store = store || window.sessionStorage;
     if (createHash) this._createHash = createHash;
