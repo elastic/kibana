@@ -27,7 +27,7 @@ const setup = (opts = {}) => {
   return { lru, store };
 };
 
-describe('State Management LazyLruStore', () => {
+describe('LazyLruStore', () => {
   describe('#getItem()', () => {
     it('returns null when item not found', () => {
       const { lru } = setup();
