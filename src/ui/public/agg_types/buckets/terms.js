@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import Notifier from 'ui/notify/notifier';
 
 define(function (require) {
   return function TermsAggDefinition(Private) {
@@ -8,6 +8,7 @@ define(function (require) {
     let AggConfig = Private(require('ui/Vis/AggConfig'));
     let Schemas = Private(require('ui/Vis/Schemas'));
     let createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+    const notify = new Notifier();
 
     let orderAggSchema = (new Schemas([
       {
@@ -94,14 +95,6 @@ define(function (require) {
               let params = agg.params;
               let orderBy = params.orderBy;
               let paramDef = agg.type.params.byName.orderAgg;
-
-              const orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
-              const orderParamDef = agg.type.params.byName.order;
-              if (get(orderAgg, 'type.name') === 'count') {
-                orderParamDef.options.byVal.asc.display = 'Ascending [DEPRECATED]';
-              } else {
-                orderParamDef.options.byVal.asc.display = 'Ascending';
-              }
 
               // setup the initial value of orderBy
               if (!orderBy && prevOrderBy === INIT) {
