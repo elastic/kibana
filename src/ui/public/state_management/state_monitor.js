@@ -9,6 +9,7 @@ function stateMonitor(state, defaultState) {
   let ignoredProps = [];
   let changeHandlers = [];
 
+  // state.toJSON returns a reference, clone so we can mutate it safely
   const originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
 
   function filterState(state) {
@@ -19,6 +20,7 @@ function stateMonitor(state, defaultState) {
   }
 
   function getStatus() {
+    // state.toJSON returns a reference, clone so we can mutate it safely
     const currentState = filterState(cloneDeep(state.toJSON()));
     const isClean = isEqual(currentState, originalState);
 
