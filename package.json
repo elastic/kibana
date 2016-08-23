@@ -118,7 +118,7 @@
     "less-loader": "2.2.0",
     "loader-utils": "0.2.11",
     "lodash": "3.10.1",
-    "marked": "0.3.5",
+    "marked": "0.3.6",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "2.13.0",
