@@ -6,7 +6,12 @@ modules.get('kibana')
 .service('globalNavState', (localStorage, $rootScope) => {
   return {
     isOpen: () => {
-      return localStorage.get('kibana.isGlobalNavOpen');
+      const isOpen = localStorage.get('kibana.isGlobalNavOpen');
+      if (isOpen === null) {
+        // The global nav should default to being open for the initial experience.
+        return true;
+      }
+      return isOpen;
     },
 
     setOpen: isOpen => {
