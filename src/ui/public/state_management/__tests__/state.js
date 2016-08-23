@@ -8,7 +8,7 @@ import 'ui/private';
 import Notifier from 'ui/notify/notifier';
 import StateManagementStateProvider from 'ui/state_management/state';
 import { unhashQueryString } from 'ui/state_management/state_hashing';
-import { HashingStore } from 'ui/state_management/state_storage/hashing_store';
+import { HashingStore } from 'ui/state_management/state_storage';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import EventsProvider from 'ui/events';
 
