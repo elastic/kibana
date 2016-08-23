@@ -19,7 +19,7 @@ function stateMonitor(state, defaultState) {
   }
 
   function getStatus() {
-    const currentState = filterState(state.toJSON());
+    const currentState = filterState(cloneDeep(state.toJSON()));
     const isClean = isEqual(currentState, originalState);
 
     return {
