@@ -19,6 +19,7 @@ export default function HistogramVisType(Private) {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
+        legendPosition: 'right',
         smoothLines: false,
         scale: 'linear',
         interpolate: 'linear',

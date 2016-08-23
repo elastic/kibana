@@ -1,6 +1,6 @@
 <div class="legend-col-wrapper" ng-if="labels.length">
   <div ng-click="toggleLegend()" class="legend-toggle">
-    <i class="legend-icon fa" ng-class="open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left'"></i>
+    <i class="legend-icon fa {{getToggleLegendClasses()}}"></i>
   </div>
   <ul class="legend-ul" ng-show="open">
 
