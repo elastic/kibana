@@ -12,6 +12,7 @@ import { memoize } from 'lodash';
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
   const urlShortener = Private(LibUrlShortenerProvider);
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   return {
     restrict: 'E',
@@ -73,21 +74,15 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
         });
       };
 
-      // since getUrl() is called within a watcher we cache the unhashing step
-      const unhashAndCacheUrl = memoize((urlWithHashes, unhashableStates) => {
-        const urlWithStates = unhashUrl(urlWithHashes, unhashableStates);
-        return urlWithStates;
-      });
-
       $scope.getUrl = function () {
         const urlWithHashes = $location.absUrl();
-        const getUnhashableStates = Private(getUnhashableStatesProvider);
-        let url = unhashAndCacheUrl(urlWithHashes, getUnhashableStates());
+        const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
 
         if ($scope.shareAsEmbed) {
-          url = url.replace('?', '?embed=true&');
+          return urlWithStates.replace('?', '?embed=true&');
         }
-        return url;
+
+        return urlWithStates;
       };
 
       $scope.$watch('getUrl()', updateUrl);
