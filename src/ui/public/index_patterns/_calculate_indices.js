@@ -63,15 +63,11 @@ export default function CalculateIndicesFactory(Promise, es) {
 
     let indexDetails = _(indices).map((stats, index) => {
       const field = stats.fields[timeFieldName];
-
-      // TODO: remove when we get to es 2.2, see elastic/elasticsearch#14404
-      let min = field.min_value;
-      if (typeof min === 'string') min = moment(min).valueOf();
-
-      let max = field.max_value;
-      if (typeof max === 'string') max = moment(max).valueOf();
-
-      return { index, min, max };
+      return {
+        index,
+        min: field.min_value,
+        max: field.max_value
+      };
     });
 
     if (sortDirection) {
