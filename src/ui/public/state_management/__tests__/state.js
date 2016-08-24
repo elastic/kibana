@@ -13,7 +13,7 @@ import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import EventsProvider from 'ui/events';
 
 describe('State Management', function () {
-  const notify = new Notifier();
+  const notifier = new Notifier();
   let $rootScope;
   let $location;
   let State;
@@ -33,13 +33,13 @@ describe('State Management', function () {
       sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
       const store = new StubBrowserStorage();
       const hashingStore = new HashingStore({ store });
-      const state = new State(param, initial, { hashingStore, notify });
+      const state = new State(param, initial, { hashingStore, notifier });
 
       const getUnhashedSearch = state => {
         return unhashQueryString($location.search(), [ state ]);
       };
 
-      return { notify, store, hashingStore, state, getUnhashedSearch };
+      return { notifier, store, hashingStore, state, getUnhashedSearch };
     };
   }));
 
@@ -185,7 +185,6 @@ describe('State Management', function () {
     });
   });
 
-
   describe('Hashing', () => {
     it('stores state values in a hashingStore, writing the hash to the url', () => {
       const { state, hashingStore } = setup({ storeInHash: true });
@@ -194,7 +193,7 @@ describe('State Management', function () {
       const urlVal = $location.search()[state.getQueryParamName()];
 
       expect(hashingStore.isHash(urlVal)).to.be(true);
-      expect(hashingStore.lookup(urlVal)).to.eql({ foo: 'bar' });
+      expect(hashingStore.getItemAtHash(urlVal)).to.eql({ foo: 'bar' });
     });
 
     it('should replace rison in the URL with a hash', () => {
@@ -208,29 +207,28 @@ describe('State Management', function () {
       const urlVal = $location.search()._s;
       expect(urlVal).to.not.be(rison);
       expect(hashingStore.isHash(urlVal)).to.be(true);
-      expect(hashingStore.lookup(urlVal)).to.eql(obj);
+      expect(hashingStore.getItemAtHash(urlVal)).to.eql(obj);
     });
 
     context('error handling', () => {
       it('notifies the user when a hash value does not map to a stored value', () => {
-        const { state, hashingStore, notify } = setup({ storeInHash: true });
+        const { state, hashingStore, notifier } = setup({ storeInHash: true });
         const search = $location.search();
-        const badHash = hashingStore.add({});
-        hashingStore.remove(badHash);
+        const badHash = hashingStore._getShortHash('{"a": "b"}');
 
         search[state.getQueryParamName()] = badHash;
         $location.search(search);
 
-        expect(notify._notifs).to.have.length(0);
+        expect(notifier._notifs).to.have.length(0);
         state.fetch();
-        expect(notify._notifs).to.have.length(1);
-        expect(notify._notifs[0].content).to.match(/use the share functionality/i);
+        expect(notifier._notifs).to.have.length(1);
+        expect(notifier._notifs[0].content).to.match(/use the share functionality/i);
       });
 
-      it('presents fatal error linking to github when hashingStore.add fails', () => {
-        const { state, hashingStore, notify } = setup({ storeInHash: true });
-        const fatalStub = sinon.stub(notify, 'fatal').throws();
-        sinon.stub(hashingStore, 'add').throws();
+      it('presents fatal error linking to github when hashingStore.hashAndSetItem fails', () => {
+        const { state, hashingStore, notifier } = setup({ storeInHash: true });
+        const fatalStub = sinon.stub(notifier, 'fatal').throws();
+        sinon.stub(hashingStore, 'hashAndSetItem').throws();
 
         expect(() => {
           state.toQueryParam();

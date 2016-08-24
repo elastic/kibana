@@ -36,7 +36,7 @@ export default class LazyLruStore {
     const {
       id,
       store,
-      notify = new Notifier(`LazyLruStore (re: probably history hashing)`),
+      notifier = new Notifier(`LazyLruStore (re: probably history hashing)`),
       maxItems = Infinity,
       maxSetAttempts = DEFAULT_MAX_SET_ATTEMPTS,
       idealClearRatio = DEFAULT_IDEAL_CLEAR_RATIO,
@@ -54,7 +54,7 @@ export default class LazyLruStore {
     this._id = id;
     this._prefix = `lru:${this._id}:`;
     this._store = store;
-    this._notify = notify;
+    this._notifier = notifier;
     this._maxItems = maxItems;
     this._itemCountGuess = this._getItemCount();
     this._maxSetAttempts = maxSetAttempts;
@@ -135,7 +135,7 @@ export default class LazyLruStore {
    *  then this function will call itself again, this time sending
    *  attempt + 1 as the attempt number. If this loop continues
    *  and attempt meets or exceeds the this._maxSetAttempts then a fatal
-   *  error will be sent to notify, as the users session is no longer
+   *  error will be sent to notifier, as the users session is no longer
    *  usable.
    *
    *  @private
@@ -173,7 +173,7 @@ export default class LazyLruStore {
    */
   _indexStoredItems() {
     const store = this._store;
-    const notify = this._notify;
+    const notifier = this._notifier;
 
     const items = [];
     let totalBytes = 0;
@@ -228,8 +228,8 @@ export default class LazyLruStore {
    *  @return {boolean} success
    */
   _makeSpaceFor(key, chunk) {
-    const notify = this._notify;
-    return notify.event(`trying to make room in lru ${this._id}`, () => {
+    const notifier = this._notifier;
+    return notifier.event(`trying to make room in lru ${this._id}`, () => {
       const { totalBytes, itemsByOldestAccess } = this._indexStoredItems();
 
       // pick how much space we are going to try to clear
@@ -238,7 +238,7 @@ export default class LazyLruStore {
       const freeMin = key.length + chunk.length;
       const freeIdeal = freeMin * this._idealClearRatio;
       const toClear = Math.max(freeMin, Math.min(freeIdeal, totalBytes * this._maxIdealClearPercent));
-      notify.log(`PLAN: min ${freeMin} bytes, target ${toClear} bytes`);
+      notifier.log(`PLAN: min ${freeMin} bytes, target ${toClear} bytes`);
 
       let remainingToClear = toClear;
       let removedItemCount = 0;
@@ -253,7 +253,7 @@ export default class LazyLruStore {
 
       const label = success ? 'SUCCESS' : 'FAILURE';
       const removedBytes = toClear - remainingToClear;
-      notify.log(`${label}: removed ${removedItemCount} items for ${removedBytes} bytes`);
+      notifier.log(`${label}: removed ${removedItemCount} items for ${removedBytes} bytes`);
       return success;
     });
   }
@@ -269,7 +269,7 @@ export default class LazyLruStore {
    */
   _doItemAutoRemoval(item) {
     const timeString = new Date(item.time).toISOString();
-    this._notify.log(`REMOVE: entry "${item.key}" from ${timeString}, freeing ${item.bytes} bytes`);
+    this._notifier.log(`REMOVE: entry "${item.key}" from ${timeString}, freeing ${item.bytes} bytes`);
     this._store.removeItem(item.key);
     this._itemCountGuess -= 1;
   }

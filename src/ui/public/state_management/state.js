@@ -18,14 +18,14 @@ export default function StateProvider(Private, $rootScope, $location, config) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
-  function State(urlParam, defaults, { hashingStore, notify } = {}) {
+  function State(urlParam, defaults, { hashingStore, notifier } = {}) {
     State.Super.call(this);
 
     let self = this;
     self.setDefaults(defaults);
     self._urlParam = urlParam || '_s';
-    this._notify = notify || new Notifier();
-    self._hasher = hashingStore || new HashingStore({
+    this._notifier = notifier || new Notifier();
+    self._hashingStore = hashingStore || new HashingStore({
       store: new LazyLruStore({
         id: `${this._urlParam}:state`,
         store: window.sessionStorage,
@@ -67,7 +67,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       return null;
     }
 
-    if (this._hasher.isHash(urlVal)) {
+    if (this._hashingStore.isHash(urlVal)) {
       return this._parseQueryParamValue(urlVal);
     }
 
@@ -80,7 +80,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
     }
 
     if (unableToParse) {
-      this._notify.error('Unable to parse URL');
+      this._notifier.error('Unable to parse URL');
       search[this._urlParam] = this.toQueryParam(this._defaults);
       $location.search(search).replace();
     }
@@ -194,13 +194,13 @@ export default function StateProvider(Private, $rootScope, $location, config) {
    *  @return {any} - the stored value, or null if hash does not resolve
    */
   State.prototype._parseQueryParamValue = function (queryParam) {
-    if (!this._hasher.isHash(queryParam)) {
+    if (!this._hashingStore.isHash(queryParam)) {
       return rison.decode(queryParam);
     }
 
-    const stored = this._hasher.lookup(queryParam);
+    const stored = this._hashingStore.getItemAtHash(queryParam);
     if (stored === null) {
-      this._notify.error('Unable to completely restore the URL, be sure to use the share functionality.');
+      this._notifier.error('Unable to completely restore the URL, be sure to use the share functionality.');
     }
 
     return stored;
@@ -228,10 +228,11 @@ export default function StateProvider(Private, $rootScope, $location, config) {
     }
 
     try {
-      return this._hasher.add(state);
+      const hash = this._hashingStore.hashAndSetItem(state);
+      return hash;
     } catch (err) {
-      this._notify.log('Unable to create hash of State due to error: ' + (state.stack || state.message));
-      this._notify.fatal(
+      this._notifier.log('Unable to create hash of State due to error: ' + (state.stack || state.message));
+      this._notifier.fatal(
         new Error(
           'Kibana is unable to store history items in your session ' +
           'because it is full and there don\'t seem to be items any items safe ' +

@@ -11,12 +11,12 @@ const setup = ({ createHash } = {}) => {
   return { store, hashingStore };
 };
 
-describe('State Management Hashing Store', () => {
-  describe('#add', () => {
+describe('Hashing Store', () => {
+  describe('#hashAndSetItem', () => {
     it('adds a value to the store and returns its hash', () => {
       const { hashingStore, store } = setup();
       const val = { foo: 'bar' };
-      const hash = hashingStore.add(val);
+      const hash = hashingStore.hashAndSetItem(val);
       expect(hash).to.be.a('string');
       expect(hash).to.be.ok();
       expect(store).to.have.length(1);
@@ -25,8 +25,8 @@ describe('State Management Hashing Store', () => {
     it('json encodes the values it stores', () => {
       const { hashingStore, store } = setup();
       const val = { toJSON() { return 1; } };
-      const hash = hashingStore.add(val);
-      expect(hashingStore.lookup(hash)).to.eql(1);
+      const hash = hashingStore.hashAndSetItem(val);
+      expect(hashingStore.getItemAtHash(hash)).to.eql(1);
     });
 
     it('addresses values with a short hash', () => {
@@ -36,7 +36,7 @@ describe('State Management Hashing Store', () => {
         createHash: () => longHash
       });
 
-      const hash = hashingStore.add(val);
+      const hash = hashingStore.hashAndSetItem(val);
       expect(hash.length < longHash.length).to.be.ok();
     });
 
@@ -64,48 +64,37 @@ describe('State Management Hashing Store', () => {
         }
       });
 
-      const hash1 = hashingStore.add(fixtures[0].val);
-      const hash2 = hashingStore.add(fixtures[1].val);
-      const hash3 = hashingStore.add(fixtures[2].val);
+      const hash1 = hashingStore.hashAndSetItem(fixtures[0].val);
+      const hash2 = hashingStore.hashAndSetItem(fixtures[1].val);
+      const hash3 = hashingStore.hashAndSetItem(fixtures[2].val);
 
       expect(hash3).to.have.length(hash2.length + 1);
       expect(hash2).to.have.length(hash1.length + 1);
     });
 
-    it('bubbles up the error if the store fails to setItem', () => {
+    it('bubbles up the error if the store fails to hashAndSetItem', () => {
       const { store, hashingStore } = setup();
       const err = new Error();
       sinon.stub(store, 'setItem').throws(err);
       expect(() => {
-        hashingStore.add({});
+        hashingStore.hashAndSetItem({});
       }).to.throwError(e => expect(e).to.be(err));
     });
   });
 
-  describe('#lookup', () => {
+  describe('#getItemAtHash', () => {
     it('reads a value from the store by its hash', () => {
       const { hashingStore } = setup();
       const val = { foo: 'bar' };
-      const hash = hashingStore.add(val);
-      expect(hashingStore.lookup(hash)).to.eql(val);
+      const hash = hashingStore.hashAndSetItem(val);
+      expect(hashingStore.getItemAtHash(hash)).to.eql(val);
     });
 
     it('returns null when the value is not in the store', () => {
       const { hashingStore } = setup();
       const val = { foo: 'bar' };
-      const hash = hashingStore.add(val);
-      expect(hashingStore.lookup(`${hash} break`)).to.be(null);
-    });
-  });
-
-  describe('#remove', () => {
-    it('removes the value by its hash', () => {
-      const { hashingStore } = setup();
-      const val = { foo: 'bar' };
-      const hash = hashingStore.add(val);
-      expect(hashingStore.lookup(hash)).to.eql(val);
-      hashingStore.remove(hash);
-      expect(hashingStore.lookup(hash)).to.be(null);
+      const hash = hashingStore.hashAndSetItem(val);
+      expect(hashingStore.getItemAtHash(`${hash} break`)).to.be(null);
     });
   });
 
@@ -113,7 +102,7 @@ describe('State Management Hashing Store', () => {
     it('can identify values that look like hashes', () => {
       const { hashingStore } = setup();
       const val = { foo: 'bar' };
-      const hash = hashingStore.add(val);
+      const hash = hashingStore.hashAndSetItem(val);
       expect(hashingStore.isHash(hash)).to.be(true);
     });
 
