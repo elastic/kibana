@@ -135,6 +135,44 @@ describe('stateMonitor', function () {
       });
     });
 
+    describe('setDefault', function () {
+      let changeStub;
+
+      beforeEach(() => {
+        changeStub = sinon.stub();
+        monitor.onChange(changeStub);
+        sinon.assert.notCalled(changeStub);
+      });
+
+      it('should trigger the onChange handler', function () {
+        monitor.setDefault({ new: 'state' });
+        sinon.assert.calledOnce(changeStub);
+      });
+
+      it('should change the status with differing state', function () {
+        monitor.setDefault({ new: 'state' });
+        sinon.assert.calledOnce(changeStub);
+
+        const status = changeStub.firstCall.args[0];
+        expect(status).to.have.property('clean', false);
+        expect(status).to.have.property('dirty', true);
+      });
+
+      it('should trigger the onChange handler without state change', function () {
+        monitor.setDefault(cloneDeep(mockState.toJSON()));
+        sinon.assert.calledOnce(changeStub);
+      });
+
+      it('should not change the status with matching state', function () {
+        monitor.setDefault(cloneDeep(mockState.toJSON()));
+        sinon.assert.calledOnce(changeStub);
+
+        const status = changeStub.firstCall.args[0];
+        expect(status).to.have.property('clean', true);
+        expect(status).to.have.property('dirty', false);
+      });
+    });
+
     describe('status object', function () {
       let handlerFn;
 
