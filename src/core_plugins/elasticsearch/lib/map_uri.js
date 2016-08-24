@@ -1,8 +1,9 @@
 import querystring from 'querystring';
 import { resolve } from 'url';
 import filterHeaders from './filter_headers';
+import setHeaders from './set_headers';
 
-module.exports = function mapUri(server, prefix) {
+export default function mapUri(server, prefix) {
 
   const config = server.config();
   return function (request, done) {
@@ -14,7 +15,8 @@ module.exports = function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    const filteredHeaders = filterHeaders(request.headers, server.config().get('elasticsearch.requestHeadersWhitelist'));
-    done(null, url, filteredHeaders);
+    const filteredHeaders = filterHeaders(request.headers, config.get('elasticsearch.requestHeadersWhitelist'));
+    const customHeaders = setHeaders(filteredHeaders, config.get('elasticsearch.customHeaders'));
+    done(null, url, customHeaders);
   };
 };

@@ -345,10 +345,10 @@ name of your cluster.
 --------
 cluster.name: "my_cluster"
 --------
-. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch_url` should be set to
+. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.url` should be set to
 `localhost:9200`.
 +
 --------
 # The Elasticsearch instance to use for all your queries.
-elasticsearch_url: "http://localhost:9200"
+elasticsearch.url: "http://localhost:9200"
 --------

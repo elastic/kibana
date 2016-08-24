@@ -22,15 +22,35 @@ describe('plugins/elasticsearch', function () {
       };
     });
 
-    it('only sends the whitelisted request headers', function () {
+    it('sends custom headers if set', function () {
+      const get = sinon.stub();
+      get.withArgs('elasticsearch.requestHeadersWhitelist').returns([]);
+      get.withArgs('elasticsearch.customHeaders').returns({ foo: 'bar' });
+      const server = { config: () => ({ get }) };
 
-      const get = sinon.stub()
-      .withArgs('elasticsearch.url').returns('http://foobar:9200')
-      .withArgs('elasticsearch.requestHeadersWhitelist').returns(['x-my-custom-HEADER', 'Authorization']);
-      const config = function () { return { get: get }; };
-      const server = {
-        config: config
-      };
+      mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
+        expect(err).to.be(null);
+        expect(upstreamHeaders).to.have.property('foo', 'bar');
+      });
+    });
+
+    it('sends configured custom headers even if the same named header exists in request', function () {
+      const get = sinon.stub();
+      get.withArgs('elasticsearch.requestHeadersWhitelist').returns(['x-my-custom-header']);
+      get.withArgs('elasticsearch.customHeaders').returns({'x-my-custom-header': 'asconfigured'});
+      const server = { config: () => ({ get }) };
+
+      mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
+        expect(err).to.be(null);
+        expect(upstreamHeaders).to.have.property('x-my-custom-header', 'asconfigured');
+      });
+    });
+
+    it('only proxies the whitelisted request headers', function () {
+      const get = sinon.stub();
+      get.withArgs('elasticsearch.requestHeadersWhitelist').returns(['x-my-custom-HEADER', 'Authorization']);
+      get.withArgs('elasticsearch.customHeaders').returns({});
+      const server = { config: () => ({ get }) };
 
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
@@ -40,15 +60,11 @@ describe('plugins/elasticsearch', function () {
       });
     });
 
-    it('sends no headers if whitelist is set to []', function () {
-
-      const get = sinon.stub()
-      .withArgs('elasticsearch.url').returns('http://foobar:9200')
-      .withArgs('elasticsearch.requestHeadersWhitelist').returns([]);
-      const config = function () { return { get: get }; };
-      const server = {
-        config: config
-      };
+    it('proxies no headers if whitelist is set to []', function () {
+      const get = sinon.stub();
+      get.withArgs('elasticsearch.requestHeadersWhitelist').returns([]);
+      get.withArgs('elasticsearch.customHeaders').returns({});
+      const server = { config: () => ({ get }) };
 
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
@@ -56,15 +72,11 @@ describe('plugins/elasticsearch', function () {
       });
     });
 
-    it('sends no headers if whitelist is set to no value', function () {
-
-      const get = sinon.stub()
-      .withArgs('elasticsearch.url').returns('http://foobar:9200')
-      .withArgs('elasticsearch.requestHeadersWhitelist').returns([ null ]); // This is how Joi returns it
-      const config = function () { return { get: get }; };
-      const server = {
-        config: config
-      };
+    it('proxies no headers if whitelist is set to no value', function () {
+      const get = sinon.stub();
+      get.withArgs('elasticsearch.requestHeadersWhitelist').returns([ null ]); // This is how Joi returns it
+      get.withArgs('elasticsearch.customHeaders').returns({});
+      const server = { config: () => ({ get }) };
 
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
         expect(err).to.be(null);
