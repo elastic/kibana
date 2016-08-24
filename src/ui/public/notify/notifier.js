@@ -142,7 +142,7 @@ function add(notif, cb) {
   notif.getIconClass = () => (notif.type === 'banner') ?  '' : `fa fa-${notif.icon}`;
   notif.getToastMessageClass = ()  => (notif.type === 'banner') ?  'toast-message-banner' : 'toast-message';
   notif.getAlertClass = () => (notif.type === 'banner') ?
-    `toast-banner alert ${typeToAlertClassMap[notif.type]}` :
+    `alert ${typeToAlertClassMap[notif.type]}` : // not including `.toast` class leaves out the flex properties for banner
     `toast alert ${typeToAlertClassMap[notif.type]}`;
   notif.getButtonGroupClass = () => (notif.type === 'banner') ?
     'toast-controls-banner' :

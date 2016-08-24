@@ -77,14 +77,6 @@
     }
   }
 
-  .toast-banner {
-    // no flex
-  }
-
-  .toast-message-banner {
-    display: block;
-  }
-
   // add darkened background to the different badges
   .alert-success .badge {
     background: darken(@alert-success-bg, 25%);
@@ -118,4 +110,10 @@
   .toast-message {
     white-space: normal;
   }
+}
+
+// toast message class for banner needs to be display:block because banner does
+// not have a flex layout, and the styled element could be any kind of element
+.toast-message-banner {
+  display: block;
 }
