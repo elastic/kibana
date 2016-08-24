@@ -1,3 +1,5 @@
+/src/core_plugins/console/public/webpackShims
+/src/core_plugins/console/public/tests/webpackShims
 /src/core_plugins/timelion/bower_components
 /src/core_plugins/timelion/vendor_components
 test/fixtures/scenarios
