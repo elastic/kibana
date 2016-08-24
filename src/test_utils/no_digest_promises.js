@@ -2,7 +2,12 @@ import Bluebird from 'bluebird';
 import 'ui/promises';
 import uiModules from 'ui/modules';
 
-Bluebird.longStackTraces();
+Bluebird.config({
+  warnings: false,
+  longStackTraces: true,
+  cancellation: false,
+  monitoring: false
+});
 
 /**
  * replace the Promise service with Bluebird so that tests

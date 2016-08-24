@@ -1,6 +1,6 @@
 import Hapi from 'hapi';
 import { constant, once, compact, flatten } from 'lodash';
-import { promisify, resolve, fromNode } from 'bluebird';
+import { resolve, fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import Config from './config/config';

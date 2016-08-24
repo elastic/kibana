@@ -9,10 +9,7 @@ function ScenarioManager(server) {
   // NOTE: some large sets of test data can take several minutes to load
   this.client = new elasticsearch.Client({
     host: server,
-    requestTimeout: 300000,
-    defer: function () {
-      return Promise.defer();
-    }
+    requestTimeout: 300000
   });
 }
 

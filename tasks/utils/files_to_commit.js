@@ -1,10 +1,10 @@
 import SimpleGit from 'simple-git';
-import { promisify } from 'bluebird';
+import { fromCallback as fcb } from 'bluebird';
 import { includes } from 'lodash';
 
 export default function filesToCommit(path) {
   const simpleGit = new SimpleGit(path);
-  const gitDiff = promisify(simpleGit.diff, simpleGit);
+  const gitDiff = args => fcb(cb => simpleGit.diff(args, cb));
 
   return gitDiff(['--name-status', '--cached'])
   .then(output => {

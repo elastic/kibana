@@ -10,6 +10,6 @@ export default function registerCollectFilesToCommit(grunt) {
       grunt.log.ok(`${files.length} files with changes to commit`);
       grunt.config.set('filesToCommit', files);
     })
-    .nodeify(this.async());
+    .asCallback(this.async());
   });
 };
