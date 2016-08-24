@@ -8,9 +8,14 @@ function stateMonitor(state, defaultState) {
   let destroyed = false;
   let ignoredProps = [];
   let changeHandlers = [];
+  let originalState;
 
-  // state.toJSON returns a reference, clone so we can mutate it safely
-  const originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
+  setOriginalState(defaultState);
+
+  function setOriginalState(defaultState) {
+    // state.toJSON returns a reference, clone so we can mutate it safely
+    originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
+  }
 
   function filterState(state) {
     ignoredProps.forEach(path => {
@@ -50,6 +55,17 @@ function stateMonitor(state, defaultState) {
   };
 
   return {
+    setDefault(defaultState) {
+      // update the originalState and apply ignoredProps
+      if (defaultState) {
+        setOriginalState(defaultState);
+        filterState(originalState);
+      }
+
+      // fire the change handler
+      dispatchChange();
+    },
+
     ignoreProps(props) {
       ignoredProps = ignoredProps.concat(props);
       filterState(originalState);
@@ -69,9 +85,7 @@ function stateMonitor(state, defaultState) {
 
       // if the state is already dirty, fire the change handler immediately
       const status = getStatus();
-      if (status.dirty) {
-        dispatchChange();
-      }
+      if (status.dirty) dispatchChange();
 
       return this;
     },
