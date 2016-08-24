@@ -7,8 +7,13 @@ import { encode as encodeRison } from 'rison-node';
 import 'ui/private';
 import Notifier from 'ui/notify/notifier';
 import StateManagementStateProvider from 'ui/state_management/state';
-import { unhashQueryString } from 'ui/state_management/state_hashing';
-import { HashingStore } from 'ui/state_management/state_storage';
+import {
+  unhashQueryString,
+} from 'ui/state_management/state_hashing';
+import {
+  createStorageHash,
+  HashingStore,
+} from 'ui/state_management/state_storage';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import EventsProvider from 'ui/events';
 
@@ -32,7 +37,7 @@ describe('State Management', function () {
       const { param, initial, storeInHash } = (opts || {});
       sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
       const store = new StubBrowserStorage();
-      const hashingStore = new HashingStore({ store });
+      const hashingStore = new HashingStore(createStorageHash, store);
       const state = new State(param, initial, { hashingStore, notifier });
 
       const getUnhashedSearch = state => {

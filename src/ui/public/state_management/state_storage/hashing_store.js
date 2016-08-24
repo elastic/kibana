@@ -1,9 +1,4 @@
 import angular from 'angular';
-import { sortBy } from 'lodash';
-import { Sha256 } from 'ui/crypto';
-
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import { LazyLruStore } from './lazy_lru_store';
 
 /**
  *  The HashingStore is a wrapper around a browser store object
@@ -12,9 +7,9 @@ import { LazyLruStore } from './lazy_lru_store';
  *  at a later time.
  */
 class HashingStore {
-  constructor({ store, createHash, maxItems } = {}) {
-    this._store = store || window.sessionStorage;
-    if (createHash) this._createHash = createHash;
+  constructor(createStorageHash, store) {
+    this._createStorageHash = createStorageHash;
+    this._store = store;
   }
 
   /**
@@ -49,23 +44,11 @@ class HashingStore {
    *  @return {string} the hash of the value
    */
   hashAndSetItem(object) {
+    // The object may contain Angular $$ properties, so let's ignore them.
     const json = angular.toJson(object);
     const hash = this._getShortHash(json);
     this._store.setItem(hash, json);
     return hash;
-  }
-
-  // private api
-
-  /**
-   *  calculate the full hash of a json object
-   *
-   *  @private
-   *  @param {string} json
-   *  @return {string} hash
-   */
-  _createHash(json) {
-    return new Sha256().update(json, 'utf8').digest('hex');
   }
 
   /**
@@ -77,7 +60,7 @@ class HashingStore {
    *  @param {string} shortHash
    */
   _getShortHash(json) {
-    const fullHash = `${HashingStore.HASH_TAG}${this._createHash(json)}`;
+    const fullHash = `${HashingStore.HASH_TAG}${this._createStorageHash(json)}`;
 
     let short;
     for (let i = 7; i < fullHash.length; i++) {
