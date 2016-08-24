@@ -1,20 +1,22 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { encode as encodeRison } from 'rison-node';
-
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import { HashingStore } from 'ui/state_management/state_storage';
+import {
+  createStorageHash,
+  HashingStore,
+} from 'ui/state_management/state_storage';
 
-const setup = ({ createHash } = {}) => {
+const setup = createStorageHash => {
   const store = new StubBrowserStorage();
-  const hashingStore = new HashingStore({ store, createHash });
+  const hashingStore = new HashingStore(createStorageHash, store);
   return { store, hashingStore };
 };
 
 describe('Hashing Store', () => {
   describe('#hashAndSetItem', () => {
     it('adds a value to the store and returns its hash', () => {
-      const { hashingStore, store } = setup();
+      const { hashingStore, store } = setup(createStorageHash);
       const val = { foo: 'bar' };
       const hash = hashingStore.hashAndSetItem(val);
       expect(hash).to.be.a('string');
@@ -23,7 +25,7 @@ describe('Hashing Store', () => {
     });
 
     it('json encodes the values it stores', () => {
-      const { hashingStore, store } = setup();
+      const { hashingStore, store } = setup(createStorageHash);
       const val = { toJSON() { return 1; } };
       const hash = hashingStore.hashAndSetItem(val);
       expect(hashingStore.getItemAtHash(hash)).to.eql(1);
@@ -32,9 +34,7 @@ describe('Hashing Store', () => {
     it('addresses values with a short hash', () => {
       const val = { foo: 'bar' };
       const longHash = 'longlonglonglonglonglonglonglonglonglonghash';
-      const { hashingStore } = setup({
-        createHash: () => longHash
-      });
+      const { hashingStore } = setup(() => longHash);
 
       const hash = hashingStore.hashAndSetItem(val);
       expect(hash.length < longHash.length).to.be.ok();
@@ -57,11 +57,9 @@ describe('Hashing Store', () => {
       ];
 
       const matchVal = json => f => JSON.stringify(f.val) === json;
-      const { hashingStore } = setup({
-        createHash: val => {
-          const fixture = fixtures.find(matchVal(val));
-          return fixture.hash;
-        }
+      const { hashingStore } = setup(val => {
+        const fixture = fixtures.find(matchVal(val));
+        return fixture.hash;
       });
 
       const hash1 = hashingStore.hashAndSetItem(fixtures[0].val);
@@ -73,7 +71,7 @@ describe('Hashing Store', () => {
     });
 
     it('bubbles up the error if the store fails to hashAndSetItem', () => {
-      const { store, hashingStore } = setup();
+      const { store, hashingStore } = setup(createStorageHash);
       const err = new Error();
       sinon.stub(store, 'setItem').throws(err);
       expect(() => {
@@ -84,14 +82,14 @@ describe('Hashing Store', () => {
 
   describe('#getItemAtHash', () => {
     it('reads a value from the store by its hash', () => {
-      const { hashingStore } = setup();
+      const { hashingStore } = setup(createStorageHash);
       const val = { foo: 'bar' };
       const hash = hashingStore.hashAndSetItem(val);
       expect(hashingStore.getItemAtHash(hash)).to.eql(val);
     });
 
     it('returns null when the value is not in the store', () => {
-      const { hashingStore } = setup();
+      const { hashingStore } = setup(createStorageHash);
       const val = { foo: 'bar' };
       const hash = hashingStore.hashAndSetItem(val);
       expect(hashingStore.getItemAtHash(`${hash} break`)).to.be(null);
@@ -100,7 +98,7 @@ describe('Hashing Store', () => {
 
   describe('#isHash', () => {
     it('can identify values that look like hashes', () => {
-      const { hashingStore } = setup();
+      const { hashingStore } = setup(createStorageHash);
       const val = { foo: 'bar' };
       const hash = hashingStore.hashAndSetItem(val);
       expect(hashingStore.isHash(hash)).to.be(true);
@@ -118,7 +116,7 @@ describe('Hashing Store', () => {
 
       tests.forEach(([type, val]) => {
         it(`is not fooled by rison ${type} "${val}"`, () => {
-          const { hashingStore } = setup();
+          const { hashingStore } = setup(createStorageHash);
           const rison = encodeRison(val);
           expect(hashingStore.isHash(rison)).to.be(false);
         });
