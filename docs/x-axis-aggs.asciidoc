@@ -20,9 +20,9 @@ a range.
 *Date Range*:: A {ref}search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values 
 that are within a range of dates that you specify. You can specify the ranges for the dates using 
 {ref}common-options.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints. 
-Click the red *(/)* symbol to remove a range.
+Click the red *(x)* symbol to remove a range.
 *IPv4 Range*:: The {ref}search-aggregations-bucket-iprange-aggregation.html[_IPv4 range_] aggregation enables you to
-specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(/)* symbol to 
+specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to 
 remove a range.
 *Terms*:: A {ref}search-aggregations-bucket-terms-aggregation.html[_terms_] aggregation enables you to specify the top 
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
