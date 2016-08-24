@@ -8,6 +8,7 @@ import Notifier from 'ui/notify/notifier';
 import KbnUrlProvider from 'ui/url';
 
 import {
+  createStorageHash,
   HashingStore,
   LazyLruStore,
 } from './state_storage';
@@ -21,34 +22,36 @@ export default function StateProvider(Private, $rootScope, $location, config) {
   function State(urlParam, defaults, { hashingStore, notifier } = {}) {
     State.Super.call(this);
 
-    let self = this;
-    self.setDefaults(defaults);
-    self._urlParam = urlParam || '_s';
+    this.setDefaults(defaults);
+    this._urlParam = urlParam || '_s';
     this._notifier = notifier || new Notifier();
-    self._hashingStore = hashingStore || new HashingStore({
-      store: new LazyLruStore({
+
+    this._hashingStore = hashingStore || (() => {
+      const lazyLruStore =  new LazyLruStore({
         id: `${this._urlParam}:state`,
         store: window.sessionStorage,
         maxItems: MAX_BROWSER_HISTORY
-      })
-    });
+      });
+
+      return new HashingStore(createStorageHash, lazyLruStore);
+    })();
 
     // When the URL updates we need to fetch the values from the URL
-    self._cleanUpListeners = _.partial(_.callEach, [
+    this._cleanUpListeners = _.partial(_.callEach, [
       // partial route update, no app reload
-      $rootScope.$on('$routeUpdate', function () {
+      $rootScope.$on('$routeUpdate', () => {
         self.fetch();
       }),
 
       // beginning of full route update, new app will be initialized before
       // $routeChangeSuccess or $routeChangeError
-      $rootScope.$on('$routeChangeStart', function () {
+      $rootScope.$on('$routeChangeStart', () => {
         if (!self._persistAcrossApps) {
           self.destroy();
         }
       }),
 
-      $rootScope.$on('$routeChangeSuccess', function () {
+      $rootScope.$on('$routeChangeSuccess', () => {
         if (self._persistAcrossApps) {
           self.fetch();
         }
