@@ -1,4 +1,8 @@
 export {
+  default as createStorageHash,
+} from './create_storage_hash';
+
+export {
   default as HashingStore,
 } from './hashing_store';
 
