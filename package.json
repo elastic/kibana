@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
   "peerDependencies": {
-    "eslint": ">=1.0.0",
-    "eslint-plugin-mocha": "1.1.0",
-    "babel-eslint": "4.1.8"
+    "eslint": ">=3, <4",
+    "eslint-plugin-mocha": "4.4.0",
+    "babel-eslint": "6.1.2"
   }
 }
