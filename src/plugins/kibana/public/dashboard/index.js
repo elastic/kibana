@@ -4,7 +4,7 @@ define(function (require) {
   const angular = require('angular');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
-  const stateMonitor = require('ui/state_management/state_monitor');
+  const stateMonitorFactory = require('ui/state_management/state_monitor');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -90,9 +90,10 @@ define(function (require) {
           filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
         };
 
+        let stateMonitor;
+        const $appStatus = this.appStatus = $scope.appStatus = {};
         const $state = $scope.state = new AppState(stateDefaults);
         const $uiState = $scope.uiState = $state.makeStateful('uiState');
-        const $appStatus = this.appStatus = $scope.appStatus = {};
 
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
           if (!angular.equals(newVal, oldVal)) $state.save();
@@ -126,11 +127,11 @@ define(function (require) {
           initPanelIndices();
 
           // watch for state changes and update the appStatus.dirty value
-          const monitor = stateMonitor.create($state, stateDefaults);
-          monitor.onChange((status) => {
+          stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+          stateMonitor.onChange((status) => {
             $appStatus.dirty = status.dirty;
           });
-          $scope.$on('$destroy', () => monitor.destroy());
+          $scope.$on('$destroy', () => stateMonitor.destroy());
 
           $scope.$emit('application.load');
         }
@@ -203,6 +204,7 @@ define(function (require) {
 
           dash.save()
           .then(function (id) {
+            stateMonitor.setDefault($state.toJSON());
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');

@@ -7,7 +7,7 @@ define(function (require) {
   const rison = require('ui/utils/rison');
 
   const dateMath = require('ui/utils/dateMath');
-  const stateMonitor = require('ui/state_management/state_monitor');
+  const stateMonitorFactory = require('ui/state_management/state_monitor');
 
   require('ui/doc_table');
   require('ui/visualize');
@@ -119,6 +119,7 @@ define(function (require) {
       docTitle.change(savedSearch.title);
     }
 
+    let stateMonitor;
     const $appStatus = $scope.appStatus = this.appStatus = {};
     const $state = $scope.state = new AppState(getStateDefaults());
     $scope.uiState = $state.makeStateful('uiState');
@@ -161,11 +162,11 @@ define(function (require) {
         $scope.failuresShown = showTotal;
       };
 
-      const monitor = stateMonitor.create($state, getStateDefaults());
-      monitor.onChange((status) => {
+      stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
+      stateMonitor.onChange((status) => {
         $appStatus.dirty = status.dirty;
       });
-      $scope.$on('$destroy', () => monitor.destroy());
+      $scope.$on('$destroy', () => stateMonitor.destroy());
 
       $scope.updateDataSource()
       .then(function () {
@@ -292,6 +293,7 @@ define(function (require) {
 
         return savedSearch.save()
         .then(function (id) {
+          stateMonitor.setDefault($state.toJSON());
           $scope.configTemplate.close('save');
 
           if (id) {

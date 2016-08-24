@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  const stateMonitor = require('ui/state_management/state_monitor');
+  const stateMonitorFactory = require('ui/state_management/state_monitor');
   require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');
@@ -68,6 +68,7 @@ define(function (require) {
       location: 'Visualization Editor'
     });
 
+    let stateMonitor;
     const $appStatus = this.appStatus = {};
 
     const savedVis = $route.current.locals.savedVis;
@@ -132,11 +133,11 @@ define(function (require) {
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
 
-      const monitor = stateMonitor.create($state, stateDefaults);
-      monitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
+      stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+      stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
         $appStatus.dirty = status.dirty;
       });
-      $scope.$on('$destroy', () => monitor.destroy());
+      $scope.$on('$destroy', () => stateMonitor.destroy());
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -242,6 +243,7 @@ define(function (require) {
 
       savedVis.save()
       .then(function (id) {
+        stateMonitor.setDefault($state.toJSON());
         configTemplate.close('save');
 
         if (id) {
