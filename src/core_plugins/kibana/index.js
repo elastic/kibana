@@ -3,6 +3,7 @@ import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 
 module.exports = function (kibana) {
+  const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
     config: function (Joi) {
@@ -43,7 +44,7 @@ module.exports = function (kibana) {
           id: 'kibana:discover',
           title: 'Discover',
           order: -1003,
-          url: '/app/kibana#/discover',
+          url: `${kbnBaseUrl}#discover`,
           description: 'interactively explore your data',
           icon: 'plugins/kibana/assets/discover.svg',
         },
@@ -51,7 +52,7 @@ module.exports = function (kibana) {
           id: 'kibana:visualize',
           title: 'Visualize',
           order: -1002,
-          url: '/app/kibana#/visualize',
+          url: `${kbnBaseUrl}#visualize`,
           description: 'design data visualizations',
           icon: 'plugins/kibana/assets/visualize.svg',
         },
@@ -59,7 +60,7 @@ module.exports = function (kibana) {
           id: 'kibana:dashboard',
           title: 'Dashboard',
           order: -1001,
-          url: '/app/kibana#/dashboard',
+          url: `${kbnBaseUrl}#dashboard`,
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',
         },
@@ -67,7 +68,7 @@ module.exports = function (kibana) {
           id: 'kibana:management',
           title: 'Management',
           order: 1000,
-          url: '/app/kibana#/management',
+          url: `${kbnBaseUrl}#management`,
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
           linkToLastSubUrl: false
@@ -75,7 +76,8 @@ module.exports = function (kibana) {
       ],
       injectDefaultVars(server, options) {
         return {
-          kbnIndex: options.index
+          kbnIndex: options.index,
+          kbnBaseUrl
         };
       },
     },
