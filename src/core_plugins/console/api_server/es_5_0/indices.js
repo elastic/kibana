@@ -60,7 +60,7 @@ module.exports = function (api) {
       "fields": [],
       "types": [],
       "completion_fields": [],
-      "fielddata_fields": [],
+      "docvalue_fields": [],
       "level": ["cluster", "indices", "shards"]
     }
 

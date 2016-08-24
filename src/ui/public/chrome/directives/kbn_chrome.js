@@ -1,15 +1,16 @@
 import $ from 'jquery';
 
+import './kbn_chrome.less';
 import UiModules from 'ui/modules';
 
 export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', function ($rootScope) {
+  .directive('kbnChrome', $rootScope => {
     return {
       template($el) {
-        const $content = $(require('ui/chrome/chrome.html'));
+        const $content = $(require('./kbn_chrome.html'));
         const $app = $content.find('.application');
 
         if (internals.rootController) {
@@ -43,6 +44,7 @@ export default function (chrome, internals) {
         // and some local values
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
+
         return chrome;
       }
     };

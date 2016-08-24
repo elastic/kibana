@@ -287,10 +287,10 @@ export default function SourceAbstractFactory(Private, Promise, PromiseEmitter) 
           flatState.body.stored_fields = computedFields.storedFields;
           flatState.body._source = computedFields._source;
           flatState.body.script_fields = flatState.body.script_fields || {};
-          flatState.body.fielddata_fields = flatState.body.fielddata_fields || [];
+          flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
 
           _.extend(flatState.body.script_fields, computedFields.scriptFields);
-          flatState.body.fielddata_fields = _.union(flatState.body.fielddata_fields, computedFields.fielddataFields);
+          flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
         }
 
         decorateQuery(flatState.body.query);
