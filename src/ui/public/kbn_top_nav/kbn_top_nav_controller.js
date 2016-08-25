@@ -65,8 +65,8 @@ export default function ($compile) {
         run: (item) => this.toggle(item.key)
       }, opt);
 
-      defaultedOpt.hideButton = isFunction(opt.hideButton) ? opt.hideButton : () => opt.hideButton;
-      defaultedOpt.disableButton = isFunction(opt.disableButton) ? opt.disableButton : () => opt.disableButton;
+      defaultedOpt.hideButton = isFunction(opt.hideButton) ? opt.hideButton : () => !!opt.hideButton || false;
+      defaultedOpt.disableButton = isFunction(opt.disableButton) ? opt.disableButton : () => !!opt.disableButton || false;
       defaultedOpt.tooltip = isFunction(opt.tooltip) ? opt.tooltip : () => opt.tooltip;
 
       return defaultedOpt;
