@@ -2,9 +2,10 @@
   "name": "@elastic/eslint-config-kibana",
   "version": "0.2.0-alpha1",
   "description": "The eslint config used by the kibana team",
-  "main": "index.js",
+  "main": ".eslintrc.json",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "node tasks/writejson.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,8 @@
     "eslint": ">=3, <4",
     "eslint-plugin-mocha": "4.4.0",
     "babel-eslint": "6.1.2"
+  },
+  "devDependencies": {
+    "js-yaml": "^3.6.1"
   }
 }

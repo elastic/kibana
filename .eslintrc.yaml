@@ -1,0 +1,77 @@
+---
+parser: babel-eslint
+
+plugins:
+  - mocha
+
+env:
+  es6: true
+  amd: true
+  node: true
+  mocha: true
+  browser: true
+
+rules:
+  block-scoped-var: error
+  camelcase: [ error, { properties: never } ]
+  comma-dangle: off
+  comma-style: [ error, last ]
+  consistent-return: off
+  curly: [ error, multi-line ]
+  dot-location: [ error, property ]
+  dot-notation: [ error, { allowKeywords: true } ]
+  eqeqeq: [ error, allow-null ]
+  guard-for-in: error
+  indent: [ error, 2, { SwitchCase: 1 } ]
+  key-spacing: [ off, { align: value } ]
+  max-len: [ error, 140, 2, { ignoreComments: true, ignoreUrls: true } ]
+  new-cap: [ error, { capIsNewExceptions: [ Private ] } ]
+  no-bitwise: off
+  no-caller: error
+  no-cond-assign: off
+  no-const-assign: error
+  no-debugger: error
+  no-empty: error
+  no-eval: error
+  no-extend-native: error
+  no-extra-parens: off
+  no-irregular-whitespace: error
+  no-iterator: error
+  no-loop-func: error
+  no-multi-spaces: off
+  no-multi-str: error
+  no-nested-ternary: error
+  no-new: off
+  no-path-concat: off
+  no-proto: error
+  no-redeclare: error
+  no-return-assign: off
+  no-script-url: error
+  no-sequences: error
+  no-shadow: off
+  no-trailing-spaces: error
+  no-undef: error
+  no-underscore-dangle: off
+  no-unused-expressions: off
+  # Disallow declaration of variables that are not used in the code.
+  no-unused-vars: [ error ]
+  no-use-before-define: [ error, nofunc ]
+  no-with: error
+  one-var: [ error, never ]
+  quotes: [ error, single ]
+  semi-spacing: [ error, { before: false, after: true } ]
+  semi: [ error, always ]
+  no-extra-semi: [ error ]
+  space-before-blocks: [ error, always ]
+  space-before-function-paren: [ error, { anonymous: always, named: never } ]
+  space-in-parens: [ error, never ]
+  space-infix-ops: [ error, { int32Hint: false } ]
+  space-unary-ops: [ error ]
+  strict: [ error, never ]
+  valid-typeof: error
+  wrap-iife: [ error, outside ]
+  yoda: off
+  mocha/no-exclusive-tests: error
+  mocha/handle-done-callback: error
+  no-var: error
+  prefer-const: error
