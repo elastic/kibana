@@ -32,7 +32,7 @@ describe('chrome nav controls', function () {
       return {
         name: 'control',
         order: 100,
-        template: `<span id="testTemplateEl"></span>`
+        template: '<span id="testTemplateEl"></span>'
       };
     });
 
@@ -45,21 +45,21 @@ describe('chrome nav controls', function () {
       return {
         name: 'control2',
         order: 2,
-        template: `<span id="2", class="testControl"></span>`
+        template: '<span id="2", class="testControl"></span>'
       };
     });
     stubRegistry.register(function () {
       return {
         name: 'control1',
         order: 1,
-        template: `<span id="1", class="testControl"></span>`
+        template: '<span id="1", class="testControl"></span>'
       };
     });
     stubRegistry.register(function () {
       return {
         name: 'control3',
         order: 3,
-        template: `<span id="3", class="testControl"></span>`
+        template: '<span id="3", class="testControl"></span>'
       };
     });
 

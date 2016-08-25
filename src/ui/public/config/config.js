@@ -7,9 +7,9 @@ import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
 
 // service for delivering config variables to everywhere else
-module.service(`config`, function (Private, $rootScope, $http, chrome, uiSettings) {
+module.service('config', function (Private, $rootScope, $http, chrome, uiSettings) {
   const config = this;
-  const notify = new Notifier({ location: `Config` });
+  const notify = new Notifier({ location: 'Config' });
   const { defaults, user: initialUserSettings } = uiSettings;
   const delayedUpdate = Private(ConfigDelayedUpdaterProvider);
   let settings = mergeSettings(defaults, initialUserSettings);
@@ -55,7 +55,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
   function watchAll(scope = $rootScope, fn) {
     const update = (e, ...args) => fn(...args);
     fn(null, null, null, config);
-    return scope.$on(`change:config`, update);
+    return scope.$on('change:config', update);
   }
 
   function change(key, value) {
@@ -99,7 +99,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     const newVal = config.get(key);
     notify.log(`config change: ${key}: ${oldVal} -> ${newVal}`);
     $rootScope.$broadcast(`change:config.${key}`, newVal, oldVal, key, config);
-    $rootScope.$broadcast(`change:config`,        newVal, oldVal, key, config);
+    $rootScope.$broadcast('change:config',        newVal, oldVal, key, config);
   }
 
   function nullOrEmpty(value) {

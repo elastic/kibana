@@ -6,8 +6,8 @@ import es from 'event-stream';
 import readYamlConfig from '../read_yaml_config';
 import expect from 'expect.js';
 
-const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
-const cli = follow(`../../../../bin/kibana`);
+const testConfigFile = follow('fixtures/reload_logging_config/kibana.test.yml');
+const cli = follow('../../../../bin/kibana');
 
 function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));
@@ -22,19 +22,19 @@ function setLoggingJson(enabled) {
   return conf;
 }
 
-describe(`Server logging configuration`, function () {
+describe('Server logging configuration', function () {
 
   const isWindows = /^win/.test(process.platform);
   if (isWindows) {
     it('SIGHUP is not a feature of Windows.');
   } else {
-    it(`should be reloadable via SIGHUP process signaling`, function (done) {
+    it('should be reloadable via SIGHUP process signaling', function (done) {
       this.timeout(60000);
 
       let asserted = false;
       let json = Infinity;
       const conf = setLoggingJson(true);
-      const child = spawn(cli, [`--config`, testConfigFile]);
+      const child = spawn(cli, ['--config', testConfigFile]);
 
       child.on('error', err => {
         done(new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`));
@@ -62,7 +62,7 @@ describe(`Server logging configuration`, function () {
       function parseJsonLogLine(line) {
         try {
           const data = JSON.parse(line);
-          const listening = data.tags.indexOf(`listening`) !== -1;
+          const listening = data.tags.indexOf('listening') !== -1;
           if (listening) {
             switchToPlainTextLog();
           }
@@ -74,13 +74,13 @@ describe(`Server logging configuration`, function () {
       function switchToPlainTextLog() {
         json = 3; // ignore both "reloading" messages + ui settings status message
         setLoggingJson(false);
-        child.kill(`SIGHUP`); // reload logging config
+        child.kill('SIGHUP'); // reload logging config
       }
 
       function expectPlainTextLogLine(line) {
         // assert
-        const tags = `[\u001b[32minfo\u001b[39m][\u001b[36mconfig\u001b[39m]`;
-        const status = `Reloaded logging configuration due to SIGHUP.`;
+        const tags = '[\u001b[32minfo\u001b[39m][\u001b[36mconfig\u001b[39m]';
+        const status = 'Reloaded logging configuration due to SIGHUP.';
         const expected = `${tags} ${status}`;
         const actual = line.slice(-expected.length);
         expect(actual).to.eql(expected);

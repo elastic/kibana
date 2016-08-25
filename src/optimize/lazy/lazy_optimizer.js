@@ -87,7 +87,7 @@ module.exports = class LazyOptimizer extends BaseOptimizer {
 
   logRunStart() {
     this.log(['info', 'optimize'], {
-      tmpl: `Lazy optimization started`,
+      tmpl: 'Lazy optimization started',
       bundles: this.bundles.getIds()
     });
   }

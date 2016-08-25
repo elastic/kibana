@@ -38,8 +38,8 @@ module.exports = () => Joi.object({
     port: Joi.number().default(5601),
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
-    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
-    basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, 'start with a slash'),
+    basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, 'start with a slash, don\'t end with one'),
     ssl: Joi.object({
       cert: Joi.string(),
       key: Joi.string()
