@@ -243,7 +243,7 @@ define(function (require) {
 
       savedVis.save()
       .then(function (id) {
-        stateMonitor.setDefault($state.toJSON());
+        stateMonitor.setDefaultState($state.toJSON());
         configTemplate.close('save');
 
         if (id) {

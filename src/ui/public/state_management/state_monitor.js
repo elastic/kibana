@@ -55,7 +55,7 @@ function stateMonitor(state, defaultState) {
   };
 
   return {
-    setDefault(defaultState) {
+    setDefaultState(defaultState) {
       // update the originalState and apply ignoredProps
       if (defaultState) {
         setOriginalState(defaultState);

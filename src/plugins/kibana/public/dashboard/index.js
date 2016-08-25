@@ -204,7 +204,7 @@ define(function (require) {
 
           dash.save()
           .then(function (id) {
-            stateMonitor.setDefault($state.toJSON());
+            stateMonitor.setDefaultState($state.toJSON());
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
