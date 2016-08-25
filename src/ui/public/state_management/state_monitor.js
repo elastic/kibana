@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual, set } from 'lodash';
+import { cloneDeep, isEqual, set, isPlainObject } from 'lodash';
 
 export default {
   create: (state, defaultState) => stateMonitor(state, defaultState)
@@ -57,10 +57,9 @@ function stateMonitor(state, defaultState) {
   return {
     setDefaultState(defaultState) {
       // update the originalState and apply ignoredProps
-      if (defaultState) {
-        setOriginalState(defaultState);
-        removeIgnoredProps(originalState);
-      }
+      if (!isPlainObject(defaultState)) throw new TypeError('The default state must be an object');
+      setOriginalState(defaultState);
+      removeIgnoredProps(originalState);
 
       // fire the change handler
       dispatchChange();

@@ -135,7 +135,7 @@ describe('stateMonitor', function () {
       });
     });
 
-    describe('setDefault', function () {
+    describe('setDefaultState', function () {
       let changeStub;
 
       beforeEach(() => {
@@ -144,13 +144,23 @@ describe('stateMonitor', function () {
         sinon.assert.notCalled(changeStub);
       });
 
+      it('should throw if no state is provided', function () {
+        const fn = () => monitor.setDefaultState();
+        expect(fn).to.throwException(/must be an object/);
+      });
+
+      it('should throw if given the wrong type', function () {
+        const fn = () => monitor.setDefaultState([]);
+        expect(fn).to.throwException(/must be an object/);
+      });
+
       it('should trigger the onChange handler', function () {
-        monitor.setDefault({ new: 'state' });
+        monitor.setDefaultState({ new: 'state' });
         sinon.assert.calledOnce(changeStub);
       });
 
       it('should change the status with differing state', function () {
-        monitor.setDefault({ new: 'state' });
+        monitor.setDefaultState({ new: 'state' });
         sinon.assert.calledOnce(changeStub);
 
         const status = changeStub.firstCall.args[0];
@@ -159,12 +169,12 @@ describe('stateMonitor', function () {
       });
 
       it('should trigger the onChange handler without state change', function () {
-        monitor.setDefault(cloneDeep(mockState.toJSON()));
+        monitor.setDefaultState(cloneDeep(mockState.toJSON()));
         sinon.assert.calledOnce(changeStub);
       });
 
       it('should not change the status with matching state', function () {
-        monitor.setDefault(cloneDeep(mockState.toJSON()));
+        monitor.setDefaultState(cloneDeep(mockState.toJSON()));
         sinon.assert.calledOnce(changeStub);
 
         const status = changeStub.firstCall.args[0];
