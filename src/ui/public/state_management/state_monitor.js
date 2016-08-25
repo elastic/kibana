@@ -17,7 +17,7 @@ function stateMonitor(state, defaultState) {
     originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
   }
 
-  function filterState(state) {
+  function removeIgnoredProps(state) {
     ignoredProps.forEach(path => {
       set(state, path, true);
     });
@@ -26,7 +26,7 @@ function stateMonitor(state, defaultState) {
 
   function getStatus() {
     // state.toJSON returns a reference, clone so we can mutate it safely
-    const currentState = filterState(cloneDeep(state.toJSON()));
+    const currentState = removeIgnoredProps(cloneDeep(state.toJSON()));
     const isClean = isEqual(currentState, originalState);
 
     return {
@@ -59,7 +59,7 @@ function stateMonitor(state, defaultState) {
       // update the originalState and apply ignoredProps
       if (defaultState) {
         setOriginalState(defaultState);
-        filterState(originalState);
+        removeIgnoredProps(originalState);
       }
 
       // fire the change handler
@@ -68,7 +68,7 @@ function stateMonitor(state, defaultState) {
 
     ignoreProps(props) {
       ignoredProps = ignoredProps.concat(props);
-      filterState(originalState);
+      removeIgnoredProps(originalState);
       return this;
     },
 
