@@ -4,7 +4,7 @@ import {
 
 import PageObjects from '../../support/page_objects';
 
-var expect = require('expect.js');
+let expect = require('expect.js');
 
 bdd.describe('status page', function () {
   bdd.before(function () {
@@ -12,7 +12,7 @@ bdd.describe('status page', function () {
   });
 
   bdd.it('should show the kibana plugin as ready', function () {
-    var self = this;
+    let self = this;
 
     return PageObjects.common.tryForTime(6000, function () {
       return PageObjects.common.findTestSubject('statusBreakdown')

@@ -32,7 +32,7 @@ export default class ConsolePage {
         return line.getVisibleText();
       }
 
-      var getEditorDataPromises = editorData.map(getEditorData);
+      let getEditorDataPromises = editorData.map(getEditorData);
       return Promise.all(getEditorDataPromises);
     });
   }

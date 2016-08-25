@@ -5,7 +5,7 @@ export default function keysDeep(object, base) {
   let delimitedBase = base ? base + '.' : '';
 
   _.forEach(object, (value, key) => {
-    var fullKey = delimitedBase + key;
+    let fullKey = delimitedBase + key;
     if (_.isPlainObject(value)) {
       result = result.concat(keysDeep(value, fullKey));
     } else {

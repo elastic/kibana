@@ -17,7 +17,7 @@ module.directive('patternChecker', function () {
     controller: function (Notifier, $scope, $timeout, $http) {
       let validationTimeout;
 
-      var notify = new Notifier({
+      let notify = new Notifier({
         location: 'Add Data'
       });
 

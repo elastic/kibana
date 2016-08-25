@@ -94,7 +94,7 @@ export default class DiscoverPage {
         .getAttribute('height');
       }
 
-      var getChartDataPromises = chartData.map(getChartData);
+      let getChartDataPromises = chartData.map(getChartData);
       return Promise.all(getChartDataPromises);
     })
     .then(function (bars) {
