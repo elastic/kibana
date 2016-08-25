@@ -1,7 +1,5 @@
 import _ from 'lodash';
-import {
-  fromNode,
-} from 'bluebird';
+import { fromNode } from 'bluebird';
 import npm from 'npm';
 import npmLicense from 'license-checker';
 
@@ -10,82 +8,67 @@ export default function licenses(grunt) {
     const config = this.options();
     const done = this.async();
 
-    const result = {};
-    const options = { start: process.cwd(), json: true };
-    const checkQueueLength = 2;
+    const result = [];
+    const options = {
+      start: process.cwd(),
+      production: true,
+      json: true
+    };
 
-    function getLicenses(dependency) {
-      if (config.overrides[dependency.name]) {
-        return config.overrides[dependency.name];
-      }
-
-      if (dependency && dependency.licenses) {
-        return _.flatten([dependency.licenses]);
-      }
-    }
-
-    function processPackage(dependency) {
-      const pkgInfo = Object.assign({}, dependency);
-      pkgInfo.licenses = getLicenses(dependency);
-      pkgInfo.valid = (function () {
-        if (_.intersection(pkgInfo.licenses, config.licenses).length > 0) {
-          return true;
-        }
-        return false;
-      }());
-      return pkgInfo;
-    }
-
-    const allDependencies = await fromNode(cb => {
-      npmLicense.init(options, result => {
+    const packages = await fromNode(cb => {
+      npmLicense.init(options, (result, error) => {
         cb(undefined, result);
       });
     });
 
-    // Only check production NPM dependencies, not dev
-    await fromNode(cb => npm.load({production: true}, cb));
+    /**
+     * Licenses for a package by name with overrides
+     *
+     * @param {String} name
+     * @return {Array}
+     */
 
-    const npmList = await fromNode(cb => {
-      npm.commands.list([], true, (a, b, npmList) => cb(undefined, npmList));
-    });
+    function licensesForPackage(name) {
+      let licenses = packages[name].licenses;
 
-    // Recurse npm --production --json ls output, create array of dependency
-    // objects, each with a name prop formatted as 'package@version' and a
-    // path prop leading back to the root dependency.
-    function getDependencies(dependencies, path, list = []) {
-      Object.keys(dependencies).forEach(name => {
-        const dependency = dependencies[name];
-        const newPath = path ? `${path} -> ${dependency.from}` : dependency.from;
-        list.push({
-          path: newPath,
-          name: name + '@' + dependency.version
-        });
+      if (config.overrides.hasOwnProperty(name)) {
+        licenses = config.overrides[name];
+      }
 
-        if (dependency.dependencies) {
-          getDependencies(dependency.dependencies, newPath, list);
-        }
-      });
-      return list;
-    };
-
-    const productionDependencies = {};
-    getDependencies(npmList.dependencies).forEach(dependency => {
-      productionDependencies[dependency.name] =
-        Object.assign({}, allDependencies[dependency.name], dependency);
-    });
-
-    const licenseStats = _.map(productionDependencies, processPackage);
-    const invalidLicenses = licenseStats.filter(pkg => !pkg.valid);
-
-    if (!grunt.option('only-invalid')) {
-      grunt.log.debug(JSON.stringify(licenseStats, null, 2));
+      return typeof licenses === 'string' ? [licenses] : licenses;
     }
 
-    if (invalidLicenses.length) {
-      grunt.log.debug(JSON.stringify(invalidLicenses, null, 2));
+    /**
+     * Determine if a package has a valid license
+     *
+     * @param {String} name
+     * @return {Boolean}
+     */
+
+    function isInvalidLicense(name) {
+      let licenses = licensesForPackage(name);
+
+      // verify all licenses for the package are in the config
+      return _.intersection(licenses, config.licenses).length < licenses.length;
+    }
+
+    // Build object containing only invalid packages
+    const invalidPackages = _.pick(packages, (pkg, name) => {
+      return isInvalidLicense(name);
+    });
+
+    if (Object.keys(invalidPackages).length) {
+      const util = require('util');
+      const execSync = require('child_process').execSync;
+      const names = Object.keys(invalidPackages);
+
+      // Uses npm ls to create tree for package locations
+      const tree = execSync(`npm ls ${names.join(' ')}`);
+
+      grunt.log.debug(JSON.stringify(invalidPackages, null, 2));
       grunt.fail.warn(
-        `Non-confirming licenses:\n ${_.pluck(invalidLicenses, 'path').join('\n')}`,
-        invalidLicenses.length
+        `Non-confirming licenses:\n ${names.join('\n ')}\n\n${tree}`,
+        invalidPackages.length
       );
     }
 
