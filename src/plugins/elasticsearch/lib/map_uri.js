@@ -1,6 +1,5 @@
 import querystring from 'querystring';
 import { resolve } from 'url';
-import setHeaders from './set_headers';
 
 export default function mapUri(server, prefix) {
 
@@ -14,7 +13,6 @@ export default function mapUri(server, prefix) {
     }
     const query = querystring.stringify(request.query);
     if (query) url += '?' + query;
-    const customHeaders = setHeaders(request.headers, config.get('elasticsearch.customHeaders'));
-    done(null, url, customHeaders);
+    done(null, url);
   };
 };
