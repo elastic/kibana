@@ -56,13 +56,16 @@ function stateMonitor(state, defaultState) {
 
   return {
     setDefaultState(defaultState) {
+      // check the current status
+      const currentStatus = getStatus();
+
       // update the originalState and apply ignoredProps
       if (!isPlainObject(defaultState)) throw new TypeError('The default state must be an object');
       setOriginalState(defaultState);
       removeIgnoredProps(originalState);
 
       // fire the change handler
-      dispatchChange();
+      if (!isEqual(currentStatus, getStatus())) dispatchChange();
     },
 
     ignoreProps(props) {

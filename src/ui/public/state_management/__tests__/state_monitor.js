@@ -168,14 +168,14 @@ describe('stateMonitor', function () {
         expect(status).to.have.property('dirty', true);
       });
 
-      it('should trigger the onChange handler without state change', function () {
+      it('should not trigger the onChange handler without state change', function () {
         monitor.setDefaultState(cloneDeep(mockState.toJSON()));
-        sinon.assert.calledOnce(changeStub);
+        sinon.assert.notCalled(changeStub);
       });
 
       it('should not change the status with matching state', function () {
         monitor.setDefaultState(cloneDeep(mockState.toJSON()));
-        sinon.assert.calledOnce(changeStub);
+        sinon.assert.notCalled(changeStub);
 
         const status = changeStub.firstCall.args[0];
         expect(status).to.have.property('clean', true);
