@@ -8,13 +8,13 @@ function stateMonitor(state, customInitialState) {
   let destroyed = false;
   let ignoredProps = [];
   let changeHandlers = [];
-  let originalState;
+  let initialState;
 
-  setOriginalState(customInitialState);
+  setInitialState(customInitialState);
 
-  function setOriginalState(initialState) {
+  function setInitialState(customInitialState) {
     // state.toJSON returns a reference, clone so we can mutate it safely
-    originalState = cloneDeep(initialState) || cloneDeep(state.toJSON());
+    initialState = cloneDeep(customInitialState) || cloneDeep(state.toJSON());
   }
 
   function removeIgnoredProps(state) {
@@ -27,7 +27,7 @@ function stateMonitor(state, customInitialState) {
   function getStatus() {
     // state.toJSON returns a reference, clone so we can mutate it safely
     const currentState = removeIgnoredProps(cloneDeep(state.toJSON()));
-    const isClean = isEqual(currentState, originalState);
+    const isClean = isEqual(currentState, initialState);
 
     return {
       clean: isClean,
@@ -55,22 +55,22 @@ function stateMonitor(state, customInitialState) {
   };
 
   return {
-    setDefaultState(customInitialState) {
+    setInitialState(customInitialState) {
       // check the current status
-      const currentStatus = getStatus();
+      const previousStatus = getStatus();
 
-      // update the originalState and apply ignoredProps
+      // update the initialState and apply ignoredProps
       if (!isPlainObject(customInitialState)) throw new TypeError('The default state must be an object');
-      setOriginalState(customInitialState);
-      removeIgnoredProps(originalState);
+      setInitialState(customInitialState);
+      removeIgnoredProps(initialState);
 
-      // fire the change handler
-      if (!isEqual(currentStatus, getStatus())) dispatchChange();
+      // fire the change handler if the status has changed
+      if (!isEqual(previousStatus, getStatus())) dispatchChange();
     },
 
     ignoreProps(props) {
       ignoredProps = ignoredProps.concat(props);
-      removeIgnoredProps(originalState);
+      removeIgnoredProps(initialState);
       return this;
     },
 

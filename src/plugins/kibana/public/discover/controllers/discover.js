@@ -293,7 +293,7 @@ define(function (require) {
 
         return savedSearch.save()
         .then(function (id) {
-          stateMonitor.setDefaultState($state.toJSON());
+          stateMonitor.setInitialState($state.toJSON());
           $scope.configTemplate.close('save');
 
           if (id) {

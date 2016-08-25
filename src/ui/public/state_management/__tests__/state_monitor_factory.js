@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash';
 import stateMonitor from 'ui/state_management/state_monitor_factory';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
 
-describe('stateMonitor', function () {
+describe('stateMonitorFactory', function () {
   const noop = () => {};
   const eventTypes = [
     'save_with_changes',
@@ -135,7 +135,7 @@ describe('stateMonitor', function () {
       });
     });
 
-    describe('setDefaultState', function () {
+    describe('setInitialState', function () {
       let changeStub;
 
       beforeEach(() => {
@@ -145,22 +145,22 @@ describe('stateMonitor', function () {
       });
 
       it('should throw if no state is provided', function () {
-        const fn = () => monitor.setDefaultState();
+        const fn = () => monitor.setInitialState();
         expect(fn).to.throwException(/must be an object/);
       });
 
       it('should throw if given the wrong type', function () {
-        const fn = () => monitor.setDefaultState([]);
+        const fn = () => monitor.setInitialState([]);
         expect(fn).to.throwException(/must be an object/);
       });
 
       it('should trigger the onChange handler', function () {
-        monitor.setDefaultState({ new: 'state' });
+        monitor.setInitialState({ new: 'state' });
         sinon.assert.calledOnce(changeStub);
       });
 
       it('should change the status with differing state', function () {
-        monitor.setDefaultState({ new: 'state' });
+        monitor.setInitialState({ new: 'state' });
         sinon.assert.calledOnce(changeStub);
 
         const status = changeStub.firstCall.args[0];
@@ -169,7 +169,7 @@ describe('stateMonitor', function () {
       });
 
       it('should not trigger the onChange handler without state change', function () {
-        monitor.setDefaultState(cloneDeep(mockState.toJSON()));
+        monitor.setInitialState(cloneDeep(mockState.toJSON()));
         sinon.assert.notCalled(changeStub);
       });
     });
