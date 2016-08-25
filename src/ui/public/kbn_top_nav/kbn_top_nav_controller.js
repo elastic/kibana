@@ -57,7 +57,7 @@ export default function ($compile) {
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        run: (item) => !item.disableButton && this.toggle(item.key)
+        run: (item) => this.toggle(item.key)
       }, opt);
 
       defaultedOpt.hideButton = result(opt, 'hideButton', false);
