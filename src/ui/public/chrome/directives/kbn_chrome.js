@@ -33,7 +33,7 @@ export default function (chrome, internals) {
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
-          let { href } = window.location;
+          const { href } = window.location;
           internals.trackPossibleSubUrl(href);
         };
 

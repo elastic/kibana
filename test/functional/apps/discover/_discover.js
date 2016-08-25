@@ -12,8 +12,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('discover app', function describeIndexTests() {
   bdd.before(function () {
-    let fromTime = '2015-09-19 06:31:44.000';
-    let toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
@@ -37,12 +37,12 @@ bdd.describe('discover app', function describeIndexTests() {
 
 
   bdd.describe('query', function () {
-    let queryName1 = 'Query # 1';
-    let fromTimeString = 'September 19th 2015, 06:31:44.000';
-    let toTimeString = 'September 23rd 2015, 18:31:44.000';
+    const queryName1 = 'Query # 1';
+    const fromTimeString = 'September 19th 2015, 06:31:44.000';
+    const toTimeString = 'September 23rd 2015, 18:31:44.000';
 
     bdd.it('should show correct time range string by timepicker', function () {
-      let expectedTimeRangeString = fromTimeString + ' to ' + toTimeString;
+      const expectedTimeRangeString = fromTimeString + ' to ' + toTimeString;
       return PageObjects.discover.getTimespanText()
       .then(function (actualTimeString) {
         expect(actualTimeString).to.be(expectedTimeRangeString);
@@ -50,7 +50,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('save query should show toast message and display query name', function () {
-      let expectedSavedQueryMessage = 'Discover: Saved Data Source "' + queryName1 + '"';
+      const expectedSavedQueryMessage = 'Discover: Saved Data Source "' + queryName1 + '"';
       return PageObjects.discover.saveSearch(queryName1)
       .then(function () {
         return PageObjects.header.getToastMessage();
@@ -85,7 +85,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show the correct hit count', function () {
-      let expectedHitCount = '14,004';
+      const expectedHitCount = '14,004';
       return PageObjects.common.try(function tryingForTime() {
         return PageObjects.discover.getHitCount()
         .then(function compareData(hitCount) {
@@ -95,7 +95,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show the correct bar chart', function () {
-      let expectedBarChartData = [ '3.237',
+      const expectedBarChartData = [ '3.237',
         '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
         '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
         '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
@@ -108,7 +108,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct time range string in chart', function () {
-      let expectedTimeRangeString = fromTimeString + ' - ' + toTimeString;
+      const expectedTimeRangeString = fromTimeString + ' - ' + toTimeString;
       return PageObjects.discover.getChartTimespan()
       .then(function (actualTimeString) {
         expect(actualTimeString).to.be(expectedTimeRangeString);
@@ -116,7 +116,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct initial chart interval of 3 hours', function () {
-      let expectedChartInterval = 'by 3 hours';
+      const expectedChartInterval = 'by 3 hours';
       return PageObjects.discover.getChartInterval()
       .then(function (actualInterval) {
         expect(actualInterval).to.be(expectedChartInterval);
@@ -124,8 +124,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Hourly', function () {
-      let chartInterval = 'Hourly';
-      let expectedBarChartData = [ '1.527', '2.290',
+      const chartInterval = 'Hourly';
+      const expectedBarChartData = [ '1.527', '2.290',
         '5.599', '7.890', '13.236', '30.290', '46.072', '55.490', '86.8',
         '112', '122.181', '131.6', '132.872', '113.527', '102.581',
         '81.709', '65.672', '43.781', '24.181', '14', '9.672', '6.109',
@@ -148,8 +148,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Daily', function () {
-      let chartInterval = 'Daily';
-      let expectedBarChartData = [
+      const chartInterval = 'Daily';
+      const expectedBarChartData = [
         '133.196', '129.192', '129.724'
       ];
       return PageObjects.discover.setChartInterval(chartInterval)
@@ -162,8 +162,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Weekly', function () {
-      let chartInterval = 'Weekly';
-      let expectedBarChartData = [ '66.598', '129.458'];
+      const chartInterval = 'Weekly';
+      const expectedBarChartData = [ '66.598', '129.458'];
       return PageObjects.discover.setChartInterval(chartInterval)
       .then(function () {
         return PageObjects.common.sleep(2000);
@@ -174,8 +174,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('browser back button should show previous interval Daily', function () {
-      let expectedChartInterval = 'Daily';
-      let expectedBarChartData = [
+      const expectedChartInterval = 'Daily';
+      const expectedBarChartData = [
         '133.196', '129.192', '129.724'
       ];
       return this.remote.goBack()
@@ -193,8 +193,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Monthly', function () {
-      let chartInterval = 'Monthly';
-      let expectedBarChartData = [ '122.535'];
+      const chartInterval = 'Monthly';
+      const expectedBarChartData = [ '122.535'];
       return PageObjects.discover.setChartInterval(chartInterval)
       .then(function () {
         return PageObjects.common.sleep(2000);
@@ -205,8 +205,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Yearly', function () {
-      let chartInterval = 'Yearly';
-      let expectedBarChartData = [ '122.535'];
+      const chartInterval = 'Yearly';
+      const expectedBarChartData = [ '122.535'];
       return PageObjects.discover.setChartInterval(chartInterval)
       .then(function () {
         return PageObjects.common.sleep(2000);
@@ -217,8 +217,8 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data for chart interval Auto', function () {
-      let chartInterval = 'Auto';
-      let expectedBarChartData = [ '3.237',
+      const chartInterval = 'Auto';
+      const expectedBarChartData = [ '3.237',
         '17.674', '64.75', '125.737', '119.962', '65.712', '16.449',
         '2.712', '3.675', '17.674', '59.762', '119.087', '123.812',
         '61.862', '15.487', '2.362', '2.800', '15.312', '61.862', '123.2',
@@ -234,7 +234,7 @@ bdd.describe('discover app', function describeIndexTests() {
     });
 
     bdd.it('should show Auto chart interval of 3 hours', function () {
-      let expectedChartInterval = 'by 3 hours';
+      const expectedChartInterval = 'by 3 hours';
       return PageObjects.discover.getChartInterval()
       .then(function (actualInterval) {
         expect(actualInterval).to.be(expectedChartInterval);
@@ -252,7 +252,7 @@ bdd.describe('discover app', function describeIndexTests() {
         return PageObjects.discover.getBarChartData()
         .then(function compareData(paths) {
           // the largest bars are over 100 pixels high so this is less than 1% tolerance
-          let barHeightTolerance = 1;
+          const barHeightTolerance = 1;
           let stringResults = '';
           let hasFailure = false;
           for (let y = 0; y < expectedBarChartData.length; y++) {
@@ -277,8 +277,8 @@ bdd.describe('discover app', function describeIndexTests() {
   });
 
   bdd.describe('query #2, which has an empty time range', function () {
-    let fromTime = '1999-06-11 09:22:11.000';
-    let toTime = '1999-06-12 11:21:04.000';
+    const fromTime = '1999-06-11 09:22:11.000';
+    const toTime = '1999-06-12 11:21:04.000';
 
     bdd.before(() => {
       PageObjects.common.debug('setAbsoluteRangeForAnotherQuery');

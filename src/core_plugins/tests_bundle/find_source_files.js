@@ -5,7 +5,7 @@ import { resolve } from 'path';
 import { map, fromNode } from 'bluebird';
 import glob from 'glob-all';
 
-let findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
+const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   patterns = [].concat(patterns || []);
 
   const matches = await fromNode(cb => {

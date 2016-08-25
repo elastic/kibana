@@ -10,8 +10,8 @@ import PageObjects from '../../../support/page_objects';
 
 bdd.describe('visualize app', function describeIndexTests() {
   bdd.before(function () {
-    let fromTime = '2015-09-19 06:31:44.000';
-    let toTime = '2015-09-23 18:31:44.000';
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
     PageObjects.common.debug('navigateToApp visualize');
     return PageObjects.common.navigateToApp('visualize')
@@ -51,10 +51,10 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('line charts', function indexPatternCreation() {
-    let vizName1 = 'Visualization LineChart';
+    const vizName1 = 'Visualization LineChart';
 
     bdd.it('should be able to save and load', function pageHeader() {
-      let remote = this.remote;
+      const remote = this.remote;
 
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
@@ -75,11 +75,11 @@ bdd.describe('visualize app', function describeIndexTests() {
 
     bdd.it('should show correct chart, take screenshot', function pageHeader() {
 
-      let remote = this.remote;
+      const remote = this.remote;
 
       // this test only verifies the numerical part of this data
       // it could also check the legend to verify the extensions
-      let expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
+      const expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
       // sleep a bit before trying to get the chart data
       return PageObjects.common.sleep(3000)
@@ -87,7 +87,7 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.getLineChartData('fill="#57c17b"')
         .then(function showData(data) {
           PageObjects.common.saveScreenshot('Visualize-line-chart');
-          let tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+          const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
           for (let x = 0; x < data.length; x++) {
             PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
               (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
@@ -101,8 +101,8 @@ bdd.describe('visualize app', function describeIndexTests() {
 
     bdd.it('should show correct data', function pageHeader() {
 
-      let remote = this.remote;
-      let expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
+      const remote = this.remote;
+      const expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
       return PageObjects.visualize.collapseChart()
       .then(function getDataTableData() {

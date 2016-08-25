@@ -1,5 +1,5 @@
 import _ from 'lodash';
-let keys = {};
+const keys = {};
 export default {
   get: function (path, def) {
     return keys[path] == null ? def : keys[path];

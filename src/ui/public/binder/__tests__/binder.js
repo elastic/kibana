@@ -16,13 +16,13 @@ describe('Binder class', function () {
   context('Constructing with a $scope', function () {
     it('accepts a $scope and listens for $destroy', function () {
       sinon.stub($scope, '$on');
-      let binder = new Binder($scope);
+      const binder = new Binder($scope);
       expect($scope.$on.callCount).to.be(1);
       expect($scope.$on.args[0][0]).to.be('$destroy');
     });
 
     it('unbinds when the $scope is destroyed', function () {
-      let binder = new Binder($scope);
+      const binder = new Binder($scope);
       sinon.stub(binder, 'destroy');
       $scope.$destroy();
       expect(binder.destroy.callCount).to.be(1);
@@ -31,12 +31,12 @@ describe('Binder class', function () {
 
   describe('Binder#on', function () {
     it('binds to normal event emitters', function () {
-      let binder = new Binder();
-      let emitter = {
+      const binder = new Binder();
+      const emitter = {
         on: sinon.stub(),
         removeListener: sinon.stub()
       };
-      let handler = sinon.stub();
+      const handler = sinon.stub();
 
       binder.on(emitter, 'click', handler);
       expect(emitter.on.callCount).to.be(1);
@@ -52,9 +52,9 @@ describe('Binder class', function () {
 
   describe('Binder#jqOn', function () {
     it('binds jquery event handlers', function () {
-      let binder = new Binder();
-      let el = document.createElement('div');
-      let handler = sinon.stub();
+      const binder = new Binder();
+      const el = document.createElement('div');
+      const handler = sinon.stub();
 
       binder.jqOn(el, 'click', handler);
       $(el).click();

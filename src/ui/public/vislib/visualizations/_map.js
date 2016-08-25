@@ -13,19 +13,19 @@ import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visual
 import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
 export default function MapFactory(Private, tilemap, $sanitize) {
 
-  let defaultMapZoom = 2;
-  let defaultMapCenter = [15, 5];
-  let defaultMarkerType = 'Scaled Circle Markers';
+  const defaultMapZoom = 2;
+  const defaultMapCenter = [15, 5];
+  const defaultMarkerType = 'Scaled Circle Markers';
 
-  let tilemapOptions = tilemap.options;
-  let attribution = $sanitize(marked(tilemapOptions.attribution));
+  const tilemapOptions = tilemap.options;
+  const attribution = $sanitize(marked(tilemapOptions.attribution));
 
-  let mapTiles = {
+  const mapTiles = {
     url: tilemap.url,
     options: _.assign({}, tilemapOptions, { attribution })
   };
 
-  let markerTypes = {
+  const markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
     'Shaded Circle Markers': Private(VislibVisualizationsMarkerTypesShadedCirclesProvider),
     'Shaded Geohash Grid': Private(VislibVisualizationsMarkerTypesGeohashGridProvider),
@@ -55,7 +55,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
     this._mapCenter = params.center || defaultMapCenter;
     this._attr = params.attr || {};
 
-    let mapOptions = {
+    const mapOptions = {
       minZoom: tilemapOptions.minZoom,
       maxZoom: tilemapOptions.maxZoom,
       noWrap: true,
@@ -70,8 +70,8 @@ export default function MapFactory(Private, tilemap, $sanitize) {
   TileMapMap.prototype.addBoundingControl = function () {
     if (this._boundingControl) return;
 
-    let self = this;
-    let drawOptions = { draw: {} };
+    const self = this;
+    const drawOptions = { draw: {} };
 
     _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
       if (self._events && !self._events.listenerCount(drawShape)) {
@@ -93,11 +93,11 @@ export default function MapFactory(Private, tilemap, $sanitize) {
   TileMapMap.prototype.addFitControl = function () {
     if (this._fitControl) return;
 
-    let self = this;
-    let fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
+    const self = this;
+    const fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
 
     // Add button to fit container to points
-    let FitControl = L.Control.extend({
+    const FitControl = L.Control.extend({
       options: {
         position: 'topleft'
       },
@@ -129,7 +129,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
   TileMapMap.prototype.addTitle = function (mapLabel) {
     if (this._label) return;
 
-    let label = this._label = L.control();
+    const label = this._label = L.control();
 
     label.onAdd = function () {
       this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
@@ -200,13 +200,13 @@ export default function MapFactory(Private, tilemap, $sanitize) {
    * @return {Object} marker layer
    */
   TileMapMap.prototype._createMarkers = function (options) {
-    let MarkerType = markerTypes[this._markerType];
+    const MarkerType = markerTypes[this._markerType];
     return new MarkerType(this.map, this._geoJson, options);
   };
 
   TileMapMap.prototype._attachEvents = function () {
-    let self = this;
-    let saturateTiles = self.saturateTiles.bind(self);
+    const self = this;
+    const saturateTiles = self.saturateTiles.bind(self);
 
     this._tileLayer.on('tileload', saturateTiles);
 
@@ -233,11 +233,11 @@ export default function MapFactory(Private, tilemap, $sanitize) {
     });
 
     this.map.on('draw:created', function (e) {
-      let drawType = e.layerType;
+      const drawType = e.layerType;
       if (!self._events || !self._events.listenerCount(drawType)) return;
 
       // TODO: Different drawTypes need differ info. Need a switch on the object creation
-      let bounds = e.layer.getBounds();
+      const bounds = e.layer.getBounds();
 
       let SElng = bounds.getSouthEast().lng;
       if (SElng > 180) {

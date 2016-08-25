@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 describe('update filters', function () {
-  let storeNames = {
+  const storeNames = {
     app: 'appState',
     global: 'globalState'
   };

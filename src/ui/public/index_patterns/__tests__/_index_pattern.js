@@ -21,7 +21,7 @@ describe('index pattern', function () {
   let DocSource;
   let config;
   let docSourceResponse;
-  let indexPatternId = 'test-pattern';
+  const indexPatternId = 'test-pattern';
   let indexPattern;
   let calculateIndices;
   let $rootScope;

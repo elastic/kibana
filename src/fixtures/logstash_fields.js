@@ -1,5 +1,5 @@
 function stubbedLogstashFields() {
-  let sourceData = [
+  const sourceData = [
     { name: 'bytes',              type: 'number',     indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 10 },
     { name: 'ssl',                type: 'boolean',    indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 20 },
     { name: '@timestamp',         type: 'date',       indexed: true,  analyzed: true, sortable:  true,  filterable: true,   count: 30 },

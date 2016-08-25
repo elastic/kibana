@@ -6,7 +6,7 @@ import DocTitleProvider from 'ui/doc_title';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
-  let MAIN_TITLE = 'Kibana 4';
+  const MAIN_TITLE = 'Kibana 4';
 
   let docTitle;
   let $rootScope;
@@ -36,9 +36,9 @@ describe('docTitle Service', function () {
 
   describe('setup', function () {
     it('resets the title when a route change begins', function () {
-      let spy = $rootScope.$on;
+      const spy = $rootScope.$on;
 
-      let found = spy.args.some(function (args) {
+      const found = spy.args.some(function (args) {
         return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
       });
 

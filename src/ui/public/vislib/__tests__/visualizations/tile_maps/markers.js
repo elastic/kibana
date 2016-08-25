@@ -12,9 +12,9 @@ import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visu
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
 import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
 // defaults to roughly the lower 48 US states
-let defaultSWCoords = [13.496, -143.789];
-let defaultNECoords = [55.526, -57.919];
-let bounds = {};
+const defaultSWCoords = [13.496, -143.789];
+const defaultNECoords = [55.526, -57.919];
+const bounds = {};
 let MarkerType;
 let map;
 
@@ -29,7 +29,7 @@ function getBounds() {
   return L.latLngBounds(bounds.southWest, bounds.northEast);
 }
 
-let mockMap = {
+const mockMap = {
   addLayer: _.noop,
   closePopup: _.noop,
   getBounds: getBounds,
@@ -76,8 +76,8 @@ describe('Marker Tests', function () {
       it('should not filter any features', function () {
         // set bounds to the entire world
         setBounds([-87.252, -343.828], [87.252, 343.125]);
-        let boundFilter = markerLayer._filterToMapBounds();
-        let mapFeature = mapData.features.filter(boundFilter);
+        const boundFilter = markerLayer._filterToMapBounds();
+        const mapFeature = mapData.features.filter(boundFilter);
 
         expect(mapFeature.length).to.equal(mapData.features.length);
       });
@@ -85,8 +85,8 @@ describe('Marker Tests', function () {
       it('should filter out data points that are outside of the map bounds', function () {
         // set bounds to roughly US southwest
         setBounds([31.690, -124.387], [42.324, -102.919]);
-        let boundFilter = markerLayer._filterToMapBounds();
-        let mapFeature = mapData.features.filter(boundFilter);
+        const boundFilter = markerLayer._filterToMapBounds();
+        const mapFeature = mapData.features.filter(boundFilter);
 
         expect(mapFeature.length).to.be.lessThan(mapData.features.length);
       });
@@ -94,8 +94,8 @@ describe('Marker Tests', function () {
 
     describe('legendQuantizer', function () {
       it('should return a range of hex colors', function () {
-        let minColor = markerLayer._legendQuantizer(mapData.properties.allmin);
-        let maxColor = markerLayer._legendQuantizer(mapData.properties.allmax);
+        const minColor = markerLayer._legendQuantizer(mapData.properties.allmin);
+        const maxColor = markerLayer._legendQuantizer(mapData.properties.allmax);
 
         expect(minColor.substring(0, 1)).to.equal('#');
         expect(minColor).to.have.length(7);
@@ -105,18 +105,18 @@ describe('Marker Tests', function () {
       });
 
       it('should return a color with 1 color', function () {
-        let geoJson = { properties: { min: 1, max: 1 } };
+        const geoJson = { properties: { min: 1, max: 1 } };
         markerLayer = createMarker(MarkerClass, geoJson);
 
         // ensure the quantizer domain is correct
-        let color = markerLayer._legendQuantizer(1);
+        const color = markerLayer._legendQuantizer(1);
         expect(color).to.not.be(undefined);
         expect(color.substring(0, 1)).to.equal('#');
 
         // should always get the same color back
         _.times(5, function () {
-          let num = _.random(0, 100);
-          let randColor = markerLayer._legendQuantizer(0);
+          const num = _.random(0, 100);
+          const randColor = markerLayer._legendQuantizer(0);
           expect(randColor).to.equal(color);
         });
       });
@@ -124,19 +124,19 @@ describe('Marker Tests', function () {
 
     describe('applyShadingStyle', function () {
       it('should return a style object', function () {
-        let style = markerLayer.applyShadingStyle(100);
+        const style = markerLayer.applyShadingStyle(100);
         expect(style).to.be.an('object');
 
-        let keys = _.keys(style);
-        let expected = ['fillColor', 'color'];
+        const keys = _.keys(style);
+        const expected = ['fillColor', 'color'];
         _.each(expected, function (key) {
           expect(keys).to.contain(key);
         });
       });
 
       it('should use the legendQuantizer', function () {
-        let spy = sinon.spy(markerLayer, '_legendQuantizer');
-        let style = markerLayer.applyShadingStyle(100);
+        const spy = sinon.spy(markerLayer, '_legendQuantizer');
+        const style = markerLayer.applyShadingStyle(100);
         expect(spy.callCount).to.equal(1);
       });
     });
@@ -144,9 +144,9 @@ describe('Marker Tests', function () {
     describe('showTooltip', function () {
       it('should use the tooltip formatter', function () {
         let content;
-        let sample = _.sample(mapData.features);
+        const sample = _.sample(mapData.features);
 
-        let stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
+        const stub = sinon.stub(markerLayer, '_tooltipFormatter', function (val) {
           return;
         });
 
@@ -186,12 +186,12 @@ describe('Marker Tests', function () {
       });
 
       it('should use the value formatter', function () {
-        let formatterSpy = sinon.spy(markerLayer, '_valueFormatter');
+        const formatterSpy = sinon.spy(markerLayer, '_valueFormatter');
         // called twice for every legend color defined
-        let expectedCallCount = markerLayer._legendColors.length * 2;
+        const expectedCallCount = markerLayer._legendColors.length * 2;
 
         markerLayer.addLegend();
-        let legend = markerLayer._legend.onAdd();
+        const legend = markerLayer._legend.onAdd();
 
         expect(formatterSpy.callCount).to.equal(expectedCallCount);
         expect(legend).to.be.a(HTMLDivElement);
@@ -202,14 +202,14 @@ describe('Marker Tests', function () {
   describe('Shaded Circles', function () {
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
-      let MarkerClass = Private(VislibVisualizationsMarkerTypesShadedCirclesProvider);
+      const MarkerClass = Private(VislibVisualizationsMarkerTypesShadedCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
     describe('geohashMinDistance method', function () {
       it('should return a finite number', function () {
-        let sample = _.sample(mapData.features);
-        let distance = markerLayer._geohashMinDistance(sample);
+        const sample = _.sample(mapData.features);
+        const distance = markerLayer._geohashMinDistance(sample);
 
         expect(distance).to.be.a('number');
         expect(_.isFinite(distance)).to.be(true);
@@ -224,34 +224,34 @@ describe('Marker Tests', function () {
     beforeEach(ngMock.inject(function (Private) {
       zoom = _.random(1, 18);
       sinon.stub(mockMap, 'getZoom', _.constant(zoom));
-      let MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
+      const MarkerClass = Private(VislibVisualizationsMarkerTypesScaledCirclesProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
     describe('radiusScale method', function () {
-      let valueArray = [10, 20, 30, 40, 50, 60];
-      let max = _.max(valueArray);
-      let prev = -1;
+      const valueArray = [10, 20, 30, 40, 50, 60];
+      const max = _.max(valueArray);
+      const prev = -1;
 
       it('should return 0 for value of 0', function () {
         expect(markerLayer._radiusScale(0)).to.equal(0);
       });
 
       it('should return a scaled value for negative and positive numbers', function () {
-        let upperBound = markerLayer._radiusScale(max);
-        let results = [];
+        const upperBound = markerLayer._radiusScale(max);
+        const results = [];
 
         function roundValue(value) {
           // round number to 6 decimal places
-          let r = Math.pow(10, 6);
+          const r = Math.pow(10, 6);
           return Math.round(value * r) / r;
         }
 
         _.each(valueArray, function (value, i) {
-          let ratio = Math.pow(value / max, 0.5);
-          let comparison = ratio * upperBound;
-          let radius = markerLayer._radiusScale(value);
-          let negRadius = markerLayer._radiusScale(value * -1);
+          const ratio = Math.pow(value / max, 0.5);
+          const comparison = ratio * upperBound;
+          const radius = markerLayer._radiusScale(value);
+          const negRadius = markerLayer._radiusScale(value * -1);
           results.push(radius);
 
           expect(negRadius).to.equal(radius);
@@ -269,7 +269,7 @@ describe('Marker Tests', function () {
   describe('Heatmaps', function () {
     beforeEach(ngMock.module('MarkerFactory'));
     beforeEach(ngMock.inject(function (Private) {
-      let MarkerClass = Private(VislibVisualizationsMarkerTypesHeatmapProvider);
+      const MarkerClass = Private(VislibVisualizationsMarkerTypesHeatmapProvider);
       markerLayer = createMarker(MarkerClass);
     }));
 
@@ -281,7 +281,7 @@ describe('Marker Tests', function () {
       });
 
       it('should return an array or values for each feature', function () {
-        let arr = markerLayer._dataToHeatArray(max);
+        const arr = markerLayer._dataToHeatArray(max);
         expect(arr).to.be.an('array');
         expect(arr).to.have.length(mapData.features.length);
 
@@ -289,11 +289,11 @@ describe('Marker Tests', function () {
 
       it('should return an array item with lat, lng, metric for each feature', function () {
         _.times(3, function () {
-          let arr = markerLayer._dataToHeatArray(max);
-          let index = _.random(mapData.features.length - 1);
-          let feature = mapData.features[index];
-          let featureValue = feature.properties.value;
-          let featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
+          const arr = markerLayer._dataToHeatArray(max);
+          const index = _.random(mapData.features.length - 1);
+          const feature = mapData.features[index];
+          const featureValue = feature.properties.value;
+          const featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });
       });
@@ -302,11 +302,11 @@ describe('Marker Tests', function () {
         _.times(5, function () {
           markerLayer._attr.heatNormalizeData = true;
 
-          let arr = markerLayer._dataToHeatArray(max);
-          let index = _.random(mapData.features.length - 1);
-          let feature = mapData.features[index];
-          let featureValue = feature.properties.value / max;
-          let featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
+          const arr = markerLayer._dataToHeatArray(max);
+          const index = _.random(mapData.features.length - 1);
+          const feature = mapData.features[index];
+          const featureValue = feature.properties.value / max;
+          const featureArr = feature.geometry.coordinates.slice(0).concat(featureValue);
           expect(arr[index]).to.eql(featureArr);
         });
       });
@@ -315,18 +315,18 @@ describe('Marker Tests', function () {
     describe('tooltipProximity', function () {
       it('should return true if feature is close enough to event latlng', function () {
         _.times(5, function () {
-          let feature = _.sample(mapData.features);
-          let point = markerLayer._getLatLng(feature);
-          let arr = markerLayer._tooltipProximity(point, feature);
+          const feature = _.sample(mapData.features);
+          const point = markerLayer._getLatLng(feature);
+          const arr = markerLayer._tooltipProximity(point, feature);
           expect(arr).to.be(true);
         });
       });
 
       it('should return false if feature is not close enough to event latlng', function () {
         _.times(5, function () {
-          let feature = _.sample(mapData.features);
-          let point = L.latLng(90, -180);
-          let arr = markerLayer._tooltipProximity(point, feature);
+          const feature = _.sample(mapData.features);
+          const point = L.latLng(90, -180);
+          const arr = markerLayer._tooltipProximity(point, feature);
           expect(arr).to.be(false);
         });
       });
@@ -335,9 +335,9 @@ describe('Marker Tests', function () {
     describe('nearestFeature', function () {
       it('should return nearest geoJson feature object', function () {
         _.times(5, function () {
-          let feature = _.sample(mapData.features);
-          let point = markerLayer._getLatLng(feature);
-          let nearestPoint = markerLayer._nearestFeature(point);
+          const feature = _.sample(mapData.features);
+          const point = markerLayer._getLatLng(feature);
+          const nearestPoint = markerLayer._nearestFeature(point);
           expect(nearestPoint).to.equal(feature);
         });
       });
@@ -345,15 +345,15 @@ describe('Marker Tests', function () {
 
     describe('getLatLng', function () {
       it('should return a leaflet latLng object', function () {
-        let feature = _.sample(mapData.features);
-        let latLng = markerLayer._getLatLng(feature);
-        let compare = L.latLng(feature.geometry.coordinates.slice(0).reverse());
+        const feature = _.sample(mapData.features);
+        const latLng = markerLayer._getLatLng(feature);
+        const compare = L.latLng(feature.geometry.coordinates.slice(0).reverse());
         expect(latLng).to.eql(compare);
       });
 
       it('should memoize the result', function () {
-        let spy = sinon.spy(L, 'latLng');
-        let feature = _.sample(mapData.features);
+        const spy = sinon.spy(L, 'latLng');
+        const feature = _.sample(mapData.features);
 
         markerLayer._getLatLng(feature);
         expect(spy.callCount).to.be(1);

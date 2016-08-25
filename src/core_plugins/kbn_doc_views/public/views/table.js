@@ -26,7 +26,7 @@ docViewsRegistry.register(function () {
         };
 
         $scope.showArrayInObjectsWarning = function (row, field) {
-          let value = $scope.flattened[field];
+          const value = $scope.flattened[field];
           return _.isArray(value) && typeof value[0] === 'object';
         };
       }

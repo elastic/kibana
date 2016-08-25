@@ -11,7 +11,7 @@ export default function GeoHashAggDefinition(Private, config) {
    * Map Leaflet zoom levels to geohash precision levels.
    * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
    */
-  let zoomPrecision = {};
+  const zoomPrecision = {};
   const minGeohashPixels = 16;
   for (let zoom = 0; zoom <= 21; zoom += 1) {
     const worldPixels = 256 * Math.pow(2, zoom);

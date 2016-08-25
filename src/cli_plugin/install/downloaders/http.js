@@ -53,7 +53,7 @@ export default async function downloadUrl(logger, sourceUrl, targetPath, timeout
     const { req, resp } = await sendRequest({ sourceUrl, timeout });
 
     try {
-      let totalSize = parseFloat(resp.headers['content-length']) || 0;
+      const totalSize = parseFloat(resp.headers['content-length']) || 0;
       const progress = new Progress(logger);
       progress.init(totalSize);
 

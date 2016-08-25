@@ -8,8 +8,8 @@ import 'ui/directives/validate_index_name';
 describe('Validate index name directive', function () {
   let $compile;
   let $rootScope;
-  let noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';
-  let allowWildcardHtml = '<input type="text" ng-model="indexName" allow-wildcard validate-index-name />';
+  const noWildcardHtml = '<input type="text" ng-model="indexName" validate-index-name />';
+  const allowWildcardHtml = '<input type="text" ng-model="indexName" allow-wildcard validate-index-name />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -20,7 +20,7 @@ describe('Validate index name directive', function () {
 
   function checkPattern(input, html) {
     $rootScope.indexName = input;
-    let element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
     $rootScope.$digest();
     return element;
   }
@@ -57,7 +57,7 @@ describe('Validate index name directive', function () {
 
   badPatterns.forEach(function (pattern) {
     it('should not accept index pattern: ' + pattern, function () {
-      let element = checkPattern(pattern, noWildcardHtml);
+      const element = checkPattern(pattern, noWildcardHtml);
       expect(element.hasClass('ng-invalid')).to.be(true);
       expect(element.hasClass('ng-valid')).to.not.be(true);
     });
@@ -65,7 +65,7 @@ describe('Validate index name directive', function () {
 
   goodPatterns.forEach(function (pattern) {
     it('should accept index pattern: ' + pattern, function () {
-      let element = checkPattern(pattern, noWildcardHtml);
+      const element = checkPattern(pattern, noWildcardHtml);
       expect(element.hasClass('ng-invalid')).to.not.be(true);
       expect(element.hasClass('ng-valid')).to.be(true);
     });
@@ -73,7 +73,7 @@ describe('Validate index name directive', function () {
 
   it('should disallow wildcards by default', function () {
     wildcardPatterns.forEach(function (pattern) {
-      let element = checkPattern(pattern, noWildcardHtml);
+      const element = checkPattern(pattern, noWildcardHtml);
       expect(element.hasClass('ng-invalid')).to.be(true);
       expect(element.hasClass('ng-valid')).to.not.be(true);
     });
@@ -81,7 +81,7 @@ describe('Validate index name directive', function () {
 
   it('should allow wildcards if the allow-wildcard attribute is present', function () {
     wildcardPatterns.forEach(function (pattern) {
-      let element = checkPattern(pattern, allowWildcardHtml);
+      const element = checkPattern(pattern, allowWildcardHtml);
       expect(element.hasClass('ng-invalid')).to.not.be(true);
       expect(element.hasClass('ng-valid')).to.be(true);
     });

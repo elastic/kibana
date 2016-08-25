@@ -16,11 +16,11 @@ bdd.describe('visualize app', function () {
   this.timeout = defaultTimeout;
 
   bdd.before(function () {
-    let self = this;
+    const self = this;
     remote.setWindowSize(1280,800);
 
     PageObjects.common.debug('Starting visualize before method');
-    let logstash = scenarioManager.loadIfEmpty('logstashFunctional');
+    const logstash = scenarioManager.loadIfEmpty('logstashFunctional');
     // delete .kibana index and update configDoc
     return esClient.deleteAndUpdateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'})
     .then(function loadkibanaIndexPattern() {

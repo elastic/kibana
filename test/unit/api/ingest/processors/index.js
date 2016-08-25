@@ -1,18 +1,18 @@
 define(function (require) {
-  let append = require('./_append');
-  let convert = require('./_convert');
-  let date = require('./_date');
-  let geoip = require('./_geoip');
-  let grok = require('./_grok');
-  let gsub = require('./_gsub');
-  let join = require('./_join');
-  let lowercase = require('./_lowercase');
-  let remove = require('./_remove');
-  let rename = require('./_rename');
-  let set = require('./_set');
-  let split = require('./_split');
-  let trim = require('./_trim');
-  let uppercase = require('./_uppercase');
+  const append = require('./_append');
+  const convert = require('./_convert');
+  const date = require('./_date');
+  const geoip = require('./_geoip');
+  const grok = require('./_grok');
+  const gsub = require('./_gsub');
+  const join = require('./_join');
+  const lowercase = require('./_lowercase');
+  const remove = require('./_remove');
+  const rename = require('./_rename');
+  const set = require('./_set');
+  const split = require('./_split');
+  const trim = require('./_trim');
+  const uppercase = require('./_uppercase');
 
   return function processors(bdd, scenarioManager, request) {
     append(bdd, scenarioManager, request);

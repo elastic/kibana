@@ -6,7 +6,7 @@ export default function PendingRequestList() {
    * they are processed by fetch.[sourceType]().
    * @type {Array}
    */
-  let queue = [];
+  const queue = [];
 
   queue.getInactive = function (/* strategies */) {
     return queue.get.apply(queue, arguments)

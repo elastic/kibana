@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-let opts = [
+const opts = [
   /@((?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+\.js)\:(\d+)(?:\:(\d+)|())/ig,
   /(?: \(|at )((?:[!#$&-;=?-\[\]_a-z~]|%[0-9a-f]{2})+\.js)\:(\d+)(?:\:(\d+)|())/ig
 ];
@@ -8,7 +8,7 @@ let opts = [
 let sample;
 try { throw new Error('msg'); } catch (e) { sample = e.stack; }
 
-let format = _.find(opts, function (format) {
+const format = _.find(opts, function (format) {
   return format.test(sample);
 });
 

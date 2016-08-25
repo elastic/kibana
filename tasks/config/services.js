@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
-  let { resolve } = require('path');
-  let rootDir = grunt.config.get('root');
+  const { resolve } = require('path');
+  const rootDir = grunt.config.get('root');
 
   return [
     ['launchd', '10.9'],

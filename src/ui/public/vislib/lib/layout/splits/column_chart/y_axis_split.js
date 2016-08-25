@@ -10,10 +10,10 @@ define(function () {
 
     // render and get bounding box width
     return function (selection, parent, opts) {
-      let yAxis = opts && opts.yAxis;
+      const yAxis = opts && opts.yAxis;
 
       selection.each(function () {
-        let div = d3.select(this);
+        const div = d3.select(this);
 
         div.call(setWidth, yAxis);
 
@@ -31,14 +31,14 @@ define(function () {
     function setWidth(el, yAxis) {
       if (!yAxis) return;
 
-      let padding = 5;
-      let height = parseInt(el.node().clientHeight, 10);
+      const padding = 5;
+      const height = parseInt(el.node().clientHeight, 10);
 
       // render svg and get the width of the bounding box
-      let svg = d3.select('body')
+      const svg = d3.select('body')
       .append('svg')
       .attr('style', 'position:absolute; top:-10000; left:-10000');
-      let width = svg.append('g')
+      const width = svg.append('g')
       .call(yAxis.getYAxis(height)).node().getBBox().width + padding;
       svg.remove();
 

@@ -1,9 +1,9 @@
 define(function (require) {
-  let Promise = require('bluebird');
-  let _ = require('intern/dojo/node!lodash');
-  let expect = require('intern/dojo/node!expect.js');
-  let fakeNamesIndexTemplate = require('intern/dojo/node!../../fixtures/fake_names_index_template.json');
-  let fs = require('intern/dojo/node!fs');
+  const Promise = require('bluebird');
+  const _ = require('intern/dojo/node!lodash');
+  const expect = require('intern/dojo/node!expect.js');
+  const fakeNamesIndexTemplate = require('intern/dojo/node!../../fixtures/fake_names_index_template.json');
+  const fs = require('intern/dojo/node!fs');
 
   return function (bdd, scenarioManager, request) {
     const es = scenarioManager.client;
@@ -33,7 +33,7 @@ define(function (require) {
       });
 
       bdd.it('should also accept the raw csv data in the payload body', function () {
-        let csvData = fs.readFileSync('test/unit/fixtures/fake_names_big.csv', {encoding: 'utf8'});
+        const csvData = fs.readFileSync('test/unit/fixtures/fake_names_big.csv', {encoding: 'utf8'});
 
         return request.post('/kibana/names/_data')
         .send(csvData)

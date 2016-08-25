@@ -1,8 +1,8 @@
 define(function (require) {
-  let Promise = require('bluebird');
-  let createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
-  let _ = require('intern/dojo/node!lodash');
-  let expect = require('intern/dojo/node!expect.js');
+  const Promise = require('bluebird');
+  const createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
+  const _ = require('intern/dojo/node!lodash');
+  const expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager, request) {
     bdd.describe('POST ingest', function postIngest() {
@@ -101,7 +101,7 @@ define(function (require) {
               id: 'logstash-*'
             })
             .then(function (res) {
-              let fields = JSON.parse(res._source.fields);
+              const fields = JSON.parse(res._source.fields);
               // @timestamp was created with only name and type, all other fields should be set as defaults by API
               expect(res._source.title).to.be('logstash-*');
               expect(fields[1].name).to.be('@timestamp');
@@ -142,7 +142,7 @@ define(function (require) {
           .then(function () {
             return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
             .then(function (template) {
-              let mappings = template['kibana-logstash-*'].mappings._default_.properties;
+              const mappings = template['kibana-logstash-*'].mappings._default_.properties;
               expect(mappings).to.be.ok();
               expect(_.isEqual(mappings.ip, {index: true, type: 'ip', doc_values: true})).to.be.ok();
               expect(_.isEqual(mappings['@timestamp'], {index: true, type: 'date', doc_values: true})).to.be.ok();
@@ -220,7 +220,7 @@ define(function (require) {
 
       bdd.it('should return 409 conflict when the pattern matches existing indices',
         function existingIndicesConflict() {
-          let ingestConfig = createTestData();
+          const ingestConfig = createTestData();
           ingestConfig.index_pattern.id = ingestConfig.index_pattern.title = '.kib*';
 
           return request.post('/kibana/ingest')
@@ -229,7 +229,7 @@ define(function (require) {
         });
 
       bdd.it('should enforce snake_case in the request body', function () {
-        let ingestConfig = createTestData();
+        const ingestConfig = createTestData();
         ingestConfig.index_pattern = _.mapKeys(ingestConfig.index_pattern, function (value, key) {
           return _.camelCase(key);
         });

@@ -4,9 +4,9 @@ import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/comp
 import VislibComponentsZeroInjectionZeroFillDataArrayProvider from 'ui/vislib/components/zero_injection/zero_fill_data_array';
 export default function ZeroInjectionUtilService(Private) {
 
-  let orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
-  let createZeroFilledArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
-  let zeroFillDataArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
+  const orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+  const createZeroFilledArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
+  const zeroFillDataArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
 
   /*
    * A Kibana data object may have multiple series with different array lengths.
@@ -34,12 +34,12 @@ export default function ZeroInjectionUtilService(Private) {
       throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
     }
 
-    let keys = orderXValues(obj);
-    let arr = getDataArray(obj);
+    const keys = orderXValues(obj);
+    const arr = getDataArray(obj);
 
     arr.forEach(function (object) {
       object.series.forEach(function (series) {
-        let zeroArray = createZeroFilledArray(keys);
+        const zeroArray = createZeroFilledArray(keys);
 
         series.values = zeroFillDataArray(zeroArray, series.values);
       });

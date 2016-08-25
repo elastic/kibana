@@ -37,7 +37,7 @@ bdd.describe('initial state', function () {
   });
 
   bdd.it('should contain default index pattern', function () {
-    let defaultPattern = 'logstash-*';
+    const defaultPattern = 'logstash-*';
 
     return PageObjects.settings.getIndexPatternField().getProperty('value')
     .then(function (pattern) {
