@@ -11,9 +11,10 @@ import {
   unhashQueryString,
 } from 'ui/state_management/state_hashing';
 import {
-  createStorageHash,
-  HashingStore,
+  createStateHash,
+  isStateHash,
 } from 'ui/state_management/state_storage';
+import HashedItemStore from 'ui/state_management/state_storage/hashed_item_store';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import EventsProvider from 'ui/events';
 
@@ -37,14 +38,14 @@ describe('State Management', function () {
       const { param, initial, storeInHash } = (opts || {});
       sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
       const store = new StubBrowserStorage();
-      const hashingStore = new HashingStore(createStorageHash, store);
-      const state = new State(param, initial, { hashingStore, notifier });
+      const hashedItemStore = new HashedItemStore(store);
+      const state = new State(param, initial, hashedItemStore, notifier);
 
       const getUnhashedSearch = state => {
         return unhashQueryString($location.search(), [ state ]);
       };
 
-      return { notifier, store, hashingStore, state, getUnhashedSearch };
+      return { notifier, store, hashedItemStore, state, getUnhashedSearch };
     };
   }));
 
@@ -191,18 +192,18 @@ describe('State Management', function () {
   });
 
   describe('Hashing', () => {
-    it('stores state values in a hashingStore, writing the hash to the url', () => {
-      const { state, hashingStore } = setup({ storeInHash: true });
+    it('stores state values in a hashedItemStore, writing the hash to the url', () => {
+      const { state, hashedItemStore } = setup({ storeInHash: true });
       state.foo = 'bar';
       state.save();
       const urlVal = $location.search()[state.getQueryParamName()];
 
-      expect(hashingStore.isHash(urlVal)).to.be(true);
-      expect(hashingStore.getItemAtHash(urlVal)).to.eql({ foo: 'bar' });
+      expect(isStateHash(urlVal)).to.be(true);
+      expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify({ foo: 'bar' }));
     });
 
     it('should replace rison in the URL with a hash', () => {
-      const { state, hashingStore } = setup({ storeInHash: true });
+      const { state, hashedItemStore } = setup({ storeInHash: true });
       const obj = { foo: { bar: 'baz' } };
       const rison = encodeRison(obj);
 
@@ -211,15 +212,15 @@ describe('State Management', function () {
 
       const urlVal = $location.search()._s;
       expect(urlVal).to.not.be(rison);
-      expect(hashingStore.isHash(urlVal)).to.be(true);
-      expect(hashingStore.getItemAtHash(urlVal)).to.eql(obj);
+      expect(isStateHash(urlVal)).to.be(true);
+      expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify(obj));
     });
 
     context('error handling', () => {
       it('notifies the user when a hash value does not map to a stored value', () => {
-        const { state, hashingStore, notifier } = setup({ storeInHash: true });
+        const { state, hashedItemStore, notifier } = setup({ storeInHash: true });
         const search = $location.search();
-        const badHash = hashingStore._getShortHash('{"a": "b"}');
+        const badHash = createStateHash('{"a": "b"}', () => null);
 
         search[state.getQueryParamName()] = badHash;
         $location.search(search);
@@ -230,10 +231,10 @@ describe('State Management', function () {
         expect(notifier._notifs[0].content).to.match(/use the share functionality/i);
       });
 
-      it('presents fatal error linking to github when hashingStore.hashAndSetItem fails', () => {
-        const { state, hashingStore, notifier } = setup({ storeInHash: true });
+      it('presents fatal error linking to github when setting item fails', () => {
+        const { state, hashedItemStore, notifier } = setup({ storeInHash: true });
         const fatalStub = sinon.stub(notifier, 'fatal').throws();
-        sinon.stub(hashingStore, 'hashAndSetItem').throws();
+        sinon.stub(hashedItemStore, 'setItem').returns(false);
 
         expect(() => {
           state.toQueryParam();

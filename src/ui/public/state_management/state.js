@@ -8,58 +8,52 @@ import Notifier from 'ui/notify/notifier';
 import KbnUrlProvider from 'ui/url';
 
 import {
-  createStorageHash,
-  HashingStore,
-  LazyLruStore,
+  createStateHash,
+  hashedItemStoreSingleton,
+  isStateHash,
 } from './state_storage';
-
-const MAX_BROWSER_HISTORY = 50;
 
 export default function StateProvider(Private, $rootScope, $location, config) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
-  function State(urlParam, defaults, { hashingStore, notifier } = {}) {
+  function State(
+    urlParam,
+    defaults,
+    hashedItemStore = hashedItemStoreSingleton,
+    notifier = new Notifier()
+  ) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
     this._urlParam = urlParam || '_s';
-    this._notifier = notifier || new Notifier();
-
-    this._hashingStore = hashingStore || (() => {
-      const lazyLruStore =  new LazyLruStore({
-        id: `${this._urlParam}:state`,
-        store: window.sessionStorage,
-        maxItems: MAX_BROWSER_HISTORY
-      });
-
-      return new HashingStore(createStorageHash, lazyLruStore);
-    })();
+    this._notifier = notifier;
+    this._hashedItemStore = hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
     this._cleanUpListeners = _.partial(_.callEach, [
       // partial route update, no app reload
       $rootScope.$on('$routeUpdate', () => {
-        self.fetch();
+        this.fetch();
       }),
 
       // beginning of full route update, new app will be initialized before
       // $routeChangeSuccess or $routeChangeError
       $rootScope.$on('$routeChangeStart', () => {
-        if (!self._persistAcrossApps) {
-          self.destroy();
+        if (!this._persistAcrossApps) {
+          this.destroy();
         }
       }),
 
       $rootScope.$on('$routeChangeSuccess', () => {
-        if (self._persistAcrossApps) {
-          self.fetch();
+        if (this._persistAcrossApps) {
+          this.fetch();
         }
       })
     ]);
 
     // Initialize the State with fetch
-    self.fetch();
+    this.fetch();
   }
 
   State.prototype._readFromURL = function () {
@@ -70,7 +64,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       return null;
     }
 
-    if (this._hashingStore.isHash(urlVal)) {
+    if (isStateHash(urlVal)) {
       return this._parseQueryParamValue(urlVal);
     }
 
@@ -197,16 +191,17 @@ export default function StateProvider(Private, $rootScope, $location, config) {
    *  @return {any} - the stored value, or null if hash does not resolve
    */
   State.prototype._parseQueryParamValue = function (queryParam) {
-    if (!this._hashingStore.isHash(queryParam)) {
+    if (!isStateHash(queryParam)) {
       return rison.decode(queryParam);
     }
 
-    const stored = this._hashingStore.getItemAtHash(queryParam);
-    if (stored === null) {
+    const json = this._hashedItemStore.getItem(queryParam);
+    if (json === null) {
       this._notifier.error('Unable to completely restore the URL, be sure to use the share functionality.');
     }
 
-    return stored;
+    const state = JSON.parse(json);
+    return state;
   };
 
   /**
@@ -230,23 +225,29 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       return rison.encode(state);
     }
 
-    try {
-      const hash = this._hashingStore.hashAndSetItem(state);
+    // We need to strip out Angular-specific properties.
+    const json = angular.toJson(state);
+    const hash = createStateHash(json, hash => {
+      return this._hashedItemStore.getItem(hash);
+    });
+    const isItemSet = this._hashedItemStore.setItem(hash, json);
+
+    if (isItemSet) {
       return hash;
-    } catch (err) {
-      this._notifier.log('Unable to create hash of State due to error: ' + (state.stack || state.message));
-      this._notifier.fatal(
-        new Error(
-          'Kibana is unable to store history items in your session ' +
-          'because it is full and there don\'t seem to be items any items safe ' +
-          'to delete.\n' +
-          '\n' +
-          'This can usually be fixed by moving to a fresh tab, but could ' +
-          'be caused by a larger issue. If you are seeing this message regularly, ' +
-          'please file an issue at https://github.com/elastic/kibana/issues.'
-        )
-      );
     }
+
+    // If we ran out of space trying to persist the state, notify the user.
+    this._notifier.fatal(
+      new Error(
+        'Kibana is unable to store history items in your session ' +
+        'because it is full and there don\'t seem to be items any items safe ' +
+        'to delete.\n' +
+        '\n' +
+        'This can usually be fixed by moving to a fresh tab, but could ' +
+        'be caused by a larger issue. If you are seeing this message regularly, ' +
+        'please file an issue at https://github.com/elastic/kibana/issues.'
+      )
+    );
   };
 
   /**
