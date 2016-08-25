@@ -172,15 +172,6 @@ describe('stateMonitor', function () {
         monitor.setDefaultState(cloneDeep(mockState.toJSON()));
         sinon.assert.notCalled(changeStub);
       });
-
-      it('should not change the status with matching state', function () {
-        monitor.setDefaultState(cloneDeep(mockState.toJSON()));
-        sinon.assert.notCalled(changeStub);
-
-        const status = changeStub.firstCall.args[0];
-        expect(status).to.have.property('clean', true);
-        expect(status).to.have.property('dirty', false);
-      });
     });
 
     describe('status object', function () {
