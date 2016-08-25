@@ -162,9 +162,10 @@ a {
         opacity: 0.5;
         cursor: default;
 
-        &:active {
+        &:active, &:focus {
           color: @kibanaGray2;
           background-color: transparent;
+          outline: none;
         }
       }
     }
