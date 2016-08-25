@@ -1,10 +1,10 @@
-const app = uiModules.get('kibana');
 import Clipboard from 'clipboard';
 import '../styles/index.less';
 import LibUrlShortenerProvider from '../lib/url_shortener';
 import uiModules from 'ui/modules';
 import shareObjectUrlTemplate from 'ui/share/views/share_object_url.html';
 
+const app = uiModules.get('kibana');
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
   const urlShortener = Private(LibUrlShortenerProvider);
