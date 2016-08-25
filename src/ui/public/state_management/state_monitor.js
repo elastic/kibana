@@ -1,20 +1,20 @@
 import { cloneDeep, isEqual, set, isPlainObject } from 'lodash';
 
 export default {
-  create: (state, defaultState) => stateMonitor(state, defaultState)
+  create: (state, customInitialState) => stateMonitor(state, customInitialState)
 };
 
-function stateMonitor(state, defaultState) {
+function stateMonitor(state, customInitialState) {
   let destroyed = false;
   let ignoredProps = [];
   let changeHandlers = [];
   let originalState;
 
-  setOriginalState(defaultState);
+  setOriginalState(customInitialState);
 
-  function setOriginalState(defaultState) {
+  function setOriginalState(initialState) {
     // state.toJSON returns a reference, clone so we can mutate it safely
-    originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
+    originalState = cloneDeep(initialState) || cloneDeep(state.toJSON());
   }
 
   function removeIgnoredProps(state) {
@@ -55,13 +55,13 @@ function stateMonitor(state, defaultState) {
   };
 
   return {
-    setDefaultState(defaultState) {
+    setDefaultState(customInitialState) {
       // check the current status
       const currentStatus = getStatus();
 
       // update the originalState and apply ignoredProps
-      if (!isPlainObject(defaultState)) throw new TypeError('The default state must be an object');
-      setOriginalState(defaultState);
+      if (!isPlainObject(customInitialState)) throw new TypeError('The default state must be an object');
+      setOriginalState(customInitialState);
       removeIgnoredProps(originalState);
 
       // fire the change handler
