@@ -1,2 +1,4 @@
 ---
 extends: '@elastic/kibana'
+rules:
+  no-unused-vars: off
