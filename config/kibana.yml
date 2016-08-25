@@ -56,10 +56,6 @@
 # This must be > 0
 # elasticsearch.requestTimeout: 30000
 
-# Header names and values that are sent to Elasticsearch. Any custom headers cannot be overwritten
-# by client-side headers.
-# elasticsearch.customHeaders: {}
-
 # Time in milliseconds for Elasticsearch to wait for responses from shards.
 # Set to 0 to disable.
 # elasticsearch.shardTimeout: 0
