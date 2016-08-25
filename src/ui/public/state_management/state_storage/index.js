@@ -1,11 +1,8 @@
 export {
-  default as createStorageHash,
-} from './create_storage_hash';
+  default as hashedItemStoreSingleton,
+} from './hashed_item_store_singleton';
 
 export {
-  default as HashingStore,
-} from './hashing_store';
-
-export {
-  default as LazyLruStore,
-} from './lazy_lru_store';
+  createStateHash,
+  isStateHash,
+} from './state_hash';
