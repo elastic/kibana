@@ -32,3 +32,5 @@ rules:
   semi: off
   strict: off
   wrap-iife: off
+  no-var: off
+  prefer-const: off
