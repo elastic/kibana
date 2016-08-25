@@ -1,4 +1,4 @@
-
-test/fixtures/scenarios
-optimize
+/optimize
+src/fixtures/vislib/mock_data
+src/ui/public/angular-bootstrap
 test/fixtures/scenarios
