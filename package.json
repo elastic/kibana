@@ -154,7 +154,7 @@
     "wreck": "6.2.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.2.0-alpha1",
+    "@elastic/eslint-config-kibana": "0.2.0",
     "Nonsense": "0.1.2",
     "angular-mocks": "1.4.7",
     "auto-release-sinon": "1.0.3",
