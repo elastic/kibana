@@ -7,7 +7,7 @@ define(function (require) {
   const rison = require('ui/utils/rison');
 
   const dateMath = require('ui/utils/dateMath');
-  const stateMonitorFactory = require('ui/state_management/state_monitor');
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
 
   require('ui/doc_table');
   require('ui/visualize');

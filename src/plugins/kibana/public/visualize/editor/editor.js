@@ -4,7 +4,7 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
-  const stateMonitorFactory = require('ui/state_management/state_monitor');
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
   require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');

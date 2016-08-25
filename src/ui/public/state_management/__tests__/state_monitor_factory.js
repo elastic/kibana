@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import stateMonitor from 'ui/state_management/state_monitor';
+import stateMonitor from 'ui/state_management/state_monitor_factory';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
 
 describe('stateMonitor', function () {

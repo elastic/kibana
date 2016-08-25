@@ -4,7 +4,7 @@ define(function (require) {
   const angular = require('angular');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
-  const stateMonitorFactory = require('ui/state_management/state_monitor');
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
 
   require('ui/directives/config');
   require('ui/courier');
