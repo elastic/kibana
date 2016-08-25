@@ -205,4 +205,4 @@ export default function PieChartFactory(Private) {
   };
 
   return PieChart;
-};
+}

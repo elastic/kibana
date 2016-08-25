@@ -52,4 +52,4 @@ export default function AggTypeMetricPercentilesProvider(Private) {
     },
     getValue: getPercentileValue
   });
-};
+}

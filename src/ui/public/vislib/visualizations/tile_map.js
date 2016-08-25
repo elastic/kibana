@@ -131,4 +131,4 @@ export default function TileMapFactory(Private) {
   };
 
   return TileMap;
-};
+}

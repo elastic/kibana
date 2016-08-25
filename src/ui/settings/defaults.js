@@ -246,4 +246,4 @@ export default function defaultSettingsProvider() {
         'will be displayed on-screen for. Setting to Infinity will disable.'
     },
   };
-};
+}

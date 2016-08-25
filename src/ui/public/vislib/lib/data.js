@@ -721,4 +721,4 @@ export default function DataFactory(Private) {
   };
 
   return Data;
-};
+}

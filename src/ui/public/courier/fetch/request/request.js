@@ -107,4 +107,4 @@ export default function AbstractReqProvider(Private, Promise) {
       return new this.constructor(this.source, this.defer);
     }
   };
-};
+}

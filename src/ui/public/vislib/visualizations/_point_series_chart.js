@@ -181,4 +181,4 @@ export default function PointSeriesChartProvider(Private) {
   };
 
   return PointSeriesChart;
-};
+}

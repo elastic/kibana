@@ -18,4 +18,4 @@ export default function VisTypeFactory(Private) {
   }
 
   return VisType;
-};
+}

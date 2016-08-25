@@ -128,4 +128,4 @@ export default function ChartTitleFactory(Private) {
   };
 
   return ChartTitle;
-};
+}

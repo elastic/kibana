@@ -32,4 +32,4 @@ export default function RedirectWhenMissingFn($location, kbnUrl, Notifier, Promi
       return Promise.halt();
     };
   };
-};
+}

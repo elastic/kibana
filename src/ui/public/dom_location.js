@@ -12,4 +12,4 @@ export default function DomLocationProvider($window) {
       return ($window.location.href = val);
     }
   };
-};
+}

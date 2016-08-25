@@ -1,1 +1,1 @@
-export class UnsupportedProtocolError extends Error {};
+export class UnsupportedProtocolError extends Error {}

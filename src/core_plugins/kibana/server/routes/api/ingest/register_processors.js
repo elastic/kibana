@@ -21,4 +21,4 @@ export function registerProcessors(server) {
       });
     }
   });
-};
+}

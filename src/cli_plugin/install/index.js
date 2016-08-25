@@ -47,4 +47,4 @@ export default function pluginInstall(program) {
   install file:///Path/to/my/x-pack.zip
   install https://path.to/my/x-pack.zip`)
   .action(processCommand);
-};
+}

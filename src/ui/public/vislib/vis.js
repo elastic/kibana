@@ -183,4 +183,4 @@ export default function VisFactory(Private) {
   };
 
   return Vis;
-};
+}

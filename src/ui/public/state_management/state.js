@@ -151,4 +151,4 @@ export default function StateProvider(Private, $rootScope, $location) {
 
   return State;
 
-};
+}

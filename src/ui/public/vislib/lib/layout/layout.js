@@ -150,4 +150,4 @@ export default function LayoutFactory(Private) {
   };
 
   return Layout;
-};
+}

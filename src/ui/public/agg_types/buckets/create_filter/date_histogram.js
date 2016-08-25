@@ -13,4 +13,4 @@ export default function createDateHistogramFilterProvider(Private) {
     }, agg.vis.indexPattern);
   };
 
-};
+}

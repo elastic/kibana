@@ -63,7 +63,7 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
       return resp.responses;
     }
   };
-};
+}
 
 function emptySearch() {
   return {

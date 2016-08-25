@@ -17,4 +17,4 @@ export default function PointSeriesInitYAxis() {
     const xAggOutput = x.agg.write();
     chart.yScale = xAggOutput.metricScale || null;
   };
-};
+}

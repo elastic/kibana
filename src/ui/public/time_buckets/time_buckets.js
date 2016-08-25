@@ -369,4 +369,4 @@ export default function IntervalHelperProvider(Private, timefilter, config) {
   };
 
   return TimeBuckets;
-};
+}

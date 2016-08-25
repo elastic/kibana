@@ -130,4 +130,4 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
   }
 
   return new Mapper();
-};
+}

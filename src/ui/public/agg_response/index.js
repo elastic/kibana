@@ -10,4 +10,4 @@ export default function NormalizeChartDataFactory(Private) {
     tabify: Private(AggResponseTabifyTabifyProvider),
     geoJson: Private(AggResponseGeoJsonGeoJsonProvider)
   };
-};
+}

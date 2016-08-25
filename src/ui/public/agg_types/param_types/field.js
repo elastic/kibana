@@ -66,4 +66,4 @@ export default function FieldAggParamFactory(Private) {
   };
 
   return FieldAggParam;
-};
+}

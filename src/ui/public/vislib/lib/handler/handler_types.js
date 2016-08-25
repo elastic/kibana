@@ -17,4 +17,4 @@ export default function HandlerTypeFactory(Private) {
     area: pointSeries.area,
     tile_map: Private(VislibLibHandlerTypesTileMapProvider)
   };
-};
+}

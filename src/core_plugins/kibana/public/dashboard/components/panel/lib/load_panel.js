@@ -15,4 +15,4 @@ export default function loadPanelFunction(Private) { // Inject services here
     }
 
   };
-};
+}

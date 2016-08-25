@@ -95,4 +95,4 @@ export default function DurationFormatProvider(Private) {
     const kind = inputFormat in ratioToSeconds ? 'seconds' : inputFormat;
     return moment.duration(val * ratio, kind);
   }
-};
+}

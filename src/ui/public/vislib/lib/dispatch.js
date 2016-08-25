@@ -315,4 +315,4 @@ export default function DispatchClass(Private) {
 
 
   return Dispatch;
-};
+}

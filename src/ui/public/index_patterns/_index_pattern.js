@@ -363,4 +363,4 @@ export default function IndexPatternFactory(Private, Notifier, config, kbnIndex,
   }
 
   return IndexPattern;
-};
+}

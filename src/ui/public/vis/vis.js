@@ -160,4 +160,4 @@ export default function VisFactory(Notifier, Private) {
   };
 
   return Vis;
-};
+}

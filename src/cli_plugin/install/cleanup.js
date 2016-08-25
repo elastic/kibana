@@ -19,7 +19,7 @@ export function cleanPrevious(settings, logger) {
       resolve();
     }
   });
-};
+}
 
 export function cleanArtifacts(settings) {
   // delete the working directory.
@@ -29,4 +29,4 @@ export function cleanArtifacts(settings) {
     rimraf.sync(settings.plugins[0].path);
   }
   catch (e) {} // eslint-disable-line no-empty
-};
+}

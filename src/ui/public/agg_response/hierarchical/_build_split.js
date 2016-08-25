@@ -13,4 +13,4 @@ export default function biuldSplitProvider(Private) {
     split.names = collectKeys(split.slices.children);
     return split;
   };
-};
+}

@@ -378,4 +378,4 @@ export default function AreaChartFactory(Private) {
   };
 
   return AreaChart;
-};
+}

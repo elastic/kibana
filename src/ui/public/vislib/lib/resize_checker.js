@@ -198,4 +198,4 @@ export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
   };
 
   return ResizeChecker;
-};
+}

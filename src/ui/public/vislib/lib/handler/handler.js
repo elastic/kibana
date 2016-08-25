@@ -209,4 +209,4 @@ export default function HandlerBaseClass(Private) {
   };
 
   return Handler;
-};
+}

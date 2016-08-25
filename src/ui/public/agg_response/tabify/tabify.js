@@ -101,4 +101,4 @@ export default function tabifyAggResponseProvider(Private, Notifier) {
   }
 
   return notify.timed('tabify agg response', tabifyAggResponse);
-};
+}

@@ -21,4 +21,4 @@ export class Join extends Processor {
       separator: this.separator || ''
     };
   }
-};
+}

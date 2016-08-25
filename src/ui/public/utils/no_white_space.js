@@ -15,4 +15,4 @@ const TAGS_WITH_WS = />\s+</g;
  */
 export default function noWhiteSpace(html) {
   return html.replace(TAGS_WITH_WS, '><');
-};
+}

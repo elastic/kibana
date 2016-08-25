@@ -14,4 +14,4 @@ export default function GetArrayUtilService(Private) {
     if (!obj.series) return flattenSeries(obj);
     return obj.series;
   };
-};
+}

@@ -18,4 +18,4 @@ export class Trim extends Processor {
       sourceField: this.sourceField || ''
     };
   }
-};
+}

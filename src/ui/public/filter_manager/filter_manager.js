@@ -81,4 +81,4 @@ export default function (Private) {
   };
 
   return filterManager;
-};
+}

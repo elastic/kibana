@@ -66,4 +66,4 @@ export default function VislibVisBuildChartData(Private) {
   function convertTable(vis, table) {
     return vis.type.responseConverter(vis, table);
   }
-};
+}

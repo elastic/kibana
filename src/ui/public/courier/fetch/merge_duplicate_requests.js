@@ -26,4 +26,4 @@ export default function FetchMergeDuplicateRequests(Private) {
   }
 
   return mergeDuplicateRequests;
-};
+}

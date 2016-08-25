@@ -41,4 +41,4 @@ export default function DateRangeAggDefinition(Private, config) {
       editor: dateRangesTemplate
     }]
   });
-};
+}

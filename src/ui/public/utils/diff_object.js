@@ -47,4 +47,4 @@ export default function (target, source) {
 
   return diff;
 
-};
+}

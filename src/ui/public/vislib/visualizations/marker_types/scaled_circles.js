@@ -56,4 +56,4 @@ export default function ScaledCircleMarkerFactory(Private) {
 
 
   return ScaledCircleMarker;
-};
+}

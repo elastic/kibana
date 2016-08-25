@@ -351,4 +351,4 @@ export default function LineChartFactory(Private) {
   };
 
   return LineChart;
-};
+}

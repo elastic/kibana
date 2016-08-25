@@ -20,4 +20,4 @@ export default function mapGeoBoundBoxProvider(Promise, courier) {
     }
     return Promise.reject(filter);
   };
-};
+}
