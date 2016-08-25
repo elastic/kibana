@@ -8,4 +8,4 @@ export default function changeTimeFilterProvider(timefilter) {
     timefilter.time.to = moment(values.lt || values.lte);
     timefilter.time.mode = 'absolute';
   };
-};
+}

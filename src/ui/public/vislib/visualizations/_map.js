@@ -322,4 +322,4 @@ export default function MapFactory(Private, tilemap, $sanitize) {
   };
 
   return TileMapMap;
-};
+}

@@ -13,4 +13,4 @@ export default function diffTimeProvider(Private) {
       oldTime = _.clone(self.time);
     };
   };
-};
+}

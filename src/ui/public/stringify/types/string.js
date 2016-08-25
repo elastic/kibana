@@ -73,4 +73,4 @@ export default function StringFormatProvider(Private) {
   };
 
   return _String;
-};
+}

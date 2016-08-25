@@ -94,4 +94,4 @@ export default function ChartBaseClass(Private) {
   };
 
   return Chart;
-};
+}

@@ -21,4 +21,4 @@ export default function searchLoader(savedSearches, Private) { // Inject service
         };
       });
   };
-};
+}

@@ -21,7 +21,7 @@ export default function (grunt) {
       done(err);
     }
   });
-};
+}
 
 function invokeAllAsync(all, fn) {
   return Promise.all(all.map(fn));

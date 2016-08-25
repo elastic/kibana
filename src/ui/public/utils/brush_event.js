@@ -10,4 +10,4 @@ export default function brushEventProvider(timefilter) {
     timefilter.time.to = to;
     timefilter.time.mode = 'absolute';
   };
-};
+}

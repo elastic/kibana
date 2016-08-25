@@ -55,4 +55,4 @@ export default function normalizeSortRequest(config) {
     normalized[sortField] = sortValue;
     return normalized;
   }
-};
+}

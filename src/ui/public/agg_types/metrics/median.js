@@ -32,4 +32,4 @@ export default function AggTypeMetricMedianProvider(Private) {
     getResponseAggs: percentiles.getResponseAggs,
     getValue: percentiles.getValue
   });
-};
+}

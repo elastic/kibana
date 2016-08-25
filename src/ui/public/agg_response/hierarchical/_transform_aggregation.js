@@ -36,4 +36,4 @@ export default function transformAggregationProvider(Private) {
       return branch;
     });
   };
-};
+}

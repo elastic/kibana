@@ -47,4 +47,4 @@ export default function MetricAggTypeProvider(Private) {
   };
 
   return MetricAggType;
-};
+}

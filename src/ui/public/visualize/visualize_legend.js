@@ -110,7 +110,7 @@ uiModules.get('kibana')
         data = data.columns || data.rows || [data];
         if (type === 'pie') return Data.prototype.pieNames(data);
         return getSeriesLabels(data);
-      };
+      }
 
       function getSeriesLabels(data) {
         const values = data.map(function (chart) {

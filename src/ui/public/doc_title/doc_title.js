@@ -42,4 +42,4 @@ uiModules.get('kibana')
 // return a "private module" so that it can be used both ways
 export default function DoctitleProvider(docTitle) {
   return docTitle;
-};
+}

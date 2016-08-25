@@ -231,4 +231,4 @@ export default function YAxisFactory(Private) {
   };
 
   return YAxis;
-};
+}

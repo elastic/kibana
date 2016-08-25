@@ -22,4 +22,4 @@ export default function DiffTimePickerValuesFn() {
 
     return false;
   };
-};
+}

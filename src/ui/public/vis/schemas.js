@@ -59,4 +59,4 @@ export default function VisTypeSchemasFactory(Private) {
   }
 
   return Schemas;
-};
+}

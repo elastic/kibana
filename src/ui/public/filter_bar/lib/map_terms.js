@@ -17,4 +17,4 @@ export default function mapTermsProvider(Promise, courier) {
     }
     return Promise.reject(filter);
   };
-};
+}

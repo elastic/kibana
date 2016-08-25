@@ -21,4 +21,4 @@ export class Rename extends Processor {
       targetField: this.targetField || ''
     };
   }
-};
+}

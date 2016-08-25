@@ -3,4 +3,4 @@ export default function createTermsFilterProvider(Private) {
   return function (aggConfig, key) {
     return buildPhraseFilter(aggConfig.params.field, key, aggConfig.vis.indexPattern);
   };
-};
+}

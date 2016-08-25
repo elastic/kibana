@@ -78,4 +78,4 @@ export default function FetchTheseProvider(Private, Promise) {
   }
 
   return fetchThese;
-};
+}

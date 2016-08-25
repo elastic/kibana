@@ -79,7 +79,7 @@ uiModules
         $timeout(function () {
           if (shouldHaveFullSpy()) {
             $visEl.addClass('spy-only');
-          };
+          }
         }, 0);
       };
 

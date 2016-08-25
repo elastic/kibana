@@ -14,4 +14,4 @@ export default function createDateRangeFilterProvider(config) {
     return buildRangeFilter(agg.params.field, filter, agg.vis.indexPattern);
   };
 
-};
+}

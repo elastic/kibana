@@ -73,4 +73,4 @@ export default function AxisTitleFactory(Private) {
   };
 
   return AxisTitle;
-};
+}

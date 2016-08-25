@@ -195,4 +195,4 @@ export default function SearchSourceFactory(Promise, Private) {
   };
 
   return SearchSource;
-};
+}

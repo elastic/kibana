@@ -523,4 +523,4 @@ export default function XAxisFactory(Private) {
   };
 
   return XAxis;
-};
+}

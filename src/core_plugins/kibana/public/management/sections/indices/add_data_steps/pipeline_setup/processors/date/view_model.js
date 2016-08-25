@@ -29,4 +29,4 @@ export class Date extends Processor {
       customFormat: this.customFormat || ''
     };
   }
-};
+}

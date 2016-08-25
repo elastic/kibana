@@ -207,4 +207,4 @@ export default function HeatmapMarkerFactory(Private) {
   };
 
   return HeatmapMarker;
-};
+}

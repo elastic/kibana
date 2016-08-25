@@ -19,4 +19,4 @@ export default function mapUri(server, prefix) {
     const customHeaders = setHeaders(filteredHeaders, config.get('elasticsearch.customHeaders'));
     done(null, url, customHeaders);
   };
-};
+}

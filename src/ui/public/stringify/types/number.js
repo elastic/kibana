@@ -9,4 +9,4 @@ export default function NumberFormatProvider(Private) {
       10000, 12.345678, -1, -999, 0.52
     ]
   });
-};
+}

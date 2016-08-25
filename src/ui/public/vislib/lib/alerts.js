@@ -97,4 +97,4 @@ export default function AlertsFactory(Private) {
   };
 
   return Alerts;
-};
+}

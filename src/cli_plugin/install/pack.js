@@ -134,4 +134,4 @@ export async function extract(settings, logger) {
     logger.error(err);
     throw new Error('Error extracting plugin archive');
   }
-};
+}

@@ -327,4 +327,4 @@ export default function ColumnChartFactory(Private) {
   };
 
   return ColumnChart;
-};
+}

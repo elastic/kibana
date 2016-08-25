@@ -25,4 +25,4 @@ export class Convert extends Processor {
       type: this.type || 'auto'
     };
   }
-};
+}

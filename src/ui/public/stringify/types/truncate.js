@@ -32,4 +32,4 @@ export default function TruncateFormatProvider(Private) {
   Truncate.sampleInput = [ require('ui/stringify/samples/large.html') ];
 
   return Truncate;
-};
+}

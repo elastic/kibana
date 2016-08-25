@@ -30,4 +30,4 @@ export default function ErrorHandlerFactory() {
   };
 
   return ErrorHandler;
-};
+}

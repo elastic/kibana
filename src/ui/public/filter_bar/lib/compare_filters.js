@@ -21,7 +21,7 @@ export default function (first, second, comparatorOptions) {
   if (!comparators.state) excludedAttributes.push('$state');
 
   return _.isEqual(mapFilter(first), mapFilter(second));
-};
+}
 
 function mapFilter(filter) {
   const cleaned = _.omit(filter, excludedAttributes);

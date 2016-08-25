@@ -64,4 +64,4 @@ export default function ShadedCircleMarkerFactory(Private) {
   };
 
   return ShadedCircleMarker;
-};
+}
