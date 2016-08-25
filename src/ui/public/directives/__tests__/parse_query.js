@@ -15,13 +15,13 @@ let $elemScope;
 let $elem;
 
 let cycleIndex = 0;
-let markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
+const markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 let fromUser;
 import toUser from 'ui/parse_query/lib/to_user';
 import 'ui/parse_query';
 import ParseQueryLibFromUserProvider from 'ui/parse_query/lib/from_user';
 
-let init = function () {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -41,7 +41,7 @@ let init = function () {
   });
 };
 
-let compile = function () {
+const compile = function () {
   $rootScope.mockModel = 'cycle' + cycleIndex++;
   $rootScope.mockQueryInput = undefined;
 

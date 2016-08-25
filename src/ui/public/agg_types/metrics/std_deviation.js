@@ -2,12 +2,12 @@ import _ from 'lodash';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
 export default function AggTypeMetricStandardDeviationProvider(Private) {
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
 
-  let responseAggConfigProps = {
+  const responseAggConfigProps = {
     valProp: function () {
-      let details = this.keyedDetails(this.params.customLabel)[this.key];
+      const details = this.keyedDetails(this.params.customLabel)[this.key];
       return details.valProp;
     },
     makeLabel: function () {
@@ -45,7 +45,7 @@ export default function AggTypeMetricStandardDeviationProvider(Private) {
     ],
 
     getResponseAggs: function (agg) {
-      let ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
+      const ValueAggConfig = getResponseAggConfigClass(agg, responseAggConfigProps);
 
       return [
         new ValueAggConfig('std_lower'),

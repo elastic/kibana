@@ -3,19 +3,19 @@ import $ from 'jquery';
 import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
 import numeral from 'numeral';
 export default function HierarchicalTooltipFormaterProvider($rootScope, $compile, $sce) {
-  let $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
-  let $tooltipScope = $rootScope.$new();
+  const $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
+  const $tooltipScope = $rootScope.$new();
 
   $compile($tooltip)($tooltipScope);
 
   return function (columns) {
     return function (event) {
-      let datum = event.datum;
+      const datum = event.datum;
 
       // Collect the current leaf and parents into an array of values
       $tooltipScope.rows = collectBranch(datum);
 
-      let metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
+      const metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
       // Map those values to what the tooltipSource.rows format.
       _.forEachRight($tooltipScope.rows, function (row, i, rows) {

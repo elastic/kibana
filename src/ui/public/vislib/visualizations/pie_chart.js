@@ -5,7 +5,7 @@ import errors from 'ui/errors';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 export default function PieChartFactory(Private) {
 
-  let Chart = Private(VislibVisualizationsChartProvider);
+  const Chart = Private(VislibVisualizationsChartProvider);
 
   /**
    * Pie Chart Visualization
@@ -24,7 +24,7 @@ export default function PieChartFactory(Private) {
     }
     PieChart.Super.apply(this, arguments);
 
-    let charts = this.handler.data.getVisData();
+    const charts = this.handler.data.getVisData();
     this._validatePieData(charts);
 
     this._attr = _.defaults(handler._attr || {}, {
@@ -37,7 +37,7 @@ export default function PieChartFactory(Private) {
    * If so, an error is thrown.
    */
   PieChart.prototype._validatePieData = function (charts) {
-    let isAllZeros = charts.every(function (chart) {
+    const isAllZeros = charts.every(function (chart) {
       return chart.slices.children.length === 0;
     });
 
@@ -52,7 +52,7 @@ export default function PieChartFactory(Private) {
    * @returns {D3.Selection} SVG path with event listeners attached
    */
   PieChart.prototype.addPathEvents = function (element) {
-    let events = this.events;
+    const events = this.events;
 
     return element
       .call(events.addHoverEvent())
@@ -64,11 +64,11 @@ export default function PieChartFactory(Private) {
     (function assignPercentages(slices) {
       if (slices.sumOfChildren != null) return;
 
-      let parent = slices;
-      let children = parent.children;
-      let parentPercent = parent.percentOfParent;
+      const parent = slices;
+      const children = parent.children;
+      const parentPercent = parent.percentOfParent;
 
-      let sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
+      const sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
         return sum + Math.abs(child.size);
       }, 0));
 
@@ -98,24 +98,24 @@ export default function PieChartFactory(Private) {
    * @returns {D3.Selection} SVG with paths attached
    */
   PieChart.prototype.addPath = function (width, height, svg, slices) {
-    let self = this;
-    let marginFactor = 0.95;
-    let isDonut = self._attr.isDonut;
-    let radius = (Math.min(width, height) / 2) * marginFactor;
-    let color = self.handler.data.getPieColorFunc();
-    let tooltip = self.tooltip;
-    let isTooltip = self._attr.addTooltip;
+    const self = this;
+    const marginFactor = 0.95;
+    const isDonut = self._attr.isDonut;
+    const radius = (Math.min(width, height) / 2) * marginFactor;
+    const color = self.handler.data.getPieColorFunc();
+    const tooltip = self.tooltip;
+    const isTooltip = self._attr.addTooltip;
 
-    let partition = d3.layout.partition()
+    const partition = d3.layout.partition()
     .sort(null)
     .value(function (d) {
       return d.percentOfParent * 100;
     });
-    let x = d3.scale.linear()
+    const x = d3.scale.linear()
     .range([0, 2 * Math.PI]);
-    let y = d3.scale.sqrt()
+    const y = d3.scale.sqrt()
     .range([0, radius]);
-    let arc = d3.svg.arc()
+    const arc = d3.svg.arc()
     .startAngle(function (d) {
       return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
     })
@@ -135,7 +135,7 @@ export default function PieChartFactory(Private) {
       return Math.max(0, y(d.y + d.dy));
     });
 
-    let path = svg
+    const path = svg
     .datum(slices)
     .selectAll('path')
     .data(partition.nodes)
@@ -161,8 +161,8 @@ export default function PieChartFactory(Private) {
   };
 
   PieChart.prototype._validateContainerSize = function (width, height) {
-    let minWidth = 20;
-    let minHeight = 20;
+    const minWidth = 20;
+    const minHeight = 20;
 
     if (width <= minWidth || height <= minHeight) {
       throw new errors.ContainerTooSmall();
@@ -176,28 +176,27 @@ export default function PieChartFactory(Private) {
    * @returns {Function} Creates the pie chart
    */
   PieChart.prototype.draw = function () {
-    let self = this;
+    const self = this;
 
     return function (selection) {
       selection.each(function (data) {
-        let slices = data.slices;
-        let div = d3.select(this);
-        let width = $(this).width();
-        let height = $(this).height();
-        let path;
+        const slices = data.slices;
+        const div = d3.select(this);
+        const width = $(this).width();
+        const height = $(this).height();
 
         if (!slices.children.length) return;
 
         self.convertToPercentage(slices);
         self._validateContainerSize(width, height);
 
-        let svg = div.append('svg')
+        const svg = div.append('svg')
         .attr('width', width)
         .attr('height', height)
         .append('g')
         .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-        path = self.addPath(width, height, svg, slices);
+        const path = self.addPath(width, height, svg, slices);
         self.addPathEvents(path);
 
         return svg;

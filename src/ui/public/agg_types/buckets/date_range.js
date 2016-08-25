@@ -7,9 +7,9 @@ import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import dateRangesTemplate from 'ui/agg_types/controls/date_ranges.html';
 
 export default function DateRangeAggDefinition(Private, config) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
 
   return new BucketAggType({
@@ -17,7 +17,7 @@ export default function DateRangeAggDefinition(Private, config) {
     title: 'Date Range',
     createFilter: createFilter,
     getKey: function (bucket, key, agg) {
-      let formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
+      const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
       return dateRange.toString(bucket, formatter);
     },
     getFormat: function () {

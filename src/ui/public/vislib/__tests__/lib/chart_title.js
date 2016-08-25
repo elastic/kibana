@@ -15,7 +15,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   let chartTitle;
   let el;
   let dataObj;
-  let data = {
+  const data = {
     hits: 621,
     label: '',
     ordered: {

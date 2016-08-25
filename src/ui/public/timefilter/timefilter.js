@@ -19,11 +19,11 @@ uiRoutes
 uiModules
 .get('kibana')
 .service('timefilter', function (Private, globalState, $rootScope, config) {
-  let Events = Private(EventsProvider);
-  let diff = Private(UtilsDiffTimePickerValsProvider);
+  const Events = Private(EventsProvider);
+  const diff = Private(UtilsDiffTimePickerValsProvider);
 
   function convertISO8601(stringTime) {
-    let obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
+    const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
     return obj.isValid() ? obj : stringTime;
   }
 
@@ -31,15 +31,15 @@ uiModules
   function Timefilter() {
     Timefilter.Super.call(this);
 
-    let self = this;
-    let diffTime = Private(TimefilterLibDiffTimeProvider)(self);
-    let diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
+    const self = this;
+    const diffTime = Private(TimefilterLibDiffTimeProvider)(self);
+    const diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
 
     self.enabled = false;
 
     self.init = _.once(function () {
-      let timeDefaults = config.get('timepicker:timeDefaults');
-      let refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
+      const timeDefaults = config.get('timepicker:timeDefaults');
+      const refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 
       // These can be date math strings or moments.
       self.time = _.defaults(globalState.time || {}, timeDefaults);
@@ -47,8 +47,8 @@ uiModules
 
       globalState.on('fetch_with_changes', function () {
         // clone and default to {} in one
-        let newTime = _.defaults({}, globalState.time, timeDefaults);
-        let newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
+        const newTime = _.defaults({}, globalState.time, timeDefaults);
+        const newRefreshInterval = _.defaults({}, globalState.refreshInterval, refreshIntervalDefaults);
 
         if (newTime) {
           if (newTime.to) newTime.to = convertISO8601(newTime.to);
@@ -78,10 +78,10 @@ uiModules
 
   Timefilter.prototype.get = function (indexPattern) {
     let filter;
-    let timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
+    const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
 
     if (timefield) {
-      let bounds = this.getBounds();
+      const bounds = this.getBounds();
       filter = {range : {}};
       filter.range[timefield.name] = {
         gte: bounds.min.valueOf(),

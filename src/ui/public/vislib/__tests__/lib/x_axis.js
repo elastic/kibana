@@ -16,7 +16,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   let el;
   let fixture;
   let dataObj;
-  let data = {
+  const data = {
     hits: 621,
     label: '',
     ordered: {

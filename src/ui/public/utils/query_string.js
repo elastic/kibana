@@ -1,4 +1,4 @@
-let qs = {};
+const qs = {};
 
 /*****
 /*** orignally copied from angular, modified our purposes
@@ -37,7 +37,7 @@ function encodeUriQuery(val, pctEncodeSpaces) {
  * @returns {Object.<string,boolean|Array>}
  */
 qs.decode = function (keyValue) {
-  let obj = {};
+  const obj = {};
   let keyValueParts;
   let key;
 
@@ -46,7 +46,7 @@ qs.decode = function (keyValue) {
       keyValueParts = keyValue.split('=');
       key = tryDecodeURIComponent(keyValueParts[0]);
       if (key !== void 0) {
-        let val = keyValueParts[1] !== void 0 ? tryDecodeURIComponent(keyValueParts[1]) : true;
+        const val = keyValueParts[1] !== void 0 ? tryDecodeURIComponent(keyValueParts[1]) : true;
         if (!obj[key]) {
           obj[key] = val;
         } else if (Array.isArray(obj[key])) {
@@ -66,10 +66,10 @@ qs.decode = function (keyValue) {
  * @return {String}
  */
 qs.encode = function (obj) {
-  let parts = [];
-  let keys = Object.keys(obj).sort();
+  const parts = [];
+  const keys = Object.keys(obj).sort();
   keys.forEach(function (key) {
-    let value = obj[key];
+    const value = obj[key];
     if (Array.isArray(value)) {
       value.forEach(function (arrayValue) {
         parts.push(qs.param(key, arrayValue));
@@ -111,8 +111,8 @@ qs.findInUrl = function (url) {
 };
 
 qs.replaceParamInUrl = function (url, param, newVal) {
-  let loc = qs.findInUrl(url);
-  let parsed = qs.decode(url.substring(loc.start + 1, loc.end));
+  const loc = qs.findInUrl(url);
+  const parsed = qs.decode(url.substring(loc.start + 1, loc.end));
 
   if (newVal != null) {
     parsed[param] = newVal;
@@ -120,7 +120,7 @@ qs.replaceParamInUrl = function (url, param, newVal) {
     delete parsed[param];
   }
 
-  let chars = url.split('');
+  const chars = url.split('');
   chars.splice(loc.start, loc.end - loc.start, '?' + qs.encode(parsed));
   return chars.join('');
 };

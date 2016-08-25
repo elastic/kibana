@@ -22,7 +22,7 @@ StackTraceMapper.prototype.init = function (mapUrls) {
 StackTraceMapper.prototype.mapError = function (err) {
   if (!stackLineFormat || !err.stack) return err;
 
-  let stack = err.stack.replace(stackLineFormat, this.mapLine);
+  const stack = err.stack.replace(stackLineFormat, this.mapLine);
   return setErrorStack(err, stack);
 };
 
@@ -39,10 +39,10 @@ StackTraceMapper.prototype.getMapFor = function (url) {
 StackTraceMapper.prototype.loadMaps = function (mapUrls) {
   mapUrls = _.clone(mapUrls || {});
 
-  let maps = this.maps;
+  const maps = this.maps;
 
   $('script[src][src-map]').each(function () {
-    let $el = $(this);
+    const $el = $(this);
     mapUrls[$el.attr('src')] = $el.attr('src-map');
   });
 

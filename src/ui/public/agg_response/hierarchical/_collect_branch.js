@@ -3,13 +3,13 @@ define(function () {
     // walk up the branch for each parent
     function walk(item, memo) {
       // record the the depth
-      let depth = item.depth - 1;
+      const depth = item.depth - 1;
 
       // Using the aggConfig determine what the field name is. If the aggConfig
       // doesn't exist (which means it's an _all agg) then use the level for
       // the field name
-      let col = item.aggConfig;
-      let field = (col && col.params && col.params.field && col.params.field.displayName)
+      const col = item.aggConfig;
+      const field = (col && col.params && col.params.field && col.params.field.displayName)
         || (col && col.label)
         || ('level ' + item.depth);
 

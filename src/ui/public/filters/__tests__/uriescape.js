@@ -7,7 +7,7 @@ import 'plugins/kibana/discover/index';
 
 let filter;
 
-let init = function (expandable) {
+const init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

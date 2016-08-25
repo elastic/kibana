@@ -43,7 +43,7 @@ describe('Filter Bar Directive', function () {
       Promise = $injector.get('Promise');
       mapFilter = Private(FilterBarLibMapFilterProvider);
 
-      let queryFilter = Private(FilterBarQueryFilterProvider);
+      const queryFilter = Private(FilterBarQueryFilterProvider);
       queryFilter.getFilters = function () {
         return appState.filters;
       };
@@ -52,7 +52,7 @@ describe('Filter Bar Directive', function () {
 
   describe('Element rendering', function () {
     beforeEach(function (done) {
-      let filters = [
+      const filters = [
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
         { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
         { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
@@ -66,7 +66,7 @@ describe('Filter Bar Directive', function () {
         $scope = $el.isolateScope();
       });
 
-      let off = $rootScope.$on('filterbar:updated', function () {
+      const off = $rootScope.$on('filterbar:updated', function () {
         off();
         // force a nextTick so it continues *after* the $digest loop completes
         setTimeout(done, 0);
@@ -77,7 +77,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should render all the filters in state', function () {
-      let filters = $el.find('.filter');
+      const filters = $el.find('.filter');
       expect(filters).to.have.length(5);
       expect($(filters[0]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
@@ -90,7 +90,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should be able to set an alias', function () {
-      let filter = $el.find('.filter')[4];
+      const filter = $el.find('.filter')[4];
       expect($(filter).find('span')[0].innerHTML).to.equal('foo');
     });
 

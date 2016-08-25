@@ -21,12 +21,12 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return a match filter for terms', function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      let aggConfig = vis.aggs.byTypeName.terms[0];
-      let filter = createFilter(aggConfig, 'apache');
+      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const filter = createFilter(aggConfig, 'apache');
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('match');
       expect(filter.query.match).to.have.property('_type');

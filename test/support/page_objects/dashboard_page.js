@@ -124,7 +124,7 @@ export default class DashboardPage {
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
-    let self = this;
+    const self = this;
     return this.findTimeout
     .findByCssSelector('button.ng-scope[aria-label="Load Saved Dashboard"]')
     .click()
@@ -160,7 +160,7 @@ export default class DashboardPage {
         return chart.getAttribute('title');
       }
 
-      let getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }
@@ -211,7 +211,7 @@ export default class DashboardPage {
         });
       }
 
-      let getTitlePromises = titleObjects.map(getTitles);
+      const getTitlePromises = titleObjects.map(getTitles);
       return Promise.all(getTitlePromises);
     });
   }

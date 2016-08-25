@@ -8,7 +8,7 @@ describe('kibana cli', function () {
 
     describe('commander options', function () {
 
-      let program = {
+      const program = {
         command: function () { return program; },
         description: function () { return program; },
         option: function () { return program; },

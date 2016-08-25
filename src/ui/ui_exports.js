@@ -27,7 +27,7 @@ class UiExports {
       throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
     }
 
-    for (let consumer of this.consumers) {
+    for (const consumer of this.consumers) {
       consumer.consumePlugin && consumer.consumePlugin(plugin);
     }
 
@@ -41,7 +41,7 @@ class UiExports {
   }
 
   exportConsumer(type) {
-    for (let consumer of this.consumers) {
+    for (const consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
       const fn = consumer.exportConsumer(type);
       if (fn) return fn;
@@ -52,7 +52,7 @@ class UiExports {
       case 'apps':
         return (plugin, specs) => {
           const id = plugin.id;
-          for (let spec of [].concat(specs || [])) {
+          for (const spec of [].concat(specs || [])) {
 
             const app = this.apps.new(_.defaults({}, spec, {
               id: plugin.id,
@@ -126,7 +126,7 @@ class UiExports {
   }
 
   getAllApps() {
-    let { apps } = this;
+    const { apps } = this;
     return [...apps].concat(...apps.hidden);
   }
 

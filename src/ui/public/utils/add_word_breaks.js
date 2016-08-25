@@ -7,7 +7,7 @@ define(function () {
     let inHtmlChar = false;
 
     for (let i = 0, len = text.length; i < len; i++) {
-      let chr = text.charAt(i);
+      const chr = text.charAt(i);
       newText += chr;
 
       switch (chr) {

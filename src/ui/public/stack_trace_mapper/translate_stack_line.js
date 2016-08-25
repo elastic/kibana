@@ -3,16 +3,16 @@ import _ from 'lodash';
 module.exports = function (map, match, filename, line, col) {
   if (!map) return match;
 
-  let position = {
+  const position = {
     line: parseFloat(line) || 0,
     column: parseFloat(col) || 0
   };
 
-  let srcPosition = map.smc.originalPositionFor(position);
+  const srcPosition = map.smc.originalPositionFor(position);
   if (!srcPosition || !srcPosition.source) return match;
 
-  let srcFilename = srcPosition.source;
-  let srcLine = srcPosition.line;
+  const srcFilename = srcPosition.source;
+  const srcLine = srcPosition.line;
   let srcCol = srcPosition.column;
 
   if (srcCol === 0 && position.column) {
@@ -28,8 +28,8 @@ module.exports = function (map, match, filename, line, col) {
   // we don't accidentally replace the wrong part we use splitting and consumption
   let resp = '';
   let remainingResp = match;
-  let fold = function (replace, replacement) {
-    let wrappingContent = remainingResp.split(replace);
+  const fold = function (replace, replacement) {
+    const wrappingContent = remainingResp.split(replace);
     resp += wrappingContent.shift() + replacement;
     remainingResp = wrappingContent.join(replace);
   };

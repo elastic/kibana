@@ -35,7 +35,7 @@ export default class Common {
 
   init(remote) {
     function injectTimestampQuery(func, url) {
-      let formatted = modifyQueryString(url, function (parsed) {
+      const formatted = modifyQueryString(url, function (parsed) {
         parsed.query._t = Date.now();
       });
       return func.call(this, formatted);
@@ -51,7 +51,7 @@ export default class Common {
     }
 
     function modifyQueryString(url, func) {
-      let parsed = parse(url, true);
+      const parsed = parse(url, true);
       if (parsed.query === null) {
         parsed.query = {};
       }
@@ -76,8 +76,8 @@ export default class Common {
   }
 
   navigateToApp(appName, testStatusPage) {
-    let self = this;
-    let appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
+    const self = this;
+    const appUrl = getUrl.noAuth(config.servers.kibana, config.apps[appName]);
     self.debug('navigating to ' + appName + ' url: ' + appUrl);
 
     function navigateTo(url) {
@@ -100,7 +100,7 @@ export default class Common {
             .then(function (kibanaLoaded) {
               self.debug('kibanaLoaded = ' + kibanaLoaded);
               if (!kibanaLoaded) {
-                let msg = 'Kibana is not loaded, retrying';
+                const msg = 'Kibana is not loaded, retrying';
                 self.debug(msg);
                 throw new Error(msg);
               }
@@ -111,7 +111,7 @@ export default class Common {
           return self.remote.getCurrentUrl();
         })
         .then(function (currentUrl) {
-          let loginPage = new RegExp('login').test(currentUrl);
+          const loginPage = new RegExp('login').test(currentUrl);
           if (loginPage) {
             self.debug('Found loginPage = ' + loginPage + ', username = '
               + config.servers.kibana.shield.username);
@@ -126,7 +126,7 @@ export default class Common {
         })
         .then(function (currentUrl) {
           currentUrl = currentUrl.replace(/\/\/\w+:\w+@/, '//');
-          let maxAdditionalLengthOnNavUrl = 230;
+          const maxAdditionalLengthOnNavUrl = 230;
           // On several test failures at the end of the TileMap test we try to navigate back to
           // Visualize so we can create the next Vertical Bar Chart, but we can see from the
           // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
@@ -137,11 +137,11 @@ export default class Common {
           // Navigating to Settings when there is a default index pattern has a URL length of 196
           // (from debug output). Some other tabs may also be long. But a rather simple configured
           // visualization is about 1000 chars long. So at least we catch that case.
-          let navSuccessful = new RegExp(appUrl + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+          const navSuccessful = new RegExp(appUrl + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
           .test(currentUrl);
 
           if (!navSuccessful) {
-            let msg = 'App failed to load: ' + appName +
+            const msg = 'App failed to load: ' + appName +
             ' in ' + defaultFindTimeout + 'ms' +
             ' appUrl = ' + appUrl +
             ' currentUrl = ' + currentUrl;
@@ -175,7 +175,7 @@ export default class Common {
   }
 
   runScript(fn, timeout) {
-    let self = this;
+    const self = this;
     // by default, give the app 10 seconds to load
     timeout = timeout || 10000;
 
@@ -183,9 +183,9 @@ export default class Common {
     return self.remote
     .setExecuteAsyncTimeout(timeout)
     .executeAsync(function (done) {
-      let interval = setInterval(function () {
-        let ready = (document.readyState === 'complete');
-        let hasJQuery = !!window.$;
+      const interval = setInterval(function () {
+        const ready = (document.readyState === 'complete');
+        const hasJQuery = !!window.$;
 
         if (ready && hasJQuery) {
           console.log('doc ready, jquery loaded');
@@ -199,25 +199,25 @@ export default class Common {
   }
 
   getApp() {
-    let self = this;
+    const self = this;
 
     return self.remote.setFindTimeout(defaultFindTimeout)
     .findByCssSelector('.app-wrapper .application')
     .then(function () {
       return self.runScript(function () {
-        let $ = window.$;
-        let $scope = $('.app-wrapper .application').scope();
+        const $ = window.$;
+        const $scope = $('.app-wrapper .application').scope();
         return $scope ? $scope.chrome.getApp() : {};
       });
     });
   }
 
   checkForKibanaApp() {
-    let self = this;
+    const self = this;
 
     return self.getApp()
     .then(function (app) {
-      let appId = app.id;
+      const appId = app.id;
       self.debug('current application: ' + appId);
       return appId === 'kibana';
     })
@@ -246,7 +246,7 @@ export default class Common {
   }
 
   sleep(sleepMilliseconds) {
-    let self = this;
+    const self = this;
     self.debug('... sleep(' + sleepMilliseconds + ') start');
 
     return bluebird.resolve().delay(sleepMilliseconds)

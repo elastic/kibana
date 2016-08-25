@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.directive('cssTruncate', function ($timeout) {
   return {

@@ -50,7 +50,7 @@ module.exports = function (grunt) {
 
     fs.readdirSync('./target').forEach((file) => {
       if (path.extname(file) !== '.txt') {
-        let link = url.format({
+        const link = url.format({
           protocol: 'https',
           hostname: 'download.elastic.co',
           pathname: config[0].dest + file

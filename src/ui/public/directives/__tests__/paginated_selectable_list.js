@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 
-let objectList = [
+const objectList = [
   { title: 'apple' },
   { title: 'orange' },
   { title: 'coconut' },
@@ -11,7 +11,7 @@ let objectList = [
   { title: 'grapes' }
 ];
 
-let stringList = [
+const stringList = [
   'apple',
   'orange',
   'coconut',
@@ -19,18 +19,18 @@ let stringList = [
   'grapes'
 ];
 
-let lists = [objectList, stringList, []];
+const lists = [objectList, stringList, []];
 
 let $scope;
 let $element;
 let $isolatedScope;
 
 lists.forEach(function (list) {
-  let isArrayOfObjects = list.every((item) => {
+  const isArrayOfObjects = list.every((item) => {
     return _.isPlainObject(item);
   });
 
-  let init = function (arr, willFail) {
+  const init = function (arr, willFail) {
     // Load the application
     ngMock.module('kibana');
 
@@ -83,8 +83,8 @@ lists.forEach(function (list) {
       });
 
       it('should initially sort an array of objects in ascending order', function () {
-        let property = $isolatedScope.listProperty;
-        let sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
+        const property = $isolatedScope.listProperty;
+        const sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
 
         expect($isolatedScope.hits).to.be.an('array');
 
@@ -104,8 +104,8 @@ lists.forEach(function (list) {
       });
 
       it('should sort an array of objects in ascending order', function () {
-        let property = $isolatedScope.listProperty;
-        let sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
+        const property = $isolatedScope.listProperty;
+        const sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
 
         $isolatedScope.isAscending = false;
         $isolatedScope.sortHits(list);
@@ -122,8 +122,8 @@ lists.forEach(function (list) {
       });
 
       it('should sort an array of objects in descending order', function () {
-        let property = $isolatedScope.listProperty;
-        let reversedList = property ? _.sortBy(list, property).reverse() : _.sortBy(list).reverse();
+        const property = $isolatedScope.listProperty;
+        const reversedList = property ? _.sortBy(list, property).reverse() : _.sortBy(list).reverse();
 
         $isolatedScope.isAscending = true;
         $isolatedScope.sortHits(list);
@@ -146,8 +146,8 @@ lists.forEach(function (list) {
       });
 
       it('should return the result of the function its passed', function () {
-        let property = $isolatedScope.listProperty;
-        let sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
+        const property = $isolatedScope.listProperty;
+        const sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
 
         $isolatedScope.hits.forEach(function (hit, index) {
           if (property) {
@@ -165,8 +165,8 @@ lists.forEach(function (list) {
       });
 
       it('should return the result of the function its passed', function () {
-        let property = $isolatedScope.listProperty;
-        let sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
+        const property = $isolatedScope.listProperty;
+        const sortedList = property ? _.sortBy(list, property) : _.sortBy(list);
 
         $isolatedScope.userOnSelect = function (val) { return val; };
 

@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 // By default, ElasticSearch surrounds matched values in <em></em>. This is not ideal because it is possible that
 // the value could contain <em></em> in the value. We define these custom tags that we would never expect to see

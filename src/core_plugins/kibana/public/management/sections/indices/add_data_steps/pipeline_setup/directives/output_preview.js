@@ -28,8 +28,8 @@ app.directive('outputPreview', function () {
       });
 
       $scope.updateUi = function () {
-        let left = $scope.oldObject;
-        let right = $scope.newObject;
+        const left = $scope.oldObject;
+        const right = $scope.newObject;
         let delta = $scope.diffpatch.diff(left, right);
         if (!delta || $scope.error) delta = {};
 

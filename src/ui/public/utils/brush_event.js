@@ -1,8 +1,8 @@
 import moment from 'moment';
 export default function brushEventProvider(timefilter) {
   return function (event) {
-    let from = moment(event.range[0]);
-    let to = moment(event.range[1]);
+    const from = moment(event.range[0]);
+    const to = moment(event.range[1]);
 
     if (to - from === 0) return;
 

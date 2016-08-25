@@ -1,11 +1,11 @@
 import SearchSourceProvider from 'ui/courier/data_source/search_source';
 
 export default function RootSearchSource(Private, $rootScope, timefilter, Notifier) {
-  let SearchSource = Private(SearchSourceProvider);
+  const SearchSource = Private(SearchSourceProvider);
 
-  let notify = new Notifier({ location: 'Root Search Source' });
+  const notify = new Notifier({ location: 'Root Search Source' });
 
-  let globalSource = new SearchSource();
+  const globalSource = new SearchSource();
   globalSource.inherits(false); // this is the final source, it has no parents
   globalSource.filter(function (globalSource) {
     // dynamic time filter will be called in the _flatten phase of things

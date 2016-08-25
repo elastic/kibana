@@ -25,15 +25,15 @@ uiModules.get('kibana')
       filter: '=?',
     },
     link: function ($scope) {
-      let notify = new Notifier();
+      const notify = new Notifier();
       $scope.limit = 50;
       $scope.persist = {
         sorting: $scope.sorting,
         columns: $scope.columns
       };
 
-      let prereq = (function () {
-        let fns = [];
+      const prereq = (function () {
+        const fns = [];
 
         return function register(fn) {
           fns.push(fn);
@@ -59,7 +59,7 @@ uiModules.get('kibana')
       $scope.$watch('columns', function (columns) {
         if (columns.length !== 0) return;
 
-        let $state = getAppState();
+        const $state = getAppState();
         $scope.columns.push('_source');
         if ($state) $state.replace();
       });

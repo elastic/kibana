@@ -32,7 +32,7 @@ describe('Filter Bar pushFilter()', function () {
     }));
 
     it('should create the filters property it needed', function () {
-      let altState = {};
+      const altState = {};
       pushFilterFn(altState)(filter);
       expect(altState.filters).to.be.an(Array);
     });
