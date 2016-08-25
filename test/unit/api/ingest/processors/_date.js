@@ -1,8 +1,8 @@
 define(function (require) {
-  var Promise = require('bluebird');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
-  var moment = require('intern/dojo/node!moment');
+  let Promise = require('bluebird');
+  let _ = require('intern/dojo/node!lodash');
+  let expect = require('intern/dojo/node!expect.js');
+  let moment = require('intern/dojo/node!moment');
 
   const testPipeline = {
     processors: [{

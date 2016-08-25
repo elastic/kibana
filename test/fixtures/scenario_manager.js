@@ -1,7 +1,7 @@
-var path = require('path');
-var elasticsearch = require('elasticsearch');
-var Promise = require('bluebird');
-var config = require('./config').scenarios;
+let path = require('path');
+let elasticsearch = require('elasticsearch');
+let Promise = require('bluebird');
+let config = require('./config').scenarios;
 
 function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
@@ -23,14 +23,14 @@ function ScenarioManager(server) {
 * @return {Promise} A promise that is resolved when elasticsearch has a response
 */
 ScenarioManager.prototype.load = function (id) {
-  var self = this;
-  var scenario = config[id];
+  let self = this;
+  let scenario = config[id];
   if (!scenario) return Promise.reject('No scenario found for ' + id);
 
   return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
-    var loadIndexDefinition;
+    let loadIndexDefinition;
     if (bulk.indexDefinition) {
-      var body = require(path.join(scenario.baseDir, bulk.indexDefinition));
+      let body = require(path.join(scenario.baseDir, bulk.indexDefinition));
       loadIndexDefinition = self.client.indices.create({
         index: bulk.indexName,
         body: body
@@ -41,7 +41,7 @@ ScenarioManager.prototype.load = function (id) {
 
     return loadIndexDefinition
     .then(function bulkRequest() {
-      var body = require(path.join(scenario.baseDir, bulk.source));
+      let body = require(path.join(scenario.baseDir, bulk.source));
       return self.client.bulk({
         body: body
       });
@@ -71,10 +71,10 @@ ScenarioManager.prototype.load = function (id) {
 * @return {Promise} A promise that is resolved when elasticsearch has a response
 */
 ScenarioManager.prototype.unload = function (id) {
-  var scenario = config[id];
+  let scenario = config[id];
   if (!scenario) return Promise.reject('No scenario found for ' + id);
 
-  var indices = scenario.bulk.map(function mapBulk(bulk) {
+  let indices = scenario.bulk.map(function mapBulk(bulk) {
     return bulk.indexName;
   });
 
@@ -96,7 +96,7 @@ ScenarioManager.prototype.unload = function (id) {
 * @return {Promise} A promise that is resolved when elasticsearch has a response
 */
 ScenarioManager.prototype.reload = function (id) {
-  var self = this;
+  let self = this;
 
   return self.unload(id)
   .then(function load() {
@@ -120,12 +120,12 @@ ScenarioManager.prototype.deleteAll = function () {
  * @return {Promise} A promise that is resolved when elasticsearch has a response
  */
 ScenarioManager.prototype.loadIfEmpty = function (id) {
-  var self = this;
-  var scenario = config[id];
+  let self = this;
+  let scenario = config[id];
   if (!scenario) throw new Error('No scenario found for ' + id);
 
   return Promise.all(scenario.bulk.map(function mapBulk(bulk) {
-    var loadIndexDefinition;
+    let loadIndexDefinition;
 
     return self.client.count({
       index: bulk.indexName

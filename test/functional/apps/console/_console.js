@@ -15,7 +15,7 @@ bdd.describe('console app', function describeIndexTests() {
   });
 
   bdd.it('should show the default request', function () {
-    var expectedRequest = [
+    let expectedRequest = [
       'GET _search',
       '{',
       '  "query": {',
@@ -39,7 +39,7 @@ bdd.describe('console app', function describeIndexTests() {
   });
 
   bdd.it('default request response should contain .kibana' , function () {
-    var expectedResponseContains = '"_index": ".kibana",';
+    let expectedResponseContains = '"_index": ".kibana",';
     return PageObjects.console.clickPlay()
     .then(function () {
       PageObjects.common.saveScreenshot('Console-default-request');

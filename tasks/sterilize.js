@@ -26,7 +26,7 @@ export default function (grunt) {
 
     rl.on('close', this.async());
     rl.question(`\n${danger} Do you really want to delete all of the above files?, [N/y] `, function (resp) {
-      var yes = resp.toLowerCase().trim()[0] === 'y';
+      let yes = resp.toLowerCase().trim()[0] === 'y';
       rl.close();
 
       if (yes) {

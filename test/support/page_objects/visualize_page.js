@@ -75,7 +75,7 @@ export default class VisualizePage {
   }
 
   getChartTypes() {
-    var types = [];
+    let types = [];
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('.wizard-type-heading h4')
@@ -83,7 +83,7 @@ export default class VisualizePage {
       function getChartType(chart) {
         return chart.getVisibleText();
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(function (texts) {
@@ -208,7 +208,7 @@ export default class VisualizePage {
           }
         });
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     });
   }
@@ -228,7 +228,7 @@ export default class VisualizePage {
   }
 
   selectField(fieldValue) {
-    var self = this;
+    let self = this;
     return PageObjects.common.try(function tryingForTime() {
       return self.remote
       .setFindTimeout(defaultFindTimeout)
@@ -350,7 +350,7 @@ export default class VisualizePage {
   }
 
   clickVisualizationByLinkText(vizName) {
-    var self = this;
+    let self = this;
     PageObjects.common.debug('clickVisualizationByLinkText(' + vizName + ')');
 
     return PageObjects.common.try(function tryingForTime() {
@@ -364,7 +364,7 @@ export default class VisualizePage {
   // this starts by clicking the Load Saved Viz button, not from the
   // bottom half of the "Create a new visualization      Step 1" page
   loadSavedVisualization(vizName) {
-    var self = this;
+    let self = this;
     return this.clickLoadSavedVisButton()
     .then(function filterVisualization() {
       return self.openSavedVisualization(vizName);
@@ -374,7 +374,7 @@ export default class VisualizePage {
   // this is for starting on the
   // bottom half of the "Create a new visualization      Step 1" page
   openSavedVisualization(vizName) {
-    var self = this;
+    let self = this;
     return self.filterVisByName(vizName)
     .then(() => {
       return PageObjects.common.sleep(1000);
@@ -393,7 +393,7 @@ export default class VisualizePage {
         return chart
         .getVisibleText();
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(texts => {
@@ -412,7 +412,7 @@ export default class VisualizePage {
         return chart
         .getVisibleText();
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(texts => {
@@ -428,14 +428,14 @@ export default class VisualizePage {
    */
   getAreaChartData(aggregateName) {
 
-    var self = this.remote;
-    var chartData = [];
-    var tempArray = [];
-    var chartSections = 0;
-    var chartMap = {};
-    var height = 0;
-    var yAxisLabel = 0;
-    var yAxisHeight = 0;
+    let self = this.remote;
+    let chartData = [];
+    let tempArray = [];
+    let chartSections = 0;
+    let chartMap = {};
+    let height = 0;
+    let yAxisLabel = 0;
+    let yAxisHeight = 0;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -474,7 +474,7 @@ export default class VisualizePage {
       tempArray = data.replace('M','').split('L');
       chartSections = tempArray.length / 2;
       PageObjects.common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
-      for (var i = 0; i < chartSections; i++) {
+      for (let i = 0; i < chartSections; i++) {
         chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
         PageObjects.common.debug('chartData[i] =' + chartData[i]);
       }
@@ -485,9 +485,9 @@ export default class VisualizePage {
 
   // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
   getLineChartData(cssPart) {
-    var self = this.remote;
-    var yAxisLabel = 0;
-    var yAxisHeight;
+    let self = this.remote;
+    let yAxisLabel = 0;
+    let yAxisHeight;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -535,7 +535,7 @@ export default class VisualizePage {
           }
 
           // 4). pass the chartTypes to the getChartType function
-          var getChartTypesPromises = chartTypes.map(getChartType);
+          let getChartTypesPromises = chartTypes.map(getChartType);
           return Promise.all(getChartTypesPromises);
         });
       })
@@ -548,9 +548,9 @@ export default class VisualizePage {
 
   // this is ALMOST identical to DiscoverPage.getBarChartData
   getBarChartData() {
-    var self = this.remote;
-    var yAxisLabel = 0;
-    var yAxisHeight;
+    let self = this.remote;
+    let yAxisLabel = 0;
+    let yAxisHeight;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -601,7 +601,7 @@ export default class VisualizePage {
             }
           });
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        let getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       })
       .then(function (bars) {
@@ -611,7 +611,7 @@ export default class VisualizePage {
   }
 
   getPieChartData() {
-    var self = this.remote;
+    let self = this.remote;
 
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
@@ -626,7 +626,7 @@ export default class VisualizePage {
           return slice;
         });
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then(function (slices) {
@@ -670,7 +670,7 @@ export default class VisualizePage {
   }
 
   waitForToastMessageGone() {
-    var self = this;
+    let self = this;
     return PageObjects.common.try(function tryingForTime() {
       return self.remote
       .setFindTimeout(100)
@@ -742,8 +742,8 @@ export default class VisualizePage {
     .then((chartTypes) => {
 
       function getChartType(chart) {
-        var color;
-        var radius;
+        let color;
+        let radius;
         return chart.getAttribute('stroke')
         .then((stroke) => {
           color = stroke;
@@ -760,7 +760,7 @@ export default class VisualizePage {
           return {color: color, radius: radius};
         });
       }
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     })
     .then((circles) => {

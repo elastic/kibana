@@ -65,8 +65,8 @@ module.exports = function (grunt) {
 
     activeDownloads.push(platform);
 
-    var bytes = parseInt(resp.headers['content-length'], 10) || 'unknown number of';
-    var mb = ((bytes / 1024) / 1024).toFixed(2);
+    let bytes = parseInt(resp.headers['content-length'], 10) || 'unknown number of';
+    let mb = ((bytes / 1024) / 1024).toFixed(2);
     grunt.log.ok(`downloading ${platform.name} - ${mb} mb`);
   };
 

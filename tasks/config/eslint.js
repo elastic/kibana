@@ -1,4 +1,4 @@
-var resolve = require('path').resolve;
+let resolve = require('path').resolve;
 
 module.exports = function (grunt) {
   return {

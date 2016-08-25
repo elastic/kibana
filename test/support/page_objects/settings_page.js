@@ -41,7 +41,7 @@ export default class SettingsPage {
   }
 
   setAdvancedSettings(propertyName, propertyValue) {
-    var self = this;
+    let self = this;
 
     return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
     .click()
@@ -69,7 +69,7 @@ export default class SettingsPage {
   }
 
   getAdvancedSettings(propertyName) {
-    var self = this;
+    let self = this;
     PageObjects.common.debug('in setAdvancedSettings');
     return PageObjects.common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
     .getVisibleText();
@@ -177,7 +177,7 @@ export default class SettingsPage {
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     });
   }
@@ -192,8 +192,8 @@ export default class SettingsPage {
   }
 
   getFieldsTabCount() {
-    var self = this;
-    var selector = 'li.kbn-management-tab.active a small';
+    let self = this;
+    let selector = 'li.kbn-management-tab.active a small';
 
     return PageObjects.common.try(function () {
       return self.remote.setFindTimeout(defaultFindTimeout / 10)
@@ -206,12 +206,12 @@ export default class SettingsPage {
   }
 
   getPageSize() {
-    var selectedItemLabel = '';
+    let selectedItemLabel = '';
     return this.remote.setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
     .then(function (chartTypes) {
       function getChartType(chart) {
-        var thisChart = chart;
+        let thisChart = chart;
         return chart.isSelected()
         .then(function (isSelected) {
           if (isSelected === true) {
@@ -223,7 +223,7 @@ export default class SettingsPage {
         });
       }
 
-      var getChartTypesPromises = chartTypes.map(getChartType);
+      let getChartTypesPromises = chartTypes.map(getChartType);
       return Bluebird.all(getChartTypesPromises);
     })
     .then(() => {
@@ -336,7 +336,7 @@ export default class SettingsPage {
   }
 
   removeIndexPattern() {
-    var alertText;
+    let alertText;
 
     return PageObjects.common.try(() => {
       PageObjects.common.debug('click delete index pattern button');

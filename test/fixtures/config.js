@@ -1,5 +1,5 @@
-var path = require('path');
-var rootDir = path.join(__dirname, 'scenarios');
+let path = require('path');
+let rootDir = path.join(__dirname, 'scenarios');
 
 module.exports = {
   scenarios: {

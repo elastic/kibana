@@ -1,8 +1,8 @@
 define(function (require) {
-  var Promise = require('bluebird');
-  var createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
+  let Promise = require('bluebird');
+  let createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
+  let _ = require('intern/dojo/node!lodash');
+  let expect = require('intern/dojo/node!expect.js');
 
 
   return function (bdd, scenarioManager, request) {
