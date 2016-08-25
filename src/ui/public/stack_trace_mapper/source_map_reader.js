@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SourceMapConsumer } from 'source-map/lib/source-map/source-map-consumer';
+import { SourceMapConsumer } from 'source-map/lib/source-map-consumer';
 import { parse } from 'url';
 
 function SourceMapReader(url, map) {
