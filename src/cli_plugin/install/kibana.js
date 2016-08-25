@@ -47,7 +47,7 @@ export async function rebuildCache(settings, logger) {
 
 export function assertVersion(settings) {
   if (!settings.plugins[0].version) {
-    throw new Error (`Plugin version not found. Check package.json in archive`);
+    throw new Error ('Plugin version not found. Check package.json in archive');
   }
 
   const actual = cleanVersion(settings.plugins[0].version);

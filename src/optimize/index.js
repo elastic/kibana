@@ -26,7 +26,7 @@ module.exports = async (kbnServer, server, config) => {
   if (!invalidBundles.getIds().length) {
     server.log(
       ['debug', 'optimize'],
-      `All bundles are cached and ready to go!`
+      'All bundles are cached and ready to go!'
     );
     return;
   }

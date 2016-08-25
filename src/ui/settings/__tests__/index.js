@@ -166,14 +166,14 @@ describe('ui settings', function () {
       expectElasticsearchGetQuery(server, configGet);
     });
 
-    it(`without user configuration it's equal to the defaults`, async function () {
+    it('without user configuration it\'s equal to the defaults', async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
       expect(isEqual(result, defaultsProvider())).to.equal(true);
     });
 
-    it(`user configuration gets merged with defaults`, async function () {
+    it('user configuration gets merged with defaults', async function () {
       const getResult = { foo: 'bar' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
@@ -182,7 +182,7 @@ describe('ui settings', function () {
       expect(isEqual(result, merged)).to.equal(true);
     });
 
-    it(`user configuration gets merged into defaults`, async function () {
+    it('user configuration gets merged into defaults', async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getRaw();
@@ -200,7 +200,7 @@ describe('ui settings', function () {
       expectElasticsearchGetQuery(server, configGet);
     });
 
-    it(`returns key value pairs`, async function () {
+    it('returns key value pairs', async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getAll();
@@ -212,7 +212,7 @@ describe('ui settings', function () {
       expect(isEqual(result, expectation)).to.equal(true);
     });
 
-    it(`returns key value pairs including user configuration`, async function () {
+    it('returns key value pairs including user configuration', async function () {
       const getResult = { something: 'user-provided' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getAll();
@@ -225,7 +225,7 @@ describe('ui settings', function () {
       expect(isEqual(result, expectation)).to.equal(true);
     });
 
-    it(`returns key value pairs including user configuration for existing settings`, async function () {
+    it('returns key value pairs including user configuration for existing settings', async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.getAll();
@@ -247,7 +247,7 @@ describe('ui settings', function () {
       expectElasticsearchGetQuery(server, configGet);
     });
 
-    it(`returns the promised value for a key`, async function () {
+    it('returns the promised value for a key', async function () {
       const getResult = {};
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');
@@ -255,14 +255,14 @@ describe('ui settings', function () {
       expect(result).to.equal(defaults.dateFormat.value);
     });
 
-    it(`returns the user-configured value for a custom key`, async function () {
+    it('returns the user-configured value for a custom key', async function () {
       const getResult = { custom: 'value' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('custom');
       expect(result).to.equal('value');
     });
 
-    it(`returns the user-configured value for a modified key`, async function () {
+    it('returns the user-configured value for a modified key', async function () {
       const getResult = { dateFormat: 'YYYY-MM-DD' };
       const { server, uiSettings, configGet } = instantiate({ getResult });
       const result = await uiSettings.get('dateFormat');

@@ -39,7 +39,7 @@ app.directive('pipelineSetup', function () {
     },
     controller: function ($scope, debounce, Private, Notifier) {
       const ingest = Private(IngestProvider);
-      const notify = new Notifier({ location: `Ingest Pipeline Setup` });
+      const notify = new Notifier({ location: 'Ingest Pipeline Setup' });
       $scope.sample = {};
 
       //determines which processors are available on the cluster

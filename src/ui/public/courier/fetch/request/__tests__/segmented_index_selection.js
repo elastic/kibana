@@ -78,7 +78,7 @@ describe('Segmented Request Index Selection', function () {
     });
   });
 
-  it(`sets size 0 for indices that couldn't procude hits`, async function () {
+  it('sets size 0 for indices that couldn\'t procude hits', async function () {
     const search = new MockSource();
     const indexPattern = search.get('index');
 

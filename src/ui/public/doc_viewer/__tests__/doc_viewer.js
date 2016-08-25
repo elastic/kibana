@@ -58,7 +58,7 @@ describe('docViewer', function () {
           title: 'exampleView',
           order: 0,
           directive: {
-            template: `Example`
+            template: 'Example'
           }
         });
       });

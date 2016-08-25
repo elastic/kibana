@@ -100,10 +100,10 @@ const buttonHierarchyClass = (index) => {
   return 'btn-default';
 };
 const typeToAlertClassMap = {
-  danger: `alert-danger`,
-  warning: `alert-warning`,
-  info: `alert-info`,
-  banner: `alert-banner`,
+  danger: 'alert-danger',
+  warning: 'alert-warning',
+  info: 'alert-info',
+  banner: 'alert-banner',
 };
 
 function add(notif, cb) {

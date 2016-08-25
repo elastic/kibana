@@ -43,7 +43,7 @@ describe('globalNavLink directive', () => {
   describe('interface', () => {
 
     describe('isActive attribute', () => {
-      it(`doesn't apply the active class when false`, () => {
+      it('doesn\'t apply the active class when false', () => {
         const element = create({
           isActive: false,
         });
@@ -59,7 +59,7 @@ describe('globalNavLink directive', () => {
     });
 
     describe('isDisabled attribute', () => {
-      it(`doesn't apply the is-global-nav-link-disabled class when false`, () => {
+      it('doesn\'t apply the is-global-nav-link-disabled class when false', () => {
         const element = create({
           isDisabled: false,
         });
@@ -107,7 +107,7 @@ describe('globalNavLink directive', () => {
     });
 
     describe('kbnRoute attribute', () => {
-      it(`is applied to the link when href isn't defined`, () => {
+      it('is applied to the link when href isn\'t defined', () => {
         const attrs = {
           kbnRoute: '#test',
         };
@@ -116,7 +116,7 @@ describe('globalNavLink directive', () => {
         expect(link.attr('href')).to.be(attrs.kbnRoute);
       });
 
-      it(`isn't applied to the link when href is defined`, () => {
+      it('isn\'t applied to the link when href is defined', () => {
         const attrs = {
           href: 'link to a website',
           kbnRoute: '#test',
@@ -147,7 +147,7 @@ describe('globalNavLink directive', () => {
           expect(placeholder.length).to.be(0);
         });
 
-        it(`is set as the img src`, () => {
+        it('is set as the img src', () => {
           const attrs = {
             icon: 'icon url',
           };
@@ -176,7 +176,7 @@ describe('globalNavLink directive', () => {
           expect(placeholder.length).to.be(1);
         });
 
-        it(`uses the title's first letter as the placeholder`, () => {
+        it('uses the title\'s first letter as the placeholder', () => {
           const attrs = {
             icon: undefined,
             title: 'Xyz',
