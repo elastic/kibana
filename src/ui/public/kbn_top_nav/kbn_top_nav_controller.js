@@ -50,7 +50,12 @@ export default function ($compile) {
     open(key) { this.setCurrent(key); }
     close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
     toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
-
+    handleClick(menuItem) {
+      if (menuItem.disableButton) {
+        return false;
+      }
+      menuItem.run(menuItem, this);
+    }
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
       const defaultedOpt = Object.assign({
