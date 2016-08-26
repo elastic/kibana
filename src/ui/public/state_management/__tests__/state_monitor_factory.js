@@ -1,10 +1,10 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import stateMonitor from 'ui/state_management/state_monitor';
+import stateMonitor from 'ui/state_management/state_monitor_factory';
 import SimpleEmitter from 'ui/utils/SimpleEmitter';
 
-describe('stateMonitor', function () {
+describe('stateMonitorFactory', function () {
   const noop = () => {};
   const eventTypes = [
     'save_with_changes',
@@ -132,6 +132,45 @@ describe('stateMonitor', function () {
         status = changeStub.secondCall.args[0];
         expect(status).to.have.property('clean', false);
         expect(status).to.have.property('dirty', true);
+      });
+    });
+
+    describe('setInitialState', function () {
+      let changeStub;
+
+      beforeEach(() => {
+        changeStub = sinon.stub();
+        monitor.onChange(changeStub);
+        sinon.assert.notCalled(changeStub);
+      });
+
+      it('should throw if no state is provided', function () {
+        const fn = () => monitor.setInitialState();
+        expect(fn).to.throwException(/must be an object/);
+      });
+
+      it('should throw if given the wrong type', function () {
+        const fn = () => monitor.setInitialState([]);
+        expect(fn).to.throwException(/must be an object/);
+      });
+
+      it('should trigger the onChange handler', function () {
+        monitor.setInitialState({ new: 'state' });
+        sinon.assert.calledOnce(changeStub);
+      });
+
+      it('should change the status with differing state', function () {
+        monitor.setInitialState({ new: 'state' });
+        sinon.assert.calledOnce(changeStub);
+
+        const status = changeStub.firstCall.args[0];
+        expect(status).to.have.property('clean', false);
+        expect(status).to.have.property('dirty', true);
+      });
+
+      it('should not trigger the onChange handler without state change', function () {
+        monitor.setInitialState(cloneDeep(mockState.toJSON()));
+        sinon.assert.notCalled(changeStub);
       });
     });
 
