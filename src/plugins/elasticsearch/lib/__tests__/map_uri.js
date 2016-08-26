@@ -11,6 +11,7 @@ describe('plugins/elasticsearch', function () {
       request = {
         path: '/elasticsearch/some/path',
         headers: {
+          host: 'localhost:5601',
           cookie: 'some_cookie_string',
           'accept-encoding': 'gzip, deflate',
           origin: 'https://localhost:5601',
@@ -22,9 +23,22 @@ describe('plugins/elasticsearch', function () {
       };
     });
 
+    it('sends the host header based on the elasticsearch.url rather than the Kibana client', function () {
+      const get = sinon.stub();
+      get.withArgs('elasticsearch.customHeaders').returns({});
+      get.withArgs('elasticsearch.url').returns('http://example.com:1234');
+      const server = { config: () => ({ get }) };
+
+      mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
+        expect(err).to.be(null);
+        expect(upstreamHeaders).to.have.property('host', 'example.com:1234');
+      });
+    });
+
     it('sends custom headers if set', function () {
       const get = sinon.stub();
       get.withArgs('elasticsearch.customHeaders').returns({ foo: 'bar' });
+      get.withArgs('elasticsearch.url').returns('http://example.com:1234');
       const server = { config: () => ({ get }) };
 
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
@@ -36,6 +50,7 @@ describe('plugins/elasticsearch', function () {
     it('sends configured custom headers even if the same named header exists in request', function () {
       const get = sinon.stub();
       get.withArgs('elasticsearch.customHeaders').returns({'x-my-custom-header': 'asconfigured'});
+      get.withArgs('elasticsearch.url').returns('http://example.com:1234');
       const server = { config: () => ({ get }) };
 
       mapUri(server)(request, function (err, upstreamUri, upstreamHeaders) {
