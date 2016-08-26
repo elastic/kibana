@@ -64,16 +64,19 @@ describe('KbnTopNavController', function () {
     });
 
     describe('hideButton:', function () {
-      it('defaults to false', function () {
+      it('defaults to a function that returns false', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        expect(pluck(controller.opts, 'hideButton')).to.eql([false, false]);
+        pluck(controller.opts, 'hideButton').forEach(prop => {
+          expect(prop).to.be.a(Function);
+          expect(prop()).to.eql(false);
+        });
       });
 
-      it('excludes opts from opts when true', function () {
+      it('excludes opts from opts when set to true', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234', hideButton: true },
@@ -81,27 +84,42 @@ describe('KbnTopNavController', function () {
 
         expect(controller.menuItems).to.have.length(1);
       });
+
+      it('excludes opts from opts when set to a function that returns true', function () {
+        const controller = new KbnTopNavController([
+          { key: 'foo' },
+          { key: '1234', hideButton: () => true },
+        ]);
+
+        expect(controller.menuItems).to.have.length(1);
+      });
     });
 
     describe('disableButton:', function () {
-      it('defaults to false', function () {
+      it('defaults to a function that returns false', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        expect(pluck(controller.opts, 'disableButton')).to.eql([false, false]);
+        pluck(controller.opts, 'disableButton').forEach(prop => {
+          expect(prop).to.be.a(Function);
+          expect(prop()).to.eql(false);
+        });
       });
     });
 
     describe('tooltip:', function () {
-      it('defaults to empty string', function () {
+      it('defaults to a function that returns undefined', function () {
         const controller = new KbnTopNavController([
           { key: 'foo' },
           { key: '1234' },
         ]);
 
-        expect(pluck(controller.opts, 'tooltip')).to.eql(['', '']);
+        pluck(controller.opts, 'tooltip').forEach(prop => {
+          expect(prop).to.be.a(Function);
+          expect(prop()).to.eql(undefined);
+        });
       });
     });
 
