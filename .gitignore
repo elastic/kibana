@@ -11,5 +11,6 @@ target
 .idea
 *.iml
 *.log
+/html_docs
 esvm
 .htpasswd
