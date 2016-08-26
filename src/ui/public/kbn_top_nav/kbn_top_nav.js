@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import 'ui/watch_multi';
-import angular from 'angular';
 import 'ui/directives/input_focus';
 import uiModules from 'ui/modules';
 import template from './kbn_top_nav.html';

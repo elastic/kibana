@@ -234,7 +234,7 @@ angular.module('ui.bootstrap.tabs', [])
   return {
     restrict: 'A',
     require: '^tab',
-    link: function(scope, elm, attrs, tabCtrl) {
+    link: function(scope, elm) {
       scope.$watch('headingElement', function updateHeadingElement(heading) {
         if (heading) {
           elm.html('');

@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import handleESError from '../../../lib/handle_es_error';
-import {ingestToPattern, patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
+import {patternToIngest} from '../../../../common/lib/convert_pattern_and_ingest_name';
 
 export function registerDelete(server) {
   server.route({
@@ -25,7 +25,7 @@ export function registerDelete(server) {
         })
       ])
       .then(
-        function (pattern) {
+        function () {
           reply({success: true});
         },
         function (error) {

@@ -13,7 +13,7 @@ let $scope;
 
 let $elem;
 
-const init = function (text) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 

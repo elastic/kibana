@@ -3,12 +3,8 @@ import VisProvider from 'ui/vis';
 import uiModules from 'ui/modules';
 uiModules
 .get('app/visualize')
-.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
+.factory('SavedVis', function (courier, Promise, savedSearches, Private) {
   const Vis = Private(VisProvider);
-
-  const notify = new Notifier({
-    location: 'SavedVis'
-  });
 
   _.class(SavedVis).inherits(courier.SavedObject);
   function SavedVis(opts) {
@@ -63,7 +59,7 @@ uiModules
 
       return self.vis ? self._updateVis() : self._createVis();
     })
-    .then(function (vis) {
+    .then(function () {
       self.searchSource.aggs(function () {
         self.vis.requesting();
         return self.vis.aggs.toDsl();

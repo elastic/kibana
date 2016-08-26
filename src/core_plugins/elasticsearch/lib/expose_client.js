@@ -41,7 +41,6 @@ module.exports = function (server) {
 
     const uri = url.parse(options.url);
 
-    let authorization;
     if (options.auth && options.username && options.password) {
       uri.auth = util.format('%s:%s', options.username, options.password);
     }

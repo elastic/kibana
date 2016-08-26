@@ -1,13 +1,10 @@
-import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../core_plugins/kibana/common/lib/case_conversion';
 import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 
 export default function IngestProvider($rootScope, $http, config, $q, Private, indexPatterns) {
-
   const ingestAPIPrefix = chrome.addBasePath('/api/kibana/ingest');
-  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
 
   this.save = function (indexPattern, pipeline) {
     if (_.isEmpty(indexPattern)) {
@@ -59,7 +56,7 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
 
     return $http.post(`${ingestAPIPrefix}/simulate`, pack(pipeline))
     .then(unpack)
-    .catch(err => {
+    .catch(() => {
       return $q.reject(new Error('Error simulating pipeline'));
     });
   };
@@ -71,7 +68,7 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
 
     return $http.get(`${ingestAPIPrefix}/processors`)
     .then(unpack)
-    .catch(err => {
+    .catch(() => {
       return $q.reject(new Error('Error fetching enabled processors'));
     });
   };
@@ -101,5 +98,4 @@ export default function IngestProvider($rootScope, $http, config, $q, Private, i
       headers: {'Content-Type': undefined}
     });
   };
-
 }

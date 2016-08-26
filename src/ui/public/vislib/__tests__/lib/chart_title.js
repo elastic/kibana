@@ -1,20 +1,14 @@
 import d3 from 'd3';
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
-import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;
-  let Data;
-  let persistedState;
   let chartTitle;
   let el;
-  let dataObj;
   const data = {
     hits: 621,
     label: '',
@@ -77,8 +71,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     ChartTitle = Private(VislibLibChartTitleProvider);
-    Data = Private(VislibLibDataProvider);
-    persistedState = new (Private(PersistedStatePersistedStateProvider))();
 
     el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')
@@ -88,7 +80,6 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       .attr('class', 'chart-title')
       .style('height', '20px');
 
-    dataObj = new Data(data, {}, persistedState);
     chartTitle = new ChartTitle($('.vis-wrapper')[0], 'rows');
   }));
 
@@ -115,5 +106,4 @@ describe('Vislib ChartTitle Class Test Suite', function () {
       expect(_.isFunction(chartTitle.draw())).to.be(true);
     });
   });
-
 });

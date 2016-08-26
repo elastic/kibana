@@ -1,5 +1,4 @@
 import IndexedArray from 'ui/indexed_array';
-import _ from 'lodash';
 import $ from 'jquery';
 import aggSelectHtml from 'plugins/kibana/visualize/editor/agg_select.html';
 import advancedToggleHtml from 'plugins/kibana/visualize/editor/advanced_toggle.html';
@@ -13,10 +12,6 @@ uiModules
 .get('app/visualize')
 .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
   const aggTypes = Private(AggTypesIndexProvider);
-
-  const notify = new Notifier({
-    location: 'visAggGroup'
-  });
 
   return {
     restrict: 'E',

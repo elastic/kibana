@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
 import FilterBarLibFilterOutTimeBasedFilterProvider from 'ui/filter_bar/lib/filter_out_time_based_filter';
 
 describe('Filter Bar Directive', function () {
@@ -17,7 +16,7 @@ describe('Filter Bar Directive', function () {
       }
     ));
 
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
+    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
       filterOutTimeBasedFilter = Private(FilterBarLibFilterOutTimeBasedFilterProvider);
       $rootScope = _$rootScope_;
     }));

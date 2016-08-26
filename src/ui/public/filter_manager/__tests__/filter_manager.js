@@ -5,7 +5,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FilterManagerProvider from 'ui/filter_manager';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
-let $rootScope;
 let queryFilter;
 let filterManager;
 let appState;
@@ -36,8 +35,7 @@ describe('Filter Manager', function () {
     }
   ));
 
-  beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-    $rootScope = _$rootScope_;
+  beforeEach(ngMock.inject(function (Private) {
     filterManager = Private(FilterManagerProvider);
 
     // mock required queryFilter methods, used in the manager

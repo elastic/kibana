@@ -1,4 +1,3 @@
-import angular from 'angular';
 import $ from 'jquery';
 import _ from 'lodash';
 import EventsProvider from 'ui/events';

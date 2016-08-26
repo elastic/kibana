@@ -8,14 +8,12 @@ import VislibVisProvider from 'ui/vislib/vis';
 import VisRenderbotProvider from 'ui/vis/renderbot';
 import VislibVisTypeVislibRenderbotProvider from 'ui/vislib_vis_type/vislib_renderbot';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-import AggResponseIndexProvider from 'ui/agg_response/index';
 describe('renderbot', function exportWrapper() {
   let vislib;
   let Vis;
   let Renderbot;
   let VislibRenderbot;
   let persistedState;
-  let normalizeChartData;
   const mockVisType = {
     name: 'test'
   };
@@ -29,7 +27,6 @@ describe('renderbot', function exportWrapper() {
       Renderbot = Private(VisRenderbotProvider);
       VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
       persistedState = new (Private(PersistedStatePersistedStateProvider))();
-      normalizeChartData = Private(AggResponseIndexProvider);
     });
   }
 
@@ -92,7 +89,6 @@ describe('renderbot', function exportWrapper() {
     };
     const $el = $('<div>testing</div>');
     let createVisSpy;
-    let getParamsStub;
     let renderbot;
 
     beforeEach(function () {
@@ -121,7 +117,6 @@ describe('renderbot', function exportWrapper() {
   describe('render', function () {
     const vis = { type: mockVisType, isHierarchical: _.constant(false) };
     const $el = $('<div>testing</div>');
-    const stubs = {};
 
     beforeEach(function () {
       sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));

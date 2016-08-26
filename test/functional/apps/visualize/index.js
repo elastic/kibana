@@ -1,6 +1,4 @@
 
-import expect from 'expect.js';
-
 import {
   bdd,
   remote,
@@ -16,7 +14,6 @@ bdd.describe('visualize app', function () {
   this.timeout = defaultTimeout;
 
   bdd.before(function () {
-    const self = this;
     remote.setWindowSize(1200,800);
 
     PageObjects.common.debug('Starting visualize before method');

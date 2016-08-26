@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import sinon from 'sinon';
 import setHeaders from '../set_headers';
 
 describe('plugins/elasticsearch', function () {

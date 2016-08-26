@@ -1,5 +1,4 @@
 define(function (require) {
-  const Promise = require('bluebird');
   const _ = require('intern/dojo/node!lodash');
   const expect = require('intern/dojo/node!expect.js');
   const fakeNamesIndexTemplate = require('intern/dojo/node!../../fixtures/fake_names_index_template.json');
@@ -169,7 +168,7 @@ define(function (require) {
               ]
             }
           })
-          .then((res) => {
+          .then(() => {
             return request.post('/kibana/names/_data?pipeline=true')
             .attach('csv', 'test/unit/fixtures/fake_names.csv')
             .expect(200);

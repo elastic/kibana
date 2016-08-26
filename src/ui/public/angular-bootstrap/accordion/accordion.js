@@ -26,7 +26,7 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
     var that = this;
     this.groups.push(groupScope);
 
-    groupScope.$on('$destroy', function (event) {
+    groupScope.$on('$destroy', function() {
       that.removeGroup(groupScope);
     });
   };

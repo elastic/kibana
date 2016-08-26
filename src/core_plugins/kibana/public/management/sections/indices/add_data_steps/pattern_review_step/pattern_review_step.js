@@ -32,7 +32,7 @@ modules.get('apps/management')
       },
       controllerAs: 'reviewStep',
       bindToController: true,
-      controller: function ($scope, Private) {
+      controller: function ($scope) {
         this.errors = [];
         const sampleFields = {};
 

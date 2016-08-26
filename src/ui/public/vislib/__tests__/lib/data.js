@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -225,19 +224,11 @@ describe('Vislib Data Class Test Suite', function () {
 
   describe('Data.flatten', function () {
     let serIn;
-    let rowIn;
-    let colIn;
     let serOut;
-    let rowOut;
-    let colOut;
 
     beforeEach(function () {
       serIn = new Data(seriesData, {}, persistedState);
-      rowIn = new Data(rowsData, {}, persistedState);
-      colIn = new Data(colsData, {}, persistedState);
       serOut = serIn.flatten();
-      rowOut = rowIn.flatten();
-      colOut = colIn.flatten();
     });
 
     it('should return an array of value objects from every series', function () {

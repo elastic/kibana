@@ -11,7 +11,6 @@ import checkEsVersion from '../check_es_version';
 describe('plugins/elasticsearch', function () {
   describe('lib/check_es_version', function () {
     let server;
-    let plugin;
 
     beforeEach(function () {
       const get = sinon.stub().withArgs('elasticsearch.engineVersion').returns('^1.4.3');
@@ -88,6 +87,5 @@ describe('plugins/elasticsearch', function () {
         expect(e).to.be.a(SetupError);
       });
     });
-
   });
 });

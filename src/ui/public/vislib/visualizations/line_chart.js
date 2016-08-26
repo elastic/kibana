@@ -185,10 +185,8 @@ export default function LineChartFactory(Private) {
    * @returns {D3.UpdateSelection} SVG with paths added
    */
   LineChart.prototype.addLines = function (svg, data) {
-    const self = this;
     const xScale = this.handler.xAxis.xScale;
     const yScale = this.handler.yAxis.yScale;
-    const xAxisFormatter = this.handler.data.get('xAxisFormatter');
     const color = this.handler.data.getColorFunc();
     const ordered = this.handler.data.get('ordered');
     const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
@@ -267,7 +265,6 @@ export default function LineChartFactory(Private) {
     const elWidth = this._attr.width = $elem.width();
     const elHeight = this._attr.height = $elem.height();
     const scaleType = this.handler.yAxis.getScaleType();
-    const yMin = this.handler.yAxis.yMin;
     const yScale = this.handler.yAxis.yScale;
     const xScale = this.handler.xAxis.xScale;
     const minWidth = 20;
@@ -281,7 +278,6 @@ export default function LineChartFactory(Private) {
     let svg;
     let width;
     let height;
-    let lines;
     let circles;
 
     return function (selection) {
@@ -323,7 +319,7 @@ export default function LineChartFactory(Private) {
 
         self.addClipPath(svg, width, height);
         if (self._attr.drawLinesBetweenPoints) {
-          lines = self.addLines(svg, data.series);
+          self.addLines(svg, data.series);
         }
         circles = self.addCircles(svg, layers);
         self.addCircleEvents(circles, svg);

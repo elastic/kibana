@@ -19,7 +19,7 @@ module.controller('KbnTableVisController', function ($scope, Private) {
     $scope.uiState.set('vis.params.sort', newSort);
   });
 
-  $scope.$watch('esResponse', function (resp, oldResp) {
+  $scope.$watch('esResponse', function (resp) {
     let tableGroups = $scope.tableGroups = null;
     let hasSomeRows = $scope.hasSomeRows = null;
 

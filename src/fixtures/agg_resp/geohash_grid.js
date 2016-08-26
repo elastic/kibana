@@ -1,7 +1,5 @@
 import _ from 'lodash';
 export default function GeoHashGridAggResponseFixture() {
-
-
   // for vis:
   //
   // vis = new Vis(indexPattern, {
@@ -22,8 +20,6 @@ export default function GeoHashGridAggResponseFixture() {
     _.range(65, 90), // A-Z
     _.range(97, 122) // a-z
   );
-
-  let totalDocCount = 0;
 
   const tags = _.times(_.random(4, 20), function (i) {
     // random number of tags

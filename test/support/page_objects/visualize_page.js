@@ -75,7 +75,6 @@ export default class VisualizePage {
   }
 
   getChartTypes() {
-    const types = [];
     return this.remote
     .setFindTimeout(defaultFindTimeout)
     .findAllByCssSelector('.wizard-type-heading h4')
@@ -427,13 +426,10 @@ export default class VisualizePage {
    ** Returns an array of height values
    */
   getAreaChartData(aggregateName) {
-
     const self = this.remote;
     const chartData = [];
     let tempArray = [];
     let chartSections = 0;
-    const chartMap = {};
-    const height = 0;
     let yAxisLabel = 0;
     let yAxisHeight = 0;
 
@@ -484,7 +480,7 @@ export default class VisualizePage {
 
 
   // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-  getLineChartData(cssPart) {
+  getLineChartData() {
     const self = this.remote;
     let yAxisLabel = 0;
     let yAxisHeight;
@@ -611,8 +607,6 @@ export default class VisualizePage {
   }
 
   getPieChartData() {
-    const self = this.remote;
-
     // 1). get the maximim chart Y-Axis marker value
     return this.remote
     .setFindTimeout(defaultFindTimeout * 2)

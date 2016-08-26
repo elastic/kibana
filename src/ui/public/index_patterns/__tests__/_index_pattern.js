@@ -19,7 +19,6 @@ describe('index pattern', function () {
   let mappingSetup;
   let mockLogstashFields;
   let DocSource;
-  let config;
   let docSourceResponse;
   const indexPatternId = 'test-pattern';
   let indexPattern;
@@ -28,9 +27,8 @@ describe('index pattern', function () {
   let intervals;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector, _config_) {
+  beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
-    config = _config_;
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
     docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
@@ -150,11 +148,9 @@ describe('index pattern', function () {
     require('test_utils/no_digest_promises').activateForSuite();
     const indexPatternId = 'test-pattern';
     let indexPattern;
-    let fieldLength;
     let truncatedFields;
 
     beforeEach(function () {
-      fieldLength = mockLogstashFields.length;
       truncatedFields = mockLogstashFields.slice(3);
       return create(indexPatternId, {
         _source: {
@@ -278,7 +274,7 @@ describe('index pattern', function () {
     });
 
     it('should decrement the poplarity count', function () {
-      indexPattern.fields.forEach(function (field, i) {
+      indexPattern.fields.forEach(function (field) {
         const oldCount = field.count;
         const incrementAmount = 4;
         const decrementAmount = -2;

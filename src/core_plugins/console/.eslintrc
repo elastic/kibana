@@ -34,3 +34,4 @@ rules:
   wrap-iife: off
   no-var: off
   prefer-const: off
+  no-unused-vars: off

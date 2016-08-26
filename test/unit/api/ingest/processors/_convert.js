@@ -1,6 +1,5 @@
 define(function (require) {
   const Promise = require('bluebird');
-  const _ = require('intern/dojo/node!lodash');
   const expect = require('intern/dojo/node!expect.js');
 
   const testPipeline = {

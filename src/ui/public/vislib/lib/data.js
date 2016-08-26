@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import errors from 'ui/errors';
 import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 import VislibComponentsZeroInjectionOrderedXKeysProvider from 'ui/vislib/components/zero_injection/ordered_x_keys';
 import VislibComponentsLabelsLabelsProvider from 'ui/vislib/components/labels/labels';
@@ -388,7 +387,6 @@ export default function DataFactory(Private) {
    */
   Data.prototype.getYMin = function (getValue) {
     const self = this;
-    const arr = [];
 
     if (this._attr.mode === 'percentage' || this._attr.mode === 'wiggle' ||
       this._attr.mode === 'silhouette') {
@@ -428,7 +426,6 @@ export default function DataFactory(Private) {
    */
   Data.prototype.getYMax = function (getValue) {
     const self = this;
-    const arr = [];
 
     if (self._attr.mode === 'percentage') {
       return 1;
@@ -522,7 +519,7 @@ export default function DataFactory(Private) {
     const names = [];
     const self = this;
 
-    _.forEach(array, function (obj, i) {
+    _.forEach(array, function (obj) {
       names.push({
         label: obj.name,
         values: obj,

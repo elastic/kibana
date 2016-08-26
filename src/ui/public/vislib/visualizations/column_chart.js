@@ -111,7 +111,6 @@ export default function ColumnChartFactory(Private) {
     const data = this.chartData;
     const xScale = this.handler.xAxis.xScale;
     const yScale = this.handler.yAxis.yScale;
-    const height = yScale.range()[0];
     const yMin = this.handler.yAxis.yScale.domain()[0];
 
     let barWidth;
@@ -174,7 +173,6 @@ export default function ColumnChartFactory(Private) {
     const yScale = this.handler.yAxis.yScale;
     const data = this.chartData;
     const n = data.series.length;
-    const height = yScale.range()[0];
     const groupSpacingPercentage = 0.15;
     const isTimeScale = (data.ordered && data.ordered.date);
     const minWidth = 1;
@@ -308,7 +306,7 @@ export default function ColumnChartFactory(Private) {
         // Adds event listeners
         self.addBarEvents(bars, svg);
 
-        const line = svg.append('line')
+        svg.append('line')
         .attr('class', 'base-line')
         .attr('x1', 0)
         .attr('y1', yScale(0))

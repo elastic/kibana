@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import esBool from './es_bool';
 import versionSatisfies from './version_satisfies';
 import SetupError from './setup_error';
 

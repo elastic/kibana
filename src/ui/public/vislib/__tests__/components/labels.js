@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -13,7 +12,6 @@ let rowsLabels;
 let seriesArr;
 let rowsArr;
 let uniqLabels;
-let error;
 
 const seriesData = {
   'label': '',

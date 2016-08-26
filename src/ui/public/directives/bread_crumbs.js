@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import chrome from 'ui/chrome/chrome';
 import breadCrumbsTemplate from 'ui/partials/bread_crumbs.html';
 import uiModules from 'ui/modules';

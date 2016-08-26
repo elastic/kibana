@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import _ from 'lodash';
 import ingestSimulateApiKibanaToEsConverter from '../../converters/ingest_simulate_api_kibana_to_es_converter';
 
 describe('ingestSimulateApiKibanaToEsConverter', function () {

@@ -1,6 +1,4 @@
-import _ from 'lodash';
 import notify from 'ui/notify';
-import $ from 'jquery';
 import 'ui/autoload/styles';
 import 'plugins/status_page/status_page_metric';
 import 'plugins/status_page/status_page.less';
@@ -9,7 +7,7 @@ import uiModules from 'ui/modules';
 
 const chrome = require('ui/chrome')
 .setRootTemplate(require('plugins/status_page/status_page.html'))
-.setRootController('ui', function ($http, $scope) {
+.setRootController('ui', function ($http) {
   const ui = this;
   ui.loading = false;
 

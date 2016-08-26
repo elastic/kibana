@@ -1,8 +1,7 @@
-import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
 import Binder from 'ui/binder';
-export default function AlertsFactory(Private) {
+export default function AlertsFactory() {
 
   /**
    * Adds allerts that float in front of a visualization

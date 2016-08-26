@@ -13,7 +13,7 @@ export default function ScaledCircleMarkerFactory(Private) {
    * @param params {Object}
    */
   _.class(ScaledCircleMarker).inherits(BaseMarker);
-  function ScaledCircleMarker(map, geoJson, params) {
+  function ScaledCircleMarker() {
     const self = this;
     ScaledCircleMarker.Super.apply(this, arguments);
 

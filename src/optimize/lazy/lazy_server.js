@@ -1,5 +1,4 @@
 
-import Boom from 'boom';
 import { Server } from 'hapi';
 import { fromNode } from 'bluebird';
 

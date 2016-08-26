@@ -1,9 +1,7 @@
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
-import $ from 'jquery';
 import _ from 'lodash';
-import RegistryVisTypesProvider from 'ui/registry/vis_types';
 import uiModules from 'ui/modules';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import 'angular-sanitize';
@@ -11,10 +9,6 @@ import 'angular-sanitize';
 uiModules
 .get('kibana/directive', ['ngSanitize'])
 .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
-
-
-  const visTypes = Private(RegistryVisTypesProvider);
-
   const notify = new Notifier({
     location: 'Visualize'
   });
@@ -158,7 +152,7 @@ uiModules
         searchSource.onError(notify.error).catch(notify.fatal);
       }));
 
-      $scope.$watch('esResp', prereq(function (resp, prevResp) {
+      $scope.$watch('esResp', prereq(function (resp) {
         if (!resp) return;
         $scope.renderbot.render(resp);
       }));

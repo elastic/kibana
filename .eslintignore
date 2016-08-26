@@ -2,3 +2,4 @@
 src/fixtures/vislib/mock_data
 src/ui/public/angular-bootstrap/**/*.js
 test/fixtures/scenarios/**/*.js
+src/core_plugins/console

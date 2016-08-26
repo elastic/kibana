@@ -1,4 +1,4 @@
-import { forOwn, has, noop } from 'lodash';
+import {has, noop} from 'lodash';
 
 // deprecated settings are still allowed, but will be removed at a later time. They
 // are checked for after the config object is prepared and known, so legacySettings

@@ -4,9 +4,7 @@ import expect from 'expect.js';
 
 import DomLocationProvider from 'ui/dom_location';
 import { constant } from 'lodash';
-import { set } from 'lodash';
 import { cloneDeep } from 'lodash';
-import { indexBy } from 'lodash';
 import $ from 'jquery';
 import 'ui/chrome';
 import '../app_switcher';

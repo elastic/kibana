@@ -1,10 +1,5 @@
-import moment from 'moment';
 import 'ui/directives/input_whole_number';
-export default function IntervalOptionsService(Private) {
-
-  // shorthand
-  const ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
-
+export default function IntervalOptionsService() {
   return [
     {
       display: 'Auto',
