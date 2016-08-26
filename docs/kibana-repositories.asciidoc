@@ -6,7 +6,7 @@ repositories available for APT and YUM based distributions.
 
 NOTE: Since the packages are created as part of the Kibana build, source packages are not available.
 
-Packages are signed with the PGP key http://pgp.mit.edu/pks/lookup?op=vindex&search=0xD27D666CD88E42B4[D88E42B4], which
+Packages are signed with the PGP key https://pgp.mit.edu/pks/lookup?op=vindex&search=0xD27D666CD88E42B4[D88E42B4], which
 has the following fingerprint:
 
     4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4
@@ -24,10 +24,9 @@ wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add 
 +
 . Add the repository definition to your `/etc/apt/sources.list.d/kibana.list` file:
 +
-[source, sh]
---------------------------------------------------
-echo "deb https://packages.elastic.co/kibana/{branch}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
---------------------------------------------------
+["source", "sh", subs="attributes"]
+
+echo "deb https://packages.elastic.co/kibana/{version}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
 +
 [WARNING]
 ==================================================
@@ -79,11 +78,11 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 +
 . Create a file named `kibana.repo` in the `/etc/yum.repos.d/` directory with the following contents:
 +
-[source,sh]
+["source", "sh", subs="attributes"]
 --------------------------------------------------
-[kibana-{branch}]
-name=Kibana repository for {branch}.x packages
-baseurl=https://packages.elastic.co/kibana/{branch}/centos
+[kibana-{version}]
+name=Kibana repository for {version}.x packages
+baseurl=https://packages.elastic.co/kibana/{version}/centos
 gpgcheck=1
 gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch
 enabled=1

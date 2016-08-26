@@ -1,44 +1,14 @@
 [[releasenotes]]
-== Kibana 4.4 Release Notes
+== Kibana {version} Release Notes
 
-The 4.4 release of Kibana requires Elasticsearch 2.2 or later.
-
-Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch  
-include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates 
-in the index pattern name.
+The {version} release of Kibana requires Elasticsearch {esversion} or later.
 
 [float]
 [[enhancements]]
 == Enhancements
-
-* {k4issue}5897[Issue 5897]: Embedding links now include navigation and search bars.
-* {k4issue}1362[Issue 1362]: Color palette selector added.
-* {k4issue}1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
-* {k4issue}5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
-* {k4issue}5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
-* {k4issue}4966[Issue 4966]: Logo is now in SVG format.
-* {k4issue}3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
-* {k4issue}5279[Issue 5279]: Large strings are truncated with an ellipsis (`...`).
-* {k4issue}5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
+* {k4pull}7085[Pull Request 7085]: Configuration to allow unauthenticated users to see status page
 
 [float]
-[[bugfixes]]
-== Bug Fixes
-
-* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display 
-correctly.
-* {k4issue}5191[Issue 5191]: Timepicker is now available for dashboards that contain a chart based on an index that is not 
-time-based.
-* {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-* {k4issue}5824[Issue 5284]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
-
-[float]
-[[plugin-system]]
-== Plugin System Changes
-
-* {k4issue}5226[Issue 5226]: Plugins are explicit when they start to route.
-* {k4pull}5725[Pull Request 5725]: Plugins can extend Chrome navigation.
-* {k4issue}4720[Issue 4720]: Adds support for zip compression.
-* {k4pull}5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
-* {k4issue}5661[Issue 5661]: Fixes the plugin optimization path.
-* {k4pull}5538[Pull Request 5538]: Apps can use empty export types.
+[[deprecations]]
+== Deprecations
+* {k4issue}6833[Issue 6833]: Ability to sort a terms aggregation by ascending count will be removed in a future version of Elasticsearch

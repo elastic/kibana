@@ -5,6 +5,8 @@
 :shield: https://www.elastic.co/guide/en/shield/current
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
+:version: 4.6
+:esversion: 2.4
 
 include::introduction.asciidoc[]
 
