@@ -1,12 +1,12 @@
 var simple_metric = {
-  __template: {field: ""},
+  __template: { field: "" },
   field: "{field}",
   missing: 0,
   script: {
     // populated by a global rule
   }
 }, field_metric = {
-  __template: {field: ""},
+  __template: { field: "" },
   field: "{field}"
 }, gap_policy = {
   __one_of: ["skip", "insert_zeros"]
@@ -51,9 +51,9 @@ var rules = {
         }
       },
       "filters": {
-        "*": {__scope_link: "GLOBAL.filter"}
+        "*": { __scope_link: "GLOBAL.filter" }
       },
-      "other_bucket": {__one_of: [true, false]},
+      "other_bucket": { __one_of: [true, false] },
       "other_bucket_key": ""
     },
     "missing": field_metric,
@@ -81,9 +81,9 @@ var rules = {
         __template: {
           "_term": "asc"
         },
-        "_term": {__one_of: ["asc", "desc"]},
-        "_count": {__one_of: ["asc", "desc"]},
-        "*": {__one_of: ["asc", "desc"]}
+        "_term": { __one_of: ["asc", "desc"] },
+        "_count": { __one_of: ["asc", "desc"] },
+        "*": { __one_of: ["asc", "desc"] }
       },
       "min_doc_count": 10,
       "script": {
@@ -91,9 +91,9 @@ var rules = {
       },
       "include": ".*",
       "exclude": ".*",
-      "execution_hint": {__one_of: ["map", "global_ordinals", "global_ordinals_hash", "global_ordinals_low_cardinality"]},
-      "show_term_doc_count_error": {__one_of: [true, false]},
-      "collect_mode": {__one_of: ["depth_first", "breadth_first"]},
+      "execution_hint": { __one_of: ["map", "global_ordinals", "global_ordinals_hash", "global_ordinals_low_cardinality"] },
+      "show_term_doc_count_error": { __one_of: [true, false] },
+      "collect_mode": { __one_of: ["depth_first", "breadth_first"] },
       "missing": ""
     },
     "significant_terms": {
@@ -105,22 +105,22 @@ var rules = {
       "shard_size": 10,
       "shard_min_doc_count": 10,
       "min_doc_count": 10,
-      "include": {__one_of: ["*", {pattern: "", flags: ""}]},
-      "exclude": {__one_of: ["*", {pattern: "", flags: ""}]},
-      "execution_hint": {__one_of: ["map", "global_ordinals", "global_ordinals_hash"]},
+      "include": { __one_of: ["*", { pattern: "", flags: "" }] },
+      "exclude": { __one_of: ["*", { pattern: "", flags: "" }] },
+      "execution_hint": { __one_of: ["map", "global_ordinals", "global_ordinals_hash"] },
       "background_filter": {
         __scope_link: "GLOBAL.filter"
       },
       "mutual_information": {
-        "include_negatives": {__one_of: [true, false]}
+        "include_negatives": { __one_of: [true, false] }
       },
       "chi_square": {
-        "include_negatives": {__one_of: [true, false]},
-        "background_is_superset": {__one_of: [true, false]}
+        "include_negatives": { __one_of: [true, false] },
+        "background_is_superset": { __one_of: [true, false] }
       },
       "percentage": {},
       "gnd": {
-        "background_is_superset": {__one_of: [true, false]}
+        "background_is_superset": { __one_of: [true, false] }
       },
       "script_heuristic": {
         __template: {
@@ -135,14 +135,14 @@ var rules = {
       __template: {
         "field": "",
         "ranges": [
-          {"from": 50, "to": 100},
+          { "from": 50, "to": 100 },
         ]
       },
       "field": "{field}",
       "ranges": [
-        {"to": 50, "from": 100, "key": ""}
+        { "to": 50, "from": 100, "key": "" }
       ],
-      "keyed": {__one_of: [true, false]},
+      "keyed": { __one_of: [true, false] },
       "script": {
         // populated by a global rule
       }
@@ -151,15 +151,15 @@ var rules = {
       __template: {
         "field": "",
         "ranges": [
-          {"from": "now-10d/d", "to": "now"},
+          { "from": "now-10d/d", "to": "now" },
         ]
       },
       "field": "{field}",
       "format": "MM-yyy",
       "ranges": [
-        {"to": "", "from": "", "key": ""}
+        { "to": "", "from": "", "key": "" }
       ],
-      "keyed": {__one_of: [true, false]},
+      "keyed": { __one_of: [true, false] },
       "script": {
         // populated by a global rule
       }
@@ -168,15 +168,15 @@ var rules = {
       __template: {
         "field": "",
         "ranges": [
-          {"from": "10.0.0.5", "to": "10.0.0.10"},
+          { "from": "10.0.0.5", "to": "10.0.0.10" },
         ]
       },
       "field": "{field}",
       "format": "MM-yyy",
       "ranges": [
-        {"to": "", "from": "", "key": "", "mask": "10.0.0.127/25"}
+        { "to": "", "from": "", "key": "", "mask": "10.0.0.127/25" }
       ],
-      "keyed": {__one_of: [true, false]},
+      "keyed": { __one_of: [true, false] },
       "script": {
         // populated by a global rule
       }
@@ -193,11 +193,11 @@ var rules = {
         __template: {
           "_key": "asc"
         },
-        "_key": {__one_of: ["asc", "desc"]},
-        "_count": {__one_of: ["asc", "desc"]},
-        "*": {__one_of: ["asc", "desc"]}
+        "_key": { __one_of: ["asc", "desc"] },
+        "_count": { __one_of: ["asc", "desc"] },
+        "*": { __one_of: ["asc", "desc"] }
       },
-      "keyed": {__one_of: [true, false]},
+      "keyed": { __one_of: [true, false] },
       "missing": 0
     },
     "date_histogram": {
@@ -206,20 +206,20 @@ var rules = {
         "interval": "month"
       },
       "field": "{field}",
-      "interval": {__one_of: ["year", "quarter", "week", "day", "hour", "minute", "second"]},
+      "interval": { __one_of: ["year", "quarter", "week", "day", "hour", "minute", "second"] },
       "min_doc_count": 0,
       "order": {
         __template: {
           "_key": "asc"
         },
-        "_key": {__one_of: ["asc", "desc"]},
-        "_count": {__one_of: ["asc", "desc"]},
-        "*": {__one_of: ["asc", "desc"]}
+        "_key": { __one_of: ["asc", "desc"] },
+        "_count": { __one_of: ["asc", "desc"] },
+        "*": { __one_of: ["asc", "desc"] }
       },
-      "keyed": {__one_of: [true, false]},
+      "keyed": { __one_of: [true, false] },
       "pre_zone": "-01:00",
       "post_zone": "-01:00",
-      "pre_zone_adjust_large_interval": {__one_of: [true, false]},
+      "pre_zone_adjust_large_interval": { __one_of: [true, false] },
       "factor": 1000,
       "pre_offset": "1d",
       "post_offset": "1d",
@@ -230,18 +230,18 @@ var rules = {
     "geo_distance": {
       __template: {
         "field": "location",
-        "origin": {"lat": 52.3760, "lon": 4.894},
+        "origin": { "lat": 52.3760, "lon": 4.894 },
         "ranges": [
-          {"from": 100, "to": 300},
+          { "from": 100, "to": 300 },
         ]
       },
       "field": "{field}",
-      "origin": {"lat": 0.0, "lon": 0.0},
-      "unit": {__one_of: ["mi", "km", "in", "yd", "m", "cm", "mm"]},
+      "origin": { "lat": 0.0, "lon": 0.0 },
+      "unit": { __one_of: ["mi", "km", "in", "yd", "m", "cm", "mm"] },
       "ranges": [
-        {"from": 50, "to": 100}
+        { "from": 50, "to": 100 }
       ],
-      "distance_type": {__one_of: ["arc", "sloppy_arc", "plane"]}
+      "distance_type": { __one_of: ["arc", "sloppy_arc", "plane"] }
 
     },
     "geohash_grid": {
@@ -250,7 +250,7 @@ var rules = {
         "precision": 3
       },
       "field": "{field}",
-      "precision": {__one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]},
+      "precision": { __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
       "size": 10,
       "shard_size": 10
     },
@@ -269,7 +269,7 @@ var rules = {
         // populated by a global rule
       },
       "compression": 100,
-      "method": {__one_of: ["hdr", "tdigest"]},
+      "method": { __one_of: ["hdr", "tdigest"] },
       missing: 0
     },
     "cardinality": {
@@ -311,7 +311,7 @@ var rules = {
         field: ""
       },
       field: "{field}",
-      wrap_longitude: {__one_of: [true, false]}
+      wrap_longitude: { __one_of: [true, false] }
     },
     "top_hits": {
       __template: {
@@ -324,7 +324,7 @@ var rules = {
         __scope_link: "_search.sort"
       },
       highlight: {},
-      explain: {__one_of: [true, false]},
+      explain: { __one_of: [true, false] },
       _source: {
         __template: "",
         __scope_link: "_search._source"
@@ -333,7 +333,7 @@ var rules = {
         __scope_link: "_search.script_fields"
       },
       docvalue_fields: ["{field}"],
-      version: {__one_of: [true, false]}
+      version: { __one_of: [true, false] }
     },
     "percentile_ranks": {
       __template: {
@@ -346,7 +346,7 @@ var rules = {
         // populated by a global rule
       },
       "compression": 100,
-      "method": {__one_of: ["hdr", "tdigest"]},
+      "method": { __one_of: ["hdr", "tdigest"] },
       missing: 0
     },
     "sampler": {
@@ -357,7 +357,7 @@ var rules = {
       },
       "shard_size": 100,
       "max_docs_per_value": 3,
-      "execution_hint": {__one_of: ["map", "global_ordinals", "bytes_hash"]}
+      "execution_hint": { __one_of: ["map", "global_ordinals", "bytes_hash"] }
     },
     "children": {
       __template: {
@@ -378,9 +378,9 @@ var rules = {
       format: "",
       gap_policy: gap_policy,
       "window": 5,
-      model: {__one_of: ["simple", "linear", "ewma", "holt", "holt_winters"]},
+      model: { __one_of: ["simple", "linear", "ewma", "holt", "holt_winters"] },
       settings: {
-        type: {__one_of: ["add", "mult"]},
+        type: { __one_of: ["add", "mult"] },
         alpha: 0.5,
         beta: 0.5,
         gamma: 0.5,

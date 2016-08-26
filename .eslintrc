@@ -1,2 +1,5 @@
 ---
 extends: '@elastic/kibana'
+
+rules:
+  object-curly-spacing: [error, always]

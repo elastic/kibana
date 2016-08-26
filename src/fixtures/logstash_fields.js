@@ -17,13 +17,13 @@ function stubbedLogstashFields() {
     { name: 'machine.os',         type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
     { name: 'geo.src',            type: 'string',     indexed: true,  analyzed: true, sortable:  true,  filterable: true },
     { name: '_type',              type: 'string',     indexed: false,  analyzed: true, sortable:  true,  filterable: true },
-    { name: '_id',                type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: true},
-    { name: '_source',            type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: false},
+    { name: '_id',                type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: true },
+    { name: '_source',            type: 'string',     indexed: false, analyzed: false, sortable: false, filterable: false },
     { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false, sortable: false, filterable: true },
     { name: 'script string',      type: 'string',     scripted: true, script: '\'i am a string\'', lang: 'expression' },
     { name: 'script number',      type: 'number',     scripted: true, script: '1234', lang: 'expression' },
     { name: 'script date',        type: 'date',       scripted: true, script: '1234', lang: 'painless' },
-    { name: 'script murmur3',     type: 'murmur3',    scripted: true, script: '1234', lang: 'expression'},
+    { name: 'script murmur3',     type: 'murmur3',    scripted: true, script: '1234', lang: 'expression' },
   ].map(function (field) {
     field.count = field.count || 0;
     field.scripted = field.scripted || false;

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import fromRoot from '../../../utils/from_root';
-import {parse} from '../settings';
+import { parse } from '../settings';
 
 describe('kibana cli', function () {
 

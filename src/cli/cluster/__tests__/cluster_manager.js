@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import cluster from 'cluster';
-import {sample} from 'lodash';
+import { sample } from 'lodash';
 
 import ClusterManager from '../cluster_manager';
 import Worker from '../worker';

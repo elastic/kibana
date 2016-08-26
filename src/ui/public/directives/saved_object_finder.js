@@ -229,7 +229,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       };
 
       self.manageObjects = function (type) {
-        $location.url('/management/kibana/objects?_a=' + rison.encode({tab: type}));
+        $location.url('/management/kibana/objects?_a=' + rison.encode({ tab: type }));
       };
 
       self.hitCountNoun = function () {

@@ -244,7 +244,7 @@ describe('kbnUrl', function () {
 
     it('should change the entire url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -265,7 +265,7 @@ describe('kbnUrl', function () {
 
     it('should allow setting app state on the target url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -276,11 +276,11 @@ describe('kbnUrl', function () {
       expect($location.search()).to.eql(search);
       expect($location.hash()).to.be(hash);
 
-      kbnUrl.change(newPath, null, {foo: 'bar'});
+      kbnUrl.change(newPath, null, { foo: 'bar' });
 
       // verify the ending state
       expect($location.path()).to.be(newPath);
-      expect($location.search()).to.eql({_a: '(foo:bar)'});
+      expect($location.search()).to.eql({ _a: '(foo:bar)' });
       expect($location.hash()).to.be('');
     });
   });
@@ -288,7 +288,7 @@ describe('kbnUrl', function () {
   describe('changePath', function () {
     it('should change just the path', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -311,7 +311,7 @@ describe('kbnUrl', function () {
   describe('redirect', function () {
     it('should change the entire url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -332,7 +332,7 @@ describe('kbnUrl', function () {
 
     it('should allow setting app state on the target url', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 
@@ -343,11 +343,11 @@ describe('kbnUrl', function () {
       expect($location.search()).to.eql(search);
       expect($location.hash()).to.be(hash);
 
-      kbnUrl.redirect(newPath, null, {foo: 'bar'});
+      kbnUrl.redirect(newPath, null, { foo: 'bar' });
 
       // verify the ending state
       expect($location.path()).to.be(newPath);
-      expect($location.search()).to.eql({_a: '(foo:bar)'});
+      expect($location.search()).to.eql({ _a: '(foo:bar)' });
       expect($location.hash()).to.be('');
     });
 
@@ -373,7 +373,7 @@ describe('kbnUrl', function () {
   describe('redirectPath', function () {
     it('should only change the path', function () {
       const path = '/test/path';
-      const search = {search: 'test'};
+      const search = { search: 'test' };
       const hash = 'hash';
       const newPath = '/new/location';
 

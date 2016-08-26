@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { fromRoot } from '../../../utils';
 import { resolve } from 'path';
-import {parseMilliseconds, parse} from '../settings';
+import { parseMilliseconds, parse } from '../settings';
 
 describe('kibana cli', function () {
 

@@ -1,4 +1,4 @@
-import {has} from 'lodash';
+import { has } from 'lodash';
 export default function mapRangeProvider(Promise, courier) {
   return function (filter) {
     if (!filter.range) return Promise.reject(filter);

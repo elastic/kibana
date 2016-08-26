@@ -17,7 +17,7 @@ function pickDefaultTimeFieldName(dateFields) {
 }
 
 function findFieldsByType(indexPatternFields, type) {
-  return _.map(_.filter(indexPatternFields, {type}), 'name');
+  return _.map(_.filter(indexPatternFields, { type }), 'name');
 }
 
 modules.get('apps/management')
@@ -70,7 +70,7 @@ modules.get('apps/management')
             this.errors.push(`Error in field ${fieldName} - conflicting types '${sampleFields[fieldName].type}' and '${type}'`);
           }
           else {
-            sampleFields[fieldName] = {type, value};
+            sampleFields[fieldName] = { type, value };
           }
         });
 
@@ -79,9 +79,9 @@ modules.get('apps/management')
           title: 'filebeat-*',
           fields: _(sampleFields)
             .map((field, fieldName) => {
-              return {name: fieldName, type: field.type};
+              return { name: fieldName, type: field.type };
             })
-            .reject({type: 'object'})
+            .reject({ type: 'object' })
             .value()
         });
 
@@ -106,12 +106,12 @@ modules.get('apps/management')
 
         const buildRows = () => {
           this.rows = _.map(this.indexPattern.fields, (field) => {
-            const {type: detectedType, value: sampleValue} = sampleFields[field.name];
+            const { type: detectedType, value: sampleValue } = sampleFields[field.name];
             return [
               _.escape(field.name),
               {
                 markup: editFieldTypeHTML,
-                scope: _.assign($scope.$new(), {field: field, detectedType: detectedType, buildRows: buildRows}),
+                scope: _.assign($scope.$new(), { field: field, detectedType: detectedType, buildRows: buildRows }),
                 value: field.type
               },
               typeof sampleValue === 'object' ? _.escape(JSON.stringify(sampleValue)) : _.escape(sampleValue)
@@ -120,9 +120,9 @@ modules.get('apps/management')
         };
 
         this.columns = [
-          {title: 'Field'},
-          {title: 'Type'},
-          {title: 'Example', sortable: false}
+          { title: 'Field' },
+          { title: 'Type' },
+          { title: 'Example', sortable: false }
         ];
 
         buildRows();

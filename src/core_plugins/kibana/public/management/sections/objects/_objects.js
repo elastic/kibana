@@ -40,7 +40,7 @@ uiModules.get('apps/management')
 
         $q.all(services).then(function (data) {
           $scope.services = sortBy(data, 'title');
-          if ($state.tab) $scope.currentTab = find($scope.services, {title: $state.tab});
+          if ($state.tab) $scope.currentTab = find($scope.services, { title: $state.tab });
 
           $scope.$watch('state.tab', function (tab) {
             if (!tab) $scope.changeTab($scope.services[0]);
@@ -89,7 +89,7 @@ uiModules.get('apps/management')
       };
 
       $scope.bulkExport = function () {
-        const objs = $scope.selectedItems.map(partialRight(extend, {type: $scope.currentTab.type}));
+        const objs = $scope.selectedItems.map(partialRight(extend, { type: $scope.currentTab.type }));
         retrieveAndExportDocs(objs);
       };
 
@@ -105,7 +105,7 @@ uiModules.get('apps/management')
         if (!objs.length) return notify.error('No saved objects to export.');
         es.mget({
           index: kbnIndex,
-          body: {docs: objs.map(transformToMget)}
+          body: { docs: objs.map(transformToMget) }
         })
         .then(function (response) {
           saveToFile(response.docs.map(partialRight(pick, '_id', '_type', '_source')));
@@ -114,11 +114,11 @@ uiModules.get('apps/management')
 
       // Takes an object and returns the associated data needed for an mget API request
       function transformToMget(obj) {
-        return {_id: obj.id, _type: obj.type};
+        return { _id: obj.id, _type: obj.type };
       }
 
       function saveToFile(results) {
-        const blob = new Blob([angular.toJson(results, true)], {type: 'application/json'});
+        const blob = new Blob([angular.toJson(results, true)], { type: 'application/json' });
         saveAs(blob, 'export.json');
       }
 
@@ -131,7 +131,7 @@ uiModules.get('apps/management')
         }
 
         return Promise.map(docs, function (doc) {
-          const service = find($scope.services, {type: doc._type}).service;
+          const service = find($scope.services, { type: doc._type }).service;
           return service.get().then(function (obj) {
             obj.id = doc._id;
             return obj.applyESResp(doc).then(function () {
