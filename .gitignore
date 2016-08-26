@@ -13,6 +13,7 @@ target
 *.log
 /test/screenshots/failure/*.png
 /test/screenshots/session/*.png
+/html_docs
 /esvm
 .htpasswd
 .eslintcache
