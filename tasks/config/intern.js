@@ -10,12 +10,6 @@ module.exports = function (grunt) {
       appSuites: grunt.option('appSuites')
     },
     dev: {},
-    api: {
-      options: {
-        runType: 'client',
-        config: 'test/intern_api'
-      }
-    },
     visualRegression: {
       options: {
         runType: 'runner',

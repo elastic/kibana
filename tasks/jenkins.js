@@ -29,7 +29,6 @@ module.exports = function (grunt) {
     'licenses',
     'test:server',
     'test:browser',
-    'test:api',
   ]);
 
   grunt.registerTask('jenkins:selenium', [

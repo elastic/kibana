@@ -28,8 +28,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test:quick', [
     'test:server',
     'test:ui',
-    'test:browser',
-    'test:api'
+    'test:browser'
   ]);
 
   grunt.registerTask('test:dev', [
@@ -57,23 +56,6 @@ module.exports = function (grunt) {
   grunt.registerTask('test:ui:runner', [
     'clean:screenshots',
     'intern:dev'
-  ]);
-
-  grunt.registerTask('test:api', [
-    'esvm:ui',
-    'run:apiTestServer',
-    'intern:api',
-    'esvm_shutdown:ui',
-    'stop:apiTestServer'
-  ]);
-
-  grunt.registerTask('test:api:server', [
-    'esvm:ui',
-    'run:apiTestServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api:runner', [
-    'intern:api'
   ]);
 
   grunt.registerTask('test', subTask => {
