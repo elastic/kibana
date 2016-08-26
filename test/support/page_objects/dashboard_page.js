@@ -175,7 +175,7 @@ export default class DashboardPage {
         let obj = {};
         return chart.getAttribute('data-col')
         .then(theData => {
-          obj = {dataCol:theData};
+          obj = { dataCol:theData };
           return chart;
         })
         .then(chart => {

@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import states from './states';
 import Status from './status';
-import {version} from '../../../package.json';
+import { version } from '../../../package.json';
 
 module.exports = class ServerStatus {
   constructor(server) {

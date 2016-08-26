@@ -1,7 +1,7 @@
 import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
-import {transform, pluck} from 'lodash';
-import {promisify} from 'bluebird';
+import { transform, pluck } from 'lodash';
+import { promisify } from 'bluebird';
 import { makeRe } from 'minimatch';
 
 const mkdirp = promisify(require('mkdirp'));

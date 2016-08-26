@@ -21,7 +21,7 @@ define(function (require) {
           ignore: 404
         })
         .then(() => {
-          return es.indices.deleteTemplate({name: 'names'});
+          return es.indices.deleteTemplate({ name: 'names' });
         });
       });
 
@@ -32,7 +32,7 @@ define(function (require) {
       });
 
       bdd.it('should also accept the raw csv data in the payload body', function () {
-        const csvData = fs.readFileSync('test/unit/fixtures/fake_names_big.csv', {encoding: 'utf8'});
+        const csvData = fs.readFileSync('test/unit/fixtures/fake_names_big.csv', { encoding: 'utf8' });
 
         return request.post('/kibana/names/_data')
         .send(csvData)

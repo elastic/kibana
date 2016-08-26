@@ -457,7 +457,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
       $scope.searchSource.highlight({
         pre_tags: [highlightTags.pre],
         post_tags: [highlightTags.post],
-        fields: {'*': {}},
+        fields: { '*': {} },
         require_field_match: false,
         fragment_size: 2147483647 // Limit of an integer.
       });

@@ -73,7 +73,7 @@ describe('ingestSimulateApiKibanaToEsConverter', function () {
         ]
       },
       'docs': [
-        {'_source': {}}
+        { '_source': {} }
       ]
     };
 

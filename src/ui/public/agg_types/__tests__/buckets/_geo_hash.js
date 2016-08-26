@@ -45,7 +45,7 @@ describe('Geohash Agg', function () {
 
       Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel) => {
         it(`zoom level ${zoomLevel} should correspond to correct geohash-precision`, () => {
-          const output = {params: {}};
+          const output = { params: {} };
           paramWriter.write({
             vis: {
               hasUiState: () => true,

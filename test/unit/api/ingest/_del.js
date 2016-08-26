@@ -19,7 +19,7 @@ define(function (require) {
       bdd.afterEach(function () {
         return request.del('/kibana/ingest/logstash-*')
         .then(function () {
-          return scenarioManager.client.indices.deleteTemplate({name: 'kibana-logstash-*'})
+          return scenarioManager.client.indices.deleteTemplate({ name: 'kibana-logstash-*' })
           .catch(function (err) {
             if (err.status !== 404) {
               throw err;
@@ -35,7 +35,7 @@ define(function (require) {
             return request.get('/kibana/ingest/logstash-*').expect(404);
           })
           .then(function () {
-            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
+            return scenarioManager.client.indices.getTemplate({ name: 'kibana-logstash-*' })
               .catch(function (error) {
                 expect(error.status).to.be(404);
               });

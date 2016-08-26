@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import ServerStatus from '../server_status';
 
 describe('Status class', function () {
-  const plugin = {id: 'test', version: '1.2.3'};
+  const plugin = { id: 'test', version: '1.2.3' };
 
   let server;
   let serverStatus;

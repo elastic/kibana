@@ -60,7 +60,7 @@ describe('createMappingsFromPatternFields', function () {
   });
 
   it('should handle nested fields', function () {
-    testFields.push({name: 'geo.coordinates', type: 'geo_point'});
+    testFields.push({ name: 'geo.coordinates', type: 'geo_point' });
     const mappings = createMappingsFromPatternFields(testFields);
 
     expect(mappings).to.have.property('geo');

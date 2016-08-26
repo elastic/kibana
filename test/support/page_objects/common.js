@@ -13,7 +13,7 @@ import {
 } from 'url';
 
 import getUrl from '../../utils/get_url';
-import {config, defaultFindTimeout, shieldPage} from '../index';
+import { config, defaultFindTimeout, shieldPage } from '../index';
 
 import {
   Log,

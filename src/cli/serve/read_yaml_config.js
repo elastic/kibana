@@ -1,4 +1,4 @@
-import {isArray, isPlainObject, forOwn, memoize, set, transform} from 'lodash';
+import { isArray, isPlainObject, forOwn, memoize, set, transform } from 'lodash';
 import { readFileSync as read } from 'fs';
 import { safeLoad } from 'js-yaml';
 import { red } from 'ansicolors';

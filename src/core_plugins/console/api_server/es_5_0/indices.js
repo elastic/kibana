@@ -108,7 +108,7 @@ module.exports = function (api) {
       tokenizer: "",
       char_filter: [],
       filter: [],
-      explain: {__one_of: [false, true]},
+      explain: { __one_of: [false, true] },
       attributes: []
     }
   });

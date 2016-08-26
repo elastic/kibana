@@ -31,7 +31,7 @@ modules.get('apps/management')
           }
           catch (error) {
             this.samples = _.map(splitRawSamples, (sample) => {
-              return {message: sample};
+              return { message: sample };
             });
           }
         });

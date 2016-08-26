@@ -1,5 +1,5 @@
 import UiModules from 'ui/modules';
-import {words, kebabCase} from 'lodash';
+import { words, kebabCase } from 'lodash';
 
 export function kbnUrlDirective(name) {
   const attr = kebabCase(words(name).slice(1));
