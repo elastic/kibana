@@ -143,7 +143,7 @@ angular.module('ui.bootstrap.timepicker', [])
       }
     };
 
-    hoursInputEl.bind('blur', function(e) {
+    hoursInputEl.bind('blur', function() {
       if ( !$scope.invalidHours && $scope.hours < 10) {
         $scope.$apply( function() {
           $scope.hours = pad( $scope.hours );
@@ -162,7 +162,7 @@ angular.module('ui.bootstrap.timepicker', [])
       }
     };
 
-    minutesInputEl.bind('blur', function(e) {
+    minutesInputEl.bind('blur', function() {
       if ( !$scope.invalidMinutes && $scope.minutes < 10 ) {
         $scope.$apply( function() {
           $scope.minutes = pad( $scope.minutes );

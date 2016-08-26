@@ -13,13 +13,9 @@ export default function ShadedCircleMarkerFactory(Private) {
    * @return {Leaflet object} featureLayer
    */
   _.class(ShadedCircleMarker).inherits(BaseMarker);
-  function ShadedCircleMarker(map, geoJson, params) {
+  function ShadedCircleMarker() {
     const self = this;
     ShadedCircleMarker.Super.apply(this, arguments);
-
-    // super min and max from all chart data
-    const min = this.geoJson.properties.allmin;
-    const max = this.geoJson.properties.allmax;
 
     // multiplier to reduce size of all circles
     const scaleFactor = 0.8;

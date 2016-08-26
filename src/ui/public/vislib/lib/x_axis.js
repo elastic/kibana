@@ -286,12 +286,10 @@ export default function XAxisFactory(Private) {
     const self = this;
     const ordered = self.ordered;
     let axis;
-    let labels;
 
     return function (selection) {
       selection.each(function () {
         axis = d3.select(this);
-        labels = axis.selectAll('.tick text');
         if (ordered && ordered.date) {
           axis.call(self.filterAxisLabels());
         } else {
@@ -317,7 +315,6 @@ export default function XAxisFactory(Private) {
     const barWidth = self.xScale.rangeBand();
     const maxRotatedLength = 120;
     const xAxisPadding = 15;
-    let svg;
     const lengths = [];
     let length;
     self._attr.isRotated = false;
@@ -440,7 +437,6 @@ export default function XAxisFactory(Private) {
     const visEls = $('.vis-wrapper');
     let xAxisChartTitle;
     let yAxisChartTitle;
-    let text;
     let titles;
 
     return function () {
@@ -453,13 +449,13 @@ export default function XAxisFactory(Private) {
         let titleWidth = xAxisTitle.width();
         let titleHeight = yAxisTitle.height();
 
-        text = visEl.select('.x-axis-title')
+        visEl.select('.x-axis-title')
         .select('svg')
         .attr('width', titleWidth)
         .select('text')
         .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
 
-        text = visEl.select('.y-axis-title')
+        visEl.select('.y-axis-title')
         .select('svg')
         .attr('height', titleHeight)
         .select('text')
@@ -471,7 +467,7 @@ export default function XAxisFactory(Private) {
 
           titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
           titles.each(function () {
-            text = d3.select(this)
+            d3.select(this)
             .select('svg')
             .attr('width', titleWidth)
             .select('text')
@@ -485,7 +481,7 @@ export default function XAxisFactory(Private) {
 
           titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
           titles.each(function () {
-            text = d3.select(this)
+            d3.select(this)
             .select('svg')
             .attr('height', titleHeight)
             .select('text')

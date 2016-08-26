@@ -1,5 +1,3 @@
-import { resolve } from 'path';
-import { fromNode as fn } from 'bluebird';
 import expect from 'expect.js';
 
 import * as kbnTestServer from '../../../test/utils/kbn_server';

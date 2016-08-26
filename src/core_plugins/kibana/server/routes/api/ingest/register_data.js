@@ -1,4 +1,3 @@
-import { Promise } from 'bluebird';
 import parse from 'csv-parse';
 import _ from 'lodash';
 import hi from 'highland';

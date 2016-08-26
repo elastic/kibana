@@ -3,7 +3,7 @@ import _ from 'lodash';
 import sequencer from 'ui/utils/sequencer';
 import EventsProvider from 'ui/events';
 import ReflowWatcherProvider from 'ui/reflow_watcher';
-export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
+export default function ResizeCheckerFactory(Private, Notifier) {
 
   const EventEmitter = Private(EventsProvider);
   const reflowWatcher = Private(ReflowWatcherProvider);
@@ -176,8 +176,6 @@ export default function ResizeCheckerFactory(Private, Notifier, $rootScope) {
     }
 
     const check = this.check; // already bound
-    const tick = this._tick;
-    const notify = this.notify;
     const ms = this._currentSchedule[this._tick];
     return (this._timerId = setTimeout(function () {
       check();

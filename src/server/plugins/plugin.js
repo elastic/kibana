@@ -3,7 +3,6 @@ import toPath from 'lodash/internal/toPath';
 import Joi from 'joi';
 import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
-import { inherits } from 'util';
 
 const extendInitFns = Symbol('extend plugin initialization');
 

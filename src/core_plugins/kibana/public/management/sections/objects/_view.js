@@ -168,7 +168,7 @@ uiModules.get('apps/management')
           type: service.type,
           id: $routeParams.id
         })
-        .then(function (resp) {
+        .then(function () {
           return redirectHandler('deleted');
         })
         .catch(notify.fatal);
@@ -197,7 +197,7 @@ uiModules.get('apps/management')
           id: $routeParams.id,
           body: source
         })
-        .then(function (resp) {
+        .then(function () {
           return redirectHandler('updated');
         })
         .catch(notify.fatal);
@@ -207,7 +207,7 @@ uiModules.get('apps/management')
         return es.indices.refresh({
           index: kbnIndex
         })
-        .then(function (resp) {
+        .then(function () {
           const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
 
           $location.path('/management/kibana/objects').search({

@@ -1,6 +1,5 @@
 module.exports = function (grunt) {
   const { basename, resolve } = require('path');
-  const { forOwn } = require('lodash');
 
   const exec = require('../utils/exec').silent;
 

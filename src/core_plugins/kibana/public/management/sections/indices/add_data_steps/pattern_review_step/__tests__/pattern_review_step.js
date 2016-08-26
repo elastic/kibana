@@ -7,7 +7,7 @@ describe('pattern review directive', function () {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function ($injector) {
     $compile = $injector.get('$compile');
     $rootScope = $injector.get('$rootScope');
   }));

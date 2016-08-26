@@ -22,10 +22,6 @@ module.service('savedSearches', function (Promise, config, kbnIndex, es, createN
     type: 'search'
   });
 
-  const notify = createNotifier({
-    location: 'Saved Searches'
-  });
-
   this.type = SavedSearch.type;
   this.Class = SavedSearch;
 

@@ -104,14 +104,11 @@ export default function PointSeriesChartProvider(Private) {
     const height = attr.height;
     const width = attr.width;
     const margin = attr.margin;
-    const color = '#004c99';
 
     // we don't want to draw endzones over our min and max values, they
     // are still a part of the dataset. We want to start the endzones just
     // outside of them so we will use these values rather than ordered.min/max
     const oneUnit = (ordered.units || _.identity)(1);
-    const beyondMin = ordered.min - oneUnit;
-    const beyondMax = ordered.max + oneUnit;
 
     // points on this axis represent the amount of time they cover,
     // so draw the endzones at the actual time bounds

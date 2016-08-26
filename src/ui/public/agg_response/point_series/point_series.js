@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import AggResponsePointSeriesGetSeriesProvider from 'ui/agg_response/point_series/_get_series';
 import AggResponsePointSeriesGetAspectsProvider from 'ui/agg_response/point_series/_get_aspects';
 import AggResponsePointSeriesInitYAxisProvider from 'ui/agg_response/point_series/_init_y_axis';

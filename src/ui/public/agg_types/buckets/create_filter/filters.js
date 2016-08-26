@@ -1,6 +1,6 @@
 import buildQueryFilter from 'ui/filter_manager/lib/query';
 import _ from 'lodash';
-export default function CreateFilterFiltersProvider(Private) {
+export default function CreateFilterFiltersProvider() {
   return function (aggConfig, key) {
     // have the aggConfig write agg dsl params
     const dslFilters = _.get(aggConfig.toDsl(), 'filters.filters');

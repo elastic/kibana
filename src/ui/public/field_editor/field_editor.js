@@ -13,7 +13,7 @@ import './field_editor.less';
 
 uiModules
 .get('kibana', ['colorpicker.module'])
-.directive('fieldEditor', function (Private, $sce) {
+.directive('fieldEditor', function (Private) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
   const Field = Private(IndexPatternsFieldProvider);
   const fieldTypesByLang = {

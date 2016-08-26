@@ -1,10 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager,
-} from '../../../support';
+import {bdd} from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -62,8 +59,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     const vizName1 = 'Visualization PieChart';
 
     bdd.it('should save and load', function pageHeader() {
-      const remote = this.remote;
-
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
         PageObjects.common.debug('Saved viz message = ' + message);
@@ -85,12 +80,10 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show 10 slices in pie chart, take screenshot', function pageHeader() {
-      const remote = this.remote;
       const expectedPieChartSliceCount = 10;
 
       return PageObjects.visualize.getPieChartData()
       .then(function (pieData) {
-        const barHeightTolerance = 1;
         PageObjects.common.debug('pieData.length = ' + pieData.length);
         PageObjects.common.saveScreenshot('Visualize-pie-chart');
         expect(pieData.length).to.be(expectedPieChartSliceCount);
@@ -98,7 +91,6 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
     bdd.it('should show correct data', function pageHeader() {
-      const remote = this.remote;
       const expectedTableData =  [ '0 55', '40,000 50', '80,000 41', '120,000 43',
         '160,000 44', '200,000 40', '240,000 46', '280,000 39', '320,000 40', '360,000 47'
       ];

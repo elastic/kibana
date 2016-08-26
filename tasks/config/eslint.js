@@ -1,6 +1,4 @@
-const resolve = require('path').resolve;
-
-module.exports = function (grunt) {
+module.exports = function () {
   return {
     // just lint the source dir
     source: {

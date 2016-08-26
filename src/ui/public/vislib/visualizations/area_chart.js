@@ -72,7 +72,6 @@ export default function AreaChartFactory(Private) {
    * @returns {D3.UpdateSelection} SVG with path added
    */
   AreaChart.prototype.addPath = function (svg, layers) {
-    const self = this;
     const ordered = this.handler.data.get('ordered');
     const isTimeSeries = (ordered && ordered.date);
     const isOverlapping = this.isOverlapping;
@@ -163,7 +162,6 @@ export default function AreaChartFactory(Private) {
    * @returns {D3.UpdateSelection} SVG with circles added
    */
   AreaChart.prototype.addCircles = function (svg, data) {
-    const self = this;
     const color = this.handler.data.getColorFunc();
     const xScale = this.handler.xAxis.xScale;
     const yScale = this.handler.yAxis.yScale;
@@ -302,7 +300,6 @@ export default function AreaChartFactory(Private) {
     let height;
     let layers;
     let circles;
-    let path;
 
     return function (selection) {
       selection.each(function (data) {
@@ -337,7 +334,7 @@ export default function AreaChartFactory(Private) {
         self.createEndZones(svg);
 
         // add path
-        path = self.addPath(svg, layers);
+        self.addPath(svg, layers);
 
         if (yMin < 0 && self._attr.mode !== 'wiggle' && self._attr.mode !== 'silhouette') {
 
@@ -358,8 +355,7 @@ export default function AreaChartFactory(Private) {
         // add click and hover events to circles
         self.addCircleEvents(circles, svg);
 
-        // chart base line
-        const line = svg.append('line')
+        svg.append('line')
         .attr('class', 'base-line')
         .attr('x1', 0)
         .attr('y1', yScale(0))

@@ -5,7 +5,7 @@ describe('Buckets wrapper', function () {
   let Buckets;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function (Private) {
     Buckets = Private(AggResponseTabifyBucketsProvider);
   }));
 

@@ -37,7 +37,7 @@ define(function () {
     });
 
     mappingSetup.expandShorthand = function (sh) {
-      return _.mapValues(sh || {}, function (val, prop) {
+      return _.mapValues(sh || {}, function (val) {
         // allow shortcuts for the field types, by just setting the value
         // to the type name
         if (typeof val === 'string') val = { type: val };
@@ -85,7 +85,7 @@ define(function () {
           index: kbnIndex,
           type: type,
           body: body
-        }).then(function (resp) {
+        }).then(function () {
           // add this type to the list of knownTypes
           knownTypes.push(type);
 

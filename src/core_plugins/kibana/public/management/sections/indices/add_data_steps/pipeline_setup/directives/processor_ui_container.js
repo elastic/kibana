@@ -1,5 +1,4 @@
 import uiModules from 'ui/modules';
-import _ from 'lodash';
 import '../styles/_processor_ui_container.less';
 import './output_preview';
 import './processor_ui_container_header';

@@ -14,7 +14,7 @@ modules.get('apps/management')
       },
       bindToController: true,
       controllerAs: 'installStep',
-      controller: function ($scope) {
+      controller: function () {
         this.pipelineId = patternToIngest(this.results.indexPattern.id);
         this.docLinks = docLinks;
       }

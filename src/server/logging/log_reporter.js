@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
 import { Squeeze } from 'good-squeeze';

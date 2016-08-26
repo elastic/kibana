@@ -24,7 +24,7 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       $scope.clipboardButton = $el.find('button.clipboard-button')[0];
 
       const clipboard = new Clipboard($scope.clipboardButton, {
-        target(trigger) {
+        target() {
           return $scope.textbox;
         }
       });

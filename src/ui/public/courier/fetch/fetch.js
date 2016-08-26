@@ -21,7 +21,7 @@ export default function fetchService(Private, Promise) {
 
   this.fetchQueued = fetchQueued;
 
-  function fetchASource(source, strategy) {
+  function fetchASource(source) {
     const defer = Promise.defer();
 
     fetchThese([

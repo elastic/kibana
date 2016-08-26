@@ -109,7 +109,6 @@ export default (function () {
     updateConfigDoc: function (docMap) {
       // first we need to get the config doc's id so we can use it in our _update call
       const self = this;
-      let configId;
       const docMapString = JSON.stringify(docMap);
 
       return this.getConfigId()
@@ -138,7 +137,6 @@ export default (function () {
     */
     deleteAndUpdateConfigDoc: function (docMap) {
       const self = this;
-      let configId;
 
       return this.delete('.kibana')
       .then(function () {
@@ -147,7 +145,6 @@ export default (function () {
             return self.getConfigId();
           });
         } else {
-          const docMapString = JSON.stringify(docMap);
           return Try.try(function () {
             return self.updateConfigDoc(docMap);
           });

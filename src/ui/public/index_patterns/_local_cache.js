@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import angular from 'angular';
 
 export default function LocalCacheFactory() {

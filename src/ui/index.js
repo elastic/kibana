@@ -1,4 +1,3 @@
-import { format as formatUrl } from 'url';
 import { readFileSync as readFile } from 'fs';
 import { defaults } from 'lodash';
 import Boom from 'boom';

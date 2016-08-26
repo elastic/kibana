@@ -2,9 +2,7 @@ import angular from 'angular';
 import moment from 'moment';
 import expect from 'expect.js';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
 import 'plugins/kibana/visualize/index';
 import 'plugins/kibana/dashboard/index';
 import 'plugins/kibana/discover/index';
@@ -17,15 +15,10 @@ let $parentScope;
 let $scope;
 
 let $elem;
-const anchor = '2014-01-01T06:06:06.666Z';
-let clock;
 
 const init = function () {
   // Load the application
   ngMock.module('kibana');
-
-  // Stub out the clock so 'now' doesn't move
-  clock = sinon.useFakeTimers(moment(anchor).valueOf());
 
   // Create the scope
   ngMock.inject(function ($rootScope, $compile) {

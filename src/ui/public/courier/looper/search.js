@@ -9,7 +9,7 @@ export default function SearchLooperService(Private, Promise, Notifier, $rootSco
   const requestQueue = Private(RequestQueueProvider);
 
   const Looper = Private(LooperProvider);
-  const notif = new Notifier({ location: 'Search Looper' });
+  new Notifier({ location: 'Search Looper' });
 
   /**
    * The Looper which will manage the doc fetch interval

@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import sinon from 'sinon';
 import createMultiSelectModel from '../create_multi_select_model';
 
 describe('createMultiSelectModel', function () {

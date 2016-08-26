@@ -1,7 +1,7 @@
 
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
-import { get, indexBy } from 'lodash';
+import {indexBy} from 'lodash';
 import Collection from '../../utils/collection';
 
 const byIdCache = Symbol('byIdCache');
@@ -20,7 +20,6 @@ module.exports = class Plugins extends Collection {
     this[pluginApis].add(api);
 
     const output = [].concat(require(path)(api) || []);
-    const config = this.kbnServer.config;
 
     if (!output.length) return;
 

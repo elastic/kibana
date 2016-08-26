@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import exposeClient from './expose_client';
 import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import checkEsVersion from './check_es_version';

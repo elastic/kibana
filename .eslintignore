@@ -2,3 +2,5 @@
 src/fixtures/vislib/mock_data
 src/ui/public/angular-bootstrap
 test/fixtures/scenarios
+src/core_plugins/console
+src/ui/public/utils/decode_geo_hash.js

@@ -1,6 +1,3 @@
-
-/* eslint-disable */
-
 /**
  * TODO: Write custom components that address our needs to directly and deprecate these Bootstrap components.
  */
@@ -210,4 +207,3 @@ import typeaheadPopup from './typeahead/typeahead-popup.html';
 angular.module('template/typeahead/typeahead-popup.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/typeahead/typeahead-popup.html', typeaheadPopup);
 }]);
-

@@ -1,7 +1,5 @@
 define(function (require) {
-  const Promise = require('bluebird');
   const createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
-  const _ = require('intern/dojo/node!lodash');
   const expect = require('intern/dojo/node!expect.js');
 
 

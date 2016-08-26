@@ -9,7 +9,7 @@ import _ from 'lodash';
 function KbnFormController($scope, $element) {
   const self = this;
 
-  self.errorCount = function (predicate) {
+  self.errorCount = function () {
     return self.$$invalidModels().length;
   };
 

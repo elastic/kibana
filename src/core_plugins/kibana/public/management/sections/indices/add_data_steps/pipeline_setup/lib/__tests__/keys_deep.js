@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import sinon from 'sinon';
 import keysDeep from '../keys_deep';
 
 describe('keys deep', function () {
