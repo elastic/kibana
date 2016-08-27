@@ -17,9 +17,9 @@
           ng-click="showDetails = !showDetails"
           ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
           class="legend-value-title"
-          tooltip="{{legendData.label}}"
+          tooltip="{{legendData.legendLabel}}"
         >
-          <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
+          <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.legendLabel}}
         </div>
 
         <div ng-if="showDetails" class="legend-value-details">

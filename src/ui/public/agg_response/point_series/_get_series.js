@@ -55,15 +55,17 @@ export default function PointSeriesGetSeries(Private) {
       });
     }
 
-    if (showLabelCount(vis)) {
-      series = _.map(series, siri => {
-        if (siri.values.length === 0) return siri;
-        if (siri.values[0].aggConfigResult.aggConfig._opts.type !== 'count') return siri;
-        const count = siri.values.reduce((prev, curr) => prev + curr.y, 0);
-        siri.label += ` (${count})`;
-        return siri;
-      });
-    }
+    series = _.map(series, siri => {
+      if (siri.values.length === 0) return siri;
+      if (siri.values[0].aggConfigResult.aggConfig._opts.type !== 'count') return siri;
+      const count = siri.values.reduce((prev, curr) => prev + curr.y, 0);
+      if (showLabelCount(vis)) {
+        siri.legendLabel = `${siri.label} (${count})`;
+      } else {
+        siri.legendLabel = siri.label;
+      }
+      return siri;
+    });
 
     return series;
   };
