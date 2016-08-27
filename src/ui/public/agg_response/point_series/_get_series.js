@@ -57,6 +57,7 @@ export default function PointSeriesGetSeries(Private) {
 
     series = _.map(series, siri => {
       if (siri.values.length === 0) return siri;
+      if (!siri.values[0].aggConfigResult.aggConfig) return siri;
       if (siri.values[0].aggConfigResult.aggConfig._opts.type !== 'count') return siri;
       const count = siri.values.reduce((prev, curr) => prev + curr.y, 0);
       if (showLabelCount(vis)) {
