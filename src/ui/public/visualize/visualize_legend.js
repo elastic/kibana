@@ -83,16 +83,6 @@ uiModules.get('kibana')
         return filters.length;
       };
 
-      $scope.showLegendCount = legendData => {
-        if (!$scope.vis.params.addLegendCount) return false;
-        if (!$scope.vis.type.params.isLegendCountSupported) return false;
-        return !!$scope.getLegendCount(legendData);
-      };
-
-      $scope.getLegendCount = legendData => {
-        return legendData.values.size || legendData.values.reduce((prev, curr) => prev + curr.y, 0);
-      };
-
       $scope.colors = [
         '#3F6833', '#967302', '#2F575E', '#99440A', '#58140C', '#052B51', '#511749', '#3F2B5B', //6
         '#508642', '#CCA300', '#447EBC', '#C15C17', '#890F02', '#0A437C', '#6D1F62', '#584477', //2

@@ -21,7 +21,7 @@ export default function HistogramVisType(Private) {
         isDonut: false
       },
       editor: pieTemplate,
-      isLegendCountSupported: true
+      isLegendCountSupported: false
     },
     responseConverter: false,
     hierarchicalData: true,

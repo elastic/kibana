@@ -5,7 +5,12 @@ export default function PointSeriesGetSeries(Private) {
   let getPoint = Private(AggResponsePointSeriesGetPointProvider);
   let addToSiri = Private(AggResponsePointSeriesAddToSiriProvider);
 
-  return function getSeries(rows, chart) {
+  function showLabelCount(vis) {
+    if (!vis.params.addLegendCount) return false;
+    if (!vis.type.params.isLegendCountSupported) return false;
+    return true;
+  }
+  return function getSeries(rows, chart, vis) {
     let aspects = chart.aspects;
     let multiY = _.isArray(aspects.y);
     let yScale = chart.yScale;
@@ -47,6 +52,16 @@ export default function PointSeriesGetSeries(Private) {
         }
 
         return y ? y.i : series.length;
+      });
+    }
+
+    if (showLabelCount(vis)) {
+      series = _.map(series, siri => {
+        if (siri.values.length === 0) return siri;
+        if (siri.values[0].aggConfigResult.aggConfig._opts.type !== 'count') return siri;
+        const count = siri.values.reduce((prev, curr) => prev + curr.y, 0);
+        siri.label += ` (${count})`;
+        return siri;
       });
     }
 
