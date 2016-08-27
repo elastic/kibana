@@ -6,7 +6,7 @@ export default function PointSeriesGetSeries(Private) {
   let addToSiri = Private(AggResponsePointSeriesAddToSiriProvider);
 
   function showLabelCount(vis) {
-    if (!vis.params.addLegendCount) return false;
+    if (!vis || !vis.params || !vis.params.addLegendCount) return false;
     if (!vis.type.params.isLegendCountSupported) return false;
     return true;
   }
