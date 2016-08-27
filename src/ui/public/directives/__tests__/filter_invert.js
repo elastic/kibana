@@ -18,7 +18,7 @@ describe('FilterInvert directive', function () {
   }));
 
   it('sets CSS filter:invert property in supported browsers', function () {
-    $controller.register('filterInvertController', () => {
+    $controller.register('filterInvertController', function () {
       this.isFilterSupported = () => true;
     });
     $compile($elem)($parentScope);
