@@ -33,8 +33,5 @@ describe('FilterInvert directive', function () {
     $compile($elem)($parentScope);
     $elem.scope().$digest();
     expect($elem.attr('style')).to.contain('hidden');
-    $elem.scope().$digest();
-
-    expect($elem.next().attr('class')).to.equal('svg');
   });
 });
