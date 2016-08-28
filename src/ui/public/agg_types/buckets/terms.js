@@ -16,12 +16,13 @@ export default function TermsAggDefinition(Private) {
   let createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
+  const aggFilter = ['!top_hits', '!percentiles', '!median', '!std_dev'];
   let orderAggSchema = (new Schemas([
     {
       group: 'none',
       name: 'orderAgg',
       title: 'Order Agg',
-      aggFilter: ['!percentiles', '!median', '!std_dev']
+      aggFilter: aggFilter
     }
   ])).all[0];
 
@@ -95,9 +96,14 @@ export default function TermsAggDefinition(Private) {
           $scope.$watch('responseValueAggs', updateOrderAgg);
           $scope.$watch('agg.params.orderBy', updateOrderAgg);
 
+          $scope.rejectAgg = function (agg) {
+            // aggFilter elements all starts with a '!'
+            // so the index of agg.type.name in a filter is 1 if it is included
+            return Boolean(aggFilter.find((filter) => filter.indexOf(agg.type.name) === 1));
+          };
+
           function updateOrderAgg() {
             let agg = $scope.agg;
-            let aggs = agg.vis.aggs;
             let params = agg.params;
             let orderBy = params.orderBy;
             let paramDef = agg.type.params.byName.orderAgg;
@@ -106,7 +112,11 @@ export default function TermsAggDefinition(Private) {
             if (!orderBy && prevOrderBy === INIT) {
               // abort until we get the responseValueAggs
               if (!$scope.responseValueAggs) return;
-              params.orderBy = (_.first($scope.responseValueAggs) || { id: 'custom' }).id;
+              let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
+              if (!respAgg) {
+                respAgg = { id: 'custom' };
+              }
+              params.orderBy = respAgg.id;
               return;
             }
 
@@ -123,7 +133,8 @@ export default function TermsAggDefinition(Private) {
               }
 
               // ensure that orderBy is set to a valid agg
-              if (!_.find($scope.responseValueAggs, { id: orderBy })) {
+              const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
+              if (!respAgg) {
                 params.orderBy = null;
               }
               return;

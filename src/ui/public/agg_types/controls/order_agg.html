@@ -9,6 +9,7 @@
       <option
         ng-repeat="respAgg in responseValueAggs track by respAgg.id"
         value="{{respAgg.id}}"
+        ng-disabled="rejectAgg(respAgg)"
         ng-selected="agg.params.orderBy === respAgg.id">
         metric: {{safeMakeLabel(respAgg)}}
       </option>
