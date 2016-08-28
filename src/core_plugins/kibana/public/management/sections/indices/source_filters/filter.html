@@ -1,0 +1,12 @@
+<div class="value">
+  <span ng-if="sourceFilters.editing !== filter">{{ filter.value }}</span>
+
+  <input
+    ng-model="filter.value"
+    input-focus
+    ng-if="sourceFilters.editing === filter"
+    placeholder="{{ sourceFilters.placeHolder }}"
+    type="text"
+    required
+    class="form-control">
+</div>

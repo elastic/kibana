@@ -6,94 +6,28 @@
 
 <div ng-class="{ saving: sourceFilters.saving }" class="source-filters-container">
 
-  <table class="table table-hover">
-    <thead ng-if="sourceFilters.all().length">
-      <tr>
-        <td></td><td><h4 class="header">Known Matches</h4></td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="filter in sourceFilters.all()">
-        <td>
-          <form
-            ng-submit="sourceFilters.save(filter)"
-            class="source-filter"
-            name="form">
+  <form name="form" ng-submit="sourceFilters.create()">
+    <div class="input-group">
+      <input
+        ng-model="sourceFilters.newValue"
+        placeholder="{{ sourceFilters.placeHolder }}"
+        type="text"
+        class="form-control">
 
-            <div class="value">
-              <span ng-if="sourceFilters.editing !== filter">{{ filter.value }}</span>
+      <div class="input-group-btn" role="group" aria-label="Source Filter Editor Controls">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          ng-disabled="!sourceFilters.newValue">
+          Add
+        </button>
+      </div>
+    </div>
+  </form>
 
-              <input
-                ng-model="filter.value"
-                input-focus
-                ng-if="sourceFilters.editing === filter"
-                placeholder="sourceFilters.placeHolder"
-                type="text"
-                required
-                class="form-control">
-            </div>
-
-            <div class="controls">
-              <button
-                aria-label="Edit source filter"
-                ng-if="sourceFilters.editing !== filter"
-                ng-click="sourceFilters.editing = filter"
-                type="button"
-                class="btn btn-default">
-                <i aria-hidden="true" class="fa fa-pencil"></i>
-              </button>
-              <button
-                aria-label="Save source filter"
-                ng-if="sourceFilters.editing === filter"
-                type="submit"
-                class="btn btn-primary">
-                <i aria-hidden="true" class="fa fa-save"></i>
-              </button>
-              <button
-                aria-label="Delete source filter"
-                ng-click="sourceFilters.delete(filter)"
-                type="button"
-                class="btn btn-danger">
-                <i aria-hidden="true" class="fa fa-trash"></i>
-              </button>
-            </div>
-          </form>
-        </td>
-        <td>
-          <div class="known-matches">
-            <p ng-if="!sourceFilters.sampleMatches[$index]">
-              <em>The source filter doesn't match any known fields.</em>
-            </p>
-            <ul>
-              <li ng-repeat="match in sourceFilters.sampleMatches[$index]">{{match}}</li>
-            </ul>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>
-          <form name="form" ng-submit="sourceFilters.create()">
-            <div class="input-group">
-              <input
-                ng-model="sourceFilters.newValue"
-                placeholder="sourceFilters.placeHolder"
-                type="text"
-                class="form-control">
-
-              <div class="input-group-btn" role="group" aria-label="Source Filter Editor Controls">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  ng-disabled="!sourceFilters.newValue">
-                  Add
-                </button>
-              </div>
-            </div>
-          </form>
-        </td>
-      </tr>
-    </tfoot>
-  </table>
+  <paginated-table
+    columns="columns"
+    rows="rows"
+    per-page="perPage">
+  </paginated-table>
 </div>

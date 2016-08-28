@@ -32,7 +32,7 @@
       </div>
 
       <form role="form">
-        <input ng-disabled="state.tab == 'sourceFilters'" aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
+        <input aria-label="Filter" ng-model="fieldFilter" class="form-control span12" type="text" placeholder="Filter" />
       </form>
 
       <br />
@@ -42,7 +42,7 @@
         <li class="kbn-management-tab" ng-class="{ active: state.tab === editSection.index }" ng-repeat="editSection in editSections">
           <a ng-click="changeTab(editSection)">
             {{ editSection.title }}
-            <small ng-if="editSection.count">({{ editSection.count }})</small>
+            <small>({{ editSection.count }})</small>
           </a>
         </li>
       </ul>

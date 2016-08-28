@@ -8,7 +8,8 @@ export default function GetFieldTypes() {
 
     _.defaults(fieldCount, {
       indexed: 0,
-      scripted: 0
+      scripted: 0,
+      sourceFilters: 0
     });
 
     return [
@@ -24,7 +25,8 @@ export default function GetFieldTypes() {
       },
       {
         title: 'source filters',
-        index: 'sourceFilters'
+        index: 'sourceFilters',
+        count: fieldCount.sourceFilters
       }
     ];
   };

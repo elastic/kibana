@@ -7,9 +7,20 @@ export default function fieldWildcard(config) {
     return new RegExp('^' + glob.split('*').map(escapeRegExp).join('.*') + '$');
   });
 
+  function endsWith(str, test) {
+    if (!str || typeof str !== 'string' || str.length < test.length) {
+      return false;
+    }
+    return str.substring(str.length - test.length) === test;
+  }
+
   function fieldWildcardMatcher(globs) {
     return function matcher(val) {
-      return metaFields.indexOf(val) === -1 && globs.some(p => makeRegEx(p).test(val));
+      // do not test metaFields or keyword
+      if (metaFields.indexOf(val) !== -1 || endsWith(val, '.keyword')) {
+        return false;
+      }
+      return globs.some(p => makeRegEx(p).test(val));
     };
   }
 
