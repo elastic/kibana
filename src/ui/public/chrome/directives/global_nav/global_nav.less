@@ -1,0 +1,44 @@
+
+@import (reference) "~ui/styles/variables";
+
+.global-nav {
+  width: @as-closed-width;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  background-color: @app-links-wrapper-background;
+  overflow: hidden;
+
+  &.is-global-nav-open {
+    width: @as-open-width;
+
+    .app-title {
+      display: inline-block;
+    }
+
+    + .app-wrapper {
+      left: @as-open-width;
+    }
+  }
+
+  .logo-small,
+  .logo {
+    height: 70px;
+    width: @as-open-width;
+    list-style-type: none;
+    &.kibana {
+      background-image: url("~ui/images/kibana.svg");
+      background-position: 6px 10px;
+      background-size: 140px 50px;
+      background-repeat: no-repeat;
+      background-color: #e8488b;
+    }
+  }
+}
+
+  .gloal-nav__bottom-links {
+    position: absolute;
+    bottom: 0;
+  }

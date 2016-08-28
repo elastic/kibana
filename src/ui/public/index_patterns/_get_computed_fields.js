@@ -4,9 +4,9 @@ import _ from 'lodash';
 export default function () {
   let self = this;
   let scriptFields = {};
-  let fielddataFields = [];
+  let docvalueFields = [];
 
-  fielddataFields = _.pluck(self.fields.byType.date, 'name');
+  docvalueFields = _.pluck(self.fields.byType.date, 'name');
 
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
@@ -20,7 +20,7 @@ export default function () {
   return {
     storedFields: ['*'],
     scriptFields: scriptFields,
-    fielddataFields: fielddataFields
+    docvalueFields: docvalueFields
   };
 
 };

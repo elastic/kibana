@@ -315,7 +315,7 @@ export default function XAxisFactory(Private) {
     let self = this;
     let text;
     let barWidth = self.xScale.rangeBand();
-    let maxRotatedLength = 180;
+    let maxRotatedLength = 120;
     let xAxisPadding = 15;
     let svg;
     let lengths = [];
@@ -351,7 +351,9 @@ export default function XAxisFactory(Private) {
         .attr('dy', '-.60em')
         .attr('transform', function rotate() {
           return 'rotate(-90)';
-        });
+        })
+        .append('title')
+        .text(text => text);
         selection.select('svg')
         .attr('height', self._attr.xAxisLabelHt);
       }

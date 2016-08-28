@@ -12,8 +12,11 @@ kbn-management-objects-view {
   display: block;
 }
 
-nav.navbar {
-  height: 70px;
+/**
+ * 1. Allow navbar to get taller on narrow screens.
+*/
+.management-navbar {
+  min-height: 70px; /* 1 */
 }
 
 .tab-management {

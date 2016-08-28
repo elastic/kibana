@@ -1,0 +1,11 @@
+
+<global-nav-link
+  ng-repeat="link in switcher.shownNavLinks"
+  is-active="link.active"
+  is-disabled="!switcher.isNavLinkEnabled(link)"
+  tooltip-content="switcher.getTooltip(link)"
+  on-click="switcher.ensureNavigation($event, link)"
+  href="link.active ? link.url : (link.lastSubUrl || link.url)"
+  icon="link.icon"
+  title="link.title"
+></global-nav-link>

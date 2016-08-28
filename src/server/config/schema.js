@@ -1,6 +1,4 @@
 import Joi from 'joi';
-import fs from 'fs';
-import path from 'path';
 import { get } from 'lodash';
 import { randomBytes } from 'crypto';
 import os from 'os';
@@ -36,7 +34,7 @@ module.exports = () => Joi.object({
 
   server: Joi.object({
     name: Joi.string().default(os.hostname()),
-    host: Joi.string().hostname().default('0.0.0.0'),
+    host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5601),
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
@@ -139,7 +137,7 @@ module.exports = () => Joi.object({
     options: Joi.object({
       attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
       minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
-      maxZoom: Joi.number().default(7),
+      maxZoom: Joi.number().default(10),
       tileSize: Joi.number(),
       subdomains: Joi.array().items(Joi.string()).single(),
       errorTileUrl: Joi.string().uri(),

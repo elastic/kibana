@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';

@@ -1,4 +1,6 @@
-import './app_switcher';
+
+import './global_nav';
+
 import kbnChromeProv from './kbn_chrome';
 import kbnChromeNavControlsProv from './append_nav_controls';
 import './kbn_loading_indicator';

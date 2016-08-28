@@ -60,7 +60,7 @@ module.exports = function (api) {
       "fields": [],
       "types": [],
       "completion_fields": [],
-      "fielddata_fields": [],
+      "docvalue_fields": [],
       "level": ["cluster", "indices", "shards"]
     }
 
@@ -93,11 +93,23 @@ module.exports = function (api) {
     ],
     url_params: {
       "analyzer": "",
-      "char_filters": [],
+      "char_filter": [],
       "field": "",
-      "filters": [],
+      "filter": [],
       "text": "",
-      "tokenizer": ""
+      "tokenizer": "",
+      "explain": "__flag__",
+      "attributes": []
+    },
+    data_autocomplete_rules: {
+      text: [],
+      field: "{field}",
+      analyzer: "",
+      tokenizer: "",
+      char_filter: [],
+      filter: [],
+      explain: {__one_of: [false, true]},
+      attributes: []
     }
   });
 

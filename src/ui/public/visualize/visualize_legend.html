@@ -1,6 +1,6 @@
 <div class="legend-col-wrapper" ng-if="labels.length">
   <div ng-click="toggleLegend()" class="legend-toggle">
-    <i class="legend-icon fa" ng-class="open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left'"></i>
+    <i class="legend-icon fa {{getToggleLegendClasses()}}"></i>
   </div>
   <ul class="legend-ul" ng-show="open">
 
@@ -9,13 +9,16 @@
       ng-mouseenter="highlight($event)"
       ng-mouseleave="unhighlight($event)"
       data-label="{{legendData.label}}"
-      class="legend-value color">
+      class="legend-value color"
+    >
 
       <div class="legend-value-container">
         <div
           ng-click="showDetails = !showDetails"
           ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
-          class="legend-value-title">
+          class="legend-value-title"
+          tooltip="{{legendData.label}}"
+        >
           <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
         </div>
 
@@ -29,7 +32,8 @@
             <i ng-repeat="choice in colors"
               ng-click="setColor(legendData.label, choice)"
               ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
-              ng-style="{color: choice}" class="fa dot">
+              ng-style="{color: choice}" class="fa dot"
+            >
             </i>
           </div>
 

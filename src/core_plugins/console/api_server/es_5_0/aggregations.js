@@ -332,7 +332,7 @@ var rules = {
       script_fields: {
         __scope_link: "_search.script_fields"
       },
-      fielddata_fields: ["{field}"],
+      docvalue_fields: ["{field}"],
       version: {__one_of: [true, false]}
     },
     "percentile_ranks": {
@@ -426,6 +426,12 @@ var rules = {
       script: {
         // populated by a global rule
       }
+    },
+    "matrix_stats": {
+      __template: {
+        fields: []
+      },
+      fields: ["{field}"]
     }
   }
 };

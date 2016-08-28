@@ -93,19 +93,13 @@ export default function VisFactory(Private) {
     try {
       this.handler[method]();
     } catch (error) {
-      // If involving height and width of the container, log error to screen.
-      // Because we have to wait for the DOM element to initialize, we do not
-      // want to throw an error when the DOM `el` is zero
-      if (error instanceof errors.ContainerTooSmall ||
-        error instanceof errors.InvalidWiggleSelection ||
-        error instanceof errors.InvalidLogScaleValues ||
-        error instanceof errors.PieContainsAllZeros ||
-        error instanceof errors.NotEnoughData ||
-        error instanceof errors.NoResults) {
-        this.handler.error(error.message);
+
+      if (error instanceof errors.KbnError) {
+        error.displayToScreen(this.handler);
       } else {
         throw error;
       }
+
     }
   };
 

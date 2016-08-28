@@ -110,6 +110,7 @@ module.exports = function (grunt) {
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testdev',
         ...kbnServerFlags,
       ]
     },

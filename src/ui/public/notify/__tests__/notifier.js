@@ -6,11 +6,22 @@ import Notifier from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
-  let message = 'Oh, the humanity!';
   let notifier;
   let params;
-  let version = window.__KBN__.version;
-  let buildNum = window.__KBN__.buildNum;
+  const version = window.__KBN__.version;
+  const buildNum = window.__KBN__.buildNum;
+  const message = 'Oh, the humanity!';
+  const customText = 'fooMarkup';
+  const customParams = {
+    title: 'fooTitle',
+    actions:[{
+      text: 'Cancel',
+      callback: sinon.spy()
+    }, {
+      text: 'OK',
+      callback: sinon.spy()
+    }]
+  };
 
   beforeEach(function () {
     ngMock.module('kibana');
@@ -185,6 +196,127 @@ describe('Notifier', function () {
     });
   });
 
+  describe('#custom', function () {
+    let customNotification;
+
+    beforeEach(() => {
+      customNotification = notifier.custom(customText, customParams);
+    });
+
+    afterEach(() => {
+      customNotification.clear();
+    });
+
+    it('throws if second param is not an object', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      function callCustomIncorrectly() {
+        const badParam = null;
+        customNotification = notifier.custom(customText, badParam);
+      }
+      expect(callCustomIncorrectly).to.throwException(function (e) {
+        expect(e.message).to.be('Config param is required, and must be an object');
+      });
+
+    });
+
+    it('has a custom function to make notifications', function () {
+      expect(notifier.custom).to.be.a('function');
+    });
+
+    it('properly merges options', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const overrideParams = _.defaults({ lifetime: 20000 }, customParams);
+      customNotification = notifier.custom(customText, overrideParams);
+
+      expect(customNotification).to.have.property('type', 'info'); // default
+      expect(customNotification).to.have.property('title', overrideParams.title); // passed in thru customParams
+      expect(customNotification).to.have.property('lifetime', overrideParams.lifetime); // passed in thru overrideParams
+
+      expect(overrideParams.type).to.be(undefined);
+      expect(overrideParams.title).to.be.a('string');
+      expect(overrideParams.lifetime).to.be.a('number');
+    });
+
+    it('sets the content', function () {
+      expect(customNotification).to.have.property('content', `${params.location}: ${customText}`);
+      expect(customNotification.content).to.be.a('string');
+    });
+
+    it('uses custom actions', function () {
+      expect(customNotification).to.have.property('customActions');
+      expect(customNotification.customActions).to.have.length(customParams.actions.length);
+    });
+
+    it('gives a default action if none are provided', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const noActionParams = _.defaults({ actions: [] }, customParams);
+      customNotification = notifier.custom(customText, noActionParams);
+      expect(customNotification).to.have.property('actions');
+      expect(customNotification.actions).to.have.length(1);
+    });
+
+    it('defaults type and lifetime for "info" config', function () {
+      expect(customNotification.type).to.be('info');
+      expect(customNotification.lifetime).to.be(5000);
+    });
+
+    it('dynamic lifetime for "banner" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'banner' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('banner');
+      expect(customNotification.lifetime).to.be(3000000);
+    });
+
+    it('dynamic lifetime for "warning" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'warning' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('warning');
+      expect(customNotification.lifetime).to.be(10000);
+    });
+
+    it('dynamic type and lifetime for "error" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'error' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('danger');
+      expect(customNotification.lifetime).to.be(300000);
+    });
+
+    it('dynamic type and lifetime for "danger" config', function () {
+      // destroy the default custom notification, avoid duplicate handling
+      customNotification.clear();
+
+      const errorTypeParams = _.defaults({ type: 'danger' }, customParams);
+      customNotification = notifier.custom(customText, errorTypeParams);
+      expect(customNotification.type).to.be('danger');
+      expect(customNotification.lifetime).to.be(300000);
+    });
+
+    it('should wrap the callback functions in a close function', function () {
+      customNotification.customActions.forEach((action, idx) => {
+        expect(action.callback).not.to.equal(customParams.actions[idx]);
+        action.callback();
+      });
+      customParams.actions.forEach(action => {
+        expect(action.callback.called).to.true;
+      });
+    });
+  });
+
   describe('#banner', function () {
     testVersionInfo('banner');
 
@@ -193,7 +325,7 @@ describe('Notifier', function () {
     });
 
     it('prepends location to message for markdown', function () {
-      expect(notify('banner').markdown).to.equal(params.location + ': ' + message);
+      expect(notify('banner').content).to.equal(`${params.location}: ${message}`);
     });
 
     it('sets type to "banner"', function () {
@@ -250,4 +382,180 @@ describe('Notifier', function () {
       });
     });
   }
+});
+
+describe('Directive Notification', function () {
+  let notifier;
+  let compile;
+  let scope;
+
+  const directiveParam = {
+    template: '<h1>Hello world {{ unit.message }}</h1>',
+    controllerAs: 'unit',
+    controller() {
+      this.message = '🎉';
+    }
+  };
+  const customParams = {
+    title: 'fooTitle',
+    actions:[{
+      text: 'Cancel',
+      callback: sinon.spy()
+    }, {
+      text: 'OK',
+      callback: sinon.spy()
+    }]
+  };
+  let directiveNotification;
+
+  beforeEach(() => {
+    ngMock.module('kibana');
+    ngMock.inject(function ($rootScope, $compile) {
+      scope = $rootScope.$new();
+      compile = $compile;
+      compile;
+      scope;
+    });
+
+    while (Notifier.prototype._notifs.pop()); // clear global notifications
+
+    notifier = new Notifier({ location: 'directiveFoo' });
+    directiveNotification = notifier.directive(directiveParam, customParams);
+  });
+
+  afterEach(() => {
+    directiveNotification.clear();
+    scope.$destroy();
+  });
+
+  describe('returns a renderable notification', () => {
+    let element;
+
+    beforeEach(() => {
+      scope.notif = notifier.directive(directiveParam, customParams);
+      const template = `
+        <render-directive
+          definition="notif.directive"
+          notif="notif"
+        ></render-directive>`;
+      element = compile(template)(scope);
+      scope.$apply();
+    });
+
+    it('that renders with the provided template', () => {
+      expect(element.find('h1').text()).to.contain('Hello world');
+    });
+
+    it('that renders with the provided controller', () => {
+      expect(element.text()).to.contain('🎉');
+    });
+  });
+
+  it('throws if first param is not an object', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badDirectiveParam = null;
+      directiveNotification = notifier.directive(badDirectiveParam, {});
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Directive param is required, and must be an object');
+    });
+  });
+
+  it('throws if second param is not an object', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badConfigParam = null;
+      directiveNotification = notifier.directive(directiveParam, badConfigParam);
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Config param is required, and must be an object');
+    });
+  });
+
+  it('throws if directive param has scope definition instead of allow the helper to do its work', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badDirectiveParam = {
+        scope: {
+          garbage: '='
+        }
+      };
+      directiveNotification = notifier.directive(badDirectiveParam, customParams);
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Directive should not have a scope definition. Notifier has an internal implementation.');
+    });
+  });
+
+  it('throws if directive param has link function instead of allow the helper to do its work', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    function callDirectiveIncorrectly() {
+      const badDirectiveParam = {
+        link: ($scope) => {
+          /*eslint-disable no-console*/
+          console.log($scope.nothing);
+          /*eslint-enable*/
+        }
+      };
+      directiveNotification = notifier.directive(badDirectiveParam, customParams);
+    }
+    expect(callDirectiveIncorrectly).to.throwException(function (e) {
+      expect(e.message).to.be('Directive should not have a link function. Notifier has an internal link function helper.');
+    });
+  });
+
+  it('has a directive function to make notifications with template and scope', () => {
+    expect(notifier.directive).to.be.a('function');
+  });
+
+  it('sets the scope property and link function', () => {
+    expect(directiveNotification).to.have.property('directive');
+    expect(directiveNotification.directive).to.be.an('object');
+
+    expect(directiveNotification.directive).to.have.property('scope');
+    expect(directiveNotification.directive.scope).to.be.an('object');
+
+    expect(directiveNotification.directive).to.have.property('link');
+    expect(directiveNotification.directive.link).to.be.an('function');
+  });
+
+  /* below copied from custom notification tests */
+  it('uses custom actions', () => {
+    expect(directiveNotification).to.have.property('customActions');
+    expect(directiveNotification.customActions).to.have.length(customParams.actions.length);
+  });
+
+  it('gives a default action if none are provided', () => {
+    // destroy the default custom notification, avoid duplicate handling
+    directiveNotification.clear();
+
+    const noActionParams = _.defaults({ actions: [] }, customParams);
+    directiveNotification = notifier.directive(directiveParam, noActionParams);
+    expect(directiveNotification).to.have.property('actions');
+    expect(directiveNotification.actions).to.have.length(1);
+  });
+
+  it('defaults type and lifetime for "info" config', () => {
+    expect(directiveNotification.type).to.be('info');
+    expect(directiveNotification.lifetime).to.be(5000);
+  });
+
+  it('should wrap the callback functions in a close function', () => {
+    directiveNotification.customActions.forEach((action, idx) => {
+      expect(action.callback).not.to.equal(customParams.actions[idx]);
+      action.callback();
+    });
+    customParams.actions.forEach(action => {
+      expect(action.callback.called).to.true;
+    });
+  });
 });

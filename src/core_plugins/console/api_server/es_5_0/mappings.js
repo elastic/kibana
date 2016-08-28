@@ -81,7 +81,7 @@ module.exports = function (api) {
       'properties': {
         '*': {
           type: {
-            __one_of: ['text', 'keyword', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
+            __one_of: ['text', 'keyword', 'float', 'half_float', 'scaled_float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
               'binary', 'object', 'nested', "geo_point", "geo_shape"
             ]
           },
@@ -111,6 +111,7 @@ module.exports = function (api) {
           // numeric
           precision_step: 4,
           ignore_malformed: BOOLEAN,
+          scaling_factor: 100,
 
           // geo_point
           lat_lon: {

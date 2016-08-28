@@ -303,18 +303,16 @@ export default function LineChartFactory(Private) {
 
         width = elWidth - margin.left - margin.right;
         height = elHeight - margin.top - margin.bottom;
+        if (width < minWidth || height < minHeight) {
+          throw new errors.ContainerTooSmall();
+        }
+        self.validateDataCompliesWithScalingMethod(data);
 
         if (addTimeMarker) {
           timeMarker = new TimeMarker(times, xScale, height);
         }
 
-        if (self._attr.scale === 'log' && self._invalidLogScaleValues(data)) {
-          throw new errors.InvalidLogScaleValues();
-        }
 
-        if (width < minWidth || height < minHeight) {
-          throw new errors.ContainerTooSmall();
-        }
 
         div = d3.select(el);
 
