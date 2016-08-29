@@ -10,6 +10,7 @@ function ScenarioManager(server) {
   this.client = new elasticsearch.Client({
     host: server,
     requestTimeout: 300000,
+    apiVersion: 'master',
     defer: function () {
       return Promise.defer();
     }

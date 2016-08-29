@@ -4,6 +4,8 @@ import expect from 'expect.js';
 import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import _ from 'lodash';
+
 describe('FieldEditor directive', function () {
 
   let Field;
@@ -14,8 +16,15 @@ describe('FieldEditor directive', function () {
   let $scope;
   let $el;
 
+  let $httpBackend;
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
+    $httpBackend = $injector.get('$httpBackend');
+    $httpBackend
+    .when('GET', '/api/kibana/scripts/languages')
+    .respond(['expression', 'painless']);
+
     $rootScope = $injector.get('$rootScope');
     Field = Private(IndexPatternsFieldProvider);
     StringFormat = Private(RegistryFieldFormatsProvider).getType('string');
@@ -126,6 +135,56 @@ describe('FieldEditor directive', function () {
         expect(editor.field.format.param('foo')).to.be(200);
       });
 
+    });
+
+    describe('scripted fields', function () {
+      let editor;
+      let field;
+
+      beforeEach(function () {
+        $rootScope.field = $rootScope.indexPattern.fields.byName['script string'];
+        compile();
+        editor = $scope.editor;
+        field = editor.field;
+      });
+
+      it('has a scripted flag set to true', function () {
+        expect(field.scripted).to.be(true);
+      });
+
+      it('contains a lang param', function () {
+        expect(field).to.have.property('lang');
+        expect(field.lang).to.be('expression');
+      });
+
+      it('provides lang options based on what is enabled for inline use in ES', function () {
+        $httpBackend.flush();
+        expect(_.isEqual(editor.scriptingLangs, ['expression', 'painless'])).to.be.ok();
+      });
+
+      it('provides curated type options based on language', function () {
+        $rootScope.$apply();
+        expect(editor.fieldTypes).to.have.length(1);
+        expect(editor.fieldTypes[0]).to.be('number');
+
+        editor.field.lang = 'painless';
+        $rootScope.$apply();
+
+        expect(editor.fieldTypes).to.have.length(4);
+        expect(_.isEqual(editor.fieldTypes, ['number', 'string', 'date', 'boolean'])).to.be.ok();
+      });
+
+      it('updates formatter options based on field type', function () {
+        field.lang = 'painless';
+
+        $rootScope.$apply();
+        expect(editor.field.type).to.be('string');
+        const stringFormats = editor.fieldFormatTypes;
+
+        field.type = 'date';
+        $rootScope.$apply();
+        expect(editor.fieldFormatTypes).to.not.be(stringFormats);
+      });
     });
   });
 
