@@ -14,5 +14,13 @@ export default {
     elasticsearchOutputAnchorParameters: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/elasticsearch-output.html#_parameters`,
     startup: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/_step_5_starting_filebeat.html`,
     exportedFields: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/exported-fields.html`
+  },
+  scriptedFields: {
+    scriptFields: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/search-request-script-fields.html`,
+    scriptAggs: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/search-aggregations.html#_values_source`,
+    painless: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html`,
+    painlessApi: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html#painless-api`,
+    painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
+    luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   }
 };

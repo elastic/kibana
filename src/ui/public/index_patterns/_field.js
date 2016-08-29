@@ -50,7 +50,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     // scripted objs
     obj.fact('scripted', scripted);
     obj.writ('script', scripted ? spec.script : null);
-    obj.writ('lang', scripted ? (spec.lang || 'expression') : null);
+    obj.writ('lang', scripted ? (spec.lang || 'painless') : null);
 
     // mapping info
     obj.fact('indexed', indexed);

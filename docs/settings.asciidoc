@@ -295,7 +295,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 +
 *alias*: `host` deprecated[4.2]
 +
-*default*: `"0.0.0.0"`
+*default*: `"localhost"`
 
 `elasticsearch.url` added[4.2]:: The Elasticsearch instance where the indices you want to query reside.
 +
