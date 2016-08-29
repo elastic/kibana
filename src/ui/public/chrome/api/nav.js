@@ -22,7 +22,7 @@ export default function (chrome, internals) {
     let isUrl = url && isString(url);
     if (!isUrl) return url;
 
-    let parsed = parse(url, true);
+    let parsed = parse(url, true, true);
     if (!parsed.host && parsed.pathname) {
       if (parsed.pathname[0] === '/') {
         parsed.pathname = chrome.getBasePath() + parsed.pathname;

@@ -1,8 +1,10 @@
 # Kibana is served by a back end server. This setting specifies the port to use.
 # server.port: 5601
 
-# This setting specifies the IP address of the back end server.
-# server.host: "0.0.0.0"
+# Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.
+# The default is 'localhost', which usually means remote machines will not be able to connect.
+# To allow connections from remote users, set this parameter to a non-loopback address.
+# server.host: "localhost"
 
 # Enables you to specify a path to mount Kibana at if you are running behind a proxy. This setting
 # cannot end in a slash.
@@ -64,6 +66,10 @@
 # List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
 # elasticsearch.requestHeadersWhitelist: [ authorization ]
+
+# Header names and values that are sent to Elasticsearch. Any custom headers cannot be overwritten
+# by client-side headers, regardless of the elasticsearch.requestHeadersWhitelist configuration.
+# elasticsearch.customHeaders: {}
 
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 # elasticsearch.shardTimeout: 0

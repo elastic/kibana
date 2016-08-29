@@ -121,7 +121,6 @@ module.exports = function (api) {
         ]
       },
       stored_fields: ['{field}'],
-      fielddata_fields: ["{field}"],
       docvalue_fields: ["{field}"],
       script_fields: {
         __template: {

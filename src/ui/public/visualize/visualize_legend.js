@@ -57,6 +57,23 @@ uiModules.get('kibana')
         $scope.uiState.set('vis.legendOpen', $scope.open);
       };
 
+      $scope.getToggleLegendClasses = function () {
+        switch ($scope.vis.params.legendPosition) {
+          case 'top':
+            return $scope.open ? 'fa-chevron-circle-up' : 'fa-chevron-circle-down';
+            break;
+          case 'bottom':
+            return $scope.open ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up';
+            break;
+          case 'left':
+            return $scope.open ? 'fa-chevron-circle-left' : 'fa-chevron-circle-right';
+            break;
+          case 'right':
+          default:
+            return $scope.open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left';
+        }
+      };
+
       $scope.filter = function (legendData, negate) {
         clickHandler({point: legendData, negate: negate});
       };

@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
 import setupLogging from '../../server/logging';
+import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -24,9 +25,13 @@ export default class BasePathProxy {
 
     const { cert } = config.get('server.ssl');
     if (cert) {
-      this.proxyAgent = new HttpsAgent({
-        ca: readFileSync(cert)
-      });
+      const httpsAgentConfig = {};
+      if (cert === DEV_SSL_CERT_PATH && config.get('server.host') !== 'localhost') {
+        httpsAgentConfig.rejectUnauthorized = false;
+      } else {
+        httpsAgentConfig.ca = readFileSync(cert);
+      }
+      this.proxyAgent = new HttpsAgent(httpsAgentConfig);
     }
 
     if (!this.basePath) {

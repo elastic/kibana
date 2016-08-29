@@ -1,4 +1,15 @@
 <div>
+  <div class="vis-option-item" ng-if="vis.params.addLegend">
+    <label>
+      Legend Position
+      <select
+        class="form-control"
+        ng-model="vis.params.legendPosition"
+        ng-options="position for position in ['top', 'left', 'right', 'bottom']"
+      >
+      </select>
+    </label>
+  </div>
   <div class="vis-option-item">
     <label>
       <input type="checkbox" ng-model="vis.params.addTooltip">
