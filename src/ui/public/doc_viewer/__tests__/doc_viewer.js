@@ -14,18 +14,18 @@ describe('docViewer', function () {
   let init;
 
   beforeEach(function () {
-    ngMock.module('kibana', function (PrivateProvider) {
-      stubRegistry = new Registry({
-        index: ['name'],
-        order: ['order'],
-        constructor() {
-          this.forEach(docView => {
-            docView.shouldShow = docView.shouldShow || _.constant(true);
-            docView.name = docView.name || docView.title;
-          });
-        }
-      });
+    stubRegistry = new Registry({
+      index: ['name'],
+      order: ['order'],
+      constructor() {
+        this.forEach(docView => {
+          docView.shouldShow = docView.shouldShow || _.constant(true);
+          docView.name = docView.name || docView.title;
+        });
+      }
+    });
 
+    ngMock.module('kibana', function (PrivateProvider) {
       PrivateProvider.swap(docViewsRegistry, stubRegistry);
     });
   });
@@ -39,7 +39,6 @@ describe('docViewer', function () {
         return $elem;
       });
     };
-
   });
 
   describe('injecting views', function () {
@@ -55,6 +54,7 @@ describe('docViewer', function () {
         });
       });
     }
+
     it('should have a tab for the view', function () {
       registerExtension();
       registerExtension({ title: 'exampleView2' });

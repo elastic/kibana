@@ -3,6 +3,7 @@ import moment from 'moment';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
+import sinon from 'auto-release-sinon';
 import 'plugins/kibana/visualize/index';
 import 'plugins/kibana/dashboard/index';
 import 'plugins/kibana/discover/index';
@@ -64,6 +65,9 @@ const init = function () {
 
 
 describe('timepicker directive', function () {
+  beforeEach(() => {
+    sinon.useFakeTimers(moment('2014-01-01T04:04:04.444Z').valueOf());
+  });
 
   describe('tabs', function () {
 
