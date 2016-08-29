@@ -100,6 +100,7 @@ app.directive('dashboardGrid', function ($compile, Notifier) {
         safeLayout();
         $window.on('resize', safeLayout);
         $scope.$on('ready:vis', safeLayout);
+        $scope.$on('globalNav:update', safeLayout);
       }
 
       // return the panel object for an element.

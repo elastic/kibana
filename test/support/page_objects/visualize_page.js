@@ -692,4 +692,80 @@ export default class VisualizePage {
     .findByCssSelector('visualize-legend');
   }
 
+  clickMapButton(zoomSelector) {
+    return this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findAllByCssSelector(zoomSelector)
+    .click()
+    .then(() => {
+      return PageObjects.common.sleep(1000);
+    })
+    .then(() => {
+      return PageObjects.header.getSpinnerDone();
+    });
+  }
+
+  clickMapZoomIn() {
+    return this.clickMapButton('a.leaflet-control-zoom-in');
+  }
+
+  clickMapZoomOut() {
+    return this.clickMapButton('a.leaflet-control-zoom-out');
+  }
+
+  getMapZoomEnabled(zoomSelector) {
+    return this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findAllByCssSelector(zoomSelector)
+    .getAttribute('class')
+    .then((element) => {
+      return !element.toString().includes('leaflet-disabled');
+    });
+  }
+
+  getMapZoomInEnabled() {
+    return this.getMapZoomEnabled('a.leaflet-control-zoom-in');
+  }
+
+  getMapZoomOutEnabled() {
+    return this.getMapZoomEnabled('a.leaflet-control-zoom-out');
+  }
+
+  clickMapFitDataBounds() {
+    return this.clickMapButton('a.fa-crop');
+  }
+
+  getTileMapData() {
+    return this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findAllByCssSelector('path.leaflet-clickable')
+    .then((chartTypes) => {
+
+      function getChartType(chart) {
+        var color;
+        var radius;
+        return chart.getAttribute('stroke')
+        .then((stroke) => {
+          color = stroke;
+        })
+        .then(() => {
+          return chart.getAttribute('d');
+        })
+        .then((d) => {
+          // scale the radius up (sometimes less than 1) and then round to int
+          radius = d.replace(/.*A(\d+\.\d+),.*/,'$1') * 10;
+          radius = Math.round(radius);
+        })
+        .then(() => {
+          return {color: color, radius: radius};
+        });
+      }
+      var getChartTypesPromises = chartTypes.map(getChartType);
+      return Promise.all(getChartTypesPromises);
+    })
+    .then((circles) => {
+      return circles;
+    });
+  }
+
 }
