@@ -9,10 +9,10 @@ import DocRequestProvider from '../fetch/request/doc';
 import DocStrategyProvider from '../fetch/strategy/doc';
 
 export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
-  let sendToEs = Private(DocSendToEsProvider);
-  let SourceAbstract = Private(AbstractDataSourceProvider);
-  let DocRequest = Private(DocRequestProvider);
-  let docStrategy = Private(DocStrategyProvider);
+  const sendToEs = Private(DocSendToEsProvider);
+  const SourceAbstract = Private(AbstractDataSourceProvider);
+  const DocRequest = Private(DocRequestProvider);
+  const docStrategy = Private(DocStrategyProvider);
 
   _.class(DocSource).inherits(SourceAbstract);
   function DocSource(initialState) {
@@ -99,7 +99,7 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
    * @return {string}
    */
   DocSource.prototype._versionKey = function () {
-    let state = this._state;
+    const state = this._state;
 
     if (!state.index || !state.type || !state.id) return;
     return 'DocVersion:' + (
@@ -125,10 +125,10 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
    * @return {[type]} [description]
    */
   DocSource.prototype._getStoredVersion = function () {
-    let key = this._versionKey();
+    const key = this._versionKey();
     if (!key) return;
 
-    let v = sessionStorage.get(key);
+    const v = sessionStorage.get(key);
     this._version = v ? _.parseInt(v) : void 0;
     return this._version;
   };
@@ -141,7 +141,7 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
   DocSource.prototype._storeVersion = function (version) {
     if (!version) return this._clearVersion();
 
-    let key = this._versionKey();
+    const key = this._versionKey();
     if (!key) return;
     this._version = version;
     sessionStorage.set(key, version);
@@ -151,10 +151,10 @@ export default function DocSourceFactory(Private, Promise, es, sessionStorage) {
    * Clears the stored version for a DocSource
    */
   DocSource.prototype._clearVersion = function () {
-    let key = this._versionKey();
+    const key = this._versionKey();
     if (!key) return;
     sessionStorage.remove(key);
   };
 
   return DocSource;
-};
+}

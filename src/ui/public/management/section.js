@@ -1,4 +1,4 @@
-import {assign} from 'lodash';
+import { assign } from 'lodash';
 import IndexedArray from 'ui/indexed_array';
 
 export default class ManagementSection {

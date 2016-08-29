@@ -1,4 +1,3 @@
-import _ from 'lodash';
 export default function PendingRequestList() {
 
   /**
@@ -6,7 +5,7 @@ export default function PendingRequestList() {
    * they are processed by fetch.[sourceType]().
    * @type {Array}
    */
-  let queue = [];
+  const queue = [];
 
   queue.getInactive = function (/* strategies */) {
     return queue.get.apply(queue, arguments)
@@ -33,4 +32,4 @@ export default function PendingRequestList() {
   };
 
   return queue;
-};
+}

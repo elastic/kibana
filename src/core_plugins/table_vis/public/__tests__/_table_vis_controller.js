@@ -4,14 +4,11 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import tabifyPm from 'ui/agg_response/tabify/tabify';
-import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import StateManagementAppStateProvider from 'ui/state_management/app_state';
 describe('Controller', function () {
-
   let $rootScope;
-  let TableGroup;
   let $compile;
   let Private;
   let $scope;
@@ -27,7 +24,6 @@ describe('Controller', function () {
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(StateManagementAppStateProvider);
-    TableGroup = Private(AggResponseTabifyTableGroupProvider);
     Vis = Private(VisProvider);
   }));
 
@@ -60,7 +56,7 @@ describe('Controller', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
-    $rootScope.uiState = new AppState({uiState: {}}).makeStateful('uiState');
+    $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')
@@ -112,7 +108,7 @@ describe('Controller', function () {
       columnIndex: 1,
       direction: 'asc'
     };
-    initController(new OneRangeVis({sort: sortObj}));
+    initController(new OneRangeVis({ sort: sortObj }));
 
     // modify the data to not have any buckets
     const resp = _.cloneDeep(fixtures.oneRangeBucket);

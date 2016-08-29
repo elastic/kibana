@@ -1,13 +1,13 @@
 define(function (require) {
-  var bdd = require('intern!bdd');
-  var serverConfig = require('intern/dojo/node!../../../server_config');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
-  var request = require('intern/dojo/node!supertest-as-promised');
-  var url = require('intern/dojo/node!url');
-  var count = require('./_count');
+  const bdd = require('intern!bdd');
+  const serverConfig = require('intern/dojo/node!../../../server_config');
+  const ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
+  let request = require('intern/dojo/node!supertest-as-promised');
+  const url = require('intern/dojo/node!url');
+  const count = require('./_count');
 
   bdd.describe('search API', function () {
-    var scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
+    const scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
     request = request(url.format(serverConfig.servers.kibana) + '/api');
 
     bdd.before(function () {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import Ipv4Address from 'ui/utils/ipv4_address';
 import uiModules from 'ui/modules';
 

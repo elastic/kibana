@@ -1,20 +1,17 @@
-import _ from 'lodash';
 import ordinalSuffix from 'ui/utils/ordinal_suffix';
 import percentsEditor from 'ui/agg_types/controls/percentiles.html';
 import 'ui/number_list';
 import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
 import AggTypesMetricsGetResponseAggConfigClassProvider from 'ui/agg_types/metrics/get_response_agg_config_class';
-import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import getPercentileValue from './percentiles_get_value';
 
 export default function AggTypeMetricPercentilesProvider(Private) {
-  let MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  let getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const getResponseAggConfigClass = Private(AggTypesMetricsGetResponseAggConfigClassProvider);
 
   // required by the percentiles editor
 
-  let valueProps = {
+  const valueProps = {
     makeLabel: function () {
       const label = this.params.customLabel || this.fieldDisplayName();
       return ordinalSuffix(this.key) + ' percentile of ' + label;
@@ -44,7 +41,7 @@ export default function AggTypeMetricPercentilesProvider(Private) {
       }
     ],
     getResponseAggs: function (agg) {
-      let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+      const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
       return agg.params.percents.map(function (percent) {
         return new ValueAggConfig(percent);
@@ -52,4 +49,4 @@ export default function AggTypeMetricPercentilesProvider(Private) {
     },
     getValue: getPercentileValue
   });
-};
+}

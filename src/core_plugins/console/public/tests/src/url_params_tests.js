@@ -2,7 +2,7 @@ let _ = require('lodash');
 let url_params = require('../../src/autocomplete/url_params');
 let autocomplete_engine = require('../../src/autocomplete/engine');
 
-var {test, module, ok, fail, asyncTest, deepEqual, equal, start} = QUnit;
+var { test, module, ok, fail, asyncTest, deepEqual, equal, start } = QUnit;
 
 module("Url params");
 
@@ -23,7 +23,7 @@ function param_test(name, description, tokenPath, expectedContext, globalParams)
     if (expectedContext.autoCompleteSet) {
       expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
         if (_.isString(t)) {
-          t = {name: t}
+          t = { name: t }
         }
         return t;
       });
@@ -49,14 +49,14 @@ function param_test(name, description, tokenPath, expectedContext, globalParams)
 function t(name, meta, insert_value) {
   var r = name;
   if (meta) {
-    r = {name: name, meta: meta};
+    r = { name: name, meta: meta };
     if (meta === "param" && !insert_value) {
       insert_value = name + "=";
     }
   }
   if (insert_value) {
     if (_.isString(r)) {
-      r = {name: name}
+      r = { name: name }
     }
     r.insert_value = insert_value;
   }
@@ -71,19 +71,19 @@ function t(name, meta, insert_value) {
   param_test("settings params",
     params,
     "a/1",
-    {"a": ["1"]}
+    { "a": ["1"] }
   );
 
   param_test("autocomplete top level",
     params,
     [],
-    {autoCompleteSet: [t("a", "param"), t("b", "flag")]}
+    { autoCompleteSet: [t("a", "param"), t("b", "flag")] }
   );
 
   param_test("autocomplete top level, with defaults",
     params,
     [],
-    {autoCompleteSet: [t("a", "param"), t("b", "flag"), t("c", "param")]},
+    { autoCompleteSet: [t("a", "param"), t("b", "flag"), t("c", "param")] },
     {
       "c": [2]
     }
@@ -92,13 +92,13 @@ function t(name, meta, insert_value) {
   param_test("autocomplete values",
     params,
     "a",
-    {autoCompleteSet: [t("1", "a"), t("2", "a")]}
+    { autoCompleteSet: [t("1", "a"), t("2", "a")] }
   );
 
   param_test("autocomplete values flag",
     params,
     "b",
-    {autoCompleteSet: [t("true", "b"), t("false", "b")]}
+    { autoCompleteSet: [t("true", "b"), t("false", "b")] }
   );
 
 

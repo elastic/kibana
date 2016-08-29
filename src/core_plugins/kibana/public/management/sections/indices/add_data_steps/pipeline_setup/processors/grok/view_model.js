@@ -27,4 +27,4 @@ export class Grok extends Processor {
       pattern: this.pattern || ''
     };
   }
-};
+}

@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import handleESError from '../../../lib/handle_es_error';
 import handleResponse from '../../../lib/process_es_ingest_processors_response';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../../common/lib/case_conversion';
 
 export function registerProcessors(server) {
   server.route({
@@ -21,4 +20,4 @@ export function registerProcessors(server) {
       });
     }
   });
-};
+}

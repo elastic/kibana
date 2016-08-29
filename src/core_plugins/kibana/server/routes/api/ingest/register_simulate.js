@@ -4,7 +4,7 @@ import handleResponse from '../../../lib/process_es_ingest_simulate_response';
 import handleError from '../../../lib/process_es_ingest_simulate_error';
 import simulateRequestSchema from '../../../lib/schemas/simulate_request_schema';
 import ingestSimulateApiKibanaToEsConverter from '../../../lib/converters/ingest_simulate_api_kibana_to_es_converter';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../../common/lib/case_conversion';
+import { keysToSnakeCaseShallow } from '../../../../common/lib/case_conversion';
 
 export function registerSimulate(server) {
   server.route({
@@ -34,4 +34,4 @@ export function registerSimulate(server) {
       });
     }
   });
-};
+}

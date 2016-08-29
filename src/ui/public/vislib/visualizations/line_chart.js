@@ -6,8 +6,8 @@ import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizatio
 import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 export default function LineChartFactory(Private) {
 
-  let PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
-  let TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
+  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
   /**
    * Line Chart Visualization
@@ -43,13 +43,13 @@ export default function LineChartFactory(Private) {
    * @returns {D3.Selection} SVG circles with event listeners attached
    */
   LineChart.prototype.addCircleEvents = function (element, svg) {
-    let events = this.events;
-    let isBrushable = events.isBrushable();
-    let brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-    let hover = events.addHoverEvent();
-    let mouseout = events.addMouseoutEvent();
-    let click = events.addClickEvent();
-    let attachedEvents = element.call(hover).call(mouseout).call(click);
+    const events = this.events;
+    const isBrushable = events.isBrushable();
+    const brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+    const hover = events.addHoverEvent();
+    const mouseout = events.addMouseoutEvent();
+    const click = events.addClickEvent();
+    const attachedEvents = element.call(hover).call(mouseout).call(click);
 
     if (isBrushable) {
       attachedEvents.call(brush);
@@ -67,16 +67,16 @@ export default function LineChartFactory(Private) {
    * @returns {D3.UpdateSelection} SVG with circles added
    */
   LineChart.prototype.addCircles = function (svg, data) {
-    let self = this;
-    let showCircles = this._attr.showCircles;
-    let color = this.handler.data.getColorFunc();
-    let xScale = this.handler.xAxis.xScale;
-    let yScale = this.handler.yAxis.yScale;
-    let ordered = this.handler.data.get('ordered');
-    let tooltip = this.tooltip;
-    let isTooltip = this._attr.addTooltip;
+    const self = this;
+    const showCircles = this._attr.showCircles;
+    const color = this.handler.data.getColorFunc();
+    const xScale = this.handler.xAxis.xScale;
+    const yScale = this.handler.yAxis.yScale;
+    const ordered = this.handler.data.get('ordered');
+    const tooltip = this.tooltip;
+    const isTooltip = this._attr.addTooltip;
 
-    let radii = _(data)
+    const radii = _(data)
     .map(function (series) {
       return _.pluck(series, '_input.z');
     })
@@ -90,15 +90,15 @@ export default function LineChartFactory(Private) {
       max: -Infinity
     });
 
-    let radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
+    const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
-    let layer = svg.selectAll('.points')
+    const layer = svg.selectAll('.points')
     .data(data)
     .enter()
       .append('g')
       .attr('class', 'points line');
 
-    let circles = layer
+    const circles = layer
     .selectAll('circle')
     .data(function appendData(data) {
       return data.filter(function (d) {
@@ -126,9 +126,9 @@ export default function LineChartFactory(Private) {
     }
 
     function colorCircle(d) {
-      let parent = d3.select(this).node().parentNode;
-      let lengthOfParent = d3.select(parent).data()[0].length;
-      let isVisible = (lengthOfParent === 1);
+      const parent = d3.select(this).node().parentNode;
+      const lengthOfParent = d3.select(parent).data()[0].length;
+      const isVisible = (lengthOfParent === 1);
 
       // If only 1 point exists, show circle
       if (!showCircles && !isVisible) return 'none';
@@ -136,10 +136,10 @@ export default function LineChartFactory(Private) {
     }
     function getCircleRadiusFn(modifier) {
       return function getCircleRadius(d) {
-        let margin = self._attr.margin;
-        let width = self._attr.width - margin.left - margin.right;
-        let height = self._attr.height - margin.top - margin.bottom;
-        let circleRadius = (d._input.z - radii.min) / radiusStep;
+        const margin = self._attr.margin;
+        const width = self._attr.width - margin.left - margin.right;
+        const height = self._attr.height - margin.top - margin.bottom;
+        const circleRadius = (d._input.z - radii.min) / radiusStep;
 
         return _.min([Math.sqrt((circleRadius || 2) + 2), width, height]) + (modifier || 0);
       };
@@ -185,14 +185,12 @@ export default function LineChartFactory(Private) {
    * @returns {D3.UpdateSelection} SVG with paths added
    */
   LineChart.prototype.addLines = function (svg, data) {
-    let self = this;
-    let xScale = this.handler.xAxis.xScale;
-    let yScale = this.handler.yAxis.yScale;
-    let xAxisFormatter = this.handler.data.get('xAxisFormatter');
-    let color = this.handler.data.getColorFunc();
-    let ordered = this.handler.data.get('ordered');
-    let interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
-    let line = d3.svg.line()
+    const xScale = this.handler.xAxis.xScale;
+    const yScale = this.handler.yAxis.yScale;
+    const color = this.handler.data.getColorFunc();
+    const ordered = this.handler.data.get('ordered');
+    const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
+    const line = d3.svg.line()
     .defined(function (d) { return !_.isNull(d.y); })
     .interpolate(interpolate)
     .x(function x(d) {
@@ -204,9 +202,8 @@ export default function LineChartFactory(Private) {
     .y(function y(d) {
       return yScale(d.y);
     });
-    let lines;
 
-    lines = svg
+    const lines = svg
     .selectAll('.lines')
     .data(data)
     .enter()
@@ -237,10 +234,10 @@ export default function LineChartFactory(Private) {
    * @returns {D3.UpdateSelection} SVG with clipPath added
    */
   LineChart.prototype.addClipPath = function (svg, width, height) {
-    let clipPathBuffer = 5;
-    let startX = 0;
-    let startY = 0 - clipPathBuffer;
-    let id = 'chart-area' + _.uniqueId();
+    const clipPathBuffer = 5;
+    const startX = 0;
+    const startY = 0 - clipPathBuffer;
+    const id = 'chart-area' + _.uniqueId();
 
     return svg
     .attr('clip-path', 'url(#' + id + ')')
@@ -262,35 +259,33 @@ export default function LineChartFactory(Private) {
    * @returns {Function} Creates the line chart
    */
   LineChart.prototype.draw = function () {
-    let self = this;
-    let $elem = $(this.chartEl);
-    let margin = this._attr.margin;
-    let elWidth = this._attr.width = $elem.width();
-    let elHeight = this._attr.height = $elem.height();
-    let scaleType = this.handler.yAxis.getScaleType();
-    let yMin = this.handler.yAxis.yMin;
-    let yScale = this.handler.yAxis.yScale;
-    let xScale = this.handler.xAxis.xScale;
-    let minWidth = 20;
-    let minHeight = 20;
-    let startLineX = 0;
-    let lineStrokeWidth = 1;
-    let addTimeMarker = this._attr.addTimeMarker;
-    let times = this._attr.times || [];
+    const self = this;
+    const $elem = $(this.chartEl);
+    const margin = this._attr.margin;
+    const elWidth = this._attr.width = $elem.width();
+    const elHeight = this._attr.height = $elem.height();
+    const scaleType = this.handler.yAxis.getScaleType();
+    const yScale = this.handler.yAxis.yScale;
+    const xScale = this.handler.xAxis.xScale;
+    const minWidth = 20;
+    const minHeight = 20;
+    const startLineX = 0;
+    const lineStrokeWidth = 1;
+    const addTimeMarker = this._attr.addTimeMarker;
+    const times = this._attr.times || [];
     let timeMarker;
     let div;
     let svg;
     let width;
     let height;
-    let lines;
     let circles;
 
     return function (selection) {
       selection.each(function (data) {
-        let el = this;
+        const el = this;
 
-        let layers = data.series.map(function mapSeries(d) {
-          let label = d.label;
+        const layers = data.series.map(function mapSeries(d) {
+          const label = d.label;
           return d.values.map(function mapValues(e, i) {
             return {
               _input: e,
@@ -324,13 +319,13 @@ export default function LineChartFactory(Private) {
 
         self.addClipPath(svg, width, height);
         if (self._attr.drawLinesBetweenPoints) {
-          lines = self.addLines(svg, data.series);
+          self.addLines(svg, data.series);
         }
         circles = self.addCircles(svg, layers);
         self.addCircleEvents(circles, svg);
         self.createEndZones(svg);
 
-        let scale = (scaleType === 'log') ? yScale(1) : yScale(0);
+        const scale = (scaleType === 'log') ? yScale(1) : yScale(0);
         if (scale) {
           svg.append('line')
           .attr('class', 'base-line')
@@ -352,4 +347,4 @@ export default function LineChartFactory(Private) {
   };
 
   return LineChart;
-};
+}

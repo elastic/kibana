@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
@@ -12,7 +11,7 @@ describe('Input focus directive', function () {
   let $el;
   let selectedEl;
   let selectedText;
-  let inputValue = 'Input Text Value';
+  const inputValue = 'Input Text Value';
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {

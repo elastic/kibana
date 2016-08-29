@@ -13,4 +13,4 @@ export default function processESIngestProcessorsResponse(response) {
     .value();
 
   return results;
-};
+}

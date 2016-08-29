@@ -21,7 +21,7 @@ import AggTypesBucketsSignificantTermsProvider from 'ui/agg_types/buckets/signif
 import AggTypesBucketsGeoHashProvider from 'ui/agg_types/buckets/geo_hash';
 export default function AggTypeService(Private) {
 
-  let aggs = {
+  const aggs = {
     metrics: [
       Private(AggTypesMetricsCountProvider),
       Private(AggTypesMetricsAvgProvider),
@@ -76,6 +76,6 @@ export default function AggTypeService(Private) {
     group: ['type'],
     initialSet: aggs.metrics.concat(aggs.buckets)
   });
-};
+}
 
 // preload

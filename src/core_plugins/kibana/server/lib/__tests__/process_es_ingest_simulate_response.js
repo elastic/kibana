@@ -1,6 +1,5 @@
 import processESIngestSimulateResponse from '../process_es_ingest_simulate_response';
 import expect from 'expect.js';
-import _ from 'lodash';
 
 describe('processESIngestSimulateResponse', function () {
 
@@ -39,7 +38,7 @@ describe('processESIngestSimulateResponse', function () {
 
       const expected = [
         { processorId: 'processor1', output: 'new_foo', error: undefined },
-        { processorId: 'processor2', output: undefined, error: { compile: false, message: 'something bad happened'} }
+        { processorId: 'processor2', output: undefined, error: { compile: false, message: 'something bad happened' } }
       ];
       const actual = processESIngestSimulateResponse(response);
 
@@ -60,7 +59,7 @@ describe('processESIngestSimulateResponse', function () {
 
       const expected = [
         { processorId: 'processor2', output: 'new_bar', error: undefined },
-        { processorId: 'processor3', output: undefined, error: { compile: false, message: 'something bad happened'} }
+        { processorId: 'processor3', output: undefined, error: { compile: false, message: 'something bad happened' } }
       ];
       const actual = processESIngestSimulateResponse(response);
 

@@ -1,5 +1,4 @@
 import { pick } from 'lodash';
-import { join } from 'path';
 
 export default class UiNavLink {
   constructor(uiExports, spec) {

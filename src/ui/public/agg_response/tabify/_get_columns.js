@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 export default function GetColumnsProvider(Private) {
-  let AggConfig = Private(VisAggConfigProvider);
+  const AggConfig = Private(VisAggConfigProvider);
 
   return function getColumns(vis, minimal) {
-    let aggs = vis.aggs.getResponseAggs();
+    const aggs = vis.aggs.getResponseAggs();
 
     if (minimal == null) minimal = !vis.isHierarchical();
 
@@ -23,10 +23,10 @@ export default function GetColumnsProvider(Private) {
     }
 
     // supposed to be bucket,...metrics,bucket,...metrics
-    let columns = [];
+    const columns = [];
 
     // seperate the metrics
-    let grouped = _.groupBy(aggs, function (agg) {
+    const grouped = _.groupBy(aggs, function (agg) {
       return agg.schema.group;
     });
 
@@ -38,7 +38,7 @@ export default function GetColumnsProvider(Private) {
     }
 
     // return the buckets, and after each place all of the metrics
-    grouped.buckets.forEach(function (agg, i) {
+    grouped.buckets.forEach(function (agg) {
       columns.push({ aggConfig: agg });
       grouped.metrics.forEach(function (metric) {
         columns.push({ aggConfig: metric });
@@ -47,4 +47,4 @@ export default function GetColumnsProvider(Private) {
 
     return columns;
   };
-};
+}

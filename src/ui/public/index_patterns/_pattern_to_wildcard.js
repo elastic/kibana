@@ -5,7 +5,7 @@ export default function PatternToWildcardFn() {
     let inPattern = false;
 
     for (let i = 0; i < format.length; i++) {
-      let ch = format.charAt(i);
+      const ch = format.charAt(i);
       switch (ch) {
         case '[':
           inPattern = false;
@@ -34,4 +34,4 @@ export default function PatternToWildcardFn() {
 
     return wildcard;
   };
-};
+}

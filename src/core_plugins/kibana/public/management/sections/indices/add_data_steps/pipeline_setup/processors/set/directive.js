@@ -9,7 +9,6 @@ app.directive('processorUiSet', function () {
     restrict: 'E',
     template: template,
     controller : function ($scope) {
-      const processor = $scope.processor;
       const pipeline = $scope.pipeline;
 
       function processorUiChanged() {

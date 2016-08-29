@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
@@ -17,7 +16,7 @@ describe('Optioned', function () {
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      let aggParam = new OptionedAggParam({
+      const aggParam = new OptionedAggParam({
         name: 'some_param',
         type: 'optioned'
       });

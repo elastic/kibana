@@ -20,4 +20,4 @@ export class Append extends Processor {
       values: this.values || []
     };
   }
-};
+}

@@ -7,7 +7,7 @@ module.exports = async function (kbnServer, server, config) {
     return [];
   }
 
-  let { plugins } = kbnServer;
+  const { plugins } = kbnServer;
 
   // extend plugin apis with additional context
   plugins.getPluginApis().forEach(api => {

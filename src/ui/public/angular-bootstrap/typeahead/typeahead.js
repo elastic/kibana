@@ -302,7 +302,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
         }
       });
 
-      element.bind('blur', function (evt) {
+      element.bind('blur', function() {
         hasFocus = false;
       });
 

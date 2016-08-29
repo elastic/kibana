@@ -1,20 +1,5 @@
-define(function (require) {
-  var Promise = require('bluebird');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
-
-  const testPipeline = {
-    processors: [{
-      processor_id: 'processor1',
-      type_id: 'geoip',
-      source_field: 'ip',
-      target_field: 'geoip'
-    }],
-    input: { ip: '74.125.21.103' }
-  };
-
-
-  return function (bdd, scenarioManager, request) {
+define(function () {
+  return function (bdd) {
     bdd.describe('simulate - geoip processor', () => {
   //TODO: These tests can be re-added when we address
   // installing plugins for integration tests

@@ -1,18 +1,18 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-var Promise = require('bluebird');
+const expect = require('expect.js');
+const sinon = require('sinon');
+const Promise = require('bluebird');
 
-var ScenarioManager = require('../scenario_manager');
+const ScenarioManager = require('../scenario_manager');
 
 describe('scenario manager', function () {
-  var manager = new ScenarioManager('http://localhost:9200');
+  const manager = new ScenarioManager('http://localhost:9200');
 
   describe('loading and unloading', function () {
     this.timeout(60000);
 
-    var bulk;
-    var create;
-    var indicesDelete;
+    let bulk;
+    let create;
+    let indicesDelete;
     beforeEach(function () {
       bulk = sinon.stub(manager.client, 'bulk', Promise.resolve);
       create = sinon.stub(manager.client.indices, 'create', Promise.resolve);
@@ -43,9 +43,9 @@ describe('scenario manager', function () {
     });
 
     it('should be able to reload a scenario', function () {
-      var load = sinon.stub(manager, 'load', Promise.resolve);
-      var unload = sinon.stub(manager, 'unload', Promise.resolve);
-      var id = 'makelogs';
+      const load = sinon.stub(manager, 'load', Promise.resolve);
+      const unload = sinon.stub(manager, 'unload', Promise.resolve);
+      const id = 'makelogs';
       return manager.reload(id).then(function () {
         expect(load.calledWith(id)).to.be(true);
         expect(unload.calledWith(id)).to.be(true);
@@ -56,9 +56,9 @@ describe('scenario manager', function () {
     });
 
     it('should load if the index does not exist', function () {
-      var load = sinon.stub(manager, 'load', Promise.resolve);
-      var throwError = sinon.stub(manager.client, 'count', Promise.reject);
-      var id = 'makelogs';
+      const load = sinon.stub(manager, 'load', Promise.resolve);
+      const throwError = sinon.stub(manager.client, 'count', Promise.reject);
+      const id = 'makelogs';
       return manager.loadIfEmpty(id).then(function () {
         expect(load.calledWith(id)).to.be(true);
 
@@ -68,13 +68,13 @@ describe('scenario manager', function () {
     });
 
     it('should load if the index is empty', function () {
-      var load = sinon.stub(manager, 'load', Promise.resolve);
-      var returnZero = sinon.stub(manager.client, 'count', function () {
+      const load = sinon.stub(manager, 'load', Promise.resolve);
+      const returnZero = sinon.stub(manager.client, 'count', function () {
         return Promise.resolve({
           'count': 0
         });
       });
-      var id = 'makelogs';
+      const id = 'makelogs';
       return manager.loadIfEmpty(id).then(function () {
         expect(load.calledWith(id)).to.be(true);
 
@@ -85,13 +85,13 @@ describe('scenario manager', function () {
 
 
     it('should not load if the index is not empty', function () {
-      var load = sinon.stub(manager, 'load', Promise.resolve);
-      var returnOne = sinon.stub(manager.client, 'count', function () {
+      const load = sinon.stub(manager, 'load', Promise.resolve);
+      const returnOne = sinon.stub(manager.client, 'count', function () {
         return Promise.resolve({
           'count': 1
         });
       });
-      var id = 'makelogs';
+      const id = 'makelogs';
       return manager.loadIfEmpty(id).then(function () {
         expect(load.called).to.be(false);
 

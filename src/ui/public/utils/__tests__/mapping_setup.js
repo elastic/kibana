@@ -18,7 +18,7 @@ describe('ui/utils/mapping_setup', function () {
     });
 
     it('can set type as an option', function () {
-      const mapping = mappingSetup.expandShorthand({ foo: {type: 'integer'} });
+      const mapping = mappingSetup.expandShorthand({ foo: { type: 'integer' } });
       expect(mapping.foo.type).to.be('integer');
     });
 

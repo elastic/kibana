@@ -1,12 +1,11 @@
-import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 export default function TileMapFactory(Private) {
 
-  let Chart = Private(VislibVisualizationsChartProvider);
-  let TileMapMap = Private(VislibVisualizationsMapProvider);
+  const Chart = Private(VislibVisualizationsChartProvider);
+  const TileMapMap = Private(VislibVisualizationsMapProvider);
 
   /**
    * Tile Map Visualization: renders maps
@@ -41,7 +40,7 @@ export default function TileMapFactory(Private) {
    * @return {Function} - function to add a map to a selection
    */
   TileMap.prototype.draw = function () {
-    let self = this;
+    const self = this;
 
     // clean up old maps
     self.destroy();
@@ -86,7 +85,7 @@ export default function TileMapFactory(Private) {
    */
   TileMap.prototype._appendGeoExtents = function () {
     // add allmin and allmax to geoJson
-    let geoMinMax = this.handler.data.getGeoExtents();
+    const geoMinMax = this.handler.data.getGeoExtents();
     this.geoJson.properties.allmin = geoMinMax.min;
     this.geoJson.properties.allmax = geoMinMax.max;
   };
@@ -131,4 +130,4 @@ export default function TileMapFactory(Private) {
   };
 
   return TileMap;
-};
+}

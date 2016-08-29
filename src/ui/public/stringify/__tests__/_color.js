@@ -13,7 +13,7 @@ describe('Color Format', function () {
   }));
 
   it('should add colors if the value is in range', function () {
-    let colorer = new ColorFormat({
+    const colorer = new ColorFormat({
       colors: [{
         range: '100:150',
         text: 'blue',
@@ -27,7 +27,7 @@ describe('Color Format', function () {
   });
 
   it('should not convert invalid ranges', function () {
-    let colorer = new ColorFormat({
+    const colorer = new ColorFormat({
       colors: [{
         range: '100150',
         text: 'blue',

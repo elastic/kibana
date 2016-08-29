@@ -19,11 +19,11 @@ modules.get('apps/management')
         const ingest = Private(IngestProvider);
         const $state = this.state = new AppState();
 
-        var notify = new Notifier({
+        const notify = new Notifier({
           location: 'Add Data'
         });
 
-        var totalSteps = 3;
+        const totalSteps = 3;
         this.stepResults = {};
 
         this.setCurrentStep = (step) => {
@@ -39,7 +39,7 @@ modules.get('apps/management')
             this.setCurrentStep($state.currentStep + 1);
           }
           else if ($state.currentStep + 1 === totalSteps) {
-            kbnUrl.change('/discover', null, {index: this.stepResults.indexPattern.id});
+            kbnUrl.change('/discover', null, { index: this.stepResults.indexPattern.id });
           }
         };
 

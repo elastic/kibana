@@ -11,7 +11,6 @@ import SegmentedRequestProvider from '../segmented';
 
 describe('Segmented Request Index Selection', function () {
   let Promise;
-  let $rootScope;
   let SegmentedReq;
   let MockSource;
   let HitSortFn;
@@ -22,7 +21,6 @@ describe('Segmented Request Index Selection', function () {
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
     HitSortFn = Private(HitSortFnProv);
-    $rootScope = $injector.get('$rootScope');
     SegmentedReq = Private(SegmentedRequestProvider);
 
     MockSource = class {
@@ -78,7 +76,7 @@ describe('Segmented Request Index Selection', function () {
     });
   });
 
-  it(`sets size 0 for indices that couldn't procude hits`, async function () {
+  it('sets size 0 for indices that couldn\'t procude hits', async function () {
     const search = new MockSource();
     const indexPattern = search.get('index');
 

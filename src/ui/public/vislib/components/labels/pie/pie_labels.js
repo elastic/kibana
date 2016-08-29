@@ -3,17 +3,17 @@ import VislibComponentsLabelsPieRemoveZeroSlicesProvider from 'ui/vislib/compone
 import VislibComponentsLabelsPieGetPieNamesProvider from 'ui/vislib/components/labels/pie/get_pie_names';
 
 export default function PieLabels(Private) {
-  let removeZeroSlices = Private(VislibComponentsLabelsPieRemoveZeroSlicesProvider);
-  let getNames = Private(VislibComponentsLabelsPieGetPieNamesProvider);
+  const removeZeroSlices = Private(VislibComponentsLabelsPieRemoveZeroSlicesProvider);
+  const getNames = Private(VislibComponentsLabelsPieGetPieNamesProvider);
 
   return function (obj) {
     if (!_.isObject(obj)) { throw new TypeError('PieLabel expects an object'); }
 
-    let data = obj.columns || obj.rows || [obj];
-    let names = [];
+    const data = obj.columns || obj.rows || [obj];
+    const names = [];
 
     data.forEach(function (obj) {
-      let columns = obj.raw ? obj.raw.columns : undefined;
+      const columns = obj.raw ? obj.raw.columns : undefined;
       obj.slices = removeZeroSlices(obj.slices);
 
       getNames(obj, columns).forEach(function (name) {
@@ -23,4 +23,4 @@ export default function PieLabels(Private) {
 
     return _.uniq(names);
   };
-};
+}

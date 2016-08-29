@@ -79,7 +79,7 @@ describe('processESIngestSimulateResponse', function () {
   });
 
   it('should return an empty array for unexpected response', function () {
-    expect(_.isEqual(processESIngestProcessorsResponse({ nodes: {}}), [])).to.be.ok();
+    expect(_.isEqual(processESIngestProcessorsResponse({ nodes: {} }), [])).to.be.ok();
     expect(_.isEqual(processESIngestProcessorsResponse({}), [])).to.be.ok();
     expect(_.isEqual(processESIngestProcessorsResponse(undefined), [])).to.be.ok();
     expect(_.isEqual(processESIngestProcessorsResponse(null), [])).to.be.ok();

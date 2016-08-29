@@ -3,7 +3,6 @@ import _ from 'lodash';
 import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
 import 'ui/render_directive';
 import 'plugins/kbn_doc_views/views/table';
 import docViewsRegistry from 'ui/registry/doc_views';
@@ -16,9 +15,9 @@ const hit = {
   '_source': {
     'extension': 'html',
     'bytes': 100,
-    'area': [{lat: 7, lon: 7}],
+    'area': [{ lat: 7, lon: 7 }],
     'noMapping': 'hasNoMapping',
-    'objectArray': [{foo: true}, {bar: false}],
+    'objectArray': [{ foo: true }, { bar: false }],
     '_underscore': 1
   }
 };
@@ -78,7 +77,6 @@ describe('docViews', function () {
       initView(docViews.byName.Table);
     });
     it('should have a row for each field', function () {
-      const rows = $elem.find('tr');
       expect($elem.find('tr').length).to.be(_.keys(flattened).length);
     });
 

@@ -5,7 +5,7 @@ import errors from 'ui/errors';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function YAxisFactory(Private) {
 
-  let ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
   /**
    * Appends y axis to the visualization
@@ -46,7 +46,7 @@ export default function YAxisFactory(Private) {
   };
 
   YAxis.prototype._validateUserExtents = function (domain) {
-    let self = this;
+    const self = this;
 
     return domain.map(function (val) {
       val = parseInt(val, 10);
@@ -58,8 +58,8 @@ export default function YAxisFactory(Private) {
   };
 
   YAxis.prototype._getExtents = function (domain) {
-    let min = domain[0];
-    let max = domain[1];
+    const min = domain[0];
+    const max = domain[1];
 
     if (this._isUserDefined()) return this._validateUserExtents(domain);
     if (this._isYExtents()) return domain;
@@ -112,8 +112,8 @@ export default function YAxisFactory(Private) {
    * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
    */
   YAxis.prototype.getYScale = function (height) {
-    let scale = this._getScaleType(this._attr.scale);
-    let domain = this._getExtents(this.domain);
+    const scale = this._getScaleType(this._attr.scale);
+    const domain = this._getExtents(this.domain);
 
     this.yScale = scale
     .domain(domain)
@@ -130,7 +130,7 @@ export default function YAxisFactory(Private) {
   };
 
   YAxis.prototype.tickFormat = function () {
-    let isPercentage = this._attr.mode === 'percentage';
+    const isPercentage = this._attr.mode === 'percentage';
     if (isPercentage) return d3.format('%');
     if (this.yAxisFormatter) return this.yAxisFormatter;
     return d3.format('n');
@@ -148,7 +148,7 @@ export default function YAxisFactory(Private) {
    * @returns {D3.Svg.Axis|*} D3 yAxis function
    */
   YAxis.prototype.getYAxis = function (height) {
-    let yScale = this.getYScale(height);
+    const yScale = this.getYScale(height);
     this._validateYScale(yScale);
 
     // Create the d3 yAxis function
@@ -172,7 +172,7 @@ export default function YAxisFactory(Private) {
    * @returns {number} Number of y axis ticks
    */
   YAxis.prototype.tickScale = function (height) {
-    let yTickScale = d3.scale.linear()
+    const yTickScale = d3.scale.linear()
     .clamp(true)
     .domain([20, 40, 1000])
     .range([0, 3, 11]);
@@ -187,29 +187,29 @@ export default function YAxisFactory(Private) {
    * @returns {Function} Renders y axis to visualization
    */
   YAxis.prototype.draw = function () {
-    let self = this;
-    let margin = this._attr.margin;
-    let mode = this._attr.mode;
-    let isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
+    const self = this;
+    const margin = this._attr.margin;
+    const mode = this._attr.mode;
+    const isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
 
     return function (selection) {
       selection.each(function () {
-        let el = this;
+        const el = this;
 
-        let div = d3.select(el);
-        let width = $(el).parent().width();
-        let height = $(el).height();
-        let adjustedHeight = height - margin.top - margin.bottom;
+        const div = d3.select(el);
+        const width = $(el).parent().width();
+        const height = $(el).height();
+        const adjustedHeight = height - margin.top - margin.bottom;
 
         // Validate whether width and height are not 0 or `NaN`
         self.validateWidthandHeight(width, adjustedHeight);
 
-        let yAxis = self.getYAxis(adjustedHeight);
+        const yAxis = self.getYAxis(adjustedHeight);
 
         // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
         if (!isWiggleOrSilhouette) {
           // Append svg and y axis
-          let svg = div.append('svg')
+          const svg = div.append('svg')
           .attr('width', width)
           .attr('height', height);
 
@@ -218,9 +218,9 @@ export default function YAxisFactory(Private) {
           .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
           .call(yAxis);
 
-          let container = svg.select('g.y.axis').node();
+          const container = svg.select('g.y.axis').node();
           if (container) {
-            let cWidth = Math.max(width, container.getBBox().width);
+            const cWidth = Math.max(width, container.getBBox().width);
             svg.attr('width', cWidth);
             svg.select('g')
             .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
@@ -231,4 +231,4 @@ export default function YAxisFactory(Private) {
   };
 
   return YAxis;
-};
+}

@@ -20,11 +20,11 @@ modules.get('apps/management')
       const ingest = Private(IngestProvider);
       const $state = this.state = new AppState();
 
-      var notify = new Notifier({
+      const notify = new Notifier({
         location: 'Add Data'
       });
 
-      var totalSteps = 4;
+      const totalSteps = 4;
       this.stepResults = {};
 
       this.setCurrentStep = (step) => {

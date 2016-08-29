@@ -25,8 +25,6 @@ function decodeGeoHash(geohash) {
   lat[1] = 90.0;
   lon[0] = -180.0;
   lon[1] = 180.0;
-  let lat_err = 90.0;
-  let lon_err = 180.0;
   for (let i = 0; i < geohash.length; i++) {
     let c = geohash[i];
     let cd = BASE32.indexOf(c);

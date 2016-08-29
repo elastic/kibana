@@ -1,9 +1,8 @@
-import { chain, isArray, isPlainObject, forOwn, memoize, set, transform } from 'lodash';
+import { isArray, isPlainObject, forOwn, memoize, set, transform } from 'lodash';
 import { readFileSync as read } from 'fs';
 import { safeLoad } from 'js-yaml';
 import { red } from 'ansicolors';
 
-import { fromRoot } from '../../utils';
 import { rewriteLegacyConfig } from './legacy_config';
 import { checkForDeprecatedConfig } from './deprecated_config';
 

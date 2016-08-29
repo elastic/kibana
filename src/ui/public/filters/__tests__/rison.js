@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
@@ -8,7 +7,7 @@ import 'plugins/kibana/discover/index';
 let rison;
 let risonDecode;
 
-let init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -20,13 +19,13 @@ let init = function (expandable) {
 };
 
 describe('rison filters', function () {
-  let testObj = {
+  const testObj = {
     time: {
       from: 'now-15m',
       to: 'now'
     }
   };
-  let testRison = '(time:(from:now-15m,to:now))';
+  const testRison = '(time:(from:now-15m,to:now))';
 
   beforeEach(function () {
     init();

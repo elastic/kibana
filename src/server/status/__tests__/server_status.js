@@ -7,7 +7,7 @@ import Status from '../status';
 import ServerStatus from '../server_status';
 
 describe('ServerStatus class', function () {
-  const plugin = {id: 'name', version: '1.2.3'};
+  const plugin = { id: 'name', version: '1.2.3' };
 
   let server;
   let serverStatus;
@@ -26,7 +26,7 @@ describe('ServerStatus class', function () {
 
   describe('#createForPlugin(plugin)', function () {
     it('should create a new status by plugin', function () {
-      let status = serverStatus.createForPlugin(plugin);
+      const status = serverStatus.createForPlugin(plugin);
       expect(status).to.be.a(Status);
     });
   });
@@ -45,7 +45,7 @@ describe('ServerStatus class', function () {
 
   describe('#getForPluginId(plugin)', function () {
     it('exposes plugin status for the plugin', function () {
-      let status = serverStatus.createForPlugin(plugin);
+      const status = serverStatus.createForPlugin(plugin);
       expect(serverStatus.getForPluginId(plugin.id)).to.be(status);
     });
 
@@ -57,7 +57,7 @@ describe('ServerStatus class', function () {
 
   describe('#getState(id)', function () {
     it('should expose the state of a status by id', function () {
-      let status = serverStatus.create('someid');
+      const status = serverStatus.create('someid');
       status.green();
       expect(serverStatus.getState('someid')).to.be('green');
     });
@@ -65,7 +65,7 @@ describe('ServerStatus class', function () {
 
   describe('#getStateForPluginId(plugin)', function () {
     it('should expose the state of a plugin by id', function () {
-      let status = serverStatus.createForPlugin(plugin);
+      const status = serverStatus.createForPlugin(plugin);
       status.green();
       expect(serverStatus.getStateForPluginId(plugin.id)).to.be('green');
     });
@@ -73,11 +73,11 @@ describe('ServerStatus class', function () {
 
   describe('#overall()', function () {
     it('considers each status to produce a summary', function () {
-      let status = serverStatus.createForPlugin(plugin);
+      const status = serverStatus.createForPlugin(plugin);
 
       expect(serverStatus.overall().state).to.be('uninitialized');
 
-      let match = function (overall, state) {
+      const match = function (overall, state) {
         expect(overall).to.have.property('state', state.id);
         expect(overall).to.have.property('title', state.title);
         expect(overall).to.have.property('icon', state.icon);
@@ -99,18 +99,18 @@ describe('ServerStatus class', function () {
 
   describe('#toJSON()', function () {
     it('serializes to overall status and individuals', function () {
-      const pluginOne = {id: 'one', version: '1.0.0'};
-      const pluginTwo = {id: 'two', version: '2.0.0'};
+      const pluginOne = { id: 'one', version: '1.0.0' };
+      const pluginTwo = { id: 'two', version: '2.0.0' };
 
-      let service = serverStatus.create('some service');
-      let p1 = serverStatus.createForPlugin(pluginOne);
-      let p2 = serverStatus.createForPlugin(pluginTwo);
+      const service = serverStatus.create('some service');
+      const p1 = serverStatus.createForPlugin(pluginOne);
+      const p2 = serverStatus.createForPlugin(pluginTwo);
 
       service.green();
       p1.yellow();
       p2.red();
 
-      let json = JSON.parse(JSON.stringify(serverStatus));
+      const json = JSON.parse(JSON.stringify(serverStatus));
       expect(json).to.have.property('overall');
       expect(json.overall.state).to.eql(serverStatus.overall().state);
       expect(json.statuses).to.have.length(3);

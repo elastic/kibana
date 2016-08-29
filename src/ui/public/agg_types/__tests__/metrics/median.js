@@ -1,23 +1,18 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import AggTypeMetricMedianProvider from 'ui/agg_types/metrics/median';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggTypeMetricMedianProvider class', function () {
-
-  let vis;
   let indexPattern;
-  let aggTypeMetricMedian;
   let aggDsl;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    aggTypeMetricMedian = Private(AggTypeMetricMedianProvider);
 
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       'title': 'New Visualization',
       'type': 'metric',
       'params': {
@@ -42,7 +37,7 @@ describe('AggTypeMetricMedianProvider class', function () {
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
     // anything else)
-    let aggConfig = vis.aggs[0];
+    const aggConfig = vis.aggs[0];
     aggDsl = aggConfig.toDsl();
   }));
 
@@ -57,5 +52,4 @@ describe('AggTypeMetricMedianProvider class', function () {
   it ('asks Elasticsearch for array-based values in the aggregation response', function () {
     expect(aggDsl.percentiles.keyed).to.be(false);
   });
-
 });

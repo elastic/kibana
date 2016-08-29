@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-let module = uiModules.get('kibana');
+const module = uiModules.get('kibana');
 
 module.directive('autoSelectIfOnlyOne', function ($parse) {
   return {
@@ -7,7 +7,7 @@ module.directive('autoSelectIfOnlyOne', function ($parse) {
     require: 'ngModel',
     link: function (scope, element, attributes, ngModelCtrl) {
       attributes.$observe('autoSelectIfOnlyOne', function (result) {
-        let options = $parse(result)(scope);
+        const options = $parse(result)(scope);
         if (options && options.length === 1) {
           ngModelCtrl.$setViewValue(options[0]);
           ngModelCtrl.$render();

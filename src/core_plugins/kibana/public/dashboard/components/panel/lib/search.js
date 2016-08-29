@@ -1,4 +1,4 @@
-export default function searchLoader(savedSearches, Private) { // Inject services here
+export default function searchLoader(savedSearches) { // Inject services here
   return function (panel, $scope) { // Function parameters here
     return savedSearches.get(panel.id)
       .then(function (savedSearch) {
@@ -21,4 +21,4 @@ export default function searchLoader(savedSearches, Private) { // Inject service
         };
       });
   };
-};
+}

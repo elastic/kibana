@@ -1,12 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  defaultTimeout,
-  scenarioManager,
-  esClient
-} from '../../../support';
+import { bdd, esClient } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -16,7 +11,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
     return esClient.deleteAndUpdateConfigDoc();
   });
 
-  var columns = [{
+  const columns = [{
     heading: 'name',
     first: '@message',
     last: 'xss.raw',
@@ -77,10 +72,10 @@ bdd.describe('index result field sort', function describeIndexTests() {
   });
 
   bdd.describe('field list pagination', function () {
-    var expectedDefaultPageSize = 25;
-    var expectedFieldCount = 85;
-    var expectedLastPageCount = 10;
-    var pages = [1, 2, 3, 4];
+    const expectedDefaultPageSize = 25;
+    const expectedFieldCount = 85;
+    const expectedLastPageCount = 10;
+    const pages = [1, 2, 3, 4];
 
     bdd.before(function () {
       return PageObjects.settings.navigateTo()
@@ -110,8 +105,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
     });
 
     bdd.it('should have the correct number of rows per page', function () {
-      var pageCount = Math.ceil(expectedFieldCount / expectedDefaultPageSize);
-      var chain = pages.reduce(function (chain, val) {
+      const chain = pages.reduce(function (chain, val) {
         return chain.then(function () {
           return PageObjects.settings.goToPage(val)
           .then(function () {
@@ -122,7 +116,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
           })
           .then(function (pageCount) {
             PageObjects.common.saveScreenshot('Settings-indices-paged');
-            var expectedSize = (val < 4) ? expectedDefaultPageSize : expectedLastPageCount;
+            const expectedSize = (val < 4) ? expectedDefaultPageSize : expectedLastPageCount;
             expect(pageCount.length).to.be(expectedSize);
           });
         });

@@ -1,7 +1,5 @@
 define(function (require) {
-  var Promise = require('bluebird');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
+  const expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager, request) {
     bdd.describe('Count API', function postIngest() {

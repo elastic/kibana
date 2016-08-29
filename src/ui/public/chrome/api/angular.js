@@ -13,7 +13,7 @@ module.exports = function (chrome, internals) {
   chrome.getBreadcrumbs = _.noop;
 
   chrome.setupAngular = function () {
-    let kibana = modules.get('kibana');
+    const kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
       kibana.value(name, val);
@@ -28,7 +28,7 @@ module.exports = function (chrome, internals) {
     .value('sessionId', Date.now())
     .value('chrome', chrome)
     .value('esUrl', (function () {
-      let a = document.createElement('a');
+      const a = document.createElement('a');
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
@@ -39,7 +39,7 @@ module.exports = function (chrome, internals) {
       };
 
       chrome.getBreadcrumbs = () => {
-        let path = $location.path();
+        const path = $location.path();
         let length = path.length - 1;
 
         // trim trailing slash
@@ -52,7 +52,7 @@ module.exports = function (chrome, internals) {
 
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);
-      const check = (event) => {
+      const check = () => {
         if ($location.path() === '/error/url-overflow') return;
 
         try {

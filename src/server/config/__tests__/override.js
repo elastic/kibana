@@ -4,7 +4,7 @@ import expect from 'expect.js';
 describe('override(target, source)', function () {
 
   it('should override the values form source to target', function () {
-    let target = {
+    const target = {
       test: {
         enable: true,
         host: ['host-01', 'host-02'],
@@ -13,7 +13,7 @@ describe('override(target, source)', function () {
         }
       }
     };
-    let source = { test: { client: { type: 'nosql' } } };
+    const source = { test: { client: { type: 'nosql' } } };
     expect(override(target, source)).to.eql({
       test: {
         enable: true,

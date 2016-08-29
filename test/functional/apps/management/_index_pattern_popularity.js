@@ -1,11 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager,
-  esClient
-} from '../../../support';
+import { bdd, esClient } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -27,7 +23,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
   });
 
   bdd.describe('change popularity', function indexPatternCreation() {
-    var fieldName = 'geo.coordinates';
+    const fieldName = 'geo.coordinates';
 
     // set the page size to All again, https://github.com/elastic/kibana/issues/5030
     // TODO: remove this after issue #5030 is closed

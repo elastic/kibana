@@ -7,12 +7,10 @@ import AggParamsPM from 'ui/agg_types/agg_params';
 import VisProvider from 'ui/vis';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
-import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggType Class', function () {
   let AggType;
   let AggParams;
-  let AggConfig;
   let indexPattern;
   let fieldFormat;
   let Vis;
@@ -26,7 +24,6 @@ describe('AggType Class', function () {
     Vis = Private(VisProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);
     AggType = Private(AggTypesAggTypeProvider);
-    AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -39,7 +36,7 @@ describe('AggType Class', function () {
     });
 
     describe('application of config properties', function () {
-      let copiedConfigProps = [
+      const copiedConfigProps = [
         'name',
         'title',
         'makeLabel',
@@ -48,11 +45,11 @@ describe('AggType Class', function () {
 
       describe('"' + copiedConfigProps.join('", "') + '"', function () {
         it('assigns the config value to itself', function () {
-          let config = _.transform(copiedConfigProps, function (config, prop) {
+          const config = _.transform(copiedConfigProps, function (config, prop) {
             config[prop] = {};
           }, {});
 
-          let aggType = new AggType(config);
+          const aggType = new AggType(config);
 
           copiedConfigProps.forEach(function (prop) {
             expect(aggType[prop]).to.be(config[prop]);
@@ -62,7 +59,7 @@ describe('AggType Class', function () {
 
       describe('makeLabel', function () {
         it('makes a function when the makeLabel config is not specified', function () {
-          let someGetter = function () {};
+          const someGetter = function () {};
 
           let aggType = new AggType({
             makeLabel: someGetter
@@ -81,7 +78,7 @@ describe('AggType Class', function () {
 
       describe('getFormat', function () {
         it('returns the formatter for the aggConfig', function () {
-          let aggType = new AggType({});
+          const aggType = new AggType({});
 
           let vis = new Vis(indexPattern, {
             type: 'histogram',
@@ -112,9 +109,9 @@ describe('AggType Class', function () {
         });
 
         it('can be overridden via config', function () {
-          let someGetter = function () {};
+          const someGetter = function () {};
 
-          let aggType = new AggType({
+          const aggType = new AggType({
             getFormat: someGetter
           });
 
@@ -128,7 +125,7 @@ describe('AggType Class', function () {
         });
 
         it('defaults to AggParams object with JSON param', function () {
-          let aggType = new AggType({
+          const aggType = new AggType({
             name: 'smart agg'
           });
 
@@ -139,7 +136,7 @@ describe('AggType Class', function () {
         });
 
         it('can disable customLabel', function () {
-          let aggType = new AggType({
+          const aggType = new AggType({
             name: 'smart agg',
             customLabels: false
           });
@@ -149,13 +146,13 @@ describe('AggType Class', function () {
         });
 
         it('passes the params arg directly to the AggParams constructor', function () {
-          let params = [
-            {name: 'one'},
-            {name: 'two'}
+          const params = [
+            { name: 'one' },
+            { name: 'two' }
           ];
-          let paramLength = params.length + 2; // json and custom label are always appended
+          const paramLength = params.length + 2; // json and custom label are always appended
 
-          let aggType = new AggType({
+          const aggType = new AggType({
             name: 'bucketeer',
             params: params
           });
@@ -169,8 +166,8 @@ describe('AggType Class', function () {
 
       describe('getResponseAggs', function () {
         it('copies the value', function () {
-          let football = {};
-          let aggType = new AggType({
+          const football = {};
+          const aggType = new AggType({
             getResponseAggs: football
           });
 
@@ -178,7 +175,7 @@ describe('AggType Class', function () {
         });
 
         it('defaults to _.noop', function () {
-          let aggType = new AggType({});
+          const aggType = new AggType({});
 
           expect(aggType.getResponseAggs).to.be(_.noop);
         });
@@ -186,5 +183,4 @@ describe('AggType Class', function () {
     });
 
   });
-
 });

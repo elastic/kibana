@@ -1,27 +1,26 @@
 module.exports = function (grunt) {
-  let { map, fromNode } = require('bluebird');
-  let { resolve } = require('path');
-  let { pluck } = require('lodash');
-  let { createWriteStream } = require('fs');
-  let { createGunzip } = require('zlib');
-  let { Extract } = require('tar');
-  let { rename } = require('fs');
-  let wreck = require('wreck');
+  const { map, fromNode } = require('bluebird');
+  const { resolve } = require('path');
+  const { createWriteStream } = require('fs');
+  const { createGunzip } = require('zlib');
+  const { Extract } = require('tar');
+  const { rename } = require('fs');
+  const wreck = require('wreck');
 
-  let platforms = grunt.config.get('platforms');
-  let activeDownloads = [];
+  const platforms = grunt.config.get('platforms');
+  const activeDownloads = [];
 
-  let start = async (platform) => {
-    let finalDir = platform.nodeDir;
-    let downloadDir = `${finalDir}.temp`;
+  const start = async (platform) => {
+    const finalDir = platform.nodeDir;
+    const downloadDir = `${finalDir}.temp`;
 
     if (grunt.file.isDir(platform.nodeDir)) {
       grunt.log.ok(`${platform.name} exists`);
       return;
     }
 
-    let resp = await fromNode(cb => {
-      let req = wreck.request('GET', platform.nodeUrl, null, function (err, resp) {
+    const resp = await fromNode(cb => {
+      wreck.request('GET', platform.nodeUrl, null, function (err, resp) {
         if (err) {
           return cb(err);
         }
@@ -65,8 +64,8 @@ module.exports = function (grunt) {
 
     activeDownloads.push(platform);
 
-    var bytes = parseInt(resp.headers['content-length'], 10) || 'unknown number of';
-    var mb = ((bytes / 1024) / 1024).toFixed(2);
+    const bytes = parseInt(resp.headers['content-length'], 10) || 'unknown number of';
+    const mb = ((bytes / 1024) / 1024).toFixed(2);
     grunt.log.ok(`downloading ${platform.name} - ${mb} mb`);
   };
 

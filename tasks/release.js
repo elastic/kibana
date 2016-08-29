@@ -3,7 +3,6 @@ module.exports = function (grunt) {
   const url = require('url');
   const fs = require('fs');
   const path = require('path');
-  const _ = require('lodash');
 
   // build, then zip and upload to s3
   grunt.registerTask('release', [
@@ -43,14 +42,13 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('_release:complete', function () {
-    const { sha, version } = grunt.config.get('build');
     const config = grunt.config.get('aws_s3.staging.files');
 
     grunt.log.ok('Builds uploaded');
 
     fs.readdirSync('./target').forEach((file) => {
       if (path.extname(file) !== '.txt') {
-        let link = url.format({
+        const link = url.format({
           protocol: 'https',
           hostname: 'download.elastic.co',
           pathname: config[0].dest + file

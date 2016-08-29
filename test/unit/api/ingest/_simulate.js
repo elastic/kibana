@@ -1,8 +1,6 @@
 define(function (require) {
-  var Promise = require('bluebird');
-  var createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
+  const Promise = require('bluebird');
+  const expect = require('intern/dojo/node!expect.js');
 
   const testPipeline = {
     processors: [{
@@ -28,20 +26,20 @@ define(function (require) {
 
           // requires at least one processor
           request.post('/kibana/ingest/simulate')
-          .send({input: {}, processors: []})
+          .send({ input: {}, processors: [] })
           .expect(400),
 
           // All processors must have a processorId property and a typeId property
           request.post('/kibana/ingest/simulate')
-          .send({input: {}, processors: [{}]})
+          .send({ input: {}, processors: [{}] })
           .expect(400),
 
           request.post('/kibana/ingest/simulate')
-          .send({input: {}, processors: ['foo']})
+          .send({ input: {}, processors: ['foo'] })
           .expect(400),
 
           request.post('/kibana/ingest/simulate')
-          .send({input: {}, processors: 'foo'})
+          .send({ input: {}, processors: 'foo' })
           .expect(400)
         ]);
       });

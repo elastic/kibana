@@ -18,8 +18,8 @@ $('body').attr('id', 'test-harness-body'); // so we can make high priority selec
 
 
 /*** Setup seeded random ***/
-let seedInput = parse(window.location.href, true).query.seed;
-let seed = _.add(seedInput, 0) || Date.now();
+const seedInput = parse(window.location.href, true).query.seed;
+const seed = _.add(seedInput, 0) || Date.now();
 Math.random = _.bindKey(new Nonsense(seed), 'frac');
 Math.random.nonsense = new Nonsense(seed);
 console.log('Random-ness seed: ' + seed);
@@ -38,7 +38,7 @@ before(function () {
   this.timeout(30000);
 
   let mapper;
-  let Runner = window.Mocha.Runner;
+  const Runner = window.Mocha.Runner;
 
   Runner.prototype.emit = _.wrap(Runner.prototype.emit, function (emit, event, test, err) {
     if (err && mapper) err = mapper.mapError(err);

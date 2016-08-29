@@ -14,7 +14,7 @@ export default function selectableArray(items, selectedItems) {
       selected: !_.isUndefined(selected)
     };
   });
-};
+}
 
 function cleanItem(item) {
   return _.trim(item).toUpperCase();

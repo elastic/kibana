@@ -56,7 +56,7 @@ function getCurrentSettings() {
   };
 }
 
-function updateSettings({ fontSize, wrapMode, autocomplete}) {
+function updateSettings({ fontSize, wrapMode, autocomplete }) {
   setFontSize(fontSize);
   setWrapMode(wrapMode);
   setAutocomplete(autocomplete);

@@ -1,8 +1,8 @@
 define(function (require) {
-  var Promise = require('bluebird');
-  var createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
-  var _ = require('intern/dojo/node!lodash');
-  var expect = require('intern/dojo/node!expect.js');
+  const Promise = require('bluebird');
+  const createTestData = require('intern/dojo/node!../../../unit/api/ingest/data');
+  const _ = require('intern/dojo/node!lodash');
+  const expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager, request) {
     bdd.describe('POST ingest', function postIngest() {
@@ -42,12 +42,12 @@ define(function (require) {
 
           // Fields must have a name and type
           request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'index_pattern.fields', [{count: 0}]))
+            .send(_.set(createTestData(), 'index_pattern.fields', [{ count: 0 }]))
             .expect(400),
 
           // should validate pipeline processors
           request.post('/kibana/ingest')
-            .send(_.set(createTestData(), 'pipeline[0]', {bad: 'processor'}))
+            .send(_.set(createTestData(), 'pipeline[0]', { bad: 'processor' }))
             .expect(400)
         ]);
       });
@@ -63,7 +63,7 @@ define(function (require) {
           .send(createTestData())
           .expect(204)
           .then(function () {
-            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'});
+            return scenarioManager.client.indices.getTemplate({ name: 'kibana-logstash-*' });
           });
       });
 
@@ -81,7 +81,7 @@ define(function (require) {
                 '@timestamp': '2015-09-20T10:28:22.684Z',
                 agent: 'Jack',
                 bytes: 9001,
-                geo: {coordinates: {lat: 43.07260861, lon: -92.61077833}}
+                geo: { coordinates: { lat: 43.07260861, lon: -92.61077833 } }
               }
             })
             .then(function (response) {
@@ -101,7 +101,7 @@ define(function (require) {
               id: 'logstash-*'
             })
             .then(function (res) {
-              var fields = JSON.parse(res._source.fields);
+              const fields = JSON.parse(res._source.fields);
               // @timestamp was created with only name and type, all other fields should be set as defaults by API
               expect(res._source.title).to.be('logstash-*');
               expect(fields[1].name).to.be('@timestamp');
@@ -127,7 +127,7 @@ define(function (require) {
             })
             .then(function (res) {
               const fields = JSON.parse(res._source.fields);
-              const sourceField = _.find(fields, {name: '_source'});
+              const sourceField = _.find(fields, { name: '_source' });
               expect(sourceField).to.be.ok();
               expect(sourceField).to.have.property('name', '_source');
             });
@@ -140,13 +140,13 @@ define(function (require) {
           .send(createTestData())
           .expect(204)
           .then(function () {
-            return scenarioManager.client.indices.getTemplate({name: 'kibana-logstash-*'})
+            return scenarioManager.client.indices.getTemplate({ name: 'kibana-logstash-*' })
             .then(function (template) {
-              var mappings = template['kibana-logstash-*'].mappings._default_.properties;
+              const mappings = template['kibana-logstash-*'].mappings._default_.properties;
               expect(mappings).to.be.ok();
-              expect(_.isEqual(mappings.ip, {index: true, type: 'ip', doc_values: true})).to.be.ok();
-              expect(_.isEqual(mappings['@timestamp'], {index: true, type: 'date', doc_values: true})).to.be.ok();
-              expect(_.isEqual(mappings.bytes, {index: true, type: 'double', doc_values: true})).to.be.ok();
+              expect(_.isEqual(mappings.ip, { index: true, type: 'ip', doc_values: true })).to.be.ok();
+              expect(_.isEqual(mappings['@timestamp'], { index: true, type: 'date', doc_values: true })).to.be.ok();
+              expect(_.isEqual(mappings.bytes, { index: true, type: 'double', doc_values: true })).to.be.ok();
 
               // object fields are mapped as such, with individual mappings for each of their properties
               expect(_.isEqual(mappings.geo, {
@@ -220,7 +220,7 @@ define(function (require) {
 
       bdd.it('should return 409 conflict when the pattern matches existing indices',
         function existingIndicesConflict() {
-          var ingestConfig = createTestData();
+          const ingestConfig = createTestData();
           ingestConfig.index_pattern.id = ingestConfig.index_pattern.title = '.kib*';
 
           return request.post('/kibana/ingest')
@@ -229,7 +229,7 @@ define(function (require) {
         });
 
       bdd.it('should enforce snake_case in the request body', function () {
-        var ingestConfig = createTestData();
+        const ingestConfig = createTestData();
         ingestConfig.index_pattern = _.mapKeys(ingestConfig.index_pattern, function (value, key) {
           return _.camelCase(key);
         });

@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 export default function TruncateFormatProvider(Private) {
 
-  let FieldFormat = Private(IndexPatternsFieldFormatProvider);
+  const FieldFormat = Private(IndexPatternsFieldFormatProvider);
 
   class Bool extends FieldFormat {
 
@@ -39,4 +39,4 @@ export default function TruncateFormatProvider(Private) {
   Bool.fieldType = ['boolean', 'number', 'string'];
 
   return Bool;
-};
+}

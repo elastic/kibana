@@ -1,7 +1,7 @@
 let _ = require("lodash");
 
 function addSimpleCat(endpoint, api, params, patterns) {
-  var url_params = {"help": "__flag__", "v": "__flag__", "bytes": ["b"]};
+  var url_params = { "help": "__flag__", "v": "__flag__", "bytes": ["b"] };
   _.each(params || [], function (p) {
     if (_.isString(p)) {
       url_params[p] = "__flag__";
@@ -37,10 +37,10 @@ module.exports = function (api) {
   addSimpleCat('_cat/allocation', api, null, ['_cat/allocation', '_cat/allocation/{nodes}']);
   addSimpleCat('_cat/count', api);
   addSimpleCat('_cat/health', api, [
-    {"ts": ["false", "true"]}
+    { "ts": ["false", "true"] }
   ]);
   addSimpleCat('_cat/indices', api, [
-      {h: []},
+      { h: [] },
       "pri",
     ],
     ['_cat/indices', '_cat/indices/{indices}']);

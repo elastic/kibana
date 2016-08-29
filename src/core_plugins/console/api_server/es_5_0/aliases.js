@@ -7,7 +7,7 @@ module.exports = function (api) {
     data_autocomplete_rules: {
       'actions': {
         __template: [
-          {'add': {'index': 'test1', 'alias': 'alias1'}}
+          { 'add': { 'index': 'test1', 'alias': 'alias1' } }
         ],
         __any_of: [
           {

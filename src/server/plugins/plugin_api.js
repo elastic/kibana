@@ -1,6 +1,5 @@
-import _ from 'lodash';
 import Plugin from './plugin';
-import { basename, join } from 'path';
+import { join } from 'path';
 
 module.exports = class PluginApi {
   constructor(kibana, pluginPath) {

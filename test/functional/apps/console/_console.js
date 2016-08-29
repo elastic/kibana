@@ -1,10 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  scenarioManager
-} from '../../../support';
+import { bdd } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -15,7 +12,7 @@ bdd.describe('console app', function describeIndexTests() {
   });
 
   bdd.it('should show the default request', function () {
-    var expectedRequest = [
+    const expectedRequest = [
       'GET _search',
       '{',
       '  "query": {',
@@ -39,7 +36,7 @@ bdd.describe('console app', function describeIndexTests() {
   });
 
   bdd.it('default request response should contain .kibana' , function () {
-    var expectedResponseContains = '"_index": ".kibana",';
+    const expectedResponseContains = '"_index": ".kibana",';
     return PageObjects.console.clickPlay()
     .then(function () {
       PageObjects.common.saveScreenshot('Console-default-request');

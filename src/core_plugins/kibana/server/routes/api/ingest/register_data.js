@@ -1,4 +1,3 @@
-import { Promise } from 'bluebird';
 import parse from 'csv-parse';
 import _ from 'lodash';
 import hi from 'highland';
@@ -49,7 +48,7 @@ export function registerData(server) {
           push(null, doc);
         }
         else {
-          push(null, {index: _.isEmpty(fileName) ? {} : {_id: `${fileName}:${currentLine}`}});
+          push(null, { index: _.isEmpty(fileName) ? {} : { _id: `${fileName}:${currentLine}` } });
           push(null, doc);
           currentLine++;
           next();
@@ -85,10 +84,10 @@ export function registerData(server) {
           }
 
           return memo;
-        }, {created: 0});
+        }, { created: 0 });
       })
       .stopOnError((err, push) => {
-        push(null, {created: 0, errors: {other: [err.message]}});
+        push(null, { created: 0, errors: { other: [err.message] } });
       })
       .pipe(JSONStream.stringify())
       .pipe(responseStream);

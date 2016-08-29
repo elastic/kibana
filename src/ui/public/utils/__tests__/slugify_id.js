@@ -4,7 +4,7 @@ import expect from 'expect.js';
 
 describe('slugifyId()', function () {
 
-  let fixtures = [
+  const fixtures = [
     ['test/test', 'test-slash-test'],
     ['test?test', 'test-questionmark-test'],
     ['test=test', 'test-equal-test'],
@@ -28,9 +28,9 @@ describe('slugifyId()', function () {
   ];
 
   _.each(fixtures, function (fixture) {
-    let msg = 'should convert ' + fixture[0] + ' to ' + fixture[1];
+    const msg = 'should convert ' + fixture[0] + ' to ' + fixture[1];
     it(msg, function () {
-      let results = slugifyId(fixture[0]);
+      const results = slugifyId(fixture[0]);
       expect(results).to.be(fixture[1]);
     });
   });

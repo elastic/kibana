@@ -101,4 +101,4 @@ export default function EventsProvider(Private, Promise) {
   };
 
   return Events;
-};
+}

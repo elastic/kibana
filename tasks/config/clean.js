@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  let modules = Object.keys(grunt.config.get('deepModules'));
+  const modules = Object.keys(grunt.config.get('deepModules'));
   return {
     build: 'build',
     target: 'target',

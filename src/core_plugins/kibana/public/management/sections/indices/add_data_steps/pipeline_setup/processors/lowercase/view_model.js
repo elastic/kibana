@@ -18,4 +18,4 @@ export class Lowercase extends Processor {
       sourceField: this.sourceField || ''
     };
   }
-};
+}

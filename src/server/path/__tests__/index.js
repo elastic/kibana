@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import path from '../';
-import { accessSync, R_OK} from 'fs';
+import { accessSync, R_OK } from 'fs';
 
 describe('Default path finder', function () {
   it('should find a kibana.yml', () => {

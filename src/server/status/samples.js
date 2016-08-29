@@ -7,8 +7,8 @@ function Samples(max) {
 }
 
 Samples.prototype.add = function (sample) {
-  let vals = this.vals;
-  let length = this.length = Math.min(this.length + 1, this.max);
+  const vals = this.vals;
+  const length = this.length = Math.min(this.length + 1, this.max);
 
   _.forOwn(sample, function (val, name) {
     if (val == null) val = null;

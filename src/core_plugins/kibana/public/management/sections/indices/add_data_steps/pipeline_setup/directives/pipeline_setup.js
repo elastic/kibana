@@ -1,7 +1,6 @@
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import Pipeline from '../lib/pipeline';
-import angular from 'angular';
 import * as ProcessorTypes from '../processors/view_models';
 import IngestProvider from 'ui/ingest';
 import '../styles/_pipeline_setup.less';
@@ -39,7 +38,7 @@ app.directive('pipelineSetup', function () {
     },
     controller: function ($scope, debounce, Private, Notifier) {
       const ingest = Private(IngestProvider);
-      const notify = new Notifier({ location: `Ingest Pipeline Setup` });
+      const notify = new Notifier({ location: 'Ingest Pipeline Setup' });
       $scope.sample = {};
 
       //determines which processors are available on the cluster
@@ -59,7 +58,7 @@ app.directive('pipelineSetup', function () {
       $scope.pipeline = pipeline;
 
       //initiates the simulate call if the pipeline is dirty
-      const simulatePipeline = debounce((event, message) => {
+      const simulatePipeline = debounce(() => {
         if (pipeline.processors.length === 0) {
           pipeline.updateOutput();
           return;
@@ -70,11 +69,11 @@ app.directive('pipelineSetup', function () {
         .catch(notify.error);
       }, 200);
 
-      $scope.$watchCollection('pipeline.processors', (newVal, oldVal) => {
+      $scope.$watchCollection('pipeline.processors', () => {
         pipeline.updateParents();
       });
 
-      $scope.$watch('sample', (newVal) => {
+      $scope.$watch('sample', () => {
         pipeline.input = $scope.sample;
         pipeline.updateParents();
       });

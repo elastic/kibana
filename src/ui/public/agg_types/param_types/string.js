@@ -3,7 +3,7 @@ import editorHtml from 'ui/agg_types/controls/string.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 export default function FieldAggParamFactory(Private) {
 
-  let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
 
   _.class(ScriptAggParam).inherits(BaseAggParam);
   function ScriptAggParam(config) {
@@ -29,4 +29,4 @@ export default function FieldAggParamFactory(Private) {
   };
 
   return ScriptAggParam;
-};
+}
