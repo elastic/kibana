@@ -4,7 +4,11 @@ import _ from 'lodash';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisTitleFactory(Private) {
 
-  let ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const defaults = {
+    title: '',
+    elSelector: '.axis-wrapper-{pos} .axis-title'
+  };
 
   /**
    * Appends axis title(s) to the visualization
@@ -16,14 +20,15 @@ export default function AxisTitleFactory(Private) {
    * @param yTitle {String} Y-axis title
    */
   _.class(AxisTitle).inherits(ErrorHandler);
-  function AxisTitle(el, xTitle, yTitle) {
+  function AxisTitle(axis, attr) {
     if (!(this instanceof AxisTitle)) {
-      return new AxisTitle(el, xTitle, yTitle);
+      return new AxisTitle(axis, attr);
     }
 
-    this.el = el;
-    this.xTitle = xTitle;
-    this.yTitle = yTitle;
+    _.extend(this, defaults, attr);
+    this.el = axis.vis.el;
+    this.data = axis.data;
+    this.elSelector = this.elSelector.replace('{pos}', axis.position);
   }
 
   /**
@@ -32,9 +37,8 @@ export default function AxisTitleFactory(Private) {
    * @method render
    * @returns {HTMLElement} DOM Element with axis titles
    */
-  AxisTitle.prototype.render = function () {
-    d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
-    d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
+  AxisTitle.prototype.render = function (selection) {
+    d3.select(this.el).selectAll(this.elSelector).call(this.draw());
   };
 
   /**
@@ -44,15 +48,15 @@ export default function AxisTitleFactory(Private) {
    * @param title {String} Axis title
    * @returns {Function} Appends axis title to a D3 selection
    */
-  AxisTitle.prototype.draw = function (title) {
-    let self = this;
+  AxisTitle.prototype.draw = function () {
+    const self = this;
 
     return function (selection) {
       selection.each(function () {
-        let el = this;
-        let div = d3.select(el);
-        let width = $(el).width();
-        let height = $(el).height();
+        const el = this;
+        const div = d3.select(el);
+        const width = $(el).width();
+        const height = $(el).height();
 
         self.validateWidthandHeight(width, height);
 
@@ -64,10 +68,10 @@ export default function AxisTitleFactory(Private) {
           if (div.attr('class') === 'x-axis-title') {
             return 'translate(' + width / 2 + ',11)';
           }
-          return 'translate(11,' + height / 2 + ')rotate(270)';
+          return 'translate(11,' + height / 2 + ') rotate(270)';
         })
         .attr('text-anchor', 'middle')
-        .text(title);
+        .text(this.title);
       });
     };
   };

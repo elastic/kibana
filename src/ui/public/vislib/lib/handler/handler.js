@@ -33,7 +33,7 @@ export default function HandlerBaseClass(Private) {
       'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
     });
 
-    this.xAxis = opts.xAxis;
+    this.categoryAxes = opts.categoryAxes;
     this.valueAxes = opts.valueAxes;
     this.chartTitle = opts.chartTitle;
     this.axisTitle = opts.axisTitle;
@@ -45,9 +45,9 @@ export default function HandlerBaseClass(Private) {
       this.layout,
       this.axisTitle,
       this.chartTitle,
-      this.alerts,
-      this.xAxis
-    ].concat(_.values(this.valueAxes)), Boolean);
+      this.alerts
+    ].concat(_.values(this.categoryAxes))
+    .concat(_.values(this.valueAxes)), Boolean);
 
     // memoize so that the same function is returned every time,
     // allowing us to remove/re-add the same function

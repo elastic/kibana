@@ -70,7 +70,7 @@ export default function LineChartFactory(Private) {
     let self = this;
     let showCircles = this._attr.showCircles;
     let color = this.handler.data.getColorFunc();
-    let xScale = this.handler.xAxis.xScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].scale;
     let ordered = this.handler.data.get('ordered');
     let tooltip = this.tooltip;
     let isTooltip = this._attr.addTooltip;
@@ -186,7 +186,7 @@ export default function LineChartFactory(Private) {
    */
   LineChart.prototype.addLines = function (svg, data) {
     let self = this;
-    let xScale = this.handler.xAxis.xScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].scale;
     let xAxisFormatter = this.handler.data.get('xAxisFormatter');
     let color = this.handler.data.getColorFunc();
     let ordered = this.handler.data.get('ordered');
@@ -269,7 +269,7 @@ export default function LineChartFactory(Private) {
     let elHeight = this._attr.height = $elem.height();
     let scaleType = _.values(this.handler.valueAxes)[0].getScaleType();
     let yScale = _.values(this.handler.valueAxes)[0].scale;
-    let xScale = this.handler.xAxis.xScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].scale;
     let minWidth = 20;
     let minHeight = 20;
     let startLineX = 0;

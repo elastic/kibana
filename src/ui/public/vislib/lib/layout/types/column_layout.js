@@ -45,11 +45,15 @@ export default function ColumnLayoutFactory(Private) {
             children: [
               {
                 type: 'div',
-                class: 'y-axis-col',
+                class: 'y-axis-spacer-block y-axis-spacer-block-top'
+              },
+              {
+                type: 'div',
+                class: 'y-axis-col axis-wrapper-left',
                 children: [
                   {
                     type: 'div',
-                    class: 'y-axis-title'
+                    class: 'y-axis-title axis-title'
                   },
                   {
                     type: 'div',
@@ -65,7 +69,7 @@ export default function ColumnLayoutFactory(Private) {
               },
               {
                 type: 'div',
-                class: 'y-axis-spacer-block'
+                class: 'y-axis-spacer-block y-axis-spacer-block-bottom'
               }
             ]
           },
@@ -73,6 +77,26 @@ export default function ColumnLayoutFactory(Private) {
             type: 'div',
             class: 'vis-col-wrapper',
             children: [
+              {
+                type: 'div',
+                class: 'x-axis-wrapper axis-wrapper-top',
+                children: [
+                  {
+                    type: 'div',
+                    class: 'x-axis-div-wrapper',
+                    splits: xAxisSplit
+                  },
+                  /*{
+                    type: 'div',
+                    class: 'x-axis-chart-title',
+                    splits: chartTitleSplit
+                  },*/
+                  {
+                    type: 'div',
+                    class: 'x-axis-title axis-title'
+                  }
+                ]
+              },
               {
                 type: 'div',
                 class: 'chart-wrapper',
@@ -84,7 +108,7 @@ export default function ColumnLayoutFactory(Private) {
               },
               {
                 type: 'div',
-                class: 'x-axis-wrapper',
+                class: 'x-axis-wrapper axis-wrapper-bottom',
                 children: [
                   {
                     type: 'div',
@@ -98,9 +122,43 @@ export default function ColumnLayoutFactory(Private) {
                   },
                   {
                     type: 'div',
-                    class: 'x-axis-title'
+                    class: 'x-axis-title axis-title'
                   }
                 ]
+              }
+            ]
+          },
+          {
+            type: 'div',
+            class: 'y-axis-col-wrapper',
+            children: [
+              {
+                type: 'div',
+                class: 'y-axis-spacer-block y-axis-spacer-block-top'
+              },
+              {
+                type: 'div',
+                class: 'y-axis-col axis-wrapper-right',
+                children: [
+                  {
+                    type: 'div',
+                    class: 'y-axis-div-wrapper',
+                    splits: yAxisSplit
+                  },
+                  /*{
+                    type: 'div',
+                    class: 'y-axis-chart-title',
+                    splits: chartTitleSplit
+                  },*/
+                  {
+                    type: 'div',
+                    class: 'y-axis-title axis-title'
+                  }
+                ]
+              },
+              {
+                type: 'div',
+                class: 'y-axis-spacer-block y-axis-spacer-block-bottom'
               }
             ]
           }

@@ -26,7 +26,7 @@ define(function () {
         })
         .enter()
           .append('div')
-          .attr('class', 'y-axis-div');
+          .attr('class', 'y-axis-div axis-div');
       });
     };
 
