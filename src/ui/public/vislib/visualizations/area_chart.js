@@ -77,7 +77,7 @@ export default function AreaChartFactory(Private) {
     let isTimeSeries = (ordered && ordered.date);
     let isOverlapping = this.isOverlapping;
     let color = this.handler.data.getColorFunc();
-    let xScale = this.handler.xAxis.xScale;
+    let xScale = this.handler.xAxis.getScale();
     let interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
 
     // Data layers
@@ -109,8 +109,7 @@ export default function AreaChartFactory(Private) {
           return xScale(d.x) + xScale.rangeBand() / 2;
         })
         .y0(function (d) {
-          const valueAxis = self.chartData.series[i].valueAxis || _.keys(self.handler.valueAxes)[0];
-          const yScale = self.handler.valueAxes[valueAxis].scale;
+          const yScale = _.values(this.handler.valueAxes)[0].getScale();
           if (isOverlapping) {
             return yScale(0);
           }
@@ -118,8 +117,7 @@ export default function AreaChartFactory(Private) {
           return yScale(d.y0);
         })
         .y1(function (d) {
-          const valueAxis = self.chartData.series[i].valueAxis || _.keys(self.handler.valueAxes)[0];
-          const yScale = self.handler.valueAxes[valueAxis].scale;
+          const yScale = _.values(this.handler.valueAxes)[0].getScale();
           if (isOverlapping) {
             return yScale(d.y);
           }
@@ -167,7 +165,7 @@ export default function AreaChartFactory(Private) {
   AreaChart.prototype.addCircles = function (svg, data) {
     let self = this;
     let color = this.handler.data.getColorFunc();
-    let xScale = this.handler.xAxis.xScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
     let ordered = this.handler.data.get('ordered');
     let circleRadius = 12;
     let circleStrokeWidth = 0;
@@ -215,8 +213,7 @@ export default function AreaChartFactory(Private) {
       return xScale(d.x) + xScale.rangeBand() / 2;
     })
     .attr('cy', function cy(d, i, j) {
-      const valueAxis = data[j].valueAxis || _.keys(self.handler.valueAxes)[0];
-      const yScale = self.handler.valueAxes[valueAxis].scale;
+      const yScale = _.values(this.handler.valueAxes)[0].getScale();
 
       if (isOverlapping) {
         return yScale(d.y);
@@ -290,13 +287,13 @@ export default function AreaChartFactory(Private) {
   AreaChart.prototype.draw = function () {
     // Attributes
     let self = this;
-    let xScale = this.handler.xAxis.xScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
     let $elem = $(this.chartEl);
     let margin = this._attr.margin;
     let elWidth = this._attr.width = $elem.width();
     let elHeight = this._attr.height = $elem.height();
+    let yScale = _.values(this.handler.valueAxes)[0].getScale();
     let yMin = _.values(this.handler.valueAxes)[0].yMin;
-    let yScale = _.values(this.handler.valueAxes)[0].scale;
     let minWidth = 20;
     let minHeight = 20;
     let addTimeMarker = this._attr.addTimeMarker;

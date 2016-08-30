@@ -111,10 +111,10 @@ export default function ColumnChartFactory(Private) {
    */
   ColumnChart.prototype.addStackedBars = function (bars) {
     let data = this.chartData;
-    let xScale = this.handler.xAxis.xScale;
-    let yScale = this.handler.yAxis.yScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
+    let yScale = _.values(this.handler.valueAxes)[0].getScale();
     let height = yScale.range()[0];
-    let yMin = this.handler.yAxis.yScale.domain()[0];
+    let yMin = yScale.domain()[0];
 
     let barWidth;
     if (data.ordered && data.ordered.date) {
@@ -172,8 +172,8 @@ export default function ColumnChartFactory(Private) {
    * @returns {D3.UpdateSelection}
    */
   ColumnChart.prototype.addGroupedBars = function (bars) {
-    let xScale = this.handler.xAxis.xScale;
-    let yScale = this.handler.yAxis.yScale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
+    let yScale = _.values(this.handler.valueAxes)[0].getScale();
     let data = this.chartData;
     let n = data.series.length;
     let height = yScale.range()[0];
@@ -258,8 +258,8 @@ export default function ColumnChartFactory(Private) {
     let margin = this._attr.margin;
     let elWidth = this._attr.width = $elem.width();
     let elHeight = this._attr.height = $elem.height();
-    let yScale = this.handler.yAxis.yScale;
-    let xScale = this.handler.xAxis.xScale;
+    let yScale = _.values(this.handler.valueAxes)[0].getScale();
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
     let minWidth = 20;
     let minHeight = 20;
     let addTimeMarker = this._attr.addTimeMarker;
