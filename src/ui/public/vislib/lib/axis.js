@@ -21,10 +21,10 @@ export default function AxisFactory(Private) {
     expandLastBucket: true, //TODO: rename ... bucket has nothing to do with vis
     inverted: false,
     style: {
-      color: 'black',
+      color: '#ddd',
       lineWidth: '1px',
       opacity: 1,
-      tickColor: 'black',
+      tickColor: '#ddd',
       tickWidth: '1px',
       tickLength: '6px'
     }

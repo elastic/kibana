@@ -10,7 +10,7 @@ export default function AxisLabelsFactory(Private) {
     rotate: 0,
     rotateAnchor: 'center',
     filter: false,
-    color: 'black',
+    color: '#ddd',
     font: '"Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif', // TODO
     fontSize: '8pt',
     truncate: 100
