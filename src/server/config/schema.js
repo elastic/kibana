@@ -30,9 +30,9 @@ module.exports = () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
-  uuid: Joi.string().guid().default(),
 
   server: Joi.object({
+    uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
     host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5601),
