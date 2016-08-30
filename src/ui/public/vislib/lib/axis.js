@@ -83,23 +83,22 @@ export default function AxisFactory(Private) {
    * @returns {D3.Svg.Axis|*} D3 axis function
    */
   Axis.prototype.getAxis = function (length) {
-    const scale = this.getScale(length);
+    const scale = this.createScale(length);
 
     // Create the d3 axis function
-    this.axis = d3.svg.axis()
+    return d3.svg.axis()
       .scale(scale)
       .tickFormat(this.tickFormat(this.domain))
       .ticks(this.tickScale(length))
       .orient(this.position);
-
-    return this.axis;
   };
 
-  Axis.prototype.getScale = function (length) {
-    if (!this._scale || length) {
-      this._scale = this.scale.getScale(length);
-    }
-    return this._scale;
+  Axis.prototype.getScale = function () {
+    return this.scale.scale;
+  };
+
+  Axis.prototype.createScale = function (length) {
+    return this.scale.getScale(length);
   };
 
   Axis.prototype.addInterval = function (interval) {
