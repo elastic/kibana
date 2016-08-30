@@ -228,12 +228,12 @@ export default function AxisFactory(Private) {
         const width = $(el).parent().width();
         const height = $(el).height();
         const length = self.getLength(el, n);
-        let adjustedHeight = height - margin.top - margin.bottom;
-        let adjustedWidth = width + margin.left + margin.right + 50;
+        let adjustedHeight = height;
+        let adjustedWidth = width;
         if (self.isHorizontal()) {
-          adjustedWidth /= n;
+          adjustedWidth = (width + margin.left + margin.right + 50) / n;
         } else {
-          adjustedHeight /= n;
+          adjustedHeight = (height - margin.top - margin.bottom) / n;
         }
 
         // Validate whether width and height are not 0 or `NaN`
