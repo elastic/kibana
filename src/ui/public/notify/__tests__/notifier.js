@@ -401,7 +401,7 @@ describe('Notifier', function () {
       expect(notify('banner').getIconClass()).to.equal('');
       expect(notify('banner').getButtonClass()).to.equal('btn-banner');
       expect(notify('banner').getAlertClassStack()).to.equal('toast-stack alert alert-banner');
-      expect(notify('banner').getAlertClass()).to.equal('toast-banner alert alert-banner');
+      expect(notify('banner').getAlertClass()).to.equal('alert alert-banner');
       expect(notify('banner').getButtonGroupClass()).to.equal('toast-controls-banner');
       expect(notify('banner').getToastMessageClass()).to.equal('toast-message-banner');
     });
