@@ -196,10 +196,10 @@ export default function AxisFactory(Private) {
             .attr('transform', 'translate(1,0)');
         }
       } else {
-        selection.attr('width', length);
+        selection.attr('width', length + xAxisPadding);
         if (self.position === 'left') {
           selection.select('g')
-            .attr('transform', `translate(${length - 2 - parseInt(self.style.lineWidth)},${self._attr.margin.top})`);
+            .attr('transform', `translate(${length + xAxisPadding - 2 - parseInt(self.style.lineWidth)},${self._attr.margin.top})`);
         }
       }
     };
