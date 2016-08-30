@@ -8,21 +8,21 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
 
-    &-countdown {
+  .toaster-countdown {
+    .badge {
+      color: @white;
+    }
+
+    &:hover {
       .badge {
-        color: @white;
+        font-size: 0;
       }
 
-      &:hover {
-        .badge {
-          font-size: 0;
-        }
-
-        .badge:after {
-          font-size: @font-size-small;
-          content: attr(hover-text);
-        }
+      .badge:after {
+        font-size: @font-size-small;
+        content: attr(hover-text);
       }
     }
   }
@@ -91,11 +91,29 @@
     background: darken(@alert-danger-bg, 25%);
   }
   .alert-banner {
-    background-color: #c0c0c0;
+    background-color: white;
     padding: 10px 15px;
+
+    a {
+      color: #328caa;
+    }
+
+    .toaster-countdown {
+      background-color: white;
+    }
+
+    .badge {
+      background-color: #328caa;
+    }
   }
 
   .toast-message {
     white-space: normal;
   }
+}
+
+// toast message class for banner needs to be display:block because banner does
+// not have a flex layout, and the styled element could be any kind of element
+.toast-message-banner {
+  display: block;
 }

@@ -15,17 +15,19 @@ import {
 import util from 'util';
 
 import getUrl from '../../utils/get_url';
+
 import {
   config,
   defaultTryTimeout,
   defaultFindTimeout,
   remote,
-  shieldPage
+  shieldPage,
+  esClient
 } from '../index';
 
 import {
   Log,
-  Try,
+  Try
 } from '../utils';
 
 const mkdirpAsync = promisify(mkdirp);
@@ -83,8 +85,23 @@ export default class Common {
     function navigateTo(url) {
       return self.try(function () {
         // since we're using hash URLs, always reload first to force re-render
-        self.debug('navigate to: ' + url);
-        return self.remote.get(url)
+        return esClient.getDefaultIndex()
+        .then(function (defaultIndex) {
+          if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
+            if (!defaultIndex) {
+              // https://github.com/elastic/kibana/issues/7496
+              // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
+              // that change.  If we got here, fix it.
+              self.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
+              self.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
+              return esClient.updateConfigDoc({'dateFormat:tz':'UTC', 'defaultIndex':'logstash-*'});
+            }
+          }
+        })
+        .then(function () {
+          self.debug('navigate to: ' + url);
+          return self.remote.get(url);
+        })
         .then(function () {
           return self.sleep(700);
         })
