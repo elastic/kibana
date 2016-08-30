@@ -3,7 +3,6 @@ import _ from 'lodash';
 import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
 import VislibAxis from 'ui/vislib/lib/axis';
@@ -12,7 +11,6 @@ export default function ColumnHandler(Private) {
   let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
   let Handler = Private(VislibLibHandlerHandlerProvider);
   let Data = Private(VislibLibDataProvider);
-  let XAxis = Private(VislibLibXAxisProvider);
   let ChartTitle = Private(VislibLibChartTitleProvider);
   let Alerts = Private(VislibLibAlertsProvider);
   const Axis = Private(VislibAxis);

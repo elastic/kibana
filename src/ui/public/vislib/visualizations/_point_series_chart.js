@@ -94,7 +94,7 @@ export default function PointSeriesChartProvider(Private) {
   PointSeriesChart.prototype.createEndZones = function (svg) {
     let self = this;
     let xAxis = _.values(this.handler.categoryAxes)[0];
-    let xScale = xAxis.scale;
+    let xScale = xAxis.getScale();
     let ordered = xAxis.ordered;
     let missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 

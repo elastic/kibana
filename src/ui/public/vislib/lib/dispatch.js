@@ -170,7 +170,7 @@ export default function DispatchClass(Private) {
     // Don't allow brushing for time based charts from non-time-based indices
     let hasTimeField = this.handler.vis._attr.hasTimeField;
 
-    return Boolean(hasTimeField && xAxis.ordered && xAxis.scale && _.isFunction(xAxis.scale.invert));
+    return Boolean(hasTimeField && xAxis.ordered && xAxis.scale.scale && _.isFunction(xAxis.scale.scale.invert));
   };
 
   /**
@@ -191,8 +191,8 @@ export default function DispatchClass(Private) {
   Dispatch.prototype.addBrushEvent = function (svg) {
     if (!this.isBrushable()) return;
 
-    let xScale = _.values(this.handler.categoryAxes)[0].scale;
-    let yScale = _.values(this.handler.valueAxes)[0].scale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
+    let yScale = _.values(this.handler.valueAxes)[0].getScale();
     let brush = this.createBrush(xScale, svg);
 
     function brushEnd() {

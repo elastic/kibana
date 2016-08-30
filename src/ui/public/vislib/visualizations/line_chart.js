@@ -70,7 +70,7 @@ export default function LineChartFactory(Private) {
     let self = this;
     let showCircles = this._attr.showCircles;
     let color = this.handler.data.getColorFunc();
-    let xScale = _.values(this.handler.categoryAxes)[0].scale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
     let ordered = this.handler.data.get('ordered');
     let tooltip = this.tooltip;
     let isTooltip = this._attr.addTooltip;
@@ -118,7 +118,7 @@ export default function LineChartFactory(Private) {
 
     function cy(d, i, j) {
       const valueAxis = data[j].valueAxis || _.keys(self.handler.valueAxes)[0];
-      return self.handler.valueAxes[valueAxis].scale(d.y);
+      return self.handler.valueAxes[valueAxis].getScale()(d.y);
     }
 
     function cColor(d) {
@@ -186,7 +186,7 @@ export default function LineChartFactory(Private) {
    */
   LineChart.prototype.addLines = function (svg, data) {
     let self = this;
-    let xScale = _.values(this.handler.categoryAxes)[0].scale;
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
     let xAxisFormatter = this.handler.data.get('xAxisFormatter');
     let color = this.handler.data.getColorFunc();
     let ordered = this.handler.data.get('ordered');
@@ -214,7 +214,7 @@ export default function LineChartFactory(Private) {
       })
       .y(function y(d) {
         const valueAxis = data[i].valueAxis || _.keys(self.handler.valueAxes)[0];
-        return self.handler.valueAxes[valueAxis].scale(d.y);
+        return self.handler.valueAxes[valueAxis].getScale()(d.y);
       });
       return line(d.values);
     })
@@ -267,9 +267,9 @@ export default function LineChartFactory(Private) {
     let margin = this._attr.margin;
     let elWidth = this._attr.width = $elem.width();
     let elHeight = this._attr.height = $elem.height();
-    let scaleType = _.values(this.handler.valueAxes)[0].getScaleType();
-    let yScale = _.values(this.handler.valueAxes)[0].scale;
-    let xScale = _.values(this.handler.categoryAxes)[0].scale;
+    let scaleType = _.values(this.handler.valueAxes)[0].scale.getScaleType();
+    let yScale = _.values(this.handler.valueAxes)[0].getScale();
+    let xScale = _.values(this.handler.categoryAxes)[0].getScale();
     let minWidth = 20;
     let minHeight = 20;
     let startLineX = 0;
