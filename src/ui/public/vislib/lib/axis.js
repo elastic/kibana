@@ -227,7 +227,7 @@ export default function AxisFactory(Private) {
         const div = d3.select(el);
         const width = $(el).parent().width();
         const height = $(el).height();
-        let length = self.getLength(el, n);
+        const length = self.getLength(el, n);
         let adjustedHeight = height - margin.top - margin.bottom;
         let adjustedWidth = width + margin.left + margin.right + 50;
         if (self.isHorizontal()) {
@@ -239,7 +239,7 @@ export default function AxisFactory(Private) {
         // Validate whether width and height are not 0 or `NaN`
         self.validateWidthandHeight(adjustedWidth, adjustedHeight);
 
-        let axis = self.getAxis(length);
+        const axis = self.getAxis(length);
 
         // The axis should not appear if mode is set to 'wiggle' or 'silhouette'
         if (self.show) {
