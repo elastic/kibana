@@ -142,7 +142,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('"Fit data bounds" should zoom to level 3', function pageHeader() {
+    bdd.it('Fit data bounds should zoom to level 3', function pageHeader() {
       var expectedPrecision2ZoomCircles =   [ { color: '#750000', radius: 192 },
         { color: '#750000', radius: 191 },
         { color: '#750000', radius: 177 },
