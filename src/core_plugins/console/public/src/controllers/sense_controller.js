@@ -16,13 +16,16 @@ module.run(function (Private, $rootScope) {
   };
 });
 
-module.controller('SenseController', function SenseController($scope, docTitle) {
+module.controller('SenseController', function SenseController($scope, $timeout, docTitle) {
 
   docTitle.change('Console');
 
-  const output = getOutput($('#output'));
-  const input = getInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
-  init(input, output);
+  let input, output;
+  $timeout(() => {
+    output = getOutput($('#output'));
+    input = getInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
+    init(input, output);
+  });
 
   $scope.sendSelected = () => {
     input.focus();
