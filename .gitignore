@@ -5,7 +5,8 @@
 .node_binaries
 node_modules
 trash
-bundles
+/optimize/bundles
+/optimize/testdev
 target
 /build
 .jruby
@@ -16,6 +17,7 @@ target
 /test/screenshots/failure
 /test/screenshots/session
 /test/screenshots/visual_regression_gallery.html
+/html_docs
 /esvm
 .htpasswd
 .eslintcache

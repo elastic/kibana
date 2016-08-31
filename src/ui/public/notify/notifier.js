@@ -85,6 +85,27 @@ function restartNotifTimer(notif, cb) {
   startNotifTimer(notif, cb);
 }
 
+const typeToButtonClassMap = {
+  danger: 'btn-danger', // NOTE: `error` type is internally named as `danger`
+  warning: 'btn-warning',
+  info: 'btn-info',
+  banner: 'btn-banner'
+};
+const buttonHierarchyClass = (index) => {
+  if (index === 0) {
+    // first action: primary className
+    return 'btn-primary';
+  }
+  // subsequent actions: secondary/default className
+  return 'btn-default';
+};
+const typeToAlertClassMap = {
+  danger: `alert-danger`,
+  warning: `alert-warning`,
+  info: `alert-info`,
+  banner: `alert-banner`,
+};
+
 function add(notif, cb) {
   _.set(notif, 'info.version', version);
   _.set(notif, 'info.buildNum', buildNum);
@@ -97,10 +118,14 @@ function add(notif, cb) {
     });
   } else if (notif.customActions) {
     // wrap all of the custom functions in a close
-    notif.customActions = notif.customActions.map(action => {
+    notif.customActions = notif.customActions.map((action, index) => {
       return {
         key: action.text,
-        callback: closeNotif(notif, action.callback, action.text)
+        callback: closeNotif(notif, action.callback, action.text),
+        getButtonClass() {
+          const buttonTypeClass = typeToButtonClassMap[notif.type];
+          return `${buttonHierarchyClass(index)} ${buttonTypeClass}`;
+        }
       };
     });
   }
@@ -110,6 +135,18 @@ function add(notif, cb) {
   notif.isTimed = function isTimed() {
     return notif.timerId ? true : false;
   };
+
+  // decorate the notification with helper functions for the template
+  notif.getButtonClass = () => typeToButtonClassMap[notif.type];
+  notif.getAlertClassStack = () => `toast-stack alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getIconClass = () => (notif.type === 'banner') ?  '' : `fa fa-${notif.icon}`;
+  notif.getToastMessageClass = ()  => (notif.type === 'banner') ?  'toast-message-banner' : 'toast-message';
+  notif.getAlertClass = () => (notif.type === 'banner') ?
+    `alert ${typeToAlertClassMap[notif.type]}` : // not including `.toast` class leaves out the flex properties for banner
+    `toast alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getButtonGroupClass = () => (notif.type === 'banner') ?
+    'toast-controls-banner' :
+    'toast-controls';
 
   let dup = null;
   if (notif.content) {

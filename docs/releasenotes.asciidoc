@@ -16,6 +16,7 @@ The {version} release of Kibana requires Elasticsearch {esversion} or later.
 * {k4issue}6531[Issue 6531]: Improved warning for URL lengths that approach browser limits.
 * {k4issue}6602[Issue 6602]: Improves dark theme support.
 * {k4issue}6791[Issue 6791]: Enables composition of custom user toast notifications in Advanced Settings.
+* {k4pull}8014[Pull Request 8014]: Changes the UUID config setting from `uuid` to `server.uuid`, and puts UUID storage into data file instead of Elasticsearch.
 
 [float]
 [[bugfixes]]

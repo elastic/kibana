@@ -22,6 +22,7 @@ function stubbedLogstashFields() {
     { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false, sortable: false, filterable: true },
     { name: 'script string',      type: 'string',     scripted: true, script: '\'i am a string\'', lang: 'expression' },
     { name: 'script number',      type: 'number',     scripted: true, script: '1234', lang: 'expression' },
+    { name: 'script date',        type: 'date',       scripted: true, script: '1234', lang: 'painless' },
     { name: 'script murmur3',     type: 'murmur3',    scripted: true, script: '1234', lang: 'expression'},
   ].map(function (field) {
     field.count = field.count || 0;

@@ -54,7 +54,7 @@ describe('lib/config/config', function () {
       it('should allow keys in the schema', function () {
         let config = new Config(schema);
         let run = function () {
-          config.set('test.client.host', 'http://0.0.0.0');
+          config.set('test.client.host', 'http://localhost');
         };
         expect(run).to.not.throwException();
       });
