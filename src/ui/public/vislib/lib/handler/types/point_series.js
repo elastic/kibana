@@ -35,8 +35,8 @@ export default function ColumnHandler(Private) {
       return new Handler(vis, {
         data: data,
         chartTitle: new ChartTitle(vis.el),
-        categoryAxes: {
-          'CategoryAxis-1': new Axis({
+        categoryAxes: [
+          new Axis({
             id: 'CategoryAxis-1',
             type: 'category',
             vis: vis,
@@ -49,10 +49,10 @@ export default function ColumnHandler(Private) {
               title: data.get('xAxisLabel')
             }
           })
-        },
+        ],
         alerts: new Alerts(vis, data, opts.alerts),
-        valueAxes:  {
-          'ValueAxis-1': new Axis({
+        valueAxes:  [
+          new Axis({
             id: 'ValueAxis-1',
             type: 'value',
             vis: vis,
@@ -64,7 +64,7 @@ export default function ColumnHandler(Private) {
               title: data.get('yAxisLabel')
             }
           })
-        }
+        ]
       });
 
     };
