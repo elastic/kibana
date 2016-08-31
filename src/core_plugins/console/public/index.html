@@ -5,7 +5,7 @@
     <ul id="autocomplete"></ul>
     <div id="editor_actions">
       <kbn-tooltip text="click to send request">
-        <a class="editor_action" ng-click="sense.sendSelected()">
+        <a class="editor_action" ng-click="sendSelected()">
           <i class="fa fa-play"></i>
         </a>
       </kbn-tooltip>
@@ -19,7 +19,7 @@
             <a href="#" id="copy_as_curl">Copy as cURL</a>
           </li>
           <li role="menuitem">
-            <a ng-click="sense.autoIndent($event)">Auto indent</a>
+            <a ng-click="autoIndent($event)">Auto indent</a>
           </li>
         </ul>
       </span>

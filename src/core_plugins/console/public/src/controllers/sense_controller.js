@@ -21,13 +21,13 @@ module.controller('SenseController', function SenseController($scope, docTitle) 
   const input = require('../input');
   const es = require('../es');
 
-  this.sendSelected = () => {
+  $scope.sendSelected = () => {
     input.focus();
     input.sendCurrentRequestToES();
     return false;
   };
 
-  this.autoIndent = (event) => {
+  $scope.autoIndent = (event) => {
     input.autoIndent();
     event.preventDefault();
     input.focus();
