@@ -122,7 +122,7 @@ describe('Ingest Service', function () {
 
     it('POSTs to the kibana _data endpoint with the correct params and the file attached as multipart/form-data', function () {
       $httpBackend
-      .expectPOST('/api/kibana/foo/_data?csv_delimiter=;&pipeline=true', function (data) {
+      .expectPOST('/api/kibana/foo/_data?csv_delimiter=;', function (data) {
         // The assertions we can do here are limited because of poor browser support for FormData methods
         return data instanceof FormData;
       })
@@ -130,18 +130,18 @@ describe('Ingest Service', function () {
 
       const file = new Blob(['foo,bar'], {type : 'text/csv'});
 
-      ingest.uploadCSV(file, 'foo', ';', true);
+      ingest.uploadCSV(file, 'foo', ';');
       $httpBackend.flush();
     });
 
     it('Returns error from the data API if there is one', function (done) {
       $httpBackend
-      .expectPOST('/api/kibana/foo/_data?csv_delimiter=;&pipeline=true')
+      .expectPOST('/api/kibana/foo/_data?csv_delimiter=;')
       .respond(404);
 
       const file = new Blob(['foo,bar'], {type : 'text/csv'});
 
-      ingest.uploadCSV(file, 'foo', ';', true)
+      ingest.uploadCSV(file, 'foo', ';')
       .then(
         () => {
           throw new Error('expected an error response');
@@ -154,37 +154,6 @@ describe('Ingest Service', function () {
 
       $httpBackend.flush();
     });
-  });
-
-  describe('getProcessors', () => {
-
-    it('Calls the processors GET endpoint of the ingest API', function () {
-      $httpBackend
-      .expectGET('/api/kibana/ingest/processors')
-      .respond('ok');
-
-      ingest.getProcessors();
-      $httpBackend.flush();
-    });
-
-    it('Throws user-friendly error when there is an error in the request', function (done) {
-      $httpBackend
-      .when('GET', '/api/kibana/ingest/processors')
-      .respond(404);
-
-      ingest.getProcessors()
-      .then(
-        () => {
-          throw new Error('expected an error response');
-        },
-        (error) => {
-          expect(error.message).to.be('Error fetching enabled processors');
-          done();
-        });
-
-      $httpBackend.flush();
-    });
-
   });
 
 });
