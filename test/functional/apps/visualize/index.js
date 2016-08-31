@@ -17,7 +17,7 @@ bdd.describe('visualize app', function () {
 
   bdd.before(function () {
     var self = this;
-    remote.setWindowSize(1200,800);
+    remote.setWindowSize(1280,800);
 
     PageObjects.common.debug('Starting visualize before method');
     var logstash = scenarioManager.loadIfEmpty('logstashFunctional');
