@@ -45,6 +45,8 @@ export default async (kbnServer, server, config) => {
     if (bundle) bundles.add(bundle);
   }
 
+  const defaultLocale = config.get('i18n.locale');
+
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
 
@@ -141,18 +143,18 @@ function translate(key) {
   return kibanaTranslations[key];
 }
 
-function getTranslationLocale(acceptLanguages, server) {
+function getTranslationLocale(acceptLanguages, defaultLocale, server) {
   let localeStr = '';
 
   if (acceptLanguages === null || acceptLanguages.length <= 0) {
-    return DEFAULT_LOCALE;
+    return defaultLocale;
   }
   const registeredLocales = server.plugins.i18n.getRegisteredTranslationLocales();
   localeStr = getTranslationLocaleExactMatch(acceptLanguages, registeredLocales);
   if (localeStr != null) {
     return localeStr;
   }
-  localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales);
+  localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale);
 }
 
 function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
@@ -173,7 +175,7 @@ function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
   return null;
 }
 
-function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales) {
+function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale) {
   let localeStr = '';
 
   const acceptLangsLen = acceptLanguages.length;
@@ -188,5 +190,5 @@ function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales) {
       }
     }
   }
-  return DEFAULT_LOCALE;
+  return defaultLocale;
 }
