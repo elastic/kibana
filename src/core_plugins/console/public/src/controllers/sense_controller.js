@@ -1,5 +1,10 @@
 import 'ui/doc_title';
 import { useResizeCheckerProvider } from '../sense_editor_resize';
+import $ from 'jquery';
+import getInput from '../input';
+import getOutput from '../output';
+import es from '../es';
+import init from '../app';
 
 const module = require('ui/modules').get('app/sense');
 
@@ -15,11 +20,9 @@ module.controller('SenseController', function SenseController($scope, docTitle) 
 
   docTitle.change('Console');
 
-  // require the root app code, which expects to execute once the dom is loaded up
-  require('../app');
-
-  const input = require('../input');
-  const es = require('../es');
+  const output = getOutput($('#output'));
+  const input = getInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
+  init(input, output);
 
   $scope.sendSelected = () => {
     input.focus();
