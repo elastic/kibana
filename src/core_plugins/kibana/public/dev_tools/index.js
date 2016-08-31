@@ -15,6 +15,7 @@ uiModules
   return {
     restrict: 'E',
     template,
+    transclude: true,
     link: function ($scope) {
       $scope.devTools = Private(devTools).inOrder;
     }
