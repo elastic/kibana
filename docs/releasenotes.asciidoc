@@ -7,6 +7,20 @@ The {version} release of Kibana requires Elasticsearch {esversion} or later.
 [[enhancements]]
 == Enhancements
 * {k4pull}7085[Pull Request 7085]: Configuration to allow unauthenticated users to see status page
+* {k4pull}7996[Pull Request 7996]: Added option to configure headers for all Elasticsearch requests
+* {k4pull}7335[Pull Request 7335]: Status page and API now include plugin version info
+* {k4pull}6150[Pull Request 6150]: Error notifications will auto-dismiss after a timeout
+* {k4issue}6728[Issue 6728]: Package repos are now based on major versions
+
+[float]
+[[bugfixes]]
+== Bug Fixes
+* {k4pull}7457[Pull Request 7457]: Plugins now have a home for their data
+* {k4issue}8090[Issue 8090]: Fixed blank notifications that were appearing in plugin apps like Sense
+* {k4issue}8060[Issue 8060]: In some circumstances, Visualization editor controls would collapse after applying updates. They will now remain expanded
+* {k4pull}7422[Pull Request 7422]: Better cleanup on package removal
+* {k4issue}7590[Issue 7590]: Fixed logging for package installs using SysV
+* {k4pull}7431[Pull Request 7431]: A more accurate description for the Kibana service
 
 [float]
 [[deprecations]]
