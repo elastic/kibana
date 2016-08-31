@@ -83,7 +83,7 @@ export default function AxisFactory(Private) {
    * @returns {D3.Svg.Axis|*} D3 axis function
    */
   Axis.prototype.getAxis = function (length) {
-    const scale = this.createScale(length);
+    const scale = this.scale.getScale(length);
 
     // Create the d3 axis function
     return d3.svg.axis()
@@ -95,10 +95,6 @@ export default function AxisFactory(Private) {
 
   Axis.prototype.getScale = function () {
     return this.scale.scale;
-  };
-
-  Axis.prototype.createScale = function (length) {
-    return this.scale.getScale(length);
   };
 
   Axis.prototype.addInterval = function (interval) {
@@ -137,7 +133,7 @@ export default function AxisFactory(Private) {
 
   Axis.prototype.getLength = function (el, n) {
     if (this.isHorizontal()) {
-      return $(el).parent().width() / n - this._attr.margin.left - this._attr.margin.right;
+      return $(el).parent().width() / n - this._attr.margin.left - this._attr.margin.right - 50;
     }
     return $(el).parent().height() / n - this._attr.margin.top - this._attr.margin.bottom;
   };
@@ -147,7 +143,7 @@ export default function AxisFactory(Private) {
    *
    * @method updateXaxisHeight
    */
-  Axis.prototype.updateXaxisHeight = function (height) {
+  Axis.prototype.updateXaxisHeight = function () {
     const self = this;
     const selection = d3.select(this.vis.el).selectAll('.vis-wrapper');
 
@@ -161,7 +157,8 @@ export default function AxisFactory(Private) {
           .attr('class', 'inner-spacer-block');
       }
 
-      visEl.selectAll(`.y-axis-spacer-block-${self.position} .inner-spacer-block`).style('height', `${height}px`);
+      const height = visEl.select(`.axis-wrapper-${self.position}`).style('height');
+      visEl.selectAll(`.y-axis-spacer-block-${self.position} .inner-spacer-block`).style('height', height);
     });
 
   };
@@ -187,7 +184,7 @@ export default function AxisFactory(Private) {
 
       if (self.isHorizontal()) {
         selection.attr('height', length);
-        self.updateXaxisHeight(length + xAxisPadding);
+        self.updateXaxisHeight();
         if (self.position === 'top') {
           selection.select('g')
             .attr('transform', `translate(0, ${length - parseInt(self.style.lineWidth)})`);
@@ -227,16 +224,9 @@ export default function AxisFactory(Private) {
         const width = $(el).parent().width();
         const height = $(el).height();
         const length = self.getLength(el, n);
-        let adjustedHeight = height;
-        let adjustedWidth = width;
-        if (self.isHorizontal()) {
-          adjustedWidth = (width + margin.left + margin.right + 50) / n;
-        } else {
-          adjustedHeight = (height - margin.top - margin.bottom) / n;
-        }
 
         // Validate whether width and height are not 0 or `NaN`
-        self.validateWidthandHeight(adjustedWidth, adjustedHeight);
+        self.validateWidthandHeight(width, height);
 
         const axis = self.getAxis(length);
 
@@ -244,16 +234,16 @@ export default function AxisFactory(Private) {
         if (self.show) {
           // Append svg and y axis
           const svg = div.append('svg')
-          .attr('width', adjustedWidth)
+          .attr('width', width)
           .attr('height', height);
 
-          const svgAxis = svg.append('g')
+
+          svg.append('g')
           .attr('class', `axis ${self.id}`)
           .call(axis);
 
           const container = svg.select('g.axis').node();
           if (container) {
-            const cWidth = Math.max(adjustedWidth, container.getBBox().width);
             svg.select('path')
             .attr('style', `stroke: ${self.style.color}; stroke-width: ${self.style.lineWidth}; stroke-opacity: ${self.style.opacity}`);
             svg.selectAll('line')

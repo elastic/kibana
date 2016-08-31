@@ -26,8 +26,7 @@ export default function AxisTitleFactory(Private) {
     }
 
     _.extend(this, defaults, attr);
-    this.el = axis.vis.el;
-    this.data = axis.data;
+    this.axis = axis;
     this.elSelector = this.elSelector.replace('{pos}', axis.position);
   }
 
@@ -38,7 +37,7 @@ export default function AxisTitleFactory(Private) {
    * @returns {HTMLElement} DOM Element with axis titles
    */
   AxisTitle.prototype.render = function (selection) {
-    d3.select(this.el).selectAll(this.elSelector).call(this.draw());
+    d3.select(this.axis.vis.el).selectAll(this.elSelector).call(this.draw());
   };
 
   /**
@@ -60,18 +59,26 @@ export default function AxisTitleFactory(Private) {
 
         self.validateWidthandHeight(width, height);
 
-        div.append('svg')
+        const svg = div.append('svg')
         .attr('width', width)
-        .attr('height', height)
-        .append('text')
+        .attr('height', height);
+
+
+        const bbox = svg.append('text')
         .attr('transform', function () {
-          if (div.attr('class') === 'x-axis-title') {
+          if (self.axis.isHorizontal()) {
             return 'translate(' + width / 2 + ',11)';
           }
           return 'translate(11,' + height / 2 + ') rotate(270)';
         })
         .attr('text-anchor', 'middle')
-        .text(this.title);
+        .text(self.title).node().getBBox();
+
+        if (self.axis.isHorizontal()) {
+          svg.attr('height', bbox.height);
+        } else {
+          svg.attr('width', bbox.width);
+        }
       });
     };
   };
