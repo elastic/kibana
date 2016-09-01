@@ -121,6 +121,26 @@ export default function (_) {
       return dest;
     },
 
+    /**
+     * Merges arrays in an alternating fashion. Eg _.zipperConcat([1,2,3],[4,5,6]) to [1,4,2,5,3,6]
+     *
+     * @param  {Array} source(s) - One or more arrays to merge together in an alternating fashion
+     * @return {Array}
+     */
+    zipperConcat: function () {
+      var result = [];
+      for (var i = 0; ;++i) {
+        var temp = [];
+        for (var j = 0; j < arguments.length; ++j) {
+          var atPos = arguments[j].slice(i, i + 1);
+          if (atPos.length) temp.push(result.push(atPos[0]));
+        }
+        if (!temp.length) {
+          return result;
+        }
+      }
+    }
+
 
   });
 };

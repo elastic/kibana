@@ -243,74 +243,67 @@ describe('Vislib Color Module Test Suite', function () {
   });
 
   describe('Color Palette', function () {
-    let num1 = 45;
-    let num2 = 72;
-    let num3 = 90;
-    let string = 'Welcome';
-    let bool = true;
-    let nullValue = null;
-    let emptyArr = [];
-    let emptyObject = {};
-    let notAValue;
-    let createColorPalette;
-    let colorPalette;
+    let colorCount = 42;
+    let colors;
+    let colorFn;
+
+    function hue(color) {
+      return d3.hsl(color).h;
+    }
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      seedColors = Private(VislibComponentsColorSeedColorsProvider);
-      createColorPalette = Private(VislibComponentsColorColorPaletteProvider);
-      colorPalette = createColorPalette(num1);
+      seedColors = Private(require('ui/vislib/components/color/seed_colors'));
+      colorFn = Private(require('ui/vislib/components/color/color_palette'));
+      colors = colorFn(colorCount);
     }));
 
-    it('should throw an error if input is not a number', function () {
-      expect(function () {
-        createColorPalette(string);
-      }).to.throwError();
-
-      expect(function () {
-        createColorPalette(bool);
-      }).to.throwError();
-
-      expect(function () {
-        createColorPalette(nullValue);
-      }).to.throwError();
-
-      expect(function () {
-        createColorPalette(emptyArr);
-      }).to.throwError();
-
-      expect(function () {
-        createColorPalette(emptyObject);
-      }).to.throwError();
-
-      expect(function () {
-        createColorPalette(notAValue);
-      }).to.throwError();
-    });
-
     it('should be a function', function () {
-      expect(typeof createColorPalette).to.be('function');
+      expect(colorFn).to.be.a(Function);
     });
 
     it('should return an array', function () {
-      expect(colorPalette instanceof Array).to.be(true);
+      expect(colors).to.be.a(Array);
     });
 
-    it('should return an array of the same length as the input', function () {
-      expect(colorPalette.length).to.be(num1);
+    it('should return an array of the same length or longer than the input', function () {
+      expect(colors.length >= 42).to.be(true);
     });
 
-    it('should return the seed color array when input length is 72', function () {
-      expect(createColorPalette(num2)[71]).to.be(seedColors[71]);
+    it('should use the seed colors first', function () {
+      _.each(seedColors.base, function (color, i) {
+        expect(color).to.equal(colors[i]);
+      });
     });
 
-    it('should return an array of the same length as the input when input is greater than 72', function () {
-      expect(createColorPalette(num3).length).to.be(num3);
+    it('Should generate a color "between" the first and last', function () {
+      var seeds = [
+        hue(_.last(seedColors.base)),
+        hue(_.first(seedColors.base))
+      ].sort(function (a, b) { return  a - b; });
+      var parsedResult = hue(colors[seedColors.base.length]);
+      expect(parsedResult).to.be.within.apply(this, seeds);
+
     });
 
-    it('should create new darker colors when input is greater than 72', function () {
-      expect(createColorPalette(num3)[72]).not.to.equal(seedColors[0]);
+    it('Should be closer to the left hand color on the second level than on the first', function () {
+      var seeds = [
+        hue(_.last(seedColors.base)),
+        hue(_.first(seedColors.base))
+      ];
+      var firstLevel = hue(colors[seedColors.base.length]);
+      var secondLevel = hue(colors[seedColors.base.length * 2]);
+
+      expect(Math.abs(firstLevel - seeds[0])).to.be.greaterThan(Math.abs(secondLevel - seeds[0]));
+      expect(secondLevel - seeds[0]).to.be.lessThan(secondLevel - seeds[1]);
+
     });
 
+    it('Should double the number of colors each time the list is exhausted', function () {
+      expect(colorFn(64).length).to.be(64);
+      expect(colorFn(65).length).to.be(128);
+      expect(colorFn(128).length).to.be(128);
+      expect(colorFn(135).length).to.be(256);
+    });
   });
 });

@@ -7,14 +7,19 @@ define(function () {
    */
 
   return function SeedColorUtilService() {
-    return [
-      '#6eadc1',
+    var seed = [
       '#57c17b',
-      '#6f87d8',
-      '#663db8',
-      '#bc52bc',
-      '#9e3533',
-      '#daa05d'
+      '#7eb26d',
+      '#eab839',
+      '#ef843c',
+      '#e24d42',
+      '#1f78c1',
+      '#ba43a9',
+      '#705da0'
     ];
+
+    seed.base = seed.slice(0);
+
+    return seed;
   };
 });
