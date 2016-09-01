@@ -51,10 +51,7 @@
  * For these reasons, HashedItemStore doesn't concern itself with this constraint.
  */
 
-import {
- sortBy,
- values,
-} from 'lodash';
+import { pull, sortBy } from 'lodash';
 
 export default class HashedItemStore {
 
@@ -69,19 +66,12 @@ export default class HashedItemStore {
     // Store indexed items in descending order by touched (oldest first, newest last). We'll use
     // this to remove older items when we run out of storage space.
     this._indexedItems = [];
-    // Associate item hashes with the corresponding indexed items. We'll use this to quickly look
-    // up an item and update its touched date when it reoccurs in the browser history.
-    this._hashToIndexedItemMap = {};
 
-    // Build index from the persisted index. This happens when we re-open a closed tab.
+    // Potentially restore a previously persisted index. This happens when
+    // we re-open a closed tab.
     const persistedItemIndex = this._sessionStorage.getItem(HashedItemStore.PERSISTED_INDEX_KEY);
-
     if (persistedItemIndex) {
-      this._hashToIndexedItemMap = JSON.parse(persistedItemIndex) || {};
-      this._indexedItems = values(this._hashToIndexedItemMap);
-
-      // Order items by touched date (oldest first, newest last).
-      this._indexedItems = sortBy(this._indexedItems, 'touched');
+      this._indexedItems = sortBy(JSON.parse(persistedItemIndex) || [], 'touched');
     }
   }
 
@@ -103,6 +93,10 @@ export default class HashedItemStore {
     }
 
     return item;
+  }
+
+  _getIndexedItem(hash) {
+    return this._indexedItems.find(indexedItem => indexedItem.hash === hash);
   }
 
   _persistItem(hash, item) {
@@ -128,10 +122,6 @@ export default class HashedItemStore {
 
   _removeOldestItem() {
     const oldestIndexedItem = this._indexedItems.shift();
-
-    // Remove oldest item from index.
-    delete this._hashToIndexedItemMap[oldestIndexedItem.hash];
-
     // Remove oldest item from storage.
     this._sessionStorage.removeItem(oldestIndexedItem.hash);
   }
@@ -139,36 +129,23 @@ export default class HashedItemStore {
   _touchHash(hash) {
     // Touching a hash indicates that it's been used recently, so it won't be the first in line
     // when we remove items to free up storage space.
-    if (this._hashToIndexedItemMap[hash]) {
-      const indexedItem = this._hashToIndexedItemMap[hash];
 
-      // If item is already indexed, update the touched date.
-      indexedItem.touched = Date.now();
+    // either get or create an indexedItem
+    const indexedItem = this._getIndexedItem(hash) || { hash };
 
-      // Since the items are already sorted by touched and we're only changing one item, we can
-      // avoid a "costly" sort by just moving it to the end of the array.
-      const index = this._indexedItems.indexOf(indexedItem);
-      this._indexedItems.splice(index, 1);
-      this._indexedItems.push(indexedItem);
-    } else {
-      // If the item isn't indexed, create it...
-      const indexedItem = {
-        hash,
-        touched: Date.now(),
-      };
+    // set/update the touched time to now so that it's the "newest" item in the index
+    indexedItem.touched =  Date.now();
 
-      // ...and index it.
-      this._indexedItems.push(indexedItem);
-      this._hashToIndexedItemMap[hash] = indexedItem;
-    }
+    // ensure that the item is last in the index
+    pull(this._indexedItems, indexedItem);
+    this._indexedItems.push(indexedItem);
 
     // Regardless of whether this is a new or updated item, we need to persist the index.
     this._sessionStorage.setItem(
       HashedItemStore.PERSISTED_INDEX_KEY,
-      JSON.stringify(this._hashToIndexedItemMap)
+      JSON.stringify(this._indexedItems)
     );
   }
-
 }
 
-HashedItemStore.PERSISTED_INDEX_KEY = 'kibana.hashedItemIndex';
+HashedItemStore.PERSISTED_INDEX_KEY = 'kbn.hashedItemsIndex.v1';
