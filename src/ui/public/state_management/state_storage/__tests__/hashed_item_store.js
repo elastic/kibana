@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import bluebird from 'bluebird';
 
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import HashedItemStore from '../hashed_item_store';
@@ -12,7 +11,7 @@ describe('hashedItemStore', () => {
         const sessionStorage = new StubBrowserStorage();
         sinon.spy(sessionStorage, 'getItem');
 
-        const hashedItemStore = new HashedItemStore(sessionStorage);
+        new HashedItemStore(sessionStorage);
         sinon.assert.calledWith(sessionStorage.getItem, HashedItemStore.PERSISTED_INDEX_KEY);
         sessionStorage.getItem.restore();
       });
