@@ -13,6 +13,7 @@ import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
+import stateMonitor  from 'ui/state_management/state_monitor';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
@@ -54,6 +55,7 @@ uiRoutes
 
 app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
   return {
+    controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -94,6 +96,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
       const $state = $scope.state = new AppState(stateDefaults);
       const $uiState = $scope.uiState = $state.makeStateful('uiState');
+      const $appStatus = $scope.appStatus = this.appStatus = {};
 
       $scope.$watchCollection('state.options', function (newVal, oldVal) {
         if (!angular.equals(newVal, oldVal)) $state.save();
@@ -143,6 +146,14 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         }
 
         initPanelIndices();
+
+        // watch for state changes and update the appStatus.dirty value
+        const monitor = stateMonitor.create($state, stateDefaults);
+        monitor.onChange((status) => {
+          $appStatus.dirty = status.dirty;
+        });
+        $scope.$on('$destroy', () => monitor.destroy());
+
         $scope.$emit('application.load');
       }
 
