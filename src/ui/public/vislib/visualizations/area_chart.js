@@ -109,7 +109,7 @@ export default function AreaChartFactory(Private) {
           return xScale(d.x) + xScale.rangeBand() / 2;
         })
         .y0(function (d) {
-          const yScale = this.handler.valueAxes[0].getScale();
+          const yScale = self.handler.valueAxes[0].getScale();
           if (isOverlapping) {
             return yScale(0);
           }
@@ -117,7 +117,7 @@ export default function AreaChartFactory(Private) {
           return yScale(d.y0);
         })
         .y1(function (d) {
-          const yScale = this.handler.valueAxes[0].getScale();
+          const yScale = self.handler.valueAxes[0].getScale();
           if (isOverlapping) {
             return yScale(d.y);
           }
@@ -213,7 +213,7 @@ export default function AreaChartFactory(Private) {
       return xScale(d.x) + xScale.rangeBand() / 2;
     })
     .attr('cy', function cy(d, i, j) {
-      const yScale = this.handler.valueAxes[0].getScale();
+      const yScale = self.handler.valueAxes[0].getScale();
 
       if (isOverlapping) {
         return yScale(d.y);
