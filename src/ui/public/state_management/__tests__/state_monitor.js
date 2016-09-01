@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
 import stateMonitor from 'ui/state_management/state_monitor';
-import SimpleEmitter from 'ui/utils/SimpleEmitter';
+import SimpleEmitter from 'ui/utils/simple_emitter';
 
 describe('stateMonitor', function () {
   const noop = () => {};
