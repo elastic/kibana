@@ -27,6 +27,9 @@ fi
 
 nvm install "$(cat .node-version)"
 
+node -v
+npm -v
+
 ###*****###
 ### NPM ###
 ###*****###
