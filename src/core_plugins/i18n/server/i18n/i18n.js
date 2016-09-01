@@ -66,7 +66,7 @@ function getLocaleFromFileName(fullFileName) {
  */
 module.exports.registerTranslations = registerTranslations;
 /**
- * Return all translations registered for a particular locale. If a translation is unavailable for the locale then default locale is used.
+ * Return all translations registered for a particular locale.
  * @param {string} locale - Translation locale to be returned
  * @return {Promise} - A Promise object which will contain on resolve a JSON object of all registered translations
  */

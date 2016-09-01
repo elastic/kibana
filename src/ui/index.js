@@ -11,11 +11,7 @@ import UiBundle from './ui_bundle';
 import UiBundleCollection from './ui_bundle_collection';
 import UiBundlerEnv from './ui_bundler_env';
 import langParser from 'accept-language-parser';
-
-let kibanaTranslations = [];
-let acceptLanguages = '';
-
-const DEFAULT_LOCALE = 'en';
+import UiI18n from './ui_i18n';
 
 export default async (kbnServer, server, config) => {
   const uiExports = kbnServer.uiExports = new UiExports({
@@ -59,11 +55,11 @@ export default async (kbnServer, server, config) => {
       if (!app) return reply(Boom.notFound('Unknown app ' + id));
 
       const acceptLanguageStr = req.headers['accept-language'];
-      acceptLanguages = langParser.parse(acceptLanguageStr);
+      const acceptLanguages = langParser.parse(acceptLanguageStr);
 
       try {
         if (kbnServer.status.isGreen()) {
-          await reply.renderApp(app);
+          await reply.renderApp(app, acceptLanguages);
         } else {
           await reply.renderStatusPage();
         }
@@ -77,6 +73,10 @@ export default async (kbnServer, server, config) => {
     const uiSettings = server.uiSettings();
 
     return {
+  server.decorate('reply', 'renderApp', async function (app, acceptLanguages) {
+    const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
+    const uiSettings = server.uiSettings();
+    const payload = {
       app: app,
       nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
@@ -100,9 +100,11 @@ export default async (kbnServer, server, config) => {
   async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
     try {
       if (kibanaTranslations.length <= 0) {
-        const language = await getTranslationLanguage(acceptLanguages);
-        kibanaTranslations = await i18nPlugin.getRegisteredLanguageTranslations(language);
+        const locale = getTranslationLocale(acceptLanguages, defaultLocale, server);
+        kibanaTranslations = await server.plugins.i18n.getRegisteredLocaleTranslations(locale);
       }
+      const translations = await UiI18n.getLocaleTranslations(acceptLanguages, defaultLocale, server);
+      const i18n = new UiI18n.I18n(translations);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
@@ -111,8 +113,7 @@ export default async (kbnServer, server, config) => {
           includeUserProvidedConfig
         }),
         bundlePath: `${config.get('server.basePath')}/bundles`,
-        welcomeMessage: translate('CORE-WELCOME_MESSAGE'),
-        welcomeError: translate('CORE-WELCOME_ERROR'),
+        i18n: i18n,
       });
     } catch (err) {
       reply(err);
@@ -135,60 +136,3 @@ export default async (kbnServer, server, config) => {
     });
   });
 };
-
-function translate(key) {
-  if (!(key in kibanaTranslations)) {
-    return null;
-  }
-  return kibanaTranslations[key];
-}
-
-function getTranslationLocale(acceptLanguages, defaultLocale, server) {
-  let localeStr = '';
-
-  if (acceptLanguages === null || acceptLanguages.length <= 0) {
-    return defaultLocale;
-  }
-  const registeredLocales = server.plugins.i18n.getRegisteredTranslationLocales();
-  localeStr = getTranslationLocaleExactMatch(acceptLanguages, registeredLocales);
-  if (localeStr != null) {
-    return localeStr;
-  }
-  localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale);
-}
-
-function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
-  let localeStr = '';
-
-  const acceptLangsLen = acceptLanguages.length;
-  for (let indx = 0; indx < acceptLangsLen; indx++) {
-    const language = acceptLanguages[indx];
-    if (language.region) {
-      localeStr = language.code + '-' + language.region;
-    } else {
-      localeStr = language.code;
-    }
-    if (registeredLocales.indexOf(localeStr) > -1) {
-      return localeStr;
-    }
-  }
-  return null;
-}
-
-function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale) {
-  let localeStr = '';
-
-  const acceptLangsLen = acceptLanguages.length;
-  const regLangsLen = registeredLocales.length;
-  for (let indx = 0; indx < acceptLangsLen; indx++) {
-    const language = acceptLanguages[indx];
-    localeStr = language.code;
-    for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
-      const locale = registeredLocales[regIndx];
-      if (locale.match('^' + locale)) {
-        return locale;
-      }
-    }
-  }
-  return defaultLocale;
-}
