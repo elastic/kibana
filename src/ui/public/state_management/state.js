@@ -2,10 +2,8 @@ import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
-import qs from 'ui/utils/query_string';
 import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
-import KbnUrlProvider from 'ui/url';
 
 import {
   createStateHash,
@@ -200,8 +198,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
       this._notifier.error('Unable to completely restore the URL, be sure to use the share functionality.');
     }
 
-    const state = JSON.parse(json);
-    return state;
+    return JSON.parse(json);
   };
 
   /**

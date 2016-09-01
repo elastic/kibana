@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import sinon from 'sinon';
 import { encode as encodeRison } from 'rison-node';
 
 import {

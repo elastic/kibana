@@ -1,5 +1,3 @@
-
-import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -112,7 +110,7 @@ describe('State Management', function () {
       });
       state.test = 'foo';
       state.save();
-      let search = getUnhashedSearch(state);
+      getUnhashedSearch(state);
       $rootScope.$apply();
     });
   });
@@ -218,7 +216,7 @@ describe('State Management', function () {
 
     context('error handling', () => {
       it('notifies the user when a hash value does not map to a stored value', () => {
-        const { state, hashedItemStore, notifier } = setup({ storeInHash: true });
+        const { state, notifier } = setup({ storeInHash: true });
         const search = $location.search();
         const badHash = createStateHash('{"a": "b"}', () => null);
 
