@@ -195,6 +195,7 @@
     "makelogs": "3.0.2",
     "marked-text-renderer": "0.1.0",
     "mocha": "2.5.3",
+    "murmurhash3js": "3.0.1",
     "ncp": "2.0.0",
     "nock": "2.10.0",
     "npm": "3.10.3",
