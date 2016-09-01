@@ -283,7 +283,7 @@ export default function defaultSettingsProvider() {
       description: 'Your API key from www.quandl.com'
     },
     'state:storeInSessionStorage': {
-      value: false,
+      value: true,
       description: 'The URL can sometimes grow to be too large for some browsers to ' +
         'handle. To counter-act this we are testing if storing parts of the URL in ' +
         'sessions storage could help. Please let us know how it goes!'
