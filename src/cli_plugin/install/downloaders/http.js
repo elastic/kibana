@@ -48,7 +48,7 @@ function downloadResponse({ resp, targetPath, progress }) {
 Responsible for managing http transfers
 */
 export default async function downloadUrl(logger, sourceUrl, targetPath, timeout, proxy) {
-  let reqOptions = {
+  const reqOptions = {
     'timeout': timeout,
     'maxRedirects': 11, //Because this one goes to 11.
     'encoding': null

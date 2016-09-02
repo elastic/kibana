@@ -24,8 +24,8 @@ export function parseMilliseconds(val) {
 };
 
 export function parseProxy(val) {
-  let result = val.trim();
-  let regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+  const result = val.trim();
+  const regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
   if (!regexp.test(result)) {
     throw new Error(`Invalid proxy name ${result}`);
   }
