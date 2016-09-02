@@ -4,20 +4,19 @@ const I18n =  class {
   }
 
   translate(key) {
-    if (!(key in this.translations)) {
+    if (!this.translations.hasOwnProperty(key)) {
       return null;
     }
     return this.translations[key];
   }
 };
 
-const getLocaleTranslations = async function (acceptLanguages, defaultLocale, server) {
-  const locale = getTranslationLocale(acceptLanguages, defaultLocale, server);
+const getLocaleTranslations = async function (locale, server) {
   const translations = await server.plugins.i18n.getRegisteredLocaleTranslations(locale);
   return translations;
 };
 
-function getTranslationLocale(acceptLanguages, defaultLocale, server) {
+const getTranslationLocale = function (acceptLanguages, defaultLocale, server) {
   let localeStr = '';
 
   if (acceptLanguages === null || acceptLanguages.length <= 0) {
@@ -30,7 +29,31 @@ function getTranslationLocale(acceptLanguages, defaultLocale, server) {
   }
   localeStr = getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, defaultLocale);
   return localeStr;
-}
+};
+
+const updateMissingTranslations = async function (defaultLocale, translations, server) {
+  const defaultLocaleTranslations = await getLocaleTranslations(defaultLocale, server);
+  if (defaultLocaleTranslations === null || defaultLocaleTranslations.length <= 0) {
+    return translations;
+  }
+
+  const transKeys = Object.keys(translations).sort();
+  const defaultLocaleTransKeys = Object.keys(defaultLocaleTranslations).sort();
+  if (transKeys === defaultLocaleTransKeys) {
+    return translations;
+  }
+
+  let updatedTranslations = [];
+  for (let key in defaultLocaleTranslations) {
+    if (!defaultLocaleTranslations.hasOwnProperty(key)) continue;
+    if (!translations.hasOwnProperty(key)) {
+      updatedTranslations[key] = defaultLocaleTranslations[key];
+    } else {
+      updatedTranslations[key] = translations[key];
+    }
+  }
+  return updatedTranslations;
+};
 
 function getTranslationLocaleExactMatch(acceptLanguages, registeredLocales) {
   let localeStr = '';
@@ -70,6 +93,14 @@ function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, d
 
 /**
  * Return translations for a locale.
+ * @param {string} locale - Locale  to get translations for
+ * @param {object} server - Hapi server instance
+ * @return {object} - A JSON object of translations
+ */
+module.exports.getLocaleTranslations = getLocaleTranslations;
+
+/**
+ * Return suitable locale for translations.
  * The locale is decided by checking the user side locales against locale translations.
  * If no exact or partial match is found then the default locale is used.
  * @param {string} acceptLanguages - List of accept languages/locales from user side
@@ -77,7 +108,16 @@ function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, d
  * @param {object} server - Hapi server instance
  * @return {object} - A JSON object of translations
  */
-module.exports.getLocaleTranslations = getLocaleTranslations;
+module.exports.getTranslationLocale = getTranslationLocale;
+
+/**
+ * Return updated translations with any missing translations loaded from default localetranslations.
+ * @param {string} defaultLocale - Default locale as configured in Kibana
+ * @param {object} translations - An object array of translations
+ * @param {object} server - Hapi server instance
+ * @return {object} - A JSON object of translations
+ */
+module.exports.updateMissingTranslations = updateMissingTranslations;
 
 /**
  * Class which encapsulates translations for a locale and return translations string for a given translation key using translate(key).

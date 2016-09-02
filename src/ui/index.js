@@ -99,12 +99,17 @@ export default async (kbnServer, server, config) => {
 
   async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
     try {
-      if (kibanaTranslations.length <= 0) {
-        const locale = getTranslationLocale(acceptLanguages, defaultLocale, server);
-        kibanaTranslations = await server.plugins.i18n.getRegisteredLocaleTranslations(locale);
-      }
-      const translations = await UiI18n.getLocaleTranslations(acceptLanguages, defaultLocale, server);
-      const i18n = new UiI18n.I18n(translations);
+    if (kibanaTranslations.length <= 0) {
+      const locale = getTranslationLocale(acceptLanguages, defaultLocale, server);
+      kibanaTranslations = await server.plugins.i18n.getRegisteredLocaleTranslations(locale);
+    }
+    const translations = await UiI18n.getLocaleTranslations(acceptLanguages, defaultLocale, server);
+    let locale = UiI18n.getTranslationLocale(acceptLanguages, defaultLocale, server);
+    let translations = await UiI18n.getLocaleTranslations(locale, server);
+    if (locale !== defaultLocale) {
+      translations = await UiI18n.updateMissingTranslations(defaultLocale, translations, server);
+    }
+    const i18n = new UiI18n.I18n(translations);
       return reply.view(app.templateName, {
         app,
         kibanaPayload: await getKibanaPayload({
