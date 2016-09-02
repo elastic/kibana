@@ -39,17 +39,6 @@ module.exports = function (grunt) {
         ' Licensed <%= package.license %> */\n'
     },
 
-    lintThese: [
-      'Gruntfile.js',
-      '<%= root %>/tasks/**/*.js',
-      '<%= root %>/test/**/*.js',
-      '<%= src %>/**/*.js',
-      '!<%= src %>/ui/public/angular-bootstrap/**/*.js',
-      '!<%= src %>/core_plugins/timelion/bower_components/**/*.js',
-      '!<%= src %>/core_plugins/timelion/vendor_components/**/*.js',
-      '!<%= src %>/fixtures/**/*.js',
-      '!<%= root %>/test/fixtures/scenarios/**/*.js'
-    ],
     deepModules: {
       'caniuse-db': '1.0.30000265',
       'chalk': '1.1.0',
