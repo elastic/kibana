@@ -1,11 +1,11 @@
 
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
-import { get, indexBy } from 'lodash';
+import { indexBy } from 'lodash';
 import Collection from '../../utils/collection';
 
-let byIdCache = Symbol('byIdCache');
-let pluginApis = Symbol('pluginApis');
+const byIdCache = Symbol('byIdCache');
+const pluginApis = Symbol('pluginApis');
 
 module.exports = class Plugins extends Collection {
 
@@ -16,24 +16,23 @@ module.exports = class Plugins extends Collection {
   }
 
   async new(path) {
-    let api = new PluginApi(this.kbnServer, path);
+    const api = new PluginApi(this.kbnServer, path);
     this[pluginApis].add(api);
 
-    let output = [].concat(require(path)(api) || []);
-    let config = this.kbnServer.config;
+    const output = [].concat(require(path)(api) || []);
 
     if (!output.length) return;
 
     // clear the byIdCache
     this[byIdCache] = null;
 
-    for (let product of output) {
+    for (const product of output) {
 
       if (product instanceof api.Plugin) {
-        let plugin = product;
+        const plugin = product;
         this.add(plugin);
 
-        let enabled = await plugin.readConfig();
+        const enabled = await plugin.readConfig();
         if (!enabled) this.delete(plugin);
         continue;
       }

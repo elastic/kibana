@@ -3,13 +3,13 @@ import expect from 'expect.js';
 
 describe('IndexedArray Inflector', function () {
   it('returns a function', function () {
-    let getter = inflector();
+    const getter = inflector();
     expect(getter).to.be.a('function');
   });
 
   describe('fn', function () {
     it('prepends a prefix', function () {
-      let inflect = inflector('my');
+      const inflect = inflector('my');
 
       expect(inflect('Family')).to.be('myFamily');
       expect(inflect('family')).to.be('myFamily');
@@ -17,7 +17,7 @@ describe('IndexedArray Inflector', function () {
     });
 
     it('adds both a prefix and suffix', function () {
-      let inflect = inflector('foo', 'Bar');
+      const inflect = inflector('foo', 'Bar');
 
       expect(inflect('box')).to.be('fooBoxBar');
       expect(inflect('box.car.MAX')).to.be('fooBoxCarMaxBar');
@@ -25,19 +25,19 @@ describe('IndexedArray Inflector', function () {
     });
 
     it('ignores prefix if it is already at the end of the inflected string', function () {
-      let inflect = inflector('foo', 'Bar');
+      const inflect = inflector('foo', 'Bar');
       expect(inflect('fooBox')).to.be('fooBoxBar');
       expect(inflect('FooBox')).to.be('FooBoxBar');
     });
 
     it('ignores postfix if it is already at the end of the inflected string', function () {
-      let inflect = inflector('foo', 'Bar');
+      const inflect = inflector('foo', 'Bar');
       expect(inflect('bar')).to.be('fooBar');
       expect(inflect('showBoxBar')).to.be('fooShowBoxBar');
     });
 
     it('works with "name"', function () {
-      let inflect = inflector('in', 'Order');
+      const inflect = inflector('in', 'Order');
       expect(inflect('name')).to.be('inNameOrder');
     });
   });

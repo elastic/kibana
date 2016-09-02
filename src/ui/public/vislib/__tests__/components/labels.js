@@ -1,4 +1,3 @@
-import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -13,26 +12,25 @@ let rowsLabels;
 let seriesArr;
 let rowsArr;
 let uniqLabels;
-let error;
 
-let seriesData = {
+const seriesData = {
   'label': '',
   'series': [
     {
       'label': '100',
-      'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+      'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
     }
   ]
 };
 
-let rowsData = {
+const rowsData = {
   'rows': [
     {
       'label': 'a',
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -41,7 +39,7 @@ let rowsData = {
       'series': [
         {
           'label': '300',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -50,7 +48,7 @@ let rowsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -59,21 +57,21 @@ let rowsData = {
       'series': [
         {
           'label': '200',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     }
   ]
 };
 
-let columnsData = {
+const columnsData = {
   'columns': [
     {
       'label': 'a',
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -82,7 +80,7 @@ let columnsData = {
       'series': [
         {
           'label': '300',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -91,7 +89,7 @@ let columnsData = {
       'series': [
         {
           'label': '100',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     },
@@ -100,7 +98,7 @@ let columnsData = {
       'series': [
         {
           'label': '200',
-          'values': [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 3}]
+          'values': [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }]
         }
       ]
     }
@@ -152,23 +150,23 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Data array', function () {
-    let childrenObject = {
+    const childrenObject = {
       children: []
     };
-    let seriesObject = {
+    const seriesObject = {
       series: []
     };
-    let rowsObject = {
+    const rowsObject = {
       rows: []
     };
-    let columnsObject = {
+    const columnsObject = {
       columns: []
     };
-    let string = 'string';
-    let number = 23;
-    let boolean = false;
-    let emptyArray = [];
-    let nullValue = null;
+    const string = 'string';
+    const number = 23;
+    const boolean = false;
+    const emptyArray = [];
+    const nullValue = null;
     let notAValue;
     let dataArray;
     let testSeries;
@@ -267,21 +265,21 @@ describe('Vislib Labels Module Test Suite', function () {
 
   describe('Unique labels', function () {
     let uniqLabels;
-    let arrObj = [
-      {'label': 'a'},
-      {'label': 'b'},
-      {'label': 'b'},
-      {'label': 'c'},
-      {'label': 'c'},
-      {'label': 'd'},
-      {'label': 'f'}
+    const arrObj = [
+      { 'label': 'a' },
+      { 'label': 'b' },
+      { 'label': 'b' },
+      { 'label': 'c' },
+      { 'label': 'c' },
+      { 'label': 'd' },
+      { 'label': 'f' }
     ];
-    let string = 'string';
-    let number = 24;
-    let boolean = false;
-    let nullValue = null;
-    let emptyObject = {};
-    let emptyArray = [];
+    const string = 'string';
+    const number = 24;
+    const boolean = false;
+    const nullValue = null;
+    const emptyObject = {};
+    const emptyArray = [];
     let notAValue;
     let uniq;
     let testArr;
@@ -340,18 +338,18 @@ describe('Vislib Labels Module Test Suite', function () {
   });
 
   describe('Get series', function () {
-    let string = 'string';
-    let number = 24;
-    let boolean = false;
-    let nullValue = null;
-    let rowsObject = {
+    const string = 'string';
+    const number = 24;
+    const boolean = false;
+    const nullValue = null;
+    const rowsObject = {
       rows: []
     };
-    let columnsObject = {
+    const columnsObject = {
       columns: []
     };
-    let emptyObject = {};
-    let emptyArray = [];
+    const emptyObject = {};
+    const emptyArray = [];
     let notAValue;
     let getSeries;
     let columnsLabels;

@@ -49,8 +49,6 @@ angular.module('ui.bootstrap.collapse', ['ui.bootstrap.transition'])
           } else {
             // CSS transitions don't work with height: auto, so we have to manually change the height to a specific value
             element.css({ height: element[0].scrollHeight + 'px' });
-            //trigger reflow so a browser realizes that height was updated from auto to a specific value
-            var x = element[0].offsetWidth;
 
             element.removeClass('collapse in').addClass('collapsing');
 

@@ -21,4 +21,4 @@ export default function processESIngestSimulateResponse(resp) {
   });
 
   return results;
-};
+}

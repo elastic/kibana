@@ -33,8 +33,8 @@ module.exports = function (kibana) {
           'docViews'
         ],
 
-        injectVars: function (server, options) {
-          let config = server.config();
+        injectVars: function (server) {
+          const config = server.config();
           return {
             kbnDefaultAppId: config.get('kibana.defaultAppId'),
             tilemap: config.get('tilemap')
@@ -85,7 +85,7 @@ module.exports = function (kibana) {
       },
     },
 
-    init: function (server, options) {
+    init: function (server) {
       // uuid
       manageUuid(server);
       // routes

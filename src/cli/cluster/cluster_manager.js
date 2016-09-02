@@ -1,8 +1,13 @@
-import cluster from 'cluster';
-const { join, resolve } = require('path');
-const { format: formatUrl } = require('url');
-import Hapi from 'hapi';
-const { debounce, compact, get, invoke, bindAll, once, sample, uniq } = require('lodash');
+const {
+  resolve
+} = require('path');
+const {
+  debounce,
+  invoke,
+  bindAll,
+  once,
+  uniq
+} = require('lodash');
 
 import Log from '../log';
 import Worker from './worker';
@@ -85,19 +90,16 @@ module.exports = class ClusterManager {
     const chokidar = require('chokidar');
     const fromRoot = require('../../utils/from_root');
 
-    const watchPaths = uniq(
-      [
-        fromRoot('src/core_plugins'),
-        fromRoot('src/server'),
-        fromRoot('src/ui'),
-        fromRoot('src/utils'),
-        fromRoot('config'),
-        ...extraPaths
-      ]
-      .map(path => resolve(path))
-    );
+    const watchPaths = [
+      fromRoot('src/core_plugins'),
+      fromRoot('src/server'),
+      fromRoot('src/ui'),
+      fromRoot('src/utils'),
+      fromRoot('config'),
+      ...extraPaths
+    ].map(path => resolve(path));
 
-    this.watcher = chokidar.watch(watchPaths, {
+    this.watcher = chokidar.watch(uniq(watchPaths), {
       cwd: fromRoot('.'),
       ignored: /[\\\/](\..*|node_modules|bower_components|public|__tests__)[\\\/]/
     });
@@ -126,7 +128,7 @@ module.exports = class ClusterManager {
     rl.setPrompt('');
     rl.prompt();
 
-    rl.on('line', line => {
+    rl.on('line', () => {
       nls = nls + 1;
 
       if (nls >= 2) {

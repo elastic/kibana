@@ -1,12 +1,7 @@
 
 import expect from 'expect.js';
 
-import {
-  bdd,
-  remote,
-  scenarioManager,
-  esClient
-} from '../../../support';
+import { bdd, remote, esClient } from '../../../support';
 
 import PageObjects from '../../../support/page_objects';
 
@@ -48,7 +43,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       return PageObjects.settings.getTableHeader()
       .then(function (headers) {
         PageObjects.common.debug('header.length = ' + headers.length);
-        var expectedHeaders = [
+        const expectedHeaders = [
           'name',
           'type',
           'format',
@@ -60,7 +55,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
         // 6 name   type  format  analyzed  indexed   controls
         expect(headers.length).to.be(expectedHeaders.length);
 
-        var comparedHeaders = headers.map(function compareHead(header, i) {
+        const comparedHeaders = headers.map(function compareHead(header, i) {
           return header.getVisibleText()
           .then(function (text) {
             expect(text).to.be(expectedHeaders[i]);
@@ -74,7 +69,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
 
   bdd.describe('index pattern deletion', function indexDelete() {
     bdd.before(function () {
-      var expectedAlertText = 'Are you sure you want to remove this index pattern?';
+      const expectedAlertText = 'Are you sure you want to remove this index pattern?';
       return PageObjects.settings.removeIndexPattern()
       .then(function (alertText) {
         PageObjects.common.saveScreenshot('Settings-indices-confirm-remove-index-pattern');

@@ -25,4 +25,4 @@ export class GeoIp extends Processor {
       databaseFields: this.databaseFields || []
     };
   }
-};
+}

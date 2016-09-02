@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import 'ui/paginated_table';
-import popularityHtml from 'plugins/kibana/management/sections/indices/_field_popularity.html';
 import controlsHtml from 'plugins/kibana/management/sections/indices/_field_controls.html';
 import dateScripts from 'plugins/kibana/management/sections/indices/_date_scripts';
 import uiModules from 'ui/modules';
@@ -38,7 +37,7 @@ uiModules.get('apps/management')
         rowScopes.length = 0;
 
         const fields = filter($scope.indexPattern.getScriptedFields(), $scope.fieldFilter);
-        _.find($scope.fieldTypes, {index: 'scriptedFields'}).count = fields.length; // Update the tab count
+        _.find($scope.fieldTypes, { index: 'scriptedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
           const rowScope = $scope.$new();

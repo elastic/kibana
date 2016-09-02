@@ -1,6 +1,6 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
-import { merge, sample } from 'lodash';
+import { sample } from 'lodash';
 import { format as formatUrl } from 'url';
 import { map, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
@@ -103,9 +103,9 @@ export default class BasePathProxy {
 
     server.route({
       method: '*',
-      path: `/{oldBasePath}/{kbnPath*}`,
+      path: '/{oldBasePath}/{kbnPath*}',
       handler(req, reply) {
-        const {oldBasePath, kbnPath = ''} = req.params;
+        const { oldBasePath, kbnPath = '' } = req.params;
 
         const isGet = req.method === 'get';
         const isBasePath = oldBasePath.length === 3;

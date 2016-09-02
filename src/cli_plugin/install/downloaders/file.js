@@ -1,9 +1,9 @@
 import Progress from '../progress';
-import { createWriteStream, createReadStream, unlinkSync, statSync } from 'fs';
+import { createWriteStream, createReadStream, statSync } from 'fs';
 
 function openSourceFile({ sourcePath }) {
   try {
-    let fileInfo = statSync(sourcePath);
+    const fileInfo = statSync(sourcePath);
 
     const readStream = createReadStream(sourcePath);
 

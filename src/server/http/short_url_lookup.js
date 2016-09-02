@@ -24,7 +24,7 @@ export default function (server) {
   }
 
   async function getUrlDoc(urlId) {
-    const urlDoc = await new Promise((resolve, reject) => {
+    const urlDoc = await new Promise(resolve => {
       const client = server.plugins.elasticsearch.client;
       const kibanaIndex = server.config().get('kibana.index');
 
@@ -36,7 +36,7 @@ export default function (server) {
       .then(response => {
         resolve(response);
       })
-      .catch(err => {
+      .catch(() => {
         resolve();
       });
     });
@@ -100,4 +100,4 @@ export default function (server) {
       }
     }
   };
-};
+}

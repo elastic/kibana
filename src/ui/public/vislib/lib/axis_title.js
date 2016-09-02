@@ -4,7 +4,7 @@ import _ from 'lodash';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisTitleFactory(Private) {
 
-  let ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
   /**
    * Appends axis title(s) to the visualization
@@ -45,14 +45,14 @@ export default function AxisTitleFactory(Private) {
    * @returns {Function} Appends axis title to a D3 selection
    */
   AxisTitle.prototype.draw = function (title) {
-    let self = this;
+    const self = this;
 
     return function (selection) {
       selection.each(function () {
-        let el = this;
-        let div = d3.select(el);
-        let width = $(el).width();
-        let height = $(el).height();
+        const el = this;
+        const div = d3.select(el);
+        const width = $(el).width();
+        const height = $(el).height();
 
         self.validateWidthandHeight(width, height);
 
@@ -73,4 +73,4 @@ export default function AxisTitleFactory(Private) {
   };
 
   return AxisTitle;
-};
+}

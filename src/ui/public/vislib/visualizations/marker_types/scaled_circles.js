@@ -3,7 +3,7 @@ import L from 'leaflet';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
 export default function ScaledCircleMarkerFactory(Private) {
 
-  let BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
+  const BaseMarker = Private(VislibVisualizationsMarkerTypesBaseMarkerProvider);
 
   /**
    * Map overlay: circle markers that are scaled to illustrate values
@@ -13,17 +13,17 @@ export default function ScaledCircleMarkerFactory(Private) {
    * @param params {Object}
    */
   _.class(ScaledCircleMarker).inherits(BaseMarker);
-  function ScaledCircleMarker(map, geoJson, params) {
-    let self = this;
+  function ScaledCircleMarker() {
+    const self = this;
     ScaledCircleMarker.Super.apply(this, arguments);
 
     // multiplier to reduce size of all circles
-    let scaleFactor = 0.6;
+    const scaleFactor = 0.6;
 
     this._createMarkerGroup({
       pointToLayer: function (feature, latlng) {
-        let value = feature.properties.value;
-        let scaledRadius = self._radiusScale(value) * scaleFactor;
+        const value = feature.properties.value;
+        const scaledRadius = self._radiusScale(value) * scaleFactor;
         return L.circleMarker(latlng).setRadius(scaledRadius);
       }
     });
@@ -38,17 +38,17 @@ export default function ScaledCircleMarkerFactory(Private) {
    * @return {Number}
    */
   ScaledCircleMarker.prototype._radiusScale = function (value) {
-    let precisionBiasBase = 5;
-    let precisionBiasNumerator = 200;
-    let zoom = this.map.getZoom();
-    let maxValue = this.geoJson.properties.allmax;
-    let precision = _.max(this.geoJson.features.map(function (feature) {
+    const precisionBiasBase = 5;
+    const precisionBiasNumerator = 200;
+    const zoom = this.map.getZoom();
+    const maxValue = this.geoJson.properties.allmax;
+    const precision = _.max(this.geoJson.features.map(function (feature) {
       return String(feature.properties.geohash).length;
     }));
 
-    let pct = Math.abs(value) / Math.abs(maxValue);
-    let zoomRadius = 0.5 * Math.pow(2, zoom);
-    let precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
+    const pct = Math.abs(value) / Math.abs(maxValue);
+    const zoomRadius = 0.5 * Math.pow(2, zoom);
+    const precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
     // square root value percentage
     return Math.pow(pct, 0.5) * zoomRadius * precisionScale;
@@ -56,4 +56,4 @@ export default function ScaledCircleMarkerFactory(Private) {
 
 
   return ScaledCircleMarker;
-};
+}

@@ -8,11 +8,11 @@ import SegmentedRequestProvider from '../fetch/request/segmented';
 import SearchStrategyProvider from '../fetch/strategy/search';
 
 export default function SearchSourceFactory(Promise, Private) {
-  let SourceAbstract = Private(AbstractDataSourceProvider);
-  let SearchRequest = Private(SearchRequestProvider);
-  let SegmentedRequest = Private(SegmentedRequestProvider);
-  let searchStrategy = Private(SearchStrategyProvider);
-  let normalizeSortRequest = Private(NormalizeSortRequestProvider);
+  const SourceAbstract = Private(AbstractDataSourceProvider);
+  const SearchRequest = Private(SearchRequestProvider);
+  const SegmentedRequest = Private(SegmentedRequestProvider);
+  const searchStrategy = Private(SearchStrategyProvider);
+  const normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
@@ -71,7 +71,7 @@ export default function SearchSourceFactory(Promise, Private) {
    * @return {undefined|searchSource}
    */
   SearchSource.prototype.getParent = function (onlyHardLinked) {
-    let self = this;
+    const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
     return onlyHardLinked ? undefined : Private(rootSearchSource).get();
@@ -92,9 +92,9 @@ export default function SearchSourceFactory(Promise, Private) {
   };
 
   SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
-    let self = this;
+    const self = this;
     return Promise.try(function addRequest() {
-      let req = new SegmentedRequest(self, Promise.defer(), initFunction);
+      const req = new SegmentedRequest(self, Promise.defer(), initFunction);
 
       // return promises created by the completion handler so that
       // errors will bubble properly
@@ -139,7 +139,7 @@ export default function SearchSourceFactory(Promise, Private) {
    */
   SearchSource.prototype._mergeProp = function (state, val, key) {
     if (typeof val === 'function') {
-      let source = this;
+      const source = this;
       return Promise.cast(val(this))
       .then(function (newVal) {
         return source._mergeProp(state, newVal, key);
@@ -186,7 +186,7 @@ export default function SearchSourceFactory(Promise, Private) {
       // ignore if we already have a value
       if (state.body[key] == null) {
         if (key === 'query' && _.isString(val)) {
-          val = { query_string: { query: val }};
+          val = { query_string: { query: val } };
         }
 
         state.body[key] = val;
@@ -195,4 +195,4 @@ export default function SearchSourceFactory(Promise, Private) {
   };
 
   return SearchSource;
-};
+}

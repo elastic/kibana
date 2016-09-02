@@ -1,33 +1,25 @@
-import angular from 'angular';
 import expect from 'expect.js';
-import sinon from 'auto-release-sinon';
 import moment from 'moment';
 import ngMock from 'ng_mock';
+import sinon from 'auto-release-sinon';
 import 'ui/filters/moment';
-
 
 let filter;
 
-let config;
-let anchor = '2014-01-01T06:06:06.666';
-let clock;
-
-let init = function (expandable) {
+const init = function () {
   // Load the application
   ngMock.module('kibana');
 
-  clock = sinon.useFakeTimers(moment(anchor).valueOf());
+  sinon.useFakeTimers(moment('2014-01-01T04:04:04.444').valueOf());
 
   // Create the scope
-  ngMock.inject(function ($filter, _config_) {
+  ngMock.inject(function ($filter) {
     filter = $filter('moment');
-    config = _config_;
   });
 };
 
 
 describe('moment formatting filter', function () {
-
   beforeEach(function () {
     init();
   });
@@ -38,11 +30,11 @@ describe('moment formatting filter', function () {
 
   // MMMM Do YYYY, HH:mm:ss.SSS
   it('should format moments', function () {
-    expect(filter(moment())).to.be('January 1st 2014, 06:06:06.666');
+    expect(filter(moment())).to.be('January 1st 2014, 04:04:04.444');
   });
 
   it('should format dates', function () {
-    expect(filter(new Date())).to.be('January 1st 2014, 06:06:06.666');
+    expect(filter(new Date())).to.be('January 1st 2014, 04:04:04.444');
   });
 
   it('should return the original value if passed anything other than a moment or Date', function () {

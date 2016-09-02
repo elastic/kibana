@@ -62,7 +62,7 @@ describe('kibana cli', function () {
       describe('http downloader', function () {
 
         it('should throw an ENOTFOUND error for a http ulr that returns 404', function () {
-          const couchdb = nock('http://example.com')
+          nock('http://example.com')
             .get('/plugin.tar.gz')
             .reply(404);
 
@@ -88,7 +88,7 @@ describe('kibana cli', function () {
         it('should download a file from a valid http url', function () {
           const filePath = join(__dirname, 'replies/banana.jpg');
 
-          const couchdb = nock('http://example.com')
+          nock('http://example.com')
             .defaultReplyHeaders({
               'content-length': '341965',
               'content-type': 'application/zip'
@@ -143,7 +143,7 @@ describe('kibana cli', function () {
           'http://example.com/goodfile.tar.gz'
         ];
 
-        const couchdb = nock('http://example.com')
+        nock('http://example.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -173,7 +173,7 @@ describe('kibana cli', function () {
           'http://example.com/badfile3.tar.gz'
         ];
 
-        const couchdb = nock('http://example.com')
+        nock('http://example.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })
@@ -202,7 +202,7 @@ describe('kibana cli', function () {
           'http://example.com/badfile3.tar.gz'
         ];
 
-        const couchdb = nock('http://example.com')
+        nock('http://example.com')
         .defaultReplyHeaders({
           'content-length': '10'
         })

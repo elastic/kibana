@@ -2,7 +2,6 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import expect from 'expect.js';
 
-import uiModules from 'ui/modules';
 import chromeNavControlsRegistry from 'ui/registry/chrome_nav_controls';
 import Registry from 'ui/registry/_registry';
 
@@ -32,11 +31,11 @@ describe('chrome nav controls', function () {
       return {
         name: 'control',
         order: 100,
-        template: `<span id="testTemplateEl"></span>`
+        template: '<span id="testTemplateEl"></span>'
       };
     });
 
-    let $el = compile();
+    const $el = compile();
     expect($el.find('#testTemplateEl')).to.have.length(1);
   });
 
@@ -45,25 +44,25 @@ describe('chrome nav controls', function () {
       return {
         name: 'control2',
         order: 2,
-        template: `<span id="2", class="testControl"></span>`
+        template: '<span id="2", class="testControl"></span>'
       };
     });
     stubRegistry.register(function () {
       return {
         name: 'control1',
         order: 1,
-        template: `<span id="1", class="testControl"></span>`
+        template: '<span id="1", class="testControl"></span>'
       };
     });
     stubRegistry.register(function () {
       return {
         name: 'control3',
         order: 3,
-        template: `<span id="3", class="testControl"></span>`
+        template: '<span id="3", class="testControl"></span>'
       };
     });
 
-    let $el = compile();
+    const $el = compile();
     expect(
       $el.find('.testControl')
       .toArray()

@@ -124,4 +124,4 @@ export default function CourierFetchCallClient(Private, Promise, es, esShardTime
   }
 
   return callClient;
-};
+}

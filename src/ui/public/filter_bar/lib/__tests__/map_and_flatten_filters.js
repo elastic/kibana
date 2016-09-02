@@ -1,6 +1,5 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'auto-release-sinon';
 import FilterBarLibMapAndFlattenFiltersProvider from 'ui/filter_bar/lib/map_and_flatten_filters';
 
 describe('Filter Bar Directive', function () {
@@ -21,7 +20,7 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
     }));
 
-    let filters = [
+    const filters = [
       null,
       [
         { meta: { index: 'logstash-*' }, exists: { field: '_type' } },

@@ -9,9 +9,9 @@ export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', $rootScope => {
+  .directive('kbnChrome', () => {
     return {
-      template($el) {
+      template() {
         const $content = $(require('./kbn_chrome.html'));
         const $app = $content.find('.application');
 
@@ -35,7 +35,7 @@ export default function (chrome, internals) {
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
-          let { href } = window.location;
+          const { href } = window.location;
           internals.trackPossibleSubUrl(href);
         };
 

@@ -3,12 +3,11 @@ import expect from 'expect.js';
 
 describe('markdown vis controller', function () {
   let $scope;
-  let $el;
 
   beforeEach(ngMock.module('kibana/markdown_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();
-    $controller('KbnMarkdownVisController', {$scope: $scope});
+    $controller('KbnMarkdownVisController', { $scope: $scope });
     $scope.$digest();
   }));
 

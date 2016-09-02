@@ -1,11 +1,11 @@
 
 import { fromRoot } from '../../utils';
-import { chain, memoize } from 'lodash';
+import { chain } from 'lodash';
 import { resolve } from 'path';
-import { map, fromNode } from 'bluebird';
+import { fromNode } from 'bluebird';
 import glob from 'glob-all';
 
-let findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
+const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   patterns = [].concat(patterns || []);
 
   const matches = await fromNode(cb => {

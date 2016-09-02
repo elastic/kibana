@@ -1,5 +1,4 @@
 
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
@@ -9,16 +8,15 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-let dateHistogramArray = [
+const dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-let names = [
+const names = [
   'series',
   'columns',
   'rows',
@@ -27,17 +25,15 @@ let names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
-    let Handler;
     let vis;
     let persistedState;
-    let events = [
+    const events = [
       'click',
       'brush'
     ];
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Handler = Private(VislibLibHandlerHandlerProvider);
       vis = Private(FixturesVislibVisFixtureProvider)();
       persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.render(data, persistedState);
@@ -155,6 +151,5 @@ dateHistogramArray.forEach(function (data, i) {
       });
 
     });
-
   });
 });

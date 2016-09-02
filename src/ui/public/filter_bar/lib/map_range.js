@@ -1,4 +1,4 @@
-import {has} from 'lodash';
+import { has } from 'lodash';
 export default function mapRangeProvider(Promise, courier) {
   return function (filter) {
     if (!filter.range) return Promise.reject(filter);
@@ -7,9 +7,9 @@ export default function mapRangeProvider(Promise, courier) {
     .indexPatterns
     .get(filter.meta.index)
     .then(function (indexPattern) {
-      let key = Object.keys(filter.range)[0];
-      let convert = indexPattern.fields.byName[key].format.getConverterFor('text');
-      let range = filter.range[key];
+      const key = Object.keys(filter.range)[0];
+      const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+      const range = filter.range[key];
 
       let left = has(range, 'gte') ? range.gte : range.gt;
       if (left == null) left = -Infinity;
@@ -24,4 +24,4 @@ export default function mapRangeProvider(Promise, courier) {
     });
 
   };
-};
+}

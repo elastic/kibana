@@ -3,7 +3,6 @@ import toPath from 'lodash/internal/toPath';
 import Joi from 'joi';
 import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
-import { inherits } from 'util';
 
 const extendInitFns = Symbol('extend plugin initialization');
 
@@ -90,8 +89,8 @@ module.exports = class Plugin {
   }
 
   async readConfig() {
-    let schema = await this.getConfigSchema(Joi);
-    let { config } = this.kbnServer;
+    const schema = await this.getConfigSchema(Joi);
+    const { config } = this.kbnServer;
     config.extendSchema(this.configPrefix, schema || defaultConfigSchema);
 
     if (config.get([...toPath(this.configPrefix), 'enabled'])) {
@@ -107,8 +106,8 @@ module.exports = class Plugin {
   }
 
   async init() {
-    let { id, version, kbnServer, configPrefix } = this;
-    let { config } = kbnServer;
+    const { id, version, kbnServer, configPrefix } = this;
+    const { config } = kbnServer;
 
     // setup the hapi register function and get on with it
     const asyncRegister = async (server, options) => {

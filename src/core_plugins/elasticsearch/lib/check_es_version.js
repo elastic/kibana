@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import esBool from './es_bool';
 import versionSatisfies from './version_satisfies';
 import SetupError from './setup_error';
 
@@ -22,7 +21,7 @@ module.exports = function (server) {
       return 'Elasticsearch v' + node.version + ' @ ' + node.http_address + ' (' + node.ip + ')';
     });
 
-    const message = `This version of Kibana requires Elasticsearch ` +
+    const message = 'This version of Kibana requires Elasticsearch ' +
     `${engineVersion} on all nodes. I found ` +
     `the following incompatible nodes in your cluster: ${badNodeNames.join(',')}`;
 

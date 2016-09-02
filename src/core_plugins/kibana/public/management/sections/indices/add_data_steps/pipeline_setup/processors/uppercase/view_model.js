@@ -18,4 +18,4 @@ export class Uppercase extends Processor {
       sourceField: this.sourceField || ''
     };
   }
-};
+}

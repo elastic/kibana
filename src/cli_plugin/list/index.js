@@ -27,4 +27,4 @@ export default function pluginList(program) {
     )
     .description('list installed plugins')
     .action(processCommand);
-};
+}

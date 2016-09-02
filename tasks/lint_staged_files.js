@@ -8,7 +8,7 @@ export default function (grunt) {
     grunt.task.requires('collectFilesToCommit');
 
     // match these patterns
-    var patterns = grunt.config.get('eslint.source.files.src');
+    const patterns = grunt.config.get('eslint.source.files.src');
     if (!patterns) grunt.fail.warn('eslint file pattern is not defined');
 
     const files = grunt.config

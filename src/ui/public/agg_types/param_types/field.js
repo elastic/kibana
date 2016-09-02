@@ -4,7 +4,7 @@ import editorHtml from 'ui/agg_types/controls/field.html';
 import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
 export default function FieldAggParamFactory(Private) {
 
-  let BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
 
   _.class(FieldAggParam).inherits(BaseAggParam);
   function FieldAggParam(config) {
@@ -33,7 +33,7 @@ export default function FieldAggParamFactory(Private) {
    * @return {field}
    */
   FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
-    let field = aggConfig.vis.indexPattern.fields.byName[fieldName];
+    const field = aggConfig.vis.indexPattern.fields.byName[fieldName];
 
     if (!field) {
       throw new SavedObjectNotFound('index-pattern-field', fieldName);
@@ -53,7 +53,7 @@ export default function FieldAggParamFactory(Private) {
    * @return {undefined}
    */
   FieldAggParam.prototype.write = function (aggConfig, output) {
-    let field = aggConfig.params.field;
+    const field = aggConfig.params.field;
 
     if (field.scripted) {
       output.params.script = {
@@ -66,4 +66,4 @@ export default function FieldAggParamFactory(Private) {
   };
 
   return FieldAggParam;
-};
+}

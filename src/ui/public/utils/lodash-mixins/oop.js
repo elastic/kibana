@@ -41,4 +41,4 @@ export default function (_) {
       return Object.defineProperties(ClassConstructor, props);
     }
   });
-};
+}

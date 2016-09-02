@@ -1,10 +1,7 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
-import sinon from 'auto-release-sinon';
-import searchResponse from 'fixtures/search_response';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
 import 'ui/private';
 import 'ui/doc_table';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
@@ -23,7 +20,7 @@ let $timeout;
 
 let searchSource;
 
-let init = function ($elem, props) {
+const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
@@ -41,7 +38,7 @@ let init = function ($elem, props) {
   });
 };
 
-let destroy = function () {
+const destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };

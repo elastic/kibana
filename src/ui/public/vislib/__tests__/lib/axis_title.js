@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -17,7 +16,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let dataObj;
   let xTitle;
   let yTitle;
-  let data = {
+  const data = {
     hits: 621,
     label: '',
     ordered: {

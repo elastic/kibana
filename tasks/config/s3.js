@@ -1,6 +1,4 @@
-module.exports = function (grunt) {
-  var { config } = grunt;
-
+module.exports = function () {
   return {
     release: {
       bucket: 'download.elasticsearch.org',

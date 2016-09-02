@@ -59,7 +59,7 @@ export default (grunt) => {
       grunt.fail.fatal('Aborting publish');
     }
 
-    var rl = readline.createInterface({
+    const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     });

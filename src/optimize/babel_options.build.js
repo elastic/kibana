@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-let fromRoot = require('path').resolve.bind(null, __dirname, '../../');
+const fromRoot = require('path').resolve.bind(null, __dirname, '../../');
 
 if (!process.env.BABEL_CACHE_PATH) {
   process.env.BABEL_CACHE_PATH = fromRoot('optimize/.babelcache.json');

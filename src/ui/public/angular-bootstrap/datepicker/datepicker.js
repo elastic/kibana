@@ -278,7 +278,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
         return Math.floor(Math.round((time - checkDate) / 86400000) / 7) + 1;
       }
 
-      ctrl.handleKeyDown = function( key, evt ) {
+      ctrl.handleKeyDown = function(key) {
         var date = ctrl.activeDate.getDate();
 
         if (key === 'left') {
@@ -334,7 +334,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
         return new Date( date1.getFullYear(), date1.getMonth() ) - new Date( date2.getFullYear(), date2.getMonth() );
       };
 
-      ctrl.handleKeyDown = function( key, evt ) {
+      ctrl.handleKeyDown = function(key) {
         var date = ctrl.activeDate.getMonth();
 
         if (key === 'left') {
@@ -361,7 +361,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
   };
 }])
 
-.directive('yearpicker', ['dateFilter', function (dateFilter) {
+.directive('yearpicker', ['dateFilter', function() {
   return {
     restrict: 'EA',
     replace: true,
@@ -394,7 +394,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootst
         return date1.getFullYear() - date2.getFullYear();
       };
 
-      ctrl.handleKeyDown = function( key, evt ) {
+      ctrl.handleKeyDown = function(key) {
         var date = ctrl.activeDate.getFullYear();
 
         if (key === 'left') {
@@ -559,7 +559,7 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
         }
       };
 
-      var keydown = function(evt, noApply) {
+      var keydown = function(evt) {
         scope.keydown(evt);
       };
       element.bind('keydown', keydown);
@@ -629,7 +629,7 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
     replace: true,
     transclude: true,
     templateUrl: 'template/datepicker/popup.html',
-    link:function (scope, element, attrs) {
+    link:function(scope, element) {
       element.bind('click', function(event) {
         event.preventDefault();
         event.stopPropagation();

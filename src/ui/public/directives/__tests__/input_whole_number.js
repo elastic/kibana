@@ -1,4 +1,3 @@
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/directives/input_whole_number';
@@ -6,7 +5,7 @@ import 'ui/directives/input_whole_number';
 describe('Whole number input directive', function () {
   let $compile;
   let $rootScope;
-  let html = '<input type="text" ng-model="value" input-whole-number />';
+  const html = '<input type="text" ng-model="value" input-whole-number />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -16,7 +15,7 @@ describe('Whole number input directive', function () {
   }));
 
   it('should allow whole numbers', function () {
-    let element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = '123';
     $rootScope.$digest();
@@ -32,7 +31,7 @@ describe('Whole number input directive', function () {
   });
 
   it('should disallow numbers with decimals', function () {
-    let element = $compile(html)($rootScope);
+    const element = $compile(html)($rootScope);
 
     $rootScope.value = '123.0';
     $rootScope.$digest();

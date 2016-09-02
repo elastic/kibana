@@ -1,10 +1,8 @@
 import _ from 'lodash';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
-import qs from 'ui/utils/query_string';
 import EventsProvider from 'ui/events';
 import Notifier from 'ui/notify/notifier';
-import KbnUrlProvider from 'ui/url';
 
 const notify = new Notifier();
 export default function StateProvider(Private, $rootScope, $location) {
@@ -14,7 +12,7 @@ export default function StateProvider(Private, $rootScope, $location) {
   function State(urlParam, defaults) {
     State.Super.call(this);
 
-    let self = this;
+    const self = this;
     self.setDefaults(defaults);
     self._urlParam = urlParam || '_s';
 
@@ -45,7 +43,7 @@ export default function StateProvider(Private, $rootScope, $location) {
   }
 
   State.prototype._readFromURL = function () {
-    let search = $location.search();
+    const search = $location.search();
     try {
       return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
     } catch (e) {
@@ -74,7 +72,7 @@ export default function StateProvider(Private, $rootScope, $location) {
 
     _.defaults(stash, this._defaults);
     // apply diff to state from stash, will change state in place via side effect
-    let diffResults = applyDiff(this, stash);
+    const diffResults = applyDiff(this, stash);
 
     if (diffResults.keys.length) {
       this.emit('fetch_with_changes', diffResults.keys);
@@ -87,7 +85,7 @@ export default function StateProvider(Private, $rootScope, $location) {
    */
   State.prototype.save = function (replace) {
     let stash = this._readFromURL();
-    let state = this.toObject();
+    const state = this.toObject();
     replace = replace || false;
 
     if (!stash) {
@@ -97,14 +95,14 @@ export default function StateProvider(Private, $rootScope, $location) {
 
     _.defaults(state, this._defaults);
     // apply diff to state from stash, will change state in place via side effect
-    let diffResults = applyDiff(stash, state);
+    const diffResults = applyDiff(stash, state);
 
     if (diffResults.keys.length) {
       this.emit('save_with_changes', diffResults.keys);
     }
 
     // persist the state in the URL
-    let search = $location.search();
+    const search = $location.search();
     search[this._urlParam] = this.toRISON();
     if (replace) {
       $location.search(search).replace();
@@ -129,7 +127,7 @@ export default function StateProvider(Private, $rootScope, $location) {
   State.prototype.reset = function () {
     // apply diff to _attributes from defaults, this is side effecting so
     // it will change the state in place.
-    let diffResults = applyDiff(this, this._defaults);
+    const diffResults = applyDiff(this, this._defaults);
     if (diffResults.keys.length) {
       this.emit('reset_with_changes', diffResults.keys);
     }
@@ -151,4 +149,4 @@ export default function StateProvider(Private, $rootScope, $location) {
 
   return State;
 
-};
+}

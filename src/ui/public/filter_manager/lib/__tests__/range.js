@@ -9,7 +9,7 @@ let expected;
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
+    beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       expected = _.cloneDeep(require('fixtures/filter_skeleton'));
     }));
@@ -25,7 +25,7 @@ describe('Filter Manager', function () {
           lte: 3
         }
       };
-      expect(fn(indexPattern.fields.byName.bytes, {gte: 1, lte: 3}, indexPattern)).to.eql(expected);
+      expect(fn(indexPattern.fields.byName.bytes, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should return a script filter when passed a scripted field', function () {
@@ -40,23 +40,23 @@ describe('Filter Manager', function () {
           lte: 3
         }
       });
-      expect(fn(indexPattern.fields.byName['script number'], {gte: 1, lte: 3}, indexPattern)).to.eql(expected);
+      expect(fn(indexPattern.fields.byName['script number'], { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should throw an error when gte and gt, or lte and lt are both passed', function () {
       expect(function () {
-        fn(indexPattern.fields.byName['script number'], {gte: 1, gt: 3}, indexPattern);
+        fn(indexPattern.fields.byName['script number'], { gte: 1, gt: 3 }, indexPattern);
       }).to.throwError();
       expect(function () {
-        fn(indexPattern.fields.byName['script number'], {lte: 1, lt: 3}, indexPattern);
+        fn(indexPattern.fields.byName['script number'], { lte: 1, lt: 3 }, indexPattern);
       }).to.throwError();
     });
 
     it('to use the right operator for each of gte, gt, lt and lte', function () {
-      _.each({gte: '>=', gt: '>', lte: '<=', lt: '<'}, function (operator, key) {
-        let params = {};
+      _.each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, function (operator, key) {
+        const params = {};
         params[key] = 5;
-        let filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
+        const filter = fn(indexPattern.fields.byName['script number'], params, indexPattern);
 
         expect(filter.script.script.inline).to.be('(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
         expect(filter.script.script.params[key]).to.be(5);

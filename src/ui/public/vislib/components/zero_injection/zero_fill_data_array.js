@@ -1,5 +1,5 @@
 import _ from 'lodash';
-export default function ZeroFillDataArrayUtilService(Private) {
+export default function ZeroFillDataArrayUtilService() {
 
   /*
    * Accepts an array of zero-filled y value objects (arr1)
@@ -15,9 +15,9 @@ export default function ZeroFillDataArrayUtilService(Private) {
     let i;
     let val;
     let index;
-    let max = arr2.length;
+    const max = arr2.length;
 
-    let getX = function (d) {
+    const getX = function (d) {
       return d.x === val.x;
     };
 
@@ -29,4 +29,4 @@ export default function ZeroFillDataArrayUtilService(Private) {
 
     return arr1;
   };
-};
+}

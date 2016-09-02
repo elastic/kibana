@@ -9,8 +9,8 @@ describe('forEachField', function () {
   beforeEach(function () {
     testDoc = {
       foo: [
-        {bar: [{'baz': 1}]},
-        {bat: 'boo'}
+        { bar: [{ 'baz': 1 }] },
+        { bat: 'boo' }
       ]
     };
   });
@@ -30,7 +30,7 @@ describe('forEachField', function () {
   it('should call iteratee for each item in an array field, but not for the array itself', function () {
     const iteratee = sinon.spy();
 
-    forEachField({foo: [1, 2, 3]}, iteratee);
+    forEachField({ foo: [1, 2, 3] }, iteratee);
 
     expect(iteratee.callCount).to.be(3);
     expect(iteratee.calledWith(1, 'foo')).to.be.ok();
@@ -53,7 +53,7 @@ describe('forEachField', function () {
 
   it('should detect geo_point fields and should not invoke iteratee for its lat and lon sub properties', function () {
     const iteratee = sinon.spy();
-    const geo = {lat: 38.6631, lon: -90.5771};
+    const geo = { lat: 38.6631, lon: -90.5771 };
 
     forEachField({ geo }, iteratee);
 

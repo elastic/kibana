@@ -1,4 +1,3 @@
-import moment from 'moment';
 import dateRange from 'ui/utils/date_range';
 import 'ui/directives/validate_date_math';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
@@ -6,10 +5,10 @@ import AggTypesBucketsCreateFilterDateRangeProvider from 'ui/agg_types/buckets/c
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 import dateRangesTemplate from 'ui/agg_types/controls/date_ranges.html';
 
-export default function DateRangeAggDefinition(Private, config) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
-  let fieldFormats = Private(RegistryFieldFormatsProvider);
+export default function DateRangeAggDefinition(Private) {
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
+  const fieldFormats = Private(RegistryFieldFormatsProvider);
 
 
   return new BucketAggType({
@@ -17,7 +16,7 @@ export default function DateRangeAggDefinition(Private, config) {
     title: 'Date Range',
     createFilter: createFilter,
     getKey: function (bucket, key, agg) {
-      let formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
+      const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
       return dateRange.toString(bucket, formatter);
     },
     getFormat: function () {
@@ -41,4 +40,4 @@ export default function DateRangeAggDefinition(Private, config) {
       editor: dateRangesTemplate
     }]
   });
-};
+}

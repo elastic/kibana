@@ -18,7 +18,7 @@ function serializeError(err) {
   };
 }
 
-let levelColor = function (code) {
+const levelColor = function (code) {
   if (code < 299) return ansicolors.green(code);
   if (code < 399) return ansicolors.yellow(code);
   if (code < 499) return ansicolors.magenta(code);
@@ -41,13 +41,13 @@ module.exports = class TransformObjStream extends Stream.Transform {
   }
 
   _transform(event, enc, next) {
-    let data = this.filter(this.readEvent(event));
+    const data = this.filter(this.readEvent(event));
     this.push(this.format(data) + '\n');
     next();
   }
 
   readEvent(event) {
-    let data = {
+    const data = {
       type: event.event,
       '@timestamp': moment.utc(event.timestamp).format(),
       tags: [].concat(event.tags || []),
@@ -82,7 +82,7 @@ module.exports = class TransformObjStream extends Stream.Transform {
         contentLength: contentLength
       };
 
-      let query = querystring.stringify(event.query);
+      const query = querystring.stringify(event.query);
       if (query) data.req.url += '?' + query;
 
 

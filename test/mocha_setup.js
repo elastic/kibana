@@ -1,5 +1,5 @@
-var sinon = require('sinon');
-var autoRelease = require('auto-release-sinon');
+const sinon = require('sinon');
+const autoRelease = require('auto-release-sinon');
 
 require('babel/register')(require('../src/optimize/babel_options').node);
 
@@ -13,7 +13,7 @@ require('babel/register')(require('../src/optimize/babel_options').node);
 // The global "afterEach" variable is also tracked, and once it is assigned by mocha
 // the variable global is reconfigured to point directly to the new value (from mocha)
 // and all of the queued invocations are executed.
-var queuedAfterEachArgs = [];
+const queuedAfterEachArgs = [];
 Object.defineProperty(global, 'afterEach', {
   configurable: true,
   get() { return undefined; },

@@ -13,7 +13,7 @@ describe('Filter Bar Directive', function () {
     }));
 
     it('should return the key and value for matching filters', function (done) {
-      let filter = { exists: { field: '_type' } };
+      const filter = { exists: { field: '_type' } };
       mapExists(filter).then(function (result) {
         expect(result).to.have.property('key', 'exists');
         expect(result).to.have.property('value', '_type');
@@ -23,7 +23,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should return undefined for none matching', function (done) {
-      let filter = { query: { match: { query: 'foo' } } };
+      const filter = { query: { match: { query: 'foo' } } };
       mapExists(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();

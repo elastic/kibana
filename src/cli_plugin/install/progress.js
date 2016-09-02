@@ -32,7 +32,7 @@ export default class Progress {
   }
 
   complete() {
-    this.logger.log(`Transfer complete`, false);
+    this.logger.log('Transfer complete', false);
   }
 
 }

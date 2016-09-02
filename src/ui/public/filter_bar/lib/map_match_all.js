@@ -7,4 +7,4 @@ export default function mapMatchAllProvider(Promise) {
     }
     return Promise.reject(filter);
   };
-};
+}

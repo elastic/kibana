@@ -1,5 +1,3 @@
-import _ from 'lodash';
-import moment from 'moment';
 import 'ui/validate_date_interval';
 import AggTypesBucketsBucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
 import AggTypesBucketsCreateFilterHistogramProvider from 'ui/agg_types/buckets/create_filter/histogram';
@@ -7,8 +5,8 @@ import intervalTemplate from 'ui/agg_types/controls/interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 export default function HistogramAggDefinition(Private) {
-  let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  let createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
+  const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
+  const createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
 
 
   return new BucketAggType({
@@ -49,7 +47,7 @@ export default function HistogramAggDefinition(Private) {
         default: {},
         editor: extendedBoundsTemplate,
         write: function (aggConfig, output) {
-          let val = aggConfig.params.extended_bounds;
+          const val = aggConfig.params.extended_bounds;
 
           if (aggConfig.params.min_doc_count && (val.min != null || val.max != null)) {
             output.params.extended_bounds = {
@@ -61,7 +59,7 @@ export default function HistogramAggDefinition(Private) {
 
         // called from the editor
         shouldShow: function (aggConfig) {
-          let field = aggConfig.params.field;
+          const field = aggConfig.params.field;
           if (
             field
             && (field.type === 'number' || field.type === 'date')
@@ -72,4 +70,4 @@ export default function HistogramAggDefinition(Private) {
       }
     ]
   });
-};
+}

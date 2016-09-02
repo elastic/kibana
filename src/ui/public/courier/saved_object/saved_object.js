@@ -10,38 +10,38 @@ import SearchSourceProvider from '../data_source/search_source';
 
 export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
 
-  let DocSource = Private(DocSourceProvider);
-  let SearchSource = Private(SearchSourceProvider);
-  let mappingSetup = Private(MappingSetupProvider);
+  const DocSource = Private(DocSourceProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const mappingSetup = Private(MappingSetupProvider);
 
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};
 
     // save an easy reference to this
-    let self = this;
+    const self = this;
 
     /************
      * Initialize config vars
      ************/
     // the doc which is used to store this object
-    let docSource = new DocSource();
+    const docSource = new DocSource();
 
     // type name for this object, used as the ES-type
-    let type = config.type;
+    const type = config.type;
 
     // Create a notifier for sending alerts
-    let notify = new Notifier({
+    const notify = new Notifier({
       location: 'Saved ' + type
     });
 
     // mapping definition for the fields that this object will expose
-    let mapping = mappingSetup.expandShorthand(config.mapping);
+    const mapping = mappingSetup.expandShorthand(config.mapping);
 
     // default field values, assigned when the source is loaded
-    let defaults = config.defaults || {};
+    const defaults = config.defaults || {};
 
-    let afterESResp = config.afterESResp || _.noop;
-    let customInit = config.init || _.noop;
+    const afterESResp = config.afterESResp || _.noop;
+    const customInit = config.init || _.noop;
 
     // optional search source which this object configures
     self.searchSource = config.searchSource && new SearchSource();
@@ -113,7 +113,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
 
       if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, self.id);
 
-      let meta = resp._source.kibanaSavedObjectMeta || {};
+      const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;
 
       if (!config.indexPattern && self._source.indexPattern) {
@@ -158,8 +158,8 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
         state = {};
       }
 
-      let oldState = self.searchSource.toJSON();
-      let fnProps = _.transform(oldState, function (dynamic, val, name) {
+      const oldState = self.searchSource.toJSON();
+      const fnProps = _.transform(oldState, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
       }, {});
 
@@ -200,7 +200,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      * @return {Object}
      */
     self.serialize = function () {
-      let body = {};
+      const body = {};
 
       _.forOwn(mapping, function (fieldMapping, fieldName) {
         if (self[fieldName] != null) {
@@ -227,7 +227,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
      */
     self.save = function () {
 
-      let body = self.serialize();
+      const body = self.serialize();
 
       // Slugify the object id
       self.id = slugifyId(self.id);
@@ -240,7 +240,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
     };
 
     self.saveSource = function (source) {
-      let finish = function (id) {
+      const finish = function (id) {
         self.id = id;
         return es.indices.refresh({
           index: kbnIndex
@@ -255,7 +255,7 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
       .catch(function (err) {
         // record exists, confirm overwriting
         if (_.get(err, 'origError.status') === 409) {
-          let confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
+          const confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
           return safeConfirm(confirmMessage).then(
             function () {
@@ -298,4 +298,4 @@ export default function SavedObjectFactory(es, kbnIndex, Promise, Private, Notif
   }
 
   return SavedObject;
-};
+}

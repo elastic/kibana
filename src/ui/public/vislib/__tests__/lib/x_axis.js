@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -16,7 +15,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   let el;
   let fixture;
   let dataObj;
-  let data = {
+  const data = {
     hits: 621,
     label: '',
     ordered: {
@@ -127,7 +126,6 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
-    let ordered;
     let timeScale;
     let timeDomain;
     let ordinalScale;
@@ -201,7 +199,6 @@ describe('Vislib xAxis Class Test Suite', function () {
 
   describe('getXAxis Method', function () {
     let width;
-    let axis;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();

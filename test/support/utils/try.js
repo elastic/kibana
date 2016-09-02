@@ -10,11 +10,10 @@ import Log from './log.js';
 class Try {
 
   tryForTime(timeout, block) {
-    var self = this;
-    var start = Date.now();
-    var retryDelay = 502;
-    var lastTry = 0;
-    var tempMessage;
+    const start = Date.now();
+    const retryDelay = 502;
+    let lastTry = 0;
+    let tempMessage;
 
     function attempt() {
       lastTry = Date.now();
