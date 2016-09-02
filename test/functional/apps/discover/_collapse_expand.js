@@ -41,7 +41,7 @@ bdd.describe('discover tab', function describeIndexTests() {
       return PageObjects.discover.getSidebarWidth()
         .then(function (width) {
           PageObjects.common.debug('expanded sidebar width = ' + width);
-          expect(width > 180).to.be(true);
+          expect(width > 20).to.be(true);
         });
     });
 
@@ -66,7 +66,7 @@ bdd.describe('discover tab', function describeIndexTests() {
         })
         .then(function (width) {
           PageObjects.common.debug('expanded sidebar width = ' + width);
-          expect(width > 180).to.be(true);
+          expect(width > 20).to.be(true);
         });
     });
   });
