@@ -1,15 +1,140 @@
-<form role="form" class="vis-share">
-  <div class="form-group" ng-if="allowEmbed">
-    <label>
-      Embed this {{objectType}}
-      <small>Add to your html source. Note all clients must still be able to access kibana</small>
-    </label>
-    <share-object-url share-as-embed="true"></share-object-url>
+<div class="share-dropdown">
+  <!-- Left panel -->
+  <div class="share-panel share-panel--left">
+    <!-- Title -->
+    <div class="share-panel-title">
+      Share Original
+    </div>
+
+    <!-- Help text -->
+    <div class="share-panel-help-text">
+      The Original URL provides a link to a saved {{share.objectType}}. An Original URL will always load the most recent version of a saved {{share.objectType}}.
+    </div>
+
+    <div ng-if="!share.originalUrl" class="share-panel-warning">
+      Please save this {{share.objectType}} to enable sharing its Original URL.
+    </div>
+
+    <div ng-if="share.originalUrl">
+      <!-- Link -->
+      <div class="share-panel-section">
+        <!-- Header -->
+        <div class="share-panel-header">
+          <div class="share-panel-header__label">
+            Link
+          </div>
+          <div class="share-panel-header__actions">
+            <a
+              class="share-panel-header__action"
+              ng-click="share.copyToClipboard('#originalUrl')"
+            >
+              Copy
+            </a>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <input
+          id="originalUrl"
+          class="share-panel-input"
+          type="text"
+          readonly
+          value="{{share.originalUrl}}"
+        />
+      </div>
+    </div>
   </div>
-  <div class="form-group">
-    <label>
-      Share a link
-    </label>
-    <share-object-url share-as-embed="false"></share-object-url>
+
+  <!-- Right panel -->
+  <div class="share-panel share-panel--right">
+    <!-- Title -->
+    <div class="share-panel-title">
+      Share Snapshot
+    </div>
+
+    <!-- Help text -->
+    <div class="share-panel-help-text">
+      Snapshot URLs encode the current state of the {{share.objectType}} in the URL itself. Edits to the saved {{share.objectType}} won't be visible via this URL.
+    </div>
+
+    <!-- iframe -->
+    <div class="share-panel-section" ng-if="share.allowEmbed">
+      <!-- Header -->
+      <div class="share-panel-header">
+        <div class="share-panel-header__label">
+          Embedded iframe
+        </div>
+        <div class="share-panel-header__actions">
+          <a
+            class="share-panel-header__action"
+            ng-if="!share.shortSnapshotIframeUrl"
+            ng-click="share.useShortUrl('shortSnapshotIframeUrl', share.getEmbeddableUrl(share.snapshotUrl))"
+          >
+            Shorten URL
+          </a>
+
+          <a
+            class="share-panel-header__action"
+            ng-click="share.copyToClipboard('#snapshotIframeUrl')"
+          >
+            Copy
+          </a>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <input
+        id="snapshotIframeUrl"
+        class="share-panel-input"
+        type="text"
+        readonly
+        value="{{share.getIframeUrl(share.shortSnapshotIframeUrl || share.snapshotUrl)}}"
+      />
+
+      <!-- Notes -->
+      <div class="share-panel-form-note">
+        Add to your HTML source. Note that all clients must be able to access Kibana.
+      </div>
+    </div>
+
+    <!-- Link -->
+    <div class="share-panel-section">
+      <!-- Header -->
+      <div class="share-panel-header">
+        <div class="share-panel-header__label">
+          Link
+        </div>
+        <div class="share-panel-header__actions">
+          <a
+            class="share-panel-header__action"
+            ng-if="!share.shortSnapshotUrl"
+            ng-click="share.useShortUrl('shortSnapshotUrl', share.snapshotUrl)"
+          >
+            Shorten URL
+          </a>
+
+          <a
+            class="share-panel-header__action"
+            ng-click="share.copyToClipboard('#snapshotUrl')"
+          >
+            Copy
+          </a>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <input
+        id="snapshotUrl"
+        class="share-panel-input"
+        type="text"
+        readonly
+        value="{{share.shortSnapshotUrl || share.snapshotUrl}}"
+      />
+
+      <!-- Notes -->
+      <div class="share-panel-form-note" ng-if="!share.shortSnapshotUrl">
+        We recommend IE users share a Short URL due to IE’s restrictions on URL length.
+      </div>
+    </div>
   </div>
-</form>
+</div>
