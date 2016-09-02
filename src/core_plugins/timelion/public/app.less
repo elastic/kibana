@@ -1,0 +1,261 @@
+@import "~ui/styles/variables.less";
+@import (reference) "~ui/styles/mixins";
+@import './chart.less';
+@import './suggestions.less';
+
+[chart] {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestions {
+  position: absolute;
+  top: 30px;
+}
+
+.timelion {
+  position: relative;
+
+  &-container {
+    margin: 20px;
+
+    &-fixed {
+      margin: 25px;
+    }
+  }
+
+  &-container-drawer {
+    position: fixed;
+    bottow: 0px;
+
+    &-tab {
+      width: 100%;
+      background-color: @gray-lighter;
+    }
+  }
+
+  &-expression {
+    position: relative !important;
+  }
+
+  &-subnav {
+    background-color: @gray-lighter;
+    margin: 0px
+  }
+
+  &-stats {
+    font-weight: normal;
+  }
+
+  &-buttons {
+    position: absolute;
+    right: 0px;
+    display: inline-block;
+    padding: 5px 20px;
+    background-color: @navbar-default-bg;
+    border-bottom-left-radius: @border-radius-base;
+
+    a {
+      margin: 5px;
+      color: #000;
+    }
+  }
+
+  .config .list-group-item .container-fluid {
+    background-color: transparent;
+    padding: 0;
+  }
+}
+
+.timelion:after {
+  content: "{Re}search";
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  font-size: 32px;
+  font-weight: bold;
+  color: @gray;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+[ng-click] {
+  cursor: pointer;
+}
+
+.chart-container {
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  border: 2px dashed transparent;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  margin-bottom: 10px;
+
+  &.active {
+    border-color: #ccc;
+  }
+}
+
+
+navbar.timelion-navbar {
+
+  &-fixed {
+    border-top: 5px solid @navbar-default-bg;
+    top: 0;
+    left: @as-closed-width;
+    right: 0px;
+    position: fixed;
+  }
+
+  input, select {
+    height: 34px;
+  }
+
+  .form-control:focus {
+    border-color: @gray-lighter;
+  }
+}
+
+.timelion-nav-wrapper {
+  z-index: 20;
+}
+
+.timelion-scroll-class {
+
+}
+
+.chart-container.running {
+  opacity: 0.50;
+}
+
+select.timelion-interval {
+  width: 70px !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-position: right 50%;
+  background-repeat: no-repeat;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAMCAYAAABSgIzaAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NDZFNDEwNjlGNzFEMTFFMkJEQ0VDRTM1N0RCMzMyMkIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NDZFNDEwNkFGNzFEMTFFMkJEQ0VDRTM1N0RCMzMyMkIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NkU0MTA2N0Y3MUQxMUUyQkRDRUNFMzU3REIzMzIyQiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo0NkU0MTA2OEY3MUQxMUUyQkRDRUNFMzU3REIzMzIyQiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PuGsgwQAAAA5SURBVHjaYvz//z8DOYCJgUxAf42MQIzTk0D/M+KzkRGPoQSdykiKJrBGpOhgJFYTWNEIiEeAAAMAzNENEOH+do8AAAAASUVORK5CYII=);
+  padding: .5em;
+  padding-right: 1.5em;
+  border-left: 0px;
+  height: auto;
+  border-radius: 0;
+
+  &-other {
+    width: 10px !important;
+  }
+}
+
+timelion-interval {
+  display: flex;
+}
+
+input.timelion-interval {
+  border-radius: 0;
+  height: auto;
+  width: 40px !important;
+  padding: .5em;
+  border-right: 0px;
+  border-left: 0px;
+  text-align: center;
+}
+
+div.doc-container {
+  &-functions {
+    height: 310px;
+    overflow-y: auto;
+    background-color: @body-bg;
+    position: relative;
+    padding: 0px;
+
+    h3 {
+      margin-top: 0px;
+    }
+
+    tr.function:hover {
+      background-color: @gray-lighter;
+    }
+  }
+
+  &-content {
+    padding: 0 20px 20px 20px;
+    height: 310px;
+    overflow-y: auto;
+    background-color: @body-bg;
+    position: relative;
+  }
+
+  &-buttons {
+    text-align: center;
+    background-color: @body-bg;
+    height: 40px;
+
+    .btn-doc {
+      &-prev {
+        position: absolute;
+        left: 20px;
+      }
+
+      &-next {
+        position: absolute;
+        right: 20px;
+      }
+    }
+  }
+}
+
+.cell-actions {
+  position: absolute;
+  bottom:5px;
+  left:5px;
+  line-height: 10px;
+
+  > div {
+    display: inline-block;
+    font-size: 10px;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border: 1px solid #666;
+    padding: 3px;
+    font-weight: bold;
+    background-color: #ccc;
+    opacity: 0.50;
+    z-index: 10;
+  }
+
+  .cell-action {
+    opacity: 0;
+  }
+}
+
+.chart-container:hover {
+  .cell-action {
+    opacity: 0.50;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.legendLabel {
+  //max-width: 210px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+.ngLegendValue:hover {
+  text-decoration: underline;
+}
+
+.ngLegendValueNumber {
+  margin-left: 5px;
+  margin-right: 5px;
+  font-weight: bold;
+}
