@@ -4,6 +4,7 @@ import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
+import crypto from './server/lib/crypto';
 
 module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -95,6 +96,7 @@ module.exports = function (kibana) {
       scripts(server);
 
       server.expose('systemApi', systemApi);
+      server.expose('crypto', crypto);
     }
   });
 
