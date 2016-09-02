@@ -95,18 +95,20 @@ bdd.describe('visualize app', function describeIndexTests() {
         return PageObjects.visualize.clickGo();
       })
       .then(function () {
-        return PageObjects.visualize.getLineChartData('fill="#57c17b"')
-        .then(function showData(data) {
-          PageObjects.common.debug('data=' + data);
-          PageObjects.common.saveScreenshot('Visualize-line-chart');
-          var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-          for (var x = 0; x < data.length; x++) {
-            PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
-              (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
-              ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-            expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
-          }
-          PageObjects.common.debug('Done');
+        return PageObjects.common.try(function () {
+          return PageObjects.visualize.getLineChartData('fill="#57c17b"')
+          .then(function showData(data) {
+            PageObjects.common.debug('data=' + data);
+            PageObjects.common.saveScreenshot('Visualize-line-chart');
+            var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+            for (var x = 0; x < data.length; x++) {
+              PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
+                (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
+                ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
+              expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+            }
+            PageObjects.common.debug('Done');
+          });
         });
       });
     });
