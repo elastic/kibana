@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _, { keys } from 'lodash';
 const visualRegression = require('../utilities/visual_regression');
 
 module.exports = function (grunt) {
@@ -22,7 +22,19 @@ module.exports = function (grunt) {
   );
 
   grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
-  grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
+  grunt.registerTask('test:browser', ['run:testServer', 'karma:unit']);
+  grunt.registerTask('test:browser-ci', () => {
+    const ciShardTasks = keys(grunt.config.get('karma'))
+      .filter(key => key.startsWith('ciShard-'))
+      .map(key => `karma:${key}`);
+
+    grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
+
+    grunt.task.run([
+      'run:testServer',
+      ...ciShardTasks
+    ]);
+  });
   grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
   grunt.registerTask('test:quick', [
