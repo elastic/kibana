@@ -1,21 +1,23 @@
 import { badRequest } from 'boom';
 
 export default function (kbnServer, server, config) {
-  const version = config.get('pkg.version');
   const disabled = config.get('server.xsrf.disableProtection');
-  const header = 'kbn-version';
+  // COMPAT: We continue to check on the kbn-version header for backwards
+  // compatibility since all existing consumers have been required to use it.
+  const versionHeader = 'kbn-version';
+  const xsrfHeader = 'kbn-xsrf';
 
   server.ext('onPostAuth', function (req, reply) {
-    const noHeaderGet = (req.method === 'get' || req.method === 'head') && !req.headers[header];
-    if (disabled || noHeaderGet) return reply.continue();
+    if (disabled) {
+      return reply.continue();
+    }
 
-    const submission = req.headers[header];
-    if (!submission) return reply(badRequest(`Missing ${header} header`));
-    if (submission !== version) {
-      return reply(badRequest('Browser client is out of date, please refresh the page', {
-        expected: version,
-        got: submission
-      }));
+    const isSafeMethod = req.method === 'get' || req.method === 'head';
+    const hasVersionHeader = versionHeader in req.headers;
+    const hasXsrfHeader = xsrfHeader in req.headers;
+
+    if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
+      return reply(badRequest(`Request must contain an ${xsrfHeader} header`));
     }
 
     return reply.continue();

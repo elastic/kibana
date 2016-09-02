@@ -1,3 +1,5 @@
+import versionCheckMixin from './version_check';
+
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
   let fs = require('fs');
@@ -184,6 +186,8 @@ module.exports = function (kbnServer, server, config) {
       }
     }
   });
+
+  kbnServer.mixin(versionCheckMixin);
 
   return kbnServer.mixin(require('./xsrf'));
 };
