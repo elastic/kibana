@@ -51,7 +51,7 @@ module.exports = new Datasource ('worldbank', {
       var data = _.compact(_.map(deduped, function (val, date) {
         // Discard nulls
         if (val == null) return;
-        return [moment(date, 'YYYY').valueOf(), parseInt(val, 10)];
+        return [moment(date, 'YYYY').valueOf(), Number(val)];
       }));
 
       if (!hasData) throw new Error('Worldbank request succeeded, but there was no data for ' + config.code);
