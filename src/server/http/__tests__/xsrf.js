@@ -9,8 +9,9 @@ const nonDestructiveMethods = ['GET', 'HEAD'];
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
 const src = resolve.bind(null, __dirname, '../../../../src');
 
-const xsrfHeader = 'kbn-version';
-const version = require(src('../package.json')).version;
+const xsrfHeader = 'kbn-xsrf';
+const versionHeader = 'kbn-version';
+const actualVersion = require(src('../package.json')).version;
 
 describe('xsrf request filter', function () {
   function inject(kbnServer, opts) {
@@ -59,31 +60,30 @@ describe('xsrf request filter', function () {
         else expect(resp.payload).to.be('ok');
       });
 
-      it('failes on invalid tokens', async function () {
+      it('accepts requests with the xsrf header', async function () {
         const resp = await inject(kbnServer, {
           url: '/xsrf/test/route',
           method: method,
           headers: {
-            [xsrfHeader]: `invalid:${version}`,
+            [xsrfHeader]: 'anything',
           },
         });
 
-        expect(resp.statusCode).to.be(400);
-        expect(resp.headers).to.have.property(xsrfHeader, version);
+        expect(resp.statusCode).to.be(200);
         if (method === 'HEAD') expect(resp.payload).to.be.empty();
-        else expect(resp.payload).to.match(/"Browser client is out of date/);
+        else expect(resp.payload).to.be('ok');
       });
     });
   }
 
   for (const method of destructiveMethods) {
     context(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
-      it('accepts requests with the correct token', async function () {
+      it('accepts requests with the xsrf header', async function () {
         const resp = await inject(kbnServer, {
           url: '/xsrf/test/route',
           method: method,
           headers: {
-            [xsrfHeader]: version,
+            [xsrfHeader]: 'anything',
           },
         });
 
@@ -91,27 +91,29 @@ describe('xsrf request filter', function () {
         expect(resp.payload).to.be('ok');
       });
 
-      it('rejects requests without a token', async function () {
+      // this is still valid for existing csrf protection support
+      // it does not actually do any validation on the version value itself
+      it('accepts requests with the version header', async function () {
+        const resp = await inject(kbnServer, {
+          url: '/xsrf/test/route',
+          method: method,
+          headers: {
+            [versionHeader]: actualVersion,
+          },
+        });
+
+        expect(resp.statusCode).to.be(200);
+        expect(resp.payload).to.be('ok');
+      });
+
+      it('rejects requests without either an xsrf or version header', async function () {
         const resp = await inject(kbnServer, {
           url: '/xsrf/test/route',
           method: method
         });
 
         expect(resp.statusCode).to.be(400);
-        expect(resp.payload).to.match(/"Missing kbn-version header/);
-      });
-
-      it('rejects requests with an invalid token', async function () {
-        const resp = await inject(kbnServer, {
-          url: '/xsrf/test/route',
-          method: method,
-          headers: {
-            [xsrfHeader]: `invalid:${version}`,
-          },
-        });
-
-        expect(resp.statusCode).to.be(400);
-        expect(resp.payload).to.match(/"Browser client is out of date/);
+        expect(resp.payload).to.match(/"Request must contain an kbn-xsrf header/);
       });
     });
   }
