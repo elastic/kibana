@@ -1,21 +1,84 @@
-share-object-url {
-  .input-group {
+.share-dropdown {
+  display: flex;
+  padding: 5px 15px;
+}
+
+.share-panel {
+  flex: 1 1 0%;
+}
+
+.share-panel--left {
+  margin-right: 30px;
+}
+
+.share-panel--right {
+  border-left: 1px solid #E3E3E3;
+  padding-left: 30px;
+}
+
+  .share-panel-title {
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    font-size: 18px;
+    color: #000000;
+    border-bottom: 1px solid #E3E3E3;
+  }
+
+.share-panel-section {
+  margin-bottom: 16px;
+}
+
+.share-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+  .share-panel-header__label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  .share-panel-header__actions {
     display: flex;
+  }
 
-    .clipboard-button {
-       border-top-left-radius: 0;
-       border-bottom-left-radius: 0;
-    }
+  .share-panel-header__action {
+    font-size: 12px;
 
-    .shorten-button {
-       border-top-right-radius: 0;
-       border-top-left-radius: 0;
-       border-bottom-right-radius: 0;
-       border-bottom-left-radius: 0;
-    }
-
-    .form-control.url {
-      cursor: text;
+    & + & {
+      margin-left: 10px;
     }
   }
+
+.share-panel-input {
+  width: 100%;
+  padding: 4px 10px;
+  margin-bottom: 6px;
+  border: 0;
+  border-radius: 4px;
+}
+
+.share-panel-form-note {
+  font-size: 14px;
+  color: #656565;
+}
+
+.share-panel-help-text {
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.share-panel-help-text--info {
+  color: #656565;
+}
+
+.share-panel-warning {
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #5C5230;
+  background-color: #FCCF35;
 }
