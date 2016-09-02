@@ -3,6 +3,10 @@ import { remove } from 'lodash';
 
 import './kbn_chrome.less';
 import UiModules from 'ui/modules';
+import {
+  getUnhashableStatesProvider,
+  unhashUrl,
+} from 'ui/state_management/state_hashing';
 import { isSystemApiRequest } from 'ui/system_api';
 
 export default function (chrome, internals) {
@@ -28,15 +32,17 @@ export default function (chrome, internals) {
       },
 
       controllerAs: 'chrome',
-      controller($scope, $rootScope, $location, $http) {
+      controller($scope, $rootScope, $location, $http, Private) {
+        const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
-          let { href } = window.location;
-          internals.trackPossibleSubUrl(href);
+          const urlWithHashes = window.location.href;
+          const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+          internals.trackPossibleSubUrl(urlWithStates);
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
