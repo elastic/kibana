@@ -245,5 +245,42 @@ export default function defaultSettingsProvider() {
       description: 'The time in milliseconds which an information notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.'
     },
+    // Timelion stuff
+    'timelion:showTutorial': {
+      value: false,
+      description: 'Should I show the tutorial by default when entering the timelion app?'
+    },
+    'timelion:es.timefield': {
+      value: '@timestamp',
+      description: 'Default field containing a timestamp when using .es()'
+    },
+    'timelion:es.default_index': {
+      value: '_all',
+      description: 'Default elasticsearch index to search with .es()'
+    },
+    'timelion:target_buckets': {
+      value: 200,
+      description: 'The number of buckets to shoot for when using auto intervals'
+    },
+    'timelion:max_buckets': {
+      value: 2000,
+      description: 'The maximum number of buckets a single datasource can return'
+    },
+    'timelion:default_columns': {
+      value: 2,
+      description: 'Number of columns on a timelion sheet by default'
+    },
+    'timelion:default_rows': {
+      value: 2,
+      description: 'Number of rows on a timelion sheet by default'
+    },
+    'timelion:graphite.url': {
+      value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
+      description: 'The URL of your graphite host'
+    },
+    'timelion:quandl.key': {
+      value: 'someKeyHere',
+      description: 'Your API key from www.quandl.com'
+    }
   };
 };
