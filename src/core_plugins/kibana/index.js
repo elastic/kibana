@@ -1,7 +1,9 @@
+import manageUuid from './server/lib/manage_uuid';
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
+import * as systemApi from './server/lib/system_api';
 
 module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -84,10 +86,15 @@ module.exports = function (kibana) {
     },
 
     init: function (server, options) {
+      // uuid
+      manageUuid(server);
+      // routes
       ingest(server);
       search(server);
       settings(server);
       scripts(server);
+
+      server.expose('systemApi', systemApi);
     }
   });
 
