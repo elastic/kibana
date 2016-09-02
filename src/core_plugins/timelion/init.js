@@ -4,8 +4,6 @@ var processFunctionDefinition = require('./server/lib/process_function_definitio
 module.exports = function (server) {
   //var config = server.config();
 
-  require('./server/lib/populate_config')(server);
-
   require('./server/routes/run.js')(server);
   require('./server/routes/functions.js')(server);
   require('./server/routes/validate_es.js')(server);
