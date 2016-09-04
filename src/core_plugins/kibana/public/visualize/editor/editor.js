@@ -52,10 +52,11 @@ uiRoutes
 
 uiModules
 .get('app/visualize', [
+  'kibana/courier',
   'kibana/notify',
-  'kibana/courier'
+  'kibana/sharing_ui'
 ])
-.controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
+.controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise, kbnShare) {
 
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -91,14 +92,20 @@ uiModules
     template: require('plugins/kibana/visualize/editor/panels/load.html'),
     description: 'Load Saved Visualization',
   }, {
-    key: 'share',
-    template: require('plugins/kibana/visualize/editor/panels/share.html'),
-    description: 'Share Visualization'
-  }, {
     key: 'refresh',
     description: 'Refresh',
     run: function () { $scope.fetch(); }
-  }];
+  },
+  require('ui/kbn_share/kbn_share_nav')];
+
+  kbnShare.register('visualize.editor.link', {
+    $scope,
+    icon: {
+      title: 'Share',
+      classes: 'fa fa-link'
+    },
+    template: require('plugins/kibana/visualize/editor/panels/share.html')
+  });
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);

@@ -25,7 +25,8 @@ const app = uiModules.get('app/dashboard', [
   'kibana/courier',
   'kibana/config',
   'kibana/notify',
-  'kibana/typeahead'
+  'kibana/typeahead',
+  'kibana/sharing_ui'
 ]);
 
 uiRoutes
@@ -52,7 +53,7 @@ uiRoutes
   }
 });
 
-app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
+app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, kbnShare) {
   return {
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
@@ -117,14 +118,20 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         description: 'Load Saved Dashboard',
         template: require('plugins/kibana/dashboard/partials/load_dashboard.html')
       }, {
-        key: 'share',
-        description: 'Share Dashboard',
-        template: require('plugins/kibana/dashboard/partials/share.html')
-      }, {
         key: 'options',
         description: 'Options',
         template: require('plugins/kibana/dashboard/partials/options.html')
-      }];
+      },
+      require('ui/kbn_share/kbn_share_nav')];
+
+      kbnShare.register('dashboard.link', {
+        $scope,
+        icon: {
+          title: 'Share',
+          classes: 'fa fa-link'
+        },
+        template: require('plugins/kibana/dashboard/partials/share.html')
+      });
 
       $scope.refresh = _.bindKey(courier, 'fetch');
 

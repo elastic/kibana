@@ -1,0 +1,24 @@
+<div class="sharing-ui-menu__ListWrapper">
+  <ul class="sharing-ui-menu__List">
+    <li
+      ng-repeat="item in kbnShare.menuItems"
+      ng-show="kbnShare.isVisible(item)"
+      class="sharing-ui-menu__Item"
+    >
+      <button class="sharing-ui-menu__Button" ng-click="kbnShare.open(item.key)">
+        <i class="sharing-ui-menu__Icon {{item.icon.classes}}"></i>
+        <span ng-bind="item.icon.title"></span>
+      </button>
+    </li>
+  </ul>
+  <a
+    class="sharing-ui-menu__Close"
+    ng-click="kbnShare.close()"
+    ng-show="kbnShare.hasCurrent()"
+  >Back</a>
+</div>
+<div
+  id="share-ui-template"
+  class="sharing-ui-menu__SharePanel"
+  ng-show="kbnShare.hasCurrent()"
+></div>
