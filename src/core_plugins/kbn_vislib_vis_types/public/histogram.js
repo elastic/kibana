@@ -14,7 +14,6 @@ export default function HistogramVisType(Private) {
     'exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',

@@ -12,7 +12,7 @@ define(function () {
 
     // render and get bounding box width
     return function (selection, parent, opts) {
-      let yAxis = opts && _.values(opts.valueAxes)[0];
+      let yAxis = opts && opts.valueAxes[0];
 
       selection.each(function () {
         let div = d3.select(this);
