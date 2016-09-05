@@ -262,6 +262,13 @@ define(function (require) {
       .click();
     },
 
+    selectOrderBy: function orderBy(fieldValue) {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByCssSelector('select[name="orderBy"] > option[value="' + fieldValue + '"]')
+      .click();
+    },
+
     getInterval: function getInterval() {
       var self = this;
       return this.remote

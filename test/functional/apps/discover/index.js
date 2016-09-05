@@ -9,13 +9,11 @@ define(function (require) {
   var collapseExpand = require('./_collapse_expand');
 
   bdd.describe('discover app', function () {
-    var remote;
     var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
     this.timeout = config.timeouts.default;
 
     bdd.before(function () {
-      remote = this.remote;
-      return remote.setWindowSize(1200,800);
+      return this.remote.setWindowSize(1200,800);
     });
 
     bdd.after(function unloadMakelogs() {

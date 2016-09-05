@@ -13,7 +13,6 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var visualizePage;
-      var remote;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -21,7 +20,6 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
       });
 
       bdd.before(function () {
