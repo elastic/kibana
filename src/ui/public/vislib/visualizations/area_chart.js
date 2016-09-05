@@ -77,7 +77,7 @@ export default function AreaChartFactory(Private) {
     let isTimeSeries = (ordered && ordered.date);
     let isOverlapping = this.isOverlapping;
     let color = this.handler.data.getColorFunc();
-    let xScale = this.handler.xAxis.getScale();
+    let xScale = this.handler.categoryAxes[0].getScale();
     let interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
 
     // Data layers

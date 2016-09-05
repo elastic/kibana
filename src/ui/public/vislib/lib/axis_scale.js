@@ -159,8 +159,8 @@ export default function AxisScaleFactory(Private) {
       if (this.isTimeDomain()) return this.getTimeDomain(this.axis.values);
       if (this.isOrdinal()) return this.axis.values;
 
-      const min = this.min || this.axis.data.getYMin();
-      const max = this.max || this.axis.data.getYMax();
+      const min = this.axis.min || this.axis.data.getYMin();
+      const max = this.axis.max || this.axis.data.getYMax();
       const domain = [min, max];
       if (this.isUserDefined()) return this.validateUserExtents(domain);
       if (this.isYExtents()) return domain;
