@@ -55,8 +55,6 @@ bdd.describe('visualize app', function describeIndexTests() {
 
     bdd.it('should show correct chart, take screenshot', function pageHeader() {
 
-      var remote = this.remote;
-
       // this test only verifies the numerical part of this data
       // it could also check the legend to verify the extensions
       var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
@@ -82,8 +80,6 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
     bdd.it('should show correct chart order by Term', function pageHeader() {
-
-      var remote = this.remote;
 
       // this test only verifies the numerical part of this data
       // https://github.com/elastic/kibana/issues/8141
@@ -116,7 +112,6 @@ bdd.describe('visualize app', function describeIndexTests() {
 
     bdd.it('should show correct data, ordered by Term', function pageHeader() {
 
-      var remote = this.remote;
       var expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       return PageObjects.visualize.collapseChart()
@@ -131,7 +126,6 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
     bdd.it('should be able to save and load', function pageHeader() {
-      var remote = this.remote;
 
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
