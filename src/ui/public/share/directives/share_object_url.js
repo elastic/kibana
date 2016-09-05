@@ -6,7 +6,7 @@ import uiModules from 'ui/modules';
 import shareObjectUrlTemplate from 'ui/share/views/share_object_url.html';
 
 
-app.directive('shareObjectUrl', function (Private, Notifier) {
+app.directive('shareObjectUrl', function (Private, Notifier, $rootScope, $httpParamSerializer) {
   const urlShortener = Private(LibUrlShortenerProvider);
 
   return {
@@ -69,15 +69,27 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
         });
       };
 
-      $scope.getUrl = function () {
-        let url = $location.absUrl();
-        if ($scope.shareAsEmbed) {
-          url = url.replace('?', '?embed=true&');
-        }
-        return url;
-      };
+      // $scope.getUrl = function () {
+      //   let url = $location.absUrl();
+      //   if ($scope.shareAsEmbed) {
+      //     url = url.replace('?', '?embed=true&');
+      //   }
+      //   return url;
+      // };
 
-      $scope.$watch('getUrl()', updateUrl);
+      $rootScope.$on('state:queryParamChange', (event, param, value) => {
+        // When there's a change to the state, build a new shared URL using the new query param.
+        let search = $location.search();
+        search[param] = value;
+        const url = `${$location.absUrl().split('?')[0]}?${$httpParamSerializer(search)}`;
+        updateUrl(url);
+      });
+
+      $rootScope.$broadcast('state:triggerQueryParamChange');
+
+      // TODO: What other use cases does this address beyond query param changes?
+      // We need to address them too.
+      // $scope.$watch('getUrl()', updateUrl);
     }
   };
 });
