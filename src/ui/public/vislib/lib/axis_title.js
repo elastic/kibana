@@ -1,10 +1,10 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
-import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisTitleFactory(Private) {
 
-  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const ErrorHandler = Private(ErrorHandlerProvider);
   const defaults = {
     title: '',
     elSelector: '.axis-wrapper-{pos} .axis-title'
@@ -57,21 +57,21 @@ export default function AxisTitleFactory(Private) {
           self.validateWidthandHeight(width, height);
 
           const svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height);
+          .attr('width', width)
+          .attr('height', height);
 
 
           const bbox = svg.append('text')
-            .attr('transform', function () {
-              if (self.axis.isHorizontal()) {
-                return 'translate(' + width / 2 + ',11)';
-              }
-              return 'translate(11,' + height / 2 + ') rotate(270)';
-            })
-            .attr('text-anchor', 'middle')
-            .text(self.title)
-            .node()
-            .getBBox();
+          .attr('transform', function () {
+            if (self.axis.isHorizontal()) {
+              return 'translate(' + width / 2 + ',11)';
+            }
+            return 'translate(11,' + height / 2 + ') rotate(270)';
+          })
+          .attr('text-anchor', 'middle')
+          .text(self.title)
+          .node()
+          .getBBox();
 
           if (self.axis.isHorizontal()) {
             svg.attr('height', bbox.height);

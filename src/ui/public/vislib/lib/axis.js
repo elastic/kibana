@@ -1,16 +1,16 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import VislibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
-import VislibAxisTitleProvider from 'ui/vislib/lib/axis_title';
-import VislibAxisLabelsProvider from 'ui/vislib/lib/axis_labels';
-import VislibAxisScaleProvider from 'ui/vislib/lib/axis_scale';
+import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import AxisTitleProvider from 'ui/vislib/lib/axis_title';
+import AxisLabelsProvider from 'ui/vislib/lib/axis_labels';
+import AxisScaleProvider from 'ui/vislib/lib/axis_scale';
 
 export default function AxisFactory(Private) {
-  const ErrorHandler = Private(VislibErrorHandlerProvider);
-  const AxisTitle = Private(VislibAxisTitleProvider);
-  const AxisLabels = Private(VislibAxisLabelsProvider);
-  const AxisScale = Private(VislibAxisScaleProvider);
+  const ErrorHandler = Private(ErrorHandlerProvider);
+  const AxisTitle = Private(AxisTitleProvider);
+  const AxisLabels = Private(AxisLabelsProvider);
+  const AxisScale = Private(AxisScaleProvider);
   const defaults = {
     show: true,
     type: 'value',
@@ -74,10 +74,10 @@ export default function AxisFactory(Private) {
       const scale = this.scale.getScale(length);
 
       return d3.svg.axis()
-        .scale(scale)
-        .tickFormat(this.tickFormat(this.domain))
-        .ticks(this.tickScale(length))
-        .orient(this.position);
+      .scale(scale)
+      .tickFormat(this.tickFormat(this.domain))
+      .ticks(this.tickScale(length))
+      .orient(this.position);
     }
 
     getScale() {
@@ -93,11 +93,10 @@ export default function AxisFactory(Private) {
     }
 
     tickScale(length) {
-      // TODO: should accept size and decide based on position which one to use (width, height)
       const yTickScale = d3.scale.linear()
-        .clamp(true)
-        .domain([20, 40, 1000])
-        .range([0, 3, 11]);
+      .clamp(true)
+      .domain([20, 40, 1000])
+      .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(length));
     }
@@ -125,8 +124,8 @@ export default function AxisFactory(Private) {
 
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.selectAll('.y-axis-spacer-block')
-            .append('div')
-            .attr('class', 'inner-spacer-block');
+          .append('div')
+          .attr('class', 'inner-spacer-block');
         }
 
         const height = visEl.select(`.axis-wrapper-${self.position}`).style('height');
@@ -158,15 +157,16 @@ export default function AxisFactory(Private) {
           self.updateXaxisHeight();
           if (self.position === 'top') {
             selection.select('g')
-              .attr('transform', `translate(0, ${length - parseInt(self.style.lineWidth)})`);
+            .attr('transform', `translate(0, ${length - parseInt(self.style.lineWidth)})`);
             selection.select('path')
-              .attr('transform', 'translate(1,0)');
+            .attr('transform', 'translate(1,0)');
           }
         } else {
           selection.attr('width', length + xAxisPadding);
           if (self.position === 'left') {
+            const translateWidth = length + xAxisPadding - 2 - parseInt(self.style.lineWidth);
             selection.select('g')
-              .attr('transform', `translate(${length + xAxisPadding - 2 - parseInt(self.style.lineWidth)},${self._attr.margin.top})`);
+            .attr('transform', `translate(${translateWidth},${self._attr.margin.top})`);
           }
         }
       };
@@ -174,8 +174,6 @@ export default function AxisFactory(Private) {
 
     draw() {
       const self = this;
-      const margin = this.vis._attr.margin;
-      const mode = this._attr.mode;
 
       return function (selection) {
         const n = selection[0].length;
@@ -194,17 +192,14 @@ export default function AxisFactory(Private) {
 
           const axis = self.getAxis(length);
 
-          // The axis should not appear if mode is set to 'wiggle' or 'silhouette'
           if (self.show) {
-            // Append svg and y axis
             const svg = div.append('svg')
-              .attr('width', width)
-              .attr('height', height);
-
+            .attr('width', width)
+            .attr('height', height);
 
             svg.append('g')
-              .attr('class', `axis ${self.id}`)
-              .call(axis);
+            .attr('class', `axis ${self.id}`)
+            .call(axis);
 
             const container = svg.select('g.axis').node();
             if (container) {

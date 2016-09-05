@@ -4,10 +4,10 @@ import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
 
-import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisScaleFactory(Private) {
 
-  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const ErrorHandler = Private(ErrorHandlerProvider);
 
   /**
    * Appends axis title(s) to the visualization

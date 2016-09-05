@@ -1,10 +1,10 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
-import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
+import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisLabelsFactory(Private) {
 
-  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
+  const ErrorHandler = Private(ErrorHandlerProvider);
   const defaults = {
     show: true,
     rotate: 0,
@@ -50,30 +50,30 @@ export default function AxisLabelsFactory(Private) {
 
         if (self.rotate) {
           text
-            .style('text-anchor', function () {
-              return self.rotateAnchor === 'center' ? 'center' : 'end';
-            })
-            .attr('dy', function () {
-              if (self.axis.isHorizontal()) {
-                if (self.axis.position === 'top') return '-0.9em';
-                else return '0.3em';
-              }
-              return '0';
-            })
-            .attr('dx', function () {
-              return self.axis.isHorizontal() ? '-0.9em' : '0';
-            })
-            .attr('transform', function rotate(d, j) {
-              if (self.rotateAnchor === 'center') {
-                const coord = text[0][j].getBBox();
-                const transX = ((coord.x) + (coord.width / 2));
-                const transY = ((coord.y) + (coord.height / 2));
-                return `rotate(${self.rotate}, ${transX}, ${transY})`;
-              } else {
-                const rotateDeg = self.axis.position === 'top' ? self.rotate : -self.rotate;
-                return `rotate(${rotateDeg})`;
-              }
-            });
+          .style('text-anchor', function () {
+            return self.rotateAnchor === 'center' ? 'center' : 'end';
+          })
+          .attr('dy', function () {
+            if (self.axis.isHorizontal()) {
+              if (self.axis.position === 'top') return '-0.9em';
+              else return '0.3em';
+            }
+            return '0';
+          })
+          .attr('dx', function () {
+            return self.axis.isHorizontal() ? '-0.9em' : '0';
+          })
+          .attr('transform', function rotate(d, j) {
+            if (self.rotateAnchor === 'center') {
+              const coord = text[0][j].getBBox();
+              const transX = ((coord.x) + (coord.width / 2));
+              const transY = ((coord.y) + (coord.height / 2));
+              return `rotate(${self.rotate}, ${transX}, ${transY})`;
+            } else {
+              const rotateDeg = self.axis.position === 'top' ? self.rotate : -self.rotate;
+              return `rotate(${rotateDeg})`;
+            }
+          });
         }
       };
     };
@@ -101,10 +101,10 @@ export default function AxisLabelsFactory(Private) {
       const self = this;
       return function (selection) {
         selection.selectAll('.tick text')
-          .text(function () {
-            // TODO: add title to trancuated labels
-            return self.truncateLabel(this, self.truncate);
-          });
+        .text(function () {
+          // TODO: add title to trancuated labels
+          return self.truncateLabel(this, self.truncate);
+        });
       };
     };
 
@@ -122,20 +122,20 @@ export default function AxisLabelsFactory(Private) {
         if (!self.filter) return;
 
         selection.selectAll('.tick text')
-          .text(function (d) {
-            par = d3.select(this.parentNode).node();
-            myX = self.axis.scale.scale(d);
-            myWidth = par.getBBox().width * padding;
-            halfWidth = myWidth / 2;
-            maxW = $(self.axis.vis.el).find(self.axis.elSelector).width();
+        .text(function (d) {
+          par = d3.select(this.parentNode).node();
+          myX = self.axis.scale.scale(d);
+          myWidth = par.getBBox().width * padding;
+          halfWidth = myWidth / 2;
+          maxW = $(self.axis.vis.el).find(self.axis.elSelector).width();
 
-            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-              startX = myX + halfWidth;
-              return self.axis.axisFormatter(d);
-            } else {
-              d3.select(this.parentNode).remove();
-            }
-          });
+          if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
+            startX = myX + halfWidth;
+            return self.axis.axisFormatter(d);
+          } else {
+            d3.select(this.parentNode).remove();
+          }
+        });
       };
     };
 
@@ -145,10 +145,10 @@ export default function AxisLabelsFactory(Private) {
       return function (selection) {
         selection.each(function () {
           selection.selectAll('text')
-            .attr('style', function () {
-              const currentStyle = d3.select(this).attr('style');
-              return `${currentStyle} font-size: ${self.fontSize};`;
-            });
+          .attr('style', function () {
+            const currentStyle = d3.select(this).attr('style');
+            return `${currentStyle} font-size: ${self.fontSize};`;
+          });
           //.attr('x', -3 - parseInt(self.style.lineWidth) / 2 - parseInt(self.style.tickLength));
           if (!self.show) selection.selectAll('test').attr('style', 'display: none;');
 
