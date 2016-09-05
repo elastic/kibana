@@ -13,7 +13,6 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var visualizePage;
-      var remote;
       var fromTime;
       var toTime;
 
@@ -23,7 +22,6 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
         fromTime = '2015-09-19 06:31:44.000';
         toTime = '2015-09-23 18:31:44.000';
 

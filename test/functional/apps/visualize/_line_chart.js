@@ -13,7 +13,7 @@ define(function (require) {
       var settingsPage;
       var discoverPage;
       var visualizePage;
-      var remote;
+      //var remote;
 
       bdd.before(function () {
         common = new Common(this.remote);
@@ -21,7 +21,6 @@ define(function (require) {
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
         visualizePage = new VisualizePage(this.remote);
-        remote = this.remote;
         var fromTime = '2015-09-19 06:31:44.000';
         var toTime = '2015-09-23 18:31:44.000';
 
@@ -90,8 +89,6 @@ define(function (require) {
 
         bdd.it('should show correct chart, take screenshot', function pageHeader() {
 
-          var remote = this.remote;
-
           // this test only verifies the numerical part of this data
           // it could also check the legend to verify the extensions
           var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
@@ -120,8 +117,6 @@ define(function (require) {
         });
 
         bdd.it('should show correct chart order by Term', function pageHeader() {
-
-          var remote = this.remote;
 
           // this test only verifies the numerical part of this data
           // https://github.com/elastic/kibana/issues/8141
@@ -158,7 +153,6 @@ define(function (require) {
 
         bdd.it('should show correct data, ordered by Term', function pageHeader() {
 
-          var remote = this.remote;
           var expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
           return visualizePage.collapseChart()
@@ -176,8 +170,6 @@ define(function (require) {
         bdd.it('should be able to save and load', function pageHeader() {
 
           common.debug('Start of test' + testSubName + 'Visualization');
-          var remote = this.remote;
-
           return visualizePage.saveVisualization(vizName1)
           .then(function (message) {
             common.debug('Saved viz message = ' + message);
