@@ -6,12 +6,15 @@ import VisSchemasProvider from 'ui/vis/schemas';
 import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
+import routeBasedNotifierProvider from 'ui/route_based_notifier';
+
 export default function TermsAggDefinition(Private) {
   let BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   let bucketCountBetween = Private(AggTypesBucketsBucketCountBetweenProvider);
   let AggConfig = Private(VisAggConfigProvider);
   let Schemas = Private(VisSchemasProvider);
   let createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
+  const routeBasedNotifier = Private(routeBasedNotifierProvider);
 
   let orderAggSchema = (new Schemas([
     {
@@ -149,6 +152,9 @@ export default function TermsAggDefinition(Private) {
           }
 
           if (orderAgg.type.name === 'count') {
+            if (dir === 'asc') {
+              routeBasedNotifier.warning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
+            }
             order._count = dir;
             return;
           }
