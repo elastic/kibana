@@ -1,17 +1,23 @@
-import { cloneDeep, isEqual, set } from 'lodash';
+import { cloneDeep, isEqual, set, isPlainObject } from 'lodash';
 
 export default {
-  create: (state, defaultState) => stateMonitor(state, defaultState)
+  create: (state, customInitialState) => stateMonitor(state, customInitialState)
 };
 
-function stateMonitor(state, defaultState) {
+function stateMonitor(state, customInitialState) {
   let destroyed = false;
   let ignoredProps = [];
   let changeHandlers = [];
+  let initialState;
 
-  const originalState = cloneDeep(defaultState) || cloneDeep(state.toJSON());
+  setInitialState(customInitialState);
 
-  function filterState(state) {
+  function setInitialState(customInitialState) {
+    // state.toJSON returns a reference, clone so we can mutate it safely
+    initialState = cloneDeep(customInitialState) || cloneDeep(state.toJSON());
+  }
+
+  function removeIgnoredProps(state) {
     ignoredProps.forEach(path => {
       set(state, path, true);
     });
@@ -19,8 +25,8 @@ function stateMonitor(state, defaultState) {
   }
 
   function getStatus() {
-    const currentState = filterState(cloneDeep(state.toJSON()));
-    const isClean = isEqual(currentState, originalState);
+    const currentState = removeIgnoredProps(cloneDeep(state.toJSON()));
+    const isClean = isEqual(currentState, initialState);
 
     return {
       clean: isClean,
@@ -48,9 +54,23 @@ function stateMonitor(state, defaultState) {
   };
 
   return {
+    setInitialState(customInitialState) {
+      if (!isPlainObject(customInitialState)) throw new TypeError('The default state must be an object');
+
+      // check the current status
+      const previousStatus = getStatus();
+
+      // update the initialState and apply ignoredProps
+      setInitialState(customInitialState);
+      removeIgnoredProps(initialState);
+
+      // fire the change handler if the status has changed
+      if (!isEqual(previousStatus, getStatus())) dispatchChange();
+    },
+
     ignoreProps(props) {
       ignoredProps = ignoredProps.concat(props);
-      filterState(originalState);
+      removeIgnoredProps(initialState);
       return this;
     },
 
@@ -67,9 +87,7 @@ function stateMonitor(state, defaultState) {
 
       // if the state is already dirty, fire the change handler immediately
       const status = getStatus();
-      if (status.dirty) {
-        dispatchChange();
-      }
+      if (status.dirty) dispatchChange();
 
       return this;
     },

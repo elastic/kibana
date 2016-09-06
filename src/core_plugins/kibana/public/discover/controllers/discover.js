@@ -23,7 +23,7 @@ import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import FilterManagerProvider from 'ui/filter_manager';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
-import stateMonitor  from 'ui/state_management/state_monitor';
+import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
@@ -140,6 +140,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     docTitle.change(savedSearch.title);
   }
 
+  let stateMonitor;
   const $appStatus = $scope.appStatus = this.appStatus = {};
   const $state = $scope.state = new AppState(getStateDefaults());
   $scope.uiState = $state.makeStateful('uiState');
@@ -183,11 +184,11 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
       $scope.failuresShown = showTotal;
     };
 
-    const monitor = stateMonitor.create($state, getStateDefaults());
-    monitor.onChange((status) => {
+    stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
+    stateMonitor.onChange((status) => {
       $appStatus.dirty = status.dirty;
     });
-    $scope.$on('$destroy', () => monitor.destroy());
+    $scope.$on('$destroy', () => stateMonitor.destroy());
 
     $scope.updateDataSource()
     .then(function () {
@@ -314,6 +315,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
       return savedSearch.save()
       .then(function (id) {
+        stateMonitor.setInitialState($state.toJSON());
         $scope.kbnTopNav.close('save');
 
         if (id) {

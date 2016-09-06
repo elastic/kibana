@@ -12,7 +12,7 @@ import DocTitleProvider from 'ui/doc_title';
 import UtilsBrushEventProvider from 'ui/utils/brush_event';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import FilterBarFilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handler';
-import stateMonitor  from 'ui/state_management/state_monitor';
+import stateMonitorFactory from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
@@ -73,6 +73,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     location: 'Visualization Editor'
   });
 
+  let stateMonitor;
   const $appStatus = this.appStatus = {};
 
   const savedVis = $route.current.locals.savedVis;
@@ -153,11 +154,11 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter');
 
-    const monitor = stateMonitor.create($state, stateDefaults);
-    monitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
+    stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+    stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
       $appStatus.dirty = status.dirty;
     });
-    $scope.$on('$destroy', () => monitor.destroy());
+    $scope.$on('$destroy', () => stateMonitor.destroy());
 
     editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
     editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -265,6 +266,7 @@ function VisEditor($scope, $route, timefilter, AppState, $location, kbnUrl, $tim
 
     savedVis.save()
     .then(function (id) {
+      stateMonitor.setInitialState($state.toJSON());
       $scope.kbnTopNav.close('save');
 
       if (id) {
