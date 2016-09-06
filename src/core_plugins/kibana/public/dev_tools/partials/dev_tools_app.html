@@ -3,7 +3,7 @@
     <bread-crumbs omit-current-page="true"></bread-crumbs>
 
     <ul class="nav navbar-nav">
-      <li ng-repeat="item in devTools">
+      <li ng-repeat="item in devTools" ng-class="{active: currentPath === item.url}">
         <a class="navbar-link" kbn-href="{{::item.url}}">
           {{::item.display}}
         </a>
