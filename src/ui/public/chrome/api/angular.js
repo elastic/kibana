@@ -47,7 +47,7 @@ module.exports = function (chrome, internals) {
           length--;
         }
 
-        return path.substr(1, length).split('/');
+        return path.substr(1, length).replace(/_/g, ' ').split('/');
       };
 
       const notify = new Notifier();
