@@ -10,8 +10,10 @@ import _ from 'lodash';
 import StackTraceMapper from 'ui/stack_trace_mapper';
 import { parse } from 'url';
 import $ from 'jquery';
+import { setupAutoRelease } from 'auto-release-sinon';
 import './test_harness.less';
 import 'ng_mock';
+import { setupTestSharding } from './test_sharding';
 
 /*** the vislib tests have certain style requirements, so lets make sure they are met ***/
 $('body').attr('id', 'test-harness-body'); // so we can make high priority selectors
@@ -24,13 +26,9 @@ Math.random = _.bindKey(new Nonsense(seed), 'frac');
 Math.random.nonsense = new Nonsense(seed);
 console.log('Random-ness seed: ' + seed);
 
-
-/*** Setup auto releasing stubs and spys ***/
-require('auto-release-sinon').setupAutoRelease(sinon, window.afterEach);
-
-
-/*** Make sure that angular-mocks gets setup in the global suite **/
-
+// Setup auto releasing stubs and spys
+setupAutoRelease(sinon, window.afterEach);
+setupTestSharding();
 
 /*** manually map error stack traces using the sourcemap ***/
 before(function () {

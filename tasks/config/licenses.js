@@ -34,6 +34,10 @@ module.exports = function (grunt) {
       overrides: {
         'assert-plus@0.1.5': ['MIT'],
         'buffers@0.1.1': ['MIT/X11'],
+        'bytes@1.0.0': ['MIT'],
+        'color-name@1.0.0': ['UNLICENSE'],
+        'commander@2.2.0': ['MIT'],
+        'css-color-names@0.0.1': ['MIT'],
         'css-parse@1.0.4': ['MIT'],
         'css-stringify@1.0.5': ['MIT'],
         'css@1.0.8': ['MIT'],
