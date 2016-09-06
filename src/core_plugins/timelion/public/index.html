@@ -1,0 +1,67 @@
+<div class="timelion app-container" ng-controller="timelion" fixed-element-root>
+
+  <kbn-top-nav name="timelion" config="topNavMenu">
+    <div class="kibana-nav-info ng-scope">
+      <span class="kibana-nav-info-title">
+        <span ng-show="opts.savedSheet.id">
+          {{opts.savedSheet.title}}
+          <i class="fa fa-bolt" ng-click="showStats = !showStats"></i>
+        </span>
+        <small class="timelion-stats" ng-show="showStats">
+          Query Time {{stats.queryTime - stats.invokeTime}}ms /
+          Processing Time {{stats.sheetTime - stats.queryTime}}ms
+        </small>
+      </span>
+    </div>
+  </kbn-top-nav>
+
+  <navbar class="timelion-navbar" fixed-element="timelion-navbar-fixed">
+    <form role="form" class="fill inline-form" ng-submit="search()" name="discoverSearch">
+      <div class="input-group">
+        <input input-focus
+          ng-model="state.sheet[state.selected]"
+          timelion-expression="{{state.sheet[state.selected]}}"
+          placeholder="Expression ..."
+          aria-label="Expression input"
+          type="text"
+          class="form-control timelion-expression">
+
+        <timelion-interval model="state.interval"></timelion-interval>
+
+        <button aria-label="Search" type="submit">
+          <span class="fa fa-play"></span>
+        </button>
+
+      </div>
+    </form>
+  </navbar>
+
+  <div class="timelion-container" fixed-element-body="timelion-container-fixed">
+    <div class="timelion-container-sheet">
+      <div class="timelion-container-sheet-margin">
+
+          <timelion-fullscreen
+            ng-show="transient.fullscreen"
+            transient="transient"
+            state="state"
+            series="sheet[state.selected]"
+            expression="state.sheet[state.selected]"
+            on-search="search"
+          >
+          </timelion-fullscreen>
+
+          <timelion-cells
+            ng-show="!transient.fullscreen"
+            transient="transient"
+            state="state"
+            sheet="sheet"
+            on-search="search"
+            on-select="setActiveCell"
+          >
+          </timelion-cells>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
