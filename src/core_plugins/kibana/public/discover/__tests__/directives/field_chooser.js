@@ -13,18 +13,13 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 let $parentScope;
 let $scope;
-let config;
 let hits;
 let indexPattern;
 let indexPatternList;
-let shortDotsValue;
 
 // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
 const init = function ($elem, props) {
-  ngMock.inject(function ($rootScope, $compile, $timeout, _config_) {
-    shortDotsValue = _config_.get('shortDots:enable');
-    config = _config_;
-    config.set('shortDots:enable', false);
+  ngMock.inject(function ($rootScope, $compile, $timeout) {
     $parentScope = $rootScope;
     _.assign($parentScope, props);
     $compile($elem)($parentScope);
@@ -39,7 +34,6 @@ const init = function ($elem, props) {
 const destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
-  config.set('shortDots:enable', shortDotsValue);
 };
 
 describe('discover field chooser directives', function () {
@@ -56,7 +50,21 @@ describe('discover field chooser directives', function () {
     '</disc-field-chooser>'
   );
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', ($provide) => {
+    $provide.decorator('config', ($delegate) => {
+      // disable shortDots for these tests
+      $delegate.get = _.wrap($delegate.get, function (origGet, name) {
+        if (name === 'shortDots:enable') {
+          return false;
+        } else {
+          return origGet.call(this, name);
+        }
+      });
+
+      return $delegate;
+    });
+  }));
+
   beforeEach(ngMock.inject(function (Private) {
     hits = Private(FixturesHitsProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
