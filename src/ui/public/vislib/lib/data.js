@@ -673,8 +673,7 @@ export default function DataFactory(Private) {
      * @returns {Array} min and max values
      */
     mapDataExtents(series) {
-      let values;
-      values = _.map(series.rows, function (row) {
+      const values = _.map(series.rows, function (row) {
         return row[row.length - 1];
       });
       return [_.min(values), _.max(values)];

@@ -26,7 +26,7 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
         $scope.search = $scope.search || _.noop;
 
         let legendValueNumbers;
-        let debouncedSetLegendNumbers;
+        let debouncedSetLegendNumbers; // eslint-disable-line prefer-const
         const defaultOptions = {
           xaxis: {
             mode: 'time',
