@@ -19,7 +19,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     bdd.it('should show the correct chart types', function pageHeader() {
       var expectedChartTypes = [
         'Area chart', 'Data table', 'Line chart', 'Markdown widget',
-        'Metric', 'Pie chart', 'Tile map', 'Vertical bar chart'
+        'Metric', 'Pie chart', 'Tile map', 'Timeseries', 'Vertical bar chart'
       ];
       // find all the chart types and make sure there all there
       return PageObjects.visualize.getChartTypes()
