@@ -5,13 +5,14 @@ import 'plugins/kibana/dev_tools/styles/dev_tools_app.less';
 
 uiModules
 .get('apps/dev_tools')
-.directive('kbnDevToolsApp', function (Private) {
+.directive('kbnDevToolsApp', function (Private, $location) {
   return {
     restrict: 'E',
     template,
     transclude: true,
     link: function ($scope) {
       $scope.devTools = Private(devTools).inOrder;
+      $scope.currentPath = `#${$location.path()}`;
     }
   };
 });
