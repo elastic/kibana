@@ -13,7 +13,7 @@ import 'plugins/kibana/dashboard/services/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/main.less';
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import DocTitleProvider from 'ui/doc_title';
-import stateMonitor  from 'ui/state_management/state_monitor';
+import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/dashboard/index.html';
@@ -94,6 +94,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
       };
 
+      let stateMonitor;
       const $state = $scope.state = new AppState(stateDefaults);
       const $uiState = $scope.uiState = $state.makeStateful('uiState');
       const $appStatus = $scope.appStatus = this.appStatus = {};
@@ -148,11 +149,11 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
         initPanelIndices();
 
         // watch for state changes and update the appStatus.dirty value
-        const monitor = stateMonitor.create($state, stateDefaults);
-        monitor.onChange((status) => {
+        stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+        stateMonitor.onChange((status) => {
           $appStatus.dirty = status.dirty;
         });
-        $scope.$on('$destroy', () => monitor.destroy());
+        $scope.$on('$destroy', () => stateMonitor.destroy());
 
         $scope.$emit('application.load');
       }
@@ -227,6 +228,7 @@ app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter,
 
         dash.save()
         .then(function (id) {
+          stateMonitor.setInitialState($state.toJSON());
           $scope.kbnTopNav.close('save');
           if (id) {
             notify.info('Saved Dashboard as "' + dash.title + '"');
