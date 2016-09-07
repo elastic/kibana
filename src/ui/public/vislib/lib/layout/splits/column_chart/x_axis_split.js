@@ -19,7 +19,7 @@ define(function () {
         })
         .enter()
           .append('div')
-          .attr('class', 'x-axis-div');
+          .attr('class', 'x-axis-div axis-div');
       });
     };
   };

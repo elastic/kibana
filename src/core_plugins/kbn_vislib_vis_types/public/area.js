@@ -16,7 +16,6 @@ export default function HistogramVisType(Private) {
       'effect on the series above it.',
     params: {
       defaults: {
-        shareYAxis: true,
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',

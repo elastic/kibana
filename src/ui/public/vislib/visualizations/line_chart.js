@@ -70,8 +70,7 @@ export default function LineChartFactory(Private) {
     let self = this;
     let showCircles = this._attr.showCircles;
     let color = this.handler.data.getColorFunc();
-    let xScale = this.handler.xAxis.xScale;
-    let yScale = this.handler.yAxis.yScale;
+    let xScale = this.handler.categoryAxes[0].getScale();
     let ordered = this.handler.data.get('ordered');
     let tooltip = this.tooltip;
     let isTooltip = this._attr.addTooltip;
@@ -117,8 +116,8 @@ export default function LineChartFactory(Private) {
       return xScale(d.x) + xScale.rangeBand() / 2;
     }
 
-    function cy(d) {
-      return yScale(d.y);
+    function cy(d, i, j) {
+      return self.handler.valueAxes[0].getScale()(d.y);
     }
 
     function cColor(d) {
@@ -186,24 +185,11 @@ export default function LineChartFactory(Private) {
    */
   LineChart.prototype.addLines = function (svg, data) {
     let self = this;
-    let xScale = this.handler.xAxis.xScale;
-    let yScale = this.handler.yAxis.yScale;
+    let xScale = this.handler.categoryAxes[0].getScale();
     let xAxisFormatter = this.handler.data.get('xAxisFormatter');
     let color = this.handler.data.getColorFunc();
     let ordered = this.handler.data.get('ordered');
     let interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
-    let line = d3.svg.line()
-    .defined(function (d) { return !_.isNull(d.y); })
-    .interpolate(interpolate)
-    .x(function x(d) {
-      if (ordered && ordered.date) {
-        return xScale(d.x);
-      }
-      return xScale(d.x) + xScale.rangeBand() / 2;
-    })
-    .y(function y(d) {
-      return yScale(d.y);
-    });
     let lines;
 
     lines = svg
@@ -215,7 +201,19 @@ export default function LineChartFactory(Private) {
 
     lines.append('path')
     .call(this._addIdentifier)
-    .attr('d', function lineD(d) {
+    .attr('d', function lineD(d, i) {
+      const line = d3.svg.line()
+      .defined(function (d) { return !_.isNull(d.y); })
+      .interpolate(interpolate)
+      .x(function x(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .y(function y(d) {
+        return self.handler.valueAxes[0].getScale()(d.y);
+      });
       return line(d.values);
     })
     .attr('fill', 'none')
@@ -267,10 +265,9 @@ export default function LineChartFactory(Private) {
     let margin = this._attr.margin;
     let elWidth = this._attr.width = $elem.width();
     let elHeight = this._attr.height = $elem.height();
-    let scaleType = this.handler.yAxis.getScaleType();
-    let yMin = this.handler.yAxis.yMin;
-    let yScale = this.handler.yAxis.yScale;
-    let xScale = this.handler.xAxis.xScale;
+    let scaleType = this.handler.valueAxes[0].scale.getScaleType();
+    let yScale = this.handler.valueAxes[0].getScale();
+    let xScale = this.handler.categoryAxes[0].getScale();
     let minWidth = 20;
     let minHeight = 20;
     let startLineX = 0;

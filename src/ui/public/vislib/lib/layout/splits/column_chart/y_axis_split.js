@@ -1,4 +1,6 @@
 import d3 from 'd3';
+import _ from 'lodash';
+
 define(function () {
   return function YAxisSplitFactory() {
 
@@ -10,7 +12,7 @@ define(function () {
 
     // render and get bounding box width
     return function (selection, parent, opts) {
-      let yAxis = opts && opts.yAxis;
+      let yAxis = opts && opts.valueAxes[0];
 
       selection.each(function () {
         let div = d3.select(this);
@@ -24,7 +26,7 @@ define(function () {
         })
         .enter()
           .append('div')
-          .attr('class', 'y-axis-div');
+          .attr('class', 'y-axis-div axis-div');
       });
     };
 
@@ -39,7 +41,9 @@ define(function () {
       .append('svg')
       .attr('style', 'position:absolute; top:-10000; left:-10000');
       let width = svg.append('g')
-      .call(yAxis.getYAxis(height)).node().getBBox().width + padding;
+      .call(() => {
+        yAxis.getAxis(height);
+      }).node().getBBox().width + padding;
       svg.remove();
 
       el.style('width', (width + padding) + 'px');
