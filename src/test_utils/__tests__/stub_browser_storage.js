@@ -49,10 +49,10 @@ describe('StubBrowserStorage', () => {
     });
   });
 
-  describe('size limiting', () => {
+  describe('#setStubbedSizeLimit', () => {
     it('allows limiting the storage size', () => {
       const store = new StubBrowserStorage();
-      store._setSizeLimit(10);
+      store.setStubbedSizeLimit(10);
       store.setItem('abc', 'def'); // store size is 6, key.length + val.length
       expect(() => {
         store.setItem('ghi', 'jkl');
@@ -61,25 +61,41 @@ describe('StubBrowserStorage', () => {
 
     it('allows defining the limit as infinity', () => {
       const store = new StubBrowserStorage();
-      store._setSizeLimit(Infinity);
+      store.setStubbedSizeLimit(Infinity);
       store.setItem('abc', 'def');
       store.setItem('ghi', 'jkl'); // unlike the previous test, this doesn't throw
     });
 
-    it('requires setting the limit before keys', () => {
+    it('throws an error if the limit is below the current size', () => {
       const store = new StubBrowserStorage();
       store.setItem('key', 'val');
       expect(() => {
-        store._setSizeLimit(10);
-      }).throwError(/before setting/);
+        store.setStubbedSizeLimit(5);
+      }).throwError(Error);
     });
 
     it('respects removed items', () => {
       const store = new StubBrowserStorage();
-      store._setSizeLimit(10);
+      store.setStubbedSizeLimit(10);
       store.setItem('abc', 'def');
       store.removeItem('abc');
       store.setItem('ghi', 'jkl'); // unlike the previous test, this doesn't throw
+    });
+  });
+
+  describe('#getStubbedSizeLimit', () => {
+    it('returns the size limit', () => {
+      const store = new StubBrowserStorage();
+      store.setStubbedSizeLimit(10);
+      expect(store.getStubbedSizeLimit()).to.equal(10);
+    });
+  });
+
+  describe('#getStubbedSize', () => {
+    it('returns the size', () => {
+      const store = new StubBrowserStorage();
+      store.setItem(1, 1);
+      expect(store.getStubbedSize()).to.equal(2);
     });
   });
 });
