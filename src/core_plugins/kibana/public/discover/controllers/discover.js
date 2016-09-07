@@ -77,8 +77,9 @@ uiRoutes
 
 app.directive('discoverApp', function () {
   return {
+    restrict: 'E',
     controllerAs: 'discoverApp',
-    controller: discoverController,
+    controller: discoverController
   };
 });
 

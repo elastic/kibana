@@ -58,6 +58,7 @@ uiModules
 ])
 .directive('visualizeApp', function () {
   return {
+    restrict: 'E',
     controllerAs: 'visualizeApp',
     controller: VisEditor,
   };
