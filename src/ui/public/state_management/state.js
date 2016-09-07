@@ -1,3 +1,12 @@
+
+/**
+ * @name State
+ *
+ * @extends Events
+ *
+ * @description Persists generic "state" to and reads it from the URL.
+ */
+
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';

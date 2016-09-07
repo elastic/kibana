@@ -1,3 +1,14 @@
+
+/**
+ * @name Vis
+ *
+ * @description This class consists of aggs, params, listeners, title, and type.
+ *  - Aggs: Instances of AggConfig.
+ *  - Params: Are these the settings in the Options tab?
+ *
+ * Not to be confused with vislib/vis.js.
+ */
+
 import _ from 'lodash';
 import AggTypesIndexProvider from 'ui/agg_types/index';
 import RegistryVisTypesProvider from 'ui/registry/vis_types';
@@ -24,7 +35,6 @@ export default function VisFactory(Notifier, Private) {
 
     this.indexPattern = indexPattern;
 
-    // http://aphyr.com/data/posts/317/state.gif
     this.setState(state);
     this.setUiState(uiState);
   }
@@ -36,6 +46,7 @@ export default function VisFactory(Notifier, Private) {
 
     let schemas = type.schemas;
 
+    // NOTE: What is this doing?
     let aggs = _.transform(oldState, function (newConfigs, oldConfigs, oldGroupName) {
       let schema = schemas.all.byName[oldGroupName];
 
@@ -119,6 +130,7 @@ export default function VisFactory(Notifier, Private) {
   };
 
   Vis.prototype.requesting = function () {
+    // Invoke requesting() on each agg. Aggs is an instance of AggConfigs.
     _.invoke(this.aggs.getRequestAggs(), 'requesting');
   };
 
@@ -149,6 +161,11 @@ export default function VisFactory(Notifier, Private) {
   Vis.prototype.getUiState = function () {
     return this.__uiState;
   };
+
+  /**
+   * Currently this is only used to extract map-specific information
+   * (e.g. mapZoom, mapCenter).
+   */
   Vis.prototype.uiStateVal = function (key, val) {
     if (this.hasUiState()) {
       if (_.isUndefined(val)) {
