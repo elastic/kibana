@@ -22,6 +22,7 @@ import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit
 import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 import FilterManagerProvider from 'ui/filter_manager';
 import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interval_options';
+import stateMonitorFactory  from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
@@ -79,7 +80,15 @@ uiRoutes
   }
 });
 
-app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
+app.directive('discoverApp', function () {
+  return {
+    restrict: 'E',
+    controllerAs: 'discoverApp',
+    controller: discoverController
+  };
+});
+
+function discoverController($scope, config, courier, $route, $window, Notifier,
   AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
   const Vis = Private(VisProvider);
@@ -136,6 +145,8 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     docTitle.change(savedSearch.title);
   }
 
+  let stateMonitor;
+  const $appStatus = $scope.appStatus = this.appStatus = {};
   const $state = $scope.state = new AppState(getStateDefaults());
   $scope.uiState = $state.makeStateful('uiState');
 
@@ -177,6 +188,12 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
     $scope.showLessFailures = function () {
       $scope.failuresShown = showTotal;
     };
+
+    stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
+    stateMonitor.onChange((status) => {
+      $appStatus.dirty = status.dirty;
+    });
+    $scope.$on('$destroy', () => stateMonitor.destroy());
 
     $scope.updateDataSource()
     .then(function () {
@@ -303,6 +320,7 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
 
       return savedSearch.save()
       .then(function (id) {
+        stateMonitor.setInitialState($state.toJSON());
         $scope.kbnTopNav.close('save');
 
         if (id) {
@@ -571,4 +589,4 @@ app.controller('discover', function ($scope, config, courier, $route, $window, N
   }
 
   init();
-});
+};
