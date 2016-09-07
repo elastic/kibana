@@ -138,8 +138,15 @@ of the existing `.kibana` index.
 .. Follow other steps below to complete the new installation.
 .. Once the new version is fully configured and working with required plugins, remove the previous version 
 of Kibana
-. To upgrade using a Linux Package Manager:
-.. Uninstall the existing Kibana package: `apt-get remove kibana` or `yum remove kibana`
-.. Install the new Kibana package.   There have been some installer issues between various version of 
-Kibana so the uninstall and install process is safer than an upgrade.
+. To upgrade using linux packages:
+.. If upgrading from Kibana 4.5.3 or older:
+... Uninstall the existing Kibana package: `apt-get remove kibana` or `yum remove kibana`. There have been some
+installer issues between various versions of Kibana so uninstalling and reinstalling is safer than an upgrade from older
+versions of Kibana.
+.. From package repository:
+... Update to the latest minor version repo appropriate for your distro, e.g. `https://packages.elastic.co/kibana/4.6/(debian|centos)`
+... Update the package list: `apt-get update` or `yum check-update`
+... Upgrade Kibana: `apt-get install kibana` or `yum update kibana`
+.. From RPM or DEB distributions:
+... Download and install the latest package for your distro
 
