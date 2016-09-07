@@ -7,9 +7,7 @@ const FILE_ENCODING = 'utf8';
 
 export default async function manageUuid(server) {
   const config = server.config();
-  const serverPort = server.info.port;
-  const serverHostname = config.get('server.host');
-  const fileName = `${serverHostname}:${serverPort}`;
+  const fileName = 'uuid';
   const uuidFile = pathJoin(config.get('path.data'), fileName);
 
   async function detectUuid() {
@@ -17,8 +15,12 @@ export default async function manageUuid(server) {
     try {
       const result = await readFile(uuidFile);
       return result.toString(FILE_ENCODING);
-    } catch (e) {
-      return false;
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        // non-existant uuid file is ok
+        return false;
+      }
+      server.log(['error', 'read-uuid'], err);
     }
   }
 
@@ -26,7 +28,8 @@ export default async function manageUuid(server) {
     const writeFile = Promise.promisify(writeFileCallback);
     try {
       return await writeFile(uuidFile, uuid, { encoding: FILE_ENCODING });
-    } catch (e) {
+    } catch (err) {
+      server.log(['error', 'write-uuid'], err);
       return false;
     }
   }
