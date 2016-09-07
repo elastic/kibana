@@ -5,7 +5,9 @@ import { createGunzip } from 'zlib';
 import { Extract } from 'tar';
 import { fromFile } from 'check-hash';
 import wreck from 'wreck';
+import { mkdirp } from 'mkdirp';
 
+const mkdirpAsync = promisify(mkdirp);
 const wreckGetAsync = promisify(wreck.get, wreck);
 const checkHashFromFileAsync = promisify(fromFile);
 const writeFileAsync = promisify(writeFile);
@@ -80,10 +82,15 @@ export default function downloadNodeBuilds(grunt) {
   };
 
   const start = async (platform) => {
+    const downloadDir = join(platform.nodeDir, '..');
     let downloadCounter = 0;
-    let isDownloadValid = await checkShaSum(platform);
+    let isDownloadValid = false;
 
-    if (isDownloadValid) return;
+    await mkdirpAsync(downloadDir);
+    if (grunt.option('skip-download')) {
+      isDownloadValid = await checkShaSum(platform);
+      if (isDownloadValid) return;
+    }
 
     grunt.log.ok('starting download ...');
     while (!isDownloadValid && (downloadCounter < downloadLimit)) {
