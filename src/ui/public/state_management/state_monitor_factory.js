@@ -25,6 +25,7 @@ function stateMonitor(state, customInitialState) {
   }
 
   function getStatus() {
+    // state.toJSON returns a reference, clone so we can mutate it safely
     const currentState = removeIgnoredProps(cloneDeep(state.toJSON()));
     const isClean = isEqual(currentState, initialState);
 
