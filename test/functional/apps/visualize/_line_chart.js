@@ -53,8 +53,79 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('line charts', function indexPatternCreation() {
     var vizName1 = 'Visualization LineChart';
 
-    bdd.it('should be able to save and load', function pageHeader() {
-      var remote = this.remote;
+    bdd.it('should show correct chart, take screenshot', function () {
+
+      // this test only verifies the numerical part of this data
+      // it could also check the legend to verify the extensions
+      var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
+
+      // sleep a bit before trying to get the chart data
+      return PageObjects.common.sleep(3000)
+      .then(function () {
+        return PageObjects.visualize.getLineChartData('fill="#57c17b"')
+        .then(function showData(data) {
+          PageObjects.common.debug('data=' + data);
+          PageObjects.common.saveScreenshot('Visualize-line-chart');
+          var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+          for (var x = 0; x < data.length; x++) {
+            PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
+              (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
+              ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
+            expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+          }
+          PageObjects.common.debug('Done');
+        });
+      });
+    });
+
+
+    bdd.it('should show correct chart order by Term', function () {
+
+      // this test only verifies the numerical part of this data
+      // https://github.com/elastic/kibana/issues/8141
+      var expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
+
+      PageObjects.common.debug('Order By = Term');
+      return PageObjects.visualize.selectOrderBy('_term')
+      .then(function clickGo() {
+        return PageObjects.visualize.clickGo();
+      })
+      .then(function () {
+        return PageObjects.common.try(function () {
+          return PageObjects.visualize.getLineChartData('fill="#57c17b"')
+          .then(function showData(data) {
+            PageObjects.common.debug('data=' + data);
+            PageObjects.common.saveScreenshot('Visualize-line-chart');
+            var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+            for (var x = 0; x < data.length; x++) {
+              PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
+                (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
+                ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
+              expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+            }
+            PageObjects.common.debug('Done');
+          });
+        });
+      });
+    });
+
+
+    bdd.it('should show correct data, ordered by Term', function () {
+
+      var expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
+
+      return PageObjects.visualize.collapseChart()
+      .then(function getDataTableData() {
+        return PageObjects.visualize.getDataTableData();
+      })
+      .then(function showData(data) {
+        PageObjects.common.debug(data.split('\n'));
+        expect(data.trim().split('\n')).to.eql(expectedChartData);
+      });
+    });
+
+
+    bdd.it('should be able to save and load', function () {
 
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
@@ -72,47 +143,6 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-
-    bdd.it('should show correct chart, take screenshot', function pageHeader() {
-
-      var remote = this.remote;
-
-      // this test only verifies the numerical part of this data
-      // it could also check the legend to verify the extensions
-      var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
-
-      // sleep a bit before trying to get the chart data
-      return PageObjects.common.sleep(3000)
-      .then(function () {
-        return PageObjects.visualize.getLineChartData('fill="#57c17b"')
-        .then(function showData(data) {
-          PageObjects.common.saveScreenshot('Visualize-line-chart');
-          var tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-          for (var x = 0; x < data.length; x++) {
-            PageObjects.common.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
-              (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
-              ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-            expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
-          }
-          PageObjects.common.debug('Done');
-        });
-      });
-    });
-
-    bdd.it('should show correct data', function pageHeader() {
-
-      var remote = this.remote;
-      var expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
-
-      return PageObjects.visualize.collapseChart()
-      .then(function getDataTableData() {
-        return PageObjects.visualize.getDataTableData();
-      })
-      .then(function showData(data) {
-        PageObjects.common.debug(data.split('\n'));
-        expect(data.trim().split('\n')).to.eql(expectedChartData);
-      });
-    });
 
 
   });
