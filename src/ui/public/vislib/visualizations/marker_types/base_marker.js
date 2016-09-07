@@ -25,6 +25,12 @@ export default function MarkerFactory() {
       this.quantizeLegendColors();
     }
 
+    getLabel() {
+      if (this.popups.length) {
+        return this.popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
+      }
+      return '';
+    };
     /**
      * Adds legend div to each map when data is split
      * uses d3 scale from BaseMarker.prototype.quantizeLegendColors
@@ -45,6 +51,10 @@ export default function MarkerFactory() {
         // creates all the neccessary DOM elements for the control, adds listeners
         // on relevant map events, and returns the element containing the control
         const $div = $('<div>').addClass('tilemap-legend');
+
+        const titleText = self.getLabel();
+        const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
+        $div.append($title);
 
         _.each(self._legendColors, function (color, i) {
           const labelText = self._legendQuantizer
