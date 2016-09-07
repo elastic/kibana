@@ -75,13 +75,12 @@ uiRoutes
   }
 });
 
-app
-  .directive('discoverApp', function () {
-    return {
-      controllerAs: 'discoverApp',
-      controller: discoverController,
-    };
-  });
+app.directive('discoverApp', function () {
+  return {
+    controllerAs: 'discoverApp',
+    controller: discoverController,
+  };
+});
 
 function discoverController($scope, config, courier, $route, $window, Notifier,
   AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
