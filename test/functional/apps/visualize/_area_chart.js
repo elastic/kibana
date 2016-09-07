@@ -62,7 +62,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('area charts', function indexPatternCreation() {
     var vizName1 = 'Visualization AreaChart';
 
-    bdd.it('should save and load with special characters', function pageHeader() {
+    bdd.it('should save and load with special characters', function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       return PageObjects.visualize.saveVisualization(vizNamewithSpecialChars)
       .then(function (message) {
@@ -74,7 +74,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('should save and load', function pageHeader() {
+    bdd.it('should save and load', function () {
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
         PageObjects.common.debug('Saved viz message = ' + message);
@@ -98,7 +98,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('should show correct chart, take screenshot', function pageHeader() {
+    bdd.it('should show correct chart, take screenshot', function () {
       var chartHeight = 0;
       var xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
         '2015-09-22 00:00', '2015-09-23 00:00'
@@ -133,7 +133,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('should show correct data', function pageHeader() {
+    bdd.it('should show correct data', function () {
       var expectedTableData = [ 'September 20th 2015, 00:00:00.000 37',
         'September 20th 2015, 03:00:00.000 202',
         'September 20th 2015, 06:00:00.000 740',

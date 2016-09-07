@@ -68,7 +68,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       });
     });
 
-    bdd.it('should be reset on cancel', function pageHeader() {
+    bdd.it('should be reset on cancel', function () {
       // Cancel saving the popularity change
       return PageObjects.settings.controlChangeCancel()
       .then(function () {
@@ -87,7 +87,7 @@ bdd.describe('index result popularity', function describeIndexTests() {
       });
     });
 
-    bdd.it('can be saved', function pageHeader() {
+    bdd.it('can be saved', function () {
       // Saving the popularity change
       return PageObjects.settings.controlChangeSave()
       .then(function () {

@@ -27,7 +27,7 @@ bdd.describe('creating and deleting default index', function describeIndexTests(
       return PageObjects.settings.createIndexPattern();
     });
 
-    bdd.it('should have index pattern in page header', function pageHeader() {
+    bdd.it('should have index pattern in page header', function () {
       return PageObjects.settings.getIndexPageHeading().getVisibleText()
       .then(function (patternName) {
         PageObjects.common.saveScreenshot('Settings-indices-new-index-pattern');
