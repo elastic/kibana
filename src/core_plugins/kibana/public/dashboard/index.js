@@ -55,6 +55,7 @@ uiRoutes
 
 app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
   return {
+    restrict: 'E',
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
