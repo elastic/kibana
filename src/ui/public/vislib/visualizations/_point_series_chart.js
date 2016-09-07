@@ -88,8 +88,8 @@ export default function PointSeriesChartProvider(Private) {
      */
     createEndZones(svg) {
       const self = this;
-      const xAxis = this.handler.xAxis;
-      const xScale = xAxis.xScale;
+      const xAxis = this.handler.categoryAxes[0];
+      const xScale = xAxis.getScale();
       const ordered = xAxis.ordered;
       const missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 
@@ -112,7 +112,7 @@ export default function PointSeriesChartProvider(Private) {
         w: Math.max(xScale(ordered.min), 0)
       };
 
-      const rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
+      const rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.values));
       const rightStart = rightLastVal + oneUnit;
       const rightEndzone = {
         x: xScale(rightStart),
