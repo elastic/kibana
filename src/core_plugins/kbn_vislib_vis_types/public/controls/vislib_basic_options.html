@@ -1,11 +1,11 @@
 <div>
-  <div class="vis-option-item" ng-if="vis.params.addLegend">
+  <div class="vis-option-item">
     <label>
       Legend Position
       <select
         class="form-control"
         ng-model="vis.params.legendPosition"
-        ng-options="position for position in ['top', 'left', 'right', 'bottom']"
+        ng-options="position for position in vis.type.params.legendPositions"
       >
       </select>
     </label>

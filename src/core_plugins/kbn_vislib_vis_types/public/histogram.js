@@ -26,6 +26,7 @@ export default function HistogramVisType(Private) {
         setYExtents: false,
         yAxis: {}
       },
+      legendPositions: ['left', 'right', 'top', 'bottom'],
       scales: ['linear', 'log', 'square root'],
       modes: ['stacked', 'percentage', 'grouped'],
       editor: histogramTemplate
