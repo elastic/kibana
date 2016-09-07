@@ -161,12 +161,13 @@ export default function DispatchClass(Private, config) {
      * @returns {Boolean}
      */
     allowBrushing() {
-      const xAxis = this.handler.xAxis;
+      const xAxis = this.handler.categoryAxes[0];
+      const xScale = xAxis.getScale();
       // Don't allow brushing for time based charts from non-time-based indices
       const hasTimeField = this.handler.vis._attr.hasTimeField;
 
-      return Boolean(hasTimeField && xAxis.ordered && xAxis.xScale && _.isFunction(xAxis.xScale.invert));
-    };
+      return Boolean(hasTimeField && xAxis.ordered && xScale && _.isFunction(xScale.invert));
+  };
 
     /**
      * Determine if brushing is currently enabled
@@ -186,7 +187,7 @@ export default function DispatchClass(Private, config) {
     addBrushEvent(svg) {
       if (!this.isBrushable()) return;
 
-      const xScale = this.handler.xAxis.xScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
       const brush = this.createBrush(xScale, svg);
 
       function brushEnd() {
