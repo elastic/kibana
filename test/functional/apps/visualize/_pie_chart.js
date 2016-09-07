@@ -61,7 +61,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   bdd.describe('pie chart', function indexPatternCreation() {
     var vizName1 = 'Visualization PieChart';
 
-    bdd.it('should save and load', function pageHeader() {
+    bdd.it('should save and load', function () {
       return PageObjects.visualize.saveVisualization(vizName1)
       .then(function (message) {
         PageObjects.common.debug('Saved viz message = ' + message);
@@ -82,7 +82,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('should show 10 slices in pie chart, take screenshot', function pageHeader() {
+    bdd.it('should show 10 slices in pie chart, take screenshot', function () {
       var expectedPieChartSliceCount = 10;
 
       return PageObjects.visualize.getPieChartData()
@@ -94,7 +94,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('should show correct data', function pageHeader() {
+    bdd.it('should show correct data', function () {
       var expectedTableData =  [ '0 55', '40,000 50', '80,000 41', '120,000 43',
         '160,000 44', '200,000 40', '240,000 46', '280,000 39', '320,000 40', '360,000 47'
       ];
