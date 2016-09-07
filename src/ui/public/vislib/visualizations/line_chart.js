@@ -70,8 +70,8 @@ export default function LineChartFactory(Private) {
       const self = this;
       const showCircles = this._attr.showCircles;
       const color = this.handler.data.getColorFunc();
-      const xScale = this.handler.xAxis.xScale;
-      const yScale = this.handler.yAxis.yScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
+      const yScale = this.handler.valueAxes[0].getScale();
       const ordered = this.handler.data.get('ordered');
       const tooltip = this.tooltip;
       const isTooltip = this._attr.addTooltip;
@@ -186,8 +186,8 @@ export default function LineChartFactory(Private) {
      * @returns {D3.UpdateSelection} SVG with paths added
      */
     addLines(svg, data) {
-      const xScale = this.handler.xAxis.xScale;
-      const yScale = this.handler.yAxis.yScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
+      const yScale = this.handler.valueAxes[0].getScale();
       const xAxisFormatter = this.handler.data.get('xAxisFormatter');
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
@@ -268,9 +268,9 @@ export default function LineChartFactory(Private) {
       const margin = this._attr.margin;
       const elWidth = this._attr.width = $elem.width();
       const elHeight = this._attr.height = $elem.height();
-      const scaleType = this.handler.yAxis.getScaleType();
-      const yScale = this.handler.yAxis.yScale;
-      const xScale = this.handler.xAxis.xScale;
+      const scaleType = this.handler.valueAxes[0].scale.getScaleType();
+      const yScale = this.handler.valueAxes[0].getScale();
+      const xScale = this.handler.categoryAxes[0].getScale();
       const minWidth = 20;
       const minHeight = 20;
       const startLineX = 0;
