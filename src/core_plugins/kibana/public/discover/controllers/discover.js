@@ -2,7 +2,6 @@ import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
 import getSort from 'ui/doc_table/lib/get_sort';
-import rison from 'rison-node';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -26,8 +25,7 @@ import AggTypesBucketsIntervalOptionsProvider from 'ui/agg_types/buckets/_interv
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
-
-
+import StateProvider from 'ui/state_management/state';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -43,18 +41,25 @@ uiRoutes
   template: indexTemplate,
   reloadOnSearch: false,
   resolve: {
-    ip: function (Promise, courier, config, $location) {
+    ip: function (Promise, courier, config, $location, Private) {
+      const State = Private(StateProvider);
       return courier.indexPatterns.getIds()
       .then(function (list) {
-        const stateRison = $location.search()._a;
-
-        let state;
-        try { state = rison.decode(stateRison); }
-        catch (e) { state = {}; }
+        /**
+         *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+         *  the load order of AppState conflicts with the load order of many other things
+         *  so in order to get the name of the index we should use, and to switch to the
+         *  default if necessary, we parse the appState with a temporary State object and
+         *  then destroy it immediatly after we're done
+         *
+         *  @type {State}
+         */
+        const state = new State('_a', {});
 
         const specified = !!state.index;
         const exists = _.contains(list, state.index);
         const id = exists ? state.index : config.get('defaultIndex');
+        state.destroy();
 
         return Promise.props({
           list: list,
