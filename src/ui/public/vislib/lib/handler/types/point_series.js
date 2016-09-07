@@ -1,18 +1,17 @@
+import d3 from 'd3';
+import _ from 'lodash';
 import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
-import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
-import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
+import VislibAxis from 'ui/vislib/lib/axis';
 
 export default function ColumnHandler(Private) {
   const injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
   const Handler = Private(VislibLibHandlerHandlerProvider);
   const Data = Private(VislibLibDataProvider);
-  const XAxis = Private(VislibLibXAxisProvider);
-  const YAxis = Private(VislibLibYAxisProvider);
+  const Axis = Private(VislibAxis);
   const AxisTitle = Private(VislibLibAxisTitleProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
@@ -37,24 +36,37 @@ export default function ColumnHandler(Private) {
 
       return new Handler(vis, {
         data: data,
-        axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
         chartTitle: new ChartTitle(vis.el),
-        xAxis: new XAxis({
-          el                : vis.el,
-          xValues           : data.xValues(),
-          ordered           : data.get('ordered'),
-          xAxisFormatter    : data.get('xAxisFormatter'),
-          expandLastBucket  : opts.expandLastBucket,
-          _attr             : vis._attr
-        }),
+        categoryAxes: [
+          new Axis({
+            id: 'CategoryAxis-1',
+            type: 'category',
+            vis: vis,
+            data: data,
+            values: data.xValues(),
+            ordered: data.get('ordered'),
+            axisFormatter: data.get('xAxisFormatter'),
+            expandLastBucket: opts.expandLastBucket,
+            axisTitle: {
+              title: data.get('xAxisLabel')
+            }
+          })
+        ],
         alerts: new Alerts(vis, data, opts.alerts),
-        yAxis: new YAxis({
-          el   : vis.el,
-          yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
-          yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
-          yAxisFormatter: data.get('yAxisFormatter'),
-          _attr: vis._attr
-        })
+        valueAxes:  [
+          new Axis({
+            id: 'ValueAxis-1',
+            type: 'value',
+            vis: vis,
+            data: data,
+            min : isUserDefinedYAxis ? vis._attr.yAxis.min : 0,
+            max : isUserDefinedYAxis ? vis._attr.yAxis.max : 0,
+            axisFormatter: data.get('yAxisFormatter'),
+            axisTitle: {
+              title: data.get('yAxisLabel')
+            }
+          })
+        ]
       });
 
     };
