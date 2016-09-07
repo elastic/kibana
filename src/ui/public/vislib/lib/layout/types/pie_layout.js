@@ -54,10 +54,6 @@ export default function ColumnLayoutFactory(Private) {
                 splits: chartTitleSplit
               }
             ]
-          },
-          {
-            type: 'div',
-            class: 'legend-col-wrapper'
           }
         ]
       }
