@@ -1,4 +1,3 @@
-import d3 from 'd3';
 import VislibLibLayoutSplitsTileMapMapSplitProvider from 'ui/vislib/lib/layout/splits/tile_map/map_split';
 export default function ColumnLayoutFactory(Private) {
   const mapSplit = Private(VislibLibLayoutSplitsTileMapMapSplitProvider);

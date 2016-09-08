@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import L from 'leaflet';
 import VislibVisualizationsMarkerTypesBaseMarkerProvider from 'ui/vislib/visualizations/marker_types/base_marker';
 export default function GeohashGridMarkerFactory(Private) {
@@ -15,10 +14,6 @@ export default function GeohashGridMarkerFactory(Private) {
   class GeohashGridMarker extends BaseMarker {
     constructor(map, geoJson, params) {
       super(map, geoJson, params);
-
-      // super min and max from all chart data
-      const min = this.geoJson.properties.allmin;
-      const max = this.geoJson.properties.allmax;
 
       this._createMarkerGroup({
         pointToLayer: function (feature, latlng) {

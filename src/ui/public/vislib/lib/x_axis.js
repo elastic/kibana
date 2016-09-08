@@ -280,7 +280,6 @@ export default function XAxisFactory(Private) {
       return function (selection) {
         selection.each(function () {
           const axis = d3.select(this);
-          const labels = axis.selectAll('.tick text');
           if (ordered && ordered.date) {
             axis.call(self.filterAxisLabels());
           } else {

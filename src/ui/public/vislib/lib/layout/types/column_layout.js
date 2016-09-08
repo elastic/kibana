@@ -1,4 +1,3 @@
-import d3 from 'd3';
 import VislibLibLayoutSplitsColumnChartChartSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/chart_split';
 import VislibLibLayoutSplitsColumnChartYAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/y_axis_split';
 import VislibLibLayoutSplitsColumnChartXAxisSplitProvider from 'ui/vislib/lib/layout/splits/column_chart/x_axis_split';

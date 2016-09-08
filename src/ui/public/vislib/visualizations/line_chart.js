@@ -186,7 +186,6 @@ export default function LineChartFactory(Private) {
      * @returns {D3.UpdateSelection} SVG with paths added
      */
     addLines(svg, data) {
-      const self = this;
       const xScale = this.handler.xAxis.xScale;
       const yScale = this.handler.yAxis.yScale;
       const xAxisFormatter = this.handler.data.get('xAxisFormatter');
@@ -270,7 +269,6 @@ export default function LineChartFactory(Private) {
       const elWidth = this._attr.width = $elem.width();
       const elHeight = this._attr.height = $elem.height();
       const scaleType = this.handler.yAxis.getScaleType();
-      const yMin = this.handler.yAxis.yMin;
       const yScale = this.handler.yAxis.yScale;
       const xScale = this.handler.xAxis.xScale;
       const minWidth = 20;
