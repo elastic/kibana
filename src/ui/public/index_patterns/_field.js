@@ -72,7 +72,7 @@ export default function FieldObjectProvider(Private, shortDotsFilter, $rootScope
     obj.comp('$$spec', spec);
 
     // conflict info
-    obj.writ('indicesTypes');
+    obj.writ('conflictDescriptions');
 
     return obj.create();
   }
