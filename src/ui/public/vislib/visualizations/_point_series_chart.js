@@ -6,9 +6,9 @@ import errors from 'ui/errors';
 
 export default function PointSeriesChartProvider(Private) {
 
-  let Chart = Private(VislibVisualizationsChartProvider);
-  let Tooltip = Private(VislibComponentsTooltipProvider);
-  let touchdownTmpl = _.template(require('ui/vislib/partials/touchdown.tmpl.html'));
+  const Chart = Private(VislibVisualizationsChartProvider);
+  const Tooltip = Private(VislibComponentsTooltipProvider);
+  const touchdownTmpl = _.template(require('ui/vislib/partials/touchdown.tmpl.html'));
 
   class PointSeriesChart extends Chart {
     constructor(handler, chartEl, chartData) {
@@ -20,8 +20,8 @@ export default function PointSeriesChartProvider(Private) {
       let currentStackIndex = 0;
 
       return function (d, y0, y) {
-        let firstStack = currentStackIndex % stackCount === 0;
-        let lastStack = ++currentStackIndex === stackCount;
+        const firstStack = currentStackIndex % stackCount === 0;
+        const lastStack = ++currentStackIndex === stackCount;
 
         if (firstStack) {
           currentStackOffsets = [0, 0];
@@ -47,14 +47,14 @@ export default function PointSeriesChartProvider(Private) {
      * @returns {Array} Stacked data objects with x, y, and y0 values
      */
     stackData(data) {
-      let self = this;
-      let isHistogram = (this._attr.type === 'histogram' && this._attr.mode === 'stacked');
-      let stack = this._attr.stack;
+      const self = this;
+      const isHistogram = (this._attr.type === 'histogram' && this._attr.mode === 'stacked');
+      const stack = this._attr.stack;
 
       if (isHistogram) stack.out(self._stackMixedValues(data.series.length));
 
       return stack(data.series.map(function (d) {
-        let label = d.label;
+        const label = d.label;
         return d.values.map(function (e, i) {
           return {
             _input: e,
@@ -87,37 +87,37 @@ export default function PointSeriesChartProvider(Private) {
      * @returns {D3.Selection}
      */
     createEndZones(svg) {
-      let self = this;
-      let xAxis = this.handler.xAxis;
-      let xScale = xAxis.xScale;
-      let ordered = xAxis.ordered;
-      let missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
+      const self = this;
+      const xAxis = this.handler.xAxis;
+      const xScale = xAxis.xScale;
+      const ordered = xAxis.ordered;
+      const missingMinMax = !ordered || _.isUndefined(ordered.min) || _.isUndefined(ordered.max);
 
       if (missingMinMax || ordered.endzones === false) return;
 
-      let attr = this.handler._attr;
-      let height = attr.height;
-      let width = attr.width;
-      let margin = attr.margin;
-      let color = '#004c99';
+      const attr = this.handler._attr;
+      const height = attr.height;
+      const width = attr.width;
+      const margin = attr.margin;
+      const color = '#004c99';
 
       // we don't want to draw endzones over our min and max values, they
       // are still a part of the dataset. We want to start the endzones just
       // outside of them so we will use these values rather than ordered.min/max
-      let oneUnit = (ordered.units || _.identity)(1);
-      let beyondMin = ordered.min - oneUnit;
-      let beyondMax = ordered.max + oneUnit;
+      const oneUnit = (ordered.units || _.identity)(1);
+      const beyondMin = ordered.min - oneUnit;
+      const beyondMax = ordered.max + oneUnit;
 
       // points on this axis represent the amount of time they cover,
       // so draw the endzones at the actual time bounds
-      let leftEndzone = {
+      const leftEndzone = {
         x: 0,
         w: Math.max(xScale(ordered.min), 0)
       };
 
-      let rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
-      let rightStart = rightLastVal + oneUnit;
-      let rightEndzone = {
+      const rightLastVal = xAxis.expandLastBucket ? ordered.max : Math.min(ordered.max, _.last(xAxis.xValues));
+      const rightStart = rightLastVal + oneUnit;
+      const rightEndzone = {
         x: xScale(rightStart),
         w: Math.max(width - xScale(rightStart), 0)
       };
@@ -139,13 +139,13 @@ export default function PointSeriesChartProvider(Private) {
         });
 
       function callPlay(event) {
-        let boundData = event.target.__data__;
-        let mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
-        let wholeBucket = boundData && boundData.x != null;
+        const boundData = event.target.__data__;
+        const mouseChartXCoord = event.clientX - self.chartEl.getBoundingClientRect().left;
+        const wholeBucket = boundData && boundData.x != null;
 
         // the min and max that the endzones start in
-        let min = leftEndzone.w;
-        let max = rightEndzone.x;
+        const min = leftEndzone.w;
+        const max = rightEndzone.x;
 
         // bounds of the cursor to consider
         let xLeft = mouseChartXCoord;
@@ -154,7 +154,6 @@ export default function PointSeriesChartProvider(Private) {
           xLeft = xScale(boundData.x);
           xRight = xScale(xAxis.addInterval(boundData.x));
         }
-
 
         return {
           wholeBucket: wholeBucket,
@@ -166,7 +165,7 @@ export default function PointSeriesChartProvider(Private) {
         return touchdownTmpl(callPlay(d3.event));
       }
 
-      let endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
+      const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
       this.tooltips.push(endzoneTT);
       endzoneTT.order = 0;
       endzoneTT.showCondition = function inEndzone() {

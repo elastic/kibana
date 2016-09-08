@@ -16,14 +16,14 @@ describe('Vislib Color Module Test Suite', function () {
   describe('Color (main)', function () {
     let previousConfig;
     let getColors;
-    let arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
-    let arrayOfNumbers = [1, 2, 3, 4, 5];
-    let arrayOfUndefinedValues = [undefined, undefined, undefined];
-    let arrayOfObjects = [{}, {}, {}];
-    let arrayOfBooleans = [true, false, true];
-    let arrayOfNullValues = [null, null, null];
-    let emptyObject = {};
-    let nullValue = null;
+    const arr = ['good', 'better', 'best', 'never', 'let', 'it', 'rest'];
+    const arrayOfNumbers = [1, 2, 3, 4, 5];
+    const arrayOfUndefinedValues = [undefined, undefined, undefined];
+    const arrayOfObjects = [{}, {}, {}];
+    const arrayOfBooleans = [true, false, true];
+    const arrayOfNullValues = [null, null, null];
+    const emptyObject = {};
+    const nullValue = null;
     let notAValue;
     let color;
 
@@ -243,14 +243,14 @@ describe('Vislib Color Module Test Suite', function () {
   });
 
   describe('Color Palette', function () {
-    let num1 = 45;
-    let num2 = 72;
-    let num3 = 90;
-    let string = 'Welcome';
-    let bool = true;
-    let nullValue = null;
-    let emptyArr = [];
-    let emptyObject = {};
+    const num1 = 45;
+    const num2 = 72;
+    const num3 = 90;
+    const string = 'Welcome';
+    const bool = true;
+    const nullValue = null;
+    const emptyArr = [];
+    const emptyObject = {};
     let notAValue;
     let createColorPalette;
     let colorPalette;

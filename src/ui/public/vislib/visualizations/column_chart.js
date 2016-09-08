@@ -7,8 +7,8 @@ import VislibVisualizationsPointSeriesChartProvider from 'ui/vislib/visualizatio
 import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 export default function ColumnChartFactory(Private) {
 
-  let PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
-  let TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
+  const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
+  const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
   /**
    * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
@@ -44,21 +44,19 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection} SVG with rect added
      */
     addBars(svg, layers) {
-      let self = this;
-      let color = this.handler.data.getColorFunc();
-      let tooltip = this.tooltip;
-      let isTooltip = this._attr.addTooltip;
-      let layer;
-      let bars;
+      const self = this;
+      const color = this.handler.data.getColorFunc();
+      const tooltip = this.tooltip;
+      const isTooltip = this._attr.addTooltip;
 
-      layer = svg.selectAll('.layer')
+      const layer = svg.selectAll('.layer')
         .data(layers)
         .enter().append('g')
         .attr('class', function (d, i) {
           return 'series ' + i;
         });
 
-      bars = layer.selectAll('rect')
+      const bars = layer.selectAll('rect')
         .data(function (d) {
           return d;
         });
@@ -94,7 +92,7 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection}
      */
     updateBars(bars) {
-      let offset = this._attr.mode;
+      const offset = this._attr.mode;
 
       if (offset === 'grouped') {
         return this.addGroupedBars(bars);
@@ -110,16 +108,16 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection}
      */
     addStackedBars(bars) {
-      let data = this.chartData;
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let height = yScale.range()[0];
-      let yMin = this.handler.yAxis.yScale.domain()[0];
+      const data = this.chartData;
+      const xScale = this.handler.xAxis.xScale;
+      const yScale = this.handler.yAxis.yScale;
+      const height = yScale.range()[0];
+      const yMin = this.handler.yAxis.yScale.domain()[0];
 
       let barWidth;
       if (data.ordered && data.ordered.date) {
-        let start = data.ordered.min;
-        let end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+        const start = data.ordered.min;
+        const end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);
@@ -172,23 +170,23 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.UpdateSelection}
      */
     addGroupedBars(bars) {
-      let xScale = this.handler.xAxis.xScale;
-      let yScale = this.handler.yAxis.yScale;
-      let data = this.chartData;
-      let n = data.series.length;
-      let height = yScale.range()[0];
-      let groupSpacingPercentage = 0.15;
-      let isTimeScale = (data.ordered && data.ordered.date);
-      let minWidth = 1;
+      const xScale = this.handler.xAxis.xScale;
+      const yScale = this.handler.yAxis.yScale;
+      const data = this.chartData;
+      const n = data.series.length;
+      const height = yScale.range()[0];
+      const groupSpacingPercentage = 0.15;
+      const isTimeScale = (data.ordered && data.ordered.date);
+      const minWidth = 1;
       let barWidth;
 
       // update
       bars
         .attr('x', function (d, i, j) {
           if (isTimeScale) {
-            let groupWidth = xScale(data.ordered.min + data.ordered.interval) -
+            const groupWidth = xScale(data.ordered.min + data.ordered.interval) -
               xScale(data.ordered.min);
-            let groupSpacing = groupWidth * groupSpacingPercentage;
+            const groupSpacing = groupWidth * groupSpacingPercentage;
 
             barWidth = (groupWidth - groupSpacing) / n;
 
@@ -231,13 +229,13 @@ export default function ColumnChartFactory(Private) {
      * @returns {D3.Selection} rect with event listeners attached
      */
     addBarEvents(element, svg) {
-      let events = this.events;
-      let isBrushable = events.isBrushable();
-      let brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      let hover = events.addHoverEvent();
-      let mouseout = events.addMouseoutEvent();
-      let click = events.addClickEvent();
-      let attachedEvents = element.call(hover).call(mouseout).call(click);
+      const events = this.events;
+      const isBrushable = events.isBrushable();
+      const brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      const hover = events.addHoverEvent();
+      const mouseout = events.addMouseoutEvent();
+      const click = events.addClickEvent();
+      const attachedEvents = element.call(hover).call(mouseout).call(click);
 
       if (isBrushable) {
         attachedEvents.call(brush);
@@ -253,31 +251,25 @@ export default function ColumnChartFactory(Private) {
      * @returns {Function} Creates the vertical bar chart
      */
     draw() {
-      let self = this;
-      let $elem = $(this.chartEl);
-      let margin = this._attr.margin;
-      let elWidth = this._attr.width = $elem.width();
-      let elHeight = this._attr.height = $elem.height();
-      let yScale = this.handler.yAxis.yScale;
-      let xScale = this.handler.xAxis.xScale;
-      let minWidth = 20;
-      let minHeight = 20;
-      let addTimeMarker = this._attr.addTimeMarker;
-      let times = this._attr.times || [];
+      const self = this;
+      const $elem = $(this.chartEl);
+      const margin = this._attr.margin;
+      const elWidth = this._attr.width = $elem.width();
+      const elHeight = this._attr.height = $elem.height();
+      const yScale = this.handler.yAxis.yScale;
+      const xScale = this.handler.xAxis.xScale;
+      const minWidth = 20;
+      const minHeight = 20;
+      const addTimeMarker = this._attr.addTimeMarker;
+      const times = this._attr.times || [];
       let timeMarker;
-      let div;
-      let svg;
-      let width;
-      let height;
-      let layers;
-      let bars;
 
       return function (selection) {
         selection.each(function (data) {
-          layers = self.stackData(data);
+          const layers = self.stackData(data);
 
-          width = elWidth;
-          height = elHeight - margin.top - margin.bottom;
+          const width = elWidth;
+          const height = elHeight - margin.top - margin.bottom;
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
@@ -296,21 +288,21 @@ export default function ColumnChartFactory(Private) {
           with a ${self._attr.scale} scaling method. Try 'linear' scaling instead.`);
           }
 
-          div = d3.select(this);
+          const div = d3.select(this);
 
-          svg = div.append('svg')
+          const svg = div.append('svg')
             .attr('width', width)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
             .attr('transform', 'translate(0,' + margin.top + ')');
 
-          bars = self.addBars(svg, layers);
+          const bars = self.addBars(svg, layers);
           self.createEndZones(svg);
 
           // Adds event listeners
           self.addBarEvents(bars, svg);
 
-          let line = svg.append('line')
+          svg.append('line')
             .attr('class', 'base-line')
             .attr('x1', 0)
             .attr('y1', yScale(0))

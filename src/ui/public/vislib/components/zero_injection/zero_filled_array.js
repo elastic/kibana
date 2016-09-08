@@ -12,7 +12,7 @@ define(function () {
         throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
       }
 
-      let zeroFilledArray = [];
+      const zeroFilledArray = [];
 
       arr.forEach(function (val) {
         zeroFilledArray.push({

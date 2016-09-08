@@ -3,7 +3,7 @@ import _ from 'lodash';
 import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
 export default function LayoutFactory(Private) {
 
-  let layoutType = Private(VislibLibLayoutLayoutTypesProvider);
+  const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
 
   /**
    * Builds the visualization DOM layout
@@ -50,7 +50,7 @@ export default function LayoutFactory(Private) {
      * @returns {*} Creates the visualization layout
      */
     createLayout(arr) {
-      let self = this;
+      const self = this;
 
       return _.each(arr, function (obj) {
         self.layout(obj);
@@ -83,7 +83,7 @@ export default function LayoutFactory(Private) {
         obj.parent = '.' + obj.parent;
       }
 
-      let childEl = this.appendElem(obj.parent, obj.type, obj.class);
+      const childEl = this.appendElem(obj.parent, obj.type, obj.class);
 
       if (obj.datum) {
         childEl.datum(obj.datum);
@@ -94,7 +94,7 @@ export default function LayoutFactory(Private) {
       }
 
       if (obj.children) {
-        let newParent = childEl[0][0];
+        const newParent = childEl[0][0];
 
         _.forEach(obj.children, function (obj) {
           if (!obj.parent) {

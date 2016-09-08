@@ -6,8 +6,8 @@ import VislibLibDispatchProvider from 'ui/vislib/lib/dispatch';
 import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
 export default function ChartBaseClass(Private) {
 
-  let Dispatch = Private(VislibLibDispatchProvider);
-  let Tooltip = Private(VislibComponentsTooltipProvider);
+  const Dispatch = Private(VislibLibDispatchProvider);
+  const Tooltip = Private(VislibComponentsTooltipProvider);
 
   /**
    * The Base Class for all visualizations.
@@ -25,11 +25,11 @@ export default function ChartBaseClass(Private) {
       this.chartData = chartData;
       this.tooltips = [];
 
-      let events = this.events = new Dispatch(handler);
+      const events = this.events = new Dispatch(handler);
 
       if (_.get(this.handler, '_attr.addTooltip')) {
-        let $el = this.handler.el;
-        let formatter = this.handler.data.get('tooltipFormatter');
+        const $el = this.handler.el;
+        const formatter = this.handler.data.get('tooltipFormatter');
 
         // Add tooltip
         this.tooltip = new Tooltip('chart', $el, formatter, events);
@@ -47,7 +47,7 @@ export default function ChartBaseClass(Private) {
      * @returns {HTMLElement} Contains the D3 chart
      */
     render() {
-      let selection = d3.select(this.chartEl);
+      const selection = d3.select(this.chartEl);
 
       selection.selectAll('*').remove();
       selection.call(this.draw());
@@ -61,7 +61,7 @@ export default function ChartBaseClass(Private) {
      */
     _addIdentifier(selection, labelProp) {
       labelProp = labelProp || 'label';
-      let labels = this.handler.data.labels;
+      const labels = this.handler.data.labels;
 
       function resolveLabel(datum) {
         if (labels.length === 1) return labels[0];
@@ -70,7 +70,7 @@ export default function ChartBaseClass(Private) {
       }
 
       selection.each(function (datum) {
-        let label = resolveLabel(datum);
+        const label = resolveLabel(datum);
         if (label != null) dataLabel(this, label);
       });
     };
@@ -81,13 +81,12 @@ export default function ChartBaseClass(Private) {
      * @method destroy
      */
     destroy() {
-      let selection = d3.select(this.chartEl);
+      const selection = d3.select(this.chartEl);
       this.events.removeAllListeners();
       this.tooltips.forEach(function (tooltip) {
         tooltip.destroy();
       });
       selection.remove();
-      selection = null;
     };
   }
 
