@@ -96,6 +96,8 @@ module.exports = function (kibana) {
         await mkdirp(server.config().get('path.data'));
       } catch (err) {
         server.log(['error', 'init'], err);
+        // Stop the server startup with a fatal error
+        throw err;
       }
     },
 
