@@ -10,10 +10,10 @@ import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_t
 export default function VisFactory(Private) {
 
 
-  let ResizeChecker = Private(VislibLibResizeCheckerProvider);
-  let Events = Private(EventsProvider);
-  let handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
-  let chartTypes = Private(VislibVisualizationsVisTypesProvider);
+  const ResizeChecker = Private(VislibLibResizeCheckerProvider);
+  const Events = Private(EventsProvider);
+  const handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
+  const chartTypes = Private(VislibVisualizationsVisTypesProvider);
 
   /**
    * Creates the visualizations.
@@ -46,7 +46,7 @@ export default function VisFactory(Private) {
      * @param data {Object} Elasticsearch query results
      */
     render(data, uiState) {
-      let chartType = this._attr.type;
+      const chartType = this._attr.type;
 
       if (!data) {
         throw new Error('No valid data!');
@@ -109,7 +109,7 @@ export default function VisFactory(Private) {
      * @method destroy
      */
     destroy() {
-      let selection = d3.select(this.el).select('.vis-wrapper');
+      const selection = d3.select(this.el).select('.vis-wrapper');
 
       this.binder.destroy();
       this.resizeChecker.destroy();
@@ -117,7 +117,6 @@ export default function VisFactory(Private) {
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
-      selection = null;
     };
 
     /**
@@ -151,9 +150,9 @@ export default function VisFactory(Private) {
      * @returns {*}
      */
     on(event, listener) {
-      let first = this.listenerCount(event) === 0;
-      let ret = Events.prototype.on.call(this, event, listener);
-      let added = this.listenerCount(event) > 0;
+      const first = this.listenerCount(event) === 0;
+      const ret = Events.prototype.on.call(this, event, listener);
+      const added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
       // enable the event in the handler
@@ -170,9 +169,9 @@ export default function VisFactory(Private) {
      * @returns {*}
      */
     off(event, listener) {
-      let last = this.listenerCount(event) === 1;
-      let ret = Events.prototype.off.call(this, event, listener);
-      let removed = this.listenerCount(event) === 0;
+      const last = this.listenerCount(event) === 1;
+      const ret = Events.prototype.off.call(this, event, listener);
+      const removed = this.listenerCount(event) === 0;
 
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);

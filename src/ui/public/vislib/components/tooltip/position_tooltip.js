@@ -1,31 +1,31 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
-let OFFSET = 10;
+const OFFSET = 10;
 let $clone;
 
 // translate css properties into their basic direction
-let propDirs = {
+const propDirs = {
   top: 'north',
   left: 'west'
 };
 
 function positionTooltip(opts, html) {
   if (!opts) return;
-  let $chart = $(opts.$chart);
-  let $el = $(opts.$el);
-  let $window = $(opts.$window || window);
-  let $sizer = $(opts.$sizer);
-  let prev = $chart.data('previousPlacement') || {};
-  let event = opts.event;
+  const $chart = $(opts.$chart);
+  const $el = $(opts.$el);
+  const $window = $(opts.$window || window);
+  const $sizer = $(opts.$sizer);
+  const prev = $chart.data('previousPlacement') || {};
+  const event = opts.event;
 
   if (!$chart.size() || !$el.size()) return;
 
-  let size = getTtSize(html || $el.html(), $sizer);
-  let pos = getBasePosition(size, event);
-  let overflow = getOverflow(size, pos, [$chart, $window]);
+  const size = getTtSize(html || $el.html(), $sizer);
+  const pos = getBasePosition(size, event);
+  const overflow = getOverflow(size, pos, [$chart, $window]);
 
-  let placement = placeToAvoidOverflow(pos, prev, overflow);
+  const placement = placeToAvoidOverflow(pos, prev, overflow);
   $chart.data('previousPlacement', placement);
   return placement;
 }
@@ -35,7 +35,7 @@ function getTtSize(ttHtml, $sizer) {
     $sizer.html(ttHtml);
   }
 
-  let size = {
+  const size = {
     width: $sizer.outerWidth(),
     height: $sizer.outerHeight()
   };
@@ -55,7 +55,7 @@ function getBasePosition(size, event) {
 function getBounds($el) {
   // in testing, $window is not actually a window, so we need to add
   // the offsets to make it work right.
-  let bounds = $el.offset() || { top: 0, left: 0 };
+  const bounds = $el.offset() || { top: 0, left: 0 };
   bounds.top += $el.scrollTop();
   bounds.left += $el.scrollLeft();
   bounds.bottom = bounds.top + $el.outerHeight();
@@ -64,7 +64,7 @@ function getBounds($el) {
 }
 
 function getOverflow(size, pos, containers) {
-  let overflow = {};
+  const overflow = {};
 
   containers.map(getBounds).forEach(function (bounds) {
     // number of pixels that the toolip would overflow it's far
@@ -90,10 +90,10 @@ function mergeOverflows(dest, src) {
 }
 
 function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
-  let stash = '_' + prop;
+  const stash = '_' + prop;
 
   // list of directions in order of preference
-  let dirs = _.unique([prev[stash], pref, fallback].filter(Boolean));
+  const dirs = _.unique([prev[stash], pref, fallback].filter(Boolean));
 
   let dir;
   let value;
@@ -126,7 +126,7 @@ function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
 }
 
 function placeToAvoidOverflow(pos, prev, overflow) {
-  let placement = {};
+  const placement = {};
   pickPlacement('top', pos, overflow, prev, 'south', 'north', placement);
   pickPlacement('left', pos, overflow, prev, 'east', 'west', placement);
   return placement;

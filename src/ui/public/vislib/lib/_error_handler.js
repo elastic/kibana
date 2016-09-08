@@ -24,8 +24,8 @@ export default function ErrorHandlerFactory() {
      * @returns {HTMLElement} HTML div with an error message
      */
     validateWidthandHeight(width, height) {
-      let badWidth = _.isNaN(width) || width <= 0;
-      let badHeight = _.isNaN(height) || height <= 0;
+      const badWidth = _.isNaN(width) || width <= 0;
+      const badHeight = _.isNaN(height) || height <= 0;
 
       if (badWidth || badHeight) {
         throw new errors.ContainerTooSmall();

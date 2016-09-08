@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import VislibComponentsZeroInjectionUniqKeysProvider from 'ui/vislib/components/zero_injection/uniq_keys';
 export default function OrderedXKeysUtilService(Private) {
-  let getUniqKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
+  const getUniqKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
 
   /*
    * Accepts a Kibana data object and returns
@@ -16,11 +16,11 @@ export default function OrderedXKeysUtilService(Private) {
       throw new Error('OrderedXKeysUtilService expects an object');
     }
 
-    let uniqKeys = getUniqKeys(obj);
-    let uniqKeysPairs = [...uniqKeys.entries()];
+    const uniqKeys = getUniqKeys(obj);
+    const uniqKeysPairs = [...uniqKeys.entries()];
 
-    let interval = _.get(obj, 'ordered.interval');
-    let dateInterval = moment.isDuration(interval) ? interval : false;
+    const interval = _.get(obj, 'ordered.interval');
+    const dateInterval = moment.isDuration(interval) ? interval : false;
 
     return _(uniqKeysPairs)
     .sortBy(function (d) {
@@ -32,13 +32,13 @@ export default function OrderedXKeysUtilService(Private) {
     .map(function (d, i, list) {
       if (!d[1].isNumber) return d[0];
 
-      let val = +d[0];
+      const val = +d[0];
       if (interval == null) return val;
 
-      let gapEdge = parseFloat(_.get(list, [i + 1, 0]));
+      const gapEdge = parseFloat(_.get(list, [i + 1, 0]));
       if (isNaN(gapEdge)) return val;
 
-      let vals = [];
+      const vals = [];
       let next = val;
 
       if (dateInterval) {

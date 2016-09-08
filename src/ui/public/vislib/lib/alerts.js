@@ -18,7 +18,7 @@ export default function AlertsFactory(Private) {
       this.alertDefs = alertDefs || [];
 
       this.binder.jqOn(vis.el, 'mouseenter', '.vis-alerts-tray', function () {
-        let $tray = $(this);
+        const $tray = $(this);
         hide();
         $(vis.el).on('mousemove', checkForExit);
 
@@ -38,13 +38,13 @@ export default function AlertsFactory(Private) {
         }
 
         function checkForExit(event) {
-          let pos = $tray.offset();
+          const pos = $tray.offset();
           if (pos.top > event.clientY || pos.left > event.clientX) return show();
 
-          let bottom = pos.top + $tray.height();
+          const bottom = pos.top + $tray.height();
           if (event.clientY > bottom) return show();
 
-          let right = pos.left + $tray.width();
+          const right = pos.left + $tray.width();
           if (event.clientX > right) return show();
         }
       });
@@ -57,21 +57,21 @@ export default function AlertsFactory(Private) {
      * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
      */
     render() {
-      let vis = this.vis;
-      let data = this.data;
+      const vis = this.vis;
+      const data = this.data;
 
-      let alerts = _(this.alertDefs)
+      const alerts = _(this.alertDefs)
         .map(function (alertDef) {
           if (!alertDef) return;
           if (alertDef.test && !alertDef.test(vis, data)) return;
 
-          let type = alertDef.type || 'info';
-          let icon = alertDef.icon || type;
-          let msg = alertDef.msg;
+          const type = alertDef.type || 'info';
+          const icon = alertDef.icon || type;
+          const msg = alertDef.msg;
 
           // alert container
-          let $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
-          let $text = $('<p>').addClass('vis-alerts-text').text(msg);
+          const $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
+          const $text = $('<p>').addClass('vis-alerts-text').text(msg);
 
           return $('<div>').addClass('vis-alert vis-alert-' + type).append([$icon, $text]);
         })

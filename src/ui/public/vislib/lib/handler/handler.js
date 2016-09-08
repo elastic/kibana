@@ -6,8 +6,8 @@ import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 export default function HandlerBaseClass(Private) {
 
-  let Data = Private(VislibLibDataProvider);
-  let Layout = Private(VislibLibLayoutLayoutProvider);
+  const Data = Private(VislibLibDataProvider);
+  const Layout = Private(VislibLibLayoutLayoutProvider);
 
   /**
    * Handles building all the components of the visualization
@@ -51,7 +51,7 @@ export default function HandlerBaseClass(Private) {
       // memoize so that the same function is returned every time,
       // allowing us to remove/re-add the same function
       this.getProxyHandler = _.memoize(function (event) {
-        let self = this;
+        const self = this;
         return function (e) {
           self.vis.emit(event, e);
         };
@@ -87,7 +87,7 @@ export default function HandlerBaseClass(Private) {
      * @private
      */
     _validateData() {
-      let dataType = this.data.type;
+      const dataType = this.data.type;
 
       if (!dataType) {
         throw new errors.NoResults();
@@ -102,9 +102,9 @@ export default function HandlerBaseClass(Private) {
      * @returns {HTMLElement} With the visualization child element
      */
     render() {
-      let self = this;
-      let charts = this.charts = [];
-      let selection = d3.select(this.el);
+      const self = this;
+      const charts = this.charts = [];
+      const selection = d3.select(this.el);
 
       selection.selectAll('*').remove();
 
@@ -118,7 +118,7 @@ export default function HandlerBaseClass(Private) {
       // render the chart(s)
       selection.selectAll('.chart')
         .each(function (chartData) {
-          let chart = new self.ChartClass(self, this, chartData);
+          const chart = new self.ChartClass(self, this, chartData);
 
           self.vis.activeEvents().forEach(function (event) {
             self.enable(event, chart);
@@ -131,7 +131,7 @@ export default function HandlerBaseClass(Private) {
 
     chartEventProxyToggle(method) {
       return function (event, chart) {
-        let proxyHandler = this.getProxyHandler(event);
+        const proxyHandler = this.getProxyHandler(event);
 
         _.each(chart ? [chart] : this.charts, function (chart) {
           chart.events[method](event, proxyHandler);
@@ -162,7 +162,7 @@ export default function HandlerBaseClass(Private) {
     error(message) {
       this.removeAll(this.el);
 
-      let div = d3.select(this.el)
+      const div = d3.select(this.el)
         .append('div')
         // class name needs `chart` in it for the polling checkSize function
         // to continuously call render on resize
