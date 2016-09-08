@@ -6,6 +6,7 @@ import L from 'leaflet';
 
 import sinon from 'auto-release-sinon';
 import geoJsonData from 'fixtures/vislib/mock_data/geohash/_geo_json';
+import tileMapServiceConfig from 'fixtures/vislib/_tilemap_tms_fixture';
 import $ from 'jquery';
 import VislibVisualizationsMapProvider from 'ui/vislib/visualizations/_map';
 
@@ -75,7 +76,7 @@ describe('TileMap Map Tests', function () {
         attachEvents: sinon.stub(TileMapMap.prototype, '_attachEvents'),
         addMarkers: sinon.stub(TileMapMap.prototype, '_addMarkers'),
       };
-      map = new TileMapMap($mockMapEl, geoJsonData, {});
+      map = new TileMapMap($mockMapEl, geoJsonData, tileMapServiceConfig);
     });
 
     it('should create the create leaflet objects', function () {
@@ -111,7 +112,6 @@ describe('TileMap Map Tests', function () {
 
   describe('attachEvents', function () {
     let map;
-
     beforeEach(function () {
       sinon.stub(TileMapMap.prototype, '_createMap', function () {
         this._tileLayer = leafletMocks.tileLayer;

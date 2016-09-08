@@ -11,19 +11,11 @@ import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visu
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
 import VislibVisualizationsMarkerTypesGeohashGridProvider from 'ui/vislib/visualizations/marker_types/geohash_grid';
 import VislibVisualizationsMarkerTypesHeatmapProvider from 'ui/vislib/visualizations/marker_types/heatmap';
-export default function MapFactory(Private, tilemap, $sanitize) {
+export default function MapFactory(Private) {
 
   let defaultMapZoom = 2;
   let defaultMapCenter = [15, 5];
   let defaultMarkerType = 'Scaled Circle Markers';
-
-  let tilemapOptions = tilemap.options;
-  let attribution = $sanitize(marked(tilemapOptions.attribution));
-
-  let mapTiles = {
-    url: tilemap.url,
-    options: _.assign({}, tilemapOptions, { attribution })
-  };
 
   let markerTypes = {
     'Scaled Circle Markers': Private(VislibVisualizationsMarkerTypesScaledCirclesProvider),
@@ -46,18 +38,16 @@ export default function MapFactory(Private, tilemap, $sanitize) {
     this._chartData = chartData;
 
     // keep a reference to all of the optional params
+    this._attr = params.attr || {};
     this._events = _.get(params, 'events');
     this._markerType = markerTypes[params.markerType] ? params.markerType : defaultMarkerType;
     this._valueFormatter = params.valueFormatter || _.identity;
     this._tooltipFormatter = params.tooltipFormatter || _.identity;
     this._geoJson = _.get(this._chartData, 'geoJson');
-    this._mapZoom =  Math.max(Math.min(params.zoom || defaultMapZoom, tilemapOptions.maxZoom), tilemapOptions.minZoom);
     this._mapCenter = params.center || defaultMapCenter;
-    this._attr = params.attr || {};
+    this._mapZoom =  params.mapZoom || defaultMapZoom;
 
     let mapOptions = {
-      minZoom: tilemapOptions.minZoom,
-      maxZoom: tilemapOptions.maxZoom,
       noWrap: true,
       maxBounds: L.latLngBounds([-90, -220], [90, 220]),
       scrollWheelZoom: false,
@@ -286,10 +276,15 @@ export default function MapFactory(Private, tilemap, $sanitize) {
         maxZoom: 18
       });
       this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);
-    } else {
-      this._tileLayer = L.tileLayer(mapTiles.url, mapTiles.options);
+    } else if (this._attr.tms) {
+      _.assign(mapOptions, {
+        minZoom: this._attr.tms.options.minZoom,
+        maxZoom: this._attr.tms.options.maxZoom
+      });
+      // calculate default map zoom level for the tile layer
+      this._mapZoom = Math.max(Math.min(this._mapZoom, this._attr.tms.options.maxZoom), this._attr.tms.options.minZoom);
+      this._tileLayer = L.tileLayer(this._attr.tms.url, this._attr.tms.options);
     }
-
     // append tile layers, center and zoom to the map options
     mapOptions.layers = this._tileLayer;
     mapOptions.center = this._mapCenter;
@@ -322,4 +317,4 @@ export default function MapFactory(Private, tilemap, $sanitize) {
   };
 
   return TileMapMap;
-};
+}
