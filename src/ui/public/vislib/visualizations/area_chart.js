@@ -72,7 +72,6 @@ export default function AreaChartFactory(Private) {
      * @returns {D3.UpdateSelection} SVG with path added
      */
     addPath(svg, layers) {
-      const self = this;
       const ordered = this.handler.data.get('ordered');
       const isTimeSeries = (ordered && ordered.date);
       const isOverlapping = this.isOverlapping;
@@ -81,49 +80,49 @@ export default function AreaChartFactory(Private) {
       const yScale = this.handler.yAxis.yScale;
       const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       const area = d3.svg.area()
-        .x(function (d) {
-          if (isTimeSeries) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .y0(function (d) {
-          if (isOverlapping) {
-            return yScale(0);
-          }
+      .x(function (d) {
+        if (isTimeSeries) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .y0(function (d) {
+        if (isOverlapping) {
+          return yScale(0);
+        }
 
-          return yScale(d.y0);
-        })
-        .y1(function (d) {
-          if (isOverlapping) {
-            return yScale(d.y);
-          }
+        return yScale(d.y0);
+      })
+      .y1(function (d) {
+        if (isOverlapping) {
+          return yScale(d.y);
+        }
 
-          return yScale(d.y0 + d.y);
-        })
-        .defined(function (d) {
-          return !_.isNull(d.y);
-        })
-        .interpolate(interpolate);
+        return yScale(d.y0 + d.y);
+      })
+      .defined(function (d) {
+        return !_.isNull(d.y);
+      })
+      .interpolate(interpolate);
 
       // Data layers
       const layer = svg.selectAll('.layer')
-        .data(layers)
-        .enter()
-        .append('g')
-        .attr('class', function (d, i) {
-          return 'pathgroup ' + i;
-        });
+      .data(layers)
+      .enter()
+      .append('g')
+      .attr('class', function (d, i) {
+        return 'pathgroup ' + i;
+      });
 
       // Append path
       const path = layer.append('path')
-        .call(this._addIdentifier)
-        .style('fill', function (d) {
-          return color(d[0].label);
-        })
-        .classed('overlap_area', function () {
-          return isOverlapping;
-        });
+      .call(this._addIdentifier)
+      .style('fill', function (d) {
+        return color(d[0].label);
+      })
+      .classed('overlap_area', function () {
+        return isOverlapping;
+      });
 
       // update
       path.attr('d', function (d) {
@@ -165,7 +164,6 @@ export default function AreaChartFactory(Private) {
      * @returns {D3.UpdateSelection} SVG with circles added
      */
     addCircles(svg, data) {
-      const self = this;
       const color = this.handler.data.getColorFunc();
       const xScale = this.handler.xAxis.xScale;
       const yScale = this.handler.yAxis.yScale;

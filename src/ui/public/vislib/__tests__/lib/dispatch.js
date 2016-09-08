@@ -121,7 +121,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     it('should attach whatever gets passed on vis.on() to chart.events', function (done) {
       let vis;
       let persistedState;
-      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();
@@ -141,7 +140,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     it('can be added after rendering', function () {
       let vis;
       let persistedState;
-      let chart;
       ngMock.module('kibana');
       ngMock.inject(function (Private) {
         vis = Private(FixturesVislibVisFixtureProvider)();

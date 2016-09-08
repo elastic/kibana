@@ -17,7 +17,7 @@ define(function () {
         const parent = $(this).parents('.vis-wrapper');
 
         if (!data.series) {
-          const splits = div.selectAll('.chart-title')
+          div.selectAll('.chart-title')
           .data(function (d) {
             return d.rows ? d.rows : d.columns;
           })

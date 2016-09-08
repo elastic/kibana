@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 export default function MapHandlerProvider(Private) {

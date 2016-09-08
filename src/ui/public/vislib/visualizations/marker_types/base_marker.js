@@ -108,7 +108,7 @@ export default function MarkerFactory() {
           }
           self._showTooltip(feature);
         },
-        mouseout: function (e) {
+        mouseout: function () {
           self._hidePopup();
         }
       });

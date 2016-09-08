@@ -1,5 +1,3 @@
-
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 

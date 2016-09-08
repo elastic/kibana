@@ -102,7 +102,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
         options: {
           position: 'topleft'
         },
-        onAdd: function (map) {
+        onAdd: function () {
           $(fitContainer).html('<a class="fa fa-crop" href="#" title="Fit Data Bounds"></a>')
             .on('click', function (e) {
               e.preventDefault();
@@ -111,7 +111,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
 
           return fitContainer;
         },
-        onRemove: function (map) {
+        onRemove: function () {
           $(fitContainer).off('click');
         }
       });
@@ -215,7 +215,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
         self._tileLayer.off('tileload', saturateTiles);
       });
 
-      this.map.on('moveend', function setZoomCenter(ev) {
+      this.map.on('moveend', function setZoomCenter() {
         if (!self.map) return;
         // update internal center and zoom references
         const uglyCenter = self.map.getCenter();
