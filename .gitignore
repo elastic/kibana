@@ -31,3 +31,4 @@ selenium
 .babelcache.json
 *.swp
 *.swo
+*.out
