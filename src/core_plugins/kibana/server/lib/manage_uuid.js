@@ -21,6 +21,8 @@ export default async function manageUuid(server) {
         return false;
       }
       server.log(['error', 'read-uuid'], err);
+      // Note: this will most likely be logged as an Unhandled Rejection
+      throw err;
     }
   }
 
@@ -30,7 +32,8 @@ export default async function manageUuid(server) {
       return await writeFile(uuidFile, uuid, { encoding: FILE_ENCODING });
     } catch (err) {
       server.log(['error', 'write-uuid'], err);
-      return false;
+      // Note: this will most likely be logged as an Unhandled Rejection
+      throw err;
     }
   }
 
