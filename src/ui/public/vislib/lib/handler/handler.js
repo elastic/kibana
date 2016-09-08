@@ -117,16 +117,16 @@ export default function HandlerBaseClass(Private) {
 
       // render the chart(s)
       selection.selectAll('.chart')
-        .each(function (chartData) {
-          const chart = new self.ChartClass(self, this, chartData);
+      .each(function (chartData) {
+        const chart = new self.ChartClass(self, this, chartData);
 
-          self.vis.activeEvents().forEach(function (event) {
-            self.enable(event, chart);
-          });
-
-          charts.push(chart);
-          chart.render();
+        self.vis.activeEvents().forEach(function (event) {
+          self.enable(event, chart);
         });
+
+        charts.push(chart);
+        chart.render();
+      });
     };
 
     chartEventProxyToggle(method) {
@@ -163,18 +163,18 @@ export default function HandlerBaseClass(Private) {
       this.removeAll(this.el);
 
       const div = d3.select(this.el)
-        .append('div')
-        // class name needs `chart` in it for the polling checkSize function
-        // to continuously call render on resize
-        .attr('class', 'visualize-error chart error');
+      .append('div')
+      // class name needs `chart` in it for the polling checkSize function
+      // to continuously call render on resize
+      .attr('class', 'visualize-error chart error');
 
       if (message === 'No results found') {
         div.append('div')
-          .attr('class', 'text-center visualize-error visualize-chart ng-scope')
-          .append('div').attr('class', 'item top')
-          .append('div').attr('class', 'item')
-          .append('h2').html('<i class="fa fa-meh-o"></i>')
-          .append('h4').text(message);
+        .attr('class', 'text-center visualize-error visualize-chart ng-scope')
+        .append('div').attr('class', 'item top')
+        .append('div').attr('class', 'item')
+        .append('h2').html('<i class="fa fa-meh-o"></i>')
+        .append('h4').text(message);
 
         div.append('div').attr('class', 'item bottom');
         return div;

@@ -48,9 +48,9 @@ export default function MarkerFactory() {
 
         _.each(self._legendColors, function (color, i) {
           const labelText = self._legendQuantizer
-            .invertExtent(color)
-            .map(self._valueFormatter)
-            .join(' – ');
+          .invertExtent(color)
+          .map(self._valueFormatter)
+          .join(' – ');
 
           const label = $('<div>').text(labelText);
 
@@ -216,9 +216,9 @@ export default function MarkerFactory() {
 
     _createTooltip(content, latLng) {
       L.popup({autoPan: false})
-        .setLatLng(latLng)
-        .setContent(content)
-        .openOn(this.map);
+      .setLatLng(latLng)
+      .setContent(content)
+      .openOn(this.map);
     };
 
     /**

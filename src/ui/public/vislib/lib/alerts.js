@@ -61,21 +61,21 @@ export default function AlertsFactory(Private) {
       const data = this.data;
 
       const alerts = _(this.alertDefs)
-        .map(function (alertDef) {
-          if (!alertDef) return;
-          if (alertDef.test && !alertDef.test(vis, data)) return;
+      .map(function (alertDef) {
+        if (!alertDef) return;
+        if (alertDef.test && !alertDef.test(vis, data)) return;
 
-          const type = alertDef.type || 'info';
-          const icon = alertDef.icon || type;
-          const msg = alertDef.msg;
+        const type = alertDef.type || 'info';
+        const icon = alertDef.icon || type;
+        const msg = alertDef.msg;
 
-          // alert container
-          const $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
-          const $text = $('<p>').addClass('vis-alerts-text').text(msg);
+        // alert container
+        const $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
+        const $text = $('<p>').addClass('vis-alerts-text').text(msg);
 
-          return $('<div>').addClass('vis-alert vis-alert-' + type).append([$icon, $text]);
-        })
-        .compact();
+        return $('<div>').addClass('vis-alert vis-alert-' + type).append([$icon, $text]);
+      })
+      .compact();
 
       if (!alerts.size()) return;
 

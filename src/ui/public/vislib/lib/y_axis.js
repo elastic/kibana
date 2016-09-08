@@ -117,8 +117,8 @@ export default function YAxisFactory(Private) {
       const domain = this._getExtents(this.domain);
 
       this.yScale = scale
-        .domain(domain)
-        .range([height, 0]);
+      .domain(domain)
+      .range([height, 0]);
 
       if (!this._isUserDefined()) this.yScale.nice(); // round extents when not user defined
       // Prevents bars from going off the chart when the y extents are within the domain range
@@ -154,10 +154,10 @@ export default function YAxisFactory(Private) {
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
-        .scale(yScale)
-        .tickFormat(this.tickFormat(this.domain))
-        .ticks(this.tickScale(height))
-        .orient('left');
+      .scale(yScale)
+      .tickFormat(this.tickFormat(this.domain))
+      .ticks(this.tickScale(height))
+      .orient('left');
 
       return this.yAxis;
     };
@@ -174,9 +174,9 @@ export default function YAxisFactory(Private) {
      */
     tickScale(height) {
       const yTickScale = d3.scale.linear()
-        .clamp(true)
-        .domain([20, 40, 1000])
-        .range([0, 3, 11]);
+      .clamp(true)
+      .domain([20, 40, 1000])
+      .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(height));
     };
@@ -211,20 +211,20 @@ export default function YAxisFactory(Private) {
           if (!isWiggleOrSilhouette) {
             // Append svg and y axis
             const svg = div.append('svg')
-              .attr('width', width)
-              .attr('height', height);
+            .attr('width', width)
+            .attr('height', height);
 
             svg.append('g')
-              .attr('class', 'y axis')
-              .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
-              .call(yAxis);
+            .attr('class', 'y axis')
+            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
+            .call(yAxis);
 
             const container = svg.select('g.y.axis').node();
             if (container) {
               const cWidth = Math.max(width, container.getBBox().width);
               svg.attr('width', cWidth);
               svg.select('g')
-                .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
+              .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
             }
           }
         });

@@ -131,8 +131,8 @@ export default function LayoutFactory(Private) {
       }
 
       return d3.select(el)
-        .append(type)
-        .attr('class', className);
+      .append(type)
+      .attr('class', className);
     };
 
     /**
