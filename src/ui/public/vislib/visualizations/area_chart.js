@@ -177,49 +177,49 @@ export default function AreaChartFactory(Private) {
       const isOverlapping = this.isOverlapping;
 
       const layer = svg.selectAll('.points')
-        .data(data)
-        .enter()
-        .append('g')
-        .attr('class', 'points area');
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', 'points area');
 
       // append the circles
       const circles = layer
-        .selectAll('circles')
-        .data(function appendData(data) {
-          return data.filter(function isZeroOrNull(d) {
-            return d.y !== 0 && !_.isNull(d.y);
-          });
+      .selectAll('circles')
+      .data(function appendData(data) {
+        return data.filter(function isZeroOrNull(d) {
+          return d.y !== 0 && !_.isNull(d.y);
         });
+      });
 
       // exit
       circles.exit().remove();
 
       // enter
       circles
-        .enter()
-        .append('circle')
-        .call(this._addIdentifier)
-        .attr('stroke', function strokeColor(d) {
-          return color(d.label);
-        })
-        .attr('fill', 'transparent')
-        .attr('stroke-width', circleStrokeWidth);
+      .enter()
+      .append('circle')
+      .call(this._addIdentifier)
+      .attr('stroke', function strokeColor(d) {
+        return color(d.label);
+      })
+      .attr('fill', 'transparent')
+      .attr('stroke-width', circleStrokeWidth);
 
       // update
       circles
-        .attr('cx', function cx(d) {
-          if (ordered && ordered.date) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .attr('cy', function cy(d) {
-          if (isOverlapping) {
-            return yScale(d.y);
-          }
-          return yScale(d.y0 + d.y);
-        })
-        .attr('r', circleRadius);
+      .attr('cx', function cx(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .attr('cy', function cy(d) {
+        if (isOverlapping) {
+          return yScale(d.y);
+        }
+        return yScale(d.y0 + d.y);
+      })
+      .attr('r', circleRadius);
 
       // Add tooltip
       if (isTooltip) {
@@ -246,14 +246,14 @@ export default function AreaChartFactory(Private) {
 
       // Creating clipPath
       return svg
-        .attr('clip-path', 'url(#' + id + ')')
-        .append('clipPath')
-        .attr('id', id)
-        .append('rect')
-        .attr('x', startX)
-        .attr('y', startY)
-        .attr('width', width)
-        .attr('height', height);
+      .attr('clip-path', 'url(#' + id + ')')
+      .append('clipPath')
+      .attr('id', id)
+      .append('rect')
+      .attr('x', startX)
+      .attr('y', startY)
+      .attr('width', width)
+      .attr('height', height);
     };
 
     checkIfEnoughData() {
@@ -322,10 +322,10 @@ export default function AreaChartFactory(Private) {
 
           // Create the canvas for the visualization
           const svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(0,' + margin.top + ')');
+          .attr('width', width)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(0,' + margin.top + ')');
 
           // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
@@ -338,13 +338,13 @@ export default function AreaChartFactory(Private) {
 
             // Draw line at yScale 0 value
             svg.append('line')
-              .attr('class', 'zero-line')
-              .attr('x1', 0)
-              .attr('y1', yScale(0))
-              .attr('x2', width)
-              .attr('y2', yScale(0))
-              .style('stroke', '#ddd')
-              .style('stroke-width', 1);
+            .attr('class', 'zero-line')
+            .attr('x1', 0)
+            .attr('y1', yScale(0))
+            .attr('x2', width)
+            .attr('y2', yScale(0))
+            .style('stroke', '#ddd')
+            .style('stroke-width', 1);
           }
 
           // add circles
@@ -355,13 +355,13 @@ export default function AreaChartFactory(Private) {
 
           // chart base line
           svg.append('line')
-            .attr('class', 'base-line')
-            .attr('x1', 0)
-            .attr('y1', yScale(0))
-            .attr('x2', width)
-            .attr('y2', yScale(0))
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
+          .attr('class', 'base-line')
+          .attr('x1', 0)
+          .attr('y1', yScale(0))
+          .attr('x2', width)
+          .attr('y2', yScale(0))
+          .style('stroke', '#ddd')
+          .style('stroke-width', 1);
 
           if (addTimeMarker) {
             timeMarker.render(svg);

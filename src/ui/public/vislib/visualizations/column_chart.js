@@ -291,10 +291,10 @@ export default function ColumnChartFactory(Private) {
           const div = d3.select(this);
 
           const svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(0,' + margin.top + ')');
+          .attr('width', width)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(0,' + margin.top + ')');
 
           const bars = self.addBars(svg, layers);
           self.createEndZones(svg);
@@ -303,13 +303,13 @@ export default function ColumnChartFactory(Private) {
           self.addBarEvents(bars, svg);
 
           svg.append('line')
-            .attr('class', 'base-line')
-            .attr('x1', 0)
-            .attr('y1', yScale(0))
-            .attr('x2', width)
-            .attr('y2', yScale(0))
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
+          .attr('class', 'base-line')
+          .attr('x1', 0)
+          .attr('y1', yScale(0))
+          .attr('x2', width)
+          .attr('y2', yScale(0))
+          .style('stroke', '#ddd')
+          .style('stroke-width', 1);
 
           if (addTimeMarker) {
             timeMarker.render(svg);

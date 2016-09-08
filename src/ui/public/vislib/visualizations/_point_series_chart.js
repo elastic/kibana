@@ -123,20 +123,20 @@ export default function PointSeriesChartProvider(Private) {
       };
 
       this.endzones = svg.selectAll('.layer')
-        .data([leftEndzone, rightEndzone])
-        .enter()
-        .insert('g', '.brush')
-        .attr('class', 'endzone')
-        .append('rect')
-        .attr('class', 'zone')
-        .attr('x', function (d) {
-          return d.x;
-        })
-        .attr('y', 0)
-        .attr('height', height - margin.top - margin.bottom)
-        .attr('width', function (d) {
-          return d.w;
-        });
+      .data([leftEndzone, rightEndzone])
+      .enter()
+      .insert('g', '.brush')
+      .attr('class', 'endzone')
+      .append('rect')
+      .attr('class', 'zone')
+      .attr('x', function (d) {
+        return d.x;
+      })
+      .attr('y', 0)
+      .attr('height', height - margin.top - margin.bottom)
+      .attr('width', function (d) {
+        return d.w;
+      });
 
       function callPlay(event) {
         const boundData = event.target.__data__;

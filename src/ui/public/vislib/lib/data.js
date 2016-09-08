@@ -47,16 +47,16 @@ export default function DataFactory(Private) {
 
       this._attr = _.defaults(attr || {}, {
         stack: d3.layout.stack()
-          .x(function (d) {
-            return d.x;
-          })
-          .y(function (d) {
-            if (offset === 'expand') {
-              return Math.abs(d.y);
-            }
-            return d.y;
-          })
-          .offset(offset || 'zero')
+        .x(function (d) {
+          return d.x;
+        })
+        .y(function (d) {
+          if (offset === 'expand') {
+            return Math.abs(d.y);
+          }
+          return d.y;
+        })
+        .offset(offset || 'zero')
       });
 
       if (attr.mode === 'stacked' && attr.type === 'histogram') {
@@ -484,10 +484,10 @@ export default function DataFactory(Private) {
       }
 
       const points = chart.series
-        .reduce(function (points, series) {
-          return points.concat(series.values);
-        }, [])
-        .map(getValue);
+      .reduce(function (points, series) {
+        return points.concat(series.values);
+      }, [])
+      .map(getValue);
 
       return d3[extent](points);
     };
@@ -557,13 +557,13 @@ export default function DataFactory(Private) {
         const namedObj = this.returnNames(slices.children, 0, columns);
 
         return _(namedObj)
-          .sortBy(function (obj) {
-            return obj.index;
-          })
-          .unique(function (d) {
-            return d.label;
-          })
-          .value();
+        .sortBy(function (obj) {
+          return obj.index;
+        })
+        .unique(function (d) {
+          return d.label;
+        })
+        .value();
       }
     };
 

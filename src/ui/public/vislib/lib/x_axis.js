@@ -219,10 +219,10 @@ export default function XAxisFactory(Private) {
       }
 
       this.xAxis = d3.svg.axis()
-        .scale(this.xScale)
-        .ticks(10)
-        .tickFormat(this.xAxisFormatter)
-        .orient('bottom');
+      .scale(this.xScale)
+      .ticks(10)
+      .tickFormat(this.xAxisFormatter)
+      .orient('bottom');
     };
 
     /**
@@ -238,8 +238,8 @@ export default function XAxisFactory(Private) {
       return function (selection) {
         const n = selection[0].length;
         const parentWidth = $(self.el)
-          .find('.x-axis-div-wrapper')
-          .width();
+        .find('.x-axis-div-wrapper')
+        .width();
 
         selection.each(function () {
 
@@ -252,13 +252,13 @@ export default function XAxisFactory(Private) {
           self.getXAxis(width);
 
           const svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height);
+          .attr('width', width)
+          .attr('height', height);
 
           svg.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0,0)')
-            .call(self.xAxis);
+          .attr('class', 'x axis')
+          .attr('transform', 'translate(0,0)')
+          .call(self.xAxis);
         });
 
         selection.call(self.filterOrRotate());
@@ -329,19 +329,20 @@ export default function XAxisFactory(Private) {
 
         if (self._attr.isRotated) {
           text
-            .text(function truncate() {
-              return self.truncateLabel(this, self._attr.xAxisLabelHt);
-            })
-            .style('text-anchor', 'end')
-            .attr('dx', '-.8em')
-            .attr('dy', '-.60em')
-            .attr('transform', function rotate() {
-              return 'rotate(-90)';
-            })
-            .append('title')
-            .text(text => text);
+          .text(function truncate() {
+            return self.truncateLabel(this, self._attr.xAxisLabelHt);
+          })
+          .style('text-anchor', 'end')
+          .attr('dx', '-.8em')
+          .attr('dy', '-.60em')
+          .attr('transform', function rotate() {
+            return 'rotate(-90)';
+          })
+          .append('title')
+          .text(text => text);
+
           selection.select('svg')
-            .attr('height', self._attr.xAxisLabelHt);
+          .attr('height', self._attr.xAxisLabelHt);
         }
       };
     };
@@ -395,20 +396,20 @@ export default function XAxisFactory(Private) {
 
       return function (selection) {
         selection.selectAll('.tick text')
-          .text(function (d) {
-            par = d3.select(this.parentNode).node();
-            myX = self.xScale(d);
-            myWidth = par.getBBox().width * padding;
-            halfWidth = myWidth / 2;
-            maxW = $(self.el).find('.x-axis-div').width();
+        .text(function (d) {
+          par = d3.select(this.parentNode).node();
+          myX = self.xScale(d);
+          myWidth = par.getBBox().width * padding;
+          halfWidth = myWidth / 2;
+          maxW = $(self.el).find('.x-axis-div').width();
 
-            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-              startX = myX + halfWidth;
-              return self.xAxisFormatter(d);
-            } else {
-              d3.select(this.parentNode).remove();
-            }
-          });
+          if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
+            startX = myX + halfWidth;
+            return self.xAxisFormatter(d);
+          } else {
+            d3.select(this.parentNode).remove();
+          }
+        });
       };
     };
 
@@ -440,16 +441,16 @@ export default function XAxisFactory(Private) {
           let titleHeight = yAxisTitle.height();
 
           text = visEl.select('.x-axis-title')
-            .select('svg')
-            .attr('width', titleWidth)
-            .select('text')
-            .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+          .select('svg')
+          .attr('width', titleWidth)
+          .select('text')
+          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
 
           text = visEl.select('.y-axis-title')
-            .select('svg')
-            .attr('height', titleHeight)
-            .select('text')
-            .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+          .select('svg')
+          .attr('height', titleHeight)
+          .select('text')
+          .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
 
           if ($visEl.find('.x-axis-chart-title').length) {
             xAxisChartTitle = $visEl.find('.x-axis-chart-title');
@@ -458,10 +459,10 @@ export default function XAxisFactory(Private) {
             titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
-                .select('svg')
-                .attr('width', titleWidth)
-                .select('text')
-                .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+              .select('svg')
+              .attr('width', titleWidth)
+              .select('text')
+              .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
             });
           }
 
@@ -472,10 +473,10 @@ export default function XAxisFactory(Private) {
             titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
-                .select('svg')
-                .attr('height', titleHeight)
-                .select('text')
-                .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+              .select('svg')
+              .attr('height', titleHeight)
+              .select('text')
+              .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
             });
           }
 
@@ -498,8 +499,8 @@ export default function XAxisFactory(Private) {
 
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.select('.y-axis-spacer-block')
-            .append('div')
-            .attr('class', 'inner-spacer-block');
+          .append('div')
+          .attr('class', 'inner-spacer-block');
         }
         const xAxisHt = visEl.select('.x-axis-wrapper').style('height');
 

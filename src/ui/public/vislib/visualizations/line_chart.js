@@ -77,38 +77,38 @@ export default function LineChartFactory(Private) {
       const isTooltip = this._attr.addTooltip;
 
       const radii = _(data)
-        .map(function (series) {
-          return _.pluck(series, '_input.z');
-        })
-        .flattenDeep()
-        .reduce(function (result, val) {
-          if (result.min > val) result.min = val;
-          if (result.max < val) result.max = val;
-          return result;
-        }, {
-          min: Infinity,
-          max: -Infinity
-        });
+      .map(function (series) {
+        return _.pluck(series, '_input.z');
+      })
+      .flattenDeep()
+      .reduce(function (result, val) {
+        if (result.min > val) result.min = val;
+        if (result.max < val) result.max = val;
+        return result;
+      }, {
+        min: Infinity,
+        max: -Infinity
+      });
 
       const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
       const layer = svg.selectAll('.points')
-        .data(data)
-        .enter()
-        .append('g')
-        .attr('class', 'points line');
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', 'points line');
 
       const circles = layer
-        .selectAll('circle')
-        .data(function appendData(data) {
-          return data.filter(function (d) {
-            return !_.isNull(d.y);
-          });
+      .selectAll('circle')
+      .data(function appendData(data) {
+        return data.filter(function (d) {
+          return !_.isNull(d.y);
         });
+      });
 
       circles
-        .exit()
-        .remove();
+      .exit()
+      .remove();
 
       function cx(d) {
         if (ordered && ordered.date) {
@@ -148,27 +148,27 @@ export default function LineChartFactory(Private) {
 
 
       circles
-        .enter()
-        .append('circle')
-        .attr('r', getCircleRadiusFn())
-        .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
-        .attr('cx', cx)
-        .attr('cy', cy)
-        .attr('class', 'circle-decoration')
-        .call(this._addIdentifier)
-        .attr('fill', colorCircle);
+      .enter()
+      .append('circle')
+      .attr('r', getCircleRadiusFn())
+      .attr('fill-opacity', (this._attr.drawLinesBetweenPoints ? 1 : 0.7))
+      .attr('cx', cx)
+      .attr('cy', cy)
+      .attr('class', 'circle-decoration')
+      .call(this._addIdentifier)
+      .attr('fill', colorCircle);
 
       circles
-        .enter()
-        .append('circle')
-        .attr('r', getCircleRadiusFn(10))
-        .attr('cx', cx)
-        .attr('cy', cy)
-        .attr('fill', 'transparent')
-        .attr('class', 'circle')
-        .call(this._addIdentifier)
-        .attr('stroke', cColor)
-        .attr('stroke-width', 0);
+      .enter()
+      .append('circle')
+      .attr('r', getCircleRadiusFn(10))
+      .attr('cx', cx)
+      .attr('cy', cy)
+      .attr('fill', 'transparent')
+      .attr('class', 'circle')
+      .call(this._addIdentifier)
+      .attr('stroke', cColor)
+      .attr('stroke-width', 0);
 
       if (isTooltip) {
         circles.call(tooltip.render());
@@ -194,22 +194,21 @@ export default function LineChartFactory(Private) {
       const ordered = this.handler.data.get('ordered');
       const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       const line = d3.svg.line()
-        .defined(function (d) {
-          return !_.isNull(d.y);
-        })
-        .interpolate(interpolate)
-        .x(function x(d) {
-          if (ordered && ordered.date) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .y(function y(d) {
-          return yScale(d.y);
-        });
-      let lines;
+      .defined(function (d) {
+        return !_.isNull(d.y);
+      })
+      .interpolate(interpolate)
+      .x(function x(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .y(function y(d) {
+        return yScale(d.y);
+      });
 
-      lines = svg
+      const lines = svg
         .selectAll('.lines')
         .data(data)
         .enter()
@@ -246,16 +245,16 @@ export default function LineChartFactory(Private) {
       const id = 'chart-area' + _.uniqueId();
 
       return svg
-        .attr('clip-path', 'url(#' + id + ')')
-        .append('clipPath')
-        .attr('id', id)
-        .append('rect')
-        .attr('x', startX)
-        .attr('y', startY)
-        .attr('width', width)
-        // Adding clipPathBuffer to height so it doesn't
-        // cutoff the lower part of the chart
-        .attr('height', height + clipPathBuffer);
+      .attr('clip-path', 'url(#' + id + ')')
+      .append('clipPath')
+      .attr('id', id)
+      .append('rect')
+      .attr('x', startX)
+      .attr('y', startY)
+      .attr('width', width)
+      // Adding clipPathBuffer to height so it doesn't
+      // cutoff the lower part of the chart
+      .attr('height', height + clipPathBuffer);
     };
 
     /**
@@ -313,10 +312,10 @@ export default function LineChartFactory(Private) {
           const div = d3.select(el);
 
           const svg = div.append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          .attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
           self.addClipPath(svg, width, height);
           if (self._attr.drawLinesBetweenPoints) {
@@ -329,13 +328,13 @@ export default function LineChartFactory(Private) {
           const scale = (scaleType === 'log') ? yScale(1) : yScale(0);
           if (scale) {
             svg.append('line')
-              .attr('class', 'base-line')
-              .attr('x1', startLineX)
-              .attr('y1', scale)
-              .attr('x2', width)
-              .attr('y2', scale)
-              .style('stroke', '#ddd')
-              .style('stroke-width', lineStrokeWidth);
+            .attr('class', 'base-line')
+            .attr('x1', startLineX)
+            .attr('y1', scale)
+            .attr('x2', width)
+            .attr('y2', scale)
+            .style('stroke', '#ddd')
+            .style('stroke-width', lineStrokeWidth);
           }
 
           if (addTimeMarker) {

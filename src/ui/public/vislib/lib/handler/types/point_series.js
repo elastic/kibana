@@ -17,6 +17,13 @@ export default function ColumnHandler(Private) {
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
 
+  function getData(vis, opts) {
+    if (opts.zeroFill) {
+      return new Data(injectZeros(vis.data), vis._attr, vis.uiState);
+    } else {
+      return new Data(vis.data, vis._attr, vis.uiState);
+    }
+  }
   /*
    * Create handlers for Area, Column, and Line charts which
    * are all nearly the same minus a few details
@@ -26,13 +33,7 @@ export default function ColumnHandler(Private) {
 
     return function (vis) {
       const isUserDefinedYAxis = vis._attr.setYExtents;
-      let data;
-
-      if (opts.zeroFill) {
-        data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);
-      } else {
-        data = new Data(vis.data, vis._attr, vis.uiState);
-      }
+      const data = getData(vis, opts);
 
       return new Handler(vis, {
         data: data,

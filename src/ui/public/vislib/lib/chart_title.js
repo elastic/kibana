@@ -105,19 +105,19 @@ export default function ChartTitleFactory(Private) {
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-            .attr('width', width)
-            .attr('height', height)
-            .append('text')
-            .attr('transform', function () {
-              if (dataType === 'rows') {
-                return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
-              }
-              return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
-            })
-            .attr('text-anchor', 'middle')
-            .text(function (d) {
-              return d.label;
-            });
+          .attr('width', width)
+          .attr('height', height)
+          .append('text')
+          .attr('transform', function () {
+            if (dataType === 'rows') {
+              return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
+            }
+            return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
+          })
+          .attr('text-anchor', 'middle')
+          .text(function (d) {
+            return d.label;
+          });
 
           // truncate long chart titles
           div.selectAll('text')
