@@ -177,6 +177,23 @@
 
   </div>
 
+  <div  ng-if="editor.field.conflictDescriptions.length > 0" class="alert alert-warning">
+    <!-- {{editor.field.conflictDescriptions}} -->
+    <!-- {{editor.field.indicesTypes}} -->
+    The type of this field changes across indices. It is unavailable for many analysis functions. The types per index are as follows:
+    <table class="table">
+    <thead>
+      <th> Index Name </th>
+      <th> Field Type </th>
+    </thead>
+    <tbody>
+    <tr ng-repeat="obj in editor.field.conflictDescriptions">
+      <td>{{obj.index}}</td> <td>{{obj.type}}</td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+
   <div class="form-group">
     <button
       type="button"

@@ -15,6 +15,7 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
    */
   return function (response) {
     let fields = {};
+    let conflictFields = {};
     _.each(response, function (index, indexName) {
       if (indexName === kbnIndex) return;
       _.each(index.mappings, function (mappings) {
@@ -23,21 +24,38 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
           if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
           let mapping = mapField(field, name);
-          const indexType = 'Index: ' + indexName + ', Type: ' + mapping.type + ';';
-          mapping.indicesTypes = indexType;
+
+          let conflictDescription = {
+            index: indexName,
+            type: mapping.type
+          };
+          mapping.conflictDescriptions = [];
+          mapping.conflictDescriptions.push(conflictDescription);
 
           if (fields[name]) {
-            mapping.indicesTypes = fields[name].indicesTypes + mapping.indicesTypes;
             if (fields[name].type !== mapping.type) {
               // conflict fields are not available for much except showing in the discover table
               mapping.type = 'conflict';
               mapping.indexed = false;
             }
           }
-          fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values', 'indicesTypes');
+          if (conflictFields[name]) {
+            mapping.conflictDescriptions = conflictFields[name].conflictDescriptions;
+            mapping.conflictDescriptions.push(conflictDescription);
+          }
+          fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values');
+          conflictFields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values', 'conflictDescriptions');
         });
       });
     });
+
+    for (let key in conflictFields) {
+      if (!conflictFields.hasOwnProperty(key)) continue;
+      let conflictField = conflictFields[key];
+      if (conflictField.type === 'conflict') {
+        fields[key].conflictDescriptions = conflictField.conflictDescriptions;
+      }
+    }
 
     config.get('metaFields').forEach(function (meta) {
       if (fields[meta]) return;
