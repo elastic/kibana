@@ -1,9 +1,13 @@
+import Promise from 'bluebird';
+import { mkdirp as mkdirpNode } from 'mkdirp';
 import manageUuid from './server/lib/manage_uuid';
 import ingest from './server/routes/api/ingest';
 import search from './server/routes/api/search';
 import settings from './server/routes/api/settings';
 import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
+
+const mkdirp = Promise.promisify(mkdirpNode);
 
 module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -83,6 +87,18 @@ module.exports = function (kibana) {
           kbnBaseUrl
         };
       },
+    },
+
+    preInit: async function (server) {
+      try {
+        // Create the data directory (recursively, if the a parent dir doesn't exist).
+        // If it already exists, does nothing.
+        await mkdirp(server.config().get('path.data'));
+      } catch (err) {
+        server.log(['error', 'init'], err);
+        // Stop the server startup with a fatal error
+        throw err;
+      }
     },
 
     init: function (server, options) {
