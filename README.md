@@ -14,12 +14,25 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 * Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
 * Visit [http://localhost:5601](http://localhost:5601)
 
-
 ## Upgrade from previous version
 
 * Move any custom configurations in your old kibana.yml to your new one
 * Reinstall plugins
 * Start or restart Kibana
+
+## Version compatibility with Elasticsearch
+
+Ideally, you should be running Elasticsearch and Kibana with matching version numbers (💚 in the table below). If your Elasticsearch has an older version number or a newer _major_ number than Kibana, then Kibana will fail to run (🚫). If Elasticsearch has a newer minor or patch number than Kibana, then the Kibana Server will log a warning (⚠️).
+
+| Kibana version | ES version | Outcome | Description |
+| -------------- | ---------- | ------- | ----------- |
+| 6.1.2          | 6.1.2      | 💚      | Versions are the same. |
+| 6.1.2          | 6.1.5      | ⚠️      | ES patch number is newer. |
+| 6.1.2          | 6.5.0      | ⚠️      | ES major number is newer. |
+| 6.1.2          | 7.0.0      | 🚫      | ES major number is newer. |
+| 6.1.2          | 6.1.0      | 🚫      | ES patch number is older. |
+| 6.1.2          | 6.0.0      | 🚫      | ES minor number is older. |
+| 6.1.2          | 5.0.0      | 🚫      | ES major number is older. |
 
 ## Quick Start
 

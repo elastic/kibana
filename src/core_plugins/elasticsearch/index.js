@@ -33,7 +33,6 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: Joi.string().default('master'),
-        engineVersion: Joi.string().valid('^6.0.0').default('^6.0.0')
       }).default();
     },
 
