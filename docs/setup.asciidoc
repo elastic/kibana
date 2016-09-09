@@ -39,7 +39,7 @@ add index patterns at any time from the <<settings-create-pattern,Settings tab>>
 
 TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a 
 different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and 
-restart Kibana. Forninformation about using Kibana with your production nodes, see <<production>>.
+restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
 
 To configure the Elasticsearch indices you want to access with Kibana:
 
