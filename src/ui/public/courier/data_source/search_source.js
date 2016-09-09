@@ -152,14 +152,13 @@ export default function SearchSourceFactory(Promise, Private, config) {
       case 'filter':
         let verifiedFilters = val;
         if (config.get('courier:ignoreFilterIfFieldNotInIndex')) {
-          if (!(val instanceof Array)) val = [val];
-          verifiedFilters = val.filter (function (el) {
-            let keep = true;
+          if (!_.isArray(val)) val = [val];
+          verifiedFilters = val.filter(function (el) {
             if ('meta' in el && 'index' in state) {
               const field = state.index.fields.byName[el.meta.key];
-              if (!field) keep = false;
+              if (!field) return false;
             }
-            return keep;
+            return true;
           });
         }
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
