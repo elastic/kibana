@@ -1,5 +1,8 @@
 
+@import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
+
+@global-nav-logo-height: 70px;
 
 .global-nav {
   width: @as-closed-width;
@@ -25,7 +28,7 @@
 
   .logo-small,
   .logo {
-    height: 70px;
+    height: @global-nav-logo-height;
     width: @as-open-width;
     list-style-type: none;
     &.kibana {
@@ -38,7 +41,40 @@
   }
 }
 
-  .gloal-nav__bottom-links {
-    position: absolute;
-    bottom: 0;
+  /**
+   * 1. Push main apps to the top and bottom buttons to the bottom.
+   * 2. Fill height of global nav, but respect the height of the logo.
+   * 3. Allow user to scroll to see clipped nav items when the nav is too short.
+   * 4. Style the scrollbar to look good in Chrome and Safari.
+   */
+  .global-nav__links {
+    display: flex; /* 1 */
+    flex-direction: column; /* 1 */
+    justify-content: space-between; /* 1 */
+    height: ~"calc(100% - @{global-nav-logo-height})"; /* 2 */
+    overflow-x: hidden; /* 3 */
+    overflow-y: auto; /* 3 */
+
+    &::-webkit-scrollbar { /* 4 */
+      width: 16px;
+      height: 16px;
+    }
+
+    &::-webkit-scrollbar-thumb { /* 4 */
+      background-color: #2f99c1;
+      border: 6px solid transparent;
+      background-clip: content-box;
+    }
+
+    &::-webkit-scrollbar-track { /* 4 */
+      background-color: transparent;
+    }
   }
+
+    /**
+     * 1. Prevent the top and bottom links from collapsing when the browser window is too short.
+     *    This problem is specific to Safari.
+     */
+    .global-nav__links-section {
+      flex: 0 0 auto; /* 1 */
+    }
