@@ -60,7 +60,7 @@ export default async (kbnServer, server, config) => {
     }
   });
 
-  server.decorate('reply', 'renderApp', async function (app) {
+  async function renderApp(app, includeUserSettings) {
     const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
     const uiSettings = server.uiSettings();
     const payload = {
@@ -73,7 +73,7 @@ export default async (kbnServer, server, config) => {
       serverName: config.get('server.name'),
       uiSettings: {
         defaults: await uiSettings.getDefaults(),
-        user: isElasticsearchPluginRed ? {} : await uiSettings.getUserProvided()
+        user: (isElasticsearchPluginRed || !includeUserSettings) ? {} : await uiSettings.getUserProvided()
       },
       vars: defaults(app.getInjectedVars() || {}, uiExports.defaultInjectedVars),
     };
@@ -84,5 +84,8 @@ export default async (kbnServer, server, config) => {
       kibanaPayload: payload,
       bundlePath: `${config.get('server.basePath')}/bundles`,
     });
-  });
+  }
+
+  server.decorate('reply', 'renderApp', function (app) { renderApp.call(this, app, true);});
+  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) { renderApp.call(this, app, false);});
 };
