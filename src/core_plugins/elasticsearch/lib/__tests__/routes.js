@@ -6,28 +6,29 @@ import fromRoot from '../../../../utils/from_root';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
-
     let kbnServer;
 
-    before(function () {
-      this.timeout(60000); // sometimes waiting for server takes longer than 10
+    before(async function () {
+      // Sometimes waiting for server takes longer than 10s.
+      // NOTE: This can't be a fat-arrow function because `this` needs to refer to the execution
+      // context, not to the parent context.
+      this.timeout(60000);
 
       kbnServer = kbnTestServer.createServer({
         plugins: {
           scanDirs: [
             fromRoot('src/core_plugins')
           ]
-        }
+        },
       });
-      return kbnServer.ready()
-      .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
-    });
 
+      await kbnServer.ready();
+      await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+    });
 
     after(function () {
       return kbnServer.close();
     });
-
 
     function testRoute(options) {
       if (typeof options.payload === 'object') {
@@ -48,7 +49,6 @@ describe('plugins/elasticsearch', function () {
         });
       });
     }
-
 
     testRoute({
       method: 'GET',
