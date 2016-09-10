@@ -1,5 +1,3 @@
-
-import angular from 'angular';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
@@ -12,13 +10,13 @@ import $ from 'jquery';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-let dateHistogramArray = [
+const dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-let names = [
+const names = [
   'series',
   'columns',
   'rows',
@@ -30,7 +28,7 @@ dateHistogramArray.forEach(function (data, i) {
     let Handler;
     let vis;
     let persistedState;
-    let events = [
+    const events = [
       'click',
       'brush'
     ];

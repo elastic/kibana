@@ -6,17 +6,17 @@ import posTT from '../position_tooltip';
 
 describe('Tooltip Positioning', function () {
 
-  let positions = ['north', 'south', 'east', 'west'];
-  let bounds = ['top', 'left', 'bottom', 'right'];
+  const positions = ['north', 'south', 'east', 'west'];
+  const bounds = ['top', 'left', 'bottom', 'right'];
   let $window;
   let $chart;
   let $tooltip;
   let $sizer;
 
   function testEl(width, height, $children) {
-    let $el = $('<div>');
+    const $el = $('<div>');
 
-    let size = {
+    const size = {
       width: _.random(width[0], width[1]),
       height: _.random(height[0], height[1])
     };
@@ -57,7 +57,7 @@ describe('Tooltip Positioning', function () {
     xPercent = xPercent || 0.5;
     yPercent = yPercent || 0.5;
 
-    let base = $chart.offset();
+    const base = $chart.offset();
 
     return {
       clientX: base.left + ($chart.testSize.width * xPercent),
@@ -67,14 +67,14 @@ describe('Tooltip Positioning', function () {
 
   describe('getTtSize()', function () {
     it('should measure the outer-size of the tooltip using an un-obstructed clone', function () {
-      let w = sinon.spy($.fn, 'outerWidth');
-      let h = sinon.spy($.fn, 'outerHeight');
+      const w = sinon.spy($.fn, 'outerWidth');
+      const h = sinon.spy($.fn, 'outerHeight');
 
       posTT.getTtSize($tooltip.html(), $sizer);
 
       [w, h].forEach(function (spy) {
         expect(spy).to.have.property('callCount', 1);
-        let matchHtml = w.thisValues.filter(function ($t) {
+        const matchHtml = w.thisValues.filter(function ($t) {
           return !$t.is($tooltip) && $t.html() === $tooltip.html();
         });
         expect(matchHtml).to.have.length(1);
@@ -84,8 +84,8 @@ describe('Tooltip Positioning', function () {
 
   describe('getBasePosition()', function () {
     it('calculates the offset values for the four positions', function () {
-      let size = posTT.getTtSize($tooltip.html(), $sizer);
-      let pos = posTT.getBasePosition(size, makeEvent());
+      const size = posTT.getTtSize($tooltip.html(), $sizer);
+      const pos = posTT.getBasePosition(size, makeEvent());
 
       positions.forEach(function (p) {
         expect(pos).to.have.property(p);
@@ -98,7 +98,7 @@ describe('Tooltip Positioning', function () {
 
   describe('getBounds()', function () {
     it('returns the offsets for the tlrb of the element', function () {
-      let cbounds = posTT.getBounds($chart);
+      const cbounds = posTT.getBounds($chart);
 
       bounds.forEach(function (b) {
         expect(cbounds).to.have.property(b);
@@ -114,14 +114,14 @@ describe('Tooltip Positioning', function () {
       // size the tooltip very small so it won't collide with the edges
       $tooltip.css({ width: 15, height: 15 });
       $sizer.css({ width: 15, height: 15 });
-      let size = posTT.getTtSize($tooltip.html(), $sizer);
+      const size = posTT.getTtSize($tooltip.html(), $sizer);
       expect(size).to.have.property('width', 15);
       expect(size).to.have.property('height', 15);
 
       // position the element based on a mouse that is in the middle of the chart
-      let pos = posTT.getBasePosition(size, makeEvent(0.5, 0.5));
+      const pos = posTT.getBasePosition(size, makeEvent(0.5, 0.5));
 
-      let overflow = posTT.getOverflow(size, pos, [$chart, $window]);
+      const overflow = posTT.getOverflow(size, pos, [$chart, $window]);
       positions.forEach(function (p) {
         expect(overflow).to.have.property(p);
 
@@ -131,11 +131,11 @@ describe('Tooltip Positioning', function () {
     });
 
     it('identifies an overflow with a positive value in that direction', function () {
-      let size = posTT.getTtSize($tooltip.html(), $sizer);
+      const size = posTT.getTtSize($tooltip.html(), $sizer);
 
       // position the element based on a mouse that is in the bottom right hand courner of the chart
-      let pos = posTT.getBasePosition(size, makeEvent(0.99, 0.99));
-      let overflow = posTT.getOverflow(size, pos, [$chart, $window]);
+      const pos = posTT.getBasePosition(size, makeEvent(0.99, 0.99));
+      const overflow = posTT.getOverflow(size, pos, [$chart, $window]);
 
       positions.forEach(function (p) {
         expect(overflow).to.have.property(p);
@@ -157,9 +157,9 @@ describe('Tooltip Positioning', function () {
     });
 
     function check(xPercent, yPercent/*, prev, directions... */) {
-      let directions = _.drop(arguments, 2);
-      let event = makeEvent(xPercent, yPercent);
-      let placement = posTT({
+      const directions = _.drop(arguments, 2);
+      const event = makeEvent(xPercent, yPercent);
+      const placement = posTT({
         $window: $window,
         $chart: $chart,
         $sizer: $sizer,
@@ -214,12 +214,12 @@ describe('Tooltip Positioning', function () {
 
     describe('maintain the direction of the tooltip on reposition', function () {
       it('mouse moves from the top right to the middle', function () {
-        let pos = check(0.99, 0.10, 'bottom', 'left');
+        const pos = check(0.99, 0.10, 'bottom', 'left');
         check(0.50, 0.50, pos, 'bottom', 'left');
       });
 
       it('mouse moves from the bottom left to the middle', function () {
-        let pos = check(0.10, 0.99, 'top', 'right');
+        const pos = check(0.10, 0.99, 'top', 'right');
         check(0.50, 0.50, pos, 'top', 'right');
       });
     });

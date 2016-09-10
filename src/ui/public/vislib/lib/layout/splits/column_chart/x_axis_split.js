@@ -10,7 +10,7 @@ define(function () {
 
     return function (selection) {
       selection.each(function () {
-        let div = d3.select(this);
+        const div = d3.select(this);
 
         div.selectAll('.x-axis-div')
         .append('div')
