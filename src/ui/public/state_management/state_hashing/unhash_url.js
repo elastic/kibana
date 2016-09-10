@@ -3,6 +3,12 @@ import {
   format as formatUrl,
 } from 'url';
 
+import encodeUriQuery from 'encode-uri-query';
+
+import {
+  stringify as stringifyQueryString
+} from 'querystring';
+
 import unhashQueryString from './unhash_query_string';
 
 export default function unhashUrl(urlWithHashes, states) {
@@ -26,11 +32,18 @@ export default function unhashUrl(urlWithHashes, states) {
   if (!appUrlParsed.query) return urlWithHashes;
 
   const appQueryWithoutHashes = unhashQueryString(appUrlParsed.query || {}, states);
+
+  // encodeUriQuery implements the less-aggressive encoding done naturally by
+  // the browser. We use it to generate the same urls the browser would
+  const appQueryStringWithoutHashes = stringifyQueryString(appQueryWithoutHashes, null, null, {
+    encodeURIComponent: encodeUriQuery
+  });
+
   return formatUrl({
     ...urlWithHashesParsed,
     hash: formatUrl({
       pathname: appUrlParsed.pathname,
-      query: appQueryWithoutHashes,
+      search: appQueryStringWithoutHashes,
     })
   });
 }
