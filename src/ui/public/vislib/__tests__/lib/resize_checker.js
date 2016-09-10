@@ -16,7 +16,7 @@ describe('Vislib Resize Checker', function () {
   let EventEmitter;
   let checker;
   let reflowWatcher;
-  let reflowSpies = {};
+  const reflowSpies = {};
 
   beforeEach(ngMock.module('kibana'));
 
@@ -27,7 +27,7 @@ describe('Vislib Resize Checker', function () {
     reflowSpies.on = sinon.spy(reflowWatcher, 'on');
     reflowSpies.off = sinon.spy(reflowWatcher, 'off');
 
-    let $el = $(document.createElement('div'))
+    const $el = $(document.createElement('div'))
     .appendTo('body')
     .css('visibility', 'hidden')
     .get(0);
@@ -47,7 +47,7 @@ describe('Vislib Resize Checker', function () {
 
     it('listens for the "reflow" event of the reflowWatchers', function () {
       expect(reflowSpies.on).to.have.property('callCount', 1);
-      let call = reflowSpies.on.getCall(0);
+      const call = reflowSpies.on.getCall(0);
       expect(call.args[0]).to.be('reflow');
     });
 
@@ -63,8 +63,8 @@ describe('Vislib Resize Checker', function () {
 
   describe('#read', function () {
     it('gets the proper dimensions for the element', function () {
-      let dimensions = checker.read();
-      let windowWidth = document.documentElement.clientWidth;
+      const dimensions = checker.read();
+      const windowWidth = document.documentElement.clientWidth;
 
       expect(dimensions.w).to.equal(windowWidth);
       expect(dimensions.h).to.equal(0);
@@ -73,7 +73,7 @@ describe('Vislib Resize Checker', function () {
 
   describe('#saveSize', function () {
     it('calls #read() when no arg is passed', function () {
-      let stub = sinon.stub(checker, 'read').returns({});
+      const stub = sinon.stub(checker, 'read').returns({});
 
       checker.saveSize();
 
@@ -81,7 +81,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('saves the size of the element', function () {
-      let football = {};
+      const football = {};
       checker.saveSize(football);
       expect(checker).to.have.property('_savedSize', football);
     });
@@ -123,12 +123,12 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('emits "resize" based on MS_MAX_RESIZE_DELAY, even if el\'s constantly changing size', function () {
-      let steps = _.random(5, 10);
+      const steps = _.random(5, 10);
       this.slow(steps * 10);
 
       // we are going to fake the delay using the fake clock
-      let msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
-      let clock = sinon.useFakeTimers();
+      const msStep = Math.floor(ResizeChecker.MS_MAX_RESIZE_DELAY / (steps - 1));
+      const clock = sinon.useFakeTimers();
 
       _.times(steps, function step(i) {
         checker.$el.css('height', 100 + i);
@@ -145,8 +145,8 @@ describe('Vislib Resize Checker', function () {
 
   describe('#destroy()', function () {
     it('removes the "reflow" event from the reflowWatcher', function () {
-      let onCall = reflowSpies.on.getCall(0);
-      let handler = onCall.args[1];
+      const onCall = reflowSpies.on.getCall(0);
+      const handler = onCall.args[1];
 
       checker.destroy();
       expect(reflowSpies.off).to.have.property('callCount', 1);
@@ -154,7 +154,7 @@ describe('Vislib Resize Checker', function () {
     });
 
     it('clears the timeout', function () {
-      let spy = sinon.spy(window, 'clearTimeout');
+      const spy = sinon.spy(window, 'clearTimeout');
       checker.destroy();
       expect(spy).to.have.property('callCount', 1);
     });
@@ -193,9 +193,9 @@ describe('Vislib Resize Checker', function () {
         timerId = checker.continueSchedule();
       }
 
-      let last = _.last(schedule);
+      const last = _.last(schedule);
       _.times(5, function () {
-        let timer = clock.timers[checker.continueSchedule()];
+        const timer = clock.timers[checker.continueSchedule()];
         expect(timer).to.have.property('callAt', last);
       });
     });
