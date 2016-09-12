@@ -82,7 +82,7 @@ module.exports = function (kibana) {
           linkToLastSubUrl: false
         },
         {
-          title: 'DevTools',
+          title: 'Dev Tools',
           order: 1010,
           url: '/app/kibana#/dev_tools',
           description: 'development tools',

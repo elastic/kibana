@@ -2,7 +2,7 @@ import 'ui/doc_title';
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 import $ from 'jquery';
 import getInput from '../input';
-import getOutput from '../output';
+import { initializeOutput } from '../output';
 import es from '../es';
 import init from '../app';
 
@@ -21,8 +21,11 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
   docTitle.change('Console');
 
   let input, output;
+
+  // We need to wait for these elements to be rendered before we can select them with jQuery
+  // and then initialize this app
   $timeout(() => {
-    output = getOutput($('#output'));
+    output = initializeOutput($('#output'));
     input = getInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
     init(input, output);
   });
