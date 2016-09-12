@@ -39,8 +39,8 @@ function setAutocomplete(settings) {
 
 function applyCurrentSettings(editor) {
   if (typeof editor === 'undefined') {
-    applyCurrentSettings(require('./input'));
-    applyCurrentSettings(require('./output'));
+    applyCurrentSettings(require('./input')());
+    applyCurrentSettings(require('./output')());
   }
   if (editor) {
     editor.getSession().setUseWrapMode(getWrapMode());
@@ -60,7 +60,7 @@ function updateSettings({ fontSize, wrapMode, autocomplete}) {
   setFontSize(fontSize);
   setWrapMode(wrapMode);
   setAutocomplete(autocomplete);
-  require('./input').focus();
+  require('./input')().focus();
   return getCurrentSettings();
 }
 
