@@ -47,7 +47,9 @@ module.exports = function (chrome, internals) {
           length--;
         }
 
-        return path.substr(1, length).replace(/_/g, ' ').split('/');
+        return path.substr(1, length)
+          .replace(/_/g, ' ') // Present snake-cased breadcrumb names as individual words
+          .split('/');
       };
 
       const notify = new Notifier();

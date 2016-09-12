@@ -8,6 +8,7 @@ uiModules
 .directive('kbnDevToolsApp', function (Private, $location) {
   return {
     restrict: 'E',
+    replace: true,
     template,
     transclude: true,
     link: function ($scope) {

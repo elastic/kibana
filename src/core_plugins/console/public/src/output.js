@@ -4,11 +4,9 @@ let settings = require('./settings');
 let OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');
 
-let cached;
-export default function getOutput($el) {
-  if (!$el) return cached;
-  // var $el = $("#output");
-  var output = ace.require('ace/ace').edit($el[0]);
+let output;
+export function initializeOutput($el) {
+  output = ace.require('ace/ace').edit($el[0]);
 
   var outputMode = new OutputMode.Mode();
 
@@ -66,5 +64,9 @@ export default function getOutput($el) {
     settings.applyCurrentSettings(output);
   }
 
-  return cached = output;
+  return output;
+};
+
+export default function getOutput() {
+  return output;
 };

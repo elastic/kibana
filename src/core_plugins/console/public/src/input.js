@@ -4,7 +4,6 @@ let ZeroClipboard = require('zeroclip');
 let ext_searchbox = require('ace/ext-searchbox');
 let Autocomplete = require('./autocomplete');
 let mappings = require('./mappings');
-let getOutput = require('./output');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');
 let storage = require('./storage');
@@ -17,14 +16,13 @@ let cached;
 export default function getInput($el, $actionsEl, $copyAsCurlEl, output) {
   if (!$el) return cached;
 
-  // var $el = $('#editor');
   var input = new SenseEditor($el);
 
   uiModules.get('app/sense').setupResizeCheckerForRootEditors($el, input, output);
 
   input.autocomplete = new Autocomplete(input);
 
-  input.$actions = $actionsEl; // $("#editor_actions");
+  input.$actions = $actionsEl;
 
   input.commands.addCommand({
     name: 'auto indent request',
@@ -58,25 +56,24 @@ export default function getInput($el, $actionsEl, $copyAsCurlEl, output) {
    * The original shortcut will now just open the menu and highlight the
    *
    */
-  var $copyAsCURL = $copyAsCurlEl; // $('#copy_as_curl');
   var zc = (function setupZeroClipboard() {
-    var zc = new ZeroClipboard($copyAsCURL); // the ZeroClipboard instance
+    var zc = new ZeroClipboard($copyAsCurlEl); // the ZeroClipboard instance
 
     zc.on('wrongflash noflash', function () {
       if (!storage.get('flash_warning_shown')) {
         alert('Console needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
         storage.set('flash_warning_shown', 'true');
       }
-      $copyAsCURL.hide();
+      $copyAsCurlEl.hide();
     });
 
     zc.on('ready', function () {
       function setupCopyButton(cb) {
         cb = typeof cb === 'function' ? cb : $.noop;
-        $copyAsCURL.css('visibility', 'hidden');
+        $copyAsCurlEl.css('visibility', 'hidden');
         input.getRequestsAsCURL(function (curl) {
-          $copyAsCURL.attr('data-clipboard-text', curl);
-          $copyAsCURL.css('visibility', 'visible');
+          $copyAsCurlEl.attr('data-clipboard-text', curl);
+          $copyAsCurlEl.css('visibility', 'visible');
           cb();
         });
       }
@@ -89,7 +86,7 @@ export default function getInput($el, $actionsEl, $copyAsCurlEl, output) {
     });
 
     zc.on('complete', function () {
-      $copyAsCURL.click();
+      $copyAsCurlEl.click();
       input.focus();
     });
 
