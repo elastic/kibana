@@ -55,7 +55,6 @@ function assertValidPackageName(plugin) {
   }
 }
 
-
 /**
  * Examine each package.json file to determine the plugin name,
  *  version, and platform. Mutates the package objects in the packages array
@@ -70,6 +69,10 @@ async function mergePackageData(settings, packages) {
     pkg.version = _.get(packageInfo, 'version');
     pkg.name = _.get(packageInfo, 'name');
     pkg.path =  resolve(settings.pluginDir, pkg.name);
+    pkg.kibanaVersion = _.get(packageInfo, 'kibana.version');
+    if (!pkg.kibanaVersion) {
+      pkg.kibanaVersion = pkg.version;
+    }
 
     const regExp = new RegExp(`${pkg.name}-(.+)`, 'i');
     const matches = pkg.folder.match(regExp);
