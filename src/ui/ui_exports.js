@@ -82,6 +82,7 @@ class UiExports {
       case 'chromeNavControls':
       case 'navbarExtensions':
       case 'managementSections':
+      case 'devTools':
       case 'docViews':
       case 'hacks':
         return (plugin, spec) => {
