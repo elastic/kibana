@@ -21,6 +21,10 @@ describe('kibana cli', function () {
     let settings;
 
     beforeEach(function () {
+      //These tests are dependent on the file system, and I had some inconsistent
+      //behavior with rimraf.sync show up. Until these tests are re-written to not
+      //depend on the file system, I make sure that each test uses a different
+      //working directory.
       testNum += 1;
       testWorkingPath = join(workingPathRoot, testNum + '');
       tempArchiveFilePath = join(testWorkingPath, 'archive.part');
