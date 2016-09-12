@@ -59,7 +59,7 @@ describe('kibana cli', function () {
           expect(errorStub.called).to.be(false);
         });
 
-        it('should throw an error if plugin does contain a version.', function () {
+        it('should throw an error if plugin is missing a kibana version.', function () {
           const errorStub = sinon.stub();
 
           try {
@@ -69,10 +69,10 @@ describe('kibana cli', function () {
             errorStub(err);
           }
 
-          expect(errorStub.firstCall.args[0]).to.match(/plugin version not found/i);
+          expect(errorStub.firstCall.args[0]).to.match(/plugin package\.json is missing both a version property/i);
         });
 
-        it('should throw an error if plugin kibanaVersion does does not match kibana version', function () {
+        it('should throw an error if plugin kibanaVersion does not match kibana version', function () {
           const errorStub = sinon.stub();
           settings.plugins[0].kibanaVersion = '1.2.3.4';
 
