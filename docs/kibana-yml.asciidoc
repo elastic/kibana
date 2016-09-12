@@ -14,6 +14,7 @@ to this Kibana instance.
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to store saved searches, visualizations and
 dashboards. Kibana creates a new index if the index doesn’t already exist.
 `kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
+`kibana.addDataMaxBytes:`:: *Default: 1073741824* The maximum upload size in bytes for the CSV Upload wizard
 [[tilemap-settings]]`tilemap.url:`:: *Default: `"https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`* The URL to the tile
 service that Kibana uses to display map tiles in tilemap visualizations.
 `tilemap.options.minZoom:`:: *Default: 1* The minimum zoom level.
