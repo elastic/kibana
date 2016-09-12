@@ -6,16 +6,16 @@ import { patternToIngest } from '../../../../common/lib/convert_pattern_and_inge
 import { PassThrough } from 'stream';
 import JSONStream from 'JSONStream';
 
-const ONE_GIGABYTE = 1024 * 1024 * 1024;
-
 export function registerData(server) {
+  const maxBytes = server.config().get('kibana.addDataMaxBytes');
+
   server.route({
     path: '/api/kibana/{id}/_data',
     method: 'POST',
     config: {
       payload: {
         output: 'stream',
-        maxBytes: ONE_GIGABYTE
+        maxBytes
       }
     },
     handler: function (req, reply) {
