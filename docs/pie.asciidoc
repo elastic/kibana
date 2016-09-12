@@ -80,7 +80,7 @@ Select the *Options* tab to change the following aspects of the table:
 
 *Donut*:: Display the chart as a sliced ring instead of a sliced pie.
 *Show Tooltip*:: Check this box to enable the display of tooltips.
-*Show Legend Counts*:: Check this box to enable showing sum of values per each series in legend
+*Show Sum of Series*:: Show a sum of all the values in each series next to it's label in the legend
 
 
 After changing options, click the *Apply changes* button to update your visualization, or the grey *Discard
