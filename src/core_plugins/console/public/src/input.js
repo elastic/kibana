@@ -12,11 +12,9 @@ let es = require('./es');
 let history = require('./history');
 import uiModules from 'ui/modules';
 
-let cached;
-export default function getInput($el, $actionsEl, $copyAsCurlEl, output) {
-  if (!$el) return cached;
-
-  var input = new SenseEditor($el);
+let input;
+export function initializeInput($el, $actionsEl, $copyAsCurlEl, output) {
+  input = new SenseEditor($el);
 
   uiModules.get('app/sense').setupResizeCheckerForRootEditors($el, input, output);
 
@@ -243,5 +241,9 @@ export default function getInput($el, $actionsEl, $copyAsCurlEl, output) {
   input.sendCurrentRequestToES = sendCurrentRequestToES;
   require('./input_resize')(input, output);
 
-  return cached = input;
+  return input;
+};
+
+export default function getInput() {
+  return input;
 };
