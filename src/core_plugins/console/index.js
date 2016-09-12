@@ -9,19 +9,7 @@ module.exports = function (kibana) {
   let { existsSync } = require('fs');
   const { startsWith, endsWith } = require('lodash');
 
-  const apps = [
-    {
-      title: 'Console',
-      description: 'JSON aware developer\'s interface to ElasticSearch',
-      main: 'plugins/console/console',
-      icon: 'plugins/console/logo.svg',
-      injectVars: function (server, options) {
-        const varsToInject = options;
-        varsToInject.elasticsearchUrl = server.config().get('elasticsearch.url');
-        return varsToInject;
-      }
-    }
-  ];
+  const apps = [];
 
   if (existsSync(resolve(__dirname, 'public/tests'))) {
     apps.push({
@@ -146,7 +134,7 @@ module.exports = function (kibana) {
           payload: {
             output: 'stream',
             parse: false
-          },
+          }
         }
       });
 
@@ -156,7 +144,7 @@ module.exports = function (kibana) {
         config: {
           ...proxyRouteConfig
         }
-      })
+      });
 
       server.route({
         path: '/api/console/api_server',
@@ -187,6 +175,14 @@ module.exports = function (kibana) {
 
     uiExports: {
       apps: apps,
+
+      devTools: ['plugins/console/console'],
+
+      injectDefaultVars(server, options) {
+        const varsToInject = options;
+        varsToInject.elasticsearchUrl = server.config().get('elasticsearch.url');
+        return varsToInject;
+      },
 
       noParse: [
         join(modules, 'ace' + sep),
