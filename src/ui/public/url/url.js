@@ -154,7 +154,7 @@ function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
     if (replace) $location.replace();
 
     if (appState) {
-      $location.search('_a', rison.encode(appState));
+      $location.search(appState.getQueryParamName(), appState.toQueryParam());
     }
 
     let next = {

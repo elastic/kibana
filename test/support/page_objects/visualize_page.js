@@ -247,6 +247,14 @@ export default class VisualizePage {
     .click();
   }
 
+  selectOrderBy(fieldValue) {
+    return this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findByCssSelector('select[name="orderBy"] > option[value="' + fieldValue + '"]')
+    .click();
+  }
+
+
   getInterval() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)

@@ -4,10 +4,15 @@ import '../styles/index.less';
 import LibUrlShortenerProvider from '../lib/url_shortener';
 import uiModules from 'ui/modules';
 import shareObjectUrlTemplate from 'ui/share/views/share_object_url.html';
-
+import {
+  getUnhashableStatesProvider,
+  unhashUrl,
+} from 'ui/state_management/state_hashing';
+import { memoize } from 'lodash';
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
   const urlShortener = Private(LibUrlShortenerProvider);
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   return {
     restrict: 'E',
@@ -70,11 +75,14 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       $scope.getUrl = function () {
-        let url = $location.absUrl();
+        const urlWithHashes = $location.absUrl();
+        const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+
         if ($scope.shareAsEmbed) {
-          url = url.replace('?', '?embed=true&');
+          return urlWithStates.replace('?', '?embed=true&');
         }
-        return url;
+
+        return urlWithStates;
       };
 
       $scope.$watch('getUrl()', updateUrl);

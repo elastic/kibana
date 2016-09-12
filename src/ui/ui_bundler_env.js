@@ -46,7 +46,8 @@ module.exports = class UiBundlerEnv {
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
       ui: fromRoot('src/ui/public'),
-      test_harness: fromRoot('src/test_harness/public')
+      test_harness: fromRoot('src/test_harness/public'),
+      querystring: 'querystring-browser',
     };
 
     // map of which plugins created which aliases

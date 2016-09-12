@@ -16,7 +16,7 @@ bdd.describe('visualize app', function describeIndexTests() {
   });
 
   bdd.describe('chart types', function indexPatternCreation() {
-    bdd.it('should show the correct chart types', function pageHeader() {
+    bdd.it('should show the correct chart types', function () {
       var expectedChartTypes = [
         'Area chart', 'Data table', 'Line chart', 'Markdown widget',
         'Metric', 'Pie chart', 'Tile map', 'Timeseries', 'Vertical bar chart'
