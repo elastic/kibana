@@ -47,7 +47,7 @@ export async function rebuildCache(settings, logger) {
 
 export function assertVersion(settings) {
   if (!settings.plugins[0].kibanaVersion) {
-    throw new Error (`Plugin version not found. Check package.json in archive`);
+    throw new Error (`Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`);
   }
 
   const actual = cleanVersion(settings.plugins[0].kibanaVersion);
