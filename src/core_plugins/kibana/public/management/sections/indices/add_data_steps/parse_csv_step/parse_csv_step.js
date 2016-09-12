@@ -4,9 +4,10 @@ import modules from 'ui/modules';
 import validateHeaders from './lib/validate_headers';
 import template from './parse_csv_step.html';
 import './styles/_add_data_parse_csv_step.less';
+import numeral from '@spalger/numeral';
 
 modules.get('apps/management')
-  .directive('parseCsvStep', function () {
+  .directive('parseCsvStep', function (addDataMaxBytes) {
     return {
       restrict: 'E',
       template: template,
@@ -20,6 +21,8 @@ modules.get('apps/management')
       controller: function ($scope, debounce) {
         const maxSampleRows = 10;
         const maxSampleColumns = 20;
+
+        this.maxBytesFormatted = numeral(addDataMaxBytes).format('0 b');
 
         this.delimiterOptions = [
           {
@@ -54,6 +57,13 @@ modules.get('apps/management')
           delete this.columns;
           this.formattedErrors = [];
           this.formattedWarnings = [];
+
+          if (this.file.size > addDataMaxBytes) {
+            this.formattedErrors.push(
+              `File size (${this.file.size} bytes) is greater than the configured limit of ${addDataMaxBytes} bytes`
+            );
+            return;
+          }
 
           const config = _.assign(
             {
