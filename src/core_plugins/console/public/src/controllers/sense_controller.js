@@ -1,7 +1,7 @@
 import 'ui/doc_title';
 import { useResizeCheckerProvider } from '../sense_editor_resize';
 import $ from 'jquery';
-import getInput from '../input';
+import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
 import es from '../es';
 import init from '../app';
@@ -26,7 +26,7 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
   // and then initialize this app
   $timeout(() => {
     output = initializeOutput($('#output'));
-    input = getInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
+    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
     init(input, output);
   });
 
