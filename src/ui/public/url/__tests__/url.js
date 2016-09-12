@@ -15,6 +15,13 @@ let $location;
 let $rootScope;
 let appState;
 
+class StubAppState {
+  constructor() {
+    this.getQueryParamName = () => '_a';
+    this.toQueryParam = () => 'stateQueryParam';
+    this.destroy = sinon.stub();
+  }
+}
 
 function init() {
   ngMock.module('kibana/url', 'kibana', function ($provide, PrivateProvider) {
@@ -24,7 +31,7 @@ function init() {
       };
     });
 
-    appState = { destroy: sinon.stub() };
+    appState = new StubAppState();
     PrivateProvider.swap(AppStateProvider, $decorate => {
       const AppState = $decorate();
       AppState.getAppState = () => appState;
@@ -277,11 +284,11 @@ describe('kbnUrl', function () {
       expect($location.search()).to.eql(search);
       expect($location.hash()).to.be(hash);
 
-      kbnUrl.change(newPath, null, {foo: 'bar'});
+      kbnUrl.change(newPath, null, new StubAppState());
 
       // verify the ending state
       expect($location.path()).to.be(newPath);
-      expect($location.search()).to.eql({_a: '(foo:bar)'});
+      expect($location.search()).to.eql({ _a: 'stateQueryParam' });
       expect($location.hash()).to.be('');
     });
   });
@@ -344,11 +351,11 @@ describe('kbnUrl', function () {
       expect($location.search()).to.eql(search);
       expect($location.hash()).to.be(hash);
 
-      kbnUrl.redirect(newPath, null, {foo: 'bar'});
+      kbnUrl.redirect(newPath, null, new StubAppState());
 
       // verify the ending state
       expect($location.path()).to.be(newPath);
-      expect($location.search()).to.eql({_a: '(foo:bar)'});
+      expect($location.search()).to.eql({ _a: 'stateQueryParam' });
       expect($location.hash()).to.be('');
     });
 

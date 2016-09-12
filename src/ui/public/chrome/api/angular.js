@@ -5,7 +5,7 @@ import modules from 'ui/modules';
 import Notifier from 'ui/notify/notifier';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
-const URL_LIMIT_WARN_WITHIN = 150;
+const URL_LIMIT_WARN_WITHIN = 1000;
 
 module.exports = function (chrome, internals) {
 
@@ -57,10 +57,20 @@ module.exports = function (chrome, internals) {
 
         try {
           if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-            notify.warning(`
-              The URL has gotten big and may cause Kibana
-              to stop working. Please simplify the data on screen.
-            `);
+            notify.directive({
+              template: `
+                <p>
+                  The URL has gotten big and may cause Kibana
+                  to stop working. Please either enable the
+                  <code>state:storeInSessionStorage</code>
+                  option in the <a href="#/management/kibana/settings">advanced
+                  settings</a> or simplify the onscreen visuals.
+                </p>
+              `
+            }, {
+              type: 'error',
+              actions: [{ text: 'close' }]
+            });
           }
         } catch (e) {
           const { host, path, search, protocol } = parseUrl(window.location.href);

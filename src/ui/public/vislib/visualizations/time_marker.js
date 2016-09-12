@@ -2,47 +2,44 @@ import d3 from 'd3';
 import dateMath from '@elastic/datemath';
 export default function TimeMarkerFactory() {
 
-  function TimeMarker(times, xScale, height) {
-    if (!(this instanceof TimeMarker)) {
-      return new TimeMarker(times, xScale, height);
+  class TimeMarker {
+    constructor(times, xScale, height) {
+      const currentTimeArr = [{
+        'time': new Date().getTime(),
+        'class': 'time-marker',
+        'color': '#c80000',
+        'opacity': 0.3,
+        'width': 2
+      }];
+
+      this.xScale = xScale;
+      this.height = height;
+      this.times = (times.length) ? times.map(function (d) {
+        return {
+          'time': dateMath.parse(d.time),
+          'class': d.class || 'time-marker',
+          'color': d.color || '#c80000',
+          'opacity': d.opacity || 0.3,
+          'width': d.width || 2
+        };
+      }) : currentTimeArr;
     }
 
-    let currentTimeArr = [{
-      'time': new Date().getTime(),
-      'class': 'time-marker',
-      'color': '#c80000',
-      'opacity': 0.3,
-      'width': 2
-    }];
+    _isTimeBasedChart(selection) {
+      const data = selection.data();
+      return data.every(function (datum) {
+        return (datum.ordered && datum.ordered.date);
+      });
+    };
 
-    this.xScale = xScale;
-    this.height = height;
-    this.times = (times.length) ? times.map(function (d) {
-      return {
-        'time': dateMath.parse(d.time),
-        'class': d.class || 'time-marker',
-        'color': d.color || '#c80000',
-        'opacity': d.opacity || 0.3,
-        'width': d.width || 2
-      };
-    }) : currentTimeArr;
-  }
+    render(selection) {
+      const self = this;
 
-  TimeMarker.prototype._isTimeBasedChart = function (selection) {
-    let data = selection.data();
-    return data.every(function (datum) {
-      return (datum.ordered && datum.ordered.date);
-    });
-  };
+      // return if not time based chart
+      if (!self._isTimeBasedChart(selection)) return;
 
-  TimeMarker.prototype.render = function (selection) {
-    let self = this;
-
-    // return if not time based chart
-    if (!self._isTimeBasedChart(selection)) return;
-
-    selection.each(function () {
-      d3.select(this).selectAll('time-marker')
+      selection.each(function () {
+        d3.select(this).selectAll('time-marker')
         .data(self.times)
         .enter().append('line')
         .attr('class', function (d) {
@@ -66,8 +63,9 @@ export default function TimeMarkerFactory() {
         })
         .attr('y1', self.height)
         .attr('y2', self.xScale.range()[0]);
-    });
-  };
+      });
+    };
+  }
 
   return TimeMarker;
 };
