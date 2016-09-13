@@ -93,6 +93,7 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     dataObj = new Data(data, {}, persistedState);
     xAxis = new Axis({
+      type: 'category',
       el: $('.x-axis-div')[0],
       xValues: dataObj.xValues(),
       ordered: dataObj.get('ordered'),
