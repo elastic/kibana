@@ -1,4 +1,4 @@
-<kbn-dev-tools-app>
+<kbn-dev-tools-app data-test-subj="console">
   <sense-navbar></sense-navbar>
 
   <div id="editor_output_container">
@@ -6,7 +6,10 @@
       <ul id="autocomplete"></ul>
       <div id="editor_actions">
         <kbn-tooltip text="click to send request">
-          <a class="editor_action" ng-click="sendSelected()">
+          <a
+            class="editor_action"
+            ng-click="sendSelected()"
+            data-test-subj="send-request-button">
             <i class="fa fa-play"></i>
           </a>
         </kbn-tooltip>
@@ -26,14 +29,14 @@
         </span>
       </div>
 
-      <div id="editor">GET _search
+      <div id="editor" data-test-subj="request-editor">GET _search
   {
     "query": { "match_all": {} }
   }</div>
 
     </div>
     <div id="editor_resizer">&#xFE19;</div>
-    <div id="output_container">
+    <div id="output_container" data-test-subj="response-editor">
       <div id="output">{}</div>
     </div>
   </div>
