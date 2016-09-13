@@ -217,7 +217,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     });
 
     it('should create an xAxisFormatter function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xAxisFormatter)).to.be(true);
+      expect(_.isFunction(xAxis.axisFormatter)).to.be(true);
     });
   });
 
