@@ -43,7 +43,8 @@ module.exports = {
       hash: '/management'
     },
     console: {
-      pathname: 'app/console',
+      pathname: kibanaURL,
+      hash: '/dev_tools/console',
     }
   }
 };

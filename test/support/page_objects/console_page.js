@@ -1,59 +1,38 @@
+import Bluebird from 'bluebird';
 
+import PageObjects from './';
 import {
   defaultFindTimeout,
 } from '../';
 
+async function getVisibleTextFromAceEditor(editor) {
+  const lines = await editor.findAllByClassName('ace_line_group');
+  const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+  return linesText.join('\n');
+}
+
 export default class ConsolePage {
-
-  init(remote) {
-    this.remote = remote;
-    this.findTimeout = this.remote.setFindTimeout(defaultFindTimeout);
-  }
-
-  getServer() {
-    return this.findTimeout
-    .findByCssSelector('#kibana-body > div.content > div > div')
-    .getVisibleText();
-  }
-
-  setServer(server) {
-    return this.findTimeout
-    .findByCssSelector('input[aria-label="Server Name"]')
-    .clearValue()
-    .type(server);
-  }
-
-  getRequest() {
-    return this.findTimeout
-    .findAllByCssSelector('div.ace_line_group')
-    .then(function (editorData) {
-
-      function getEditorData(line) {
-        return line.getVisibleText();
-      }
-
-      var getEditorDataPromises = editorData.map(getEditorData);
-      return Promise.all(getEditorDataPromises);
-    });
-  }
-
-  getResponse() {
-    return this.findTimeout
-    .findByCssSelector('#output > div.ace_scroller > div')
-    .getVisibleText();
-  }
-
-  clickPlay() {
-    return this.findTimeout
-    .findByCssSelector('#editor_actions > span.ng-scope > a > i')
-    .click();
-  }
-
-  collapseHelp() {
-    return this.findTimeout
-    .findByCssSelector('div.config-close.remove > i')
-    .click();
+  init() {
 
   }
 
+  async getRequest() {
+    const requestEditor = await PageObjects.common.findTestSubject('console request-editor');
+    return await getVisibleTextFromAceEditor(requestEditor);
+  }
+
+  async getResponse() {
+    const responseEditor = await PageObjects.common.findTestSubject('console response-editor');
+    return await getVisibleTextFromAceEditor(responseEditor);
+  }
+
+  async clickPlay() {
+    const sendRequestButton = await PageObjects.common.findTestSubject('console send-request-button');
+    await sendRequestButton.click();
+  }
+
+  async collapseHelp() {
+    const closeButton = await PageObjects.common.findTestSubject('console top-nav config-close-button');
+    await closeButton.click();
+  }
 }
