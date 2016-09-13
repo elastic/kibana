@@ -12,7 +12,6 @@ export default function ColumnHandler(Private) {
   const Handler = Private(VislibLibHandlerHandlerProvider);
   const Data = Private(VislibLibDataProvider);
   const Axis = Private(VislibAxis);
-  const AxisTitle = Private(VislibLibAxisTitleProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
 
