@@ -8,6 +8,7 @@ import { readFileSync } from 'fs';
 
 import Config from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
+import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';
 import { DEV_SSL_CERT_PATH } from '../dev_ssl';
 
@@ -44,6 +45,8 @@ export default class BasePathProxy {
 
     setupLogging(null, this.server, config);
     setupConnection(null, this.server, config);
+    registerHapiPlugins(null, this.server, config);
+
     this.setupRoutes();
   }
 
