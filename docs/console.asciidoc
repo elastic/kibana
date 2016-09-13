@@ -171,3 +171,11 @@ sense.proxyFilter:
 
 Restart Kibana for these changes to take effect.
 
+Alternatively if the users of Kibana have no requirements or need to access any of the Console functionality, it can
+be disabled completely and not even show up as an available app by setting the `console.enabled` property to `false`:
+
+[source,yaml]
+--------
+console.enabled:
+  - false
+--------
