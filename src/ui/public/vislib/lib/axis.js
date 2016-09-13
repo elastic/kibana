@@ -3,19 +3,19 @@ import $ from 'jquery';
 import _ from 'lodash';
 import moment from 'moment';
 import VislibLibErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
-export default function XAxisFactory(Private) {
+export default function AxisFactory(Private) {
 
   const ErrorHandler = Private(VislibLibErrorHandlerProvider);
 
   /**
    * Adds an x axis to the visualization
    *
-   * @class XAxis
+   * @class Axis
    * @constructor
    * @param args {{el: (HTMLElement), xValues: (Array), ordered: (Object|*),
    * xAxisFormatter: (Function), _attr: (Object|*)}}
    */
-  class XAxis extends ErrorHandler {
+  class Axis extends ErrorHandler {
     constructor(args) {
       super();
       this.el = args.el;
@@ -509,5 +509,5 @@ export default function XAxisFactory(Private) {
     };
   }
 
-  return XAxis;
+  return Axis;
 };
