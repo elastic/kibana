@@ -29,6 +29,7 @@ export default function AxisFactory(Private) {
       this.scale = null;
       this.domain = [args.yMin, args.yMax];
       this.elSelector = args.type === 'category' ? '.x-axis-div' : '.y-axis-div';
+      this.type = args.type;
     }
 
     /**
@@ -226,7 +227,7 @@ export default function AxisFactory(Private) {
       this.xAxis = d3.svg.axis()
       .scale(this.xScale)
       .ticks(10)
-      .tickFormat(this.xAxisFormatter)
+      .tickFormat(this.axisFormatter)
       .orient('bottom');
     };
 
@@ -294,7 +295,9 @@ export default function AxisFactory(Private) {
           }
         });
 
-        selection.call(self.filterOrRotate());
+        if (self.type === 'category') {
+          selection.call(self.filterOrRotate());
+        }
       };
     };
 
@@ -478,7 +481,7 @@ export default function AxisFactory(Private) {
     tickFormat() {
       const isPercentage = this._attr.mode === 'percentage';
       if (isPercentage) return d3.format('%');
-      if (this.yAxisFormatter) return this.yAxisFormatter;
+      if (this.axisFormatter) return this.axisFormatter;
       return d3.format('n');
     };
 
@@ -584,7 +587,7 @@ export default function AxisFactory(Private) {
 
           if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
             startX = myX + halfWidth;
-            return self.xAxisFormatter(d);
+            return self.axisFormatter(d);
           } else {
             d3.select(this.parentNode).remove();
           }
