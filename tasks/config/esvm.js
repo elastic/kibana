@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      branch: 'master',
+      branch: '5.x',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         http: {
