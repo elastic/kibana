@@ -5,6 +5,8 @@ import exposeClient from './expose_client';
 import migrateConfig from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import checkEsVersion from './check_es_version';
+import kibanaVersion from './kibana_version';
+
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
 const format = util.format;
@@ -85,7 +87,7 @@ module.exports = function (plugin, server) {
 
   function check() {
     return waitForPong()
-    .then(_.partial(checkEsVersion, server))
+    .then(() => checkEsVersion(server, kibanaVersion.get()))
     .then(waitForShards)
     .then(setGreenStatus)
     .then(_.partial(migrateConfig, server))
