@@ -1,7 +1,7 @@
 import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
+import VislibLibAxisProvider from 'ui/vislib/lib/axis';
 import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
 import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
@@ -11,7 +11,7 @@ export default function ColumnHandler(Private) {
   const injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
   const Handler = Private(VislibLibHandlerHandlerProvider);
   const Data = Private(VislibLibDataProvider);
-  const XAxis = Private(VislibLibXAxisProvider);
+  const Axis = Private(VislibLibAxisProvider);
   const YAxis = Private(VislibLibYAxisProvider);
   const AxisTitle = Private(VislibLibAxisTitleProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
@@ -39,7 +39,7 @@ export default function ColumnHandler(Private) {
         data: data,
         axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
         chartTitle: new ChartTitle(vis.el),
-        xAxis: new XAxis({
+        xAxis: new Axis({
           el                : vis.el,
           xValues           : data.xValues(),
           ordered           : data.get('ordered'),
