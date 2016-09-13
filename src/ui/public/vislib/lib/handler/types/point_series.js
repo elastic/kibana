@@ -38,6 +38,7 @@ export default function ColumnHandler(Private) {
         axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
         chartTitle: new ChartTitle(vis.el),
         xAxis: new Axis({
+          type              : 'category',
           el                : vis.el,
           xValues           : data.xValues(),
           ordered           : data.get('ordered'),
@@ -47,6 +48,7 @@ export default function ColumnHandler(Private) {
         }),
         alerts: new Alerts(vis, data, opts.alerts),
         yAxis: new Axis({
+          type : 'value',
           el   : vis.el,
           yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
           yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
