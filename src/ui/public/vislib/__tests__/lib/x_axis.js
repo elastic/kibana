@@ -6,10 +6,10 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
+import VislibLibAxisProvider from 'ui/vislib/lib/axis';
 
 describe('Vislib xAxis Class Test Suite', function () {
-  let XAxis;
+  let Axis;
   let Data;
   let persistedState;
   let xAxis;
@@ -82,7 +82,7 @@ describe('Vislib xAxis Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private) {
     Data = Private(VislibLibDataProvider);
     persistedState = new (Private(PersistedStatePersistedStateProvider))();
-    XAxis = Private(VislibLibXAxisProvider);
+    Axis = Private(VislibLibAxisProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'x-axis-wrapper')
@@ -92,7 +92,7 @@ describe('Vislib xAxis Class Test Suite', function () {
       .attr('class', 'x-axis-div');
 
     dataObj = new Data(data, {}, persistedState);
-    xAxis = new XAxis({
+    xAxis = new Axis({
       el: $('.x-axis-div')[0],
       xValues: dataObj.xValues(),
       ordered: dataObj.get('ordered'),
