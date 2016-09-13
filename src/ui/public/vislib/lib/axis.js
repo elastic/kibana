@@ -23,12 +23,12 @@ export default function AxisFactory(Private) {
       this.el = args.el;
       this.xValues = args.xValues;
       this.ordered = args.ordered;
-      this.xAxisFormatter = args.xAxisFormatter;
+      this.axisFormatter = args.type === 'category' ? args.xAxisFormatter : args.yAxisFormatter;
       this.expandLastBucket = args.expandLastBucket == null ? true : args.expandLastBucket;
       this._attr = _.defaults(args._attr || {});
       this.scale = null;
       this.domain = [args.yMin, args.yMax];
-      this.yAxisFormatter = args.yAxisFormatter;
+      this.elSelector = args.type === 'category' ? '.x-axis-div' : '.y-axis-div';
     }
 
     /**
@@ -38,7 +38,7 @@ export default function AxisFactory(Private) {
      * @returns {D3.UpdateSelection} Appends x axis to visualization
      */
     render() {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
+      d3.select(this.el).selectAll(this.elSelector).call(this.draw());
     };
 
     /**
@@ -264,34 +264,33 @@ export default function AxisFactory(Private) {
 
           self.validateWidthandHeight(width, height);
 
-          self.getXAxis(width);
-
-          const yAxis = self.getYAxis(adjustedHeight);
-
           const svg = div.append('svg')
           .attr('width', width)
           .attr('height', height);
 
-          svg.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', 'translate(0,0)')
-          .call(self.xAxis);
-
-          // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
-          if (!isWiggleOrSilhouette) {
-
+          if (self.type === 'category') {
+            self.getXAxis(width);
             svg.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(0,0)')
+            .call(self.xAxis);
+          } else {
+            const yAxis = self.getYAxis(adjustedHeight);
+            if (!isWiggleOrSilhouette) {
+              svg.append('g')
               .attr('class', 'y axis')
               .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
               .call(yAxis);
 
-            const container = svg.select('g.y.axis').node();
-            if (container) {
-              const cWidth = Math.max(width, container.getBBox().width);
-              svg.attr('width', cWidth);
-              svg.select('g')
-                .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
+              const container = svg.select('g.y.axis').node();
+              if (container) {
+                const cWidth = Math.max(width, container.getBBox().width);
+                svg.attr('width', cWidth);
+                svg.select('g')
+                  .attr('transform', 'translate(' + (cWidth - 2) + ',' + margin.top + ')');
+              }
             }
+
           }
         });
 
