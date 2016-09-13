@@ -9,40 +9,31 @@ define(function () {
      */
 
     // render and get bounding box width
-    return function (selection, parent, opts) {
-      const yAxis = opts && opts.yAxis;
+    return function (selection) {
 
       selection.each(function () {
         const div = d3.select(this);
-
-        div.call(setWidth, yAxis);
+        let rows;
 
         div.selectAll('.y-axis-div')
         .append('div')
         .data(function (d) {
+          rows = d.rows ? d.rows.length : 1;
           return d.rows ? d.rows : [d];
         })
         .enter()
           .append('div')
-          .attr('class', 'y-axis-div');
+          .attr('class', (d, i) => {
+            let divClass = '';
+            if (i === 0) {
+              divClass += ' chart-first';
+            }
+            if (i === rows - 1) {
+              divClass += ' chart-last';
+            }
+            return 'y-axis-div axis-div' + divClass;
+          });
       });
     };
-
-    function setWidth(el, yAxis) {
-      if (!yAxis) return;
-
-      const padding = 5;
-      const height = parseInt(el.node().clientHeight, 10);
-
-      // render svg and get the width of the bounding box
-      const svg = d3.select('body')
-      .append('svg')
-      .attr('style', 'position:absolute; top:-10000; left:-10000');
-      const width = svg.append('g')
-      .call(yAxis.getYAxis(height)).node().getBBox().width + padding;
-      svg.remove();
-
-      el.style('width', (width + padding) + 'px');
-    }
   };
 });

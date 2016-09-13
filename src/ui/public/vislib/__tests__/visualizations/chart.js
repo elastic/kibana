@@ -4,11 +4,11 @@ import ngMock from 'ng_mock';
 import VislibVisProvider from 'ui/vislib/vis';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-import VislibVisualizationsColumnChartProvider from 'ui/vislib/visualizations/column_chart';
+import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
 import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  let ColumnChart;
+  let PieChart;
   let Chart;
   let Data;
   let persistedState;
@@ -88,23 +88,23 @@ describe('Vislib _chart Test Suite', function () {
     Vis = Private(VislibVisProvider);
     Data = Private(VislibLibDataProvider);
     persistedState = new (Private(PersistedStatePersistedStateProvider))();
-    ColumnChart = Private(VislibVisualizationsColumnChartProvider);
+    PieChart = Private(VislibVisualizationsPieChartProvider);
     Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
     config = {
       type: 'histogram',
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
-      stack: d3.layout.stack(),
+      hasTimeField: true,
+      zeroFill: true
     };
 
     vis = new Vis(el[0][0], config);
-    vis.data = new Data(data, config, persistedState);
+    vis.render(data, persistedState);
 
-    myChart = new ColumnChart(vis, el, chartData);
+    myChart = vis.handler.charts[0];
   }));
 
   afterEach(function () {
@@ -125,7 +125,7 @@ describe('Vislib _chart Test Suite', function () {
     myChart.destroy();
 
     expect(function () {
-      myChart.draw();
+      myChart.render();
     }).to.throwError();
   });
 

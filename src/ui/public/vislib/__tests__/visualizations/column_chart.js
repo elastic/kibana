@@ -37,7 +37,8 @@ dataTypesArray.forEach(function (dataType, i) {
       hasTimeField: true,
       addLegend: true,
       addTooltip: true,
-      mode: mode
+      mode: mode,
+      zeroFill: true
     };
 
     beforeEach(ngMock.module('kibana'));
@@ -58,10 +59,10 @@ dataTypesArray.forEach(function (dataType, i) {
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
-          stackedData = chart.stackData(chart.chartData);
+          stackedData = chart.chartData;
 
-          isStacked = stackedData.every(function (arr) {
-            return arr.every(function (d) {
+          isStacked = stackedData.series.every(function (arr) {
+            return arr.values.every(function (d) {
               return _.isNumber(d.y0);
             });
           });
@@ -69,7 +70,11 @@ dataTypesArray.forEach(function (dataType, i) {
       });
 
       it('should append a d.y0 key to the data object', function () {
-        expect(isStacked).to.be(true);
+        if (mode === 'grouped') {
+          expect(isStacked).to.be(false);
+        } else {
+          expect(isStacked).to.be(true);
+        }
       });
     });
 
@@ -90,7 +95,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('updateBars method', function () {
       beforeEach(function () {
-        vis.handler._attr.mode = 'grouped';
+        vis.handler.visConfig.set('mode', 'grouped');
         vis.render(vis.data, persistedState);
       });
 
@@ -149,16 +154,17 @@ dataTypesArray.forEach(function (dataType, i) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          const yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
+          const domain = yAxis.getScale().domain();
 
-          expect(yAxis.domain[0]).to.not.be(undefined);
-          expect(yAxis.domain[1]).to.not.be(undefined);
+          expect(domain[0]).to.not.be(undefined);
+          expect(domain[1]).to.not.be(undefined);
         });
       });
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          const yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -184,18 +190,18 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
-        vis._attr.defaultYExtents = true;
+        vis.visConfigArgs.defaultYExtents = true;
         vis.render(data, persistedState);
       });
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          const yAxis = chart.handler.yAxis;
-          const min = vis.handler.data.getYMin();
-          const max = vis.handler.data.getYMax();
-
-          expect(yAxis.domain[0]).to.equal(min);
-          expect(yAxis.domain[1]).to.equal(max);
+          const yAxis = chart.handler.valueAxes[0];
+          const min = vis.handler.valueAxes[0].axisScale.getYMin();
+          const max = vis.handler.valueAxes[0].axisScale.getYMax();
+          const domain = yAxis.getScale().domain();
+          expect(domain[0]).to.equal(min);
+          expect(domain[1]).to.equal(max);
         });
       });
     });
