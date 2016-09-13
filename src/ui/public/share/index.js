@@ -1,2 +1,2 @@
+import './styles/index.less';
 import './directives/share';
-import './directives/share_object_url';
