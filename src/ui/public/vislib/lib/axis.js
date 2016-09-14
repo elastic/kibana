@@ -14,13 +14,6 @@ export default function AxisFactory(Private) {
   const AxisScale = Private(AxisScaleProvider);
   const AxisConfig = Private(AxisConfigProvider);
 
-  /**
-   * Appends y axis to the visualization
-   *
-   * @class Axis
-   * @constructor
-   * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
-   */
   class Axis extends ErrorHandler {
     constructor(args) {
       super();
