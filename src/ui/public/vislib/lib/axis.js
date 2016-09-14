@@ -30,9 +30,9 @@ export default function AxisFactory(Private) {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
       }
-      this.scale = new AxisScale(this.config, this.data);
+      this.axisScale = new AxisScale(this.config, this.data);
       this.axisTitle = new AxisTitle(this.config);
-      this.axisLabels = new AxisLabels(this.config, this.scale);
+      this.axisLabels = new AxisLabels(this.config, this.axisScale);
     }
 
     render() {
@@ -42,7 +42,7 @@ export default function AxisFactory(Private) {
     }
 
     getAxis(length) {
-      const scale = this.scale.getScale(length);
+      const scale = this.axisScale.getScale(length);
       const position = this.config.get('position');
       return d3.svg.axis()
       .scale(scale)
@@ -52,15 +52,15 @@ export default function AxisFactory(Private) {
     }
 
     getScale() {
-      return this.scale.scale;
+      return this.axisScale.scale;
     }
 
     addInterval(interval) {
-      return this.scale.addInterval(interval);
+      return this.axisScale.addInterval(interval);
     }
 
     substractInterval(interval) {
-      return this.scale.substractInterval(interval);
+      return this.axisScale.substractInterval(interval);
     }
 
     tickScale(length) {
