@@ -28,6 +28,9 @@ module.exports = class KbnServer {
       // find plugins and set this.plugins
       require('./plugins/scan'),
 
+      // make sure that all plugins expect the current version of Kibana
+      require('./plugins/check_version'),
+
       // tell the config we are done loading plugins
       require('./config/complete'),
 
