@@ -80,11 +80,11 @@ export default function AxisConfigFactory() {
     };
 
     isOrdinal() {
-      return !!this.data.xValues() && (!this.isTimeDomain());
+      return !!this.values && (!this.isTimeDomain());
     };
 
     isTimeDomain() {
-      return this.data.data.ordered && this.data.data.ordered.date;
+      return this.ordered && this.ordered.date;
     };
 
     isPercentage() {
