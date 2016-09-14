@@ -52,14 +52,14 @@ bdd.describe('shared links', function describeIndexTests() {
 
   bdd.describe('shared link', function () {
     bdd.it('should show "Share a link" caption', function () {
-      var expectedCaption = 'Share a link';
+      var expectedCaption = 'Share saved';
       return PageObjects.discover.clickShare()
       .then(function () {
         PageObjects.common.saveScreenshot('Discover-share-link');
         return PageObjects.discover.getShareCaption();
       })
       .then(function (actualCaption) {
-        expect(actualCaption).to.be(expectedCaption);
+        expect(actualCaption).to.contain(expectedCaption);
       });
     });
 
@@ -100,7 +100,7 @@ bdd.describe('shared links', function describeIndexTests() {
       .then(function () {
         return PageObjects.common.try(function tryingForTime() {
           PageObjects.common.saveScreenshot('Discover-shorten-url-button');
-          return PageObjects.discover.getShortenedUrl()
+          return PageObjects.discover.getSharedUrl()
           .then(function (actualUrl) {
             expect(actualUrl).to.match(re);
           });
