@@ -25,6 +25,10 @@ export default function AxisFactory(Private) {
     constructor(args) {
       super();
       this.data = args.data;
+      if (this.config.get('type') === 'category') {
+        this.values = this.data.xValues();
+        this.ordered = this.data.data.ordered;
+      }
       this.config = new AxisConfig(args);
       this.scale = new AxisScale(this.config, this.data);
       this.axisTitle = new AxisTitle(this.config);
