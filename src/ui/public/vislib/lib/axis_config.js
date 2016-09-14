@@ -68,7 +68,7 @@ export default function AxisConfigFactory() {
 
       if (this.type === 'category') {
         this.values = this.data.xValues();
-        this.ordered = this.data.data.ordered;
+        this.ordered = this.data.get('ordered');
       }
     };
 
