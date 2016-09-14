@@ -2,7 +2,10 @@
   <!-- Left panel -->
   <div class="share-panel share-panel--left">
     <!-- Title -->
-    <div class="share-panel__title">
+    <div
+      data-test-subj="shareUiTitle"
+      class="share-panel__title"
+    >
       Share saved {{share.objectType}}
     </div>
 
@@ -146,6 +149,7 @@
         </div>
         <div class="share-panel-header__actions">
           <a
+            data-test-subj="sharedSnapshotShortUrlButton"
             class="share-panel-header__action"
             ng-if="!share.urlFlags.shortSnapshot"
             ng-click="share.toggleShortSnapshotUrl()"
@@ -162,6 +166,7 @@
           </a>
 
           <a
+            data-test-subj="sharedSnapshotCopyButton"
             class="share-panel-header__action"
             ng-click="share.copyToClipboard('#snapshotUrl')"
           >
@@ -172,6 +177,7 @@
 
       <!-- Input -->
       <input
+        data-test-subj="sharedSnapshotUrl"
         id="snapshotUrl"
         class="share-panel-input"
         type="text"
