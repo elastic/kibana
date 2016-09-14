@@ -5,10 +5,6 @@ import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisTitleFactory(Private) {
 
   const ErrorHandler = Private(ErrorHandlerProvider);
-  const defaults = {
-    title: '',
-    elSelector: '.axis-wrapper-{pos} .axis-title'
-  };
 
   /**
    * Appends axis title(s) to the visualization
@@ -20,11 +16,10 @@ export default function AxisTitleFactory(Private) {
    * @param yTitle {String} Y-axis title
    */
   class AxisTitle extends ErrorHandler {
-    constructor(axis, attr) {
+    constructor(config) {
       super();
-      _.extend(this, defaults, attr);
-      this.axis = axis;
-      this.elSelector = this.elSelector.replace('{pos}', axis.position);
+      this.config = config;
+      this.elSelector = this.config.title.elSelector.replace('{pos}', config.get('position'));
     }
 
     /**
@@ -33,8 +28,8 @@ export default function AxisTitleFactory(Private) {
      * @method render
      * @returns {HTMLElement} DOM Element with axis titles
      */
-    render(selection) {
-      d3.select(this.axis.vis.el).selectAll(this.elSelector).call(this.draw());
+    render() {
+      d3.select(this.config.get('rootEl')).selectAll(this.elSelector).call(this.draw());
     };
 
     /**
@@ -46,6 +41,7 @@ export default function AxisTitleFactory(Private) {
      */
     draw() {
       const self = this;
+      const config = this.config;
 
       return function (selection) {
         selection.each(function () {
@@ -63,17 +59,17 @@ export default function AxisTitleFactory(Private) {
 
           const bbox = svg.append('text')
           .attr('transform', function () {
-            if (self.axis.isHorizontal()) {
+            if (self.config.isHorizontal()) {
               return 'translate(' + width / 2 + ',11)';
             }
             return 'translate(11,' + height / 2 + ') rotate(270)';
           })
           .attr('text-anchor', 'middle')
-          .text(self.title)
+          .text(config.get('title.text'))
           .node()
           .getBBox();
 
-          if (self.axis.isHorizontal()) {
+          if (config.isHorizontal()) {
             svg.attr('height', bbox.height);
           } else {
             svg.attr('width', bbox.width);
