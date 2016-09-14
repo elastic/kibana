@@ -6,15 +6,6 @@ export default function AxisTitleFactory(Private) {
 
   const ErrorHandler = Private(ErrorHandlerProvider);
 
-  /**
-   * Appends axis title(s) to the visualization
-   *
-   * @class AxisTitle
-   * @constructor
-   * @param el {HTMLElement} DOM element
-   * @param xTitle {String} X-axis title
-   * @param yTitle {String} Y-axis title
-   */
   class AxisTitle extends ErrorHandler {
     constructor(config) {
       super();
@@ -22,23 +13,10 @@ export default function AxisTitleFactory(Private) {
       this.elSelector = this.config.title.elSelector.replace('{pos}', config.get('position'));
     }
 
-    /**
-     * Renders both x and y axis titles
-     *
-     * @method render
-     * @returns {HTMLElement} DOM Element with axis titles
-     */
     render() {
       d3.select(this.config.get('rootEl')).selectAll(this.elSelector).call(this.draw());
     };
 
-    /**
-     * Appends an SVG with title text
-     *
-     * @method draw
-     * @param title {String} Axis title
-     * @returns {Function} Appends axis title to a D3 selection
-     */
     draw() {
       const self = this;
       const config = this.config;

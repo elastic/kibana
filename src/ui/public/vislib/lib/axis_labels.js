@@ -6,16 +6,6 @@ export default function AxisLabelsFactory(Private) {
 
   const ErrorHandler = Private(ErrorHandlerProvider);
 
-  /**
-   * Appends axis title(s) to the visualization
-   *
-   * @class AxisLabels
-   * @constructor
-   * @param el {HTMLElement} DOM element
-   * @param xTitle {String} X-axis title
-   * @param yTitle {String} Y-axis title
-   */
-
   class AxisLabels extends ErrorHandler {
     constructor(config, scale) {
       super();
