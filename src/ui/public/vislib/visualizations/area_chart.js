@@ -212,8 +212,6 @@ export default function AreaChartFactory(Private) {
         return xScale(d.x) + xScale.rangeBand() / 2;
       })
       .attr('cy', function cy(d, i, j) {
-        const yScale = self.handler.valueAxes[0].getScale();
-
         if (isOverlapping) {
           return yScale(d.y);
         }
