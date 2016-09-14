@@ -28,7 +28,7 @@ Ideally, you should be running Elasticsearch and Kibana with matching version nu
 | -------------- | ---------- | ------- | ----------- |
 | 6.1.2          | 6.1.2      | 💚      | Versions are the same. |
 | 6.1.2          | 6.1.5      | ⚠️      | ES patch number is newer. |
-| 6.1.2          | 6.5.0      | ⚠️      | ES major number is newer. |
+| 6.1.2          | 6.5.0      | ⚠️      | ES minor number is newer. |
 | 6.1.2          | 7.0.0      | 🚫      | ES major number is newer. |
 | 6.1.2          | 6.1.0      | 🚫      | ES patch number is older. |
 | 6.1.2          | 6.0.0      | 🚫      | ES minor number is older. |
