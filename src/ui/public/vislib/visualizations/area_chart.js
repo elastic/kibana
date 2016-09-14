@@ -76,8 +76,8 @@ export default function AreaChartFactory(Private) {
       const isTimeSeries = (ordered && ordered.date);
       const isOverlapping = this.isOverlapping;
       const color = this.handler.data.getColorFunc();
-      const xScale = this.handler.xAxis.xScale;
-      const yScale = this.handler.yAxis.yScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
+      const yScale = this.handler.valueAxes[0].getScale();
       const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
       const area = d3.svg.area()
       .x(function (d) {
@@ -165,8 +165,8 @@ export default function AreaChartFactory(Private) {
      */
     addCircles(svg, data) {
       const color = this.handler.data.getColorFunc();
-      const xScale = this.handler.xAxis.xScale;
-      const yScale = this.handler.yAxis.yScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
+      const yScale = this.handler.valueAxes[0].getScale();
       const ordered = this.handler.data.get('ordered');
       const circleRadius = 12;
       const circleStrokeWidth = 0;
@@ -211,7 +211,7 @@ export default function AreaChartFactory(Private) {
         }
         return xScale(d.x) + xScale.rangeBand() / 2;
       })
-      .attr('cy', function cy(d) {
+      .attr('cy', function cy(d, i, j) {
         if (isOverlapping) {
           return yScale(d.y);
         }
@@ -284,13 +284,13 @@ export default function AreaChartFactory(Private) {
     draw() {
       // Attributes
       const self = this;
-      const xScale = this.handler.xAxis.xScale;
+      const xScale = this.handler.categoryAxes[0].getScale();
       const $elem = $(this.chartEl);
       const margin = this._attr.margin;
       const elWidth = this._attr.width = $elem.width();
       const elHeight = this._attr.height = $elem.height();
-      const yMin = this.handler.yAxis.yMin;
-      const yScale = this.handler.yAxis.yScale;
+      const yMin = this.handler.valueAxes[0].yMin;
+      const yScale = this.handler.valueAxes[0].getScale();
       const minWidth = 20;
       const minHeight = 20;
       const addTimeMarker = this._attr.addTimeMarker;
