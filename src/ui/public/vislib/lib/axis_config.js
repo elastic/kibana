@@ -46,15 +46,6 @@ export default function AxisConfigFactory() {
     }
   };
 
-  /**
-   * Appends axis title(s) to the visualization
-   *
-   * @class AxisTitle
-   * @constructor
-   * @param el {HTMLElement} DOM element
-   * @param xTitle {String} X-axis title
-   * @param yTitle {String} Y-axis title
-   */
   class AxisConfig {
     constructor(config) {
       if (config.type === 'category') {
