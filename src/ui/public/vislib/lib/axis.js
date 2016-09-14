@@ -150,7 +150,7 @@ export default function AxisFactory(Private) {
             }
           })());
         });
-        const length = _.max(lengths);
+        const length = lengths.length > 0 ? _.max(lengths) : 0;
 
         if (self.isHorizontal()) {
           selection.attr('height', length);
