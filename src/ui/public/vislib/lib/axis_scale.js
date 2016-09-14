@@ -19,38 +19,38 @@ export default function AxisScaleFactory(Private) {
    * @param yTitle {String} Y-axis title
    */
   class AxisScale extends ErrorHandler {
-    constructor(axis, attr) {
+    constructor(config, data) {
       super();
-      this.attr = attr;
-      this.axis = axis;
+      this.config = config;
+      this.data = data;
+
+      if (this.config.get('type') === 'category') {
+        this.values = data.xValues();
+        this.ordered = data.data.ordered;
+      }
     };
 
     isPercentage() {
-      return (this.axis._attr.mode === 'percentage');
+      const mode = this.config.get('mode');
+      return (mode === 'percentage');
     };
 
     isUserDefined() {
-      return (this.axis._attr.setYExtents);
+      const setYExtents = this.config.get('setYExtents');
+      return (setYExtents);
     };
 
     isYExtents() {
-      return (this.axis._attr.defaultYExtents);
-    };
-
-    isOrdinal() {
-      return !!this.axis.values && (!this.isTimeDomain());
-    };
-
-    isTimeDomain() {
-      return this.axis.ordered && this.axis.ordered.date;
+      const defaultYExtents = this.config.get('defaultYExtents');
+      return (defaultYExtents);
     };
 
     isLogScale() {
-      return this.attr.scale === 'log';
+      return this.getScaleType() === 'log';
     };
 
     getScaleType() {
-      return this.attr.scale;
+      return this.config.get('scale');
     };
 
     validateUserExtents(domain) {
@@ -58,7 +58,7 @@ export default function AxisScaleFactory(Private) {
         val = parseInt(val, 10);
 
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
-        if (this.axis.isPercentage() && this.axis._attr.setYExtents) return val / 100;
+        if (this.isPercentage() && this.isUserDefined()) return val / 100;
         return val;
       });
     };
@@ -76,11 +76,11 @@ export default function AxisScaleFactory(Private) {
     };
 
     minExtent(data) {
-      return this.calculateExtent(data || this.axis.values, 'min');
+      return this.calculateExtent(data || this.values, 'min');
     };
 
     maxExtent(data) {
-      return this.calculateExtent(data || this.axis.values, 'max');
+      return this.calculateExtent(data || this.values, 'max');
     };
 
     /**
@@ -89,11 +89,11 @@ export default function AxisScaleFactory(Private) {
      * @param extent
      */
     calculateExtent(data, extent) {
-      const ordered = this.axis.ordered;
+      const ordered = this.ordered;
       const opts = [ordered[extent]];
 
       let point = d3[extent](data);
-      if (this.axis.expandLastBucket && extent === 'max') {
+      if (this.config.get('expandLastBucket') && extent === 'max') {
         point = this.addInterval(point);
       }
       opts.push(point);
@@ -136,7 +136,7 @@ export default function AxisScaleFactory(Private) {
      * @returns {number} - x + n intervals
      */
     modByInterval(x, n) {
-      const ordered = this.axis.ordered;
+      const ordered = this.ordered;
       if (!ordered) return x;
       const interval = ordered.interval;
       if (!interval) return x;
@@ -156,11 +156,13 @@ export default function AxisScaleFactory(Private) {
     };
 
     getExtents() {
-      if (this.isTimeDomain()) return this.getTimeDomain(this.axis.values);
-      if (this.isOrdinal()) return this.axis.values;
+      if (this.config.get('type') === 'category') {
+        if (this.config.isTimeDomain()) return this.getTimeDomain(this.values);
+        if (this.config.isOrdinal()) return this.values;
+      }
 
-      const min = this.axis.min || this.axis.data.getYMin();
-      const max = this.axis.max || this.axis.data.getYMax();
+      const min = this.config.get('min') || this.data.getYMin();
+      const max = this.config.get('max') || this.data.getYMax();
       const domain = [min, max];
       if (this.isUserDefined()) return this.validateUserExtents(domain);
       if (this.isYExtents()) return domain;
@@ -169,10 +171,10 @@ export default function AxisScaleFactory(Private) {
     };
 
     getRange(length) {
-      if (this.axis.isHorizontal()) {
-        return !this.axis.inverted ? [0, length] : [length, 0];
+      if (this.config.isHorizontal()) {
+        return !this.config.get('inverted') ? [0, length] : [length, 0];
       } else {
-        return this.axis.inverted ? [0, length] : [length, 0];
+        return this.config.get('inverted') ? [0, length] : [length, 0];
       }
     };
 
@@ -208,8 +210,8 @@ export default function AxisScaleFactory(Private) {
       if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
       fnName = fnName || 'linear';
 
-      if (this.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
-      if (this.isOrdinal()) return d3.scale.ordinal();
+      if (this.config.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
+      if (this.config.isOrdinal()) return d3.scale.ordinal();
       if (typeof d3.scale[fnName] !== 'function') return this.throwCustomError('Axis.getScaleType: ' + fnName + ' is not a function');
 
       return d3.scale[fnName]();
@@ -223,19 +225,20 @@ export default function AxisScaleFactory(Private) {
      * @returns {D3.Scale.QuantitiveScale|*} D3 scale function
      */
     getScale(length) {
-      const scale = this.getScaleType(this.attr.scale);
+      const scale = this.getScaleType(this.config.get('vis._attr.scale'));
       const domain = this.getExtents();
       const range = this.getRange(length);
       this.scale = scale.domain(domain);
-      if (this.isOrdinal()) {
+      if (this.config.isOrdinal()) {
         this.scale.rangeBands(range, 0.1);
       } else {
         this.scale.range(range);
       }
 
-      if (!this.isUserDefined() && !this.isOrdinal() && !this.isTimeDomain()) this.scale.nice(); // round extents when not user defined
+      if (!this.isUserDefined() && !this.config.isOrdinal() && !this.config.isTimeDomain()) this.scale.nice(); // round extents when not user defined
       // Prevents bars from going off the chart when the y extents are within the domain range
-      if (this.axis._attr.type === 'histogram' && this.scale.clamp) this.scale.clamp(true);
+      // todo: make this work (its accessing chart config ... we only have axis config availible)
+      //if (this.axis._attr.type === 'histogram' && this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
 
