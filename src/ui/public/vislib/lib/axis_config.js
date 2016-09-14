@@ -65,6 +65,11 @@ export default function AxisConfigFactory() {
 
       this.elSelector = this.elSelector.replace('{pos}', this.position);
       this.rootEl = this.vis.el;
+
+      if (this.type === 'category') {
+        this.values = this.data.xValues();
+        this.ordered = this.data.get('ordered');
+      }
     };
 
     get(property) {
@@ -80,11 +85,11 @@ export default function AxisConfigFactory() {
     };
 
     isOrdinal() {
-      return !!this.data.xValues() && (!this.isTimeDomain());
+      return !!this.values && (!this.isTimeDomain());
     };
 
     isTimeDomain() {
-      return this.data.data.ordered && this.data.data.ordered.date;
+      return this.ordered && this.ordered.date;
     };
 
     isPercentage() {
