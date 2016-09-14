@@ -9,7 +9,6 @@ import scripts from './server/routes/api/scripts';
 import * as systemApi from './server/lib/system_api';
 
 const mkdirp = Promise.promisify(mkdirpNode);
-const readdir = Promise.promisify(fs.readdir);
 
 module.exports = function (kibana) {
   const kbnBaseUrl = '/app/kibana';

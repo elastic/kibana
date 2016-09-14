@@ -78,10 +78,6 @@ export default async (kbnServer, server, config) => {
     const uiSettings = server.uiSettings();
 
     return {
-  server.decorate('reply', 'renderApp', async function (app, acceptLanguages) {
-    const isElasticsearchPluginRed = server.plugins.elasticsearch.status.state === 'red';
-    const uiSettings = server.uiSettings();
-    const payload = {
       app: app,
       nav: uiExports.navLinks.inOrder,
       version: kbnServer.version,
@@ -102,13 +98,8 @@ export default async (kbnServer, server, config) => {
     };
   }
 
-  async function renderApp({ app, reply, includeUserProvidedConfig = true }) {
+  async function renderApp({ app, reply, acceptLanguages, includeUserProvidedConfig = true }) {
     try {
-    if (kibanaTranslations.length <= 0) {
-      const locale = getTranslationLocale(acceptLanguages, defaultLocale, server);
-      kibanaTranslations = await server.plugins.i18n.getRegisteredLocaleTranslations(locale);
-    }
-    const translations = await UiI18n.getLocaleTranslations(acceptLanguages, defaultLocale, server);
     let locale = UiI18n.getTranslationLocale(acceptLanguages, defaultLocale, server);
     let translations = await UiI18n.getLocaleTranslations(locale, server);
     if (locale !== defaultLocale) {
