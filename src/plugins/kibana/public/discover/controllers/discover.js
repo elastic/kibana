@@ -4,10 +4,10 @@ define(function (require) {
   const moment = require('moment');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const getSort = require('ui/doc_table/lib/get_sort');
-  const rison = require('ui/utils/rison');
 
   const dateMath = require('ui/utils/dateMath');
   const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
+  const StateProvider = require('ui/state_management/state');
 
   require('ui/doc_table');
   require('ui/visualize');
@@ -33,18 +33,25 @@ define(function (require) {
     template: require('plugins/kibana/discover/index.html'),
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, courier, config, $location) {
+      ip: function (Promise, courier, config, $location, Private) {
+        const State = Private(StateProvider);
         return courier.indexPatterns.getIds()
         .then(function (list) {
-          const stateRison = $location.search()._a;
-
-          let state;
-          try { state = rison.decode(stateRison); }
-          catch (e) { state = {}; }
+          /**
+           *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+           *  the load order of AppState conflicts with the load order of many other things
+           *  so in order to get the name of the index we should use, and to switch to the
+           *  default if necessary, we parse the appState with a temporary State object and
+           *  then destroy it immediatly after we're done
+           *
+           *  @type {State}
+           */
+          const state = new State('_a', {});
 
           const specified = !!state.index;
           const exists = _.contains(list, state.index);
           const id = exists ? state.index : config.get('defaultIndex');
+          state.destroy();
 
           return Promise.props({
             list: list,

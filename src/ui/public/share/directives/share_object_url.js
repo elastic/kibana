@@ -1,10 +1,13 @@
 const app = require('ui/modules').get('kibana');
 const Clipboard = require('clipboard');
+const unhashUrl = require('ui/state_management/state_hashing').unhashUrl;
+const getUnhashableStatesProvider = require('ui/state_management/state_hashing').getUnhashableStatesProvider;
 
 require('../styles/index.less');
 
 app.directive('shareObjectUrl', function (Private, Notifier) {
   const urlShortener = Private(require('../lib/url_shortener'));
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   return {
     restrict: 'E',
@@ -67,11 +70,14 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
       };
 
       $scope.getUrl = function () {
-        let url = $location.absUrl();
+        const urlWithHashes = $location.absUrl();
+        const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+
         if ($scope.shareAsEmbed) {
-          url = url.replace('?', '?embed=true&');
+          return urlWithStates.replace('?', '?embed=true&');
         }
-        return url;
+
+        return urlWithStates;
       };
 
       $scope.$watch('getUrl()', updateUrl);

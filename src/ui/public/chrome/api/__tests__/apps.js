@@ -152,8 +152,8 @@ describe('Chrome API :: apps', function () {
         expect(chrome.getLastUrlFor('app')).to.equal(null);
         chrome.setLastUrlFor('app', 'url');
         expect(chrome.getLastUrlFor('app')).to.equal('url');
-        expect(store._getKeys().length).to.equal(1);
-        expect(store._getValues().shift()).to.equal('url');
+        expect(store.getStubbedKeys().length).to.equal(1);
+        expect(store.getStubbedValues().shift()).to.equal('url');
       });
     });
   });
