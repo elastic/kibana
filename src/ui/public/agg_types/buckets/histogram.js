@@ -15,16 +15,7 @@ export default function HistogramAggDefinition(Private) {
   const NUM_BUCKETS = 50;
 
   function numberOfDigits(num) {
-    return (Math.trunc(num) + '').length;
-  }
-
-  function roundToNearest(num, roundDigit) {
-    if (roundDigit <= 0) {
-      return Math.round(num);
-    } else {
-      var transform = 10 * roundDigit;
-      return Math.round(num / transform) * transform;
-    }
+    return (Math.trunc(num).toString()).length;
   }
 
   function getInterval(agg) {
@@ -34,7 +25,7 @@ export default function HistogramAggDefinition(Private) {
       var min = 0;
       var max = 0;
       var key = agg.params.field.displayName;
-      _.flatten([queryFilter.getAppFilters()]).forEach(function (it) {
+      _.flatten([queryFilter.getAppFilters(), queryFilter.getGlobalFilters()]).forEach(function (it) {
         if (it.meta.key === key) {
           var filterMin = -1;
           var filterMax = -1;
@@ -52,8 +43,14 @@ export default function HistogramAggDefinition(Private) {
       if (found) {
         var range = max - min;
         interval = range / NUM_BUCKETS;
-        var numDigits = numberOfDigits(interval);
-        interval = roundToNearest(interval, numDigits - 1);
+        var digits = numberOfDigits(interval);
+        var roundPrecision = 0;
+        if (digits === 2) {
+          roundPrecision = -1;
+        } else if (digits > 2) {
+          roundPrecision = (digits - 2) * -1;
+        }
+        interval = _.round(interval, roundPrecision);
         if (interval < 1) interval = 1;
       }
     }
