@@ -2,7 +2,6 @@ import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/componen
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibAxisProvider from 'ui/vislib/lib/axis';
-import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
 import VislibLibAxisTitleProvider from 'ui/vislib/lib/axis_title';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
@@ -12,7 +11,6 @@ export default function ColumnHandler(Private) {
   const Handler = Private(VislibLibHandlerHandlerProvider);
   const Data = Private(VislibLibDataProvider);
   const Axis = Private(VislibLibAxisProvider);
-  const YAxis = Private(VislibLibYAxisProvider);
   const AxisTitle = Private(VislibLibAxisTitleProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
@@ -40,6 +38,7 @@ export default function ColumnHandler(Private) {
         axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
         chartTitle: new ChartTitle(vis.el),
         xAxis: new Axis({
+          type              : 'category',
           el                : vis.el,
           xValues           : data.xValues(),
           ordered           : data.get('ordered'),
@@ -48,7 +47,8 @@ export default function ColumnHandler(Private) {
           _attr             : vis._attr
         }),
         alerts: new Alerts(vis, data, opts.alerts),
-        yAxis: new YAxis({
+        yAxis: new Axis({
+          type : 'value',
           el   : vis.el,
           yMin : isUserDefinedYAxis ? vis._attr.yAxis.min : data.getYMin(),
           yMax : isUserDefinedYAxis ? vis._attr.yAxis.max : data.getYMax(),
@@ -56,7 +56,6 @@ export default function ColumnHandler(Private) {
           _attr: vis._attr
         })
       });
-
     };
   }
 

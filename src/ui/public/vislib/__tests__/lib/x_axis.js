@@ -93,6 +93,7 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     dataObj = new Data(data, {}, persistedState);
     xAxis = new Axis({
+      type: 'category',
       el: $('.x-axis-div')[0],
       xValues: dataObj.xValues(),
       ordered: dataObj.get('ordered'),
@@ -217,7 +218,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     });
 
     it('should create an xAxisFormatter function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xAxisFormatter)).to.be(true);
+      expect(_.isFunction(xAxis.axisFormatter)).to.be(true);
     });
   });
 
