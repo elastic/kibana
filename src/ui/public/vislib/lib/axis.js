@@ -45,10 +45,10 @@ export default function AxisFactory(Private) {
       const scale = this.scale.getScale(length);
       const position = this.config.get('position');
       return d3.svg.axis()
-        .scale(scale)
-        .tickFormat(this.tickFormat(this.domain))
-        .ticks(this.tickScale(length))
-        .orient(position);
+      .scale(scale)
+      .tickFormat(this.tickFormat(this.domain))
+      .ticks(this.tickScale(length))
+      .orient(position);
     }
 
     getScale() {
@@ -65,9 +65,9 @@ export default function AxisFactory(Private) {
 
     tickScale(length) {
       const yTickScale = d3.scale.linear()
-        .clamp(true)
-        .domain([20, 40, 1000])
-        .range([0, 3, 11]);
+      .clamp(true)
+      .domain([20, 40, 1000])
+      .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(length));
     }
@@ -96,8 +96,8 @@ export default function AxisFactory(Private) {
 
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.selectAll('.y-axis-spacer-block')
-            .append('div')
-            .attr('class', 'inner-spacer-block');
+          .append('div')
+          .attr('class', 'inner-spacer-block');
         }
 
         const height = visEl.select(`.axis-wrapper-${position}`).style('height');
@@ -132,16 +132,16 @@ export default function AxisFactory(Private) {
           self.updateXaxisHeight();
           if (position === 'top') {
             selection.select('g')
-              .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
+            .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
             selection.select('path')
-              .attr('transform', 'translate(1,0)');
+            .attr('transform', 'translate(1,0)');
           }
         } else {
           selection.attr('width', length + xAxisPadding);
           if (position === 'left') {
             const translateWidth = length + xAxisPadding - 2 - parseInt(style.lineWidth);
             selection.select('g')
-              .attr('transform', `translate(${translateWidth},${margin.top})`);
+            .attr('transform', `translate(${translateWidth},${margin.top})`);
           }
         }
       };
@@ -171,23 +171,23 @@ export default function AxisFactory(Private) {
 
           if (config.get('show')) {
             const svg = div.append('svg')
-              .attr('width', width)
-              .attr('height', height);
+            .attr('width', width)
+            .attr('height', height);
 
             svg.append('g')
-              .attr('class', `axis ${config.get('id')}`)
-              .call(axis);
+            .attr('class', `axis ${config.get('id')}`)
+            .call(axis);
 
             const container = svg.select('g.axis').node();
             if (container) {
               svg.select('path')
-                .style('stroke', style.color)
-                .style('stroke-width', style.lineWidth)
-                .style('stroke-opacity', style.opacity);
+              .style('stroke', style.color)
+              .style('stroke-width', style.lineWidth)
+              .style('stroke-opacity', style.opacity);
               svg.selectAll('line')
-                .style('stroke', style.tickColor)
-                .style('stroke-width', style.tickWidth)
-                .style('stroke-opacity', style.opacity);
+              .style('stroke', style.tickColor)
+              .style('stroke-width', style.tickWidth)
+              .style('stroke-opacity', style.opacity);
               // TODO: update to be depenent on position ...
               //.attr('x1', -parseInt(style.lineWidth) / 2)
               //.attr('x2', -parseInt(style.lineWidth) / 2 - parseInt(style.tickLength));
