@@ -17,7 +17,7 @@ define(function () {
       selection.each(function () {
         const div = d3.select(this);
 
-        div.call(setWidth, yAxis);
+        //div.call(setWidth, yAxis);
 
         div.selectAll('.y-axis-div')
         .append('div')
