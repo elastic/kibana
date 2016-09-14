@@ -65,6 +65,11 @@ export default function AxisConfigFactory() {
 
       this.elSelector = this.elSelector.replace('{pos}', this.position);
       this.rootEl = this.vis.el;
+
+      if (this.type === 'category') {
+        this.values = this.data.xValues();
+        this.ordered = this.data.data.ordered;
+      }
     };
 
     get(property) {
