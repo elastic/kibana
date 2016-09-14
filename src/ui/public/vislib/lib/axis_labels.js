@@ -20,7 +20,7 @@ export default function AxisLabelsFactory(Private) {
     constructor(config, scale) {
       super();
       this.config = config;
-      this.scale = scale;
+      this.axisScale = scale;
 
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
       if (this.config.isHorizontal() && this.config.isOrdinal()) {
@@ -117,7 +117,7 @@ export default function AxisLabelsFactory(Private) {
         selection.selectAll('.tick text')
         .text(function (d) {
           par = d3.select(this.parentNode).node();
-          myX = self.scale.scale(d);
+          myX = self.axisScale.scale(d);
           myWidth = par.getBBox().width * padding;
           halfWidth = myWidth / 2;
           maxW = $(config.get('rootEl')).find(config.get('elSelector')).width();
