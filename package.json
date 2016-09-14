@@ -180,7 +180,7 @@
     "grunt-cli": "0.1.13",
     "grunt-contrib-clean": "1.0.0",
     "grunt-contrib-copy": "0.8.1",
-    "grunt-esvm": "3.2.5",
+    "grunt-esvm": "3.2.6",
     "grunt-karma": "2.0.0",
     "grunt-run": "0.6.0",
     "grunt-simple-mocha": "0.4.0",
