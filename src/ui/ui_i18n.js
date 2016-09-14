@@ -83,7 +83,7 @@ function getTranslationLocaleBestCaseMatch(acceptLanguages, registeredLocales, d
     localeStr = language.code;
     for (let regIndx = 0; regIndx < regLangsLen; regIndx++) {
       const locale = registeredLocales[regIndx];
-      if (locale.match('^' + locale)) {
+      if (locale.match('^' + localeStr)) {
         return locale;
       }
     }

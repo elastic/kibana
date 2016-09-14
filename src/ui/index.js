@@ -41,7 +41,12 @@ export default async (kbnServer, server, config) => {
     if (bundle) bundles.add(bundle);
   }
 
-  const defaultLocale = config.get('i18n.locale');
+  let defaultLocale = '';
+  try {
+    defaultLocale = config.get('i18n.locale');
+  } catch (e) {
+    defaultLocale = 'en';
+  }
 
   // render all views from the ui/views directory
   server.setupViews(resolve(__dirname, 'views'));
