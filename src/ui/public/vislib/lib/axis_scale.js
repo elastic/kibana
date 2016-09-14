@@ -26,7 +26,7 @@ export default function AxisScaleFactory(Private) {
 
       if (this.config.get('type') === 'category') {
         this.values = data.xValues();
-        this.ordered = data.data.ordered;
+        this.ordered = data.get('ordered');
       }
     };
 
