@@ -9,15 +9,6 @@ export default function AxisScaleFactory(Private) {
 
   const ErrorHandler = Private(ErrorHandlerProvider);
 
-  /**
-   * Appends axis title(s) to the visualization
-   *
-   * @class AxisScale
-   * @constructor
-   * @param el {HTMLElement} DOM element
-   * @param xTitle {String} X-axis title
-   * @param yTitle {String} Y-axis title
-   */
   class AxisScale extends ErrorHandler {
     constructor(config, data) {
       super();
@@ -63,14 +54,6 @@ export default function AxisScaleFactory(Private) {
       });
     };
 
-    /**
-     * Returns D3 time domain
-     *
-     * @method getTimeDomain
-     * @param scale {Function} D3 scale function
-     * @param data {Array}
-     * @returns {*} D3 scale function
-     */
     getTimeDomain(data) {
       return [this.minExtent(data), this.maxExtent(data)];
     };
@@ -83,11 +66,6 @@ export default function AxisScaleFactory(Private) {
       return this.calculateExtent(data || this.values, 'max');
     };
 
-    /**
-     *
-     * @param data
-     * @param extent
-     */
     calculateExtent(data, extent) {
       const ordered = this.ordered;
       const opts = [ordered[extent]];
@@ -105,36 +83,14 @@ export default function AxisScaleFactory(Private) {
       }, []));
     };
 
-    /**
-     * Add the interval to a point on the x axis,
-     * this properly adds dates if needed.
-     *
-     * @param {number} x - a value on the x-axis
-     * @returns {number} - x + the ordered interval
-     */
     addInterval(x) {
       return this.modByInterval(x, +1);
     };
 
-    /**
-     * Subtract the interval to a point on the x axis,
-     * this properly subtracts dates if needed.
-     *
-     * @param {number} x - a value on the x-axis
-     * @returns {number} - x - the ordered interval
-     */
     subtractInterval(x) {
       return this.modByInterval(x, -1);
     };
 
-    /**
-     * Modify the x value by n intervals, properly
-     * handling dates if needed.
-     *
-     * @param {number} x - a value on the x-axis
-     * @param {number} n - the number of intervals
-     * @returns {number} - x + n intervals
-     */
     modByInterval(x, n) {
       const ordered = this.ordered;
       if (!ordered) return x;
@@ -186,26 +142,11 @@ export default function AxisScaleFactory(Private) {
       throw new errors.InvalidLogScaleValues();
     };
 
-    /**
-     * Return the domain for log scale, i.e. the extent of the log scale.
-     * Log scales must begin at 1 since the log(0) = -Infinity
-     *
-     * @param scale
-     * @param yMin
-     * @param yMax
-     * @returns {*[]}
-     */
     logDomain(min, max) {
       if (min < 0 || max < 0) return this.throwLogScaleValuesError();
       return [1, max];
     };
 
-    /**
-     * Returns the appropriate D3 scale
-     *
-     * @param fnName {String} D3 scale
-     * @returns {*}
-     */
     getScaleType(fnName) {
       if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
       fnName = fnName || 'linear';
@@ -217,13 +158,6 @@ export default function AxisScaleFactory(Private) {
       return d3.scale[fnName]();
     };
 
-    /**
-     * Creates the d3 y scale function
-     *
-     * @method getscale
-     * @param length {Number} DOM Element height
-     * @returns {D3.Scale.QuantitiveScale|*} D3 scale function
-     */
     getScale(length) {
       const scale = this.getScaleType(this.config.get('vis._attr.scale'));
       const domain = this.getExtents();
