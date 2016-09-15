@@ -89,9 +89,11 @@ function createData(seriesData) {
         el: node,
         _attr: {
           margin: { top: 0, right: 0, bottom: 0, left: 0 },
+          type: 'histogram',
           yAxis: {}
         }
-      }
+      },
+      data: dataObj
     }));
   };
 
@@ -117,7 +119,6 @@ describe('Vislib yAxis Class Test Suite', function () {
   describe('render Method', function () {
     beforeEach(function () {
       createData(defaultGraphData);
-      expect(d3.select(yAxis.el).selectAll('.y-axis-div')).to.have.length(1);
       yAxis.render();
     });
 
@@ -155,7 +156,8 @@ describe('Vislib yAxis Class Test Suite', function () {
     describe('API', function () {
       beforeEach(function () {
         createData(defaultGraphData);
-        yScale = yAxis.getScale(height);
+        yAxis.getAxis(height);
+        yScale = yAxis.getScale();
       });
 
       it('should return a function', function () {
@@ -163,25 +165,12 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
     });
 
-    describe('should return log values', function () {
-      let domain;
-      let extents;
-
-      it('should return 1', function () {
-        yAxis._attr.scale = 'log';
-        extents = [0, 400];
-        domain = yAxis.getExtents(extents);
-
-        // Log scales have a yMin value of 1
-        expect(domain[0]).to.be(1);
-      });
-    });
-
     describe('positive values', function () {
       beforeEach(function () {
         graphData = defaultGraphData;
         createData(graphData);
-        yScale = yAxis.getScale(height);
+        yAxis.getAxis(height);
+        yScale = yAxis.getScale();
       });
 
 
@@ -201,7 +190,8 @@ describe('Vislib yAxis Class Test Suite', function () {
           [ -22, -8, -30, -4, 0, 0, -3, -22, -14, -24 ]
         ];
         createData(graphData);
-        yScale = yAxis.getScale(height);
+        yAxis.getAxis(height);
+        yScale = yAxis.getScale();
       });
 
       it('should have domain between min value and 0', function () {
@@ -220,7 +210,8 @@ describe('Vislib yAxis Class Test Suite', function () {
           [ 22, 8, -30, -4, 0, 0, 3, -22, 14, 24 ]
         ];
         createData(graphData);
-        yScale = yAxis.getScale(height);
+        yAxis.getAxis(height);
+        yScale = yAxis.getScale();
       });
 
       it('should have domain between min and max values', function () {
@@ -296,16 +287,16 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     it('should return a function', function () {
       fnNames.forEach(function (fnName) {
-        expect(yAxis.getD3Scale(fnName)).to.be.a(Function);
+        expect(yAxis.axisScale.getD3Scale(fnName)).to.be.a(Function);
       });
 
       // if no value is provided to the function, scale should default to a linear scale
-      expect(yAxis.getD3Scale()).to.be.a(Function);
+      expect(yAxis.axisScale.getD3Scale()).to.be.a(Function);
     });
 
     it('should throw an error if function name is undefined', function () {
       expect(function () {
-        yAxis.getD3Scale('square');
+        yAxis.axisScale.getD3Scale('square');
       }).to.throwError();
     });
   });
@@ -313,18 +304,18 @@ describe('Vislib yAxis Class Test Suite', function () {
   describe('_logDomain method', function () {
     it('should throw an error', function () {
       expect(function () {
-        yAxis._logDomain(-10, -5);
+        yAxis.axisScale.logDomain(-10, -5);
       }).to.throwError();
       expect(function () {
-        yAxis._logDomain(-10, 5);
+        yAxis.axisScale.logDomain(-10, 5);
       }).to.throwError();
       expect(function () {
-        yAxis._logDomain(0, -5);
+        yAxis.axisScale.logDomain(0, -5);
       }).to.throwError();
     });
 
     it('should return a yMin value of 1', function () {
-      const yMin = yAxis._logDomain(0, 200)[0];
+      const yMin = yAxis.axisScale.logDomain(0, 200)[0];
       expect(yMin).to.be(1);
     });
   });
@@ -399,14 +390,18 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     it('returns the yAxisFormatter when passed', function () {
       const yAxis = buildYAxis({
-        yAxisFormatter: formatter
+        labels: {
+          axisFormatter: formatter
+        }
       });
       expect(yAxis.tickFormat()).to.be(formatter);
     });
 
     it('returns a percentage formatter when the vis is in percentage mode', function () {
       const yAxis = buildYAxis({
-        yAxisFormatter: formatter,
+        labels: {
+          axisFormatter: formatter
+        },
         _attr: {
           mode: 'percentage'
         }
