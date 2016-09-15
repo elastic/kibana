@@ -1,15 +1,10 @@
 import d3 from 'd3';
-import $ from 'jquery';
 import _ from 'lodash';
 import moment from 'moment';
 import errors from 'ui/errors';
 
-import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisScaleFactory(Private) {
-
-  const ErrorHandler = Private(ErrorHandlerProvider);
-
-  class AxisScale extends ErrorHandler {
+  class AxisScale {
     constructor(config, data) {
       super();
       this.config = config;
