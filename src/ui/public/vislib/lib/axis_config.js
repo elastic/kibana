@@ -24,7 +24,7 @@ export default function AxisConfigFactory() {
       tickLength: '6px'
     },
     labels: {
-      axisFormatter: null, // TODO: create default axis formatter
+      axisFormatter: d => d,
       show: true,
       rotate: 0,
       rotateAnchor: 'center',
