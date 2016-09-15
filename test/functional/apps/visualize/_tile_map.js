@@ -51,7 +51,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
   bdd.describe('tile map chart', function indexPatternCreation() {
 
-    bdd.it('should show correct tile map data on default zoom level', function pageHeader() {
+    bdd.it('should show correct tile map data on default zoom level', function () {
       var expectedTableData = [ 'dn 1,429', 'dp 1,418', '9y 1,215', '9z 1,099', 'dr 1,076',
         'dj 982', '9v 938', '9q 722', '9w 475', 'cb 457', 'c2 453', '9x 420', 'dq 399',
         '9r 396', '9t 274', 'c8 271', 'dh 214', 'b6 207', 'bd 206', 'b7 167', 'f0 141',
@@ -74,7 +74,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     });
 
 
-    bdd.it('should zoom out to level 1 from default level 2', function pageHeader() {
+    bdd.it('should zoom out to level 1 from default level 2', function () {
       var expectedPrecision2Circles =  [ { color: '#750000', radius: 48 },
         { color: '#750000', radius: 48 },
         { color: '#750000', radius: 44 },
@@ -142,7 +142,7 @@ bdd.describe('visualize app', function describeIndexTests() {
       });
     });
 
-    bdd.it('"Fit data bounds" should zoom to level 3', function pageHeader() {
+    bdd.it('Fit data bounds should zoom to level 3', function () {
       var expectedPrecision2ZoomCircles =   [ { color: '#750000', radius: 192 },
         { color: '#750000', radius: 191 },
         { color: '#750000', radius: 177 },
@@ -205,7 +205,7 @@ bdd.describe('visualize app', function describeIndexTests() {
     ** check some data after we save the viz, then zoom in and check that the data
     ** changed, then open the saved viz and check that it's back to the original data.
     */
-    bdd.it('should save with zoom level and load, take screenshot', function pageHeader() {
+    bdd.it('should save with zoom level and load, take screenshot', function () {
       var vizName1 = 'Visualization TileMap';
       var expectedTableData =  [ 'dr4 127', 'dr7 92', '9q5 91', '9qc 89', 'drk 87',
         'dps 82', 'dph 82', 'dp3 79', 'dpe 78', 'dp8 77'
@@ -285,7 +285,7 @@ bdd.describe('visualize app', function describeIndexTests() {
 
 
 
-    bdd.it('should zoom in to level 10', function pageHeader() {
+    bdd.it('should zoom in to level 10', function () {
       // 6
       return PageObjects.visualize.clickMapZoomIn()
       .then(function () {

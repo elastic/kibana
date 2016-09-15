@@ -11,7 +11,7 @@ import VislibComponentsZeroInjectionZeroFilledArrayProvider from 'ui/vislib/comp
 import VislibComponentsZeroInjectionZeroFillDataArrayProvider from 'ui/vislib/components/zero_injection/zero_fill_data_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
-  let dateHistogramRows = {
+  const dateHistogramRows = {
     'rows': [
       {
         'label': 'Top 5 @tags: success',
@@ -161,7 +161,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     ]
   };
 
-  let seriesData = {
+  const seriesData = {
     series: [
       {
         label: '200',
@@ -176,7 +176,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     ]
   };
 
-  let multiSeriesData = {
+  const multiSeriesData = {
     series: [
       {
         label: '200',
@@ -205,7 +205,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     ]
   };
 
-  let multiSeriesNumberedData = {
+  const multiSeriesNumberedData = {
     series: [
       {
         label: '200',
@@ -234,24 +234,24 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     ]
   };
 
-  let childrenObject = {
+  const childrenObject = {
     children: []
   };
-  let seriesObject = {
+  const seriesObject = {
     series: []
   };
-  let rowsObject = {
+  const rowsObject = {
     rows: []
   };
-  let columnsObject = {
+  const columnsObject = {
     columns: []
   };
-  let emptyObject = {};
-  let str = 'string';
-  let number = 24;
-  let boolean = false;
-  let nullValue = null;
-  let emptyArray = [];
+  const emptyObject = {};
+  const str = 'string';
+  const number = 24;
+  const boolean = false;
+  const nullValue = null;
+  const emptyArray = [];
   let notAValue;
 
   describe('Zero Injection (main)', function () {
@@ -497,8 +497,8 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
   describe('Zero Filled Array', function () {
     let createZeroArray;
-    let arr1 = [1, 2, 3, 4, 5];
-    let arr2 = ['1', '2', '3', '4', '5'];
+    const arr1 = [1, 2, 3, 4, 5];
+    const arr2 = ['1', '2', '3', '4', '5'];
     let results1;
     let results2;
 
@@ -578,10 +578,10 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
   describe('Zero Filled Data Array', function () {
     let zeroFillArray;
-    let xValueArr = [1, 2, 3, 4, 5];
+    const xValueArr = [1, 2, 3, 4, 5];
     let createZeroArray;
     let arr1;
-    let arr2 = [ {x: 3, y: 834} ];
+    const arr2 = [ {x: 3, y: 834} ];
     let results;
 
     beforeEach(ngMock.module('kibana'));
@@ -659,7 +659,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return ordered x values', function () {
-      let values = results.rows[0].series[0].values;
+      const values = results.rows[0].series[0].values;
       expect(values[0].x).to.be.lessThan(values[1].x);
       expect(values[1].x).to.be.lessThan(values[2].x);
       expect(values[2].x).to.be.lessThan(values[3].x);

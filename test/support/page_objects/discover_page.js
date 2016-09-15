@@ -51,6 +51,9 @@ export default class DiscoverPage {
     return this.clickLoadSavedSearchButton()
     .then(() => {
       this.findTimeout.findByLinkText(searchName).click();
+    })
+    .then(() => {
+      return PageObjects.header.getSpinnerDone();
     });
   }
 
@@ -79,8 +82,11 @@ export default class DiscoverPage {
   }
 
   getBarChartData() {
-    return this.findTimeout
-    .findAllByCssSelector('rect[data-label="Count"]')
+    return PageObjects.header.getSpinnerDone()
+    .then(() => {
+      return this.findTimeout
+      .findAllByCssSelector('rect[data-label="Count"]');
+    })
     .then(function (chartData) {
 
       function getChartData(chart) {
@@ -128,13 +134,19 @@ export default class DiscoverPage {
       return this.findTimeout
       .findByCssSelector('option[label="' + interval + '"]')
       .click();
+    })
+    .then(() => {
+      return PageObjects.header.getSpinnerDone();
     });
   }
 
   getHitCount() {
-    return this.findTimeout
-    .findByCssSelector('strong.discover-info-hits')
-    .getVisibleText();
+    return PageObjects.header.getSpinnerDone()
+    .then(() => {
+      return this.findTimeout
+      .findByCssSelector('strong.discover-info-hits')
+      .getVisibleText();
+    });
   }
 
   query(queryString) {
@@ -146,6 +158,9 @@ export default class DiscoverPage {
       return this.findTimeout
       .findByCssSelector('button[aria-label="Search"]')
       .click();
+    })
+    .then(() => {
+      return PageObjects.header.getSpinnerDone();
     });
   }
 

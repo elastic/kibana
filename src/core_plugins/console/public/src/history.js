@@ -1,7 +1,6 @@
 const $ = require('jquery');
 const { uniq } = require('lodash');
 const storage = require('./storage');
-const chrome = require('ui/chrome');
 
 const history = module.exports = {
   restoreFromHistory() {

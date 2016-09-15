@@ -5,6 +5,8 @@ import fs from 'fs';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';
+import versionCheckMixin from './version_check';
+
 module.exports = async function (kbnServer, server, config) {
 
 
@@ -131,6 +133,8 @@ module.exports = async function (kbnServer, server, config) {
       }
     }
   });
+
+  kbnServer.mixin(versionCheckMixin);
 
   return kbnServer.mixin(require('./xsrf'));
 };

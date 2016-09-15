@@ -25,6 +25,7 @@ uiModules.get('apps/management')
       $scope.perPage = 25;
       $scope.columns = [
         { title: 'name' },
+        { title: 'lang' },
         { title: 'script' },
         { title: 'format' },
         { title: 'controls', sortable: false }
@@ -46,6 +47,7 @@ uiModules.get('apps/management')
 
           return [
             _.escape(field.name),
+            _.escape(field.lang),
             _.escape(field.script),
             _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
             {

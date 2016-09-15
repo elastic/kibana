@@ -49,7 +49,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
         return PageObjects.settings.removeIndexPattern();
       });
 
-      bdd.it('should sort ascending', function pageHeader() {
+      bdd.it('should sort ascending', function () {
         return PageObjects.settings.sortBy(col.heading)
         .then(function getText() {
           return col.selector();
@@ -60,7 +60,7 @@ bdd.describe('index result field sort', function describeIndexTests() {
         });
       });
 
-      bdd.it('should sort descending', function pageHeader() {
+      bdd.it('should sort descending', function () {
         return PageObjects.settings.sortBy(col.heading)
         .then(function sortAgain() {
           return PageObjects.settings.sortBy(col.heading);

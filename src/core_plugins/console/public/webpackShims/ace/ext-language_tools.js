@@ -28,7 +28,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-ace.define('ace/ext/language_tools', ['require', 'exports', 'module' , 'ace/snippets', 'ace/autocomplete', 'ace/config', 'ace/autocomplete/text_completer', 'ace/editor'], function(require, exports, module) {
+consoleAce.define('ace/ext/language_tools', ['require', 'exports', 'module' , 'ace/snippets', 'ace/autocomplete', 'ace/config', 'ace/autocomplete/text_completer', 'ace/editor'], function(require, exports, module) {
 
 
 var snippetManager = require("../snippets").snippetManager;
@@ -144,7 +144,7 @@ require("../config").defineOptions(Editor.prototype, "editor", {
 
 });
 
-ace.define('ace/snippets', ['require', 'exports', 'module' , 'ace/lib/lang', 'ace/range', 'ace/keyboard/hash_handler', 'ace/tokenizer', 'ace/lib/dom'], function(require, exports, module) {
+consoleAce.define('ace/snippets', ['require', 'exports', 'module' , 'ace/lib/lang', 'ace/range', 'ace/keyboard/hash_handler', 'ace/tokenizer', 'ace/lib/dom'], function(require, exports, module) {
 
 var lang = require("./lib/lang")
 var Range = require("./range").Range
@@ -959,7 +959,7 @@ exports.snippetManager = new SnippetManager();
 
 });
 
-ace.define('ace/autocomplete', ['require', 'exports', 'module' , 'ace/keyboard/hash_handler', 'ace/autocomplete/popup', 'ace/autocomplete/util', 'ace/lib/event', 'ace/lib/lang', 'ace/snippets'], function(require, exports, module) {
+consoleAce.define('ace/autocomplete', ['require', 'exports', 'module' , 'ace/keyboard/hash_handler', 'ace/autocomplete/popup', 'ace/autocomplete/util', 'ace/lib/event', 'ace/lib/lang', 'ace/snippets'], function(require, exports, module) {
 
 
 var HashHandler = require("./keyboard/hash_handler").HashHandler;
@@ -1276,7 +1276,7 @@ exports.FilteredList = FilteredList;
 
 });
 
-ace.define('ace/autocomplete/popup', ['require', 'exports', 'module' , 'ace/edit_session', 'ace/virtual_renderer', 'ace/editor', 'ace/range', 'ace/lib/event', 'ace/lib/lang', 'ace/lib/dom'], function(require, exports, module) {
+consoleAce.define('ace/autocomplete/popup', ['require', 'exports', 'module' , 'ace/edit_session', 'ace/virtual_renderer', 'ace/editor', 'ace/range', 'ace/lib/event', 'ace/lib/lang', 'ace/lib/dom'], function(require, exports, module) {
 
 
 var EditSession = require("../edit_session").EditSession;
@@ -1575,7 +1575,7 @@ exports.AcePopup = AcePopup;
 
 });
 
-ace.define('ace/autocomplete/util', ['require', 'exports', 'module' ], function(require, exports, module) {
+consoleAce.define('ace/autocomplete/util', ['require', 'exports', 'module' ], function(require, exports, module) {
 
 
 exports.parForEach = function(array, fn, callback) {
@@ -1620,7 +1620,7 @@ exports.retrieveFollowingIdentifier = function(text, pos, regex) {
 
 });
 
-ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module' , 'ace/range'], function(require, exports, module) {
+consoleAce.define('ace/autocomplete/text_completer', ['require', 'exports', 'module' , 'ace/range'], function(require, exports, module) {
     var Range = require("ace/range").Range;
     
     var splitRegex = /[^a-zA-Z_0-9\$\-]+/;
