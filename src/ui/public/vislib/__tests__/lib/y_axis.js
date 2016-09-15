@@ -5,7 +5,7 @@ import expect from 'expect.js';
 import $ from 'jquery';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-import VislibLibYAxisProvider from 'ui/vislib/lib/y_axis';
+import VislibLibYAxisProvider from 'ui/vislib/lib/axis';
 
 let YAxis;
 let Data;
