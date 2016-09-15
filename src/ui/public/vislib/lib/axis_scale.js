@@ -35,7 +35,7 @@ export default function AxisScaleFactory(Private) {
     };
 
     getScaleType() {
-      return this.config.get('scale');
+      return this.config.get('scale.type');
     };
 
     validateUserExtents(domain) {
@@ -141,7 +141,7 @@ export default function AxisScaleFactory(Private) {
       return [1, max];
     };
 
-    getScaleType(fnName) {
+    getD3Scale(fnName) {
       if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
       fnName = fnName || 'linear';
 
@@ -154,7 +154,7 @@ export default function AxisScaleFactory(Private) {
 
     getScale(length) {
       const config = this.config;
-      const scale = this.getScaleType(this.config.get('vis._attr.scale'));
+      const scale = this.getD3Scale(this.getScaleType());
       const domain = this.getExtents();
       const range = this.getRange(length);
       this.scale = scale.domain(domain);
