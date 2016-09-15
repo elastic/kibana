@@ -4,7 +4,6 @@ import _ from 'lodash';
 export default function AxisLabelsFactory(Private) {
   class AxisLabels {
     constructor(config, scale) {
-      super();
       this.config = config;
       this.axisScale = scale;
 
