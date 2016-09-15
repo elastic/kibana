@@ -4,6 +4,8 @@
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
 
+[[breaking-changes-5.0]]
+=== Breaking changes in 5.0
 * {k4pull}8013[Pull Request 8013]: Kibana binds to localhost by default
 * {k4pull}7855[Pull Request 7855]: Markdown headers require a space between the final hash and title
 * {k4pull}7308[Pull Request 7308]: Debian and rpm packages install assets to `/usr/share/kibana`, and configuration to `/etc/kibana`
