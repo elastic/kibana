@@ -182,7 +182,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          const yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
 
           expect(yAxis.domain[0]).to.not.be(undefined);
           expect(yAxis.domain[1]).to.not.be(undefined);
@@ -191,7 +191,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          const yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
