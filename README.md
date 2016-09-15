@@ -22,17 +22,19 @@ Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/bl
 
 ## Version compatibility with Elasticsearch
 
-Ideally, you should be running Elasticsearch and Kibana with matching version numbers (💚 in the table below). If your Elasticsearch has an older version number or a newer _major_ number than Kibana, then Kibana will fail to run (🚫). If Elasticsearch has a newer minor or patch number than Kibana, then the Kibana Server will log a warning (⚠️).
+Ideally, you should be running Elasticsearch and Kibana with matching version numbers. If your Elasticsearch has an older version number or a newer _major_ number than Kibana, then Kibana will fail to run. If Elasticsearch has a newer minor or patch number than Kibana, then the Kibana Server will log a warning.
 
-| Kibana version | ES version | Outcome | Description |
-| -------------- | ---------- | ------- | ----------- |
-| 6.1.2          | 6.1.2      | 💚      | Versions are the same. |
-| 6.1.2          | 6.1.5      | ⚠️      | ES patch number is newer. |
-| 6.1.2          | 6.5.0      | ⚠️      | ES minor number is newer. |
-| 6.1.2          | 7.0.0      | 🚫      | ES major number is newer. |
-| 6.1.2          | 6.1.0      | 🚫      | ES patch number is older. |
-| 6.1.2          | 6.0.0      | 🚫      | ES minor number is older. |
-| 6.1.2          | 5.0.0      | 🚫      | ES major number is older. |
+_Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
+
+| Situation                 | Example Kibana version     | Example ES version | Outcome |
+| ------------------------- | -------------------------- |------------------- | ------- |
+| Versions are the same.    | 5.1.2                      | 5.1.2              | 💚 OK      |
+| ES patch number is newer. | 5.1.__2__                  | 5.1.__5__          | ⚠️ Logged warning      |
+| ES minor number is newer. | 5.__1__.2                  | 5.__5__.0          | ⚠️ Logged warning      |
+| ES major number is newer. | __5__.1.2                  | __6__.0.0          | 🚫 Fatal error      |
+| ES patch number is older. | 5.1.__2__                  | 5.1.__0__          | 🚫 Fatal error      |
+| ES minor number is older. | 5.__1__.2                  | 5.__0__.0          | 🚫 Fatal error      |
+| ES major number is older. | __5__.1.2                  | __4__.0.0          | 🚫 Fatal error      |
 
 ## Quick Start
 
