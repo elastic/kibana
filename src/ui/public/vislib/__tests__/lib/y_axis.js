@@ -78,14 +78,19 @@ function createData(seriesData) {
 
   buildYAxis = function (params) {
     return new YAxis(_.merge({}, params, {
-      el: node,
-      yMin: dataObj.getYMin(),
-      yMax: dataObj.getYMax(),
-      _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      type: 'value',
+      scale: {
+        min: dataObj.getYMin(),
+        max: dataObj.getYMax(),
         defaultYMin: true,
         setYExtents: false,
-        yAxis: {}
+      },
+      vis: {
+        el: node,
+        _attr: {
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+          yAxis: {}
+        }
       }
     }));
   };
@@ -150,7 +155,7 @@ describe('Vislib yAxis Class Test Suite', function () {
     describe('API', function () {
       beforeEach(function () {
         createData(defaultGraphData);
-        yScale = yAxis.getYScale(height);
+        yScale = yAxis.getScale(height);
       });
 
       it('should return a function', function () {
@@ -165,7 +170,7 @@ describe('Vislib yAxis Class Test Suite', function () {
       it('should return 1', function () {
         yAxis._attr.scale = 'log';
         extents = [0, 400];
-        domain = yAxis._getExtents(extents);
+        domain = yAxis.getExtents(extents);
 
         // Log scales have a yMin value of 1
         expect(domain[0]).to.be(1);
@@ -176,7 +181,7 @@ describe('Vislib yAxis Class Test Suite', function () {
       beforeEach(function () {
         graphData = defaultGraphData;
         createData(graphData);
-        yScale = yAxis.getYScale(height);
+        yScale = yAxis.getScale(height);
       });
 
 
@@ -196,7 +201,7 @@ describe('Vislib yAxis Class Test Suite', function () {
           [ -22, -8, -30, -4, 0, 0, -3, -22, -14, -24 ]
         ];
         createData(graphData);
-        yScale = yAxis.getYScale(height);
+        yScale = yAxis.getScale(height);
       });
 
       it('should have domain between min value and 0', function () {
@@ -215,7 +220,7 @@ describe('Vislib yAxis Class Test Suite', function () {
           [ 22, 8, -30, -4, 0, 0, 3, -22, 14, 24 ]
         ];
         createData(graphData);
-        yScale = yAxis.getYScale(height);
+        yScale = yAxis.getScale(height);
       });
 
       it('should have domain between min and max values', function () {
@@ -291,16 +296,16 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     it('should return a function', function () {
       fnNames.forEach(function (fnName) {
-        expect(yAxis._getScaleType(fnName)).to.be.a(Function);
+        expect(yAxis.getD3Scale(fnName)).to.be.a(Function);
       });
 
       // if no value is provided to the function, scale should default to a linear scale
-      expect(yAxis._getScaleType()).to.be.a(Function);
+      expect(yAxis.getD3Scale()).to.be.a(Function);
     });
 
     it('should throw an error if function name is undefined', function () {
       expect(function () {
-        yAxis._getScaleType('square');
+        yAxis.getD3Scale('square');
       }).to.throwError();
     });
   });
@@ -332,31 +337,31 @@ describe('Vislib yAxis Class Test Suite', function () {
       createData(defaultGraphData);
       mode = yAxis._attr.mode;
       yMax = yAxis.yMax;
-      yScale = yAxis.getYScale;
+      yScale = yAxis.getScale;
     });
 
     afterEach(function () {
       yAxis._attr.mode = mode;
       yAxis.yMax = yMax;
-      yAxis.getYScale = yScale;
+      yAxis.getScale = yScale;
     });
 
     it('should use percentage format for percentages', function () {
       yAxis._attr.mode = 'percentage';
-      const tickFormat = yAxis.getYAxis().tickFormat();
+      const tickFormat = yAxis.getAxis().tickFormat();
       expect(tickFormat(1)).to.be('100%');
     });
 
     it('should use decimal format for small values', function () {
       yAxis.yMax = 1;
-      const tickFormat = yAxis.getYAxis().tickFormat();
+      const tickFormat = yAxis.getAxis().tickFormat();
       expect(tickFormat(0.8)).to.be('0.8');
     });
 
     it('should throw an error if yScale is NaN', function () {
-      yAxis.getYScale = function () { return NaN; };
+      yAxis.getScale = function () { return NaN; };
       expect(function () {
-        yAxis.getYAxis();
+        yAxis.getAxis();
       }).to.throwError();
     });
   });
