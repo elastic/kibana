@@ -3,7 +3,6 @@ import template from 'plugins/kibana/management/sections/indices/filebeat/direct
 import IngestProvider from 'ui/ingest';
 import 'plugins/kibana/management/sections/indices/add_data_steps/pattern_review_step';
 import 'plugins/kibana/management/sections/indices/add_data_steps/paste_samples_step';
-import 'plugins/kibana/management/sections/indices/add_data_steps/pipeline_setup';
 import 'plugins/kibana/management/sections/indices/add_data_steps/install_filebeat_step';
 import '../../styles/_add_data_wizard.less';
 
