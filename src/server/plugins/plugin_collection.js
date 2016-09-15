@@ -2,10 +2,22 @@
 import PluginApi from './plugin_api';
 import { inspect } from 'util';
 import { get, indexBy } from 'lodash';
+import toPath from 'lodash/internal/toPath';
 import Collection from '../../utils/collection';
 
 let byIdCache = Symbol('byIdCache');
 let pluginApis = Symbol('pluginApis');
+
+async function addPluginConfig(pluginCollection, plugin) {
+  const configSchema = await plugin.readConfigSchema();
+  let { config } = pluginCollection.kbnServer;
+  config.extendSchema(plugin.configPrefix, configSchema);
+}
+
+function removePluginConfig(pluginCollection, plugin) {
+  let { config } = pluginCollection.kbnServer;
+  config.removeSchema(plugin.configPrefix);
+}
 
 module.exports = class Plugins extends Collection {
 
@@ -27,19 +39,24 @@ module.exports = class Plugins extends Collection {
     // clear the byIdCache
     this[byIdCache] = null;
 
-    for (let product of output) {
-
-      if (product instanceof api.Plugin) {
-        let plugin = product;
-        this.add(plugin);
-
-        let enabled = await plugin.readConfig();
-        if (!enabled) this.delete(plugin);
-        continue;
+    for (let plugin of output) {
+      if (!plugin instanceof api.Plugin) {
+        throw new TypeError('unexpected plugin export ' + inspect(plugin));
       }
 
-      throw new TypeError('unexpected plugin export ' + inspect(product));
+      await this.add(plugin);
+      if (!plugin.enabled) this.delete(plugin);
     }
+  }
+
+  async add(plugin) {
+    await addPluginConfig(this, plugin);
+    super.add(plugin);
+  }
+
+  delete(plugin) {
+    removePluginConfig(this, plugin);
+    super.delete(plugin);
   }
 
   get byId() {
