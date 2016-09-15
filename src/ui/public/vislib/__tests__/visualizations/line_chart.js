@@ -132,16 +132,16 @@ describe('Vislib Line Chart', function () {
 
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
-            const yAxis = chart.handler.yAxis;
-
-            expect(yAxis.domain[0]).to.not.be(undefined);
-            expect(yAxis.domain[1]).to.not.be(undefined);
+            const yAxis = chart.handler.valueAxes[0];
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.not.be(undefined);
+            expect(domain[1]).to.not.be(undefined);
           });
         });
 
         it('should render a zero axis line', function () {
           vis.handler.charts.forEach(function (chart) {
-            const yAxis = chart.handler.yAxis;
+            const yAxis = chart.handler.valueAxes[0];
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -173,11 +173,11 @@ describe('Vislib Line Chart', function () {
 
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
-            const yAxis = chart.handler.yAxis;
+            const yAxis = chart.handler.valueAxes[0];
             const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
-
-            expect(yAxis.domain[0]).to.equal(yVals[0]);
-            expect(yAxis.domain[1]).to.equal(yVals[1]);
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.equal(yVals[0]);
+            expect(domain[1]).to.equal(yVals[1]);
           });
         });
       });
