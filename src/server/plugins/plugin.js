@@ -59,6 +59,12 @@ module.exports = class Plugin {
     this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
+
+    // Plugins must specify their version, and by default that version should match
+    // the version of kibana down to the patch level. If these two versions need
+    // to diverge, they can specify a kibana.version in the package to indicate the
+    // version of kibana the plugin is intended to work with.
+    this.kibanaVersion = opts.kibanaVersion || _.get(pkg, 'kibana.version', this.version);
     this.externalPreInit = opts.preInit || _.noop;
     this.externalInit = opts.init || _.noop;
     this.configPrefix = opts.configPrefix || this.id;
