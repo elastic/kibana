@@ -134,9 +134,9 @@ describe('Vislib Line Chart', function () {
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
-
-            expect(yAxis.domain[0]).to.not.be(undefined);
-            expect(yAxis.domain[1]).to.not.be(undefined);
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.not.be(undefined);
+            expect(domain[1]).to.not.be(undefined);
           });
         });
 
@@ -176,9 +176,9 @@ describe('Vislib Line Chart', function () {
           vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
-
-            expect(yAxis.domain[0]).to.equal(yVals[0]);
-            expect(yAxis.domain[1]).to.equal(yVals[1]);
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.equal(yVals[0]);
+            expect(domain[1]).to.equal(yVals[1]);
           });
         });
       });

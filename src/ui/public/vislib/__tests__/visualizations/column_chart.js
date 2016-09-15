@@ -151,9 +151,10 @@ dataTypesArray.forEach(function (dataType, i) {
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
+          const domain = yAxis.getScale().domain();
 
-          expect(yAxis.domain[0]).to.not.be(undefined);
-          expect(yAxis.domain[1]).to.not.be(undefined);
+          expect(domain[0]).to.not.be(undefined);
+          expect(domain[1]).to.not.be(undefined);
         });
       });
 
@@ -194,9 +195,9 @@ dataTypesArray.forEach(function (dataType, i) {
           const yAxis = chart.handler.valueAxes[0];
           const min = vis.handler.data.getYMin();
           const max = vis.handler.data.getYMax();
-
-          expect(yAxis.domain[0]).to.equal(min);
-          expect(yAxis.domain[1]).to.equal(max);
+          const domain = yAxis.getScale().domain();
+          expect(domain[0]).to.equal(min);
+          expect(domain[1]).to.equal(max);
         });
       });
     });
