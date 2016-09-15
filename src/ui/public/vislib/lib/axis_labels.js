@@ -14,8 +14,8 @@ export default function AxisLabelsFactory(Private) {
 
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
       if (this.config.isHorizontal() && this.config.isOrdinal()) {
-        this.filter = config.labels && config.labels.filter ? config.labels.filter : false;
-        this.rotate = config.labels && config.labels.rotate ? config.labels.rotate : 70;
+        this.filter = config.get('labels.filter', false);
+        this.rotate = config.get('labels.rotate', 70);
       }
     }
 
@@ -114,7 +114,7 @@ export default function AxisLabelsFactory(Private) {
 
           if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
             startX = myX + halfWidth;
-            return config.get('axisFormatter')(d);
+            return config.get('labels.axisFormatter')(d);
           } else {
             d3.select(this.parentNode).remove();
           }
@@ -124,16 +124,17 @@ export default function AxisLabelsFactory(Private) {
 
     draw() {
       const self = this;
+      const config = this.config;
 
       return function (selection) {
         selection.each(function () {
           selection.selectAll('text')
           .attr('style', function () {
             const currentStyle = d3.select(this).attr('style');
-            return `${currentStyle} font-size: ${self.fontSize};`;
+            return `${currentStyle} font-size: ${config.get('labels.fontSize')};`;
           });
           //.attr('x', -3 - parseInt(self.style.lineWidth) / 2 - parseInt(self.style.tickLength));
-          if (!self.show) selection.selectAll('test').attr('style', 'display: none;');
+          if (!config.get('labels.show')) selection.selectAll('test').attr('style', 'display: none;');
 
           selection.call(self.truncateLabels());
           selection.call(self.rotateAxisLabels());
