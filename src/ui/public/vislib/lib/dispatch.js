@@ -26,8 +26,8 @@ export default function DispatchClass(Private, config) {
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
      * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
-    * series: *, config: *, data: (Object|*),
-   * e: (d3.event|*), handler: (Object|*)}} Event response object
+     * series: *, config: *, data: (Object|*),
+     * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     eventResponse(d, i) {
       const datum = d._input || d;
@@ -167,7 +167,7 @@ export default function DispatchClass(Private, config) {
       const hasTimeField = this.handler.vis._attr.hasTimeField;
 
       return Boolean(hasTimeField && xAxis.ordered && xScale && _.isFunction(xScale.invert));
-  };
+    };
 
     /**
      * Determine if brushing is currently enabled
@@ -264,43 +264,43 @@ export default function DispatchClass(Private, config) {
 
       // Brush scale
       const brush = d3.svg.brush()
-      .x(xScale)
-      .on('brushend', function brushEnd() {
+        .x(xScale)
+        .on('brushend', function brushEnd() {
 
-        // Assumes data is selected at the chart level
-        // In this case, the number of data objects should always be 1
-        const data = d3.select(this).data()[0];
-        const isTimeSeries = (data.ordered && data.ordered.date);
+          // Assumes data is selected at the chart level
+          // In this case, the number of data objects should always be 1
+          const data = d3.select(this).data()[0];
+          const isTimeSeries = (data.ordered && data.ordered.date);
 
-        // Allows for brushing on d3.scale.ordinal()
-        const selected = xScale.domain().filter(function (d) {
-          return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
+          // Allows for brushing on d3.scale.ordinal()
+          const selected = xScale.domain().filter(function (d) {
+            return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
+          });
+          const range = isTimeSeries ? brush.extent() : selected;
+
+          return self.emit('brush', {
+            range: range,
+            config: attr,
+            e: d3.event,
+            data: data
+          });
         });
-        const range = isTimeSeries ? brush.extent() : selected;
-
-        return self.emit('brush', {
-          range: range,
-          config: attr,
-          e: d3.event,
-          data: data
-        });
-      });
 
       // if `addBrushing` is true, add brush canvas
       if (self.listenerCount('brush')) {
         svg.insert('g', 'g')
-        .attr('class', 'brush')
-        .call(brush)
-        .call(function (brushG) {
-          // hijack the brush start event to filter out right/middle clicks
-          const brushHandler = brushG.on('mousedown.brush');
-          if (!brushHandler) return; // touch events in use
-          brushG.on('mousedown.brush', function () {
-            if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
-          });
-        })
-        .selectAll('rect')
-        .attr('height', height - margin.top - margin.bottom);
+          .attr('class', 'brush')
+          .call(brush)
+          .call(function (brushG) {
+            // hijack the brush start event to filter out right/middle clicks
+            const brushHandler = brushG.on('mousedown.brush');
+            if (!brushHandler) return; // touch events in use
+            brushG.on('mousedown.brush', function () {
+              if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
+            });
+          })
+          .selectAll('rect')
+          .attr('height', height - margin.top - margin.bottom);
 
         return brush;
       }
