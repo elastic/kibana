@@ -50,6 +50,17 @@ describe('fieldWildcard', function () {
       expect(original.filter(filter)).to.eql(original);
     });
 
+    it('does not match raw fields', function () {
+      const filter = fieldWildcardFilter([ 'a*' ]);
+
+      const original = [
+        'age',
+        'age.raw'
+      ];
+
+      expect(original.filter(filter)).to.eql(['age.raw']);
+    });
+
     it('does not match keyword fields', function () {
       const filter = fieldWildcardFilter([ 'a*' ]);
 

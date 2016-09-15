@@ -1,4 +1,4 @@
-import { escapeRegExp, memoize } from 'lodash';
+import { endsWith, escapeRegExp, memoize } from 'lodash';
 
 export default function fieldWildcard(config) {
   const metaFields = config.get('metaFields');
@@ -7,17 +7,10 @@ export default function fieldWildcard(config) {
     return new RegExp('^' + glob.split('*').map(escapeRegExp).join('.*') + '$');
   });
 
-  function endsWith(str, test) {
-    if (!str || typeof str !== 'string' || str.length < test.length) {
-      return false;
-    }
-    return str.substring(str.length - test.length) === test;
-  }
-
   function fieldWildcardMatcher(globs) {
     return function matcher(val) {
       // do not test metaFields or keyword
-      if (metaFields.indexOf(val) !== -1 || endsWith(val, '.keyword')) {
+      if (metaFields.indexOf(val) !== -1 || endsWith(val, '.keyword') || endsWith(val, '.raw')) {
         return false;
       }
       return globs.some(p => makeRegEx(p).test(val));

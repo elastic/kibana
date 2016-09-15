@@ -38,7 +38,8 @@ uiModules.get('kibana')
           {
             title: 'matches',
             sortable: false,
-            info: 'The known fields that match the filter'
+            info: 'The source fields that match the filter. ' +
+              'Multi-fields may show up as a false match but these filters only actually apply to fields in the original source document'
           },
           {
             title: 'controls',
