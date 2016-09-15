@@ -61,6 +61,7 @@ export default function ColumnHandler(Private) {
             vis: vis,
             data: data,
             scale: {
+              type: vis._attr.scale,
               setYExtents: vis._attr.setYExtents,
               defaultYExtents: vis._attr.defaultYExtents,
               min : isUserDefinedYAxis ? vis._attr.yAxis.min : 0,
