@@ -97,7 +97,8 @@ describe('Vislib xAxis Class Test Suite', function () {
       vis: {
         el: $('.x-axis-div')[0],
         _attr: {
-          margin: { top: 0, right: 0, bottom: 0, left: 0 }
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+          type: 'histogram'
         }
       },
       data: dataObj,
@@ -130,7 +131,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     });
   });
 
-  describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
+  describe('getScale, getDomain, getTimeDomain, and getRange Methods', function () {
     let ordered;
     let timeScale;
     let timeDomain;
@@ -140,28 +141,45 @@ describe('Vislib xAxis Class Test Suite', function () {
     let range;
 
     beforeEach(function () {
-      timeScale = xAxis.getScale();
-      timeDomain = xAxis.getExtents();
-      range = xAxis.getRange(width);
-      xAxis.ordered = {};
-      ordinalScale = xAxis.getScale();
-      ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
       width = $('.x-axis-div').width();
+      xAxis.getAxis(width);
+      timeScale = xAxis.getScale();
+      timeDomain = xAxis.axisScale.getExtents();
+      range = xAxis.axisScale.getRange(width);
     });
 
     it('should return a function', function () {
       expect(_.isFunction(timeScale)).to.be(true);
-      expect(_.isFunction(ordinalScale)).to.be(true);
     });
 
     it('should return the correct domain', function () {
-      expect(_.isDate(timeDomain.domain()[0])).to.be(true);
-      expect(_.isDate(timeDomain.domain()[1])).to.be(true);
+      expect(_.isDate(timeScale.domain()[0])).to.be(true);
+      expect(_.isDate(timeScale.domain()[1])).to.be(true);
     });
 
     it('should return the min and max dates', function () {
-      expect(timeDomain.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
-      expect(timeDomain.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
+      expect(timeScale.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
+      expect(timeScale.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
+    });
+
+    it('should return the correct range', function () {
+      expect(range[0]).to.be(0);
+      expect(range[1]).to.be(width);
+    });
+  });
+
+  describe('getOrdinalDomain Method', function () {
+    let ordinalScale;
+    let ordinalDomain;
+    let width;
+
+    beforeEach(function () {
+      width = $('.x-axis-div').width();
+      xAxis.ordered = null;
+      xAxis.config.ordered = null;
+      xAxis.getAxis(width);
+      ordinalScale = xAxis.getScale();
+      ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
     });
 
     it('should return an ordinal scale', function () {
@@ -172,11 +190,6 @@ describe('Vislib xAxis Class Test Suite', function () {
     it('should return an array of values', function () {
       expect(_.isArray(ordinalDomain.domain())).to.be(true);
     });
-
-    it('should return the correct range', function () {
-      expect(range[0]).to.be(0);
-      expect(range[1]).to.be(width);
-    });
   });
 
   describe('getXScale Method', function () {
@@ -185,7 +198,8 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
-      xScale = xAxis.getScale(width);
+      xAxis.getAxis(width);
+      xScale = xAxis.getScale();
     });
 
     it('should return a function', function () {
