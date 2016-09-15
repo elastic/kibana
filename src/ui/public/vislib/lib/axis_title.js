@@ -5,7 +5,6 @@ export default function AxisTitleFactory(Private) {
 
   class AxisTitle {
     constructor(config) {
-      super();
       this.config = config;
       this.elSelector = this.config.get('title.elSelector').replace('{pos}', this.config.get('position'));
     }
