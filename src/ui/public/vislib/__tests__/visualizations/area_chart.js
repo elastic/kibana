@@ -224,11 +224,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          const yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.valueAxes[0];
           const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+          const domain = yAxis.getScale().domain();
 
-          expect(yAxis.domain[0]).to.equal(yVals[0]);
-          expect(yAxis.domain[1]).to.equal(yVals[1]);
+          expect(domain[0]).to.equal(yVals[0]);
+          expect(domain[1]).to.equal(yVals[1]);
         });
       });
     });
