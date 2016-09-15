@@ -8,17 +8,20 @@ import SetupError from '../setup_error';
 import serverConfig from '../../../../../test/server_config';
 import checkEsVersion from '../check_es_version';
 
-describe('plugins/elasticsearch', function () {
-  describe('lib/check_es_version', function () {
+describe('plugins/elasticsearch', () => {
+  describe('lib/check_es_version', () => {
+    const KIBANA_VERSION = '5.1.0';
+
     let server;
     let plugin;
 
     beforeEach(function () {
-      const get = sinon.stub().withArgs('elasticsearch.engineVersion').returns('^1.4.3');
-      const config = function () { return { get: get }; };
       server = {
         log: _.noop,
-        config: config,
+        // This is required or else we get a SetupError.
+        config: () => ({
+          get: sinon.stub(),
+        }),
         plugins: {
           elasticsearch: {
             client: {
@@ -44,7 +47,9 @@ describe('plugins/elasticsearch', function () {
 
         const node = {
           version: version,
-          http_address: 'http_address',
+          http: {
+            publish_address: 'http_address',
+          },
           ip: 'ip'
         };
 
@@ -54,40 +59,41 @@ describe('plugins/elasticsearch', function () {
 
       const client = server.plugins.elasticsearch.client;
       client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
-
     }
 
-    it('passes with single a node that matches', function () {
-      setNodes('1.4.3');
-      return checkEsVersion(server);
+    it('returns true with single a node that matches', async () => {
+      setNodes('5.1.0');
+      const result = await checkEsVersion(server, KIBANA_VERSION);
+      expect(result).to.be(true);
     });
 
-    it('passes with multiple nodes that satisfy', function () {
-      setNodes('1.4.3', '1.4.4', '1.4.3-Beta1');
-      return checkEsVersion(server);
+    it('returns true with multiple nodes that satisfy', async () => {
+      setNodes('5.1.0', '5.2.0', '5.1.1-Beta1');
+      const result = await checkEsVersion(server, KIBANA_VERSION);
+      expect(result).to.be(true);
     });
 
-    it('fails with a single node that is out of date', function () {
-      setNodes('1.4.4', '1.4.2', '1.4.5');
-
-      checkEsVersion(server)
-      .catch(function (e) {
+    it('throws an error with a single node that is out of date', async () => {
+      // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
+      setNodes('5.1.0', '5.2.0', '5.0.0');
+      try {
+        await checkEsVersion(server, KIBANA_VERSION);
+      } catch (e) {
         expect(e).to.be.a(SetupError);
-      });
+      }
     });
 
-    it('fails if that single node is a client node', function () {
+    it('fails if that single node is a client node', async () => {
       setNodes(
-        '1.4.4',
-        { version: '1.4.2', attributes: { client: 'true' } },
-        '1.4.5'
+        '5.1.0',
+        '5.2.0',
+        { version: '5.0.0', attributes: { client: 'true' } },
       );
-
-      checkEsVersion(server)
-      .catch(function (e) {
+      try {
+        await checkEsVersion(server, KIBANA_VERSION);
+      } catch (e) {
         expect(e).to.be.a(SetupError);
-      });
+      }
     });
-
   });
 });

@@ -14,10 +14,13 @@ module.exports = function (kibana) {
   return new kibana.Plugin({
     id: 'kibana',
     config: function (Joi) {
+      const ONE_GIGABYTE = 1024 * 1024 * 1024;
+
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('discover'),
-        index: Joi.string().default('.kibana')
+        index: Joi.string().default('.kibana'),
+        addDataMaxBytes: Joi.number().default(ONE_GIGABYTE)
       }).default();
     },
 
@@ -34,6 +37,7 @@ module.exports = function (kibana) {
           'fieldFormats',
           'navbarExtensions',
           'managementSections',
+          'devTools',
           'docViews'
         ],
 
@@ -41,7 +45,8 @@ module.exports = function (kibana) {
           let config = server.config();
           return {
             kbnDefaultAppId: config.get('kibana.defaultAppId'),
-            tilemap: config.get('tilemap')
+            tilemap: config.get('tilemap'),
+            addDataMaxBytes: config.get('kibana.addDataMaxBytes')
           };
         },
       },
@@ -79,6 +84,13 @@ module.exports = function (kibana) {
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
           linkToLastSubUrl: false
+        },
+        {
+          title: 'Dev Tools',
+          order: 1010,
+          url: '/app/kibana#/dev_tools',
+          description: 'development tools',
+          icon: 'plugins/kibana/assets/wrench.svg'
         }
       ],
       injectDefaultVars(server, options) {

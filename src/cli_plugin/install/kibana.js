@@ -46,14 +46,14 @@ export async function rebuildCache(settings, logger) {
 }
 
 export function assertVersion(settings) {
-  if (!settings.plugins[0].version) {
-    throw new Error (`Plugin version not found. Check package.json in archive`);
+  if (!settings.plugins[0].kibanaVersion) {
+    throw new Error (`Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`);
   }
 
-  const actual = cleanVersion(settings.plugins[0].version);
+  const actual = cleanVersion(settings.plugins[0].kibanaVersion);
   const expected = cleanVersion(settings.version);
   if (!versionSatisfies(actual, expected)) {
-    throw new Error (`Incorrect version in plugin [${settings.plugins[0].name}]. ` +
+    throw new Error (`Incorrect Kibana version in plugin [${settings.plugins[0].name}]. ` +
       `Expected [${expected}]; found [${actual}]`);
   }
 }
