@@ -42,8 +42,12 @@ export default function ColumnHandler(Private) {
             type: 'category',
             vis: vis,
             data: data,
-            axisFormatter: data.get('xAxisFormatter'),
-            expandLastBucket: opts.expandLastBucket,
+            labels: {
+              axisFormatter: data.get('xAxisFormatter')
+            },
+            scale: {
+              expandLastBucket: opts.expandLastBucket
+            },
             title: {
               text: data.get('xAxisLabel')
             }
@@ -56,9 +60,15 @@ export default function ColumnHandler(Private) {
             type: 'value',
             vis: vis,
             data: data,
-            min : isUserDefinedYAxis ? vis._attr.yAxis.min : 0,
-            max : isUserDefinedYAxis ? vis._attr.yAxis.max : 0,
-            axisFormatter: data.get('yAxisFormatter'),
+            scale: {
+              setYExtents: vis._attr.setYExtents,
+              defaultYExtents: vis._attr.defaultYExtents,
+              min : isUserDefinedYAxis ? vis._attr.yAxis.min : 0,
+              max : isUserDefinedYAxis ? vis._attr.yAxis.max : 0,
+            },
+            labels: {
+              axisFormatter: data.get('yAxisFormatter'),
+            },
             title: {
               text: data.get('yAxisLabel')
             }
