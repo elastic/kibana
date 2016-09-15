@@ -10,7 +10,7 @@ export default function AxisTitleFactory(Private) {
     constructor(config) {
       super();
       this.config = config;
-      this.elSelector = this.config.title.elSelector.replace('{pos}', config.get('position'));
+      this.elSelector = this.config.get('title.elSelector').replace('{pos}', this.config.get('position'));
     }
 
     render() {
@@ -37,7 +37,7 @@ export default function AxisTitleFactory(Private) {
 
           const bbox = svg.append('text')
           .attr('transform', function () {
-            if (self.config.isHorizontal()) {
+            if (config.isHorizontal()) {
               return 'translate(' + width / 2 + ',11)';
             }
             return 'translate(11,' + height / 2 + ') rotate(270)';

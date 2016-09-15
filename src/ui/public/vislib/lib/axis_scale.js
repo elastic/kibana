@@ -23,17 +23,17 @@ export default function AxisScaleFactory(Private) {
 
     isPercentage() {
       const mode = this.config.get('mode');
-      return (mode === 'percentage');
+      return mode === 'percentage';
     };
 
     isUserDefined() {
-      const setYExtents = this.config.get('setYExtents');
-      return (setYExtents);
+      const setYExtents = this.config.get('scale.setYExtents');
+      return setYExtents;
     };
 
     isYExtents() {
-      const defaultYExtents = this.config.get('defaultYExtents');
-      return (defaultYExtents);
+      const defaultYExtents = this.config.get('scale.defaultYExtents');
+      return defaultYExtents;
     };
 
     isLogScale() {
@@ -71,7 +71,7 @@ export default function AxisScaleFactory(Private) {
       const opts = [ordered[extent]];
 
       let point = d3[extent](data);
-      if (this.config.get('expandLastBucket') && extent === 'max') {
+      if (this.config.get('scale.expandLastBucket') && extent === 'max') {
         point = this.addInterval(point);
       }
       opts.push(point);
@@ -117,8 +117,8 @@ export default function AxisScaleFactory(Private) {
         if (this.config.isOrdinal()) return this.values;
       }
 
-      const min = this.config.get('min') || this.data.getYMin();
-      const max = this.config.get('max') || this.data.getYMax();
+      const min = this.config.get('scale.min') || this.data.getYMin();
+      const max = this.config.get('scale.max') || this.data.getYMax();
       const domain = [min, max];
       if (this.isUserDefined()) return this.validateUserExtents(domain);
       if (this.isYExtents()) return domain;
@@ -128,9 +128,9 @@ export default function AxisScaleFactory(Private) {
 
     getRange(length) {
       if (this.config.isHorizontal()) {
-        return !this.config.get('inverted') ? [0, length] : [length, 0];
+        return !this.config.get('scale.inverted') ? [0, length] : [length, 0];
       } else {
-        return this.config.get('inverted') ? [0, length] : [length, 0];
+        return this.config.get('scale.inverted') ? [0, length] : [length, 0];
       }
     };
 
@@ -159,20 +159,20 @@ export default function AxisScaleFactory(Private) {
     };
 
     getScale(length) {
+      const config = this.config;
       const scale = this.getScaleType(this.config.get('vis._attr.scale'));
       const domain = this.getExtents();
       const range = this.getRange(length);
       this.scale = scale.domain(domain);
-      if (this.config.isOrdinal()) {
+      if (config.isOrdinal()) {
         this.scale.rangeBands(range, 0.1);
       } else {
         this.scale.range(range);
       }
 
-      if (!this.isUserDefined() && !this.config.isOrdinal() && !this.config.isTimeDomain()) this.scale.nice(); // round extents when not user defined
+      if (!this.isUserDefined() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice(); // round extents when not user defined
       // Prevents bars from going off the chart when the y extents are within the domain range
-      // todo: make this work (its accessing chart config ... we only have axis config availible)
-      //if (this.axis._attr.type === 'histogram' && this.scale.clamp) this.scale.clamp(true);
+      if (config.get('vis._attr.type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
 
