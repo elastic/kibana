@@ -6,7 +6,6 @@ import errors from 'ui/errors';
 export default function AxisScaleFactory(Private) {
   class AxisScale {
     constructor(config, data) {
-      super();
       this.config = config;
       this.data = data;
 
