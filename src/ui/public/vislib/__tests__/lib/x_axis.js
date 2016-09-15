@@ -94,12 +94,15 @@ describe('Vislib xAxis Class Test Suite', function () {
     dataObj = new Data(data, {}, persistedState);
     xAxis = new Axis({
       type: 'category',
-      el: $('.x-axis-div')[0],
-      xValues: dataObj.xValues(),
-      ordered: dataObj.get('ordered'),
-      xAxisFormatter: dataObj.get('xAxisFormatter'),
-      _attr: {
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+      vis: {
+        el: $('.x-axis-div')[0],
+        _attr: {
+          margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        }
+      },
+      data: dataObj,
+      labels: {
+        xAxisFormatter: dataObj.get('xAxisFormatter')
       }
     });
   }));
@@ -138,8 +141,8 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     beforeEach(function () {
       timeScale = xAxis.getScale();
-      timeDomain = xAxis.getDomain(timeScale);
-      range = xAxis.getRange(timeDomain, width);
+      timeDomain = xAxis.getExtents();
+      range = xAxis.getRange(width);
       xAxis.ordered = {};
       ordinalScale = xAxis.getScale();
       ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
@@ -171,8 +174,8 @@ describe('Vislib xAxis Class Test Suite', function () {
     });
 
     it('should return the correct range', function () {
-      expect(range.range()[0]).to.be(0);
-      expect(range.range()[1]).to.be(width);
+      expect(range[0]).to.be(0);
+      expect(range[1]).to.be(width);
     });
   });
 
@@ -182,7 +185,7 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
-      xScale = xAxis.getXScale(width);
+      xScale = xAxis.getScale(width);
     });
 
     it('should return a function', function () {
@@ -206,19 +209,11 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
-      xAxis.getXAxis(width);
+      xAxis.getAxis(width);
     });
 
-    it('should create an xAxis function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xAxis)).to.be(true);
-    });
-
-    it('should create an xScale function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.xScale)).to.be(true);
-    });
-
-    it('should create an xAxisFormatter function on the xAxis class', function () {
-      expect(_.isFunction(xAxis.axisFormatter)).to.be(true);
+    it('should create an getScale function on the xAxis class', function () {
+      expect(_.isFunction(xAxis.getScale())).to.be(true);
     });
   });
 
