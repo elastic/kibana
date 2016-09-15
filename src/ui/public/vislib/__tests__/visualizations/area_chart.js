@@ -183,9 +183,10 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
           const yAxis = chart.handler.valueAxes[0];
+          const domain = yAxis.getScale().domain();
 
-          expect(yAxis.domain[0]).to.not.be(undefined);
-          expect(yAxis.domain[1]).to.not.be(undefined);
+          expect(domain[0]).to.not.be(undefined);
+          expect(domain[1]).to.not.be(undefined);
         });
       });
 
