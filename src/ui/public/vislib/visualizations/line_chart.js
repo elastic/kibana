@@ -268,7 +268,7 @@ export default function LineChartFactory(Private) {
       const margin = this._attr.margin;
       const elWidth = this._attr.width = $elem.width();
       const elHeight = this._attr.height = $elem.height();
-      const scaleType = this.handler.valueAxes[0].scale.getScaleType();
+      const scaleType = this.handler.valueAxes[0].axisScale.getScaleType();
       const yScale = this.handler.valueAxes[0].getScale();
       const xScale = this.handler.categoryAxes[0].getScale();
       const minWidth = 20;
