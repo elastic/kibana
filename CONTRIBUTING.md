@@ -71,10 +71,10 @@ These guidelines will help you get your Pull Request into shape so that a code r
 
 ### Setting Up Your Development Environment
 
-Clone the `kibana` repo and change directory into it
+Fork, then clone the `kibana` repo and change directory into it
 
 ```bash
-git clone https://github.com/elastic/kibana.git kibana
+git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
 
