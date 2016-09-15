@@ -1,12 +1,9 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
-import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisTitleFactory(Private) {
 
-  const ErrorHandler = Private(ErrorHandlerProvider);
-
-  class AxisTitle extends ErrorHandler {
+  class AxisTitle {
     constructor(config) {
       super();
       this.config = config;
@@ -28,12 +25,9 @@ export default function AxisTitleFactory(Private) {
           const width = $(el).width();
           const height = $(el).height();
 
-          self.validateWidthandHeight(width, height);
-
           const svg = div.append('svg')
           .attr('width', width)
           .attr('height', height);
-
 
           const bbox = svg.append('text')
           .attr('transform', function () {

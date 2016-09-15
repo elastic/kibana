@@ -1,12 +1,8 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
-import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisLabelsFactory(Private) {
-
-  const ErrorHandler = Private(ErrorHandlerProvider);
-
-  class AxisLabels extends ErrorHandler {
+  class AxisLabels {
     constructor(config, scale) {
       super();
       this.config = config;
