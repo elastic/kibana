@@ -9,7 +9,11 @@ export default function AxisConfigFactory() {
     scale: {
       type: 'linear',
       expandLastBucket: true, //TODO: rename ... bucket has nothing to do with vis
-      inverted: false
+      inverted: false,
+      setYExtents: null,
+      defaultYExtents: null,
+      min: null,
+      max: null
     },
     style: {
       color: '#ddd',
@@ -48,31 +52,34 @@ export default function AxisConfigFactory() {
 
   class AxisConfig {
     constructor(config) {
-      if (config.type === 'category') {
-        _.defaultsDeep(config, categoryDefaults);
-      }
-      _.defaultsDeep(config, defaults);
-      _.extend(this, config);
+      const typeDefaults = config.type === 'category' ? categoryDefaults : {};
+      this._values = _.defaultsDeep({}, config, typeDefaults, defaults);
 
-      this.elSelector = this.elSelector.replace('{pos}', this.position);
-      this.rootEl = this.vis.el;
+      this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
+      this._values.rootEl = this._values.vis.el;
 
-      if (this.type === 'category') {
+      this.data = this._values.data;
+      if (this._values.type === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
       }
     };
 
-    get(property) {
-      return _.get(this, property, null);
+    get(property, defaults = null) {
+      if (_.has(this._values, property)) {
+        return _.get(this._values, property, defaults);
+      } else {
+        throw new Error(`Accessing invalid config property: ${property}`);
+        return defaults;
+      }
     };
 
     set(property, value) {
-      return _.set(this, property, value);
+      return _.set(this._values, property, value);
     };
 
     isHorizontal() {
-      return (this.position === 'top' || this.position === 'bottom');
+      return (this._values.position === 'top' || this._values.position === 'bottom');
     };
 
     isOrdinal() {
@@ -84,15 +91,15 @@ export default function AxisConfigFactory() {
     };
 
     isPercentage() {
-      return (this.vis._attr.mode === 'percentage');
+      return (this._values.vis._attr.mode === 'percentage');
     };
 
     isUserDefined() {
-      return (this.vis._attr.setYExtents);
+      return (this._values.vis._attr.setYExtents);
     };
 
     isYExtents() {
-      return (this.vis._attr.defaultYExtents);
+      return (this._values.vis._attr.defaultYExtents);
     };
 
     isLogScale() {
@@ -100,7 +107,7 @@ export default function AxisConfigFactory() {
     };
 
     getScaleType() {
-      return this.vis._attr.scale;
+      return this._values.vis._attr.scale;
     };
   }
 

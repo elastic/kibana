@@ -100,10 +100,11 @@ export default function AxisFactory(Private) {
 
     adjustSize() {
       const self = this;
+      const config = this.config;
       const xAxisPadding = 15;
-      const style = this.config.get('style');
-      const margin = this.config.get('vis._attr.margin');
-      const position = this.config.get('position');
+      const style = config.get('style');
+      const margin = config.get('vis._attr.margin');
+      const position = config.get('position');
 
       return function (selection) {
         const text = selection.selectAll('.tick text');
@@ -111,7 +112,7 @@ export default function AxisFactory(Private) {
 
         text.each(function textWidths() {
           lengths.push((() => {
-            if (self.config.isHorizontal()) {
+            if (config.isHorizontal()) {
               return d3.select(this.parentNode).node().getBBox().height;
             } else {
               return d3.select(this.parentNode).node().getBBox().width;
@@ -120,7 +121,7 @@ export default function AxisFactory(Private) {
         });
         const length = lengths.length > 0 ? _.max(lengths) : 0;
 
-        if (self.config.isHorizontal()) {
+        if (config.isHorizontal()) {
           selection.attr('height', length);
           self.updateXaxisHeight();
           if (position === 'top') {
@@ -143,7 +144,7 @@ export default function AxisFactory(Private) {
     draw() {
       const self = this;
       const config = this.config;
-      const style = config.style;
+      const style = config.get('style');
 
       return function (selection) {
         const n = selection[0].length;
