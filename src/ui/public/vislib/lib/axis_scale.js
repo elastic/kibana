@@ -164,7 +164,7 @@ export default function AxisScaleFactory(Private) {
         this.scale.range(range);
       }
 
-      if (!this.isUserDefined() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice(); // round extents when not user defined
+      if (!this.isUserDefined() && !this.isYExtents() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
       if (config.get('vis._attr.type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
 
