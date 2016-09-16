@@ -175,7 +175,7 @@ describe('kibana cli', function () {
 
             const expected = [
               command,
-              `https://download.elastic.co/kibana/${command}/${command}-1234.zip`
+              `https://artifacts.elastic.co/download/kibana-plugins/${command}/${command}-1234.zip`
             ];
 
             expect(settings.urls).to.eql(expected);
