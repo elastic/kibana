@@ -164,6 +164,35 @@ app.directive('share', function (Private) {
           notify.info('URL selected. Press Ctrl+C to copy.');
         }
       };
+
+      this.copyTextToClipboard = text => {
+        const notify = new Notifier({
+          location: `Share ${$scope.objectType}`,
+        });
+
+        // This code was borrowed from 'copee', see https://github.com/styfle/copee
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.cols = 1;
+        ta.rows = 1;
+        ta.style.color = 'transparent';
+        ta.style.border = 'none';
+        document.body.appendChild(ta);
+        ta.select();
+        let success = false;
+        try {
+          success = document.execCommand('copy');
+        } catch (err) {
+          success = false;
+        }
+        document.body.removeChild(ta);
+
+        if (success) {
+          notify.info('URL copied to clipboard.');
+        } else {
+          notify.info('Failed to copy to clipboard');
+        }
+      };
     }
   };
 });
