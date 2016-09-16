@@ -43,7 +43,14 @@ uiModules.get('apps/management')
   };
 
   $scope.refreshFieldList = function () {
-    fetchFieldList().then(updateFieldList);
+    const timeField = index.timeField;
+    fetchFieldList().then(function (results) {
+      if (timeField) {
+        updateFieldListAndSeed(results, timeField);
+      } else {
+        updateFieldList(results);
+      }
+    });
   };
 
   $scope.createIndexPattern = function () {
@@ -245,6 +252,19 @@ uiModules.get('apps/management')
         dateFields: dateFields
       };
     }, notify.fatal);
+  }
+
+  function updateFieldListAndSeed(results, seedField) {
+
+    updateFieldList(results);
+
+    if (!results.dateFields.length) {
+      return;
+    }
+
+    const matchingField = results.dateFields.find(field => field.name === seedField.name);
+    index.timeField = matchingField ? matchingField : results.dateFields[0];
+
   }
 
   function updateFieldList(results) {
