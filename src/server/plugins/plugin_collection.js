@@ -9,7 +9,7 @@ let byIdCache = Symbol('byIdCache');
 let pluginApis = Symbol('pluginApis');
 
 async function addPluginConfig(pluginCollection, plugin) {
-  const configSchema = await plugin.readConfigSchema();
+  const configSchema = await plugin.getConfigSchema();
   let { config } = pluginCollection.kbnServer;
   config.extendSchema(plugin.configPrefix, configSchema);
 }
@@ -44,19 +44,14 @@ module.exports = class Plugins extends Collection {
         throw new TypeError('unexpected plugin export ' + inspect(plugin));
       }
 
-      await this.add(plugin);
-      if (!plugin.enabled) this.delete(plugin);
+      await addPluginConfig(this, plugin);
+      this.add(plugin);
     }
   }
 
-  async add(plugin) {
-    await addPluginConfig(this, plugin);
-    super.add(plugin);
-  }
-
-  delete(plugin) {
+  async disable(plugin) {
     removePluginConfig(this, plugin);
-    super.delete(plugin);
+    this.delete(plugin);
   }
 
   get byId() {
