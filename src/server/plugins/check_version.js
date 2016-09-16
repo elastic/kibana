@@ -24,7 +24,7 @@ export default async function (kbnServer, server, config) {
     if (!compatibleWithKibana(kbnServer, plugin)) {
       const message = `Plugin "${name}" was disabled because it expected Kibana version "${version}", and found "${kbnServer.version}".`;
       warningMessages.add(message);
-      plugins.delete(plugin);
+      plugins.disable(plugin);
     }
   }
 

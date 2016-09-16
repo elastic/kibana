@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import toPath from 'lodash/internal/toPath';
 import Joi from 'joi';
 import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
@@ -68,7 +67,7 @@ module.exports = class Plugin {
     this.externalPreInit = opts.preInit || _.noop;
     this.externalInit = opts.init || _.noop;
     this.configPrefix = opts.configPrefix || this.id;
-    this.getConfigSchema = opts.config || _.noop;
+    this.getExternalConfigSchema = opts.config || _.noop;
     this.preInit = _.once(this.preInit);
     this.init = _.once(this.init);
     this[extendInitFns] = [];
@@ -95,14 +94,9 @@ module.exports = class Plugin {
     };
   }
 
-  async readConfigSchema() {
-    let schema = await this.getConfigSchema(Joi);
+  async getConfigSchema() {
+    let schema = await this.getExternalConfigSchema(Joi);
     return schema || defaultConfigSchema;
-  }
-
-  get enabled() {
-    const { config } = this.kbnServer;
-    return config.get([...toPath(this.configPrefix), 'enabled']);
   }
 
   async preInit() {
