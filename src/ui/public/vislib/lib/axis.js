@@ -37,9 +37,11 @@ export default function AxisFactory(Private) {
     getAxis(length) {
       const scale = this.axisScale.getScale(length);
       const position = this.config.get('position');
+      const axisFormatter = this.config.get('labels.axisFormatter');
+
       return d3.svg.axis()
       .scale(scale)
-      .tickFormat(this.tickFormat(this.domain))
+      .tickFormat(axisFormatter)
       .ticks(this.tickScale(length))
       .orient(position);
     }
@@ -63,12 +65,6 @@ export default function AxisFactory(Private) {
       .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(length));
-    }
-
-    tickFormat() {
-      if (this.config.get('labels.axisFormatter')) return this.config.get('labels.axisFormatter');
-      if (this.config.isPercentage()) return d3.format('%');
-      return d3.format('n');
     }
 
     getLength(el, n) {

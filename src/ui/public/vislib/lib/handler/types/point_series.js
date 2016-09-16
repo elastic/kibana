@@ -43,7 +43,7 @@ export default function ColumnHandler(Private) {
             vis: vis,
             data: data,
             labels: {
-              axisFormatter: data.data.xAxisFormatter
+              axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
             },
             scale: {
               expandLastBucket: opts.expandLastBucket
@@ -68,7 +68,7 @@ export default function ColumnHandler(Private) {
               max : isUserDefinedYAxis ? vis._attr.yAxis.max : undefined,
             },
             labels: {
-              axisFormatter: data.data.yAxisFormatter,
+              axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
             },
             title: {
               text: data.get('yAxisLabel')
