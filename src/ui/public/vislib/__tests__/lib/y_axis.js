@@ -226,9 +226,8 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     describe('validate user defined values', function () {
       beforeEach(function () {
-        yAxis._attr.mode = 'stacked';
-        yAxis._attr.setYExtents = false;
-        yAxis._attr.yAxis = {};
+        yAxis.config.set('scale.stacked', true);
+        yAxis.config.set('scale.setYExtents', false);
       });
 
       it('should throw a NaN error', function () {
@@ -241,11 +240,11 @@ describe('Vislib yAxis Class Test Suite', function () {
       });
 
       it('should return a decimal value', function () {
-        yAxis._attr.mode = 'percentage';
-        yAxis._attr.setYExtents = true;
+        yAxis.config.set('scale.stacked', 'percent');
+        yAxis.config.set('scale.setYExtents', true);
         domain = [];
-        domain[0] = yAxis._attr.yAxis.min = 20;
-        domain[1] = yAxis._attr.yAxis.max = 80;
+        domain[0] = 20;
+        domain[1] = 80;
         const newDomain = yAxis._validateUserExtents(domain);
 
         expect(newDomain[0]).to.be(domain[0] / 100);
