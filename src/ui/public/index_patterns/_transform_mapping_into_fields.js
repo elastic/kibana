@@ -25,12 +25,9 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
 
           let mapping = mapField(field, name);
 
-          let conflictDescription = {
-            index: indexName,
-            type: mapping.type
-          };
-          mapping.conflictDescriptions = [];
-          mapping.conflictDescriptions.push(conflictDescription);
+          const origType = mapping.type;
+          mapping.conflictDescriptions = {};
+          mapping.conflictDescriptions[origType] = [indexName];
 
           if (fields[name]) {
             if (fields[name].type !== mapping.type) {
@@ -41,7 +38,11 @@ export default function transformMappingIntoFields(Private, kbnIndex, config) {
           }
           if (conflictFields[name]) {
             mapping.conflictDescriptions = conflictFields[name].conflictDescriptions;
-            mapping.conflictDescriptions.push(conflictDescription);
+            if (mapping.conflictDescriptions.hasOwnProperty(origType)) {
+              mapping.conflictDescriptions[origType].push(indexName);
+            } else {
+              mapping.conflictDescriptions[origType] = [indexName];
+            }
           }
           fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values');
           conflictFields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values', 'conflictDescriptions');
