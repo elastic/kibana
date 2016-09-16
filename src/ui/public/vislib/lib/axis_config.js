@@ -121,11 +121,11 @@ export default function AxisConfigFactory() {
     };
 
     isUserDefined() {
-      return (this._values.vis._attr.setYExtents);
+      return (this._values.scale.setYExtents);
     };
 
     isYExtents() {
-      return (this._values.vis._attr.defaultYExtents);
+      return (this._values.scale.defaultYExtents);
     };
 
     isLogScale() {
@@ -133,7 +133,7 @@ export default function AxisConfigFactory() {
     };
 
     getScaleType() {
-      return this._values.vis._attr.scale;
+      return this._values.scale.type;
     };
   }
 

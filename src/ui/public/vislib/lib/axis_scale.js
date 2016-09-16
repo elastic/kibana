@@ -15,35 +15,17 @@ export default function AxisScaleFactory(Private) {
       }
     };
 
-    isPercentage() {
-      const mode = this.config.get('mode');
-      return mode === 'percentage';
-    };
-
-    isUserDefined() {
-      const setYExtents = this.config.get('scale.setYExtents');
-      return setYExtents;
-    };
-
-    isYExtents() {
-      const defaultYExtents = this.config.get('scale.defaultYExtents');
-      return defaultYExtents;
-    };
-
-    isLogScale() {
-      return this.getScaleType() === 'log';
-    };
-
     getScaleType() {
-      return this.config.get('scale.type');
+      return this.config.getScaleType();
     };
 
     validateUserExtents(domain) {
+      const config = this.config;
       return domain.map((val) => {
         val = parseInt(val, 10);
 
         if (isNaN(val)) throw new Error(val + ' is not a valid number');
-        if (this.isPercentage() && this.isUserDefined()) return val / 100;
+        if (config.isPercentage() && config.isUserDefined()) return val / 100;
         return val;
       });
     };
@@ -114,9 +96,9 @@ export default function AxisScaleFactory(Private) {
       const min = this.config.get('scale.min') || this.data.getYMin();
       const max = this.config.get('scale.max') || this.data.getYMax();
       const domain = [min, max];
-      if (this.isUserDefined()) return this.validateUserExtents(domain);
-      if (this.isYExtents()) return domain;
-      if (this.isLogScale()) return this.logDomain(min, max);
+      if (this.config.isUserDefined()) return this.validateUserExtents(domain);
+      if (this.config.isYExtents()) return domain;
+      if (this.config.isLogScale()) return this.logDomain(min, max);
       return [Math.min(0, min), Math.max(0, max)];
     };
 
@@ -154,7 +136,7 @@ export default function AxisScaleFactory(Private) {
 
     getScale(length) {
       const config = this.config;
-      const scale = this.getD3Scale(this.getScaleType());
+      const scale = this.getD3Scale(config.getScaleType());
       const domain = this.getExtents();
       const range = this.getRange(length);
       this.scale = scale.domain(domain);
@@ -164,7 +146,7 @@ export default function AxisScaleFactory(Private) {
         this.scale.range(range);
       }
 
-      if (!this.isUserDefined() && !this.isYExtents() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice();
+      if (!config.isUserDefined() && !config.isYExtents() && !config.isOrdinal() && !config.isTimeDomain()) this.scale.nice();
       // Prevents bars from going off the chart when the y extents are within the domain range
       if (config.get('vis._attr.type') === 'histogram' && this.scale.clamp) this.scale.clamp(true);
 
