@@ -8,7 +8,7 @@
 :k4pull: https://github.com/elastic/kibana/pull/
 :version: 5.0.0-alpha5
 :esversion: 5.0.0-alpha5
-:packageversion: 5.0-alpha
+:packageversion: 5.0.0-alpha
 
 include::introduction.asciidoc[]
 
