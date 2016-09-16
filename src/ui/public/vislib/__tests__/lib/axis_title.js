@@ -110,7 +110,10 @@ describe('Vislib AxisTitle Class Test Suite', function () {
         text: dataObj.get('xAxisLabel')
       },
       vis: {
-        el: el.node()
+        el: el.node(),
+        _attr: {
+          type: 'histogram'
+        }
       }
     });
     const yAxisConfig = new AxisConfig({
@@ -119,7 +122,10 @@ describe('Vislib AxisTitle Class Test Suite', function () {
         text: dataObj.get('yAxisLabel')
       },
       vis: {
-        el: el.node()
+        el: el.node(),
+        _attr: {
+          type: 'histogram'
+        }
       }
     });
     xTitle = new AxisTitle(xAxisConfig);
@@ -132,7 +138,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   describe('render Method', function () {
     beforeEach(function () {
-      xTitle.render();
+      xTitle.render();//here
       yTitle.render();
     });
 

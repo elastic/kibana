@@ -77,7 +77,7 @@ function createData(seriesData) {
   }, persistedState);
 
   buildYAxis = function (params) {
-    return new YAxis(_.merge({}, params, {
+    return new YAxis(_.merge({}, {
       type: 'value',
       scale: {
         min: dataObj.getYMin(),
@@ -90,11 +90,12 @@ function createData(seriesData) {
         _attr: {
           margin: { top: 0, right: 0, bottom: 0, left: 0 },
           type: 'histogram',
+          mode: 'grouped',
           yAxis: {}
         }
       },
       data: dataObj
-    }));
+    }, params));
   };
 
   yAxis = buildYAxis();
@@ -226,8 +227,11 @@ describe('Vislib yAxis Class Test Suite', function () {
 
     describe('validate user defined values', function () {
       beforeEach(function () {
+        createData(defaultGraphData);
         yAxis.config.set('scale.stacked', true);
         yAxis.config.set('scale.setYExtents', false);
+        yAxis.getAxis(height);
+        yScale = yAxis.getScale();
       });
 
       it('should throw a NaN error', function () {
@@ -235,17 +239,18 @@ describe('Vislib yAxis Class Test Suite', function () {
         const max = 12;
 
         expect(function () {
-          yAxis._validateUserExtents(min, max);
+          yAxis.axisScale.validateUserExtents(min, max);
         }).to.throwError();
       });
 
       it('should return a decimal value', function () {
-        yAxis.config.set('scale.stacked', 'percent');
+        yAxis.config.set('vis._attr.mode', 'percentage');
         yAxis.config.set('scale.setYExtents', true);
+        yAxis.getAxis(height);
         domain = [];
         domain[0] = 20;
         domain[1] = 80;
-        const newDomain = yAxis._validateUserExtents(domain);
+        const newDomain = yAxis.axisScale.validateUserExtents(domain);
 
         expect(newDomain[0]).to.be(domain[0] / 100);
         expect(newDomain[1]).to.be(domain[1] / 100);
@@ -253,7 +258,7 @@ describe('Vislib yAxis Class Test Suite', function () {
 
       it('should return the user defined value', function () {
         domain = [20, 50];
-        const newDomain = yAxis._validateUserExtents(domain);
+        const newDomain = yAxis.axisScale.validateUserExtents(domain);
 
         expect(newDomain[0]).to.be(domain[0]);
         expect(newDomain[1]).to.be(domain[1]);
@@ -266,7 +271,7 @@ describe('Vislib yAxis Class Test Suite', function () {
         const max = 12;
 
         expect(function () {
-          yAxis._validateAxisExtents(min, max);
+          yAxis.axisScale.validateAxisExtents(min, max);
         }).to.throwError();
       });
 
@@ -275,7 +280,7 @@ describe('Vislib yAxis Class Test Suite', function () {
         const max = 10;
 
         expect(function () {
-          yAxis._validateAxisExtents(min, max);
+          yAxis.axisScale.validateAxisExtents(min, max);
         }).to.throwError();
       });
     });
@@ -325,19 +330,22 @@ describe('Vislib yAxis Class Test Suite', function () {
     let yScale;
     beforeEach(function () {
       createData(defaultGraphData);
-      mode = yAxis._attr.mode;
       yMax = yAxis.yMax;
-      yScale = yAxis.getScale;
     });
 
     afterEach(function () {
-      yAxis._attr.mode = mode;
       yAxis.yMax = yMax;
-      yAxis.getScale = yScale;
+      yAxis = buildYAxis();
     });
 
     it('should use percentage format for percentages', function () {
-      yAxis._attr.mode = 'percentage';
+      yAxis = buildYAxis({
+        vis: {
+          _attr: {
+            mode: 'percentage'
+          }
+        }
+      });
       const tickFormat = yAxis.getAxis().tickFormat();
       expect(tickFormat(1)).to.be('100%');
     });
@@ -348,12 +356,6 @@ describe('Vislib yAxis Class Test Suite', function () {
       expect(tickFormat(0.8)).to.be('0.8');
     });
 
-    it('should throw an error if yScale is NaN', function () {
-      yAxis.getScale = function () { return NaN; };
-      expect(function () {
-        yAxis.getAxis();
-      }).to.throwError();
-    });
   });
 
   describe('draw Method', function () {
@@ -375,39 +377,6 @@ describe('Vislib yAxis Class Test Suite', function () {
       expect(yAxis.tickScale(1000)).to.be(11);
       expect(yAxis.tickScale(40)).to.be(3);
       expect(yAxis.tickScale(20)).to.be(0);
-    });
-  });
-
-  describe('#tickFormat()', function () {
-    const formatter = function () {};
-
-    it('returns a basic number formatter by default', function () {
-      const yAxis = buildYAxis();
-      expect(yAxis.tickFormat()).to.not.be(formatter);
-      expect(yAxis.tickFormat()(1)).to.be('1');
-    });
-
-    it('returns the yAxisFormatter when passed', function () {
-      const yAxis = buildYAxis({
-        labels: {
-          axisFormatter: formatter
-        }
-      });
-      expect(yAxis.tickFormat()).to.be(formatter);
-    });
-
-    it('returns a percentage formatter when the vis is in percentage mode', function () {
-      const yAxis = buildYAxis({
-        labels: {
-          axisFormatter: formatter
-        },
-        _attr: {
-          mode: 'percentage'
-        }
-      });
-
-      expect(yAxis.tickFormat()).to.not.be(formatter);
-      expect(yAxis.tickFormat()(1)).to.be('100%');
     });
   });
 });
