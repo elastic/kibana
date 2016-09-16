@@ -43,7 +43,7 @@ export default function AxisTitleFactory(Private) {
           if (config.isHorizontal()) {
             svg.attr('height', bbox.height);
           } else {
-            svg.attr('width', bbox.width);
+            svg.attr('width', bbox.height);
           }
         });
       };

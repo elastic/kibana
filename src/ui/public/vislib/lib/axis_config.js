@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import d3 from 'd3';
 export default function AxisConfigFactory() {
 
   const defaults = {
@@ -24,7 +25,7 @@ export default function AxisConfigFactory() {
       tickLength: '6px'
     },
     labels: {
-      axisFormatter: d => String(d),
+      axisFormatter: d3.format('n'),
       show: true,
       rotate: 0,
       rotateAnchor: 'center',
@@ -46,7 +47,8 @@ export default function AxisConfigFactory() {
     labels: {
       rotate: 0,
       rotateAnchor: 'end',
-      filter: true
+      filter: true,
+      truncate: 0
     }
   };
 
@@ -62,6 +64,30 @@ export default function AxisConfigFactory() {
       if (this._values.type === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
+      }
+
+      if (this._values.type === 'value') {
+        const isWiggleOrSilluete = this._values.vis._attr.mode === 'wiggle' || this._values.vis._attr.mode === 'silluete';
+        // if show was not explicitly set and wiggle or silluete option was checked
+        if (!config.show && isWiggleOrSilluete) {
+          this._values.show = false;
+        }
+
+        // override axisFormatter (to replicate current behaviour)
+        if (this.isPercentage()) {
+          this._values.labels.axisFormatter = d3.format('%');
+        }
+
+        if (this.isLogScale()) {
+          this._values.labels.filter = true;
+        }
+      }
+
+      // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
+      // unless explicitly overriden by user
+      if (this.isHorizontal() && this.isOrdinal()) {
+        this._values.labels.filter = config.labels.filter || false;
+        this._values.labels.rotate = config.labels.rotate || 70;
       }
     };
 

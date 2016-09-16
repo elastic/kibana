@@ -6,12 +6,6 @@ export default function AxisLabelsFactory(Private) {
     constructor(config, scale) {
       this.config = config;
       this.axisScale = scale;
-
-      // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
-      if (this.config.isHorizontal() && this.config.isOrdinal()) {
-        this.filter = config.get('labels.filter', false);
-        this.rotate = config.get('labels.rotate', 70);
-      }
     }
 
     render(selection) {
@@ -19,7 +13,6 @@ export default function AxisLabelsFactory(Private) {
     };
 
     rotateAxisLabels() {
-      const self = this;
       const config = this.config;
       return function (selection) {
         const text = selection.selectAll('.tick text');
@@ -27,7 +20,7 @@ export default function AxisLabelsFactory(Private) {
         if (config.get('labels.rotate')) {
           text
           .style('text-anchor', function () {
-            return config.get('rotateAnchor') === 'center' ? 'center' : 'end';
+            return config.get('labels.rotateAnchor') === 'center' ? 'center' : 'end';
           })
           .attr('dy', function () {
             if (config.isHorizontal()) {
@@ -40,13 +33,14 @@ export default function AxisLabelsFactory(Private) {
             return config.isHorizontal() ? '-0.9em' : '0';
           })
           .attr('transform', function rotate(d, j) {
+            let rotateDeg = config.get('labels.rotate');
             if (config.get('labels.rotateAnchor') === 'center') {
               const coord = text[0][j].getBBox();
               const transX = ((coord.x) + (coord.width / 2));
               const transY = ((coord.y) + (coord.height / 2));
-              return `rotate(${config.get('labels.rotate')}, ${transX}, ${transY})`;
+              return `rotate(${rotateDeg}, ${transX}, ${transY})`;
             } else {
-              const rotateDeg = config.get('position') === 'top' ? self.rotate : -self.rotate;
+              rotateDeg = config.get('position') === 'top' ? rotateDeg : -rotateDeg;
               return `rotate(${rotateDeg})`;
             }
           });
@@ -77,6 +71,8 @@ export default function AxisLabelsFactory(Private) {
       const self = this;
       const config = this.config;
       return function (selection) {
+        if (!config.get('labels.truncate')) return;
+
         selection.selectAll('.tick text')
         .text(function () {
           // TODO: add title to trancuated labels
@@ -88,12 +84,7 @@ export default function AxisLabelsFactory(Private) {
     filterAxisLabels() {
       const self = this;
       const config = this.config;
-      let startX = 0;
-      let maxW;
-      let par;
-      let myX;
-      let myWidth;
-      let halfWidth;
+      let startPos = 0;
       let padding = 1.1;
 
       return function (selection) {
@@ -101,15 +92,16 @@ export default function AxisLabelsFactory(Private) {
 
         selection.selectAll('.tick text')
         .text(function (d) {
-          par = d3.select(this.parentNode).node();
-          myX = self.axisScale.scale(d);
-          myWidth = par.getBBox().width * padding;
-          halfWidth = myWidth / 2;
-          maxW = $(config.get('rootEl')).find(config.get('elSelector')).width();
+          const par = d3.select(this.parentNode).node();
+          const el = $(config.get('rootEl')).find(config.get('elSelector'));
+          const maxSize = config.isHorizontal() ? el.width() : el.height();
+          const myPos = config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d);
+          const mySize = (config.isHorizontal() ? par.getBBox().width : par.getBBox().height) * padding;
+          const halfSize = mySize / 2;
 
-          if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-            startX = myX + halfWidth;
-            return config.get('labels.axisFormatter')(d);
+          if ((startPos + halfSize) < myPos && maxSize > (myPos + halfSize)) {
+            startPos = myPos + halfSize;
+            return this.innerHTML;
           } else {
             d3.select(this.parentNode).remove();
           }
