@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import toPath from 'lodash/internal/toPath';
 import Joi from 'joi';
 import Bluebird, { attempt, fromNode } from 'bluebird';
 import { basename, resolve } from 'path';
@@ -59,10 +58,16 @@ module.exports = class Plugin {
     this.uiExportsSpecs = opts.uiExports || {};
     this.requiredIds = opts.require || [];
     this.version = opts.version || pkg.version;
+
+    // Plugins must specify their version, and by default that version should match
+    // the version of kibana down to the patch level. If these two versions need
+    // to diverge, they can specify a kibana.version in the package to indicate the
+    // version of kibana the plugin is intended to work with.
+    this.kibanaVersion = opts.kibanaVersion || _.get(pkg, 'kibana.version', this.version);
     this.externalPreInit = opts.preInit || _.noop;
     this.externalInit = opts.init || _.noop;
     this.configPrefix = opts.configPrefix || this.id;
-    this.getConfigSchema = opts.config || _.noop;
+    this.getExternalConfigSchema = opts.config || _.noop;
     this.preInit = _.once(this.preInit);
     this.init = _.once(this.init);
     this[extendInitFns] = [];
@@ -89,17 +94,9 @@ module.exports = class Plugin {
     };
   }
 
-  async readConfig() {
-    let schema = await this.getConfigSchema(Joi);
-    let { config } = this.kbnServer;
-    config.extendSchema(this.configPrefix, schema || defaultConfigSchema);
-
-    if (config.get([...toPath(this.configPrefix), 'enabled'])) {
-      return true;
-    } else {
-      config.removeSchema(this.configPrefix);
-      return false;
-    }
+  async getConfigSchema() {
+    let schema = await this.getExternalConfigSchema(Joi);
+    return schema || defaultConfigSchema;
   }
 
   async preInit() {
