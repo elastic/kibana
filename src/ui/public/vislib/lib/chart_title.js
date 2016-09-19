@@ -7,9 +7,9 @@ export default function ChartTitleFactory(Private) {
   const Tooltip = Private(TooltipProvider);
 
   class ChartTitle extends ErrorHandler {
-    constructor(handler) {
+    constructor(config) {
       super();
-      this.el = handler.el;
+      this.el = config.el;
       this.tooltip = new Tooltip('chart-title', this.el, function (d) {
         return '<p>' + _.escape(d.label) + '</p>';
       });
