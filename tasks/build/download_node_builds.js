@@ -6,7 +6,7 @@ module.exports = function (grunt) {
   let { createGunzip } = require('zlib');
   let { Extract } = require('tar');
   let { rename } = require('fs');
-  let wreck = require('wreck');
+  let request = require('request');
 
   let platforms = grunt.config.get('platforms');
   let activeDownloads = [];
@@ -21,7 +21,7 @@ module.exports = function (grunt) {
     }
 
     let resp = await fromNode(cb => {
-      let req = wreck.request('GET', platform.nodeUrl, null, function (err, resp) {
+      let req = request.get(platform.nodeUrl, function (err, resp) {
         if (err) {
           return cb(err);
         }
