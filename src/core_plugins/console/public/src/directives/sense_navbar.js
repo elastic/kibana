@@ -19,7 +19,6 @@ require('ui/modules')
     controller: class SenseNavbarController {
       constructor($scope, $timeout, $element, Private) {
         const KbnTopNavController = Private(KbnTopNavControllerProvider);
-        $scope.chrome = require('ui/chrome');
 
         this.menu = new KbnTopNavController([
           {
