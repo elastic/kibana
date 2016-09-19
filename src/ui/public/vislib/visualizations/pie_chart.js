@@ -7,6 +7,14 @@ export default function PieChartFactory(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
 
+  const defaults = {
+    isDonut: false,
+    showTooltip: true,
+    color: undefined, // todo
+    fillColor: undefined, // todo
+    xValue: function (d) { return d.x; },
+    yValue: function (d) { return d.y; }
+  };
   /**
    * Pie Chart Visualization
    *
@@ -24,10 +32,9 @@ export default function PieChartFactory(Private) {
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
 
-      this._attr = _.defaults(handler._attr || {}, {
-        isDonut: handler._attr.isDonut || false
-      });
+      this._attr = _.defaults(handler._attr.chart || {}, defaults);
     }
+
 
     /**
      * Checks whether pie slices have all zero values.

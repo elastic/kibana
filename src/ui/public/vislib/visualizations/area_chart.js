@@ -7,8 +7,17 @@ import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/tim
 export default function AreaChartFactory(Private) {
 
   const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
-  const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
+  const defaults = {
+    mode: 'normal',
+    showCircles: true,
+    radiusRatio: 9,
+    showLines: true,
+    smoothLines: false,
+    interpolate: 'linear',
+    color: undefined, // todo
+    fillColor: undefined, // todo
+  };
   /**
    * Area chart visualization
    *
@@ -21,13 +30,14 @@ export default function AreaChartFactory(Private) {
    * chart
    */
   class AreaChart extends PointSeriesChart {
-    constructor(handler, chartEl, chartData) {
+    constructor(handler, chartEl, chartData, chartConfig) {
       super(handler, chartEl, chartData);
 
       this.isOverlapping = (handler._attr.mode === 'overlap');
 
       if (this.isOverlapping) {
 
+        // todo ... default opacity handler should check what the opacity is and then move back to it on mouseout
         // Default opacity should return to 0.6 on mouseout
         const defaultOpacity = 0.6;
         handler._attr.defaultOpacity = defaultOpacity;
@@ -53,14 +63,7 @@ export default function AreaChartFactory(Private) {
 
       this.checkIfEnoughData();
 
-      this._attr = _.defaults(handler._attr || {}, {
-        xValue: function (d) {
-          return d.x;
-        },
-        yValue: function (d) {
-          return d.y;
-        }
-      });
+      this._attr = _.defaults(chartConfig || {}, defaults);
     }
 
     /**
@@ -71,45 +74,17 @@ export default function AreaChartFactory(Private) {
      * @param layers {Array} Chart data array
      * @returns {D3.UpdateSelection} SVG with path added
      */
-    addPath(svg, layers) {
+    addPath(svg, data, label) {
       const ordered = this.handler.data.get('ordered');
       const isTimeSeries = (ordered && ordered.date);
       const isOverlapping = this.isOverlapping;
       const color = this.handler.data.getColorFunc();
-      const xScale = this.handler.categoryAxes[0].getScale();
-      const yScale = this.handler.valueAxes[0].getScale();
+      const xScale = this.getCategoryAxis().getScale();
+      const yScale = this.getValueAxis().getScale();
       const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
-      const area = d3.svg.area()
-      .x(function (d) {
-        if (isTimeSeries) {
-          return xScale(d.x);
-        }
-        return xScale(d.x) + xScale.rangeBand() / 2;
-      })
-      .y0(function (d) {
-        if (isOverlapping) {
-          return yScale(0);
-        }
-
-        return yScale(d.y0);
-      })
-      .y1(function (d) {
-        if (isOverlapping) {
-          return yScale(d.y);
-        }
-
-        return yScale(d.y0 + d.y);
-      })
-      .defined(function (d) {
-        return !_.isNull(d.y);
-      })
-      .interpolate(interpolate);
 
       // Data layers
-      const layer = svg.selectAll('.layer')
-      .data(layers)
-      .enter()
-      .append('g')
+      const layer = svg.append('g')
       .attr('class', function (d, i) {
         return 'pathgroup ' + i;
       });
@@ -117,8 +92,8 @@ export default function AreaChartFactory(Private) {
       // Append path
       const path = layer.append('path')
       .call(this._addIdentifier)
-      .style('fill', function (d) {
-        return color(d[0].label);
+      .style('fill', () => {
+        return color(label);
       })
       .classed('overlap_area', function () {
         return isOverlapping;
@@ -126,33 +101,24 @@ export default function AreaChartFactory(Private) {
 
       // update
       path.attr('d', function (d) {
-        return area(d);
+        const area = d3.svg.area()
+        .x(function (d) {
+          return xScale(d.x) + xScale.rangeBand() / 2;
+        })
+        .y0(function (d) {
+          return yScale(d.y0);
+        })
+        .y1(function (d) {
+          return yScale(d.y0 + d.y);
+        })
+        .defined(function (d) {
+          return !_.isNull(d.y);
+        })
+        .interpolate(interpolate);
+        return area(data);
       });
 
       return path;
-    };
-
-    /**
-     * Adds Events to SVG circles
-     *
-     * @method addCircleEvents
-     * @param element {D3.UpdateSelection} SVG circles
-     * @returns {D3.Selection} circles with event listeners attached
-     */
-    addCircleEvents(element, svg) {
-      const events = this.events;
-      const isBrushable = events.isBrushable();
-      const brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      const hover = events.addHoverEvent();
-      const mouseout = events.addMouseoutEvent();
-      const click = events.addClickEvent();
-      const attachedEvents = element.call(hover).call(mouseout).call(click);
-
-      if (isBrushable) {
-        attachedEvents.call(brush);
-      }
-
-      return attachedEvents;
     };
 
     /**
@@ -165,8 +131,8 @@ export default function AreaChartFactory(Private) {
      */
     addCircles(svg, data) {
       const color = this.handler.data.getColorFunc();
-      const xScale = this.handler.categoryAxes[0].getScale();
-      const yScale = this.handler.valueAxes[0].getScale();
+      const xScale = this.getCategoryAxis().getScale();
+      const yScale = this.getValueAxis().getScale();
       const ordered = this.handler.data.get('ordered');
       const circleRadius = 12;
       const circleStrokeWidth = 0;
@@ -174,16 +140,12 @@ export default function AreaChartFactory(Private) {
       const isTooltip = this._attr.addTooltip;
       const isOverlapping = this.isOverlapping;
 
-      const layer = svg.selectAll('.points')
-      .data(data)
-      .enter()
-      .append('g')
+      const layer = svg.append('g')
       .attr('class', 'points area');
 
       // append the circles
-      const circles = layer
-      .selectAll('circles')
-      .data(function appendData(data) {
+      const circles = layer.selectAll('circles')
+      .data(function appendData() {
         return data.filter(function isZeroOrNull(d) {
           return d.y !== 0 && !_.isNull(d.y);
         });
@@ -211,7 +173,7 @@ export default function AreaChartFactory(Private) {
         }
         return xScale(d.x) + xScale.rangeBand() / 2;
       })
-      .attr('cy', function cy(d, i, j) {
+      .attr('cy', function cy(d) {
         if (isOverlapping) {
           return yScale(d.y);
         }
@@ -227,41 +189,11 @@ export default function AreaChartFactory(Private) {
       return circles;
     };
 
-    /**
-     * Adds SVG clipPath
-     *
-     * @method addClipPath
-     * @param svg {HTMLElement} SVG to which clipPath is appended
-     * @param width {Number} SVG width
-     * @param height {Number} SVG height
-     * @returns {D3.UpdateSelection} SVG with clipPath added
-     */
-    addClipPath(svg, width, height) {
-      // Prevents circles from being clipped at the top of the chart
-      const startX = 0;
-      const startY = 0;
-      const id = 'chart-area' + _.uniqueId();
-
-      // Creating clipPath
-      return svg
-      .attr('clip-path', 'url(#' + id + ')')
-      .append('clipPath')
-      .attr('id', id)
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height);
-    };
-
     checkIfEnoughData() {
-      const series = this.chartData.series;
       const message = 'Area charts require more than one data point. Try adding ' +
         'an X-Axis Aggregation';
 
-      const notEnoughData = series.some(function (obj) {
-        return obj.values.length < 2;
-      });
+      const notEnoughData = this.chartData.values.length < 2;
 
       if (notEnoughData) {
         throw new errors.NotEnoughData(message);
@@ -282,88 +214,17 @@ export default function AreaChartFactory(Private) {
      * @returns {Function} Creates the area chart
      */
     draw() {
-      // Attributes
       const self = this;
-      const xScale = this.handler.categoryAxes[0].getScale();
-      const $elem = $(this.chartEl);
-      const margin = this._attr.margin;
-      const elWidth = this._attr.width = $elem.width();
-      const elHeight = this._attr.height = $elem.height();
-      const yMin = this.handler.valueAxes[0].yMin;
-      const yScale = this.handler.valueAxes[0].getScale();
-      const minWidth = 20;
-      const minHeight = 20;
-      const addTimeMarker = this._attr.addTimeMarker;
-      const times = this._attr.times || [];
-      let timeMarker;
 
       return function (selection) {
-        selection.each(function (data) {
-          // Stack data
-          const layers = self.stackData(data);
+        selection.each(function () {
+          const data = self.handler.pointSeries.mapData(self.chartData, self);
+          const svg = self.chartEl.append('g');
+          svg.data([self.chartData]);
 
-          // Get the width and height
-          const width = elWidth;
-          const height = elHeight - margin.top - margin.bottom;
-
-          if (addTimeMarker) {
-            timeMarker = new TimeMarker(times, xScale, height);
-          }
-
-          if (width < minWidth || height < minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
-          self.validateWiggleSelection();
-
-          // Select the current DOM element
-          const div = d3.select(this);
-
-          // Create the canvas for the visualization
-          const svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height + margin.top + margin.bottom)
-          .append('g')
-          .attr('transform', 'translate(0,' + margin.top + ')');
-
-          // add clipPath to hide circles when they go out of bounds
-          self.addClipPath(svg, width, height);
-          self.createEndZones(svg);
-
-          // add path
-          self.addPath(svg, layers);
-
-          if (yMin < 0 && self._attr.mode !== 'wiggle' && self._attr.mode !== 'silhouette') {
-
-            // Draw line at yScale 0 value
-            svg.append('line')
-            .attr('class', 'zero-line')
-            .attr('x1', 0)
-            .attr('y1', yScale(0))
-            .attr('x2', width)
-            .attr('y2', yScale(0))
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
-          }
-
-          // add circles
-          const circles = self.addCircles(svg, layers);
-
-          // add click and hover events to circles
-          self.addCircleEvents(circles, svg);
-
-          // chart base line
-          svg.append('line')
-          .attr('class', 'base-line')
-          .attr('x1', 0)
-          .attr('y1', yScale(0))
-          .attr('x2', width)
-          .attr('y2', yScale(0))
-          .style('stroke', '#ddd')
-          .style('stroke-width', 1);
-
-          if (addTimeMarker) {
-            timeMarker.render(svg);
-          }
+          self.addPath(svg, data, self.chartData.label);
+          const circles = self.addCircles(svg, data);
+          self.addCircleEvents(circles);
 
           self.events.emit('rendered', {
             chart: data
