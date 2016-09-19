@@ -87,14 +87,51 @@ export default function AxisScaleFactory(Private) {
       return y.valueOf();
     };
 
+    getMinMaxExtent(extent) {
+      const data = this.axis.handler.data.chartData();
+      const chartPoints = _.reduce(data, (chartPoints, chart) => {
+        const stackedData = {};
+        const points = this.axis.handler.chart.series.reduce((points, seri, i) => {
+          const matchingValueAxis = !!seri.valueAxis && seri.valueAxis === this.axis.id;
+          const isFirstAxis = this.axis.id === this.axis.handler.valueAxes[0].id;
+          const shouldStackData = seri.mode === 'stacked';
+
+          if (matchingValueAxis || (!seri.valueAxis && isFirstAxis)) {
+            // this wont work correctly with stacked data ... it will stack all n charts
+            const axisPoints = chart.series[i].values.map(val => {
+              if (shouldStackData) {
+                const y0 = stackedData[val.x] ? stackedData[val.x] : 0;
+                stackedData[val.x] = y0 + val.y;
+                return stackedData[val.x];
+              }
+              return val.y;
+            });
+            return points.concat(axisPoints);
+          }
+          return points;
+        }, []);
+        return chartPoints.concat(points);
+      }, []);
+
+      return d3[extent](chartPoints);
+    };
+
+    getYMin() {
+      return this.getMinMaxExtent('min');
+    };
+
+    getYMax() {
+      return this.getMinMaxExtent('max');
+    };
+
     getExtents() {
       if (this.config.get('type') === 'category') {
         if (this.config.isTimeDomain()) return this.getTimeDomain(this.values);
         if (this.config.isOrdinal()) return this.values;
       }
 
-      const min = this.config.get('scale.min') || this.data.getYMin();
-      const max = this.config.get('scale.max') || this.data.getYMax();
+      const min = this.config.get('scale.min') || this.getYMin();
+      const max = this.config.get('scale.max') || this.getYMax();
       const domain = [min, max];
       if (this.config.isUserDefined()) return this.validateUserExtents(domain);
       if (this.config.isYExtents()) return domain;
@@ -123,15 +160,18 @@ export default function AxisScaleFactory(Private) {
       return [1, max];
     };
 
-    getD3Scale(fnName) {
-      if (fnName === 'square root') fnName = 'sqrt'; // Rename 'square root' to 'sqrt'
-      fnName = fnName || 'linear';
+    getD3Scale() {
+      // todo: why do we need this renaming ?
+      if (this.scaleType === 'square root') this.scaleType = 'sqrt'; // Rename 'square root' to 'sqrt'
+      this.scaleType = this.scaleType || 'linear';
 
       if (this.config.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
       if (this.config.isOrdinal()) return d3.scale.ordinal();
-      if (typeof d3.scale[fnName] !== 'function') return this.throwCustomError('Axis.getScaleType: ' + fnName + ' is not a function');
+      if (typeof d3.scale[this.scaleType] !== 'function') {
+        return this.throwCustomError(`Axis.getScaleType: ${this.scaleType} is not a function`);
+      }
 
-      return d3.scale[fnName]();
+      return d3.scale[this.scaleType]();
     };
 
     getScale(length) {
