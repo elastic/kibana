@@ -164,7 +164,7 @@ export default function DispatchClass(Private, config) {
       const xAxis = this.handler.categoryAxes[0];
       const xScale = xAxis.getScale();
       // Don't allow brushing for time based charts from non-time-based indices
-      const hasTimeField = this.handler.vis._attr.hasTimeField;
+      const hasTimeField = this.handler.config.get('hasTimeField');
 
       return Boolean(hasTimeField && xAxis.ordered && xScale && _.isFunction(xScale.invert));
     };

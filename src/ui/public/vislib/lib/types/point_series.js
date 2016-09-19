@@ -1,10 +1,6 @@
 import _ from 'lodash';
-import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 
 export default function ColumnHandler(Private) {
-  const Handler = Private(VislibLibHandlerHandlerProvider);
-  const Data = Private(VislibLibDataProvider);
   /*
    * Create handlers for Area, Column, and Line charts which
    * are all nearly the same minus a few details
@@ -12,14 +8,11 @@ export default function ColumnHandler(Private) {
   function create(opts) {
     opts = opts || {};
 
-    return function (vis) {
-      const isUserDefinedYAxis = vis._attr.setYExtents;
-      const config = _.defaults({}, vis._attr, {
+    return function (cfg, data) {
+      const isUserDefinedYAxis = cfg.setYExtents;
+      const config = _.defaults({}, cfg, {
         chartTitle: {}
       }, opts);
-      const data = new Data(vis.data, vis._attr, vis.uiState);
-
-      // todo: make sure all old params map correctly to new values
 
       config.type = 'point_series';
 
@@ -29,11 +22,11 @@ export default function ColumnHandler(Private) {
             id: 'ValueAxis-1',
             type: 'value',
             scale: {
-              type: vis._attr.scale,
-              setYExtents: vis._attr.setYExtents,
-              defaultYExtents: vis._attr.defaultYExtents,
-              min : isUserDefinedYAxis ? vis._attr.yAxis.min : undefined,
-              max : isUserDefinedYAxis ? vis._attr.yAxis.max : undefined,
+              type: config.scale,
+              setYExtents: config.setYExtents,
+              defaultYExtents: config.defaultYExtents,
+              min : isUserDefinedYAxis ? config.yAxis.min : undefined,
+              max : isUserDefinedYAxis ? config.yAxis.max : undefined,
             },
             labels: {
               axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
@@ -50,7 +43,7 @@ export default function ColumnHandler(Private) {
           {
             id: 'CategoryAxis-1',
             type: 'category',
-            ordered: vis.data.ordered,
+            ordered: data.ordered,
             labels: {
               axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
             },
@@ -65,19 +58,18 @@ export default function ColumnHandler(Private) {
       }
 
       if (!config.chart) {
-        const series = (vis.data.rows || vis.data.columns || [vis.data])[0].series;
+        const series = (data.data.rows || data.data.columns || [data.data])[0].series;
         config.chart = {
           type: 'point_series',
           series: _.map(series, (seri) => {
-            return _.defaults({}, vis._attr, {
+            return _.defaults({}, cfg, {
               data: seri
             });
           })
         };
       }
 
-      return new Handler(vis, config);
-
+      return config;
     };
   }
 

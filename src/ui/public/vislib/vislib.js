@@ -1,7 +1,7 @@
-import 'ui/vislib/lib/handler/types/pie';
-import 'ui/vislib/lib/handler/types/point_series';
-import 'ui/vislib/lib/handler/types/tile_map';
-import 'ui/vislib/lib/handler/handler_types';
+import 'ui/vislib/lib/types/pie';
+import 'ui/vislib/lib/types/point_series';
+import 'ui/vislib/lib/types/tile_map';
+import 'ui/vislib/lib/types';
 import 'ui/vislib/lib/layout/layout_types';
 import 'ui/vislib/lib/data';
 import 'ui/vislib/visualizations/_map.js';
