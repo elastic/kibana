@@ -1,13 +1,13 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
-import VislibComponentsTooltipProvider from 'ui/vislib/components/tooltip';
+import ChartProvider from 'ui/vislib/visualizations/_chart';
+import TooltipProvider from 'ui/vislib/components/tooltip';
 import errors from 'ui/errors';
 
 export default function PointSeriesChartProvider(Private) {
 
-  const Chart = Private(VislibVisualizationsChartProvider);
-  const Tooltip = Private(VislibComponentsTooltipProvider);
+  const Chart = Private(ChartProvider);
+  const Tooltip = Private(TooltipProvider);
   const touchdownTmpl = _.template(require('ui/vislib/partials/touchdown.tmpl.html'));
 
   class PointSeriesChart extends Chart {
@@ -15,77 +15,41 @@ export default function PointSeriesChartProvider(Private) {
       super(handler, chartEl, chartData);
     }
 
-    _stackMixedValues(stackCount) {
-      let currentStackOffsets = [0, 0];
-      let currentStackIndex = 0;
-
-      return function (d, y0, y) {
-        const firstStack = currentStackIndex % stackCount === 0;
-        const lastStack = ++currentStackIndex === stackCount;
-
-        if (firstStack) {
-          currentStackOffsets = [0, 0];
-        }
-
-        if (lastStack) currentStackIndex = 0;
-
-        if (y >= 0) {
-          d.y0 = currentStackOffsets[1];
-          currentStackOffsets[1] += y;
-        } else {
-          d.y0 = currentStackOffsets[0];
-          currentStackOffsets[0] += y;
-        }
-      };
+    getStackedCount() {
+      return _.reduce(this.handler.data.data.series, function (sum, val) {
+        if (val.stacked || 1) return sum + 1;
+      }, 0);
     };
 
-    /**
-     * Stacks chart data values
-     *
-     * @method stackData
-     * @param data {Object} Elasticsearch query result for this chart
-     * @returns {Array} Stacked data objects with x, y, and y0 values
-     */
-    stackData(data) {
-      const self = this;
-      const isHistogram = (this._attr.type === 'histogram' && this._attr.mode === 'stacked');
-      const stack = this._attr.stack;
-
-      if (isHistogram) stack.out(self._stackMixedValues(data.series.length));
-
-      return stack(data.series.map(function (d) {
-        const label = d.label;
-        return d.values.map(function (e, i) {
-          return {
-            _input: e,
-            label: label,
-            x: self._attr.xValue.call(d.values, e, i),
-            y: self._attr.yValue.call(d.values, e, i)
-          };
-        });
-      }));
-    };
-
-
-    validateDataCompliesWithScalingMethod(data) {
-      const valuesSmallerThanOne = function (d) {
-        return d.values && d.values.some(e => e.y < 1);
-      };
-
-      const invalidLogScale = data.series && data.series.some(valuesSmallerThanOne);
-      if (this._attr.scale === 'log' && invalidLogScale) {
-        throw new errors.InvalidLogScaleValues();
+    getStackedNum(data) {
+      let i = 0;
+      for (const seri of this.handler.data.data.series) {
+        if (seri === data) return i;
+        if (seri.stacked || 1) i++;
       }
+      return 0;
     };
 
-    /**
-     * Creates rects to show buckets outside of the ordered.min and max, returns rects
-     *
-     * @param xScale {Function} D3 xScale function
-     * @param svg {HTMLElement} Reference to SVG
-     * @method createEndZones
-     * @returns {D3.Selection}
-     */
+    getValueAxis() {
+      return _.find(this.handler.valueAxes, axis => {
+        return axis.id === this._attr.valueAxis;
+      }) || this.handler.valueAxes[0];
+    };
+
+    getCategoryAxis() {
+      return _.find(this.handler.categoryAxes, axis => {
+        return axis.id === this._attr.categoryAxis;
+      }) || this.handler.categoryAxes[0];
+    };
+
+    addCircleEvents(element) {
+      const events = this.events;
+      const hover = events.addHoverEvent();
+      const mouseout = events.addMouseoutEvent();
+      const click = events.addClickEvent();
+      return element.call(hover).call(mouseout).call(click);
+    };
+
     createEndZones(svg) {
       const self = this;
       const xAxis = this.handler.categoryAxes[0];
