@@ -52,7 +52,6 @@ module.exports = function timechartFn(Private, config, $rootScope, timefilter, $
           },
           legend: {
             backgroundColor: null,
-            backgroundOpacity: 0,
             position: 'nw',
             labelBoxBorderColor: 'rgb(255,255,255,0)',
             labelFormatter: function (label, series) {
