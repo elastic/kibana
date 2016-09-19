@@ -166,7 +166,7 @@ Here is an example configuration the only allows Console to connect to localhost
 
 [source,yaml]
 --------
-concosole.proxyFilter:
+console.proxyFilter:
   - ^https?://(localhost|127\.0\.0\.1|\[::0\]).*
 --------
 
