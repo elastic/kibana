@@ -17,55 +17,6 @@
   border-width: 0;
 }
 
-  .navbar-static-top {
-    background-color: @kibanaGray5;
-    color: @kibanaGray2;
-    .navbar-brand:hover,
-    .navbar-brand {
-      float: none;
-      color: @kibanaGray2;
-      font-size: 1em;
-      background-color: transparent;
-      padding-top: 8px;
-      height: 35px;
-    }
-    .navbar-nav {
-
-      > li > a,
-      > span {
-        color: @kibanaGray2;
-        font-size: 1.5em;
-        padding: 5px 0 6px 0;
-        margin: 0 10px;
-        border-bottom: 2px solid transparent;
-      }
-      // singular tabs are treated as titles
-      > li:only-child > a {
-        color: @kibanaGray1;
-      }
-      // Active, hover state for the getTabs
-      > .active > a,
-      > .active > a:hover,
-      > .active > a:active,
-      > li > a:active,
-      > li > a:hover {
-        color: @kibanaGray1;
-        background-color: transparent;
-        border-bottom: 2px solid @kibanaGray1;
-      }
-
-      .is-navbar-nav-link-disabled {
-        opacity: 0.5;
-        cursor: default;
-
-        &:hover {
-          border-bottom-color: transparent;
-          color: @kibanaGray2;
-        }
-      }
-    }
-  }
-
   .navbar-btn-link {
     margin: 0;
     border-radius: 0;
