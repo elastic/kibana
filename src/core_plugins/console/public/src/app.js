@@ -7,7 +7,7 @@ let es = require('./es');
 let utils = require('./utils');
 let _ = require('lodash');
 
-export default function init(input, output) {
+export default function init(input, output, sourceLocation = 'stored') {
   $(document.body).removeClass('fouc');
 
   // set the value of the input and clear the output
@@ -19,7 +19,6 @@ export default function init(input, output) {
   }
 
   function loadSavedState() {
-    var sourceLocation = utils.getUrlParam('load_from') || "stored";
     var previousSaveState = history.getSavedEditorState();
 
     if (sourceLocation == "stored") {
