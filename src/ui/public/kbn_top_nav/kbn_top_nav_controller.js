@@ -1,5 +1,6 @@
 import { capitalize, isArray, isFunction } from 'lodash';
 
+import chrome from 'ui/chrome';
 import uiModules from 'ui/modules';
 import filterTemplate from 'ui/chrome/config/filter.html';
 import intervalTemplate from 'ui/chrome/config/interval.html';
@@ -20,6 +21,10 @@ export default function ($compile) {
       };
 
       this.addItems(opts);
+    }
+
+    isVisible() {
+      return chrome.getVisible();
     }
 
     addItems(rawOpts) {
