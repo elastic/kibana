@@ -32,7 +32,10 @@ define(function () {
         // limit the response to just the _source field for each index
         fields: '_source'
       }).then(function (resp) {
-        return _.keys(resp[indexName].mappings);
+        // indexName is not sufficient here, if the kibana indexed is aliased we need to use
+        // the root index name as key
+        const index = _.keys(resp)[0];
+        return _.keys(resp[index].mappings);
       });
     });
 
