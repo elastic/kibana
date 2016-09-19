@@ -81,6 +81,13 @@ export default function defaultSettingsProvider() {
         'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
         'cause requests to take much longer to process'
     },
+    'courier:ignoreFilterIfFieldNotInIndex': {
+      value: false,
+      description: 'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
+        'When set to false, all filters are applied to all visualizations. ' +
+        'When set to true, filter(s) will be ignored for a visualization ' +
+        'when the visualization\'s index does not contain the filtering field.'
+    },
     'fields:popularLimit': {
       value: 10,
       description: 'The top N most popular fields to show',
