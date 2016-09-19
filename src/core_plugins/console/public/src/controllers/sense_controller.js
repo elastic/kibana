@@ -16,7 +16,7 @@ module.run(function (Private, $rootScope) {
   };
 });
 
-module.controller('SenseController', function SenseController($scope, $timeout, docTitle) {
+module.controller('SenseController', function SenseController($scope, $timeout, $location, docTitle) {
 
   docTitle.change('Console');
 
@@ -27,7 +27,7 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
   $timeout(() => {
     output = initializeOutput($('#output'));
     input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output);
-    init(input, output);
+    init(input, output, $location.search().load_from);
   });
 
   $scope.sendSelected = () => {
