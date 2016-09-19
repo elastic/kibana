@@ -81,15 +81,18 @@ uiModules
         // build collection of agg params html
         type.params.forEach(function (param, i) {
           let aggParam;
+          let fields;
           // if field param exists, compute allowed fields
           if (param.name === 'field') {
-            $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+            fields = $aggParamEditorsScope.indexedFields = getIndexedFields(param);
+          } else if (param.type === 'field') {
+            fields = $aggParamEditorsScope[param.name] = getIndexedFields(param);
           }
 
-          if ($aggParamEditorsScope.indexedFields) {
-            const hasIndexedFields = $aggParamEditorsScope.indexedFields.length > 0;
+          if (fields) {
+            const hasIndexedFields = fields.length > 0;
             const isExtraParam = i > 0;
-            if (!hasIndexedFields && isExtraParam) { // don't draw the rest of the options if their are no indexed fields.
+            if (!hasIndexedFields && isExtraParam) { // don't draw the rest of the options if there are no indexed fields.
               return;
             }
           }
@@ -142,7 +145,7 @@ uiModules
         const fieldTypes = param.filterFieldTypes;
 
         if (fieldTypes) {
-          fields = $filter('fieldType')(fields, fieldTypes);
+          fields = $filter('fieldType')(fields, _.isFunction(fieldTypes) ? fieldTypes.bind(this, $scope.agg.vis) : fieldTypes);
           fields = $filter('orderBy')(fields, ['type', 'name']);
         }
 

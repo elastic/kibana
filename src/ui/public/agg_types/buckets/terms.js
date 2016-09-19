@@ -96,6 +96,7 @@ export default function TermsAggDefinition(Private) {
           $scope.$watch('responseValueAggs', updateOrderAgg);
           $scope.$watch('agg.params.orderBy', updateOrderAgg);
 
+          // Returns true if the agg is not compatible with the terms bucket
           $scope.rejectAgg = function (agg) {
             // aggFilter elements all starts with a '!'
             // so the index of agg.type.name in a filter is 1 if it is included
@@ -114,7 +115,7 @@ export default function TermsAggDefinition(Private) {
               if (!$scope.responseValueAggs) return;
               let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
               if (!respAgg) {
-                respAgg = { id: 'custom' };
+                respAgg = { id: '_term' };
               }
               params.orderBy = respAgg.id;
               return;
@@ -126,16 +127,10 @@ export default function TermsAggDefinition(Private) {
             // we aren't creating a custom aggConfig
             if (!orderBy || orderBy !== 'custom') {
               params.orderAgg = null;
-
-              if (orderBy === '_term') {
-                params.orderBy = '_term';
-                return;
-              }
-
               // ensure that orderBy is set to a valid agg
               const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
               if (!respAgg) {
-                params.orderBy = null;
+                params.orderBy = '_term';
               }
               return;
             }

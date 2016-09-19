@@ -146,7 +146,11 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
 
     if (fieldParam) {
       let prevField = this.params.field;
-      let fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, fieldParam.filterFieldTypes);
+      let filters = fieldParam.filterFieldTypes;
+      if (_.isFunction(fieldParam.filterFieldTypes)) {
+        filters = fieldParam.filterFieldTypes.bind(this, this.vis);
+      }
+      let fieldOpts = fieldTypeFilter(this.vis.indexPattern.fields, filters);
       field = _.contains(fieldOpts, prevField) ? prevField : null;
     }
 

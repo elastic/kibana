@@ -86,7 +86,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg5');
     });
 
-    it('defaults to the custom metric if no agg is compatible', function () {
+    it('defaults to the _term metric if no agg is compatible', function () {
       init({
         responseValueAggs: [
           {
@@ -97,15 +97,15 @@ describe('Terms Agg', function () {
           }
         ]
       });
-      expect($rootScope.agg.params.orderBy).to.be('custom');
+      expect($rootScope.agg.params.orderBy).to.be('_term');
     });
 
-    it('selects "custom metric" if there are no metric aggs', function () {
+    it('selects _term if there are no metric aggs', function () {
       init({});
-      expect($rootScope.agg.params.orderBy).to.be('custom');
+      expect($rootScope.agg.params.orderBy).to.be('_term');
     });
 
-    it('is emptied if the selected metric becomes incompatible', function () {
+    it('selects _term if the selected metric becomes incompatible', function () {
       init({
         responseValueAggs: [
           {
@@ -126,10 +126,10 @@ describe('Terms Agg', function () {
         }
       ];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be(null);
+      expect($rootScope.agg.params.orderBy).to.be('_term');
     });
 
-    it('is emptied if the selected metric is removed', function () {
+    it('selects _term if the selected metric is removed', function () {
       init({
         responseValueAggs: [
           {
@@ -143,7 +143,7 @@ describe('Terms Agg', function () {
       expect($rootScope.agg.params.orderBy).to.be('agg1');
       $rootScope.responseValueAggs = [];
       $rootScope.$digest();
-      expect($rootScope.agg.params.orderBy).to.be(null);
+      expect($rootScope.agg.params.orderBy).to.be('_term');
     });
 
     it('adds "custom metric" option');

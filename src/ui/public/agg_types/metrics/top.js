@@ -1,6 +1,6 @@
-import { noop, get } from 'lodash';
+import { noop } from 'lodash';
 import MetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
-import topEditor from 'ui/agg_types/controls/top.html';
+import topSortEditor from 'ui/agg_types/controls/top_sort.html';
 
 export default function AggTypeMetricTopProvider(Private) {
   const MetricAggType = Private(MetricAggTypeProvider);
@@ -9,16 +9,25 @@ export default function AggTypeMetricTopProvider(Private) {
     name: 'top_hits',
     title: 'Top',
     makeLabel: function (aggConfig) {
-      const prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Latest' : 'Earliest';
+      const prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Last' : 'First';
       return `${prefix} ${aggConfig.params.field.displayName}`;
     },
     params: [
       {
         name: 'field',
+        filterFieldTypes: function (vis, value) {
+          if (vis.type.name === 'table') {
+            return true;
+          }
+          if (vis.type.name === 'pie') {
+            return value === 'number';
+          }
+          return value === 'number' || value === 'date';
+        },
         write(agg, output) {
           output.params = {
             size: 1,
-            _source: agg.params.field.name
+            docvalue_fields: [ agg.params.field.name ]
           };
         }
       },
@@ -36,7 +45,7 @@ export default function AggTypeMetricTopProvider(Private) {
         name: 'sortOrder',
         type: 'optioned',
         default: 'desc',
-        editor: topEditor,
+        editor: topSortEditor,
         options: [
           { display: 'Descending', val: 'desc' },
           { display: 'Ascending', val: 'asc' }
@@ -53,7 +62,7 @@ export default function AggTypeMetricTopProvider(Private) {
       }
     ],
     getValue(agg, bucket) {
-      return get(bucket[agg.id].hits.hits[0]._source, agg.params.field.name);
+      return bucket[agg.id].hits.hits[0].fields[agg.params.field.name][0];
     }
   });
 };
