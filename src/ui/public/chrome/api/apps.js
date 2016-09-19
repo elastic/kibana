@@ -15,7 +15,7 @@ module.exports = function (chrome, internals) {
   } catch (error) {
     throw new Error(
       'Kibana requires access to sessionStorage, and it looks like ' +
-      'your browser isn\'t providing access to sessionStorage. If you\'re ' +
+      'your browser is restricting it. If you\'re ' +
       'using Safari with private browsing enabled, you can solve this ' +
       'problem by disabling private browsing, or by using another browser.');
   }
