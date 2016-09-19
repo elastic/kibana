@@ -12,12 +12,16 @@ async function getVisibleTextFromAceEditor(editor) {
 }
 
 export default class ConsolePage {
-  init() {
+  init(remote) {
+    this.remote = remote;
+  }
 
+  async getRequestEditor() {
+    return await PageObjects.common.findTestSubject('console request-editor');
   }
 
   async getRequest() {
-    const requestEditor = await PageObjects.common.findTestSubject('console request-editor');
+    const requestEditor = await this.getRequestEditor();
     return await getVisibleTextFromAceEditor(requestEditor);
   }
 
@@ -34,5 +38,34 @@ export default class ConsolePage {
   async collapseHelp() {
     const closeButton = await PageObjects.common.findTestSubject('console help-close-button');
     await closeButton.click();
+  }
+
+  async openSettings() {
+    const settingsButton = await PageObjects.common.findTestSubject('console top-nav menu-item-settings');
+    await settingsButton.click();
+  }
+
+  async setFontSizeSetting(newSize) {
+    await this.openSettings();
+
+    // while the settings form opens/loads this may fail, so retry for a while
+    await PageObjects.common.try(async () => {
+      const fontSizeInput = await PageObjects.common.findTestSubject('console setting-font-size-input');
+      await fontSizeInput.clearValue();
+      await fontSizeInput.click();
+      await fontSizeInput.type(String(newSize));
+    });
+
+    const saveButton = await PageObjects.common.findTestSubject('console settings-save-button');
+    await saveButton.click();
+  }
+
+  async getFontSize(editor) {
+    const aceLine = await editor.findByClassName('ace_line');
+    return await aceLine.getComputedStyle('font-size');
+  }
+
+  async getRequestFontSize() {
+    return await this.getFontSize(await this.getRequestEditor());
   }
 }
