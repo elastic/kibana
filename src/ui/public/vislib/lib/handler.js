@@ -2,31 +2,19 @@ import d3 from 'd3';
 import _ from 'lodash';
 import errors from 'ui/errors';
 import Binder from 'ui/binder';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
 import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
 import VislibAxis from 'ui/vislib/lib/axis';
 import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
-import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 
 export default function HandlerBaseClass(Private) {
-
-  const injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
   const chartTypes = Private(VislibVisualizationsVisTypesProvider);
-  const Data = Private(VislibLibDataProvider);
   const Layout = Private(VislibLibLayoutLayoutProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
   const Axis = Private(VislibAxis);
 
-
-  const defaults = {
-    // todo: more defaults
-    style: {
-      margin : { top: 10, right: 3, bottom: 5, left: 3 }
-    }
-  };
   /**
    * Handles building all the components of the visualization
    *
@@ -37,27 +25,22 @@ export default function HandlerBaseClass(Private) {
    * create the visualization
    */
   class Handler {
-    constructor(vis, opts) {
-
-      if (opts.zeroFill) {
-        this.data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);
-      } else {
-        this.data = new Data(vis.data, vis._attr, vis.uiState);
-      }
-      this.vis = vis;
-      this.el = vis.el;
+    constructor(vis, config) {
+      this.el = config.get('el');
       this.chartTypes = chartTypes;
-      this.ChartClass = chartTypes[opts.type];
+      this.ChartClass = chartTypes[config.get('type')];
       this.charts = [];
 
-      this._attr = _.defaults({}, opts || {}, defaults);
+      this.vis = vis;
+      this._attr = config;
+      this.data = config.data;
 
-      this.categoryAxes = _.map(opts.categoryAxes, axis => new Axis(this, axis));
-      this.valueAxes = _.map(opts.valueAxes, axis => new Axis(this, axis));
-      this.chartTitle = new ChartTitle(this, opts.chartTitle);
-      this.alerts = new Alerts(this, opts.alerts);
+      this.categoryAxes = _.map(config.get('categoryAxes'), axis => new Axis(config, axis));
+      this.valueAxes = _.map(config.get('valueAxes'), axis => new Axis(config, axis));
+      this.chartTitle = new ChartTitle(config);
+      this.alerts = new Alerts(this, config.get('alerts'));
 
-      this.layout = new Layout(vis.el, vis.data, vis._attr.type, opts);
+      this.layout = new Layout(config);
       this.binder = new Binder();
       this.renderArray = _.filter([
         this.layout,

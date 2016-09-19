@@ -27,7 +27,7 @@ export default function PointSeriesFactory(Private) {
       this.handler = handler;
       this.chartData = chartData;
       this.chartEl = chartEl;
-      this._attr = handler._attr.chart;
+      this._attr = handler._attr.get('chart');
       this.handler.pointSeries = this;
     }
 
@@ -101,9 +101,9 @@ export default function PointSeriesFactory(Private) {
       // todo: do we need to handle width and height here ?
       let self = this;
       let $elem = $(this.chartEl);
-      let margin = this.handler._attr.style.margin;
-      let elWidth = this._attr.width = this.handler._attr.width = $elem.width();
-      let elHeight = this._attr.height = this.handler._attr.height = $elem.height();
+      let margin = this.handler._attr.get('style.margin');
+      let elWidth = this._attr.width = $elem.width();
+      let elHeight = this._attr.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
       let minWidth = 20;
       let minHeight = 20;
@@ -143,7 +143,7 @@ export default function PointSeriesFactory(Private) {
           self.stackedData = {};
           const chartTypes = self.handler.chartTypes;
           _.each(self._attr.series, (seri, i) => {
-            const chart = new chartTypes[seri.type || self.handler._attr.type](self.handler, svg, data.series[i], seri);
+            const chart = new chartTypes[seri.type || self.handler._attr.get('chart.type')](self.handler, svg, data.series[i], seri);
             chart.events = self.events;
             svg.call(chart.draw());
           });

@@ -5,17 +5,17 @@ import errors from 'ui/errors';
 import 'ui/vislib/styles/main.less';
 import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
 import EventsProvider from 'ui/events';
-import VislibLibHandlerHandlerTypesProvider from 'ui/vislib/lib/handler/handler_types';
+import VisConifgProvider from 'ui/vislib/lib/vis_config';
+import VisHandlerProvider from 'ui/vislib/lib/handler';
+
 export default function VisFactory(Private) {
 
 
   const ResizeChecker = Private(VislibLibResizeCheckerProvider);
   const Events = Private(EventsProvider);
-  const handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
+  const VisConfig = Private(VisConifgProvider);
+  const Handler = Private(VisHandlerProvider);
 
-  const defaults = {
-    margin : { top: 10, right: 3, bottom: 5, left: 3 }
-  };
   /**
    * Creates the visualizations.
    *
@@ -29,7 +29,8 @@ export default function VisFactory(Private) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this._attr = _.defaults({}, config, defaults);
+      this._attr = config;
+      this._attr.el = this.el;
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -44,8 +45,6 @@ export default function VisFactory(Private) {
      * @param data {Object} Elasticsearch query results
      */
     render(data, uiState) {
-      const chartType = this._attr.type;
-
       if (!data) {
         throw new Error('No valid data!');
       }
@@ -62,7 +61,8 @@ export default function VisFactory(Private) {
         uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
       }
 
-      this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
+      this.config = new VisConfig(this._attr, this.data, this.uiState);
+      this.handler = new Handler(this, this.config);
       this._runWithoutResizeChecker('render');
     };
 
