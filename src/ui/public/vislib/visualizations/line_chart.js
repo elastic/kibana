@@ -7,8 +7,17 @@ import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/tim
 export default function LineChartFactory(Private) {
 
   const PointSeriesChart = Private(VislibVisualizationsPointSeriesChartProvider);
-  const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
 
+  const defaults = {
+    mode: 'normal',
+    showCircles: true,
+    radiusRatio: 9,
+    showLines: true,
+    smoothLines: false,
+    interpolate: 'linear',
+    color: undefined, // todo
+    fillColor: undefined // todo
+  };
   /**
    * Line Chart Visualization
    *
@@ -20,43 +29,10 @@ export default function LineChartFactory(Private) {
    * @param chartData {Object} Elasticsearch query results for this specific chart
    */
   class LineChart extends PointSeriesChart {
-    constructor(handler, chartEl, chartData) {
-      super(handler, chartEl, chartData);
-
-      // Line chart specific attributes
-      this._attr = _.defaults(handler._attr || {}, {
-        interpolate: 'linear',
-        xValue: function (d) {
-          return d.x;
-        },
-        yValue: function (d) {
-          return d.y;
-        }
-      });
+    constructor(handler, chartEl, chartData, chartConfig) {
+      super(handler, chartEl, chartData, chartConfig);
+      this._attr = _.defaults(chartConfig || {}, defaults);
     }
-
-    /**
-     * Adds Events to SVG circle
-     *
-     * @method addCircleEvents
-     * @param element{D3.UpdateSelection} Reference to SVG circle
-     * @returns {D3.Selection} SVG circles with event listeners attached
-     */
-    addCircleEvents(element, svg) {
-      const events = this.events;
-      const isBrushable = events.isBrushable();
-      const brush = isBrushable ? events.addBrushEvent(svg) : undefined;
-      const hover = events.addHoverEvent();
-      const mouseout = events.addMouseoutEvent();
-      const click = events.addClickEvent();
-      const attachedEvents = element.call(hover).call(mouseout).call(click);
-
-      if (isBrushable) {
-        attachedEvents.call(brush);
-      }
-
-      return attachedEvents;
-    };
 
     /**
      * Adds circles to SVG
@@ -70,37 +46,33 @@ export default function LineChartFactory(Private) {
       const self = this;
       const showCircles = this._attr.showCircles;
       const color = this.handler.data.getColorFunc();
-      const xScale = this.handler.categoryAxes[0].getScale();
-      const yScale = this.handler.valueAxes[0].getScale();
+      const xScale = this.getCategoryAxis().getScale();
+      const yScale = this.getValueAxis().getScale();
       const ordered = this.handler.data.get('ordered');
       const tooltip = this.tooltip;
       const isTooltip = this._attr.addTooltip;
 
       const radii = _(data)
-      .map(function (series) {
-        return _.pluck(series, '_input.z');
-      })
-      .flattenDeep()
-      .reduce(function (result, val) {
-        if (result.min > val) result.min = val;
-        if (result.max < val) result.max = val;
-        return result;
-      }, {
-        min: Infinity,
-        max: -Infinity
-      });
+        .map(function (point) {
+          return point._input.z;
+        })
+        .reduce(function (result, val) {
+          if (result.min > val) result.min = val;
+          if (result.max < val) result.max = val;
+          return result;
+        }, {
+          min: Infinity,
+          max: -Infinity
+        });
 
       const radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / Math.pow(this._attr.radiusRatio, 2);
 
-      const layer = svg.selectAll('.points')
-      .data(data)
-      .enter()
-      .append('g')
+      const layer = svg.append('g')
       .attr('class', 'points line');
 
       const circles = layer
       .selectAll('circle')
-      .data(function appendData(data) {
+      .data(function appendData() {
         return data.filter(function (d) {
           return !_.isNull(d.y);
         });
@@ -185,39 +157,35 @@ export default function LineChartFactory(Private) {
      * @param data {Array} Array of object data points
      * @returns {D3.UpdateSelection} SVG with paths added
      */
-    addLines(svg, data) {
-      const xScale = this.handler.categoryAxes[0].getScale();
-      const yScale = this.handler.valueAxes[0].getScale();
+    addLine(svg, data) {
+      const xScale = this.getCategoryAxis().getScale();
+      const yScale = this.getValueAxis().getScale();
       const xAxisFormatter = this.handler.data.get('xAxisFormatter');
       const color = this.handler.data.getColorFunc();
       const ordered = this.handler.data.get('ordered');
       const interpolate = (this._attr.smoothLines) ? 'cardinal' : this._attr.interpolate;
-      const line = d3.svg.line()
-      .defined(function (d) {
-        return !_.isNull(d.y);
-      })
-      .interpolate(interpolate)
-      .x(function x(d) {
-        if (ordered && ordered.date) {
-          return xScale(d.x);
-        }
-        return xScale(d.x) + xScale.rangeBand() / 2;
-      })
-      .y(function y(d) {
-        return yScale(d.y);
-      });
 
-      const lines = svg
-        .selectAll('.lines')
-        .data(data)
-        .enter()
-        .append('g')
+      const line = svg.append('g')
         .attr('class', 'pathgroup lines');
 
-      lines.append('path')
+      line.append('path')
         .call(this._addIdentifier)
-        .attr('d', function lineD(d) {
-          return line(d.values);
+        .attr('d', () => {
+          const d3Line = d3.svg.line()
+            .defined(function (d) {
+              return !_.isNull(d.y);
+            })
+            .interpolate(interpolate)
+            .x(function x(d) {
+              if (ordered && ordered.date) {
+                return xScale(d.x);
+              }
+              return xScale(d.x) + xScale.rangeBand() / 2;
+            })
+            .y(function y(d) {
+              return yScale(d.y);
+            });
+          return d3Line(data);
         })
         .attr('fill', 'none')
         .attr('stroke', function lineStroke(d) {
@@ -225,35 +193,7 @@ export default function LineChartFactory(Private) {
         })
         .attr('stroke-width', 2);
 
-      return lines;
-    };
-
-    /**
-     * Adds SVG clipPath
-     *
-     * @method addClipPath
-     * @param svg {HTMLElement} SVG to which clipPath is appended
-     * @param width {Number} SVG width
-     * @param height {Number} SVG height
-     * @returns {D3.UpdateSelection} SVG with clipPath added
-     */
-    addClipPath(svg, width, height) {
-      const clipPathBuffer = 5;
-      const startX = 0;
-      const startY = 0 - clipPathBuffer;
-      const id = 'chart-area' + _.uniqueId();
-
-      return svg
-      .attr('clip-path', 'url(#' + id + ')')
-      .append('clipPath')
-      .attr('id', id)
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      // Adding clipPathBuffer to height so it doesn't
-      // cutoff the lower part of the chart
-      .attr('height', height + clipPathBuffer);
+      return line;
     };
 
     /**
@@ -264,80 +204,22 @@ export default function LineChartFactory(Private) {
      */
     draw() {
       const self = this;
-      const $elem = $(this.chartEl);
-      const margin = this._attr.margin;
-      const elWidth = this._attr.width = $elem.width();
-      const elHeight = this._attr.height = $elem.height();
-      const scaleType = this.handler.valueAxes[0].axisScale.getScaleType();
-      const yScale = this.handler.valueAxes[0].getScale();
-      const xScale = this.handler.categoryAxes[0].getScale();
-      const minWidth = 20;
-      const minHeight = 20;
-      const startLineX = 0;
-      const lineStrokeWidth = 1;
-      const addTimeMarker = this._attr.addTimeMarker;
-      const times = this._attr.times || [];
-      let timeMarker;
 
       return function (selection) {
-        selection.each(function (data) {
-          const el = this;
+        selection.each(function () {
 
-          const layers = data.series.map(function mapSeries(d) {
-            const label = d.label;
-            return d.values.map(function mapValues(e, i) {
-              return {
-                _input: e,
-                label: label,
-                x: self._attr.xValue.call(d.values, e, i),
-                y: self._attr.yValue.call(d.values, e, i)
-              };
-            });
-          });
+          // this should only stack if series mode is stacked ...
+          // but it should still do the transform ? why do we need that transform in the first place ?
+          // should we just update the values with y0 (0 for non stacked) ??
+          const data = self.handler.pointSeries.mapData(self.chartData, self);
+          const svg = self.chartEl.append('g');
+          svg.data([self.chartData]);
 
-          const width = elWidth - margin.left - margin.right;
-          const height = elHeight - margin.top - margin.bottom;
-          if (width < minWidth || height < minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
-          self.validateDataCompliesWithScalingMethod(data);
-
-          if (addTimeMarker) {
-            timeMarker = new TimeMarker(times, xScale, height);
-          }
-
-
-          const div = d3.select(el);
-
-          const svg = div.append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', height + margin.top + margin.bottom)
-          .append('g')
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-          self.addClipPath(svg, width, height);
           if (self._attr.drawLinesBetweenPoints) {
-            self.addLines(svg, data.series);
+            self.addLine(svg, data);
           }
-          const circles = self.addCircles(svg, layers);
-          self.addCircleEvents(circles, svg);
-          self.createEndZones(svg);
-
-          const scale = (scaleType === 'log') ? yScale(1) : yScale(0);
-          if (scale) {
-            svg.append('line')
-            .attr('class', 'base-line')
-            .attr('x1', startLineX)
-            .attr('y1', scale)
-            .attr('x2', width)
-            .attr('y2', scale)
-            .style('stroke', '#ddd')
-            .style('stroke-width', lineStrokeWidth);
-          }
-
-          if (addTimeMarker) {
-            timeMarker.render(svg);
-          }
+          const circles = self.addCircles(svg, data);
+          self.addCircleEvents(circles);
 
           self.events.emit('rendered', {
             chart: data
