@@ -1,27 +1,10 @@
-import d3 from 'd3';
 import _ from 'lodash';
-import VislibComponentsZeroInjectionInjectZerosProvider from 'ui/vislib/components/zero_injection/inject_zeros';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
 import VislibLibDataProvider from 'ui/vislib/lib/data';
-import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
-import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
-import VislibAxis from 'ui/vislib/lib/axis';
 
 export default function ColumnHandler(Private) {
-  const injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
   const Handler = Private(VislibLibHandlerHandlerProvider);
   const Data = Private(VislibLibDataProvider);
-  const Axis = Private(VislibAxis);
-  const ChartTitle = Private(VislibLibChartTitleProvider);
-  const Alerts = Private(VislibLibAlertsProvider);
-
-  function getData(vis, opts) {
-    if (opts.zeroFill) {
-      return new Data(injectZeros(vis.data), vis._attr, vis.uiState);
-    } else {
-      return new Data(vis.data, vis._attr, vis.uiState);
-    }
-  }
   /*
    * Create handlers for Area, Column, and Line charts which
    * are all nearly the same minus a few details
@@ -31,35 +14,20 @@ export default function ColumnHandler(Private) {
 
     return function (vis) {
       const isUserDefinedYAxis = vis._attr.setYExtents;
-      const data = getData(vis, opts);
+      const config = _.defaults({}, vis._attr, {
+        chartTitle: {}
+      }, opts);
+      const data = new Data(vis.data, vis._attr, vis.uiState);
 
-      return new Handler(vis, {
-        data: data,
-        chartTitle: new ChartTitle(vis.el),
-        categoryAxes: [
-          new Axis({
-            id: 'CategoryAxis-1',
-            type: 'category',
-            vis: vis,
-            data: data,
-            labels: {
-              axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
-            },
-            scale: {
-              expandLastBucket: opts.expandLastBucket
-            },
-            title: {
-              text: data.get('xAxisLabel')
-            }
-          })
-        ],
-        alerts: new Alerts(vis, data, opts.alerts),
-        valueAxes:  [
-          new Axis({
+      // todo: make sure all old params map correctly to new values
+
+      config.type = 'point_series';
+
+      if (!config.valueAxes) {
+        config.valueAxes = [
+          {
             id: 'ValueAxis-1',
             type: 'value',
-            vis: vis,
-            data: data,
             scale: {
               type: vis._attr.scale,
               setYExtents: vis._attr.setYExtents,
@@ -73,9 +41,42 @@ export default function ColumnHandler(Private) {
             title: {
               text: data.get('yAxisLabel')
             }
+          }
+        ];
+      }
+
+      if (!config.categoryAxes) {
+        config.categoryAxes = [
+          {
+            id: 'CategoryAxis-1',
+            type: 'category',
+            ordered: vis.data.ordered,
+            labels: {
+              axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
+            },
+            scale: {
+              expandLastBucket: opts.expandLastBucket
+            },
+            title: {
+              text: data.get('xAxisLabel')
+            }
+          }
+        ];
+      }
+
+      if (!config.chart) {
+        const series = (vis.data.rows || vis.data.columns || [vis.data])[0].series;
+        config.chart = {
+          type: 'point_series',
+          series: _.map(series, (seri) => {
+            return _.defaults({}, vis._attr, {
+              data: seri
+            });
           })
-        ]
-      });
+        };
+      }
+
+      return new Handler(vis, config);
 
     };
   }
