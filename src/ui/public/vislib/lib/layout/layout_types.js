@@ -17,6 +17,7 @@ export default function LayoutTypeFactory(Private) {
     line: Private(VislibLibLayoutTypesColumnLayoutProvider),
     area: Private(VislibLibLayoutTypesColumnLayoutProvider),
     pie: Private(VislibLibLayoutTypesPieLayoutProvider),
-    tile_map: Private(VislibLibLayoutTypesMapLayoutProvider)
+    tile_map: Private(VislibLibLayoutTypesMapLayoutProvider),
+    point_series: Private(VislibLibLayoutTypesColumnLayoutProvider)
   };
 };
