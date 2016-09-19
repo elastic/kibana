@@ -42,7 +42,10 @@ export default function ColumnChartFactory(Private) {
       const tooltip = this.tooltip;
       const isTooltip = this._attr.addTooltip;
 
-      const layer = svg.append('g');
+      const layer = svg.append('g')
+      .attr('class', function (d, i) {
+        return 'series ' + i;
+      });
 
       const bars = layer.selectAll('rect')
         .data(layers);
@@ -56,7 +59,7 @@ export default function ColumnChartFactory(Private) {
       .append('rect')
       .call(this._addIdentifier)
       .attr('fill', function (d) {
-        return color(layers.label);
+        return color(d.label);
       });
 
       self.updateBars(bars);
@@ -101,9 +104,9 @@ export default function ColumnChartFactory(Private) {
       const yMin = yScale.domain()[0];
 
       let barWidth;
-      if (data.ordered && data.ordered.date) {
-        const start = data.ordered.min;
-        const end = moment(data.ordered.min).add(data.ordered.interval).valueOf();
+      if (this.getCategoryAxis().config.isTimeDomain()) {
+        const start = this.handler.data.data.ordered.min;
+        const end = moment(this.handler.data.data.ordered.min).add(this.handler.data.data.ordered.interval).valueOf();
 
         barWidth = xScale(end) - xScale(start);
         barWidth = barWidth - Math.min(barWidth * 0.25, 15);

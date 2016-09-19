@@ -50,8 +50,7 @@ export default function HandlerBaseClass(Private) {
       this.ChartClass = chartTypes[opts.type];
       this.charts = [];
 
-      _.defaults(this, opts || {}, defaults);
-      this._attr = opts;
+      this._attr = _.defaults({}, opts || {}, defaults);
 
       this.categoryAxes = _.map(opts.categoryAxes, axis => new Axis(this, axis));
       this.valueAxes = _.map(opts.valueAxes, axis => new Axis(this, axis));
