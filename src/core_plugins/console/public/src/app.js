@@ -4,7 +4,6 @@ let curl = require('./curl');
 let history = require('./history');
 let mappings = require('./mappings');
 let es = require('./es');
-let utils = require('./utils');
 let _ = require('lodash');
 
 export default function init(input, output, sourceLocation = 'stored') {
