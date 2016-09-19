@@ -101,7 +101,7 @@ export default function PointSeriesFactory(Private) {
       // todo: do we need to handle width and height here ?
       let self = this;
       let $elem = $(this.chartEl);
-      let margin = this.handler.style.margin;
+      let margin = this.handler._attr.style.margin;
       let elWidth = this._attr.width = this.handler._attr.width = $elem.width();
       let elHeight = this._attr.height = this.handler._attr.height = $elem.height();
       let xScale = this.handler.categoryAxes[0].getScale();
