@@ -13,6 +13,9 @@ export default function VisFactory(Private) {
   const Events = Private(EventsProvider);
   const handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
 
+  const defaults = {
+    margin : { top: 10, right: 3, bottom: 5, left: 3 }
+  };
   /**
    * Creates the visualizations.
    *
@@ -26,7 +29,7 @@ export default function VisFactory(Private) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this._attr = config;
+      this._attr = _.defaults({}, config, defaults);
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);

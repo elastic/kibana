@@ -103,6 +103,9 @@ export default function AreaChartFactory(Private) {
       path.attr('d', function (d) {
         const area = d3.svg.area()
         .x(function (d) {
+          if (isTimeSeries) {
+            return xScale(d.x);
+          }
           return xScale(d.x) + xScale.rangeBand() / 2;
         })
         .y0(function (d) {
