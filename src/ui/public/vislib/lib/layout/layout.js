@@ -22,11 +22,11 @@ export default function LayoutFactory(Private) {
    * @param chartType {Object} Reference to chart functions, i.e. Pie
    */
   class Layout {
-    constructor(el, data, chartType, opts) {
-      this.el = el;
-      this.data = data;
-      this.opts = opts;
-      this.layoutType = layoutType[chartType](this.el, this.data);
+    constructor(config) {
+      this.el = config.get('el');
+      this.data = config.data.data;
+      this.opts = config;
+      this.layoutType = layoutType[config.get('type')](this.el, this.data);
     }
 
     // Render the layout

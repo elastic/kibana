@@ -53,23 +53,24 @@ export default function AxisConfigFactory() {
   };
 
   class AxisConfig {
-    constructor(config) {
-      const typeDefaults = config.type === 'category' ? categoryDefaults : {};
-      this._values = _.defaultsDeep({}, config, typeDefaults, defaults);
+    constructor(chartConfig, axisConfig) {
+      const typeDefaults = axisConfig.type === 'category' ? categoryDefaults : {};
+      this._values = _.defaultsDeep({}, axisConfig, typeDefaults, defaults);
+      this._chartConfig = chartConfig;
 
       this._values.elSelector = this._values.elSelector.replace('{pos}', this._values.position);
-      this._values.rootEl = this._values.vis.el;
+      this._values.rootEl = this._chartConfig.get('el');
 
-      this.data = this._values.data;
+      this.data = this._chartConfig.data;
       if (this._values.type === 'category') {
         this.values = this.data.xValues();
         this.ordered = this.data.get('ordered');
       }
 
       if (this._values.type === 'value') {
-        const isWiggleOrSilluete = this._values.vis._attr.mode === 'wiggle' || this._values.vis._attr.mode === 'silluete';
+        const isWiggleOrSilluete = this._chartConfig.mode === 'wiggle' || this._chartConfig.mode === 'silluete';
         // if show was not explicitly set and wiggle or silluete option was checked
-        if (!config.show && isWiggleOrSilluete) {
+        if (!axisConfig.show && isWiggleOrSilluete) {
           this._values.show = false;
         }
 
@@ -86,8 +87,8 @@ export default function AxisConfigFactory() {
       // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
       // unless explicitly overriden by user
       if (this.isHorizontal() && this.isOrdinal()) {
-        this._values.labels.filter = config.labels.filter || false;
-        this._values.labels.rotate = config.labels.rotate || 70;
+        this._values.labels.filter = axisConfig.labels.filter || false;
+        this._values.labels.rotate = axisConfig.labels.rotate || 70;
       }
     };
 
@@ -117,7 +118,7 @@ export default function AxisConfigFactory() {
     };
 
     isPercentage() {
-      return (this._values.vis._attr.mode === 'percentage');
+      return (this._chartConfig.mode === 'percentage');
     };
 
     isUserDefined() {
