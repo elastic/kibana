@@ -5,9 +5,10 @@ import errors from 'ui/errors';
 
 export default function AxisScaleFactory(Private) {
   class AxisScale {
-    constructor(config, data) {
+    constructor(config, data, handler) {
       this.config = config;
       this.data = data;
+      this.handler = handler;
 
       if (this.config.get('type') === 'category') {
         this.values = data.xValues();
@@ -88,12 +89,13 @@ export default function AxisScaleFactory(Private) {
     };
 
     getMinMaxExtent(extent) {
-      const data = this.axis.handler.data.chartData();
+      const config = this.config;
+      const data = this.data.chartData();
       const chartPoints = _.reduce(data, (chartPoints, chart) => {
         const stackedData = {};
-        const points = this.axis.handler.chart.series.reduce((points, seri, i) => {
-          const matchingValueAxis = !!seri.valueAxis && seri.valueAxis === this.axis.id;
-          const isFirstAxis = this.axis.id === this.axis.handler.valueAxes[0].id;
+        const points = this.handler._attr.chart.series.reduce((points, seri, i) => {
+          const matchingValueAxis = !!seri.valueAxis && seri.valueAxis === config.get('id');
+          const isFirstAxis = config.get('id') === this.handler._attr.valueAxes[0].id;
           const shouldStackData = seri.mode === 'stacked';
 
           if (matchingValueAxis || (!seri.valueAxis && isFirstAxis)) {
