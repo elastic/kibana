@@ -14,6 +14,7 @@
           type="number"
           required
           class="form-control"
+          data-test-subj="setting-font-size-input"
           >
       </div>
     </div>
@@ -62,7 +63,8 @@
     <button
       type="submit"
       ng-disabled="settingsForm.$invalid"
-      class="btn btn-primary">
+      class="btn btn-primary"
+      data-test-subj="settings-save-button">
       Save
     </button>
   </div>
