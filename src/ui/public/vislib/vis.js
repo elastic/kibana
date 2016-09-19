@@ -6,14 +6,12 @@ import 'ui/vislib/styles/main.less';
 import VislibLibResizeCheckerProvider from 'ui/vislib/lib/resize_checker';
 import EventsProvider from 'ui/events';
 import VislibLibHandlerHandlerTypesProvider from 'ui/vislib/lib/handler/handler_types';
-import VislibVisualizationsVisTypesProvider from 'ui/vislib/visualizations/vis_types';
 export default function VisFactory(Private) {
 
 
   const ResizeChecker = Private(VislibLibResizeCheckerProvider);
   const Events = Private(EventsProvider);
   const handlerTypes = Private(VislibLibHandlerHandlerTypesProvider);
-  const chartTypes = Private(VislibVisualizationsVisTypesProvider);
 
   /**
    * Creates the visualizations.
@@ -28,10 +26,7 @@ export default function VisFactory(Private) {
       super(arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.binder = new Binder();
-      this.ChartClass = chartTypes[config.type];
-      this._attr = _.defaults({}, config || {}, {
-        legendOpen: true
-      });
+      this._attr = config;
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
