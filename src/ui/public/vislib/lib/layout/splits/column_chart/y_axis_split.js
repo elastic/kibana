@@ -12,7 +12,7 @@ define(function () {
 
     // render and get bounding box width
     return function (selection, parent, opts) {
-      let yAxis = opts && opts.valueAxes[0];
+      const yAxis = opts && opts.valueAxes[0];
 
       selection.each(function () {
         const div = d3.select(this);
@@ -40,13 +40,12 @@ define(function () {
       const svg = d3.select('body')
       .append('svg')
       .attr('style', 'position:absolute; top:-10000; left:-10000');
-      let width = svg.append('g')
+
+      svg.append('g')
       .call(() => {
         yAxis.getAxis(height);
       }).node().getBBox().width + padding;
       svg.remove();
-
-      el.style('width', (width + padding) + 'px');
     }
   };
 });
