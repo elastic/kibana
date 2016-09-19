@@ -40,6 +40,8 @@ export default function HistogramAggDefinition(Private) {
         write: function (aggConfig, output) {
           if (aggConfig.params.min_doc_count) {
             output.params.min_doc_count = 0;
+          } else {
+            output.params.min_doc_count = 1;
           }
         }
       },
