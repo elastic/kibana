@@ -1,16 +1,16 @@
-<div class="dev-tools-app-container app-container">
+<div class="dev-tools__app-container app-container">
   <bread-crumbs class="bread-crumbs--navbar" omit-current-page="true"></bread-crumbs>
-  <kbn-top-nav name="devtools">
+  <kbn-top-nav name="devtools" config="kbnDevToolsApp.topNavConfig">
     <div class="localTabs">
       <a
-        ng-repeat="item in devTools"
+        ng-repeat="item in kbnDevToolsApp.devTools"
         class="localTab"
-        ng-class="{'localTab-isSelected': currentPath === item.url}"
+        ng-class="{'localTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
         kbn-href="{{::item.url}}"
       >
         {{::item.display}}
       </a>
     </div>
   </kbn-top-nav>
-  <div role="main" class="dev-tools-container" ng-transclude></div>
+  <div role="main" class="dev-tools__container" ng-transclude></div>
 </div>
