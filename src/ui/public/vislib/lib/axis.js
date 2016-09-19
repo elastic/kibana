@@ -154,6 +154,7 @@ export default function AxisFactory(Private) {
           const height = $(el).height();
           const length = self.getLength(el, n);
 
+          self.data = div.data()[0];
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);
 
