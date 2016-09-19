@@ -1,16 +1,19 @@
+import _ from 'lodash';
 import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
-import VislibLibDataProvider from 'ui/vislib/lib/data';
 export default function MapHandlerProvider(Private) {
 
   const Handler = Private(VislibLibHandlerHandlerProvider);
-  const Data = Private(VislibLibDataProvider);
 
   return function (vis) {
-    const data = new Data(vis.data, vis._attr, vis.uiState);
+    const config = vis._attr;
 
-    const MapHandler = new Handler(vis, {
-      data: data
-    });
+    if (!config.chart) {
+      config.chart = _.defaults(vis._attr, {
+        type: 'tile_map'
+      });
+    }
+
+    const MapHandler = new Handler(vis, config);
 
     MapHandler.resize = function () {
       this.charts.forEach(function (chart) {
