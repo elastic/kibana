@@ -46,7 +46,7 @@ uiModules.get('apps/management')
     const timeField = index.timeField;
     fetchFieldList().then(function (results) {
       if (timeField) {
-        updateFieldListAndSeed(results, timeField);
+        updateFieldListAndSetTimeField(results, timeField.name);
       } else {
         updateFieldList(results);
       }
@@ -254,17 +254,20 @@ uiModules.get('apps/management')
     }, notify.fatal);
   }
 
-  function updateFieldListAndSeed(results, seedField) {
-
+  function updateFieldListAndSetTimeField(results, timeFieldName) {
     updateFieldList(results);
 
     if (!results.dateFields.length) {
       return;
     }
 
-    const matchingField = results.dateFields.find(field => field.name === seedField.name);
-    index.timeField = matchingField ? matchingField : results.dateFields[0];
+    const matchingTimeField = results.dateFields.find(field => field.name === timeFieldName);
+    const defaultTimeField = results.dateFields[0];
 
+    //assign the field from the results-list
+    //angular recreates a new timefield instance, each time the list is refreshed.
+    //This ensures the selected field matches one of the instances in the list.
+    index.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
   }
 
   function updateFieldList(results) {
