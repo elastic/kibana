@@ -64,8 +64,12 @@ export default function VisFactory(Private) {
         uiState.on('change', this._uiStateChangeHandler = () => this.render(this.data, this.uiState));
       }
 
+      this.resizeChecker.stopSchedule();
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
+      this.resizeChecker.saveSize();
+      this.resizeChecker.saveDirty(false);
+      this.resizeChecker.continueSchedule();
     };
 
     /**

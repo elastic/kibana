@@ -182,6 +182,10 @@ export default function ResizeCheckerFactory(Private, Notifier) {
     }, ms));
   };
 
+  ResizeChecker.prototype.stopSchedule = function () {
+    clearTimeout(this._timerId);
+  };
+
   /**
    * Signal that the ResizeChecker should shutdown.
    *
