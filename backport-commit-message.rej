@@ -1,0 +1,14 @@
+Backport PR #8349
+---------
+
+**Commit 1:**
+Always set output.params.min_doc_count instead of leaving Elasticsearch default (which changed).  Ref: 5665
+
+* Original sha: 5eb43cf70b526d67ad8946ff67d9d6ecaa05ccf9
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-09-19T20:47:34Z
+
+**Commit 2:**
+Fix tests for min_doc_count change
+
+* Original sha: fe60886cddc9f7ace996edff7047ffc4389ce67f
+* Authored by LeeDr <lee.drengenberg@elastic.co> on 2016-09-19T23:07:46Z
