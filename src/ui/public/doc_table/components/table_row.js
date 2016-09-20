@@ -10,6 +10,7 @@ import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import uiModules from 'ui/modules';
+import Notifier from 'ui/notify/notifier';
 let module = uiModules.get('app/discover');
 
 
@@ -76,6 +77,35 @@ module.directive('kbnTableRow', function ($compile) {
         $detailsTr.html(detailsHtml);
 
         $detailsScope.row = $scope.row;
+
+        $detailsScope.copyTextToClipboard = text => {
+          const notify = new Notifier({
+            location: `Share Document`,
+          });
+
+          // This code was borrowed from 'copee', see https://github.com/styfle/copee
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.cols = 1;
+          ta.rows = 1;
+          ta.style.color = 'transparent';
+          ta.style.border = 'none';
+          document.body.appendChild(ta);
+          ta.select();
+          let success = false;
+          try {
+            success = document.execCommand('copy');
+          } catch (err) {
+            success = false;
+          }
+          document.body.removeChild(ta);
+
+          if (success) {
+            notify.info('URL copied to clipboard.');
+          } else {
+            notify.info('Failed to copy to clipboard');
+          }
+        };
 
         $compile($detailsTr)($detailsScope);
       };
