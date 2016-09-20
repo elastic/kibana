@@ -158,16 +158,25 @@ Console is meant to be used as a local development tool. As such, it will send r
 just as a local curl command would. To overcome the CORS limitations enforced by browsers, Console's Node.js backend
 serves as a proxy to send requests on behalf of the browser. However, if put on a server and exposed to the internet
 this can become a security risk. In those cases, we highly recommend you lock down the proxy by setting the
-`console.proxyFilter` setting. The setting accepts a list of regular expressions that are evaluated against each URL
- the proxy is requested to retrieve. If none of the regular expressions match the proxy will reject the request.
+`console.proxyFilter` Kibana server setting. The setting accepts a list of regular expressions that are evaluated 
+against each URL the proxy is requested to retrieve. If none of the regular expressions match the proxy will reject 
+the request.
 
 Here is an example configuration the only allows Console to connect to localhost:
 
 [source,yaml]
 --------
-sense.proxyFilter:
+console.proxyFilter:
   - ^https?://(localhost|127\.0\.0\.1|\[::0\]).*
 --------
 
 Restart Kibana for these changes to take effect.
 
+Alternatively if the users of Kibana have no requirements or need to access any of the Console functionality, it can
+be disabled completely and not even show up as an available app by setting the `console.enabled` Kibana server setting to `false`:
+
+[source,yaml]
+--------
+console.enabled:
+  - false
+--------
