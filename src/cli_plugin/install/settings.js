@@ -6,7 +6,7 @@ import { arch, platform } from 'os';
 function generateUrls({ version, plugin }) {
   return [
     plugin,
-    `https://artifacts.elastic.co/download/kibana-plugins/${plugin}/${plugin}-${version}.zip`
+    `https://artifacts.elastic.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`
   ];
 }
 
