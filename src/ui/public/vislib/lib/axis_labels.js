@@ -1,42 +1,11 @@
 import d3 from 'd3';
 import $ from 'jquery';
 import _ from 'lodash';
-import ErrorHandlerProvider from 'ui/vislib/lib/_error_handler';
 export default function AxisLabelsFactory(Private) {
-
-  const ErrorHandler = Private(ErrorHandlerProvider);
-  const defaults = {
-    show: true,
-    rotate: 0,
-    rotateAnchor: 'center',
-    filter: false,
-    color: '#ddd',
-    font: '"Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif', // TODO
-    fontSize: '8pt',
-    truncate: 100
-  };
-
-  /**
-   * Appends axis title(s) to the visualization
-   *
-   * @class AxisLabels
-   * @constructor
-   * @param el {HTMLElement} DOM element
-   * @param xTitle {String} X-axis title
-   * @param yTitle {String} Y-axis title
-   */
-
-  class AxisLabels extends ErrorHandler {
-    constructor(axis, attr) {
-      super();
-      _.extend(this, defaults, attr);
-      this.axis = axis;
-
-      // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
-      if (this.axis.isHorizontal() && this.axis.scale.isOrdinal()) {
-        this.filter = attr && attr.filter ? attr.filter : false;
-        this.rotate = attr && attr.rotate ? attr.rotate : 70;
-      }
+  class AxisLabels {
+    constructor(config, scale) {
+      this.config = config;
+      this.axisScale = scale;
     }
 
     render(selection) {
@@ -44,33 +13,34 @@ export default function AxisLabelsFactory(Private) {
     };
 
     rotateAxisLabels() {
-      const self = this;
+      const config = this.config;
       return function (selection) {
         const text = selection.selectAll('.tick text');
 
-        if (self.rotate) {
+        if (config.get('labels.rotate')) {
           text
           .style('text-anchor', function () {
-            return self.rotateAnchor === 'center' ? 'center' : 'end';
+            return config.get('labels.rotateAnchor') === 'center' ? 'center' : 'end';
           })
           .attr('dy', function () {
-            if (self.axis.isHorizontal()) {
-              if (self.axis.position === 'top') return '-0.9em';
+            if (config.isHorizontal()) {
+              if (config.get('position') === 'top') return '-0.9em';
               else return '0.3em';
             }
             return '0';
           })
           .attr('dx', function () {
-            return self.axis.isHorizontal() ? '-0.9em' : '0';
+            return config.isHorizontal() ? '-0.9em' : '0';
           })
           .attr('transform', function rotate(d, j) {
-            if (self.rotateAnchor === 'center') {
+            let rotateDeg = config.get('labels.rotate');
+            if (config.get('labels.rotateAnchor') === 'center') {
               const coord = text[0][j].getBBox();
               const transX = ((coord.x) + (coord.width / 2));
               const transY = ((coord.y) + (coord.height / 2));
-              return `rotate(${self.rotate}, ${transX}, ${transY})`;
+              return `rotate(${rotateDeg}, ${transX}, ${transY})`;
             } else {
-              const rotateDeg = self.axis.position === 'top' ? self.rotate : -self.rotate;
+              rotateDeg = config.get('position') === 'top' ? rotateDeg : -rotateDeg;
               return `rotate(${rotateDeg})`;
             }
           });
@@ -99,39 +69,39 @@ export default function AxisLabelsFactory(Private) {
 
     truncateLabels() {
       const self = this;
+      const config = this.config;
       return function (selection) {
+        if (!config.get('labels.truncate')) return;
+
         selection.selectAll('.tick text')
         .text(function () {
           // TODO: add title to trancuated labels
-          return self.truncateLabel(this, self.truncate);
+          return self.truncateLabel(this, config.get('labels.truncate'));
         });
       };
     };
 
     filterAxisLabels() {
       const self = this;
-      let startX = 0;
-      let maxW;
-      let par;
-      let myX;
-      let myWidth;
-      let halfWidth;
+      const config = this.config;
+      let startPos = 0;
       let padding = 1.1;
 
       return function (selection) {
-        if (!self.filter) return;
+        if (!config.get('labels.filter')) return;
 
         selection.selectAll('.tick text')
         .text(function (d) {
-          par = d3.select(this.parentNode).node();
-          myX = self.axis.scale.scale(d);
-          myWidth = par.getBBox().width * padding;
-          halfWidth = myWidth / 2;
-          maxW = $(self.axis.vis.el).find(self.axis.elSelector).width();
+          const par = d3.select(this.parentNode).node();
+          const el = $(config.get('rootEl')).find(config.get('elSelector'));
+          const maxSize = config.isHorizontal() ? el.width() : el.height();
+          const myPos = config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d);
+          const mySize = (config.isHorizontal() ? par.getBBox().width : par.getBBox().height) * padding;
+          const halfSize = mySize / 2;
 
-          if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-            startX = myX + halfWidth;
-            return self.axis.axisFormatter(d);
+          if ((startPos + halfSize) < myPos && maxSize > (myPos + halfSize)) {
+            startPos = myPos + halfSize;
+            return this.innerHTML;
           } else {
             d3.select(this.parentNode).remove();
           }
@@ -141,16 +111,17 @@ export default function AxisLabelsFactory(Private) {
 
     draw() {
       const self = this;
+      const config = this.config;
 
       return function (selection) {
         selection.each(function () {
           selection.selectAll('text')
           .attr('style', function () {
             const currentStyle = d3.select(this).attr('style');
-            return `${currentStyle} font-size: ${self.fontSize};`;
+            return `${currentStyle} font-size: ${config.get('labels.fontSize')};`;
           });
           //.attr('x', -3 - parseInt(self.style.lineWidth) / 2 - parseInt(self.style.tickLength));
-          if (!self.show) selection.selectAll('test').attr('style', 'display: none;');
+          if (!config.get('labels.show')) selection.selectAll('test').attr('style', 'display: none;');
 
           selection.call(self.truncateLabels());
           selection.call(self.rotateAxisLabels());
