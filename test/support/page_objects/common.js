@@ -254,6 +254,10 @@ export default class Common {
     return Try.try(block);
   }
 
+  tryMethod(object, method, ...args) {
+    return this.try(() => object[method](...args));
+  }
+
   log(...args) {
     Log.log(...args);
   }
