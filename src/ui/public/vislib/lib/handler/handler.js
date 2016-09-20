@@ -116,12 +116,20 @@ export default function HandlerBaseClass(Private) {
       });
 
       // render the chart(s)
-      selection.selectAll('.chart')
-      .each(function (chartData) {
+      this.loadedCount = 0;
+      const chartSelection = selection.selectAll('.chart');
+      chartSelection.each(function (chartData) {
         const chart = new self.ChartClass(self, this, chartData);
 
         self.vis.activeEvents().forEach(function (event) {
           self.enable(event, chart);
+        });
+
+        chart.events.on('rendered', () => {
+          self.loadedCount++;
+          if (self.loadedCount === chartSelection.length) {
+            charts[0].events.emit('renderComplete');
+          }
         });
 
         charts.push(chart);

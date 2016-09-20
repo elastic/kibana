@@ -214,7 +214,7 @@ export default function MapFactory(Private, tilemap, $sanitize) {
       this._tileLayer.on('load', () => {
         if (!self._events) return;
 
-        self._events.emit('mapLoaded', {
+        self._events.emit('rendered', {
           chart: self._chartData,
           map: self.map,
           center: self._mapCenter,
