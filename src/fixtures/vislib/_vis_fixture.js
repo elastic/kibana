@@ -11,7 +11,8 @@ let $visCanvas = $('<div>')
     position: 'fixed',
     top: '0px',
     left: '0px',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    'pointer-events': 'none', // Prevent element from blocking you from clicking a test
   })
   .appendTo('body');
 
