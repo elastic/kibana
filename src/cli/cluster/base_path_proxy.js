@@ -109,9 +109,10 @@ export default class BasePathProxy {
 
         const isGet = req.method === 'get';
         const isBasePath = oldBasePath.length === 3;
-        const isApp = kbnPath.slice(0, 4) === 'app/';
+        const isApp = kbnPath.startsWith('app/');
+        const isKnownShortPath = ['login', 'logout', 'status'].includes(kbnPath);
 
-        if (isGet && isBasePath && isApp) {
+        if (isGet && isBasePath && (isApp || isKnownShortPath)) {
           return reply.redirect(`${basePath}/${kbnPath}`);
         }
 
