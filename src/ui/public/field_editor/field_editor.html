@@ -24,25 +24,6 @@
     </p>
   </div>
 
-  <div  ng-if="editor.conflictDescriptionsLength > 0">
-    <p>
-      <i class="fa fa-warning text-warning"></i> 
-      <strong>Field Type Conflict:</strong>
-      The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:
-      <table class="table">
-      <thead>
-        <th> Field Type </th>
-        <th> Index Names </th>
-      </thead>
-      <tbody>
-      <tr ng-repeat="(type, indices) in editor.field.conflictDescriptions">
-        <td>{{type}}</td> <td>{{indices}}</td>
-      </tr>
-      </tbody>
-      </table>
-    </p>
-  </div>
-
   <div ng-if="editor.field.scripted" class="form-group">
     <label>Language</label>
     <select
@@ -194,6 +175,25 @@
       </div>
     </div>
 
+  </div>
+
+  <div  ng-if="editor.conflictDescriptionsLength > 0">
+    <p>
+      <i class="fa fa-warning text-warning"></i> 
+      <strong>Field Type Conflict:</strong>
+      The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:
+      <table class="table">
+      <thead>
+        <th> Field Type </th>
+        <th> Index Names </th>
+      </thead>
+      <tbody>
+      <tr ng-repeat="(type, indices) in editor.field.conflictDescriptions">
+        <td>{{type}}</td> <td>{{indices}}</td>
+      </tr>
+      </tbody>
+      </table>
+    </p>
   </div>
 
   <div class="form-group">
