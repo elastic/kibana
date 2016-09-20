@@ -1,6 +1,7 @@
 
 import bluebird, {
-  promisify
+  promisify,
+  filter as filterAsync
 } from 'bluebird';
 import fs from 'fs';
 import _ from 'lodash';
@@ -307,6 +308,13 @@ export default class Common {
     return this.remote
       .setFindTimeout(defaultFindTimeout)
       .findDisplayedByCssSelector(testSubjSelector(selector));
+  }
+
+  async findAllTestSubjects(selector) {
+    this.debug('in findAllTestSubjects: ' + testSubjSelector(selector));
+    const remote = this.remote.setFindTimeout(defaultFindTimeout);
+    const all = await remote.findAllByCssSelector(testSubjSelector(selector));
+    return await filterAsync(all, el => el.isDisplayed());
   }
 
 }
