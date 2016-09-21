@@ -61,6 +61,18 @@ define(function (require) {
           {text: 'Years ago', value: 'y'},
         ];
 
+        $scope.$watch('from', function (date) {
+          if (moment.isMoment(date) && $scope.mode === 'absolute') {
+            $scope.absolute.from = date;
+          }
+        });
+
+        $scope.$watch('to', function (date) {
+          if (moment.isMoment(date) && $scope.mode === 'absolute') {
+            $scope.absolute.to = date;
+          }
+        });
+
         $scope.$watch('absolute.from', function (date) {
           if (_.isDate(date)) $scope.absolute.from = moment(date);
         });
