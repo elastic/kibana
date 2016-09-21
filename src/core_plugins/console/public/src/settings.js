@@ -1,5 +1,3 @@
-let es = require('./es');
-
 const storage = require('./storage');
 
 function getFontSize() {
@@ -18,12 +16,6 @@ function getWrapMode() {
 
 function setWrapMode(mode) {
   storage.set('wrap_mode', mode);
-  applyCurrentSettings();
-  return true;
-}
-
-function setBasicAuth(mode) {
-  storage.set('basic_auth', mode);
   applyCurrentSettings();
   return true;
 }
