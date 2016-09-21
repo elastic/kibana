@@ -41,7 +41,14 @@ define(function (require) {
     };
 
     $scope.refreshFieldList = function () {
-      fetchFieldList().then(updateFieldList);
+      const timeField = index.timeField;
+      fetchFieldList().then(function (results) {
+        if (timeField) {
+          updateFieldListAndSetTimeField(results, timeField.name);
+        } else {
+          updateFieldList(results);
+        }
+      });
     };
 
     $scope.createIndexPattern = function () {
@@ -248,6 +255,22 @@ define(function (require) {
     function updateFieldList(results) {
       index.fetchFieldsError = results.fetchFieldsError;
       index.dateFields = results.dateFields;
+    }
+
+    function updateFieldListAndSetTimeField(results, timeFieldName) {
+      updateFieldList(results);
+
+      if (!results.dateFields.length) {
+        return;
+      }
+
+      const matchingTimeField = results.dateFields.find(field => field.name === timeFieldName);
+      const defaultTimeField = results.dateFields[0];
+
+      //assign the field from the results-list
+      //angular recreates a new timefield instance, each time the list is refreshed.
+      //This ensures the selected field matches one of the instances in the list.
+      index.timeField = matchingTimeField ? matchingTimeField : defaultTimeField;
     }
 
     function promiseMatch(lastPromise, cb) {
