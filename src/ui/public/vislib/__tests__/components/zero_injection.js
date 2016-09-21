@@ -336,13 +336,13 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should inject zeros in the input array', function () {
-      expect(sample2.series[1].values[1].y).to.be(0);
-      expect(sample2.series[2].values[0].y).to.be(0);
+      expect(sample2.series[1].values[2].y).to.be(0);
       expect(sample2.series[2].values[1].y).to.be(0);
+      expect(sample2.series[2].values[2].y).to.be(0);
       expect(sample2.series[2].values[4].y).to.be(0);
-      expect(sample3.series[1].values[1].y).to.be(0);
-      expect(sample3.series[2].values[0].y).to.be(0);
+      expect(sample3.series[1].values[2].y).to.be(0);
       expect(sample3.series[2].values[1].y).to.be(0);
+      expect(sample3.series[2].values[2].y).to.be(0);
       expect(sample3.series[2].values[4].y).to.be(0);
     });
 
@@ -408,16 +408,16 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array of values in the correct order', function () {
-      expect(results[0]).to.be('1');
-      expect(results[1]).to.be('2');
-      expect(results[2]).to.be('3');
-      expect(results[3]).to.be('4');
-      expect(results[4]).to.be('5');
-      expect(numberedResults[0]).to.be(1);
-      expect(numberedResults[1]).to.be(2);
-      expect(numberedResults[2]).to.be(3);
-      expect(numberedResults[3]).to.be(4);
-      expect(numberedResults[4]).to.be(5);
+      expect(results[0]).to.be('3');
+      expect(results[1]).to.be('1');
+      expect(results[2]).to.be('4');
+      expect(results[3]).to.be('5');
+      expect(results[4]).to.be('2');
+      expect(numberedResults[0]).to.be(3);
+      expect(numberedResults[1]).to.be(1);
+      expect(numberedResults[2]).to.be(4);
+      expect(numberedResults[3]).to.be(5);
+      expect(numberedResults[4]).to.be(2);
     });
   });
 
