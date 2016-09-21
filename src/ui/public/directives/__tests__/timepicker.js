@@ -398,7 +398,6 @@ describe('timepicker directive', function () {
       done();
     });
 
-
     it('should parse the time of scope.from and scope.to to set its own variables', function (done) {
       $scope.setQuick('now-30m', 'now');
       $scope.setMode('absolute');
@@ -406,6 +405,22 @@ describe('timepicker directive', function () {
 
       expect($scope.absolute.from.valueOf()).to.be(moment().subtract(30, 'minutes').valueOf());
       expect($scope.absolute.to.valueOf()).to.be(moment().valueOf());
+      done();
+    });
+
+    it('should update its own variables if timefilter time is updated', function (done) {
+      $scope.setMode('absolute');
+      $scope.$digest();
+
+      const startDate = moment('1980-01-01T00:11:02.001Z');
+      const endDate = moment('1983-10-11T0=40:03:32.051Z');
+
+      $parentScope.timefilter.time.from = startDate;
+      $parentScope.timefilter.time.to = endDate;
+      $parentScope.$digest();
+
+      expect($scope.absolute.from.valueOf()).to.be(startDate.valueOf());
+      expect($scope.absolute.to.valueOf()).to.be(endDate.valueOf());
       done();
     });
 
