@@ -138,7 +138,7 @@ uiModules
       }
 
       function getIndexedFields(param) {
-        let fields = $scope.agg.vis.indexPattern.fields.raw;
+        let fields = _.filter($scope.agg.vis.indexPattern.fields.raw, 'aggregatable');
         const fieldTypes = param.filterFieldTypes;
 
         if (fieldTypes) {
