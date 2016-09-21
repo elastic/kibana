@@ -92,6 +92,7 @@ export function setupTopLevelDescribeFilter(test) {
     return result;
   };
 
+  // to allow describe.only calls. we dont need interceptor as it will call describe internally
   describeInterceptor.only = originalDescribe.only;
 
   // ensure that window.describe isn't messed with by other code
