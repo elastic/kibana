@@ -27,7 +27,7 @@ export default function OrderedXKeysUtilService(Private) {
       if (d[1].isDate || d[1].isOrdered) {
         return +d[0];
       }
-      return d[1].index;
+      return -d[1].sum;
     })
     .map(function (d, i, list) {
       if (!d[1].isNumber) return d[0];
