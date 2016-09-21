@@ -19,7 +19,13 @@ module.controller('KbnTableVisController', function ($scope, Private) {
     $scope.uiState.set('vis.params.sort', newSort);
   });
 
-  $scope.$watch('esResponse', function (resp, oldResp) {
+  /**
+   * Recreate the entire table when:
+   * - the underlying data changes (esResponse)
+   * - one of the view options changes (vis.params)
+   */
+  $scope.$watchMulti(['esResponse', 'vis.params'], function ([resp]) {
+
     let tableGroups = $scope.tableGroups = null;
     let hasSomeRows = $scope.hasSomeRows = null;
 
