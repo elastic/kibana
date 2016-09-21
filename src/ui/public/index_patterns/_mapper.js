@@ -1,12 +1,14 @@
 import { IndexPatternMissingIndices } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
+import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
 import IndexPatternsTransformMappingIntoFieldsProvider from 'ui/index_patterns/_transform_mapping_into_fields';
 import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
 import IndexPatternsPatternToWildcardProvider from 'ui/index_patterns/_pattern_to_wildcard';
 import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 export default function MapperService(Private, Promise, es, config, kbnIndex) {
 
+  let enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   let transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
   let intervals = Private(IndexPatternsIntervalsProvider);
   let patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
@@ -49,16 +51,17 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
         });
       }
 
-      let promise = Promise.resolve(id);
+      let indexList = id;
+      let promise = Promise.resolve();
       if (indexPattern.intervalName) {
         promise = self.getIndicesForIndexPattern(indexPattern)
         .then(function (existing) {
           if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-          return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
         });
       }
 
-      return promise.then(function (indexList) {
+      return promise.then(function () {
         return es.indices.getFieldMapping({
           index: indexList,
           fields: '*',
@@ -69,6 +72,7 @@ export default function MapperService(Private, Promise, es, config, kbnIndex) {
       })
       .catch(handleMissingIndexPattern)
       .then(transformMappingIntoFields)
+      .then(fields => enhanceFieldsWithCapabilities(fields, indexList))
       .then(function (fields) {
         fieldCache.set(id, fields);
         return fieldCache.get(id);
