@@ -12,6 +12,7 @@ define(function (require) {
   var simulate = require('./_simulate');
   var processors = require('./_processors');
   var processorTypes = require('./processors/index');
+  var fieldCapabilities = require('./_field_capabilities');
 
   bdd.describe('ingest API', function () {
     var scenarioManager = new ScenarioManager(url.format(serverConfig.servers.elasticsearch));
@@ -31,5 +32,6 @@ define(function (require) {
     simulate(bdd, scenarioManager, request);
     processors(bdd, scenarioManager, request);
     processorTypes(bdd, scenarioManager, request);
+    fieldCapabilities(bdd, scenarioManager, request);
   });
 });
