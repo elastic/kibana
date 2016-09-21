@@ -1,6 +1,12 @@
 .vis-editor {
   .flex-parent();
 
+  @media (min-width: @screen-md-min) {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
   @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
   @vis-editor-sidebar-min-width: 350px;
   @vis-editor-nesting-width: 8px;
