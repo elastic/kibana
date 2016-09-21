@@ -67,31 +67,37 @@ export function setupTopLevelDescribeFilter(test) {
   let describeCallDepth = 0;
   const ignoredCalls = [];
 
+  const describeInterceptor = function (describeName, describeBody) {
+    const context = this;
+
+    const isTopLevelCall = describeCallDepth === 0;
+    const shouldIgnore = isTopLevelCall && Boolean(test(describeName)) === false;
+    if (shouldIgnore) return;
+
+    /**
+     *  we wrap the delegation to mocha in a try/finally block
+     *  to ensure that our describeCallDepth counter stays up
+     *  to date even if the call throws an error.
+     *
+     *  note that try/finally won't actually catch the error, it
+     *  will continue to propogate up the call stack
+     */
+    let result;
+    try {
+      describeCallDepth += 1;
+      result = originalDescribe.call(context, describeName, describeBody);
+    } finally {
+      describeCallDepth -= 1;
+    }
+    return result;
+  };
+
+  describeInterceptor.only = originalDescribe.only;
+
   // ensure that window.describe isn't messed with by other code
   Object.defineProperty(window, 'describe', {
     configurable: false,
     enumerable: true,
-    value: function describeInterceptor(describeName, describeBody) {
-      const context = this;
-
-      const isTopLevelCall = describeCallDepth === 0;
-      const shouldIgnore = isTopLevelCall && Boolean(test(describeName)) === false;
-      if (shouldIgnore) return;
-
-      /**
-       *  we wrap the delegation to mocha in a try/finally block
-       *  to ensure that our describeCallDepth counter stays up
-       *  to date even if the call throws an error.
-       *
-       *  note that try/finally won't actually catch the error, it
-       *  will continue to propogate up the call stack
-       */
-      try {
-        describeCallDepth += 1;
-        originalDescribe.call(context, describeName, describeBody);
-      } finally {
-        describeCallDepth -= 1;
-      }
-    }
+    value: describeInterceptor
   });
 }
