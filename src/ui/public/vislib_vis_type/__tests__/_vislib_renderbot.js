@@ -134,10 +134,11 @@ describe('renderbot', function exportWrapper() {
       let buildStub = sinon.stub(renderbot, 'buildChartData', _.constant(football));
       let renderStub = sinon.stub(renderbot.vislibVis, 'render');
 
-      renderbot.render('flat data', persistedState);
-      expect(renderStub.callCount).to.be(1);
-      expect(buildStub.callCount).to.be(1);
-      expect(renderStub.firstCall.args[0]).to.be(football);
+      renderbot.render('flat data', persistedState).then(() => {
+        expect(renderStub.callCount).to.be(1);
+        expect(buildStub.callCount).to.be(1);
+        expect(renderStub.firstCall.args[0]).to.be(football);
+      });
     });
   });
 

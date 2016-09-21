@@ -46,9 +46,11 @@ module.exports = function VislibRenderbotFactory(Private) {
   VislibRenderbot.prototype.buildChartData = buildChartData;
   VislibRenderbot.prototype.render = function (esResponse) {
     this.chartData = this.buildChartData(esResponse);
-    // to allow legend to render first
-    setTimeout(() => {
-      this.vislibVis.render(this.chartData, this.uiState);
+    // to allow legend to render first (wait for angular digest cycle to complete)
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(this.vislibVis.render(this.chartData, this.uiState));
+      });
     });
   };
 
