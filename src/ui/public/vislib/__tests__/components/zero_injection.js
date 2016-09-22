@@ -421,8 +421,9 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array of values in the correct order when orderBuckets is set', function () {
-      const orderBuckets = true;
-      results = orderXValues(multiSeriesData, orderBuckets);
+      const sortBuckets = true;
+      results = orderXValues(multiSeriesData, sortBuckets);
+      numberedResults = orderXValues(multiSeriesNumberedData, sortBuckets);
 
       expect(results[0]).to.be('3');
       expect(results[1]).to.be('1');
