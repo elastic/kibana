@@ -8,15 +8,22 @@ import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 import VislibLibAlertsProvider from 'ui/vislib/lib/alerts';
 
 export default function ColumnHandler(Private) {
-  let injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
-  let Handler = Private(VislibLibHandlerHandlerProvider);
-  let Data = Private(VislibLibDataProvider);
-  let XAxis = Private(VislibLibXAxisProvider);
-  let YAxis = Private(VislibLibYAxisProvider);
-  let AxisTitle = Private(VislibLibAxisTitleProvider);
-  let ChartTitle = Private(VislibLibChartTitleProvider);
-  let Alerts = Private(VislibLibAlertsProvider);
+  const injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+  const Handler = Private(VislibLibHandlerHandlerProvider);
+  const Data = Private(VislibLibDataProvider);
+  const XAxis = Private(VislibLibXAxisProvider);
+  const YAxis = Private(VislibLibYAxisProvider);
+  const AxisTitle = Private(VislibLibAxisTitleProvider);
+  const ChartTitle = Private(VislibLibChartTitleProvider);
+  const Alerts = Private(VislibLibAlertsProvider);
 
+  function getData(vis, opts) {
+    if (opts.zeroFill) {
+      return new Data(injectZeros(vis.data), vis._attr, vis.uiState);
+    } else {
+      return new Data(vis.data, vis._attr, vis.uiState);
+    }
+  }
   /*
    * Create handlers for Area, Column, and Line charts which
    * are all nearly the same minus a few details
@@ -25,14 +32,8 @@ export default function ColumnHandler(Private) {
     opts = opts || {};
 
     return function (vis) {
-      let isUserDefinedYAxis = vis._attr.setYExtents;
-      let data;
-
-      if (opts.zeroFill) {
-        data = new Data(injectZeros(vis.data), vis._attr, vis.uiState);
-      } else {
-        data = new Data(vis.data, vis._attr, vis.uiState);
-      }
+      const isUserDefinedYAxis = vis._attr.setYExtents;
+      const data = getData(vis, opts);
 
       return new Handler(vis, {
         data: data,
@@ -78,8 +79,8 @@ export default function ColumnHandler(Private) {
           test: function (vis, data) {
             if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
 
-            let hasPos = data.getYMax(data._getY) > 0;
-            let hasNeg = data.getYMin(data._getY) < 0;
+            const hasPos = data.getYMax(data._getY) > 0;
+            const hasNeg = data.getYMin(data._getY) < 0;
             return (hasPos && hasNeg);
           }
         },
