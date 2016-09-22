@@ -339,6 +339,10 @@ export default function LineChartFactory(Private) {
             timeMarker.render(svg);
           }
 
+          self.events.emit('rendered', {
+            chart: data
+          });
+
           return svg;
         });
       };
