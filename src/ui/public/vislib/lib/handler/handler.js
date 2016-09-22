@@ -116,7 +116,7 @@ export default function HandlerBaseClass(Private) {
       });
 
       // render the chart(s)
-      this.loadedCount = 0;
+      let loadedCount = 0;
       const chartSelection = selection.selectAll('.chart');
       chartSelection.each(function (chartData) {
         const chart = new self.ChartClass(self, this, chartData);
@@ -126,8 +126,9 @@ export default function HandlerBaseClass(Private) {
         });
 
         chart.events.on('rendered', () => {
-          self.loadedCount++;
-          if (self.loadedCount === chartSelection.length) {
+          loadedCount++;
+          if (loadedCount === chartSelection.length) {
+            // events from all charts are propagated to vis, we only need to fire renderComplete on one (first)
             charts[0].events.emit('renderComplete');
           }
         });
