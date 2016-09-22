@@ -19,7 +19,7 @@ export default function ColumnHandler(Private) {
 
   function getData(vis, opts) {
     if (opts.zeroFill) {
-      return new Data(injectZeros(vis.data), vis._attr, vis.uiState);
+      return new Data(injectZeros(vis.data, vis._attr.sortBuckets), vis._attr, vis.uiState);
     } else {
       return new Data(vis.data, vis._attr, vis.uiState);
     }
