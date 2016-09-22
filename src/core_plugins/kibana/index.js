@@ -40,7 +40,8 @@ module.exports = function (kibana) {
           'navbarExtensions',
           'managementSections',
           'devTools',
-          'docViews'
+          'docViews',
+          'pipelinesProcessors'
         ],
 
         injectVars: function (server, options) {
