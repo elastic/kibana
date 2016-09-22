@@ -18,6 +18,16 @@ app.directive('processorUiContainerHeader', function () {
     controller: function ($scope) {
       $scope.collectionTypes = ProcessorCollection.types;
       $scope.processorStates = Processor.states;
+
+      $scope.$on('drag-start', e => {
+        $scope.wasCollapsed = $scope.processor.collapsed;
+        $scope.processor.collapsed = true;
+      });
+
+      $scope.$on('drag-end', e => {
+        $scope.processor.collapsed = $scope.wasCollapsed;
+        $scope.processorCollection.updateParents();
+      });
     }
   };
 });

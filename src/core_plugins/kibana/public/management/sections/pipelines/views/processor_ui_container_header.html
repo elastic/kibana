@@ -35,7 +35,20 @@
   <div
     ng-show="processorCollection.type!=collectionTypes.FOREACH"
     class="processor-ui-container-header-controls btn-group">
+
+    <!-- drag handle -->
     <button
+      draggable-handle
+      aria-label="Modify Priority by Dragging"
+      ng-if="processorCollection.processors.length > 1"
+      tooltip="Modify Priority by Dragging"
+      tooltip-append-to-body="true"
+      type="button"
+      class="btn btn-xs">
+      <i aria-hidden="true" class="fa fa-arrows-v"></i>
+    </button>
+
+<!--     <button
       aria-label="Increase Priority"
       tooltip="Increase Priority"
       tooltip-append-to-body="true"
@@ -55,7 +68,7 @@
       class="btn btn-xs btn-primary"
       ng-disabled="pipeline.hasCompileError">
       <i aria-hidden="true" class="fa fa-caret-down"></i>
-    </button>
+    </button> -->
 
     <button
       aria-label="Remove Processor"

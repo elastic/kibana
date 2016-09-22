@@ -5,20 +5,48 @@
     <pipeline-details pipeline="pipeline"></pipeline-details>
     <pipeline-header pipeline="pipeline"></pipeline-header>
     <div class="pipeline panel">
-      <ul
+      <div
+        class="pipeline-container"
+        draggable-container="pipeline.activeProcessorCollection.processors"
+        ng-show="pipeline.activeProcessorCollection.processors.length > 0">
+        <div
+          draggable-item="processor"
+          ng-repeat="processor in pipeline.activeProcessorCollection.processors track by processor.processorId">
+          <processor-ui-container
+            pipeline="pipeline"
+            processor-collection="pipeline.activeProcessorCollection"
+            processor="processor">
+          </processor-ui-container>
+        </div>
+      </div>
+      <div
         class="pipeline-container"
         ng-show="pipeline.activeProcessorCollection.processors.length > 0">
-        <li ng-repeat="processor in pipeline.activeProcessorCollection.processors track by processor.processorId">
+        <div ng-hide="pipeline.processorCollections.length > 0">
+          <pipeline-on-failure pipeline="pipeline"></pipeline-on-failure>
+        </div>
+      </div>
+<!--       <ul
+        class="pipeline-container"
+        draggable-container="pipeline.activeProcessorCollection.processors"
+        ng-show="pipeline.activeProcessorCollection.processors.length > 0">
+        <li
+          draggable-item="processor"
+          ng-repeat="processor in pipeline.activeProcessorCollection.processors track by processor.processorId">
           <processor-ui-container
             pipeline="pipeline"
             processor-collection="pipeline.activeProcessorCollection"
             processor="processor">
           </processor-ui-container>
         </li>
+      </ul>
+      <ul
+        class="pipeline-container"
+        ng-show="pipeline.activeProcessorCollection.processors.length > 0">
         <li ng-hide="pipeline.processorCollections.length > 0">
           <pipeline-on-failure pipeline="pipeline"></pipeline-on-failure>
         </li>
-      </ul>
+      </ul> -->
 
       <div class="add-processor">
         <div
