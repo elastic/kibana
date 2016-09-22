@@ -336,13 +336,13 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should inject zeros in the input array', function () {
-      expect(sample2.series[1].values[2].y).to.be(0);
+      expect(sample2.series[1].values[1].y).to.be(0);
+      expect(sample2.series[2].values[0].y).to.be(0);
       expect(sample2.series[2].values[1].y).to.be(0);
-      expect(sample2.series[2].values[2].y).to.be(0);
       expect(sample2.series[2].values[4].y).to.be(0);
-      expect(sample3.series[1].values[2].y).to.be(0);
+      expect(sample3.series[1].values[1].y).to.be(0);
+      expect(sample3.series[2].values[0].y).to.be(0);
       expect(sample3.series[2].values[1].y).to.be(0);
-      expect(sample3.series[2].values[2].y).to.be(0);
       expect(sample3.series[2].values[4].y).to.be(0);
     });
 
@@ -421,7 +421,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array of values in the correct order when orderBuckets is set', function () {
-      let orderBuckets = true;
+      const orderBuckets = true;
       results = orderXValues(multiSeriesData, orderBuckets);
 
       expect(results[0]).to.be('3');
