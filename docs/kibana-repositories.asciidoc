@@ -19,14 +19,14 @@ has the following fingerprint:
 +
 [source,sh]
 --------------------------------------------------
-wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 --------------------------------------------------
 +
 . Add the repository definition to your `/etc/apt/sources.list.d/kibana.list` file:
 +
 ["source","sh",subs="attributes"]
 --------------------------------------------------
-echo "deb https://packages.elastic.co/kibana/{packageversion}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
+echo "deb https://artifacts.elastic.co/packages/5.x-prerelease/apt stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
 --------------------------------------------------
 +
 [WARNING]
@@ -75,7 +75,7 @@ as CentOS version 5.
 +
 [source,sh]
 --------------------------------------------------
-rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 --------------------------------------------------
 +
 . Create a file named `kibana.repo` in the `/etc/yum.repos.d/` directory with the following contents:
@@ -84,9 +84,9 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 --------------------------------------------------
 [kibana-{packageversion}]
 name=Kibana repository for {packageversion} packages
-baseurl=https://packages.elastic.co/kibana/{packageversion}/centos
+baseurl=https://artifacts.elastic.co/packages/5.x-prerelease/yum
 gpgcheck=1
-gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
 enabled=1
 --------------------------------------------------
 +
