@@ -315,6 +315,10 @@ export default function ColumnChartFactory(Private) {
             timeMarker.render(svg);
           }
 
+          self.events.emit('rendered', {
+            chart: data
+          });
+
           return svg;
         });
       };
