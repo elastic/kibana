@@ -1,0 +1,19 @@
+<div class="form-group">
+  <label>Field:</label>
+  <field-select
+    processor="processor"
+    field="processor.sourceField">
+  </field-select>
+</div>
+<div class="form-group">
+  <label>Pattern:</label>
+  <input type="text" class="form-control" ng-model="processor.pattern">
+</div>
+<div class="form-group">
+  <label>Replacement:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.replacement">
+</div>
+<failure-options
+  processor="processor"
+  pipeline="pipeline">
+</failure-options>

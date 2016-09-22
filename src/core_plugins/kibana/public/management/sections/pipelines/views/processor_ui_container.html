@@ -1,0 +1,51 @@
+<form name="processorForm">
+  <processor-ui-container-header
+    pipeline="pipeline"
+    processor-collection="processorCollection"
+    processor="processor">
+  </processor-ui-container-header>
+  <div
+    class="processor-ui-container-body"
+    ng-class="{locked: processor.locked}">
+    <div
+      class="processor-ui-container-body-content"
+      ng-hide="processor.collapsed">
+      <div class="alert alert-warning unknown-warning" ng-show="processor.typeId === 'unknown'">This processor is a type that is unknown by Kibana. This interface will allow you to edit and view this processor as raw JSON. It is strongly recommended that you install the plugin that corresponds to this processor type. Warning: Entering JSON that ingest does not understand can break Kibana.</div>
+      <processor-input processor="processor"></processor-input>
+      <processor-id processor="processor"></processor-id>
+      <div class="processor-ui-content"></div>
+      <failure-action
+        failure-action="processor.failureAction"
+        processor-collection="processor.failureProcessorCollection"
+        pipeline="pipeline"
+        options="processor.failureOptions">
+      </failure-action>
+      <div
+        ng-show="processor.state === processorStates.ERROR_FAIL"
+        class="alert alert-danger">
+        {{processor.error.message}}
+      </div>
+      <div
+        ng-show="processor.state === processorStates.ERROR_RECOVER"
+        class="alert alert-warning">
+        {{processor.error.message}}
+      </div>
+      <div
+        ng-show="processor.state === processorStates.ERROR_COMPILE"
+        class="alert alert-danger">
+        <div>Compile Error</div>
+        {{processor.error.message}}
+      </div>
+      <div
+        ng-show="processor.state === processorStates.NO_RESULT"
+        class="alert alert-info">
+        No results were returned for this processor. May be part of a failure path that was not triggered.
+      </div>
+      <processor-output
+        ng-show="processor.state === processorStates.VALID"
+        processor="processor">
+      </processor-output>
+    </div>
+    <div class="overlay"></div>
+  </div>
+</form>

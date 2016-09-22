@@ -1,0 +1,15 @@
+<div class="form-group">
+  <label>Target Field:</label>
+  <field-select
+    processor="processor"
+    field="processor.targetField">
+  </field-select>
+</div>
+<div class="form-group">
+  <label>Order:</label>
+  <select
+    class="form-control"
+    ng-options="k as v for (k, v) in sortOrders"
+    ng-model="processor.sortOrder">
+  </select>
+</div>

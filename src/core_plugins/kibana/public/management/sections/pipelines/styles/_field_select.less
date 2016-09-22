@@ -1,0 +1,78 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+field-select {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  .ui-select-bootstrap > .ui-select-choices {
+    max-height: 350px;
+  }
+
+  // .ui-select-container.open {
+  //   .form-control {
+  //     background-color: @settings-add-data-wizard-processor-select-active-bg;
+  //   }
+  // }
+
+  // Temporary bug fix - https://github.com/angular-ui/ui-select/issues/1575
+  .ui-select-search {
+    width: 100% !important;
+  }
+
+  .ui-select-container {
+    display: inline-block;
+    width: 100%;
+
+    .btn-default {
+      color: #000;
+    }
+
+    .dropdown-menu {
+      .box-shadow(0 2px 4px rgba(0,0,0,0.175));
+    }
+
+    // .form-control {
+    //   background-color: @settings-add-data-wizard-processor-select-bg;
+    // }
+
+    // .form-control:active {
+    //   background-color: @settings-add-data-wizard-processor-select-active-bg;
+    // }
+
+    .ui-select-choices-row {
+      &>a {
+        padding: 6px 12px;
+        white-space: normal;
+      }
+
+      border-bottom: solid 1px;
+      border-bottom-color: @settings-add-data-wizard-processor-select-choices-border;
+
+      label {
+        margin-bottom: 0;
+      }
+
+      .processor-help-text {
+        //color: @settings-add-data-wizard-processor-select-choices-helptext-color;
+        font-size: 0.9em;
+      }
+
+      &.active {
+        .processor-help-text {
+          //color: @settings-add-data-wizard-processor-select-choices-helptext-active-color;
+        }
+      }
+    }
+
+    .ui-select-search {
+      //color: @settings-add-data-wizard-processor-select-active-color;
+
+      &::placeholder {
+        //color: @settings-add-data-wizard-processor-select-placeholder-active-color;
+      }
+    }
+  }
+}

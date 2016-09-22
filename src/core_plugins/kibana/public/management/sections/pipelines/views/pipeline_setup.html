@@ -1,0 +1,70 @@
+<div class="main-panels">
+  <div
+    ng-hide="expandContext < 1"
+    class="left-panel">
+    <pipeline-details pipeline="pipeline"></pipeline-details>
+    <pipeline-header pipeline="pipeline"></pipeline-header>
+    <div class="pipeline panel">
+      <ul
+        class="pipeline-container"
+        ng-show="pipeline.activeProcessorCollection.processors.length > 0">
+        <li ng-repeat="processor in pipeline.activeProcessorCollection.processors track by processor.processorId">
+          <processor-ui-container
+            pipeline="pipeline"
+            processor-collection="pipeline.activeProcessorCollection"
+            processor="processor">
+          </processor-ui-container>
+        </li>
+        <li ng-hide="pipeline.processorCollections.length > 0">
+          <pipeline-on-failure pipeline="pipeline"></pipeline-on-failure>
+        </li>
+      </ul>
+
+      <div class="add-processor">
+        <div
+          class="form-group"
+          ng-hide="pipeline.activeProcessorCollection.processors.length > 0 ||
+            pipeline.processorCollections.length > 0">
+          <label>
+            Your pipeline is currently empty. Add a processor to get started!
+          </label>
+        </div>
+
+        <div
+          class="add-processor-dropdown"
+          ng-hide="pipeline.activeProcessorCollection.processors.length > 0 &&
+            pipeline.activeProcessorCollection.type === collectionTypes.FOREACH">
+          <processor-select processor-type-id="processorTypeId"></processor-select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="center-panel">
+    <div class="buttons">
+      <button
+        aria-label="{{expandContext > 1 ? 'Expand Right Panel' : 'Collapse Left Panel'}}"
+        tooltip="{{expandContext > 1 ? 'Expand Right Panel' : 'Collapse Left Panel'}}"
+        ng-click="expandContext = expandContext - 1"
+        ng-disabled="expandContext < 1"
+        type="button"
+        class="btn btn-primary btn-xs collapser">
+        <i aria-hidden="true" class="fa fa-chevron-circle-left"></i>
+      </button>
+      <button
+        aria-label="{{expandContext < 1 ? 'Expand Left Panel' : 'Collapse Right Panel'}}"
+        tooltip="{{expandContext < 1 ? 'Expand Left Panel' : 'Collapse Right Panel'}}"
+        ng-click="expandContext = expandContext + 1"
+        ng-disabled="expandContext > 1"
+        type="button"
+        class="btn btn-primary btn-xs collapser">
+        <i aria-hidden="true" class="fa fa-chevron-circle-right"></i>
+      </button>
+    </div>
+  </div>
+  <div
+    ng-hide="expandContext > 1"
+    class="right-panel">
+    <pipeline-input pipeline="pipeline" samples="samples"></pipeline-input>
+    <pipeline-output pipeline="pipeline" samples="samples"></pipeline-output>
+  </div>
+</div>

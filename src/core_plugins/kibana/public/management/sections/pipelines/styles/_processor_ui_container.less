@@ -1,0 +1,52 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+processor-ui-container {
+  display: block;
+  margin-bottom: 1px;
+  border-bottom: 2px solid;
+  border-color: white;
+
+  .processor-ui-container-body {
+    display: block;
+    //overflow: hidden; ????
+    position: relative;
+
+    &-content {
+      padding: 10px;
+      background-color: white;
+    }
+
+    .overlay {
+      display: none;
+      position: absolute;
+
+      top: -5000px;
+      left: -5000px;
+      width: 10000px;
+      height: 10000px;
+      background-color: @settings-add-data-wizard-processor-container-overlay-bg;
+    }
+
+    .unknown-warning {
+      margin-top: 0px;
+      margin-bottom: 5px;
+    }
+
+    &.locked {
+      .overlay {
+        display: block;
+      }
+    }
+  }
+
+  label {
+    font-weight: normal;
+  }
+
+  .alert {
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
+}

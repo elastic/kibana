@@ -1,0 +1,55 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+.processor-ui-container-header {
+  display: flex;
+  align-items: center;
+  flex: 1 0 auto;
+  background-color: @settings-add-data-wizard-panel-bg;
+  border: none;
+  padding: 10px;
+
+  button {
+    width: 22px;
+    border-radius: 4px;
+  }
+
+  &-toggle {
+    flex: 0 0 auto;
+    margin-right: 5px;
+  }
+
+  &-title {
+    flex: 1 1 auto;
+    .ellipsis();
+    font-weight: bold;
+
+    .processor-title {
+      width: 100%;
+    }
+
+    .processor-description {
+      font-weight: normal;
+    }
+
+    .processor-description.danger {
+      font-weight: bold;
+      color: @brand-danger;
+    }
+
+    .processor-description.warning {
+      font-weight: bold;
+      color: @brand-warning;
+    }
+
+    .processor-description.info {
+      font-style: italic;
+    }
+
+  }
+
+  &-controls {
+    flex: 0 0 auto;
+  }
+}

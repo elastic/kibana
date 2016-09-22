@@ -1,0 +1,10 @@
+<ui-select
+  ng-model="selected.value"
+  reset-search-input="false"
+  field-select-tweaks>
+  <ui-select-match>{{selected.value}}</ui-select-match>
+  <ui-select-choices
+    repeat="field as field in union([$select.search, $select.selected], fields) | filter: $select.search">
+    <div ng-bind-html="field"></div>
+  </ui-select-choices>
+</ui-select>

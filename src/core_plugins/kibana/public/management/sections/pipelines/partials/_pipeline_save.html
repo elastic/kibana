@@ -1,0 +1,15 @@
+<form
+  role="form"
+  ng-submit="topNavOpts.doSave()">
+  <div class="form-group">
+    <label for="pipelineId">Title</label>
+    <input
+      class="form-control"
+      input-focus="select"
+      type="text"
+      name="pipelineId"
+      ng-model="topNavOpts.pipeline.pipelineId"
+      required>
+  </div>
+  <button type="submit" class="btn btn-primary">Save</button>
+</form>

@@ -7,6 +7,7 @@ import 'ui/field_editor';
 import 'plugins/kibana/management/sections/indices/_indexed_fields';
 import 'plugins/kibana/management/sections/indices/_scripted_fields';
 import 'ui/directives/bread_crumbs';
+import 'ui/config';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import appTemplate from 'plugins/kibana/management/app.html';
@@ -25,7 +26,7 @@ require('ui/index_patterns/route_setup/load_default')({
 
 uiModules
 .get('apps/management')
-.directive('kbnManagementApp', function (Private, $route, $location, timefilter, buildNum, buildSha) {
+.directive('kbnManagementApp', function (Private, $route, $location, timefilter, buildNum, buildSha, config) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -35,6 +36,17 @@ uiModules
     },
 
     link: function ($scope) {
+      function applyFilter(section) {
+        section.items.forEach(item => {
+          applyFilter(item);
+
+          if (item.configFlag && !config.get(item.configFlag)) {
+            section.deregister(item.id);
+          }
+        });
+      }
+      applyFilter(management);
+
       timefilter.enabled = false;
       $scope.sections = management.items.inOrder;
       $scope.section = management.getSection($scope.sectionName) || management;

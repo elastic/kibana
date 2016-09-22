@@ -1,0 +1,25 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+pipeline-on-failure {
+  display: block;
+  margin-bottom: 1px;
+  border-bottom: 2px solid;
+  border-color: white;
+
+  .processor-ui-container-body {
+    display: block;
+    overflow: hidden;
+    position: relative;
+
+    &-content {
+      padding: 10px;
+      background-color: white;
+    }
+  }
+
+  label {
+    font-weight: normal;
+  }
+}

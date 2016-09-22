@@ -1,0 +1,28 @@
+<div class="form-group">
+  <label>Field:</label>
+  <field-select
+    processor="processor"
+    field="processor.sourceField">
+  </field-select>
+</div>
+<div class="form-group">
+  <label>Type:</label>
+  <select
+    class="form-control"
+    ng-options="type as type for type in types"
+    ng-model="processor.type">
+  </select>
+</div>
+<div class="form-group">
+  <label>Target Field:</label>
+  <input type="text" class="form-control" ng-model="processor.targetField">
+</div>
+<div class="form-group">
+  <label>Ignore Missing Field:</label>
+  <select
+    class="form-control"
+    ng-model="processor.ignoreMissing"
+    ng-options="o.v as o.n for o in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
+  </select>
+</div>
+

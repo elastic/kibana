@@ -1,0 +1,37 @@
+<table>
+  <tr ng-repeat="definition in definitions">
+    <td>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="definition.name"
+        ng-change="onChange()"
+        input-focus />
+    </td>
+    <td>
+      <input
+        type="text"
+        class="form-control"
+        ng-model="definition.value"
+        ng-change="onChange()" />
+    </td>
+    <td>
+      <button
+        type="button"
+        ng-click="definitions.splice($index, 1)"
+        class="btn btn-danger btn-xs">
+        <i class="fa fa-times"></i>
+      </button>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      <button
+        type="button"
+        ng-click="definitions.push({})"
+        class="btn btn-primary add-range">
+        Add Pattern Definition
+      </button>
+    </td>
+  </tr>
+</table>

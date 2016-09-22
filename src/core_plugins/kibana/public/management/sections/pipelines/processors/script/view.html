@@ -1,0 +1,29 @@
+<div class="form-group">
+  <label>Language:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.language">
+</div>
+<div class="form-group">
+  <label>Inline Script:</label>
+  <textarea
+    ng-model="processor.inlineScript"
+    class="form-control"
+    ng-model-options="{ updateOn: 'blur' }">
+  </textarea>
+  <div class="info">NOTE: It is possible to write an invalid script that could cause Elasticsearch to crash. To help avoid this, this field will not cause the pipeline to simulate until it loses focus.</div>
+</div>
+<div class="form-group">
+  <label>Filename:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.filename">
+</div>
+<div class="form-group">
+  <label>Script Id:</label>
+  <input type="text" class="form-control" ng-trim="false" ng-model="processor.scriptId">
+</div>
+<div class="form-group">
+  <label>Script Parameters:</label>
+  <script-parameters
+    parameters="processor.params"
+    on-change="pipeline.setDirty()">
+  </script-parameters>
+</div>
+
