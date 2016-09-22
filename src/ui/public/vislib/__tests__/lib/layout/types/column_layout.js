@@ -9,7 +9,7 @@ describe('Vislib Column Layout Test Suite', function () {
   let layoutType;
   let columnLayout;
   let el;
-  let data = {
+  const data = {
     hits: 621,
     label: '',
     ordered: {
