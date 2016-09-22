@@ -15,7 +15,7 @@ import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
-let dataTypes = [
+const dataTypes = [
   ['series pos', seriesPos],
   ['series pos neg', seriesPosNeg],
   ['series neg', seriesNeg],
@@ -26,8 +26,8 @@ let dataTypes = [
 
 describe('Vislib Line Chart', function () {
   dataTypes.forEach(function (type, i) {
-    let name = type[0];
-    let data = type[1];
+    const name = type[0];
+    const data = type[1];
 
     describe(name + ' Data', function () {
       let vis;
@@ -35,7 +35,7 @@ describe('Vislib Line Chart', function () {
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
-        let visLibParams = {
+        const visLibParams = {
           type: 'line',
           addLegend: true,
           addTooltip: true,
@@ -133,7 +133,7 @@ describe('Vislib Line Chart', function () {
 
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
+            const yAxis = chart.handler.yAxis;
 
             expect(yAxis.domain[0]).to.not.be(undefined);
             expect(yAxis.domain[1]).to.not.be(undefined);
@@ -142,7 +142,7 @@ describe('Vislib Line Chart', function () {
 
         it('should render a zero axis line', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
+            const yAxis = chart.handler.yAxis;
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -174,8 +174,8 @@ describe('Vislib Line Chart', function () {
 
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
-            let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+            const yAxis = chart.handler.yAxis;
+            const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
             expect(yAxis.domain[0]).to.equal(yVals[0]);
             expect(yAxis.domain[1]).to.equal(yVals[1]);

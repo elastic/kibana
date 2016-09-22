@@ -1,5 +1,4 @@
 import d3 from 'd3';
-import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -9,7 +8,7 @@ import notQuiteEnoughVariables from 'fixtures/vislib/mock_data/not_enough_data/_
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
-let someOtherVariables = {
+const someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
   'series neg': require('fixtures/vislib/mock_data/date_histogram/_series_neg'),
@@ -18,7 +17,7 @@ let someOtherVariables = {
   'stackedSeries': require('fixtures/vislib/mock_data/date_histogram/_stacked_series')
 };
 
-let visLibParams = {
+const visLibParams = {
   type: 'area',
   addLegend: true,
   addTooltip: true
@@ -158,12 +157,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should not draw circles where d.y === 0', function () {
         vis.handler.charts.forEach(function (chart) {
-          let series = chart.chartData.series;
-          let isZero = series.some(function (d) {
+          const series = chart.chartData.series;
+          const isZero = series.some(function (d) {
             return d.y === 0;
           });
-          let circles = $.makeArray($(chart.chartEl).find('circle'));
-          let isNotDrawn = circles.some(function (d) {
+          const circles = $.makeArray($(chart.chartEl).find('circle'));
+          const isNotDrawn = circles.some(function (d) {
             return d.__data__.y === 0;
           });
 
@@ -183,7 +182,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          let yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.yAxis;
 
           expect(yAxis.domain[0]).to.not.be(undefined);
           expect(yAxis.domain[1]).to.not.be(undefined);
@@ -192,7 +191,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          let yAxis = chart.handler.yAxis;
+          const yAxis = chart.handler.yAxis;
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -224,8 +223,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          let yAxis = chart.handler.yAxis;
-          let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+          const yAxis = chart.handler.yAxis;
+          const yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
           expect(yAxis.domain[0]).to.equal(yVals[0]);
           expect(yAxis.domain[1]).to.equal(yVals[1]);
