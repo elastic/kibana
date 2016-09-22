@@ -365,6 +365,10 @@ export default function AreaChartFactory(Private) {
             timeMarker.render(svg);
           }
 
+          self.events.emit('rendered', {
+            chart: data
+          });
+
           return svg;
         });
       };
