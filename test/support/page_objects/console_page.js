@@ -32,7 +32,7 @@ export default class ConsolePage {
   }
 
   async collapseHelp() {
-    const closeButton = await PageObjects.common.findTestSubject('console top-nav config-close-button');
+    const closeButton = await PageObjects.common.findTestSubject('console help-close-button');
     await closeButton.click();
   }
 }
